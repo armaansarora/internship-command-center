@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const offset = parseInt(searchParams.get("offset") ?? "0");
   const unreadOnly = searchParams.get("unreadOnly") === "true";
 
-  const conditions = unreadOnly ? eq(notifications.isRead, 0) : undefined;
+  const conditions = unreadOnly ? eq(notifications.isRead, false) : undefined;
 
   const rows = await db
     .select()
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   const [{ count: unreadCount }] = await db
     .select({ count: sql<number>`count(*)` })
     .from(notifications)
-    .where(eq(notifications.isRead, 0));
+    .where(eq(notifications.isRead, false));
 
   return NextResponse.json({
     notifications: rows.map((n) => ({
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       body: n.body,
       sourceAgent: n.sourceAgent,
       isRead: Boolean(n.isRead),
-      actions: n.actions ? JSON.parse(n.actions) : null,
+      actions: n.actions ? JSON.parse(n.actions as string) : null,
       createdAt: n.createdAt,
     })),
     total,

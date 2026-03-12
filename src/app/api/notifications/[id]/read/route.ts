@@ -14,7 +14,7 @@ export async function POST(
   }
 
   const { id } = await params;
-  await db.update(notifications).set({ isRead: 1 }).where(eq(notifications.id, id));
+  await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
 
   return NextResponse.json({ success: true });
 }
