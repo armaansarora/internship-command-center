@@ -1,12 +1,10 @@
-import { serve } from 'inngest/next'
-import { inngest } from '@/lib/inngest/client'
-
-// Import agent functions as they're created in future phases
-// import { researchCompany } from '@/lib/agents/cio/research'
+import { serve } from "inngest/next";
+import { inngest } from "@/lib/inngest/client";
+import { ceoOrchestrator } from "@/lib/agents/ceo";
+import { croAgent } from "@/lib/agents/cro";
+import { compileBriefing } from "@/lib/agents/ceo/compile-briefing";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [
-    // Agent functions will be registered here as they're built
-  ],
-})
+  functions: [ceoOrchestrator, croAgent, compileBriefing],
+});
