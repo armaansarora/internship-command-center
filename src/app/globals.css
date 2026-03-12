@@ -45,6 +45,22 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  /* Boardroom Design Tokens */
+  --color-boardroom: #1A1A2E;
+  --color-charcoal: #252540;
+  --color-navy: #16213E;
+  --color-gold: #C9A84C;
+  --color-ivory: #F5F0E8;
+  --color-parchment: #D4C5A9;
+  --color-slate: #8B8FA3;
+  --color-emerald: #2D8B6F;
+  --color-sapphire: #4A6FA5;
+  --color-amber: #B8860B;
+  --color-ruby: #9B3B3B;
+  --color-amethyst: #7B5EA7;
+  --color-pearl: #C8C8D0;
+  --font-heading: var(--font-playfair);
+  --font-data: var(--font-jetbrains);
 }
 
 :root {
@@ -129,6 +145,45 @@
 @keyframes fadeFloat {
   0%, 100% { opacity: 0.7; transform: translateY(0); }
   50% { opacity: 1; transform: translateY(-4px); }
+}
+
+/* Boardroom Luxury Utilities */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.ambient-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(120, 80, 200, 0.15), transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(201, 168, 76, 0.1), transparent 50%);
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.15),
+              0 0 60px rgba(201, 168, 76, 0.05);
+}
+
+.gradient-border {
+  background: linear-gradient(var(--color-boardroom), var(--color-boardroom)) padding-box,
+              linear-gradient(135deg, #C9A84C, transparent, #C9A84C) border-box;
+  border: 1px solid transparent;
+}
+
+.film-grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.inner-light {
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 @layer base {
