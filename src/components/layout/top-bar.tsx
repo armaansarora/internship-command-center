@@ -3,7 +3,8 @@
 import { usePathname } from 'next/navigation';
 import { useSyncExternalStore } from 'react';
 import { useTheme } from 'next-themes';
-import { Bell, Sun, Moon, Search, Circle } from 'lucide-react';
+import { Sun, Moon, Search, Circle } from 'lucide-react';
+import { NotificationBell } from '@/components/agents/notification-bell';
 
 /** Map pathname segments to human-readable breadcrumb labels */
 const routeLabels: Record<string, string> = {
@@ -94,14 +95,8 @@ export function TopBar() {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-1">
-        {/* Notification Bell */}
-        <button
-          type="button"
-          className="relative flex items-center justify-center h-8 w-8 rounded-full text-parchment/70 hover:text-gold hover:bg-ivory/5 transition-colors duration-150"
-          aria-label="Notifications"
-        >
-          <Bell className="h-4 w-4" />
-        </button>
+        {/* Live Notification Bell */}
+        <NotificationBell />
 
         {/* System Status */}
         <div
