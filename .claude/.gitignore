@@ -1,0 +1,10 @@
+*
+!.gitignore
+!commands/
+!commands/**
+!rules/
+!rules/**
+!skills/
+!skills/**
+!launch.json
+!settings.json
