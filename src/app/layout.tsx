@@ -11,6 +11,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { auth } from '@/auth';
 import { SignOutButton } from '@/components/auth/sign-out-button';
 import { ServiceWorkerRegistration } from '@/components/layout/service-worker-registration';
+import { TopBar } from '@/components/layout/top-bar';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -80,9 +81,12 @@ export default async function RootLayout({
             {session ? (
               <div className="flex min-h-screen bg-background text-foreground">
                 <AppSidebar footer={<SignOutButton />} />
-                <LayoutTransition className="flex-1 overflow-auto pb-16 md:pb-0">
-                  {children}
-                </LayoutTransition>
+                <div className="flex-1 flex flex-col min-w-0">
+                  <TopBar />
+                  <LayoutTransition className="flex-1 overflow-auto pb-16 md:pb-0">
+                    {children}
+                  </LayoutTransition>
+                </div>
                 <CommandPalette />
                 <BottomTabBar />
               </div>
