@@ -1,5 +1,6 @@
 import { inngest } from "@/lib/inngest/client";
-import { generateText, tool } from "ai";
+import { generateText, zodSchema, stepCountIs } from "ai";
+import type { ToolSet } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod/v4";
 import { agentLogger } from "@/lib/agents/logger";
@@ -16,9 +17,76 @@ const CRO_DEFINITION = {
   name: "Chief Revenue Officer",
   codename: "Revenue",
   model: "claude-sonnet-4-20250514",
-  maxTokens: 4096,
+  maxOutputTokens: 4096,
   temperature: 0.3,
 };
+
+const croTools = {
+  queryApplications: {
+    description: "Query the applications table with filters",
+    inputSchema: zodSchema(
+      z.object({
+        status: z.array(z.string()).optional(),
+        tier: z.array(z.number()).optional(),
+        companyId: z.string().optional(),
+        createdAfter: z.string().optional(),
+        limit: z.number().default(50),
+      })
+    ),
+    execute: async (
+      params: {
+        status?: string[];
+        tier?: number[];
+        companyId?: string;
+        createdAfter?: string;
+        limit?: number;
+      }
+    ) => queryApplications(params),
+  },
+  updateApplicationStatus: {
+    description: "Update an application's status",
+    inputSchema: zodSchema(
+      z.object({
+        applicationId: z.string(),
+        newStatus: z.string(),
+        reason: z.string(),
+      })
+    ),
+    execute: async (params: {
+      applicationId: string;
+      newStatus: string;
+      reason: string;
+    }) => updateApplicationStatus(params),
+  },
+  suggestFollowUp: {
+    description: "Draft a follow-up outreach for stale applications",
+    inputSchema: zodSchema(
+      z.object({
+        applicationId: z.string(),
+        contactId: z.string().optional(),
+        suggestedSubject: z.string(),
+        suggestedBody: z.string(),
+      })
+    ),
+    execute: async (params: {
+      applicationId: string;
+      contactId?: string;
+      suggestedSubject: string;
+      suggestedBody: string;
+    }) => suggestFollowUp(params),
+  },
+  analyzeConversionRates: {
+    description: "Calculate conversion rates between pipeline stages",
+    inputSchema: zodSchema(
+      z.object({
+        fromDate: z.string().optional(),
+        toDate: z.string().optional(),
+      })
+    ),
+    execute: async (params: { fromDate?: string; toDate?: string }) =>
+      analyzeConversionRates(params),
+  },
+} satisfies ToolSet;
 
 export const croAgent = inngest.createFunction(
   {
@@ -29,7 +97,7 @@ export const croAgent = inngest.createFunction(
   async ({ event, step }) => {
     if (event.data.department !== "cro") return;
 
-    const { executionId, taskId, instructions, priority } = event.data;
+    const { executionId, taskId, instructions } = event.data;
     const startTime = Date.now();
 
     const logId = await step.run("log-start", async () => {
@@ -61,60 +129,21 @@ export const croAgent = inngest.createFunction(
 
         return generateText({
           model: anthropic(CRO_DEFINITION.model),
-          maxTokens: CRO_DEFINITION.maxTokens,
+          maxOutputTokens: CRO_DEFINITION.maxOutputTokens,
           temperature: CRO_DEFINITION.temperature,
           system: `You are the Chief Revenue Officer (CRO) of an internship command center.
 Your job is to analyze the application pipeline, identify action items, suggest follow-ups for stale applications, and track conversion rates.
 Be concise and actionable. Focus on what needs attention NOW.`,
           prompt: instructions,
-          tools: {
-            queryApplications: tool({
-              description: "Query the applications table with filters",
-              parameters: z.object({
-                status: z.array(z.string()).optional(),
-                tier: z.array(z.number()).optional(),
-                companyId: z.string().optional(),
-                createdAfter: z.string().optional(),
-                limit: z.number().default(50),
-              }),
-              execute: async (params) => queryApplications(params),
-            }),
-            updateApplicationStatus: tool({
-              description: "Update an application's status",
-              parameters: z.object({
-                applicationId: z.string(),
-                newStatus: z.string(),
-                reason: z.string(),
-              }),
-              execute: async (params) => updateApplicationStatus(params),
-            }),
-            suggestFollowUp: tool({
-              description: "Draft a follow-up outreach for stale applications",
-              parameters: z.object({
-                applicationId: z.string(),
-                contactId: z.string().optional(),
-                suggestedSubject: z.string(),
-                suggestedBody: z.string(),
-              }),
-              execute: async (params) => suggestFollowUp(params),
-            }),
-            analyzeConversionRates: tool({
-              description: "Calculate conversion rates between pipeline stages",
-              parameters: z.object({
-                fromDate: z.string().optional(),
-                toDate: z.string().optional(),
-              }),
-              execute: async (params) => analyzeConversionRates(params),
-            }),
-          },
-          maxSteps: 5,
+          tools: croTools,
+          stopWhen: stepCountIs(5),
         });
       });
 
       const durationMs = Date.now() - startTime;
       const tokenUsage = {
-        input: result.usage?.promptTokens ?? 0,
-        output: result.usage?.completionTokens ?? 0,
+        input: result.usage?.inputTokens ?? 0,
+        output: result.usage?.outputTokens ?? 0,
       };
 
       await step.run("log-complete", async () => {
@@ -141,7 +170,10 @@ Be concise and actionable. Focus on what needs attention NOW.`,
             executionId,
             department: "cro",
             taskId,
-            result: { summary: result.text, toolCalls: result.toolCalls?.length ?? 0 },
+            result: {
+              summary: result.text,
+              toolCalls: result.toolCalls?.length ?? 0,
+            },
             tokenUsage,
             durationMs,
             timestamp: new Date().toISOString(),
