@@ -1,3 +1,4 @@
+// Design tokens — keep in sync with globals.css @theme block
 // Core palette
 export const colors = {
   boardroom: '#1A1A2E',
@@ -44,10 +45,10 @@ export const typography = {
     size: '16px',
     tracking: '0.02em',
   },
-  body: { font: 'Inter', weight: 400, size: '14px', tracking: 'normal' },
-  label: { font: 'Inter', weight: 500, size: '13px', tracking: 'normal' },
+  body: { font: 'Geist', weight: 400, size: '14px', tracking: 'normal' },
+  label: { font: 'Geist', weight: 500, size: '13px', tracking: 'normal' },
   tableHeader: {
-    font: 'Inter',
+    font: 'Geist',
     weight: 600,
     size: '12px',
     tracking: '0.08em',

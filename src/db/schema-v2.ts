@@ -91,6 +91,10 @@ export const applications = sqliteTable(
     appliedAt: text('applied_at'),
     source: text('source'),
     notes: text('notes'),
+    sector: text('sector'),
+    contactId: text('contact_id').references(() => contacts.id, {
+      onDelete: 'set null',
+    }),
     salary: text('salary'),
     location: text('location'),
     createdAt: createdAt(),
@@ -121,6 +125,8 @@ export const contacts = sqliteTable(
     relationship: text('relationship', {
       enum: ['alumni', 'recruiter', 'referral', 'cold', 'warm_intro'],
     }),
+    phone: text('phone'),
+    introducedBy: text('introduced_by'),
     warmth: integer('warmth').default(50),
     lastContactAt: text('last_contact_at'),
     notes: text('notes'),
@@ -200,6 +206,7 @@ export const documents = sqliteTable(
     title: text('title'),
     content: text('content'),
     version: integer('version').default(1),
+    isActive: integer('is_active', { mode: 'boolean' }).default(false),
     parentId: text('parent_id'),
     generatedBy: text('generated_by'),
     createdAt: createdAt(),
