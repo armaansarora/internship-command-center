@@ -24,7 +24,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html>
+    <html lang="en">
       <body
         style={{
           margin: 0,
@@ -109,7 +109,7 @@ export default function GlobalError({
               fontFamily:
                 "'Inter', system-ui, -apple-system, sans-serif",
               letterSpacing: "0.05em",
-              textTransform: "uppercase" as const,
+              textTransform: "uppercase",
               transition: "background-color 0.2s, color 0.2s",
             }}
             onMouseEnter={(e) => {
