@@ -4,9 +4,11 @@ vi.mock("ai", () => ({
   generateText: vi.fn().mockResolvedValue({
     text: "Pipeline analysis complete. 3 follow-ups needed.",
     toolCalls: [],
-    usage: { promptTokens: 500, completionTokens: 200 },
+    usage: { inputTokens: 500, outputTokens: 200 },
   }),
   tool: vi.fn((opts) => opts),
+  zodSchema: vi.fn((schema) => schema),
+  stepCountIs: vi.fn((n) => ({ type: "step-count", count: n })),
 }));
 
 vi.mock("@ai-sdk/anthropic", () => ({
