@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { agentLogs } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { auth } from "@/auth";
+import { LatestBriefingResponse } from "@/contracts/api";
 
 export async function GET() {
   const session = await auth();
@@ -24,13 +25,13 @@ export async function GET() {
     .limit(1);
 
   if (!latest?.outputSummary) {
-    return NextResponse.json(null);
+    return NextResponse.json(LatestBriefingResponse.parse(null));
   }
 
   try {
     const briefing = JSON.parse(latest.outputSummary);
-    return NextResponse.json(briefing);
+    return NextResponse.json(LatestBriefingResponse.parse(briefing));
   } catch {
-    return NextResponse.json(null);
+    return NextResponse.json(LatestBriefingResponse.parse(null));
   }
 }

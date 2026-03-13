@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { agentLogs } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/auth";
+import { BriefingResponse } from "@/contracts/api";
 
 export async function GET(
   _request: NextRequest,
@@ -30,7 +31,7 @@ export async function GET(
     try {
       const briefing = JSON.parse(log.outputSummary ?? "{}");
       if (briefing.briefingId === id) {
-        return NextResponse.json(briefing);
+        return NextResponse.json(BriefingResponse.parse(briefing));
       }
     } catch {
       continue;

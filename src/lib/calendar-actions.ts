@@ -1,6 +1,6 @@
 'use server';
 
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { createInterviewEvent, createFollowUpReminder } from '@/lib/calendar';
 
 const interviewSchema = z.object({

@@ -3,7 +3,7 @@
 
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createContact, updateContact } from '@/lib/contact-actions';
 import type { ContactWithWarmth } from '@/lib/contacts';

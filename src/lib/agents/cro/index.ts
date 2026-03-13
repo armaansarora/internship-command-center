@@ -2,8 +2,8 @@ import { inngest } from "@/lib/inngest/client";
 import { generateText, zodSchema, stepCountIs } from "ai";
 import type { ToolSet } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { z } from "zod/v4";
 import { agentLogger } from "@/lib/agents/logger";
+import { CroTools } from "@/contracts/departments/cro";
 import { eventBus } from "@/lib/agents/event-bus";
 import {
   queryApplications,
@@ -26,15 +26,7 @@ const CRO_DEFINITION = {
 const croTools = {
   queryApplications: {
     description: "Query the applications table with filters",
-    inputSchema: zodSchema(
-      z.object({
-        status: z.array(z.string()).optional(),
-        tier: z.array(z.number()).optional(),
-        companyId: z.string().optional(),
-        createdAfter: z.string().optional(),
-        limit: z.number().default(50),
-      })
-    ),
+    inputSchema: zodSchema(CroTools.queryApplications.shape.parameters),
     execute: async (
       params: {
         status?: string[];
@@ -47,13 +39,7 @@ const croTools = {
   },
   updateApplicationStatus: {
     description: "Update an application's status",
-    inputSchema: zodSchema(
-      z.object({
-        applicationId: z.string(),
-        newStatus: z.string(),
-        reason: z.string(),
-      })
-    ),
+    inputSchema: zodSchema(CroTools.updateApplicationStatus.shape.parameters),
     execute: async (params: {
       applicationId: string;
       newStatus: string;
@@ -62,14 +48,7 @@ const croTools = {
   },
   suggestFollowUp: {
     description: "Draft a follow-up outreach for stale applications",
-    inputSchema: zodSchema(
-      z.object({
-        applicationId: z.string(),
-        contactId: z.string().optional(),
-        suggestedSubject: z.string(),
-        suggestedBody: z.string(),
-      })
-    ),
+    inputSchema: zodSchema(CroTools.suggestFollowUp.shape.parameters),
     execute: async (params: {
       applicationId: string;
       contactId?: string;
@@ -79,28 +58,13 @@ const croTools = {
   },
   analyzeConversionRates: {
     description: "Calculate conversion rates between pipeline stages",
-    inputSchema: zodSchema(
-      z.object({
-        fromDate: z.string().optional(),
-        toDate: z.string().optional(),
-      })
-    ),
+    inputSchema: zodSchema(CroTools.analyzeConversionRates.shape.parameters),
     execute: async (params: { fromDate?: string; toDate?: string }) =>
       analyzeConversionRates(params),
   },
   searchJobs: {
     description: "Search for internship job listings using JSearch API",
-    inputSchema: zodSchema(
-      z.object({
-        query: z.string(),
-        location: z.string().optional(),
-        datePosted: z
-          .enum(["today", "3days", "week", "month"])
-          .default("week"),
-        remoteOnly: z.boolean().default(false),
-        limit: z.number().default(10),
-      })
-    ),
+    inputSchema: zodSchema(CroTools.searchJobs.shape.parameters),
     execute: async (params: {
       query: string;
       location?: string;
@@ -111,13 +75,7 @@ const croTools = {
   },
   lookupAtsJob: {
     description: "Look up a specific job on Lever or Greenhouse ATS",
-    inputSchema: zodSchema(
-      z.object({
-        company: z.string(),
-        atsType: z.enum(["lever", "greenhouse"]),
-        jobId: z.string().optional(),
-      })
-    ),
+    inputSchema: zodSchema(CroTools.lookupAtsJob.shape.parameters),
     execute: async (params: {
       company: string;
       atsType: "lever" | "greenhouse";

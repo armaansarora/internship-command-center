@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
+import { MarkReadResponse } from "@/contracts/api";
 
 export async function POST(
   _request: NextRequest,
@@ -16,5 +17,5 @@ export async function POST(
   const { id } = await params;
   await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id));
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json(MarkReadResponse.parse({ success: true }));
 }

@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { outreachQueue } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
-import { OutreachRejectRequest } from "@/contracts/api";
+import { OutreachRejectRequest, OutreachRejectResponse } from "@/contracts/api";
 
 export async function POST(
   request: NextRequest,
@@ -24,5 +24,5 @@ export async function POST(
     .set({ status: "rejected" })
     .where(eq(outreachQueue.id, id));
 
-  return NextResponse.json({ success: true, outreachId: id, status: "rejected" });
+  return NextResponse.json(OutreachRejectResponse.parse({ success: true, outreachId: id, status: "rejected" }));
 }

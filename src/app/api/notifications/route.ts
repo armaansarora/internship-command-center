@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { auth } from "@/auth";
+import { NotificationListResponse } from "@/contracts/api";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
     .from(notifications)
     .where(eq(notifications.isRead, false));
 
-  return NextResponse.json({
+  return NextResponse.json(NotificationListResponse.parse({
     notifications: rows.map((n) => ({
       id: n.id,
       type: n.type,
@@ -48,5 +49,5 @@ export async function GET(request: NextRequest) {
     })),
     total,
     unreadCount,
-  });
+  }));
 }

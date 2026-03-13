@@ -2,8 +2,8 @@ import { inngest } from "@/lib/inngest/client";
 import { generateText, zodSchema, stepCountIs } from "ai";
 import type { ToolSet } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { z } from "zod/v4";
 import { agentLogger } from "@/lib/agents/logger";
+import { CioTools } from "@/contracts/departments/cio";
 import { eventBus } from "@/lib/agents/event-bus";
 import {
   searchCompany,
@@ -25,38 +25,19 @@ const CIO_DEFINITION = {
 const cioTools = {
   searchCompany: {
     description: "Search for company information using Tavily",
-    inputSchema: zodSchema(
-      z.object({
-        query: z.string(),
-        maxResults: z.number().default(5),
-      })
-    ),
+    inputSchema: zodSchema(CioTools.searchCompany.shape.parameters),
     execute: async (params: { query: string; maxResults?: number }) =>
       searchCompany(params),
   },
   scrapeUrl: {
     description: "Scrape a specific URL for company data using Firecrawl",
-    inputSchema: zodSchema(
-      z.object({
-        url: z.string().url(),
-        extractFields: z.array(z.string()).optional(),
-      })
-    ),
+    inputSchema: zodSchema(CioTools.scrapeUrl.shape.parameters),
     execute: async (params: { url: string; extractFields?: string[] }) =>
       scrapeUrl(params),
   },
   lookupSecFilings: {
     description: "Look up SEC EDGAR filings for a public company",
-    inputSchema: zodSchema(
-      z.object({
-        companyName: z.string(),
-        cik: z.string().optional(),
-        filingType: z
-          .enum(["10-K", "10-Q", "8-K", "DEF 14A"])
-          .default("10-K"),
-        limit: z.number().default(3),
-      })
-    ),
+    inputSchema: zodSchema(CioTools.lookupSecFilings.shape.parameters),
     execute: async (params: {
       companyName: string;
       cik?: string;
@@ -66,13 +47,7 @@ const cioTools = {
   },
   getEconomicData: {
     description: "Get economic indicators from FRED API",
-    inputSchema: zodSchema(
-      z.object({
-        seriesId: z.string(),
-        observationStart: z.string().optional(),
-        limit: z.number().default(10),
-      })
-    ),
+    inputSchema: zodSchema(CioTools.getEconomicData.shape.parameters),
     execute: async (params: {
       seriesId: string;
       observationStart?: string;
@@ -81,33 +56,7 @@ const cioTools = {
   },
   upsertCompany: {
     description: "Create or update a company record in the database",
-    inputSchema: zodSchema(
-      z.object({
-        name: z.string(),
-        domain: z.string().optional(),
-        industry: z.string().optional(),
-        sector: z.string().optional(),
-        size: z.enum(["startup", "mid", "large", "enterprise"]).optional(),
-        headquarters: z.string().optional(),
-        description: z.string().optional(),
-        cultureSummary: z.string().optional(),
-        recentNews: z.string().optional(),
-        financialsSummary: z.string().optional(),
-        keyPeople: z
-          .array(
-            z.object({
-              name: z.string(),
-              title: z.string(),
-              linkedinUrl: z.string().optional(),
-            })
-          )
-          .optional(),
-        internshipIntel: z.string().optional(),
-        careersUrl: z.string().optional(),
-        linkedinUrl: z.string().optional(),
-        glassdoorUrl: z.string().optional(),
-      })
-    ),
+    inputSchema: zodSchema(CioTools.upsertCompany.shape.parameters),
     execute: async (params: {
       name: string;
       domain?: string;

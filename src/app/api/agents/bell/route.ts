@@ -35,11 +35,11 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const response: { executionId: string; status: "dispatched"; message: string } = {
+  const response = BellRingResponse.parse({
     executionId,
     status: "dispatched",
     message: "Bell rang. CEO is assembling the team.",
-  };
+  });
 
   return NextResponse.json(response);
 }

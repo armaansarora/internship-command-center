@@ -2,8 +2,8 @@ import { inngest } from "@/lib/inngest/client";
 import { generateText, zodSchema, stepCountIs } from "ai";
 import type { ToolSet } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
-import { z } from "zod/v4";
 import { agentLogger } from "@/lib/agents/logger";
+import { CooTools } from "@/contracts/departments/coo";
 import { eventBus } from "@/lib/agents/event-bus";
 import {
   fetchRecentEmails,
@@ -24,13 +24,7 @@ const COO_DEFINITION = {
 const cooTools = {
   fetchRecentEmails: {
     description: "Fetch recent emails from Gmail API",
-    inputSchema: zodSchema(
-      z.object({
-        maxResults: z.number().default(20),
-        query: z.string().optional(),
-        after: z.string().optional(),
-      })
-    ),
+    inputSchema: zodSchema(CooTools.fetchRecentEmails.shape.parameters),
     execute: async (params: {
       maxResults?: number;
       query?: string;
@@ -39,20 +33,7 @@ const cooTools = {
   },
   classifyEmail: {
     description: "Classify an email and store metadata",
-    inputSchema: zodSchema(
-      z.object({
-        gmailId: z.string(),
-        threadId: z.string(),
-        subject: z.string(),
-        from: z.string(),
-        snippet: z.string(),
-        bodyText: z.string(),
-        classification: z.string().optional(),
-        urgency: z.string().optional(),
-        suggestedAction: z.string().optional(),
-        linkedApplicationId: z.string().optional(),
-      })
-    ),
+    inputSchema: zodSchema(CooTools.classifyEmail.shape.parameters),
     execute: async (params: {
       gmailId: string;
       threadId: string;
@@ -68,16 +49,7 @@ const cooTools = {
   },
   createCalendarEvent: {
     description: "Create a Google Calendar event for an interview",
-    inputSchema: zodSchema(
-      z.object({
-        title: z.string(),
-        startAt: z.string(),
-        endAt: z.string(),
-        description: z.string().optional(),
-        location: z.string().optional(),
-        interviewId: z.string().optional(),
-      })
-    ),
+    inputSchema: zodSchema(CooTools.createCalendarEvent.shape.parameters),
     execute: async (params: {
       title: string;
       startAt: string;
@@ -89,14 +61,7 @@ const cooTools = {
   },
   updateApplicationFromEmail: {
     description: "Update application status based on email content",
-    inputSchema: zodSchema(
-      z.object({
-        applicationId: z.string(),
-        newStatus: z.string(),
-        reason: z.string(),
-        emailGmailId: z.string(),
-      })
-    ),
+    inputSchema: zodSchema(CooTools.updateApplicationFromEmail.shape.parameters),
     execute: async (params: {
       applicationId: string;
       newStatus: string;

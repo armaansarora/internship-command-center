@@ -4,6 +4,7 @@ import { outreachQueue } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { inngest } from "@/lib/inngest/client";
 import { auth } from "@/auth";
+import { OutreachApproveResponse } from "@/contracts/api";
 
 export async function POST(
   _request: NextRequest,
@@ -27,5 +28,5 @@ export async function POST(
     data: { outreachId: id, approvedAt: now },
   });
 
-  return NextResponse.json({ success: true, outreachId: id, status: "approved" });
+  return NextResponse.json(OutreachApproveResponse.parse({ success: true, outreachId: id, status: "approved" }));
 }

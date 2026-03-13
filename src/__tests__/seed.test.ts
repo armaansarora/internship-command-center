@@ -17,10 +17,10 @@ describe('Seed data', () => {
       'SELECT DISTINCT tier FROM applications ORDER BY tier'
     );
     const tierValues = result.rows.map((row) => row.tier);
-    expect(tierValues).toContain('T1');
-    expect(tierValues).toContain('T2');
-    expect(tierValues).toContain('T3');
-    expect(tierValues).toContain('T4');
+    expect(tierValues).toContain(1);
+    expect(tierValues).toContain(2);
+    expect(tierValues).toContain(3);
+    expect(tierValues).toContain(4);
     client.close();
   });
 
@@ -36,7 +36,7 @@ describe('Seed data', () => {
   it('includes applications with interview status', async () => {
     const client = createClient({ url: 'file:./data/internship.db' });
     const result = await client.execute(
-      "SELECT * FROM applications WHERE status = 'interview'"
+      "SELECT * FROM applications WHERE status = 'interviewing'"
     );
     expect(result.rows.length).toBeGreaterThanOrEqual(1);
     client.close();
