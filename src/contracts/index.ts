@@ -31,6 +31,8 @@ export {
 
 // Department-specific
 export { CroResultData, CroTools } from "./departments/cro";
+export { CioResultData, CioTools } from "./departments/cio";
+export { CooResultData, CooTools, EmailClassification } from "./departments/coo";
 
 // API route contracts
 export {

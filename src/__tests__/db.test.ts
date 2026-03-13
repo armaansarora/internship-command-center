@@ -11,19 +11,19 @@ describe('Database', () => {
     client.close();
   });
 
-  it('has the company_research table', async () => {
+  it('has the company_research table (now companies)', async () => {
     const client = createClient({ url: 'file:./data/internship.db' });
     const result = await client.execute(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='company_research'"
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='companies'"
     );
     expect(result.rows).toHaveLength(1);
     client.close();
   });
 
-  it('has the follow_ups table', async () => {
+  it('has the contacts table', async () => {
     const client = createClient({ url: 'file:./data/internship.db' });
     const result = await client.execute(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='follow_ups'"
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='contacts'"
     );
     expect(result.rows).toHaveLength(1);
     client.close();

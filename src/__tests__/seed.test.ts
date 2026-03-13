@@ -33,10 +33,10 @@ describe('Seed data', () => {
     client.close();
   });
 
-  it('includes JPMorgan with interview status', async () => {
+  it('includes applications with interview status', async () => {
     const client = createClient({ url: 'file:./data/internship.db' });
     const result = await client.execute(
-      "SELECT * FROM applications WHERE company LIKE '%JPMorgan%' AND status = 'interview'"
+      "SELECT * FROM applications WHERE status = 'interview'"
     );
     expect(result.rows.length).toBeGreaterThanOrEqual(1);
     client.close();

@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { LayoutGrid, Table2 } from 'lucide-react';

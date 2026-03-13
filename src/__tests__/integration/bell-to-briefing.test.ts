@@ -31,7 +31,7 @@ describe("Bell-to-Briefing Pipeline", () => {
     expect(event.data.priority).toBe("normal"); // default applied
   });
 
-  it("Step 2: CEO produces a valid dispatch decision", () => {
+  it("Step 2: CEO produces a valid dispatch decision for all 3 departments", () => {
     const decision = CeoDecision.parse({
       departments: [
         {
@@ -39,25 +39,46 @@ describe("Bell-to-Briefing Pipeline", () => {
           instructions: "Analyze the current pipeline status",
           priority: "normal",
         },
+        {
+          department: "cio",
+          instructions: "Analyze the technical landscape",
+          priority: "normal",
+        },
+        {
+          department: "coo",
+          instructions: "Review operational status",
+          priority: "normal",
+        },
       ],
-      reasoning: "CRO should analyze revenue pipeline",
+      reasoning:
+        "Dispatching CRO (pipeline), CIO (research), and COO (operations) in parallel.",
     });
-    expect(decision.departments).toHaveLength(1);
-    expect(decision.departments[0].dependsOn).toEqual([]); // default
+    expect(decision.departments).toHaveLength(3);
+    expect(decision.departments.map((d) => d.department)).toEqual([
+      "cro",
+      "cio",
+      "coo",
+    ]);
+    for (const dept of decision.departments) {
+      expect(dept.dependsOn).toEqual([]); // default
+    }
   });
 
-  it("Step 3: CEO dispatches to CRO", () => {
-    const dispatch = CeoDispatchEvent.parse({
-      name: "ceo/dispatch",
-      data: {
-        executionId,
-        department: "cro",
-        taskId: "task-cro-001",
-        instructions: "Analyze the current pipeline status",
-        priority: "normal",
-      },
-    });
-    expect(dispatch.data.department).toBe("cro");
+  it("Step 3: CEO dispatches to CRO, CIO, and COO", () => {
+    const departments = ["cro", "cio", "coo"] as const;
+    for (const dept of departments) {
+      const dispatch = CeoDispatchEvent.parse({
+        name: "ceo/dispatch",
+        data: {
+          executionId,
+          department: dept,
+          taskId: `task-${dept}-001`,
+          instructions: `Analyze ${dept} domain`,
+          priority: "normal",
+        },
+      });
+      expect(dispatch.data.department).toBe(dept);
+    }
   });
 
   it("Step 4: agent start event fires", () => {
@@ -120,7 +141,7 @@ describe("Bell-to-Briefing Pipeline", () => {
     expect(complete.data.durationMs).toBe(4500);
   });
 
-  it("Step 8: briefing compile event aggregates results", () => {
+  it("Step 8: briefing compile event aggregates results from all 3 departments", () => {
     const compile = BriefingCompileEvent.parse({
       name: "briefing/compile",
       data: {
@@ -132,18 +153,35 @@ describe("Bell-to-Briefing Pipeline", () => {
             status: "complete",
             result: { summary: "Pipeline healthy" },
           },
+          {
+            department: "cio",
+            taskId: "task-cio-001",
+            status: "complete",
+            result: { summary: "Tech research complete" },
+          },
+          {
+            department: "coo",
+            taskId: "task-coo-001",
+            status: "complete",
+            result: { summary: "Operations on track" },
+          },
         ],
         timestamp: now,
       },
     });
-    expect(compile.data.departmentResults).toHaveLength(1);
+    expect(compile.data.departmentResults).toHaveLength(3);
+    expect(compile.data.departmentResults.map((r) => r.department)).toEqual([
+      "cro",
+      "cio",
+      "coo",
+    ]);
   });
 
-  it("Step 9: briefing summary is valid", () => {
+  it("Step 9: briefing summary includes all 3 departments", () => {
     const briefing = BriefingSummary.parse({
       executionId,
       briefingId: "briefing-001",
-      headline: "Morning Briefing: Pipeline Strong",
+      headline: "Morning Briefing: All Systems Go",
       sections: [
         {
           department: "cro",
@@ -158,16 +196,34 @@ describe("Bell-to-Briefing Pipeline", () => {
             },
           ],
         },
+        {
+          department: "cio",
+          title: "Technical Research",
+          content: "Completed tech stack analysis for 5 target companies.",
+          highlights: ["React + TypeScript dominant in target roles"],
+          pendingActions: [],
+        },
+        {
+          department: "coo",
+          title: "Operations Status",
+          content: "All deadlines on track, no scheduling conflicts.",
+          highlights: ["2 interviews scheduled this week"],
+          pendingActions: [],
+        },
       ],
       metrics: {
-        totalTokensUsed: 2300,
-        totalDurationMs: 5200,
-        departmentsInvolved: ["cro"],
+        totalTokensUsed: 6900,
+        totalDurationMs: 12000,
+        departmentsInvolved: ["cro", "cio", "coo"],
       },
       createdAt: now,
     });
-    expect(briefing.headline).toContain("Pipeline");
-    expect(briefing.sections).toHaveLength(1);
+    expect(briefing.sections).toHaveLength(3);
+    expect(briefing.metrics.departmentsInvolved).toEqual([
+      "cro",
+      "cio",
+      "coo",
+    ]);
   });
 
   it("Step 10: briefing ready event fires", () => {
@@ -199,9 +255,10 @@ describe("Bell-to-Briefing Pipeline", () => {
     expect(notification.data.channels).toContain("in_app");
   });
 
-  it("validates full contract chain end-to-end", () => {
+  it("validates full contract chain end-to-end with all 3 departments", () => {
     // This test verifies every event in sequence can be created,
     // proving the contract chain is complete and type-safe
+    const departments = ["cro", "cio", "coo"] as const;
     const steps = [
       () =>
         BellRingEvent.parse({
@@ -213,54 +270,68 @@ describe("Bell-to-Briefing Pipeline", () => {
             timestamp: now,
           },
         }),
-      () =>
-        CeoDispatchEvent.parse({
-          name: "ceo/dispatch",
-          data: {
-            executionId,
-            department: "cro",
-            taskId: "t",
-            instructions: "go",
-            priority: "normal",
-          },
-        }),
-      () =>
-        AgentStartEvent.parse({
-          name: "agent/start",
-          data: { executionId, department: "cro", taskId: "t", timestamp: now },
-        }),
-      () =>
-        AgentProgressEvent.parse({
-          name: "agent/progress",
-          data: {
-            executionId,
-            department: "cro",
-            taskId: "t",
-            step: "working",
-            timestamp: now,
-          },
-        }),
-      () =>
-        AgentCompleteEvent.parse({
-          name: "agent/complete",
-          data: {
-            executionId,
-            department: "cro",
-            taskId: "t",
-            result: {},
-            tokenUsage: { input: 1, output: 1 },
-            durationMs: 1,
-            timestamp: now,
-          },
-        }),
+      // CEO dispatches to all 3 departments
+      ...departments.map(
+        (dept) => () =>
+          CeoDispatchEvent.parse({
+            name: "ceo/dispatch",
+            data: {
+              executionId,
+              department: dept,
+              taskId: `t-${dept}`,
+              instructions: "go",
+              priority: "normal",
+            },
+          })
+      ),
+      // Each department starts, progresses, and completes
+      ...departments.flatMap((dept) => [
+        () =>
+          AgentStartEvent.parse({
+            name: "agent/start",
+            data: {
+              executionId,
+              department: dept,
+              taskId: `t-${dept}`,
+              timestamp: now,
+            },
+          }),
+        () =>
+          AgentProgressEvent.parse({
+            name: "agent/progress",
+            data: {
+              executionId,
+              department: dept,
+              taskId: `t-${dept}`,
+              step: "working",
+              timestamp: now,
+            },
+          }),
+        () =>
+          AgentCompleteEvent.parse({
+            name: "agent/complete",
+            data: {
+              executionId,
+              department: dept,
+              taskId: `t-${dept}`,
+              result: {},
+              tokenUsage: { input: 1, output: 1 },
+              durationMs: 1,
+              timestamp: now,
+            },
+          }),
+      ]),
+      // Briefing compile with all 3 results
       () =>
         BriefingCompileEvent.parse({
           name: "briefing/compile",
           data: {
             executionId,
-            departmentResults: [
-              { department: "cro", taskId: "t", status: "complete" },
-            ],
+            departmentResults: departments.map((dept) => ({
+              department: dept,
+              taskId: `t-${dept}`,
+              status: "complete" as const,
+            })),
             timestamp: now,
           },
         }),

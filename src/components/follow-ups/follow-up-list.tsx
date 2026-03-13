@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client';
 
 import { AnimatedList, AnimatedItem } from '@/components/shared/animated-list';

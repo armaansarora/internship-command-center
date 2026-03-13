@@ -10,6 +10,8 @@ import {
   updateApplicationStatus,
   suggestFollowUp,
   analyzeConversionRates,
+  searchJobs,
+  lookupAtsJob,
 } from "./tools";
 
 const CRO_DEFINITION = {
@@ -85,6 +87,42 @@ const croTools = {
     ),
     execute: async (params: { fromDate?: string; toDate?: string }) =>
       analyzeConversionRates(params),
+  },
+  searchJobs: {
+    description: "Search for internship job listings using JSearch API",
+    inputSchema: zodSchema(
+      z.object({
+        query: z.string(),
+        location: z.string().optional(),
+        datePosted: z
+          .enum(["today", "3days", "week", "month"])
+          .default("week"),
+        remoteOnly: z.boolean().default(false),
+        limit: z.number().default(10),
+      })
+    ),
+    execute: async (params: {
+      query: string;
+      location?: string;
+      datePosted?: "today" | "3days" | "week" | "month";
+      remoteOnly?: boolean;
+      limit?: number;
+    }) => searchJobs(params),
+  },
+  lookupAtsJob: {
+    description: "Look up a specific job on Lever or Greenhouse ATS",
+    inputSchema: zodSchema(
+      z.object({
+        company: z.string(),
+        atsType: z.enum(["lever", "greenhouse"]),
+        jobId: z.string().optional(),
+      })
+    ),
+    execute: async (params: {
+      company: string;
+      atsType: "lever" | "greenhouse";
+      jobId?: string;
+    }) => lookupAtsJob(params),
   },
 } satisfies ToolSet;
 

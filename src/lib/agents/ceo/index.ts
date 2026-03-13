@@ -4,6 +4,31 @@ import { eventBus } from "@/lib/agents/event-bus";
 
 const randomHex = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
+const DEPARTMENTS = ["cro", "cio", "coo"] as const;
+type Department = (typeof DEPARTMENTS)[number];
+
+function buildInstructions(
+  department: Department,
+  prompt: string | undefined,
+  trigger: string
+): string {
+  if (prompt) {
+    const prefixes: Record<Department, string> = {
+      cro: `User request: "${prompt}". Analyze the internship application pipeline accordingly.`,
+      cio: `User request: "${prompt}". Analyze the technical landscape — research companies, roles, and technology stacks.`,
+      coo: `User request: "${prompt}". Review operational status — deadlines, scheduling conflicts, and process efficiency.`,
+    };
+    return prefixes[department];
+  }
+
+  const defaults: Record<Department, string> = {
+    cro: "Perform a comprehensive pipeline analysis: check for stale applications, identify action items, analyze conversion rates, and suggest follow-ups for applications that haven't been touched in 7+ days.",
+    cio: "Analyze the technical landscape: research target companies' tech stacks, identify skill gaps, and surface relevant technical preparation items.",
+    coo: "Review operational status: check upcoming deadlines, identify scheduling conflicts, verify follow-up cadences, and flag any process bottlenecks.",
+  };
+  return defaults[department];
+}
+
 export const ceoOrchestrator = inngest.createFunction(
   { id: "ceo-orchestrator", retries: 2 },
   { event: "bell/ring" },
@@ -28,7 +53,7 @@ export const ceoOrchestrator = inngest.createFunction(
       });
     });
 
-    // Phase 1: Always dispatch CRO for pipeline analysis
+    // Phase 1: Decide which departments to dispatch
     const decision = await step.run("ceo-decide", async () => {
       eventBus.publish(executionId, {
         type: "agent_progress",
@@ -38,89 +63,107 @@ export const ceoOrchestrator = inngest.createFunction(
         timestamp: new Date().toISOString(),
       });
 
-      const defaultInstructions = prompt
-        ? `User request: "${prompt}". Analyze the internship application pipeline accordingly.`
-        : "Perform a comprehensive pipeline analysis: check for stale applications, identify action items, analyze conversion rates, and suggest follow-ups for applications that haven't been touched in 7+ days.";
-
       return {
-        departments: [
-          {
-            department: "cro" as const,
-            instructions: defaultInstructions,
-            priority: priority,
-            dependsOn: [] as string[],
-          },
-        ],
-        reasoning: "Phase 1: CRO pipeline analysis is the primary department.",
+        departments: DEPARTMENTS.map((dept) => ({
+          department: dept,
+          instructions: buildInstructions(dept, prompt, trigger),
+          priority: priority,
+          dependsOn: [] as string[],
+        })),
+        reasoning:
+          "Dispatching CRO (pipeline), CIO (research), and COO (operations) in parallel.",
       };
     });
 
-    const taskId = randomHex();
-    await step.run("dispatch-cro", async () => {
-      await inngest.send({
-        name: "ceo/dispatch",
-        data: {
-          executionId,
-          department: "cro",
-          taskId,
-          instructions: decision.departments[0]!.instructions,
-          priority: decision.departments[0]!.priority,
-        },
-      });
-    });
+    // Generate a unique taskId per department
+    const taskIds: Record<Department, string> = {
+      cro: randomHex(),
+      cio: randomHex(),
+      coo: randomHex(),
+    };
 
-    // Wait for CRO to complete (or error)
-    const croResult = await step.waitForEvent("wait-cro-complete", {
-      event: "agent/complete",
-      match: "data.executionId",
-      timeout: "5m",
-    });
-
-    if (!croResult) {
-      // Timed out — check for error
-      const croError = await step.waitForEvent("wait-cro-error", {
-        event: "agent/error",
-        match: "data.executionId",
-        timeout: "10s",
-      });
-
-      await step.run("compile-partial", async () => {
+    // Dispatch all 3 departments in parallel
+    for (const dept of DEPARTMENTS) {
+      const deptEntry = decision.departments.find(
+        (d) => d.department === dept
+      )!;
+      await step.run(`dispatch-${dept}`, async () => {
         await inngest.send({
-          name: "briefing/compile",
+          name: "ceo/dispatch",
           data: {
             executionId,
-            departmentResults: [{
-              department: "cro",
-              taskId,
-              status: croError ? "error" as const : "timeout" as const,
-              result: croError ? { error: croError.data.error } : undefined,
-            }],
-            timestamp: new Date().toISOString(),
-          },
-        });
-      });
-    } else {
-      await step.run("compile-full", async () => {
-        await inngest.send({
-          name: "briefing/compile",
-          data: {
-            executionId,
-            departmentResults: [{
-              department: "cro",
-              taskId,
-              status: "complete" as const,
-              result: croResult.data.result,
-            }],
-            timestamp: new Date().toISOString(),
+            department: dept,
+            taskId: taskIds[dept],
+            instructions: deptEntry.instructions,
+            priority: deptEntry.priority,
           },
         });
       });
     }
 
+    // Wait for all 3 departments to complete (or timeout)
+    type DeptResult = {
+      department: Department;
+      taskId: string;
+      status: "complete" | "error" | "timeout";
+      result?: Record<string, unknown>;
+    };
+
+    const departmentResults: DeptResult[] = [];
+
+    for (const dept of DEPARTMENTS) {
+      const result = await step.waitForEvent(`wait-${dept}-complete`, {
+        event: "agent/complete",
+        if: `async.data.executionId == '${executionId}' && async.data.department == '${dept}'`,
+        timeout: "5m",
+      });
+
+      if (!result) {
+        // Timed out — check for error
+        const errorResult = await step.waitForEvent(`wait-${dept}-error`, {
+          event: "agent/error",
+          if: `async.data.executionId == '${executionId}' && async.data.department == '${dept}'`,
+          timeout: "10s",
+        });
+
+        departmentResults.push({
+          department: dept,
+          taskId: taskIds[dept],
+          status: errorResult ? "error" : "timeout",
+          result: errorResult
+            ? { error: errorResult.data.error }
+            : undefined,
+        });
+      } else {
+        departmentResults.push({
+          department: dept,
+          taskId: taskIds[dept],
+          status: "complete",
+          result: result.data.result,
+        });
+      }
+    }
+
+    // Compile briefing with all department results
+    await step.run("compile-briefing", async () => {
+      await inngest.send({
+        name: "briefing/compile",
+        data: {
+          executionId,
+          departmentResults,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    });
+
     const durationMs = Date.now() - startTime;
+    const deptSummary = departmentResults
+      .map((r) => `${r.department.toUpperCase()}:${r.status}`)
+      .join(", ");
+
     await step.run("log-complete", async () => {
       await agentLogger.complete(logId, {
-        outputSummary: `Dispatched CRO. Duration: ${durationMs}ms`,
+        outputSummary: `Dispatched ${DEPARTMENTS.length} depts (${deptSummary}). Duration: ${durationMs}ms`,
         durationMs,
       });
     });

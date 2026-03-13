@@ -119,3 +119,98 @@ export async function analyzeConversionRates(params: {
 
   return { totalApplications: total, byStatus, conversionRates };
 }
+
+export async function searchJobs(params: {
+  query: string;
+  location?: string;
+  datePosted?: "today" | "3days" | "week" | "month";
+  remoteOnly?: boolean;
+  limit?: number;
+}) {
+  const apiKey = process.env.JSEARCH_API_KEY;
+  if (!apiKey) {
+    throw new Error("JSEARCH_API_KEY environment variable is not set");
+  }
+
+  const url = new URL("https://jsearch.p.rapidapi.com/search");
+  url.searchParams.set("query", params.query);
+  url.searchParams.set("date_posted", params.datePosted ?? "week");
+  url.searchParams.set("remote_jobs_only", String(params.remoteOnly ?? false));
+  url.searchParams.set("num_pages", "1");
+  if (params.location) {
+    url.searchParams.set("location", params.location);
+  }
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      "X-RapidAPI-Key": apiKey,
+      "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`JSearch API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const limit = params.limit ?? 10;
+
+  const jobs = (data.data ?? []).slice(0, limit).map((job: Record<string, unknown>) => ({
+    title: job.job_title as string,
+    company: job.employer_name as string,
+    location: `${job.job_city}, ${job.job_state}`,
+    url: job.job_apply_link as string,
+    datePosted: job.job_posted_at_datetime_utc as string,
+    description: ((job.job_description as string) ?? "").slice(0, 500),
+  }));
+
+  return { jobs };
+}
+
+export async function lookupAtsJob(params: {
+  company: string;
+  atsType: "lever" | "greenhouse";
+  jobId?: string;
+}) {
+  const slug = params.company.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  try {
+    if (params.atsType === "lever") {
+      const url = `https://api.lever.co/v0/postings/${slug}?mode=json`;
+      const response = await fetch(url);
+      if (!response.ok) return { jobs: [] };
+
+      const data = await response.json();
+      const postings = Array.isArray(data) ? data : [data];
+
+      const jobs = postings.slice(0, 20).map((p: Record<string, unknown>) => ({
+        id: p.id as string,
+        title: p.text as string,
+        location: (p.categories as Record<string, unknown>)?.location as string,
+        url: p.hostedUrl as string,
+        team: (p.categories as Record<string, unknown>)?.team as string,
+      }));
+
+      return { jobs };
+    } else {
+      const url = `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs`;
+      const response = await fetch(url);
+      if (!response.ok) return { jobs: [] };
+
+      const data = await response.json();
+      const listings = (data.jobs ?? []) as Record<string, unknown>[];
+
+      const jobs = listings.slice(0, 20).map((j) => ({
+        id: String(j.id),
+        title: j.title as string,
+        location: (j.location as Record<string, unknown>)?.name as string,
+        url: j.absolute_url as string,
+        team: ((j.departments as Record<string, unknown>[]) ?? [])[0]?.name as string,
+      }));
+
+      return { jobs };
+    }
+  } catch {
+    return { jobs: [] };
+  }
+}

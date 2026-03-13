@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Mail } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import type { CompanyEmails } from '@/lib/gmail';

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import * as schema from '../../db/schema-v2';
+import * as schema from '../../db/schema';
 
 describe('V2 Schema', () => {
   it('exports all 15 tables', () => {

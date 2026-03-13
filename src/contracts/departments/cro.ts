@@ -77,4 +77,28 @@ export const CroTools = {
       toDate: z.string().datetime().optional(),
     }),
   }),
+  searchJobs: z.object({
+    description: z.literal(
+      "Search for internship job listings using JSearch API"
+    ),
+    parameters: z.object({
+      query: z.string(),
+      location: z.string().optional(),
+      datePosted: z
+        .enum(["today", "3days", "week", "month"])
+        .default("week"),
+      remoteOnly: z.boolean().default(false),
+      limit: z.number().default(10),
+    }),
+  }),
+  lookupAtsJob: z.object({
+    description: z.literal(
+      "Look up a specific job on Lever or Greenhouse ATS"
+    ),
+    parameters: z.object({
+      company: z.string(),
+      atsType: z.enum(["lever", "greenhouse"]),
+      jobId: z.string().optional(),
+    }),
+  }),
 } as const;
