@@ -1,5 +1,6 @@
 'use server';
 
+import { auth } from '@/auth';
 import { generateInterviewPrep } from '@/lib/interview-prep';
 import { revalidatePath } from 'next/cache';
 
@@ -11,6 +12,9 @@ export async function generateInterviewPrepAction(
   company: string,
   role: string
 ): Promise<{ content: string } | { error: string }> {
+  const session = await auth();
+  if (!session) return { error: 'Unauthorized' };
+
   try {
     const content = await generateInterviewPrep(company, role, applicationId);
     revalidatePath(`/applications/${applicationId}`);

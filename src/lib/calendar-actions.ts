@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod/v4';
+import { auth } from '@/auth';
 import { createInterviewEvent, createFollowUpReminder } from '@/lib/calendar';
 
 const interviewSchema = z.object({
@@ -16,6 +17,9 @@ const interviewSchema = z.object({
  * Server action to create a Google Calendar event for an interview.
  */
 export async function addInterviewToCalendar(formData: FormData) {
+  const session = await auth();
+  if (!session) return { error: 'Unauthorized' };
+
   const parsed = interviewSchema.safeParse({
     company: formData.get('company'),
     role: formData.get('role'),
@@ -61,6 +65,9 @@ export async function addFollowUpToCalendar(
   dueDate: string,
   note?: string
 ) {
+  const session = await auth();
+  if (!session) return { error: 'Unauthorized' };
+
   const result = await createFollowUpReminder({ company, role, dueDate, note });
 
   if (result.success) {

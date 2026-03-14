@@ -1,5 +1,6 @@
 'use server';
 
+import { auth } from '@/auth';
 import Anthropic from '@anthropic-ai/sdk';
 import { RESUME } from '@/lib/resume';
 
@@ -41,6 +42,9 @@ export async function generateFollowUpEmail(
   notes: string | null,
   templateType: TemplateType = 'follow-up',
 ): Promise<{ content: string; error?: string }> {
+  const session = await auth();
+  if (!session) return { content: '', error: 'Unauthorized' };
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
