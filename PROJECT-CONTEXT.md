@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-18T18:45:00-04:00 (AST)
+**Last updated:** 2026-03-18T19:45:00-04:00 (AST)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -162,10 +162,10 @@ All planning docs are in `docs/`. Operational files stay in root.
 ## 7. CURRENT STATE
 
 **Phase:** 0 — The Shell (IN PROGRESS)
-**Branch:** `docs-handoff` (commit `8eefff0`)
-**Last commit:** Phase 0 foundation — 247 files changed, 8,961 insertions, 39,786 deletions
+**Branch:** `docs-handoff` (commit `209ad16`)
+**Last commit:** Audit fixes — FloorShell consistency, dead code removal, schema FK, docs alignment
 
-### Completed (Tasks 0.1–0.4)
+### Completed (Tasks 0.1–0.4 + Audit)
 - ✅ Fresh Next.js 16 project (old code wiped, deps installed)
 - ✅ 16-table Drizzle schema with RLS policies + type exports
 - ✅ Supabase Auth: Google OAuth, middleware, server/client/admin clients
@@ -174,13 +174,17 @@ All planning docs are in `docs/`. Operational files stay in root.
 - ✅ Lobby page: Google OAuth sign-in with Tower branding
 - ✅ Authenticated layout with WorldShell (DayNightProvider + CustomCursor)
 - ✅ FloorShell component (sky gradient, window tint, floor badge)
-- ✅ All 9 floor stubs under `(authenticated)/` route group
+- ✅ All 9 floor stubs under `(authenticated)/` route group — ALL wrapped in FloorShell
 - ✅ DayNightProvider (7 time states, updates every 60s, sets data-time on html)
 - ✅ CustomCursor (7 contextual states, touch device fallback, RAF animation)
 - ✅ Design token system in CSS (gold, dark, glass, day/night states)
 - ✅ Tailwind v3 config with Tower tokens
-- ✅ Generated migration SQL via `drizzle-kit generate` (353 lines)
+- ✅ Generated migration SQL via `drizzle-kit generate` (353 + 1 incremental lines)
 - ✅ Clean TypeScript build, zero errors, all 15 routes compile
+- ✅ Recursive audit: 15 findings, all fixed (see commit `209ad16`)
+- ✅ FK added: `applications.contactId` → `contacts.id`
+- ✅ Dead weight removed: empty hooks/, inngest/ dirs, unused WorldShell props
+- ✅ Docs aligned: npm (not pnpm), Zod v4 (not v3), missing scripts added
 
 ### Blocked
 - ⏳ Schema push to Supabase — direct DB connection is IPv6-only (unreachable from build sandbox). Migration SQL generated and shared as `migration-full.sql`. **Action required: Run in Supabase SQL Editor (Dashboard → SQL Editor → New Query → paste → Run).**
@@ -193,7 +197,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 - 0.9: Contracts system port (1,015 LOC → Supabase/Drizzle)
 - 0.10: Deploy to Vercel + verify production
 
-### File Structure (current)
+### File Structure (current — post-audit)
 ```
 src/
 ├── app/
@@ -206,25 +210,25 @@ src/
 │   ├── (authenticated)/
 │   │   ├── layout.tsx          # Auth gate + WorldShell
 │   │   ├── world-shell.tsx     # Client: DayNight + Cursor
-│   │   ├── penthouse/page.tsx  # Dashboard placeholder
-│   │   ├── war-room/page.tsx   # Phase 1 stub
-│   │   ├── rolodex-lounge/page.tsx
-│   │   ├── writing-room/page.tsx
-│   │   ├── situation-room/page.tsx
-│   │   ├── briefing-room/page.tsx
-│   │   ├── observatory/page.tsx
-│   │   └── c-suite/page.tsx
+│   │   ├── penthouse/page.tsx  # Dashboard placeholder (FloorShell PH)
+│   │   ├── war-room/page.tsx   # Phase 1 stub (FloorShell 7)
+│   │   ├── rolodex-lounge/    # Phase 3 stub (FloorShell 6)
+│   │   ├── writing-room/      # Phase 4 stub (FloorShell 5)
+│   │   ├── situation-room/    # Phase 2 stub (FloorShell 4)
+│   │   ├── briefing-room/     # Phase 4 stub (FloorShell 3)
+│   │   ├── observatory/       # Phase 5 stub (FloorShell 2)
+│   │   └── c-suite/           # Phase 5 stub (FloorShell 1)
 │   └── api/auth/
 │       ├── callback/route.ts   # OAuth callback
-│       └── signout/route.ts    # Sign-out
+│       └── signout/route.ts    # Sign-out (NextResponse redirect)
 ├── components/world/
 │   ├── DayNightProvider.tsx     # Time state context
 │   ├── CustomCursor.tsx         # Gold cursor system
 │   └── FloorShell.tsx           # Sky + window + floor badge
 ├── db/
-│   ├── schema.ts               # 16 tables, RLS, types
+│   ├── schema.ts               # 16 tables, RLS, types, all FKs
 │   ├── index.ts                # Drizzle client
-│   └── migrations/             # Generated SQL
+│   └── migrations/             # Generated SQL (0000 base + 0001 FK fix)
 ├── lib/
 │   ├── supabase/{client,server,admin,middleware}.ts
 │   ├── day-night.ts            # Time state calculation
