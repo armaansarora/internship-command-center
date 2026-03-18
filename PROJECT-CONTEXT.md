@@ -11,10 +11,13 @@
 1. `memory_search` for "internship command center project"
 2. Read this file + `.env.local` for credentials
 3. Read the doc relevant to your task:
-   - Building a phase → `MASTER-PLAN.md` (acceptance criteria, deliverables)
-   - Making UI decisions → `VISION-SPEC.md` (spatial UI, characters, design tokens)
-   - Choosing a library/pattern → `TECH-BRIEF.md` (research findings, code patterns)
-   - Understanding codebase → `AUDIT.md` (keep/kill, LOC counts)
+   - Building a phase → `docs/MASTER-PLAN.md` (acceptance criteria, deliverables, testing)
+   - Making UI decisions → `docs/VISION-SPEC.md` (spatial UI, characters, design tokens)
+   - Choosing a library/pattern → `docs/TECH-BRIEF.md` (research findings, code patterns)
+   - Understanding codebase → `docs/AUDIT.md` (keep/kill, LOC counts)
+   - Schema questions → `docs/SCHEMA-DRAFT.md` (16 tables, RLS, pgvector)
+   - Character behavior → `docs/CHARACTER-PROMPTS.md` (system prompts, voices)
+   - File placement → `docs/FILE-STRUCTURE.md` (project tree)
 4. Load skills: `website-building/webapp`, `design-foundations`, `coding-and-data`
 5. Confirm connectors: `list_external_tools` for supabase, resend, github, vercel, gcal, google_drive
 6. **Auto-update this file after every interaction.** Even minor things.
@@ -42,7 +45,7 @@
 Multi-tenant SaaS for automating internship/job searches. Users sign in, connect Google, and the system handles email parsing, application tracking, follow-ups, interview prep, cover letters, analytics, and AI agent orchestration. Planned for eventual sale.
 
 **Codename:** The Tower
-**UI Paradigm:** Immersive spatial building — elevator navigation, floor-based rooms, 2D illustrated characters (see VISION-SPEC.md)
+**UI Paradigm:** Immersive spatial building — elevator navigation, floor-based rooms, 2D illustrated characters (see docs/VISION-SPEC.md)
 
 ---
 
@@ -114,7 +117,7 @@ All credentials stored in `/home/user/workspace/command-center/.env.local`.
 
 ## 5. CODE AUDIT SUMMARY
 
-Full audit in `AUDIT.md`. Old repo: ~19,800 LOC, 200+ files. **Armaan approved audit 2026-03-18.**
+Full audit in `docs/AUDIT.md`. Old repo: ~19,800 LOC, 200+ files. **Armaan approved audit 2026-03-18.**
 
 ### Keep (~7,000 LOC)
 | Module | LOC | Adapt |

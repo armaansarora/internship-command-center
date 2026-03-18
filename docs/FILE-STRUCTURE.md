@@ -169,8 +169,7 @@ internship-command-center/
 │   ├── SCHEMA-DRAFT.md
 │   ├── CHARACTER-PROMPTS.md
 │   ├── FILE-STRUCTURE.md             # This file
-│   ├── AUDIT.md
-│   └── ARCHITECTURE.md
+│   └── AUDIT.md                      # Keep/kill verdicts from old repo (reference)
 │
 └── PROJECT-CONTEXT.md                # Operational context (auto-updated)
 ```
