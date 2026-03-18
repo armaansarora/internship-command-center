@@ -13,13 +13,6 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
-  // Downgrade React Compiler strictness rules to warnings for intentional patterns
-  {
-    rules: {
-      "react-hooks/set-state-in-effect": "warn",
-      "react-hooks/purity": "warn",
-    },
-  },
 ]);
 
 export default eslintConfig;
