@@ -2,6 +2,7 @@
 
 import { DayNightProvider } from "@/components/world/DayNightProvider";
 import { CustomCursor } from "@/components/world/CustomCursor";
+import { Elevator } from "@/components/world/Elevator";
 
 interface WorldShellProps {
   children: React.ReactNode;
@@ -19,10 +20,11 @@ export function WorldShell({ children }: WorldShellProps) {
   return (
     <DayNightProvider>
       <div className="relative flex min-h-dvh w-full">
-        {/* Elevator panel — left side (Phase 0.6) */}
+        {/* Elevator panel — left side */}
+        <Elevator />
 
-        {/* Main content area */}
-        <main className="flex-1">{children}</main>
+        {/* Main content area — offset for elevator panel on desktop */}
+        <main className="flex-1 md:ml-16">{children}</main>
       </div>
       <CustomCursor />
     </DayNightProvider>

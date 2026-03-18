@@ -2,6 +2,7 @@
 
 import type { FloorId } from "@/types/ui";
 import { FLOORS } from "@/types/ui";
+import { Skyline } from "./Skyline";
 
 interface FloorShellProps {
   floorId: FloorId;
@@ -12,10 +13,12 @@ interface FloorShellProps {
  * FloorShell — wraps each floor's content with the window frame, skyline view,
  * and floor-specific ambient adjustments.
  *
- * Phase 0.5 will add the Skyline component behind the content.
- * Phase 0.6 will integrate with the Elevator transition.
- *
- * For now: a minimal shell that establishes the spatial structure.
+ * Layers (back to front):
+ * 1. Sky gradient (CSS vars from day/night cycle)
+ * 2. Skyline (4-layer parallax SVG)
+ * 3. Window tint overlay
+ * 4. Room content
+ * 5. Floor info badge (UI layer)
  */
 export function FloorShell({ floorId, children }: FloorShellProps) {
   const floor = FLOORS.find((f) => f.id === floorId);
@@ -31,18 +34,19 @@ export function FloorShell({ floorId, children }: FloorShellProps) {
             hsl(var(--sky-hue) var(--sky-saturation) var(--sky-lightness)),
             hsl(var(--sky-hue) calc(var(--sky-saturation) * 0.7) calc(var(--sky-lightness) * 0.6))
           )`,
-          zIndex: "var(--z-skyline)" as string,
+          zIndex: 0,
         }}
       />
 
-      {/* Skyline layers will be inserted here (Phase 0.5) */}
+      {/* NYC Skyline with parallax */}
+      <Skyline floorId={floorId} />
 
       {/* Window tint overlay */}
       <div
         className="absolute inset-0"
         style={{
           backgroundColor: "var(--window-tint)",
-          zIndex: 1,
+          zIndex: 2,
         }}
       />
 

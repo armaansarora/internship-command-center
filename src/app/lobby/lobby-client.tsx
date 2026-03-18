@@ -1,16 +1,38 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { FLOORS, type FloorId } from "@/types/ui";
 
 /**
- * Lobby client component — handles Google OAuth sign-in.
- * Phase 0: construction-mode aesthetic (bare concrete, scaffolding).
- * Phase 0.7 will flesh out the full immersive lobby environment.
+ * Lobby client component — The building entrance.
+ *
+ * Construction-mode aesthetic: bare concrete, scaffolding grid, exposed beams.
+ * Returning users see a welcome-back greeting.
+ * Building directory shows floor status (locked/available).
  */
 export function LobbyClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isReturningUser, setIsReturningUser] = useState(false);
+
+  // Detect returning users via Supabase session check
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      // If there's a session but the server redirect brought them here,
+      // they're a returning user with an expired/invalid session
+      if (session === null) {
+        // Check for any stored auth indicator — we can't use localStorage
+        // in sandboxed iframes, so we rely on the Supabase cookie state
+      }
+    });
+    // Simple heuristic: if there are Supabase cookies present, they've been here before
+    if (typeof document !== "undefined") {
+      const hasPriorVisit = document.cookie.includes("sb-");
+      setIsReturningUser(hasPriorVisit);
+    }
+  }, []);
 
   async function handleSignIn() {
     setIsLoading(true);
@@ -36,44 +58,71 @@ export function LobbyClient() {
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden">
-      {/* Background — dark tower base */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--tower-darkest)] via-[var(--tower-darker)] to-[var(--tower-dark)]" />
-
-      {/* Subtle grid pattern (construction scaffolding hint) */}
+      {/* Background — dark concrete */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0"
         style={{
-          backgroundImage:
-            "linear-gradient(var(--gold) 1px, transparent 1px), linear-gradient(90deg, var(--gold) 1px, transparent 1px)",
+          background:
+            "linear-gradient(180deg, var(--tower-darkest) 0%, #0D0D18 40%, var(--tower-darker) 100%)",
+        }}
+      />
+
+      {/* Construction scaffolding grid */}
+      <div
+        className="absolute inset-0 opacity-[0.025]"
+        style={{
+          backgroundImage: `
+            linear-gradient(var(--gold) 1px, transparent 1px),
+            linear-gradient(90deg, var(--gold) 1px, transparent 1px)
+          `,
           backgroundSize: "60px 60px",
         }}
       />
 
+      {/* Concrete texture noise overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
+        }}
+      />
+
+      {/* Exposed beam — horizontal accent */}
+      <div className="absolute top-[15%] left-0 right-0 h-px bg-[var(--gold)] opacity-10" />
+      <div className="absolute top-[85%] left-0 right-0 h-px bg-[var(--gold)] opacity-10" />
+      <div className="absolute top-0 bottom-0 left-[10%] w-px bg-[var(--gold)] opacity-[0.05]" />
+      <div className="absolute top-0 bottom-0 right-[10%] w-px bg-[var(--gold)] opacity-[0.05]" />
+
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-8 px-6">
-        {/* Floor indicator */}
-        <div className="floor-label tracking-[0.2em] text-xs opacity-60">
+      <div className="relative z-10 flex flex-col items-center gap-10 px-6 max-w-md w-full">
+        {/* Construction badge */}
+        <div className="floor-label tracking-[0.25em] text-[10px] opacity-40">
           FLOOR L — THE LOBBY
         </div>
 
         {/* Tower mark */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-px w-16 bg-[var(--gold)] opacity-40" />
-          <h1 className="text-display text-xl tracking-tight">
-            The Tower
-          </h1>
-          <p className="max-w-sm text-center text-sm text-[var(--text-secondary)]">
-            Your internship command center. AI-powered pipeline management,
-            company research, and interview preparation.
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-px w-10 bg-[var(--gold)] opacity-30" />
+            <TowerMark />
+            <div className="h-px w-10 bg-[var(--gold)] opacity-30" />
+          </div>
+
+          <h1 className="text-display text-xl tracking-tight">The Tower</h1>
+
+          <p className="max-w-xs text-center text-sm text-[var(--text-secondary)] leading-relaxed">
+            {isReturningUser
+              ? "Welcome back. Your offices are as you left them."
+              : "Your internship command center. AI-powered pipeline management, research, and preparation."}
           </p>
-          <div className="h-px w-16 bg-[var(--gold)] opacity-40" />
         </div>
 
         {/* Sign-in card */}
-        <div className="glass-card gold-border-top w-full max-w-sm p-8">
+        <div className="glass-card gold-border-top w-full p-8">
           <div className="flex flex-col items-center gap-6">
             <p className="text-sm text-[var(--text-secondary)]">
-              Enter the building
+              {isReturningUser ? "Resume your session" : "Enter the building"}
             </p>
 
             <button
@@ -82,7 +131,7 @@ export function LobbyClient() {
               className="flex w-full items-center justify-center gap-3 rounded-lg bg-[var(--gold)] px-6 py-3 text-sm font-medium text-[var(--tower-darkest)] transition-all hover:bg-[var(--gold-bright)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <span className="text-data text-xs animate-gold-pulse">
+                <span className="text-data text-xs tracking-wider">
                   AUTHENTICATING...
                 </span>
               ) : (
@@ -99,12 +148,91 @@ export function LobbyClient() {
           </div>
         </div>
 
+        {/* Building Directory */}
+        <div className="w-full">
+          <div className="text-data text-[10px] tracking-[0.2em] text-[var(--text-muted)] mb-3 text-center uppercase">
+            Building Directory
+          </div>
+          <div className="glass rounded-lg p-4 space-y-1">
+            {FLOORS.filter((f) => f.id !== "L").map((floor) => (
+              <DirectoryRow
+                key={floor.id}
+                floorId={floor.id}
+                name={floor.name}
+                label={floor.label}
+                available={floor.phase === 0}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Construction notice */}
-        <p className="text-data text-xs text-[var(--text-muted)]">
-          PHASE 0 — UNDER CONSTRUCTION
+        <p className="text-data text-[10px] text-[var(--text-muted)] tracking-[0.15em] opacity-60">
+          UNDER CONSTRUCTION — PHASE 0
         </p>
       </div>
     </div>
+  );
+}
+
+/** Single row in the building directory */
+function DirectoryRow({
+  floorId,
+  name,
+  label,
+  available,
+}: {
+  floorId: FloorId;
+  name: string;
+  label: string;
+  available: boolean;
+}) {
+  return (
+    <div
+      className={[
+        "flex items-center gap-3 px-3 py-2 rounded transition-opacity",
+        available ? "opacity-100" : "opacity-30",
+      ].join(" ")}
+    >
+      <span className="text-data text-xs text-[var(--gold)] w-7 text-right shrink-0">
+        {floorId}
+      </span>
+      <span className="h-3 w-px bg-[var(--glass-border)]" />
+      <span className="text-xs text-[var(--text-primary)] flex-1 truncate">
+        {name}
+      </span>
+      <span className="text-[10px] text-[var(--text-muted)] shrink-0">
+        {available ? label : "LOCKED"}
+      </span>
+    </div>
+  );
+}
+
+/** Minimal SVG tower mark — geometric building silhouette */
+function TowerMark() {
+  return (
+    <svg
+      width="24"
+      height="32"
+      viewBox="0 0 24 32"
+      fill="none"
+      aria-label="The Tower"
+    >
+      <rect x="4" y="8" width="16" height="24" fill="var(--gold)" opacity="0.15" />
+      <rect x="6" y="4" width="12" height="28" fill="var(--gold)" opacity="0.25" />
+      <rect x="8" y="0" width="8" height="32" fill="var(--gold)" opacity="0.4" />
+      {/* Window dots */}
+      <rect x="10" y="6" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      <rect x="12.5" y="6" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      <rect x="10" y="10" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      <rect x="12.5" y="10" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      <rect x="10" y="14" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      <rect x="12.5" y="14" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      <rect x="10" y="18" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      <rect x="12.5" y="18" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
+      {/* Door */}
+      <rect x="10" y="26" width="4" height="6" fill="var(--gold)" opacity="0.5" />
+    </svg>
   );
 }
 
