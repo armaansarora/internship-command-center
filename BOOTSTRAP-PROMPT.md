@@ -7,7 +7,7 @@
 2. Skill helpers listed in "Skill Helpers Loaded" section → use `read` tool with exact file paths
 
 [CONTEXT SUMMARY]
-Current time: Wednesday, March 18, 2026 at 5:06 PM AST
+Current time: Wednesday, March 18, 2026 at 5:21 PM AST
 User: armaansarora20@gmail.com
 Email: armaansarora20@gmail.com
 
@@ -47,12 +47,15 @@ The Tower — Phase 0 Build
 Phase 0: The Shell. Full specs in `MASTER-PLAN.md` (12 deliverables, acceptance criteria, dependencies, risks).
 
 ## Context Files (READ IN ORDER)
-1. `/home/user/workspace/command-center/PROJECT-CONTEXT.md` — Operational context: credentials, stack, audit summary, connectors (~150 lines)
+1. `/home/user/workspace/command-center/PROJECT-CONTEXT.md` — Operational context: credentials, stack, audit summary, connectors, document map (~160 lines)
 2. `/home/user/workspace/command-center/MASTER-PLAN.md` — ALL 7 phases with concrete specs, acceptance criteria, deliverables, dependencies (~300 lines)
 3. `/home/user/workspace/command-center/VISION-SPEC.md` — Locked spatial UI: building, floors, characters, cursor, day/night, design tokens (~250 lines)
-4. `/home/user/workspace/command-center/TECH-BRIEF.md` — Research synthesis: GSAP, Drizzle/RLS, Inngest, AI SDK v6, character pipeline, skyline approach (~360 lines)
-5. `/home/user/workspace/command-center/.env.local` — All credentials
-6. `/home/user/workspace/command-center/AUDIT.md` — Keep/kill verdicts for old repo
+4. `/home/user/workspace/command-center/TECH-BRIEF.md` — Research synthesis with ⚠️ corrections: GSAP, Drizzle/RLS (migration bug warning), Inngest (Realtime is dev preview), @supabase/ssr (updated API), AI SDK v6, character pipeline (~400 lines)
+5. `/home/user/workspace/command-center/SCHEMA-DRAFT.md` — Full Postgres schema: 16 tables, userId everywhere, RLS, pgvector, indexes. Copy into `src/db/schema.ts` (~430 lines)
+6. `/home/user/workspace/command-center/CHARACTER-PROMPTS.md` — System prompts for all 8 characters + Concierge (~220 lines)
+7. `/home/user/workspace/command-center/FILE-STRUCTURE.md` — Complete project file tree: what goes where (~170 lines)
+8. `/home/user/workspace/command-center/.env.local` — All credentials
+9. `/home/user/workspace/command-center/AUDIT.md` — Keep/kill verdicts for old repo
 
 ### Skills Loaded
 - `website-building/webapp`

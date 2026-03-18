@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-18T17:06:00-04:00 (AST)
+**Last updated:** 2026-03-18T17:21:00-04:00 (AST)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -119,10 +119,14 @@ All UI components, all pages, auth, DB connection, 147 planning docs, Sentry, se
 
 | File | Purpose | Lines |
 |---|---|---|
-| `PROJECT-CONTEXT.md` | THIS FILE — operational context, credentials, stack, audit summary | ~200 |
+| `PROJECT-CONTEXT.md` | THIS FILE — operational context, credentials, stack, audit summary | ~160 |
 | `MASTER-PLAN.md` | All 7 phases with deliverables, acceptance criteria, dependencies, complexity | ~300 |
 | `VISION-SPEC.md` | Locked spatial UI spec: building, floors, characters, cursor, day/night, design tokens | ~250 |
-| `TECH-BRIEF.md` | Research synthesis: GSAP, Supabase/Drizzle/RLS, Inngest, AI SDK, character pipeline | ~360 |
+| `TECH-BRIEF.md` | Research synthesis: GSAP, Supabase/Drizzle/RLS, Inngest, AI SDK, character pipeline. Includes ⚠️ warnings on Inngest Realtime (dev preview), Drizzle RLS migration bugs, @supabase/ssr API changes | ~400 |
+| `SCHEMA-DRAFT.md` | Full Postgres schema: 16 tables, userId on every table, RLS policies, pgvector columns, Zod validation. Ready to copy into `src/db/schema.ts` | ~430 |
+| `CHARACTER-PROMPTS.md` | System prompts for all 8 C-Suite characters + Concierge. Shared preamble, personality specs, voice examples, domain assignments | ~220 |
+| `FILE-STRUCTURE.md` | Complete Next.js 16 project file tree: pages, components (world/characters/rooms/ui/data), lib, agents, Inngest functions, hooks | ~170 |
+| `BOOTSTRAP-PROMPT.md` | Copy-paste prompt for new chat sessions — loads skills, reads context files, starts Phase 0 | ~90 |
 | `AUDIT.md` | File-by-file keep/kill verdicts | ~180 |
 | `ARCHITECTURE.md` | Architecture doc (update to match current stack) | ~100 |
 | `.env.local` | All credentials (never commit) | — |
@@ -134,9 +138,10 @@ All UI components, all pages, auth, DB connection, 147 planning docs, Sentry, se
 ## 7. CURRENT STATE
 
 **Phase:** Pre-build (Phase 0 not started)
-**Branch:** `docs-handoff` has docs. `main` has old code (will be wiped in Phase 0).
+**Branch:** `docs-handoff` has all planning docs (8 files). `main` has old code (will be wiped in Phase 0).
 **Blockers:** None. Everything is green.
 **Next action:** Start Phase 0 — The Shell.
+**Last audit:** 2026-03-18. Self-audit identified and fixed: Drizzle RLS API correction, Inngest Realtime stability warning, @supabase/ssr pattern update, Tailwind v3/v4 note. Created SCHEMA-DRAFT.md, CHARACTER-PROMPTS.md, FILE-STRUCTURE.md.
 
 ---
 

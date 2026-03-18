@@ -113,9 +113,11 @@ Source: [Stack Overflow day/night CSS](https://stackoverflow.com/questions/39572
 ## 4. Supabase + Drizzle + RLS
 
 ### Drizzle Native RLS Support
-Drizzle ORM has built-in RLS support. Define policies directly in schema.
+Drizzle ORM has built-in RLS support. Define policies directly in the schema's third argument.
 
-**Pattern:**
+**⚠️ KNOWN ISSUE (as of March 2026):** `drizzle-kit` has a bug with RLS policy migration generation (GitHub issue #4198) — updating an existing policy can produce incorrect SQL. **Mitigation:** For policy changes, write raw SQL migrations instead of relying on `drizzle-kit generate`. Initial schema push (`drizzle-kit push`) works fine; the bug affects subsequent policy modifications only.
+
+**Pattern (correct API — third-argument array, not `.withRLS()`):**
 ```ts
 import { pgTable, uuid, text, pgPolicy } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -126,7 +128,7 @@ export const applications = pgTable('applications', {
   company: text('company').notNull(),
   status: text('status').notNull().default('saved'),
   // ...
-}).withRLS([
+}, (table) => [
   pgPolicy('user_isolation', {
     for: 'all',
     to: 'authenticated',
@@ -139,32 +141,65 @@ export const applications = pgTable('applications', {
 **Service-role bypass for background jobs (Inngest):**
 ```ts
 // In Inngest functions, use service role client
+import { createClient } from '@supabase/supabase-js';
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-// Set user context for RLS in transactions
-await db.transaction(async (tx) => {
-  await tx.execute(sql`SET LOCAL app.user_id = ${userId}`);
-  // Queries now filtered by RLS
-});
+// Service role bypasses RLS entirely — no SET LOCAL needed.
+// Only use SET LOCAL app.user_id if you want to run queries AS a user through service role.
 ```
 
-Source: [Drizzle RLS docs](https://orm.drizzle.team/docs/rls)
+Source: [Drizzle RLS docs](https://orm.drizzle.team/docs/rls), [Drizzle GitHub #4198](https://github.com/drizzle-team/drizzle-orm/issues/4198)
 
-### Next.js 16 Auth Pattern (Middleware + Data Access Layer)
-The gold standard per Next.js docs:
-1. **Middleware** (`middleware.ts`): Check session cookie, redirect unauthenticated users to /login. Fast — runs on edge.
-2. **Data Access Layer** (server functions): Verify session server-side before any DB query. Double protection.
-3. **Suspense streaming**: Wrap auth-dependent UI in `<Suspense>` for instant shell render while auth checks complete.
+### @supabase/ssr Auth Pattern
 
-Source: [Next.js Auth Guide](https://nextjs.org/docs/app/guides/authentication)
+**⚠️ API UPDATE (as of 2025):** The `@supabase/ssr` package replaces the old `@supabase/auth-helpers-nextjs`. Key changes:
+- Client: `createBrowserClient(url, publishableKey)` — uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (renamed from "anon key" in latest docs, but the actual key value is the same anon key)
+- Server: `createServerClient(url, publishableKey, { cookies })` — requires cookie read/write callbacks
+- Middleware: `updateSession()` pattern refreshes auth tokens on every request
+
+**Middleware pattern (`middleware.ts`):**
+```ts
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user && !request.nextUrl.pathname.startsWith('/lobby')) {
+    return NextResponse.redirect(new URL('/lobby', request.url));
+  }
+  return supabaseResponse;
+}
+```
+
+**Data Access Layer:** Verify session server-side before any DB query (double protection beyond middleware). Wrap auth-dependent UI in `<Suspense>` for instant shell render.
+
+Source: [Supabase SSR docs](https://supabase.com/docs/guides/auth/server-side/nextjs), [Next.js Auth Guide](https://nextjs.org/docs/app/guides/authentication)
 
 ---
 
 ## 5. Inngest: Background Jobs + Realtime
 
 ### Inngest Realtime API
-Stream background job progress to the frontend in real-time.
 
-**Pattern:**
+**⚠️ STABILITY WARNING (as of March 2026):** Inngest Realtime is in **"developer preview"** — NOT production stable. APIs may change without notice. Not covered by Inngest's SLA. Safe for our use case (progress indicators are nice-to-have, not critical), but plan a fallback.
+
+**Fallback plan:** If Realtime API breaks or changes, fall back to Supabase Realtime (Postgres LISTEN/NOTIFY) for progress streaming. The Inngest function writes progress to a `job_progress` table, and the client subscribes via Supabase's `channel.on('postgres_changes', ...)`. This is production-stable and already in our stack.
+
+**Current Pattern (developer preview — may change):**
 ```ts
 // In Inngest function
 const { step, publish } = createFunction(...);
@@ -330,8 +365,10 @@ Rive is a real-time animation tool that exports lightweight web animations. Coul
 {
   "dependencies": {
     "next": "^16.0.0",
+    "react": "^19.x",
+    "react-dom": "^19.x",
     "@supabase/supabase-js": "^2.x",
-    "@supabase/ssr": "^0.x",
+    "@supabase/ssr": "^0.6.x",
     "drizzle-orm": "^1.x",
     "gsap": "^3.13",
     "framer-motion": "^12.x",
@@ -348,9 +385,16 @@ Rive is a real-time animation tool that exports lightweight web animations. Coul
     "drizzle-kit": "^1.x",
     "typescript": "^5.x",
     "@types/node": "^22.x",
+    "@types/react": "^19.x",
     "tailwindcss": "^3.x",
+    "@tailwindcss/typography": "^0.5.x",
     "eslint": "^9.x",
-    "prettier": "^3.x"
+    "eslint-config-next": "^16.x",
+    "prettier": "^3.x",
+    "prettier-plugin-tailwindcss": "^0.6.x"
   }
 }
+```
+
+**Note on Tailwind v3 vs v4:** We're using Tailwind v3 (stable, well-documented, huge ecosystem). Tailwind v4 is available but has breaking changes with config format (CSS-based instead of JS config) and some plugin incompatibilities. Upgrade to v4 is a Phase 6 polish item if warranted.
 ```
