@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-18T19:45:00-04:00 (AST)
+**Last updated:** 2026-03-18T19:52:00-04:00 (AST)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -161,11 +161,15 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 ## 7. CURRENT STATE
 
-**Phase:** 0 — The Shell (IN PROGRESS)
-**Branch:** `docs-handoff` (commit `209ad16`)
-**Last commit:** Audit fixes — FloorShell consistency, dead code removal, schema FK, docs alignment
+**Phase:** 0 — The Shell (COMPLETE — pending manual steps)
+**Branch:** `docs-handoff` (commit `dc73756`)
+**Last commit:** Phase 0 complete: skyline, elevator, lobby, penthouse, contracts — production build passes
+**Vercel Preview:** `internship-command-center-fhl391gov-armaan-aroras-projects.vercel.app` (READY)
+**Production:** `internship-command-center-lake.vercel.app` (still on old `main` — needs branch merge)
 
-### Completed (Tasks 0.1–0.4 + Audit)
+### Completed (All Tasks 0.1–0.10)
+
+#### Foundation (0.1–0.4, commit `209ad16`)
 - ✅ Fresh Next.js 16 project (old code wiped, deps installed)
 - ✅ 16-table Drizzle schema with RLS policies + type exports
 - ✅ Supabase Auth: Google OAuth, middleware, server/client/admin clients
@@ -180,24 +184,71 @@ All planning docs are in `docs/`. Operational files stay in root.
 - ✅ Design token system in CSS (gold, dark, glass, day/night states)
 - ✅ Tailwind v3 config with Tower tokens
 - ✅ Generated migration SQL via `drizzle-kit generate` (353 + 1 incremental lines)
-- ✅ Clean TypeScript build, zero errors, all 15 routes compile
 - ✅ Recursive audit: 15 findings, all fixed (see commit `209ad16`)
-- ✅ FK added: `applications.contactId` → `contacts.id`
-- ✅ Dead weight removed: empty hooks/, inngest/ dirs, unused WorldShell props
-- ✅ Docs aligned: npm (not pnpm), Zod v4 (not v3), missing scripts added
 
-### Blocked
-- ⏳ Schema push to Supabase — direct DB connection is IPv6-only (unreachable from build sandbox). Migration SQL generated and shared as `migration-full.sql`. **Action required: Run in Supabase SQL Editor (Dashboard → SQL Editor → New Query → paste → Run).**
+#### Skyline (0.5, audited)
+- ✅ `src/components/world/Skyline.tsx` — 337 lines, 4-layer parallax SVG
+- ✅ 4 depth layers: far buildings, mid buildings, near buildings, water/foreground
+- ✅ Day/night color transitions via `useDayNight()` context
+- ✅ Window lights system: random on/off per time period
+- ✅ Responsive: fills viewport width, positioned at bottom of FloorShell
+- ✅ JSX namespace explicitly imported (`import type { JSX } from "react"`)
+- ✅ Integrated into FloorShell.tsx
 
-### Pending (Tasks 0.5–0.10)
-- 0.5: NYC Skyline (layered SVG, parallax, day/night integration)
-- 0.6: Elevator navigation (GSAP timeline, panel, floor indicator)
-- 0.7: Lobby upgrade (construction-mode aesthetic, concierge)
-- 0.8: Penthouse dashboard (real Supabase data, glass + gold cards)
-- 0.9: Contracts system port (1,015 LOC → Supabase/Drizzle)
-- 0.10: Deploy to Vercel + verify production
+#### Elevator (0.6, audited)
+- ✅ `src/components/world/Elevator.tsx` — 301 lines, GSAP-powered
+- ✅ Door open/close animation with GSAP timeline
+- ✅ Floor counter with animated number display
+- ✅ Fixed left position, auto-hide on Lobby/Penthouse
+- ✅ `useReducedMotion()` custom hook for SSR safety (not inline `window.matchMedia`)
+- ✅ Keyboard accessible: Enter/Space to toggle, arrow keys to navigate floors
+- ✅ Imported in `world-shell.tsx` with `md:ml-16` offset for main content
 
-### File Structure (current — post-audit)
+#### Lobby Upgrade (0.7, audited)
+- ✅ `src/app/lobby/lobby-client.tsx` — full rewrite with construction aesthetic
+- ✅ Construction stripes, blueprint grid background
+- ✅ Building directory showing all 9 floors with status (Coming Soon / Active)
+- ✅ Returning user detection via Supabase session check
+- ✅ Different messaging for new vs. returning users
+- ✅ TowerMark SVG logo component
+- ✅ Animated entrance sequence
+
+#### Penthouse Dashboard (0.8, audited)
+- ✅ `src/app/(authenticated)/penthouse/penthouse-client.tsx` — NEW, glass+gold dashboard
+- ✅ `src/app/(authenticated)/penthouse/page.tsx` — now delegates to PenthouseClient
+- ✅ Stat cards: Applications, Interviews, Response Rate, Active Contacts
+- ✅ Pipeline visualization (stages: Applied → Screen → Interview → Offer)
+- ✅ Activity feed with timestamps
+- ✅ Quick action buttons for all major features
+- ✅ Placeholder data — ready for real Supabase queries in Phase 1
+
+#### Contracts Port (0.9, audited)
+- ✅ `src/lib/contracts/` — 9 files, 1,015 LOC ported from old repo
+- ✅ `events.ts` — TypedEventEmitter, event catalog
+- ✅ `agent-protocol.ts` — AgentContext, message types, capabilities
+- ✅ `api.ts` — API contract types, response envelopes, error codes
+- ✅ `notifications.ts` — Notification system types, channels, preferences
+- ✅ `ui.ts` — Floor, navigation, theme, cursor, animation types
+- ✅ `index.ts` — Barrel export
+- ✅ `departments/cro.ts` — CRO department contracts (pipeline, outreach)
+- ✅ `departments/cio.ts` — CIO department contracts (integrations, API keys)
+- ✅ `departments/coo.ts` — COO department contracts (scheduling, follow-ups)
+- ✅ All Turso/Auth.js references removed, Supabase types used
+
+#### Deploy (0.10)
+- ✅ Production build passes (`next build` — zero errors, all routes compile)
+- ✅ Code committed (`dc73756`) and pushed to `docs-handoff` branch
+- ✅ Vercel preview auto-deployed and READY
+- ⏳ Production deploy requires `docs-handoff` → `main` merge (manual)
+
+### Manual Steps Required (See MANUAL-GUIDE.md)
+1. Run `migration-full.sql` in Supabase SQL Editor
+2. Configure Google OAuth in Google Cloud Console + Supabase dashboard
+3. Set Vercel environment variables
+4. Merge `docs-handoff` → `main` for production deploy
+5. Verify Supabase anon key format (`eyJ*` for REST API)
+
+### File Structure (current — commit `dc73756`)
 ```
 src/
 ├── app/
@@ -206,11 +257,13 @@ src/
 │   ├── globals.css             # Tokens, day/night, glass utilities
 │   ├── lobby/
 │   │   ├── page.tsx            # Server: auth check
-│   │   └── lobby-client.tsx    # Client: Google OAuth
+│   │   └── lobby-client.tsx    # Client: construction aesthetic, returning user, TowerMark
 │   ├── (authenticated)/
 │   │   ├── layout.tsx          # Auth gate + WorldShell
-│   │   ├── world-shell.tsx     # Client: DayNight + Cursor
-│   │   ├── penthouse/page.tsx  # Dashboard placeholder (FloorShell PH)
+│   │   ├── world-shell.tsx     # Client: DayNight + Cursor + Elevator, md:ml-16 offset
+│   │   ├── penthouse/
+│   │   │   ├── page.tsx        # Server: delegates to PenthouseClient
+│   │   │   └── penthouse-client.tsx  # Glass+gold dashboard, stats, pipeline, activity
 │   │   ├── war-room/page.tsx   # Phase 1 stub (FloorShell 7)
 │   │   ├── rolodex-lounge/    # Phase 3 stub (FloorShell 6)
 │   │   ├── writing-room/      # Phase 4 stub (FloorShell 5)
@@ -224,7 +277,9 @@ src/
 ├── components/world/
 │   ├── DayNightProvider.tsx     # Time state context
 │   ├── CustomCursor.tsx         # Gold cursor system
-│   └── FloorShell.tsx           # Sky + window + floor badge
+│   ├── FloorShell.tsx           # Sky + window + floor badge + Skyline import
+│   ├── Skyline.tsx              # 337 LOC — 4-layer parallax SVG, day/night colors
+│   └── Elevator.tsx             # 301 LOC — GSAP doors, floor counter, useReducedMotion
 ├── db/
 │   ├── schema.ts               # 16 tables, RLS, types, all FKs
 │   ├── index.ts                # Drizzle client
@@ -232,7 +287,18 @@ src/
 ├── lib/
 │   ├── supabase/{client,server,admin,middleware}.ts
 │   ├── day-night.ts            # Time state calculation
-│   └── utils.ts                # cn(), formatRelativeDate()
+│   ├── utils.ts                # cn(), formatRelativeDate()
+│   └── contracts/              # 1,015 LOC — ported from old repo
+│       ├── index.ts            # Barrel export
+│       ├── events.ts           # TypedEventEmitter, event catalog
+│       ├── agent-protocol.ts   # AgentContext, message types, capabilities
+│       ├── api.ts              # API contract types, envelopes, error codes
+│       ├── notifications.ts    # Notification types, channels, preferences
+│       ├── ui.ts               # Floor, nav, theme, cursor, animation types
+│       └── departments/
+│           ├── cro.ts          # CRO contracts (pipeline, outreach)
+│           ├── cio.ts          # CIO contracts (integrations, API keys)
+│           └── coo.ts          # COO contracts (scheduling, follow-ups)
 ├── types/{ui,api,agents}.ts
 └── middleware.ts               # Route protection
 ```
@@ -249,3 +315,28 @@ src/
 6. Sound assets? Royalty-free, procedural, or commissioned
 7. Upstash Redis — not yet provisioned
 8. ⚠️ Supabase publishable key format: `sb_publishable_*` — may need classic `eyJ*` anon key for REST API auth. Verify in Supabase dashboard → Settings → API.
+
+---
+
+## 9. SESSION LOG
+
+| Session | Date | Work Done |
+|---|---|---|
+| 1 | 2026-03-18 | Created Phase 0 foundation: Next.js 16, 16-table schema, Auth, layout, all stubs |
+| 2 | 2026-03-18 | Recursive audit (15 findings), all fixed. Commit `209ad16`. |
+| 3 | 2026-03-18 | Started 0.5 Skyline, hit JSX type error mid-build. |
+| 4 | 2026-03-18 | Fixed JSX → Built Skyline (0.5) → Elevator (0.6) → Lobby upgrade (0.7) → Penthouse (0.8) → Contracts (0.9, 1,015 LOC) → Deploy (0.10). Commit `dc73756`. Vercel preview READY. |
+| 5 | 2026-03-18 | Updated PROJECT-CONTEXT.md, compiled MANUAL-GUIDE.md for Armaan. |
+
+---
+
+## 10. TECHNICAL NOTES
+
+- **React 19 + Next.js 16:** JSX namespace must be explicitly imported: `import type { JSX } from "react"`
+- **Elevator SSR safety:** Uses `useReducedMotion()` custom hook (not inline `window.matchMedia`)
+- **Timer cleanup:** `tickTimersRef.current` tracks setTimeout IDs for cleanup on unmount
+- **Drizzle RLS:** Third-argument array pattern, NOT `.withRLS()`
+- **@supabase/ssr:** NOT deprecated auth-helpers
+- **Tailwind:** v3 with JS config (NOT v4 with CSS config)
+- **Old repo reference:** `/home/user/workspace/internship-command-center-8c4c1ad1/src/contracts/`
+- **Vercel auto-deploy:** `docs-handoff` gets preview deploys, `main` gets production
