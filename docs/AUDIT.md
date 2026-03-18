@@ -4,6 +4,8 @@
 **Codebase:** ~19,800 LOC across 200+ files
 **Stack:** Next.js 16 + Turso (SQLite) + Drizzle + NextAuth + AI SDK v6 + Inngest + Tailwind v4 + shadcn/ui
 
+> **NOTE:** This audit describes the OLD repo. The new stack uses Zod v3 (not v4), Supabase (not Turso), Supabase Auth (not NextAuth), and Tailwind v3 (not v4). See `TECH-BRIEF.md` for the current package list.
+
 ---
 
 ## Executive Summary
