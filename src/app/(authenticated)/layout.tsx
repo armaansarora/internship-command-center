@@ -18,5 +18,5 @@ export default async function AuthenticatedLayout({
     redirect("/lobby");
   }
 
-  return <WorldShell userId={user.id}>{children}</WorldShell>;
+  return <WorldShell>{children}</WorldShell>;
 }

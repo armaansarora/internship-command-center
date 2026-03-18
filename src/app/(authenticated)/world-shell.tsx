@@ -4,7 +4,6 @@ import { DayNightProvider } from "@/components/world/DayNightProvider";
 import { CustomCursor } from "@/components/world/CustomCursor";
 
 interface WorldShellProps {
-  userId: string;
   children: React.ReactNode;
 }
 

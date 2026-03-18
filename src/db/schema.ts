@@ -101,7 +101,7 @@ export const applications = pgTable("applications", {
   source: text("source"),
   notes: text("notes"),
   sector: text("sector"),
-  contactId: uuid("contact_id"),
+  contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
   salary: text("salary"),
   location: text("location"),
   ...timestamps,

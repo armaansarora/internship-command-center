@@ -37,8 +37,8 @@ A multi-tenant SaaS that automates the internship and job search process. Users 
 ## Development
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 See `docs/MASTER-PLAN.md` for the full 7-phase build plan.

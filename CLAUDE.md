@@ -2,7 +2,7 @@
 
 ## Architecture
 Next.js 16 (App Router) + Supabase Postgres + Drizzle ORM v1 + Vercel AI SDK v6 + Inngest v3 + @supabase/ssr
-Deployed on Vercel. GSAP + Framer Motion for animations. Tailwind v3.
+Deployed on Vercel. GSAP + Framer Motion for animations. Tailwind v3 (JS config, NOT v4).
 
 ## Agent System
 Corporate hierarchy: CEO orchestrates 7 C-suite agents (CIO, CRO, CMO, COO, CPO, CNO, CFO).
@@ -16,21 +16,21 @@ Fonts: Playfair Display (headings), Satoshi (body), JetBrains Mono (data).
 Day/night cycle driven by user's local time. NYC skyline with parallax.
 
 ## Key Commands
-- `pnpm dev` — dev server
-- `pnpm build` — production build
-- `pnpm test` — vitest
-- `pnpm test:e2e` — playwright
-- `pnpm lint` — eslint
-- `pnpm db:push` — push schema to Supabase via Drizzle
-- `pnpm db:studio` — Drizzle Studio
-- `pnpm db:generate` — generate migrations
+- `npm run dev` — dev server
+- `npm run build` — production build
+- `npm run lint` — eslint
+- `npx drizzle-kit generate` — generate migration SQL
+- `npx drizzle-kit push` — push schema to Supabase (requires IPv4 DB access)
 
 ## Conventions
 - Server Components by default; "use client" only when needed
-- Zod v3 for all validation
+- Zod v4 for all validation
+- Fully typed TypeScript — no `any`
 - Timestamps: `timestamp('...', { withTimezone: true })` — native Postgres
 - UUIDs for all primary keys (`uuid('id').primaryKey().defaultRandom()`)
 - RLS on every table: `auth.uid() = user_id`
+- Drizzle RLS uses third-argument array pattern, NOT `.withRLS()`
+- @supabase/ssr (NOT deprecated auth-helpers)
 - Feature branches, atomic commits, push protection ON
 - All planning docs in `/docs/` directory
 
