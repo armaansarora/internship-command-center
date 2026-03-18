@@ -284,6 +284,71 @@ This is aggressive but achievable given: AI-assisted development, existing code 
 
 ---
 
+## Testing Strategy
+
+Masters-level code means real testing. Every phase includes tests for its deliverables.
+
+### Test Stack
+| Tool | Purpose |
+|---|---|
+| Vitest | Unit tests, component tests (fast, native ESM, Vite-compatible) |
+| Playwright | E2E tests: auth flows, elevator navigation, agent interactions |
+| MSW (Mock Service Worker) | API mocking for Supabase, Inngest, external services |
+| Testing Library | React component behavior tests |
+
+### What Gets Tested Per Phase
+| Phase | Required Tests |
+|---|---|
+| 0 | Auth flow (sign in, sign out, redirect), RLS isolation (2 users can't see each other's data), Drizzle schema migration runs clean, elevator navigation state |
+| 1 | Application CRUD, pipeline status transitions, CRO agent tool calls return correct data |
+| 2 | Email classification accuracy (10+ test fixtures), calendar sync idempotency, follow-up detection |
+| 3 | Contact CRUD, warmth decay logic, pgvector similarity search returns relevant results |
+| 4 | Cover letter generation produces valid output, prep packet includes required sections |
+| 5 | CEO orchestration fan-out/fan-in, daily briefing cron, analytics calculations |
+| 6 | Stripe webhook handling (subscription created/cancelled/updated), rate limiting enforced |
+
+### Testing Rules
+1. Every DB query function gets a unit test with test data
+2. Every API route gets an integration test (happy path + auth failure)
+3. RLS isolation test runs in EVERY phase (regression)
+4. Agent tools are tested with mocked LLM responses (deterministic)
+5. E2E: auth flow + one critical user journey per phase
+6. CI runs: `vitest run` + `playwright test` on every PR
+
+### Test File Convention
+```
+src/
+  lib/agents/cro.test.ts       # Unit test next to source
+  db/schema.test.ts            # Schema validation tests
+tests/
+  e2e/auth.spec.ts             # Playwright E2E tests
+  e2e/elevator.spec.ts
+  fixtures/                    # Shared test data
+    emails.json                # Classified email samples
+    applications.json          # Sample application data
+```
+
+---
+
+## Error Handling Patterns
+
+### Server Actions / API Routes
+```ts
+// Standard error response shape (all API routes)
+type ApiResponse<T> = { data: T; error: null } | { data: null; error: { code: string; message: string } };
+```
+
+### Agent Errors
+Agent failures are logged to `agent_logs` with status `failed`, error message, and duration. The CEO orchestrator handles partial failures gracefully — if 1 of 7 agents fails, the briefing still compiles with available data and notes what's missing.
+
+### User-Facing Errors
+Errors display as in-world events, not generic toasts:
+- Auth errors: lobby door won't open, concierge explains
+- Agent errors: character shows "confused" state, explains what went wrong
+- Network errors: building lights flicker, retry indicator
+
+---
+
 ## Open Architecture Decisions (To Resolve During Build)
 
 1. **Character illustration pipeline** — AI-generated (Flux.1 + LoRA) vs. commissioned artist vs. open-source assets

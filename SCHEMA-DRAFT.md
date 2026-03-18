@@ -31,14 +31,15 @@ import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 
 // ---------------------------------------------------------------------------
-// RLS helper: every table gets this policy
+// RLS helper: factory function (each table needs a unique policy name in PG)
 // ---------------------------------------------------------------------------
-const userIsolationPolicy = pgPolicy('user_isolation', {
-  for: 'all',
-  to: 'authenticated',
-  using: sql`auth.uid() = user_id`,
-  withCheck: sql`auth.uid() = user_id`,
-});
+const userIsolation = (tableName: string) =>
+  pgPolicy(`${tableName}_user_isolation`, {
+    for: 'all',
+    to: 'authenticated',
+    using: sql`auth.uid() = user_id`,
+    withCheck: sql`auth.uid() = user_id`,
+  });
 
 // ---------------------------------------------------------------------------
 // Timestamp helpers
@@ -46,6 +47,13 @@ const userIsolationPolicy = pgPolicy('user_isolation', {
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  // NOTE: Postgres does NOT auto-update updated_at. Two options:
+  // 1. Application-level: set updatedAt in every Drizzle update call
+  // 2. DB trigger (recommended): run this SQL after schema push:
+  //    CREATE OR REPLACE FUNCTION update_updated_at()
+  //    RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ LANGUAGE plpgsql;
+  //    Then for each table: CREATE TRIGGER trg_{table}_updated_at BEFORE UPDATE ON {table}
+  //    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 };
 
 // ===========================================================================
@@ -97,7 +105,7 @@ export const companies = pgTable('companies', {
   yourConnections: jsonb('your_connections'),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('companies'),
   index('idx_companies_user_tier').on(table.userId, table.tier),
 ]);
 
@@ -124,7 +132,7 @@ export const applications = pgTable('applications', {
   location: text('location'),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('applications'),
   index('idx_apps_user_status').on(table.userId, table.status),
   index('idx_apps_user_company').on(table.userId, table.companyId),
   index('idx_apps_created').on(table.createdAt),
@@ -152,7 +160,7 @@ export const contacts = pgTable('contacts', {
   source: text('source', { enum: ['apollo', 'hunter', 'pdl', 'manual'] }),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('contacts'),
   index('idx_contacts_user_company').on(table.userId, table.companyId),
   index('idx_contacts_warmth').on(table.warmth),
 ]);
@@ -182,7 +190,7 @@ export const emails = pgTable('emails', {
   receivedAt: timestamp('received_at', { withTimezone: true }),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('emails'),
   index('idx_emails_gmail_id').on(table.gmailId),
   index('idx_emails_user_class').on(table.userId, table.classification),
 ]);
@@ -204,7 +212,7 @@ export const documents = pgTable('documents', {
   generatedBy: text('generated_by'), // which agent created it
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('documents'),
   index('idx_docs_user_app').on(table.userId, table.applicationId),
   index('idx_docs_type').on(table.type),
 ]);
@@ -232,7 +240,7 @@ export const interviews = pgTable('interviews', {
   notes: text('notes'),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('interviews'),
   index('idx_interviews_user_sched').on(table.userId, table.scheduledAt),
 ]);
 
@@ -252,7 +260,7 @@ export const calendarEvents = pgTable('calendar_events', {
   source: text('source').default('google'),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('calendar_events'),
   index('idx_cal_user_start').on(table.userId, table.startAt),
 ]);
 
@@ -279,7 +287,7 @@ export const outreachQueue = pgTable('outreach_queue', {
   resendMessageId: text('resend_message_id'),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('outreach_queue'),
   index('idx_outreach_user_status').on(table.userId, table.status),
 ]);
 
@@ -302,7 +310,7 @@ export const notifications = pgTable('notifications', {
   actions: jsonb('actions'),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('notifications'),
   index('idx_notif_user_read').on(table.userId, table.isRead),
 ]);
 
@@ -326,7 +334,7 @@ export const agentLogs = pgTable('agent_logs', {
   completedAt: timestamp('completed_at', { withTimezone: true }),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('agent_logs'),
   index('idx_logs_user_agent').on(table.userId, table.agent),
 ]);
 
@@ -345,7 +353,10 @@ export const agentMemory = pgTable('agent_memory', {
   lastAccessedAt: timestamp('last_accessed_at', { withTimezone: true }),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('agent_memory'),
+  // HNSW index for fast similarity search — create via raw SQL after push:
+  // CREATE INDEX idx_agent_memory_embedding ON agent_memory
+  //   USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
 ]);
 
 // ===========================================================================
@@ -365,7 +376,7 @@ export const dailySnapshots = pgTable('daily_snapshots', {
   totalCostCents: integer('total_cost_cents'),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('daily_snapshots'),
   index('idx_snap_user_date').on(table.userId, table.date),
 ]);
 
@@ -380,7 +391,9 @@ export const companyEmbeddings = pgTable('company_embeddings', {
   embedding: vector('embedding', { dimensions: 1536 }),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('company_embeddings'),
+  // HNSW index: CREATE INDEX idx_company_emb ON company_embeddings
+  //   USING hnsw (embedding vector_cosine_ops);
 ]);
 
 // ===========================================================================
@@ -394,7 +407,9 @@ export const jobEmbeddings = pgTable('job_embeddings', {
   embedding: vector('embedding', { dimensions: 1536 }),
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('job_embeddings'),
+  // HNSW index: CREATE INDEX idx_job_emb ON job_embeddings
+  //   USING hnsw (embedding vector_cosine_ops);
 ]);
 
 // ===========================================================================
@@ -408,8 +423,38 @@ export const progressionMilestones = pgTable('progression_milestones', {
   floorUnlocked: text('floor_unlocked'), // which floor visual upgrade this triggers
   ...timestamps,
 }, (table) => [
-  userIsolationPolicy,
+  userIsolation('progression_milestones'),
 ]);
+```
+
+---
+
+## Post-Push SQL (run after `drizzle-kit push`)
+
+```sql
+-- 1. Enable pgvector
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- 2. Auto-update updated_at trigger
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
+$$ LANGUAGE plpgsql;
+
+-- Apply to all tables (repeat for each):
+CREATE TRIGGER trg_companies_updated_at BEFORE UPDATE ON companies
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER trg_applications_updated_at BEFORE UPDATE ON applications
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+-- ... (apply to all 16 tables)
+
+-- 3. HNSW vector indexes for similarity search
+CREATE INDEX idx_agent_memory_embedding ON agent_memory
+  USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
+CREATE INDEX idx_company_emb ON company_embeddings
+  USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX idx_job_emb ON job_embeddings
+  USING hnsw (embedding vector_cosine_ops);
 ```
 
 ---

@@ -136,7 +136,21 @@ internship-command-center/
 │   │   ├── useParallax.ts            # Mouse-based parallax offset
 │   │   └── useCursor.ts              # Cursor state management
 │   │
+│   ├── types/                        # Shared TypeScript types
+│   │   ├── api.ts                    # ApiResponse<T>, error shapes
+│   │   ├── agents.ts                 # Agent names, tool input/output types
+│   │   ├── database.ts              # Drizzle inferred types (InferSelectModel)
+│   │   └── ui.ts                     # Floor, TimeState, CursorState, etc.
+│   │
 │   └── middleware.ts                  # Auth check + session refresh (Supabase SSR)
+│
+├── tests/                            # E2E + integration tests
+│   ├── e2e/
+│   │   ├── auth.spec.ts             # Playwright: sign-in, sign-out, redirect
+│   │   └── elevator.spec.ts         # Playwright: floor navigation
+│   └── fixtures/
+│       ├── emails.json              # Classified email test data
+│       └── applications.json        # Sample application data
 │
 ├── drizzle.config.ts                 # Drizzle Kit config → Supabase connection
 ├── next.config.ts                    # Next.js config
@@ -144,6 +158,8 @@ internship-command-center/
 ├── tsconfig.json
 ├── package.json
 ├── .env.local                        # Credentials (never committed)
+├── vitest.config.ts                  # Vitest config (fast unit/integration tests)
+├── playwright.config.ts              # Playwright config (E2E tests)
 ├── .gitignore
 │
 ├── docs/                             # Project documentation (committed)

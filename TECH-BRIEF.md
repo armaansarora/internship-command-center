@@ -391,10 +391,14 @@ Rive is a real-time animation tool that exports lightweight web animations. Coul
     "eslint": "^9.x",
     "eslint-config-next": "^16.x",
     "prettier": "^3.x",
-    "prettier-plugin-tailwindcss": "^0.6.x"
+    "prettier-plugin-tailwindcss": "^0.6.x",
+    "vitest": "^3.x",
+    "@testing-library/react": "^16.x",
+    "@playwright/test": "^1.x",
+    "msw": "^2.x",
+    "happy-dom": "^15.x"
   }
 }
 ```
 
 **Note on Tailwind v3 vs v4:** We're using Tailwind v3 (stable, well-documented, huge ecosystem). Tailwind v4 is available but has breaking changes with config format (CSS-based instead of JS config) and some plugin incompatibilities. Upgrade to v4 is a Phase 6 polish item if warranted.
-```

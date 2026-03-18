@@ -80,6 +80,24 @@ All credentials stored in `/home/user/workspace/command-center/.env.local`.
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g`, Team `team_EC8AIyc155clLRjzrJ0fblpa` |
 | GitHub | Repo `armaansarora/internship-command-center`, push protection ON |
 
+### Vercel Environment Variables (set in Vercel dashboard)
+| Variable | Source | Required By |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Phase 0 |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/public key | Phase 0 |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Phase 0 (Inngest, background jobs) |
+| `SUPABASE_DB_URL` | Supabase direct connection string | Phase 0 (Drizzle migrations) |
+| `RESEND_API_KEY` | Resend dashboard | Phase 2 |
+| `INNGEST_EVENT_KEY` | Inngest dashboard | Phase 2 |
+| `INNGEST_SIGNING_KEY` | Inngest dashboard | Phase 2 |
+| `ANTHROPIC_API_KEY` | Anthropic console | Phase 1 (agents) |
+| `STRIPE_SECRET_KEY` | Stripe dashboard | Phase 6 |
+| `STRIPE_WEBHOOK_SECRET` | Stripe dashboard | Phase 6 |
+| `GOOGLE_CLIENT_ID` | Google Cloud Console | Phase 0 (auth) |
+| `GOOGLE_CLIENT_SECRET` | Google Cloud Console | Phase 0 (auth) |
+| `UPSTASH_REDIS_REST_URL` | Upstash console | Phase 6 |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash console | Phase 6 |
+
 ### Connected Connectors
 | Connector | Status |
 |---|---|
