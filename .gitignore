@@ -5,8 +5,6 @@
 .env
 .env.local
 .env.production
-BOOTSTRAP-PROMPT.md
-PROJECT-CONTEXT.md
 dist
 node_modules
 server/public

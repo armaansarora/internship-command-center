@@ -165,7 +165,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 **Branch:** `docs-handoff` has all planning docs (8 files). `main` has old code (will be wiped in Phase 0).
 **Blockers:** None. Everything is green.
 **Next action:** Start Phase 0 — The Shell.
-**Last audit:** 2026-03-18 (Session 3). Recursive audit loops 1-3 cleaned 10,896 lines of dead weight. Session 4 audit deleted `.planning/` (96 old Claude Code files) and `.claude/` config dir. Added Zod v3/v4 clarification note to AUDIT.md. Created `recursive-audit` skill for permanent self-audit loop. All planning docs verified consistent.
+**Last audit:** 2026-03-18 (Session 5). Recursive audit confirmed `.planning/` (96 files) and `.claude/` (14 files) are deleted and committed — 21,899 lines of dead weight removed. Zod v3/v4 clarification in AUDIT.md. Custom skills created: `recursive-audit` (5-question self-audit loop), `context-health` (conservative context window monitoring). All planning docs verified consistent.
 
 ---
 
