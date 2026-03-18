@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-18T17:59:00-04:00 (AST)
+**Last updated:** 2026-03-18T18:45:00-04:00 (AST)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -142,7 +142,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 | File | Purpose | Lines |
 |---|---|---|
-| `PROJECT-CONTEXT.md` | THIS FILE — operational context, credentials, stack, audit summary (root) | ~170 |
+| `PROJECT-CONTEXT.md` | THIS FILE — operational context, credentials, stack, audit summary (root) | ~200 |
 | `BOOTSTRAP-PROMPT.md` | Copy-paste prompt for new chat sessions (root) | ~90 |
 | `CLAUDE.md` | Codebase summary for AI coding assistants (root) | ~45 |
 | `docs/MASTER-PLAN.md` | All 7 phases with deliverables, acceptance criteria, testing strategy, error handling | ~360 |
@@ -161,11 +161,77 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 ## 7. CURRENT STATE
 
-**Phase:** Pre-build (Phase 0 not started)
-**Branch:** `docs-handoff` has all planning docs (8 files). `main` has old code (will be wiped in Phase 0).
-**Blockers:** None. Everything is green.
-**Next action:** Start Phase 0 — The Shell.
-**Last audit:** 2026-03-18 (Session 5). Recursive audit confirmed `.planning/` (96 files) and `.claude/` (14 files) are deleted and committed — 21,899 lines of dead weight removed. Zod v3/v4 clarification in AUDIT.md. Custom skills created: `recursive-audit` (5-question self-audit loop), `context-health` (conservative context window monitoring). All planning docs verified consistent.
+**Phase:** 0 — The Shell (IN PROGRESS)
+**Branch:** `docs-handoff` (commit `8eefff0`)
+**Last commit:** Phase 0 foundation — 247 files changed, 8,961 insertions, 39,786 deletions
+
+### Completed (Tasks 0.1–0.4)
+- ✅ Fresh Next.js 16 project (old code wiped, deps installed)
+- ✅ 16-table Drizzle schema with RLS policies + type exports
+- ✅ Supabase Auth: Google OAuth, middleware, server/client/admin clients
+- ✅ Root layout: Playfair Display + Satoshi (Fontshare CDN) + JetBrains Mono
+- ✅ Auth routing: `/` → `/penthouse` or `/lobby` based on session
+- ✅ Lobby page: Google OAuth sign-in with Tower branding
+- ✅ Authenticated layout with WorldShell (DayNightProvider + CustomCursor)
+- ✅ FloorShell component (sky gradient, window tint, floor badge)
+- ✅ All 9 floor stubs under `(authenticated)/` route group
+- ✅ DayNightProvider (7 time states, updates every 60s, sets data-time on html)
+- ✅ CustomCursor (7 contextual states, touch device fallback, RAF animation)
+- ✅ Design token system in CSS (gold, dark, glass, day/night states)
+- ✅ Tailwind v3 config with Tower tokens
+- ✅ Generated migration SQL via `drizzle-kit generate` (353 lines)
+- ✅ Clean TypeScript build, zero errors, all 15 routes compile
+
+### Blocked
+- ⏳ Schema push to Supabase — direct DB connection is IPv6-only (unreachable from build sandbox). Migration SQL generated and shared as `migration-full.sql`. **Action required: Run in Supabase SQL Editor (Dashboard → SQL Editor → New Query → paste → Run).**
+
+### Pending (Tasks 0.5–0.10)
+- 0.5: NYC Skyline (layered SVG, parallax, day/night integration)
+- 0.6: Elevator navigation (GSAP timeline, panel, floor indicator)
+- 0.7: Lobby upgrade (construction-mode aesthetic, concierge)
+- 0.8: Penthouse dashboard (real Supabase data, glass + gold cards)
+- 0.9: Contracts system port (1,015 LOC → Supabase/Drizzle)
+- 0.10: Deploy to Vercel + verify production
+
+### File Structure (current)
+```
+src/
+├── app/
+│   ├── layout.tsx              # Root layout (fonts, meta)
+│   ├── page.tsx                # Auth redirect
+│   ├── globals.css             # Tokens, day/night, glass utilities
+│   ├── lobby/
+│   │   ├── page.tsx            # Server: auth check
+│   │   └── lobby-client.tsx    # Client: Google OAuth
+│   ├── (authenticated)/
+│   │   ├── layout.tsx          # Auth gate + WorldShell
+│   │   ├── world-shell.tsx     # Client: DayNight + Cursor
+│   │   ├── penthouse/page.tsx  # Dashboard placeholder
+│   │   ├── war-room/page.tsx   # Phase 1 stub
+│   │   ├── rolodex-lounge/page.tsx
+│   │   ├── writing-room/page.tsx
+│   │   ├── situation-room/page.tsx
+│   │   ├── briefing-room/page.tsx
+│   │   ├── observatory/page.tsx
+│   │   └── c-suite/page.tsx
+│   └── api/auth/
+│       ├── callback/route.ts   # OAuth callback
+│       └── signout/route.ts    # Sign-out
+├── components/world/
+│   ├── DayNightProvider.tsx     # Time state context
+│   ├── CustomCursor.tsx         # Gold cursor system
+│   └── FloorShell.tsx           # Sky + window + floor badge
+├── db/
+│   ├── schema.ts               # 16 tables, RLS, types
+│   ├── index.ts                # Drizzle client
+│   └── migrations/             # Generated SQL
+├── lib/
+│   ├── supabase/{client,server,admin,middleware}.ts
+│   ├── day-night.ts            # Time state calculation
+│   └── utils.ts                # cn(), formatRelativeDate()
+├── types/{ui,api,agents}.ts
+└── middleware.ts               # Route protection
+```
 
 ---
 
@@ -178,4 +244,4 @@ All planning docs are in `docs/`. Operational files stay in root.
 5. Weather API provider? OpenWeatherMap free tier proposed
 6. Sound assets? Royalty-free, procedural, or commissioned
 7. Upstash Redis — not yet provisioned
-8. `package.json` has old deps (Turso, Sentry, Nivo, NextAuth, etc.) — will be wiped in Phase 0 fresh init
+8. ⚠️ Supabase publishable key format: `sb_publishable_*` — may need classic `eyJ*` anon key for REST API auth. Verify in Supabase dashboard → Settings → API.
