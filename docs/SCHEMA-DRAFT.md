@@ -75,7 +75,15 @@ export const userProfiles = pgTable('user_profiles', {
   }).default('free'),
   lastFloorVisited: text('last_floor_visited').default('PH'),
   ...timestamps,
-});
+}, () => [
+  // userProfiles uses `id` directly (not user_id) since id IS the auth.users.id
+  pgPolicy('user_profiles_self_access', {
+    for: 'all',
+    to: 'authenticated',
+    using: sql`auth.uid() = id`,
+    withCheck: sql`auth.uid() = id`,
+  }),
+]);
 
 // ===========================================================================
 // 1. COMPANIES

@@ -189,6 +189,27 @@ export async function middleware(request: NextRequest) {
 
 Source: [Supabase SSR docs](https://supabase.com/docs/guides/auth/server-side/nextjs), [Next.js Auth Guide](https://nextjs.org/docs/app/guides/authentication)
 
+### Google OAuth Setup (Google Cloud Console)
+
+Required for Phase 0 (Supabase Auth) and Phase 2 (Gmail/Calendar API).
+
+**Phase 0 setup:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) → Create project (or use existing)
+2. APIs & Services → OAuth consent screen → External → fill required fields
+3. **Scopes:** `openid`, `email`, `profile` (minimum for auth)
+4. **Test users:** Add `armaansarora20@gmail.com` (app is in Testing mode initially)
+5. APIs & Services → Credentials → Create OAuth 2.0 Client ID → Web application
+6. **Authorized redirect URI:** `https://jzrsrruugcajohvvmevg.supabase.co/auth/v1/callback`
+7. Copy Client ID + Client Secret → Supabase dashboard → Authentication → Providers → Google
+8. Also set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.local`
+
+**Phase 2 additions (Gmail + Calendar):**
+1. Enable Gmail API and Google Calendar API in the same project
+2. Add scopes: `https://www.googleapis.com/auth/gmail.readonly`, `https://www.googleapis.com/auth/calendar.readonly`, `https://www.googleapis.com/auth/calendar.events`
+3. Request verification to publish app (required to lift 7-day token expiry in Testing mode)
+
+**⚠️ Testing mode limitation:** OAuth tokens expire after 7 days. Must publish to Production before real users (Phase 2 deadline). Publishing requires Google verification review (~1-2 weeks).
+
 ---
 
 ## 5. Inngest: Background Jobs + Realtime

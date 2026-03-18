@@ -135,19 +135,22 @@ All UI components, all pages, auth, DB connection, 147 planning docs, Sentry, se
 
 ## 6. DOCUMENT MAP
 
+All planning docs are in `docs/`. Operational files stay in root.
+
 | File | Purpose | Lines |
 |---|---|---|
-| `PROJECT-CONTEXT.md` | THIS FILE — operational context, credentials, stack, audit summary | ~160 |
-| `MASTER-PLAN.md` | All 7 phases with deliverables, acceptance criteria, dependencies, complexity | ~300 |
-| `VISION-SPEC.md` | Locked spatial UI spec: building, floors, characters, cursor, day/night, design tokens | ~250 |
-| `TECH-BRIEF.md` | Research synthesis: GSAP, Supabase/Drizzle/RLS, Inngest, AI SDK, character pipeline. Includes ⚠️ warnings on Inngest Realtime (dev preview), Drizzle RLS migration bugs, @supabase/ssr API changes | ~400 |
-| `SCHEMA-DRAFT.md` | Full Postgres schema: 16 tables, userId on every table, RLS policies, pgvector columns, Zod validation. Ready to copy into `src/db/schema.ts` | ~430 |
-| `CHARACTER-PROMPTS.md` | System prompts for all 8 C-Suite characters + Concierge. Shared preamble, personality specs, voice examples, domain assignments | ~220 |
-| `FILE-STRUCTURE.md` | Complete Next.js 16 project file tree: pages, components (world/characters/rooms/ui/data), lib, agents, Inngest functions, hooks | ~170 |
-| `BOOTSTRAP-PROMPT.md` | Copy-paste prompt for new chat sessions — loads skills, reads context files, starts Phase 0 | ~90 |
-| `AUDIT.md` | File-by-file keep/kill verdicts | ~180 |
-| `ARCHITECTURE.md` | Architecture doc (update to match current stack) | ~100 |
+| `PROJECT-CONTEXT.md` | THIS FILE — operational context, credentials, stack, audit summary (root) | ~170 |
+| `BOOTSTRAP-PROMPT.md` | Copy-paste prompt for new chat sessions (root) | ~90 |
+| `CLAUDE.md` | Codebase summary for AI coding assistants (root) | ~45 |
+| `docs/MASTER-PLAN.md` | All 7 phases with deliverables, acceptance criteria, testing strategy, error handling | ~360 |
+| `docs/VISION-SPEC.md` | Locked spatial UI spec: building, floors, characters, cursor, day/night, design tokens | ~250 |
+| `docs/TECH-BRIEF.md` | Research synthesis + Google OAuth setup. ⚠️ warnings on Inngest Realtime, Drizzle RLS bugs, @supabase/ssr changes | ~430 |
+| `docs/SCHEMA-DRAFT.md` | 16-table Postgres schema: RLS on ALL tables, pgvector HNSW indexes, post-push SQL triggers | ~470 |
+| `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge. Multi-tenant ready ({USER_NAME} templating) | ~225 |
+| `docs/FILE-STRUCTURE.md` | Complete project file tree: pages, components, lib, agents, types, tests | ~190 |
+| `docs/AUDIT.md` | File-by-file keep/kill verdicts for old repo (reference) | ~180 |
 | `.env.local` | All credentials (never commit) | — |
+| `.env.example` | Template with all required env vars, organized by phase | ~45 |
 
 **Old repo clone:** `/home/user/workspace/old-repo-audit/`
 

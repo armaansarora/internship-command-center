@@ -1,117 +1,60 @@
-# Internship Command Center
+# The Tower — Internship Command Center
 
-Your internship command center -- track applications, generate cover letters, manage follow-ups, and nail your internship search.
+A multi-tenant SaaS that automates the internship and job search process. Users sign in, connect their Google account, and the system handles email parsing, application tracking, follow-ups, interview prep, cover letters, analytics, and AI agent orchestration.
 
-## Features
+**Not a dashboard.** The Tower is an immersive spatial experience — users navigate a virtual building via elevator, interact with AI characters who manage different departments, and watch the NYC skyline change with their local time of day.
 
-- **Application Tracker** -- Sortable, filterable table with card grid view, inline status/tier editing, and gradient tier badges
-- **AI Cover Letters** -- Claude-powered generation with Tavily company research, voice matching, version history, and side-by-side comparison
-- **Interview Prep** -- AI-generated company overviews, likely questions, talking points, and recent news
-- **Company Comparison** -- Select 2-3 companies for structured comparison tables (culture, size, recent deals, fit)
-- **Email Integration** -- Gmail API: view application-related emails, send follow-ups directly from the app
-- **Calendar Events** -- Create Google Calendar events for interviews and follow-up reminders with one click
-- **Contact Networking** -- Track contacts with relationship warmth (auto-decay), referral chains, and "Who do I know?" cards
-- **Command Palette** -- Cmd+K for global search, navigation, and quick actions
-- **PWA Support** -- Installable on mobile, works offline with network-first caching
-- **Dashboard** -- Attention-first home screen: urgent items, status counters, email/calendar widgets, hero stats
-
-## Tech Stack
+## Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Framework | [Next.js 16](https://nextjs.org/) (App Router, Server Components, Server Actions) |
-| Database | [Turso](https://turso.tech/) (libSQL / SQLite) with [Drizzle ORM](https://orm.drizzle.team/) |
-| Auth | [Auth.js v5](https://authjs.dev/) with Google OAuth (JWT strategy) |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
-| AI | [Claude](https://docs.anthropic.com/en/docs/intro-to-claude) (Anthropic SDK) + [Tavily](https://tavily.com/) (company research) |
-| Email | Gmail API (read + send) |
-| Calendar | Google Calendar API (event creation) |
-| Animation | [Motion](https://motion.dev/) (Framer Motion) + CSS transitions |
-| Monitoring | [Sentry](https://sentry.io/) (error tracking) |
-| Hosting | [Vercel](https://vercel.com/) |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Database | Supabase Postgres + pgvector |
+| ORM | Drizzle v1 |
+| Auth | Supabase Auth (Google OAuth) |
+| Background Jobs | Inngest |
+| AI/LLM | Vercel AI SDK v6 + Anthropic |
+| Animations | GSAP + Framer Motion |
+| Email | Resend |
+| Payments | Stripe |
+| Hosting | Vercel |
 
-## Screenshots
+## The C-Suite
 
-<!-- Add screenshots here -->
-![Dashboard](docs/screenshots/dashboard.png)
-![Tracker](docs/screenshots/tracker.png)
-![Detail View](docs/screenshots/detail.png)
-![Cover Letter](docs/screenshots/cover-letter.png)
+8 AI characters with distinct personalities manage different aspects of the job search:
 
-## Getting Started
+| Agent | Domain |
+|---|---|
+| CEO | Orchestration, morning briefings |
+| CRO | Pipeline tracking, conversion analytics |
+| COO (Dylan Shorts) | Calendar, follow-ups, deadlines |
+| CIO | Company research, competitive intelligence |
+| CMO | Cover letters, outreach messaging |
+| CPO | Interview preparation, mock interviews |
+| CNO | Contact management, networking |
+| CFO | Analytics, cost tracking, reporting |
 
-### Prerequisites
-
-- Node.js 18+
-- A [Turso](https://turso.tech/) account (free tier works)
-- Google Cloud project with OAuth 2.0 credentials
-- [Anthropic API key](https://console.anthropic.com/)
-- [Tavily API key](https://tavily.com/)
-
-### Setup
+## Development
 
 ```bash
-# Clone the repository
-git clone https://github.com/armaansarora/internship-command-center.git
-cd internship-command-center
-
-# Install dependencies
-npm install
-
-# Copy environment variables
-cp .env.example .env.local
-
-# Configure your .env.local with your API keys and credentials
-# See .env.example for descriptions of each variable
-
-# Run the development server
-npm run dev
+pnpm install
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+See `docs/MASTER-PLAN.md` for the full 7-phase build plan.
 
-### Environment Variables
+## Docs
 
-See [`.env.example`](.env.example) for the full list with descriptions. Key variables:
+All planning documents are in `/docs/`:
+- **MASTER-PLAN.md** — Phases, deliverables, acceptance criteria, testing strategy
+- **VISION-SPEC.md** — Spatial UI specification (locked)
+- **TECH-BRIEF.md** — Research findings, code patterns, dependency list
+- **SCHEMA-DRAFT.md** — 16-table Postgres schema with RLS
+- **CHARACTER-PROMPTS.md** — System prompts for all AI agents
+- **FILE-STRUCTURE.md** — Target project architecture
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `TURSO_DATABASE_URL` | Yes | `file:./data/internship.db` for local, `libsql://...` for production |
-| `AUTH_SECRET` | Yes | Generate with `npx auth secret` |
-| `AUTH_GOOGLE_ID` | Yes | Google Cloud OAuth 2.0 Client ID |
-| `AUTH_GOOGLE_SECRET` | Yes | Google Cloud OAuth 2.0 Client Secret |
-| `ANTHROPIC_API_KEY` | Yes | Claude API key for AI features |
-| `TAVILY_API_KEY` | Yes | Tavily API key for company research |
-| `ALLOWED_EMAILS` | Yes | Comma-separated whitelist of allowed sign-in emails |
-
-## Architecture
-
-```
-src/
-  app/           # Next.js App Router pages and layouts
-  components/    # React components (ui/, layout/, feature-specific)
-  lib/           # Data layer, server actions, utilities
-    actions/     # Server actions (mutations)
-    db/          # Drizzle schema and database client
-    google.ts    # Gmail + Calendar API client factory
-  auth.ts        # Auth.js v5 configuration
-```
-
-- **Server Components** for data fetching (no client-side waterfalls)
-- **Server Actions** for all mutations (type-safe, no API routes needed)
-- **Turso Cloud DB** for edge-compatible SQLite with global replication
-- **JWT Strategy** for auth -- OAuth tokens stored in encrypted cookie, no session table needed
-- **Promise.all** parallelization for dashboard queries
-
-## Project Documentation
-
-See the [`.planning/`](.planning/) directory for full project documentation, including:
-
-- Architecture decisions and research
-- Phase-by-phase execution plans and summaries
-- Requirements traceability
-- Roadmap and state tracking
+Operational context in `PROJECT-CONTEXT.md` (root).
 
 ## License
 
-MIT
+Private. Not open source.
