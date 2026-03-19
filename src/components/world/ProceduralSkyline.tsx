@@ -303,6 +303,49 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
+    // ── DISTANT LIGHTNING (occasional flash) ──
+    if (!reduced) {
+      const lightningPeriod = 15000; // ~15 seconds between strikes
+      const lightningPhase = (t % lightningPeriod) / lightningPeriod;
+      // Two quick flashes in succession
+      const flash1 = lightningPhase > 0.0 && lightningPhase < 0.008;
+      const flash2 = lightningPhase > 0.012 && lightningPhase < 0.018;
+      if (flash1 || flash2) {
+        const seed = Math.floor(t / lightningPeriod);
+        const lx = ((seed * 173) % 100) / 100 * w * 0.6 + w * 0.2;
+        const flashAlpha = flash1 ? 0.06 : 0.03;
+        const lg = ctx.createRadialGradient(lx, h * 0.35, 0, lx, h * 0.35, w * 0.3);
+        lg.addColorStop(0, `rgba(200, 210, 255, ${flashAlpha})`);
+        lg.addColorStop(0.3, `rgba(180, 190, 240, ${flashAlpha * 0.5})`);
+        lg.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = lg;
+        ctx.fillRect(0, 0, w, h * 0.7);
+      }
+    }
+
+    // ── DRIFTING CLOUD WISPS ──
+    if (!reduced) {
+      ctx.globalAlpha = 1;
+      for (let c = 0; c < 4; c++) {
+        const cloudY = h * (0.08 + c * 0.09);
+        const cloudSpeed = 0.008 + c * 0.003;
+        const cloudX = ((t * cloudSpeed + c * w * 0.3) % (w * 1.5)) - w * 0.25;
+        const cloudW = w * (0.2 + c * 0.05);
+        const cloudH = 25 + c * 10;
+        const cloudAlpha = 0.02 + c * 0.005;
+
+        const cg = ctx.createRadialGradient(
+          cloudX + cloudW / 2, cloudY, 0,
+          cloudX + cloudW / 2, cloudY, cloudW / 2
+        );
+        cg.addColorStop(0, `rgba(40, 50, 80, ${cloudAlpha})`);
+        cg.addColorStop(0.6, `rgba(30, 40, 65, ${cloudAlpha * 0.5})`);
+        cg.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = cg;
+        ctx.fillRect(cloudX, cloudY - cloudH, cloudW, cloudH * 2);
+      }
+    }
+
     // ── HORIZON GLOW ──
     const hy = h * (0.58 + offset * 0.25);
     const hg = ctx.createRadialGradient(w / 2, hy, 0, w / 2, hy, w * 0.55);
