@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 10:11 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 10:14 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `2fd4a3b`)
+- **Branch:** `main` (commit `0f8835d`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 5,426 across 48 source files
 - **Build:** Clean (zero TS errors)
@@ -27,12 +27,18 @@
 
 ## Session State (where we left off)
 
-- **Current task:** Immersive UI overhaul — skyline rendering, image fitting, UI component visibility
-- **Deliverable:** 0.5-0.8
-- **Status:** not_started
-- **Last file touched:** `CLAUDE.md`
-- **Notes:** Session 9 was infra-only (automation hardening, context management). User reviewed live site and flagged: (1) skyline image doesn't fit the page properly, (2) UI components are hard to see against the background, (3) overall visual quality is poor. Next session must prioritize a complete visual overhaul of the immersive UI before moving to Phase 1.
-- **State captured:** 2026-03-19T07:26:00.000Z
+- **Current task:** Phase 0 Immersive UI — 3 waves of visual overhaul COMPLETE. Ready for Phase 1.
+- **Deliverable:** 0.5-0.8 (immersive UI)
+- **Status:** complete
+- **Last file touched:** `src/components/world/ProceduralSkyline.tsx`
+- **Notes:** Completed 3 waves of immersive UI overhaul across 13 commits. ProceduralSkyline.tsx (677 LOC) is a real-time Canvas renderer with: 3-layer parallax buildings, animated window lights, stars with constellation connections, shooting stars, breathing city bloom, distant lightning, cloud wisps, building light sweep, floating embers with mouse repulsion, mouse spotlight, HUD scan line. Lobby has typewriter tagline, 3D tilt sign-in card, radar pulse, parallax UI, staggered directory rows. Penthouse has TiltGlassPanel (3D perspective on hover), animated stat counters, PulseRing, parallax header, interactive activity feed. All effects respect prefers-reduced-motion. 4 recursive audit passes run — all clean. User wants to continue iterating on Phase 0 OR move to Phase 1 (The War Room). User instruction: never stop improving, keep iterating.
+- **State captured:** 2026-03-19T14:13:00.000Z
+
+## Changes Since Last Bootstrap
+
+```
+0f8835d session-end: 1 file changed, 11 insertions(+), 5 deletions(-)
+```
 
 ## Acceptance Criteria — Progress
 
@@ -120,7 +126,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `2fd4a3b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `0f8835d`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -266,13 +272,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 349 | 3,905 |
+| `BOOTSTRAP-PROMPT.md` | 343 | 3,878 |
 | `PROJECT-CONTEXT.md` | 405 | 6,466 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1254** | **19,454** |
+| **Total** | **1248** | **19,427** |
 
-> ⚠️ Reading all recommended files consumes ~19,454 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~19,427 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
