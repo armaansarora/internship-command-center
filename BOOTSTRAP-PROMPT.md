@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:14 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:30 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,27 +19,20 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `b7b89c2`)
+- **Branch:** `main` (commit `166f919`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 5,426 across 48 source files
+- **Total LOC:** 7,271 across 47 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Session State (where we left off)
 
-- **Current task:** Developer tooling (session-end, bootstrap)
-- **Deliverable:** infra
-- **Status:** in_progress
-- **Last file touched:** `unknown`
-- **Notes:** This session: 1 commits. Work: audit: expand false-positive list for unused dep detection
-- **State captured:** 2026-03-19T19:14:28.147Z
-
-## Changes Since Last Bootstrap
-
-```
-b7b89c2 audit: expand false-positive list for unused dep detection
-190da57 session-end: ultimate 16-step pipeline (verify, detect, generate, commit, validate, handoff)
-```
+- **Current task:** Phase 0 Overhaul — complete visual redesign of all Phase 0 components
+- **Deliverable:** 0.x
+- **Status:** complete
+- **Last file touched:** `src/components/world/ProceduralSkyline.tsx`
+- **Notes:** Complete Phase 0 visual overhaul: Lobby redesign (commanding typography, premium glass), Penthouse redesign (SVG icons, better glass panels, stronger hierarchy), FloorShell improvements (atmospheric effects, floor-specific lighting), Elevator polish (better nav panel, door textures), ProceduralSkyline time-awareness (day/night sky gradients), 7 unique floor stubs, globals.css utilities, dead code cleanup.
+- **State captured:** 2026-03-19T19:30:00.000Z
 
 ## Acceptance Criteria — Progress
 
@@ -127,7 +120,7 @@ b7b89c2 audit: expand false-positive list for unused dep detection
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `b7b89c2`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `166f919`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -135,34 +128,33 @@ b7b89c2 audit: expand false-positive list for unused dep detection
 
 ## Env Vars (names only — values in .env.local)
 
-- NEXT_PUBLIC_SUPABASE_URL
-- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+(no .env.local found)
 
-## Source Tree (48 files, 5,426 LOC)
+## Source Tree (47 files, 7,271 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 1336 |
-| `src/app/(authenticated)/penthouse` | 825 |
+| `src/components/world` | 1652 |
+| `src/app/(authenticated)/penthouse` | 1066 |
+| `src/app/lobby` | 696 |
 | `src/lib/contracts` | 696 |
-| `src/app/lobby` | 612 |
+| `src/app` | 454 |
 | `src/db` | 442 |
-| `src/app` | 376 |
 | `src/lib/contracts/departments` | 328 |
-| `src/hooks` | 127 |
+| `src/app/(authenticated)/c-suite` | 236 |
+| `src/app/(authenticated)/rolodex-lounge` | 233 |
+| `src/app/(authenticated)/briefing-room` | 191 |
+| `src/app/(authenticated)/observatory` | 191 |
+| `src/app/(authenticated)/situation-room` | 190 |
+| `src/app/(authenticated)/war-room` | 183 |
+| `src/app/(authenticated)/writing-room` | 168 |
 | `src/lib/supabase` | 121 |
 | `src/components/transitions` | 109 |
 | `src/types` | 84 |
 | `src/lib` | 80 |
 | `src/app/(authenticated)` | 56 |
 | `src/app/api/auth/callback` | 42 |
-| `src/app/(authenticated)/briefing-room` | 23 |
-| `src/app/(authenticated)/c-suite` | 23 |
-| `src/app/(authenticated)/observatory` | 23 |
-| `src/app/(authenticated)/rolodex-lounge` | 23 |
-| `src/app/(authenticated)/situation-room` | 23 |
-| `src/app/(authenticated)/war-room` | 23 |
-| `src/app/(authenticated)/writing-room` | 23 |
+| `src/hooks` | 22 |
 | `src` | 20 |
 | `src/app/api/auth/signout` | 11 |
 
@@ -197,7 +189,6 @@ src/components/world/FloorShell.tsx
 src/components/world/ProceduralSkyline.tsx
 src/db/index.ts
 src/db/schema.ts
-src/hooks/useMouseParallax.ts
 src/hooks/useReducedMotion.ts
 src/lib/contracts/agent-protocol.ts
 src/lib/contracts/api.ts
@@ -273,13 +264,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 326 | 3,698 |
+| `BOOTSTRAP-PROMPT.md` | 333 | 3,775 |
 | `PROJECT-CONTEXT.md` | 405 | 6,466 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1231** | **19,247** |
+| **Total** | **1238** | **19,324** |
 
-> ⚠️ Reading all recommended files consumes ~19,247 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~19,324 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
