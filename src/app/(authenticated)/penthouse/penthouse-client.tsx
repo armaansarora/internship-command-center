@@ -110,7 +110,7 @@ export function PenthouseClient({
     <EntranceSequence>
       <div className="flex min-h-dvh flex-col p-6 md:p-10 gap-6 max-w-5xl mx-auto">
         {/* ── HEADER with parallax ── */}
-        <header ref={headerRef} className="space-y-2 pt-2 transition-transform duration-100 ease-out">
+        <header ref={headerRef} className="space-y-2 pt-2 transition-transform duration-100 ease-out" aria-label="Penthouse dashboard header">
           <div
             className="flex items-center gap-3 mb-3"
             style={{
@@ -149,7 +149,7 @@ export function PenthouseClient({
         </header>
 
         {/* ── STAT CARDS with animated counters + tilt ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" role="group" aria-label="Dashboard statistics">
           {statCards.map((stat, i) => (
             <TiltGlassPanel
               key={stat.label}
@@ -585,7 +585,7 @@ function QuickActionCard({ action, index }: {
  */
 function PulseRing() {
   return (
-    <span className="relative inline-flex items-center justify-center w-3 h-3">
+    <span className="relative inline-flex items-center justify-center w-3 h-3" aria-hidden="true">
       {/* Core dot */}
       <span
         className="w-1.5 h-1.5 rounded-full"

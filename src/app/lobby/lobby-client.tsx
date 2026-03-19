@@ -207,17 +207,11 @@ export function LobbyClient() {
             >
               The Tower
             </h1>
-            <p
-              className="text-xs leading-relaxed max-w-xs"
-              style={{
-                color: "var(--text-secondary)",
-                textShadow: "0 1px 8px rgba(0,0,0,0.8)",
-              }}
-            >
-              {isReturningUser
+            <TypewriterText
+              text={isReturningUser
                 ? "Welcome back. Your offices are as you left them."
                 : "AI-powered internship pipeline management, research, and preparation."}
-            </p>
+            />
           </div>
 
           {/* Sign-in card */}
@@ -488,6 +482,59 @@ function RadarPulse() {
         }
       `}</style>
     </span>
+  );
+}
+
+/**
+ * TypewriterText — types out text character by character.
+ */
+function TypewriterText({ text }: { text: string }) {
+  const [displayed, setDisplayed] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
+
+  useEffect(() => {
+    setDisplayed("");
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        setDisplayed(text.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(interval);
+        // Blink cursor a few times then hide
+        setTimeout(() => setShowCursor(false), 2000);
+      }
+    }, 35);
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return (
+    <p
+      className="text-xs leading-relaxed max-w-xs min-h-[2em]"
+      style={{
+        color: "var(--text-secondary)",
+        textShadow: "0 1px 8px rgba(0,0,0,0.8)",
+      }}
+    >
+      {displayed}
+      {showCursor && (
+        <span
+          style={{
+            color: "var(--gold)",
+            animation: "cursor-blink 0.8s step-end infinite",
+            marginLeft: "1px",
+          }}
+        >
+          |
+        </span>
+      )}
+      <style>{`
+        @keyframes cursor-blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+    </p>
   );
 }
 
