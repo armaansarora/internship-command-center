@@ -1,0 +1,1 @@
+Clone repo armaansarora/internship-command-center (branch: main). Read BOOTSTRAP-PROMPT.md — it's auto-generated and current. Follow the Quick Start section. Cut the fat, keep the meat. Run all sub agents needed, use max force and effort. Make every decision yourself. Run recursive-audit after every task. Go all out.
