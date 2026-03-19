@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-18T19:52:00-04:00 (AST)
+**Last updated:** 2026-03-18T20:10:00-04:00 (EDT)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -243,10 +243,11 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 ### Manual Steps Required (See MANUAL-GUIDE.md)
 1. Run `migration-full.sql` in Supabase SQL Editor
-2. Configure Google OAuth in Google Cloud Console + Supabase dashboard
-3. Set Vercel environment variables
-4. Merge `docs-handoff` → `main` for production deploy
-5. Verify Supabase anon key format (`eyJ*` for REST API)
+2. Run `src/db/post-push.sql` in Supabase SQL Editor (triggers + pgvector)
+3. Configure Google OAuth in Google Cloud Console + Supabase dashboard
+4. Set Vercel environment variables
+5. Merge `docs-handoff` → `main` for production deploy
+6. Verify Supabase anon key format (`eyJ*` for REST API)
 
 ### File Structure (current — commit `dc73756`)
 ```
@@ -283,7 +284,8 @@ src/
 ├── db/
 │   ├── schema.ts               # 16 tables, RLS, types, all FKs
 │   ├── index.ts                # Drizzle client
-│   └── migrations/             # Generated SQL (0000 base + 0001 FK fix)
+│   ├── migrations/             # Generated SQL (0000 base + 0001 FK fix)
+│   └── post-push.sql           # Triggers (handle_new_user, updated_at) + pgvector indexes
 ├── lib/
 │   ├── supabase/{client,server,admin,middleware}.ts
 │   ├── day-night.ts            # Time state calculation
@@ -327,6 +329,7 @@ src/
 | 3 | 2026-03-18 | Started 0.5 Skyline, hit JSX type error mid-build. |
 | 4 | 2026-03-18 | Fixed JSX → Built Skyline (0.5) → Elevator (0.6) → Lobby upgrade (0.7) → Penthouse (0.8) → Contracts (0.9, 1,015 LOC) → Deploy (0.10). Commit `dc73756`. Vercel preview READY. |
 | 5 | 2026-03-18 | Updated PROJECT-CONTEXT.md, compiled MANUAL-GUIDE.md for Armaan. |
+| 6 | 2026-03-18 | Final recursive audit: found missing `handle_new_user` trigger → created `src/db/post-push.sql`. Rewrote BOOTSTRAP-PROMPT.md for Phase 1 handoff. Updated MANUAL-GUIDE.md with post-push step. |
 
 ---
 
