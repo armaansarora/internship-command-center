@@ -233,6 +233,48 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
+    // ── SHOOTING STARS (occasional) ──
+    if (!reduced) {
+      // Use time-based trigger — a shooting star appears every ~8 seconds
+      const starPeriod = 8000;
+      const starPhase = (t % starPeriod) / starPeriod;
+      if (starPhase < 0.06) {
+        // Active shooting star
+        const progress = starPhase / 0.06; // 0 to 1
+        const seed = Math.floor(t / starPeriod);
+        const sx = ((seed * 137) % 100) / 100 * w * 0.7 + w * 0.1;
+        const sy = ((seed * 97) % 100) / 100 * h * 0.25 + h * 0.02;
+        const angle = 0.4 + ((seed * 53) % 100) / 100 * 0.4;
+        const len = 80 + ((seed * 71) % 60);
+        const ex = sx + Math.cos(angle) * len * progress;
+        const ey = sy + Math.sin(angle) * len * progress;
+        const tailLen = len * 0.6;
+        const tx = ex - Math.cos(angle) * tailLen;
+        const ty = ey - Math.sin(angle) * tailLen;
+
+        const alpha = progress < 0.3 ? progress / 0.3 : progress > 0.7 ? (1 - progress) / 0.3 : 1;
+        const grad = ctx.createLinearGradient(tx, ty, ex, ey);
+        grad.addColorStop(0, "rgba(255, 255, 255, 0)");
+        grad.addColorStop(0.7, `rgba(255, 255, 255, ${alpha * 0.6})`);
+        grad.addColorStop(1, `rgba(255, 255, 255, ${alpha * 0.9})`);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+
+        // Head glow
+        const hg = ctx.createRadialGradient(ex, ey, 0, ex, ey, 6);
+        hg.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.8})`);
+        hg.addColorStop(1, "rgba(255, 255, 255, 0)");
+        ctx.fillStyle = hg;
+        ctx.beginPath();
+        ctx.arc(ex, ey, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
     // ── HORIZON GLOW ──
     const hy = h * (0.58 + offset * 0.25);
     const hg = ctx.createRadialGradient(w / 2, hy, 0, w / 2, hy, w * 0.55);
@@ -391,10 +433,11 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     ctx.fillStyle = bf;
     ctx.fillRect(0, 0, w, h);
 
-    // ── CITY BLOOM ──
+    // ── CITY BLOOM (breathing) ──
+    const breathe = reduced ? 0.05 : 0.04 + 0.02 * Math.sin(t * 0.0004);
     const bloom = ctx.createRadialGradient(w * 0.5, h * 0.62, 0, w * 0.5, h * 0.62, w * 0.45);
-    bloom.addColorStop(0, "rgba(201, 168, 76, 0.05)");
-    bloom.addColorStop(0.5, "rgba(160, 130, 60, 0.02)");
+    bloom.addColorStop(0, `rgba(201, 168, 76, ${breathe})`);
+    bloom.addColorStop(0.5, `rgba(160, 130, 60, ${breathe * 0.4})`);
     bloom.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = bloom;
     ctx.fillRect(0, 0, w, h);
