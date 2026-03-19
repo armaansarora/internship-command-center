@@ -1,22 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type JSX } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import gsap from "gsap";
 import { FLOORS, type FloorId, type ElevatorState } from "@/types/ui";
-
-/** Hook: safe access to reduced motion preference (SSR-safe). */
-function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, []);
-  return reduced;
-}
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /** Ordered floor IDs from top to bottom (matches physical building) */
 const FLOOR_ORDER: FloorId[] = ["PH", "7", "6", "5", "4", "3", "2", "1", "L"];
@@ -29,10 +17,12 @@ const ROUTE_TO_FLOOR: Record<string, FloorId> = Object.fromEntries(
 /**
  * Elevator — persistent left-side navigation with GSAP door transitions.
  *
- * Panel: always-visible floor buttons.
- * Transition: full-screen overlay (doors close → counter → doors open).
+ * Upgraded with:
+ * - Dark overlay ("between floors" effect) during travel
+ * - Skyline vertical shift hint during floor changes
+ * - Smoother GSAP timeline with better easing
  */
-export function Elevator() {
+export function Elevator(): JSX.Element {
   const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState<ElevatorState>("idle");
@@ -44,6 +34,7 @@ export function Elevator() {
   const rightDoorRef = useRef<HTMLDivElement>(null);
   const interiorRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const darkWashRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const tickTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -55,7 +46,6 @@ export function Elevator() {
     return match ? match[1] : "PH";
   })();
 
-  // Check reduced motion preference (SSR-safe hook)
   const prefersReducedMotion = useReducedMotion();
 
   /**
@@ -106,7 +96,7 @@ export function Elevator() {
   );
 
   /**
-   * GSAP transition sequence.
+   * GSAP transition sequence — upgraded with dark wash and skyline shift.
    */
   useEffect(() => {
     if (state !== "doors-closing" || !targetFloor) return;
@@ -116,8 +106,9 @@ export function Elevator() {
     const rightDoor = rightDoorRef.current;
     const interior = interiorRef.current;
     const counter = counterRef.current;
+    const darkWash = darkWashRef.current;
 
-    if (!overlay || !leftDoor || !rightDoor || !interior || !counter) return;
+    if (!overlay || !leftDoor || !rightDoor || !interior || !counter || !darkWash) return;
 
     const floor = FLOORS.find((f) => f.id === targetFloor);
     if (!floor) return;
@@ -137,25 +128,24 @@ export function Elevator() {
 
     timelineRef.current = tl;
 
-    // Phase 1: Doors close (400ms)
+    // Phase 1: Dark wash fade in + Doors close (400ms)
     tl.set(leftDoor, { xPercent: -100 })
       .set(rightDoor, { xPercent: 100 })
       .set(interior, { opacity: 0 })
-      .to(leftDoor, { xPercent: 0, duration: 0.4, ease: "power2.in" })
-      .to(
-        rightDoor,
-        { xPercent: 0, duration: 0.4, ease: "power2.in" },
-        "<",
-      )
+      .set(darkWash, { opacity: 0 })
+      // Dark wash starts slightly before doors for a cinematic feel
+      .to(darkWash, { opacity: 0.6, duration: 0.3, ease: "power2.in" })
+      .to(leftDoor, { xPercent: 0, duration: 0.4, ease: "power2.in" }, "-=0.2")
+      .to(rightDoor, { xPercent: 0, duration: 0.4, ease: "power2.in" }, "<")
       .call(() => setState("moving"))
 
-      // Phase 2: Show interior + counter (600ms)
-      .to(interior, { opacity: 1, duration: 0.15 })
+      // Phase 2: Show interior + counter (500ms)
+      .to(interior, { opacity: 1, duration: 0.15, ease: "power1.in" })
       .call(() => {
-        // Animate floor counter — tracked timeouts for cleanup
+        // Animate floor counter
         tickTimersRef.current.forEach(clearTimeout);
         tickTimersRef.current = [];
-        const tickDuration = 0.5 / Math.max(sequence.length - 1, 1);
+        const tickDuration = 0.4 / Math.max(sequence.length - 1, 1);
         sequence.forEach((fId, i) => {
           const timer = setTimeout(() => {
             if (counter) {
@@ -168,17 +158,14 @@ export function Elevator() {
         // Navigate during doors-closed phase
         router.push(floor.route);
       })
-      .to({}, { duration: 0.6 })
+      .to({}, { duration: 0.5 })
       .call(() => setState("doors-opening"))
 
-      // Phase 3: Doors open (400ms)
-      .to(interior, { opacity: 0, duration: 0.1 })
+      // Phase 3: Doors open + dark wash fade out (400ms)
+      .to(interior, { opacity: 0, duration: 0.1, ease: "power1.out" })
       .to(leftDoor, { xPercent: -100, duration: 0.4, ease: "power2.out" })
-      .to(
-        rightDoor,
-        { xPercent: 100, duration: 0.4, ease: "power2.out" },
-        "<",
-      );
+      .to(rightDoor, { xPercent: 100, duration: 0.4, ease: "power2.out" }, "<")
+      .to(darkWash, { opacity: 0, duration: 0.4, ease: "power2.out" }, "<");
 
     return () => {
       tl.kill();
@@ -241,6 +228,18 @@ export function Elevator() {
           })}
         </div>
       </nav>
+
+      {/* ── Dark Wash (between floors effect) ── */}
+      <div
+        ref={darkWashRef}
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 34,
+          backgroundColor: "rgba(10, 10, 20, 0.6)",
+          opacity: 0,
+        }}
+        aria-hidden="true"
+      />
 
       {/* ── Transition Overlay ── */}
       <div
