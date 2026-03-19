@@ -12,6 +12,7 @@
 | # | Task | Time | Difficulty |
 |---|---|---|---|
 | 1 | Run database migration in Supabase | 2 min | Easy |
+| 1b | Run post-push SQL (triggers + pgvector) | 1 min | Easy |
 | 2 | Get the correct Supabase anon key | 2 min | Easy |
 | 3 | Set up Google OAuth | 10 min | Medium |
 | 4 | Set Vercel environment variables | 3 min | Easy |
@@ -35,6 +36,19 @@
 4. Paste the entire contents of `migration-full.sql`
 5. Click **Run** (or Cmd+Enter / Ctrl+Enter)
 6. You should see "Success. No rows returned." — that's correct, DDL statements don't return rows.
+
+### Step 1b: Run Post-Push SQL (Triggers + pgvector)
+
+**Immediately after the migration succeeds**, run a second SQL file:
+
+1. Still in **SQL Editor**, click **New Query** again
+2. Paste the contents of `src/db/post-push.sql` (in the repo)
+3. Click **Run**
+
+This creates:
+- **`handle_new_user()` trigger** — automatically creates a `user_profiles` row when someone signs up. Without this, sign-in works but the app can't find the user's profile.
+- **`update_updated_at()` triggers** — auto-updates the `updated_at` column on every row edit (all 16 tables).
+- **pgvector extension + HNSW indexes** — required for AI agent memory and company embeddings.
 
 ### Verify It Worked
 
