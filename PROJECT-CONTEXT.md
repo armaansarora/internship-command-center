@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-19T03:26:00-04:00 (EDT)
+**Last updated:** 2026-03-19T15:31:00-04:00 (EDT)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -161,10 +161,11 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 ## 7. CURRENT STATE
 
-**Phase:** 0 — The Shell (COMPLETE) + Immersive UI Rebuild (COMPLETE)
-**Branch:** `main` (commit `f424ffd` + audit fix pending)
-**Last commit:** Supabase data wiring for Penthouse (`f424ffd`)
+**Phase:** 0 — The Shell (COMPLETE) + Phase 0 Visual Overhaul (COMPLETE)
+**Branch:** `main` (commit `b61d6d0`)
+**Last commit:** Phase 0 complete visual overhaul — lobby, penthouse, skyline, elevator, floor stubs (`b61d6d0`)
 **Production:** `internship-command-center-lake.vercel.app`
+**LOC:** 6,854 across 46 source files
 
 ### Completed (All Tasks 0.1–0.10)
 
@@ -237,41 +238,38 @@ All planning docs are in `docs/`. Operational files stay in root.
 - ✅ Code committed and pushed to `main` branch
 - ✅ Production deployed at `internship-command-center-lake.vercel.app`
 
-#### Immersive UI Rebuild (per docs/IMMERSIVE-UI-PLAN.md)
-Complete replacement of SVG skyline with photorealistic CSS 3D parallax system.
+#### Phase 0 Visual Overhaul (Session 10 — replaced Immersive UI Rebuild)
+Complete replacement of the CSS 3D parallax skyline system with a procedural Canvas renderer. Redesigned every screen for bigger, bolder, more immersive visuals.
 
-**New Components:**
-- ✅ `src/components/world/SkylineScene.tsx` — master immersive background (6-layer stack)
-- ✅ `src/components/world/SkylineLayers.tsx` — CSS 3D perspective parallax (4 photo layers per variant)
-- ✅ `src/components/world/AtmosphericEffects.tsx` — vignette, height fog, night bloom, sky fade
-- ✅ `src/components/world/DustMotes.tsx` — tsParticles overlay (~40 particles, 30fps cap)
-- ✅ `src/components/world/WindowTint.tsx` — glass effect with backdrop-filter
-- ✅ `src/components/transitions/EntranceSequence.tsx` — cinematic first-login (GSAP, 2s, sessionStorage skip)
+**Replaced Components (old → new):**
+- ✅ SkylineScene/SkylineLayers/AtmosphericEffects/DustMotes/WindowTint → `ProceduralSkyline.tsx` (818 lines, canvas-based)
+- ✅ `ProceduralSkyline.tsx` — time-aware via `useDayNight()` + `getSkyConfig()`, 7 sky gradient palettes, animated window lights, stars fade at dawn, lobby defaults to night
 
-**New Hooks:**
-- ✅ `src/hooks/useMouseParallax.ts` — RAF-based lerp mouse tracking, ref-stable loop
-- ✅ `src/hooks/useSkylineVariant.ts` — day/night variant from DayNightProvider
-- ✅ `src/hooks/useReducedMotion.ts` — SSR-safe reduced motion check
+**Redesigned Components:**
+- ✅ `lobby-client.tsx` — 672 lines. Commanding text-5xl/7xl title, premium glass sign-in card, wider directory (max-w-lg), 500px spotlight, stronger vignette
+- ✅ `penthouse-client.tsx` — 862 lines. Custom SVG icons (no emojis), text-3xl counters, stronger glass panels (0.82 opacity), Playfair headings
+- ✅ `FloorShell.tsx` — 174 lines. Stronger vignette, 3 mullions at 15/50/85%, bottom fog, floor-specific ambient light (PH=gold, 7=blue, others=neutral), gold dot on floor badge
+- ✅ `Elevator.tsx` — 450 lines. Richer nav panel (rgba(10,12,25,0.85), gold left edge), door brushed-metal texture, text-6xl counter, tooltips on buttons
+- ✅ `globals.css` — 370 lines. Added: `.glass-panel`, `.glass-panel-gold`, fade-in/fade-in-scale animations, `.gold-glow`/`.gold-glow-strong`, scrollbar styling, `.floor-content`
+- ✅ 7 floor stubs — each with unique visual atmosphere (War Room=tactical grid, Rolodex=amber lounge, Writing Room=ruled lines, Situation Room=alert pulses, Briefing Room=blueprint grid, Observatory=range rings, C-Suite=herringbone)
 
-**Generated Assets:**
-- ✅ `public/skyline/day/{sky,far,mid,near}.webp` + mobile + PNG variants (8 files)
-- ✅ `public/skyline/night/{sky,far,mid,near}.webp` + mobile + PNG variants (8 files)
-- ✅ `public/skyline/fallback.webp`, `fallback-day.webp`, `fallback-night.webp`
-- ✅ `scripts/create-skyline-layers.py` — Python script that generated the layers
+**Deleted (orphaned):**
+- SkylineScene.tsx, SkylineLayers.tsx, AtmosphericEffects.tsx, DustMotes.tsx, WindowTint.tsx, SkylineSVG.tsx
+- useMouseParallax.ts, useSkylineVariant.ts
 
-**Modified Files:**
-- ✅ `FloorShell.tsx` — now uses SkylineScene instead of SVG Skyline
-- ✅ `Elevator.tsx` — added dark wash overlay, uses shared useReducedMotion
-- ✅ `penthouse-client.tsx` — glass panels, EntranceSequence wrapper, accepts real data
-- ✅ `penthouse/page.tsx` — passes Supabase data to client
+**Kept from previous:**
+- ✅ `EntranceSequence.tsx` — cinematic first-login (GSAP, 2s, sessionStorage skip)
+- ✅ `useReducedMotion.ts` — SSR-safe reduced motion check
+- ✅ `public/skyline/` images — kept as fallback assets
 
-**New Dependencies:** `lenis` (installed, Phase 2 usage), `@tsparticles/react`, `@tsparticles/slim`, `@tsparticles/engine`
+**Key Design Decisions:**
+- Lobby's ProceduralSkyline defaults to "night" timeState (outside DayNightProvider context) — intentional, lobby always dark/moody
+- Design tokens: Gold `#C9A84C`, Dark `#1A1A2E`, Glass blur 16px, Playfair Display/Satoshi/JetBrains Mono
 
-**Audit (Session 7):**
-- Fixed: `useMouseParallax` RAF cascade (state in useCallback deps → ref-based stable loop)
-- Fixed: Double dynamic import for DustMotes (removed redundant `dynamic()` in SkylineScene)
-- Accepted: `as any` cast in DustMotes for tsParticles v3 RecursivePartial types
-- Verified: All CSS vars defined, all imports resolvable, all key props present, aria attributes correct, no console.logs, no TODOs, TS strict clean
+**Audit (Session 10):**
+- Pass 1: Found and removed orphaned `useMouseParallax.ts`
+- Pass 2: All 5 questions return "nothing" — zero TS errors, clean build, no console.logs/TODOs/any types, 83 aria attributes, 7 role attributes
+- CSS utility classes (glass-panel-gold, gold-glow, etc.) intentionally kept as design system infrastructure for Phase 1+
 
 ### Manual Steps (ALL COMPLETED as of Session 7)
 1. ~~Run `migration-full.sql` in Supabase SQL Editor~~ DONE
@@ -310,21 +308,14 @@ src/
 │       └── signout/route.ts    # Sign-out (NextResponse redirect)
 ├── components/
 │   ├── world/
-│   │   ├── DayNightProvider.tsx     # Time state context
-│   │   ├── CustomCursor.tsx         # Gold cursor system
-│   │   ├── FloorShell.tsx           # Immersive skyline + room content + floor badge
-│   │   ├── SkylineScene.tsx         # Master immersive background (6-layer stack)
-│   │   ├── SkylineLayers.tsx        # CSS 3D perspective parallax (4 photo layers)
-│   │   ├── AtmosphericEffects.tsx   # Vignette, height fog, night bloom, sky fade
-│   │   ├── DustMotes.tsx            # tsParticles overlay (~40 particles)
-│   │   ├── WindowTint.tsx           # Glass effect with backdrop-filter
-│   │   ├── SkylineSVG.tsx           # Old SVG skyline (fallback, renamed)
-│   │   └── Elevator.tsx             # 318 LOC — GSAP doors, dark wash, floor counter
+│   │   ├── DayNightProvider.tsx     # Time state context (7 states, 60s updates)
+│   │   ├── CustomCursor.tsx         # Gold cursor system (7 contextual states)
+│   │   ├── FloorShell.tsx           # 174 LOC — vignette, mullions, fog, floor-specific ambient light
+│   │   ├── ProceduralSkyline.tsx    # 818 LOC — Canvas renderer, time-aware, 7 sky palettes, stars, window lights
+│   │   └── Elevator.tsx             # 450 LOC — GSAP doors, brushed-metal, text-6xl counter, tooltips
 │   └── transitions/
-│       └── EntranceSequence.tsx     # Cinematic first-login animation (GSAP)
+│       └── EntranceSequence.tsx     # Cinematic first-login animation (GSAP, 2s)
 ├── hooks/
-│   ├── useMouseParallax.ts    # RAF-based lerp mouse tracking (ref-stable)
-│   ├── useSkylineVariant.ts   # Day/night variant from DayNightProvider
 │   └── useReducedMotion.ts    # SSR-safe reduced motion check
 ├── db/
 │   ├── schema.ts               # 16 tables, RLS, types, all FKs
@@ -366,7 +357,7 @@ public/skyline/
 5. Weather API provider? OpenWeatherMap free tier proposed
 6. Sound assets? Royalty-free, procedural, or commissioned
 7. Upstash Redis — not yet provisioned
-8. ⚠️ Supabase publishable key format: `sb_publishable_*` — may need classic `eyJ*` anon key for REST API auth. Verify in Supabase dashboard → Settings → API.
+8. ~~⚠️ Supabase publishable key format~~ RESOLVED — `eyJ*` anon key confirmed working (Session 7)
 
 ---
 
@@ -383,6 +374,7 @@ public/skyline/
 | 7 | 2026-03-19 | **Immersive UI Rebuild** (IMMERSIVE-UI-PLAN.md): Generated day+night NYC skyline photos, depth-separated into 4 layers each. Built SkylineScene (CSS 3D parallax), AtmosphericEffects, DustMotes, WindowTint, EntranceSequence, useMouseParallax, useSkylineVariant, useReducedMotion. Upgraded Elevator (dark wash), Penthouse (glass panels + real Supabase data). Fixed tsParticles v2/v3 conflict. Recursive audit: fixed RAF cascade in useMouseParallax, removed double dynamic import. All pushed to `main`. |
 | 8 | 2026-03-19 | **Bootstrap System Overhaul** — 10 improvements to session handoff infrastructure. (1) Husky pre-commit hook auto-regenerates BOOTSTRAP-PROMPT.md on every commit. (2) SESSION-STATE.json system for capturing mid-task state. (3) Build health check (tsc) embedded in bootstrap output. (4) Git diff since last bootstrap generation with commit tracking. (5) Acceptance criteria auto-tracking — parses MASTER-PLAN.md and checks code for evidence. (6) Dependency freshness check (npm outdated, major versions). (7) Vercel deploy status via check-vercel.ts. (8) Context budget estimation (~tokens for recommended reading files). (9) `npm run session:end` — single command chains type check → bootstrap → commit → push. (10) GitHub Actions CI guard for bootstrap staleness. Also: update-session-state.ts CLI, session-end.ts dry-run mode, fixed shell injection in commit message. 2-pass recursive audit clean. |
 | 9 | 2026-03-19 | **Automation hardening** — Eliminated all manual commands from human workflow. Added 5 mandatory agent behavior rules to CLAUDE.md: (1) auto-update SESSION-STATE.json, (2) auto-run session:end, (3) Vercel check, (4) no dirty state, (5) context window management with 40/60/70% thresholds and mandatory handoff. Fixed bootstrap Quick Start to mandate CLAUDE.md reading (was previously telling agents to skip it). CLI scripts kept as fallbacks. **User reviewed live site and flagged immersive UI as poor quality** — skyline image doesn't fit page, UI components hard to see. Next session must do a complete visual overhaul before Phase 1. |
+| 10 | 2026-03-19 | **Phase 0 Complete Visual Overhaul** — Replaced entire CSS 3D parallax skyline (SkylineScene, SkylineLayers, AtmosphericEffects, DustMotes, WindowTint) with `ProceduralSkyline.tsx` (818-line canvas renderer, time-aware, 7 sky palettes, animated window lights, stars). Redesigned lobby (672 LOC — commanding typography, premium glass sign-in, 500px spotlight), penthouse (862 LOC — custom SVG icons, text-3xl counters, stronger glass), FloorShell (174 LOC — stronger vignette, mullions, floor-specific ambient), Elevator (450 LOC — brushed-metal texture, tooltips, text-6xl counter), globals.css (370 LOC — glass utilities, animations, gold glows), and all 7 floor stubs with unique visual atmospheres. Deleted 8 orphaned files (6 components + 2 hooks). 6,854 LOC, 46 files. Commit `b61d6d0`, pushed to main. 2-pass recursive audit clean. |
 
 ---
 
@@ -396,9 +388,8 @@ public/skyline/
 - **Tailwind:** v3 with JS config (NOT v4 with CSS config)
 - **Old repo reference:** `/home/user/workspace/internship-command-center-8c4c1ad1/src/contracts/`
 - **Vercel auto-deploy:** `main` gets production
-- **tsParticles v3:** Uses `initParticlesEngine` + `loadSlim`, NOT v2 `init` prop pattern
-- **tsParticles `as any` cast:** Required for deeply nested RecursivePartial types, documented with eslint-disable
-- **useMouseParallax:** Uses ref-stable RAF loop (not useCallback with state deps) to avoid cascade teardown
-- **SkylineLayers uses `<img>` not `next/image`:** Intentional — photos are inside CSS 3D perspective containers, `next/image` would interfere with absolute positioning and transforms
-- **Lenis:** Installed but not yet wired — planned for Phase 2 smooth scroll integration
+- **ProceduralSkyline:** Canvas-based renderer replaces all photo-based skyline components. Defaults to "night" outside DayNightProvider context (intentional for lobby). Uses `useDayNight()` hook + `getSkyConfig()` for time-aware rendering
 - **EntranceSequence:** Uses sessionStorage for "played" flag — appropriate for per-session entrance
+- **Floor stubs:** Each has unique CSS atmosphere (grid patterns, gradients, animations) — not empty shells
+- **Lenis:** Installed but not yet wired — planned for Phase 2 smooth scroll integration
+- **Old skyline images:** `public/skyline/` still present as fallback assets, not currently referenced

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:30 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:35 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -18,8 +18,8 @@
 
 ## Status
 
-- **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `166f919`)
+- **Current state:** Phase 0 COMPLETE
+- **Branch:** `main` (commit `b61d6d0`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 7,271 across 47 source files
 - **Build:** Clean (zero TS errors)
@@ -33,6 +33,12 @@
 - **Last file touched:** `src/components/world/ProceduralSkyline.tsx`
 - **Notes:** Complete Phase 0 visual overhaul: Lobby redesign (commanding typography, premium glass), Penthouse redesign (SVG icons, better glass panels, stronger hierarchy), FloorShell improvements (atmospheric effects, floor-specific lighting), Elevator polish (better nav panel, door textures), ProceduralSkyline time-awareness (day/night sky gradients), 7 unique floor stubs, globals.css utilities, dead code cleanup.
 - **State captured:** 2026-03-19T19:30:00.000Z
+
+## Changes Since Last Bootstrap
+
+```
+b61d6d0 feat: Phase 0 complete visual overhaul — lobby, penthouse, skyline, elevator, floor stubs
+```
 
 ## Acceptance Criteria — Progress
 
@@ -120,7 +126,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `166f919`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b61d6d0`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -264,13 +270,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 333 | 3,775 |
-| `PROJECT-CONTEXT.md` | 405 | 6,466 |
+| `BOOTSTRAP-PROMPT.md` | 324 | 3,803 |
+| `PROJECT-CONTEXT.md` | 396 | 6,713 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1238** | **19,324** |
+| **Total** | **1220** | **19,599** |
 
-> ⚠️ Reading all recommended files consumes ~19,324 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~19,599 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
@@ -283,12 +289,11 @@ zod: ^4.3.6
 - **Tailwind:** v3 with JS config (NOT v4 with CSS config)
 - **Old repo reference:** `/home/user/workspace/internship-command-center-8c4c1ad1/src/contracts/`
 - **Vercel auto-deploy:** `main` gets production
-- **tsParticles v3:** Uses `initParticlesEngine` + `loadSlim`, NOT v2 `init` prop pattern
-- **tsParticles `as any` cast:** Required for deeply nested RecursivePartial types, documented with eslint-disable
-- **useMouseParallax:** Uses ref-stable RAF loop (not useCallback with state deps) to avoid cascade teardown
-- **SkylineLayers uses `<img>` not `next/image`:** Intentional — photos are inside CSS 3D perspective containers, `next/image` would interfere with absolute positioning and transforms
-- **Lenis:** Installed but not yet wired — planned for Phase 2 smooth scroll integration
+- **ProceduralSkyline:** Canvas-based renderer replaces all photo-based skyline components. Defaults to "night" outside DayNightProvider context (intentional for lobby). Uses `useDayNight()` hook + `getSkyConfig()` for time-aware rendering
 - **EntranceSequence:** Uses sessionStorage for "played" flag — appropriate for per-session entrance
+- **Floor stubs:** Each has unique CSS atmosphere (grid patterns, gradients, animations) — not empty shells
+- **Lenis:** Installed but not yet wired — planned for Phase 2 smooth scroll integration
+- **Old skyline images:** `public/skyline/` still present as fallback assets, not currently referenced
 
 ## Key Docs
 
