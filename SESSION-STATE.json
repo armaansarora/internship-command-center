@@ -1,9 +1,9 @@
 {
-  "currentTask": "Automation hardening — context window management rules",
+  "currentTask": "Automation hardening — fixed bootstrap to mandate CLAUDE.md reading",
   "deliverable": "infra",
   "status": "in_progress",
   "blocker": null,
-  "lastFileTouched": "CLAUDE.md",
-  "notes": "Added Rule 5: Context Window Management with 40/60/70% thresholds. Agent auto-hands off at 70%, warns at 40% and 60%. Super conservative cutoffs per user preference.",
-  "updatedAt": "2026-03-19T07:16:00.000Z"
+  "lastFileTouched": "scripts/generate-bootstrap.ts",
+  "notes": "Fixed critical gap: bootstrap Quick Start now includes CLAUDE.md as step 3 (mandatory). Context budget note no longer says to skip CLAUDE.md. New agents will always read the mandatory rules.",
+  "updatedAt": "2026-03-19T07:17:00.000Z"
 }
