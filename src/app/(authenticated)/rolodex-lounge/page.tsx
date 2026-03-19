@@ -115,9 +115,9 @@ export default async function RolodexLoungePage() {
           />
         </div>
 
-        {/* Main card */}
+        {/* Main card — fades up on mount */}
         <div
-          className="relative z-10 max-w-lg w-full rounded-xl p-8"
+          className="floor-card-enter relative z-10 max-w-lg w-full rounded-xl p-8"
           style={{
             background: "rgba(10, 12, 25, 0.78)",
             backdropFilter: "blur(20px)",
@@ -177,9 +177,10 @@ export default async function RolodexLoungePage() {
             Contact management and networking intelligence. Every relationship, indexed.
           </p>
 
-          {/* COMING SOON badge */}
+          {/* COMING SOON badge — glow pulse */}
           <div className="mb-8">
             <span
+              className="coming-soon-glow"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "11px",
@@ -192,20 +193,36 @@ export default async function RolodexLoungePage() {
             </span>
           </div>
 
-          {/* Decorative rolodex card-fan hint */}
-          <div className="flex items-end gap-[-4px] mb-4 opacity-20" aria-hidden="true">
-            {[0, 1, 2, 3, 4].map((i) => (
+          {/* Animated card stack — fans out with idle breathing animation */}
+          <div
+            className="flex items-end mb-4"
+            aria-hidden="true"
+            style={{ position: "relative", height: "52px" }}
+          >
+            {([
+              { rot: "-10deg", tx: "0px",  ty: "6px",  delay: "0s",    zIdx: 1 },
+              { rot: "-5deg",  tx: "14px", ty: "3px",  delay: "0.15s", zIdx: 2 },
+              { rot: "0deg",   tx: "28px", ty: "0px",  delay: "0.3s",  zIdx: 3 },
+              { rot: "5deg",   tx: "42px", ty: "3px",  delay: "0.45s", zIdx: 2 },
+              { rot: "10deg",  tx: "56px", ty: "6px",  delay: "0.6s",  zIdx: 1 },
+            ] as { rot: string; tx: string; ty: string; delay: string; zIdx: number }[]).map((card, i) => (
               <div
                 key={i}
-                className="rounded-md"
+                className="absolute rounded-md"
                 style={{
                   width: "56px",
                   height: "36px",
-                  marginLeft: i === 0 ? 0 : "-10px",
-                  background: `rgba(180, 130, 60, ${0.15 + i * 0.04})`,
-                  border: "1px solid rgba(180, 130, 60, 0.25)",
-                  transform: `rotate(${(i - 2) * 5}deg) translateY(${Math.abs(i - 2) * 3}px)`,
+                  left: card.tx,
+                  bottom: "0",
+                  zIndex: card.zIdx,
+                  background: `rgba(180, 130, 60, ${0.12 + i * 0.04})`,
+                  border: "1px solid rgba(180, 130, 60, 0.28)",
                   transformOrigin: "bottom center",
+                  // CSS custom props for the idle animation
+                  ["--card-rot" as string]: card.rot,
+                  ["--card-ty" as string]: card.ty,
+                  transform: `rotate(${card.rot}) translateY(${card.ty})`,
+                  animation: `card-fan-idle 3.5s ease-in-out ${card.delay} infinite`,
                 }}
               />
             ))}

@@ -8,6 +8,16 @@ export const metadata: Metadata = { title: "The Observatory" };
 export default async function ObservatoryPage() {
   await requireUser();
 
+  // Orbiting dots config: [orbit-radius-px, animation-duration-s, delay-s, size-px, color]
+  const orbitDots: { r: number; dur: number; delay: number; size: number; color: string }[] = [
+    { r: 48, dur: 6,    delay: 0,    size: 4, color: "rgba(60, 140, 220, 0.7)" },
+    { r: 48, dur: 6,    delay: -3,   size: 3, color: "rgba(60, 140, 220, 0.4)" },
+    { r: 72, dur: 10,   delay: 0,    size: 5, color: "rgba(100, 180, 255, 0.6)" },
+    { r: 72, dur: 10,   delay: -5,   size: 3, color: "rgba(60, 140, 220, 0.35)" },
+    { r: 96, dur: 15,   delay: 0,    size: 4, color: "rgba(60, 140, 220, 0.5)" },
+    { r: 96, dur: 15,   delay: -7.5, size: 3, color: "rgba(80, 160, 240, 0.3)" },
+  ];
+
   return (
     <FloorShell floorId="2">
       <div className="relative flex min-h-dvh flex-col items-center justify-center gap-6 p-8">
@@ -62,9 +72,55 @@ export default async function ObservatoryPage() {
           />
         </div>
 
-        {/* Main card */}
+        {/* Orbiting dots system — centered, behind card */}
         <div
-          className="relative z-10 max-w-lg w-full rounded-xl p-8"
+          className="pointer-events-none absolute"
+          aria-hidden="true"
+          style={{
+            top: "50%",
+            left: "50%",
+            // The dot positions are computed relative to this center point
+            width: "0px",
+            height: "0px",
+            opacity: 0.65,
+          }}
+        >
+          {orbitDots.map((dot, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                // Each dot orbits around the center (0,0) of this container.
+                // CSS orbit trick: rotate parent, translateX by radius, counter-rotate child.
+                width: `${dot.size}px`,
+                height: `${dot.size}px`,
+                background: dot.color,
+                boxShadow: `0 0 ${dot.size * 2}px ${dot.color}`,
+                // Center the dot on the orbit path
+                top: `-${dot.size / 2}px`,
+                left: `-${dot.size / 2}px`,
+                ["--orbit-r" as string]: `${dot.r}px`,
+                animation: `orbit ${dot.dur}s linear ${dot.delay}s infinite`,
+              }}
+            />
+          ))}
+          {/* Center point */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              width: "6px",
+              height: "6px",
+              background: "rgba(60, 140, 220, 0.5)",
+              boxShadow: "0 0 8px rgba(60, 140, 220, 0.4)",
+              top: "-3px",
+              left: "-3px",
+            }}
+          />
+        </div>
+
+        {/* Main card — fades up on mount */}
+        <div
+          className="floor-card-enter relative z-10 max-w-lg w-full rounded-xl p-8"
           style={{
             background: "rgba(10, 12, 25, 0.78)",
             backdropFilter: "blur(20px)",
@@ -125,16 +181,16 @@ export default async function ObservatoryPage() {
             Application analytics, conversion rates, and pipeline velocity. See the full picture.
           </p>
 
-          {/* COMING SOON badge */}
+          {/* COMING SOON badge — glow pulse */}
           <div className="mb-8">
             <span
+              className="coming-soon-glow"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "11px",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 color: "rgba(60, 160, 240, 0.8)",
-                textShadow: "0 0 10px rgba(60, 140, 220, 0.3)",
               }}
             >
               ▍ COMING SOON
@@ -146,13 +202,13 @@ export default async function ObservatoryPage() {
             className="flex items-end gap-2 h-16 mb-2 px-2"
             aria-hidden="true"
           >
-            {[0.3, 0.55, 0.4, 0.8, 0.6, 0.45, 0.7, 0.5, 0.9, 0.65].map((h, i) => (
+            {[0.3, 0.55, 0.4, 0.8, 0.6, 0.45, 0.7, 0.5, 0.9, 0.65].map((ht, i) => (
               <div
                 key={i}
                 className="flex-1 rounded-sm"
                 style={{
-                  height: `${h * 100}%`,
-                  background: `rgba(60, 140, 220, ${0.08 + h * 0.06})`,
+                  height: `${ht * 100}%`,
+                  background: `rgba(60, 140, 220, ${0.08 + ht * 0.06})`,
                   border: "1px solid rgba(60, 140, 220, 0.12)",
                 }}
               />

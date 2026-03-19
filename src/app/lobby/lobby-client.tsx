@@ -12,6 +12,9 @@ import gsap from "gsap";
  * Full-screen immersive experience: procedural NYC skyline fills the viewport.
  * Luxury Manhattan high-rise aesthetic: commanding typography, premium glass
  * cards, gold atmospheric lighting, and cinematic GSAP entrance animation.
+ *
+ * GSAP is enhancement-only. A CSS animation provides the initial fade-in fallback
+ * so content is always visible even if GSAP is slow to initialize.
  */
 export function LobbyClient() {
   const [isLoading, setIsLoading] = useState(false);
@@ -54,9 +57,16 @@ export function LobbyClient() {
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // Cinematic GSAP entrance animation
+  // Cinematic GSAP entrance animation — enhancement only.
+  // The container already has opacity: 1 via a CSS animation fallback.
+  // GSAP overrides with a more dramatic sequence when available.
   useEffect(() => {
     if (!containerRef.current) return;
+
+    // Cancel the CSS fallback animation and take over with GSAP
+    containerRef.current.style.animation = "none";
+    containerRef.current.style.opacity = "0";
+
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     // Stage 1: Fade in container
@@ -69,7 +79,7 @@ export function LobbyClient() {
         el,
         { y: 30, opacity: 0, scale: 0.97 },
         { y: 0, opacity: 1, scale: 1, duration: 0.65 },
-        `-=${0.55 - i * 0.0}` // stagger: each starts 0.1s after the previous
+        `-=${0.55 - i * 0.0}` // stagger: each starts slightly after the previous
       );
     });
 
@@ -97,6 +107,10 @@ export function LobbyClient() {
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden">
+
+      {/* ── UNDER CONSTRUCTION TICKER BANNER ── */}
+      <ConstructionTicker />
+
       {/* ── PROCEDURAL SKYLINE ── */}
       <ProceduralSkyline floorId="L" />
 
@@ -105,9 +119,9 @@ export function LobbyClient() {
         ref={spotlightRef}
         className="pointer-events-none fixed -translate-x-1/2 -translate-y-1/2"
         style={{
-          width: "500px",
-          height: "500px",
-          background: "radial-gradient(circle, rgba(201, 168, 76, 0.05) 0%, rgba(201, 168, 76, 0.02) 35%, transparent 70%)",
+          width: "600px",
+          height: "600px",
+          background: "radial-gradient(circle, rgba(201, 168, 76, 0.06) 0%, rgba(201, 168, 76, 0.025) 35%, transparent 70%)",
           zIndex: 2,
           willChange: "left, top",
         }}
@@ -115,25 +129,27 @@ export function LobbyClient() {
 
       {/* ── ATMOSPHERIC OVERLAYS ── */}
       <div className="pointer-events-none absolute inset-0" style={{ zIndex: 1 }}>
-        {/* Stronger vignette */}
+        {/* Softer vignette — more like looking through a window pane */}
         <div
           className="absolute inset-0"
-          style={{ boxShadow: "inset 0 0 250px 100px rgba(4, 6, 15, 0.75)" }}
+          style={{
+            boxShadow: "inset 0 0 180px 60px rgba(4, 6, 15, 0.55)",
+          }}
         />
-        {/* Bottom gradient — darkens lower 40% to ground the content */}
+        {/* Bottom gradient — softened, more atmospheric */}
         <div
           className="absolute inset-x-0 bottom-0"
           style={{
-            height: "40%",
-            background: "linear-gradient(to top, rgba(6, 8, 18, 0.97) 0%, rgba(6, 8, 18, 0.75) 30%, rgba(6, 8, 18, 0.35) 65%, transparent 100%)",
+            height: "45%",
+            background: "linear-gradient(to top, rgba(6, 8, 18, 0.88) 0%, rgba(6, 8, 18, 0.55) 35%, rgba(6, 8, 18, 0.2) 65%, transparent 100%)",
           }}
         />
         {/* Top fade */}
         <div
           className="absolute inset-x-0 top-0"
           style={{
-            height: "15%",
-            background: "linear-gradient(to bottom, rgba(4, 6, 15, 0.45) 0%, transparent 100%)",
+            height: "12%",
+            background: "linear-gradient(to bottom, rgba(4, 6, 15, 0.35) 0%, transparent 100%)",
           }}
         />
         {/* Window mullions at 20%, 50%, 80% */}
@@ -147,13 +163,33 @@ export function LobbyClient() {
             }}
           />
         ))}
+
+        {/* Scanline overlay — very subtle horizontal lines across the whole page */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: "repeating-linear-gradient(to bottom, transparent 0px, transparent 1px, rgba(255,255,255,0.012) 1px, rgba(255,255,255,0.012) 2px)",
+            backgroundSize: "100% 2px",
+            pointerEvents: "none",
+          }}
+          aria-hidden="true"
+        />
       </div>
 
-      {/* ── MAIN CONTENT with parallax ── */}
+      {/* ── FLOATING DUST PARTICLES ── */}
+      <ParticleField />
+
+      {/* ── MAIN CONTENT with parallax ──
+          opacity starts at 1 with CSS animation fallback;
+          GSAP takes over immediately and provides the dramatic entrance */}
       <div
         ref={containerRef}
         className="relative flex flex-col items-center justify-center flex-1 w-full"
-        style={{ zIndex: 10, opacity: 0 }}
+        style={{
+          zIndex: 10,
+          opacity: 1,
+          animation: "lobby-entrance 0.8s ease-out forwards",
+        }}
       >
         <div
           ref={contentRef}
@@ -178,24 +214,37 @@ export function LobbyClient() {
 
           {/* ── HERO: LOGO + TITLE + TAGLINE ── */}
           <div data-animate className="flex flex-col items-center gap-4 text-center">
-            {/* Logo with breathing gold glow */}
+            {/* Logo with dramatic aura glow */}
             <div className="relative flex items-center justify-center">
+              {/* Outer soft aura */}
               <div
                 className="absolute"
                 style={{
-                  width: "140px",
-                  height: "140px",
-                  background: "radial-gradient(circle, rgba(201, 168, 76, 0.18) 0%, rgba(201, 168, 76, 0.06) 50%, transparent 75%)",
-                  filter: "blur(20px)",
-                  animation: "logo-breathe 4s ease-in-out infinite",
+                  width: "220px",
+                  height: "220px",
+                  background: "radial-gradient(circle, rgba(201, 168, 76, 0.12) 0%, rgba(201, 168, 76, 0.04) 45%, transparent 72%)",
+                  filter: "blur(28px)",
+                  animation: "logo-breathe 5s ease-in-out infinite",
+                }}
+                aria-hidden="true"
+              />
+              {/* Inner tight glow */}
+              <div
+                className="absolute"
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  background: "radial-gradient(circle, rgba(201, 168, 76, 0.22) 0%, rgba(201, 168, 76, 0.08) 50%, transparent 75%)",
+                  filter: "blur(12px)",
+                  animation: "logo-breathe 5s ease-in-out infinite 0.5s",
                 }}
                 aria-hidden="true"
               />
               <TowerLogo />
               <style>{`
                 @keyframes logo-breathe {
-                  0%, 100% { opacity: 0.7; transform: scale(1); }
-                  50% { opacity: 1; transform: scale(1.15); }
+                  0%, 100% { opacity: 0.6; transform: scale(1); }
+                  50% { opacity: 1; transform: scale(1.18); }
                 }
                 @media (prefers-reduced-motion: reduce) {
                   @keyframes logo-breathe { 0%, 100% { opacity: 0.85; transform: scale(1); } }
@@ -203,20 +252,21 @@ export function LobbyClient() {
               `}</style>
             </div>
 
-            {/* The Tower — commanding headline */}
+            {/* The Tower — more commanding, larger headline */}
             <h1
-              className="text-5xl md:text-7xl tracking-tight leading-none"
+              className="text-6xl md:text-8xl tracking-tight leading-none"
               style={{
                 fontFamily: "'Playfair Display', Georgia, serif",
                 color: "var(--text-primary)",
-                textShadow: "0 4px 32px rgba(0,0,0,0.8), 0 0 60px rgba(201, 168, 76, 0.12)",
-                letterSpacing: "-0.02em",
+                textShadow:
+                  "0 4px 40px rgba(0,0,0,0.9), 0 0 80px rgba(201, 168, 76, 0.2), 0 0 160px rgba(201, 168, 76, 0.08)",
+                letterSpacing: "-0.03em",
               }}
             >
               The Tower
             </h1>
 
-            {/* Tagline — fade in, no typewriter */}
+            {/* Tagline */}
             <p
               className="text-sm md:text-base leading-relaxed max-w-sm"
               style={{
@@ -325,7 +375,164 @@ export function LobbyClient() {
 }
 
 /**
- * SignInCard — premium glass card with 3D tilt (max 3deg), gold top border.
+ * ConstructionTicker — narrow scrolling banner at the very top of the page.
+ * JetBrains Mono, 10px, gold text on near-black, infinite horizontal scroll.
+ */
+function ConstructionTicker(): JSX.Element {
+  const TEXT =
+    "PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — ";
+
+  return (
+    <div
+      className="fixed top-0 inset-x-0 overflow-hidden"
+      style={{
+        zIndex: 50,
+        height: "26px",
+        background: "rgba(4, 5, 12, 0.96)",
+        borderBottom: "1px solid rgba(201, 168, 76, 0.15)",
+      }}
+      aria-label="Under construction notice"
+      role="marquee"
+    >
+      {/* Gold accent line at very top */}
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.5) 25%, rgba(232,196,90,0.7) 50%, rgba(201,168,76,0.5) 75%, transparent)" }}
+      />
+
+      <div
+        className="flex items-center h-full whitespace-nowrap"
+        style={{
+          display: "inline-flex",
+          animation: "ticker-scroll 28s linear infinite",
+          willChange: "transform",
+        }}
+      >
+        {/* Duplicate text for seamless loop */}
+        <span
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            letterSpacing: "0.18em",
+            color: "var(--gold)",
+            opacity: 0.75,
+            paddingRight: "0",
+          }}
+        >
+          {TEXT}
+          {TEXT}
+        </span>
+      </div>
+
+      <style>{`
+        @keyframes ticker-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/**
+ * ParticleField — 30 floating gold dust particles using pure CSS keyframe
+ * animations. Each has a unique position, drift, duration, and delay for
+ * organic variation. Very low opacity (0.1–0.2), slow upward drift.
+ */
+function ParticleField(): JSX.Element {
+  // Pre-defined particle configs for deterministic SSR
+  const particles: Array<{
+    id: number;
+    left: number;
+    bottom: number;
+    size: number;
+    duration: number;
+    delay: number;
+    drift: number;
+    opacity: number;
+  }> = [
+    { id: 0,  left: 5,   bottom: 10, size: 2, duration: 18, delay: 0,    drift: 15,  opacity: 0.12 },
+    { id: 1,  left: 12,  bottom: 20, size: 1, duration: 24, delay: 2.1,  drift: -12, opacity: 0.10 },
+    { id: 2,  left: 20,  bottom: 5,  size: 3, duration: 20, delay: 4.5,  drift: 20,  opacity: 0.15 },
+    { id: 3,  left: 28,  bottom: 35, size: 1, duration: 30, delay: 1.2,  drift: -8,  opacity: 0.08 },
+    { id: 4,  left: 35,  bottom: 15, size: 2, duration: 22, delay: 6.8,  drift: 18,  opacity: 0.13 },
+    { id: 5,  left: 42,  bottom: 42, size: 1, duration: 26, delay: 3.3,  drift: -22, opacity: 0.09 },
+    { id: 6,  left: 48,  bottom: 8,  size: 2, duration: 19, delay: 8.0,  drift: 10,  opacity: 0.14 },
+    { id: 7,  left: 55,  bottom: 28, size: 3, duration: 28, delay: 0.7,  drift: -16, opacity: 0.11 },
+    { id: 8,  left: 62,  bottom: 18, size: 1, duration: 21, delay: 5.5,  drift: 24,  opacity: 0.16 },
+    { id: 9,  left: 70,  bottom: 38, size: 2, duration: 25, delay: 2.9,  drift: -10, opacity: 0.10 },
+    { id: 10, left: 78,  bottom: 12, size: 1, duration: 32, delay: 7.2,  drift: 14,  opacity: 0.08 },
+    { id: 11, left: 85,  bottom: 25, size: 2, duration: 20, delay: 1.8,  drift: -20, opacity: 0.13 },
+    { id: 12, left: 92,  bottom: 45, size: 3, duration: 23, delay: 9.1,  drift: 8,   opacity: 0.12 },
+    { id: 13, left: 8,   bottom: 55, size: 1, duration: 27, delay: 4.0,  drift: -18, opacity: 0.09 },
+    { id: 14, left: 18,  bottom: 65, size: 2, duration: 22, delay: 6.3,  drift: 22,  opacity: 0.14 },
+    { id: 15, left: 25,  bottom: 72, size: 1, duration: 35, delay: 0.4,  drift: -6,  opacity: 0.07 },
+    { id: 16, left: 33,  bottom: 58, size: 2, duration: 19, delay: 8.7,  drift: 16,  opacity: 0.15 },
+    { id: 17, left: 40,  bottom: 80, size: 3, duration: 28, delay: 3.6,  drift: -24, opacity: 0.11 },
+    { id: 18, left: 50,  bottom: 68, size: 1, duration: 24, delay: 1.5,  drift: 12,  opacity: 0.10 },
+    { id: 19, left: 58,  bottom: 52, size: 2, duration: 21, delay: 7.9,  drift: -14, opacity: 0.13 },
+    { id: 20, left: 65,  bottom: 75, size: 1, duration: 30, delay: 5.1,  drift: 20,  opacity: 0.08 },
+    { id: 21, left: 73,  bottom: 62, size: 2, duration: 26, delay: 2.4,  drift: -10, opacity: 0.12 },
+    { id: 22, left: 80,  bottom: 48, size: 3, duration: 18, delay: 9.8,  drift: 18,  opacity: 0.16 },
+    { id: 23, left: 88,  bottom: 70, size: 1, duration: 33, delay: 0.9,  drift: -22, opacity: 0.09 },
+    { id: 24, left: 95,  bottom: 32, size: 2, duration: 20, delay: 6.6,  drift: 8,   opacity: 0.14 },
+    { id: 25, left: 3,   bottom: 82, size: 1, duration: 29, delay: 4.8,  drift: -16, opacity: 0.10 },
+    { id: 26, left: 15,  bottom: 90, size: 2, duration: 23, delay: 1.1,  drift: 14,  opacity: 0.13 },
+    { id: 27, left: 45,  bottom: 88, size: 1, duration: 38, delay: 7.4,  drift: -8,  opacity: 0.07 },
+    { id: 28, left: 68,  bottom: 85, size: 2, duration: 25, delay: 3.0,  drift: 20,  opacity: 0.11 },
+    { id: 29, left: 90,  bottom: 78, size: 3, duration: 20, delay: 5.7,  drift: -18, opacity: 0.15 },
+  ];
+
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+      style={{ zIndex: 3 }}
+      aria-hidden="true"
+    >
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            position: "absolute",
+            left: `${p.left}%`,
+            bottom: `${p.bottom}%`,
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            borderRadius: "50%",
+            background: `rgba(201, 168, 76, ${p.opacity})`,
+            boxShadow: `0 0 ${p.size * 2}px rgba(201, 168, 76, ${p.opacity * 0.8})`,
+            animation: `particle-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+            // CSS custom property for horizontal drift
+            ["--drift" as string]: `${p.drift}px`,
+          }}
+        />
+      ))}
+      <style>{`
+        @keyframes particle-float {
+          0% {
+            transform: translateY(0) translateX(0) scale(1);
+            opacity: 0;
+          }
+          8% { opacity: 1; }
+          88% { opacity: 0.7; }
+          100% {
+            transform: translateY(-100vh) translateX(var(--drift, 20px)) scale(0.4);
+            opacity: 0;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes particle-float {
+            0%, 100% { transform: none; opacity: 0; }
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/**
+ * SignInCard — premium glass card with frosted noise texture, 3D tilt (max 3deg),
+ * gold top border, and cursor-following hover glow.
  */
 function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
   isLoading: boolean;
@@ -370,6 +577,18 @@ function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Frosted noise texture layer */}
+      <div
+        className="absolute inset-0 pointer-events-none rounded-xl"
+        style={{
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "120px 120px",
+          opacity: 0.035,
+          mixBlendMode: "overlay",
+        }}
+        aria-hidden="true"
+      />
+
       {/* Hover glow that follows cursor */}
       <div
         className="absolute pointer-events-none"
@@ -379,7 +598,7 @@ function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
           left: `${hoverGlow.x}%`,
           top: `${hoverGlow.y}%`,
           transform: "translate(-50%, -50%)",
-          background: "radial-gradient(circle, rgba(201, 168, 76, 0.07) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(201, 168, 76, 0.08) 0%, transparent 70%)",
           transition: "left 0.15s, top 0.15s",
         }}
       />
@@ -464,7 +683,8 @@ function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
 }
 
 /**
- * DirectoryRow — interactive floor listing with gold left border and hover glow.
+ * DirectoryRow — interactive floor listing with gold left border, hover glow,
+ * and a gold shimmer animation that sweeps left-to-right on hover.
  */
 function DirectoryRow({ floorId, name, label, available, index }: {
   floorId: FloorId;
@@ -484,7 +704,7 @@ function DirectoryRow({ floorId, name, label, available, index }: {
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden ${
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg relative overflow-hidden ${
         available ? "cursor-pointer" : ""
       }`}
       style={{
@@ -508,14 +728,16 @@ function DirectoryRow({ floorId, name, label, available, index }: {
       onMouseEnter={() => available && setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Hover shimmer */}
+      {/* Gold shimmer sweep on hover — left to right */}
       {available && (
         <div
-          className="absolute inset-0 pointer-events-none transition-opacity duration-200"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            opacity: hovered ? 1 : 0,
-            background: "linear-gradient(90deg, rgba(201, 168, 76, 0.05) 0%, transparent 50%)",
+            background: "linear-gradient(90deg, transparent 0%, rgba(201, 168, 76, 0.06) 40%, rgba(232, 196, 90, 0.14) 50%, rgba(201, 168, 76, 0.06) 60%, transparent 100%)",
+            transform: hovered ? "translateX(110%)" : "translateX(-110%)",
+            transition: hovered ? "transform 0.55s cubic-bezier(0.4,0,0.2,1)" : "none",
           }}
+          aria-hidden="true"
         />
       )}
 
@@ -615,18 +837,19 @@ function RadarPulse(): JSX.Element {
 }
 
 /**
- * TowerLogo — larger SVG tower mark, 64x88 viewBox scale.
+ * TowerLogo — 2× larger SVG tower mark (80x110 render, 64x88 viewBox).
+ * Dramatic drop-shadow filter for depth.
  */
 function TowerLogo(): JSX.Element {
   return (
     <svg
-      width="52"
-      height="72"
+      width="80"
+      height="110"
       viewBox="0 0 64 88"
       fill="none"
       aria-label="The Tower logo"
       className="relative"
-      style={{ filter: "drop-shadow(0 4px 14px rgba(201, 168, 76, 0.35))" }}
+      style={{ filter: "drop-shadow(0 6px 20px rgba(201, 168, 76, 0.5)) drop-shadow(0 0 40px rgba(201, 168, 76, 0.2))" }}
     >
       {/* Base wide block */}
       <rect x="16" y="22" width="32" height="66" fill="var(--gold)" opacity="0.10" />

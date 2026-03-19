@@ -49,9 +49,85 @@ export default async function SituationRoomPage() {
           }}
         />
 
-        {/* Main card */}
+        {/* Radar sweep animation — centered, behind card */}
         <div
-          className="relative z-10 max-w-lg w-full rounded-xl p-8"
+          className="pointer-events-none absolute"
+          aria-hidden="true"
+          style={{
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "260px",
+            height: "260px",
+            opacity: 0.12,
+          }}
+        >
+          {/* Static radar circle */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              border: "1px solid rgba(220, 120, 40, 0.6)",
+            }}
+          />
+          {/* Inner ring */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              inset: "40px",
+              border: "1px solid rgba(220, 120, 40, 0.4)",
+            }}
+          />
+          {/* Center dot */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "6px",
+              height: "6px",
+              background: "rgba(220, 120, 40, 0.8)",
+            }}
+          />
+          {/* Rotating sweep line */}
+          <div
+            className="absolute inset-0 rounded-full overflow-hidden"
+            style={{
+              animation: "radar-sweep 3s linear infinite",
+            }}
+          >
+            {/* Sweep sector — gradient from center */}
+            <div
+              className="absolute"
+              style={{
+                top: "50%",
+                left: "50%",
+                width: "50%",
+                height: "2px",
+                transformOrigin: "0% 50%",
+                background:
+                  "linear-gradient(to right, rgba(220, 120, 40, 0.9), rgba(220, 120, 40, 0))",
+              }}
+            />
+            {/* Sweep afterglow (fan) */}
+            <div
+              className="absolute"
+              style={{
+                top: 0,
+                left: "50%",
+                width: "50%",
+                height: "100%",
+                transformOrigin: "0% 50%",
+                background:
+                  "conic-gradient(from -30deg at 0% 50%, rgba(220, 120, 40, 0.15), rgba(220, 120, 40, 0) 30deg)",
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Main card — fades up on mount */}
+        <div
+          className="floor-card-enter relative z-10 max-w-lg w-full rounded-xl p-8"
           style={{
             background: "rgba(10, 12, 25, 0.78)",
             backdropFilter: "blur(20px)",
@@ -112,16 +188,16 @@ export default async function SituationRoomPage() {
             Calendar integration, follow-ups, and deadline management. Nothing falls through the cracks.
           </p>
 
-          {/* COMING SOON badge */}
+          {/* COMING SOON badge — glow pulse */}
           <div className="mb-8">
             <span
+              className="coming-soon-glow"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "11px",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 color: "rgba(220, 120, 60, 0.9)",
-                textShadow: "0 0 10px rgba(220, 100, 40, 0.35)",
               }}
             >
               ▍ COMING SOON

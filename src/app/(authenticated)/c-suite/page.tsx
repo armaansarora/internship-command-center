@@ -51,9 +51,9 @@ export default async function CSuitePage() {
           }}
         />
 
-        {/* Main card */}
+        {/* Main card — fades up on mount */}
         <div
-          className="relative z-10 max-w-lg w-full rounded-xl p-8"
+          className="floor-card-enter relative z-10 max-w-lg w-full rounded-xl p-8"
           style={{
             background: "rgba(10, 12, 25, 0.78)",
             backdropFilter: "blur(20px)",
@@ -124,20 +124,68 @@ export default async function CSuitePage() {
             The CEO&apos;s office. Full agent orchestration and daily briefings. Where strategy becomes action.
           </p>
 
-          {/* COMING SOON badge */}
+          {/* COMING SOON badge — glow pulse */}
           <div className="mb-8">
             <span
+              className="coming-soon-glow"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "11px",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 color: "var(--gold)",
-                textShadow: "0 0 12px rgba(201, 168, 76, 0.5)",
               }}
             >
               ▍ COMING SOON
             </span>
+          </div>
+
+          {/* Animated signature stroke — draws itself on load */}
+          <div
+            className="mb-4 rounded-lg overflow-hidden"
+            aria-hidden="true"
+            style={{
+              height: "56px",
+              background: "rgba(201, 168, 76, 0.03)",
+              border: "1px solid rgba(201, 168, 76, 0.1)",
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg
+              viewBox="0 0 320 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
+            >
+              {/* Main signature stroke — a flowing cursive-style path */}
+              <path
+                d="M 20 34 C 35 18, 55 38, 70 24 C 85 10, 100 40, 118 28 C 132 18, 145 36, 160 22 C 175 8, 192 38, 210 26 C 224 16, 238 34, 252 22 C 265 12, 278 32, 295 24"
+                stroke="rgba(201,168,76,0.55)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="300"
+                strokeDashoffset="300"
+                style={{
+                  animation: "stroke-draw 2.4s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards",
+                }}
+              />
+              {/* Underline flourish */}
+              <path
+                d="M 18 38 C 80 42, 200 42, 298 38"
+                stroke="rgba(201,168,76,0.25)"
+                strokeWidth="0.75"
+                strokeLinecap="round"
+                strokeDasharray="300"
+                strokeDashoffset="300"
+                style={{
+                  animation: "stroke-draw 1.8s cubic-bezier(0.4, 0, 0.2, 1) 1.8s forwards",
+                }}
+              />
+            </svg>
           </div>
 
           {/* Agent network visualization — CSS node graph */}
@@ -185,7 +233,7 @@ export default async function CSuitePage() {
                 }}
               />
             ))}
-            {/* Connection lines — simplified SVG would be ideal, using CSS-only approach */}
+            {/* Connection lines */}
             <svg
               className="absolute inset-0 w-full h-full"
               viewBox="0 0 400 72"

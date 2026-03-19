@@ -7,7 +7,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useDayNight } from "./DayNightProvider";
 
 /* ─────────────────────────────────────────────
-   PROCEDURAL NYC SKYLINE v3 — Canvas-based renderer
+   PROCEDURAL NYC SKYLINE v4 — Canvas-based renderer
 
    Features:
    - 3-layer parallax depth (far, mid, near)
@@ -17,11 +17,15 @@ import { useDayNight } from "./DayNightProvider";
    - Twinkling stars (night only, fading at dusk/dawn)
    - Shooting stars (night only)
    - Horizon glow and city light bloom (time-aware)
-   - Water/river reflection at bottom
+   - Water/river reflection at bottom (enhanced with mirror reflection)
    - Aviation warning lights on tall buildings
    - Mouse-reactive parallax on all layers
    - Floor-height viewport offset
    - Smooth fog between depth layers
+   - Ground-level light pollution glow band
+   - Atmospheric floating particles (slow-drifting dust/fireflies)
+   - Building mirror reflections in water (bottom 8%)
+   - Stronger horizon glow with warm gradient band
    ───────────────────────────────────────────── */
 
 interface Building {
@@ -65,6 +69,19 @@ interface Particle {
   alpha: number;
   life: number;
   maxLife: number;
+  warm: boolean;
+}
+
+/** Slow atmospheric floating particle (dust/firefly) — separate from ember particles */
+interface AtmoParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  baseAlpha: number;
+  phase: number;
+  speed: number;
   warm: boolean;
 }
 
@@ -169,7 +186,23 @@ function generateScene(w: number, h: number) {
     });
   }
 
-  return { stars, buildings, particles };
+  // ── ATMOSPHERIC PARTICLES (slow-drifting dust/fireflies) ──
+  const atmoParticles: AtmoParticle[] = [];
+  for (let i = 0; i < 20; i++) {
+    atmoParticles.push({
+      x: r() * w,
+      y: r() * h * 0.85,
+      vx: (r() - 0.5) * 0.12,
+      vy: -(0.04 + r() * 0.10),
+      size: 0.5 + r() * 1.2,
+      baseAlpha: 0.08 + r() * 0.07, // 0.08 – 0.15 range
+      phase: r() * Math.PI * 2,
+      speed: 0.0005 + r() * 0.001,
+      warm: r() > 0.35, // ~65% warm (gold), ~35% cool (blue-white)
+    });
+  }
+
+  return { stars, buildings, particles, atmoParticles };
 }
 
 // ── COLOR CONFIG BY TIME STATE ──
@@ -195,6 +228,7 @@ interface SkyConfig {
   waterShimmerG: number;
   waterShimmerB: number;
   duskStarOpacity: number; // override for partial star visibility
+  groundGlowStrength: number; // 0-1, how strong the ground light pollution is
 }
 
 function getSkyConfig(ts: TimeState): SkyConfig {
@@ -204,30 +238,32 @@ function getSkyConfig(ts: TimeState): SkyConfig {
         gradientStops: ["#1A0A1E", "#3D1540", "#6B2B45", "#B85C40", "#E8A050", "#F0C070"],
         starOpacity: 0.10,
         shootingStars: false,
-        windowLitChance: 0.60, // ~25% of 42%
+        windowLitChance: 0.60,
         windowWarmBias: 0.85,
         bloomStrength: 0.5,
-        horizonR: 232, horizonG: 120, horizonB: 40, horizonA: 0.10,
+        horizonR: 232, horizonG: 120, horizonB: 40, horizonA: 0.18,
         cloudAlphaBase: 0.04,
         cloudR: 180, cloudG: 130, cloudB: 80,
         fogR: 40, fogG: 20, fogB: 15,
         waterShimmerR: 220, waterShimmerG: 140, waterShimmerB: 60,
         duskStarOpacity: 0.10,
+        groundGlowStrength: 0.35,
       };
     case "morning":
       return {
         gradientStops: ["#1A3050", "#2A5070", "#4080A0", "#60A0C0", "#80C0E0", "#A0D8F0"],
         starOpacity: 0,
         shootingStars: false,
-        windowLitChance: 0.24, // ~10% of 42%
+        windowLitChance: 0.24,
         windowWarmBias: 0.10,
         bloomStrength: 0.15,
-        horizonR: 80, horizonG: 160, horizonB: 220, horizonA: 0.06,
+        horizonR: 80, horizonG: 160, horizonB: 220, horizonA: 0.10,
         cloudAlphaBase: 0.04,
         cloudR: 200, cloudG: 215, cloudB: 240,
         fogR: 50, fogG: 80, fogB: 110,
         waterShimmerR: 100, waterShimmerG: 160, waterShimmerB: 220,
         duskStarOpacity: 0,
+        groundGlowStrength: 0.08,
       };
     case "midday":
       return {
@@ -237,12 +273,13 @@ function getSkyConfig(ts: TimeState): SkyConfig {
         windowLitChance: 0.24,
         windowWarmBias: 0.10,
         bloomStrength: 0.10,
-        horizonR: 100, horizonG: 180, horizonB: 240, horizonA: 0.05,
+        horizonR: 100, horizonG: 180, horizonB: 240, horizonA: 0.08,
         cloudAlphaBase: 0.05,
         cloudR: 220, cloudG: 230, cloudB: 255,
         fogR: 60, fogG: 90, fogB: 120,
         waterShimmerR: 120, waterShimmerG: 180, waterShimmerB: 240,
         duskStarOpacity: 0,
+        groundGlowStrength: 0.05,
       };
     case "afternoon":
       return {
@@ -252,12 +289,13 @@ function getSkyConfig(ts: TimeState): SkyConfig {
         windowLitChance: 0.24,
         windowWarmBias: 0.20,
         bloomStrength: 0.12,
-        horizonR: 200, horizonG: 170, horizonB: 120, horizonA: 0.06,
+        horizonR: 200, horizonG: 170, horizonB: 120, horizonA: 0.10,
         cloudAlphaBase: 0.04,
         cloudR: 210, cloudG: 205, cloudB: 195,
         fogR: 70, fogG: 70, fogB: 80,
         waterShimmerR: 180, waterShimmerG: 160, waterShimmerB: 130,
         duskStarOpacity: 0,
+        groundGlowStrength: 0.10,
       };
     case "golden_hour":
       return {
@@ -267,12 +305,13 @@ function getSkyConfig(ts: TimeState): SkyConfig {
         windowLitChance: 0.60,
         windowWarmBias: 0.90,
         bloomStrength: 0.65,
-        horizonR: 240, horizonG: 140, horizonB: 40, horizonA: 0.12,
+        horizonR: 240, horizonG: 140, horizonB: 40, horizonA: 0.20,
         cloudAlphaBase: 0.05,
         cloudR: 220, cloudG: 130, cloudB: 60,
         fogR: 50, fogG: 25, fogB: 10,
         waterShimmerR: 240, waterShimmerG: 150, waterShimmerB: 60,
         duskStarOpacity: 0,
+        groundGlowStrength: 0.55,
       };
     case "dusk":
       return {
@@ -282,12 +321,13 @@ function getSkyConfig(ts: TimeState): SkyConfig {
         windowLitChance: 1.0,
         windowWarmBias: 0.60,
         bloomStrength: 0.75,
-        horizonR: 120, horizonG: 60, horizonB: 160, horizonA: 0.08,
+        horizonR: 120, horizonG: 60, horizonB: 160, horizonA: 0.14,
         cloudAlphaBase: 0.03,
         cloudR: 60, cloudG: 40, cloudB: 80,
         fogR: 15, fogG: 8, fogB: 25,
         waterShimmerR: 180, waterShimmerG: 120, waterShimmerB: 200,
         duskStarOpacity: 0.30,
+        groundGlowStrength: 0.70,
       };
     case "night":
     default:
@@ -298,12 +338,13 @@ function getSkyConfig(ts: TimeState): SkyConfig {
         windowLitChance: 1.0,
         windowWarmBias: 0.70,
         bloomStrength: 1.0,
-        horizonR: 201, horizonG: 168, horizonB: 76, horizonA: 0.07,
+        horizonR: 201, horizonG: 168, horizonB: 76, horizonA: 0.12,
         cloudAlphaBase: 0.02,
         cloudR: 40, cloudG: 50, cloudB: 80,
         fogR: 6, fogG: 8, fogB: 18,
         waterShimmerR: 201, waterShimmerG: 168, waterShimmerB: 76,
         duskStarOpacity: 1.0,
+        groundGlowStrength: 1.0,
       };
   }
 }
@@ -512,15 +553,27 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
-    // ── HORIZON GLOW ──
+    // ── ENHANCED HORIZON GLOW ──
+    // Primary wide radial glow
     const hy = h * (0.58 + offset * 0.25);
-    const hg = ctx.createRadialGradient(w / 2, hy, 0, w / 2, hy, w * 0.55);
-    hg.addColorStop(0, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${cfg.horizonA})`);
-    hg.addColorStop(0.35, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${cfg.horizonA * 0.5})`);
-    hg.addColorStop(0.7, "rgba(80, 90, 140, 0.02)");
+    const hg = ctx.createRadialGradient(w / 2, hy, 0, w / 2, hy, w * 0.65);
+    hg.addColorStop(0, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${cfg.horizonA * 1.4})`);
+    hg.addColorStop(0.25, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${cfg.horizonA * 0.8})`);
+    hg.addColorStop(0.55, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${cfg.horizonA * 0.2})`);
+    hg.addColorStop(0.8, "rgba(80, 90, 140, 0.02)");
     hg.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = hg;
     ctx.fillRect(0, 0, w, h);
+
+    // Warm gradient band at horizon line — the zone where sky meets buildings
+    const horizonBandY = h * (0.52 + offset * 0.2);
+    const warmBand = ctx.createLinearGradient(0, horizonBandY - h * 0.12, 0, horizonBandY + h * 0.1);
+    warmBand.addColorStop(0, "rgba(0, 0, 0, 0)");
+    warmBand.addColorStop(0.4, `rgba(${cfg.horizonR}, ${Math.floor(cfg.horizonG * 0.7)}, ${Math.floor(cfg.horizonB * 0.3)}, ${cfg.horizonA * 0.35})`);
+    warmBand.addColorStop(0.6, `rgba(${cfg.horizonR}, ${Math.floor(cfg.horizonG * 0.6)}, ${Math.floor(cfg.horizonB * 0.2)}, ${cfg.horizonA * 0.25})`);
+    warmBand.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = warmBand;
+    ctx.fillRect(0, horizonBandY - h * 0.12, w, h * 0.22);
 
     // ── BUILDINGS BY DEPTH ──
     for (let d = 0; d <= 2; d++) {
@@ -565,10 +618,10 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
           ctx.fillRect(b.x + b.w * 0.1, by - b.roofH * 0.5, b.w * 0.8, b.roofH * 0.5);
           ctx.fillRect(b.x + b.w * 0.25, by - b.roofH, b.w * 0.5, b.roofH * 0.5);
         } else if (b.roofType === "crown") {
-          for (let c = 0; c < 5; c++) {
-            const cx = b.x + (c / 5) * b.w + b.w * 0.05;
+          for (let ci = 0; ci < 5; ci++) {
+            const crx = b.x + (ci / 5) * b.w + b.w * 0.05;
             ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${bodyAlpha})`;
-            ctx.fillRect(cx, by - b.roofH, b.w * 0.08, b.roofH);
+            ctx.fillRect(crx, by - b.roofH, b.w * 0.08, b.roofH);
           }
         } else if (b.roofType === "antenna") {
           ctx.fillStyle = `rgba(120, 130, 180, ${edgeAlpha})`;
@@ -645,7 +698,59 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
-    // ── WATER REFLECTION (bottom strip) ──
+    // ── BUILDING REFLECTIONS IN WATER (bottom 8%) ──
+    // Mirror the building silhouettes into the water area with blur and reduced opacity
+    const reflectionY = h * 0.92;
+    const reflectionH = h - reflectionY;
+    if (!reduced && reflectionH > 0) {
+      ctx.save();
+      // Clip to the water reflection zone
+      ctx.beginPath();
+      ctx.rect(0, reflectionY, w, reflectionH);
+      ctx.clip();
+
+      // Draw a blurred, flipped slice of the buildings just above the water line
+      // We flip the canvas vertically around the water line and draw with low opacity
+      const sourceY = h - reflectionH * 2; // source region start (above water line)
+      const sourceH = reflectionH * 2;
+
+      ctx.save();
+      ctx.translate(0, reflectionY * 2); // translate to flip point
+      ctx.scale(1, -1);                  // flip vertically
+      ctx.globalAlpha = 0.15;
+      // Draw the canvas onto itself (the buildings region)
+      // Since we're working within rAF we draw the already-drawn buildings
+      // by re-rendering a simplified block silhouette as reflection
+      for (let d = 0; d <= 2; d++) {
+        const layer = scene.buildings.filter((b) => b.depth === d);
+        const bodyAlpha = d === 0 ? 0.65 : d === 1 ? 0.8 : 0.92;
+        for (const b of layer) {
+          const by = h - b.h;
+          const [cr, cg, cb] = b.baseColor;
+          ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${bodyAlpha * 0.4})`;
+          ctx.fillRect(b.x, by, b.w, b.h);
+        }
+      }
+      ctx.restore();
+
+      // Horizontal wavy distortion lines over the reflection
+      for (let ri = 0; ri < 8; ri++) {
+        const ry = reflectionY + ri * (reflectionH / 8);
+        const wavOffset = reduced ? 0 : Math.sin(t * 0.0008 + ri * 1.1) * 4;
+        const lineAlpha = 0.06 + 0.03 * Math.sin(t * 0.001 + ri);
+        const rg = ctx.createLinearGradient(0, ry, w, ry);
+        rg.addColorStop(0, "rgba(0,0,0,0)");
+        rg.addColorStop(0.3, `rgba(${cfg.waterShimmerR}, ${cfg.waterShimmerG}, ${cfg.waterShimmerB}, ${lineAlpha})`);
+        rg.addColorStop(0.7, `rgba(${cfg.waterShimmerR}, ${cfg.waterShimmerG}, ${cfg.waterShimmerB}, ${lineAlpha})`);
+        rg.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = rg;
+        ctx.fillRect(wavOffset, ry, w, 1);
+      }
+
+      ctx.restore();
+    }
+
+    // ── WATER REFLECTION (bottom strip overlay) ──
     const waterY = h * 0.92;
     const waterH = h - waterY;
     const wg = ctx.createLinearGradient(0, waterY, 0, h);
@@ -674,6 +779,42 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     bf.addColorStop(1, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, 0.92)`);
     ctx.fillStyle = bf;
     ctx.fillRect(0, 0, w, h);
+
+    // ── GROUND-LEVEL LIGHT POLLUTION GLOW ──
+    // Warm amber/gold horizontal band at the very bottom 10% — city street light spill
+    const groundGlowY = h * 0.90;
+    const groundGlowStrength = cfg.groundGlowStrength;
+    if (groundGlowStrength > 0) {
+      // Primary amber glow band
+      const ggg = ctx.createLinearGradient(0, groundGlowY, 0, h);
+      ggg.addColorStop(0, `rgba(201, 140, 40, 0)`);
+      ggg.addColorStop(0.25, `rgba(201, 130, 30, ${groundGlowStrength * 0.06})`);
+      ggg.addColorStop(0.55, `rgba(220, 110, 20, ${groundGlowStrength * 0.10})`);
+      ggg.addColorStop(0.8, `rgba(200, 100, 15, ${groundGlowStrength * 0.14})`);
+      ggg.addColorStop(1, `rgba(180, 90, 10, ${groundGlowStrength * 0.18})`);
+      ctx.fillStyle = ggg;
+      ctx.fillRect(0, groundGlowY, w, h - groundGlowY);
+
+      // Horizontal spread — wide radial from center bottom
+      const glowCenterY = h * 0.97;
+      const groundRadial = ctx.createRadialGradient(w / 2, glowCenterY, 0, w / 2, glowCenterY, w * 0.6);
+      groundRadial.addColorStop(0, `rgba(220, 150, 40, ${groundGlowStrength * 0.09})`);
+      groundRadial.addColorStop(0.4, `rgba(201, 120, 30, ${groundGlowStrength * 0.05})`);
+      groundRadial.addColorStop(0.7, `rgba(180, 100, 20, ${groundGlowStrength * 0.02})`);
+      groundRadial.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = groundRadial;
+      ctx.fillRect(0, groundGlowY, w, h - groundGlowY);
+
+      // Breathing pulse on ground glow
+      const breathPulse = reduced ? 0 : 0.015 * Math.sin(t * 0.00035);
+      if (Math.abs(breathPulse) > 0.001) {
+        const pulseGrad = ctx.createLinearGradient(0, h * 0.88, 0, h);
+        pulseGrad.addColorStop(0, "rgba(0,0,0,0)");
+        pulseGrad.addColorStop(1, `rgba(201, 140, 40, ${groundGlowStrength * (0.04 + breathPulse)})`);
+        ctx.fillStyle = pulseGrad;
+        ctx.fillRect(0, h * 0.88, w, h * 0.12);
+      }
+    }
 
     // ── CITY BLOOM (breathing, scaled by time) ──
     const breatheBase = reduced ? 0.05 : 0.04 + 0.02 * Math.sin(t * 0.0004);
@@ -730,6 +871,41 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
           ctx.fillStyle = pg;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    // ── ATMOSPHERIC PARTICLES (slow-drifting dust/fireflies) ──
+    if (!reduced) {
+      for (const ap of scene.atmoParticles) {
+        // Drift upward slowly
+        ap.x += ap.vx;
+        ap.y += ap.vy;
+        ap.x += Math.sin(t * ap.speed + ap.phase) * 0.08;
+
+        // Wrap around edges
+        if (ap.y < -5) {
+          ap.y = h * 0.85 + Math.random() * h * 0.12;
+          ap.x = Math.random() * w;
+        }
+        if (ap.x < -5) ap.x = w + 4;
+        if (ap.x > w + 5) ap.x = -4;
+
+        // Pulse alpha gently
+        const pulseAlpha = ap.baseAlpha * (0.6 + 0.4 * Math.sin(t * ap.speed * 3 + ap.phase));
+
+        if (ap.warm) {
+          // Warm gold
+          ctx.beginPath();
+          ctx.arc(ap.x, ap.y, ap.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(201, 168, 76, ${pulseAlpha})`;
+          ctx.fill();
+        } else {
+          // Cool blue-white
+          ctx.beginPath();
+          ctx.arc(ap.x, ap.y, ap.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180, 210, 255, ${pulseAlpha * 0.9})`;
           ctx.fill();
         }
       }

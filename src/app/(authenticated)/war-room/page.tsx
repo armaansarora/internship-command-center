@@ -42,9 +42,62 @@ export default async function WarRoomPage() {
           />
         </div>
 
-        {/* Main card */}
+        {/* Pulsing rotating crosshair SVG — War Room unique animation */}
         <div
-          className="relative z-10 max-w-lg w-full rounded-xl p-8"
+          className="pointer-events-none absolute"
+          aria-hidden="true"
+          style={{
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "180px",
+            height: "180px",
+            opacity: 0.18,
+          }}
+        >
+          {/* Outer pulse ring */}
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{
+              border: "1px solid rgba(220, 60, 60, 0.5)",
+              animation: "crosshair-pulse-ring 2.2s ease-in-out infinite",
+            }}
+          />
+          {/* Rotating crosshair SVG */}
+          <svg
+            viewBox="0 0 180 180"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              animation: "crosshair-rotate 18s linear infinite",
+            }}
+          >
+            {/* Circle */}
+            <circle cx="90" cy="90" r="70" stroke="rgba(220,60,60,0.6)" strokeWidth="0.75" />
+            {/* Crosshair lines */}
+            <line x1="20" y1="90" x2="60" y2="90" stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
+            <line x1="120" y1="90" x2="160" y2="90" stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
+            <line x1="90" y1="20" x2="90" y2="60" stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
+            <line x1="90" y1="120" x2="90" y2="160" stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
+            {/* Inner tick marks at 45° */}
+            <line x1="43" y1="43" x2="52" y2="52" stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
+            <line x1="137" y1="43" x2="128" y2="52" stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
+            <line x1="43" y1="137" x2="52" y2="128" stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
+            <line x1="137" y1="137" x2="128" y2="128" stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
+            {/* Center dot */}
+            <circle cx="90" cy="90" r="3" fill="rgba(220,60,60,0.7)" />
+            {/* Inner circle */}
+            <circle cx="90" cy="90" r="12" stroke="rgba(220,60,60,0.4)" strokeWidth="0.75" />
+          </svg>
+        </div>
+
+        {/* Main card — fades up on mount */}
+        <div
+          className="floor-card-enter relative z-10 max-w-lg w-full rounded-xl p-8"
           style={{
             background: "rgba(10, 12, 25, 0.78)",
             backdropFilter: "blur(20px)",
@@ -105,16 +158,16 @@ export default async function WarRoomPage() {
             Application pipeline. Track, manage, and dominate your job search.
           </p>
 
-          {/* COMING SOON badge */}
+          {/* COMING SOON badge — glow pulse */}
           <div className="mb-8">
             <span
+              className="coming-soon-glow"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "11px",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 color: "rgba(220, 80, 80, 0.9)",
-                textShadow: "0 0 12px rgba(220, 60, 60, 0.4)",
               }}
             >
               ▍ COMING SOON

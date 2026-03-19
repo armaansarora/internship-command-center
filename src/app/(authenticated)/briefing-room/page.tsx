@@ -8,6 +8,18 @@ export const metadata: Metadata = { title: "The Briefing Room" };
 export default async function BriefingRoomPage() {
   await requireUser();
 
+  // Teletype lines — duplicated so the scroll loop is seamless
+  const teletypeLines = [
+    "INTEL: COMPANY OVERVIEW — LOADING...",
+    "SRC: SEC-10K-FILING — PARSED",
+    "BRIEF: INTERVIEW Q&A — COMPILING",
+    "STATUS: TALKING POINTS — PENDING",
+    "TARGET: ROLE ALIGNMENT — ANALYZING",
+    "SIGNAL: CULTURAL FIT SCORE — TBD",
+    "REF: GLASSDOOR DATA — INDEXED",
+    "EXEC: LINKEDIN RESEARCH — READY",
+  ];
+
   return (
     <FloorShell floorId="3">
       <div className="relative flex min-h-dvh flex-col items-center justify-center gap-6 p-8">
@@ -38,9 +50,75 @@ export default async function BriefingRoomPage() {
           }}
         />
 
-        {/* Main card */}
+        {/* Scrolling teletype data lines — blueprint readout feel */}
         <div
-          className="relative z-10 max-w-lg w-full rounded-xl p-8"
+          className="pointer-events-none absolute right-8 top-0 bottom-0 overflow-hidden"
+          aria-hidden="true"
+          style={{ width: "220px", opacity: 0.09 }}
+        >
+          {/* Inner container scrolls continuously */}
+          <div
+            style={{
+              animation: "teletype-scroll 12s linear infinite",
+              // Double the lines so it loops seamlessly
+            }}
+          >
+            {[...teletypeLines, ...teletypeLines].map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.08em",
+                  color: "rgba(80, 160, 220, 1)",
+                  padding: "3px 0",
+                  borderBottom: "1px solid rgba(80, 160, 220, 0.15)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Left side teletype — mirrored for symmetry */}
+        <div
+          className="pointer-events-none absolute left-8 top-0 bottom-0 overflow-hidden"
+          aria-hidden="true"
+          style={{ width: "180px", opacity: 0.06 }}
+        >
+          <div
+            style={{
+              animation: "teletype-scroll 16s linear infinite",
+              animationDelay: "-6s",
+            }}
+          >
+            {[...teletypeLines, ...teletypeLines].map((line, i) => (
+              <div
+                key={i}
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.06em",
+                  color: "rgba(80, 160, 220, 1)",
+                  padding: "3px 0",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main card — fades up on mount */}
+        <div
+          className="floor-card-enter relative z-10 max-w-lg w-full rounded-xl p-8"
           style={{
             background: "rgba(10, 12, 25, 0.78)",
             backdropFilter: "blur(20px)",
@@ -101,16 +179,16 @@ export default async function BriefingRoomPage() {
             Interview preparation packets with company-specific research. Walk in knowing everything.
           </p>
 
-          {/* COMING SOON badge */}
+          {/* COMING SOON badge — glow pulse */}
           <div className="mb-8">
             <span
+              className="coming-soon-glow"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "11px",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
                 color: "rgba(80, 180, 240, 0.8)",
-                textShadow: "0 0 10px rgba(80, 160, 220, 0.3)",
               }}
             >
               ▍ COMING SOON
