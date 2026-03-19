@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:16 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:18 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -10,29 +10,30 @@
 
 1. Clone: `armaansarora/internship-command-center` (branch: `main`)
 2. Read this file top to bottom
-3. Read `PROJECT-CONTEXT.md` for full operational context
-4. Load skills: `website-building/webapp`, `design-foundations`, `recursive-audit`, `research-assistant`
-5. Read `docs/MASTER-PLAN.md` for the next phase's acceptance criteria
-6. Begin work on the TODO items below
+3. **Read `CLAUDE.md` — contains mandatory agent behavior rules (session state, context management, handoff). NON-NEGOTIABLE.**
+4. Read `PROJECT-CONTEXT.md` for full operational context
+5. Load skills: `website-building/webapp`, `design-foundations`, `recursive-audit`, `research-assistant`
+6. Read `docs/MASTER-PLAN.md` for the next phase's acceptance criteria
+7. Begin work on the TODO items below
 
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `3ba2932`)
+- **Branch:** `main` (commit `b2d68d0`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 4,774 across 54 source files
 - **Build:** Clean (zero TS errors)
-- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 16m ago)_
+- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 17m ago)_
 
 
 ## Session State (where we left off)
 
-- **Current task:** Automation hardening — context window management rules
+- **Current task:** Automation hardening — fixed bootstrap to mandate CLAUDE.md reading
 - **Deliverable:** infra
 - **Status:** in_progress
-- **Last file touched:** `CLAUDE.md`
-- **Notes:** Added Rule 5: Context Window Management with 40/60/70% thresholds. Agent auto-hands off at 70%, warns at 40% and 60%. Super conservative cutoffs per user preference.
-- **State captured:** 2026-03-19T07:16:00.000Z
+- **Last file touched:** `scripts/generate-bootstrap.ts`
+- **Notes:** Fixed critical gap: bootstrap Quick Start now includes CLAUDE.md as step 3 (mandatory). Context budget note no longer says to skip CLAUDE.md. New agents will always read the mandatory rules.
+- **State captured:** 2026-03-19T07:17:00.000Z
 
 ## Acceptance Criteria — Progress
 
@@ -120,7 +121,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `3ba2932`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b2d68d0`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -271,13 +272,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 354 | 3,900 |
+| `BOOTSTRAP-PROMPT.md` | 355 | 3,943 |
 | `PROJECT-CONTEXT.md` | 405 | 6,407 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1259** | **19,390** |
+| **Total** | **1260** | **19,433** |
 
-> ⚠️ Reading all recommended files consumes ~19,390 tokens. Prioritize: this file → PROJECT-CONTEXT.md → MASTER-PLAN.md. Skip CLAUDE.md unless exploring unfamiliar code.
+> ⚠️ Reading all recommended files consumes ~19,433 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

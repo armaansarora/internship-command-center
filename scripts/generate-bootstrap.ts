@@ -477,10 +477,11 @@ const output = `# BOOTSTRAP PROMPT — The Tower
 
 1. Clone: \`armaansarora/internship-command-center\` (branch: \`${branch}\`)
 2. Read this file top to bottom
-3. Read \`PROJECT-CONTEXT.md\` for full operational context
-4. Load skills: \`website-building/webapp\`, \`design-foundations\`, \`recursive-audit\`, \`research-assistant\`
-5. Read \`docs/MASTER-PLAN.md\` for the next phase's acceptance criteria
-6. Begin work on the TODO items below
+3. **Read \`CLAUDE.md\` — contains mandatory agent behavior rules (session state, context management, handoff). NON-NEGOTIABLE.**
+4. Read \`PROJECT-CONTEXT.md\` for full operational context
+5. Load skills: \`website-building/webapp\`, \`design-foundations\`, \`recursive-audit\`, \`research-assistant\`
+6. Read \`docs/MASTER-PLAN.md\` for the next phase's acceptance criteria
+7. Begin work on the TODO items below
 
 ## Status
 
@@ -566,7 +567,7 @@ ${staleDeps ? `\n### Stale Dependencies (major version behind)\n\n${staleDeps}\n
 ${contextBudget.map((f) => `| \`${f.file}\` | ${f.lines} | ${f.estimatedTokens.toLocaleString()} |`).join("\n")}
 | **Total** | **${contextBudget.reduce((s, f) => s + f.lines, 0)}** | **${totalContextTokens.toLocaleString()}** |
 
-${totalContextTokens > 15000 ? `> ⚠️ Reading all recommended files consumes ~${totalContextTokens.toLocaleString()} tokens. Prioritize: this file → PROJECT-CONTEXT.md → MASTER-PLAN.md. Skip CLAUDE.md unless exploring unfamiliar code.\n` : `> Reading all recommended files consumes ~${totalContextTokens.toLocaleString()} tokens — well within budget.\n`}
+${totalContextTokens > 15000 ? `> ⚠️ Reading all recommended files consumes ~${totalContextTokens.toLocaleString()} tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.\n` : `> Reading all recommended files consumes ~${totalContextTokens.toLocaleString()} tokens — well within budget.\n`}
 
 ## Technical Notes (Gotchas)
 
