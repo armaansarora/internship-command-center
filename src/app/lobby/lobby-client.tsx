@@ -298,10 +298,16 @@ function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    setHoverGlow({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    });
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setHoverGlow({ x: x * 100, y: y * 100 });
+    // 3D tilt
+    el.style.transform = `perspective(600px) rotateY(${(x - 0.5) * 5}deg) rotateX(${-(y - 0.5) * 5}deg)`;
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    const el = ref.current;
+    if (el) el.style.transform = "perspective(600px) rotateY(0deg) rotateX(0deg)";
   }, []);
 
   return (
@@ -320,6 +326,7 @@ function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
         overflow: "hidden",
       }}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Hover glow that follows mouse */}
       <div
