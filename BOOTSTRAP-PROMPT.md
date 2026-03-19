@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 10:34 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 1:11 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `8c510ee`)
+- **Branch:** `main` (commit `57efff1`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 5,426 across 48 source files
 - **Build:** Clean (zero TS errors)
@@ -29,10 +29,10 @@
 
 - **Current task:** General development
 - **Deliverable:** unknown
-- **Status:** in_progress
+- **Status:** complete
 - **Last file touched:** `unknown`
-- **Notes:** This session: 0 commits. Work: 
-- **State captured:** 2026-03-19T14:34:15.600Z
+- **Notes:** No feature commits this session (tooling/infra only).
+- **State captured:** 2026-03-19T17:11:15.952Z
 
 ## Acceptance Criteria — Progress
 
@@ -120,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `8c510ee`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `57efff1`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -266,13 +266,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 343 | 3,769 |
+| `BOOTSTRAP-PROMPT.md` | 326 | 3,698 |
 | `PROJECT-CONTEXT.md` | 405 | 6,466 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1248** | **19,318** |
+| **Total** | **1231** | **19,247** |
 
-> ⚠️ Reading all recommended files consumes ~19,318 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~19,247 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
@@ -317,26 +317,9 @@ zod: ^4.3.6
 
 1. **Start:** Clone repo → read this file → read PROJECT-CONTEXT.md → load skills → read MASTER-PLAN.md for current phase
 2. **During:** Commit after each major milestone. Run `npx tsc --noEmit` before committing.
-3. **End:** Run `npm run session:end` (chains: type check → bootstrap regen → stage → commit → push)
+3. **End:** Run `npm run session:end` (autonomous 10-step pipeline: type check → auto-detect state → bootstrap regen → stage → commit → push → verify sync → generate handoff prompt)
 4. **Always:** No `any` types. No console.logs. No TODO comments in shipped code. Aria attributes on interactive elements. prefers-reduced-motion respected.
 
 ## Session State Management
 
-To capture where you left off (so the next session can pick up seamlessly):
-
-```bash
-# Write session state before ending
-cat > SESSION-STATE.json << 'EOF'
-{
-  "currentTask": "What you were working on",
-  "deliverable": "Which MASTER-PLAN deliverable (e.g., 1.2)",
-  "status": "in_progress | blocked | review",
-  "blockers": ["List any blockers"],
-  "lastFileTouched": "src/path/to/file.tsx",
-  "notes": "Any context the next session needs",
-  "updatedAt": "ISO timestamp"
-}
-EOF
-```
-
-This file is read by the bootstrap generator and displayed in the "Session State" section above.
+`npm run session:end` handles this automatically — it auto-detects session state from git history and writes `SESSION-STATE.json`. No manual state management needed. The handoff prompt is printed to stdout and saved to `HANDOFF.md`.
