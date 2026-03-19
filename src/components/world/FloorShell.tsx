@@ -1,8 +1,9 @@
 "use client";
 
+import type { JSX } from "react";
 import type { FloorId } from "@/types/ui";
 import { FLOORS } from "@/types/ui";
-import { Skyline } from "./Skyline";
+import { SkylineScene } from "./SkylineScene";
 
 interface FloorShellProps {
   floorId: FloorId;
@@ -10,45 +11,20 @@ interface FloorShellProps {
 }
 
 /**
- * FloorShell — wraps each floor's content with the window frame, skyline view,
- * and floor-specific ambient adjustments.
+ * FloorShell — wraps each floor's content with the immersive skyline background.
  *
  * Layers (back to front):
- * 1. Sky gradient (CSS vars from day/night cycle)
- * 2. Skyline (4-layer parallax SVG)
- * 3. Window tint overlay
- * 4. Room content
- * 5. Floor info badge (UI layer)
+ * 1. SkylineScene (photorealistic NYC skyline with parallax + atmosphere)
+ * 2. Room content (dashboard panels, floor-specific UI)
+ * 3. Floor info badge
  */
-export function FloorShell({ floorId, children }: FloorShellProps) {
+export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element {
   const floor = FLOORS.find((f) => f.id === floorId);
 
   return (
     <div className="relative flex min-h-dvh w-full overflow-hidden">
-      {/* Background: Sky gradient (responds to data-time via CSS vars) */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(
-            to bottom,
-            hsl(var(--sky-hue) var(--sky-saturation) var(--sky-lightness)),
-            hsl(var(--sky-hue) calc(var(--sky-saturation) * 0.7) calc(var(--sky-lightness) * 0.6))
-          )`,
-          zIndex: 0,
-        }}
-      />
-
-      {/* NYC Skyline with parallax */}
-      <Skyline floorId={floorId} />
-
-      {/* Window tint overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundColor: "var(--window-tint)",
-          zIndex: 2,
-        }}
-      />
+      {/* Immersive skyline background — replaces old SVG skyline */}
+      <SkylineScene floorId={floorId} />
 
       {/* Room content */}
       <div
