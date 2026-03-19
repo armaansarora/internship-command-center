@@ -35,9 +35,9 @@ export default async function WritingRoomPage() {
           }}
         />
 
-        {/* Main card */}
+        {/* Main card — fades up on mount */}
         <div
-          className="relative z-10 max-w-lg w-full rounded-xl p-8"
+          className="floor-card-enter relative z-10 max-w-lg w-full rounded-xl p-8"
           style={{
             background: "rgba(10, 12, 25, 0.78)",
             backdropFilter: "blur(20px)",
@@ -84,7 +84,7 @@ export default async function WritingRoomPage() {
             The Writing Room
           </h1>
 
-          {/* Description */}
+          {/* Description — with blinking cursor inline at end */}
           <p
             className="mb-6"
             style={{
@@ -94,12 +94,24 @@ export default async function WritingRoomPage() {
               lineHeight: 1.6,
             }}
           >
-            AI-powered cover letters tailored to every application. Every word, earned.
+            AI-powered cover letters tailored to every application. Every word, earned.{" "}
+            <span
+              className="cursor-blink inline-block align-middle"
+              aria-hidden="true"
+              style={{
+                width: "2px",
+                height: "14px",
+                background: "rgba(201, 168, 76, 0.7)",
+                verticalAlign: "middle",
+                marginBottom: "1px",
+              }}
+            />
           </p>
 
-          {/* COMING SOON badge */}
+          {/* COMING SOON badge — glow pulse */}
           <div className="mb-8">
             <span
+              className="coming-soon-glow"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "11px",
@@ -112,7 +124,7 @@ export default async function WritingRoomPage() {
             </span>
           </div>
 
-          {/* Decorative — faded ruled lines inside card (like an open notebook) */}
+          {/* Open notebook preview — ruled lines with animated cursor at end */}
           <div
             className="rounded-lg p-4 mb-4 overflow-hidden"
             aria-hidden="true"
@@ -133,14 +145,14 @@ export default async function WritingRoomPage() {
                 }}
               />
             ))}
-            {/* Blinking cursor */}
+            {/* Blinking cursor on the last line */}
             <div
+              className="cursor-blink"
               style={{
                 width: "2px",
                 height: "14px",
-                background: "rgba(201, 168, 76, 0.4)",
+                background: "rgba(201, 168, 76, 0.55)",
                 display: "inline-block",
-                animation: "pulse 1.2s ease-in-out infinite",
                 verticalAlign: "middle",
               }}
             />

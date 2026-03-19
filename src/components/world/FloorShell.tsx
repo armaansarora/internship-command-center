@@ -20,7 +20,8 @@ interface FloorShellProps {
  * 4. Bottom fog gradient
  * 5. Glass window mullions (3 vertical lines at 15%, 50%, 85%)
  * 6. Room content (dashboard panels, floor-specific UI)
- * 7. Floor info badge (top-right)
+ * 7. Floor info badge (top-right) — with breathing scale animation
+ * 8. Windowsill gold gradient line (bottom)
  */
 export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element {
   const floor = FLOORS.find((f) => f.id === floorId);
@@ -119,7 +120,8 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
         {children}
       </div>
 
-      {/* Floor info badge (top-right) — gold dot + floor ID + separator + floor name */}
+      {/* Floor info badge (top-right) — gold dot + floor ID + separator + floor name
+          Has a subtle breathing scale pulse via CSS animation */}
       {floor && (
         <div
           className="absolute top-4 right-4 flex items-center gap-2 rounded-full px-4 py-1.5"
@@ -130,6 +132,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
             WebkitBackdropFilter: "blur(16px) saturate(1.4)",
             border: "1px solid rgba(201, 168, 76, 0.18)",
             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
+            animation: "floor-badge-breathe 4s ease-in-out infinite",
           }}
         >
           {/* Gold dot indicator */}
@@ -169,6 +172,26 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
           </span>
         </div>
       )}
+
+      {/* Windowsill — 1px gold gradient line at the very bottom of the viewport */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        aria-hidden="true"
+        style={{
+          height: "1px",
+          background:
+            "linear-gradient(to right, transparent 0%, rgba(201, 168, 76, 0.08) 10%, rgba(201, 168, 76, 0.35) 30%, rgba(201, 168, 76, 0.45) 50%, rgba(201, 168, 76, 0.35) 70%, rgba(201, 168, 76, 0.08) 90%, transparent 100%)",
+          zIndex: 15,
+        }}
+      />
+
+      {/* Inline keyframe for badge breathing — avoids needing a globals.css change */}
+      <style>{`
+        @keyframes floor-badge-breathe {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.018); }
+        }
+      `}</style>
     </div>
   );
 }
