@@ -598,29 +598,12 @@ ${techNotes}
 
 1. **Start:** Clone repo → read this file → read PROJECT-CONTEXT.md → load skills → read MASTER-PLAN.md for current phase
 2. **During:** Commit after each major milestone. Run \`npx tsc --noEmit\` before committing.
-3. **End:** Run \`npm run session:end\` (chains: type check → bootstrap regen → stage → commit → push)
+3. **End:** Run \`npm run session:end\` (autonomous 10-step pipeline: type check → auto-detect state → bootstrap regen → stage → commit → push → verify sync → generate handoff prompt)
 4. **Always:** No \`any\` types. No console.logs. No TODO comments in shipped code. Aria attributes on interactive elements. prefers-reduced-motion respected.
 
 ## Session State Management
 
-To capture where you left off (so the next session can pick up seamlessly):
-
-\`\`\`bash
-# Write session state before ending
-cat > SESSION-STATE.json << 'EOF'
-{
-  "currentTask": "What you were working on",
-  "deliverable": "Which MASTER-PLAN deliverable (e.g., 1.2)",
-  "status": "in_progress | blocked | review",
-  "blockers": ["List any blockers"],
-  "lastFileTouched": "src/path/to/file.tsx",
-  "notes": "Any context the next session needs",
-  "updatedAt": "ISO timestamp"
-}
-EOF
-\`\`\`
-
-This file is read by the bootstrap generator and displayed in the "Session State" section above.
+\`npm run session:end\` handles this automatically — it auto-detects session state from git history and writes \`SESSION-STATE.json\`. No manual state management needed. The handoff prompt is printed to stdout and saved to \`HANDOFF.md\`.
 `;
 
 writeFileSync(join(ROOT, "BOOTSTRAP-PROMPT.md"), output);

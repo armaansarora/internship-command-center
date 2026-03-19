@@ -27,7 +27,7 @@
  */
 
 import { execSync } from "child_process";
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -278,7 +278,6 @@ header(9, TOTAL_STEPS, "Generate handoff prompt");
 
 const commitHash = run("git rev-parse --short HEAD", { capture: true, allowFail: true }) || "unknown";
 const branch = run("git branch --show-current", { capture: true }) || "main";
-const productionUrl = "internship-command-center-lake.vercel.app";
 
 const handoff = `Clone repo armaansarora/internship-command-center (branch: ${branch}). Read BOOTSTRAP-PROMPT.md — it's auto-generated and current. Follow the Quick Start section. Cut the fat, keep the meat. Run all sub agents needed, use max force and effort. Make every decision yourself. Run recursive-audit after every task. Go all out.`;
 
