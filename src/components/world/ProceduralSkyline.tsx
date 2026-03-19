@@ -82,19 +82,25 @@ function generateScene(w: number, h: number) {
   // ── BUILDINGS ──
   const buildings: Building[] = [];
   const configs = [
-    { depth: 0, count: 50, minH: 0.08, maxH: 0.28, minW: 12, maxW: 35, colors: [[18, 22, 42], [22, 26, 48], [15, 18, 36]] as [number, number, number][] },
-    { depth: 1, count: 38, minH: 0.15, maxH: 0.45, minW: 22, maxW: 55, colors: [[22, 26, 50], [28, 32, 58], [20, 24, 46], [25, 28, 52]] as [number, number, number][] },
-    { depth: 2, count: 28, minH: 0.22, maxH: 0.58, minW: 30, maxW: 80, colors: [[30, 34, 60], [35, 40, 68], [26, 30, 55], [38, 42, 72]] as [number, number, number][] },
+    { depth: 0, count: 65, minH: 0.08, maxH: 0.30, minW: 10, maxW: 32, colors: [[18, 22, 42], [22, 26, 48], [15, 18, 36], [20, 24, 44]] as [number, number, number][] },
+    { depth: 1, count: 50, minH: 0.14, maxH: 0.48, minW: 18, maxW: 50, colors: [[22, 26, 50], [28, 32, 58], [20, 24, 46], [25, 28, 52]] as [number, number, number][] },
+    { depth: 2, count: 35, minH: 0.20, maxH: 0.60, minW: 25, maxW: 75, colors: [[30, 34, 60], [35, 40, 68], [26, 30, 55], [38, 42, 72]] as [number, number, number][] },
   ];
 
   for (const cfg of configs) {
     for (let i = 0; i < cfg.count; i++) {
       const bw = cfg.minW + r() * (cfg.maxW - cfg.minW);
       let bh = (cfg.minH + r() * (cfg.maxH - cfg.minH)) * h;
-      const bx = (i / cfg.count) * (w + 300) - 150 + (r() - 0.5) * 50;
+      // Distribute buildings across full width with overlap and slight clustering toward center
+      const spread = w + 200;
+      const baseX = (i / cfg.count) * spread - 100;
+      const centerBias = (r() - 0.5) * 80; // random jitter
+      const bx = baseX + centerBias;
 
-      // Occasional supertall
-      if (cfg.depth >= 1 && r() < 0.06) bh *= 1.5;
+      // Occasional supertall — more likely in center third of viewport
+      const centerFactor = 1 - 2 * Math.abs((bx / w) - 0.5); // 1.0 at center, 0 at edges
+      const supertallChance = cfg.depth >= 1 ? 0.05 + centerFactor * 0.08 : 0;
+      if (r() < supertallChance) bh *= 1.3 + r() * 0.4;
 
       const roofTypes: Building["roofType"][] = ["flat", "spire", "stepped", "dome", "antenna", "crown"];
       const roofType = roofTypes[Math.floor(r() * roofTypes.length)] ?? "flat";
