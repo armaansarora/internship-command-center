@@ -303,6 +303,31 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
+    // ── STAR CONSTELLATIONS (faint connecting lines between bright stars) ──
+    if (!reduced) {
+      const brightStars = scene.stars.filter(s => s.r > 1.0 && s.bright > 0.5);
+      // Connect nearby bright stars with very faint lines
+      for (let i = 0; i < brightStars.length; i++) {
+        const a = brightStars[i];
+        for (let j = i + 1; j < brightStars.length; j++) {
+          const b = brightStars[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120 && dist > 30) {
+            const lineAlpha = 0.04 * (1 - dist / 120) * Math.min(a.bright, b.bright);
+            const twinkle = 0.5 + 0.5 * Math.sin(t * 0.0005 + i * 0.7);
+            ctx.beginPath();
+            ctx.moveTo(a.x + mx * w * 0.004, a.y + my * h * 0.002);
+            ctx.lineTo(b.x + mx * w * 0.004, b.y + my * h * 0.002);
+            ctx.strokeStyle = `rgba(200, 210, 240, ${lineAlpha * twinkle})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
     // ── DISTANT LIGHTNING (occasional flash) ──
     if (!reduced) {
       const lightningPeriod = 15000; // ~15 seconds between strikes
@@ -578,6 +603,36 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       spot.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = spot;
       ctx.fillRect(spotX - spotR, spotY - spotR, spotR * 2, spotR * 2);
+    }
+
+    // ── BUILDING LIGHT SWEEP (periodic floor-by-floor illumination on a random near building) ──
+    if (!reduced) {
+      const sweepPeriod = 10000;
+      const sweepPhase = (t % sweepPeriod) / sweepPeriod;
+      if (sweepPhase < 0.3) {
+        const sweepProgress = sweepPhase / 0.3;
+        const sweepSeed = Math.floor(t / sweepPeriod);
+        // Pick a near-layer building
+        const nearBuildings = scene.buildings.filter(b => b.depth === 2 && b.h > h * 0.25);
+        if (nearBuildings.length > 0) {
+          const target = nearBuildings[sweepSeed % nearBuildings.length];
+          const px = mx * w * PARALLAX[2];
+          const py = my * h * PARALLAX[2] * 0.4;
+          const vo = offset * h * 0.32;
+          const by = h - target.h;
+          // Sweep a glow band from bottom to top of building
+          const sweepY = by + target.h * (1 - sweepProgress);
+          const bandH = target.h * 0.08;
+          const sweepAlpha = sweepProgress < 0.1 ? sweepProgress / 0.1 : sweepProgress > 0.85 ? (1 - sweepProgress) / 0.15 : 1;
+          const sg = ctx.createLinearGradient(0, sweepY - bandH, 0, sweepY + bandH);
+          sg.addColorStop(0, "rgba(255, 200, 80, 0)");
+          sg.addColorStop(0.4, `rgba(255, 200, 80, ${0.06 * sweepAlpha})`);
+          sg.addColorStop(0.6, `rgba(255, 200, 80, ${0.06 * sweepAlpha})`);
+          sg.addColorStop(1, "rgba(255, 200, 80, 0)");
+          ctx.fillStyle = sg;
+          ctx.fillRect(target.x + px, sweepY - bandH + py + vo, target.w, bandH * 2);
+        }
+      }
     }
 
     // ── SCAN LINE (subtle HUD effect) ──
