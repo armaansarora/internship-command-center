@@ -74,7 +74,7 @@ Multi-tenant SaaS for automating internship/job searches. Users sign in, connect
 
 ## 4. CREDENTIALS
 
-All credentials stored in `/home/user/workspace/command-center/.env.local`.
+All credentials stored in `.env.local` (repo root, never committed).
 
 | Service | Key Detail |
 |---|---|
@@ -273,13 +273,13 @@ Complete replacement of SVG skyline with photorealistic CSS 3D parallax system.
 - Accepted: `as any` cast in DustMotes for tsParticles v3 RecursivePartial types
 - Verified: All CSS vars defined, all imports resolvable, all key props present, aria attributes correct, no console.logs, no TODOs, TS strict clean
 
-### Manual Steps Required (See MANUAL-GUIDE.md)
-1. Run `migration-full.sql` in Supabase SQL Editor
-2. Run `src/db/post-push.sql` in Supabase SQL Editor (triggers + pgvector)
-3. Configure Google OAuth in Google Cloud Console + Supabase dashboard
-4. Set Vercel environment variables
-5. Merge `docs-handoff` → `main` for production deploy
-6. Verify Supabase anon key format (`eyJ*` for REST API)
+### Manual Steps (ALL COMPLETED as of Session 7)
+1. ~~Run `migration-full.sql` in Supabase SQL Editor~~ DONE
+2. ~~Run `src/db/post-push.sql` in Supabase SQL Editor~~ DONE
+3. ~~Configure Google OAuth in Google Cloud Console + Supabase dashboard~~ DONE
+4. ~~Set Vercel environment variables~~ DONE
+5. ~~Merge `docs-handoff` → `main`~~ DONE
+6. ~~Verify Supabase anon key format~~ DONE (eyJ* format confirmed)
 
 ### File Structure (current)
 ```
