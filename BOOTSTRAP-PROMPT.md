@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:18 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:27 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,21 +19,21 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `b2d68d0`)
+- **Branch:** `main` (commit `88ae2fa`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 4,774 across 54 source files
 - **Build:** Clean (zero TS errors)
-- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 17m ago)_
+- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 26m ago)_
 
 
 ## Session State (where we left off)
 
-- **Current task:** Automation hardening — fixed bootstrap to mandate CLAUDE.md reading
-- **Deliverable:** infra
-- **Status:** in_progress
-- **Last file touched:** `scripts/generate-bootstrap.ts`
-- **Notes:** Fixed critical gap: bootstrap Quick Start now includes CLAUDE.md as step 3 (mandatory). Context budget note no longer says to skip CLAUDE.md. New agents will always read the mandatory rules.
-- **State captured:** 2026-03-19T07:17:00.000Z
+- **Current task:** Immersive UI overhaul — skyline rendering, image fitting, UI component visibility
+- **Deliverable:** 0.5-0.8
+- **Status:** not_started
+- **Last file touched:** `CLAUDE.md`
+- **Notes:** Session 9 was infra-only (automation hardening, context management). User reviewed live site and flagged: (1) skyline image doesn't fit the page properly, (2) UI components are hard to see against the background, (3) overall visual quality is poor. Next session must prioritize a complete visual overhaul of the immersive UI before moving to Phase 1.
+- **State captured:** 2026-03-19T07:26:00.000Z
 
 ## Acceptance Criteria — Progress
 
@@ -121,7 +121,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `b2d68d0`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `88ae2fa`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -272,13 +272,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 355 | 3,943 |
-| `PROJECT-CONTEXT.md` | 405 | 6,407 |
+| `BOOTSTRAP-PROMPT.md` | 355 | 3,989 |
+| `PROJECT-CONTEXT.md` | 405 | 6,466 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1260** | **19,433** |
+| **Total** | **1260** | **19,538** |
 
-> ⚠️ Reading all recommended files consumes ~19,433 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~19,538 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
