@@ -97,7 +97,7 @@ export function LobbyClient() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-center justify-between overflow-hidden">
+    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden">
       {/* ── PROCEDURAL SKYLINE ── */}
       <ProceduralSkyline floorId="L" />
 
@@ -386,21 +386,31 @@ function DirectoryRow({ floorId, name, label, available, index }: {
   floorId: FloorId; name: string; label: string; available: boolean; index: number;
 }) {
   const [hovered, setHovered] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 800 + index * 60);
+    return () => clearTimeout(timer);
+  }, [index]);
+
   return (
     <div
       className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden ${
         available ? "cursor-pointer" : "opacity-30"
       }`}
-      style={
-        available
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible
+          ? (available && hovered ? "translateX(4px)" : "translateX(0)")
+          : "translateX(-10px)",
+        ...(available
           ? {
               borderLeft: hovered ? "2px solid rgba(201, 168, 76, 0.7)" : "2px solid rgba(201, 168, 76, 0.35)",
               background: hovered ? "rgba(201, 168, 76, 0.06)" : "transparent",
               boxShadow: hovered ? "0 0 20px rgba(201, 168, 76, 0.05)" : "none",
-              transform: hovered ? "translateX(4px)" : "translateX(0)",
             }
-          : { borderLeft: "2px solid transparent" }
-      }
+          : { borderLeft: "2px solid transparent" }),
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
