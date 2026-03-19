@@ -1,7 +1,7 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 2:37 AM EDT
-> Run `npx tsx scripts/generate-bootstrap.ts` to regenerate.
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:01 AM EDT
+> Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
 ---
@@ -18,10 +18,38 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `2cc2a34`)
+- **Branch:** `main` (commit `89ef7fc`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 4,774 across 54 source files
 - **Build:** Clean (zero TS errors)
+- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 1m ago)_
+
+
+## Session State (where we left off)
+
+- **Current task:** Phase 1: The War Room
+- **Deliverable:** 1.1
+- **Status:** not_started
+- **Notes:** Bootstrap system overhaul complete (Session 8). Phase 1 is next — start with docs/MASTER-PLAN.md acceptance criteria.
+- **State captured:** 2026-03-19T07:01:34.386Z
+
+## Acceptance Criteria — Progress
+
+**Progress: 1 verified / 0 likely / 5 unverified** (of 6)
+
+⬜ User can create an application and see it in the pipeline
+    └─ No application CRUD found in src/
+⬜ Drag-and-drop changes application status
+    └─ No drag-and-drop implementation found
+⬜ CRO agent can answer "How's my pipeline looking?" with real data
+    └─ No CRO agent implementation found
+⬜ CRO character has visible idle animation and talking state
+    └─ No CRO agent implementation found
+⬜ Conversation feels in-character (aggressive, numbers-driven tone)
+    └─ No conversation system found
+✅ All data is RLS-scoped — multi-tenant safe
+    └─ RLS policies in schema.ts
+
 
 ## TODO — Next Phase
 
@@ -91,7 +119,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `2cc2a34`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `89ef7fc`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -193,7 +221,7 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>32 packages</summary>
+<summary>33 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
@@ -217,6 +245,7 @@ eslint-config-next: 16.2.0
 framer-motion: ^12.38.0
 gsap: ^3.14.2
 happy-dom: ^20.8.4
+husky: ^9.1.7
 lenis: ^1.3.19
 next: 16.2.0
 postcss: ^8.5.8
@@ -230,6 +259,25 @@ vitest: ^4.1.0
 zod: ^4.3.6
 ```
 </details>
+
+### Stale Dependencies (major version behind)
+
+- **@types/node**: 20.19.37 → 25.5.0 (major)
+- **eslint**: 9.39.4 → 10.0.3 (major)
+- **tailwindcss**: 3.4.19 → 4.2.2 (major)
+
+## Context Budget
+
+| File | Lines | ~Tokens |
+|---|---|---|
+| `BOOTSTRAP-PROMPT.md` | 339 | 3,734 |
+| `PROJECT-CONTEXT.md` | 404 | 6,278 |
+| `docs/MASTER-PLAN.md` | 361 | 6,827 |
+| `CLAUDE.md` | 77 | 1,321 |
+| **Total** | **1181** | **18,160** |
+
+> ⚠️ Reading all recommended files consumes ~18,160 tokens. Prioritize: this file → PROJECT-CONTEXT.md → MASTER-PLAN.md. Skip CLAUDE.md unless exploring unfamiliar code.
+
 
 ## Technical Notes (Gotchas)
 
@@ -273,5 +321,26 @@ zod: ^4.3.6
 
 1. **Start:** Clone repo → read this file → read PROJECT-CONTEXT.md → load skills → read MASTER-PLAN.md for current phase
 2. **During:** Commit after each major milestone. Run `npx tsc --noEmit` before committing.
-3. **End:** Run recursive audit → update PROJECT-CONTEXT.md → run `npx tsx scripts/generate-bootstrap.ts` → commit + push
+3. **End:** Run `npm run session:end` (chains: type check → bootstrap regen → stage → commit → push)
 4. **Always:** No `any` types. No console.logs. No TODO comments in shipped code. Aria attributes on interactive elements. prefers-reduced-motion respected.
+
+## Session State Management
+
+To capture where you left off (so the next session can pick up seamlessly):
+
+```bash
+# Write session state before ending
+cat > SESSION-STATE.json << 'EOF'
+{
+  "currentTask": "What you were working on",
+  "deliverable": "Which MASTER-PLAN deliverable (e.g., 1.2)",
+  "status": "in_progress | blocked | review",
+  "blockers": ["List any blockers"],
+  "lastFileTouched": "src/path/to/file.tsx",
+  "notes": "Any context the next session needs",
+  "updatedAt": "ISO timestamp"
+}
+EOF
+```
+
+This file is read by the bootstrap generator and displayed in the "Session State" section above.

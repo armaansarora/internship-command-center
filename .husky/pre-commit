@@ -1,0 +1,3 @@
+# Auto-regenerate BOOTSTRAP-PROMPT.md before every commit
+npx tsx scripts/generate-bootstrap.ts 2>/dev/null
+git add BOOTSTRAP-PROMPT.md
