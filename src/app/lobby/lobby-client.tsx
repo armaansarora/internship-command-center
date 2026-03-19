@@ -87,14 +87,14 @@ export function LobbyClient() {
             background: "linear-gradient(to bottom, rgba(4, 6, 15, 0.4) 0%, transparent 100%)",
           }}
         />
-        {/* Subtle window mullions */}
-        <div className="absolute inset-0 flex justify-between px-[12%]">
-          {[0.08, 0.05, 0.08].map((opacity, i) => (
+        {/* Subtle window mullions — very faint, only visible in center section */}
+        <div className="absolute inset-0 flex justify-between px-[15%]">
+          {[0.04, 0.025, 0.04].map((opacity, i) => (
             <div
               key={i}
               className="w-px h-full"
               style={{
-                background: `linear-gradient(to bottom, rgba(201,168,76,${opacity * 0.6}) 0%, rgba(201,168,76,${opacity}) 50%, rgba(201,168,76,${opacity * 0.6}) 100%)`,
+                background: `linear-gradient(to bottom, transparent 10%, rgba(201,168,76,${opacity}) 45%, rgba(201,168,76,${opacity}) 55%, transparent 90%)`,
               }}
             />
           ))}
@@ -104,7 +104,7 @@ export function LobbyClient() {
       {/* ── MAIN CONTENT ── */}
       <div
         ref={containerRef}
-        className="relative flex flex-col items-center justify-center flex-1 px-6 w-full max-w-md mx-auto gap-5 py-8"
+        className="relative flex flex-col items-center justify-center flex-1 px-6 w-full max-w-md mx-auto gap-4 py-6"
         style={{ zIndex: 10, opacity: 0 }}
       >
         {/* Floor label */}
