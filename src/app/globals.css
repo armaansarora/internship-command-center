@@ -1,196 +1,292 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-  /* Boardroom Design Tokens */
-  --color-boardroom: #1A1A2E;
-  --color-charcoal: #252540;
-  --color-navy: #16213E;
-  --color-gold: #C9A84C;
-  --color-ivory: #F5F0E8;
-  --color-parchment: #D4C5A9;
-  --color-slate: #8B8FA3;
-  --color-emerald: #2D8B6F;
-  --color-sapphire: #4A6FA5;
-  --color-amber: #B8860B;
-  --color-ruby: #9B3B3B;
-  --color-amethyst: #7B5EA7;
-  --color-pearl: #C8C8D0;
-  --font-heading: var(--font-playfair);
-  --font-data: var(--font-jetbrains);
-}
+/* =============================================
+   THE TOWER — Design Token System
+   ============================================= */
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.985 0.002 280);
-  --foreground: oklch(0.15 0.02 280);
-  --card: oklch(0.995 0.001 280);
-  --card-foreground: oklch(0.15 0.02 280);
-  --popover: oklch(0.995 0.001 280);
-  --popover-foreground: oklch(0.15 0.02 280);
-  --primary: oklch(0.55 0.25 275);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.96 0.01 280);
-  --secondary-foreground: oklch(0.18 0.02 280);
-  --muted: oklch(0.96 0.008 280);
-  --muted-foreground: oklch(0.55 0.02 280);
-  --accent: oklch(0.95 0.02 275);
-  --accent-foreground: oklch(0.18 0.02 280);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.01 280);
-  --input: oklch(0.92 0.01 280);
-  --ring: oklch(0.55 0.2 275);
-  --chart-1: oklch(0.55 0.25 275);
-  --chart-2: oklch(0.6 0.2 260);
-  --chart-3: oklch(0.5 0.18 290);
-  --chart-4: oklch(0.65 0.22 250);
-  --chart-5: oklch(0.45 0.15 300);
-  --sidebar: oklch(0.98 0.005 280);
-  --sidebar-foreground: oklch(0.15 0.02 280);
-  --sidebar-primary: oklch(0.55 0.25 275);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.94 0.02 275);
-  --sidebar-accent-foreground: oklch(0.18 0.02 280);
-  --sidebar-border: oklch(0.92 0.01 280);
-  --sidebar-ring: oklch(0.55 0.2 275);
+  /* ── Core Palette ── */
+  --gold: #C9A84C;
+  --gold-dim: #8B7634;
+  --gold-bright: #E8C45A;
+  --tower-dark: #1A1A2E;
+  --tower-darker: #12121F;
+  --tower-darkest: #0A0A14;
+  --tower-surface: #1E1E35;
+  --tower-surface-2: #24243D;
+
+  /* ── Glass Surfaces ── */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-hover: rgba(255, 255, 255, 0.10);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 16px;
+
+  /* ── Text ── */
+  --text-primary: #F0EDE6;
+  --text-secondary: #A8A4A0;
+  --text-muted: #6B6865;
+  --text-gold: #C9A84C;
+
+  /* ── Semantic ── */
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
+
+  /* ── Day/Night Cycle ──
+     These are updated by DayNightProvider.tsx based on local time.
+     Default = night (the primary aesthetic) */
+  --sky-hue: 230;
+  --sky-saturation: 60%;
+  --sky-lightness: 8%;
+  --ambient-warmth: 0;
+  --ambient-brightness: 0.3;
+  --city-lights-opacity: 1;
+  --star-opacity: 0.8;
+  --sun-position: -20%;
+  --window-tint: rgba(10, 10, 20, 0.3);
+
+  /* ── Typography Scale (fluid) ── */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+
+  /* ── Spacing (4px grid) ── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* ── Depth Layers ── */
+  --z-skyline: 0;
+  --z-room: 5;
+  --z-character: 10;
+  --z-furniture: 12;
+  --z-ui: 20;
+  --z-glass-panel: 25;
+  --z-elevator: 30;
+  --z-cursor: 50;
+  --z-notification: 40;
+  --z-modal: 45;
+
+  /* ── Radius ── */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
-.dark {
-  --background: oklch(0.13 0.02 280);
-  --foreground: oklch(0.95 0.01 280);
-  --card: oklch(0.18 0.02 280);
-  --card-foreground: oklch(0.95 0.01 280);
-  --popover: oklch(0.18 0.02 280);
-  --popover-foreground: oklch(0.95 0.01 280);
-  --primary: oklch(0.65 0.25 275);
-  --primary-foreground: oklch(0.13 0.02 280);
-  --secondary: oklch(0.22 0.03 280);
-  --secondary-foreground: oklch(0.95 0.01 280);
-  --muted: oklch(0.22 0.03 280);
-  --muted-foreground: oklch(0.65 0.02 280);
-  --accent: oklch(0.22 0.04 275);
-  --accent-foreground: oklch(0.95 0.01 280);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0.01 280 / 12%);
-  --input: oklch(1 0.01 280 / 15%);
-  --ring: oklch(0.65 0.2 275);
-  --chart-1: oklch(0.65 0.25 275);
-  --chart-2: oklch(0.6 0.2 260);
-  --chart-3: oklch(0.55 0.18 290);
-  --chart-4: oklch(0.7 0.22 250);
-  --chart-5: oklch(0.5 0.15 300);
-  --sidebar: oklch(0.16 0.025 280);
-  --sidebar-foreground: oklch(0.95 0.01 280);
-  --sidebar-primary: oklch(0.65 0.25 275);
-  --sidebar-primary-foreground: oklch(0.95 0.01 280);
-  --sidebar-accent: oklch(0.22 0.04 275);
-  --sidebar-accent-foreground: oklch(0.95 0.01 280);
-  --sidebar-border: oklch(1 0.01 280 / 12%);
-  --sidebar-ring: oklch(0.65 0.2 275);
+/* =============================================
+   DAY/NIGHT TIME STATES
+   Set by JavaScript — these define the target values
+   ============================================= */
+
+/* Dawn: 5-7am */
+[data-time="dawn"] {
+  --sky-hue: 15;
+  --sky-saturation: 70%;
+  --sky-lightness: 45%;
+  --ambient-warmth: 0.6;
+  --ambient-brightness: 0.5;
+  --city-lights-opacity: 0.3;
+  --star-opacity: 0;
+  --sun-position: 5%;
+  --window-tint: rgba(255, 180, 120, 0.08);
 }
 
-.gradient-brand {
-  background: linear-gradient(135deg, oklch(0.55 0.25 275), oklch(0.55 0.22 300));
-}
-.gradient-header {
-  background: linear-gradient(135deg, oklch(0.96 0.03 275), oklch(0.98 0.01 300));
-}
-.dark .gradient-header {
-  background: linear-gradient(135deg, oklch(0.2 0.04 275), oklch(0.18 0.03 300));
-}
-
-@keyframes fadeFloat {
-  0%, 100% { opacity: 0.7; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-4px); }
+/* Morning: 7-10am */
+[data-time="morning"] {
+  --sky-hue: 200;
+  --sky-saturation: 65%;
+  --sky-lightness: 60%;
+  --ambient-warmth: 0.3;
+  --ambient-brightness: 0.8;
+  --city-lights-opacity: 0;
+  --star-opacity: 0;
+  --sun-position: 25%;
+  --window-tint: rgba(200, 220, 255, 0.05);
 }
 
-/* Boardroom Luxury Utilities */
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+/* Midday: 10am-2pm */
+[data-time="midday"] {
+  --sky-hue: 210;
+  --sky-saturation: 45%;
+  --sky-lightness: 72%;
+  --ambient-warmth: 0.1;
+  --ambient-brightness: 1;
+  --city-lights-opacity: 0;
+  --star-opacity: 0;
+  --sun-position: 50%;
+  --window-tint: rgba(255, 255, 255, 0.03);
 }
 
-.ambient-bg {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(120, 80, 200, 0.15), transparent 50%),
-    radial-gradient(ellipse at 80% 50%, rgba(201, 168, 76, 0.1), transparent 50%);
+/* Afternoon: 2-5pm */
+[data-time="afternoon"] {
+  --sky-hue: 35;
+  --sky-saturation: 50%;
+  --sky-lightness: 60%;
+  --ambient-warmth: 0.4;
+  --ambient-brightness: 0.85;
+  --city-lights-opacity: 0;
+  --star-opacity: 0;
+  --sun-position: 70%;
+  --window-tint: rgba(255, 220, 170, 0.06);
 }
 
-.gold-glow {
-  box-shadow: 0 0 20px rgba(201, 168, 76, 0.15),
-              0 0 60px rgba(201, 168, 76, 0.05);
+/* Golden Hour: 5-7pm */
+[data-time="golden_hour"] {
+  --sky-hue: 25;
+  --sky-saturation: 80%;
+  --sky-lightness: 50%;
+  --ambient-warmth: 0.9;
+  --ambient-brightness: 0.7;
+  --city-lights-opacity: 0.2;
+  --star-opacity: 0;
+  --sun-position: 85%;
+  --window-tint: rgba(255, 180, 80, 0.12);
 }
 
-.gradient-border {
-  background: linear-gradient(var(--color-boardroom), var(--color-boardroom)) padding-box,
-              linear-gradient(135deg, #C9A84C, transparent, #C9A84C) border-box;
-  border: 1px solid transparent;
+/* Dusk: 7-9pm */
+[data-time="dusk"] {
+  --sky-hue: 270;
+  --sky-saturation: 55%;
+  --sky-lightness: 30%;
+  --ambient-warmth: 0.5;
+  --ambient-brightness: 0.45;
+  --city-lights-opacity: 0.7;
+  --star-opacity: 0.3;
+  --sun-position: 95%;
+  --window-tint: rgba(60, 30, 80, 0.15);
 }
 
-.film-grain::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: 50;
+/* Night: 9pm-5am (DEFAULT) */
+[data-time="night"] {
+  --sky-hue: 230;
+  --sky-saturation: 60%;
+  --sky-lightness: 8%;
+  --ambient-warmth: 0;
+  --ambient-brightness: 0.3;
+  --city-lights-opacity: 1;
+  --star-opacity: 0.8;
+  --sun-position: -20%;
+  --window-tint: rgba(10, 10, 20, 0.3);
 }
 
-.inner-light {
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+/* =============================================
+   BASE STYLES
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: 'Satoshi', system-ui, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--tower-darkest);
+  overflow: hidden; /* The building IS the viewport */
+}
+
+::selection {
+  background: rgba(201, 168, 76, 0.3);
+  color: var(--text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* =============================================
+   GLASS UTILITIES
+   ============================================= */
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
   }
-  body {
-    @apply bg-background text-foreground;
+
+  .glass-hover {
+    transition: background 180ms ease, border-color 180ms ease;
+  }
+  .glass-hover:hover {
+    background: var(--glass-bg-hover);
+    border-color: rgba(201, 168, 76, 0.15);
+  }
+
+  .glass-card {
+    background: rgba(26, 26, 46, 0.7);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  }
+
+  /* Gold accent line (top of cards, elevator panel) */
+  .gold-border-top {
+    border-top: 2px solid var(--gold);
+  }
+
+  /* Text styles */
+  .text-display {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--text-primary);
+    line-height: 1.15;
+  }
+
+  .text-data {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .text-gold {
+    color: var(--gold);
+  }
+
+  /* Floor label (e.g., "PH", "7", "L") */
+  .floor-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-sm);
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+}
+
+/* =============================================
+   REDUCED MOTION
+   ============================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
