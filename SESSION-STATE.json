@@ -1,7 +1,9 @@
 {
-  "currentTask": "Phase 1: The War Room",
-  "deliverable": "1.1",
-  "status": "not_started",
-  "notes": "Bootstrap system overhaul complete (Session 8). Phase 1 is next — start with docs/MASTER-PLAN.md acceptance criteria.",
-  "updatedAt": "2026-03-19T07:01:34.386Z"
+  "currentTask": "Automation hardening — eliminating manual commands from human workflow",
+  "deliverable": "infra",
+  "status": "in_progress",
+  "blocker": null,
+  "lastFileTouched": "CLAUDE.md",
+  "notes": "Added Mandatory Agent Behavior section to CLAUDE.md. Agent now auto-updates SESSION-STATE.json and runs session:end. CLI scripts kept as fallbacks. About to commit + push.",
+  "updatedAt": "2026-03-19T07:12:00.000Z"
 }

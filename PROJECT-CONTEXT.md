@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-19T03:05:00-04:00 (EDT)
+**Last updated:** 2026-03-19T03:12:00-04:00 (EDT)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -382,6 +382,7 @@ public/skyline/
 | 6 | 2026-03-18 | Final recursive audit: found missing `handle_new_user` trigger → created `src/db/post-push.sql`. Rewrote BOOTSTRAP-PROMPT.md for Phase 1 handoff. Updated MANUAL-GUIDE.md with post-push step. |
 | 7 | 2026-03-19 | **Immersive UI Rebuild** (IMMERSIVE-UI-PLAN.md): Generated day+night NYC skyline photos, depth-separated into 4 layers each. Built SkylineScene (CSS 3D parallax), AtmosphericEffects, DustMotes, WindowTint, EntranceSequence, useMouseParallax, useSkylineVariant, useReducedMotion. Upgraded Elevator (dark wash), Penthouse (glass panels + real Supabase data). Fixed tsParticles v2/v3 conflict. Recursive audit: fixed RAF cascade in useMouseParallax, removed double dynamic import. All pushed to `main`. |
 | 8 | 2026-03-19 | **Bootstrap System Overhaul** — 10 improvements to session handoff infrastructure. (1) Husky pre-commit hook auto-regenerates BOOTSTRAP-PROMPT.md on every commit. (2) SESSION-STATE.json system for capturing mid-task state. (3) Build health check (tsc) embedded in bootstrap output. (4) Git diff since last bootstrap generation with commit tracking. (5) Acceptance criteria auto-tracking — parses MASTER-PLAN.md and checks code for evidence. (6) Dependency freshness check (npm outdated, major versions). (7) Vercel deploy status via check-vercel.ts. (8) Context budget estimation (~tokens for recommended reading files). (9) `npm run session:end` — single command chains type check → bootstrap → commit → push. (10) GitHub Actions CI guard for bootstrap staleness. Also: update-session-state.ts CLI, session-end.ts dry-run mode, fixed shell injection in commit message. 2-pass recursive audit clean. |
+| 9 | 2026-03-19 | **Automation hardening** — Eliminated all manual commands from the human workflow. Added "Mandatory Agent Behavior" section to CLAUDE.md: agent auto-updates SESSION-STATE.json continuously (on task start, pivot, blocker, before commits), runs session:end automatically before closing out, checks Vercel status when relevant. CLI scripts kept as fallbacks only. Human runs zero commands — everything is agent-driven or hook-driven. |
 
 ---
 

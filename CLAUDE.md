@@ -21,13 +21,15 @@ Day/night cycle driven by user's local time. NYC photorealistic skyline with CSS
 - `npm run dev` — dev server
 - `npm run build` — production build
 - `npm run lint` — eslint
-- `npx tsc --noEmit` — type check (run before committing)
+- `npx tsc --noEmit` — type check
 - `npx drizzle-kit generate` — generate migration SQL
 - `npm run bootstrap` — regenerate BOOTSTRAP-PROMPT.md (also auto-runs on every commit via Husky)
-- `npm run session:state -- --task "..." --deliverable "1.2" --status "in_progress"` — update session state
+- `npm run session:end -- --message "..."` — session-end workflow (agent runs this, not human)
+
+### Fallback CLIs (only if agent automation fails)
+- `npm run session:state -- --task "..." --deliverable "1.2" --status "in_progress"` — manual session state update
 - `npm run session:state:clear` — reset session state
-- `npm run session:end` — full session-end workflow (type check → bootstrap → stage → commit → push)
-- `npm run session:end:dry` — dry run of session:end (shows what would happen)
+- `npm run session:end:dry` — dry run of session:end
 
 ## Conventions
 - Server Components by default; "use client" only when needed
@@ -58,12 +60,49 @@ Day/night cycle driven by user's local time. NYC photorealistic skyline with CSS
 ## Bootstrap Infrastructure
 - `scripts/generate-bootstrap.ts` — generates BOOTSTRAP-PROMPT.md with: build health, git diff, acceptance criteria tracking, dep freshness, context budget, session state
 - `scripts/session-end.ts` — chains type check → bootstrap → stage → commit → push into one command
-- `scripts/update-session-state.ts` — CLI tool to update SESSION-STATE.json (task, deliverable, status, blockers)
+- `scripts/update-session-state.ts` — CLI fallback to update SESSION-STATE.json manually (prefer agent auto-update)
 - `.husky/pre-commit` — auto-regenerates BOOTSTRAP-PROMPT.md on every commit
 - `scripts/check-vercel.ts` — writes Vercel deploy status to .vercel-status.json (agent-invoked)
 - `.github/workflows/bootstrap-check.yml` — CI guard that fails PR if bootstrap is stale
 - `SESSION-STATE.json` — captures mid-session task state for handoff (committed to repo)
 - `.bootstrap-last-hash` — tracks last commit hash at generation time (gitignored)
+
+## Mandatory Agent Behavior (NON-NEGOTIABLE)
+These are automatic obligations. The human should never need to run session commands.
+
+### 1. Session State — Update Continuously
+Write `SESSION-STATE.json` directly (no CLI needed) at these trigger points:
+- **Session start**: Set `status` to `in_progress`, `currentTask` to whatever you're working on.
+- **Task pivot**: Whenever you switch to a different task or deliverable.
+- **Blocker hit**: If something blocks progress, set `blocker` immediately.
+- **Before every commit**: Ensure SESSION-STATE.json reflects current reality.
+
+Format:
+```json
+{
+  "currentTask": "Phase 1: The War Room — building task board",
+  "deliverable": "1.3",
+  "status": "in_progress",
+  "blocker": null,
+  "lastFileTouched": "src/app/war-room/page.tsx",
+  "notes": "Task board CRUD complete, wiring up real-time subscriptions next.",
+  "updatedAt": "2026-03-19T07:30:00.000Z"
+}
+```
+
+### 2. Session End — Run Automatically Before Closing Out
+Before ending any session, the agent MUST:
+1. Write final SESSION-STATE.json reflecting current state
+2. Update PROJECT-CONTEXT.md with session log entry
+3. Run: `npm run session:end -- --message "session N: description of what was done"`
+
+This commits + pushes everything. The human does NOTHING.
+
+### 3. Vercel Status — Check When Relevant
+Run `npx tsx scripts/check-vercel.ts` after any deploy-related work or if the user asks about deploy status. The bootstrap generator picks it up automatically.
+
+### 4. Never Leave Dirty State
+If a session is interrupted or errors out, the last valid SESSION-STATE.json should still describe where things stand. Always update state BEFORE doing risky operations, not after.
 
 ## Key Docs
 - `BOOTSTRAP-PROMPT.md` — auto-generated handoff (auto-runs on commit, includes build health + criteria tracking)
