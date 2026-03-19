@@ -1,4 +1,4 @@
-# BOOTSTRAP PROMPT — Phase 1: The War Room
+# BOOTSTRAP PROMPT — Immersive UI Rebuild + Phase 1
 
 ---
 
@@ -7,36 +7,49 @@
 2. Skill helpers listed in "Skill Helpers Loaded" section → use `read` tool with exact file paths
 
 [CONTEXT SUMMARY]
-Current time: Wednesday, March 18, 2026 at 8:07 PM EDT
+Current time: Thursday, March 19, 2026 at 2:04 AM EDT
 User: armaansarora20@gmail.com
 Email: armaansarora20@gmail.com
 
 ## TODO LIST
-The Tower — Phase 1: The War Room
+Immersive Tower UI Rebuild → Then Phase 1
 
-1. [pending] 1.1 — Floor 7 environment (darker tactical aesthetic, cooler blue tones)
-2. [pending] 1.2 — Application CRUD (create, read, update, delete, all RLS-scoped)
-3. [pending] 1.3 — Pipeline visualization (Kanban/funnel on the "war table", drag-and-drop)
-4. [pending] 1.4 — CRO Agent backend (port ~500 LOC tools, Vercel AI SDK v6, Supabase queries)
-5. [pending] 1.5 — CRO Character frontend (2D illustrated, idle animation, conversation panel)
-6. [pending] 1.6 — Character interaction system (reusable for all future characters)
-7. [pending] Wire real Supabase data into Penthouse dashboard (replace placeholder stats)
-8. [pending] Run recursive audit after each major task
+1. [pending] Read IMMERSIVE-UI-PLAN.md — the definitive implementation plan (552 lines)
+2. [pending] Generate/acquire NYC skyline photo assets (day + night, depth-separated into 4 layers)
+3. [pending] Replace SVG Skyline.tsx with photorealistic SkylineScene (CSS 3D parallax layers)
+4. [pending] Implement day/night crossfade with real photo variants
+5. [pending] Add atmospheric effects (vignette, height fog, glass tint, bloom, dust motes)
+6. [pending] Upgrade elevator transitions (skyline shift during travel, dark overlay between floors)
+7. [pending] Upgrade Penthouse dashboard (glass panels over immersive background)
+8. [pending] Cinematic first-login entrance animation
+9. [pending] Wire real Supabase data into Penthouse (replace placeholder stats)
+10. [pending] Run recursive audit on immersive UI
+11. [pending] Phase 1: War Room (Floor 7) — application CRUD, pipeline, CRO agent
+
+## CRITICAL CONTEXT — READ THIS FIRST
+
+The user (Armaan) is HIGHLY DISAPPOINTED with the current UI. The existing Skyline component is flat SVG rectangles — "a pile of junk, 2D, flat, not game-like, not immersive." He wants:
+- **Photorealistic NYC skyline** — real photographs, not shapes
+- **Depth and parallax** — feel like you're looking through a real window
+- **Immersive, game-like quality** — "nano banana standard, cool earth standard, something incredible"
+- **Atmospheric effects** — fog, bloom, glass tint, particles
+
+A comprehensive research operation was completed (5 parallel agents across Opus, GPT-5.4, Gemini Pro, Sonnet). The findings are synthesized into `docs/IMMERSIVE-UI-PLAN.md`. **Read that file before writing any code.**
 
 <connectors>
-- google_cloud_vision_api__pipedream
-- resend__pipedream
-- vercel
-- supabase__pipedream
-- google_forms__pipedream
-- jira_mcp_merge
 - google_sheets__pipedream
 - github_mcp_direct
-- cloud_convert__pipedream
-- youtube_analytics_api__pipedream
-- gcal
 - stripe
 - google_drive
+- google_cloud_vision_api__pipedream
+- gcal
+- google_forms__pipedream
+- supabase__pipedream
+- vercel
+- cloud_convert__pipedream
+- resend__pipedream
+- youtube_analytics_api__pipedream
+- jira_mcp_merge
 </connectors>
 
 ## User Instructions (CRITICAL — preserve verbatim)
@@ -49,111 +62,89 @@ The Tower — Phase 1: The War Room
 - "Furthermore anything that doesn't work should be gotten rid of and things that are update should reflect across the whole system obviously."
 - "Remember cut the fat keep the meat, keep everything organized and meat."
 - "Run the skill which will make you do the readaudit skill for all the work you have done so far. It was made by me."
+- "I am away from my desk right now. Do everything you can, so start with the rest of the project. Add to a list of things I need to manually do when I'm back."
+- "Run multiple agents, use different sub-agents, use all the AI models available, optimize your workflow."
 - Push protection ON — never commit secrets
 - Fully typed TypeScript, no `any`
 - Tailwind v3 (NOT v4) — JS config
 - @supabase/ssr (NOT deprecated auth-helpers)
 - Drizzle RLS uses third-argument array pattern, NOT `.withRLS()`
 
-## SHARED ASSETS (use same name to update)
-- tower_schema_migration
-- manual_action_guide
+## Current State of the App
 
-## Phase 0 — COMPLETE (what exists)
+### What's LIVE and WORKING
+- **Production URL:** `https://internship-command-center-lake.vercel.app`
+- **Repo:** `armaansarora/internship-command-center` on `main` branch (commit `ecb5af7`)
+- **Supabase:** All 16 tables created, `handle_new_user` trigger active, RLS policies in place
+- **Auth:** Google OAuth configured in Supabase (provider ON, callback URL set)
+- **Vercel:** Env vars imported, production deployment READY
+- **Build:** Clean — 15/15 routes, zero TypeScript errors
 
-### Architecture
-- **Next.js 16** (App Router) + **Supabase Postgres** + **Drizzle ORM** + **Vercel AI SDK v6**
-- **React 19**: JSX namespace must be explicitly imported: `import type { JSX } from "react"`
-- **GSAP** for elevator door transitions, **Framer Motion** for component animations
-- **Tailwind v3** with JS config, Tower design tokens (Gold #C9A84C, Dark #1A1A2E, Glass blur 16px)
-- **Fonts**: Playfair Display (headings), Satoshi via Fontshare CDN (body), JetBrains Mono (data)
+### Known Issue — Auth Redirect
+Google OAuth login currently fails because Supabase's **Site URL** setting was pointing to `localhost:3000`. Armaan was told to fix it:
+- **Site URL** → `https://internship-command-center-lake.vercel.app`
+- **Redirect URLs** → `https://internship-command-center-lake.vercel.app/**`
+- **Status:** May or may not be fixed yet. Test by visiting production URL. If login works, it's fixed.
 
-### What's Built (2,463 LOC in src/)
-| Component | File | LOC | Description |
-|---|---|---|---|
-| Root layout | `src/app/layout.tsx` | 64 | Fonts, metadata, globals.css |
-| Auth redirect | `src/app/page.tsx` | 17 | Routes to /penthouse or /lobby |
-| Middleware | `src/middleware.ts` | 19 | Session refresh, public path whitelist |
-| Auth layout | `src/app/(authenticated)/layout.tsx` | 22 | Auth gate → WorldShell |
-| WorldShell | `src/app/(authenticated)/world-shell.tsx` | 32 | DayNight + Cursor + Elevator, `md:ml-16` offset |
-| Lobby | `src/app/lobby/lobby-client.tsx` | 260 | Construction aesthetic, building directory, returning user detection, TowerMark SVG |
-| Penthouse | `src/app/(authenticated)/penthouse/penthouse-client.tsx` | 271 | Glass+gold dashboard, stat cards, pipeline viz, activity feed (PLACEHOLDER DATA) |
-| Skyline | `src/components/world/Skyline.tsx` | 336 | 4-layer parallax SVG, day/night color transitions |
-| Elevator | `src/components/world/Elevator.tsx` | 318 | GSAP door animation, floor counter, useReducedMotion hook |
-| FloorShell | `src/components/world/FloorShell.tsx` | 76 | Sky gradient + Skyline + window tint + floor badge |
-| DayNightProvider | `src/components/world/DayNightProvider.tsx` | 75 | 7 time states, CSS custom properties |
-| CustomCursor | `src/components/world/CustomCursor.tsx` | 130 | 7 contextual states, touch fallback |
-| Schema | `src/db/schema.ts` | 428 | 16 tables, RLS policies, type exports |
-| Contracts | `src/lib/contracts/` (9 files) | 1,015 | Events, agent protocol, API types, department contracts |
-| Types | `src/types/` (3 files) | 81 | UI types (Floor, TimeState, CursorState, ElevatorState), API response, Agent config |
-| Supabase clients | `src/lib/supabase/` (4 files) | 117 | Server, client, admin, middleware |
-| Utilities | `src/lib/utils.ts` + `day-night.ts` | 78 | cn(), formatRelativeDate(), time state calc |
-| Floor stubs | 7 files | ~140 | War Room, Rolodex, Writing Room, Situation Room, Briefing Room, Observatory, C-Suite |
+### What's JUNK (must replace)
+- `src/components/world/Skyline.tsx` — 337 lines of SVG `<rect>` elements pretending to be a skyline. Replace entirely.
+- `src/components/world/FloorShell.tsx` — Composes the fake skyline. Needs rewrite to use new SkylineScene.
+- Penthouse dashboard shows placeholder dashes and zeros — no real data.
 
-### Key Patterns Already Established
-- **Server Components by default**, `"use client"` only when needed
-- **Auth flow**: `getUser()` for reads, `requireUser()` for gates (redirects to /lobby)
-- **FloorShell wrapping**: Every authenticated page wraps content in `<FloorShell floorId="X">`
-- **Elevator SSR safety**: `useReducedMotion()` custom hook (not inline `window.matchMedia`)
-- **Timer cleanup**: `tickTimersRef.current` tracks setTimeout IDs for cleanup on unmount
-- **Zod v4** for all validation (contracts use `zod/v4` import)
-- **No localStorage/sessionStorage** — uses cookies and server state only
+### What's SOLID (keep)
+- Auth system (middleware, callbacks, server/client/admin Supabase clients) — 168 LOC
+- Database schema (Drizzle ORM, 16 tables, RLS) — 440 LOC
+- Contracts (Zod v4 schemas, 9 files) — 1,015 LOC
+- Types (UI, API, Agents) — 81 LOC
+- DayNightProvider, CustomCursor, Elevator — all functional
+- Lobby (lobby-client.tsx) — functional login page
+- All config (Tailwind, Next, Drizzle, TS)
+- Docs (master plan, tech brief, vision spec, character prompts)
 
-### What's NOT Built Yet (Phase 0 gaps to close in Phase 1)
-- **Penthouse uses placeholder data** — stat cards show "—", pipeline shows 0 total, activity feed is empty. Must wire real Supabase queries once schema is pushed.
-- **Contracts are type-only** — nothing in `src/app/` or `src/components/` imports them yet. Phase 1 wires them.
-- **No API routes beyond auth** — no `/api/applications`, no `/api/agents`, nothing.
-- **No server actions** — all forms are placeholder.
+## The Implementation Plan
 
-## Phase 1 Scope (from MASTER-PLAN.md)
+**READ THIS FILE:** `/home/user/workspace/command-center/docs/IMMERSIVE-UI-PLAN.md`
 
-### Deliverables
-| # | Deliverable | Complexity | Description |
-|---|---|---|---|
-| 1.1 | Floor 7 Environment | M | War Room atmosphere: darker, tactical, data-dense. Cooler blue lighting. |
-| 1.2 | Application CRUD | M | Full CRUD. Status pipeline: Saved → Applied → Phone Screen → Interview → Offer → Rejected. Search/filter. RLS-scoped. |
-| 1.3 | Pipeline Visualization | M | Visual Kanban/funnel as part of the room environment — data on the "war table." Drag-and-drop status changes. |
-| 1.4 | CRO Agent (Backend) | L | Port ~500 LOC CRO tools. Vercel AI SDK v6 `generateText` with tools. Supabase queries. Tools: `queryApplications`, `updateStatus`, `suggestFollowUp`, `analyzeConversionRates`. |
-| 1.5 | CRO Character (Frontend) | M | 2D illustrated character. Idle animation at whiteboard. Click → conversation panel. Personality: aggressive, numbers-driven. |
-| 1.6 | Character Interaction System | L | Reusable for all 8 characters. Components: character sprite with parallax depth, approach detection, conversation panel (styled as dialogue, not chatbot), AI message streaming, character personality injection. |
+Key decisions already made (do NOT revisit):
+- **CSS 3D layered photo parallax** — NOT Three.js/R3F (real photos > procedural 3D for fixed-direction view)
+- **New packages:** `lenis`, `motion`, `@tsparticles/react`, `@tsparticles/slim` (~50KB total)
+- **Keep:** GSAP (already installed), DayNightProvider, Elevator (enhance, don't replace)
+- **NOT using:** Remotion, Three.js, Rive, Lottie, Theatre.js
+- **Asset approach:** Real NYC panoramic photo → depth-separated into 4 layers → day + night variants
 
-### Acceptance Criteria
-- [ ] User can create an application and see it in the pipeline
-- [ ] Drag-and-drop changes application status
-- [ ] CRO agent can answer "How's my pipeline looking?" with real data
-- [ ] CRO character has visible idle animation and talking state
-- [ ] Conversation feels in-character (aggressive, numbers-driven tone)
-- [ ] All data is RLS-scoped — multi-tenant safe
-- [ ] Penthouse dashboard shows real data (not placeholders)
-
-### Dependencies (must be done before Phase 1 code works)
-- Armaan must complete MANUAL-GUIDE.md steps: migration SQL, post-push SQL, Google OAuth, Vercel env vars, branch merge
-- Old repo CRO agent code reference: `/home/user/workspace/internship-command-center-8c4c1ad1/src/contracts/departments/cro.ts` (already ported to `src/lib/contracts/departments/cro.ts`)
-- Old repo agent system: `/home/user/workspace/internship-command-center-8c4c1ad1/src/agents/` (~1,815 LOC to adapt)
+## Research Files (for reference)
+- `/home/user/workspace/command-center/docs/IMMERSIVE-UI-PLAN.md` — THE PLAN (read this)
+- `/home/user/workspace/command-center/docs/research/research-threejs-r3f.md` — Three.js/R3F findings
+- `/home/user/workspace/command-center/docs/research/research-animation-frameworks.md` — Animation framework comparison
+- `/home/user/workspace/command-center/docs/research/research-gamedev-techniques.md` — Game dev techniques for web
+- `/home/user/workspace/command-center/docs/research/research-reference-sites.md` — Awwwards references, inspiration
+- `/home/user/workspace/command-center/docs/research/research-nyc-visuals.md` — NYC imagery approaches
 
 ## Key Infrastructure
 
 | Service | Detail |
 |---|---|
-| **Repo** | `armaansarora/internship-command-center` on `docs-handoff` branch (commit `ce72f38`) |
+| **Repo** | `armaansarora/internship-command-center` on `main` branch (commit `ecb5af7`) |
 | **Supabase** | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | **Vercel** | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g`, Team `team_EC8AIyc155clLRjzrJ0fblpa` |
-| **Preview** | `internship-command-center-fhl391gov-armaan-aroras-projects.vercel.app` (READY) |
-| **Production** | `internship-command-center-lake.vercel.app` (needs branch merge) |
+| **Production** | `internship-command-center-lake.vercel.app` |
+| **Design tokens** | Gold `#C9A84C`, Dark `#1A1A2E`, Glass blur 16px, Playfair Display/Satoshi/JetBrains Mono |
 
 ## Critical Context Files (READ THESE)
-1. `/home/user/workspace/command-center/PROJECT-CONTEXT.md` — full operational context, updated session log
-2. `/home/user/workspace/command-center/docs/MASTER-PLAN.md` — Phase 1 acceptance criteria (lines 65-93)
-3. `/home/user/workspace/command-center/docs/VISION-SPEC.md` — spatial UI spec, character system
-4. `/home/user/workspace/command-center/docs/CHARACTER-PROMPTS.md` — CRO personality and system prompt
-5. `/home/user/workspace/command-center/docs/TECH-BRIEF.md` — Vercel AI SDK v6 patterns, Inngest, Drizzle
-6. `/home/user/workspace/command-center/.env.local` — credentials (⚠️ publishable key needs update — see MANUAL-GUIDE.md)
+1. `/home/user/workspace/command-center/docs/IMMERSIVE-UI-PLAN.md` — **THE IMPLEMENTATION PLAN** ⬅️ START HERE
+2. `/home/user/workspace/command-center/PROJECT-CONTEXT.md` — full operational context
+3. `/home/user/workspace/command-center/docs/MASTER-PLAN.md` — Phase 1 acceptance criteria
+4. `/home/user/workspace/command-center/docs/VISION-SPEC.md` — spatial UI spec, character system
+5. `/home/user/workspace/command-center/docs/CHARACTER-PROMPTS.md` — CRO personality
+6. `/home/user/workspace/command-center/docs/TECH-BRIEF.md` — AI SDK v6 patterns, Drizzle
+7. `/home/user/workspace/command-center/.env.local` — credentials (anon key is correct `eyJ*` format)
 
 ## Skills Loaded (must reload)
 - `website-building/webapp`
 - `design-foundations`
-- `coding-and-data`
 - `recursive-audit`
+- `research-assistant`
+- `media` (for image generation if needed)
 
 ## Skill Helpers Loaded (must re-read)
 - `/home/user/workspace/skills/website-building/shared/01-design-tokens.md`
@@ -163,18 +154,19 @@ The Tower — Phase 1: The War Room
 | Session | Work Done |
 |---|---|
 | 1 | Created Phase 0 foundation: Next.js 16, 16-table schema, Auth, layout, all stubs |
-| 2 | Recursive audit (15 findings), all fixed. Commit `209ad16`. |
+| 2 | Recursive audit (15 findings), all fixed. |
 | 3 | Started 0.5 Skyline, hit JSX type error mid-build. |
-| 4 | Fixed JSX → Skyline (0.5) → Elevator (0.6) → Lobby (0.7) → Penthouse (0.8) → Contracts (0.9, 1,015 LOC) → Deploy (0.10). Commit `dc73756`. |
-| 5 | Updated PROJECT-CONTEXT.md, MANUAL-GUIDE.md. Final audit: found missing `handle_new_user` trigger — created `post-push.sql`. Rewrote BOOTSTRAP-PROMPT.md for Phase 1 handoff. Commit `ce72f38`+ |
+| 4 | Fixed JSX → Skyline (0.5) → Elevator (0.6) → Lobby (0.7) → Penthouse (0.8) → Contracts (0.9, 1,015 LOC) → Deploy (0.10). |
+| 5 | Updated PROJECT-CONTEXT.md, MANUAL-GUIDE.md. Final audit: found missing `handle_new_user` trigger — created `post-push.sql`. |
+| 6 | Updated .env.local with real anon key + Google OAuth creds. Ran migration + post-push SQL. Merged `docs-handoff` → `main`. Production deploy READY. Fixed Supabase Site URL redirect issue. User saw the live app — declared UI "a pile of junk." **5 parallel research agents deployed** (Opus, GPT-5.4, Gemini Pro, Sonnet) across Three.js, animation frameworks, game dev techniques, reference sites, NYC visual assets. Synthesis agent (Opus) produced IMMERSIVE-UI-PLAN.md. |
 
 ## Technical Notes (Gotchas)
 - **React 19 + Next.js 16:** JSX namespace must be `import type { JSX } from "react"` — not global
 - **Elevator SSR:** Uses `useReducedMotion()` custom hook, not inline `window.matchMedia`
-- **Timer cleanup:** `tickTimersRef.current` tracks setTimeout IDs for cleanup on unmount
 - **Drizzle RLS:** Third-argument array pattern, NOT `.withRLS()`
 - **@supabase/ssr:** NOT deprecated auth-helpers
 - **Tailwind:** v3 with JS config (NOT v4 with CSS config)
-- **Supabase key:** `.env.local` has `sb_publishable_*` format — may need classic `eyJ*` anon key for REST API
-- **Vercel auto-deploy:** `docs-handoff` gets preview deploys, `main` gets production
+- **Supabase anon key:** Already updated to `eyJ*` format in `.env.local`
+- **Vercel auto-deploy:** `main` branch → production
 - **No `any` types** — everything fully typed TypeScript
+- **Old repo reference:** `/home/user/workspace/internship-command-center-8c4c1ad1/src/` (agent code to port later)
