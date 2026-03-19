@@ -2,69 +2,37 @@
 
 import { useState, useEffect, type JSX } from "react";
 import { EntranceSequence } from "@/components/transitions/EntranceSequence";
+import type {
+  PenthouseStats,
+  PipelineStageData,
+  ActivityItemData,
+} from "./penthouse-data";
 
-/** Dashboard stat card data shape */
-interface StatCard {
+/** Stat card display config */
+interface StatCardConfig {
   label: string;
   value: string;
-  delta?: string;
-  deltaDirection?: "up" | "down" | "flat";
   icon: string;
 }
-
-/** Activity feed item */
-interface ActivityItem {
-  id: string;
-  type: "application" | "email" | "interview" | "follow_up";
-  title: string;
-  description: string;
-  timestamp: string;
-}
-
-/** Pipeline stage counts */
-interface PipelineStage {
-  name: string;
-  count: number;
-  color: string;
-}
-
-/**
- * Placeholder data — will be replaced with real Supabase queries.
- */
-const PLACEHOLDER_STATS: StatCard[] = [
-  { label: "Applications", value: "—", icon: "📋" },
-  { label: "In Pipeline", value: "—", icon: "🔄" },
-  { label: "Interviews", value: "—", icon: "🎯" },
-  { label: "Response Rate", value: "—%", icon: "📊" },
-];
-
-const PLACEHOLDER_PIPELINE: PipelineStage[] = [
-  { name: "Saved", count: 0, color: "var(--text-muted)" },
-  { name: "Applied", count: 0, color: "var(--info)" },
-  { name: "Screen", count: 0, color: "var(--warning)" },
-  { name: "Interview", count: 0, color: "var(--gold)" },
-  { name: "Offer", count: 0, color: "var(--success)" },
-];
-
-const PLACEHOLDER_ACTIVITY: ActivityItem[] = [];
 
 /**
  * PenthouseClient — The hero dashboard with glass-panel UI over immersive skyline.
  *
- * Layout:
- * - Wrapped in EntranceSequence for cinematic first-login
- * - Glass panel containers over the photorealistic NYC skyline background
- * - Top: Greeting + time-of-day awareness
- * - Middle: 4 stat cards (glass + gold accents)
- * - Pipeline: Visual pipeline bar
- * - Bottom: Recent activity feed + quick actions
+ * Receives real data from the server component (Supabase queries).
+ * Falls back gracefully to "—" when no data exists yet.
  */
 export function PenthouseClient({
   userName,
   userEmail,
+  stats,
+  pipeline,
+  activity,
 }: {
   userName: string | null;
   userEmail: string;
+  stats: PenthouseStats;
+  pipeline: PipelineStageData[];
+  activity: ActivityItemData[];
 }): JSX.Element {
   const [greeting, setGreeting] = useState("Welcome");
 
@@ -77,10 +45,31 @@ export function PenthouseClient({
   }, []);
 
   const displayName = userName ?? userEmail.split("@")[0];
-  const stats = PLACEHOLDER_STATS;
-  const pipeline = PLACEHOLDER_PIPELINE;
-  const activity = PLACEHOLDER_ACTIVITY;
   const totalPipeline = pipeline.reduce((sum, s) => sum + s.count, 0);
+
+  // Build stat cards from real data
+  const statCards: StatCardConfig[] = [
+    {
+      label: "Applications",
+      value: stats.totalApplications > 0 ? String(stats.totalApplications) : "—",
+      icon: "📋",
+    },
+    {
+      label: "In Pipeline",
+      value: stats.inPipeline > 0 ? String(stats.inPipeline) : "—",
+      icon: "🔄",
+    },
+    {
+      label: "Interviews",
+      value: stats.interviews > 0 ? String(stats.interviews) : "—",
+      icon: "🎯",
+    },
+    {
+      label: "Response Rate",
+      value: stats.totalApplications > 0 ? `${stats.responseRate}%` : "—%",
+      icon: "📊",
+    },
+  ];
 
   return (
     <EntranceSequence>
@@ -98,13 +87,14 @@ export function PenthouseClient({
 
         {/* ── Stat Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat) => (
+          {statCards.map((stat) => (
             <div
               key={stat.label}
               className="glass-card gold-border-top p-5 flex flex-col gap-3 backdrop-blur-xl"
               style={{
                 background: "rgba(26, 26, 46, 0.65)",
-                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
+                boxShadow:
+                  "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
               }}
             >
               <div className="flex items-center justify-between">
@@ -117,25 +107,6 @@ export function PenthouseClient({
                 <span className="text-data text-2xl text-[var(--gold)]">
                   {stat.value}
                 </span>
-                {stat.delta && (
-                  <span
-                    className={[
-                      "text-data text-xs mb-1",
-                      stat.deltaDirection === "up"
-                        ? "text-[var(--success)]"
-                        : stat.deltaDirection === "down"
-                          ? "text-[var(--error)]"
-                          : "text-[var(--text-muted)]",
-                    ].join(" ")}
-                  >
-                    {stat.deltaDirection === "up"
-                      ? "↑"
-                      : stat.deltaDirection === "down"
-                        ? "↓"
-                        : "→"}
-                    {stat.delta}
-                  </span>
-                )}
               </div>
             </div>
           ))}
@@ -146,7 +117,8 @@ export function PenthouseClient({
           className="glass-card p-6 space-y-4 backdrop-blur-xl"
           style={{
             background: "rgba(26, 26, 46, 0.6)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
+            boxShadow:
+              "0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >
           <div className="flex items-center justify-between">
@@ -168,7 +140,6 @@ export function PenthouseClient({
             </div>
           ) : (
             <>
-              {/* Pipeline bar */}
               <div className="flex h-3 rounded-full overflow-hidden bg-[var(--tower-surface)]">
                 {pipeline.map((stage) =>
                   stage.count > 0 ? (
@@ -183,8 +154,6 @@ export function PenthouseClient({
                   ) : null,
                 )}
               </div>
-
-              {/* Pipeline legend */}
               <div className="flex flex-wrap gap-4">
                 {pipeline.map((stage) => (
                   <div key={stage.name} className="flex items-center gap-2">
@@ -210,7 +179,8 @@ export function PenthouseClient({
           className="glass-card p-6 space-y-4 backdrop-blur-xl"
           style={{
             background: "rgba(26, 26, 46, 0.6)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
+            boxShadow:
+              "0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >
           <h2 className="text-sm font-medium text-[var(--text-primary)]">
@@ -302,8 +272,12 @@ export function PenthouseClient({
   );
 }
 
-function ActivityIcon({ type }: { type: ActivityItem["type"] }): JSX.Element {
-  const icons: Record<ActivityItem["type"], string> = {
+function ActivityIcon({
+  type,
+}: {
+  type: ActivityItemData["type"];
+}): JSX.Element {
+  const icons: Record<ActivityItemData["type"], string> = {
     application: "📋",
     email: "📧",
     interview: "🎯",
