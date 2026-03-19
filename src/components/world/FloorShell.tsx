@@ -30,15 +30,30 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
         <ProceduralSkyline floorId={floorId} />
       </div>
 
-      {/* Window frame vignette */}
+      {/* Window frame vignette — stronger for penthouse (higher floor = clearer view) */}
       <div
         className="pointer-events-none absolute inset-0"
         aria-hidden="true"
         style={{
-          boxShadow: "inset 0 0 180px 60px rgba(4, 6, 15, 0.6)",
+          boxShadow: floorId === "PH"
+            ? "inset 0 0 140px 40px rgba(4, 6, 15, 0.45)"
+            : "inset 0 0 180px 60px rgba(4, 6, 15, 0.6)",
           zIndex: 1,
         }}
       />
+
+      {/* Penthouse: subtle ambient light at top — you're at the summit */}
+      {floorId === "PH" && (
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0"
+          aria-hidden="true"
+          style={{
+            height: "30%",
+            background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.02) 0%, transparent 100%)",
+            zIndex: 1,
+          }}
+        />
+      )}
 
       {/* Window mullions — subtle vertical glass dividers */}
       <div
