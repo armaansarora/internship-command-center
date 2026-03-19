@@ -1,19 +1,13 @@
 "use client";
 
 import { type JSX } from "react";
-import dynamic from "next/dynamic";
 import type { FloorId } from "@/types/ui";
 import { useMouseParallax } from "@/hooks/useMouseParallax";
 import { useSkylineVariant } from "@/hooks/useSkylineVariant";
 import { SkylineLayers } from "./SkylineLayers";
 import { AtmosphericEffects } from "./AtmosphericEffects";
 import { WindowTint } from "./WindowTint";
-
-// Lazy load DustMotes — it pulls in tsParticles which is heavy
-const DustMotes = dynamic(
-  () => import("./DustMotes").then((mod) => ({ default: mod.DustMotes })),
-  { ssr: false }
-);
+import { DustMotes } from "./DustMotes";
 
 interface SkylineSceneProps {
   floorId: FloorId;
@@ -27,7 +21,7 @@ interface SkylineSceneProps {
  * 2. Day skyline layers (4x WebP in CSS 3D perspective)
  * 3. Night skyline layers (4x WebP, crossfaded via opacity)
  * 4. Atmospheric effects (vignette, height fog, bloom)
- * 5. Dust motes (tsParticles, dynamic import)
+ * 5. Dust motes (tsParticles, lazy-initialized internally)
  * 6. Window tint (glass effect overlay)
  *
  * Replaces the old SVG-based Skyline.tsx with photorealistic imagery.
