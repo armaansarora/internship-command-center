@@ -1,37 +1,65 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
+import { ProceduralSkyline } from "@/components/world/ProceduralSkyline";
+import gsap from "gsap";
 
 /**
- * Lobby client component — The building entrance.
+ * Lobby client component — The Tower entrance.
  *
- * Construction-mode aesthetic: bare concrete, scaffolding grid, exposed beams.
- * Returning users see a welcome-back greeting.
- * Building directory shows floor status (locked/available).
+ * Immersive experience: you're standing at ground level looking up at the NYC skyline.
+ * The building directory is a physical lobby directory board.
+ * The sign-in is like entering through glass lobby doors.
  */
 export function LobbyClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isReturningUser, setIsReturningUser] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const directoryRef = useRef<HTMLDivElement>(null);
 
-  // Detect returning users via Supabase session check
+  // Detect returning users
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      // If there's a session but the server redirect brought them here,
-      // they're a returning user with an expired/invalid session
-      if (session === null) {
-        // Check for any stored auth indicator — we can't use localStorage
-        // in sandboxed iframes, so we rely on the Supabase cookie state
-      }
-    });
-    // Simple heuristic: if there are Supabase cookies present, they've been here before
     if (typeof document !== "undefined") {
       const hasPriorVisit = document.cookie.includes("sb-");
       setIsReturningUser(hasPriorVisit);
     }
+  }, []);
+
+  // Entrance animation
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    tl.fromTo(
+      contentRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 1.5 }
+    );
+
+    if (heroRef.current) {
+      tl.fromTo(
+        heroRef.current,
+        { y: 60, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.2 },
+        "-=1.0"
+      );
+    }
+
+    if (directoryRef.current) {
+      tl.fromTo(
+        directoryRef.current,
+        { y: 40, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1 },
+        "-=0.6"
+      );
+    }
+
+    return () => { tl.kill(); };
   }, []);
 
   async function handleSignIn() {
@@ -57,81 +85,164 @@ export function LobbyClient() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden">
-      {/* Background — dark concrete */}
+    <div className="relative flex min-h-dvh flex-col items-center overflow-hidden">
+      {/* ── IMMERSIVE SKYLINE BACKGROUND ── */}
+      <ProceduralSkyline floorId="L" />
+
+      {/* ── WINDOW FRAME OVERLAY ── */}
       <div
-        className="absolute inset-0"
+        className="pointer-events-none absolute inset-0"
+        aria-hidden="true"
         style={{
+          boxShadow: "inset 0 0 200px 80px rgba(4, 6, 15, 0.7)",
+          zIndex: 1,
+        }}
+      />
+
+      {/* ── GROUND-LEVEL FOG ── */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        aria-hidden="true"
+        style={{
+          height: "40%",
           background:
-            "linear-gradient(180deg, var(--tower-darkest) 0%, #0D0D18 40%, var(--tower-darker) 100%)",
+            "linear-gradient(to top, rgba(10, 10, 20, 0.95) 0%, rgba(10, 10, 20, 0.6) 30%, rgba(10, 10, 20, 0.2) 60%, transparent 100%)",
+          zIndex: 2,
         }}
       />
 
-      {/* Construction scaffolding grid */}
+      {/* ── GLASS REFLECTIONS (subtle) ── */}
       <div
-        className="absolute inset-0 opacity-[0.025]"
+        className="pointer-events-none absolute inset-0"
+        aria-hidden="true"
         style={{
-          backgroundImage: `
-            linear-gradient(var(--gold) 1px, transparent 1px),
-            linear-gradient(90deg, var(--gold) 1px, transparent 1px)
+          background: `
+            linear-gradient(135deg, rgba(201, 168, 76, 0.02) 0%, transparent 50%),
+            linear-gradient(225deg, rgba(100, 120, 200, 0.015) 0%, transparent 50%)
           `,
-          backgroundSize: "60px 60px",
+          zIndex: 3,
         }}
       />
 
-      {/* Concrete texture noise overlay */}
+      {/* ── WINDOW MULLIONS (vertical glass dividers) ── */}
       <div
-        className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
-        }}
-      />
+        className="pointer-events-none absolute inset-0 flex justify-between px-[12%]"
+        aria-hidden="true"
+        style={{ zIndex: 4 }}
+      >
+        <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.05) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.05) 100%)" }} />
+        <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.03) 0%, rgba(201, 168, 76, 0.08) 50%, rgba(201, 168, 76, 0.03) 100%)" }} />
+        <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.05) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.05) 100%)" }} />
+      </div>
 
-      {/* Exposed beam — horizontal accent */}
-      <div className="absolute top-[15%] left-0 right-0 h-px bg-[var(--gold)] opacity-10" />
-      <div className="absolute top-[85%] left-0 right-0 h-px bg-[var(--gold)] opacity-10" />
-      <div className="absolute top-0 bottom-0 left-[10%] w-px bg-[var(--gold)] opacity-[0.05]" />
-      <div className="absolute top-0 bottom-0 right-[10%] w-px bg-[var(--gold)] opacity-[0.05]" />
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-10 px-6 max-w-md w-full">
-        {/* Construction badge */}
-        <div className="floor-label tracking-[0.25em] text-[10px] opacity-40">
+      {/* ── MAIN CONTENT ── */}
+      <div
+        ref={contentRef}
+        className="relative flex flex-col items-center justify-center min-h-dvh px-6 w-full max-w-lg mx-auto gap-8 py-12"
+        style={{ zIndex: 10, opacity: 0 }}
+      >
+        {/* Floor indicator — like a real lobby sign */}
+        <div
+          className="absolute top-6 left-1/2 -translate-x-1/2"
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            letterSpacing: "0.3em",
+            color: "var(--gold)",
+            opacity: 0.5,
+          }}
+        >
           FLOOR L — THE LOBBY
         </div>
 
-        {/* Tower mark */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-px w-10 bg-[var(--gold)] opacity-30" />
-            <TowerMark />
-            <div className="h-px w-10 bg-[var(--gold)] opacity-30" />
+        {/* ── HERO SECTION ── */}
+        <div ref={heroRef} className="flex flex-col items-center gap-6 text-center">
+          {/* Tower Logo Mark */}
+          <div className="relative">
+            <TowerLogo />
+            {/* Glow behind logo */}
+            <div
+              className="absolute inset-0 -m-4 rounded-full"
+              style={{
+                background: "radial-gradient(circle, rgba(201, 168, 76, 0.15) 0%, transparent 70%)",
+                filter: "blur(20px)",
+              }}
+              aria-hidden="true"
+            />
           </div>
 
-          <h1 className="text-display text-xl tracking-tight">The Tower</h1>
-
-          <p className="max-w-xs text-center text-sm text-[var(--text-secondary)] leading-relaxed">
-            {isReturningUser
-              ? "Welcome back. Your offices are as you left them."
-              : "Your internship command center. AI-powered pipeline management, research, and preparation."}
-          </p>
+          <div className="space-y-3">
+            <h1
+              className="text-3xl md:text-4xl tracking-tight"
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                color: "var(--text-primary)",
+                textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+              }}
+            >
+              The Tower
+            </h1>
+            <p
+              className="text-sm leading-relaxed max-w-xs mx-auto"
+              style={{
+                color: "var(--text-secondary)",
+                textShadow: "0 1px 10px rgba(0,0,0,0.8)",
+              }}
+            >
+              {isReturningUser
+                ? "Welcome back. Your offices are as you left them."
+                : "Your internship command center. AI-powered pipeline management, research, and preparation."}
+            </p>
+          </div>
         </div>
 
-        {/* Sign-in card */}
-        <div className="glass-card gold-border-top w-full p-8">
-          <div className="flex flex-col items-center gap-6">
-            <p className="text-sm text-[var(--text-secondary)]">
+        {/* ── SIGN-IN CARD ── */}
+        <div
+          className="w-full rounded-xl overflow-hidden"
+          style={{
+            background: "rgba(10, 12, 25, 0.75)",
+            backdropFilter: "blur(24px) saturate(1.4)",
+            WebkitBackdropFilter: "blur(24px) saturate(1.4)",
+            border: "1px solid rgba(201, 168, 76, 0.2)",
+            borderTop: "2px solid rgba(201, 168, 76, 0.5)",
+            boxShadow:
+              "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(201, 168, 76, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+          }}
+        >
+          <div className="p-8 flex flex-col items-center gap-6">
+            <p
+              className="text-sm"
+              style={{ color: "var(--text-secondary)" }}
+            >
               {isReturningUser ? "Resume your session" : "Enter the building"}
             </p>
 
             <button
               onClick={handleSignIn}
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-3 rounded-lg bg-[var(--gold)] px-6 py-3 text-sm font-medium text-[var(--tower-darkest)] transition-all hover:bg-[var(--gold-bright)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3.5 text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: "linear-gradient(135deg, var(--gold) 0%, #E8C45A 100%)",
+                color: "var(--tower-darkest)",
+                boxShadow: "0 4px 20px rgba(201, 168, 76, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.boxShadow = "0 6px 30px rgba(201, 168, 76, 0.5), inset 0 1px 0 rgba(255,255,255,0.3)";
+                (e.target as HTMLElement).style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.boxShadow = "0 4px 20px rgba(201, 168, 76, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)";
+                (e.target as HTMLElement).style.transform = "translateY(0)";
+              }}
             >
               {isLoading ? (
-                <span className="text-data text-xs tracking-wider">
+                <span
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "11px",
+                    letterSpacing: "0.15em",
+                  }}
+                >
                   AUTHENTICATING...
                 </span>
               ) : (
@@ -143,39 +254,73 @@ export function LobbyClient() {
             </button>
 
             {error && (
-              <p className="text-xs text-[var(--error)]">{error}</p>
+              <p className="text-xs" style={{ color: "var(--error)" }}>
+                {error}
+              </p>
             )}
           </div>
         </div>
 
-        {/* Building Directory */}
-        <div className="w-full">
-          <div className="text-data text-[10px] tracking-[0.2em] text-[var(--text-muted)] mb-3 text-center uppercase">
-            Building Directory
+        {/* ── BUILDING DIRECTORY ── */}
+        <div ref={directoryRef} className="w-full space-y-3">
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "10px",
+              letterSpacing: "0.25em",
+              color: "var(--text-muted)",
+              textAlign: "center",
+              textShadow: "0 1px 5px rgba(0,0,0,0.5)",
+            }}
+          >
+            BUILDING DIRECTORY
           </div>
-          <div className="glass rounded-lg p-4 space-y-1">
-            {FLOORS.filter((f) => f.id !== "L").map((floor) => (
-              <DirectoryRow
-                key={floor.id}
-                floorId={floor.id}
-                name={floor.name}
-                label={floor.label}
-                available={floor.phase === 0}
-              />
-            ))}
+
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{
+              background: "rgba(10, 12, 25, 0.65)",
+              backdropFilter: "blur(20px) saturate(1.3)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.3)",
+              border: "1px solid rgba(255, 255, 255, 0.06)",
+              boxShadow: "0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.03)",
+            }}
+          >
+            <div className="p-3 space-y-0.5">
+              {FLOORS.filter((f) => f.id !== "L").map((floor) => (
+                <DirectoryRow
+                  key={floor.id}
+                  floorId={floor.id}
+                  name={floor.name}
+                  label={floor.label}
+                  available={floor.phase === 0}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Construction notice */}
-        <p className="text-data text-[10px] text-[var(--text-muted)] tracking-[0.15em] opacity-60">
+        {/* ── CONSTRUCTION BADGE ── */}
+        <div
+          className="flex items-center gap-3"
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            letterSpacing: "0.15em",
+            color: "var(--text-muted)",
+            opacity: 0.5,
+          }}
+        >
+          <div className="h-px w-8" style={{ background: "var(--gold)", opacity: 0.3 }} />
           UNDER CONSTRUCTION — PHASE 0
-        </p>
+          <div className="h-px w-8" style={{ background: "var(--gold)", opacity: 0.3 }} />
+        </div>
       </div>
     </div>
   );
 }
 
-/** Single row in the building directory */
+/** Directory row with hover state */
 function DirectoryRow({
   floorId,
   name,
@@ -189,49 +334,101 @@ function DirectoryRow({
 }) {
   return (
     <div
-      className={[
-        "flex items-center gap-3 px-3 py-2 rounded transition-opacity",
-        available ? "opacity-100" : "opacity-30",
-      ].join(" ")}
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
+        available
+          ? "hover:bg-white/[0.04] cursor-default"
+          : "opacity-35"
+      }`}
+      style={
+        available
+          ? {
+              borderLeft: "2px solid rgba(201, 168, 76, 0.4)",
+            }
+          : {
+              borderLeft: "2px solid transparent",
+            }
+      }
     >
-      <span className="text-data text-xs text-[var(--gold)] w-7 text-right shrink-0">
+      <span
+        className="w-7 text-right shrink-0"
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: "12px",
+          color: available ? "var(--gold)" : "var(--text-muted)",
+          textShadow: available ? "0 0 10px rgba(201, 168, 76, 0.3)" : "none",
+        }}
+      >
         {floorId}
       </span>
-      <span className="h-3 w-px bg-[var(--glass-border)]" />
-      <span className="text-xs text-[var(--text-primary)] flex-1 truncate">
+      <span
+        className="h-4 w-px shrink-0"
+        style={{ background: "rgba(255, 255, 255, 0.08)" }}
+      />
+      <span
+        className="text-xs flex-1 truncate"
+        style={{
+          color: available ? "var(--text-primary)" : "var(--text-muted)",
+          fontFamily: "'Satoshi', sans-serif",
+        }}
+      >
         {name}
       </span>
-      <span className="text-[10px] text-[var(--text-muted)] shrink-0">
+      <span
+        className="shrink-0"
+        style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: "9px",
+          letterSpacing: "0.1em",
+          color: available ? "var(--text-secondary)" : "var(--text-muted)",
+        }}
+      >
         {available ? label : "LOCKED"}
       </span>
     </div>
   );
 }
 
-/** Minimal SVG tower mark — geometric building silhouette */
-function TowerMark() {
+/** Tower Logo SVG — geometric Art Deco building mark */
+function TowerLogo() {
   return (
     <svg
-      width="24"
-      height="32"
-      viewBox="0 0 24 32"
+      width="48"
+      height="64"
+      viewBox="0 0 48 64"
       fill="none"
       aria-label="The Tower"
+      className="relative"
+      style={{ filter: "drop-shadow(0 2px 10px rgba(201, 168, 76, 0.3))" }}
     >
-      <rect x="4" y="8" width="16" height="24" fill="var(--gold)" opacity="0.15" />
-      <rect x="6" y="4" width="12" height="28" fill="var(--gold)" opacity="0.25" />
-      <rect x="8" y="0" width="8" height="32" fill="var(--gold)" opacity="0.4" />
-      {/* Window dots */}
-      <rect x="10" y="6" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      <rect x="12.5" y="6" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      <rect x="10" y="10" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      <rect x="12.5" y="10" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      <rect x="10" y="14" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      <rect x="12.5" y="14" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      <rect x="10" y="18" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      <rect x="12.5" y="18" width="1.5" height="1.5" fill="var(--gold)" opacity="0.6" />
-      {/* Door */}
-      <rect x="10" y="26" width="4" height="6" fill="var(--gold)" opacity="0.5" />
+      {/* Main tower body */}
+      <rect x="14" y="16" width="20" height="48" fill="var(--gold)" opacity="0.12" />
+      <rect x="17" y="10" width="14" height="54" fill="var(--gold)" opacity="0.2" />
+      <rect x="20" y="4" width="8" height="60" fill="var(--gold)" opacity="0.35" />
+
+      {/* Spire */}
+      <rect x="23" y="0" width="2" height="6" fill="var(--gold)" opacity="0.6" />
+      <circle cx="24" cy="0" r="1.5" fill="var(--gold)" opacity="0.8" />
+
+      {/* Window grid */}
+      {[12, 20, 28, 36, 44, 52].map((y) => (
+        <g key={y}>
+          <rect x="21" y={y} width="2.5" height="3" fill="var(--gold)" opacity="0.4" rx="0.3" />
+          <rect x="24.5" y={y} width="2.5" height="3" fill="var(--gold)" opacity="0.4" rx="0.3" />
+        </g>
+      ))}
+
+      {/* Lobby entrance glow */}
+      <rect x="21" y="56" width="6" height="8" fill="var(--gold)" opacity="0.6" rx="0.5" />
+
+      {/* Side step-backs (Art Deco) */}
+      <rect x="10" y="28" width="4" height="36" fill="var(--gold)" opacity="0.08" />
+      <rect x="34" y="28" width="4" height="36" fill="var(--gold)" opacity="0.08" />
+      <rect x="7" y="38" width="3" height="26" fill="var(--gold)" opacity="0.05" />
+      <rect x="38" y="38" width="3" height="26" fill="var(--gold)" opacity="0.05" />
+
+      {/* Edge highlights */}
+      <rect x="14" y="16" width="0.5" height="48" fill="var(--gold)" opacity="0.3" />
+      <rect x="33.5" y="16" width="0.5" height="48" fill="var(--gold)" opacity="0.15" />
     </svg>
   );
 }
