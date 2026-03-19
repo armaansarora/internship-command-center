@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect, useRef, useCallback, type JSX } from "react";
+import { useState, useEffect, useRef, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
 import { ProceduralSkyline } from "@/components/world/ProceduralSkyline";
 import gsap from "gsap";
@@ -17,7 +17,6 @@ export function LobbyClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isReturningUser, setIsReturningUser] = useState(false);
-  const [entered, setEntered] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
@@ -28,6 +27,14 @@ export function LobbyClient() {
       const hasPriorVisit = document.cookie.includes("sb-");
       setIsReturningUser(hasPriorVisit);
     }
+  }, []);
+
+  // Override body overflow: hidden for the lobby (it needs to scroll)
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
   // Entrance animation
@@ -85,60 +92,58 @@ export function LobbyClient() {
   }
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-center overflow-hidden">
-      {/* ── IMMERSIVE SKYLINE BACKGROUND ── */}
-      <ProceduralSkyline floorId="L" />
+    <div className="relative flex min-h-dvh flex-col items-center overflow-y-auto overflow-x-hidden">
+      {/* ── IMMERSIVE SKYLINE BACKGROUND (fixed behind scrolling content) ── */}
+      <div className="fixed inset-0" style={{ zIndex: 0 }}>
+        <ProceduralSkyline floorId="L" />
+      </div>
 
-      {/* ── WINDOW FRAME OVERLAY ── */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        aria-hidden="true"
-        style={{
-          boxShadow: "inset 0 0 200px 80px rgba(4, 6, 15, 0.7)",
-          zIndex: 1,
-        }}
-      />
+      {/* ── FIXED OVERLAYS (stay in place while content scrolls) ── */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+        {/* Window frame vignette */}
+        <div
+          className="absolute inset-0"
+          aria-hidden="true"
+          style={{
+            boxShadow: "inset 0 0 200px 80px rgba(4, 6, 15, 0.7)",
+          }}
+        />
 
-      {/* ── GROUND-LEVEL FOG ── */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0"
-        aria-hidden="true"
-        style={{
-          height: "40%",
-          background:
-            "linear-gradient(to top, rgba(10, 10, 20, 0.95) 0%, rgba(10, 10, 20, 0.6) 30%, rgba(10, 10, 20, 0.2) 60%, transparent 100%)",
-          zIndex: 2,
-        }}
-      />
+        {/* Ground-level fog */}
+        <div
+          className="absolute inset-x-0 bottom-0"
+          aria-hidden="true"
+          style={{
+            height: "40%",
+            background:
+              "linear-gradient(to top, rgba(10, 10, 20, 0.95) 0%, rgba(10, 10, 20, 0.6) 30%, rgba(10, 10, 20, 0.2) 60%, transparent 100%)",
+          }}
+        />
 
-      {/* ── GLASS REFLECTIONS (subtle) ── */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        aria-hidden="true"
-        style={{
-          background: `
-            linear-gradient(135deg, rgba(201, 168, 76, 0.02) 0%, transparent 50%),
-            linear-gradient(225deg, rgba(100, 120, 200, 0.015) 0%, transparent 50%)
-          `,
-          zIndex: 3,
-        }}
-      />
+        {/* Glass reflections */}
+        <div
+          className="absolute inset-0"
+          aria-hidden="true"
+          style={{
+            background: `
+              linear-gradient(135deg, rgba(201, 168, 76, 0.02) 0%, transparent 50%),
+              linear-gradient(225deg, rgba(100, 120, 200, 0.015) 0%, transparent 50%)
+            `,
+          }}
+        />
 
-      {/* ── WINDOW MULLIONS (vertical glass dividers) ── */}
-      <div
-        className="pointer-events-none absolute inset-0 flex justify-between px-[12%]"
-        aria-hidden="true"
-        style={{ zIndex: 4 }}
-      >
-        <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.05) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.05) 100%)" }} />
-        <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.03) 0%, rgba(201, 168, 76, 0.08) 50%, rgba(201, 168, 76, 0.03) 100%)" }} />
-        <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.05) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.05) 100%)" }} />
+        {/* Window mullions */}
+        <div className="absolute inset-0 flex justify-between px-[12%]">
+          <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.05) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.05) 100%)" }} />
+          <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.03) 0%, rgba(201, 168, 76, 0.08) 50%, rgba(201, 168, 76, 0.03) 100%)" }} />
+          <div className="w-px h-full" style={{ background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.05) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.05) 100%)" }} />
+        </div>
       </div>
 
       {/* ── MAIN CONTENT ── */}
       <div
         ref={contentRef}
-        className="relative flex flex-col items-center justify-center min-h-dvh px-6 w-full max-w-lg mx-auto gap-8 py-12"
+        className="relative flex flex-col items-center px-6 w-full max-w-lg mx-auto gap-8 pt-16 pb-12"
         style={{ zIndex: 10, opacity: 0 }}
       >
         {/* Floor indicator — like a real lobby sign */}
@@ -200,13 +205,13 @@ export function LobbyClient() {
         <div
           className="w-full rounded-xl overflow-hidden"
           style={{
-            background: "rgba(10, 12, 25, 0.75)",
-            backdropFilter: "blur(24px) saturate(1.4)",
-            WebkitBackdropFilter: "blur(24px) saturate(1.4)",
-            border: "1px solid rgba(201, 168, 76, 0.2)",
-            borderTop: "2px solid rgba(201, 168, 76, 0.5)",
+            background: "rgba(8, 10, 22, 0.88)",
+            backdropFilter: "blur(30px) saturate(1.5)",
+            WebkitBackdropFilter: "blur(30px) saturate(1.5)",
+            border: "1px solid rgba(201, 168, 76, 0.25)",
+            borderTop: "2px solid rgba(201, 168, 76, 0.6)",
             boxShadow:
-              "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(201, 168, 76, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+              "0 25px 80px rgba(0, 0, 0, 0.6), 0 0 1px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06)",
           }}
         >
           <div className="p-8 flex flex-col items-center gap-6">
@@ -279,11 +284,11 @@ export function LobbyClient() {
           <div
             className="rounded-xl overflow-hidden"
             style={{
-              background: "rgba(10, 12, 25, 0.65)",
-              backdropFilter: "blur(20px) saturate(1.3)",
-              WebkitBackdropFilter: "blur(20px) saturate(1.3)",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
-              boxShadow: "0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.03)",
+              background: "rgba(8, 10, 22, 0.82)",
+              backdropFilter: "blur(24px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(24px) saturate(1.4)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 16px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
             }}
           >
             <div className="p-3 space-y-0.5">
