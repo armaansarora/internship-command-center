@@ -23,7 +23,11 @@ Day/night cycle driven by user's local time. NYC photorealistic skyline with CSS
 - `npm run lint` — eslint
 - `npx tsc --noEmit` — type check (run before committing)
 - `npx drizzle-kit generate` — generate migration SQL
-- `npx tsx scripts/generate-bootstrap.ts` — regenerate BOOTSTRAP-PROMPT.md
+- `npm run bootstrap` — regenerate BOOTSTRAP-PROMPT.md (also auto-runs on every commit via Husky)
+- `npm run session:state -- --task "..." --deliverable "1.2" --status "in_progress"` — update session state
+- `npm run session:state:clear` — reset session state
+- `npm run session:end` — full session-end workflow (type check → bootstrap → stage → commit → push)
+- `npm run session:end:dry` — dry run of session:end (shows what would happen)
 
 ## Conventions
 - Server Components by default; "use client" only when needed
@@ -51,8 +55,18 @@ Day/night cycle driven by user's local time. NYC photorealistic skyline with CSS
 - `EntranceSequence.tsx` — cinematic first-login (GSAP, sessionStorage skip)
 - Photos in `public/skyline/{day,night}/{sky,far,mid,near}.{webp,png}`
 
+## Bootstrap Infrastructure
+- `scripts/generate-bootstrap.ts` — generates BOOTSTRAP-PROMPT.md with: build health, git diff, acceptance criteria tracking, dep freshness, context budget, session state
+- `scripts/session-end.ts` — chains type check → bootstrap → stage → commit → push into one command
+- `scripts/update-session-state.ts` — CLI tool to update SESSION-STATE.json (task, deliverable, status, blockers)
+- `.husky/pre-commit` — auto-regenerates BOOTSTRAP-PROMPT.md on every commit
+- `scripts/check-vercel.ts` — writes Vercel deploy status to .vercel-status.json (agent-invoked)
+- `.github/workflows/bootstrap-check.yml` — CI guard that fails PR if bootstrap is stale
+- `SESSION-STATE.json` — captures mid-session task state for handoff (committed to repo)
+- `.bootstrap-last-hash` — tracks last commit hash at generation time (gitignored)
+
 ## Key Docs
-- `BOOTSTRAP-PROMPT.md` — auto-generated handoff (run `npx tsx scripts/generate-bootstrap.ts`)
+- `BOOTSTRAP-PROMPT.md` — auto-generated handoff (auto-runs on commit, includes build health + criteria tracking)
 - `PROJECT-CONTEXT.md` — operational context, credentials, session log
 - `docs/MASTER-PLAN.md` — 7 phases, acceptance criteria
 - `docs/VISION-SPEC.md` — spatial UI spec (locked)

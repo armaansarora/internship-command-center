@@ -1,0 +1,55 @@
+name: Bootstrap Freshness Check
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  check-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Save original BOOTSTRAP-PROMPT.md
+        run: cp BOOTSTRAP-PROMPT.md /tmp/original.md
+
+      - name: Regenerate bootstrap
+        run: npx tsx scripts/generate-bootstrap.ts
+
+      - name: Check for differences (ignoring dynamic sections)
+        run: |
+          # Strip lines that vary between local and CI environments:
+          # - Auto-generated timestamp
+          # - Vercel deploy status (depends on .vercel-status.json, gitignored)
+          # - "checked Xm ago" timestamps
+          # - Context Budget token/line counts (self-referential, varies with Vercel/diff sections)
+          # - Changes Since Last Bootstrap (depends on .bootstrap-last-hash, gitignored)
+          strip_dynamic() {
+            grep -v "Auto-generated" "$1" \
+              | grep -v "Vercel deploy:" \
+              | grep -v "checked.*ago)" \
+              | grep -v "Changes Since Last Bootstrap" \
+              | sed '/^```$/,/^```$/{ /^[a-f0-9]\{7\} /d; }' \
+              | grep -v "BOOTSTRAP-PROMPT.md" \
+              | grep -v "^\*\*Total\*\*"
+          }
+
+          strip_dynamic /tmp/original.md > /tmp/original-stripped.md
+          strip_dynamic BOOTSTRAP-PROMPT.md > /tmp/new-stripped.md
+
+          if diff /tmp/original-stripped.md /tmp/new-stripped.md; then
+            echo "✓ BOOTSTRAP-PROMPT.md is up to date"
+          else
+            echo "✗ BOOTSTRAP-PROMPT.md is stale!"
+            echo "Run 'npm run bootstrap' and commit the result."
+            diff /tmp/original-stripped.md /tmp/new-stripped.md || true
+            exit 1
+          fi
