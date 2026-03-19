@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `3e15030`)
+- **Branch:** `main` (commit `2fd4a3b`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 5,426 across 48 source files
 - **Build:** Clean (zero TS errors)
@@ -120,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `3e15030`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `2fd4a3b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -266,13 +266,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 349 | 3,947 |
+| `BOOTSTRAP-PROMPT.md` | 349 | 3,905 |
 | `PROJECT-CONTEXT.md` | 405 | 6,466 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1254** | **19,496** |
+| **Total** | **1254** | **19,454** |
 
-> ⚠️ Reading all recommended files consumes ~19,496 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~19,454 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
