@@ -260,12 +260,23 @@ export function LobbyClient() {
 function DirectoryRow({ floorId, name, label, available }: {
   floorId: FloorId; name: string; label: string; available: boolean;
 }) {
+  const [hovered, setHovered] = useState(false);
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
-        available ? "hover:bg-white/[0.04]" : "opacity-30"
+      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
+        available ? "cursor-pointer" : "opacity-30"
       }`}
-      style={available ? { borderLeft: "2px solid rgba(201, 168, 76, 0.35)" } : { borderLeft: "2px solid transparent" }}
+      style={
+        available
+          ? {
+              borderLeft: hovered ? "2px solid rgba(201, 168, 76, 0.7)" : "2px solid rgba(201, 168, 76, 0.35)",
+              background: hovered ? "rgba(201, 168, 76, 0.06)" : "transparent",
+              boxShadow: hovered ? "0 0 20px rgba(201, 168, 76, 0.05)" : "none",
+            }
+          : { borderLeft: "2px solid transparent" }
+      }
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <span
         className="w-6 text-right shrink-0"
