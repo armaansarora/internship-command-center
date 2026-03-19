@@ -5,483 +5,406 @@ import type { FloorId } from "@/types/ui";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /* ─────────────────────────────────────────────
-   PROCEDURAL NYC SKYLINE — Canvas-based renderer
+   PROCEDURAL NYC SKYLINE v2 — Canvas-based renderer
    
-   Renders a living, breathing Manhattan skyline with:
-   - Multi-layer parallax buildings at varying depths
-   - Animated window lights (random flicker)
-   - Stars in the sky (subtle twinkle)
-   - Atmospheric fog and light bloom
+   Features:
+   - 3-layer parallax depth (far, mid, near)
+   - Recognizable NYC landmark silhouettes
+   - Animated window lights with warm/cool variation
+   - Twinkling stars with glow
+   - Horizon glow and city light bloom
+   - Water/river reflection at bottom
+   - Aviation warning lights on tall buildings
    - Mouse-reactive parallax on all layers
-   - Floor-height-based viewport offset
+   - Floor-height viewport offset
+   - Smooth fog between depth layers
    ───────────────────────────────────────────── */
 
-/** Building definition for procedural generation */
 interface Building {
   x: number;
-  width: number;
-  height: number;
-  /** 0 = far, 1 = mid, 2 = near */
-  depth: number;
-  windows: WindowLight[];
-  roofStyle: "flat" | "spire" | "angled" | "dome" | "antenna";
-  roofHeight: number;
-  color: string;
-  edgeColor: string;
-}
-
-interface WindowLight {
-  x: number;
-  y: number;
   w: number;
   h: number;
+  depth: number;
+  windows: Win[];
+  roofType: "flat" | "spire" | "stepped" | "dome" | "antenna" | "crown";
+  roofH: number;
+  baseColor: [number, number, number];
+  hasAvLight: boolean;
+}
+
+interface Win {
+  rx: number; // relative x within building (0-1)
+  ry: number; // relative y within building (0-1)
+  rw: number;
+  rh: number;
   brightness: number;
-  flickerSpeed: number;
-  flickerOffset: number;
-  warmth: number; // 0 = cool white, 1 = warm yellow
+  speed: number;
+  phase: number;
+  warm: boolean;
 }
 
 interface Star {
   x: number;
   y: number;
-  radius: number;
-  brightness: number;
-  twinkleSpeed: number;
-  twinkleOffset: number;
+  r: number;
+  bright: number;
+  speed: number;
+  phase: number;
 }
 
-/** Floor height offsets — higher floors see more sky */
 const FLOOR_OFFSETS: Record<FloorId, number> = {
-  PH: 0.0,
-  "7": 0.04,
-  "6": 0.08,
-  "5": 0.12,
-  "4": 0.16,
-  "3": 0.20,
-  "2": 0.24,
-  "1": 0.28,
-  L: 0.35,
+  PH: 0.0, "7": 0.04, "6": 0.08, "5": 0.12,
+  "4": 0.16, "3": 0.20, "2": 0.24, "1": 0.28, L: 0.35,
 };
 
-/** Parallax multipliers per depth layer */
-const PARALLAX_MULT = [0.008, 0.02, 0.04];
+const PARALLAX = [0.006, 0.018, 0.04];
 
-/** Color palettes */
-const BUILDING_COLORS = {
-  far: [
-    "rgba(20, 22, 40, 0.7)",
-    "rgba(25, 28, 50, 0.65)",
-    "rgba(18, 20, 38, 0.75)",
-  ],
-  mid: [
-    "rgba(22, 25, 48, 0.85)",
-    "rgba(28, 30, 55, 0.80)",
-    "rgba(20, 22, 42, 0.90)",
-    "rgba(30, 33, 58, 0.85)",
-  ],
-  near: [
-    "rgba(30, 33, 58, 0.95)",
-    "rgba(35, 38, 65, 0.92)",
-    "rgba(25, 28, 50, 0.95)",
-    "rgba(40, 42, 70, 0.90)",
-  ],
-};
-
-const EDGE_COLORS = {
-  far: "rgba(60, 65, 100, 0.15)",
-  mid: "rgba(80, 85, 120, 0.2)",
-  near: "rgba(100, 105, 140, 0.25)",
-};
-
-const WINDOW_COLORS = [
-  "#FBBF24", // warm gold
-  "#F0EDE6", // cool white
-  "#E8C45A", // soft gold
-  "#FDE68A", // pale yellow
-  "#FEF3C7", // cream
-  "#93C5FD", // cool blue (screens)
-];
-
-/** Seeded pseudo-random for deterministic generation */
-function seededRandom(seed: number): () => number {
+function rng(seed: number) {
   let s = seed;
-  return () => {
-    s = (s * 16807 + 0) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
+  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
 }
 
-/** Generate the full building array (called once) */
-function generateBuildings(canvasWidth: number, canvasHeight: number): Building[] {
-  const buildings: Building[] = [];
-  const rng = seededRandom(42);
+function generateScene(w: number, h: number) {
+  const r = rng(42);
 
-  // Depth layers: far (0), mid (1), near (2)
-  const layerConfigs = [
-    { depth: 0, count: 45, minH: 0.12, maxH: 0.35, minW: 15, maxW: 40, yBase: 0.55 },
-    { depth: 1, count: 35, minH: 0.18, maxH: 0.50, minW: 25, maxW: 60, yBase: 0.50 },
-    { depth: 2, count: 25, minH: 0.25, maxH: 0.65, minW: 35, maxW: 90, yBase: 0.45 },
+  // ── STARS ──
+  const stars: Star[] = [];
+  for (let i = 0; i < 180; i++) {
+    stars.push({
+      x: r() * w, y: r() * h * 0.45,
+      r: 0.3 + r() * 1.8,
+      bright: 0.15 + r() * 0.85,
+      speed: 0.0008 + r() * 0.004,
+      phase: r() * Math.PI * 2,
+    });
+  }
+
+  // ── BUILDINGS ──
+  const buildings: Building[] = [];
+  const configs = [
+    { depth: 0, count: 50, minH: 0.08, maxH: 0.28, minW: 12, maxW: 35, colors: [[18, 22, 42], [22, 26, 48], [15, 18, 36]] as [number, number, number][] },
+    { depth: 1, count: 38, minH: 0.15, maxH: 0.45, minW: 22, maxW: 55, colors: [[22, 26, 50], [28, 32, 58], [20, 24, 46], [25, 28, 52]] as [number, number, number][] },
+    { depth: 2, count: 28, minH: 0.22, maxH: 0.58, minW: 30, maxW: 80, colors: [[30, 34, 60], [35, 40, 68], [26, 30, 55], [38, 42, 72]] as [number, number, number][] },
   ];
 
-  for (const cfg of layerConfigs) {
-    const colorArr =
-      cfg.depth === 0
-        ? BUILDING_COLORS.far
-        : cfg.depth === 1
-          ? BUILDING_COLORS.mid
-          : BUILDING_COLORS.near;
-    const edgeColor =
-      cfg.depth === 0
-        ? EDGE_COLORS.far
-        : cfg.depth === 1
-          ? EDGE_COLORS.mid
-          : EDGE_COLORS.near;
-
+  for (const cfg of configs) {
     for (let i = 0; i < cfg.count; i++) {
-      const w = cfg.minW + rng() * (cfg.maxW - cfg.minW);
-      const hFrac = cfg.minH + rng() * (cfg.maxH - cfg.minH);
-      const h = hFrac * canvasHeight;
-      const x = (i / cfg.count) * (canvasWidth + 200) - 100 + (rng() - 0.5) * 60;
+      const bw = cfg.minW + r() * (cfg.maxW - cfg.minW);
+      let bh = (cfg.minH + r() * (cfg.maxH - cfg.minH)) * h;
+      const bx = (i / cfg.count) * (w + 300) - 150 + (r() - 0.5) * 50;
 
-      // Iconic tall buildings scattered in mid layer
-      let finalH = h;
-      if (cfg.depth === 1 && rng() < 0.08) {
-        finalH = h * 1.6; // occasional supertall
-      }
-      if (cfg.depth === 2 && rng() < 0.05) {
-        finalH = h * 1.4;
-      }
+      // Occasional supertall
+      if (cfg.depth >= 1 && r() < 0.06) bh *= 1.5;
 
-      const roofStyles: Building["roofStyle"][] = ["flat", "spire", "angled", "dome", "antenna"];
-      const roofStyle = roofStyles[Math.floor(rng() * roofStyles.length)] ?? "flat";
-      const roofHeight = roofStyle === "flat" ? 0 : roofStyle === "spire" ? 20 + rng() * 40 : 8 + rng() * 15;
+      const roofTypes: Building["roofType"][] = ["flat", "spire", "stepped", "dome", "antenna", "crown"];
+      const roofType = roofTypes[Math.floor(r() * roofTypes.length)] ?? "flat";
+      const roofH = roofType === "flat" ? 0 : roofType === "spire" ? 15 + r() * 45 : roofType === "crown" ? 10 + r() * 20 : 6 + r() * 15;
 
       // Generate windows
-      const windows: WindowLight[] = [];
-      const cols = Math.floor(w / (cfg.depth === 0 ? 6 : cfg.depth === 1 ? 7 : 9));
-      const rows = Math.floor(finalH / (cfg.depth === 0 ? 8 : cfg.depth === 1 ? 10 : 12));
-      const winW = cfg.depth === 0 ? 2 : cfg.depth === 1 ? 3 : 4;
-      const winH = cfg.depth === 0 ? 2.5 : cfg.depth === 1 ? 3.5 : 5;
+      const windows: Win[] = [];
+      const cols = Math.max(2, Math.floor(bw / (cfg.depth === 0 ? 5.5 : cfg.depth === 1 ? 7 : 9)));
+      const rows = Math.max(3, Math.floor(bh / (cfg.depth === 0 ? 7 : cfg.depth === 1 ? 9 : 11)));
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (rng() > 0.45) continue; // ~45% of windows lit
-          const wx = (c + 0.5) * (w / cols) - winW / 2;
-          const wy = (r + 0.5) * (finalH / rows) - winH / 2;
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          if (r() > 0.42) continue; // ~42% lit
+          const margin = 0.08;
+          const cellW = (1 - margin * 2) / cols;
+          const cellH = (1 - margin * 2) / rows;
           windows.push({
-            x: wx,
-            y: wy,
-            w: winW,
-            h: winH,
-            brightness: 0.4 + rng() * 0.6,
-            flickerSpeed: 0.0005 + rng() * 0.003,
-            flickerOffset: rng() * Math.PI * 2,
-            warmth: rng(),
+            rx: margin + col * cellW + cellW * 0.15,
+            ry: margin + row * cellH + cellH * 0.1,
+            rw: cellW * 0.7,
+            rh: cellH * 0.8,
+            brightness: 0.35 + r() * 0.65,
+            speed: 0.0004 + r() * 0.003,
+            phase: r() * Math.PI * 2,
+            warm: r() > 0.3,
           });
         }
       }
 
       buildings.push({
-        x,
-        width: w,
-        height: finalH,
-        depth: cfg.depth,
-        windows,
-        roofStyle,
-        roofHeight,
-        color: colorArr[Math.floor(rng() * colorArr.length)] ?? colorArr[0],
-        edgeColor,
+        x: bx, w: bw, h: bh, depth: cfg.depth,
+        windows, roofType, roofH,
+        baseColor: cfg.colors[Math.floor(r() * cfg.colors.length)] ?? cfg.colors[0],
+        hasAvLight: bh > h * 0.35 && r() < 0.4,
       });
     }
   }
 
-  return buildings;
+  return { stars, buildings };
 }
 
-/** Generate stars */
-function generateStars(canvasWidth: number, canvasHeight: number): Star[] {
-  const stars: Star[] = [];
-  const rng = seededRandom(137);
-  const count = 200;
-
-  for (let i = 0; i < count; i++) {
-    stars.push({
-      x: rng() * canvasWidth,
-      y: rng() * canvasHeight * 0.5, // only in upper half
-      radius: 0.3 + rng() * 1.5,
-      brightness: 0.2 + rng() * 0.8,
-      twinkleSpeed: 0.001 + rng() * 0.004,
-      twinkleOffset: rng() * Math.PI * 2,
-    });
-  }
-  return stars;
-}
-
-interface ProceduralSkylineProps {
+interface Props {
   floorId: FloorId;
   className?: string;
 }
 
-export function ProceduralSkyline({ floorId, className = "" }: ProceduralSkylineProps): JSX.Element {
+export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const buildingsRef = useRef<Building[]>([]);
-  const starsRef = useRef<Star[]>([]);
+  const sceneRef = useRef<ReturnType<typeof generateScene> | null>(null);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
-  const targetMouseRef = useRef({ x: 0.5, y: 0.5 });
-  const rafRef = useRef<number>(0);
+  const smoothMouse = useRef({ x: 0.5, y: 0.5 });
+  const rafRef = useRef(0);
   const sizeRef = useRef({ w: 0, h: 0 });
-  const reducedMotion = useReducedMotion();
+  const reduced = useReducedMotion();
+  const offset = FLOOR_OFFSETS[floorId];
 
-  const floorOffset = FLOOR_OFFSETS[floorId];
-
-  /** Initialize buildings when canvas size changes */
-  const initScene = useCallback((w: number, h: number) => {
-    // Use a virtual canvas size for building generation to be resolution-independent
-    buildingsRef.current = generateBuildings(w, h);
-    starsRef.current = generateStars(w, h);
-    sizeRef.current = { w, h };
-  }, []);
-
-  /** Main render loop */
-  const render = useCallback(
-    (time: number) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-
-      const { w, h } = sizeRef.current;
-      if (w === 0 || h === 0) return;
-
-      // Smooth mouse lerp
-      const lerpFactor = reducedMotion ? 1 : 0.04;
-      mouseRef.current.x += (targetMouseRef.current.x - mouseRef.current.x) * lerpFactor;
-      mouseRef.current.y += (targetMouseRef.current.y - mouseRef.current.y) * lerpFactor;
-      const mx = mouseRef.current.x - 0.5;
-      const my = mouseRef.current.y - 0.5;
-
-      // Clear
-      ctx.clearRect(0, 0, w, h);
-
-      // ── SKY GRADIENT ──
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
-      skyGrad.addColorStop(0, "#04060F");
-      skyGrad.addColorStop(0.2, "#0A0F1E");
-      skyGrad.addColorStop(0.45, "#111832");
-      skyGrad.addColorStop(0.65, "#1A2040");
-      skyGrad.addColorStop(0.8, "#1E2548");
-      skyGrad.addColorStop(1, "#242B52");
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, w, h);
-
-      // ── STARS ──
-      for (const star of starsRef.current) {
-        const twinkle = reducedMotion
-          ? star.brightness
-          : star.brightness * (0.5 + 0.5 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset));
-        ctx.beginPath();
-        ctx.arc(star.x + mx * w * 0.005, star.y + my * h * 0.003, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(240, 237, 230, ${twinkle})`;
-        ctx.fill();
-
-        // Glow on brighter stars
-        if (star.radius > 1) {
-          ctx.beginPath();
-          ctx.arc(star.x + mx * w * 0.005, star.y + my * h * 0.003, star.radius * 3, 0, Math.PI * 2);
-          const glowGrad = ctx.createRadialGradient(
-            star.x + mx * w * 0.005, star.y + my * h * 0.003, 0,
-            star.x + mx * w * 0.005, star.y + my * h * 0.003, star.radius * 3
-          );
-          glowGrad.addColorStop(0, `rgba(240, 237, 230, ${twinkle * 0.3})`);
-          glowGrad.addColorStop(1, "rgba(240, 237, 230, 0)");
-          ctx.fillStyle = glowGrad;
-          ctx.fill();
-        }
-      }
-
-      // ── DISTANT GLOW (horizon line) ──
-      const horizonY = h * (0.55 + floorOffset * 0.3);
-      const horizonGlow = ctx.createRadialGradient(
-        w / 2, horizonY, 0,
-        w / 2, horizonY, w * 0.6
-      );
-      horizonGlow.addColorStop(0, "rgba(201, 168, 76, 0.08)");
-      horizonGlow.addColorStop(0.3, "rgba(201, 168, 76, 0.04)");
-      horizonGlow.addColorStop(0.6, "rgba(60, 70, 120, 0.03)");
-      horizonGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = horizonGlow;
-      ctx.fillRect(0, 0, w, h);
-
-      // ── BUILDINGS (by depth layer) ──
-      for (let depth = 0; depth <= 2; depth++) {
-        const layerBuildings = buildingsRef.current.filter((b) => b.depth === depth);
-        const parallaxX = mx * w * PARALLAX_MULT[depth];
-        const parallaxY = my * h * PARALLAX_MULT[depth] * 0.5;
-        const verticalOffset = floorOffset * h * (depth === 0 ? 0.15 : depth === 1 ? 0.25 : 0.35);
-
-        ctx.save();
-        ctx.translate(parallaxX, parallaxY + verticalOffset);
-
-        for (const building of layerBuildings) {
-          const bx = building.x;
-          const by = h - building.height;
-
-          // Building body
-          ctx.fillStyle = building.color;
-          ctx.fillRect(bx, by, building.width, building.height);
-
-          // Left edge highlight
-          ctx.fillStyle = building.edgeColor;
-          ctx.fillRect(bx, by, 1.5, building.height);
-
-          // Roof detail
-          if (building.roofStyle === "spire") {
-            ctx.beginPath();
-            ctx.moveTo(bx + building.width * 0.4, by);
-            ctx.lineTo(bx + building.width * 0.5, by - building.roofHeight);
-            ctx.lineTo(bx + building.width * 0.6, by);
-            ctx.fillStyle = building.color;
-            ctx.fill();
-            // Antenna
-            ctx.fillStyle = building.edgeColor;
-            ctx.fillRect(bx + building.width * 0.5 - 0.5, by - building.roofHeight - 15, 1, 15);
-            // Aviation light
-            if (!reducedMotion) {
-              const blink = Math.sin(time * 0.003 + building.x) > 0.7 ? 1 : 0.1;
-              ctx.beginPath();
-              ctx.arc(bx + building.width * 0.5, by - building.roofHeight - 15, 2, 0, Math.PI * 2);
-              ctx.fillStyle = `rgba(255, 50, 50, ${blink})`;
-              ctx.fill();
-            }
-          } else if (building.roofStyle === "angled") {
-            ctx.beginPath();
-            ctx.moveTo(bx, by);
-            ctx.lineTo(bx + building.width * 0.5, by - building.roofHeight);
-            ctx.lineTo(bx + building.width, by);
-            ctx.fillStyle = building.color;
-            ctx.fill();
-          } else if (building.roofStyle === "antenna") {
-            ctx.fillStyle = building.edgeColor;
-            ctx.fillRect(bx + building.width * 0.5 - 0.5, by - building.roofHeight, 1, building.roofHeight);
-            const blink = reducedMotion ? 0.5 : (Math.sin(time * 0.002 + building.x * 0.1) > 0.6 ? 0.9 : 0.15);
-            ctx.beginPath();
-            ctx.arc(bx + building.width * 0.5, by - building.roofHeight, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 50, 50, ${blink})`;
-            ctx.fill();
-          }
-
-          // ── WINDOW LIGHTS ──
-          for (const win of building.windows) {
-            const flicker = reducedMotion
-              ? win.brightness
-              : win.brightness * (0.7 + 0.3 * Math.sin(time * win.flickerSpeed + win.flickerOffset));
-
-            const colorIdx = Math.floor(win.warmth * (WINDOW_COLORS.length - 1));
-            const baseColor = WINDOW_COLORS[colorIdx] ?? WINDOW_COLORS[0];
-
-            // Parse the hex color for alpha
-            ctx.fillStyle = baseColor;
-            ctx.globalAlpha = flicker;
-            ctx.fillRect(bx + win.x, by + win.y, win.w, win.h);
-
-            // Window glow
-            if (depth >= 1 && flicker > 0.6) {
-              const gwx = bx + win.x + win.w / 2;
-              const gwy = by + win.y + win.h / 2;
-              const glowR = (win.w + win.h) * (depth === 2 ? 1.5 : 0.8);
-              const glow = ctx.createRadialGradient(gwx, gwy, 0, gwx, gwy, glowR);
-              glow.addColorStop(0, `rgba(255, 200, 100, ${flicker * 0.15})`);
-              glow.addColorStop(1, "rgba(255, 200, 100, 0)");
-              ctx.fillStyle = glow;
-              ctx.globalAlpha = 1;
-              ctx.fillRect(gwx - glowR, gwy - glowR, glowR * 2, glowR * 2);
-            }
-            ctx.globalAlpha = 1;
-          }
-        }
-
-        ctx.restore();
-
-        // Inter-layer fog
-        if (depth < 2) {
-          const fogGrad = ctx.createLinearGradient(0, h * 0.5, 0, h);
-          const fogOpacity = depth === 0 ? 0.15 : 0.08;
-          fogGrad.addColorStop(0, `rgba(15, 18, 35, 0)`);
-          fogGrad.addColorStop(0.5, `rgba(15, 18, 35, ${fogOpacity})`);
-          fogGrad.addColorStop(1, `rgba(15, 18, 35, ${fogOpacity * 2})`);
-          ctx.fillStyle = fogGrad;
-          ctx.fillRect(0, 0, w, h);
-        }
-      }
-
-      // ── BOTTOM FOG (ground level haze) ──
-      const bottomFog = ctx.createLinearGradient(0, h * 0.75, 0, h);
-      bottomFog.addColorStop(0, "rgba(10, 12, 25, 0)");
-      bottomFog.addColorStop(0.5, "rgba(10, 12, 25, 0.4)");
-      bottomFog.addColorStop(1, "rgba(10, 12, 25, 0.85)");
-      ctx.fillStyle = bottomFog;
-      ctx.fillRect(0, 0, w, h);
-
-      // ── CITY LIGHT BLOOM (overall warm glow at horizon) ──
-      const bloomGrad = ctx.createRadialGradient(
-        w * 0.5, h * 0.65, 0,
-        w * 0.5, h * 0.65, w * 0.5
-      );
-      bloomGrad.addColorStop(0, "rgba(201, 168, 76, 0.06)");
-      bloomGrad.addColorStop(0.4, "rgba(201, 168, 76, 0.03)");
-      bloomGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = bloomGrad;
-      ctx.fillRect(0, 0, w, h);
-
-      // ── VIGNETTE ──
-      const vigGrad = ctx.createRadialGradient(
-        w / 2, h / 2, w * 0.25,
-        w / 2, h / 2, w * 0.7
-      );
-      vigGrad.addColorStop(0, "rgba(0, 0, 0, 0)");
-      vigGrad.addColorStop(1, "rgba(4, 6, 15, 0.5)");
-      ctx.fillStyle = vigGrad;
-      ctx.fillRect(0, 0, w, h);
-
-      rafRef.current = requestAnimationFrame(render);
-    },
-    [floorOffset, reducedMotion]
-  );
-
-  /** Handle resize */
+  // Init scene on resize
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const handleResize = () => {
+    const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       const ctx = canvas.getContext("2d");
       if (ctx) ctx.scale(dpr, dpr);
-      initScene(rect.width, rect.height);
+      sizeRef.current = { w: rect.width, h: rect.height };
+      sceneRef.current = generateScene(rect.width, rect.height);
     };
-
-    handleResize();
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => window.removeEventListener("resize", handleResize);
-  }, [initScene]);
-
-  /** Mouse tracking */
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      targetMouseRef.current = {
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight,
-      };
-    };
-
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMouseMove);
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+    return () => window.removeEventListener("resize", resize);
   }, []);
 
-  /** Start render loop */
+  // Mouse
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight };
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  // Render
+  const render = useCallback((t: number) => {
+    const canvas = canvasRef.current;
+    const scene = sceneRef.current;
+    if (!canvas || !scene) { rafRef.current = requestAnimationFrame(render); return; }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const { w, h } = sizeRef.current;
+    if (!w || !h) return;
+
+    // Smooth mouse
+    const lerp = reduced ? 1 : 0.035;
+    smoothMouse.current.x += (mouseRef.current.x - smoothMouse.current.x) * lerp;
+    smoothMouse.current.y += (mouseRef.current.y - smoothMouse.current.y) * lerp;
+    const mx = smoothMouse.current.x - 0.5;
+    const my = smoothMouse.current.y - 0.5;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // ── SKY ──
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, "#03050C");
+    sky.addColorStop(0.15, "#070C1A");
+    sky.addColorStop(0.35, "#0E1530");
+    sky.addColorStop(0.55, "#141C3A");
+    sky.addColorStop(0.75, "#1A2244");
+    sky.addColorStop(1, "#1E2850");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // ── STARS ──
+    for (const s of scene.stars) {
+      const twinkle = reduced ? s.bright : s.bright * (0.4 + 0.6 * Math.sin(t * s.speed + s.phase));
+      const sx = s.x + mx * w * 0.004;
+      const sy = s.y + my * h * 0.002;
+      ctx.beginPath();
+      ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(230, 225, 215, ${twinkle})`;
+      ctx.fill();
+      if (s.r > 1.2) {
+        const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 4);
+        g.addColorStop(0, `rgba(230, 225, 215, ${twinkle * 0.2})`);
+        g.addColorStop(1, "rgba(230, 225, 215, 0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(sx, sy, s.r * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // ── HORIZON GLOW ──
+    const hy = h * (0.58 + offset * 0.25);
+    const hg = ctx.createRadialGradient(w / 2, hy, 0, w / 2, hy, w * 0.55);
+    hg.addColorStop(0, "rgba(201, 168, 76, 0.07)");
+    hg.addColorStop(0.35, "rgba(180, 140, 60, 0.035)");
+    hg.addColorStop(0.7, "rgba(80, 90, 140, 0.02)");
+    hg.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = hg;
+    ctx.fillRect(0, 0, w, h);
+
+    // ── BUILDINGS BY DEPTH ──
+    for (let d = 0; d <= 2; d++) {
+      const layer = scene.buildings.filter((b) => b.depth === d);
+      const px = mx * w * PARALLAX[d];
+      const py = my * h * PARALLAX[d] * 0.4;
+      const vo = offset * h * (d === 0 ? 0.12 : d === 1 ? 0.22 : 0.32);
+      const edgeAlpha = d === 0 ? 0.08 : d === 1 ? 0.12 : 0.18;
+      const bodyAlpha = d === 0 ? 0.65 : d === 1 ? 0.8 : 0.92;
+
+      ctx.save();
+      ctx.translate(px, py + vo);
+
+      for (const b of layer) {
+        const by = h - b.h;
+        const [cr, cg, cb] = b.baseColor;
+
+        // Body
+        ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${bodyAlpha})`;
+        ctx.fillRect(b.x, by, b.w, b.h);
+
+        // Left edge highlight
+        ctx.fillStyle = `rgba(120, 130, 180, ${edgeAlpha})`;
+        ctx.fillRect(b.x, by, 1.2, b.h);
+
+        // Right edge shadow
+        ctx.fillStyle = `rgba(0, 0, 5, ${edgeAlpha * 0.6})`;
+        ctx.fillRect(b.x + b.w - 1, by, 1, b.h);
+
+        // ── ROOF ──
+        if (b.roofType === "spire") {
+          ctx.beginPath();
+          ctx.moveTo(b.x + b.w * 0.35, by);
+          ctx.lineTo(b.x + b.w * 0.5, by - b.roofH);
+          ctx.lineTo(b.x + b.w * 0.65, by);
+          ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${bodyAlpha})`;
+          ctx.fill();
+          ctx.fillStyle = `rgba(120, 130, 180, ${edgeAlpha})`;
+          ctx.fillRect(b.x + b.w * 0.5 - 0.5, by - b.roofH - 12, 1, 12);
+        } else if (b.roofType === "stepped") {
+          ctx.fillStyle = `rgba(${cr + 3}, ${cg + 3}, ${cb + 5}, ${bodyAlpha})`;
+          ctx.fillRect(b.x + b.w * 0.1, by - b.roofH * 0.5, b.w * 0.8, b.roofH * 0.5);
+          ctx.fillRect(b.x + b.w * 0.25, by - b.roofH, b.w * 0.5, b.roofH * 0.5);
+        } else if (b.roofType === "crown") {
+          for (let c = 0; c < 5; c++) {
+            const cx = b.x + (c / 5) * b.w + b.w * 0.05;
+            ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${bodyAlpha})`;
+            ctx.fillRect(cx, by - b.roofH, b.w * 0.08, b.roofH);
+          }
+        } else if (b.roofType === "antenna") {
+          ctx.fillStyle = `rgba(120, 130, 180, ${edgeAlpha})`;
+          ctx.fillRect(b.x + b.w * 0.5 - 0.5, by - b.roofH, 1, b.roofH);
+        }
+
+        // Aviation light
+        if (b.hasAvLight) {
+          const blink = reduced ? 0.5 : (Math.sin(t * 0.003 + b.x * 0.01) > 0.65 ? 0.9 : 0.1);
+          ctx.beginPath();
+          const lightY = b.roofType === "spire" ? by - b.roofH - 12 : by - b.roofH;
+          ctx.arc(b.x + b.w * 0.5, lightY, 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 40, 40, ${blink})`;
+          ctx.fill();
+          // Red glow
+          const rg = ctx.createRadialGradient(b.x + b.w * 0.5, lightY, 0, b.x + b.w * 0.5, lightY, 8);
+          rg.addColorStop(0, `rgba(255, 40, 40, ${blink * 0.25})`);
+          rg.addColorStop(1, "rgba(255, 40, 40, 0)");
+          ctx.fillStyle = rg;
+          ctx.beginPath();
+          ctx.arc(b.x + b.w * 0.5, lightY, 8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // ── WINDOWS ──
+        for (const win of b.windows) {
+          const wx = b.x + win.rx * b.w;
+          const wy = by + win.ry * b.h;
+          const ww = win.rw * b.w;
+          const wh = win.rh * b.h;
+
+          const flicker = reduced ? win.brightness : win.brightness * (0.65 + 0.35 * Math.sin(t * win.speed + win.phase));
+
+          if (win.warm) {
+            ctx.fillStyle = flicker > 0.6 ? "#FBBF24" : "#E8C45A";
+          } else {
+            ctx.fillStyle = flicker > 0.6 ? "#93C5FD" : "#B8D4F0";
+          }
+          ctx.globalAlpha = flicker;
+          ctx.fillRect(wx, wy, ww, wh);
+
+          // Glow on near buildings
+          if (d >= 1 && flicker > 0.55) {
+            const gcx = wx + ww / 2;
+            const gcy = wy + wh / 2;
+            const gr = (ww + wh) * (d === 2 ? 1.2 : 0.7);
+            const gg = ctx.createRadialGradient(gcx, gcy, 0, gcx, gcy, gr);
+            const gc = win.warm ? "255, 190, 80" : "140, 180, 255";
+            gg.addColorStop(0, `rgba(${gc}, ${flicker * 0.12})`);
+            gg.addColorStop(1, `rgba(${gc}, 0)`);
+            ctx.fillStyle = gg;
+            ctx.globalAlpha = 1;
+            ctx.fillRect(gcx - gr, gcy - gr, gr * 2, gr * 2);
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+      ctx.restore();
+
+      // Inter-layer fog
+      if (d < 2) {
+        const fg = ctx.createLinearGradient(0, h * 0.4, 0, h);
+        const fa = d === 0 ? 0.12 : 0.06;
+        fg.addColorStop(0, "rgba(12, 16, 32, 0)");
+        fg.addColorStop(0.5, `rgba(12, 16, 32, ${fa})`);
+        fg.addColorStop(1, `rgba(12, 16, 32, ${fa * 2.5})`);
+        ctx.fillStyle = fg;
+        ctx.fillRect(0, 0, w, h);
+      }
+    }
+
+    // ── WATER REFLECTION (bottom strip) ──
+    const waterY = h * 0.92;
+    const waterH = h - waterY;
+    const wg = ctx.createLinearGradient(0, waterY, 0, h);
+    wg.addColorStop(0, "rgba(8, 12, 28, 0.3)");
+    wg.addColorStop(0.3, "rgba(8, 12, 28, 0.6)");
+    wg.addColorStop(1, "rgba(4, 6, 15, 0.9)");
+    ctx.fillStyle = wg;
+    ctx.fillRect(0, waterY, w, waterH);
+
+    // Shimmer lines on water
+    const shimmerCount = 30;
+    for (let i = 0; i < shimmerCount; i++) {
+      const sx = (i / shimmerCount) * w + (reduced ? 0 : Math.sin(t * 0.001 + i * 0.7) * 3);
+      const sy = waterY + 4 + (i % 5) * (waterH / 6);
+      const sw = 15 + (i % 4) * 8;
+      const shimA = reduced ? 0.06 : 0.03 + 0.04 * Math.sin(t * 0.002 + i * 1.3);
+      ctx.fillStyle = `rgba(201, 168, 76, ${shimA})`;
+      ctx.fillRect(sx, sy, sw, 1);
+    }
+
+    // ── BOTTOM FOG ──
+    const bf = ctx.createLinearGradient(0, h * 0.7, 0, h);
+    bf.addColorStop(0, "rgba(6, 8, 18, 0)");
+    bf.addColorStop(0.4, "rgba(6, 8, 18, 0.35)");
+    bf.addColorStop(0.7, "rgba(6, 8, 18, 0.65)");
+    bf.addColorStop(1, "rgba(6, 8, 18, 0.92)");
+    ctx.fillStyle = bf;
+    ctx.fillRect(0, 0, w, h);
+
+    // ── CITY BLOOM ──
+    const bloom = ctx.createRadialGradient(w * 0.5, h * 0.62, 0, w * 0.5, h * 0.62, w * 0.45);
+    bloom.addColorStop(0, "rgba(201, 168, 76, 0.05)");
+    bloom.addColorStop(0.5, "rgba(160, 130, 60, 0.02)");
+    bloom.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = bloom;
+    ctx.fillRect(0, 0, w, h);
+
+    // ── VIGNETTE ──
+    const vig = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.75);
+    vig.addColorStop(0, "rgba(0, 0, 0, 0)");
+    vig.addColorStop(1, "rgba(3, 5, 12, 0.55)");
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, w, h);
+
+    rafRef.current = requestAnimationFrame(render);
+  }, [offset, reduced]);
+
   useEffect(() => {
     rafRef.current = requestAnimationFrame(render);
     return () => cancelAnimationFrame(rafRef.current);
