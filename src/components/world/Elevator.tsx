@@ -17,10 +17,14 @@ const ROUTE_TO_FLOOR: Record<string, FloorId> = Object.fromEntries(
 /**
  * Elevator — persistent left-side navigation with GSAP door transitions.
  *
- * Upgraded with:
- * - Dark overlay ("between floors" effect) during travel
- * - Skyline vertical shift hint during floor changes
- * - Smoother GSAP timeline with better easing
+ * Features:
+ * - Heavier glass panel: rgba(10, 12, 25, 0.85) with blur(20px) + gold left edge
+ * - Active floor: stronger glow shadow
+ * - Inactive hover: gold ring border
+ * - Floor name tooltip via title attribute
+ * - Richer door gradient with brushed-metal repeating-linear-gradient texture
+ * - Floor counter at text-6xl for legibility
+ * - Ambient sound reference: door close/open SFX would hook here
  */
 export function Elevator(): JSX.Element {
   const router = useRouter();
@@ -96,7 +100,11 @@ export function Elevator(): JSX.Element {
   );
 
   /**
-   * GSAP transition sequence — upgraded with dark wash and skyline shift.
+   * GSAP transition sequence.
+   * Ambient sound hook points:
+   *   - Door close SFX: play at Phase 1 start (tl.to leftDoor/rightDoor)
+   *   - Movement hum SFX: play during Phase 2 (.to interior opacity 1)
+   *   - Door open SFX: play at Phase 3 start (.to leftDoor xPercent -100)
    */
   useEffect(() => {
     if (state !== "doors-closing" || !targetFloor) return;
@@ -129,6 +137,7 @@ export function Elevator(): JSX.Element {
     timelineRef.current = tl;
 
     // Phase 1: Dark wash fade in + Doors close (400ms)
+    // [SOUND] elevator-door-close.mp3 would trigger here
     tl.set(leftDoor, { xPercent: -100 })
       .set(rightDoor, { xPercent: 100 })
       .set(interior, { opacity: 0 })
@@ -140,6 +149,7 @@ export function Elevator(): JSX.Element {
       .call(() => setState("moving"))
 
       // Phase 2: Show interior + counter (500ms)
+      // [SOUND] elevator-hum.mp3 would start looping here
       .to(interior, { opacity: 1, duration: 0.15, ease: "power1.in" })
       .call(() => {
         // Animate floor counter
@@ -162,6 +172,7 @@ export function Elevator(): JSX.Element {
       .call(() => setState("doors-opening"))
 
       // Phase 3: Doors open + dark wash fade out (400ms)
+      // [SOUND] elevator-door-open.mp3 would trigger here, hum.mp3 stops
       .to(interior, { opacity: 0, duration: 0.1, ease: "power1.out" })
       .to(leftDoor, { xPercent: -100, duration: 0.4, ease: "power2.out" })
       .to(rightDoor, { xPercent: 100, duration: 0.4, ease: "power2.out" }, "<")
@@ -191,7 +202,19 @@ export function Elevator(): JSX.Element {
         className="fixed left-0 top-0 bottom-0 z-[30] hidden md:flex flex-col items-center justify-center w-16 gap-1 py-4"
         aria-label="Floor navigation"
       >
-        <div className="glass rounded-full py-3 px-2 flex flex-col items-center gap-1.5">
+        <div
+          className="rounded-2xl py-3 px-2 flex flex-col items-center gap-1.5"
+          style={{
+            background: "rgba(10, 12, 25, 0.85)",
+            backdropFilter: "blur(20px) saturate(1.5)",
+            WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+            borderTop: "1px solid rgba(201, 168, 76, 0.12)",
+            borderRight: "1px solid rgba(201, 168, 76, 0.08)",
+            borderBottom: "1px solid rgba(201, 168, 76, 0.08)",
+            borderLeft: "1px solid rgba(201, 168, 76, 0.15)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
+          }}
+        >
           {FLOOR_ORDER.map((floorId) => {
             const floor = FLOORS.find((f) => f.id === floorId);
             if (!floor) return null;
@@ -203,20 +226,55 @@ export function Elevator(): JSX.Element {
                 key={floorId}
                 onClick={() => navigateToFloor(floorId)}
                 disabled={isTransitioning || isActive}
+                title={`${floor.name} — ${floor.label}`}
                 aria-label={`${floor.name} — ${floor.label}`}
                 aria-current={isActive ? "page" : undefined}
                 className={[
                   "relative w-9 h-9 rounded-full flex items-center justify-center",
                   "text-data text-xs font-medium transition-all duration-200",
                   "focus-visible:outline-2 focus-visible:outline-[var(--gold)] focus-visible:outline-offset-2",
-                  isActive
-                    ? "bg-[var(--gold)] text-[var(--tower-darkest)] shadow-[0_0_12px_rgba(201,168,76,0.4)]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--glass-bg-hover)]",
-                  isLobby ? "mt-2 border border-dashed border-[var(--glass-border)]" : "",
+                  isLobby ? "mt-2" : "",
                   isTransitioning ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
                 ]
                   .filter(Boolean)
                   .join(" ")}
+                style={
+                  isActive
+                    ? {
+                        background: "var(--gold)",
+                        color: "var(--tower-darkest)",
+                        boxShadow:
+                          "0 0 16px rgba(201, 168, 76, 0.5), 0 0 32px rgba(201, 168, 76, 0.2)",
+                      }
+                    : isLobby
+                    ? {
+                        color: "var(--text-secondary)",
+                        border: "1px dashed rgba(201, 168, 76, 0.2)",
+                      }
+                    : {
+                        color: "var(--text-secondary)",
+                      }
+                }
+                onMouseEnter={(e) => {
+                  if (!isActive && !isTransitioning) {
+                    (e.currentTarget as HTMLButtonElement).style.border =
+                      "1px solid rgba(201, 168, 76, 0.3)";
+                    (e.currentTarget as HTMLButtonElement).style.color =
+                      "var(--text-primary)";
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      "rgba(201, 168, 76, 0.05)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive && !isTransitioning) {
+                    (e.currentTarget as HTMLButtonElement).style.border = isLobby
+                      ? "1px dashed rgba(201, 168, 76, 0.2)"
+                      : "";
+                    (e.currentTarget as HTMLButtonElement).style.color =
+                      "var(--text-secondary)";
+                    (e.currentTarget as HTMLButtonElement).style.background = "";
+                  }
+                }}
               >
                 {floorId === "PH" ? (
                   <span className="text-[10px] leading-none">PH</span>
@@ -248,29 +306,69 @@ export function Elevator(): JSX.Element {
         style={{ display: "none" }}
         aria-hidden="true"
       >
-        {/* Left door */}
+        {/* Left door — brushed metal gradient with vertical texture */}
         <div
           ref={leftDoorRef}
           className="absolute top-0 bottom-0 left-0 w-1/2"
           style={{
             background:
-              "linear-gradient(135deg, #2A2540 0%, #1E1B33 40%, #16132A 100%)",
-            borderRight: "1px solid var(--gold-dim)",
+              "linear-gradient(135deg, #2E2848 0%, #221F3A 35%, #1A1730 65%, #141228 100%)",
+            borderRight: "1px solid rgba(201, 168, 76, 0.25)",
             transform: "translateX(-100%)",
           }}
-        />
+        >
+          {/* Brushed metal vertical texture */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, transparent 1px, transparent 2px, rgba(255,255,255,0.008) 3px, transparent 4px)",
+              backgroundSize: "4px 100%",
+            }}
+            aria-hidden="true"
+          />
+          {/* Subtle vertical highlight on inner edge */}
+          <div
+            className="absolute top-0 bottom-0 right-0 w-4"
+            style={{
+              background:
+                "linear-gradient(to left, rgba(201, 168, 76, 0.06), transparent)",
+            }}
+            aria-hidden="true"
+          />
+        </div>
 
-        {/* Right door */}
+        {/* Right door — brushed metal gradient with vertical texture */}
         <div
           ref={rightDoorRef}
           className="absolute top-0 bottom-0 right-0 w-1/2"
           style={{
             background:
-              "linear-gradient(225deg, #2A2540 0%, #1E1B33 40%, #16132A 100%)",
-            borderLeft: "1px solid var(--gold-dim)",
+              "linear-gradient(225deg, #2E2848 0%, #221F3A 35%, #1A1730 65%, #141228 100%)",
+            borderLeft: "1px solid rgba(201, 168, 76, 0.25)",
             transform: "translateX(100%)",
           }}
-        />
+        >
+          {/* Brushed metal vertical texture */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, transparent 1px, transparent 2px, rgba(255,255,255,0.008) 3px, transparent 4px)",
+              backgroundSize: "4px 100%",
+            }}
+            aria-hidden="true"
+          />
+          {/* Subtle vertical highlight on inner edge */}
+          <div
+            className="absolute top-0 bottom-0 left-0 w-4"
+            style={{
+              background:
+                "linear-gradient(to right, rgba(201, 168, 76, 0.06), transparent)",
+            }}
+            aria-hidden="true"
+          />
+        </div>
 
         {/* Interior (visible during movement) */}
         <div
@@ -278,37 +376,72 @@ export function Elevator(): JSX.Element {
           className="absolute inset-0 flex flex-col items-center justify-center opacity-0"
           style={{
             background:
-              "linear-gradient(180deg, #1A1730 0%, #14122A 50%, #0F0D20 100%)",
+              "linear-gradient(180deg, #1E1B35 0%, #16132C 45%, #100E22 75%, #0C0A1C 100%)",
           }}
         >
-          {/* Brushed metal texture */}
+          {/* Brushed metal interior texture */}
           <div
-            className="absolute inset-0 opacity-[0.04]"
+            className="absolute inset-0"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(90deg, var(--gold) 0px, transparent 1px, transparent 3px)",
-              backgroundSize: "4px 100%",
+                "repeating-linear-gradient(90deg, rgba(255,255,255,0.014) 0px, transparent 1px, transparent 3px, rgba(255,255,255,0.007) 4px, transparent 5px)",
+              backgroundSize: "5px 100%",
+              opacity: 0.6,
             }}
+            aria-hidden="true"
           />
 
           {/* Gold trim lines */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-[var(--gold)] opacity-30" />
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--gold)] opacity-30" />
-          <div className="absolute top-0 bottom-0 left-0 w-px bg-[var(--gold)] opacity-20" />
-          <div className="absolute top-0 bottom-0 right-0 w-px bg-[var(--gold)] opacity-20" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-[var(--gold)] opacity-35" aria-hidden="true" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--gold)] opacity-35" aria-hidden="true" />
+          <div className="absolute top-0 bottom-0 left-0 w-px bg-[var(--gold)] opacity-25" aria-hidden="true" />
+          <div className="absolute top-0 bottom-0 right-0 w-px bg-[var(--gold)] opacity-25" aria-hidden="true" />
+
+          {/* Corner accents */}
+          <div
+            className="absolute top-0 left-0 w-8 h-8"
+            style={{ borderTop: "2px solid rgba(201,168,76,0.3)", borderLeft: "2px solid rgba(201,168,76,0.3)" }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute top-0 right-0 w-8 h-8"
+            style={{ borderTop: "2px solid rgba(201,168,76,0.3)", borderRight: "2px solid rgba(201,168,76,0.3)" }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute bottom-0 left-0 w-8 h-8"
+            style={{ borderBottom: "2px solid rgba(201,168,76,0.3)", borderLeft: "2px solid rgba(201,168,76,0.3)" }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute bottom-0 right-0 w-8 h-8"
+            style={{ borderBottom: "2px solid rgba(201,168,76,0.3)", borderRight: "2px solid rgba(201,168,76,0.3)" }}
+            aria-hidden="true"
+          />
 
           {/* Floor counter */}
           <div className="relative z-10 flex flex-col items-center gap-4">
-            <div className="text-data text-xs text-[var(--text-muted)] tracking-[0.3em] uppercase">
+            <div
+              className="text-data text-xs tracking-[0.3em] uppercase"
+              style={{ color: "var(--text-muted)" }}
+            >
               Floor
             </div>
             <span
               ref={counterRef}
-              className="text-data text-5xl text-[var(--gold)] tracking-wider"
+              className="text-data text-6xl tracking-wider"
+              style={{
+                color: "var(--gold)",
+                textShadow: "0 0 24px rgba(201,168,76,0.4)",
+              }}
             >
               {activeFloor === "PH" ? "PH" : activeFloor}
             </span>
-            <div className="h-px w-12 bg-[var(--gold)] opacity-40" />
+            <div
+              className="h-px w-14 opacity-50"
+              style={{ background: "var(--gold)" }}
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>

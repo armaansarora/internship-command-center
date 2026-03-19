@@ -1,33 +1,145 @@
 "use client";
-
 import { useState, useEffect, useRef, useCallback, type JSX } from "react";
 import { EntranceSequence } from "@/components/transitions/EntranceSequence";
-import type {
-  PenthouseStats,
-  PipelineStageData,
-  ActivityItemData,
-} from "./penthouse-data";
+import type { PenthouseStats, PipelineStageData, ActivityItemData } from "./penthouse-data";
 
-/** Stat card display config */
+/* ──────────────────────────────────────────────────────────────
+   TINY SVG ICON COMPONENTS (16×16)
+   ────────────────────────────────────────────────────────────── */
+
+/** Bar-chart icon: 3 vertical gold bars of varying height */
+function IconBarChart() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <rect x="1" y="9" width="3.5" height="6" rx="0.5" fill="var(--gold)" opacity="0.55" />
+      <rect x="6.25" y="5" width="3.5" height="10" rx="0.5" fill="var(--gold)" opacity="0.75" />
+      <rect x="11.5" y="2" width="3.5" height="13" rx="0.5" fill="var(--gold)" opacity="1" />
+    </svg>
+  );
+}
+
+/** Flow icon: 3 connected gold dots in a pipeline shape */
+function IconFlow() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <circle cx="2.5" cy="8" r="2" fill="var(--info)" opacity="0.9" />
+      <line x1="4.5" y1="8" x2="6.5" y2="8" stroke="var(--info)" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="8" cy="8" r="2" fill="var(--info)" opacity="0.9" />
+      <line x1="10" y1="8" x2="12" y2="8" stroke="var(--info)" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="13.5" cy="8" r="2" fill="var(--info)" opacity="0.9" />
+    </svg>
+  );
+}
+
+/** Bullseye icon: 2 concentric circles */
+function IconBullseye() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <circle cx="8" cy="8" r="6.5" stroke="var(--success)" strokeWidth="1.2" opacity="0.55" />
+      <circle cx="8" cy="8" r="3.5" stroke="var(--success)" strokeWidth="1.4" opacity="0.85" />
+      <circle cx="8" cy="8" r="1.5" fill="var(--success)" opacity="1" />
+    </svg>
+  );
+}
+
+/** Trend-line icon: a rising gold line with a dot at the end */
+function IconTrendLine() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: "block", flexShrink: 0 }}
+    >
+      <polyline
+        points="1,12 5,9 9,5.5 13,3"
+        stroke="var(--warning)"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.9"
+      />
+      <circle cx="13" cy="3" r="2" fill="var(--warning)" opacity="1" />
+    </svg>
+  );
+}
+
+/** Activity type dot indicator */
+function ActivityDot({ type }: { type: ActivityItemData["type"] }) {
+  const colorMap: Record<ActivityItemData["type"], string> = {
+    application: "var(--gold)",
+    email: "var(--info)",
+    interview: "var(--success)",
+    follow_up: "var(--warning)",
+  };
+  const color = colorMap[type];
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: "inline-block",
+        width: "8px",
+        height: "8px",
+        borderRadius: "50%",
+        background: color,
+        boxShadow: `0 0 6px ${color}`,
+        flexShrink: 0,
+        marginTop: "6px",
+      }}
+    />
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────
+   STAT CARD CONFIG (type safe, no emoji)
+   ────────────────────────────────────────────────────────────── */
+
 interface StatCardConfig {
   label: string;
   value: number;
   suffix: string;
-  icon: string;
+  icon: JSX.Element;
   accentColor: string;
 }
+
+/* ──────────────────────────────────────────────────────────────
+   MAIN COMPONENT
+   ────────────────────────────────────────────────────────────── */
 
 /**
  * PenthouseClient — The hero dashboard with immersive glass-panel UI.
  *
- * Game-like features:
+ * Features:
  * - 3D perspective tilt on glass panels (mouse-reactive)
  * - Animated number counters that count up from zero
  * - Staggered entrance with cascade delay
- * - Hover glow halos on panels
+ * - Gold edge glow on panels
  * - Parallax on header text
- * - Pulse ring on active metrics
- * - Interactive activity feed with sliding reveals
+ * - Pulse ring on active floor indicator
+ * - Interactive activity feed with sliding gold accent
  */
 export function PenthouseClient({
   userName,
@@ -54,14 +166,13 @@ export function PenthouseClient({
     else setGreeting("Burning the midnight oil");
   }, []);
 
-  // Track mouse for parallax
+  // Track mouse for parallax on header
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       mouseRef.current = {
         x: e.clientX / window.innerWidth,
         y: e.clientY / window.innerHeight,
       };
-      // Apply parallax to header
       if (headerRef.current) {
         const px = (mouseRef.current.x - 0.5) * 8;
         const py = (mouseRef.current.y - 0.5) * 4;
@@ -80,65 +191,84 @@ export function PenthouseClient({
       label: "Applications",
       value: stats.totalApplications,
       suffix: "",
-      icon: "📋",
+      icon: <IconBarChart />,
       accentColor: "var(--gold)",
     },
     {
       label: "In Pipeline",
       value: stats.inPipeline,
       suffix: "",
-      icon: "🔄",
+      icon: <IconFlow />,
       accentColor: "var(--info)",
     },
     {
       label: "Interviews",
       value: stats.interviews,
       suffix: "",
-      icon: "🎯",
+      icon: <IconBullseye />,
       accentColor: "var(--success)",
     },
     {
       label: "Response Rate",
       value: stats.totalApplications > 0 ? stats.responseRate : 0,
       suffix: "%",
-      icon: "📊",
+      icon: <IconTrendLine />,
       accentColor: "var(--warning)",
     },
   ];
 
   return (
     <EntranceSequence>
-      <div className="flex min-h-dvh flex-col p-6 md:p-10 gap-6 max-w-5xl mx-auto">
+      <div
+        className="flex min-h-dvh flex-col p-6 md:p-10 gap-8 max-w-5xl mx-auto"
+        aria-label="Penthouse dashboard"
+      >
+
         {/* ── HEADER with parallax ── */}
-        <header ref={headerRef} className="space-y-2 pt-2 transition-transform duration-100 ease-out" aria-label="Penthouse dashboard header">
+        <header
+          ref={headerRef}
+          className="space-y-3 pt-2 transition-transform duration-100 ease-out"
+          aria-label="Penthouse dashboard header"
+        >
+          {/* Floor label */}
           <div
-            className="flex items-center gap-3 mb-3"
+            className="flex items-center gap-2.5"
             style={{
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "10px",
+              fontSize: "11px",
               letterSpacing: "0.3em",
               color: "var(--gold)",
-              opacity: 0.5,
+              opacity: 0.6,
             }}
           >
             <PulseRing />
-            FLOOR PH — THE PENTHOUSE
+            <span>FLOOR PH — THE PENTHOUSE</span>
           </div>
+
+          {/* Main greeting */}
           <h1
-            className="text-2xl md:text-3xl tracking-tight"
+            className="text-3xl md:text-4xl tracking-tight"
             style={{
               fontFamily: "'Playfair Display', Georgia, serif",
               color: "var(--text-primary)",
               textShadow: "0 2px 20px rgba(0, 0, 0, 0.6)",
+              lineHeight: 1.2,
             }}
           >
             {greeting},{" "}
-            <span style={{ color: "var(--gold)", textShadow: "0 0 20px rgba(201, 168, 76, 0.3)" }}>
+            <span
+              style={{
+                color: "var(--gold)",
+                textShadow: "0 0 28px rgba(201, 168, 76, 0.4), 0 0 60px rgba(201, 168, 76, 0.15)",
+              }}
+            >
               {displayName}
             </span>
           </h1>
+
+          {/* Subtitle */}
           <p
-            className="text-sm"
+            className="text-base"
             style={{
               color: "var(--text-secondary)",
               textShadow: "0 1px 10px rgba(0, 0, 0, 0.8)",
@@ -148,8 +278,12 @@ export function PenthouseClient({
           </p>
         </header>
 
-        {/* ── STAT CARDS with animated counters + tilt ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" role="group" aria-label="Dashboard statistics">
+        {/* ── STAT CARDS — 2×2 on mobile, 4-col on lg ── */}
+        <div
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+          role="group"
+          aria-label="Dashboard statistics"
+        >
           {statCards.map((stat, i) => (
             <TiltGlassPanel
               key={stat.label}
@@ -157,25 +291,31 @@ export function PenthouseClient({
               className="p-5 flex flex-col gap-3"
               delay={i * 120}
             >
+              {/* Label + icon row */}
               <div className="flex items-center justify-between">
                 <span
-                  className="text-xs uppercase tracking-wider"
-                  style={{ color: "var(--text-secondary)" }}
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: "var(--text-secondary)",
+                  }}
                 >
                   {stat.label}
                 </span>
-                <span className="text-sm">{stat.icon}</span>
+                {stat.icon}
               </div>
-              <div className="flex items-end gap-1">
-                <AnimatedCounter
-                  value={stat.value}
-                  accentColor={stat.accentColor}
-                />
+
+              {/* Value row */}
+              <div className="flex items-end gap-1.5">
+                <AnimatedCounter value={stat.value} accentColor={stat.accentColor} />
                 {stat.suffix && (
                   <span
-                    className="text-lg mb-0.5"
+                    className="mb-1"
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "18px",
                       color: stat.accentColor,
                       opacity: 0.7,
                     }}
@@ -189,11 +329,16 @@ export function PenthouseClient({
         </div>
 
         {/* ── PIPELINE VISUALIZATION ── */}
-        <TiltGlassPanel className="p-6 space-y-4" delay={500}>
+        <TiltGlassPanel className="p-7 space-y-5" delay={500}>
+          {/* Heading row */}
           <div className="flex items-center justify-between">
             <h2
-              className="text-sm font-medium"
-              style={{ color: "var(--text-primary)" }}
+              className="text-base font-medium"
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                color: "var(--text-primary)",
+                letterSpacing: "0.01em",
+              }}
             >
               Application Pipeline
             </h2>
@@ -209,17 +354,23 @@ export function PenthouseClient({
           </div>
 
           {totalPipeline === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <div className="text-3xl opacity-40">🏗️</div>
+            <div className="flex flex-col items-center gap-3 py-10 text-center">
+              <span className="text-3xl opacity-40" aria-hidden="true">🏗️</span>
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 No applications yet. Head to the War Room to start building your pipeline.
               </p>
             </div>
           ) : (
             <>
+              {/* Progress bar — 4px, glowing segments */}
               <div
-                className="flex h-3 rounded-full overflow-hidden"
-                style={{ background: "rgba(255, 255, 255, 0.06)" }}
+                className="flex rounded-full overflow-hidden"
+                style={{
+                  height: "4px",
+                  background: "rgba(255, 255, 255, 0.06)",
+                }}
+                role="img"
+                aria-label={`Pipeline: ${totalPipeline} applications across ${pipeline.filter((s) => s.count > 0).length} stages`}
               >
                 {pipeline.map((stage) =>
                   stage.count > 0 ? (
@@ -231,14 +382,21 @@ export function PenthouseClient({
                   ) : null
                 )}
               </div>
-              <div className="flex flex-wrap gap-4">
+
+              {/* Legend */}
+              <div className="flex flex-wrap gap-5">
                 {pipeline.map((stage) => (
                   <div key={stage.name} className="flex items-center gap-2">
-                    <div
-                      className="w-2.5 h-2.5 rounded-full"
+                    <span
+                      className="rounded-full"
+                      aria-hidden="true"
                       style={{
+                        display: "inline-block",
+                        width: "8px",
+                        height: "8px",
                         backgroundColor: stage.color,
                         boxShadow: `0 0 6px ${stage.color}`,
+                        flexShrink: 0,
                       }}
                     />
                     <span
@@ -264,23 +422,27 @@ export function PenthouseClient({
         </TiltGlassPanel>
 
         {/* ── RECENT ACTIVITY ── */}
-        <TiltGlassPanel className="p-6 space-y-4" delay={650}>
+        <TiltGlassPanel className="p-7 space-y-4" delay={650}>
           <h2
-            className="text-sm font-medium"
-            style={{ color: "var(--text-primary)" }}
+            className="text-base font-medium"
+            style={{
+              fontFamily: "'Playfair Display', Georgia, serif",
+              color: "var(--text-primary)",
+              letterSpacing: "0.01em",
+            }}
           >
             Recent Activity
           </h2>
 
           {activity.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <div className="text-3xl opacity-40">📭</div>
+            <div className="flex flex-col items-center gap-3 py-10 text-center">
+              <span className="text-3xl opacity-40" aria-hidden="true">📭</span>
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 No activity yet. Your timeline will populate as you use The Tower.
               </p>
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-1" role="list" aria-label="Recent activity list">
               {activity.map((item, i) => (
                 <ActivityRow key={item.id} item={item} index={i} />
               ))}
@@ -288,26 +450,62 @@ export function PenthouseClient({
           )}
         </TiltGlassPanel>
 
-        {/* ── QUICK ACTIONS ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* ── QUICK ACTIONS — 3-col grid ── */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+          role="group"
+          aria-label="Quick actions — coming soon"
+        >
           {[
-            { label: "Add Application", desc: "Track a new opportunity", floor: "7", icon: "➕" },
-            { label: "Research Company", desc: "Get intelligence on a target", floor: "6", icon: "🔍" },
-            { label: "Prep Interview", desc: "Generate a briefing packet", floor: "3", icon: "📄" },
+            {
+              label: "Add Application",
+              desc: "Track a new opportunity",
+              floor: "7",
+              icon: (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <line x1="8" y1="2" x2="8" y2="14" stroke="var(--gold)" strokeWidth="1.6" strokeLinecap="round" />
+                  <line x1="2" y1="8" x2="14" y2="8" stroke="var(--gold)" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              ),
+            },
+            {
+              label: "Research Company",
+              desc: "Get intelligence on a target",
+              floor: "6",
+              icon: (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="4.5" stroke="var(--gold)" strokeWidth="1.5" />
+                  <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="var(--gold)" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              ),
+            },
+            {
+              label: "Prep Interview",
+              desc: "Generate a briefing packet",
+              floor: "3",
+              icon: (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <rect x="2" y="1" width="12" height="14" rx="1.5" stroke="var(--gold)" strokeWidth="1.4" />
+                  <line x1="5" y1="5.5" x2="11" y2="5.5" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" opacity="0.7" />
+                  <line x1="5" y1="8" x2="11" y2="8" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" opacity="0.7" />
+                  <line x1="5" y1="10.5" x2="8.5" y2="10.5" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" opacity="0.5" />
+                </svg>
+              ),
+            },
           ].map((action, i) => (
             <QuickActionCard key={action.label} action={action} index={i} />
           ))}
         </div>
 
-        {/* Footer */}
+        {/* ── FOOTER ── */}
         <div className="text-center pb-4">
           <p
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "10px",
               color: "var(--text-muted)",
-              letterSpacing: "0.15em",
-              opacity: 0.5,
+              letterSpacing: "0.2em",
+              opacity: 0.4,
             }}
           >
             THE TOWER — PENTHOUSE LEVEL
@@ -319,12 +517,12 @@ export function PenthouseClient({
 }
 
 /* ──────────────────────────────────────────────────────────────
-   INTERACTIVE COMPONENTS
+   SUBCOMPONENTS
    ────────────────────────────────────────────────────────────── */
 
 /**
  * TiltGlassPanel — 3D perspective tilt on hover + gold edge glow.
- * Tracks mouse position relative to the panel and applies CSS 3D transform.
+ * Staggered entrance via delay prop.
  */
 function TiltGlassPanel({
   children,
@@ -351,39 +549,42 @@ function TiltGlassPanel({
     const rect = el.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    el.style.transform = `perspective(800px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg) scale(1.01)`;
-    // Glow follows mouse
+    el.style.transform = `perspective(900px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg) scale(1.01)`;
     el.style.boxShadow = `
-      0 16px 48px rgba(0, 0, 0, 0.45),
+      0 20px 60px rgba(0, 0, 0, 0.55),
       0 0 1px rgba(255, 255, 255, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      ${x * 30}px ${y * 30}px 60px rgba(201, 168, 76, 0.06)
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      ${x * 36}px ${y * 36}px 70px rgba(201, 168, 76, 0.07),
+      0 0 0 1px rgba(201, 168, 76, 0.08)
     `;
   }, []);
 
   const handleMouseLeave = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    el.style.transform = "perspective(800px) rotateY(0deg) rotateX(0deg) scale(1)";
-    el.style.boxShadow = "0 16px 48px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)";
+    el.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg) scale(1)";
+    el.style.boxShadow =
+      "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05)";
   }, []);
 
   return (
     <div
       ref={ref}
-      className={`rounded-xl transition-all duration-300 ease-out ${className}`}
+      className={`rounded-xl ${className}`}
       style={{
-        background: "rgba(10, 12, 25, 0.78)",
-        backdropFilter: "blur(24px) saturate(1.4)",
-        WebkitBackdropFilter: "blur(24px) saturate(1.4)",
+        background: "rgba(10, 12, 25, 0.82)",
+        backdropFilter: "blur(24px) saturate(1.5)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.5)",
         border: "1px solid rgba(255, 255, 255, 0.07)",
-        borderTop: `2px solid ${accentColor ?? "rgba(201, 168, 76, 0.4)"}`,
+        borderTop: `2px solid ${accentColor ?? "rgba(201, 168, 76, 0.45)"}`,
         boxShadow:
-          "0 16px 48px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+          "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
         willChange: "transform, box-shadow",
         opacity: visible ? 1 : 0,
-        transform: visible ? "perspective(800px) rotateY(0deg) rotateX(0deg) translateY(0)" : "perspective(800px) rotateX(8deg) translateY(20px)",
-        transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
+        transform: visible
+          ? "perspective(900px) rotateY(0deg) rotateX(0deg) translateY(0)"
+          : "perspective(900px) rotateX(8deg) translateY(24px)",
+        transition: "opacity 0.65s ease-out, transform 0.65s ease-out",
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -394,7 +595,7 @@ function TiltGlassPanel({
 }
 
 /**
- * AnimatedCounter — counts from 0 to target value on mount.
+ * AnimatedCounter — counts from 0 to target on mount with ease-out cubic.
  */
 function AnimatedCounter({ value, accentColor }: { value: number; accentColor: string }) {
   const [display, setDisplay] = useState(0);
@@ -402,14 +603,16 @@ function AnimatedCounter({ value, accentColor }: { value: number; accentColor: s
   const startRef = useRef(0);
 
   useEffect(() => {
-    if (value === 0) { setDisplay(0); return; }
+    if (value === 0) {
+      setDisplay(0);
+      return;
+    }
     startRef.current = performance.now();
-    const duration = 1200 + Math.random() * 400; // Varied timing for organic feel
+    const duration = 1200 + Math.random() * 400;
 
     const animate = (now: number) => {
       const elapsed = now - startRef.current;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplay(Math.round(eased * value));
       if (progress < 1) {
@@ -423,12 +626,13 @@ function AnimatedCounter({ value, accentColor }: { value: number; accentColor: s
 
   return (
     <span
-      className="text-2xl"
+      className="text-3xl"
       style={{
         fontFamily: "'JetBrains Mono', monospace",
         fontVariantNumeric: "tabular-nums lining-nums",
         color: accentColor,
-        textShadow: `0 0 15px color-mix(in srgb, ${accentColor} 30%, transparent)`,
+        textShadow: `0 0 18px color-mix(in srgb, ${accentColor} 35%, transparent)`,
+        lineHeight: 1,
       }}
     >
       {value > 0 ? display : "—"}
@@ -437,7 +641,7 @@ function AnimatedCounter({ value, accentColor }: { value: number; accentColor: s
 }
 
 /**
- * AnimatedBar — pipeline bar that expands from 0 on mount.
+ * AnimatedBar — pipeline bar segment that expands from 0 on mount.
  */
 function AnimatedBar({ width, color }: { width: number; color: string }) {
   const [currentWidth, setCurrentWidth] = useState(0);
@@ -453,32 +657,27 @@ function AnimatedBar({ width, color }: { width: number; color: string }) {
       style={{
         width: `${currentWidth}%`,
         backgroundColor: color,
-        boxShadow: `0 0 8px ${color}`,
+        boxShadow: `0 0 10px ${color}, 0 0 4px ${color}`,
       }}
     />
   );
 }
 
 /**
- * ActivityRow — hover-interactive activity item with sliding gold line.
+ * ActivityRow — hover-interactive activity item with sliding gold accent line.
  */
 function ActivityRow({ item, index }: { item: ActivityItemData; index: number }) {
   const [hovered, setHovered] = useState(false);
 
-  const icons: Record<ActivityItemData["type"], string> = {
-    application: "📋",
-    email: "📧",
-    interview: "🎯",
-    follow_up: "↩️",
-  };
-
   return (
     <div
-      className="flex items-start gap-3 p-3 rounded-lg transition-all duration-300 relative overflow-hidden"
+      role="listitem"
+      className="flex items-start gap-3 p-3 rounded-lg relative overflow-hidden"
       style={{
         border: hovered ? "1px solid rgba(201, 168, 76, 0.2)" : "1px solid transparent",
         background: hovered ? "rgba(201, 168, 76, 0.04)" : "transparent",
         transform: hovered ? "translateX(4px)" : "translateX(0)",
+        transition: "all 0.25s ease-out",
         animationDelay: `${index * 80}ms`,
       }}
       onMouseEnter={() => setHovered(true)}
@@ -486,25 +685,30 @@ function ActivityRow({ item, index }: { item: ActivityItemData; index: number })
     >
       {/* Sliding gold accent line */}
       <div
-        className="absolute left-0 top-0 w-0.5 transition-all duration-300"
+        className="absolute left-0 top-0 w-0.5"
         style={{
           height: hovered ? "100%" : "0%",
-          background: "var(--gold)",
-          opacity: hovered ? 0.6 : 0,
+          background: "linear-gradient(to bottom, var(--gold), rgba(201, 168, 76, 0.3))",
+          opacity: hovered ? 0.7 : 0,
+          transition: "height 0.25s ease-out, opacity 0.25s ease-out",
         }}
+        aria-hidden="true"
       />
-      <span className="text-sm shrink-0 mt-0.5">{icons[item.type]}</span>
+
+      {/* Colored type dot */}
+      <ActivityDot type={item.type} />
+
+      {/* Content */}
       <div className="flex-1 min-w-0">
-        <p
-          className="text-sm truncate"
-          style={{ color: "var(--text-primary)" }}
-        >
+        <p className="text-sm truncate" style={{ color: "var(--text-primary)" }}>
           {item.title}
         </p>
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
           {item.description}
         </p>
       </div>
+
+      {/* Timestamp */}
       <span
         className="shrink-0"
         style={{
@@ -520,10 +724,13 @@ function ActivityRow({ item, index }: { item: ActivityItemData; index: number })
 }
 
 /**
- * QuickActionCard — disabled but visually interactive placeholder.
+ * QuickActionCard — disabled placeholder, muted glass with LOCKED badge.
  */
-function QuickActionCard({ action, index }: {
-  action: { label: string; desc: string; floor: string; icon: string };
+function QuickActionCard({
+  action,
+  index: _index,
+}: {
+  action: { label: string; desc: string; floor: string; icon: JSX.Element };
   index: number;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -531,47 +738,74 @@ function QuickActionCard({ action, index }: {
   return (
     <button
       disabled
+      aria-label={`${action.label} — Floor ${action.floor} — Locked`}
+      aria-disabled="true"
       title="Coming soon — complete Phase 1+"
-      className="text-left group cursor-default rounded-xl p-4 transition-all duration-300 relative overflow-hidden"
+      className="text-left cursor-default rounded-xl p-5 relative overflow-hidden"
       style={{
-        background: hovered ? "rgba(10, 12, 25, 0.7)" : "rgba(10, 12, 25, 0.55)",
+        background: hovered ? "rgba(10, 12, 25, 0.72)" : "rgba(10, 12, 25, 0.55)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        border: hovered ? "1px solid rgba(201, 168, 76, 0.15)" : "1px solid rgba(255, 255, 255, 0.05)",
-        opacity: hovered ? 0.7 : 0.5,
+        border: hovered
+          ? "1px solid rgba(201, 168, 76, 0.15)"
+          : "1px solid rgba(255, 255, 255, 0.05)",
+        borderTop: "2px solid rgba(201, 168, 76, 0.2)",
+        opacity: hovered ? 0.6 : 0.4,
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        transition: "all 0.25s ease-out",
+        willChange: "transform, opacity",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Corner icon */}
-      <div className="absolute top-3 right-3 text-lg opacity-20">{action.icon}</div>
-      <div className="text-sm" style={{ color: "var(--text-primary)" }}>
+      {/* SVG icon — top right */}
+      <div
+        className="absolute top-4 right-4"
+        aria-hidden="true"
+        style={{ opacity: 0.35 }}
+      >
+        {action.icon}
+      </div>
+
+      {/* Label */}
+      <div
+        className="text-sm font-medium pr-6"
+        style={{ color: "var(--text-primary)" }}
+      >
         {action.label}
       </div>
-      <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+
+      {/* Description */}
+      <div
+        className="text-xs mt-1.5"
+        style={{ color: "var(--text-muted)" }}
+      >
         {action.desc}
       </div>
+
+      {/* Floor number */}
       <div
-        className="mt-2"
+        className="mt-3"
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: "10px",
           color: "var(--gold)",
-          opacity: 0.6,
+          opacity: 0.55,
+          letterSpacing: "0.12em",
         }}
       >
         FLOOR {action.floor}
       </div>
-      {/* Lock indicator */}
+
+      {/* LOCKED badge — bottom right */}
       <div
-        className="absolute bottom-3 right-3"
+        className="absolute bottom-4 right-4"
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: "8px",
           letterSpacing: "0.2em",
           color: "var(--text-muted)",
-          opacity: 0.4,
+          opacity: 0.45,
         }}
       >
         LOCKED
@@ -581,39 +815,46 @@ function QuickActionCard({ action, index }: {
 }
 
 /**
- * PulseRing — animated radar-like pulse emanating from a dot.
+ * PulseRing — animated radar-like pulse emanating from a gold dot.
  */
 function PulseRing() {
   return (
-    <span className="relative inline-flex items-center justify-center w-3 h-3" aria-hidden="true">
+    <span
+      className="relative inline-flex items-center justify-center"
+      style={{ width: "14px", height: "14px" }}
+      aria-hidden="true"
+    >
       {/* Core dot */}
       <span
-        className="w-1.5 h-1.5 rounded-full"
+        className="rounded-full"
         style={{
+          width: "6px",
+          height: "6px",
           background: "var(--gold)",
-          boxShadow: "0 0 6px rgba(201, 168, 76, 0.6)",
+          boxShadow: "0 0 8px rgba(201, 168, 76, 0.7)",
+          display: "block",
         }}
       />
       {/* Ring 1 */}
       <span
         className="absolute inset-0 rounded-full"
         style={{
-          border: "1px solid rgba(201, 168, 76, 0.4)",
-          animation: "pulse-ring 2.5s ease-out infinite",
+          border: "1px solid rgba(201, 168, 76, 0.45)",
+          animation: "pulse-ring-ph 2.5s ease-out infinite",
         }}
       />
-      {/* Ring 2 (delayed) */}
+      {/* Ring 2 — delayed */}
       <span
         className="absolute inset-0 rounded-full"
         style={{
           border: "1px solid rgba(201, 168, 76, 0.3)",
-          animation: "pulse-ring 2.5s ease-out infinite 1.2s",
+          animation: "pulse-ring-ph 2.5s ease-out infinite 1.25s",
         }}
       />
       <style>{`
-        @keyframes pulse-ring {
-          0% { transform: scale(1); opacity: 0.7; }
-          100% { transform: scale(2.5); opacity: 0; }
+        @keyframes pulse-ring-ph {
+          0%   { transform: scale(1);   opacity: 0.7; }
+          100% { transform: scale(2.6); opacity: 0;   }
         }
       `}</style>
     </span>

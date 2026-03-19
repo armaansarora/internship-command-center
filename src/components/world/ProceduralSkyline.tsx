@@ -2,17 +2,21 @@
 
 import { useEffect, useRef, useCallback, type JSX } from "react";
 import type { FloorId } from "@/types/ui";
+import type { TimeState } from "@/types/ui";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useDayNight } from "./DayNightProvider";
 
 /* ─────────────────────────────────────────────
-   PROCEDURAL NYC SKYLINE v2 — Canvas-based renderer
-   
+   PROCEDURAL NYC SKYLINE v3 — Canvas-based renderer
+
    Features:
    - 3-layer parallax depth (far, mid, near)
    - Recognizable NYC landmark silhouettes
    - Animated window lights with warm/cool variation
-   - Twinkling stars with glow
-   - Horizon glow and city light bloom
+   - Time-of-day sky gradients (night/dawn/morning/midday/afternoon/golden_hour/dusk)
+   - Twinkling stars (night only, fading at dusk/dawn)
+   - Shooting stars (night only)
+   - Horizon glow and city light bloom (time-aware)
    - Water/river reflection at bottom
    - Aviation warning lights on tall buildings
    - Mouse-reactive parallax on all layers
@@ -123,7 +127,7 @@ function generateScene(w: number, h: number) {
 
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
-          if (r() > 0.42) continue; // ~42% lit
+          if (r() > 0.42) continue; // ~42% lit (base — scaled at render time)
           const margin = 0.08;
           const cellW = (1 - margin * 2) / cols;
           const cellH = (1 - margin * 2) / rows;
@@ -168,6 +172,142 @@ function generateScene(w: number, h: number) {
   return { stars, buildings, particles };
 }
 
+// ── COLOR CONFIG BY TIME STATE ──
+interface SkyConfig {
+  gradientStops: string[];
+  starOpacity: number;
+  shootingStars: boolean;
+  windowLitChance: number; // 0-1 multiplier on the base 42%
+  windowWarmBias: number;  // 0-1; 1 = all warm, 0 = all cool
+  bloomStrength: number;   // multiplier for city bloom alpha
+  horizonR: number;
+  horizonG: number;
+  horizonB: number;
+  horizonA: number;
+  cloudAlphaBase: number;
+  cloudR: number;
+  cloudG: number;
+  cloudB: number;
+  fogR: number;
+  fogG: number;
+  fogB: number;
+  waterShimmerR: number;
+  waterShimmerG: number;
+  waterShimmerB: number;
+  duskStarOpacity: number; // override for partial star visibility
+}
+
+function getSkyConfig(ts: TimeState): SkyConfig {
+  switch (ts) {
+    case "dawn":
+      return {
+        gradientStops: ["#1A0A1E", "#3D1540", "#6B2B45", "#B85C40", "#E8A050", "#F0C070"],
+        starOpacity: 0.10,
+        shootingStars: false,
+        windowLitChance: 0.60, // ~25% of 42%
+        windowWarmBias: 0.85,
+        bloomStrength: 0.5,
+        horizonR: 232, horizonG: 120, horizonB: 40, horizonA: 0.10,
+        cloudAlphaBase: 0.04,
+        cloudR: 180, cloudG: 130, cloudB: 80,
+        fogR: 40, fogG: 20, fogB: 15,
+        waterShimmerR: 220, waterShimmerG: 140, waterShimmerB: 60,
+        duskStarOpacity: 0.10,
+      };
+    case "morning":
+      return {
+        gradientStops: ["#1A3050", "#2A5070", "#4080A0", "#60A0C0", "#80C0E0", "#A0D8F0"],
+        starOpacity: 0,
+        shootingStars: false,
+        windowLitChance: 0.24, // ~10% of 42%
+        windowWarmBias: 0.10,
+        bloomStrength: 0.15,
+        horizonR: 80, horizonG: 160, horizonB: 220, horizonA: 0.06,
+        cloudAlphaBase: 0.04,
+        cloudR: 200, cloudG: 215, cloudB: 240,
+        fogR: 50, fogG: 80, fogB: 110,
+        waterShimmerR: 100, waterShimmerG: 160, waterShimmerB: 220,
+        duskStarOpacity: 0,
+      };
+    case "midday":
+      return {
+        gradientStops: ["#3060A0", "#4080C0", "#60A0D8", "#80B8E0", "#A0D0F0", "#C0E0F8"],
+        starOpacity: 0,
+        shootingStars: false,
+        windowLitChance: 0.24,
+        windowWarmBias: 0.10,
+        bloomStrength: 0.10,
+        horizonR: 100, horizonG: 180, horizonB: 240, horizonA: 0.05,
+        cloudAlphaBase: 0.05,
+        cloudR: 220, cloudG: 230, cloudB: 255,
+        fogR: 60, fogG: 90, fogB: 120,
+        waterShimmerR: 120, waterShimmerG: 180, waterShimmerB: 240,
+        duskStarOpacity: 0,
+      };
+    case "afternoon":
+      return {
+        gradientStops: ["#4060A0", "#6080B0", "#8098C0", "#A0B0C8", "#C0C8D0", "#D8D0C0"],
+        starOpacity: 0,
+        shootingStars: false,
+        windowLitChance: 0.24,
+        windowWarmBias: 0.20,
+        bloomStrength: 0.12,
+        horizonR: 200, horizonG: 170, horizonB: 120, horizonA: 0.06,
+        cloudAlphaBase: 0.04,
+        cloudR: 210, cloudG: 205, cloudB: 195,
+        fogR: 70, fogG: 70, fogB: 80,
+        waterShimmerR: 180, waterShimmerG: 160, waterShimmerB: 130,
+        duskStarOpacity: 0,
+      };
+    case "golden_hour":
+      return {
+        gradientStops: ["#1A1020", "#402030", "#804030", "#C07040", "#E09040", "#F0B060"],
+        starOpacity: 0,
+        shootingStars: false,
+        windowLitChance: 0.60,
+        windowWarmBias: 0.90,
+        bloomStrength: 0.65,
+        horizonR: 240, horizonG: 140, horizonB: 40, horizonA: 0.12,
+        cloudAlphaBase: 0.05,
+        cloudR: 220, cloudG: 130, cloudB: 60,
+        fogR: 50, fogG: 25, fogB: 10,
+        waterShimmerR: 240, waterShimmerG: 150, waterShimmerB: 60,
+        duskStarOpacity: 0,
+      };
+    case "dusk":
+      return {
+        gradientStops: ["#0A0818", "#1A1030", "#302048", "#483060", "#604070", "#705080"],
+        starOpacity: 0.30,
+        shootingStars: false,
+        windowLitChance: 1.0,
+        windowWarmBias: 0.60,
+        bloomStrength: 0.75,
+        horizonR: 120, horizonG: 60, horizonB: 160, horizonA: 0.08,
+        cloudAlphaBase: 0.03,
+        cloudR: 60, cloudG: 40, cloudB: 80,
+        fogR: 15, fogG: 8, fogB: 25,
+        waterShimmerR: 180, waterShimmerG: 120, waterShimmerB: 200,
+        duskStarOpacity: 0.30,
+      };
+    case "night":
+    default:
+      return {
+        gradientStops: ["#03050C", "#070C1A", "#0E1530", "#141C3A", "#1A2244", "#1E2850"],
+        starOpacity: 1.0,
+        shootingStars: true,
+        windowLitChance: 1.0,
+        windowWarmBias: 0.70,
+        bloomStrength: 1.0,
+        horizonR: 201, horizonG: 168, horizonB: 76, horizonA: 0.07,
+        cloudAlphaBase: 0.02,
+        cloudR: 40, cloudG: 50, cloudB: 80,
+        fogR: 6, fogG: 8, fogB: 18,
+        waterShimmerR: 201, waterShimmerG: 168, waterShimmerB: 76,
+        duskStarOpacity: 1.0,
+      };
+  }
+}
+
 interface Props {
   floorId: FloorId;
   className?: string;
@@ -182,6 +322,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
   const sizeRef = useRef({ w: 0, h: 0 });
   const reduced = useReducedMotion();
   const offset = FLOOR_OFFSETS[floorId];
+  const { timeState } = useDayNight();
 
   // Init scene on resize
   useEffect(() => {
@@ -211,7 +352,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // Render
+  // Render — re-created when timeState, offset, or reduced changes
   const render = useCallback((t: number) => {
     const canvas = canvasRef.current;
     const scene = sceneRef.current;
@@ -220,6 +361,9 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     if (!ctx) return;
     const { w, h } = sizeRef.current;
     if (!w || !h) return;
+
+    // ── COMPUTE COLOR CONFIG ONCE PER FRAME ──
+    const cfg = getSkyConfig(timeState);
 
     // Smooth mouse
     const lerp = reduced ? 1 : 0.035;
@@ -231,44 +375,44 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     ctx.clearRect(0, 0, w, h);
 
     // ── SKY ──
+    const stops = cfg.gradientStops;
     const sky = ctx.createLinearGradient(0, 0, 0, h);
-    sky.addColorStop(0, "#03050C");
-    sky.addColorStop(0.15, "#070C1A");
-    sky.addColorStop(0.35, "#0E1530");
-    sky.addColorStop(0.55, "#141C3A");
-    sky.addColorStop(0.75, "#1A2244");
-    sky.addColorStop(1, "#1E2850");
+    const positions = [0, 0.15, 0.35, 0.55, 0.75, 1.0];
+    for (let i = 0; i < stops.length; i++) {
+      sky.addColorStop(positions[i] ?? i / (stops.length - 1), stops[i] ?? "#000");
+    }
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, w, h);
 
     // ── STARS ──
-    for (const s of scene.stars) {
-      const twinkle = reduced ? s.bright : s.bright * (0.4 + 0.6 * Math.sin(t * s.speed + s.phase));
-      const sx = s.x + mx * w * 0.004;
-      const sy = s.y + my * h * 0.002;
-      ctx.beginPath();
-      ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(230, 225, 215, ${twinkle})`;
-      ctx.fill();
-      if (s.r > 1.2) {
-        const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 4);
-        g.addColorStop(0, `rgba(230, 225, 215, ${twinkle * 0.2})`);
-        g.addColorStop(1, "rgba(230, 225, 215, 0)");
-        ctx.fillStyle = g;
+    if (cfg.starOpacity > 0) {
+      for (const s of scene.stars) {
+        const twinkle = reduced ? s.bright : s.bright * (0.4 + 0.6 * Math.sin(t * s.speed + s.phase));
+        const finalAlpha = twinkle * cfg.starOpacity;
+        const sx = s.x + mx * w * 0.004;
+        const sy = s.y + my * h * 0.002;
         ctx.beginPath();
-        ctx.arc(sx, sy, s.r * 4, 0, Math.PI * 2);
+        ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(230, 225, 215, ${finalAlpha})`;
         ctx.fill();
+        if (s.r > 1.2) {
+          const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 4);
+          g.addColorStop(0, `rgba(230, 225, 215, ${finalAlpha * 0.2})`);
+          g.addColorStop(1, "rgba(230, 225, 215, 0)");
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(sx, sy, s.r * 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
     }
 
-    // ── SHOOTING STARS (occasional) ──
-    if (!reduced) {
-      // Use time-based trigger — a shooting star appears every ~8 seconds
+    // ── SHOOTING STARS (night only) ──
+    if (!reduced && cfg.shootingStars) {
       const starPeriod = 8000;
       const starPhase = (t % starPeriod) / starPeriod;
       if (starPhase < 0.06) {
-        // Active shooting star
-        const progress = starPhase / 0.06; // 0 to 1
+        const progress = starPhase / 0.06;
         const seed = Math.floor(t / starPeriod);
         const sx = ((seed * 137) % 100) / 100 * w * 0.7 + w * 0.1;
         const sy = ((seed * 97) % 100) / 100 * h * 0.25 + h * 0.02;
@@ -292,7 +436,6 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
         ctx.lineTo(ex, ey);
         ctx.stroke();
 
-        // Head glow
         const hg = ctx.createRadialGradient(ex, ey, 0, ex, ey, 6);
         hg.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.8})`);
         hg.addColorStop(1, "rgba(255, 255, 255, 0)");
@@ -303,10 +446,9 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
-    // ── STAR CONSTELLATIONS (faint connecting lines between bright stars) ──
-    if (!reduced) {
+    // ── STAR CONSTELLATIONS (faint connecting lines — only when stars visible) ──
+    if (!reduced && cfg.starOpacity > 0) {
       const brightStars = scene.stars.filter(s => s.r > 1.0 && s.bright > 0.5);
-      // Connect nearby bright stars with very faint lines
       for (let i = 0; i < brightStars.length; i++) {
         const a = brightStars[i];
         for (let j = i + 1; j < brightStars.length; j++) {
@@ -315,7 +457,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
           const dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 120 && dist > 30) {
-            const lineAlpha = 0.04 * (1 - dist / 120) * Math.min(a.bright, b.bright);
+            const lineAlpha = 0.04 * (1 - dist / 120) * Math.min(a.bright, b.bright) * cfg.starOpacity;
             const twinkle = 0.5 + 0.5 * Math.sin(t * 0.0005 + i * 0.7);
             ctx.beginPath();
             ctx.moveTo(a.x + mx * w * 0.004, a.y + my * h * 0.002);
@@ -328,11 +470,10 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
-    // ── DISTANT LIGHTNING (occasional flash) ──
-    if (!reduced) {
-      const lightningPeriod = 15000; // ~15 seconds between strikes
+    // ── DISTANT LIGHTNING (night only) ──
+    if (!reduced && timeState === "night") {
+      const lightningPeriod = 15000;
       const lightningPhase = (t % lightningPeriod) / lightningPeriod;
-      // Two quick flashes in succession
       const flash1 = lightningPhase > 0.0 && lightningPhase < 0.008;
       const flash2 = lightningPhase > 0.012 && lightningPhase < 0.018;
       if (flash1 || flash2) {
@@ -357,14 +498,14 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
         const cloudX = ((t * cloudSpeed + c * w * 0.3) % (w * 1.5)) - w * 0.25;
         const cloudW = w * (0.2 + c * 0.05);
         const cloudH = 25 + c * 10;
-        const cloudAlpha = 0.02 + c * 0.005;
+        const cloudAlpha = cfg.cloudAlphaBase + c * 0.005;
 
         const cg = ctx.createRadialGradient(
           cloudX + cloudW / 2, cloudY, 0,
           cloudX + cloudW / 2, cloudY, cloudW / 2
         );
-        cg.addColorStop(0, `rgba(40, 50, 80, ${cloudAlpha})`);
-        cg.addColorStop(0.6, `rgba(30, 40, 65, ${cloudAlpha * 0.5})`);
+        cg.addColorStop(0, `rgba(${cfg.cloudR}, ${cfg.cloudG}, ${cfg.cloudB}, ${cloudAlpha})`);
+        cg.addColorStop(0.6, `rgba(${cfg.cloudR}, ${cfg.cloudG}, ${cfg.cloudB}, ${cloudAlpha * 0.5})`);
         cg.addColorStop(1, "rgba(0, 0, 0, 0)");
         ctx.fillStyle = cg;
         ctx.fillRect(cloudX, cloudY - cloudH, cloudW, cloudH * 2);
@@ -374,8 +515,8 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     // ── HORIZON GLOW ──
     const hy = h * (0.58 + offset * 0.25);
     const hg = ctx.createRadialGradient(w / 2, hy, 0, w / 2, hy, w * 0.55);
-    hg.addColorStop(0, "rgba(201, 168, 76, 0.07)");
-    hg.addColorStop(0.35, "rgba(180, 140, 60, 0.035)");
+    hg.addColorStop(0, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${cfg.horizonA})`);
+    hg.addColorStop(0.35, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${cfg.horizonA * 0.5})`);
     hg.addColorStop(0.7, "rgba(80, 90, 140, 0.02)");
     hg.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = hg;
@@ -442,7 +583,6 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
           ctx.arc(b.x + b.w * 0.5, lightY, 1.8, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(255, 40, 40, ${blink})`;
           ctx.fill();
-          // Red glow
           const rg = ctx.createRadialGradient(b.x + b.w * 0.5, lightY, 0, b.x + b.w * 0.5, lightY, 8);
           rg.addColorStop(0, `rgba(255, 40, 40, ${blink * 0.25})`);
           rg.addColorStop(1, "rgba(255, 40, 40, 0)");
@@ -454,6 +594,10 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
 
         // ── WINDOWS ──
         for (const win of b.windows) {
+          // Skip windows based on time-of-day lit-chance
+          // Use the window's phase as a stable pseudo-random value
+          if (win.phase > cfg.windowLitChance * Math.PI * 2) continue;
+
           const wx = b.x + win.rx * b.w;
           const wy = by + win.ry * b.h;
           const ww = win.rw * b.w;
@@ -461,7 +605,9 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
 
           const flicker = reduced ? win.brightness : win.brightness * (0.65 + 0.35 * Math.sin(t * win.speed + win.phase));
 
-          if (win.warm) {
+          // Warm/cool bias based on time
+          const isWarm = win.phase < cfg.windowWarmBias * Math.PI * 2;
+          if (isWarm) {
             ctx.fillStyle = flicker > 0.6 ? "#FBBF24" : "#E8C45A";
           } else {
             ctx.fillStyle = flicker > 0.6 ? "#93C5FD" : "#B8D4F0";
@@ -475,7 +621,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
             const gcy = wy + wh / 2;
             const gr = (ww + wh) * (d === 2 ? 1.2 : 0.7);
             const gg = ctx.createRadialGradient(gcx, gcy, 0, gcx, gcy, gr);
-            const gc = win.warm ? "255, 190, 80" : "140, 180, 255";
+            const gc = isWarm ? "255, 190, 80" : "140, 180, 255";
             gg.addColorStop(0, `rgba(${gc}, ${flicker * 0.12})`);
             gg.addColorStop(1, `rgba(${gc}, 0)`);
             ctx.fillStyle = gg;
@@ -491,9 +637,9 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       if (d < 2) {
         const fg = ctx.createLinearGradient(0, h * 0.4, 0, h);
         const fa = d === 0 ? 0.12 : 0.06;
-        fg.addColorStop(0, "rgba(12, 16, 32, 0)");
-        fg.addColorStop(0.5, `rgba(12, 16, 32, ${fa})`);
-        fg.addColorStop(1, `rgba(12, 16, 32, ${fa * 2.5})`);
+        fg.addColorStop(0, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, 0)`);
+        fg.addColorStop(0.5, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, ${fa})`);
+        fg.addColorStop(1, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, ${fa * 2.5})`);
         ctx.fillStyle = fg;
         ctx.fillRect(0, 0, w, h);
       }
@@ -516,24 +662,25 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       const sy = waterY + 4 + (i % 5) * (waterH / 6);
       const sw = 15 + (i % 4) * 8;
       const shimA = reduced ? 0.06 : 0.03 + 0.04 * Math.sin(t * 0.002 + i * 1.3);
-      ctx.fillStyle = `rgba(201, 168, 76, ${shimA})`;
+      ctx.fillStyle = `rgba(${cfg.waterShimmerR}, ${cfg.waterShimmerG}, ${cfg.waterShimmerB}, ${shimA})`;
       ctx.fillRect(sx, sy, sw, 1);
     }
 
     // ── BOTTOM FOG ──
     const bf = ctx.createLinearGradient(0, h * 0.7, 0, h);
-    bf.addColorStop(0, "rgba(6, 8, 18, 0)");
-    bf.addColorStop(0.4, "rgba(6, 8, 18, 0.35)");
-    bf.addColorStop(0.7, "rgba(6, 8, 18, 0.65)");
-    bf.addColorStop(1, "rgba(6, 8, 18, 0.92)");
+    bf.addColorStop(0, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, 0)`);
+    bf.addColorStop(0.4, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, 0.35)`);
+    bf.addColorStop(0.7, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, 0.65)`);
+    bf.addColorStop(1, `rgba(${cfg.fogR}, ${cfg.fogG}, ${cfg.fogB}, 0.92)`);
     ctx.fillStyle = bf;
     ctx.fillRect(0, 0, w, h);
 
-    // ── CITY BLOOM (breathing) ──
-    const breathe = reduced ? 0.05 : 0.04 + 0.02 * Math.sin(t * 0.0004);
+    // ── CITY BLOOM (breathing, scaled by time) ──
+    const breatheBase = reduced ? 0.05 : 0.04 + 0.02 * Math.sin(t * 0.0004);
+    const breathe = breatheBase * cfg.bloomStrength;
     const bloom = ctx.createRadialGradient(w * 0.5, h * 0.62, 0, w * 0.5, h * 0.62, w * 0.45);
-    bloom.addColorStop(0, `rgba(201, 168, 76, ${breathe})`);
-    bloom.addColorStop(0.5, `rgba(160, 130, 60, ${breathe * 0.4})`);
+    bloom.addColorStop(0, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${breathe})`);
+    bloom.addColorStop(0.5, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${breathe * 0.4})`);
     bloom.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = bloom;
     ctx.fillRect(0, 0, w, h);
@@ -545,7 +692,6 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
         p.y += p.vy;
         p.life++;
 
-        // Respawn at bottom when expired or off-screen
         if (p.life > p.maxLife || p.y < -10) {
           p.x = Math.random() * w;
           p.y = h * 0.6 + Math.random() * h * 0.35;
@@ -553,7 +699,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
           p.alpha = 0.1 + Math.random() * 0.5;
         }
 
-        // Mouse repulsion — particles drift away from cursor
+        // Mouse repulsion
         const mxPos = smoothMouse.current.x * w;
         const myPos = smoothMouse.current.y * h;
         const dx = p.x - mxPos;
@@ -565,24 +711,21 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
           p.y += (dy / dist) * force * 0.5;
         }
 
-        // Fade in/out based on life
         const lifeRatio = p.life / p.maxLife;
         const fadeAlpha = lifeRatio < 0.1 ? lifeRatio / 0.1 : lifeRatio > 0.8 ? (1 - lifeRatio) / 0.2 : 1;
         const finalAlpha = p.alpha * fadeAlpha;
 
-        // Subtle drift wobble
         p.x += Math.sin(t * 0.001 + p.life * 0.02) * 0.15;
 
-        const color = p.warm ? `rgba(201, 168, 76, ${finalAlpha})` : `rgba(160, 190, 255, ${finalAlpha * 0.6})`;
+        const color = p.warm ? `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${finalAlpha})` : `rgba(160, 190, 255, ${finalAlpha * 0.6})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.fill();
 
-        // Glow
         if (p.size > 1.2 && finalAlpha > 0.15) {
           const pg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5);
-          pg.addColorStop(0, p.warm ? `rgba(201, 168, 76, ${finalAlpha * 0.15})` : `rgba(160, 190, 255, ${finalAlpha * 0.08})`);
+          pg.addColorStop(0, p.warm ? `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, ${finalAlpha * 0.15})` : `rgba(160, 190, 255, ${finalAlpha * 0.08})`);
           pg.addColorStop(1, "rgba(0, 0, 0, 0)");
           ctx.fillStyle = pg;
           ctx.beginPath();
@@ -592,27 +735,26 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
-    // ── MOUSE SPOTLIGHT (subtle radial glow following cursor) ──
+    // ── MOUSE SPOTLIGHT ──
     if (!reduced) {
       const spotX = smoothMouse.current.x * w;
       const spotY = smoothMouse.current.y * h;
       const spotR = w * 0.18;
       const spot = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, spotR);
-      spot.addColorStop(0, "rgba(201, 168, 76, 0.035)");
-      spot.addColorStop(0.4, "rgba(201, 168, 76, 0.015)");
+      spot.addColorStop(0, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, 0.035)`);
+      spot.addColorStop(0.4, `rgba(${cfg.horizonR}, ${cfg.horizonG}, ${cfg.horizonB}, 0.015)`);
       spot.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = spot;
       ctx.fillRect(spotX - spotR, spotY - spotR, spotR * 2, spotR * 2);
     }
 
-    // ── BUILDING LIGHT SWEEP (periodic floor-by-floor illumination on a random near building) ──
+    // ── BUILDING LIGHT SWEEP ──
     if (!reduced) {
       const sweepPeriod = 10000;
       const sweepPhase = (t % sweepPeriod) / sweepPeriod;
       if (sweepPhase < 0.3) {
         const sweepProgress = sweepPhase / 0.3;
         const sweepSeed = Math.floor(t / sweepPeriod);
-        // Pick a near-layer building
         const nearBuildings = scene.buildings.filter(b => b.depth === 2 && b.h > h * 0.25);
         if (nearBuildings.length > 0) {
           const target = nearBuildings[sweepSeed % nearBuildings.length];
@@ -620,7 +762,6 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
           const py = my * h * PARALLAX[2] * 0.4;
           const vo = offset * h * 0.32;
           const by = h - target.h;
-          // Sweep a glow band from bottom to top of building
           const sweepY = by + target.h * (1 - sweepProgress);
           const bandH = target.h * 0.08;
           const sweepAlpha = sweepProgress < 0.1 ? sweepProgress / 0.1 : sweepProgress > 0.85 ? (1 - sweepProgress) / 0.15 : 1;
@@ -635,7 +776,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     }
 
-    // ── SCAN LINE (subtle HUD effect) ──
+    // ── SCAN LINE (HUD effect) ──
     if (!reduced) {
       const scanPeriod = 12000;
       const scanProgress = (t % scanPeriod) / scanPeriod;
@@ -659,7 +800,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     ctx.fillRect(0, 0, w, h);
 
     rafRef.current = requestAnimationFrame(render);
-  }, [offset, reduced]);
+  }, [offset, reduced, timeState]);
 
   useEffect(() => {
     rafRef.current = requestAnimationFrame(render);
