@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-19T15:31:00-04:00 (EDT)
+**Last updated:** 2026-03-19T17:45:00-04:00 (EDT)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -152,6 +152,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 | `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge. Multi-tenant ready ({USER_NAME} templating) | ~225 |
 | `docs/FILE-STRUCTURE.md` | Complete project file tree: pages, components, lib, agents, types, tests | ~190 |
 | `docs/AUDIT.md` | File-by-file keep/kill verdicts for old repo (reference) | ~180 |
+| `docs/WAR-ROOM-BLUEPRINT.md` | **NEW:** Phase 1 definitive implementation guide — architecture decisions, component trees, CRO agent spec, DnD patterns, design tokens, 18-task plan, audit findings | ~1,445 |
 | `.env.local` | All credentials (never commit) | — |
 | `.env.example` | Template with all required env vars, organized by phase | ~45 |
 
@@ -161,8 +162,8 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 ## 7. CURRENT STATE
 
-**Phase:** 0 — The Shell (COMPLETE) + Phase 0 Visual Overhaul (COMPLETE)
-**Branch:** `main` (commit `b61d6d0`)
+**Phase:** 1 — The War Room (RESEARCH COMPLETE, BUILD NOT STARTED)
+**Branch:** `main` (commit `b61d6d0` + uncommitted: WAR-ROOM-BLUEPRINT.md)
 **Last commit:** Phase 0 complete visual overhaul — lobby, penthouse, skyline, elevator, floor stubs (`b61d6d0`)
 **Production:** `internship-command-center-lake.vercel.app`
 **LOC:** 6,854 across 46 source files
@@ -375,6 +376,7 @@ public/skyline/
 | 8 | 2026-03-19 | **Bootstrap System Overhaul** — 10 improvements to session handoff infrastructure. (1) Husky pre-commit hook auto-regenerates BOOTSTRAP-PROMPT.md on every commit. (2) SESSION-STATE.json system for capturing mid-task state. (3) Build health check (tsc) embedded in bootstrap output. (4) Git diff since last bootstrap generation with commit tracking. (5) Acceptance criteria auto-tracking — parses MASTER-PLAN.md and checks code for evidence. (6) Dependency freshness check (npm outdated, major versions). (7) Vercel deploy status via check-vercel.ts. (8) Context budget estimation (~tokens for recommended reading files). (9) `npm run session:end` — single command chains type check → bootstrap → commit → push. (10) GitHub Actions CI guard for bootstrap staleness. Also: update-session-state.ts CLI, session-end.ts dry-run mode, fixed shell injection in commit message. 2-pass recursive audit clean. |
 | 9 | 2026-03-19 | **Automation hardening** — Eliminated all manual commands from human workflow. Added 5 mandatory agent behavior rules to CLAUDE.md: (1) auto-update SESSION-STATE.json, (2) auto-run session:end, (3) Vercel check, (4) no dirty state, (5) context window management with 40/60/70% thresholds and mandatory handoff. Fixed bootstrap Quick Start to mandate CLAUDE.md reading (was previously telling agents to skip it). CLI scripts kept as fallbacks. **User reviewed live site and flagged immersive UI as poor quality** — skyline image doesn't fit page, UI components hard to see. Next session must do a complete visual overhaul before Phase 1. |
 | 10 | 2026-03-19 | **Phase 0 Complete Visual Overhaul** — Replaced entire CSS 3D parallax skyline (SkylineScene, SkylineLayers, AtmosphericEffects, DustMotes, WindowTint) with `ProceduralSkyline.tsx` (818-line canvas renderer, time-aware, 7 sky palettes, animated window lights, stars). Redesigned lobby (672 LOC — commanding typography, premium glass sign-in, 500px spotlight), penthouse (862 LOC — custom SVG icons, text-3xl counters, stronger glass), FloorShell (174 LOC — stronger vignette, mullions, floor-specific ambient), Elevator (450 LOC — brushed-metal texture, tooltips, text-6xl counter), globals.css (370 LOC — glass utilities, animations, gold glows), and all 7 floor stubs with unique visual atmospheres. Deleted 8 orphaned files (6 components + 2 hooks). 6,854 LOC, 46 files. Commit `b61d6d0`, pushed to main. 2-pass recursive audit clean. |
+| 11 | 2026-03-19 | **Phase 1 Deep Research — The War Room Blueprint.** Launched 5 parallel research subagents: (1) Kanban/pipeline UIs — @dnd-kit vs pragmatic-dnd, GSAP Flip, lexicographic ordering, WCAG 2.5.7 DnD. (2) CRO agent — AI SDK v5/v6 (package version confusion resolved: `ai: ^6.x` IS SDK 5), tool-use agents, `inputSchema:` not `parameters:`, `stopWhen:` not `maxSteps:`, `sendMessage()` not `append()`, Anthropic prompt caching. (3) Character system — Rive vs CSS sprites, XState v5 state machines, split-screen dialogue, typewriter streaming. (4) War room design — tactical/military aesthetics, color palette (navy/cyan vs Penthouse gold), glassmorphism, blueprint grids, XCOM/SHIELD/Iron Man HUD references. (5) Innovative features — zero-manual-status-updates (email detection), conversion rate benchmarking (Huntr 1.78M dataset), RE Finance vertical intelligence, gamification. Compiled into `docs/WAR-ROOM-BLUEPRINT.md` (1,445 lines). Recursive audit: 23 findings (2 critical — missing `position` column + Zod import path, 6 medium, 15 low). All findings appended to blueprint §10. Research files: 5 markdown docs totaling ~5,400 lines. |
 
 ---
 
