@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect, useRef, type JSX } from "react";
+import { useState, useEffect, useRef, useCallback, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
 import { ProceduralSkyline } from "@/components/world/ProceduralSkyline";
 import gsap from "gsap";
@@ -10,14 +10,18 @@ import gsap from "gsap";
  * Lobby client component — The Tower entrance.
  *
  * Full-screen immersive experience: procedural NYC skyline fills the viewport.
- * Content is arranged in a single viewport with no scrolling needed.
- * The sign-in card floats as a glass panel over the city.
+ * Game-like interactions: mouse-tracking spotlight, parallax UI elements,
+ * radar pulse on logo, interactive directory with slide reveals,
+ * custom cursor glow effect.
  */
 export function LobbyClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isReturningUser, setIsReturningUser] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -26,15 +30,48 @@ export function LobbyClient() {
     }
   }, []);
 
-  // Cinematic entrance animation
+  // Mouse tracking for spotlight + content parallax
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mouseRef.current = {
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
+      };
+
+      // Move spotlight
+      if (spotlightRef.current) {
+        spotlightRef.current.style.left = `${e.clientX}px`;
+        spotlightRef.current.style.top = `${e.clientY}px`;
+      }
+
+      // Parallax on content
+      if (contentRef.current) {
+        const px = (mouseRef.current.x - 0.5) * 6;
+        const py = (mouseRef.current.y - 0.5) * 3;
+        contentRef.current.style.transform = `translate(${px}px, ${py}px)`;
+      }
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  // Cinematic entrance animation — more dramatic
   useEffect(() => {
     if (!containerRef.current) return;
-    const els = containerRef.current.querySelectorAll("[data-animate]");
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-    tl.fromTo(containerRef.current, { opacity: 0 }, { opacity: 1, duration: 1.2 });
+    // Stage 1: Fade in backdrop
+    tl.fromTo(containerRef.current, { opacity: 0 }, { opacity: 1, duration: 1.5 });
+
+    // Stage 2: Content elements cascade in
+    const els = containerRef.current.querySelectorAll("[data-animate]");
     els.forEach((el, i) => {
-      tl.fromTo(el, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, `-=${0.5 + i * 0.05}`);
+      tl.fromTo(
+        el,
+        { y: 40, opacity: 0, scale: 0.96 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.7 },
+        `-=${0.55 + i * 0.04}`
+      );
     });
 
     return () => { tl.kill(); };
@@ -64,6 +101,19 @@ export function LobbyClient() {
       {/* ── PROCEDURAL SKYLINE ── */}
       <ProceduralSkyline floorId="L" />
 
+      {/* ── MOUSE SPOTLIGHT OVERLAY ── */}
+      <div
+        ref={spotlightRef}
+        className="pointer-events-none fixed -translate-x-1/2 -translate-y-1/2"
+        style={{
+          width: "400px",
+          height: "400px",
+          background: "radial-gradient(circle, rgba(201, 168, 76, 0.04) 0%, rgba(201, 168, 76, 0.015) 35%, transparent 70%)",
+          zIndex: 2,
+          willChange: "left, top",
+        }}
+      />
+
       {/* ── ATMOSPHERIC OVERLAYS ── */}
       <div className="pointer-events-none absolute inset-0" style={{ zIndex: 1 }}>
         {/* Vignette */}
@@ -87,7 +137,7 @@ export function LobbyClient() {
             background: "linear-gradient(to bottom, rgba(4, 6, 15, 0.4) 0%, transparent 100%)",
           }}
         />
-        {/* Subtle window mullions — very faint, only visible in center section */}
+        {/* Subtle window mullions */}
         <div className="absolute inset-0 flex justify-between px-[15%]">
           {[0.04, 0.025, 0.04].map((opacity, i) => (
             <div
@@ -101,169 +151,244 @@ export function LobbyClient() {
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* ── MAIN CONTENT with parallax ── */}
       <div
         ref={containerRef}
-        className="relative flex flex-col items-center justify-center flex-1 px-6 w-full max-w-md mx-auto gap-4 py-6"
+        className="relative flex flex-col items-center justify-center flex-1 w-full"
         style={{ zIndex: 10, opacity: 0 }}
       >
-        {/* Floor label */}
         <div
-          data-animate
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "10px",
-            letterSpacing: "0.3em",
-            color: "var(--gold)",
-            opacity: 0.5,
-          }}
+          ref={contentRef}
+          className="flex flex-col items-center justify-center px-6 w-full max-w-md mx-auto gap-4 py-6 transition-transform duration-150 ease-out"
         >
-          FLOOR L — THE LOBBY
-        </div>
-
-        {/* Logo + Title */}
-        <div data-animate className="flex flex-col items-center gap-3 text-center">
-          <div className="relative">
-            <TowerLogo />
-            <div
-              className="absolute inset-0 -m-6"
-              style={{
-                background: "radial-gradient(circle, rgba(201, 168, 76, 0.12) 0%, transparent 70%)",
-                filter: "blur(16px)",
-              }}
-              aria-hidden="true"
-            />
+          {/* Floor label */}
+          <div
+            data-animate
+            className="flex items-center gap-2"
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "10px",
+              letterSpacing: "0.3em",
+              color: "var(--gold)",
+              opacity: 0.5,
+            }}
+          >
+            <RadarPulse />
+            FLOOR L — THE LOBBY
           </div>
-          <h1
-            className="text-2xl md:text-3xl tracking-tight"
-            style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
-              color: "var(--text-primary)",
-              textShadow: "0 2px 20px rgba(0,0,0,0.6)",
-            }}
-          >
-            The Tower
-          </h1>
-          <p
-            className="text-xs leading-relaxed max-w-xs"
-            style={{
-              color: "var(--text-secondary)",
-              textShadow: "0 1px 8px rgba(0,0,0,0.8)",
-            }}
-          >
-            {isReturningUser
-              ? "Welcome back. Your offices are as you left them."
-              : "AI-powered internship pipeline management, research, and preparation."}
-          </p>
-        </div>
 
-        {/* Sign-in card */}
-        <div
-          data-animate
-          className="w-full rounded-xl"
-          style={{
-            background: "rgba(6, 8, 18, 0.92)",
-            backdropFilter: "blur(30px) saturate(1.5)",
-            WebkitBackdropFilter: "blur(30px) saturate(1.5)",
-            border: "1px solid rgba(201, 168, 76, 0.3)",
-            borderTop: "2px solid rgba(201, 168, 76, 0.65)",
-            boxShadow: "0 25px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(201, 168, 76, 0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-          }}
-        >
-          <div className="p-6 flex flex-col items-center gap-5">
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {isReturningUser ? "Resume your session" : "Enter the building"}
-            </p>
-            <button
-              onClick={handleSignIn}
-              disabled={isLoading}
-              className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3 text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* Logo + Title */}
+          <div data-animate className="flex flex-col items-center gap-3 text-center">
+            <div className="relative">
+              <TowerLogo />
+              <div
+                className="absolute inset-0 -m-8"
+                style={{
+                  background: "radial-gradient(circle, rgba(201, 168, 76, 0.12) 0%, transparent 70%)",
+                  filter: "blur(16px)",
+                  animation: "logo-breathe 4s ease-in-out infinite",
+                }}
+                aria-hidden="true"
+              />
+              <style>{`
+                @keyframes logo-breathe {
+                  0%, 100% { opacity: 0.6; transform: scale(1); }
+                  50% { opacity: 1; transform: scale(1.1); }
+                }
+              `}</style>
+            </div>
+            <h1
+              className="text-2xl md:text-3xl tracking-tight"
               style={{
-                background: "linear-gradient(135deg, var(--gold) 0%, #E8C45A 100%)",
-                color: "var(--tower-darkest)",
-                boxShadow: "0 4px 24px rgba(201, 168, 76, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+                fontFamily: "'Playfair Display', Georgia, serif",
+                color: "var(--text-primary)",
+                textShadow: "0 2px 20px rgba(0,0,0,0.6)",
               }}
             >
-              {isLoading ? (
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.15em" }}>
-                  AUTHENTICATING...
-                </span>
-              ) : (
-                <>
-                  <GoogleIcon />
-                  <span>Continue with Google</span>
-                </>
-              )}
-            </button>
-            {error && <p className="text-xs" style={{ color: "var(--error)" }}>{error}</p>}
+              The Tower
+            </h1>
+            <p
+              className="text-xs leading-relaxed max-w-xs"
+              style={{
+                color: "var(--text-secondary)",
+                textShadow: "0 1px 8px rgba(0,0,0,0.8)",
+              }}
+            >
+              {isReturningUser
+                ? "Welcome back. Your offices are as you left them."
+                : "AI-powered internship pipeline management, research, and preparation."}
+            </p>
           </div>
-        </div>
 
-        {/* Building Directory — compact version */}
-        <div data-animate className="w-full space-y-2">
+          {/* Sign-in card */}
+          <SignInCard
+            isLoading={isLoading}
+            error={error}
+            isReturningUser={isReturningUser}
+            onSignIn={handleSignIn}
+          />
+
+          {/* Building Directory */}
+          <div data-animate className="w-full space-y-2">
+            <div
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "9px",
+                letterSpacing: "0.25em",
+                color: "var(--text-muted)",
+                textAlign: "center",
+              }}
+            >
+              BUILDING DIRECTORY
+            </div>
+            <div
+              className="rounded-xl"
+              style={{
+                background: "rgba(6, 8, 18, 0.85)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
+                boxShadow: "0 12px 40px rgba(0, 0, 0, 0.4)",
+              }}
+            >
+              <div className="p-2.5 space-y-px">
+                {FLOORS.filter((f) => f.id !== "L").map((floor, i) => (
+                  <DirectoryRow
+                    key={floor.id}
+                    floorId={floor.id}
+                    name={floor.name}
+                    label={floor.label}
+                    available={floor.phase === 0}
+                    index={i}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
           <div
+            data-animate
+            className="flex items-center gap-3"
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "9px",
-              letterSpacing: "0.25em",
+              letterSpacing: "0.15em",
               color: "var(--text-muted)",
-              textAlign: "center",
+              opacity: 0.4,
             }}
           >
-            BUILDING DIRECTORY
+            <div className="h-px w-6" style={{ background: "var(--gold)", opacity: 0.3 }} />
+            UNDER CONSTRUCTION — PHASE 0
+            <div className="h-px w-6" style={{ background: "var(--gold)", opacity: 0.3 }} />
           </div>
-          <div
-            className="rounded-xl"
-            style={{
-              background: "rgba(6, 8, 18, 0.85)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
-              boxShadow: "0 12px 40px rgba(0, 0, 0, 0.4)",
-            }}
-          >
-            <div className="p-2.5 space-y-px">
-              {FLOORS.filter((f) => f.id !== "L").map((floor) => (
-                <DirectoryRow
-                  key={floor.id}
-                  floorId={floor.id}
-                  name={floor.name}
-                  label={floor.label}
-                  available={floor.phase === 0}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div
-          data-animate
-          className="flex items-center gap-3"
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "9px",
-            letterSpacing: "0.15em",
-            color: "var(--text-muted)",
-            opacity: 0.4,
-          }}
-        >
-          <div className="h-px w-6" style={{ background: "var(--gold)", opacity: 0.3 }} />
-          UNDER CONSTRUCTION — PHASE 0
-          <div className="h-px w-6" style={{ background: "var(--gold)", opacity: 0.3 }} />
         </div>
       </div>
     </div>
   );
 }
 
-function DirectoryRow({ floorId, name, label, available }: {
-  floorId: FloorId; name: string; label: string; available: boolean;
+/**
+ * SignInCard — glass card with hover glow effect.
+ */
+function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
+  isLoading: boolean;
+  error: string | null;
+  isReturningUser: boolean;
+  onSignIn: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [hoverGlow, setHoverGlow] = useState({ x: 50, y: 50 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setHoverGlow({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    });
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      data-animate
+      className="w-full rounded-xl transition-all duration-300"
+      style={{
+        background: "rgba(6, 8, 18, 0.92)",
+        backdropFilter: "blur(30px) saturate(1.5)",
+        WebkitBackdropFilter: "blur(30px) saturate(1.5)",
+        border: "1px solid rgba(201, 168, 76, 0.3)",
+        borderTop: "2px solid rgba(201, 168, 76, 0.65)",
+        boxShadow: `0 25px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(201, 168, 76, 0.08), inset 0 1px 0 rgba(255,255,255,0.06)`,
+        position: "relative",
+        overflow: "hidden",
+      }}
+      onMouseMove={handleMouseMove}
+    >
+      {/* Hover glow that follows mouse */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: "200px",
+          height: "200px",
+          left: `${hoverGlow.x}%`,
+          top: `${hoverGlow.y}%`,
+          transform: "translate(-50%, -50%)",
+          background: "radial-gradient(circle, rgba(201, 168, 76, 0.08) 0%, transparent 70%)",
+          transition: "left 0.15s, top 0.15s",
+        }}
+      />
+      <div className="p-6 flex flex-col items-center gap-5 relative">
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          {isReturningUser ? "Resume your session" : "Enter the building"}
+        </p>
+        <button
+          onClick={onSignIn}
+          disabled={isLoading}
+          className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3 text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
+          style={{
+            background: "linear-gradient(135deg, var(--gold) 0%, #E8C45A 100%)",
+            color: "var(--tower-darkest)",
+            boxShadow: "0 4px 24px rgba(201, 168, 76, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 32px rgba(201, 168, 76, 0.5), inset 0 1px 0 rgba(255,255,255,0.2)";
+            (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 24px rgba(201, 168, 76, 0.35), inset 0 1px 0 rgba(255,255,255,0.2)";
+            (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+          }}
+        >
+          {isLoading ? (
+            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "11px", letterSpacing: "0.15em" }}>
+              AUTHENTICATING...
+            </span>
+          ) : (
+            <>
+              <GoogleIcon />
+              <span>Continue with Google</span>
+            </>
+          )}
+        </button>
+        {error && <p className="text-xs" style={{ color: "var(--error)" }}>{error}</p>}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * DirectoryRow — interactive floor listing with slide-in gold line + glow.
+ */
+function DirectoryRow({ floorId, name, label, available, index }: {
+  floorId: FloorId; name: string; label: string; available: boolean; index: number;
 }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
+      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 relative overflow-hidden ${
         available ? "cursor-pointer" : "opacity-30"
       }`}
       style={
@@ -272,19 +397,30 @@ function DirectoryRow({ floorId, name, label, available }: {
               borderLeft: hovered ? "2px solid rgba(201, 168, 76, 0.7)" : "2px solid rgba(201, 168, 76, 0.35)",
               background: hovered ? "rgba(201, 168, 76, 0.06)" : "transparent",
               boxShadow: hovered ? "0 0 20px rgba(201, 168, 76, 0.05)" : "none",
+              transform: hovered ? "translateX(4px)" : "translateX(0)",
             }
           : { borderLeft: "2px solid transparent" }
       }
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Hover shimmer line */}
+      {available && (
+        <div
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          style={{
+            opacity: hovered ? 1 : 0,
+            background: "linear-gradient(90deg, rgba(201, 168, 76, 0.05) 0%, transparent 40%)",
+          }}
+        />
+      )}
       <span
-        className="w-6 text-right shrink-0"
+        className="w-6 text-right shrink-0 relative"
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: "11px",
           color: available ? "var(--gold)" : "var(--text-muted)",
-          textShadow: available ? "0 0 8px rgba(201, 168, 76, 0.25)" : "none",
+          textShadow: available && hovered ? "0 0 12px rgba(201, 168, 76, 0.5)" : available ? "0 0 8px rgba(201, 168, 76, 0.25)" : "none",
         }}
       >
         {floorId}
@@ -305,6 +441,43 @@ function DirectoryRow({ floorId, name, label, available }: {
         {available ? label : "LOCKED"}
       </span>
     </div>
+  );
+}
+
+/**
+ * RadarPulse — animated pulsing rings for the floor label.
+ */
+function RadarPulse() {
+  return (
+    <span className="relative inline-flex items-center justify-center w-3 h-3">
+      <span
+        className="w-1.5 h-1.5 rounded-full"
+        style={{
+          background: "var(--gold)",
+          boxShadow: "0 0 6px rgba(201, 168, 76, 0.6)",
+        }}
+      />
+      <span
+        className="absolute inset-0 rounded-full"
+        style={{
+          border: "1px solid rgba(201, 168, 76, 0.4)",
+          animation: "radar-ping 3s ease-out infinite",
+        }}
+      />
+      <span
+        className="absolute inset-0 rounded-full"
+        style={{
+          border: "1px solid rgba(201, 168, 76, 0.3)",
+          animation: "radar-ping 3s ease-out infinite 1.5s",
+        }}
+      />
+      <style>{`
+        @keyframes radar-ping {
+          0% { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(3); opacity: 0; }
+        }
+      `}</style>
+    </span>
   );
 }
 

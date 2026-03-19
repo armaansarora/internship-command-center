@@ -52,6 +52,18 @@ interface Star {
   phase: number;
 }
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  alpha: number;
+  life: number;
+  maxLife: number;
+  warm: boolean;
+}
+
 const FLOOR_OFFSETS: Record<FloorId, number> = {
   PH: 0.0, "7": 0.04, "6": 0.08, "5": 0.12,
   "4": 0.16, "3": 0.20, "2": 0.24, "1": 0.28, L: 0.35,
@@ -137,7 +149,23 @@ function generateScene(w: number, h: number) {
     }
   }
 
-  return { stars, buildings };
+  // ── PARTICLES (embers rising from city) ──
+  const particles: Particle[] = [];
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: r() * w,
+      y: h * 0.5 + r() * h * 0.5,
+      vx: (r() - 0.5) * 0.3,
+      vy: -(0.15 + r() * 0.45),
+      size: 0.8 + r() * 2.2,
+      alpha: 0.1 + r() * 0.5,
+      life: r() * 400,
+      maxLife: 300 + r() * 500,
+      warm: r() > 0.3,
+    });
+  }
+
+  return { stars, buildings, particles };
 }
 
 interface Props {
@@ -441,6 +469,89 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     bloom.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = bloom;
     ctx.fillRect(0, 0, w, h);
+
+    // ── FLOATING PARTICLES (embers/fireflies) ──
+    if (!reduced) {
+      for (const p of scene.particles) {
+        p.x += p.vx + mx * 0.5;
+        p.y += p.vy;
+        p.life++;
+
+        // Respawn at bottom when expired or off-screen
+        if (p.life > p.maxLife || p.y < -10) {
+          p.x = Math.random() * w;
+          p.y = h * 0.6 + Math.random() * h * 0.35;
+          p.life = 0;
+          p.alpha = 0.1 + Math.random() * 0.5;
+        }
+
+        // Mouse repulsion — particles drift away from cursor
+        const mxPos = smoothMouse.current.x * w;
+        const myPos = smoothMouse.current.y * h;
+        const dx = p.x - mxPos;
+        const dy = p.y - myPos;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          const force = (120 - dist) / 120 * 0.8;
+          p.x += (dx / dist) * force;
+          p.y += (dy / dist) * force * 0.5;
+        }
+
+        // Fade in/out based on life
+        const lifeRatio = p.life / p.maxLife;
+        const fadeAlpha = lifeRatio < 0.1 ? lifeRatio / 0.1 : lifeRatio > 0.8 ? (1 - lifeRatio) / 0.2 : 1;
+        const finalAlpha = p.alpha * fadeAlpha;
+
+        // Subtle drift wobble
+        p.x += Math.sin(t * 0.001 + p.life * 0.02) * 0.15;
+
+        const color = p.warm ? `rgba(201, 168, 76, ${finalAlpha})` : `rgba(160, 190, 255, ${finalAlpha * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // Glow
+        if (p.size > 1.2 && finalAlpha > 0.15) {
+          const pg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5);
+          pg.addColorStop(0, p.warm ? `rgba(201, 168, 76, ${finalAlpha * 0.15})` : `rgba(160, 190, 255, ${finalAlpha * 0.08})`);
+          pg.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = pg;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    // ── MOUSE SPOTLIGHT (subtle radial glow following cursor) ──
+    if (!reduced) {
+      const spotX = smoothMouse.current.x * w;
+      const spotY = smoothMouse.current.y * h;
+      const spotR = w * 0.18;
+      const spot = ctx.createRadialGradient(spotX, spotY, 0, spotX, spotY, spotR);
+      spot.addColorStop(0, "rgba(201, 168, 76, 0.035)");
+      spot.addColorStop(0.4, "rgba(201, 168, 76, 0.015)");
+      spot.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = spot;
+      ctx.fillRect(spotX - spotR, spotY - spotR, spotR * 2, spotR * 2);
+    }
+
+    // ── SCAN LINE (subtle HUD effect) ──
+    if (!reduced) {
+      const scanPeriod = 12000;
+      const scanProgress = (t % scanPeriod) / scanPeriod;
+      const scanY = scanProgress * h * 1.3 - h * 0.15;
+      const scanAlpha = 0.04;
+      const scanGrad = ctx.createLinearGradient(0, scanY - 30, 0, scanY + 30);
+      scanGrad.addColorStop(0, "rgba(201, 168, 76, 0)");
+      scanGrad.addColorStop(0.45, `rgba(201, 168, 76, ${scanAlpha})`);
+      scanGrad.addColorStop(0.5, `rgba(201, 168, 76, ${scanAlpha * 1.5})`);
+      scanGrad.addColorStop(0.55, `rgba(201, 168, 76, ${scanAlpha})`);
+      scanGrad.addColorStop(1, "rgba(201, 168, 76, 0)");
+      ctx.fillStyle = scanGrad;
+      ctx.fillRect(0, scanY - 30, w, 60);
+    }
 
     // ── VIGNETTE ──
     const vig = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.75);
