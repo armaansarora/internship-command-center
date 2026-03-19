@@ -91,11 +91,9 @@ function generateScene(w: number, h: number) {
     for (let i = 0; i < cfg.count; i++) {
       const bw = cfg.minW + r() * (cfg.maxW - cfg.minW);
       let bh = (cfg.minH + r() * (cfg.maxH - cfg.minH)) * h;
-      // Distribute buildings across full width with overlap and slight clustering toward center
-      const spread = w + 200;
-      const baseX = (i / cfg.count) * spread - 100;
-      const centerBias = (r() - 0.5) * 80; // random jitter
-      const bx = baseX + centerBias;
+      // Even distribution across viewport with jitter — ensures no gaps
+      const slotWidth = (w + 100) / cfg.count;
+      const bx = -50 + i * slotWidth + (r() - 0.5) * slotWidth * 0.8;
 
       // Occasional supertall — more likely in center third of viewport
       const centerFactor = 1 - 2 * Math.abs((bx / w) - 0.5); // 1.0 at center, 0 at edges
