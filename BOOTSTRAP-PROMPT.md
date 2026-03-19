@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:27 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 10:11 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,11 +19,10 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `88ae2fa`)
+- **Branch:** `main` (commit `3e15030`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 4,774 across 54 source files
+- **Total LOC:** 5,426 across 48 source files
 - **Build:** Clean (zero TS errors)
-- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 26m ago)_
 
 
 ## Session State (where we left off)
@@ -121,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `88ae2fa`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3e15030`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -129,20 +128,21 @@
 
 ## Env Vars (names only — values in .env.local)
 
-(no .env.local found)
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 
-## Source Tree (54 files, 4,774 LOC)
+## Source Tree (48 files, 5,426 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 1323 |
+| `src/components/world` | 1336 |
+| `src/app/(authenticated)/penthouse` | 825 |
 | `src/lib/contracts` | 696 |
-| `src/app/(authenticated)/penthouse` | 491 |
+| `src/app/lobby` | 612 |
 | `src/db` | 442 |
 | `src/app` | 376 |
 | `src/lib/contracts/departments` | 328 |
-| `src/app/lobby` | 284 |
-| `src/hooks` | 150 |
+| `src/hooks` | 127 |
 | `src/lib/supabase` | 121 |
 | `src/components/transitions` | 109 |
 | `src/types` | 84 |
@@ -183,21 +183,15 @@ src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
 src/components/transitions/EntranceSequence.tsx
-src/components/world/AtmosphericEffects.tsx
 src/components/world/CustomCursor.tsx
 src/components/world/DayNightProvider.tsx
-src/components/world/DustMotes.tsx
 src/components/world/Elevator.tsx
 src/components/world/FloorShell.tsx
-src/components/world/SkylineLayers.tsx
-src/components/world/SkylineSVG.tsx
-src/components/world/SkylineScene.tsx
-src/components/world/WindowTint.tsx
+src/components/world/ProceduralSkyline.tsx
 src/db/index.ts
 src/db/schema.ts
 src/hooks/useMouseParallax.ts
 src/hooks/useReducedMotion.ts
-src/hooks/useSkylineVariant.ts
 src/lib/contracts/agent-protocol.ts
 src/lib/contracts/api.ts
 src/lib/contracts/departments/cio.ts
@@ -272,13 +266,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 355 | 3,989 |
+| `BOOTSTRAP-PROMPT.md` | 349 | 3,947 |
 | `PROJECT-CONTEXT.md` | 405 | 6,466 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1260** | **19,538** |
+| **Total** | **1254** | **19,496** |
 
-> ⚠️ Reading all recommended files consumes ~19,538 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~19,496 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
