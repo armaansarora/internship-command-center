@@ -1,9 +1,9 @@
 {
-  "currentTask": "Automation hardening — eliminating manual commands from human workflow",
+  "currentTask": "Automation hardening — context window management rules",
   "deliverable": "infra",
   "status": "in_progress",
   "blocker": null,
   "lastFileTouched": "CLAUDE.md",
-  "notes": "Added Mandatory Agent Behavior section to CLAUDE.md. Agent now auto-updates SESSION-STATE.json and runs session:end. CLI scripts kept as fallbacks. About to commit + push.",
-  "updatedAt": "2026-03-19T07:12:00.000Z"
+  "notes": "Added Rule 5: Context Window Management with 40/60/70% thresholds. Agent auto-hands off at 70%, warns at 40% and 60%. Super conservative cutoffs per user preference.",
+  "updatedAt": "2026-03-19T07:16:00.000Z"
 }

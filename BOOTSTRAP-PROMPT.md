@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:12 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 3:16 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -18,21 +18,21 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE + Immersive UI Rebuild COMPLETE
-- **Branch:** `main` (commit `101a8f1`)
+- **Branch:** `main` (commit `3ba2932`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 4,774 across 54 source files
 - **Build:** Clean (zero TS errors)
-- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 11m ago)_
+- **Vercel deploy:** ✅ **READY** (commit `89ef7fc`) _(checked 16m ago)_
 
 
 ## Session State (where we left off)
 
-- **Current task:** Automation hardening — eliminating manual commands from human workflow
+- **Current task:** Automation hardening — context window management rules
 - **Deliverable:** infra
 - **Status:** in_progress
 - **Last file touched:** `CLAUDE.md`
-- **Notes:** Added Mandatory Agent Behavior section to CLAUDE.md. Agent now auto-updates SESSION-STATE.json and runs session:end. CLI scripts kept as fallbacks. About to commit + push.
-- **State captured:** 2026-03-19T07:12:00.000Z
+- **Notes:** Added Rule 5: Context Window Management with 40/60/70% thresholds. Agent auto-hands off at 70%, warns at 40% and 60%. Super conservative cutoffs per user preference.
+- **State captured:** 2026-03-19T07:16:00.000Z
 
 ## Acceptance Criteria — Progress
 
@@ -120,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `101a8f1`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3ba2932`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -271,13 +271,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 354 | 3,897 |
+| `BOOTSTRAP-PROMPT.md` | 354 | 3,900 |
 | `PROJECT-CONTEXT.md` | 405 | 6,407 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
-| `CLAUDE.md` | 116 | 1,803 |
-| **Total** | **1236** | **18,934** |
+| `CLAUDE.md` | 139 | 2,256 |
+| **Total** | **1259** | **19,390** |
 
-> ⚠️ Reading all recommended files consumes ~18,934 tokens. Prioritize: this file → PROJECT-CONTEXT.md → MASTER-PLAN.md. Skip CLAUDE.md unless exploring unfamiliar code.
+> ⚠️ Reading all recommended files consumes ~19,390 tokens. Prioritize: this file → PROJECT-CONTEXT.md → MASTER-PLAN.md. Skip CLAUDE.md unless exploring unfamiliar code.
 
 
 ## Technical Notes (Gotchas)

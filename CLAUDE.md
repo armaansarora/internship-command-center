@@ -104,6 +104,29 @@ Run `npx tsx scripts/check-vercel.ts` after any deploy-related work or if the us
 ### 4. Never Leave Dirty State
 If a session is interrupted or errors out, the last valid SESSION-STATE.json should still describe where things stand. Always update state BEFORE doing risky operations, not after.
 
+### 5. Context Window Management — SUPER CONSERVATIVE
+The agent MUST monitor its own context usage and proactively end the session before degradation.
+
+**Trigger thresholds:**
+- **~40% context used → YELLOW.** Mention to the user: "Context is around 40%, still healthy but keeping an eye on it." No action needed yet.
+- **~60% context used → ORANGE.** Warn the user: "Context is at ~60%. I recommend wrapping up the current task and handing off soon." Start finishing current work, avoid starting new large tasks.
+- **~70% context used → RED. Mandatory handoff.** Stop all new work immediately. Execute full session-end procedure (rules 1-2 above). Then tell the user:
+  1. Exactly what was completed
+  2. Exactly what's left
+  3. The new session prompt: `Clone repo armaansarora/internship-command-center (branch: main). Read BOOTSTRAP-PROMPT.md — it's auto-generated and current. Follow the Quick Start section. Cut the fat, keep the meat.`
+
+**How to estimate context usage:**
+- Track cumulative tokens read/written throughout the session
+- Every file read, tool output, and response adds to context
+- Large file reads (100+ lines), long tool outputs, and multi-step conversations burn context fast
+- When in doubt, round UP — better to hand off early than to degrade
+
+**Rules:**
+- NEVER start a new major task past 60%
+- NEVER ignore the 70% threshold — session-end is mandatory, not optional
+- The human should never experience degraded output quality. Hand off BEFORE that happens.
+- After session-end at 70%, the agent's final message must include the new session prompt above
+
 ## Key Docs
 - `BOOTSTRAP-PROMPT.md` — auto-generated handoff (auto-runs on commit, includes build health + criteria tracking)
 - `PROJECT-CONTEXT.md` — operational context, credentials, session log
