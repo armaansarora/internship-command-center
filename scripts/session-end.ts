@@ -357,7 +357,14 @@ try {
     }
   }
   // Filter out known false positives (these are used implicitly)
-  const falsePositives = ["typescript", "autoprefixer", "postcss", "tailwindcss", "husky", "eslint"];
+  // These are used implicitly by frameworks, build tools, or peer deps
+  const falsePositives = [
+    "typescript", "autoprefixer", "postcss", "tailwindcss", "husky", "eslint",
+    "react-dom",    // used by Next.js internally
+    "@types/node", "@types/react", "@types/react-dom", // type-only
+    "tsx",          // used by scripts (not in src/)
+    "vitest",       // test runner
+  ];
   unusedDeps = unusedDeps.filter((d) => !falsePositives.some((fp) => d.includes(fp)));
 
   if (unusedDeps.length > 0) {
