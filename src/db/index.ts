@@ -1,24 +1,12 @@
-import { createClient } from '@libsql/client';
-import { drizzle } from 'drizzle-orm/libsql';
-import * as schema from './schema';
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema";
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __db: ReturnType<typeof createDb> | undefined;
-}
+const connectionString = process.env.SUPABASE_DB_URL!;
 
-function createDb() {
-  const client = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
-  return drizzle(client, { schema });
-}
+// Use a single connection for serverless (Vercel)
+const client = postgres(connectionString, {
+  prepare: false, // Required for Supabase transaction-mode pooler
+});
 
-export const db = globalThis.__db ?? createDb();
-
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.__db = db;
-}
-
-export { schema };
+export const db = drizzle(client, { schema });

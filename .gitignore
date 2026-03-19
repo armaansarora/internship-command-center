@@ -32,22 +32,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-!.env.example
-
-# database
-/data/
-*.sqlite
 
 # vercel
-.vercel/
-
-# turso
-.turso/
-
-# sentry
-.sentryclirc
+.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.vercel
+.env.local
+migration-*.sql
