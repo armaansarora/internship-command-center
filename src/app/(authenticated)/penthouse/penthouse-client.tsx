@@ -991,7 +991,8 @@ function ActivityRow({ item, index }: { item: ActivityItemData; index: number })
       style={{
         border: hovered ? "1px solid rgba(201, 168, 76, 0.2)" : "1px solid transparent",
         background: hovered ? "rgba(201, 168, 76, 0.04)" : "transparent",
-        transform: hovered ? "translateX(4px)" : "translateX(0)",
+        transform: hovered ? "translateX(4px) translateY(-1px)" : "translateX(0) translateY(0)",
+        boxShadow: hovered ? "0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(201, 168, 76, 0.08)" : "none",
         transition: "all 0.25s ease-out",
         animation: `slide-in-left 0.4s ease-out both`,
         animationDelay: `${index * 80}ms`,

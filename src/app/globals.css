@@ -227,6 +227,53 @@ label[for], summary, [tabindex]:not([tabindex="-1"]),
 }
 
 /* =============================================
+   BUG-014: GLOBAL HOVER UTILITIES
+   Stronger interactive feedback on all elements.
+   Existing penthouse/elevator/lobby components use inline JS hover.
+   These CSS utilities are for new components and floor pages.
+   ============================================= */
+
+/* Cards: lift + shadow on hover */
+.hover-lift {
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(201, 168, 76, 0.1);
+}
+
+/* Buttons: brightness shift + subtle scale */
+.hover-glow {
+  transition: filter 180ms ease-out, transform 180ms ease-out, box-shadow 180ms ease-out;
+}
+.hover-glow:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+.hover-glow:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+/* Icons: scale up on hover */
+.hover-scale {
+  transition: transform 180ms ease-out, opacity 180ms ease-out;
+}
+.hover-scale:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+/* Generic interactive: border gold glow + slight brightness */
+.hover-interactive {
+  transition: border-color 180ms ease-out, background 180ms ease-out, box-shadow 180ms ease-out;
+}
+.hover-interactive:hover {
+  border-color: rgba(201, 168, 76, 0.25);
+  background: rgba(201, 168, 76, 0.04);
+  box-shadow: 0 0 16px rgba(201, 168, 76, 0.06);
+}
+
+/* =============================================
    GLASS UTILITIES
    ============================================= */
 
@@ -240,9 +287,11 @@ label[for], summary, [tabindex]:not([tabindex="-1"]),
   }
 
   .glass-hover {
-    transition: background 180ms ease, border-color 180ms ease;
+    transition: background 180ms ease, border-color 180ms ease, transform 180ms ease-out, box-shadow 180ms ease-out;
   }
   .glass-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     background: var(--glass-bg-hover);
     border-color: rgba(201, 168, 76, 0.15);
   }

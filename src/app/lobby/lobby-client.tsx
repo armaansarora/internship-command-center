@@ -3,15 +3,15 @@
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useRef, useCallback, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
-import { ProceduralSkyline } from "@/components/world/ProceduralSkyline";
+import { LobbyBackground } from "@/components/world/LobbyBackground";
 import gsap from "gsap";
 
 /**
  * Lobby client component — The Tower entrance.
  *
- * Full-screen immersive experience: procedural NYC skyline fills the viewport.
- * Luxury Manhattan high-rise aesthetic: commanding typography, premium glass
- * cards, gold atmospheric lighting, and cinematic GSAP entrance animation.
+ * Full-screen immersive experience: luxury office reception hall (BUG-010).
+ * Dark marble, golden chandelier lighting, architectural pillars.
+ * Commanding typography, premium glass cards, cinematic GSAP entrance.
  *
  * GSAP is enhancement-only. A CSS animation provides the initial fade-in fallback
  * so content is always visible even if GSAP is slow to initialize.
@@ -96,8 +96,8 @@ export function LobbyClient() {
       {/* ── UNDER CONSTRUCTION TICKER BANNER ── */}
       <ConstructionTicker />
 
-      {/* ── PROCEDURAL SKYLINE ── */}
-      <ProceduralSkyline floorId="L" />
+      {/* ── LOBBY BACKGROUND — BUG-010: luxury reception, not skyline ── */}
+      <LobbyBackground />
 
       {/* ── MOUSE SPOTLIGHT OVERLAY ── */}
       <div
@@ -695,8 +695,8 @@ function DirectoryRow({ floorId, name, label, available, index }: {
         opacity: visible ? (available ? 1 : 0.35) : 0,
         transform: visible
           ? available && hovered
-            ? "translateX(5px)"
-            : "translateX(0)"
+            ? "translateX(5px) translateY(-1px)"
+            : "translateX(0) translateY(0)"
           : "translateX(-12px)",
         transition: "opacity 0.3s ease, transform 0.3s ease, background 0.2s ease, box-shadow 0.2s ease",
         ...(available
