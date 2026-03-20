@@ -1441,4 +1441,40 @@ Add in-memory rate limit: 1 request per 3 seconds per user. Prevents cost spikes
 
 ---
 
-*Document length: ~1,400 lines + audit. Compiled from 5 research files + 6 project context files. All decisions are concrete, cited, and implementation-ready. Audit completed with 23 findings (2 critical, 6 medium, 7 low). A developer should be able to open this document and start writing code immediately.*
+---
+
+## 11. Chain of Command — AI Hierarchy Spec
+
+**Full specification:** [`docs/CHAIN-OF-COMMAND.md`](./CHAIN-OF-COMMAND.md) (1,500+ lines)
+
+The War Room's AI hierarchy follows a strict chain of command:
+
+```
+User → CEO Agent → CRO Agent → 5 Specialist Subagents
+```
+
+### Summary
+
+| Agent | Codename | Model | Role |
+|-------|----------|-------|------|
+| CEO | `tower-ceo` | Claude Sonnet 4 | Routes user intent to departments |
+| CRO | `war-room-cro` | Claude Sonnet 4 | Decomposes pipeline tasks to subagents |
+| Job Discovery | `cro-job-discovery` | GPT-4o-mini | Finds and scores new opportunities (SDR) |
+| Application Manager | `cro-application-manager` | Claude Sonnet 4 | Manages pipeline status, flags stale apps (AE) |
+| Pipeline Analyst | `cro-pipeline-analyst` | GPT-4o-mini | Conversion rates, health scores, trends (RevOps) |
+| Intel Briefer | `cro-intel-briefer` | Claude Sonnet 4 | Company research for active pipeline items (Enablement) |
+| Offer Evaluator | `cro-offer-evaluator` | Claude Sonnet 4 | Comp benchmarks, negotiation strategy (CSM) |
+
+### Key Design Decisions
+
+- **Nested agent-in-tool pattern**: Each subagent is a `tool()` in the CRO's tool array. AI SDK v5/6 native.
+- **Scope enforcement via tool restriction**: Agents can only do what their tools allow. Primary enforcement mechanism.
+- **Knowledge injection > persona labels**: Research proves "you are an expert" prompts don't work. Injecting decision trees, tier rankings, and benchmarks creates real expertise.
+- **Static context for <50 items**: RE Finance tiers, recruiting calendar, and benchmarks are small enough to inject directly. No RAG.
+- **All side-effects require user approval**: Status updates, outreach drafts, anything touching the real world.
+
+See the full spec for: production system prompts, few-shot examples, RACI matrix, domain knowledge injection tables, error handling, Inngest wiring, and contract amendments.
+
+---
+
+*Document length: ~1,500 lines + audit + hierarchy spec reference. Compiled from 5 research files + 6 project context files + 3 deep hierarchy research files. All decisions are concrete, cited, and implementation-ready. Audit completed with 23 findings (2 critical, 6 medium, 7 low). A developer should be able to open this document and start writing code immediately.*
