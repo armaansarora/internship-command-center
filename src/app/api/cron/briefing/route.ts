@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 
 /**
@@ -26,7 +26,7 @@ export async function GET(req: Request): Promise<Response> {
     );
   }
 
-  const supabase = supabaseAdmin;
+  const supabase = getSupabaseAdmin();
 
   // Get all users with profiles
   const { data: users, error: usersError } = await supabase
