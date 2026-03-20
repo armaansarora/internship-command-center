@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:47 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:55 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,10 +19,10 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `2802795`)
+- **Branch:** `main` (commit `de3978e`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 9,052 across 47 source files
-- **Build:** FAILING — 0 TS errors
+- **Total LOC:** 8,736 across 47 source files
+- **Build:** Clean (zero TS errors)
 
 
 ## Session State (where we left off)
@@ -33,12 +33,6 @@
 - **Last file touched:** `unknown`
 - **Notes:** No feature commits this session (tooling/infra only).
 - **State captured:** 2026-03-20T03:46:58.269Z
-
-## Changes Since Last Bootstrap
-
-```
-2802795 session-end: 2 files changed, 116 insertions(+), 56 deletions(-)
-```
 
 ## Acceptance Criteria — Progress
 
@@ -179,7 +173,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `2802795`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `de3978e`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -189,15 +183,15 @@ See docs/MASTER-PLAN.md for the next phase.
 
 (no .env.local found)
 
-## Source Tree (47 files, 9,052 LOC)
+## Source Tree (47 files, 8,736 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 2289 |
-| `src/app/(authenticated)/penthouse` | 1430 |
-| `src/app/lobby` | 919 |
+| `src/components/world` | 1999 |
+| `src/app/(authenticated)/penthouse` | 1411 |
+| `src/app/lobby` | 903 |
 | `src/lib/contracts` | 696 |
-| `src/app` | 671 |
+| `src/app` | 680 |
 | `src/db` | 442 |
 | `src/lib/contracts/departments` | 328 |
 | `src/app/(authenticated)/c-suite` | 284 |
@@ -315,34 +309,21 @@ zod: ^4.3.6
 
 ### Stale Dependencies (major version behind)
 
-- **@ai-sdk/anthropic**: undefined → 3.0.58 (major)
-- **@supabase/supabase-js**: undefined → 2.99.3 (major)
-- **@tsparticles/engine**: undefined → 3.9.1 (major)
-- **@tsparticles/react**: undefined → 3.0.0 (major)
-- **@tsparticles/slim**: undefined → 3.9.1 (major)
-- **ai**: undefined → 6.0.116 (major)
-- **clsx**: undefined → 2.1.1 (major)
-- **framer-motion**: undefined → 12.38.0 (major)
-- **gsap**: undefined → 3.14.2 (major)
-- **lenis**: undefined → 1.3.19 (major)
-- **next**: undefined → 16.2.0 (major)
-- **postgres**: undefined → 3.4.8 (major)
-- **react**: undefined → 19.2.4 (major)
-- **react-dom**: undefined → 19.2.4 (major)
-- **tailwind-merge**: undefined → 3.5.0 (major)
-- **zod**: undefined → 4.3.6 (major)
+- **@types/node**: 20.19.37 → 25.5.0 (major)
+- **eslint**: 9.39.4 → 10.0.3 (major)
+- **tailwindcss**: 3.4.19 → 4.2.2 (major)
 
 ## Context Budget
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 389 | 4,413 |
+| `BOOTSTRAP-PROMPT.md` | 395 | 4,377 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1290** | **21,084** |
+| **Total** | **1296** | **21,048** |
 
-> ⚠️ Reading all recommended files consumes ~21,084 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~21,048 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

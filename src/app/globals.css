@@ -203,7 +203,16 @@ body {
   font-family: 'Satoshi', system-ui, sans-serif;
   color: var(--text-primary);
   background-color: var(--tower-darkest);
-  overflow: hidden; /* The building IS the viewport */
+  /* BUG-003 fix: removed overflow:hidden so floors can scroll.
+     Skyline is position:absolute inside FloorShell, so it
+     still fills the viewport without this. */
+}
+
+/* BUG-007 fix: native cursor, pointer on all interactive elements */
+a, button, [role="button"], input, textarea, select,
+label[for], summary, [tabindex]:not([tabindex="-1"]),
+[data-cursor="interactive"] {
+  cursor: pointer;
 }
 
 ::selection {

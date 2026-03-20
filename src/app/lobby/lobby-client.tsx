@@ -22,8 +22,6 @@ export function LobbyClient() {
   const [isReturningUser, setIsReturningUser] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const mouseRef = useRef({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -32,25 +30,12 @@ export function LobbyClient() {
     }
   }, []);
 
-  // Mouse tracking for spotlight + content parallax
+  // Mouse tracking for spotlight only — BUG-008: removed content parallax
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      mouseRef.current = {
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight,
-      };
-
-      // Move spotlight
       if (spotlightRef.current) {
         spotlightRef.current.style.left = `${e.clientX}px`;
         spotlightRef.current.style.top = `${e.clientY}px`;
-      }
-
-      // Parallax on content
-      if (contentRef.current) {
-        const px = (mouseRef.current.x - 0.5) * 6;
-        const py = (mouseRef.current.y - 0.5) * 3;
-        contentRef.current.style.transform = `translate(${px}px, ${py}px)`;
       }
     };
     window.addEventListener("mousemove", onMove, { passive: true });
@@ -192,8 +177,7 @@ export function LobbyClient() {
         }}
       >
         <div
-          ref={contentRef}
-          className="flex flex-col items-center justify-center px-6 w-full max-w-lg mx-auto gap-6 py-8 transition-transform duration-150 ease-out"
+          className="flex flex-col items-center justify-center px-6 w-full max-w-lg mx-auto gap-6 py-8"
         >
 
           {/* ── FLOOR LABEL ── */}

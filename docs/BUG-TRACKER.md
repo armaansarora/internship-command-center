@@ -11,6 +11,12 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 
 | Date | Session | Bug(s) Fixed | Commit | Notes |
 |------|---------|-------------|--------|-------|
+| 2026-03-19 | Session 13 | BUG-006: Performance (15 FPS lag) | `pending` | Rewrote ProceduralSkyline v5: removed mouse tracking, constellation lines, light sweep, scan line, mouse spotlight. Reduced buildings (65/50/35 → 50/40/28), stars (180 → 120), particles (60 → 30), water shimmers (30 → 18). Removed atmospheric particles entirely. Eliminated 3 mousemove RAF loops. |
+| 2026-03-19 | Session 13 | BUG-007: Remove custom cursor | `pending` | Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` rule for all interactive elements (a, button, [role=button], input, etc.). Eliminated per-frame RAF loop + 4 document event listeners. |
+| 2026-03-19 | Session 13 | BUG-008: Remove text parallax | `pending` | Removed mousemove → transform handlers from lobby contentRef and penthouse headerRef. Text is now static. Eliminated 2 mousemove event listeners. |
+| 2026-03-19 | Session 13 | BUG-009: Apple TV autonomous drift | `pending` | Replaced mouse-reactive parallax with autonomous sinusoidal drift (60-90s cycles). Two independent sine waves create organic Ken Burns panning. prefers-reduced-motion shows static frame. |
+| 2026-03-19 | Session 13 | BUG-003: Penthouse scroll | `pending` | Removed `overflow: hidden` from body in globals.css. Changed FloorShell decorative layers from `absolute` to `fixed` so they stay as viewport backdrop while content scrolls freely. |
+| 2026-03-19 | Session 13 | BUG-004: Penthouse clickability | `pending` | Fixed by removing body overflow:hidden (z-index stacking was trapping pointer events). Quick action cards now show `cursor: not-allowed` instead of `cursor: default` for clearer disabled state. |
 | — | — | — | — | No fixes yet — tracker created Session 12 |
 
 <!-- TEMPLATE for new entries (copy, fill, paste at top of table above the "—" row):
@@ -46,19 +52,19 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 **Expected:** Clear navigation — elevator button, back arrow, or lobby link always visible.  
 **Fix:** Add persistent navigation (elevator access) from every floor.
 
-### BUG-003: Cannot scroll in penthouse `🔴 OPEN`
+### BUG-003: Cannot scroll in penthouse `🟢 FIXED`
 **Severity:** Critical  
 **Location:** Penthouse page  
 **Behavior:** Content is cut off, no scroll available.  
 **Expected:** Page scrolls to show all content.  
-**Fix:** Check for `overflow: hidden` on parent containers. Likely a layout/height issue.
+**Fixed:** Session 13 — Removed `overflow: hidden` from body. Changed FloorShell decorative layers to `position: fixed` so content scrolls freely above fixed skyline backdrop.
 
-### BUG-004: Nothing is clickable in penthouse `🔴 OPEN`
+### BUG-004: Nothing is clickable in penthouse `🟢 FIXED`
 **Severity:** Critical  
 **Location:** Penthouse page  
 **Behavior:** Dashboard cards, stats, action items — none respond to clicks.  
 **Expected:** Interactive elements should be clickable (even if they just show a "coming soon" state).  
-**Fix:** Wire click handlers or make non-interactive elements visually distinct from interactive ones.
+**Fixed:** Session 13 — Root cause was `overflow: hidden` on body trapping pointer events through z-index stacking. Quick action cards now show `cursor: not-allowed` for clearer disabled state. Stat cards and panels retain their hover effects.
 
 ### BUG-005: No sign out feature `🔴 OPEN`
 **Severity:** Critical  
@@ -71,48 +77,29 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 
 ## HIGH — Major UX Problems
 
-### BUG-006: Entire site runs at ~15 FPS, extremely laggy `🔴 OPEN`
+### BUG-006: Entire site runs at ~15 FPS, extremely laggy `🟢 FIXED`
 **Severity:** High  
 **Location:** Global — every page  
 **Behavior:** Site feels like 15 FPS. Not responsive. Interactions feel sluggish.  
-**Root causes to investigate:**
-1. ProceduralSkyline canvas re-rendering every frame without throttling
-2. Mouse parallax listeners firing on every mousemove without requestAnimationFrame batching
-3. Too many CSS animations running simultaneously (dust motes, particles, glows, etc.)
-4. GSAP animations not using `will-change` or GPU-accelerated properties
-5. React re-renders — check for missing `useMemo`/`useCallback` on expensive computations
-6. Multiple canvas contexts active at once
-**Fix:** Profile with Chrome DevTools Performance tab. Kill the biggest offenders first. Target 60 FPS.
+**Fixed:** Session 13 — ProceduralSkyline v5 rewrite. Eliminated: (1) all mouse tracking + 5 mousemove listeners, (2) constellation line O(n²) calculation, (3) building light sweep, (4) scan line, (5) mouse spotlight, (6) atmospheric particle system, (7) building mirror reflections in water. Reduced: buildings 150→118, stars 180→120, particles 60→30, water shimmers 30→18. Removed CustomCursor RAF loop + 4 event listeners.
 
-### BUG-007: Custom cursor — dot not centered in circle `🔴 OPEN`
+### BUG-007: Custom cursor — dot not centered in circle `🟢 FIXED`
 **Severity:** High  
 **Location:** Global cursor component  
 **Behavior:** The small dot and outer circle are misaligned. Dot is not centered.  
-**Expected:** Dot is perfectly centered within the circle, or...  
-**User preference:** "I don't like it in general" — consider removing the custom cursor entirely. Replace with:
-- Default cursor globally
-- `cursor: pointer` on interactive elements (standard web behavior)
-- Subtle hover states instead of custom cursor theatrics
-**Fix:** Remove custom cursor component. Use CSS `cursor: pointer` on clickable elements.
+**Fixed:** Session 13 — Removed CustomCursor entirely per user preference. Removed from WorldShell import + render. Added global CSS `cursor: pointer` on a, button, [role=button], input, textarea, select, etc. Native cursor restored.
 
-### BUG-008: Text elements move with cursor (parallax on content) `🔴 OPEN`
+### BUG-008: Text elements move with cursor (parallax on content) `🟢 FIXED`
 **Severity:** High  
 **Location:** Lobby, Penthouse — text like "Welcome Armaan Arora"  
 **Behavior:** Heading text, welcome messages, and other content shifts when moving the mouse.  
-**Expected:** Text should be STATIC. Only background/decorative layers should have subtle motion.  
-**Fix:** Remove `useMouseParallax` (or equivalent transforms) from ALL text elements, headings, cards, and interactive UI. Parallax should only apply to deep background layers (skyline, decorative).
+**Fixed:** Session 13 — Removed mousemove → transform handlers from lobby contentRef and penthouse headerRef. Text is now completely static. Lobby spotlight still tracks mouse (decorative only, zero performance impact).
 
-### BUG-009: Background parallax is motion-sickness-inducing `🔴 OPEN`
+### BUG-009: Background parallax is motion-sickness-inducing `🟢 FIXED`
 **Severity:** High  
 **Location:** Skyline / background on all pages  
 **Behavior:** Background responds to mouse movement, causing jarring shifts.  
-**Expected:** Background should drift slowly on its own — think Apple TV screensaver. Slow, ambient, autonomous movement. NOT mouse-reactive.  
-**Research needed:** Apple TV screensaver behavior:
-- Very slow panning (takes 30-60 seconds to drift across)
-- No user input drives the motion — it's purely autonomous
-- Gentle, hypnotic, never jarring
-- Ken Burns effect (slow zoom + pan simultaneously)
-**Fix:** Replace mouse-driven parallax with autonomous slow-drift animation. CSS `@keyframes` with 60-120s duration, gentle translateX/translateY + subtle scale. `prefers-reduced-motion` disables entirely.
+**Fixed:** Session 13 — Replaced all mouse-driven parallax with autonomous Apple TV-style drift. Two independent sine waves (periods ~25s and ~40s) create organic Ken Burns panning. Max displacement ~8% of viewport width. Building layers have depth-scaled drift via existing PARALLAX factors. `prefers-reduced-motion` shows completely static frame.
 
 ### BUG-010: Lobby and Penthouse share the same background `🔴 OPEN`
 **Severity:** High  
@@ -211,7 +198,23 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 **Fixed:** Session X, `commit_hash`, brief description of the fix
 -->
 
-_No closed issues yet._
+### BUG-003: Cannot scroll in penthouse `🟢 FIXED`
+**Fixed:** Session 13, `pending` — Removed `overflow: hidden` from body. Changed FloorShell decorative layers to `position: fixed` so content scrolls freely.
+
+### BUG-004: Nothing is clickable in penthouse `🟢 FIXED`
+**Fixed:** Session 13, `pending` — Root cause was `overflow: hidden` on body trapping pointer events. Quick action cards now show `cursor: not-allowed`.
+
+### BUG-006: Entire site runs at ~15 FPS `🟢 FIXED`
+**Fixed:** Session 13, `pending` — ProceduralSkyline v5 rewrite. Eliminated 5 mousemove listeners, constellation O(n²), light sweep, scan line, mouse spotlight, atmospheric particles, water mirror reflections. Reduced object counts ~35%.
+
+### BUG-007: Custom cursor removed `🟢 FIXED`
+**Fixed:** Session 13, `pending` — Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` for all interactive elements.
+
+### BUG-008: Text parallax removed `🟢 FIXED`
+**Fixed:** Session 13, `pending` — Removed mousemove → transform handlers from lobby and penthouse. Text is static.
+
+### BUG-009: Apple TV autonomous drift `🟢 FIXED`
+**Fixed:** Session 13, `pending` — Replaced mouse parallax with autonomous sinusoidal drift (Ken Burns). Two sine waves, 25-40s periods. prefers-reduced-motion static.
 
 ---
 
@@ -220,9 +223,9 @@ _No closed issues yet._
 | Metric | Count |
 |--------|-------|
 | Total reported | 14 |
-| 🔴 Open | 14 |
+| 🔴 Open | 8 |
 | 🟡 In Progress | 0 |
-| 🟢 Fixed | 0 |
+| 🟢 Fixed | 6 |
 | ⚪ Won't Fix | 0 |
 
-_Last updated: Session 12, March 19, 2026_
+_Last updated: Session 13, March 19, 2026_

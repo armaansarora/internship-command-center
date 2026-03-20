@@ -245,25 +245,7 @@ export function PenthouseClient({
   pipeline: PipelineStageData[];
   activity: ActivityItemData[];
 }): JSX.Element {
-  const headerRef = useRef<HTMLDivElement>(null);
-  const mouseRef = useRef({ x: 0.5, y: 0.5 });
-
-  // Track mouse for parallax on header
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mouseRef.current = {
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight,
-      };
-      if (headerRef.current) {
-        const px = (mouseRef.current.x - 0.5) * 8;
-        const py = (mouseRef.current.y - 0.5) * 4;
-        headerRef.current.style.transform = `translate(${px}px, ${py}px)`;
-      }
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
+  // BUG-008: removed mouse parallax on header text — text is now static
 
   const greeting = getGreeting();
   const headerDate = formatHeaderDate();
@@ -351,8 +333,7 @@ export function PenthouseClient({
       >
         {/* ── GREETING HEADER ── */}
         <header
-          ref={headerRef}
-          className="space-y-1 pt-2 transition-transform duration-100 ease-out"
+          className="space-y-1 pt-2"
           aria-label="Penthouse dashboard header"
         >
           {/* Floor label with pulse ring */}
@@ -1087,7 +1068,7 @@ function QuickActionCard({
       aria-label={`${action.label} — ${action.phase} — Coming soon`}
       aria-disabled="true"
       title="Coming soon"
-      className="text-left cursor-default rounded-xl p-5 relative overflow-hidden"
+      className="text-left cursor-not-allowed rounded-xl p-5 relative overflow-hidden"
       style={{
         background: hovered
           ? `rgba(10, 12, 25, 0.88)`
