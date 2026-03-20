@@ -55,7 +55,9 @@ Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 - `src/components/floor-7/crud/ApplicationModal.tsx` (721 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (652 LOC)
+- `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
 - `src/components/floor-4/SituationRoomClient.tsx` (574 LOC)
+- `src/app/(authenticated)/settings/settings-client.tsx` (566 LOC) — SettingsClient — account management and preferences.
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (539 LOC)
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (525 LOC)
 - `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (510 LOC) — derived from ResearchStats from companies-rest.ts
@@ -74,8 +76,8 @@ Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (420 LOC)
 - `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (420 LOC)
-- `src/app/(authenticated)/settings/settings-client.tsx` (397 LOC) — SettingsClient — account management and preferences.
-- `src/components/world/Elevator.tsx` (388 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
+- `src/components/world/EasterEggs.tsx` (420 LOC) — Shown below an idle character.
+- `src/components/world/Elevator.tsx` (394 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (385 LOC)
 - `src/components/floor-3/BriefingRoomClient.tsx` (385 LOC)
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
@@ -91,35 +93,39 @@ Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 - `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (316 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (314 LOC)
+- `src/components/world/MilestoneToast.tsx` (310 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
+- `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
-- `src/components/world/elevator/ElevatorPanel.tsx` (298 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (297 LOC)
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/CSuiteScene.tsx` (250 LOC) — CSuiteScene — Floor 1 C-Suite boardroom environment.
 - `src/components/world/LobbyBackground.tsx` (248 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
-- `src/components/floor-1/RingTheBell.tsx` (242 LOC) — RingTheBell — The primary orchestration trigger for the CEO floor.
+- `src/components/floor-1/RingTheBell.tsx` (245 LOC) — RingTheBell — The primary orchestration trigger for the CEO floor.
 - `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
+- `src/components/world/ErrorBoundary.tsx` (236 LOC) — ErrorBoundary — in-world error display using "the building's lights flicker" metaphor.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
+- `src/components/world/NotificationToast.tsx` (221 LOC)
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
-- `src/components/world/NotificationToast.tsx` (218 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (203 LOC)
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (201 LOC)
 - `src/components/penthouse/PipelineNodes.tsx` (200 LOC) — PipelineNodes renders:
+- `src/components/world/FloorShell.tsx` (200 LOC) — FloorShell — wraps each floor's content with the immersive procedural skyline.
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (198 LOC)
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
+- `src/components/ui/SoundToggle.tsx` (194 LOC) — SoundToggle — small fixed speaker button (bottom-right).
 - `src/components/floor-2/ObservatoryClient.tsx` (192 LOC)
 - `src/components/floor-6/contact-grid/ContactCard.tsx` (190 LOC)
 - `src/components/floor-5/WritingRoomTicker.tsx` (188 LOC) — WritingRoomTicker — bottom scrolling status strip showing live document data.
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
-- `src/components/world/elevator/ElevatorButton.tsx` (186 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
-- `src/components/world/FloorShell.tsx` (185 LOC) — FloorShell — wraps each floor's content with the immersive procedural skyline.
+- `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (183 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (181 LOC)
+- `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
 - `src/components/floor-1/CSuiteClient.tsx` (173 LOC)
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
@@ -133,6 +139,7 @@ Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
 - `src/components/world/NotificationSystem.tsx` (125 LOC) — NotificationSystem — in-world spatial notification manager.
+- `src/components/world/SoundProvider.tsx` (102 LOC) — SoundProvider — wraps the application to expose sound controls.
 - `src/components/penthouse/GlassPanel.tsx` (101 LOC) — GlassPanel — frosted-glass card with:
 - `src/components/world/ProceduralSkyline.tsx` (88 LOC) — Canvas-based procedural renderer
 - `src/components/world/DayNightProvider.tsx` (76 LOC) — DayNightProvider — sets `data-time` on <html> based on the user's local time.
