@@ -38,15 +38,15 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
   })();
 
   return (
-    <div className="relative flex min-h-dvh w-full overflow-hidden">
-      {/* Immersive procedural skyline background */}
-      <div className="absolute inset-0" style={{ zIndex: 0 }}>
+    <div className="relative min-h-dvh w-full">
+      {/* Immersive procedural skyline background — fixed so it stays behind scrollable content */}
+      <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <ProceduralSkyline floorId={floorId} />
       </div>
 
       {/* Floor-specific ambient light tint */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0"
+        className="pointer-events-none fixed inset-x-0 top-0"
         aria-hidden="true"
         style={{
           height: "55%",
@@ -57,7 +57,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
 
       {/* Window frame vignette — PH gets lighter (cleaner view at summit) */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none fixed inset-0"
         aria-hidden="true"
         style={{
           boxShadow:
@@ -70,7 +70,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
 
       {/* Bottom fog gradient — atmospheric depth */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0"
+        className="pointer-events-none fixed inset-x-0 bottom-0"
         aria-hidden="true"
         style={{
           height: "35%",
@@ -82,7 +82,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
 
       {/* Window mullions — 3 vertical lines at 15%, 50%, 85% */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none fixed inset-0"
         aria-hidden="true"
         style={{ zIndex: 4 }}
       >
@@ -115,8 +115,8 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
         />
       </div>
 
-      {/* Room content */}
-      <div className="relative flex-1" style={{ zIndex: 10 }}>
+      {/* Room content — BUG-003: overflow-y auto so penthouse scrolls */}
+      <div className="relative min-h-dvh" style={{ zIndex: 10 }}>
         {children}
       </div>
 
@@ -124,7 +124,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
           Has a subtle breathing scale pulse via CSS animation */}
       {floor && (
         <div
-          className="absolute top-4 right-4 flex items-center gap-2 rounded-full px-4 py-1.5"
+          className="fixed top-4 right-4 flex items-center gap-2 rounded-full px-4 py-1.5"
           style={{
             zIndex: 20,
             background: "rgba(10, 12, 25, 0.72)",
@@ -175,7 +175,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
 
       {/* Windowsill — 1px gold gradient line at the very bottom of the viewport */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0"
+        className="pointer-events-none fixed inset-x-0 bottom-0"
         aria-hidden="true"
         style={{
           height: "1px",
