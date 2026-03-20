@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 2:35 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 4:34 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,33 +19,33 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `36e8f56`)
+- **Branch:** `main` (commit `788496d`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 9,755 across 62 source files
+- **Total LOC:** 15,958 across 87 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Session State (where we left off)
 
-- **Current task:** General development
-- **Deliverable:** unknown
+- **Current task:** CRO Agent implementation
+- **Deliverable:** 1.4-1.6
 - **Status:** in_progress
 - **Last file touched:** `unknown`
-- **Notes:** No feature commits this session (tooling/infra only).
-- **State captured:** 2026-03-20T06:35:05.065Z
+- **Notes:** This session: 8 commits. Work: security: scrub hardcoded secrets from setup-env.sh and PROJECT-CONTEXT.md; docs: update PROJECT-CONTEXT.md — Phase 1 progress, war-room fix, session 16 log; fix(war-room): switch from Drizzle ORM to Supabase REST client; redeploy: env var update; fix: drizzle config auto-loads .env.local via @next/env (+3 more)
+- **State captured:** 2026-03-20T08:34:48.924Z
 
 ## Acceptance Criteria — Progress
 
-**Progress: 1 verified / 0 likely / 5 unverified** (of 6)
+**Progress: 4 verified / 1 likely / 1 unverified** (of 6)
 
-⬜ User can create an application and see it in the pipeline
-    └─ No application CRUD found in src/
-⬜ Drag-and-drop changes application status
-    └─ No drag-and-drop implementation found
-⬜ CRO agent can answer "How's my pipeline looking?" with real data
-    └─ No CRO agent implementation found
-⬜ CRO character has visible idle animation and talking state
-    └─ No CRO agent implementation found
+🟡 User can create an application and see it in the pipeline
+    └─ Partial implementation found
+✅ Drag-and-drop changes application status
+    └─ Drag-and-drop handlers found
+✅ CRO agent can answer "How's my pipeline looking?" with real data
+    └─ CRO agent file found
+✅ CRO character has visible idle animation and talking state
+    └─ CRO agent file found
 ⬜ Conversation feels in-character (aggressive, numbers-driven tone)
     └─ No conversation system found
 ✅ All data is RLS-scoped — multi-tenant safe
@@ -120,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `36e8f56`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `788496d`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -128,24 +128,40 @@
 
 ## Env Vars (names only — values in .env.local)
 
-(no .env.local found)
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- SUPABASE_DB_URL
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- ANTHROPIC_API_KEY
 
-## Source Tree (62 files, 9,755 LOC)
+## Source Tree (87 files, 15,958 LOC)
 
 | Directory | LOC |
 |---|---|
+| `src/components/floor-7/war-table` | 1281 |
 | `src/components/world` | 1189 |
+| `src/components/floor-7/crud` | 1055 |
+| `src/components/floor-7/cro-character` | 1033 |
 | `src/app/lobby` | 947 |
 | `src/lib` | 768 |
 | `src/components/penthouse` | 758 |
-| `src/app` | 728 |
+| `src/app` | 730 |
 | `src/components/world/elevator` | 718 |
 | `src/lib/contracts` | 696 |
 | `src/app/(authenticated)/penthouse` | 682 |
-| `src/db` | 496 |
+| `src/components/floor-7` | 655 |
+| `src/app/(authenticated)/war-room` | 502 |
+| `src/db` | 500 |
+| `src/lib/agents/cro` | 457 |
 | `src/app/(authenticated)/settings` | 425 |
+| `src/styles` | 366 |
 | `src/lib/contracts/departments` | 328 |
+| `src/lib/db/queries` | 313 |
 | `src/components/ui` | 294 |
+| `src/hooks` | 245 |
+| `src/lib/actions` | 207 |
 | `src/app/(authenticated)/c-suite` | 191 |
 | `src/app/(authenticated)/briefing-room` | 175 |
 | `src/app/(authenticated)/situation-room` | 154 |
@@ -153,14 +169,15 @@
 | `src/app/(authenticated)/observatory` | 144 |
 | `src/app/(authenticated)/rolodex-lounge` | 143 |
 | `src/components/transitions` | 132 |
-| `src/app/(authenticated)/war-room` | 130 |
+| `src/lib/utils` | 122 |
 | `src/lib/supabase` | 121 |
 | `src/app/(authenticated)/writing-room` | 98 |
 | `src/app/(authenticated)` | 86 |
 | `src/types` | 74 |
+| `src/lib/validators` | 71 |
 | `src/app/api/auth/callback` | 42 |
+| `src/app/api/cro` | 42 |
 | `src/lib/constants` | 31 |
-| `src/hooks` | 22 |
 | `src` | 20 |
 | `src/app/api/auth/signout` | 11 |
 
@@ -180,15 +197,30 @@ src/app/(authenticated)/settings/page.tsx
 src/app/(authenticated)/settings/settings-client.tsx
 src/app/(authenticated)/situation-room/page.tsx
 src/app/(authenticated)/war-room/page.tsx
+src/app/(authenticated)/war-room/war-room-client.tsx
 src/app/(authenticated)/world-shell.tsx
 src/app/(authenticated)/writing-room/page.tsx
 src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
+src/app/api/cro/route.ts
 src/app/globals.css
 src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
+src/components/floor-7/WarRoomClient.tsx
+src/components/floor-7/WarRoomScene.tsx
+src/components/floor-7/WarRoomTicker.tsx
+src/components/floor-7/cro-character/CROCharacter.tsx
+src/components/floor-7/cro-character/CRODialoguePanel.tsx
+src/components/floor-7/cro-character/CROWhiteboard.tsx
+src/components/floor-7/crud/ApplicationModal.tsx
+src/components/floor-7/crud/ApplicationSearch.tsx
+src/components/floor-7/war-table/ApplicationCard.tsx
+src/components/floor-7/war-table/ColumnHeader.tsx
+src/components/floor-7/war-table/PipelineColumn.tsx
+src/components/floor-7/war-table/WarTable.tsx
+src/components/floor-7/war-table/pipeline-config.ts
 src/components/icons/PenthouseIcons.tsx
 src/components/penthouse/ActivityFeed.tsx
 src/components/penthouse/GlassPanel.tsx
@@ -208,7 +240,13 @@ src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
 src/db/index.ts
 src/db/schema.ts
+src/hooks/useCROChat.ts
+src/hooks/useCharacter.ts
 src/hooks/useReducedMotion.ts
+src/lib/actions/applications.ts
+src/lib/agents/cro/character-machine.ts
+src/lib/agents/cro/system-prompt.ts
+src/lib/agents/cro/tools.ts
 src/lib/constants/floors.ts
 src/lib/contracts/agent-protocol.ts
 src/lib/contracts/api.ts
@@ -220,13 +258,17 @@ src/lib/contracts/index.ts
 src/lib/contracts/notifications.ts
 src/lib/contracts/ui.ts
 src/lib/day-night.ts
+src/lib/db/queries/applications.ts
 src/lib/skyline-engine.ts
 src/lib/supabase/admin.ts
 src/lib/supabase/client.ts
 src/lib/supabase/middleware.ts
 src/lib/supabase/server.ts
 src/lib/utils.ts
+src/lib/utils/lex-order.ts
+src/lib/validators/application.ts
 src/middleware.ts
+src/styles/floor-7.css
 src/types/agents.ts
 src/types/api.ts
 src/types/ui.ts
@@ -236,16 +278,21 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>28 packages</summary>
+<summary>34 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
+@dnd-kit/accessibility: ^3.1.1
+@dnd-kit/core: ^6.3.1
+@dnd-kit/modifiers: ^9.0.0
+@dnd-kit/sortable: ^10.0.0
 @supabase/ssr: ^0.9.0
 @supabase/supabase-js: ^2.99.2
 @tailwindcss/typography: ^0.5.19
 @types/node: ^20
 @types/react: ^19
 @types/react-dom: ^19
+@xstate/react: ^6.1.0
 ai: ^6.0.116
 autoprefixer: ^10.4.27
 clsx: ^2.1.1
@@ -266,6 +313,7 @@ tailwind-merge: ^3.5.0
 tailwindcss: ^3.4.19
 typescript: ^5
 vitest: ^4.1.0
+xstate: ^5.28.0
 zod: ^4.3.6
 ```
 </details>
@@ -280,13 +328,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 338 | 3,909 |
-| `PROJECT-CONTEXT.md` | 338 | 7,296 |
+| `BOOTSTRAP-PROMPT.md` | 343 | 3,956 |
+| `PROJECT-CONTEXT.md` | 350 | 7,939 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
 | `CLAUDE.md` | 159 | 2,731 |
-| **Total** | **1196** | **20,848** |
+| **Total** | **1213** | **21,538** |
 
-> ⚠️ Reading all recommended files consumes ~20,848 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~21,538 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
@@ -301,6 +349,8 @@ zod: ^4.3.6
 - **Tailwind:** v3 with JS config (NOT v4 with CSS config)
 - **Old repo reference:** `/home/user/workspace/internship-command-center-8c4c1ad1/src/contracts/`
 - **Vercel auto-deploy:** `main` gets production
+- **War Room DB pattern:** Server components use Supabase REST client (`createClient()` from `@/lib/supabase/server`), NOT Drizzle ORM direct postgres. Drizzle's `db` object requires a direct TCP connection to postgres which fails from Vercel serverless (IPv6-only DB, pooler unreliable). All future server components should follow the Penthouse/War Room pattern: `supabase.from('table').select('*')`.
+- **Supabase DB connectivity from Vercel:** Direct connection (`db.jzrsrruugcajohvvmevg.supabase.co:5432`) is IPv6-only. Supabase transaction pooler (`aws-0-us-east-1.pooler.supabase.com:6543`) returns "Tenant or user not found". Use REST API via Supabase client.
 - **ProceduralSkyline:** Canvas-based renderer replaces all photo-based skyline components. Defaults to "night" outside DayNightProvider context (intentional for lobby). Uses `useDayNight()` hook + `getSkyConfig()` for time-aware rendering
 - **EntranceSequence:** Uses sessionStorage for "played" flag — appropriate for per-session entrance
 - **Floor stubs:** Each has unique CSS atmosphere (grid patterns, gradients, animations) — not empty shells

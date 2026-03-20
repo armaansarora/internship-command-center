@@ -1,9 +1,37 @@
 {
-  "currentTask": "Phase 1: The War Room — wiring + commit",
-  "deliverable": "1.1-1.6",
+  "currentTask": "CRO Agent implementation",
+  "deliverable": "1.4-1.6",
   "status": "in_progress",
-  "blocker": null,
-  "lastFileTouched": "src/app/(authenticated)/war-room/page.tsx",
-  "notes": "All 6 deliverables built: Floor env, CRUD, Kanban DnD, CRO agent, character system, dialogue panel. 24 new files, ~5,800 LOC. Zero TS errors. Committing.",
-  "updatedAt": "2026-03-20T07:15:00.000Z"
+  "blockers": [],
+  "lastFileTouched": "unknown",
+  "notes": "This session: 8 commits. Work: security: scrub hardcoded secrets from setup-env.sh and PROJECT-CONTEXT.md; docs: update PROJECT-CONTEXT.md — Phase 1 progress, war-room fix, session 16 log; fix(war-room): switch from Drizzle ORM to Supabase REST client; redeploy: env var update; fix: drizzle config auto-loads .env.local via @next/env (+3 more)",
+  "filesChanged": [
+    "src/app/(authenticated)/briefing-room/page.tsx",
+    "src/app/(authenticated)/c-suite/page.tsx",
+    "src/app/(authenticated)/observatory/page.tsx",
+    "src/app/(authenticated)/penthouse/penthouse-client.tsx",
+    "src/app/(authenticated)/rolodex-lounge/page.tsx",
+    "src/app/(authenticated)/situation-room/page.tsx",
+    "src/app/(authenticated)/war-room/page.tsx",
+    "src/app/(authenticated)/war-room/war-room-client.tsx",
+    "src/app/(authenticated)/writing-room/page.tsx",
+    "src/app/api/cro/route.ts",
+    "src/app/globals.css",
+    "src/components/floor-7/WarRoomClient.tsx",
+    "src/components/floor-7/WarRoomScene.tsx",
+    "src/components/floor-7/WarRoomTicker.tsx",
+    "src/components/floor-7/cro-character/CROCharacter.tsx"
+  ],
+  "commitCount": 8,
+  "locAdded": 10020,
+  "locRemoved": 4260,
+  "newDependencies": [
+    "@dnd-kit/accessibility",
+    "@dnd-kit/core",
+    "@dnd-kit/modifiers",
+    "@dnd-kit/sortable",
+    "@xstate/react",
+    "xstate"
+  ],
+  "updatedAt": "2026-03-20T08:34:48.924Z"
 }
