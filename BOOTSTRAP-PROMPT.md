@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:17 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:18 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `5992e92`)
+- **Branch:** `main` (commit `7d39269`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 9,749 across 50 source files
 - **Build:** Clean (zero TS errors)
@@ -27,17 +27,17 @@
 
 ## Session State (where we left off)
 
-- **Current task:** General development
-- **Deliverable:** unknown
+- **Current task:** Immersive UI overhaul (skyline, lobby, penthouse)
+- **Deliverable:** 0.5-0.8
 - **Status:** in_progress
-- **Last file touched:** `unknown`
-- **Notes:** No feature commits this session (tooling/infra only).
-- **State captured:** 2026-03-20T03:46:58.269Z
+- **Last file touched:** `src/app/(authenticated)/penthouse/penthouse-client.tsx`
+- **Notes:** This session: 7 commits. Work: Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014; docs: update BUG-TRACKER with Sprint 2 commit hash; fix(sprint-2): BUG-001,002,005,011,012 — navigation, sign out, settings, user menu; docs: remove stale CustomCursor references (audit pass 2); chore: delete dead CustomCursor.tsx (audit pass 1) (+2 more)
+- **State captured:** 2026-03-20T04:18:35.187Z
 
 ## Changes Since Last Bootstrap
 
 ```
-5992e92 Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014
+7d39269 Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014
 ```
 
 ## Acceptance Criteria — Progress
@@ -179,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5992e92`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `7d39269`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -329,13 +329,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 388 | 4,265 |
+| `BOOTSTRAP-PROMPT.md` | 388 | 4,269 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1289** | **20,936** |
+| **Total** | **1289** | **20,940** |
 
-> ⚠️ Reading all recommended files consumes ~20,936 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,940 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
