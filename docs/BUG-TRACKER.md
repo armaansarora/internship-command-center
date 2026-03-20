@@ -11,12 +11,12 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 
 | Date | Session | Bug(s) Fixed | Commit | Notes |
 |------|---------|-------------|--------|-------|
-| 2026-03-19 | Session 13 | BUG-006: Performance (15 FPS lag) | `pending` | Rewrote ProceduralSkyline v5: removed mouse tracking, constellation lines, light sweep, scan line, mouse spotlight. Reduced buildings (65/50/35 → 50/40/28), stars (180 → 120), particles (60 → 30), water shimmers (30 → 18). Removed atmospheric particles entirely. Eliminated 3 mousemove RAF loops. |
-| 2026-03-19 | Session 13 | BUG-007: Remove custom cursor | `pending` | Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` rule for all interactive elements (a, button, [role=button], input, etc.). Eliminated per-frame RAF loop + 4 document event listeners. |
-| 2026-03-19 | Session 13 | BUG-008: Remove text parallax | `pending` | Removed mousemove → transform handlers from lobby contentRef and penthouse headerRef. Text is now static. Eliminated 2 mousemove event listeners. |
-| 2026-03-19 | Session 13 | BUG-009: Apple TV autonomous drift | `pending` | Replaced mouse-reactive parallax with autonomous sinusoidal drift (60-90s cycles). Two independent sine waves create organic Ken Burns panning. prefers-reduced-motion shows static frame. |
-| 2026-03-19 | Session 13 | BUG-003: Penthouse scroll | `pending` | Removed `overflow: hidden` from body in globals.css. Changed FloorShell decorative layers from `absolute` to `fixed` so they stay as viewport backdrop while content scrolls freely. |
-| 2026-03-19 | Session 13 | BUG-004: Penthouse clickability | `pending` | Fixed by removing body overflow:hidden (z-index stacking was trapping pointer events). Quick action cards now show `cursor: not-allowed` instead of `cursor: default` for clearer disabled state. |
+| 2026-03-19 | Session 13 | BUG-006: Performance (15 FPS lag) | `6a2336d` | Rewrote ProceduralSkyline v5: removed mouse tracking, constellation lines, light sweep, scan line, mouse spotlight. Reduced buildings (65/50/35 → 50/40/28), stars (180 → 120), particles (60 → 30), water shimmers (30 → 18). Removed atmospheric particles entirely. Eliminated 3 mousemove RAF loops. |
+| 2026-03-19 | Session 13 | BUG-007: Remove custom cursor | `6a2336d` | Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` rule for all interactive elements (a, button, [role=button], input, etc.). Eliminated per-frame RAF loop + 4 document event listeners. |
+| 2026-03-19 | Session 13 | BUG-008: Remove text parallax | `6a2336d` | Removed mousemove → transform handlers from lobby contentRef and penthouse headerRef. Text is now static. Eliminated 2 mousemove event listeners. |
+| 2026-03-19 | Session 13 | BUG-009: Apple TV autonomous drift | `6a2336d` | Replaced mouse-reactive parallax with autonomous sinusoidal drift (60-90s cycles). Two independent sine waves create organic Ken Burns panning. prefers-reduced-motion shows static frame. |
+| 2026-03-19 | Session 13 | BUG-003: Penthouse scroll | `6a2336d` | Removed `overflow: hidden` from body in globals.css. Changed FloorShell decorative layers from `absolute` to `fixed` so they stay as viewport backdrop while content scrolls freely. |
+| 2026-03-19 | Session 13 | BUG-004: Penthouse clickability | `6a2336d` | Fixed by removing body overflow:hidden (z-index stacking was trapping pointer events). Quick action cards now show `cursor: not-allowed` instead of `cursor: default` for clearer disabled state. |
 | — | — | — | — | No fixes yet — tracker created Session 12 |
 
 <!-- TEMPLATE for new entries (copy, fill, paste at top of table above the "—" row):
@@ -199,22 +199,22 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 -->
 
 ### BUG-003: Cannot scroll in penthouse `🟢 FIXED`
-**Fixed:** Session 13, `pending` — Removed `overflow: hidden` from body. Changed FloorShell decorative layers to `position: fixed` so content scrolls freely.
+**Fixed:** Session 13, `6a2336d` — Removed `overflow: hidden` from body. Changed FloorShell decorative layers to `position: fixed` so content scrolls freely.
 
 ### BUG-004: Nothing is clickable in penthouse `🟢 FIXED`
-**Fixed:** Session 13, `pending` — Root cause was `overflow: hidden` on body trapping pointer events. Quick action cards now show `cursor: not-allowed`.
+**Fixed:** Session 13, `6a2336d` — Root cause was `overflow: hidden` on body trapping pointer events. Quick action cards now show `cursor: not-allowed`.
 
 ### BUG-006: Entire site runs at ~15 FPS `🟢 FIXED`
-**Fixed:** Session 13, `pending` — ProceduralSkyline v5 rewrite. Eliminated 5 mousemove listeners, constellation O(n²), light sweep, scan line, mouse spotlight, atmospheric particles, water mirror reflections. Reduced object counts ~35%.
+**Fixed:** Session 13, `6a2336d` — ProceduralSkyline v5 rewrite. Eliminated 5 mousemove listeners, constellation O(n²), light sweep, scan line, mouse spotlight, atmospheric particles, water mirror reflections. Reduced object counts ~35%.
 
 ### BUG-007: Custom cursor removed `🟢 FIXED`
-**Fixed:** Session 13, `pending` — Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` for all interactive elements.
+**Fixed:** Session 13, `6a2336d` — Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` for all interactive elements.
 
 ### BUG-008: Text parallax removed `🟢 FIXED`
-**Fixed:** Session 13, `pending` — Removed mousemove → transform handlers from lobby and penthouse. Text is static.
+**Fixed:** Session 13, `6a2336d` — Removed mousemove → transform handlers from lobby and penthouse. Text is static.
 
 ### BUG-009: Apple TV autonomous drift `🟢 FIXED`
-**Fixed:** Session 13, `pending` — Replaced mouse parallax with autonomous sinusoidal drift (Ken Burns). Two sine waves, 25-40s periods. prefers-reduced-motion static.
+**Fixed:** Session 13, `6a2336d` — Replaced mouse parallax with autonomous sinusoidal drift (Ken Burns). Two sine waves, 25-40s periods. prefers-reduced-motion static.
 
 ---
 
