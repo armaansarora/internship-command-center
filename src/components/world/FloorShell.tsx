@@ -10,6 +10,26 @@ interface FloorShellProps {
   children: React.ReactNode;
 }
 
+// ── Ambient light tint per floor ──────────────────────────────────────────────
+// Extracted from inline IIFE so it's a plain lookup — easier to extend.
+const AMBIENT_CONFIG: Record<FloorId, string> = {
+  PH: "linear-gradient(to bottom, rgba(201, 168, 76, 0.06) 0%, rgba(201, 168, 76, 0.02) 40%, transparent 100%)",
+  "7": "linear-gradient(to bottom, rgba(80, 140, 220, 0.04) 0%, rgba(80, 140, 220, 0.015) 40%, transparent 100%)",
+  "6": "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)",
+  "5": "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)",
+  "4": "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)",
+  "3": "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)",
+  "2": "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)",
+  "1": "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)",
+  L:   "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)",
+};
+
+// Vignette shadow differs for PH (cleaner view at summit)
+const VIGNETTE_SHADOW: Record<"PH" | "default", string> = {
+  PH:      "inset 0 0 200px 60px rgba(4, 6, 15, 0.55)",
+  default: "inset 0 0 250px 80px rgba(4, 6, 15, 0.72)",
+};
+
 /**
  * FloorShell — wraps each floor's content with the immersive procedural skyline.
  *
@@ -24,104 +44,74 @@ interface FloorShellProps {
  * 8. Windowsill gold gradient line (bottom)
  */
 export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element {
-  const floor = FLOORS.find((f) => f.id === floorId);
-
-  // Ambient light: PH = warm golden, Floor 7 = cool blue, others = neutral
-  const ambientLight = (() => {
-    if (floorId === "PH") {
-      return "linear-gradient(to bottom, rgba(201, 168, 76, 0.06) 0%, rgba(201, 168, 76, 0.02) 40%, transparent 100%)";
-    }
-    if (floorId === "7") {
-      return "linear-gradient(to bottom, rgba(80, 140, 220, 0.04) 0%, rgba(80, 140, 220, 0.015) 40%, transparent 100%)";
-    }
-    return "linear-gradient(to bottom, rgba(160, 170, 200, 0.02) 0%, transparent 50%)";
-  })();
+  const floor       = FLOORS.find((f) => f.id === floorId);
+  const ambientLight = AMBIENT_CONFIG[floorId];
+  const vignetteShadow = floorId === "PH" ? VIGNETTE_SHADOW.PH : VIGNETTE_SHADOW.default;
 
   return (
     <div className="relative min-h-dvh w-full">
-      {/* Immersive procedural skyline background — fixed so it stays behind scrollable content */}
+
+      {/* 1 — Immersive procedural skyline background */}
       <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <ProceduralSkyline floorId={floorId} />
       </div>
 
-      {/* Floor-specific ambient light tint */}
+      {/* 2 — Floor-specific ambient light tint */}
       <div
         className="pointer-events-none fixed inset-x-0 top-0"
         aria-hidden="true"
-        style={{
-          height: "55%",
-          background: ambientLight,
-          zIndex: 1,
-        }}
+        style={{ height: "55%", background: ambientLight, zIndex: 1 }}
       />
 
-      {/* Window frame vignette — PH gets lighter (cleaner view at summit) */}
+      {/* 3 — Window frame vignette */}
       <div
         className="pointer-events-none fixed inset-0"
         aria-hidden="true"
-        style={{
-          boxShadow:
-            floorId === "PH"
-              ? "inset 0 0 200px 60px rgba(4, 6, 15, 0.55)"
-              : "inset 0 0 250px 80px rgba(4, 6, 15, 0.72)",
-          zIndex: 2,
-        }}
+        style={{ boxShadow: vignetteShadow, zIndex: 2 }}
       />
 
-      {/* Bottom fog gradient — atmospheric depth */}
+      {/* 4 — Bottom fog gradient */}
       <div
         className="pointer-events-none fixed inset-x-0 bottom-0"
         aria-hidden="true"
         style={{
           height: "35%",
-          background:
-            "linear-gradient(to top, rgba(6, 8, 18, 0.8) 0%, rgba(6, 8, 18, 0.4) 40%, transparent 100%)",
+          background: "linear-gradient(to top, rgba(6, 8, 18, 0.8) 0%, rgba(6, 8, 18, 0.4) 40%, transparent 100%)",
           zIndex: 3,
         }}
       />
 
-      {/* Window mullions — 3 vertical lines at 15%, 50%, 85% */}
-      <div
-        className="pointer-events-none fixed inset-0"
-        aria-hidden="true"
-        style={{ zIndex: 4 }}
-      >
-        {/* Left mullion at 15% */}
+      {/* 5 — Window mullions at 15%, 50%, 85% */}
+      <div className="pointer-events-none fixed inset-0" aria-hidden="true" style={{ zIndex: 4 }}>
         <div
           className="absolute top-0 bottom-0 w-px"
           style={{
             left: "15%",
-            background:
-              "linear-gradient(to bottom, rgba(201, 168, 76, 0.03) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.03) 100%)",
+            background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.03) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.03) 100%)",
           }}
         />
-        {/* Center mullion at 50% */}
         <div
           className="absolute top-0 bottom-0 w-px"
           style={{
             left: "50%",
-            background:
-              "linear-gradient(to bottom, rgba(201, 168, 76, 0.02) 0%, rgba(201, 168, 76, 0.07) 50%, rgba(201, 168, 76, 0.02) 100%)",
+            background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.02) 0%, rgba(201, 168, 76, 0.07) 50%, rgba(201, 168, 76, 0.02) 100%)",
           }}
         />
-        {/* Right mullion at 85% */}
         <div
           className="absolute top-0 bottom-0 w-px"
           style={{
             left: "85%",
-            background:
-              "linear-gradient(to bottom, rgba(201, 168, 76, 0.03) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.03) 100%)",
+            background: "linear-gradient(to bottom, rgba(201, 168, 76, 0.03) 0%, rgba(201, 168, 76, 0.12) 50%, rgba(201, 168, 76, 0.03) 100%)",
           }}
         />
       </div>
 
-      {/* Room content — BUG-003: overflow-y auto so penthouse scrolls */}
+      {/* 6 — Room content */}
       <div className="relative min-h-dvh" style={{ zIndex: 10 }}>
         {children}
       </div>
 
-      {/* Floor info badge (top-right) — gold dot + floor ID + separator + floor name
-          Has a subtle breathing scale pulse via CSS animation */}
+      {/* 7 — Floor info badge (top-right) */}
       {floor && (
         <div
           className="fixed top-4 right-4 md:right-28 flex items-center gap-2 rounded-full px-4 py-1.5"
@@ -164,16 +154,13 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
             style={{ background: "rgba(255, 255, 255, 0.14)" }}
             aria-hidden="true"
           />
-          <span
-            className="text-xs"
-            style={{ color: "var(--text-secondary)" }}
-          >
+          <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
             {floor.name}
           </span>
         </div>
       )}
 
-      {/* Windowsill — 1px gold gradient line at the very bottom of the viewport */}
+      {/* 8 — Windowsill gold gradient line */}
       <div
         className="pointer-events-none fixed inset-x-0 bottom-0"
         aria-hidden="true"
@@ -185,7 +172,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
         }}
       />
 
-      {/* Inline keyframe for badge breathing — avoids needing a globals.css change */}
+      {/* Inline keyframe for badge breathing */}
       <style>{`
         @keyframes floor-badge-breathe {
           0%, 100% { transform: scale(1); }
