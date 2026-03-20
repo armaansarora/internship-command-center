@@ -174,7 +174,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 - ✅ ANTHROPIC_API_KEY set in Vercel production env vars
 - ✅ War Room Vercel fix: replaced Drizzle ORM (direct postgres) with Supabase REST client in `war-room/page.tsx` (commit `d29842d`)
 - ⚠️ pgvector extension NOT yet enabled (user needs to run SQL in Supabase dashboard)
-- ⚠️ DB password needs rotation (currently `REDACTED_DB_PASSWORD` — exposed during setup)
+- ⚠️ DB password needs rotation (was exposed during setup — ROTATE IMMEDIATELY)
 
 ### Completed (All Tasks 0.1–0.10)
 
