@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "bootstrap": "tsx scripts/generate-bootstrap.ts",
+    "docs:organize": "tsx scripts/auto-organize-docs.ts",
     "session:state": "tsx scripts/update-session-state.ts",
     "session:state:clear": "tsx scripts/update-session-state.ts --clear",
     "session:end": "tsx scripts/session-end.ts",

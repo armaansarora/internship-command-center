@@ -1,3 +1,7 @@
-# Auto-regenerate BOOTSTRAP-PROMPT.md before every commit
+# Auto-organize docs: archive stale, regenerate CLAUDE.md components, update doc map, append session log
+npx tsx scripts/auto-organize-docs.ts 2>/dev/null
+git add CLAUDE.md PROJECT-CONTEXT.md SESSION-STATE.json docs/ 2>/dev/null
+
+# Auto-regenerate BOOTSTRAP-PROMPT.md
 npx tsx scripts/generate-bootstrap.ts 2>/dev/null
 git add BOOTSTRAP-PROMPT.md

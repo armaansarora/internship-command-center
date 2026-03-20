@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:44 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:53 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `6dd5c70`)
+- **Branch:** `main` (commit `34dbbb0`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 9,834 across 50 source files
 - **Build:** Clean (zero TS errors)
@@ -27,12 +27,12 @@
 
 ## Session State (where we left off)
 
-- **Current task:** General development
-- **Deliverable:** unknown
-- **Status:** in_progress
-- **Last file touched:** `unknown`
-- **Notes:** No feature commits this session (tooling/infra only).
-- **State captured:** 2026-03-20T05:44:29.639Z
+- **Current task:** Full doc auto-organization system
+- **Deliverable:** auto-organize-docs
+- **Status:** complete
+- **Last file touched:** `scripts/auto-organize-docs.ts`
+- **Notes:** Built auto-organize-docs.ts: (1) auto-archive stale unreferenced docs, (2) auto-generate CLAUDE.md Key Components from src/ tree, (3) auto-generate doc map table with real line counts, (4) auto-append session logs from SESSION-STATE.json. Wired into Husky pre-commit. Idempotent.
+- **State captured:** 2026-03-20T05:50:00.000Z
 
 ## Acceptance Criteria — Progress
 
@@ -120,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6dd5c70`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `34dbbb0`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -269,13 +269,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 332 | 3,812 |
-| `PROJECT-CONTEXT.md` | 338 | 7,218 |
+| `BOOTSTRAP-PROMPT.md` | 338 | 3,950 |
+| `PROJECT-CONTEXT.md` | 338 | 7,296 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
-| `CLAUDE.md` | 154 | 2,518 |
-| **Total** | **1185** | **20,460** |
+| `CLAUDE.md` | 159 | 2,731 |
+| **Total** | **1196** | **20,889** |
 
-> ⚠️ Reading all recommended files consumes ~20,460 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,889 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
