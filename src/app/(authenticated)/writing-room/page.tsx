@@ -1,97 +1,169 @@
 import type { Metadata } from "next";
-import { requireUser } from "@/lib/supabase/server";
-import { FloorStub } from "@/components/world/FloorStub";
+import { revalidatePath } from "next/cache";
+import { requireUser, createClient } from "@/lib/supabase/server";
+import { FloorShell } from "@/components/world/FloorShell";
+import { WritingRoomClient } from "@/components/floor-5/WritingRoomClient";
+import type { DocumentStats } from "@/components/floor-5/WritingRoomClient";
+import type { Application, Document } from "@/db/schema";
 
-export const metadata: Metadata = { title: "The Writing Room" };
+export const metadata: Metadata = { title: "The Writing Room | The Tower" };
 
-/** Floor 5 — Cover Letters (Phase 4) */
+/** Floor 5 — Cover Letters + CMO Agent */
 export default async function WritingRoomPage() {
-  await requireUser();
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  // Fetch cover letters and applications in parallel
+  const [documentsResult, applicationsResult] = await Promise.all([
+    supabase
+      .from("documents")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("type", "cover_letter")
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("applications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  // Map snake_case to camelCase Document type
+  const documents: Document[] = (documentsResult.data ?? []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    applicationId: row.application_id,
+    companyId: row.company_id,
+    type: row.type,
+    title: row.title,
+    content: row.content,
+    version: row.version,
+    isActive: row.is_active,
+    parentId: row.parent_id,
+    generatedBy: row.generated_by,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }));
+
+  // Map snake_case to camelCase Application type
+  const applications: Application[] = (applicationsResult.data ?? []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    companyId: row.company_id,
+    role: row.role,
+    url: row.url,
+    status: row.status,
+    tier: row.tier,
+    appliedAt: row.applied_at ? new Date(row.applied_at) : null,
+    source: row.source,
+    notes: row.notes,
+    sector: row.sector,
+    contactId: row.contact_id,
+    salary: row.salary,
+    location: row.location,
+    position: row.position,
+    companyName: row.company_name,
+    lastActivityAt: row.last_activity_at ? new Date(row.last_activity_at) : null,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }));
+
+  // Compute document stats
+  const coverLetters = documents.filter((d) => d.type === "cover_letter");
+  const latestDoc = coverLetters[0] ?? null;
+  const appIdsWithLetters = new Set(
+    coverLetters.filter((d) => d.applicationId).map((d) => d.applicationId)
+  );
+  const appsWithoutLetters = applications.filter(
+    (a) => !appIdsWithLetters.has(a.id) && a.status !== "rejected" && a.status !== "withdrawn"
+  );
+
+  // Find company name for latest doc
+  let latestDocCompany: string | null = null;
+  if (latestDoc?.applicationId) {
+    const app = applications.find((a) => a.id === latestDoc.applicationId);
+    latestDocCompany = app?.companyName ?? null;
+  }
+
+  const documentStats: DocumentStats = {
+    totalDocuments: documents.length,
+    coverLetters: coverLetters.length,
+    latestDocTitle: latestDoc?.title ?? null,
+    latestDocCompany,
+    latestDocVersion: latestDoc?.version ?? 0,
+    latestDocUpdatedAt: latestDoc?.updatedAt ?? null,
+    applicationsWithoutLetters: appsWithoutLetters.length,
+  };
+
+  // ── Server Actions ─────────────────────────────────────────────────
+
+  async function createDocument(formData: FormData): Promise<void> {
+    "use server";
+    const sessionUser = await requireUser();
+    const sb = await createClient();
+
+    const title = (formData.get("title") as string)?.trim();
+    const content = (formData.get("content") as string)?.trim();
+    const applicationId = (formData.get("applicationId") as string)?.trim() || null;
+    const companyId = (formData.get("companyId") as string)?.trim() || null;
+
+    if (!title || !content) return;
+
+    await sb.from("documents").insert({
+      user_id: sessionUser.id,
+      type: "cover_letter",
+      title,
+      content,
+      application_id: applicationId,
+      company_id: companyId,
+      version: 1,
+      is_active: true,
+      generated_by: "cmo",
+    });
+
+    revalidatePath("/writing-room");
+  }
+
+  async function updateDocument(id: string, formData: FormData): Promise<void> {
+    "use server";
+    await requireUser();
+    const sb = await createClient();
+
+    const title = (formData.get("title") as string)?.trim();
+    const content = (formData.get("content") as string)?.trim();
+
+    if (!title || !content) return;
+
+    await sb
+      .from("documents")
+      .update({
+        title,
+        content,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+
+    revalidatePath("/writing-room");
+  }
+
+  async function deleteDocument(id: string): Promise<void> {
+    "use server";
+    await requireUser();
+    const sb = await createClient();
+    await sb.from("documents").delete().eq("id", id);
+    revalidatePath("/writing-room");
+  }
 
   return (
-    <FloorStub
-      floorId="5"
-      floorLabel="Floor 5"
-      floorName="The Writing Room"
-      description={
-        <>
-          AI-powered cover letters tailored to every application. Every word, earned.{" "}
-          <span
-            className="cursor-blink inline-block align-middle"
-            aria-hidden="true"
-            style={{
-              width: "2px",
-              height: "14px",
-              background: "rgba(201, 168, 76, 0.7)",
-              verticalAlign: "middle",
-              marginBottom: "1px",
-            }}
-          />
-        </>
-      }
-      phase="Phase 4 — Planned"
-      accentColor="rgba(201, 168, 76, 0.7)"
-      accentRgb="201, 168, 76"
-      cardBorderColor="rgba(201, 168, 76, 0.12)"
-      pingDelay="0.6s"
-      atmosphereRenderer={
-        <>
-          {/* Ruled-line texture — literary feel */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            aria-hidden="true"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, rgba(201, 168, 76, 0.04) 31px, rgba(201, 168, 76, 0.04) 32px)",
-              backgroundSize: "100% 32px",
-            }}
-          />
-          {/* Left margin rule — classic notebook detail */}
-          <div
-            className="pointer-events-none absolute inset-y-0"
-            aria-hidden="true"
-            style={{
-              left: "8%",
-              width: "1px",
-              background:
-                "linear-gradient(to bottom, transparent 0%, rgba(180, 60, 60, 0.08) 15%, rgba(180, 60, 60, 0.06) 85%, transparent 100%)",
-            }}
-          />
-        </>
-      }
-      previewSlot={
-        <div
-          className="rounded-lg p-4 mb-4 overflow-hidden"
-          aria-hidden="true"
-          style={{
-            background: "rgba(255, 255, 255, 0.02)",
-            border: "1px solid rgba(255,255,255,0.05)",
-            position: "relative",
-          }}
-        >
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div
-              key={i}
-              style={{
-                height: "1px",
-                background: "rgba(201, 168, 76, 0.06)",
-                marginBottom: "16px",
-                width: i === 2 ? "65%" : i === 5 ? "40%" : "100%",
-              }}
-            />
-          ))}
-          <div
-            className="cursor-blink"
-            style={{
-              width: "2px",
-              height: "14px",
-              background: "rgba(201, 168, 76, 0.55)",
-              display: "inline-block",
-              verticalAlign: "middle",
-            }}
-          />
-        </div>
-      }
-    />
+    <FloorShell floorId="5">
+      <WritingRoomClient
+        documents={documents}
+        applications={applications}
+        stats={documentStats}
+        onCreateDocument={createDocument}
+        onUpdateDocument={updateDocument}
+        onDeleteDocument={deleteDocument}
+      />
+    </FloorShell>
   );
 }

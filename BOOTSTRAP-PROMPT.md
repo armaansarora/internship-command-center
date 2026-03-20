@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:16 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:01 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `8c19476`)
+- **Branch:** `main` (commit `92275e9`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 29,195 across 135 source files
+- **Total LOC:** 40,448 across 166 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -33,12 +33,6 @@
 - **Last file touched:** `src/app/(authenticated)/rolodex-lounge/page.tsx`
 - **Notes:** This session: 1 commits. Work: Phase 3: Floor 6 Rolodex Lounge + CNO/CIO agents + pgvector + cron sync
 - **State captured:** 2026-03-20T16:16:05.414Z
-
-## Changes Since Last Bootstrap
-
-```
-8c19476 Phase 3: Floor 6 Rolodex Lounge + CNO/CIO agents + pgvector + cron sync
-```
 
 ## Acceptance Criteria — Progress
 
@@ -126,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `8c19476`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `92275e9`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -136,12 +130,16 @@
 
 (no .env.local found)
 
-## Source Tree (135 files, 29,195 LOC)
+## Source Tree (166 files, 40,448 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 2565 |
+| `src/lib/db/queries` | 2934 |
+| `src/styles` | 1887 |
+| `src/components/floor-3/crud` | 1790 |
 | `src/components/floor-6/cio-character` | 1455 |
+| `src/components/floor-3/cpo-character` | 1380 |
+| `src/components/floor-5/cmo-character` | 1369 |
 | `src/components/floor-4/coo-character` | 1339 |
 | `src/components/floor-7/war-table` | 1281 |
 | `src/components/world` | 1189 |
@@ -149,18 +147,22 @@
 | `src/components/floor-6/cno-character` | 1081 |
 | `src/components/floor-7/crud` | 1055 |
 | `src/components/floor-7/cro-character` | 1033 |
-| `src/styles` | 978 |
+| `src/components/floor-3` | 1015 |
+| `src/hooks` | 995 |
+| `src/lib/agents/cpo` | 975 |
+| `src/components/floor-5/crud` | 949 |
 | `src/app/lobby` | 947 |
+| `src/components/floor-5` | 909 |
 | `src/components/floor-6/crud` | 889 |
 | `src/components/floor-6` | 886 |
 | `src/components/floor-7` | 792 |
 | `src/lib` | 768 |
+| `src/lib/agents/cmo` | 766 |
 | `src/components/penthouse` | 758 |
 | `src/app` | 730 |
 | `src/components/world/elevator` | 718 |
 | `src/lib/agents/cio` | 711 |
 | `src/lib/contracts` | 696 |
-| `src/hooks` | 692 |
 | `src/app/(authenticated)/penthouse` | 682 |
 | `src/lib/agents/cno` | 555 |
 | `src/lib/gmail` | 520 |
@@ -171,27 +173,30 @@
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/contracts/departments` | 328 |
 | `src/components/ui` | 294 |
+| `src/lib/utils` | 285 |
+| `src/app/(authenticated)/briefing-room` | 264 |
 | `src/lib/actions` | 207 |
 | `src/lib/calendar` | 195 |
 | `src/app/(authenticated)/c-suite` | 191 |
-| `src/app/(authenticated)/briefing-room` | 175 |
 | `src/app/(authenticated)/war-room` | 174 |
+| `src/app/(authenticated)/writing-room` | 170 |
 | `src/app/api/cron/sync` | 166 |
 | `src/components/icons` | 152 |
 | `src/app/(authenticated)/rolodex-lounge` | 150 |
 | `src/app/(authenticated)/observatory` | 144 |
 | `src/app/api/gmail/sync` | 144 |
 | `src/components/transitions` | 132 |
-| `src/lib/utils` | 122 |
 | `src/lib/supabase` | 121 |
-| `src/app/(authenticated)/writing-room` | 98 |
+| `src/app/api/cpo` | 105 |
 | `src/app/(authenticated)/situation-room` | 92 |
 | `src/app/(authenticated)` | 86 |
 | `src/types` | 74 |
 | `src/lib/validators` | 71 |
 | `src/app/api/gmail/callback` | 56 |
+| `src/app/api/drive/export` | 48 |
 | `src/app/api/auth/callback` | 42 |
 | `src/app/api/cio` | 42 |
+| `src/app/api/cmo` | 42 |
 | `src/app/api/cno` | 42 |
 | `src/app/api/coo` | 42 |
 | `src/app/api/cro` | 42 |
@@ -223,10 +228,13 @@ src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
 src/app/api/calendar/sync/route.ts
 src/app/api/cio/route.ts
+src/app/api/cmo/route.ts
 src/app/api/cno/route.ts
 src/app/api/coo/route.ts
+src/app/api/cpo/route.ts
 src/app/api/cro/route.ts
 src/app/api/cron/sync/route.ts
+src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
@@ -235,12 +243,28 @@ src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
+src/components/floor-3/BriefingRoomClient.tsx
+src/components/floor-3/BriefingRoomScene.tsx
+src/components/floor-3/BriefingRoomTicker.tsx
+src/components/floor-3/cpo-character/CPOCharacter.tsx
+src/components/floor-3/cpo-character/CPODialoguePanel.tsx
+src/components/floor-3/cpo-character/CPOWhiteboard.tsx
+src/components/floor-3/crud/InterviewTimeline.tsx
+src/components/floor-3/crud/PrepPacketViewer.tsx
 src/components/floor-4/SituationRoomClient.tsx
 src/components/floor-4/SituationRoomScene.tsx
 src/components/floor-4/SituationRoomTicker.tsx
 src/components/floor-4/coo-character/COOCharacter.tsx
 src/components/floor-4/coo-character/COODialoguePanel.tsx
 src/components/floor-4/coo-character/COOWhiteboard.tsx
+src/components/floor-5/WritingRoomClient.tsx
+src/components/floor-5/WritingRoomScene.tsx
+src/components/floor-5/WritingRoomTicker.tsx
+src/components/floor-5/cmo-character/CMOCharacter.tsx
+src/components/floor-5/cmo-character/CMODialoguePanel.tsx
+src/components/floor-5/cmo-character/CMOWhiteboard.tsx
+src/components/floor-5/crud/DocumentEditor.tsx
+src/components/floor-5/crud/DocumentList.tsx
 src/components/floor-6/RolodexLoungeClient.tsx
 src/components/floor-6/RolodexLoungeScene.tsx
 src/components/floor-6/RolodexLoungeTicker.tsx
@@ -287,8 +311,10 @@ src/components/world/elevator/ElevatorPanel.tsx
 src/db/index.ts
 src/db/schema.ts
 src/hooks/useCIOChat.ts
+src/hooks/useCMOChat.ts
 src/hooks/useCNOChat.ts
 src/hooks/useCOOChat.ts
+src/hooks/useCPOChat.ts
 src/hooks/useCROChat.ts
 src/hooks/useCharacter.ts
 src/hooks/useReducedMotion.ts
@@ -296,12 +322,18 @@ src/lib/actions/applications.ts
 src/lib/agents/cio/character-machine.ts
 src/lib/agents/cio/system-prompt.ts
 src/lib/agents/cio/tools.ts
+src/lib/agents/cmo/character-machine.ts
+src/lib/agents/cmo/system-prompt.ts
+src/lib/agents/cmo/tools.ts
 src/lib/agents/cno/character-machine.ts
 src/lib/agents/cno/system-prompt.ts
 src/lib/agents/cno/tools.ts
 src/lib/agents/coo/character-machine.ts
 src/lib/agents/coo/system-prompt.ts
 src/lib/agents/coo/tools.ts
+src/lib/agents/cpo/character-machine.ts
+src/lib/agents/cpo/system-prompt.ts
+src/lib/agents/cpo/tools.ts
 src/lib/agents/cro/character-machine.ts
 src/lib/agents/cro/system-prompt.ts
 src/lib/agents/cro/tools.ts
@@ -322,6 +354,7 @@ src/lib/db/queries/applications.ts
 src/lib/db/queries/communications-rest.ts
 src/lib/db/queries/companies-rest.ts
 src/lib/db/queries/contacts-rest.ts
+src/lib/db/queries/documents-rest.ts
 src/lib/db/queries/embeddings-rest.ts
 src/lib/gmail/oauth.ts
 src/lib/gmail/parser.ts
@@ -331,10 +364,13 @@ src/lib/supabase/client.ts
 src/lib/supabase/middleware.ts
 src/lib/supabase/server.ts
 src/lib/utils.ts
+src/lib/utils/google-drive-export.ts
 src/lib/utils/lex-order.ts
 src/lib/validators/application.ts
 src/middleware.ts
+src/styles/floor-3.css
 src/styles/floor-4.css
+src/styles/floor-5.css
 src/styles/floor-6.css
 src/styles/floor-7.css
 src/types/agents.ts
@@ -397,13 +433,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 456 | 5,319 |
+| `BOOTSTRAP-PROMPT.md` | 498 | 5,821 |
 | `PROJECT-CONTEXT.md` | 350 | 7,939 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
-| `CLAUDE.md` | 200 | 3,725 |
-| **Total** | **1367** | **23,895** |
+| `CLAUDE.md` | 216 | 4,095 |
+| **Total** | **1425** | **24,767** |
 
-> ⚠️ Reading all recommended files consumes ~23,895 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,767 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
