@@ -86,6 +86,42 @@
 }
 
 /* =============================================
+   LIGHT MODE
+   Applied when data-theme="light" on <html>.
+   Inverts the dark palette for daytime readability.
+   ============================================= */
+
+[data-theme="light"] {
+  /* ── Core Palette ── */
+  --gold: #9A7B2E;
+  --gold-dim: #7A6224;
+  --gold-bright: #B8932E;
+  --tower-dark: #F5F3EE;
+  --tower-darker: #EBE8E0;
+  --tower-darkest: #FAFAF7;
+  --tower-surface: #EFEDE6;
+  --tower-surface-2: #E8E5DD;
+
+  /* ── Glass Surfaces ── */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-hover: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: 16px;
+
+  /* ── Text ── */
+  --text-primary: #1A1A2E;
+  --text-secondary: #4A4A5A;
+  --text-muted: #8A8A96;
+  --text-gold: #9A7B2E;
+
+  /* ── Semantic ── */
+  --success: #1A8A4A;
+  --warning: #B8860B;
+  --error: #DC3545;
+  --info: #2D6FBA;
+}
+
+/* =============================================
    DAY/NIGHT TIME STATES
    Set by JavaScript — these define the target values
    ============================================= */
@@ -208,11 +244,15 @@ body {
      still fills the viewport without this. */
 }
 
-/* BUG-007 fix: native cursor, pointer on all interactive elements */
+/* Custom cursor — luxury gold aesthetic that matches The Tower brand */
+* {
+  cursor: url('/cursors/default.svg') 5 2, auto;
+}
+
 a, button, [role="button"], input, textarea, select,
 label[for], summary, [tabindex]:not([tabindex="-1"]),
 [data-cursor="interactive"] {
-  cursor: pointer;
+  cursor: url('/cursors/pointer.svg') 10 2, pointer;
 }
 
 ::selection {
@@ -306,22 +346,22 @@ label[for], summary, [tabindex]:not([tabindex="-1"]),
   }
 
   .glass-panel {
-    background: rgba(10, 12, 25, 0.78);
+    background: rgba(14, 16, 32, 0.9);
     backdrop-filter: blur(20px) saturate(1.3);
     -webkit-backdrop-filter: blur(20px) saturate(1.3);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius-xl);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
   }
 
   .glass-panel-gold {
-    background: rgba(10, 12, 25, 0.82);
+    background: rgba(14, 16, 32, 0.92);
     backdrop-filter: blur(24px) saturate(1.4);
     -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    border: 1px solid rgba(201, 168, 76, 0.15);
-    border-top: 2px solid rgba(201, 168, 76, 0.4);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-top: 2px solid rgba(201, 168, 76, 0.5);
     border-radius: var(--radius-xl);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 1px rgba(255, 255, 255, 0.12);
   }
 
   /* ── Noise texture overlay ──

@@ -16,7 +16,7 @@ import gsap from "gsap";
  * GSAP is enhancement-only. A CSS animation provides the initial fade-in fallback
  * so content is always visible even if GSAP is slow to initialize.
  */
-export function LobbyClient() {
+export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isReturningUser, setIsReturningUser] = useState(false);
@@ -278,6 +278,7 @@ export function LobbyClient() {
             isLoading={isLoading}
             error={error}
             isReturningUser={isReturningUser}
+            isAuthenticated={isAuthenticated}
             onSignIn={handleSignIn}
           />
 
@@ -518,10 +519,11 @@ function ParticleField(): JSX.Element {
  * SignInCard — premium glass card with frosted noise texture, 3D tilt (max 3deg),
  * gold top border, and cursor-following hover glow.
  */
-function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
+function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSignIn }: {
   isLoading: boolean;
   error: string | null;
   isReturningUser: boolean;
+  isAuthenticated: boolean;
   onSignIn: () => void;
 }): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
@@ -598,7 +600,7 @@ function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
               textShadow: "0 2px 12px rgba(0,0,0,0.6)",
             }}
           >
-            Enter The Tower
+            {isAuthenticated ? "Welcome Back" : "Enter The Tower"}
           </h2>
           <p
             className="text-sm"
@@ -607,50 +609,86 @@ function SignInCard({ isLoading, error, isReturningUser, onSignIn }: {
               color: "var(--text-secondary)",
             }}
           >
-            {isReturningUser ? "Resume your session" : "Authenticate to proceed"}
+            {isAuthenticated ? "Take the elevator to any floor" : isReturningUser ? "Resume your session" : "Authenticate to proceed"}
           </p>
         </div>
 
-        {/* Google sign-in button */}
-        <button
-          onClick={onSignIn}
-          disabled={isLoading}
-          aria-label={isLoading ? "Authenticating..." : "Continue with Google"}
-          className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3.5 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            background: "linear-gradient(135deg, #C9A84C 0%, #E8C45A 50%, #C9A84C 100%)",
-            backgroundSize: "200% auto",
-            color: "#0A0A14",
-            fontSize: "15px",
-            fontFamily: "'Satoshi', sans-serif",
-            fontWeight: 600,
-            boxShadow: "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)",
-            letterSpacing: "0.01em",
-          }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget as HTMLElement;
-            el.style.boxShadow = "0 8px 36px rgba(201, 168, 76, 0.55), inset 0 1px 0 rgba(255,255,255,0.25)";
-            el.style.transform = "translateY(-2px)";
-            el.style.backgroundPosition = "right center";
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget as HTMLElement;
-            el.style.boxShadow = "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)";
-            el.style.transform = "translateY(0)";
-            el.style.backgroundPosition = "left center";
-          }}
-        >
-          {isLoading ? (
-            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", letterSpacing: "0.15em" }}>
-              AUTHENTICATING...
-            </span>
-          ) : (
-            <>
-              <GoogleIcon />
-              <span>Continue with Google</span>
-            </>
-          )}
-        </button>
+        {isAuthenticated ? (
+          /* Authenticated: show elevator button to go back up */
+          <a
+            href="/penthouse"
+            className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3.5 font-medium transition-all duration-300"
+            style={{
+              background: "linear-gradient(135deg, #C9A84C 0%, #E8C45A 50%, #C9A84C 100%)",
+              backgroundSize: "200% auto",
+              color: "#0A0A14",
+              fontSize: "15px",
+              fontFamily: "'Satoshi', sans-serif",
+              fontWeight: 600,
+              boxShadow: "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)",
+              letterSpacing: "0.01em",
+              textDecoration: "none",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.boxShadow = "0 8px 36px rgba(201, 168, 76, 0.55), inset 0 1px 0 rgba(255,255,255,0.25)";
+              el.style.transform = "translateY(-2px)";
+              el.style.backgroundPosition = "right center";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.boxShadow = "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)";
+              el.style.transform = "translateY(0)";
+              el.style.backgroundPosition = "left center";
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M9 14V4M9 4L5 8M9 4L13 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>Return to Penthouse</span>
+          </a>
+        ) : (
+          /* Unauthenticated: Google sign-in button */
+          <button
+            onClick={onSignIn}
+            disabled={isLoading}
+            aria-label={isLoading ? "Authenticating..." : "Continue with Google"}
+            className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3.5 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: "linear-gradient(135deg, #C9A84C 0%, #E8C45A 50%, #C9A84C 100%)",
+              backgroundSize: "200% auto",
+              color: "#0A0A14",
+              fontSize: "15px",
+              fontFamily: "'Satoshi', sans-serif",
+              fontWeight: 600,
+              boxShadow: "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)",
+              letterSpacing: "0.01em",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.boxShadow = "0 8px 36px rgba(201, 168, 76, 0.55), inset 0 1px 0 rgba(255,255,255,0.25)";
+              el.style.transform = "translateY(-2px)";
+              el.style.backgroundPosition = "right center";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.boxShadow = "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)";
+              el.style.transform = "translateY(0)";
+              el.style.backgroundPosition = "left center";
+            }}
+          >
+            {isLoading ? (
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", letterSpacing: "0.15em" }}>
+                AUTHENTICATING...
+              </span>
+            ) : (
+              <>
+                <GoogleIcon />
+                <span>Continue with Google</span>
+              </>
+            )}
+          </button>
+        )}
 
         {error && (
           <p

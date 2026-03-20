@@ -268,14 +268,44 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 
 ---
 
+## SPRINT 3.5 — User-Reported Issues (Session 16)
+
+### BUG-015: Penthouse content disappears on first visit `🟢 FIXED`
+**Severity:** Critical  
+**Behavior:** Dashboard loads then unloads into blank screen (only skyline visible). Works on reload.  
+**Root cause:** `EntranceSequence` had a race condition — initial render showed children (flash), then `setShowEntrance(true)` re-rendered with `opacity:0`, but GSAP guard `hasPlayed.current` prevented animation from running on the re-triggered effect.  
+**Fixed:** Session 16 — Rewrote EntranceSequence with three-state pattern: `null` (determining) → `true` (animate) / `false` (skip). Content starts at `opacity:0` during determination phase, preventing flash. GSAP cleanup sets `clearProps:"all"` on complete.
+
+### BUG-016: Lobby redirects authenticated users to penthouse `🟢 FIXED`
+**Severity:** High  
+**Behavior:** Clicking Lobby in elevator sends user to /lobby, which immediately redirects back to /penthouse.  
+**Root cause:** `lobby/page.tsx` had `if (user) { redirect("/penthouse"); }`.  
+**Fixed:** Session 16 — Removed redirect. Lobby now passes `isAuthenticated` prop to LobbyClient. Authenticated users see "Welcome Back" with "Return to Penthouse" button instead of Google sign-in.
+
+### BUG-017: Widget visibility — foreground matches background `🟢 FIXED`
+**Severity:** High  
+**Behavior:** Dashboard stat cards and quick actions are nearly invisible against the dark skyline.  
+**Root cause:** GlassPanel bg was `rgba(10, 12, 25, 0.82)` — too transparent against identical dark skyline. Borders at 7% white were invisible.  
+**Fixed:** Session 16 — Increased GlassPanel bg to `rgba(14, 16, 32, 0.92)`, borders to 12% white, strengthened gold top borders. QuickActionCard bg increased to 0.85 opacity (from 0.65), base opacity raised to 0.85 (from 0.65). Updated all glass CSS utility classes.
+
+### BUG-018: No light mode `🟢 FIXED`
+**Severity:** Medium  
+**Behavior:** Settings says "light mode coming in future update" but no actual implementation.  
+**Fixed:** Session 16 — Added `[data-theme="light"]` CSS vars (inverted palette: warm cream backgrounds, dark text, muted gold accents). Wrapped app in `ThemeProvider` from next-themes (`attribute="data-theme"`, default dark). Settings toggle now functional with moon/sun icons.
+
+### BUG-019: No custom cursor `🟢 FIXED`
+**Severity:** Low  
+**Behavior:** Default browser cursor doesn't match luxury aesthetic.  
+**Fixed:** Session 16 — Added SVG cursors: dark body with gold outline (default), solid gold pointer (interactive). CSS `cursor: url()` with native fallback. Zero JS overhead.
+
 ## STATISTICS
 
 | Metric | Count |
 |--------|-------|
-| Total reported | 14 |
+| Total reported | 19 |
 | 🔴 Open | 0 |
 | 🟡 In Progress | 0 |
-| 🟢 Fixed | 13 |
+| 🟢 Fixed | 18 |
 | ⚪ Specced (Phase 2) | 1 |
 
-_Last updated: Session 15, March 20, 2026_
+_Last updated: Session 16, March 20, 2026_

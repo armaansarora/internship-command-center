@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:18 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:33 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `7d39269`)
+- **Branch:** `main` (commit `e8bea9f`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 9,749 across 50 source files
+- **Total LOC:** 9,865 across 50 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-7d39269 Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014
+e8bea9f session-end: 2 files changed, 40 insertions(+), 22 deletions(-)
 ```
 
 ## Acceptance Criteria — Progress
@@ -179,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `7d39269`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `e8bea9f`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -189,16 +189,16 @@ See docs/MASTER-PLAN.md for the next phase.
 
 (no .env.local found)
 
-## Source Tree (50 files, 9,749 LOC)
+## Source Tree (50 files, 9,865 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/components/world` | 2131 |
 | `src/app/(authenticated)/penthouse` | 1412 |
-| `src/app/lobby` | 903 |
-| `src/app` | 729 |
+| `src/app/lobby` | 940 |
+| `src/app` | 777 |
 | `src/lib/contracts` | 696 |
-| `src/app/(authenticated)/settings` | 517 |
+| `src/app/(authenticated)/settings` | 525 |
 | `src/db` | 442 |
 | `src/lib/contracts/departments` | 328 |
 | `src/components/ui` | 294 |
@@ -209,8 +209,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/observatory` | 247 |
 | `src/app/(authenticated)/war-room` | 236 |
 | `src/app/(authenticated)/writing-room` | 180 |
+| `src/components/transitions` | 132 |
 | `src/lib/supabase` | 121 |
-| `src/components/transitions` | 109 |
 | `src/app/(authenticated)` | 86 |
 | `src/lib` | 80 |
 | `src/types` | 74 |
@@ -329,13 +329,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 388 | 4,269 |
+| `BOOTSTRAP-PROMPT.md` | 388 | 4,375 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1289** | **20,940** |
+| **Total** | **1289** | **21,046** |
 
-> ⚠️ Reading all recommended files consumes ~20,940 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~21,046 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

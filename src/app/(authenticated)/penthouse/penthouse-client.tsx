@@ -691,7 +691,7 @@ function GlassPanel({
     if (!el) return;
     el.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg) scale(1)";
     el.style.boxShadow =
-      "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05)";
+      "0 20px 60px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08)";
     setHovered(false);
   }, []);
 
@@ -700,15 +700,15 @@ function GlassPanel({
       ref={ref}
       className={`rounded-xl ${className}`}
       style={{
-        background: "rgba(10, 12, 25, 0.82)",
+        background: "rgba(14, 16, 32, 0.92)",
         backdropFilter: "blur(24px) saturate(1.5)",
         WebkitBackdropFilter: "blur(24px) saturate(1.5)",
         border: hovered
-          ? `1px solid rgba(201,168,76,0.2)`
-          : `1px solid rgba(255, 255, 255, 0.07)`,
-        borderTop: `2px solid ${accentColor ?? "rgba(201, 168, 76, 0.45)"}`,
+          ? `1px solid rgba(201,168,76,0.3)`
+          : `1px solid rgba(255, 255, 255, 0.12)`,
+        borderTop: `2px solid ${accentColor ?? "rgba(201, 168, 76, 0.55)"}`,
         boxShadow:
-          "0 20px 60px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+          "0 20px 60px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
         // Noise texture overlay via pseudo-element simulation with background-image
         backgroundImage: NOISE_SVG,
         backgroundBlendMode: "overlay",
@@ -1072,20 +1072,20 @@ function QuickActionCard({
       className="text-left cursor-not-allowed rounded-xl p-5 relative overflow-hidden"
       style={{
         background: hovered
-          ? `rgba(10, 12, 25, 0.88)`
-          : "rgba(10, 12, 25, 0.65)",
+          ? `rgba(14, 16, 32, 0.94)`
+          : "rgba(14, 16, 32, 0.85)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
         border: hovered
           ? `1px solid ${action.borderColor}`
-          : "1px solid rgba(255, 255, 255, 0.07)",
-        borderTop: `2px solid ${hovered ? action.accentColor : `${action.accentColor}66`}`,
+          : "1px solid rgba(255, 255, 255, 0.12)",
+        borderTop: `2px solid ${hovered ? action.accentColor : `${action.accentColor}88`}`,
         boxShadow: hovered
           ? `0 8px 32px rgba(0,0,0,0.4), inset 0 0 24px ${action.glowColor}`
           : "0 4px 20px rgba(0,0,0,0.3)",
         backgroundImage: NOISE_SVG,
         backgroundBlendMode: "overlay",
-        opacity: hovered ? 0.95 : 0.65,
+        opacity: hovered ? 1 : 0.85,
         transform: hovered ? "translateY(-3px) scale(1.01)" : "translateY(0) scale(1)",
         transition: "all 0.25s ease-out",
         willChange: "transform, opacity, box-shadow",
@@ -1100,7 +1100,7 @@ function QuickActionCard({
         aria-hidden="true"
         style={{
           color: action.accentColor,
-          opacity: hovered ? 0.9 : 0.55,
+          opacity: hovered ? 1 : 0.75,
           transition: "opacity 0.25s ease",
         }}
       >

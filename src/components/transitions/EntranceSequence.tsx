@@ -13,46 +13,55 @@ import gsap from "gsap";
  *
  * Duration: ~2s total. Skipped on return visits (sessionStorage flag).
  * Respects prefers-reduced-motion.
+ *
+ * BUG FIX: Previous version had a race condition where content flashed
+ * visible then went to opacity:0. Now we start with opacity:0 and
+ * always animate to visible, or skip animation entirely.
  */
 export function EntranceSequence({ children }: { children: React.ReactNode }): JSX.Element {
-  const [showEntrance, setShowEntrance] = useState(false);
-  const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const [shouldAnimate, setShouldAnimate] = useState<boolean | null>(null);
   const hasPlayed = useRef(false);
 
+  // Determine on mount whether to animate
   useEffect(() => {
-    // Skip if already played this session
     if (typeof window === "undefined") return;
 
     const played = sessionStorage.getItem("tower-entrance-played");
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (played || prefersReduced) {
-      setShowEntrance(false);
-      return;
+      setShouldAnimate(false);
+    } else {
+      setShouldAnimate(true);
     }
-
-    setShowEntrance(true);
   }, []);
 
+  // Run the GSAP animation
   useEffect(() => {
-    if (!showEntrance || hasPlayed.current) return;
+    if (shouldAnimate !== true || hasPlayed.current) return;
     hasPlayed.current = true;
 
-    const overlay = overlayRef.current;
     const content = contentRef.current;
-    if (!overlay || !content) return;
+    const overlay = overlayRef.current;
+    if (!content || !overlay) return;
 
     const tl = gsap.timeline({
       onComplete: () => {
-        setShowEntrance(false);
         sessionStorage.setItem("tower-entrance-played", "1");
+        // Clean up inline styles so CSS takes over
+        gsap.set(content, { clearProps: "all" });
+        gsap.set(overlay, { clearProps: "all" });
+        if (overlay.parentElement) {
+          overlay.style.display = "none";
+        }
       },
     });
 
-    // Initial state
-    gsap.set(overlay, { opacity: 1 });
+    // Initial state: content hidden, overlay opaque
     gsap.set(content, { opacity: 0, y: 30, filter: "blur(8px)" });
+    gsap.set(overlay, { opacity: 1, display: "block" });
 
     tl
       // Phase 1: Hold on black briefly (0.3s)
@@ -72,23 +81,37 @@ export function EntranceSequence({ children }: { children: React.ReactNode }): J
         filter: "blur(0px)",
         duration: 0.8,
         ease: "power3.out",
-      }, "-=0.4") // Overlap with overlay fade
+      }, "-=0.4")
 
-      // Phase 4: Brief pause to let it breathe
+      // Phase 4: Brief pause
       .to({}, { duration: 0.2 });
 
     return () => {
       tl.kill();
+      // If timeline killed early, make content visible
+      if (content) {
+        gsap.set(content, { clearProps: "all" });
+      }
     };
-  }, [showEntrance]);
+  }, [shouldAnimate]);
 
-  if (!showEntrance) {
+  // Still determining — render hidden to avoid flash
+  if (shouldAnimate === null) {
+    return (
+      <div style={{ opacity: 0 }}>
+        {children}
+      </div>
+    );
+  }
+
+  // No animation needed — render immediately
+  if (shouldAnimate === false) {
     return <>{children}</>;
   }
 
+  // Animate: content starts hidden, overlay starts opaque
   return (
     <>
-      {/* Content with entrance animation */}
       <div ref={contentRef} style={{ opacity: 0 }}>
         {children}
       </div>
