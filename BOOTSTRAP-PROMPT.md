@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 4:44 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:46 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -18,11 +18,11 @@
 
 ## Status
 
-- **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `dd71ec4`)
+- **Current state:** Phase 0 IN PROGRESS
+- **Branch:** `main` (commit `1ce45d0`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 9,052 across 47 source files
-- **Build:** Clean (zero TS errors)
+- **Build:** FAILING — 0 TS errors
 
 
 ## Session State (where we left off)
@@ -31,19 +31,33 @@
 - **Deliverable:** unknown
 - **Status:** in_progress
 - **Last file touched:** `unknown`
-- **Notes:** No feature commits this session (tooling/infra only).
-- **State captured:** 2026-03-19T20:44:29.872Z
-
-## Changes Since Last Bootstrap
-
-```
-dd71ec4 session-end: session 11: Phase 0 quality uplift — lobby particles, penthouse counters, skyline water reflections, animated floor stubs, elevator mobile bar
-```
+- **Notes:** This session: 4 commits. Work: docs: upgrade BUG-TRACKER.md to living changelog system; docs: add BUG-TRACKER.md — 14 issues from 5-min user walkthrough; docs: add CHAIN-OF-COMMAND.md — AI hierarchy spec (1,550+ lines); docs: Phase 1 War Room Blueprint — 1,445-line implementation guide + audit
+- **State captured:** 2026-03-20T03:46:31.153Z
 
 ## Acceptance Criteria — Progress
 
-**Progress: 1 verified / 0 likely / 5 unverified** (of 6)
+**Progress: 7 verified / 1 likely / 39 unverified** (of 47)
 
+✅ User can sign in with Google and land in The Penthouse
+    └─ Auth callback + Penthouse found
+✅ RLS prevents any user from seeing another user's data (test with 2 accounts)
+    └─ RLS policies in schema.ts
+✅ Elevator navigation works between at least 2 floors (Lobby ↔ Penthouse) with full GSAP animation
+    └─ Elevator.tsx found
+✅ Day/night cycle visually changes the Penthouse based on actual AST time
+    └─ DayNightProvider found
+⬜ Skyline has visible parallax on mouse movement
+    └─ No parallax hook
+✅ Custom cursor renders on desktop, falls back to native on mobile
+    └─ CustomCursor.tsx found
+⬜ Dashboard shows real data from Supabase (applications count, pipeline status)
+    └─ Not yet checked automatically
+🟡 Contracts CRUD works through the UI
+    └─ Contracts directory exists (no UI CRUD yet)
+⬜ Lighthouse performance: >80 on all metrics
+    └─ Lighthouse audit not automated yet
+✅ Deployed to Vercel, accessible at production URL
+    └─ Deployed to Vercel (see Production URL)
 ⬜ User can create an application and see it in the pipeline
     └─ No application CRUD found in src/
 ⬜ Drag-and-drop changes application status
@@ -56,40 +70,73 @@ dd71ec4 session-end: session 11: Phase 0 quality uplift — lobby particles, pen
     └─ No conversation system found
 ✅ All data is RLS-scoped — multi-tenant safe
     └─ RLS policies in schema.ts
+⬜ User can connect their Gmail account via OAuth
+    └─ Not yet checked automatically
+⬜ System parses new emails and classifies them correctly (>90% accuracy on standard patterns)
+    └─ Not yet checked automatically
+⬜ Calendar events appear in the COO's room
+    └─ Not yet checked automatically
+⬜ COO proactively alerts about overdue follow-ups
+    └─ Not yet checked automatically
+⬜ Follow-up emails can be drafted and sent via Resend
+    └─ Not yet checked automatically
+⬜ Background sync runs on schedule without user intervention
+    └─ Not yet checked automatically
+⬜ Token refresh works silently — user never has to re-authenticate unless they revoke
+    └─ Not yet checked automatically
+⬜ User can add contacts and link them to applications
+    └─ Not yet checked automatically
+⬜ CNO alerts on cold contacts (no interaction in 2+ weeks)
+    └─ Not yet checked automatically
+⬜ CIO can research a company and produce a briefing with real data
+    └─ Not yet checked automatically
+⬜ pgvector similarity search returns relevant companies (test: "companies like Blackstone")
+    └─ Not yet checked automatically
+⬜ Contact warmth is visualized in the room environment
+    └─ Not yet checked automatically
+⬜ User can generate a cover letter tailored to a specific application
+    └─ Not yet checked automatically
+⬜ Cover letter quality is professional (test against Blackstone, CBRE, JLL applications)
+    └─ Not yet checked automatically
+⬜ Interview prep packet includes company-specific research + role-specific questions
+    └─ Not yet checked automatically
+⬜ Documents export to Google Drive successfully
+    └─ Not yet checked automatically
+⬜ CMO and CPO characters respond in distinct personalities
+    └─ Not yet checked automatically
+⬜ Analytics show accurate, real-time data for the logged-in user
+    └─ Not yet checked automatically
+⬜ "Ring the bell" triggers all agents and produces a compiled briefing within 60 seconds
+    └─ Not yet checked automatically
+⬜ Daily briefing runs automatically at configured time
+    └─ Not yet checked automatically
+⬜ CEO character delivers briefing as a conversation scene
+    └─ Not yet checked automatically
+⬜ Characters remember previous interactions across sessions
+    └─ Not yet checked automatically
+⬜ Notifications appear in-world, not as generic toasts
+    └─ Not yet checked automatically
+⬜ User can subscribe to Pro plan via Stripe Checkout
+    └─ Not yet checked automatically
+⬜ Free tier correctly limits functionality (10 apps, no agents)
+    └─ Not yet checked automatically
+⬜ Building progression visually reflects user's actual milestones
+    └─ Not yet checked automatically
+⬜ Lighthouse performance: >90 on all metrics
+    └─ Lighthouse audit not automated yet
+⬜ App is usable on mobile (iPhone SE as baseline)
+    └─ Not yet checked automatically
+⬜ Sound design works when enabled, completely silent when disabled
+    └─ Not yet checked automatically
+⬜ Sentry captures errors in production
+    └─ Not yet checked automatically
+⬜ Rate limiting prevents >100 API calls/minute per user
+    └─ Not yet checked automatically
 
 
 ## TODO — Next Phase
 
-## Phase 1: The War Room — Applications + CRO Agent
-
-**Goal:** The first functional floor beyond the dashboard. Users can manage applications with a full CRUD interface, and the CRO agent character provides pipeline intelligence.
-
-**Complexity:** L (1-2 weeks)
-
-### Deliverables
-
-| # | Deliverable | Complexity | Description |
-|---|---|---|---|
-| 1.1 | Floor 7 Environment | M | The War Room atmosphere: darker tones, tactical feel, data-dense. Own lighting scheme (cooler, more blue). Window view shows city from floor 7 height. |
-| 1.2 | Application CRUD | M | Create, read, update, delete applications. Status pipeline: Saved → Applied → Phone Screen → Interview → Offer → Rejected. Bulk actions. Search/filter. All RLS-scoped. |
-| 1.3 | Pipeline Visualization | M | Visual pipeline (Kanban or funnel) rendered as part of the room's environment — data on the "war table," not a generic chart. Drag-and-drop status changes. |
-| 1.4 | CRO Agent (Backend) | L | Port CRO agent from old repo (~500 LOC tools + agent logic). Adapt to Supabase queries. Tools: `queryApplications`, `updateStatus`, `suggestFollowUp`, `analyzeConversionRates`. Powered by Vercel AI SDK v6 `ToolLoopAgent`. |
-| 1.5 | CRO Character (Frontend) | M | 2D illustrated character in the room (Option A). Idle animation at whiteboard. Approach interaction: click character → conversation panel opens as face-to-face dialogue. CRO personality: aggressive, numbers-driven. Pipeline data visible on the whiteboard behind them. |
-| 1.6 | Character Interaction System | L | Reusable system for all future characters. Components: character sprite with parallax depth, approach detection, conversation panel (styled as dialogue, not chatbot), AI message streaming, character personality injection into system prompt. |
-
-### Acceptance Criteria
-- [ ] User can create an application and see it in the pipeline
-- [ ] Drag-and-drop changes application status
-- [ ] CRO agent can answer "How's my pipeline looking?" with real data
-- [ ] CRO character has visible idle animation and talking state
-- [ ] Conversation feels in-character (aggressive, numbers-driven tone)
-- [ ] All data is RLS-scoped — multi-tenant safe
-
-### Dependencies
-- Phase 0 complete (auth, elevator, world shell)
-- Character illustration assets (2D sprites for CRO — idle, talking, gesturing)
-
----
+See docs/MASTER-PLAN.md for the next phase.
 
 ## User Instructions (CRITICAL — preserve verbatim)
 
@@ -126,7 +173,7 @@ dd71ec4 session-end: session 11: Phase 0 quality uplift — lobby particles, pen
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `dd71ec4`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `1ce45d0`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -262,21 +309,34 @@ zod: ^4.3.6
 
 ### Stale Dependencies (major version behind)
 
-- **@types/node**: 20.19.37 → 25.5.0 (major)
-- **eslint**: 9.39.4 → 10.0.3 (major)
-- **tailwindcss**: 3.4.19 → 4.2.2 (major)
+- **@ai-sdk/anthropic**: undefined → 3.0.58 (major)
+- **@supabase/supabase-js**: undefined → 2.99.3 (major)
+- **@tsparticles/engine**: undefined → 3.9.1 (major)
+- **@tsparticles/react**: undefined → 3.0.0 (major)
+- **@tsparticles/slim**: undefined → 3.9.1 (major)
+- **ai**: undefined → 6.0.116 (major)
+- **clsx**: undefined → 2.1.1 (major)
+- **framer-motion**: undefined → 12.38.0 (major)
+- **gsap**: undefined → 3.14.2 (major)
+- **lenis**: undefined → 1.3.19 (major)
+- **next**: undefined → 16.2.0 (major)
+- **postgres**: undefined → 3.4.8 (major)
+- **react**: undefined → 19.2.4 (major)
+- **react-dom**: undefined → 19.2.4 (major)
+- **tailwind-merge**: undefined → 3.5.0 (major)
+- **zod**: undefined → 4.3.6 (major)
 
 ## Context Budget
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 329 | 3,795 |
-| `PROJECT-CONTEXT.md` | 396 | 6,713 |
+| `BOOTSTRAP-PROMPT.md` | 329 | 3,716 |
+| `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1225** | **19,591** |
+| **Total** | **1230** | **20,387** |
 
-> ⚠️ Reading all recommended files consumes ~19,591 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,387 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
