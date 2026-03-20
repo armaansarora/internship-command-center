@@ -34,16 +34,6 @@ export type TimeState =
   | "dusk"       // 7-9pm
   | "night";     // 9pm-5am
 
-/** Custom cursor states */
-export type CursorState =
-  | "default"       // Brushed gold line
-  | "interactive"   // Glow ring
-  | "character"     // Speech bubble
-  | "data"          // Magnify lens
-  | "dragging"      // Grab
-  | "loading"       // Elevator indicator
-  | "idle";         // Dimmed
-
 /** Elevator transition state */
 export type ElevatorState =
   | "idle"

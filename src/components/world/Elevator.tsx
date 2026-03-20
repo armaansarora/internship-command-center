@@ -386,13 +386,14 @@ export function Elevator(): JSX.Element {
               if (!floor) return null;
               const isActive = floorId === activeFloor;
               const isLobby = floorId === "L";
+              const isLocked = floor.phase > 0;
 
               return (
                 <div key={floorId} className="elevator-btn-wrap">
                   <button
                     onClick={() => navigateToFloor(floorId)}
                     disabled={isTransitioning || isActive}
-                    aria-label={`${floor.name} — ${floor.label}`}
+                    aria-label={`${floor.name} — ${floor.label}${isLocked ? " (Under Construction)" : ""}`}
                     aria-current={isActive ? "page" : undefined}
                     className={[
                       "relative w-9 h-9 rounded-full flex items-center justify-center",
@@ -413,7 +414,12 @@ export function Elevator(): JSX.Element {
                         : isLobby
                         ? {
                             color: "var(--text-secondary)",
-                            border: "1px dashed rgba(201, 168, 76, 0.2)",
+                            border: "1px solid rgba(201, 168, 76, 0.25)",
+                          }
+                        : isLocked
+                        ? {
+                            color: "var(--text-muted)",
+                            opacity: 0.55,
                           }
                         : {
                             color: "var(--text-secondary)",
@@ -425,20 +431,33 @@ export function Elevator(): JSX.Element {
                         el.style.border = "1px solid rgba(201, 168, 76, 0.3)";
                         el.style.color = "var(--text-primary)";
                         el.style.background = "rgba(201, 168, 76, 0.05)";
+                        el.style.opacity = "1";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive && !isTransitioning) {
                         const el = e.currentTarget as HTMLButtonElement;
                         el.style.border = isLobby
-                          ? "1px dashed rgba(201, 168, 76, 0.2)"
+                          ? "1px solid rgba(201, 168, 76, 0.25)"
                           : "";
-                        el.style.color = "var(--text-secondary)";
+                        el.style.color = isLocked ? "var(--text-muted)" : "var(--text-secondary)";
                         el.style.background = "";
+                        el.style.opacity = isLocked ? "0.55" : "";
                       }
                     }}
                   >
-                    {floorId === "PH" ? (
+                    {isLobby ? (
+                      /* BUG-002: Clear exit icon for lobby button */
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path
+                          d="M5.25 12.25H2.92C2.39 12.25 1.75 11.69 1.75 11.08V2.92C1.75 2.31 2.39 1.75 2.92 1.75H5.25M9.33 9.92L12.25 7L9.33 4.08M12.25 7H5.25"
+                          stroke="currentColor"
+                          strokeWidth="1.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : floorId === "PH" ? (
                       <span className="text-[10px] leading-none">PH</span>
                     ) : (
                       floorId
@@ -469,19 +488,19 @@ export function Elevator(): JSX.Element {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {floor.name}
+                        {isLobby ? "Exit to Lobby" : floor.name}
                       </div>
                       <div
                         style={{
                           fontFamily: "'JetBrains Mono', monospace",
                           fontSize: "9px",
-                          color: "rgba(201, 168, 76, 0.65)",
+                          color: isLocked ? "rgba(201, 168, 76, 0.4)" : "rgba(201, 168, 76, 0.65)",
                           textTransform: "uppercase",
                           letterSpacing: "0.08em",
                           marginTop: "1px",
                         }}
                       >
-                        {floor.label}
+                        {isLocked ? `Phase ${floor.phase} • Coming Soon` : floor.label}
                       </div>
                     </div>
                   </div>
@@ -642,13 +661,14 @@ export function Elevator(): JSX.Element {
                 if (!floor) return null;
                 const isActive = floorId === activeFloor;
                 const isLobby = floorId === "L";
+                const isLocked = floor.phase > 0;
 
                 return (
                   <button
                     key={floorId}
                     onClick={() => navigateToFloor(floorId)}
                     disabled={isTransitioning || isActive}
-                    aria-label={`${floor.name} — ${floor.label}`}
+                    aria-label={`${floor.name} — ${floor.label}${isLocked ? " (Under Construction)" : ""}`}
                     aria-current={isActive ? "page" : undefined}
                     className={[
                       "w-8 h-8 rounded-full flex items-center justify-center",
@@ -668,14 +688,29 @@ export function Elevator(): JSX.Element {
                         : isLobby
                         ? {
                             color: "var(--text-secondary)",
-                            border: "1px dashed rgba(201, 168, 76, 0.2)",
+                            border: "1px solid rgba(201, 168, 76, 0.25)",
+                          }
+                        : isLocked
+                        ? {
+                            color: "var(--text-muted)",
+                            opacity: 0.55,
                           }
                         : {
                             color: "var(--text-secondary)",
                           }
                     }
                   >
-                    {floorId === "PH" ? (
+                    {isLobby ? (
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path
+                          d="M5.25 12.25H2.92C2.39 12.25 1.75 11.69 1.75 11.08V2.92C1.75 2.31 2.39 1.75 2.92 1.75H5.25M9.33 9.92L12.25 7L9.33 4.08M12.25 7H5.25"
+                          stroke="currentColor"
+                          strokeWidth="1.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : floorId === "PH" ? (
                       <span className="text-[9px] leading-none">PH</span>
                     ) : (
                       floorId

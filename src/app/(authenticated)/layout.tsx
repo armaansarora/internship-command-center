@@ -4,8 +4,9 @@ import { WorldShell } from "./world-shell";
 
 /**
  * Authenticated layout — wraps all floors that require sign-in.
- * Provides the world shell: day/night cycle, custom cursor, and
- * the spatial container for floor content.
+ * Provides the world shell: day/night cycle, elevator, user menu.
+ *
+ * Passes user metadata to WorldShell for the account dropdown (BUG-005).
  */
 export default async function AuthenticatedLayout({
   children,
@@ -18,5 +19,13 @@ export default async function AuthenticatedLayout({
     redirect("/lobby");
   }
 
-  return <WorldShell>{children}</WorldShell>;
+  return (
+    <WorldShell
+      userName={user.user_metadata?.full_name ?? user.user_metadata?.name ?? null}
+      userEmail={user.email ?? ""}
+      avatarUrl={user.user_metadata?.avatar_url ?? null}
+    >
+      {children}
+    </WorldShell>
+  );
 }

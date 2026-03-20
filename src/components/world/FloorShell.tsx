@@ -124,7 +124,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
           Has a subtle breathing scale pulse via CSS animation */}
       {floor && (
         <div
-          className="fixed top-4 right-4 flex items-center gap-2 rounded-full px-4 py-1.5"
+          className="fixed top-4 right-4 md:right-28 flex items-center gap-2 rounded-full px-4 py-1.5"
           style={{
             zIndex: 20,
             background: "rgba(10, 12, 25, 0.72)",
