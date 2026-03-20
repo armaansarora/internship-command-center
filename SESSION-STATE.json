@@ -1,16 +1,16 @@
 {
-  "currentTask": "Developer tooling (session-end, bootstrap)",
-  "deliverable": "infra",
-  "status": "in_progress",
+  "currentTask": "Fix session-end push + doc automation",
+  "deliverable": "session-end-push-fix",
+  "status": "complete",
   "blockers": [],
-  "lastFileTouched": "unknown",
-  "notes": "This session: 1 commits. Work: session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)",
-  "filesChanged": [],
-  "commitCount": 1,
-  "locAdded": 700,
-  "locRemoved": 437,
-  "newDependencies": [
-    "docs:organize"
+  "lastFileTouched": "scripts/session-end.ts",
+  "notes": "Fixed session-end.ts push step: detects missing GitHub credentials (expected in Perplexity Computer sandbox), downgrades from error to info, shows deferred status in report card instead of FAIL. Also built auto-organize-docs.ts in previous turn.",
+  "filesChanged": [
+    "scripts/session-end.ts"
   ],
-  "updatedAt": "2026-03-20T05:55:53.613Z"
+  "commitCount": 0,
+  "locAdded": 0,
+  "locRemoved": 0,
+  "newDependencies": [],
+  "updatedAt": "2026-03-20T06:00:00.000Z"
 }
