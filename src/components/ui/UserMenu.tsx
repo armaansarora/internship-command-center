@@ -86,14 +86,18 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
         }}
         onMouseEnter={(e) => {
           if (!open) {
-            (e.currentTarget as HTMLButtonElement).style.border =
-              "1.5px solid rgba(201, 168, 76, 0.4)";
+            const el = e.currentTarget as HTMLButtonElement;
+            el.style.border = "1.5px solid rgba(201, 168, 76, 0.4)";
+            el.style.transform = "scale(1.08)";
+            el.style.boxShadow = "0 0 12px rgba(201, 168, 76, 0.12)";
           }
         }}
         onMouseLeave={(e) => {
           if (!open) {
-            (e.currentTarget as HTMLButtonElement).style.border =
-              "1.5px solid rgba(201, 168, 76, 0.2)";
+            const el = e.currentTarget as HTMLButtonElement;
+            el.style.border = "1.5px solid rgba(201, 168, 76, 0.2)";
+            el.style.transform = "";
+            el.style.boxShadow = "";
           }
         }}
       >

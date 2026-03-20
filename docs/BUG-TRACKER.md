@@ -107,12 +107,13 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 **Behavior:** Background responds to mouse movement, causing jarring shifts.  
 **Fixed:** Session 13 — Replaced all mouse-driven parallax with autonomous Apple TV-style drift. Two independent sine waves (periods ~25s and ~40s) create organic Ken Burns panning. Max displacement ~8% of viewport width. Building layers have depth-scaled drift via existing PARALLAX factors. `prefers-reduced-motion` shows completely static frame.
 
-### BUG-010: Lobby and Penthouse share the same background `🔴 OPEN`
+### BUG-010: Lobby and Penthouse share the same background `🟢 FIXED`
 **Severity:** High  
 **Location:** Lobby vs Penthouse  
 **Behavior:** Both pages have the same skyline/background. Lobby doesn't feel like a lobby.  
 **Expected:** Lobby should feel like walking into a luxury office building lobby — marble floors, reception desk energy, grand entrance. NOT a skyline view (that's the penthouse). Each floor needs its own visual identity.  
-**Fix:** Design distinct lobby background — think: luxury office reception. The Penthouse gets the skyline/city view. Lobby gets ground-level opulence.
+**Fix:** Design distinct lobby background — think: luxury office reception. The Penthouse gets the skyline/city view. Lobby gets ground-level opulence.  
+**Fixed:** Session 15 — Created `LobbyBackground.tsx`: CSS-only luxury reception hall with dark marble floor (reflection effect), dual pillars with gold trim, central golden chandelier with pulsing glow, vignette overlay. Replaced `ProceduralSkyline` import in lobby-client.tsx. Penthouse retains the skyline view. Each space now has distinct visual identity.
 
 ---
 
@@ -138,7 +139,7 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 - Connected services (Google, etc.)
 **Fixed:** Session 14 — Created /settings page (SettingsClient). Profile section shows name, email, Google provider badge. Appearance section (theme). Account section with export, notifications, connected services (all "Coming Soon"), and sign out. Accessible via UserMenu dropdown from every authenticated page.
 
-### BUG-013: No sound design `🔴 OPEN`
+### BUG-013: No sound design `⚪ SPECCED — Phase 2`
 **Severity:** Medium  
 **Location:** Entire app  
 **Behavior:** Site is completely silent. No ambient sound, no interaction sounds.  
@@ -147,9 +148,27 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 - Click/tap sounds on interactions
 - Transition sounds (elevator, floor change)
 - Muted by default, sound toggle in settings
-**Fix:** Phase 2+ item, but note it. Use Web Audio API or Howler.js. Always default to muted.
+**Fix:** Phase 2+ item. Use Web Audio API or Howler.js. Always default to muted.  
+**Sound Design Spec (Phase 2 Implementation Plan):**
+1. **Library:** Howler.js (lightweight, cross-browser, sprite support) or Web Audio API for ambient loops.
+2. **Sound Categories:**
+   - **Ambient loops** — One per floor aesthetic. Lobby: soft corporate hum + distant city. Penthouse: muted jazz undertone. War Room: low-frequency radar pulse. Briefing Room: keyboard clatter hum. Each ~30s seamless loop, -20dB baseline.
+   - **UI interactions** — Glass tap (button click), soft chime (navigation), whoosh (elevator transition), subtle click (toggle/checkbox). Keep under 100ms, normalize to -12dB.
+   - **Transitions** — Elevator: mechanical hum + ding on arrival. Floor change: brief whoosh crossfade. Page mount: soft fade-in swoop.
+3. **Controls:**
+   - Master mute toggle in Settings (persist to localStorage). Default: muted.
+   - Volume slider (0–100%) in Settings → Appearance.
+   - Per-category toggles: Ambient / UI / Transitions.
+   - Respect `prefers-reduced-motion` — disable all sounds when reduced motion is on.
+4. **Architecture:**
+   - `SoundProvider` context wrapping `(authenticated)/layout.tsx`.
+   - `useSound()` hook: `playClick()`, `playTransition(type)`, `setAmbient(floorId)`.
+   - Audio sprites compiled into a single .webm file per category for efficient loading.
+   - Lazy-load sound files on first user interaction (avoid autoplay policy issues).
+5. **File budget:** < 500KB total compressed audio assets.
+6. **Settings UI:** Add "Sound & Audio" section between Appearance and Account in settings-client.tsx.
 
-### BUG-014: Hover states on interactive elements are weak `🔴 OPEN`
+### BUG-014: Hover states on interactive elements are weak `🟢 FIXED`
 **Severity:** Medium  
 **Location:** Global — buttons, cards, clickable elements  
 **Behavior:** Hover animations exist but are too subtle. Hard to tell what's interactive.  
@@ -159,7 +178,8 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 - Cards: subtle lift (translateY -2px + shadow increase)
 - Buttons: clear color/brightness shift
 - Transitions: 150-200ms ease-out (not too slow, not instant)
-**Fix:** Audit every interactive element. Add `cursor-pointer` class globally to clickable things. Strengthen hover transforms.
+**Fix:** Audit every interactive element. Add `cursor-pointer` class globally to clickable things. Strengthen hover transforms.  
+**Fixed:** Session 15 — Global hover utility classes added to globals.css: `.hover-lift` (translateY -2px + shadow), `.hover-glow` (brightness + scale), `.hover-scale` (1.1x), `.hover-interactive` (gold border glow). Strengthened `.glass-hover` with translateY(-1px) + box-shadow. Strengthened penthouse ActivityRow (added translateY + shadow lift). Strengthened Elevator buttons (scale 1.08 + gold glow, transition-all). Strengthened UserMenu trigger (scale 1.08 + glow). Strengthened Lobby DirectoryRow (added translateY). GlassPanel and QuickActionCard already had premium 3D tilt / rich hover effects. All interactive elements now have clear, consistent hover feedback.
 
 ---
 
@@ -237,6 +257,15 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 ### BUG-012: Account/settings page `🟢 FIXED`
 **Fixed:** Session 14, `742ea47` — /settings route with profile, appearance, account actions. Accessible from UserMenu.
 
+### BUG-010: Lobby background `🟢 FIXED`
+**Fixed:** Session 15 — Created `LobbyBackground.tsx` (CSS-only luxury reception hall). Dark marble floor with reflections, dual pillars with gold trim, central golden chandelier, vignette overlay. Lobby now has distinct ground-level opulence; penthouse retains skyline.
+
+### BUG-014: Hover state audit `🟢 FIXED`
+**Fixed:** Session 15 — Global CSS hover utilities (`.hover-lift`, `.hover-glow`, `.hover-scale`, `.hover-interactive`). Strengthened `.glass-hover`. Enhanced inline JS hovers on ActivityRow (+translateY, +shadow), Elevator buttons (+scale 1.08, +glow), UserMenu (+scale 1.08, +glow), DirectoryRow (+translateY). GlassPanel/QuickActionCard already premium.
+
+### BUG-013: Sound design `⚪ SPECCED — Phase 2`
+**Specced:** Session 15 — Full Phase 2 implementation plan: Howler.js, three sound categories (ambient/UI/transitions), per-floor loops, master mute default, SoundProvider context, <500KB audio budget. See open issue for full spec.
+
 ---
 
 ## STATISTICS
@@ -244,9 +273,9 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 | Metric | Count |
 |--------|-------|
 | Total reported | 14 |
-| 🔴 Open | 3 |
+| 🔴 Open | 0 |
 | 🟡 In Progress | 0 |
-| 🟢 Fixed | 11 |
-| ⚪ Won't Fix | 0 |
+| 🟢 Fixed | 13 |
+| ⚪ Specced (Phase 2) | 1 |
 
-_Last updated: Session 14, March 20, 2026_
+_Last updated: Session 15, March 20, 2026_

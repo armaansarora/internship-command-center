@@ -397,7 +397,7 @@ export function Elevator(): JSX.Element {
                     aria-current={isActive ? "page" : undefined}
                     className={[
                       "relative w-9 h-9 rounded-full flex items-center justify-center",
-                      "text-data text-xs font-medium transition-colors duration-200",
+                      "text-data text-xs font-medium transition-all duration-200",
                       "focus-visible:outline-2 focus-visible:outline-[var(--gold)] focus-visible:outline-offset-2",
                       isActive ? "elevator-active-btn" : "",
                       isLobby ? "mt-2" : "",
@@ -432,6 +432,8 @@ export function Elevator(): JSX.Element {
                         el.style.color = "var(--text-primary)";
                         el.style.background = "rgba(201, 168, 76, 0.05)";
                         el.style.opacity = "1";
+                        el.style.transform = "scale(1.08)";
+                        el.style.boxShadow = "0 0 12px rgba(201, 168, 76, 0.15)";
                       }
                     }}
                     onMouseLeave={(e) => {
@@ -443,6 +445,8 @@ export function Elevator(): JSX.Element {
                         el.style.color = isLocked ? "var(--text-muted)" : "var(--text-secondary)";
                         el.style.background = "";
                         el.style.opacity = isLocked ? "0.55" : "";
+                        el.style.transform = "";
+                        el.style.boxShadow = "";
                       }
                     }}
                   >
