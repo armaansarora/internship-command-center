@@ -56,7 +56,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-dvh font-body text-[var(--text-primary)] bg-[var(--tower-darkest)] overflow-hidden">
+      <body className="min-h-dvh font-body text-[var(--text-primary)] bg-[var(--tower-darkest)]">
         {children}
       </body>
     </html>

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:59 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:07 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `23521c4`)
+- **Branch:** `main` (commit `44a2a6c`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 8,605 across 46 source files
+- **Total LOC:** 9,467 across 49 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-23521c4 chore: delete dead CustomCursor.tsx (audit pass 1)
+44a2a6c docs: remove stale CustomCursor references (audit pass 2)
 ```
 
 ## Acceptance Criteria — Progress
@@ -179,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `23521c4`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `44a2a6c`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -189,17 +189,19 @@ See docs/MASTER-PLAN.md for the next phase.
 
 (no .env.local found)
 
-## Source Tree (46 files, 8,605 LOC)
+## Source Tree (49 files, 9,467 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 1868 |
+| `src/components/world` | 1903 |
 | `src/app/(authenticated)/penthouse` | 1411 |
 | `src/app/lobby` | 903 |
 | `src/lib/contracts` | 696 |
 | `src/app` | 680 |
+| `src/app/(authenticated)/settings` | 517 |
 | `src/db` | 442 |
 | `src/lib/contracts/departments` | 328 |
+| `src/components/ui` | 290 |
 | `src/app/(authenticated)/c-suite` | 284 |
 | `src/app/(authenticated)/briefing-room` | 269 |
 | `src/app/(authenticated)/situation-room` | 266 |
@@ -209,9 +211,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/writing-room` | 180 |
 | `src/lib/supabase` | 121 |
 | `src/components/transitions` | 109 |
-| `src/types` | 84 |
+| `src/app/(authenticated)` | 86 |
 | `src/lib` | 80 |
-| `src/app/(authenticated)` | 56 |
+| `src/types` | 74 |
 | `src/app/api/auth/callback` | 42 |
 | `src/hooks` | 22 |
 | `src` | 20 |
@@ -229,6 +231,8 @@ src/app/(authenticated)/penthouse/page.tsx
 src/app/(authenticated)/penthouse/penthouse-client.tsx
 src/app/(authenticated)/penthouse/penthouse-data.ts
 src/app/(authenticated)/rolodex-lounge/page.tsx
+src/app/(authenticated)/settings/page.tsx
+src/app/(authenticated)/settings/settings-client.tsx
 src/app/(authenticated)/situation-room/page.tsx
 src/app/(authenticated)/war-room/page.tsx
 src/app/(authenticated)/world-shell.tsx
@@ -241,6 +245,7 @@ src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
 src/components/transitions/EntranceSequence.tsx
+src/components/ui/UserMenu.tsx
 src/components/world/DayNightProvider.tsx
 src/components/world/Elevator.tsx
 src/components/world/FloorShell.tsx
@@ -273,7 +278,7 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>33 packages</summary>
+<summary>34 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
@@ -300,6 +305,7 @@ happy-dom: ^20.8.4
 husky: ^9.1.7
 lenis: ^1.3.19
 next: 16.2.0
+next-themes: ^0.4.6
 postcss: ^8.5.8
 postgres: ^3.4.8
 react: 19.2.4
@@ -322,13 +328,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 381 | 4,194 |
+| `BOOTSTRAP-PROMPT.md` | 381 | 4,191 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1282** | **20,865** |
+| **Total** | **1282** | **20,862** |
 
-> ⚠️ Reading all recommended files consumes ~20,865 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,862 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

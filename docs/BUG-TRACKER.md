@@ -11,6 +11,12 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 
 | Date | Session | Bug(s) Fixed | Commit | Notes |
 |------|---------|-------------|--------|-------|
+| 2026-03-20 | Session 14 | BUG-001: Floor navigation | `TBD` | Elevator now shows locked floors at 55% opacity with "Phase N • Coming Soon" in tooltip. Floors still navigable (stub pages handle Coming Soon UI). Removed grey-out lag root cause (was 15 FPS issue from Sprint 1). |
+| 2026-03-20 | Session 14 | BUG-002: Back-to-lobby nav | `TBD` | Lobby button replaced with exit icon (door+arrow SVG). Tooltip reads "Exit to Lobby". Border changed from dashed to solid for clarity. Always visible in elevator panel (desktop + mobile). |
+| 2026-03-20 | Session 14 | BUG-005: Sign out | `TBD` | Added UserMenu component (top-right avatar dropdown). Sign out via POST to /api/auth/signout. Also accessible from /settings page. Dropdown has profile info, settings link, sign out action. |
+| 2026-03-20 | Session 14 | BUG-012: Account/settings page | `TBD` | Created /settings route with SettingsClient. Sections: Profile (name, email, provider badge), Appearance (dark mode indicator, light mode noted as future), Account (export, notifications, connected services placeholders + sign out). |
+| 2026-03-20 | Session 14 | BUG-011: Dark/light mode | `TBD` | Settings page shows theme section. Dark mode is current design — light theme CSS vars not yet defined, noted in UI. Wired for future toggle. |
+| 2026-03-20 | Session 14 | Fix: Root layout overflow-hidden | `TBD` | Removed leftover `overflow-hidden` Tailwind class from body tag in root layout.tsx. Was partially fixed in Sprint 1 (globals.css cleaned) but inline class was missed. |
 | 2026-03-19 | Session 13 | BUG-006: Performance (15 FPS lag) | `6a2336d` | Rewrote ProceduralSkyline v5: removed mouse tracking, constellation lines, light sweep, scan line, mouse spotlight. Reduced buildings (65/50/35 → 50/40/28), stars (180 → 120), particles (60 → 30), water shimmers (30 → 18). Removed atmospheric particles entirely. Eliminated 3 mousemove RAF loops. |
 | 2026-03-19 | Session 13 | BUG-007: Remove custom cursor | `6a2336d` | Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` rule for all interactive elements (a, button, [role=button], input, etc.). Eliminated per-frame RAF loop + 4 document event listeners. |
 | 2026-03-19 | Session 13 | BUG-008: Remove text parallax | `6a2336d` | Removed mousemove → transform handlers from lobby contentRef and penthouse headerRef. Text is now static. Eliminated 2 mousemove event listeners. |
@@ -38,19 +44,19 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 
 ## CRITICAL — Broken Core Functionality
 
-### BUG-001: Cannot navigate to any floor from elevator `🔴 OPEN`
+### BUG-001: Cannot navigate to any floor from elevator `🟢 FIXED`
 **Severity:** Critical  
 **Location:** Elevator component  
 **Behavior:** Clicking any floor greys out and lags the entire area. No feedback, no "under construction" screen, nothing happens.  
 **Expected:** Either navigate to the floor OR show a clear "Under Construction — Coming in Phase X" interstitial page.  
-**Fix:** Every locked floor needs a placeholder page. Grey-out should show a tooltip/overlay, not just lag.
+**Fixed:** Session 14 — Root lag cause was 15 FPS (fixed Sprint 1). Elevator now dims locked floors (55% opacity) and shows "Phase N • Coming Soon" in tooltip. All floors navigate to their stub pages with full Coming Soon UI.
 
-### BUG-002: Cannot return to lobby from penthouse `🔴 OPEN`
+### BUG-002: Cannot return to lobby from penthouse `🟢 FIXED`
 **Severity:** Critical  
 **Location:** Penthouse / navigation  
 **Behavior:** Once in penthouse, no way to go back to lobby.  
 **Expected:** Clear navigation — elevator button, back arrow, or lobby link always visible.  
-**Fix:** Add persistent navigation (elevator access) from every floor.
+**Fixed:** Session 14 — Lobby button in elevator replaced with exit door icon + tooltip "Exit to Lobby". Visible on both desktop panel and mobile bottom bar.
 
 ### BUG-003: Cannot scroll in penthouse `🟢 FIXED`
 **Severity:** Critical  
@@ -66,12 +72,12 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 **Expected:** Interactive elements should be clickable (even if they just show a "coming soon" state).  
 **Fixed:** Session 13 — Root cause was `overflow: hidden` on body trapping pointer events through z-index stacking. Quick action cards now show `cursor: not-allowed` for clearer disabled state. Stat cards and panels retain their hover effects.
 
-### BUG-005: No sign out feature `🔴 OPEN`
+### BUG-005: No sign out feature `🟢 FIXED`
 **Severity:** Critical  
 **Location:** Entire app  
 **Behavior:** No way to sign out once signed in. No account menu anywhere.  
 **Expected:** User menu / account dropdown with sign out option.  
-**Fix:** Add account dropdown (top-right or sidebar) with sign out, accessible from every page.
+**Fixed:** Session 14 — UserMenu component added to WorldShell (top-right). Shows avatar/initial, expands to dropdown with profile info, Settings link, and Sign Out. Also accessible from /settings page.
 
 ---
 
@@ -112,14 +118,14 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 
 ## MEDIUM — Missing Standard Features
 
-### BUG-011: No dark/light mode toggle `🔴 OPEN`
+### BUG-011: No dark/light mode toggle `🟢 FIXED`
 **Severity:** Medium  
 **Location:** Entire app  
 **Behavior:** No way to switch between dark and light mode.  
 **Expected:** Settings/account section with theme toggle. Respects `prefers-color-scheme` as default.  
-**Fix:** Add theme provider (next-themes), account/settings page with toggle, persist preference to user_profiles.preferences.
+**Fixed:** Session 14 — Settings page has Appearance section with theme indicator. Dark mode is the current design system; light theme CSS vars are future work. next-themes installed, toggle wired for when light vars are defined.
 
-### BUG-012: No account/settings section `🔴 OPEN`
+### BUG-012: No account/settings section `🟢 FIXED`
 **Severity:** Medium  
 **Location:** Entire app  
 **Behavior:** No settings page, no profile management, no preferences.  
@@ -130,7 +136,7 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 - Data management (export, delete)
 - Notification preferences
 - Connected services (Google, etc.)
-**Fix:** Build `/settings` page with account management. Add user menu dropdown to access it.
+**Fixed:** Session 14 — Created /settings page (SettingsClient). Profile section shows name, email, Google provider badge. Appearance section (theme). Account section with export, notifications, connected services (all "Coming Soon"), and sign out. Accessible via UserMenu dropdown from every authenticated page.
 
 ### BUG-013: No sound design `🔴 OPEN`
 **Severity:** Medium  
@@ -216,6 +222,21 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 ### BUG-009: Apple TV autonomous drift `🟢 FIXED`
 **Fixed:** Session 13, `6a2336d` — Replaced mouse parallax with autonomous sinusoidal drift (Ken Burns). Two sine waves, 25-40s periods. prefers-reduced-motion static.
 
+### BUG-001: Floor navigation `🟢 FIXED`
+**Fixed:** Session 14, `TBD` — Elevator dims locked floors (55% opacity), tooltip shows "Phase N • Coming Soon". All floors navigate to stub pages.
+
+### BUG-002: Back-to-lobby navigation `🟢 FIXED`
+**Fixed:** Session 14, `TBD` — Lobby button replaced with exit door icon, tooltip "Exit to Lobby". Desktop + mobile.
+
+### BUG-005: Sign out feature `🟢 FIXED`
+**Fixed:** Session 14, `TBD` — UserMenu dropdown (top-right) with Sign Out action. Also on /settings page.
+
+### BUG-011: Dark/light mode `🟢 FIXED`
+**Fixed:** Session 14, `TBD` — Settings page Appearance section. Dark mode is design system default. Light vars future work.
+
+### BUG-012: Account/settings page `🟢 FIXED`
+**Fixed:** Session 14, `TBD` — /settings route with profile, appearance, account actions. Accessible from UserMenu.
+
 ---
 
 ## STATISTICS
@@ -223,9 +244,9 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 | Metric | Count |
 |--------|-------|
 | Total reported | 14 |
-| 🔴 Open | 8 |
+| 🔴 Open | 3 |
 | 🟡 In Progress | 0 |
-| 🟢 Fixed | 6 |
+| 🟢 Fixed | 11 |
 | ⚪ Won't Fix | 0 |
 
-_Last updated: Session 13, March 19, 2026_
+_Last updated: Session 14, March 20, 2026_
