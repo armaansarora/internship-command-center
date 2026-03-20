@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, type JSX } from "react";
+import { useCallback, type JSX } from "react";
+import { useTheme } from "next-themes";
 
 interface SettingsClientProps {
   userName: string | null;
@@ -29,12 +30,9 @@ export function SettingsClient({
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
-  // Theme state — read from <html> data-time attribute + localStorage
-  // For now, The Tower is dark-only by design. The toggle is wired but
-  // the actual light theme CSS vars aren't defined yet.
-  const [themeNote] = useState<string>(
-    "The Tower is designed as a dark-mode experience. Light mode will be available in a future update."
-  );
+  // Theme toggle via next-themes — switches between dark and light CSS var sets
+  const { theme, setTheme } = useTheme();
+  const isDark = theme !== "light";
 
   const handleSignOut = useCallback(() => {
     const form = document.createElement("form");
@@ -252,27 +250,37 @@ export function SettingsClient({
                   maxWidth: "360px",
                 }}
               >
-                {themeNote}
+                Switch between dark and light mode.
               </div>
             </div>
-            {/* Dark mode indicator */}
-            <div
-              className="flex items-center gap-2 rounded-full px-3 py-1.5 shrink-0"
+            {/* Theme toggle button */}
+            <button
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              className="flex items-center gap-2 rounded-full px-3 py-1.5 shrink-0 transition-all duration-200"
               style={{
-                background: "rgba(201, 168, 76, 0.08)",
-                border: "1px solid rgba(201, 168, 76, 0.12)",
+                background: isDark ? "rgba(201, 168, 76, 0.08)" : "rgba(201, 168, 76, 0.15)",
+                border: isDark ? "1px solid rgba(201, 168, 76, 0.12)" : "1px solid rgba(201, 168, 76, 0.25)",
               }}
+              aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
             >
-              {/* Moon icon */}
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path
-                  d="M14 8.83A6 6 0 017.17 2 6 6 0 1014 8.83z"
-                  stroke="var(--gold)"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              {isDark ? (
+                /* Moon icon */
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M14 8.83A6 6 0 017.17 2 6 6 0 1014 8.83z"
+                    stroke="var(--gold)"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                /* Sun icon */
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="3" stroke="var(--gold)" strokeWidth="1.2" />
+                  <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4" stroke="var(--gold)" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+              )}
               <span
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
@@ -281,9 +289,9 @@ export function SettingsClient({
                   letterSpacing: "0.06em",
                 }}
               >
-                Dark
+                {isDark ? "Dark" : "Light"}
               </span>
-            </div>
+            </button>
           </div>
         </div>
       </section>
