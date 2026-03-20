@@ -51,7 +51,7 @@ internship-command-center/
 │   │   │   ├── Skyline.tsx           # Procedural NYC skyline (SVG layers)
 │   │   │   ├── DayNightProvider.tsx  # Context provider for time-of-day state
 │   │   │   ├── FloorShell.tsx        # Wrapper: window frame + skyline + room content
-│   │   │   ├── CustomCursor.tsx      # Custom cursor with contextual states
+│   │   │   ├── (deleted)              # CustomCursor.tsx removed — BUG-007
 │   │   │   └── WindowView.tsx        # Skyline view adjusted per floor height
 │   │   │
 │   │   ├── characters/               # Character interaction system
