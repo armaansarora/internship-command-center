@@ -146,7 +146,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 | File | Purpose | Lines |
 |---|---|---|
-| `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~350 |
+| `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~360 |
 | `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~570 |
 | `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~240 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |
