@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 4:59 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 11:08 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `5ce7413`)
+- **Branch:** `main` (commit `89f12a1`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 21,118 across 107 source files
 - **Build:** Clean (zero TS errors)
@@ -30,14 +30,14 @@
 - **Current task:** CRO Agent implementation
 - **Deliverable:** 1.4-1.6
 - **Status:** in_progress
-- **Last file touched:** `unknown`
-- **Notes:** This session: 8 commits. Work: security: scrub hardcoded secrets from setup-env.sh and PROJECT-CONTEXT.md; docs: update PROJECT-CONTEXT.md — Phase 1 progress, war-room fix, session 16 log; fix(war-room): switch from Drizzle ORM to Supabase REST client; redeploy: env var update; fix: drizzle config auto-loads .env.local via @next/env (+3 more)
-- **State captured:** 2026-03-20T08:34:48.924Z
+- **Last file touched:** `src/app/(authenticated)/situation-room/page.tsx`
+- **Notes:** This session: 2 commits. Work: Phase 2: Communications Floor — Gmail + Calendar + COO Dylan Shorts; Phase 1: Wire War Room CRO agent to real Supabase REST data
+- **State captured:** 2026-03-20T15:07:57.957Z
 
 ## Changes Since Last Bootstrap
 
 ```
-5ce7413 Phase 1: Wire War Room CRO agent to real Supabase REST data
+89f12a1 Phase 2: Communications Floor — Gmail + Calendar + COO Dylan Shorts
 ```
 
 ## Acceptance Criteria — Progress
@@ -126,7 +126,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5ce7413`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `89f12a1`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -358,13 +358,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 387 | 4,657 |
+| `BOOTSTRAP-PROMPT.md` | 423 | 4,996 |
 | `PROJECT-CONTEXT.md` | 350 | 7,939 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
 | `CLAUDE.md` | 187 | 3,427 |
-| **Total** | **1285** | **22,935** |
+| **Total** | **1321** | **23,274** |
 
-> ⚠️ Reading all recommended files consumes ~22,935 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~23,274 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
