@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { requireUser } from "@/lib/supabase/server";
-import { db, schema } from "@/db/index";
-import { eq, desc } from "drizzle-orm";
+import { requireUser, createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { FloorShell } from "@/components/world/FloorShell";
 import { WarRoomClient } from "@/components/floor-7/WarRoomClient";
@@ -12,49 +10,76 @@ export const metadata: Metadata = { title: "The War Room | The Tower" };
 /** Floor 7 — Applications Pipeline */
 export default async function WarRoomPage() {
   const user = await requireUser();
+  const supabase = await createClient();
 
-  // Fetch all applications for this user, ordered by position then created
-  const applications = await db
-    .select()
-    .from(schema.applications)
-    .where(eq(schema.applications.userId, user.id))
-    .orderBy(schema.applications.position, desc(schema.applications.createdAt));
+  // Fetch all applications for this user via Supabase REST (works on Vercel)
+  const { data: applications, error } = await supabase
+    .from("applications")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("position", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: false });
 
-  // Server Actions
+  if (error) {
+    console.error("War Room query failed:", error.message);
+  }
+
+  // Map snake_case DB rows to camelCase Application type
+  const mappedApplications: Application[] = (applications ?? []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    companyId: row.company_id,
+    role: row.role,
+    url: row.url,
+    status: row.status,
+    tier: row.tier,
+    appliedAt: row.applied_at ? new Date(row.applied_at) : null,
+    source: row.source,
+    notes: row.notes,
+    sector: row.sector,
+    contactId: row.contact_id,
+    salary: row.salary,
+    location: row.location,
+    position: row.position,
+    companyName: row.company_name,
+    lastActivityAt: row.last_activity_at ? new Date(row.last_activity_at) : null,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  }));
+
+  // Server Actions — use Supabase client (REST API) for Vercel compatibility
   async function moveApplication(
     id: string,
     newStatus: string,
     newPosition: string
   ): Promise<void> {
     "use server";
-    const sessionUser = await requireUser();
-    await db
-      .update(schema.applications)
-      .set({
-        status: newStatus as Application["status"],
+    await requireUser();
+    const sb = await createClient();
+    await sb
+      .from("applications")
+      .update({
+        status: newStatus,
         position: newPosition,
-        lastActivityAt: new Date(),
-        updatedAt: new Date(),
+        last_activity_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
-      .where(
-        eq(schema.applications.id, id)
-      );
-    // Verify ownership via RLS — Supabase handles this
+      .eq("id", id);
     revalidatePath("/war-room");
   }
 
   async function deleteApplication(id: string): Promise<void> {
     "use server";
     await requireUser();
-    await db
-      .delete(schema.applications)
-      .where(eq(schema.applications.id, id));
+    const sb = await createClient();
+    await sb.from("applications").delete().eq("id", id);
     revalidatePath("/war-room");
   }
 
   async function createApplication(formData: FormData): Promise<void> {
     "use server";
     const sessionUser = await requireUser();
+    const sb = await createClient();
 
     const companyName = (formData.get("companyName") as string)?.trim();
     const role = (formData.get("role") as string)?.trim();
@@ -70,12 +95,12 @@ export default async function WarRoomPage() {
 
     if (!companyName || !role) return;
 
-    await db.insert(schema.applications).values({
-      userId: sessionUser.id,
-      companyName,
+    await sb.from("applications").insert({
+      user_id: sessionUser.id,
+      company_name: companyName,
       role,
       url,
-      status: status as Application["status"],
+      status,
       source,
       location,
       salary,
@@ -83,7 +108,7 @@ export default async function WarRoomPage() {
       notes,
       tier: Number.isNaN(tier ?? NaN) ? null : tier,
       position: `init_${Date.now()}`,
-      lastActivityAt: new Date(),
+      last_activity_at: new Date().toISOString(),
     });
 
     revalidatePath("/war-room");
@@ -92,6 +117,7 @@ export default async function WarRoomPage() {
   async function updateApplication(id: string, formData: FormData): Promise<void> {
     "use server";
     await requireUser();
+    const sb = await createClient();
 
     const companyName = (formData.get("companyName") as string)?.trim();
     const role = (formData.get("role") as string)?.trim();
@@ -107,23 +133,23 @@ export default async function WarRoomPage() {
 
     if (!companyName || !role) return;
 
-    await db
-      .update(schema.applications)
-      .set({
-        companyName,
+    await sb
+      .from("applications")
+      .update({
+        company_name: companyName,
         role,
         url,
-        status: status as Application["status"],
+        status,
         source,
         location,
         salary,
         sector,
         notes,
         tier: Number.isNaN(tier ?? NaN) ? null : tier,
-        lastActivityAt: new Date(),
-        updatedAt: new Date(),
+        last_activity_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
-      .where(eq(schema.applications.id, id));
+      .eq("id", id);
 
     revalidatePath("/war-room");
   }
@@ -217,7 +243,7 @@ export default async function WarRoomPage() {
         {/* Main content */}
         <div style={{ flex: 1, minHeight: 0, position: "relative", zIndex: 1 }}>
           <WarRoomClient
-            applications={applications}
+            applications={mappedApplications}
             onMoveApplication={moveApplication}
             onDeleteApplication={deleteApplication}
             onCreateApplication={createApplication}
