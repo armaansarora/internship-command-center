@@ -9,6 +9,12 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 /** Ordered floor IDs from top to bottom (matches physical building) */
 const FLOOR_ORDER: FloorId[] = ["PH", "7", "6", "5", "4", "3", "2", "1", "L"];
 
+/** SessionStorage key used to coordinate elevator transition across route boundaries.
+ *  When navigating between lobby ↔ authenticated pages, the Elevator component unmounts
+ *  on one side and remounts on the other. This flag tells the arriving Elevator to play
+ *  the "doors opening" animation instead of starting idle. */
+const ELEVATOR_ARRIVING_KEY = "elevator-arriving";
+
 /** Map route → floorId for active detection */
 const ROUTE_TO_FLOOR: Record<string, FloorId> = Object.fromEntries(
   FLOORS.map((f) => [f.route, f.id]),
@@ -152,16 +158,11 @@ export function Elevator(): JSX.Element {
 
   /**
    * Navigate to a floor with elevator animation.
+   * ALL floors (including lobby) get the full door transition.
    */
   const navigateToFloor = useCallback(
     (floorId: FloorId) => {
       if (state !== "idle" || floorId === activeFloor) return;
-
-      // Lobby = exit the building (no transition)
-      if (floorId === "L") {
-        router.push("/lobby");
-        return;
-      }
 
       const floor = FLOORS.find((f) => f.id === floorId);
       if (!floor) return;
@@ -179,7 +180,56 @@ export function Elevator(): JSX.Element {
   );
 
   /**
-   * GSAP transition sequence.
+   * On mount: check if we’re arriving from a cross-route elevator transition.
+   * If so, play the “doors opening” animation immediately.
+   */
+  useEffect(() => {
+    try {
+      const arriving = sessionStorage.getItem(ELEVATOR_ARRIVING_KEY);
+      if (!arriving) return;
+      sessionStorage.removeItem(ELEVATOR_ARRIVING_KEY);
+    } catch { return; }
+
+    const overlay = overlayRef.current;
+    const leftDoor = leftDoorRef.current;
+    const rightDoor = rightDoorRef.current;
+    const interior = interiorRef.current;
+    const darkWash = darkWashRef.current;
+    if (!overlay || !leftDoor || !rightDoor || !interior || !darkWash) return;
+
+    // Start with doors closed (arrived state)
+    overlay.style.display = "block";
+    gsap.set(leftDoor, { xPercent: 0 });
+    gsap.set(rightDoor, { xPercent: 0 });
+    gsap.set(interior, { opacity: 1 });
+    gsap.set(darkWash, { opacity: 0.5 });
+
+    // Brief pause, then open doors gracefully
+    const tl = gsap.timeline({
+      delay: 0.25,
+      onComplete: () => {
+        setState("idle");
+        if (overlay) overlay.style.display = "none";
+        if (darkWash) gsap.set(darkWash, { opacity: 0 });
+      },
+    });
+
+    tl.to(interior, { opacity: 0, duration: 0.15, ease: "power1.out" })
+      .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
+      .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")
+      .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
+
+    return () => { tl.kill(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * GSAP transition sequence — graceful elevator ride.
+   *
+   * Three phases:
+   *  1. Doors close (dark wash + sliding doors + soft ease)
+   *  2. Moving (interior visible, floor counter ticks, route changes behind doors)
+   *  3. Doors open (only if same Elevator instance persists; cross-route handled above)
    */
   useEffect(() => {
     if (state !== "doors-closing" || !targetFloor) return;
@@ -201,58 +251,67 @@ export function Elevator(): JSX.Element {
     const fromFloor = activeFloor;
     const sequence = getFloorSequence(fromFloor, targetFloor);
 
+    // Detect if this navigation crosses the lobby ↔ authenticated boundary.
+    // lobby is outside (authenticated) route group, so the Elevator will unmount/remount.
+    const isLobbyTransition = fromFloor === "L" || targetFloor === "L";
+
     // Make overlay visible
     overlay.style.display = "block";
 
     const tl = gsap.timeline({
       onComplete: () => {
+        // Only fires if Elevator survives the navigation (same-group transitions).
         setState("idle");
         setTargetFloor(null);
         if (overlay) overlay.style.display = "none";
-        // Safety: ensure darkWash is hidden
         if (darkWash) gsap.set(darkWash, { opacity: 0 });
       },
     });
 
     timelineRef.current = tl;
 
-    // Phase 1: Dark wash fade in + Doors close (400ms)
+    // Phase 1: Dark wash fade in + Doors close
     tl.set(leftDoor, { xPercent: -100 })
       .set(rightDoor, { xPercent: 100 })
       .set(interior, { opacity: 0 })
       .set(darkWash, { opacity: 0 })
-      .to(darkWash, { opacity: 0.6, duration: 0.3, ease: "power2.in" })
-      .to(leftDoor, { xPercent: 0, duration: 0.4, ease: "power2.in" }, "-=0.2")
-      .to(rightDoor, { xPercent: 0, duration: 0.4, ease: "power2.in" }, "<")
+      .to(darkWash, { opacity: 0.5, duration: 0.35, ease: "power2.inOut" })
+      .to(leftDoor, { xPercent: 0, duration: 0.5, ease: "power3.inOut" }, "-=0.25")
+      .to(rightDoor, { xPercent: 0, duration: 0.5, ease: "power3.inOut" }, "<")
       .call(() => setState("moving"))
 
-      // Phase 2: Show interior + counter (500ms)
-      .to(interior, { opacity: 1, duration: 0.15, ease: "power1.in" })
+      // Phase 2: Show interior + counter
+      .to(interior, { opacity: 1, duration: 0.2, ease: "power1.in" })
       .call(() => {
         // Animate floor counter
         tickTimersRef.current.forEach(clearTimeout);
         tickTimersRef.current = [];
-        const tickDuration = 0.4 / Math.max(sequence.length - 1, 1);
+        const tickInterval = 400 / Math.max(sequence.length - 1, 1);
         sequence.forEach((fId, i) => {
           const timer = setTimeout(() => {
             if (counter) {
               counter.textContent = fId === "PH" ? "PH" : fId;
             }
-          }, i * tickDuration * 1000);
+          }, i * tickInterval);
           tickTimersRef.current.push(timer);
         });
+
+        // For cross-boundary navigations, set flag so arriving Elevator opens doors
+        if (isLobbyTransition) {
+          try { sessionStorage.setItem(ELEVATOR_ARRIVING_KEY, "1"); } catch {}
+        }
 
         // Navigate during doors-closed phase
         router.push(floor.route);
       })
-      .to({}, { duration: 0.5 })
+      .to({}, { duration: 0.6 })
       .call(() => setState("doors-opening"))
 
-      // Phase 3: Doors open + dark wash fade out (400ms)
-      .to(interior, { opacity: 0, duration: 0.1, ease: "power1.out" })
-      .to(leftDoor, { xPercent: -100, duration: 0.4, ease: "power2.out" })
-      .to(rightDoor, { xPercent: 100, duration: 0.4, ease: "power2.out" }, "<")
-      .to(darkWash, { opacity: 0, duration: 0.4, ease: "power2.out" }, "<");
+      // Phase 3: Doors open + dark wash fade out (graceful, slower)
+      .to(interior, { opacity: 0, duration: 0.15, ease: "power1.out" })
+      .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
+      .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")
+      .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, targetFloor]);
