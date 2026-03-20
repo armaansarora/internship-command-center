@@ -1,0 +1,365 @@
+/* ======================================================================
+   THE WAR ROOM — Floor 7 CSS
+   Design tokens, atmospheric effects, and animation keyframes.
+   Scoped under :root[data-floor="7"] where possible.
+   ====================================================================== */
+
+/* ── Design Tokens ─────────────────────────────────────────────────────── */
+:root[data-floor="7"] {
+  --wm-bg-void:           #060B14;
+  --wm-bg-deep:           #0A1628;
+  --wm-bg-panel:          #0F1F3D;
+  --wm-bg-surface:        #152847;
+  --wm-bg-border:         #1E3A5F;
+
+  --wm-accent-primary:    #1E90FF;
+  --wm-accent-secondary:  #00D4FF;
+  --wm-accent-live:       #00FF87;
+  --wm-accent-warning:    #F59E0B;
+  --wm-accent-danger:     #DC3C3C;
+  --wm-accent-intel:      #9B59B6;
+
+  --wm-text-primary:      #E8F4FD;
+  --wm-text-secondary:    #7FB3D3;
+  --wm-text-muted:        #4A7A9B;
+  --wm-text-data:         #00D4FF;
+
+  /* ── Animation timing tokens ── */
+  --wm-anim-status-pulse:  2.4s;
+  --wm-anim-glow-pulse:    3.2s;
+  --wm-anim-stale-blink:   1.6s;
+  --wm-anim-ticker-scroll: 28s;
+  --wm-anim-particle-rise: 12s;
+  --wm-anim-scanline-step: 0.1s;
+
+  /* ── Blueprint grid sizing ── */
+  --wm-grid-size-major:   48px;
+  --wm-grid-size-minor:   12px;
+
+  /* ── Panel chrome ── */
+  --wm-panel-blur:        18px;
+  --wm-panel-radius:      0.5rem;
+  --wm-bracket-size:      12px;
+}
+
+/* ── Blueprint grid background ─────────────────────────────────────────── */
+.war-room-bg {
+  background-color: var(--wm-bg-void, #060B14);
+  background-image:
+    /* Major grid — 48px spacing */
+    linear-gradient(
+      rgba(30, 144, 255, 0.045) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(30, 144, 255, 0.045) 1px,
+      transparent 1px
+    ),
+    /* Minor grid — 12px spacing */
+    linear-gradient(
+      rgba(30, 144, 255, 0.02) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(30, 144, 255, 0.02) 1px,
+      transparent 1px
+    );
+  background-size:
+    var(--wm-grid-size-major, 48px) var(--wm-grid-size-major, 48px),
+    var(--wm-grid-size-major, 48px) var(--wm-grid-size-major, 48px),
+    var(--wm-grid-size-minor, 12px) var(--wm-grid-size-minor, 12px),
+    var(--wm-grid-size-minor, 12px) var(--wm-grid-size-minor, 12px);
+}
+
+/* ── Tactical panel (glassmorphic) ─────────────────────────────────────── */
+.tactical-panel {
+  position: relative;
+  background: rgba(15, 31, 61, 0.72);
+  backdrop-filter: blur(var(--wm-panel-blur, 18px)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--wm-panel-blur, 18px)) saturate(1.4);
+  border: 1px solid rgba(30, 144, 255, 0.18);
+  border-radius: var(--wm-panel-radius, 0.5rem);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(0, 212, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Corner bracket — top-left [⌐  */
+.tactical-panel::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: var(--wm-bracket-size, 12px);
+  height: var(--wm-bracket-size, 12px);
+  border-top: 1px solid rgba(0, 212, 255, 0.65);
+  border-left: 1px solid rgba(0, 212, 255, 0.65);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Corner bracket — bottom-right ¬] */
+.tactical-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: var(--wm-bracket-size, 12px);
+  height: var(--wm-bracket-size, 12px);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.65);
+  border-right: 1px solid rgba(0, 212, 255, 0.65);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Data panel — scanline overlay ─────────────────────────────────────── */
+.data-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.data-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 212, 255, 0.012) 2px,
+    rgba(0, 212, 255, 0.012) 3px
+  );
+  background-size: 100% 3px;
+  animation: scanline-step var(--wm-anim-scanline-step, 0.1s) steps(1) infinite;
+}
+
+/* Disable scanlines on mobile */
+@media (max-width: 768px) {
+  .data-panel::after {
+    display: none;
+  }
+}
+
+/* ── Status dots ────────────────────────────────────────────────────────── */
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.active {
+  background-color: var(--wm-accent-live, #00FF87);
+  box-shadow: 0 0 6px rgba(0, 255, 135, 0.8), 0 0 12px rgba(0, 255, 135, 0.4);
+  animation: status-pulse var(--wm-anim-status-pulse, 2.4s) ease-in-out infinite;
+}
+
+.status-dot.pending {
+  background-color: var(--wm-accent-warning, #F59E0B);
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.7);
+  animation: status-pulse var(--wm-anim-status-pulse, 2.4s) ease-in-out infinite;
+  animation-delay: 0.4s;
+}
+
+.status-dot.danger {
+  background-color: var(--wm-accent-danger, #DC3C3C);
+  box-shadow: 0 0 5px rgba(220, 60, 60, 0.8);
+  animation: stale-blink var(--wm-anim-stale-blink, 1.6s) ease-in-out infinite;
+}
+
+.status-dot.inactive {
+  background-color: var(--wm-text-muted, #4A7A9B);
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+/* ── Keyframe animations ────────────────────────────────────────────────── */
+
+/* Status dot live pulse */
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 6px currentColor;
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.85);
+    box-shadow: 0 0 2px currentColor;
+  }
+}
+
+/* Element glow breathe */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(30, 144, 255, 0.25),
+      0 0 20px rgba(30, 144, 255, 0.1),
+      inset 0 0 8px rgba(30, 144, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(30, 144, 255, 0.45),
+      0 0 40px rgba(30, 144, 255, 0.2),
+      inset 0 0 12px rgba(30, 144, 255, 0.1);
+  }
+}
+
+/* Stale / danger blink */
+@keyframes stale-blink {
+  0%, 100% { opacity: 1; }
+  45%       { opacity: 1; }
+  50%       { opacity: 0.15; }
+  55%       { opacity: 1; }
+}
+
+/* Ticker horizontal scroll — assumes content is duplicated for seamless loop */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Particle float upward with horizontal drift */
+@keyframes wm-particle-float {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  8%  { opacity: 0.7; }
+  85% { opacity: 0.4; }
+  100% {
+    transform: translateY(-120vh) translateX(var(--wm-drift, 30px)) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* Scanline step — subtle shimmer effect */
+@keyframes scanline-step {
+  from { background-position: 0 0; }
+  to   { background-position: 0 3px; }
+}
+
+/* ── Glow utility for War Room elements ─────────────────────────────────── */
+.wm-glow {
+  animation: glow-pulse var(--wm-anim-glow-pulse, 3.2s) ease-in-out infinite;
+}
+
+/* ── Ticker strip ────────────────────────────────────────────────────────── */
+.war-room-ticker {
+  position: relative;
+  overflow: hidden;
+  background: rgba(6, 11, 20, 0.92);
+  border-top: 1px solid rgba(30, 144, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.war-room-ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker-scroll var(--wm-anim-ticker-scroll, 28s) linear infinite;
+}
+
+/* ── Tactical button ─────────────────────────────────────────────────────── */
+.tactical-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background: rgba(30, 144, 255, 0.12);
+  border: 1px solid rgba(30, 144, 255, 0.45);
+  border-radius: 4px;
+  color: var(--wm-accent-primary, #1E90FF);
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+  overflow: hidden;
+}
+
+.tactical-btn::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid rgba(0, 212, 255, 0.9);
+  border-left: 1px solid rgba(0, 212, 255, 0.9);
+  pointer-events: none;
+}
+
+.tactical-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.9);
+  border-right: 1px solid rgba(0, 212, 255, 0.9);
+  pointer-events: none;
+}
+
+.tactical-btn:hover {
+  background: rgba(30, 144, 255, 0.22);
+  border-color: rgba(30, 144, 255, 0.75);
+  box-shadow: 0 0 20px rgba(30, 144, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+.tactical-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 0 10px rgba(30, 144, 255, 0.15);
+}
+
+.tactical-btn-primary {
+  background: rgba(30, 144, 255, 0.2);
+  border-color: rgba(30, 144, 255, 0.6);
+  box-shadow: 0 0 12px rgba(30, 144, 255, 0.15);
+}
+
+.tactical-btn-primary:hover {
+  background: rgba(30, 144, 255, 0.32);
+  border-color: rgba(30, 144, 255, 0.9);
+  box-shadow: 0 0 28px rgba(30, 144, 255, 0.35), 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+/* ── Reduced motion — disable all ambient animations ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .war-room-ticker-track {
+    animation: none !important;
+  }
+
+  .status-dot.active,
+  .status-dot.pending,
+  .status-dot.danger {
+    animation: none !important;
+  }
+
+  .wm-glow {
+    animation: none !important;
+  }
+
+  .data-panel::after {
+    animation: none !important;
+  }
+
+  [class*="wm-particle"] {
+    display: none !important;
+  }
+}
