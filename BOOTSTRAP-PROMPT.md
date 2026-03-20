@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:34 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:43 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `b9c37e1`)
+- **Branch:** `main` (commit `9fcb51e`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 9,865 across 50 source files
+- **Total LOC:** 9,732 across 50 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-b9c37e1 fix(sprint-3.5): BUG-015,016,017,018,019 — user-reported critical fixes
+9fcb51e fix: exclude cursors/ from auth middleware
 ```
 
 ## Acceptance Criteria — Progress
@@ -179,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `b9c37e1`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `9fcb51e`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -189,17 +189,17 @@ See docs/MASTER-PLAN.md for the next phase.
 
 (no .env.local found)
 
-## Source Tree (50 files, 9,865 LOC)
+## Source Tree (50 files, 9,732 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 2131 |
+| `src/components/world` | 2143 |
 | `src/app/(authenticated)/penthouse` | 1412 |
-| `src/app/lobby` | 940 |
-| `src/app` | 777 |
+| `src/app/lobby` | 944 |
+| `src/app` | 728 |
 | `src/lib/contracts` | 696 |
-| `src/app/(authenticated)/settings` | 525 |
 | `src/db` | 442 |
+| `src/app/(authenticated)/settings` | 425 |
 | `src/lib/contracts/departments` | 328 |
 | `src/components/ui` | 294 |
 | `src/app/(authenticated)/c-suite` | 284 |
@@ -279,7 +279,7 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>34 packages</summary>
+<summary>33 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
@@ -306,7 +306,6 @@ happy-dom: ^20.8.4
 husky: ^9.1.7
 lenis: ^1.3.19
 next: 16.2.0
-next-themes: ^0.4.6
 postcss: ^8.5.8
 postgres: ^3.4.8
 react: 19.2.4
@@ -329,13 +328,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 388 | 4,376 |
+| `BOOTSTRAP-PROMPT.md` | 388 | 4,378 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1289** | **21,047** |
+| **Total** | **1289** | **21,049** |
 
-> ⚠️ Reading all recommended files consumes ~21,047 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~21,049 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

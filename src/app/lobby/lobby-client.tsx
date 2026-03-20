@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useRef, useCallback, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
 import { LobbyBackground } from "@/components/world/LobbyBackground";
+import { Elevator } from "@/components/world/Elevator";
 import gsap from "gsap";
 
 /**
@@ -92,6 +93,9 @@ export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boo
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden">
+
+      {/* ── ELEVATOR (authenticated users only) ── */}
+      {isAuthenticated && <Elevator />}
 
       {/* ── UNDER CONSTRUCTION TICKER BANNER ── */}
       <ConstructionTicker />

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, JetBrains_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 /* ─── Fonts ──────────────────────────────────────────────────────────
@@ -58,14 +57,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-dvh font-body text-[var(--text-primary)] bg-[var(--tower-darkest)]">
-        <ThemeProvider
-          attribute="data-theme"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );

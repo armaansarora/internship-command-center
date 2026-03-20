@@ -196,7 +196,10 @@ export function Elevator(): JSX.Element {
     const floor = FLOORS.find((f) => f.id === targetFloor);
     if (!floor) return;
 
-    const sequence = getFloorSequence(activeFloor, targetFloor);
+    // Capture current floor at transition start — do NOT use activeFloor in deps
+    // because router.push changes pathname → activeFloor recalcs → effect re-runs → tl.kill()
+    const fromFloor = activeFloor;
+    const sequence = getFloorSequence(fromFloor, targetFloor);
 
     // Make overlay visible
     overlay.style.display = "block";
@@ -206,6 +209,8 @@ export function Elevator(): JSX.Element {
         setState("idle");
         setTargetFloor(null);
         if (overlay) overlay.style.display = "none";
+        // Safety: ensure darkWash is hidden
+        if (darkWash) gsap.set(darkWash, { opacity: 0 });
       },
     });
 
@@ -249,12 +254,19 @@ export function Elevator(): JSX.Element {
       .to(rightDoor, { xPercent: 100, duration: 0.4, ease: "power2.out" }, "<")
       .to(darkWash, { opacity: 0, duration: 0.4, ease: "power2.out" }, "<");
 
-    return () => {
-      tl.kill();
-      tickTimersRef.current.forEach(clearTimeout);
-      tickTimersRef.current = [];
-    };
-  }, [state, targetFloor, activeFloor, getFloorSequence, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, targetFloor]);
+
+  // Safety: if the component re-renders with idle state but stale overlay/darkWash,
+  // ensure they're reset. This catches edge cases where tl.kill() runs mid-animation.
+  useEffect(() => {
+    if (state === "idle") {
+      const overlay = overlayRef.current;
+      const darkWash = darkWashRef.current;
+      if (overlay) overlay.style.display = "none";
+      if (darkWash) gsap.set(darkWash, { opacity: 0 });
+    }
+  }, [state]);
 
   // Cleanup on unmount
   useEffect(() => {

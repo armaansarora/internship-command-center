@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, type JSX } from "react";
-import { useTheme } from "next-themes";
 
 interface SettingsClientProps {
   userName: string | null;
@@ -29,10 +28,6 @@ export function SettingsClient({
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
-
-  // Theme toggle via next-themes — switches between dark and light CSS var sets
-  const { theme, setTheme } = useTheme();
-  const isDark = theme !== "light";
 
   const handleSignOut = useCallback(() => {
     const form = document.createElement("form");
@@ -201,102 +196,7 @@ export function SettingsClient({
         </div>
       </section>
 
-      {/* ── Section 2: Appearance ── */}
-      <section className="w-full" aria-labelledby="section-appearance">
-        <h2
-          id="section-appearance"
-          className="mb-4"
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "10px",
-            color: "var(--gold)",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-          }}
-        >
-          Appearance
-        </h2>
-        <div
-          className="rounded-xl p-5"
-          style={{
-            background: "rgba(10, 12, 25, 0.65)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            border: "1px solid rgba(201, 168, 76, 0.1)",
-            boxShadow:
-              "0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div
-                style={{
-                  fontFamily: "'Satoshi', sans-serif",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: "var(--text-primary)",
-                  lineHeight: 1.3,
-                }}
-              >
-                Theme
-              </div>
-              <div
-                className="mt-1"
-                style={{
-                  fontFamily: "'Satoshi', sans-serif",
-                  fontSize: "13px",
-                  color: "var(--text-muted)",
-                  lineHeight: 1.5,
-                  maxWidth: "360px",
-                }}
-              >
-                Switch between dark and light mode.
-              </div>
-            </div>
-            {/* Theme toggle button */}
-            <button
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className="flex items-center gap-2 rounded-full px-3 py-1.5 shrink-0 transition-all duration-200"
-              style={{
-                background: isDark ? "rgba(201, 168, 76, 0.08)" : "rgba(201, 168, 76, 0.15)",
-                border: isDark ? "1px solid rgba(201, 168, 76, 0.12)" : "1px solid rgba(201, 168, 76, 0.25)",
-              }}
-              aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-            >
-              {isDark ? (
-                /* Moon icon */
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path
-                    d="M14 8.83A6 6 0 017.17 2 6 6 0 1014 8.83z"
-                    stroke="var(--gold)"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ) : (
-                /* Sun icon */
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="8" r="3" stroke="var(--gold)" strokeWidth="1.2" />
-                  <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4" stroke="var(--gold)" strokeWidth="1.2" strokeLinecap="round" />
-                </svg>
-              )}
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "11px",
-                  color: "var(--gold)",
-                  letterSpacing: "0.06em",
-                }}
-              >
-                {isDark ? "Dark" : "Light"}
-              </span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Section 3: Account Actions ── */}
+      {/* ── Section 2: Account Actions ── */}
       <section className="w-full" aria-labelledby="section-account">
         <h2
           id="section-account"
