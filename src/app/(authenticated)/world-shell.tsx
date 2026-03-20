@@ -3,6 +3,7 @@
 import { DayNightProvider } from "@/components/world/DayNightProvider";
 import { Elevator } from "@/components/world/Elevator";
 import { UserMenu } from "@/components/ui/UserMenu";
+import { NotificationSystem } from "@/components/world/NotificationSystem";
 
 interface WorldShellProps {
   children: React.ReactNode;
@@ -47,6 +48,9 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
 
         {/* Main content area — offset for elevator panel on desktop */}
         <main className="flex-1 md:ml-16">{children}</main>
+
+        {/* In-world notification system — renders on all authenticated floors */}
+        <NotificationSystem />
       </div>
     </DayNightProvider>
   );

@@ -1,0 +1,323 @@
+/* ======================================================================
+   THE C-SUITE — Floor 1 CSS
+   Executive gold design system, boardroom glass, herringbone patterns.
+   Scoped under :root[data-floor="1"] where possible.
+   ====================================================================== */
+
+/* ── Design Tokens ─────────────────────────────────────────────────── */
+:root[data-floor="1"] {
+  --cs-bg-void:            #0A0803;
+  --cs-bg-deep:            #120F07;
+  --cs-bg-panel:           #1A160A;
+  --cs-bg-surface:         #221C0E;
+  --cs-bg-border:          #3D3010;
+
+  --cs-gold-primary:       #C9A84C;
+  --cs-gold-light:         #E8C96A;
+  --cs-gold-dim:           #8A6B28;
+  --cs-gold-glow:          rgba(201, 168, 76, 0.3);
+  --cs-accent-live:        #00FF87;
+  --cs-accent-alert:       #DC3C3C;
+  --cs-accent-cool:        #3C8CDC;
+
+  --cs-text-primary:       #F5E8C0;
+  --cs-text-secondary:     #B8924A;
+  --cs-text-muted:         #6B5320;
+  --cs-text-data:          #C9A84C;
+
+  /* ── Animation timing ── */
+  --cs-anim-bell:          0.6s;
+  --cs-anim-pulse:         3.0s;
+  --cs-anim-ticker-scroll: 32s;
+  --cs-anim-node-light:    0.4s;
+  --cs-anim-line-draw:     1.0s;
+
+  /* ── Panel chrome ── */
+  --cs-panel-blur:         16px;
+  --cs-panel-radius:       0.5rem;
+  --cs-bracket-size:       12px;
+}
+
+/* ── C-Suite background ────────────────────────────────────────────── */
+.csuite-bg {
+  background-color: var(--cs-bg-void, #0A0803);
+  background-image:
+    /* Gold radial glow */
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(201, 168, 76, 0.04) 0%, transparent 65%),
+    /* Herringbone pattern */
+    repeating-linear-gradient(
+      45deg,
+      rgba(201, 168, 76, 0.02) 0px,
+      rgba(201, 168, 76, 0.02) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(201, 168, 76, 0.02) 0px,
+      rgba(201, 168, 76, 0.02) 1px,
+      transparent 1px,
+      transparent 28px
+    );
+}
+
+/* ── Executive panel (glassmorphic gold) ─────────────────────────────── */
+.executive-panel {
+  position: relative;
+  background: rgba(26, 22, 10, 0.82);
+  backdrop-filter: blur(var(--cs-panel-blur, 16px)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--cs-panel-blur, 16px)) saturate(1.2);
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  border-radius: var(--cs-panel-radius, 0.5rem);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(201, 168, 76, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Corner bracket — top-left gold */
+.executive-panel::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: var(--cs-bracket-size, 12px);
+  height: var(--cs-bracket-size, 12px);
+  border-top: 1px solid rgba(201, 168, 76, 0.7);
+  border-left: 1px solid rgba(201, 168, 76, 0.7);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Corner bracket — bottom-right gold */
+.executive-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: var(--cs-bracket-size, 12px);
+  height: var(--cs-bracket-size, 12px);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.7);
+  border-right: 1px solid rgba(201, 168, 76, 0.7);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Ring the Bell button ─────────────────────────────────────────────── */
+.ring-the-bell-btn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem 2.5rem;
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  border-radius: 8px;
+  color: var(--cs-gold-primary, #C9A84C);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 150ms ease;
+  overflow: hidden;
+}
+
+.ring-the-bell-btn:hover {
+  background: rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.75);
+  box-shadow:
+    0 0 32px rgba(201, 168, 76, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+.ring-the-bell-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.ring-the-bell-btn:focus-visible {
+  outline: 2px solid rgba(201, 168, 76, 0.6);
+  outline-offset: 3px;
+}
+
+/* Bell pulse animation when triggered */
+@keyframes bell-ring {
+  0%   { transform: rotate(0deg); }
+  10%  { transform: rotate(-15deg); }
+  20%  { transform: rotate(12deg); }
+  30%  { transform: rotate(-10deg); }
+  40%  { transform: rotate(8deg); }
+  50%  { transform: rotate(-6deg); }
+  60%  { transform: rotate(4deg); }
+  70%  { transform: rotate(-2deg); }
+  80%  { transform: rotate(1deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.bell-ringing {
+  animation: bell-ring var(--cs-anim-bell, 0.6s) ease-in-out;
+}
+
+/* Gold pulse ripple */
+@keyframes gold-pulse-ripple {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(201, 168, 76, 0.5),
+      0 0 0 0 rgba(201, 168, 76, 0.3);
+  }
+  70% {
+    box-shadow:
+      0 0 0 20px rgba(201, 168, 76, 0),
+      0 0 0 40px rgba(201, 168, 76, 0);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(201, 168, 76, 0),
+      0 0 0 0 rgba(201, 168, 76, 0);
+  }
+}
+
+.gold-pulse-active {
+  animation: gold-pulse-ripple 1.2s ease-out;
+}
+
+/* ── Agent network node animations ───────────────────────────────────── */
+.agent-node {
+  transition:
+    background-color var(--cs-anim-node-light, 0.4s) ease,
+    border-color var(--cs-anim-node-light, 0.4s) ease,
+    box-shadow var(--cs-anim-node-light, 0.4s) ease;
+}
+
+.agent-node.active {
+  background: rgba(201, 168, 76, 0.45);
+  border-color: rgba(201, 168, 76, 0.9);
+  box-shadow: 0 0 16px rgba(201, 168, 76, 0.5), 0 0 32px rgba(201, 168, 76, 0.2);
+}
+
+.agent-node.completed {
+  background: rgba(0, 255, 135, 0.25);
+  border-color: rgba(0, 255, 135, 0.7);
+  box-shadow: 0 0 12px rgba(0, 255, 135, 0.4);
+}
+
+.agent-node.idle {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.25);
+  box-shadow: none;
+}
+
+/* Connection line animation */
+@keyframes cs-line-pulse {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.5; }
+}
+
+.cs-connection-line-active {
+  animation: cs-line-pulse 1.6s ease-in-out infinite;
+  stroke: rgba(201, 168, 76, 0.5) !important;
+}
+
+/* ── Gold glow utility ─────────────────────────────────────────────── */
+.cs-gold-glow {
+  animation: cs-glow-pulse var(--cs-anim-pulse, 3.0s) ease-in-out infinite;
+}
+
+@keyframes cs-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(201, 168, 76, 0.2),
+      0 0 24px rgba(201, 168, 76, 0.08);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(201, 168, 76, 0.4),
+      0 0 48px rgba(201, 168, 76, 0.16);
+  }
+}
+
+/* ── C-Suite ticker strip ──────────────────────────────────────────── */
+.csuite-ticker {
+  position: relative;
+  overflow: hidden;
+  background: rgba(10, 8, 3, 0.94);
+  border-top: 1px solid rgba(201, 168, 76, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.csuite-ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: csuite-ticker-scroll var(--cs-anim-ticker-scroll, 32s) linear infinite;
+}
+
+@keyframes csuite-ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Briefing progress card ──────────────────────────────────────────── */
+@keyframes cs-card-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cs-briefing-card-appear {
+  animation: cs-card-appear 0.3s ease-out forwards;
+}
+
+/* ── Dialogue slide-in ─────────────────────────────────────────────── */
+@keyframes cs-panel-slide-in {
+  from { transform: translateX(100%); opacity: 0.8; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes cs-backdrop-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Orchestration progress bar ──────────────────────────────────────── */
+@keyframes cs-progress-fill {
+  from { width: 0%; }
+  to   { width: var(--cs-progress-target, 100%); }
+}
+
+.cs-progress-bar {
+  animation: cs-progress-fill 0.5s ease-out forwards;
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .csuite-ticker-track,
+  .cs-gold-glow,
+  .agent-node,
+  .cs-connection-line-active {
+    animation: none !important;
+  }
+
+  .bell-ringing,
+  .gold-pulse-active {
+    animation: none !important;
+  }
+
+  @keyframes cs-panel-slide-in {
+    from { opacity: 0.8; }
+    to   { opacity: 1; }
+  }
+}

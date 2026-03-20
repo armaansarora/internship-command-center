@@ -8,12 +8,12 @@ import {
   bulkMoveSchema,
 } from "@/lib/validators/application";
 import {
-  createApplication,
-  updateApplication,
-  deleteApplication,
-  updateApplicationStatus,
-  bulkUpdateStatus,
-} from "@/lib/db/queries/applications";
+  createApplicationRest,
+  updateApplicationRest,
+  deleteApplicationRest,
+  moveApplicationRest,
+  bulkUpdateStatusRest,
+} from "@/lib/db/queries/applications-rest";
 import type { Application } from "@/db/schema";
 
 // ---------------------------------------------------------------------------
@@ -81,7 +81,7 @@ export async function createApplicationAction(
       return { data: null, error: { code: "VALIDATION_ERROR", message } };
     }
 
-    const application = await createApplication({
+    const application = await createApplicationRest({
       userId: user.id,
       ...parsed.data,
     });
@@ -112,7 +112,7 @@ export async function updateApplicationAction(
       return { data: null, error: { code: "VALIDATION_ERROR", message } };
     }
 
-    const application = await updateApplication(user.id, id, parsed.data);
+    const application = await updateApplicationRest(user.id, id, parsed.data);
 
     return { data: application, error: null };
   } catch (err) {
@@ -136,7 +136,7 @@ export async function deleteApplicationAction(
       };
     }
 
-    await deleteApplication(user.id, id);
+    await deleteApplicationRest(user.id, id);
 
     return { data: undefined, error: null };
   } catch (err) {
@@ -165,7 +165,7 @@ export async function moveApplicationAction(
       return { data: null, error: { code: "VALIDATION_ERROR", message } };
     }
 
-    const application = await updateApplicationStatus(
+    const application = await moveApplicationRest(
       user.id,
       parsed.data.id,
       parsed.data.newStatus,
@@ -197,7 +197,7 @@ export async function bulkMoveAction(
       return { data: null, error: { code: "VALIDATION_ERROR", message } };
     }
 
-    await bulkUpdateStatus(user.id, parsed.data.ids, parsed.data.newStatus);
+    await bulkUpdateStatusRest(user.id, parsed.data.ids, parsed.data.newStatus);
 
     return { data: undefined, error: null };
   } catch (err) {

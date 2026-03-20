@@ -5,6 +5,12 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import type { Application } from "@/db/schema";
+import type {
+  CreateApplicationInput,
+  UpdateApplicationInput,
+  ApplicationStatus,
+} from "@/lib/validators/application";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -393,6 +399,394 @@ export async function analyzeConversionRatesRest(
     totalAnalyzed: data.length,
     insight: insights.join(" "),
   };
+}
+
+// ---------------------------------------------------------------------------
+// CRUD Mutations (Supabase REST — Vercel-safe)
+// ---------------------------------------------------------------------------
+
+/**
+ * Map a raw DB row (snake_case) to the Application TypeScript type (camelCase).
+ */
+function rowToApplication(row: ApplicationRow): Application {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    companyId: row.company_id ?? null,
+    role: row.role,
+    url: row.url ?? null,
+    status: row.status as Application["status"],
+    tier: row.tier ?? null,
+    appliedAt: row.applied_at ? new Date(row.applied_at) : null,
+    source: row.source ?? null,
+    notes: row.notes ?? null,
+    sector: row.sector ?? null,
+    contactId: row.contact_id ?? null,
+    salary: row.salary ?? null,
+    location: row.location ?? null,
+    position: row.position ?? null,
+    companyName: row.company_name ?? null,
+    lastActivityAt: row.last_activity_at ? new Date(row.last_activity_at) : null,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+  };
+}
+
+export type NewApplicationRestInput = CreateApplicationInput & { userId: string };
+
+/**
+ * INSERT a new application into the DB and return the created row.
+ */
+export async function createApplicationRest(
+  input: NewApplicationRestInput
+): Promise<Application> {
+  const supabase = await createClient();
+
+  const now = new Date().toISOString();
+  const isApplied = input.status && input.status !== "discovered";
+
+  const { data, error } = await supabase
+    .from("applications")
+    .insert({
+      user_id: input.userId,
+      company_name: input.companyName,
+      role: input.role,
+      url: input.url ?? null,
+      status: input.status ?? "discovered",
+      source: input.source ?? null,
+      notes: input.notes ?? null,
+      location: input.location ?? null,
+      salary: input.salary ?? null,
+      sector: input.sector ?? null,
+      tier: input.tier ?? null,
+      applied_at: isApplied ? now : null,
+      last_activity_at: now,
+      updated_at: now,
+    })
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error(`createApplicationRest failed: ${error?.message ?? "no data returned"}`);
+  }
+
+  return rowToApplication(data as ApplicationRow);
+}
+
+/**
+ * UPDATE an existing application (partial fields) and return the updated row.
+ */
+export async function updateApplicationRest(
+  userId: string,
+  id: string,
+  input: UpdateApplicationInput
+): Promise<Application> {
+  const supabase = await createClient();
+
+  const now = new Date().toISOString();
+
+  // Build a snake_case update payload, only including defined values
+  const updatePayload: Record<string, unknown> = {
+    updated_at: now,
+    last_activity_at: now,
+  };
+
+  if (input.companyName !== undefined) updatePayload.company_name = input.companyName;
+  if (input.role !== undefined) updatePayload.role = input.role;
+  if (input.url !== undefined) updatePayload.url = input.url || null;
+  if (input.status !== undefined) updatePayload.status = input.status;
+  if (input.source !== undefined) updatePayload.source = input.source || null;
+  if (input.notes !== undefined) updatePayload.notes = input.notes || null;
+  if (input.location !== undefined) updatePayload.location = input.location || null;
+  if (input.salary !== undefined) updatePayload.salary = input.salary || null;
+  if (input.sector !== undefined) updatePayload.sector = input.sector || null;
+  if (input.tier !== undefined) updatePayload.tier = input.tier ?? null;
+
+  const { data, error } = await supabase
+    .from("applications")
+    .update(updatePayload)
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error(`updateApplicationRest failed: ${error?.message ?? "no data returned"}`);
+  }
+
+  return rowToApplication(data as ApplicationRow);
+}
+
+/**
+ * UPDATE status + position + timestamps for drag-and-drop moves. Returns the updated row.
+ */
+export async function moveApplicationRest(
+  userId: string,
+  id: string,
+  newStatus: ApplicationStatus,
+  newPosition?: string
+): Promise<Application> {
+  const supabase = await createClient();
+
+  const now = new Date().toISOString();
+
+  const updatePayload: Record<string, unknown> = {
+    status: newStatus,
+    updated_at: now,
+    last_activity_at: now,
+  };
+
+  if (newPosition !== undefined) {
+    updatePayload.position = newPosition;
+  }
+
+  const { data, error } = await supabase
+    .from("applications")
+    .update(updatePayload)
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error(`moveApplicationRest failed: ${error?.message ?? "no data returned"}`);
+  }
+
+  return rowToApplication(data as ApplicationRow);
+}
+
+/**
+ * DELETE an application by id where user_id matches.
+ */
+export async function deleteApplicationRest(
+  userId: string,
+  id: string
+): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("applications")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`deleteApplicationRest failed: ${error.message}`);
+  }
+}
+
+/**
+ * Bulk UPDATE multiple applications to a new status.
+ */
+export async function bulkUpdateStatusRest(
+  userId: string,
+  ids: string[],
+  newStatus: ApplicationStatus
+): Promise<void> {
+  if (ids.length === 0) return;
+
+  const supabase = await createClient();
+
+  const now = new Date().toISOString();
+
+  const { error } = await supabase
+    .from("applications")
+    .update({
+      status: newStatus,
+      updated_at: now,
+      last_activity_at: now,
+    })
+    .in("id", ids)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`bulkUpdateStatusRest failed: ${error.message}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Analytics Queries (Phase 5)
+// ---------------------------------------------------------------------------
+
+export interface TimelineWeek {
+  week: string;       // ISO date string for the Monday of the week
+  count: number;      // Applications created that week
+}
+
+export interface FunnelStage {
+  status: string;
+  count: number;
+}
+
+export interface DailyActivity {
+  date: string;       // YYYY-MM-DD
+  count: number;      // Applications with activity on that date
+}
+
+export interface AgentUsageStat {
+  agent: string;
+  runs: number;
+  successRate: number;  // 0–100
+  totalTokens: number;
+}
+
+/**
+ * Returns application counts grouped by ISO week (Monday-anchored) for trend charts.
+ */
+export async function getApplicationTimelineRest(
+  userId: string
+): Promise<TimelineWeek[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("applications")
+    .select("created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("getApplicationTimelineRest failed:", error.message);
+    return [];
+  }
+
+  const weekMap = new Map<string, number>();
+
+  for (const row of data ?? []) {
+    const d = new Date(row.created_at);
+    // Find the Monday of the week
+    const day = d.getUTCDay(); // 0=Sun, 1=Mon, ...
+    const diff = (day === 0 ? -6 : 1 - day);
+    const monday = new Date(d);
+    monday.setUTCDate(d.getUTCDate() + diff);
+    monday.setUTCHours(0, 0, 0, 0);
+    const key = monday.toISOString().split("T")[0];
+    weekMap.set(key, (weekMap.get(key) ?? 0) + 1);
+  }
+
+  return Array.from(weekMap.entries()).map(([week, count]) => ({ week, count }));
+}
+
+/**
+ * Returns counts per status for funnel visualization.
+ */
+export async function getConversionFunnelRest(
+  userId: string
+): Promise<FunnelStage[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("applications")
+    .select("status")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("getConversionFunnelRest failed:", error.message);
+    return [];
+  }
+
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const s = row.status ?? "discovered";
+    counts.set(s, (counts.get(s) ?? 0) + 1);
+  }
+
+  // Return in funnel order
+  const FUNNEL_ORDER = [
+    "discovered",
+    "applied",
+    "screening",
+    "interview_scheduled",
+    "interviewing",
+    "under_review",
+    "offer",
+    "accepted",
+    "rejected",
+    "withdrawn",
+  ];
+
+  return FUNNEL_ORDER
+    .filter((s) => counts.has(s))
+    .map((s) => ({ status: s, count: counts.get(s) ?? 0 }));
+}
+
+/**
+ * Returns count of applications with activity per day for heatmap.
+ * `days` controls how many days back to look (default 90).
+ */
+export async function getDailyActivityRest(
+  userId: string,
+  days = 90
+): Promise<DailyActivity[]> {
+  const supabase = await createClient();
+
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const { data, error } = await supabase
+    .from("applications")
+    .select("last_activity_at, created_at")
+    .eq("user_id", userId)
+    .gte("last_activity_at", since.toISOString());
+
+  if (error) {
+    console.error("getDailyActivityRest failed:", error.message);
+    return [];
+  }
+
+  const dayMap = new Map<string, number>();
+
+  for (const row of data ?? []) {
+    const ts = row.last_activity_at ?? row.created_at;
+    const dateKey = new Date(ts).toISOString().split("T")[0];
+    dayMap.set(dateKey, (dayMap.get(dateKey) ?? 0) + 1);
+  }
+
+  return Array.from(dayMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({ date, count }));
+}
+
+/**
+ * Reads agent_logs table and returns per-agent run counts + success rates.
+ */
+export async function getAgentUsageStatsRest(
+  userId: string
+): Promise<AgentUsageStat[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("agent_logs")
+    .select("agent, status, tokens_used")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("getAgentUsageStatsRest failed:", error.message);
+    return [];
+  }
+
+  interface AgentAccum {
+    runs: number;
+    completed: number;
+    totalTokens: number;
+  }
+
+  const agentMap = new Map<string, AgentAccum>();
+
+  for (const row of data ?? []) {
+    const agent = row.agent ?? "unknown";
+    const existing = agentMap.get(agent) ?? { runs: 0, completed: 0, totalTokens: 0 };
+    existing.runs += 1;
+    if (row.status === "completed") existing.completed += 1;
+    existing.totalTokens += row.tokens_used ?? 0;
+    agentMap.set(agent, existing);
+  }
+
+  return Array.from(agentMap.entries()).map(([agent, accum]) => ({
+    agent,
+    runs: accum.runs,
+    successRate: accum.runs > 0 ? Math.round((accum.completed / accum.runs) * 100) : 0,
+    totalTokens: accum.totalTokens,
+  }));
 }
 
 // ---------------------------------------------------------------------------

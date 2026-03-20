@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:26 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 2:25 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,26 +19,20 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `5e40471`)
+- **Branch:** `main` (commit `09806d6`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 40,448 across 166 source files
+- **Total LOC:** 47,762 across 203 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Session State (where we left off)
 
-- **Current task:** CRO Agent implementation
-- **Deliverable:** 1.4-1.6
+- **Current task:** Phase 5 complete — all phases wired
+- **Deliverable:** 5.1-5.8
 - **Status:** complete
-- **Last file touched:** `unknown`
-- **Notes:** This session: 2 commits. Work: chore: update SESSION-STATE.json — Phase 4 complete; feat: Phase 4 complete — CMO/CPO agents, Writing Room, Briefing Room, cross-phase wiring
-- **State captured:** 2026-03-20T17:26:27.764Z
-
-## Changes Since Last Bootstrap
-
-```
-5e40471 chore: update SESSION-STATE.json — Phase 4 complete
-```
+- **Last file touched:** `src/components/floor-1/CSuiteClient.tsx`
+- **Notes:** Phase 5: CEO + CFO agents, Observatory (Floor 2), C-Suite (Floor 1), Ring the Bell, daily briefing cron, agent memory, in-world notifications, analytics dashboard. Phase 1 CRUD fixed (Drizzle→REST). All floor CSS imported. 8 agents operational. 203 source files, 47,559 LOC. Zero TS errors.
+- **State captured:** 2026-03-20T18:20:00.000Z
 
 ## Acceptance Criteria — Progress
 
@@ -126,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5e40471`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `09806d6`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -136,40 +130,47 @@
 
 (no .env.local found)
 
-## Source Tree (166 files, 40,448 LOC)
+## Source Tree (203 files, 47,762 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 2934 |
-| `src/styles` | 1887 |
+| `src/lib/db/queries` | 3797 |
+| `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1790 |
+| `src/components/world` | 1532 |
 | `src/components/floor-6/cio-character` | 1455 |
 | `src/components/floor-3/cpo-character` | 1380 |
 | `src/components/floor-5/cmo-character` | 1369 |
 | `src/components/floor-4/coo-character` | 1339 |
 | `src/components/floor-7/war-table` | 1281 |
-| `src/components/world` | 1189 |
+| `src/hooks` | 1265 |
 | `src/components/floor-4` | 1175 |
 | `src/components/floor-6/cno-character` | 1081 |
 | `src/components/floor-7/crud` | 1055 |
 | `src/components/floor-7/cro-character` | 1033 |
 | `src/components/floor-3` | 1015 |
-| `src/hooks` | 995 |
 | `src/lib/agents/cpo` | 975 |
 | `src/components/floor-5/crud` | 949 |
 | `src/app/lobby` | 947 |
+| `src/lib/agents/cfo` | 925 |
 | `src/components/floor-5` | 909 |
 | `src/components/floor-6/crud` | 889 |
 | `src/components/floor-6` | 886 |
+| `src/components/floor-1` | 806 |
 | `src/components/floor-7` | 792 |
 | `src/lib` | 768 |
 | `src/lib/agents/cmo` | 766 |
+| `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
-| `src/app` | 730 |
+| `src/app` | 736 |
+| `src/components/floor-2/cfo-character` | 718 |
 | `src/components/world/elevator` | 718 |
 | `src/lib/agents/cio` | 711 |
 | `src/lib/contracts` | 696 |
+| `src/components/floor-1/ceo-character` | 692 |
 | `src/app/(authenticated)/penthouse` | 682 |
+| `src/lib/agents/ceo` | 646 |
+| `src/components/floor-2` | 560 |
 | `src/lib/agents/cno` | 555 |
 | `src/lib/gmail` | 520 |
 | `src/db` | 500 |
@@ -183,21 +184,23 @@
 | `src/app/(authenticated)/briefing-room` | 264 |
 | `src/lib/actions` | 207 |
 | `src/lib/calendar` | 195 |
-| `src/app/(authenticated)/c-suite` | 191 |
 | `src/app/(authenticated)/war-room` | 174 |
 | `src/app/(authenticated)/writing-room` | 170 |
 | `src/app/api/cron/sync` | 166 |
+| `src/app/api/cron/briefing` | 163 |
 | `src/components/icons` | 152 |
 | `src/app/(authenticated)/rolodex-lounge` | 150 |
-| `src/app/(authenticated)/observatory` | 144 |
 | `src/app/api/gmail/sync` | 144 |
 | `src/components/transitions` | 132 |
 | `src/lib/supabase` | 121 |
 | `src/app/api/cpo` | 105 |
 | `src/app/(authenticated)/situation-room` | 92 |
-| `src/app/(authenticated)` | 86 |
+| `src/app/(authenticated)` | 90 |
+| `src/app/api/ceo` | 86 |
 | `src/types` | 74 |
 | `src/lib/validators` | 71 |
+| `src/app/api/cfo` | 68 |
+| `src/app/api/notifications` | 58 |
 | `src/app/api/gmail/callback` | 56 |
 | `src/app/api/drive/export` | 48 |
 | `src/app/api/auth/callback` | 42 |
@@ -206,7 +209,10 @@
 | `src/app/api/cno` | 42 |
 | `src/app/api/coo` | 42 |
 | `src/app/api/cro` | 42 |
+| `src/app/api/notifications/[id]/read` | 31 |
 | `src/lib/constants` | 31 |
+| `src/app/(authenticated)/c-suite` | 20 |
+| `src/app/(authenticated)/observatory` | 20 |
 | `src` | 20 |
 | `src/app/api/calendar/sync` | 12 |
 | `src/app/api/gmail/auth` | 12 |
@@ -233,22 +239,44 @@ src/app/(authenticated)/writing-room/page.tsx
 src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
 src/app/api/calendar/sync/route.ts
+src/app/api/ceo/route.ts
+src/app/api/cfo/route.ts
 src/app/api/cio/route.ts
 src/app/api/cmo/route.ts
 src/app/api/cno/route.ts
 src/app/api/coo/route.ts
 src/app/api/cpo/route.ts
 src/app/api/cro/route.ts
+src/app/api/cron/briefing/route.ts
 src/app/api/cron/sync/route.ts
 src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
+src/app/api/notifications/[id]/read/route.ts
+src/app/api/notifications/route.ts
 src/app/globals.css
 src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
+src/components/floor-1/CSuiteClient.tsx
+src/components/floor-1/CSuiteScene.tsx
+src/components/floor-1/CSuiteTicker.tsx
+src/components/floor-1/RingTheBell.tsx
+src/components/floor-1/ceo-character/CEOCharacter.tsx
+src/components/floor-1/ceo-character/CEODialoguePanel.tsx
+src/components/floor-1/ceo-character/CEOWhiteboard.tsx
+src/components/floor-2/ObservatoryClient.tsx
+src/components/floor-2/ObservatoryScene.tsx
+src/components/floor-2/ObservatoryTicker.tsx
+src/components/floor-2/analytics/ActivityHeatmap.tsx
+src/components/floor-2/analytics/ConversionFunnel.tsx
+src/components/floor-2/analytics/PipelineVelocity.tsx
+src/components/floor-2/analytics/WeeklyTrend.tsx
+src/components/floor-2/cfo-character/CFOCharacter.tsx
+src/components/floor-2/cfo-character/CFODialoguePanel.tsx
+src/components/floor-2/cfo-character/CFOWhiteboard.tsx
 src/components/floor-3/BriefingRoomClient.tsx
 src/components/floor-3/BriefingRoomScene.tsx
 src/components/floor-3/BriefingRoomTicker.tsx
@@ -310,12 +338,16 @@ src/components/world/Elevator.tsx
 src/components/world/FloorShell.tsx
 src/components/world/FloorStub.tsx
 src/components/world/LobbyBackground.tsx
+src/components/world/NotificationSystem.tsx
+src/components/world/NotificationToast.tsx
 src/components/world/ProceduralSkyline.tsx
 src/components/world/elevator/ElevatorButton.tsx
 src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
 src/db/index.ts
 src/db/schema.ts
+src/hooks/useCEOChat.ts
+src/hooks/useCFOChat.ts
 src/hooks/useCIOChat.ts
 src/hooks/useCMOChat.ts
 src/hooks/useCNOChat.ts
@@ -325,6 +357,12 @@ src/hooks/useCROChat.ts
 src/hooks/useCharacter.ts
 src/hooks/useReducedMotion.ts
 src/lib/actions/applications.ts
+src/lib/agents/ceo/character-machine.ts
+src/lib/agents/ceo/system-prompt.ts
+src/lib/agents/ceo/tools.ts
+src/lib/agents/cfo/character-machine.ts
+src/lib/agents/cfo/system-prompt.ts
+src/lib/agents/cfo/tools.ts
 src/lib/agents/cio/character-machine.ts
 src/lib/agents/cio/system-prompt.ts
 src/lib/agents/cio/tools.ts
@@ -355,13 +393,16 @@ src/lib/contracts/index.ts
 src/lib/contracts/notifications.ts
 src/lib/contracts/ui.ts
 src/lib/day-night.ts
+src/lib/db/queries/agent-memory-rest.ts
 src/lib/db/queries/applications-rest.ts
 src/lib/db/queries/applications.ts
 src/lib/db/queries/communications-rest.ts
 src/lib/db/queries/companies-rest.ts
 src/lib/db/queries/contacts-rest.ts
+src/lib/db/queries/daily-snapshots-rest.ts
 src/lib/db/queries/documents-rest.ts
 src/lib/db/queries/embeddings-rest.ts
+src/lib/db/queries/notifications-rest.ts
 src/lib/gmail/oauth.ts
 src/lib/gmail/parser.ts
 src/lib/skyline-engine.ts
@@ -374,6 +415,8 @@ src/lib/utils/google-drive-export.ts
 src/lib/utils/lex-order.ts
 src/lib/validators/application.ts
 src/middleware.ts
+src/styles/floor-1.css
+src/styles/floor-2.css
 src/styles/floor-3.css
 src/styles/floor-4.css
 src/styles/floor-5.css
@@ -439,13 +482,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 504 | 5,892 |
-| `PROJECT-CONTEXT.md` | 351 | 8,408 |
+| `BOOTSTRAP-PROMPT.md` | 504 | 5,858 |
+| `PROJECT-CONTEXT.md` | 352 | 8,509 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
-| `CLAUDE.md` | 216 | 4,095 |
-| **Total** | **1432** | **25,307** |
+| `CLAUDE.md` | 235 | 4,603 |
+| **Total** | **1452** | **25,882** |
 
-> ⚠️ Reading all recommended files consumes ~25,307 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~25,882 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

@@ -1,3 +1,9 @@
+@import "../styles/floor-1.css";
+@import "../styles/floor-2.css";
+@import "../styles/floor-3.css";
+@import "../styles/floor-4.css";
+@import "../styles/floor-5.css";
+@import "../styles/floor-6.css";
 @import "../styles/floor-7.css";
 
 @tailwind base;

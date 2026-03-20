@@ -1,0 +1,281 @@
+/* ======================================================================
+   THE OBSERVATORY — Floor 2 CSS
+   Design tokens, atmospheric effects, and animation keyframes.
+   Scoped under :root[data-floor="2"] where possible.
+   ====================================================================== */
+
+/* ── Design Tokens ─────────────────────────────────────────────────── */
+:root[data-floor="2"] {
+  --obs-bg-void:           #050B12;
+  --obs-bg-deep:           #081220;
+  --obs-bg-panel:          #0C1A2E;
+  --obs-bg-surface:        #102238;
+  --obs-bg-border:         #1A3A5C;
+
+  --obs-accent-primary:    #3C8CDC;
+  --obs-accent-secondary:  #64B4FF;
+  --obs-accent-live:       #00D4FF;
+  --obs-accent-warning:    #F59E0B;
+  --obs-accent-success:    #00FF87;
+  --obs-accent-data:       #A8D8FF;
+
+  --obs-text-primary:      #E8F4FD;
+  --obs-text-secondary:    #7FB3D3;
+  --obs-text-muted:        #4A7A9B;
+  --obs-text-data:         #64B4FF;
+
+  /* ── Animation timing ── */
+  --obs-anim-sweep:        8s;
+  --obs-anim-pulse:        3.2s;
+  --obs-anim-ticker-scroll: 30s;
+  --obs-anim-draw:         1.2s;
+
+  /* ── Panel chrome ── */
+  --obs-panel-blur:        16px;
+  --obs-panel-radius:      0.5rem;
+  --obs-bracket-size:      10px;
+
+  /* ── Grid sizing ── */
+  --obs-grid-major:        48px;
+  --obs-grid-minor:        12px;
+}
+
+/* ── Observatory background ─────────────────────────────────────────── */
+.observatory-bg {
+  background-color: var(--obs-bg-void, #050B12);
+  background-image:
+    /* Radial star-field glow */
+    radial-gradient(ellipse 70% 50% at 50% 20%, rgba(60, 140, 220, 0.04) 0%, transparent 70%),
+    /* Major grid */
+    linear-gradient(rgba(60, 140, 220, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60, 140, 220, 0.04) 1px, transparent 1px),
+    /* Minor grid */
+    linear-gradient(rgba(60, 140, 220, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(60, 140, 220, 0.018) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    var(--obs-grid-major, 48px) var(--obs-grid-major, 48px),
+    var(--obs-grid-major, 48px) var(--obs-grid-major, 48px),
+    var(--obs-grid-minor, 12px) var(--obs-grid-minor, 12px),
+    var(--obs-grid-minor, 12px) var(--obs-grid-minor, 12px);
+}
+
+/* ── Instrument panel (glassmorphic) ─────────────────────────────────── */
+.instrument-panel {
+  position: relative;
+  background: rgba(12, 26, 46, 0.78);
+  backdrop-filter: blur(var(--obs-panel-blur, 16px)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--obs-panel-blur, 16px)) saturate(1.3);
+  border: 1px solid rgba(60, 140, 220, 0.18);
+  border-radius: var(--obs-panel-radius, 0.5rem);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(100, 180, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Corner bracket — top-left */
+.instrument-panel::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: var(--obs-bracket-size, 10px);
+  height: var(--obs-bracket-size, 10px);
+  border-top: 1px solid rgba(100, 180, 255, 0.6);
+  border-left: 1px solid rgba(100, 180, 255, 0.6);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Corner bracket — bottom-right */
+.instrument-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: var(--obs-bracket-size, 10px);
+  height: var(--obs-bracket-size, 10px);
+  border-bottom: 1px solid rgba(100, 180, 255, 0.6);
+  border-right: 1px solid rgba(100, 180, 255, 0.6);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Sweep radar animation ────────────────────────────────────────────── */
+.obs-sweep {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  margin: -150px 0 0 -150px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.obs-sweep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(60, 140, 220, 0.08) 20deg,
+    rgba(60, 140, 220, 0.14) 40deg,
+    transparent 60deg
+  );
+  animation: obs-sweep-rotate var(--obs-anim-sweep, 8s) linear infinite;
+}
+
+@keyframes obs-sweep-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Data point pulse ─────────────────────────────────────────────────── */
+.obs-data-point {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--obs-accent-live, #00D4FF);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.8);
+  animation: obs-data-pulse var(--obs-anim-pulse, 3.2s) ease-in-out infinite;
+}
+
+@keyframes obs-data-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.8), 0 0 20px rgba(0, 212, 255, 0.3);
+  }
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 4px rgba(0, 212, 255, 0.4);
+  }
+}
+
+/* ── Glow utility ─────────────────────────────────────────────────────── */
+.obs-glow {
+  animation: obs-glow-pulse var(--obs-anim-pulse, 3.2s) ease-in-out infinite;
+}
+
+@keyframes obs-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(60, 140, 220, 0.25),
+      0 0 20px rgba(60, 140, 220, 0.1),
+      inset 0 0 8px rgba(60, 140, 220, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(60, 140, 220, 0.45),
+      0 0 40px rgba(60, 140, 220, 0.2),
+      inset 0 0 12px rgba(60, 140, 220, 0.1);
+  }
+}
+
+/* ── SVG line draw animation ─────────────────────────────────────────── */
+.obs-line-draw {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: obs-draw-line var(--obs-anim-draw, 1.2s) ease-out forwards;
+}
+
+@keyframes obs-draw-line {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── Observatory ticker strip ─────────────────────────────────────────── */
+.observatory-ticker {
+  position: relative;
+  overflow: hidden;
+  background: rgba(5, 11, 18, 0.94);
+  border-top: 1px solid rgba(60, 140, 220, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.observatory-ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker-scroll var(--obs-anim-ticker-scroll, 30s) linear infinite;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Status dots ────────────────────────────────────────────────────────── */
+.obs-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.obs-status-dot.active {
+  background-color: var(--obs-accent-live, #00D4FF);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.8);
+  animation: obs-dot-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes obs-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ── Funnel bar animation ─────────────────────────────────────────────── */
+@keyframes obs-bar-grow {
+  from { height: 0; opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.obs-bar-animate {
+  animation: obs-bar-grow 0.6s ease-out forwards;
+}
+
+/* ── Analytics numbers tick-up ──────────────────────────────────────────── */
+@keyframes obs-number-appear {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.obs-number-appear {
+  animation: obs-number-appear 0.4s ease-out forwards;
+}
+
+/* ── Heatmap cell hover ──────────────────────────────────────────────────── */
+.obs-heatmap-cell {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  cursor: default;
+}
+
+.obs-heatmap-cell:hover {
+  opacity: 1 !important;
+  transform: scale(1.2);
+  z-index: 1;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .observatory-ticker-track,
+  .obs-sweep::before,
+  .obs-data-point,
+  .obs-glow,
+  .obs-status-dot.active {
+    animation: none !important;
+  }
+
+  .obs-line-draw {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+
+  .obs-heatmap-cell:hover {
+    transform: none;
+  }
+}
