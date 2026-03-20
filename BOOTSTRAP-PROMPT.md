@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:55 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:56 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `de3978e`)
+- **Branch:** `main` (commit `6a2336d`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 8,736 across 47 source files
 - **Build:** Clean (zero TS errors)
@@ -33,6 +33,12 @@
 - **Last file touched:** `unknown`
 - **Notes:** No feature commits this session (tooling/infra only).
 - **State captured:** 2026-03-20T03:46:58.269Z
+
+## Changes Since Last Bootstrap
+
+```
+6a2336d fix(sprint-1): BUG-003,004,006,007,008,009 — performance, scroll, cursor, parallax
+```
 
 ## Acceptance Criteria — Progress
 
@@ -173,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `de3978e`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `6a2336d`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -317,13 +323,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 395 | 4,377 |
+| `BOOTSTRAP-PROMPT.md` | 376 | 4,175 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1296** | **21,048** |
+| **Total** | **1277** | **20,846** |
 
-> ⚠️ Reading all recommended files consumes ~21,048 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,846 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
