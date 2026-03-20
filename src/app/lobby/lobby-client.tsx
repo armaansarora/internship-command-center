@@ -618,9 +618,13 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
         </div>
 
         {isAuthenticated ? (
-          /* Authenticated: show elevator button to go back up */
-          <a
-            href="/penthouse"
+          /* Authenticated: trigger elevator animation to go back up */
+          <button
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent("elevator:navigate", { detail: { floorId: "PH" } }),
+              );
+            }}
             className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3.5 font-medium transition-all duration-300"
             style={{
               background: "linear-gradient(135deg, #C9A84C 0%, #E8C45A 50%, #C9A84C 100%)",
@@ -631,7 +635,6 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
               fontWeight: 600,
               boxShadow: "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)",
               letterSpacing: "0.01em",
-              textDecoration: "none",
             }}
             onMouseEnter={(e) => {
               const el = e.currentTarget as HTMLElement;
@@ -650,7 +653,7 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
               <path d="M9 14V4M9 4L5 8M9 4L13 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span>Return to Penthouse</span>
-          </a>
+          </button>
         ) : (
           /* Unauthenticated: Google sign-in button */
           <button

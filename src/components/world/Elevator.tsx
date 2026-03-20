@@ -316,6 +316,22 @@ export function Elevator(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, targetFloor]);
 
+  /**
+   * Listen for custom 'elevator:navigate' events from external components
+   * (e.g., the lobby "Return to Penthouse" button) that need to trigger
+   * the elevator animation without direct access to navigateToFloor.
+   */
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ floorId: string }>).detail;
+      if (detail?.floorId) {
+        navigateToFloor(detail.floorId as FloorId);
+      }
+    };
+    window.addEventListener("elevator:navigate", handler);
+    return () => window.removeEventListener("elevator:navigate", handler);
+  }, [navigateToFloor]);
+
   // Safety: if the component re-renders with idle state but stale overlay/darkWash,
   // ensure they're reset. This catches edge cases where tl.kill() runs mid-animation.
   useEffect(() => {

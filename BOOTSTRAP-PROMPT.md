@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 12:55 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:05 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `2a0f64b`)
+- **Branch:** `main` (commit `371bd44`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 9,721 across 50 source files
+- **Total LOC:** 9,834 across 50 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-2a0f64b fix: rip out next-themes, fix elevator on lobby, fix floor nav greying, remove SVG cursors
+371bd44 Hotfix: Elevator cross-route transition + AI lobby backgrounds
 ```
 
 ## Acceptance Criteria — Progress
@@ -179,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `2a0f64b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `371bd44`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -189,13 +189,13 @@ See docs/MASTER-PLAN.md for the next phase.
 
 (no .env.local found)
 
-## Source Tree (50 files, 9,721 LOC)
+## Source Tree (50 files, 9,834 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 2132 |
+| `src/components/world` | 2242 |
 | `src/app/(authenticated)/penthouse` | 1412 |
-| `src/app/lobby` | 944 |
+| `src/app/lobby` | 947 |
 | `src/app` | 728 |
 | `src/lib/contracts` | 696 |
 | `src/db` | 442 |
@@ -328,13 +328,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 387 | 4,364 |
+| `BOOTSTRAP-PROMPT.md` | 387 | 4,378 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1288** | **21,035** |
+| **Total** | **1288** | **21,049** |
 
-> ⚠️ Reading all recommended files consumes ~21,035 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~21,049 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
