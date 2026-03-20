@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-20T01:42:00-04:00 (EDT)
+**Last updated:** 2026-03-20T04:30:00-04:00 (EDT)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -162,10 +162,19 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 ## 7. CURRENT STATE
 
-**Phase:** 0 COMPLETE, Phase 1 next — The War Room (RESEARCH COMPLETE, BUILD NOT STARTED)
+**Phase:** 0 COMPLETE, Phase 1 IN PROGRESS — The War Room (code deployed, Vercel production live)
 **Branch:** `main`
 **Production:** `internship-command-center-lake.vercel.app`
-**LOC:** 9,140 across 50 source files
+**LOC:** ~9,200 across 50 source files
+**Latest commit:** `d29842d` — fix(war-room): switch from Drizzle ORM to Supabase REST client
+
+### Phase 1 Progress
+- ✅ 1.1–1.6: Floor 7 War Room implementation committed (commit `4efb3cc` — 24 files, ~5,800 LOC)
+- ✅ Phase 1 DB migration run (`drizzle-kit push` — added `position`, `company_name`, `last_activity_at` columns + composite index)
+- ✅ ANTHROPIC_API_KEY set in Vercel production env vars
+- ✅ War Room Vercel fix: replaced Drizzle ORM (direct postgres) with Supabase REST client in `war-room/page.tsx` (commit `d29842d`)
+- ⚠️ pgvector extension NOT yet enabled (user needs to run SQL in Supabase dashboard)
+- ⚠️ DB password needs rotation (currently `REDACTED_DB_PASSWORD` — exposed during setup)
 
 ### Completed (All Tasks 0.1–0.10)
 
@@ -316,6 +325,7 @@ File structure auto-generated in BOOTSTRAP-PROMPT.md — always current.
 | 14 | 2026-03-20 | **Documentation Restructuring & Staleness Prevention.** Diagnosed 3 structural problems: massive redundancy (9,110 lines/16 docs), no auto-update beyond bootstrap, too many docs to maintain. Created 4-tier doc architecture (Tier 1: auto-generated, Tier 2: living docs, Tier 3: reference specs, Tier 4: archive). Rewrote MASTER-PLAN.md (checked off 6/10 Phase 0 acceptance criteria). Cleaned PROJECT-CONTEXT.md (removed duplicated file tree, updated doc map, fixed stale refs to archived files). Rewrote CLAUDE.md completely (removed stale component refs like SkylineScene/SkylineLayers/useMouseParallax, added doc architecture section, updated key components). Archived 7 docs to `docs/archive/` (IMMERSIVE-UI-PLAN.md, AUDIT.md, 5 research files). Deleted FILE-STRUCTURE.md (replaced by auto-generated tree in bootstrap). Enhanced `scripts/generate-bootstrap.ts` with `checkDocFreshness()` — warns when MASTER-PLAN, VISION-SPEC, or TECH-BRIEF are >7 days old. Bootstrap tested clean: Phase 0 COMPLETE detected, no stale doc warnings. |
 
 | 15 | 2026-03-20 | **Full doc auto-organization system.** Built auto-organize-docs.ts: (1) auto-archive stale unreferenced docs, (2) auto-generate CLAUDE.md Key Components from src/ tree, (3) auto-generate doc map table with real line counts, (4) auto-append session logs from SESSION-STATE.json. Wired into Husky pre-commit. Idempotent. Files: scripts/auto-organize-docs.ts, .husky/pre-commit, CLAUDE.md, PROJECT-CONTEXT.md, package.json. |
+| 16 | 2026-03-20 | **Phase 1 build committed + War Room production fix.** Phase 1 code already on `main` (commit `4efb3cc`). User provided Supabase credentials, created `.env.local`, ran `drizzle-kit push` for schema migration. War Room page returned 500 on Vercel — diagnosed as Drizzle ORM direct postgres connection failing from Vercel serverless (DB is IPv6-only at `db.jzrsrruugcajohvvmevg.supabase.co`, Supabase pooler returned "Tenant not found"). Fix: rewrote `war-room/page.tsx` to use Supabase REST client (like Penthouse does) — all queries + server actions now use `supabase.from()` instead of Drizzle `db.select()`. Added snake_case→camelCase mapping for `Application` type. Commit `d29842d`, deployed as `dpl_9EBBdP7w1kLVnLG3rbtz6cd4Raef`, build READY in iad1. TypeScript clean. Zero runtime errors. Remaining: enable pgvector extension, rotate DB password. |
 ---
 
 ## 10. TECHNICAL NOTES
@@ -330,6 +340,8 @@ File structure auto-generated in BOOTSTRAP-PROMPT.md — always current.
 - **Tailwind:** v3 with JS config (NOT v4 with CSS config)
 - **Old repo reference:** `/home/user/workspace/internship-command-center-8c4c1ad1/src/contracts/`
 - **Vercel auto-deploy:** `main` gets production
+- **War Room DB pattern:** Server components use Supabase REST client (`createClient()` from `@/lib/supabase/server`), NOT Drizzle ORM direct postgres. Drizzle's `db` object requires a direct TCP connection to postgres which fails from Vercel serverless (IPv6-only DB, pooler unreliable). All future server components should follow the Penthouse/War Room pattern: `supabase.from('table').select('*')`.
+- **Supabase DB connectivity from Vercel:** Direct connection (`db.jzrsrruugcajohvvmevg.supabase.co:5432`) is IPv6-only. Supabase transaction pooler (`aws-0-us-east-1.pooler.supabase.com:6543`) returns "Tenant or user not found". Use REST API via Supabase client.
 - **ProceduralSkyline:** Canvas-based renderer replaces all photo-based skyline components. Defaults to "night" outside DayNightProvider context (intentional for lobby). Uses `useDayNight()` hook + `getSkyConfig()` for time-aware rendering
 - **EntranceSequence:** Uses sessionStorage for "played" flag — appropriate for per-session entrance
 - **Floor stubs:** Each has unique CSS atmosphere (grid patterns, gradients, animations) — not empty shells
