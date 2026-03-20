@@ -1,14 +1,32 @@
 {
-  "currentTask": "General development",
-  "deliverable": "unknown",
+  "currentTask": "Immersive UI overhaul (skyline, lobby, penthouse)",
+  "deliverable": "0.5-0.8",
   "status": "in_progress",
   "blockers": [],
-  "lastFileTouched": "unknown",
-  "notes": "No feature commits this session (tooling/infra only).",
-  "filesChanged": [],
-  "commitCount": 0,
-  "locAdded": 0,
-  "locRemoved": 0,
-  "newDependencies": [],
-  "updatedAt": "2026-03-20T03:46:58.269Z"
+  "lastFileTouched": "src/app/(authenticated)/penthouse/penthouse-client.tsx",
+  "notes": "This session: 7 commits. Work: Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014; docs: update BUG-TRACKER with Sprint 2 commit hash; fix(sprint-2): BUG-001,002,005,011,012 — navigation, sign out, settings, user menu; docs: remove stale CustomCursor references (audit pass 2); chore: delete dead CustomCursor.tsx (audit pass 1) (+2 more)",
+  "filesChanged": [
+    "src/app/(authenticated)/layout.tsx",
+    "src/app/(authenticated)/penthouse/penthouse-client.tsx",
+    "src/app/(authenticated)/settings/page.tsx",
+    "src/app/(authenticated)/settings/settings-client.tsx",
+    "src/app/(authenticated)/world-shell.tsx",
+    "src/app/globals.css",
+    "src/app/layout.tsx",
+    "src/app/lobby/lobby-client.tsx",
+    "src/components/ui/UserMenu.tsx",
+    "src/components/world/CustomCursor.tsx",
+    "src/components/world/Elevator.tsx",
+    "src/components/world/FloorShell.tsx",
+    "src/components/world/LobbyBackground.tsx",
+    "src/components/world/ProceduralSkyline.tsx",
+    "src/types/ui.ts"
+  ],
+  "commitCount": 7,
+  "locAdded": 1438,
+  "locRemoved": 686,
+  "newDependencies": [
+    "next-themes"
+  ],
+  "updatedAt": "2026-03-20T04:18:35.187Z"
 }
