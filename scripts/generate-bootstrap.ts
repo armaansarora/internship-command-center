@@ -154,6 +154,54 @@ try {
   }
 } catch { /* give up gracefully on JSON parse errors */ }
 
+// ── Doc freshness check ────────────────────────────────────────────────────
+
+interface DocFreshness {
+  file: string;
+  lastUpdated: string | null;
+  stale: boolean;
+  reason?: string;
+}
+
+function checkDocFreshness(): DocFreshness[] {
+  const results: DocFreshness[] = [];
+  const docsToCheck = [
+    { file: "docs/MASTER-PLAN.md", pattern: /Last updated:\*\*\s*([\d-]+)/ },
+    { file: "docs/VISION-SPEC.md", pattern: /Last updated:\*\*\s*([\d-]+)/ },
+    { file: "docs/TECH-BRIEF.md", pattern: /Last updated:\*\*\s*([\d-]+)/ },
+  ];
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  for (const doc of docsToCheck) {
+    const fullPath = join(ROOT, doc.file);
+    if (!existsSync(fullPath)) {
+      results.push({ file: doc.file, lastUpdated: null, stale: true, reason: "File not found" });
+      continue;
+    }
+    const content = readFileSync(fullPath, "utf-8");
+    const match = content.match(doc.pattern);
+    if (match) {
+      const dateStr = match[1];
+      const docDate = new Date(dateStr);
+      if (docDate < sevenDaysAgo) {
+        const daysOld = Math.round((now.getTime() - docDate.getTime()) / 86400000);
+        results.push({ file: doc.file, lastUpdated: dateStr, stale: true, reason: `Last updated ${dateStr} (${daysOld}d ago)` });
+      } else {
+        results.push({ file: doc.file, lastUpdated: dateStr, stale: false });
+      }
+    } else {
+      results.push({ file: doc.file, lastUpdated: null, stale: false, reason: "No date header found" });
+    }
+  }
+
+  return results;
+}
+
+const docFreshnessChecks = checkDocFreshness();
+const staleDocs = docFreshnessChecks.filter((d) => d.stale);
+
 // ── Env vars (names only) ──────────────────────────────────────────────────
 
 let envVars = "(no .env.local found)";
@@ -490,7 +538,7 @@ const output = `# BOOTSTRAP PROMPT — The Tower
 - **Production:** \`${productionUrl}\`
 - **Total LOC:** ${totalLOC.toLocaleString()} across ${srcFiles.length} source files
 - **Build:** ${buildHealth}${vercelStatus ? `\n- **Vercel deploy:** ${vercelStatus}` : ""}
-${buildErrors.length > 0 ? `\n### Build Errors\n\`\`\`\n${buildErrors.join("\n")}\n\`\`\`\n` : ""}
+${buildErrors.length > 0 ? `\n### Build Errors\n\`\`\`\n${buildErrors.join("\n")}\n\`\`\`\n` : ""}${staleDocs.length > 0 ? `\n### ⚠️ Stale Docs Detected\n${staleDocs.map((d) => `- **\`${d.file}\`**: ${d.reason}`).join("\n")}\n\n> Update these docs before starting work — stale specs cause wasted effort.\n` : ""}
 ${sessionStateSection ? `\n## Session State (where we left off)\n\n${sessionStateSection}\n` : ""}${changesSinceLastBootstrap ? `\n## Changes Since Last Bootstrap\n\n\`\`\`\n${changesSinceLastBootstrap}\n\`\`\`\n` : ""}
 ## Acceptance Criteria — Progress
 
@@ -578,14 +626,16 @@ ${techNotes}
 | File | Purpose |
 |---|---|
 | \`PROJECT-CONTEXT.md\` | Full operational context — credentials, stack, audit summary, session log |
-| \`CLAUDE.md\` | Codebase summary for AI coding assistants |
+| \`CLAUDE.md\` | Conventions, commands, agent behavior rules, doc architecture |
 | \`docs/MASTER-PLAN.md\` | 7 phases with deliverables, acceptance criteria, testing |
 | \`docs/VISION-SPEC.md\` | Spatial UI spec (locked) — building, floors, characters, design tokens |
 | \`docs/TECH-BRIEF.md\` | Research findings, AI SDK v6 patterns, Drizzle gotchas |
 | \`docs/CHARACTER-PROMPTS.md\` | System prompts for all 8 C-suite agents |
 | \`docs/SCHEMA-DRAFT.md\` | 16-table Postgres schema with RLS |
-| \`docs/IMMERSIVE-UI-PLAN.md\` | Immersive skyline implementation plan (COMPLETED) |
-| \`docs/FILE-STRUCTURE.md\` | Target project file tree |
+| \`docs/WAR-ROOM-BLUEPRINT.md\` | Phase 1 implementation guide (architecture, CRO agent, DnD, design) |
+| \`docs/CHAIN-OF-COMMAND.md\` | AI agent hierarchy (CEO → CRO → 5 subagents, tools, RACI) |
+| \`docs/BUG-TRACKER.md\` | Bug reports, fix log, sprint priorities |
+| \`docs/archive/\` | Completed plans + research (reference only, don't read by default) |
 
 ## Skills to Load
 
@@ -623,4 +673,7 @@ if (changesSinceLastBootstrap) {
 }
 if (staleDeps) {
   console.log(`  ⚠ Stale deps detected (see output)`);
+}
+if (staleDocs.length > 0) {
+  console.log(`  ⚠ Stale docs: ${staleDocs.map((d) => d.file).join(", ")}`);
 }

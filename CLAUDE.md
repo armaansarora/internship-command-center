@@ -3,7 +3,7 @@
 ## Architecture
 Next.js 16 (App Router) + Supabase Postgres + Drizzle ORM v1 + Vercel AI SDK v6 + Inngest v3 + @supabase/ssr
 Deployed on Vercel. GSAP + Framer Motion for animations. Tailwind v3 (JS config, NOT v4).
-Photorealistic CSS 3D parallax skyline with day/night crossfade, atmospheric effects, dust motes.
+ProceduralSkyline (canvas-based renderer) with day/night cycle. LobbyBackground (CSS-only luxury reception).
 
 ## Agent System
 Corporate hierarchy: CEO orchestrates 7 C-suite agents (CIO, CRO, CMO, COO, CPO, CNO, CFO).
@@ -15,7 +15,7 @@ Contracts (1,015 LOC Zod v4 types) in `src/lib/contracts/`.
 Immersive spatial UI — building metaphor, not a dashboard. Each page is a "floor."
 Primary dark: #1A1A2E. Gold accent: #C9A84C. Glass: backdrop-filter blur(16px).
 Fonts: Playfair Display (headings), Satoshi (body), JetBrains Mono (data).
-Day/night cycle driven by user's local time. NYC photorealistic skyline with CSS 3D parallax.
+Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 
 ## Key Commands
 - `npm run dev` — dev server
@@ -43,22 +43,21 @@ Day/night cycle driven by user's local time. NYC photorealistic skyline with CSS
 - @supabase/ssr (NOT deprecated auth-helpers)
 - Tailwind v3 with JS config (NOT v4 CSS config)
 - Feature branches, atomic commits, push protection ON — never commit secrets
-- All planning docs in `/docs/` directory
+- All planning docs in `/docs/`, archived docs in `/docs/archive/`
 - Aria attributes on all interactive elements, prefers-reduced-motion respected
 
-## Immersive Skyline System
-- `SkylineScene.tsx` — master 6-layer stack (sky gradient → day layers → night layers → atmosphere → particles → glass)
-- `SkylineLayers.tsx` — CSS 3D perspective with 4 depth-separated photo layers per variant
-- `AtmosphericEffects.tsx` — vignette, height fog, night bloom, sky fade (CSS-only)
-- `DustMotes.tsx` — tsParticles v3 (~40 particles, `initParticlesEngine` + `loadSlim`)
-- `WindowTint.tsx` — glass overlay with backdrop-filter
-- `useMouseParallax.ts` — RAF-based lerp, ref-stable loop (no useCallback state deps)
-- `useSkylineVariant.ts` — day/night from DayNightProvider
-- `EntranceSequence.tsx` — cinematic first-login (GSAP, sessionStorage skip)
-- Photos in `public/skyline/{day,night}/{sky,far,mid,near}.{webp,png}`
+## Key Components
+- `ProceduralSkyline.tsx` — canvas-based renderer, time-aware via `useDayNight()` + `getSkyConfig()`, 7 sky palettes, animated window lights, stars, autonomous Apple TV-style drift
+- `LobbyBackground.tsx` — CSS-only luxury reception hall (marble, pillars, chandelier)
+- `Elevator.tsx` — GSAP-powered door animation, brushed-metal texture, keyboard accessible
+- `FloorShell.tsx` — vignette, mullions, fog, floor-specific ambient light
+- `EntranceSequence.tsx` — three-state cinematic first-login (GSAP, sessionStorage skip)
+- `DayNightProvider.tsx` — 7 time states, 60s update interval
+- `UserMenu.tsx` — avatar dropdown with sign out, settings link
+- `LobbyBackground.tsx` — CSS-only luxury reception (distinct from penthouse skyline)
 
 ## Bootstrap Infrastructure
-- `scripts/generate-bootstrap.ts` — generates BOOTSTRAP-PROMPT.md with: build health, git diff, acceptance criteria tracking, dep freshness, context budget, session state
+- `scripts/generate-bootstrap.ts` — generates BOOTSTRAP-PROMPT.md with: build health, git diff, acceptance criteria tracking, dep freshness, context budget, session state, doc freshness warnings
 - `scripts/session-end.ts` — chains type check → bootstrap → stage → commit → push into one command
 - `scripts/update-session-state.ts` — CLI fallback to update SESSION-STATE.json manually (prefer agent auto-update)
 - `.husky/pre-commit` — auto-regenerates BOOTSTRAP-PROMPT.md on every commit
@@ -127,12 +126,28 @@ The agent MUST monitor its own context usage and proactively end the session bef
 - The human should never experience degraded output quality. Hand off BEFORE that happens.
 - After session-end at 70%, the agent's final message must include the new session prompt above
 
-## Key Docs
-- `BOOTSTRAP-PROMPT.md` — auto-generated handoff (auto-runs on commit, includes build health + criteria tracking)
-- `PROJECT-CONTEXT.md` — operational context, credentials, session log
-- `docs/MASTER-PLAN.md` — 7 phases, acceptance criteria
+## Documentation Architecture
+Docs are organized into 3 tiers to prevent staleness and duplication:
+
+### Tier 1: Auto-Generated (always current)
+- `BOOTSTRAP-PROMPT.md` — regenerated on every commit via Husky. Source tree, build health, acceptance criteria, deps, session state. THE single entry point for new sessions.
+
+### Tier 2: Living Docs (updated by agents each session)
+- `PROJECT-CONTEXT.md` — operational log, credentials, session history
+- `SESSION-STATE.json` — mid-session task state
+- `docs/BUG-TRACKER.md` — bug reports and fix log
+
+### Tier 3: Reference Specs (stable, rarely change)
+- `CLAUDE.md` — THIS FILE. Conventions, commands, agent behavior rules.
+- `docs/MASTER-PLAN.md` — 7 phases with acceptance criteria (update criteria checkboxes as work completes)
 - `docs/VISION-SPEC.md` — spatial UI spec (locked)
-- `docs/TECH-BRIEF.md` — research, AI SDK v6 patterns, Drizzle gotchas
+- `docs/TECH-BRIEF.md` — research findings, SDK patterns, gotchas
 - `docs/CHARACTER-PROMPTS.md` — system prompts for 8 agents
 - `docs/SCHEMA-DRAFT.md` — 16-table schema with RLS
-- `docs/IMMERSIVE-UI-PLAN.md` — skyline implementation plan (COMPLETED)
+- `docs/WAR-ROOM-BLUEPRINT.md` — Phase 1 implementation guide
+- `docs/CHAIN-OF-COMMAND.md` — AI agent hierarchy spec
+
+### Tier 4: Archive (completed work, reference only)
+- `docs/archive/` — completed plans (IMMERSIVE-UI-PLAN.md, AUDIT.md) and research reports. Do not read unless specifically needed.
+
+**Rule: Never duplicate information across tiers.** If it's auto-generated in Tier 1, don't manually maintain it in Tier 2 or 3.
