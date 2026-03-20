@@ -86,42 +86,6 @@
 }
 
 /* =============================================
-   LIGHT MODE
-   Applied when data-theme="light" on <html>.
-   Inverts the dark palette for daytime readability.
-   ============================================= */
-
-[data-theme="light"] {
-  /* ── Core Palette ── */
-  --gold: #9A7B2E;
-  --gold-dim: #7A6224;
-  --gold-bright: #B8932E;
-  --tower-dark: #F5F3EE;
-  --tower-darker: #EBE8E0;
-  --tower-darkest: #FAFAF7;
-  --tower-surface: #EFEDE6;
-  --tower-surface-2: #E8E5DD;
-
-  /* ── Glass Surfaces ── */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-hover: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-blur: 16px;
-
-  /* ── Text ── */
-  --text-primary: #1A1A2E;
-  --text-secondary: #4A4A5A;
-  --text-muted: #8A8A96;
-  --text-gold: #9A7B2E;
-
-  /* ── Semantic ── */
-  --success: #1A8A4A;
-  --warning: #B8860B;
-  --error: #DC3545;
-  --info: #2D6FBA;
-}
-
-/* =============================================
    DAY/NIGHT TIME STATES
    Set by JavaScript — these define the target values
    ============================================= */
@@ -244,15 +208,10 @@ body {
      still fills the viewport without this. */
 }
 
-/* Custom cursor — luxury gold aesthetic that matches The Tower brand */
-* {
-  cursor: url('/cursors/default.svg') 5 2, auto;
-}
-
-a, button, [role="button"], input, textarea, select,
-label[for], summary, [tabindex]:not([tabindex="-1"]),
-[data-cursor="interactive"] {
-  cursor: url('/cursors/pointer.svg') 10 2, pointer;
+/* Interactive elements get pointer cursor */
+a, button, [role="button"], label[for], summary,
+[tabindex]:not([tabindex="-1"]), [data-cursor="interactive"] {
+  cursor: pointer;
 }
 
 ::selection {
