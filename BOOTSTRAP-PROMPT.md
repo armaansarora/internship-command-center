@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:53 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:55 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `34dbbb0`)
+- **Branch:** `main` (commit `7d95863`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 9,834 across 50 source files
 - **Build:** Clean (zero TS errors)
@@ -27,12 +27,18 @@
 
 ## Session State (where we left off)
 
-- **Current task:** Full doc auto-organization system
-- **Deliverable:** auto-organize-docs
-- **Status:** complete
-- **Last file touched:** `scripts/auto-organize-docs.ts`
-- **Notes:** Built auto-organize-docs.ts: (1) auto-archive stale unreferenced docs, (2) auto-generate CLAUDE.md Key Components from src/ tree, (3) auto-generate doc map table with real line counts, (4) auto-append session logs from SESSION-STATE.json. Wired into Husky pre-commit. Idempotent.
-- **State captured:** 2026-03-20T05:50:00.000Z
+- **Current task:** Developer tooling (session-end, bootstrap)
+- **Deliverable:** infra
+- **Status:** in_progress
+- **Last file touched:** `unknown`
+- **Notes:** This session: 1 commits. Work: session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
+- **State captured:** 2026-03-20T05:55:53.613Z
+
+## Changes Since Last Bootstrap
+
+```
+7d95863 session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
+```
 
 ## Acceptance Criteria — Progress
 
@@ -120,7 +126,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `34dbbb0`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `7d95863`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -269,13 +275,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 338 | 3,950 |
+| `BOOTSTRAP-PROMPT.md` | 332 | 3,889 |
 | `PROJECT-CONTEXT.md` | 338 | 7,296 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
 | `CLAUDE.md` | 159 | 2,731 |
-| **Total** | **1196** | **20,889** |
+| **Total** | **1190** | **20,828** |
 
-> ⚠️ Reading all recommended files consumes ~20,889 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,828 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
