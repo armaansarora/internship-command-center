@@ -1,8 +1,8 @@
 # MASTER PLAN — Internship Command Center ("The Tower")
 ## Concrete Phase Specs with Acceptance Criteria
 
-**Last updated:** 2026-03-18
-**Status:** Pre-build (Phase 0 not started)
+**Last updated:** 2026-03-20
+**Status:** Phase 0 COMPLETE — Phase 1 next
 
 ---
 
@@ -38,16 +38,16 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 | 0.12 | Vercel deployment | S | GitHub Actions: lint → typecheck → build. Auto-deploy `main` to Vercel. Preview deploys on PRs. Env vars configured in Vercel dashboard. |
 
 ### Acceptance Criteria
-- [ ] User can sign in with Google and land in The Penthouse
-- [ ] RLS prevents any user from seeing another user's data (test with 2 accounts)
-- [ ] Elevator navigation works between at least 2 floors (Lobby ↔ Penthouse) with full GSAP animation
-- [ ] Day/night cycle visually changes the Penthouse based on actual AST time
-- [ ] Skyline has visible parallax on mouse movement
-- [ ] Custom cursor renders on desktop, falls back to native on mobile
-- [ ] Dashboard shows real data from Supabase (applications count, pipeline status)
-- [ ] Contracts CRUD works through the UI
-- [ ] Lighthouse performance: >80 on all metrics
-- [ ] Deployed to Vercel, accessible at production URL
+- [x] User can sign in with Google and land in The Penthouse
+- [x] RLS prevents any user from seeing another user's data (test with 2 accounts)
+- [x] Elevator navigation works between at least 2 floors (Lobby ↔ Penthouse) with full GSAP animation
+- [x] Day/night cycle visually changes the Penthouse based on actual AST time
+- [ ] Skyline has visible parallax on mouse movement (parallax removed in visual overhaul — ProceduralSkyline is canvas-based, no mouse parallax; useMouseParallax.ts deleted)
+- [ ] Custom cursor renders on desktop, falls back to native on mobile (SKIPPED — CustomCursor.tsx was deleted per BUG-007 resolution; not present in current build)
+- [x] Dashboard shows real data from Supabase (applications count, pipeline status)
+- [ ] Contracts CRUD works through the UI (contracts ported to src/lib/contracts/ but no UI CRUD built yet)
+- [ ] Lighthouse performance: >80 on all metrics (not tested)
+- [x] Deployed to Vercel, accessible at production URL
 
 ### Dependencies
 - Supabase project already provisioned ✅

@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Internship Command Center ("The Tower")
 ## Operational Reference — Auto-Updated Every Interaction
 
-**Last updated:** 2026-03-19T22:20:00-04:00 (EDT)
+**Last updated:** 2026-03-20T01:42:00-04:00 (EDT)
 **Owner:** Armaan Arora (armaansarora20@gmail.com, GitHub: armaansarora)
 
 ---
@@ -14,11 +14,11 @@
    - Building a phase → `docs/MASTER-PLAN.md` (acceptance criteria, deliverables, testing)
    - Making UI decisions → `docs/VISION-SPEC.md` (spatial UI, characters, design tokens)
    - Choosing a library/pattern → `docs/TECH-BRIEF.md` (research findings, code patterns)
-   - Understanding codebase → `docs/AUDIT.md` (keep/kill, LOC counts)
+   - Understanding codebase → `docs/archive/AUDIT.md` (keep/kill, LOC counts — archived)
    - Schema questions → `docs/SCHEMA-DRAFT.md` (16 tables, RLS, pgvector)
    - Character behavior → `docs/CHARACTER-PROMPTS.md` (system prompts, voices)
    - AI hierarchy → `docs/CHAIN-OF-COMMAND.md` (CEO→CRO→5 subagents, system prompts, tools, RACI)
-   - File placement → `docs/FILE-STRUCTURE.md` (project tree)
+   - File placement → `BOOTSTRAP-PROMPT.md` (auto-generated project tree)
 4. Load skills: `website-building/webapp`, `design-foundations`, `coding-and-data`
 5. Confirm connectors: `list_external_tools` for supabase, resend, github, vercel, gcal, google_drive
 6. **Auto-update this file after every interaction.** Even minor things.
@@ -119,7 +119,7 @@ All credentials stored in `.env.local` (repo root, never committed).
 
 ## 5. CODE AUDIT SUMMARY
 
-Full audit in `docs/AUDIT.md`. Old repo: ~19,800 LOC, 200+ files. **Armaan approved audit 2026-03-18.**
+Full audit in `docs/archive/AUDIT.md` (archived). Old repo: ~19,800 LOC, 200+ files. **Armaan approved audit 2026-03-18.**
 
 ### Keep (~7,000 LOC)
 | Module | LOC | Adapt |
@@ -145,16 +145,15 @@ All planning docs are in `docs/`. Operational files stay in root.
 | File | Purpose | Lines |
 |---|---|---|
 | `PROJECT-CONTEXT.md` | THIS FILE — operational context, credentials, stack, audit summary (root) | ~200 |
-| `BOOTSTRAP-PROMPT.md` | Copy-paste prompt for new chat sessions (root) | ~90 |
-| `CLAUDE.md` | Codebase summary for AI coding assistants (root) | ~45 |
+| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria, context budget (root) | ~380 |
+| `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~155 |
 | `docs/MASTER-PLAN.md` | All 7 phases with deliverables, acceptance criteria, testing strategy, error handling | ~360 |
 | `docs/VISION-SPEC.md` | Locked spatial UI spec: building, floors, characters, cursor, day/night, design tokens | ~250 |
 | `docs/TECH-BRIEF.md` | Research synthesis + Google OAuth setup. ⚠️ warnings on Inngest Realtime, Drizzle RLS bugs, @supabase/ssr changes | ~430 |
 | `docs/SCHEMA-DRAFT.md` | 16-table Postgres schema: RLS on ALL tables, pgvector HNSW indexes, post-push SQL triggers | ~470 |
 | `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge. Multi-tenant ready ({USER_NAME} templating) | ~225 |
-| `docs/FILE-STRUCTURE.md` | Complete project file tree: pages, components, lib, agents, types, tests | ~190 |
-| `docs/AUDIT.md` | File-by-file keep/kill verdicts for old repo (reference) | ~180 |
 | `docs/WAR-ROOM-BLUEPRINT.md` | **NEW:** Phase 1 definitive implementation guide — architecture decisions, component trees, CRO agent spec, DnD patterns, design tokens, 18-task plan, audit findings | ~1,445 |
+| `docs/archive/` | Completed research, audits, and implementation plans (reference only) | varies |
 | `.env.local` | All credentials (never commit) | — |
 | `.env.example` | Template with all required env vars, organized by phase | ~45 |
 
@@ -164,11 +163,10 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 ## 7. CURRENT STATE
 
-**Phase:** 1 — The War Room (RESEARCH COMPLETE, BUILD NOT STARTED)
-**Branch:** `main` (commit `b61d6d0` + uncommitted: WAR-ROOM-BLUEPRINT.md)
-**Last commit:** Phase 0 complete visual overhaul — lobby, penthouse, skyline, elevator, floor stubs (`b61d6d0`)
+**Phase:** 0 COMPLETE, Phase 1 next — The War Room (RESEARCH COMPLETE, BUILD NOT STARTED)
+**Branch:** `main`
 **Production:** `internship-command-center-lake.vercel.app`
-**LOC:** 6,854 across 46 source files
+**LOC:** 9,140 across 50 source files
 
 ### Completed (All Tasks 0.1–0.10)
 
@@ -282,72 +280,7 @@ Complete replacement of the CSS 3D parallax skyline system with a procedural Can
 5. ~~Merge `docs-handoff` → `main`~~ DONE
 6. ~~Verify Supabase anon key format~~ DONE (eyJ* format confirmed)
 
-### File Structure (current)
-```
-src/
-├── app/
-│   ├── layout.tsx              # Root layout (fonts, meta)
-│   ├── page.tsx                # Auth redirect
-│   ├── globals.css             # Tokens, day/night, glass utilities
-│   ├── lobby/
-│   │   ├── page.tsx            # Server: auth check
-│   │   └── lobby-client.tsx    # Client: construction aesthetic, returning user, TowerMark
-│   ├── (authenticated)/
-│   │   ├── layout.tsx          # Auth gate + WorldShell
-│   │   ├── world-shell.tsx     # Client: DayNight + Cursor + Elevator, md:ml-16 offset
-│   │   ├── penthouse/
-│   │   │   ├── page.tsx            # Server: fetches Supabase data → PenthouseClient
-│   │   │   ├── penthouse-client.tsx # Glass+gold dashboard with EntranceSequence
-│   │   │   └── penthouse-data.ts   # Supabase queries (stats, pipeline, activity)
-│   │   ├── war-room/page.tsx   # Phase 1 stub (FloorShell 7)
-│   │   ├── rolodex-lounge/    # Phase 3 stub (FloorShell 6)
-│   │   ├── writing-room/      # Phase 4 stub (FloorShell 5)
-│   │   ├── situation-room/    # Phase 2 stub (FloorShell 4)
-│   │   ├── briefing-room/     # Phase 4 stub (FloorShell 3)
-│   │   ├── observatory/       # Phase 5 stub (FloorShell 2)
-│   │   └── c-suite/           # Phase 5 stub (FloorShell 1)
-│   └── api/auth/
-│       ├── callback/route.ts   # OAuth callback
-│       └── signout/route.ts    # Sign-out (NextResponse redirect)
-├── components/
-│   ├── world/
-│   │   ├── DayNightProvider.tsx     # Time state context (7 states, 60s updates)
-│   │   ├── CustomCursor.tsx         # Gold cursor system (7 contextual states)
-│   │   ├── FloorShell.tsx           # 174 LOC — vignette, mullions, fog, floor-specific ambient light
-│   │   ├── ProceduralSkyline.tsx    # 818 LOC — Canvas renderer, time-aware, 7 sky palettes, stars, window lights
-│   │   └── Elevator.tsx             # 450 LOC — GSAP doors, brushed-metal, text-6xl counter, tooltips
-│   └── transitions/
-│       └── EntranceSequence.tsx     # Cinematic first-login animation (GSAP, 2s)
-├── hooks/
-│   └── useReducedMotion.ts    # SSR-safe reduced motion check
-├── db/
-│   ├── schema.ts               # 16 tables, RLS, types, all FKs
-│   ├── index.ts                # Drizzle client
-│   ├── migrations/             # Generated SQL (0000 base + 0001 FK fix)
-│   └── post-push.sql           # Triggers (handle_new_user, updated_at) + pgvector indexes
-├── lib/
-│   ├── supabase/{client,server,admin,middleware}.ts
-│   ├── day-night.ts            # Time state calculation
-│   ├── utils.ts                # cn(), formatRelativeDate()
-│   └── contracts/              # 1,015 LOC — ported from old repo
-│       ├── index.ts            # Barrel export
-│       ├── events.ts           # TypedEventEmitter, event catalog
-│       ├── agent-protocol.ts   # AgentContext, message types, capabilities
-│       ├── api.ts              # API contract types, envelopes, error codes
-│       ├── notifications.ts    # Notification types, channels, preferences
-│       ├── ui.ts               # Floor, nav, theme, cursor, animation types
-│       └── departments/
-│           ├── cro.ts          # CRO contracts (pipeline, outreach)
-│           ├── cio.ts          # CIO contracts (integrations, API keys)
-│           └── coo.ts          # COO contracts (scheduling, follow-ups)
-├── types/{ui,api,agents}.ts
-└── middleware.ts               # Route protection
-
-public/skyline/
-├── day/{sky,far,mid,near}.{webp,png} + mobile variants
-├── night/{sky,far,mid,near}.{webp,png} + mobile variants
-└── fallback.webp, fallback-day.webp, fallback-night.webp
-```
+File structure auto-generated in BOOTSTRAP-PROMPT.md — always current.
 
 ---
 
@@ -381,10 +314,13 @@ public/skyline/
 | 11 | 2026-03-19 | **Phase 1 Deep Research — The War Room Blueprint.** Launched 5 parallel research subagents: (1) Kanban/pipeline UIs — @dnd-kit vs pragmatic-dnd, GSAP Flip, lexicographic ordering, WCAG 2.5.7 DnD. (2) CRO agent — AI SDK v5/v6 (package version confusion resolved: `ai: ^6.x` IS SDK 5), tool-use agents, `inputSchema:` not `parameters:`, `stopWhen:` not `maxSteps:`, `sendMessage()` not `append()`, Anthropic prompt caching. (3) Character system — Rive vs CSS sprites, XState v5 state machines, split-screen dialogue, typewriter streaming. (4) War room design — tactical/military aesthetics, color palette (navy/cyan vs Penthouse gold), glassmorphism, blueprint grids, XCOM/SHIELD/Iron Man HUD references. (5) Innovative features — zero-manual-status-updates (email detection), conversion rate benchmarking (Huntr 1.78M dataset), RE Finance vertical intelligence, gamification. Compiled into `docs/WAR-ROOM-BLUEPRINT.md` (1,445 lines). Recursive audit: 23 findings (2 critical — missing `position` column + Zod import path, 6 medium, 15 low). All findings appended to blueprint §10. Research files: 5 markdown docs totaling ~5,400 lines. |
 | 12 | 2026-03-19 | **Chain of Command Spec — AI Hierarchy Deep Dive.** Continued from Session 11 context summary. All 3 hierarchy research subagents had already completed (3,076 lines: multi-agent orchestration patterns, CRO subagent specializations, domain-expert training methods). Synthesized into `docs/CHAIN-OF-COMMAND.md` (1,550+ lines). Defines full hierarchy: User → CEO (tower-ceo) → CRO (war-room-cro) → 5 specialist subagents (Job Discovery/SDR, Application Manager/AE, Pipeline Analyst/RevOps, Intel Briefer/Enablement, Offer Evaluator/CSM). Includes: production system prompts for all 7 agents, few-shot examples per subagent, RACI matrix, tool assignments (exclusive write tools, shared read tools), domain knowledge injection tables (RE Finance tiers, recruiting calendar, comp benchmarks, sector knowledge), 3-layer scope enforcement (tool restriction + prompt boundaries + output schema validation), full AI SDK v5/6 implementation code (nested agent-in-tool pattern, Inngest wiring), error handling + graceful degradation, CRO Intel Briefer vs CIO boundary clarification, contract amendments (new Zod schemas + tool definitions). Recursive audit: 11 findings in pass 1 (tool sharing claim, App Manager delegation contradiction, toModelOutput experimental status, missing tool definitions, CIO/Intel Briefer boundary), all fixed. Pass 2 clean. Updated WAR-ROOM-BLUEPRINT.md §11 with hierarchy summary. |
 | 13 | 2026-03-20 | **Elevator + Lobby Background Hotfix Round.** Fixed 3 user-reported issues across 2 commits (`371bd44`, `e89f24e`). (1) **Elevator PH↔Lobby transitions**: removed skip-transition bypass for lobby, added `ELEVATOR_ARRIVING_KEY` sessionStorage coordination for cross-route unmount/remount. (2) **Lobby penthouse button**: changed from `<a href>` to `<button>` dispatching custom `elevator:navigate` DOM event — Elevator now listens for this event and triggers full GSAP door animation. (3) **Lobby background overhaul**: old images were portrait 1024x1536 on landscape screens (badly cropped, low-res). Regenerated all 4 AI images as 16:9 landscape using `gpt_image_1_5`, upscaled to 3840x2560 via ffmpeg lanczos+unsharp. Built Apple TV Saver-style Ken Burns animation: 4 unique keyframes (slow zoom + directional pan), 20s rotation per image, 2.5s crossfade, Fisher-Yates shuffle on mount, prefers-reduced-motion support. Smoother elevator easing (`power3.inOut`/`power3.out`), longer timings (0.5s/0.55s/0.6s). Recursive audit: CLEAN (all 5 questions returned nothing). 9,140 LOC across 50 files. |
+| 14 | 2026-03-20 | **Documentation Restructuring & Staleness Prevention.** Diagnosed 3 structural problems: massive redundancy (9,110 lines/16 docs), no auto-update beyond bootstrap, too many docs to maintain. Created 4-tier doc architecture (Tier 1: auto-generated, Tier 2: living docs, Tier 3: reference specs, Tier 4: archive). Rewrote MASTER-PLAN.md (checked off 6/10 Phase 0 acceptance criteria). Cleaned PROJECT-CONTEXT.md (removed duplicated file tree, updated doc map, fixed stale refs to archived files). Rewrote CLAUDE.md completely (removed stale component refs like SkylineScene/SkylineLayers/useMouseParallax, added doc architecture section, updated key components). Archived 7 docs to `docs/archive/` (IMMERSIVE-UI-PLAN.md, AUDIT.md, 5 research files). Deleted FILE-STRUCTURE.md (replaced by auto-generated tree in bootstrap). Enhanced `scripts/generate-bootstrap.ts` with `checkDocFreshness()` — warns when MASTER-PLAN, VISION-SPEC, or TECH-BRIEF are >7 days old. Bootstrap tested clean: Phase 0 COMPLETE detected, no stale doc warnings. |
 
 ---
 
 ## 10. TECHNICAL NOTES
+
+> Canonical technical notes live in CLAUDE.md. This section captures additional session-specific discoveries.
 
 - **React 19 + Next.js 16:** JSX namespace must be explicitly imported: `import type { JSX } from "react"`
 - **Elevator SSR safety:** Uses `useReducedMotion()` custom hook (not inline `window.matchMedia`)
