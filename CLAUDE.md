@@ -52,32 +52,45 @@ Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 
 - `src/app/lobby/lobby-client.tsx` (925 LOC) — Lobby client component — The Tower entrance.
 - `src/components/floor-7/crud/ApplicationModal.tsx` (721 LOC)
+- `src/components/floor-6/crud/ContactModal.tsx` (652 LOC)
 - `src/components/floor-4/SituationRoomClient.tsx` (574 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (539 LOC)
+- `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (510 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (500 LOC)
+- `src/components/floor-6/cio-character/CIOCharacter.tsx` (483 LOC)
 - `src/app/(authenticated)/penthouse/penthouse-client.tsx` (479 LOC)
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (463 LOC)
+- `src/components/floor-6/cio-character/CIODialoguePanel.tsx` (462 LOC)
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
+- `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (420 LOC)
 - `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (420 LOC)
 - `src/app/(authenticated)/settings/settings-client.tsx` (397 LOC) — SettingsClient — account management and preferences.
 - `src/components/world/Elevator.tsx` (388 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
+- `src/components/floor-6/RolodexLoungeClient.tsx` (375 LOC)
+- `src/components/floor-6/cno-character/CNOCharacter.tsx` (341 LOC)
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
+- `src/components/floor-6/RolodexLoungeScene.tsx` (328 LOC) — RolodexLoungeScene — Floor 6 environment compositor.
 - `src/components/floor-7/WarRoomClient.tsx` (324 LOC)
 - `src/components/floor-7/war-table/WarTable.tsx` (321 LOC)
+- `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (316 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/world/elevator/ElevatorPanel.tsx` (298 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (297 LOC)
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/world/LobbyBackground.tsx` (248 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
+- `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
+- `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/penthouse/PipelineNodes.tsx` (200 LOC) — PipelineNodes renders:
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (198 LOC)
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
+- `src/components/floor-6/contact-grid/ContactCard.tsx` (190 LOC)
 - `src/components/world/elevator/ElevatorButton.tsx` (186 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/world/FloorShell.tsx` (185 LOC) — FloorShell — wraps each floor's content with the immersive procedural skyline.
+- `src/components/floor-6/RolodexLoungeTicker.tsx` (183 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)

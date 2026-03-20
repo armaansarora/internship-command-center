@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 11:08 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 11:42 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `16aca31`)
+- **Branch:** `main` (commit `78b99c5`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 21,118 across 107 source files
+- **Total LOC:** 29,195 across 135 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -29,16 +29,10 @@
 
 - **Current task:** General development
 - **Deliverable:** unknown
-- **Status:** complete
+- **Status:** in_progress
 - **Last file touched:** `unknown`
 - **Notes:** No feature commits this session (tooling/infra only).
-- **State captured:** 2026-03-20T15:08:47.473Z
-
-## Changes Since Last Bootstrap
-
-```
-16aca31 session-end: Phase 1 complete: War Room CRO agent fully wired to Supabase REST, WarRoomClient integrated with CROCharacter/Dialogue/Whiteboard split-screen layout. Phase 2 complete: Floor 4 Situation Room built with COO Dylan Shorts agent (5 tools, 3-layer prompt, character machine), Gmail OAuth + AES-256-GCM token encryption, rule-based email parser, Google Calendar sync, communications-rest.ts query layer (8 functions), all UI components (SituationRoomScene/Client/Ticker, COOCharacter/Dialogue/Whiteboard). 22 new files, 5777 insertions. Zero TS errors, zero any types, zero console.logs, zero TODOs.
-```
+- **State captured:** 2026-03-20T15:42:16.244Z
 
 ## Acceptance Criteria — Progress
 
@@ -126,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `16aca31`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `78b99c5`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -136,32 +130,39 @@
 
 (no .env.local found)
 
-## Source Tree (107 files, 21,118 LOC)
+## Source Tree (135 files, 29,195 LOC)
 
 | Directory | LOC |
 |---|---|
+| `src/lib/db/queries` | 2565 |
+| `src/components/floor-6/cio-character` | 1455 |
 | `src/components/floor-4/coo-character` | 1339 |
-| `src/lib/db/queries` | 1305 |
 | `src/components/floor-7/war-table` | 1281 |
 | `src/components/world` | 1189 |
 | `src/components/floor-4` | 1175 |
+| `src/components/floor-6/cno-character` | 1081 |
 | `src/components/floor-7/crud` | 1055 |
 | `src/components/floor-7/cro-character` | 1033 |
+| `src/styles` | 978 |
 | `src/app/lobby` | 947 |
+| `src/components/floor-6/crud` | 889 |
+| `src/components/floor-6` | 886 |
 | `src/components/floor-7` | 792 |
 | `src/lib` | 768 |
 | `src/components/penthouse` | 758 |
 | `src/app` | 730 |
 | `src/components/world/elevator` | 718 |
+| `src/lib/agents/cio` | 711 |
 | `src/lib/contracts` | 696 |
-| `src/styles` | 685 |
+| `src/hooks` | 692 |
 | `src/app/(authenticated)/penthouse` | 682 |
+| `src/lib/agents/cno` | 555 |
 | `src/lib/gmail` | 520 |
 | `src/db` | 500 |
 | `src/lib/agents/cro` | 459 |
 | `src/lib/agents/coo` | 456 |
 | `src/app/(authenticated)/settings` | 425 |
-| `src/hooks` | 394 |
+| `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/contracts/departments` | 328 |
 | `src/components/ui` | 294 |
 | `src/lib/actions` | 207 |
@@ -169,10 +170,11 @@
 | `src/app/(authenticated)/c-suite` | 191 |
 | `src/app/(authenticated)/briefing-room` | 175 |
 | `src/app/(authenticated)/war-room` | 174 |
+| `src/app/api/cron/sync` | 166 |
 | `src/components/icons` | 152 |
+| `src/app/(authenticated)/rolodex-lounge` | 150 |
 | `src/app/(authenticated)/observatory` | 144 |
 | `src/app/api/gmail/sync` | 144 |
-| `src/app/(authenticated)/rolodex-lounge` | 143 |
 | `src/components/transitions` | 132 |
 | `src/lib/utils` | 122 |
 | `src/lib/supabase` | 121 |
@@ -183,6 +185,8 @@
 | `src/lib/validators` | 71 |
 | `src/app/api/gmail/callback` | 56 |
 | `src/app/api/auth/callback` | 42 |
+| `src/app/api/cio` | 42 |
+| `src/app/api/cno` | 42 |
 | `src/app/api/coo` | 42 |
 | `src/app/api/cro` | 42 |
 | `src/lib/constants` | 31 |
@@ -212,8 +216,11 @@ src/app/(authenticated)/writing-room/page.tsx
 src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
 src/app/api/calendar/sync/route.ts
+src/app/api/cio/route.ts
+src/app/api/cno/route.ts
 src/app/api/coo/route.ts
 src/app/api/cro/route.ts
+src/app/api/cron/sync/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
@@ -228,6 +235,19 @@ src/components/floor-4/SituationRoomTicker.tsx
 src/components/floor-4/coo-character/COOCharacter.tsx
 src/components/floor-4/coo-character/COODialoguePanel.tsx
 src/components/floor-4/coo-character/COOWhiteboard.tsx
+src/components/floor-6/RolodexLoungeClient.tsx
+src/components/floor-6/RolodexLoungeScene.tsx
+src/components/floor-6/RolodexLoungeTicker.tsx
+src/components/floor-6/cio-character/CIOCharacter.tsx
+src/components/floor-6/cio-character/CIODialoguePanel.tsx
+src/components/floor-6/cio-character/CIOWhiteboard.tsx
+src/components/floor-6/cno-character/CNOCharacter.tsx
+src/components/floor-6/cno-character/CNODialoguePanel.tsx
+src/components/floor-6/cno-character/CNOWhiteboard.tsx
+src/components/floor-6/contact-grid/ContactCard.tsx
+src/components/floor-6/contact-grid/ContactGrid.tsx
+src/components/floor-6/crud/ContactModal.tsx
+src/components/floor-6/crud/ContactSearch.tsx
 src/components/floor-7/WarRoomClient.tsx
 src/components/floor-7/WarRoomScene.tsx
 src/components/floor-7/WarRoomTicker.tsx
@@ -260,11 +280,19 @@ src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
 src/db/index.ts
 src/db/schema.ts
+src/hooks/useCIOChat.ts
+src/hooks/useCNOChat.ts
 src/hooks/useCOOChat.ts
 src/hooks/useCROChat.ts
 src/hooks/useCharacter.ts
 src/hooks/useReducedMotion.ts
 src/lib/actions/applications.ts
+src/lib/agents/cio/character-machine.ts
+src/lib/agents/cio/system-prompt.ts
+src/lib/agents/cio/tools.ts
+src/lib/agents/cno/character-machine.ts
+src/lib/agents/cno/system-prompt.ts
+src/lib/agents/cno/tools.ts
 src/lib/agents/coo/character-machine.ts
 src/lib/agents/coo/system-prompt.ts
 src/lib/agents/coo/tools.ts
@@ -286,6 +314,9 @@ src/lib/day-night.ts
 src/lib/db/queries/applications-rest.ts
 src/lib/db/queries/applications.ts
 src/lib/db/queries/communications-rest.ts
+src/lib/db/queries/companies-rest.ts
+src/lib/db/queries/contacts-rest.ts
+src/lib/db/queries/embeddings-rest.ts
 src/lib/gmail/oauth.ts
 src/lib/gmail/parser.ts
 src/lib/skyline-engine.ts
@@ -298,6 +329,7 @@ src/lib/utils/lex-order.ts
 src/lib/validators/application.ts
 src/middleware.ts
 src/styles/floor-4.css
+src/styles/floor-6.css
 src/styles/floor-7.css
 src/types/agents.ts
 src/types/api.ts
@@ -308,10 +340,11 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>34 packages</summary>
+<summary>35 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
+@ai-sdk/openai: ^3.0.41
 @dnd-kit/accessibility: ^3.1.1
 @dnd-kit/core: ^6.3.1
 @dnd-kit/modifiers: ^9.0.0
@@ -351,20 +384,20 @@ zod: ^4.3.6
 ### Stale Dependencies (major version behind)
 
 - **@types/node**: 20.19.37 → 25.5.0 (major)
-- **eslint**: 9.39.4 → 10.0.3 (major)
+- **eslint**: 9.39.4 → 10.1.0 (major)
 - **tailwindcss**: 3.4.19 → 4.2.2 (major)
 
 ## Context Budget
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 423 | 4,957 |
+| `BOOTSTRAP-PROMPT.md` | 456 | 5,319 |
 | `PROJECT-CONTEXT.md` | 350 | 7,939 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
-| `CLAUDE.md` | 187 | 3,427 |
-| **Total** | **1321** | **23,235** |
+| `CLAUDE.md` | 200 | 3,725 |
+| **Total** | **1367** | **23,895** |
 
-> ⚠️ Reading all recommended files consumes ~23,235 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~23,895 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
