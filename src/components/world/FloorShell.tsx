@@ -1,9 +1,13 @@
 "use client";
 
 import type { JSX } from "react";
+import { useEffect } from "react";
 import type { FloorId } from "@/types/ui";
 import { FLOORS } from "@/types/ui";
 import { ProceduralSkyline } from "./ProceduralSkyline";
+import { WeatherEffects } from "./WeatherEffects";
+import { useWeather } from "@/hooks/useWeather";
+import { useSoundEngine } from "./SoundProvider";
 
 interface FloorShellProps {
   floorId: FloorId;
@@ -47,6 +51,14 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
   const floor       = FLOORS.find((f) => f.id === floorId);
   const ambientLight = AMBIENT_CONFIG[floorId];
   const vignetteShadow = floorId === "PH" ? VIGNETTE_SHADOW.PH : VIGNETTE_SHADOW.default;
+  const { condition } = useWeather();
+  const { playAmbient } = useSoundEngine();
+
+  // Play ambient soundscape for this floor
+  useEffect(() => {
+    playAmbient(floorId);
+    // Ambient will fade out when the next floor loads
+  }, [floorId, playAmbient]);
 
   return (
     <div className="relative min-h-dvh w-full">
@@ -54,6 +66,8 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
       {/* 1 — Immersive procedural skyline background */}
       <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <ProceduralSkyline floorId={floorId} />
+        {/* 1b — Weather overlay behind floor content */}
+        <WeatherEffects condition={condition} />
       </div>
 
       {/* 2 — Floor-specific ambient light tint */}
@@ -106,15 +120,15 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
         />
       </div>
 
-      {/* 6 — Room content */}
-      <div className="relative min-h-dvh" style={{ zIndex: 10 }}>
+      {/* 6 — Room content — p-4 on mobile, p-8 on desktop */}
+      <div className="relative min-h-dvh p-4 md:p-0" style={{ zIndex: 10 }}>
         {children}
       </div>
 
       {/* 7 — Floor info badge (top-right) */}
       {floor && (
         <div
-          className="fixed top-4 right-4 md:right-28 flex items-center gap-2 rounded-full px-4 py-1.5"
+          className="glass-refraction fixed top-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-28 flex items-center gap-2 rounded-full px-3 py-1 md:px-4 md:py-1.5"
           style={{
             zIndex: 20,
             background: "rgba(10, 12, 25, 0.72)",
@@ -123,6 +137,7 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
             border: "1px solid rgba(201, 168, 76, 0.18)",
             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.04)",
             animation: "floor-badge-breathe 4s ease-in-out infinite",
+            position: "fixed",
           }}
         >
           {/* Gold dot indicator */}

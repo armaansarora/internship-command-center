@@ -4,6 +4,10 @@ import { DayNightProvider } from "@/components/world/DayNightProvider";
 import { Elevator } from "@/components/world/Elevator";
 import { UserMenu } from "@/components/ui/UserMenu";
 import { NotificationSystem } from "@/components/world/NotificationSystem";
+import { SoundProvider } from "@/components/world/SoundProvider";
+import { SoundToggle } from "@/components/ui/SoundToggle";
+import { EasterEggs } from "@/components/world/EasterEggs";
+import { ErrorBoundary } from "@/components/world/ErrorBoundary";
 
 interface WorldShellProps {
   children: React.ReactNode;
@@ -23,6 +27,7 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
   const displayName = userName ?? userEmail.split("@")[0];
 
   return (
+    <SoundProvider>
     <DayNightProvider>
       <div className="relative flex min-h-dvh w-full">
         {/* Elevator panel — left side */}
@@ -46,12 +51,21 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
           />
         </div>
 
-        {/* Main content area — offset for elevator panel on desktop */}
-        <main className="flex-1 md:ml-16">{children}</main>
+        {/* Main content area — full-width on mobile, offset for elevator on desktop */}
+        <main className="flex-1 md:ml-16 pb-20 md:pb-0">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
+
+        {/* Easter eggs — midnight fireworks, confetti, etc. */}
+        <EasterEggs />
 
         {/* In-world notification system — renders on all authenticated floors */}
         <NotificationSystem />
+
+        {/* Sound toggle — fixed bottom-right */}
+        <SoundToggle />
       </div>
     </DayNightProvider>
+    </SoundProvider>
   );
 }

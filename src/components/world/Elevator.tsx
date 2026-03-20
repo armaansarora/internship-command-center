@@ -8,6 +8,7 @@ import type { ElevatorState } from "@/types/ui";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { ElevatorPanel, ElevatorMobileBar } from "./elevator/ElevatorPanel";
 import { ElevatorDoors } from "./elevator/ElevatorDoors";
+import { useSoundEngine } from "./SoundProvider";
 
 // ─── SessionStorage key ──────────────────────────────────────────────────────
 /**
@@ -119,6 +120,7 @@ export function Elevator(): JSX.Element {
   const tickTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const prefersReducedMotion = useReducedMotion();
+  const { playSound } = useSoundEngine();
 
   // ── Derive active floor from current pathname ──────────────────────────────
   const activeFloor: FloorId = useMemo(() => {
@@ -162,6 +164,7 @@ export function Elevator(): JSX.Element {
 
       setTargetFloor(floorId);
       setState("doors-closing");
+      playSound("elevator-move");
     },
     [state, activeFloor, router, prefersReducedMotion],
   );
@@ -202,6 +205,8 @@ export function Elevator(): JSX.Element {
       .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
       .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")
       .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
+
+    playSound("door-open");
 
     return () => { tl.kill(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -280,6 +285,7 @@ export function Elevator(): JSX.Element {
       .call(() => setState("doors-opening"))
 
       // Phase 3: Doors open (same-instance navigation only)
+      .call(() => { playSound("elevator-ding"); })
       .to(interior, { opacity: 0, duration: 0.15, ease: "power1.out" })
       .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
       .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")

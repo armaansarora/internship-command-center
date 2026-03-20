@@ -3,6 +3,7 @@
 import type { JSX } from "react";
 import { useState, useCallback } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useSoundEngine } from "@/components/world/SoundProvider";
 
 interface AgentProgress {
   name: string;
@@ -123,10 +124,12 @@ export function RingTheBell({ onBriefingReady }: RingTheBellProps): JSX.Element 
     AGENTS.map((a) => ({ ...a, status: "waiting" as const }))
   );
   const reducedMotion = useReducedMotion();
+  const { playSound } = useSoundEngine();
 
   const handleRing = useCallback(async () => {
     if (phase !== "idle") return;
     setPhase("ringing");
+    playSound("bell-ring");
 
     // Step 1: Bell animation
     await new Promise<void>((resolve) => setTimeout(resolve, reducedMotion ? 0 : 700));
@@ -147,7 +150,7 @@ export function RingTheBell({ onBriefingReady }: RingTheBellProps): JSX.Element 
     setPhase("complete");
     // Signal parent to open CEO dialogue with ring-the-bell prompt
     onBriefingReady?.("Ring the bell — compile a full morning briefing from all department heads. CRO: pipeline status. COO: follow-up actions. CNO: networking opportunities. CIO: company intelligence. CMO: content and outreach. CPO: strategic priorities. Go.");
-  }, [phase, reducedMotion, onBriefingReady]);
+  }, [phase, reducedMotion, playSound, onBriefingReady]);
 
   const handleReset = useCallback(() => {
     setPhase("idle");

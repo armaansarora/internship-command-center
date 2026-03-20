@@ -68,7 +68,7 @@ export function GlassPanel({
   return (
     <div
       ref={ref}
-      className={`rounded-xl ${className}`}
+      className={`glass-liquid rounded-xl ${className}`}
       style={{
         background: "rgba(14, 16, 32, 0.92)",
         backdropFilter: "blur(24px) saturate(1.5)",

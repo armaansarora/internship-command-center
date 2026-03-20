@@ -50,7 +50,8 @@ export function ElevatorButton({
   const isLobby = floorId === "L";
   const isLocked = phase > 0;
 
-  const btnSizeClass = size === "md" ? "w-9 h-9" : "w-8 h-8";
+  // Mobile (sm): 44x44px minimum touch target per WCAG guidelines
+  const btnSizeClass = size === "md" ? "w-9 h-9" : "w-11 h-11";
 
   /** Static button style derived from floor state — recalculated only on relevant changes. */
   const baseStyle = useMemo((): React.CSSProperties => {

@@ -2,6 +2,7 @@ import { streamText, stepCountIs, convertToModelMessages } from "ai";
 import type { UIMessage } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { requireUser } from "@/lib/supabase/server";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { getDailyBriefingData } from "@/lib/db/queries/communications-rest";
 import { buildCOOSystemPrompt } from "@/lib/agents/coo/system-prompt";
 import { buildCOOTools } from "@/lib/agents/coo/tools";
@@ -10,6 +11,9 @@ export const maxDuration = 60;
 
 export async function POST(req: Request): Promise<Response> {
   const user = await requireUser();
+
+  const check = await withRateLimit(user.id);
+  if (check.response) return check.response;
 
   const body = (await req.json()) as { messages: UIMessage[] };
   const { messages } = body;

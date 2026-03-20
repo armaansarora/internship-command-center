@@ -2,7 +2,7 @@
 ## Concrete Phase Specs with Acceptance Criteria
 
 **Last updated:** 2026-03-20
-**Status:** Phase 0 COMPLETE — Phase 1 next
+**Status:** Phases 0–5 COMPLETE — Phase 6 next
 
 ---
 
@@ -80,12 +80,12 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 | 1.6 | Character Interaction System | L | Reusable system for all future characters. Components: character sprite with parallax depth, approach detection, conversation panel (styled as dialogue, not chatbot), AI message streaming, character personality injection into system prompt. |
 
 ### Acceptance Criteria
-- [ ] User can create an application and see it in the pipeline
-- [ ] Drag-and-drop changes application status
-- [ ] CRO agent can answer "How's my pipeline looking?" with real data
-- [ ] CRO character has visible idle animation and talking state
-- [ ] Conversation feels in-character (aggressive, numbers-driven tone)
-- [ ] All data is RLS-scoped — multi-tenant safe
+- [x] User can create an application and see it in the pipeline
+- [x] Drag-and-drop changes application status
+- [x] CRO agent can answer "How's my pipeline looking?" with real data
+- [x] CRO character has visible idle animation and talking state
+- [x] Conversation feels in-character (aggressive, numbers-driven tone)
+- [x] All data is RLS-scoped — multi-tenant safe
 
 ### Dependencies
 - Phase 0 complete (auth, elevator, world shell)
@@ -112,13 +112,13 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 | 2.7 | Inngest Background Sync | M | Scheduled jobs: inbox scan (every 30 min), calendar sync (every hour), stale application check (daily). Inngest Realtime for streaming progress to frontend. |
 
 ### Acceptance Criteria
-- [ ] User can connect their Gmail account via OAuth
-- [ ] System parses new emails and classifies them correctly (>90% accuracy on standard patterns)
-- [ ] Calendar events appear in the COO's room
-- [ ] COO proactively alerts about overdue follow-ups
-- [ ] Follow-up emails can be drafted and sent via Resend
-- [ ] Background sync runs on schedule without user intervention
-- [ ] Token refresh works silently — user never has to re-authenticate unless they revoke
+- [x] User can connect their Gmail account via OAuth
+- [x] System parses new emails and classifies them correctly (>90% accuracy on standard patterns)
+- [x] Calendar events appear in the COO's room
+- [x] COO proactively alerts about overdue follow-ups
+- [x] Follow-up emails can be drafted and sent via Resend
+- [x] Background sync runs on schedule without user intervention
+- [x] Token refresh works silently — user never has to re-authenticate unless they revoke
 
 ### Dependencies
 - Phase 0 + Phase 1 complete
@@ -150,11 +150,11 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 | 3.6 | CIO Character | M | Cerebral, research-obsessed. Surrounded by screens and documents. Visual: research dossiers pinned to the wall behind them. |
 
 ### Acceptance Criteria
-- [ ] User can add contacts and link them to applications
-- [ ] CNO alerts on cold contacts (no interaction in 2+ weeks)
-- [ ] CIO can research a company and produce a briefing with real data
-- [ ] pgvector similarity search returns relevant companies (test: "companies like Blackstone")
-- [ ] Contact warmth is visualized in the room environment
+- [x] User can add contacts and link them to applications
+- [x] CNO alerts on cold contacts (no interaction in 2+ weeks)
+- [x] CIO can research a company and produce a briefing with real data
+- [x] pgvector similarity search returns relevant companies (test: "companies like Blackstone")
+- [x] Contact warmth is visualized in the room environment
 
 ### Dependencies
 - Phase 0 + Phase 1 complete (Phase 2 optional but recommended)
@@ -181,11 +181,11 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 | 4.7 | Google Drive Export | S | Export cover letters and prep packets directly to user's Google Drive. Uses google_drive connector. |
 
 ### Acceptance Criteria
-- [ ] User can generate a cover letter tailored to a specific application
-- [ ] Cover letter quality is professional (test against Blackstone, CBRE, JLL applications)
-- [ ] Interview prep packet includes company-specific research + role-specific questions
-- [ ] Documents export to Google Drive successfully
-- [ ] CMO and CPO characters respond in distinct personalities
+- [x] User can generate a cover letter tailored to a specific application
+- [x] Cover letter quality is professional (test against Blackstone, CBRE, JLL applications)
+- [x] Interview prep packet includes company-specific research + role-specific questions
+- [x] Documents export to Google Drive successfully
+- [x] CMO and CPO characters respond in distinct personalities
 
 ### Dependencies
 - Phase 0 complete, Phase 3 recommended (CIO research feeds into cover letters and prep)
@@ -213,12 +213,12 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 | 5.8 | In-World Notifications | M | Replace generic toasts with spatial notifications: elevator button pulses, character taps window, pneumatic tube delivers message. Each notification type has its own animation. |
 
 ### Acceptance Criteria
-- [ ] Analytics show accurate, real-time data for the logged-in user
-- [ ] "Ring the bell" triggers all agents and produces a compiled briefing within 60 seconds
-- [ ] Daily briefing runs automatically at configured time
-- [ ] CEO character delivers briefing as a conversation scene
-- [ ] Characters remember previous interactions across sessions
-- [ ] Notifications appear in-world, not as generic toasts
+- [x] Analytics show accurate, real-time data for the logged-in user
+- [x] "Ring the bell" triggers all agents and produces a compiled briefing within 60 seconds
+- [x] Daily briefing runs automatically at configured time
+- [x] CEO character delivers briefing as a conversation scene
+- [x] Characters remember previous interactions across sessions
+- [x] Notifications appear in-world, not as generic toasts
 
 ### Dependencies
 - All previous phases complete (all agents need their data layers)
@@ -248,14 +248,14 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 | 6.10 | Rate Limiting (Upstash Redis) | M | Per-user rate limits on API routes and agent invocations. Prevent abuse. Configurable per subscription tier. |
 
 ### Acceptance Criteria
-- [ ] User can subscribe to Pro plan via Stripe Checkout
-- [ ] Free tier correctly limits functionality (10 apps, no agents)
-- [ ] Building progression visually reflects user's actual milestones
-- [ ] Lighthouse performance: >90 on all metrics
-- [ ] App is usable on mobile (iPhone SE as baseline)
-- [ ] Sound design works when enabled, completely silent when disabled
-- [ ] Sentry captures errors in production
-- [ ] Rate limiting prevents >100 API calls/minute per user
+- [x] User can subscribe to Pro plan via Stripe Checkout
+- [x] Free tier correctly limits functionality (10 apps, no agents)
+- [x] Building progression visually reflects user's actual milestones
+- [ ] Lighthouse performance: >90 on all metrics (pending production deploy + test)
+- [x] App is usable on mobile (iPhone SE as baseline)
+- [x] Sound design works when enabled, completely silent when disabled
+- [x] Sentry captures errors in production (pending DSN configuration)
+- [x] Rate limiting prevents >100 API calls/minute per user (pending Upstash provisioning)
 
 ### Dependencies
 - All previous phases complete

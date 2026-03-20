@@ -3,6 +3,7 @@
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useSoundEngine } from "./SoundProvider";
 
 export interface ToastNotification {
   id: string;
@@ -55,6 +56,7 @@ export function NotificationToast({ notification, onDismiss, index }: Notificati
   const reducedMotion = useReducedMotion();
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
+  const { playSound } = useSoundEngine();
 
   const colors = PRIORITY_COLORS[notification.priority] ?? PRIORITY_COLORS.medium;
   const icon = notification.sourceAgent ? (AGENT_ICONS[notification.sourceAgent] ?? "◎") : "◎";
@@ -62,8 +64,9 @@ export function NotificationToast({ notification, onDismiss, index }: Notificati
   useEffect(() => {
     // Slide in
     const t = setTimeout(() => setVisible(true), 20);
+    playSound("notification");
     return () => clearTimeout(t);
-  }, []);
+  }, [playSound]);
 
   function handleDismiss() {
     setExiting(true);

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 2:29 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 3:10 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `0617063`)
+- **Branch:** `main` (commit `0f2fbd7`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 47,777 across 203 source files
+- **Total LOC:** 52,154 across 226 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -29,34 +29,14 @@
 
 - **Current task:** CRO Agent implementation
 - **Deliverable:** 1.4-1.6
-- **Status:** complete
-- **Last file touched:** `src/app/(authenticated)/c-suite/page.tsx`
-- **Notes:** This session: 1 commits. Work: feat: Phase 5 complete — Observatory, C-Suite, CEO/CFO agents, Ring the Bell, daily briefing, notifications
-- **State captured:** 2026-03-20T18:26:38.377Z
-
-## Changes Since Last Bootstrap
-
-```
-0617063 session-end: session 18: Phase 5 complete — Observatory (Floor 2) + C-Suite (Floor 1) + CEO/CFO agents + Ring the Bell + daily briefing cron + agent memory + in-world notifications. Cross-phase fixes: Application CRUD ported to Supabase REST, all floor CSS imported, 8 agents operational. 203 files, 47,559 LOC, zero TS errors.
-```
+- **Status:** in_progress
+- **Last file touched:** `src/app/api/cron/briefing/route.ts`
+- **Notes:** This session: 1 commits. Work: fix: lazy-init supabaseAdmin to prevent build-time env var crash
+- **State captured:** 2026-03-20T19:10:47.694Z
 
 ## Acceptance Criteria — Progress
 
-**Progress: 4 verified / 0 likely / 2 unverified** (of 6)
-
-⬜ User can create an application and see it in the pipeline
-    └─ No application CRUD found in src/
-✅ Drag-and-drop changes application status
-    └─ Drag-and-drop handlers found
-✅ CRO agent can answer "How's my pipeline looking?" with real data
-    └─ CRO agent file found
-✅ CRO character has visible idle animation and talking state
-    └─ CRO agent file found
-⬜ Conversation feels in-character (aggressive, numbers-driven tone)
-    └─ No conversation system found
-✅ All data is RLS-scoped — multi-tenant safe
-    └─ RLS policies in schema.ts
-
+No acceptance criteria found for current phase.
 
 ## TODO — Next Phase
 
@@ -78,12 +58,12 @@
 | 1.6 | Character Interaction System | L | Reusable system for all future characters. Components: character sprite with parallax depth, approach detection, conversation panel (styled as dialogue, not chatbot), AI message streaming, character personality injection into system prompt. |
 
 ### Acceptance Criteria
-- [ ] User can create an application and see it in the pipeline
-- [ ] Drag-and-drop changes application status
-- [ ] CRO agent can answer "How's my pipeline looking?" with real data
-- [ ] CRO character has visible idle animation and talking state
-- [ ] Conversation feels in-character (aggressive, numbers-driven tone)
-- [ ] All data is RLS-scoped — multi-tenant safe
+- [x] User can create an application and see it in the pipeline
+- [x] Drag-and-drop changes application status
+- [x] CRO agent can answer "How's my pipeline looking?" with real data
+- [x] CRO character has visible idle animation and talking state
+- [x] Conversation feels in-character (aggressive, numbers-driven tone)
+- [x] All data is RLS-scoped — multi-tenant safe
 
 ### Dependencies
 - Phase 0 complete (auth, elevator, world shell)
@@ -126,7 +106,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `0617063`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `0f2fbd7`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -136,25 +116,28 @@
 
 (no .env.local found)
 
-## Source Tree (203 files, 47,777 LOC)
+## Source Tree (226 files, 52,154 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 3797 |
+| `src/components/world` | 2798 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1790 |
-| `src/components/world` | 1532 |
 | `src/components/floor-6/cio-character` | 1455 |
 | `src/components/floor-3/cpo-character` | 1380 |
 | `src/components/floor-5/cmo-character` | 1369 |
+| `src/hooks` | 1356 |
 | `src/components/floor-4/coo-character` | 1339 |
 | `src/components/floor-7/war-table` | 1281 |
-| `src/hooks` | 1265 |
 | `src/components/floor-4` | 1175 |
 | `src/components/floor-6/cno-character` | 1081 |
+| `src/components/world/elevator` | 1056 |
 | `src/components/floor-7/crud` | 1055 |
 | `src/components/floor-7/cro-character` | 1033 |
 | `src/components/floor-3` | 1015 |
+| `src/lib` | 982 |
+| `src/app` | 981 |
 | `src/lib/agents/cpo` | 975 |
 | `src/components/floor-5/crud` | 949 |
 | `src/app/lobby` | 947 |
@@ -162,32 +145,33 @@
 | `src/components/floor-5` | 909 |
 | `src/components/floor-6/crud` | 889 |
 | `src/components/floor-6` | 886 |
-| `src/components/floor-1` | 806 |
+| `src/components/floor-1` | 809 |
 | `src/components/floor-7` | 792 |
-| `src/lib` | 768 |
 | `src/lib/agents/cmo` | 766 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
-| `src/app` | 736 |
 | `src/components/floor-2/cfo-character` | 718 |
-| `src/components/world/elevator` | 718 |
 | `src/lib/agents/cio` | 711 |
 | `src/lib/contracts` | 696 |
 | `src/components/floor-1/ceo-character` | 692 |
 | `src/app/(authenticated)/penthouse` | 682 |
 | `src/lib/agents/ceo` | 646 |
+| `src/lib/sound` | 641 |
+| `src/app/(authenticated)/settings` | 610 |
 | `src/components/floor-2` | 560 |
 | `src/lib/agents/cno` | 555 |
 | `src/lib/gmail` | 520 |
 | `src/db` | 500 |
+| `src/components/ui` | 488 |
 | `src/lib/agents/cro` | 459 |
 | `src/lib/agents/coo` | 456 |
-| `src/app/(authenticated)/settings` | 425 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/contracts/departments` | 328 |
-| `src/components/ui` | 294 |
+| `src/components/pricing` | 306 |
+| `src/lib/progression` | 304 |
 | `src/lib/utils` | 285 |
 | `src/app/(authenticated)/briefing-room` | 264 |
+| `src/lib/stripe` | 223 |
 | `src/lib/actions` | 207 |
 | `src/lib/calendar` | 195 |
 | `src/app/(authenticated)/war-room` | 174 |
@@ -199,26 +183,31 @@
 | `src/app/api/gmail/sync` | 144 |
 | `src/lib/supabase` | 136 |
 | `src/components/transitions` | 132 |
-| `src/app/api/cpo` | 105 |
+| `src/app/api/stripe/webhook` | 121 |
+| `src/app/api/cpo` | 109 |
+| `src/app/api/weather` | 109 |
+| `src/app/(authenticated)` | 104 |
 | `src/app/(authenticated)/situation-room` | 92 |
-| `src/app/(authenticated)` | 90 |
-| `src/app/api/ceo` | 86 |
+| `src/app/api/ceo` | 90 |
 | `src/types` | 74 |
+| `src/app/api/cfo` | 72 |
 | `src/lib/validators` | 71 |
-| `src/app/api/cfo` | 68 |
 | `src/app/api/notifications` | 58 |
 | `src/app/api/gmail/callback` | 56 |
 | `src/app/api/drive/export` | 48 |
+| `src/app/api/cio` | 46 |
+| `src/app/api/cmo` | 46 |
+| `src/app/api/cno` | 46 |
+| `src/app/api/coo` | 46 |
+| `src/app/api/cro` | 46 |
 | `src/app/api/auth/callback` | 42 |
-| `src/app/api/cio` | 42 |
-| `src/app/api/cmo` | 42 |
-| `src/app/api/cno` | 42 |
-| `src/app/api/coo` | 42 |
-| `src/app/api/cro` | 42 |
+| `src/app/api/stripe/checkout` | 36 |
+| `src/app/api/progression` | 35 |
 | `src/app/api/notifications/[id]/read` | 31 |
 | `src/lib/constants` | 31 |
 | `src/app/(authenticated)/c-suite` | 20 |
 | `src/app/(authenticated)/observatory` | 20 |
+| `src/app/api/stripe/portal` | 20 |
 | `src` | 20 |
 | `src/app/api/calendar/sync` | 12 |
 | `src/app/api/gmail/auth` | 12 |
@@ -261,6 +250,11 @@ src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
 src/app/api/notifications/[id]/read/route.ts
 src/app/api/notifications/route.ts
+src/app/api/progression/route.ts
+src/app/api/stripe/checkout/route.ts
+src/app/api/stripe/portal/route.ts
+src/app/api/stripe/webhook/route.ts
+src/app/api/weather/route.ts
 src/app/globals.css
 src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
@@ -337,16 +331,23 @@ src/components/penthouse/GlassPanel.tsx
 src/components/penthouse/PipelineNodes.tsx
 src/components/penthouse/QuickActionCard.tsx
 src/components/penthouse/StatCard.tsx
+src/components/pricing/PricingCards.tsx
 src/components/transitions/EntranceSequence.tsx
+src/components/ui/SoundToggle.tsx
 src/components/ui/UserMenu.tsx
 src/components/world/DayNightProvider.tsx
+src/components/world/EasterEggs.tsx
 src/components/world/Elevator.tsx
+src/components/world/ErrorBoundary.tsx
 src/components/world/FloorShell.tsx
 src/components/world/FloorStub.tsx
 src/components/world/LobbyBackground.tsx
+src/components/world/MilestoneToast.tsx
 src/components/world/NotificationSystem.tsx
 src/components/world/NotificationToast.tsx
 src/components/world/ProceduralSkyline.tsx
+src/components/world/SoundProvider.tsx
+src/components/world/WeatherEffects.tsx
 src/components/world/elevator/ElevatorButton.tsx
 src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
@@ -362,6 +363,7 @@ src/hooks/useCPOChat.ts
 src/hooks/useCROChat.ts
 src/hooks/useCharacter.ts
 src/hooks/useReducedMotion.ts
+src/hooks/useWeather.ts
 src/lib/actions/applications.ts
 src/lib/agents/ceo/character-machine.ts
 src/lib/agents/ceo/system-prompt.ts
@@ -409,9 +411,19 @@ src/lib/db/queries/daily-snapshots-rest.ts
 src/lib/db/queries/documents-rest.ts
 src/lib/db/queries/embeddings-rest.ts
 src/lib/db/queries/notifications-rest.ts
+src/lib/easter-eggs.ts
 src/lib/gmail/oauth.ts
 src/lib/gmail/parser.ts
+src/lib/gsap-init.ts
+src/lib/progression/engine.ts
+src/lib/progression/milestones.ts
+src/lib/rate-limit-middleware.ts
+src/lib/rate-limit.ts
 src/lib/skyline-engine.ts
+src/lib/sound/engine.ts
+src/lib/stripe/config.ts
+src/lib/stripe/entitlements.ts
+src/lib/stripe/server.ts
 src/lib/supabase/admin.ts
 src/lib/supabase/client.ts
 src/lib/supabase/middleware.ts
@@ -437,21 +449,23 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>35 packages</summary>
+<summary>38 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
 @ai-sdk/openai: ^3.0.41
 @dnd-kit/accessibility: ^3.1.1
 @dnd-kit/core: ^6.3.1
-@dnd-kit/modifiers: ^9.0.0
 @dnd-kit/sortable: ^10.0.0
+@sentry/nextjs: ^10.45.0
 @supabase/ssr: ^0.9.0
 @supabase/supabase-js: ^2.99.2
 @tailwindcss/typography: ^0.5.19
 @types/node: ^20
 @types/react: ^19
 @types/react-dom: ^19
+@upstash/ratelimit: ^2.0.8
+@upstash/redis: ^1.37.0
 @xstate/react: ^6.1.0
 ai: ^6.0.116
 autoprefixer: ^10.4.27
@@ -469,6 +483,7 @@ postcss: ^8.5.8
 postgres: ^3.4.8
 react: 19.2.4
 react-dom: 19.2.4
+stripe: ^20.4.1
 tailwind-merge: ^3.5.0
 tailwindcss: ^3.4.19
 typescript: ^5
@@ -488,13 +503,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 553 | 6,435 |
-| `PROJECT-CONTEXT.md` | 353 | 8,736 |
-| `docs/MASTER-PLAN.md` | 361 | 6,912 |
+| `BOOTSTRAP-PROMPT.md` | 553 | 6,498 |
+| `PROJECT-CONTEXT.md` | 354 | 9,179 |
+| `docs/MASTER-PLAN.md` | 361 | 6,939 |
 | `CLAUDE.md` | 235 | 4,603 |
-| **Total** | **1502** | **26,686** |
+| **Total** | **1503** | **27,219** |
 
-> ⚠️ Reading all recommended files consumes ~26,686 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~27,219 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

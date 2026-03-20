@@ -1,12 +1,16 @@
 "use client";
 
-import { useCallback, type JSX } from "react";
+import { useCallback, useState, type JSX } from "react";
+import { PricingCards } from "@/components/pricing/PricingCards";
+import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
 
 interface SettingsClientProps {
   userName: string | null;
   userEmail: string;
   avatarUrl?: string | null;
   provider: string;
+  subscriptionTier: SubscriptionTier;
+  appsUsed: number;
 }
 
 /**
@@ -25,9 +29,13 @@ export function SettingsClient({
   userEmail,
   avatarUrl,
   provider,
+  subscriptionTier,
+  appsUsed,
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
+
+  const [billingLoading, setBillingLoading] = useState(false);
 
   const handleSignOut = useCallback(() => {
     const form = document.createElement("form");
@@ -35,6 +43,25 @@ export function SettingsClient({
     form.action = "/api/auth/signout";
     document.body.appendChild(form);
     form.submit();
+  }, []);
+
+  const handleBillingPortal = useCallback(async () => {
+    setBillingLoading(true);
+    try {
+      const response = await fetch("/api/stripe/portal", { method: "POST" });
+      if (!response.ok) {
+        setBillingLoading(false);
+        return;
+      }
+      const data = (await response.json()) as { url?: string };
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setBillingLoading(false);
+      }
+    } catch {
+      setBillingLoading(false);
+    }
   }, []);
 
   return (
@@ -196,7 +223,149 @@ export function SettingsClient({
         </div>
       </section>
 
-      {/* ── Section 2: Account Actions ── */}
+      {/* ── Section 2: Subscription ── */}
+      <section className="w-full" aria-labelledby="section-subscription">
+        <h2
+          id="section-subscription"
+          className="mb-4"
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            color: "var(--gold)",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+          }}
+        >
+          Subscription
+        </h2>
+
+        {/* Current plan summary */}
+        <div
+          className="rounded-xl p-5 mb-4"
+          style={{
+            background: "rgba(10, 12, 25, 0.65)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid rgba(201, 168, 76, 0.1)",
+            boxShadow:
+              "0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+          }}
+        >
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  {STRIPE_PLANS[subscriptionTier].name} Plan
+                </span>
+                <span
+                  className="rounded-full px-2 py-0.5"
+                  style={{
+                    background: "rgba(201, 168, 76, 0.12)",
+                    border: "1px solid rgba(201, 168, 76, 0.25)",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "9px",
+                    color: "#C9A84C",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Active
+                </span>
+              </div>
+              {/* App usage */}
+              <div className="mt-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "10px",
+                      color: "var(--text-muted)",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    Applications used
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "10px",
+                      color:
+                        subscriptionTier === "free" && appsUsed >= 10
+                          ? "#ef4444"
+                          : "var(--text-muted)",
+                    }}
+                  >
+                    {appsUsed}
+                    {subscriptionTier === "free" ? " / 10" : " / ∞"}
+                  </span>
+                </div>
+                {subscriptionTier === "free" && (
+                  <div
+                    className="w-48 rounded-full overflow-hidden"
+                    style={{ height: "3px", background: "rgba(255,255,255,0.08)" }}
+                    role="progressbar"
+                    aria-valuenow={appsUsed}
+                    aria-valuemin={0}
+                    aria-valuemax={10}
+                    aria-label="Applications used"
+                  >
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(100, (appsUsed / 10) * 100)}%`,
+                        background:
+                          appsUsed >= 10
+                            ? "#ef4444"
+                            : appsUsed >= 8
+                            ? "#f59e0b"
+                            : "#C9A84C",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Manage billing button — only shown for paid tiers */}
+            {subscriptionTier !== "free" && (
+              <button
+                type="button"
+                disabled={billingLoading}
+                onClick={() => void handleBillingPortal()}
+                className="rounded-lg px-4 py-2 transition-all duration-150"
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  color: "#C9A84C",
+                  background: "rgba(201, 168, 76, 0.08)",
+                  border: "1px solid rgba(201, 168, 76, 0.2)",
+                  cursor: billingLoading ? "wait" : "pointer",
+                  opacity: billingLoading ? 0.7 : 1,
+                }}
+                aria-label="Manage billing in Stripe portal"
+              >
+                {billingLoading ? "Loading..." : "Manage Billing"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Pricing cards */}
+        <PricingCards
+          currentTier={subscriptionTier}
+          appsUsed={appsUsed}
+        />
+      </section>
+
+      {/* ── Section 3: Account Actions ── */}
       <section className="w-full" aria-labelledby="section-account">
         <h2
           id="section-account"

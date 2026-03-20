@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { SettingsClient } from "./settings-client";
+import { getSubscriptionTier } from "@/lib/stripe/server";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -14,6 +16,18 @@ export const metadata: Metadata = { title: "Settings" };
 export default async function SettingsPage() {
   const user = await requireUser();
 
+  const [subscriptionTier, appsCountResult] = await Promise.all([
+    getSubscriptionTier(user.id),
+    (async () => {
+      const supabase = await createClient();
+      const { count } = await supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      return count ?? 0;
+    })(),
+  ]);
+
   return (
     <FloorShell floorId="PH">
       <SettingsClient
@@ -21,6 +35,8 @@ export default async function SettingsPage() {
         userEmail={user.email ?? ""}
         avatarUrl={user.user_metadata?.avatar_url ?? null}
         provider={user.app_metadata?.provider ?? "email"}
+        subscriptionTier={subscriptionTier}
+        appsUsed={appsCountResult}
       />
     </FloorShell>
   );

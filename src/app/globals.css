@@ -411,6 +411,60 @@ a, button, [role="button"], label[for], summary,
     text-transform: uppercase;
   }
 
+  /* ── Liquid glass — refraction gradient effect ── */
+  .glass-liquid {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.04) 40%,
+      rgba(201, 168, 76, 0.06) 60%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.37),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Gold specular highlight on hover ── */
+  .glass-liquid-gold {
+    background: linear-gradient(
+      135deg,
+      rgba(201, 168, 76, 0.06) 0%,
+      rgba(255, 255, 255, 0.04) 30%,
+      rgba(201, 168, 76, 0.08) 70%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.37),
+      0 0 20px rgba(201, 168, 76, 0.08),
+      inset 0 1px 0 rgba(201, 168, 76, 0.12);
+  }
+
+  /* ── Subtle refraction on glass surfaces ── */
+  .glass-refraction {
+    position: relative;
+  }
+  .glass-refraction::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.03) 45%,
+      transparent 50%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+
   /* Allow scrolling within floor content */
   .floor-content {
     overflow-y: auto;
@@ -648,5 +702,196 @@ a, button, [role="button"], label[for], summary,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================
+   MOBILE-FIRST RESPONSIVE OVERRIDES
+   ============================================= */
+
+@media (max-width: 767px) {
+  /* Lighter blur on mobile for GPU/battery performance */
+  .glass-panel {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-liquid {
+    backdrop-filter: blur(8px) saturate(1.1);
+    -webkit-backdrop-filter: blur(8px) saturate(1.1);
+  }
+
+  .glass-liquid-gold {
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  }
+
+  /* Ensure minimum touch targets */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Scale down glass panel blur for perf */
+  .glass-noise {
+    backdrop-filter: blur(12px) saturate(1.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  }
+}
+
+/* =============================================
+   FLOOR VISUAL UPGRADE STATES (6.2)
+   Applied via .floor-state-{state} on floor wrappers
+   ============================================= */
+
+.floor-state-construction {
+  filter: grayscale(0.3) brightness(0.85);
+}
+
+.floor-state-basic {
+  /* default — no filter */
+}
+
+.floor-state-renovated {
+  /* Subtle gold tint overlay */
+  box-shadow: inset 0 0 100px rgba(201, 168, 76, 0.05);
+}
+
+.floor-state-gold {
+  box-shadow: inset 0 0 150px rgba(201, 168, 76, 0.1);
+}
+
+.floor-state-platinum {
+  box-shadow:
+    inset 0 0 150px rgba(201, 168, 76, 0.1),
+    inset 0 0 50px rgba(255, 255, 255, 0.03);
+}
+
+/* =============================================
+   MILESTONE TOAST ANIMATIONS (6.2)
+   ============================================= */
+
+@keyframes milestone-slide-in {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes milestone-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes milestone-confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(60px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes milestone-confetti-drift {
+  0% {
+    transform: translateX(0) translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--drift, 20px)) translateY(60px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* 100-app confetti: falls from top of screen */
+@keyframes confetti-cascade {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(var(--spin, 720deg));
+    opacity: 0;
+  }
+}
+
+/* Weather effects (6.8) */
+@keyframes rain-fall {
+  from {
+    transform: translateY(-100%) rotate(5deg);
+  }
+  to {
+    transform: translateY(110vh) rotate(5deg);
+  }
+}
+
+@keyframes snow-fall {
+  0% {
+    transform: translateY(-5%) translateX(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(50vh) translateX(var(--sway, 20px));
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(110vh) translateX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes thunder-flash {
+  0%, 90%, 100% {
+    opacity: 0;
+  }
+  92%, 96% {
+    opacity: 0.15;
+  }
+  94% {
+    opacity: 0.05;
+  }
+}
+
+/* Easter egg fireworks (6.7) */
+@keyframes firework-burst {
+  0% {
+    transform: translate(var(--fx, 0px), var(--fy, 0px)) scale(0);
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(
+      calc(var(--fx, 0px) + var(--dx, 60px)),
+      calc(var(--fy, 0px) + var(--dy, -60px))
+    ) scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floor-state-construction,
+  .floor-state-renovated,
+  .floor-state-gold,
+  .floor-state-platinum {
+    filter: none;
+    box-shadow: none;
+    animation: none;
   }
 }
