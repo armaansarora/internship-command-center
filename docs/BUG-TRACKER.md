@@ -1,42 +1,66 @@
 # BUG TRACKER — The Tower
-## User-Reported Issues (Session 12, March 19, 2026)
-## Reporter: Armaan Arora — 5-minute walkthrough of production site
+## Living Document — Updated Every Session
 
-> These are real usability issues found in under 5 minutes. Fix ALL before continuing Phase 1 feature work.
+> **Rule:** Every agent session that touches bugs MUST update this file. Log what was fixed, when, and the commit hash. This is the single source of truth for site health.
+
+---
+
+## CHANGELOG
+
+Reverse-chronological log of all fixes. Every fix gets an entry here.
+
+| Date | Session | Bug(s) Fixed | Commit | Notes |
+|------|---------|-------------|--------|-------|
+| — | — | — | — | No fixes yet — tracker created Session 12 |
+
+<!-- TEMPLATE for new entries (copy, fill, paste at top of table above the "—" row):
+| YYYY-MM-DD | Session # | BUG-XXX: short description | `abc1234` | Any notes about the fix |
+-->
+
+---
+
+## OPEN ISSUES
+
+### How to Use This Section
+- When a bug is **fixed**: move it from OPEN ISSUES to CLOSED ISSUES below, add a changelog entry above
+- When a bug is **found**: add it here with the next BUG-XXX number
+- Every session: scan OPEN ISSUES, fix what you can, log what you did
+
+**Status legend:** `🔴 OPEN` · `🟡 IN PROGRESS` · `🟢 FIXED` · `⚪ WONT FIX`
 
 ---
 
 ## CRITICAL — Broken Core Functionality
 
-### BUG-001: Cannot navigate to any floor from elevator
+### BUG-001: Cannot navigate to any floor from elevator `🔴 OPEN`
 **Severity:** Critical  
 **Location:** Elevator component  
 **Behavior:** Clicking any floor greys out and lags the entire area. No feedback, no "under construction" screen, nothing happens.  
 **Expected:** Either navigate to the floor OR show a clear "Under Construction — Coming in Phase X" interstitial page.  
 **Fix:** Every locked floor needs a placeholder page. Grey-out should show a tooltip/overlay, not just lag.
 
-### BUG-002: Cannot return to lobby from penthouse
+### BUG-002: Cannot return to lobby from penthouse `🔴 OPEN`
 **Severity:** Critical  
 **Location:** Penthouse / navigation  
 **Behavior:** Once in penthouse, no way to go back to lobby.  
 **Expected:** Clear navigation — elevator button, back arrow, or lobby link always visible.  
 **Fix:** Add persistent navigation (elevator access) from every floor.
 
-### BUG-003: Cannot scroll in penthouse
+### BUG-003: Cannot scroll in penthouse `🔴 OPEN`
 **Severity:** Critical  
 **Location:** Penthouse page  
 **Behavior:** Content is cut off, no scroll available.  
 **Expected:** Page scrolls to show all content.  
 **Fix:** Check for `overflow: hidden` on parent containers. Likely a layout/height issue.
 
-### BUG-004: Nothing is clickable in penthouse
+### BUG-004: Nothing is clickable in penthouse `🔴 OPEN`
 **Severity:** Critical  
 **Location:** Penthouse page  
 **Behavior:** Dashboard cards, stats, action items — none respond to clicks.  
 **Expected:** Interactive elements should be clickable (even if they just show a "coming soon" state).  
 **Fix:** Wire click handlers or make non-interactive elements visually distinct from interactive ones.
 
-### BUG-005: No sign out feature
+### BUG-005: No sign out feature `🔴 OPEN`
 **Severity:** Critical  
 **Location:** Entire app  
 **Behavior:** No way to sign out once signed in. No account menu anywhere.  
@@ -47,7 +71,7 @@
 
 ## HIGH — Major UX Problems
 
-### BUG-006: Entire site runs at ~15 FPS, extremely laggy
+### BUG-006: Entire site runs at ~15 FPS, extremely laggy `🔴 OPEN`
 **Severity:** High  
 **Location:** Global — every page  
 **Behavior:** Site feels like 15 FPS. Not responsive. Interactions feel sluggish.  
@@ -60,7 +84,7 @@
 6. Multiple canvas contexts active at once
 **Fix:** Profile with Chrome DevTools Performance tab. Kill the biggest offenders first. Target 60 FPS.
 
-### BUG-007: Custom cursor — dot not centered in circle
+### BUG-007: Custom cursor — dot not centered in circle `🔴 OPEN`
 **Severity:** High  
 **Location:** Global cursor component  
 **Behavior:** The small dot and outer circle are misaligned. Dot is not centered.  
@@ -71,14 +95,14 @@
 - Subtle hover states instead of custom cursor theatrics
 **Fix:** Remove custom cursor component. Use CSS `cursor: pointer` on clickable elements.
 
-### BUG-008: Text elements move with cursor (parallax on content)
+### BUG-008: Text elements move with cursor (parallax on content) `🔴 OPEN`
 **Severity:** High  
 **Location:** Lobby, Penthouse — text like "Welcome Armaan Arora"  
 **Behavior:** Heading text, welcome messages, and other content shifts when moving the mouse.  
 **Expected:** Text should be STATIC. Only background/decorative layers should have subtle motion.  
 **Fix:** Remove `useMouseParallax` (or equivalent transforms) from ALL text elements, headings, cards, and interactive UI. Parallax should only apply to deep background layers (skyline, decorative).
 
-### BUG-009: Background parallax is motion-sickness-inducing
+### BUG-009: Background parallax is motion-sickness-inducing `🔴 OPEN`
 **Severity:** High  
 **Location:** Skyline / background on all pages  
 **Behavior:** Background responds to mouse movement, causing jarring shifts.  
@@ -90,7 +114,7 @@
 - Ken Burns effect (slow zoom + pan simultaneously)
 **Fix:** Replace mouse-driven parallax with autonomous slow-drift animation. CSS `@keyframes` with 60-120s duration, gentle translateX/translateY + subtle scale. `prefers-reduced-motion` disables entirely.
 
-### BUG-010: Lobby and Penthouse share the same background
+### BUG-010: Lobby and Penthouse share the same background `🔴 OPEN`
 **Severity:** High  
 **Location:** Lobby vs Penthouse  
 **Behavior:** Both pages have the same skyline/background. Lobby doesn't feel like a lobby.  
@@ -101,14 +125,14 @@
 
 ## MEDIUM — Missing Standard Features
 
-### BUG-011: No dark/light mode toggle
+### BUG-011: No dark/light mode toggle `🔴 OPEN`
 **Severity:** Medium  
 **Location:** Entire app  
 **Behavior:** No way to switch between dark and light mode.  
 **Expected:** Settings/account section with theme toggle. Respects `prefers-color-scheme` as default.  
 **Fix:** Add theme provider (next-themes), account/settings page with toggle, persist preference to user_profiles.preferences.
 
-### BUG-012: No account/settings section
+### BUG-012: No account/settings section `🔴 OPEN`
 **Severity:** Medium  
 **Location:** Entire app  
 **Behavior:** No settings page, no profile management, no preferences.  
@@ -121,7 +145,7 @@
 - Connected services (Google, etc.)
 **Fix:** Build `/settings` page with account management. Add user menu dropdown to access it.
 
-### BUG-013: No sound design
+### BUG-013: No sound design `🔴 OPEN`
 **Severity:** Medium  
 **Location:** Entire app  
 **Behavior:** Site is completely silent. No ambient sound, no interaction sounds.  
@@ -132,7 +156,7 @@
 - Muted by default, sound toggle in settings
 **Fix:** Phase 2+ item, but note it. Use Web Audio API or Howler.js. Always default to muted.
 
-### BUG-014: Hover states on interactive elements are weak
+### BUG-014: Hover states on interactive elements are weak `🔴 OPEN`
 **Severity:** Medium  
 **Location:** Global — buttons, cards, clickable elements  
 **Behavior:** Hover animations exist but are too subtle. Hard to tell what's interactive.  
@@ -176,3 +200,29 @@
 - **Every floor needs a page.** Even if it's a gorgeous "Coming Soon" screen with the floor's aesthetic and a progress bar.
 - **Standard web conventions matter.** `cursor: pointer` on clickable things. Scroll works. Back button works. Sign out exists. These aren't features — they're table stakes.
 - **Apple TV screensaver reference:** The background should feel like a living photograph. Barely moving. Hypnotic. Never reactive to the user. Think "digital painting in a luxury lobby" not "interactive parallax showcase."
+
+---
+
+## CLOSED ISSUES
+
+Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
+
+<!-- Move fixed bugs here. Keep the full bug description + add:
+**Fixed:** Session X, `commit_hash`, brief description of the fix
+-->
+
+_No closed issues yet._
+
+---
+
+## STATISTICS
+
+| Metric | Count |
+|--------|-------|
+| Total reported | 14 |
+| 🔴 Open | 14 |
+| 🟡 In Progress | 0 |
+| 🟢 Fixed | 0 |
+| ⚪ Won't Fix | 0 |
+
+_Last updated: Session 12, March 19, 2026_

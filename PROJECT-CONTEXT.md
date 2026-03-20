@@ -22,6 +22,7 @@
 4. Load skills: `website-building/webapp`, `design-foundations`, `coding-and-data`
 5. Confirm connectors: `list_external_tools` for supabase, resend, github, vercel, gcal, google_drive
 6. **Auto-update this file after every interaction.** Even minor things.
+7. **If you fix ANY bug:** Update `docs/BUG-TRACKER.md` — add changelog entry, move bug to CLOSED, update statistics. This is the living fix log.
 
 ---
 
