@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:56 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, March 19, 2026 at 11:59 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `6a2336d`)
+- **Branch:** `main` (commit `7cad1e9`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 8,736 across 47 source files
+- **Total LOC:** 8,605 across 46 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,12 +37,12 @@
 ## Changes Since Last Bootstrap
 
 ```
-6a2336d fix(sprint-1): BUG-003,004,006,007,008,009 — performance, scroll, cursor, parallax
+7cad1e9 docs: update BUG-TRACKER with commit hashes for Sprint 1 fixes
 ```
 
 ## Acceptance Criteria — Progress
 
-**Progress: 7 verified / 1 likely / 39 unverified** (of 47)
+**Progress: 6 verified / 1 likely / 40 unverified** (of 47)
 
 ✅ User can sign in with Google and land in The Penthouse
     └─ Auth callback + Penthouse found
@@ -54,8 +54,8 @@
     └─ DayNightProvider found
 ⬜ Skyline has visible parallax on mouse movement
     └─ No parallax hook
-✅ Custom cursor renders on desktop, falls back to native on mobile
-    └─ CustomCursor.tsx found
+⬜ Custom cursor renders on desktop, falls back to native on mobile
+    └─ No custom cursor
 ⬜ Dashboard shows real data from Supabase (applications count, pipeline status)
     └─ Not yet checked automatically
 🟡 Contracts CRUD works through the UI
@@ -179,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6a2336d`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `7cad1e9`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -189,11 +189,11 @@ See docs/MASTER-PLAN.md for the next phase.
 
 (no .env.local found)
 
-## Source Tree (47 files, 8,736 LOC)
+## Source Tree (46 files, 8,605 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 1999 |
+| `src/components/world` | 1868 |
 | `src/app/(authenticated)/penthouse` | 1411 |
 | `src/app/lobby` | 903 |
 | `src/lib/contracts` | 696 |
@@ -241,7 +241,6 @@ src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
 src/components/transitions/EntranceSequence.tsx
-src/components/world/CustomCursor.tsx
 src/components/world/DayNightProvider.tsx
 src/components/world/Elevator.tsx
 src/components/world/FloorShell.tsx
@@ -323,13 +322,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 376 | 4,175 |
+| `BOOTSTRAP-PROMPT.md` | 382 | 4,213 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1277** | **20,846** |
+| **Total** | **1283** | **20,884** |
 
-> ⚠️ Reading all recommended files consumes ~20,846 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,884 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
