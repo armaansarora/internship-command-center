@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:55 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 2:35 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,26 +19,20 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `7d95863`)
+- **Branch:** `main` (commit `36e8f56`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 9,834 across 50 source files
+- **Total LOC:** 9,755 across 62 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Session State (where we left off)
 
-- **Current task:** Developer tooling (session-end, bootstrap)
-- **Deliverable:** infra
+- **Current task:** General development
+- **Deliverable:** unknown
 - **Status:** in_progress
 - **Last file touched:** `unknown`
-- **Notes:** This session: 1 commits. Work: session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
-- **State captured:** 2026-03-20T05:55:53.613Z
-
-## Changes Since Last Bootstrap
-
-```
-7d95863 session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
-```
+- **Notes:** No feature commits this session (tooling/infra only).
+- **State captured:** 2026-03-20T06:35:05.065Z
 
 ## Acceptance Criteria — Progress
 
@@ -126,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `7d95863`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `36e8f56`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -136,32 +130,36 @@
 
 (no .env.local found)
 
-## Source Tree (50 files, 9,834 LOC)
+## Source Tree (62 files, 9,755 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 2242 |
-| `src/app/(authenticated)/penthouse` | 1412 |
+| `src/components/world` | 1189 |
 | `src/app/lobby` | 947 |
+| `src/lib` | 768 |
+| `src/components/penthouse` | 758 |
 | `src/app` | 728 |
+| `src/components/world/elevator` | 718 |
 | `src/lib/contracts` | 696 |
-| `src/db` | 442 |
+| `src/app/(authenticated)/penthouse` | 682 |
+| `src/db` | 496 |
 | `src/app/(authenticated)/settings` | 425 |
 | `src/lib/contracts/departments` | 328 |
 | `src/components/ui` | 294 |
-| `src/app/(authenticated)/c-suite` | 284 |
-| `src/app/(authenticated)/briefing-room` | 269 |
-| `src/app/(authenticated)/situation-room` | 266 |
-| `src/app/(authenticated)/rolodex-lounge` | 250 |
-| `src/app/(authenticated)/observatory` | 247 |
-| `src/app/(authenticated)/war-room` | 236 |
-| `src/app/(authenticated)/writing-room` | 180 |
+| `src/app/(authenticated)/c-suite` | 191 |
+| `src/app/(authenticated)/briefing-room` | 175 |
+| `src/app/(authenticated)/situation-room` | 154 |
+| `src/components/icons` | 152 |
+| `src/app/(authenticated)/observatory` | 144 |
+| `src/app/(authenticated)/rolodex-lounge` | 143 |
 | `src/components/transitions` | 132 |
+| `src/app/(authenticated)/war-room` | 130 |
 | `src/lib/supabase` | 121 |
+| `src/app/(authenticated)/writing-room` | 98 |
 | `src/app/(authenticated)` | 86 |
-| `src/lib` | 80 |
 | `src/types` | 74 |
 | `src/app/api/auth/callback` | 42 |
+| `src/lib/constants` | 31 |
 | `src/hooks` | 22 |
 | `src` | 20 |
 | `src/app/api/auth/signout` | 11 |
@@ -191,16 +189,27 @@ src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
+src/components/icons/PenthouseIcons.tsx
+src/components/penthouse/ActivityFeed.tsx
+src/components/penthouse/GlassPanel.tsx
+src/components/penthouse/PipelineNodes.tsx
+src/components/penthouse/QuickActionCard.tsx
+src/components/penthouse/StatCard.tsx
 src/components/transitions/EntranceSequence.tsx
 src/components/ui/UserMenu.tsx
 src/components/world/DayNightProvider.tsx
 src/components/world/Elevator.tsx
 src/components/world/FloorShell.tsx
+src/components/world/FloorStub.tsx
 src/components/world/LobbyBackground.tsx
 src/components/world/ProceduralSkyline.tsx
+src/components/world/elevator/ElevatorButton.tsx
+src/components/world/elevator/ElevatorDoors.tsx
+src/components/world/elevator/ElevatorPanel.tsx
 src/db/index.ts
 src/db/schema.ts
 src/hooks/useReducedMotion.ts
+src/lib/constants/floors.ts
 src/lib/contracts/agent-protocol.ts
 src/lib/contracts/api.ts
 src/lib/contracts/departments/cio.ts
@@ -211,6 +220,7 @@ src/lib/contracts/index.ts
 src/lib/contracts/notifications.ts
 src/lib/contracts/ui.ts
 src/lib/day-night.ts
+src/lib/skyline-engine.ts
 src/lib/supabase/admin.ts
 src/lib/supabase/client.ts
 src/lib/supabase/middleware.ts
@@ -226,16 +236,13 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>33 packages</summary>
+<summary>28 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
 @supabase/ssr: ^0.9.0
 @supabase/supabase-js: ^2.99.2
 @tailwindcss/typography: ^0.5.19
-@tsparticles/engine: ^3.9.1
-@tsparticles/react: ^3.0.0
-@tsparticles/slim: ^3.9.1
 @types/node: ^20
 @types/react: ^19
 @types/react-dom: ^19
@@ -247,11 +254,9 @@ drizzle-orm: ^0.45.1
 drizzle-zod: ^0.8.3
 eslint: ^9
 eslint-config-next: 16.2.0
-framer-motion: ^12.38.0
 gsap: ^3.14.2
 happy-dom: ^20.8.4
 husky: ^9.1.7
-lenis: ^1.3.19
 next: 16.2.0
 postcss: ^8.5.8
 postgres: ^3.4.8
@@ -275,13 +280,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 332 | 3,889 |
+| `BOOTSTRAP-PROMPT.md` | 338 | 3,909 |
 | `PROJECT-CONTEXT.md` | 338 | 7,296 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
 | `CLAUDE.md` | 159 | 2,731 |
-| **Total** | **1190** | **20,828** |
+| **Total** | **1196** | **20,848** |
 
-> ⚠️ Reading all recommended files consumes ~20,828 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,848 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
