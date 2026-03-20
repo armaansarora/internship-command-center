@@ -1,5 +1,10 @@
 import { tool } from "ai";
 import { z } from "zod/v4";
+import {
+  queryApplicationsForAgent,
+  updateApplicationStatusRest,
+  analyzeConversionRatesRest,
+} from "@/lib/db/queries/applications-rest";
 
 // ---------------------------------------------------------------------------
 // Tool 1: queryApplications
@@ -46,22 +51,13 @@ export function makeQueryApplicationsTool(userId: string) {
         .default("staleness_desc")
         .describe("Sort order for results"),
     }),
-    execute: async (_input) => {
-      // TODO: wire to real DB queries
-      // const apps = await db.select().from(applications).where(...)
-      void userId;
-      return {
-        applications: [] as Array<{
-          id: string;
-          companyName: string;
-          role: string;
-          status: string;
-          daysSinceActivity: number;
-          appliedAt: string | null;
-          tier: number | null;
-        }>,
-        total: 0,
-      };
+    execute: async (input) => {
+      return queryApplicationsForAgent(userId, {
+        status: input.status,
+        daysStale: input.daysStale,
+        limit: input.limit,
+        sortBy: input.sortBy,
+      });
     },
   });
 }
@@ -105,9 +101,32 @@ export function makeManageApplicationTool(userId: string) {
         .describe("Required when action is add_note"),
     }),
     execute: async (input) => {
-      // TODO: wire to real DB queries
-      // await db.update(applications).set({ status: input.newStatus }).where(...)
-      void userId;
+      if (input.action === "update_status" && input.newStatus) {
+        return updateApplicationStatusRest(userId, input.applicationId, input.newStatus);
+      }
+
+      if (input.action === "add_note" && input.note) {
+        return updateApplicationStatusRest(
+          userId,
+          input.applicationId,
+          "", // empty = no status change, handled below
+          input.note
+        );
+      }
+
+      if (input.action === "archive") {
+        return updateApplicationStatusRest(userId, input.applicationId, "withdrawn");
+      }
+
+      if (input.action === "mark_followup_sent") {
+        return updateApplicationStatusRest(
+          userId,
+          input.applicationId,
+          "", // no status change
+          "Follow-up sent"
+        );
+      }
+
       return {
         success: true,
         applicationId: input.applicationId,
@@ -146,7 +165,6 @@ export function makeSuggestFollowUpTool(userId: string) {
       role: z.string().describe("Role title for context"),
     }),
     execute: async (input) => {
-      // TODO: wire to real DB queries to fetch contact info
       void userId;
       const recipient = input.recipientName ?? "Hiring Team";
       const subject = `Following Up — ${input.role} Application`;
@@ -188,24 +206,8 @@ export function makeAnalyzeConversionRatesTool(userId: string) {
         .optional()
         .describe("ISO date string — end of the analysis window (default: now)"),
     }),
-    execute: async (_input) => {
-      // TODO: wire to real DB queries
-      void userId;
-      return {
-        window: {
-          from: _input.fromDate ?? null,
-          to: _input.toDate ?? null,
-        },
-        rates: {
-          discoveredToApplied: { rate: 0, count: 0, industryAvg: 80 },
-          appliedToScreening: { rate: 0, count: 0, industryAvg: 20 },
-          screeningToInterview: { rate: 0, count: 0, industryAvg: 25 },
-          interviewToOffer: { rate: 0, count: 0, industryAvg: 15 },
-        },
-        totalAnalyzed: 0,
-        insight:
-          "No applications found in this window. Start adding applications to track your pipeline.",
-      };
+    execute: async (input) => {
+      return analyzeConversionRatesRest(userId, input.fromDate, input.toDate);
     },
   });
 }

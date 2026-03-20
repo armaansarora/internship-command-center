@@ -3,20 +3,37 @@
 import type { JSX } from "react";
 import { useState, useCallback, useMemo, useTransition } from "react";
 import type { Application } from "@/db/schema";
+import type { PipelineStats } from "@/lib/db/queries/applications-rest";
+import { WarRoomScene } from "./WarRoomScene";
 import { WarTable } from "./war-table/WarTable";
 import { ApplicationModal } from "./crud/ApplicationModal";
 import { ApplicationSearch } from "./crud/ApplicationSearch";
+import { CROCharacter } from "./cro-character/CROCharacter";
+import { CRODialoguePanel } from "./cro-character/CRODialoguePanel";
+import { CROWhiteboard } from "./cro-character/CROWhiteboard";
 
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
 interface WarRoomClientProps {
   applications: Application[];
-  onMoveApplication: (id: string, newStatus: string, newPosition: string) => Promise<void>;
+  stats: PipelineStats;
+  onMoveApplication: (
+    id: string,
+    newStatus: string,
+    newPosition: string
+  ) => Promise<void>;
   onDeleteApplication: (id: string) => Promise<void>;
   onCreateApplication: (formData: FormData) => Promise<void>;
   onUpdateApplication: (id: string, formData: FormData) => Promise<void>;
 }
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 export function WarRoomClient({
   applications,
+  stats,
   onMoveApplication,
   onDeleteApplication,
   onCreateApplication,
@@ -26,8 +43,10 @@ export function WarRoomClient({
   const [editingApp, setEditingApp] = useState<Application | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [dialogueOpen, setDialogueOpen] = useState(false);
   const [, startTransition] = useTransition();
 
+  // ── Handlers ─────────────────────────────────────────────────────────
   const handleAddNew = useCallback(() => {
     setEditingApp(null);
     setModalOpen(true);
@@ -58,7 +77,15 @@ export function WarRoomClient({
     [editingApp, onCreateApplication, onUpdateApplication]
   );
 
-  // Filter applications based on search + status filters
+  const handleOpenDialogue = useCallback(() => {
+    setDialogueOpen(true);
+  }, []);
+
+  const handleCloseDialogue = useCallback(() => {
+    setDialogueOpen(false);
+  }, []);
+
+  // ── Derived data ─────────────────────────────────────────────────────
   const filteredApplications = useMemo(() => {
     let filtered = applications;
 
@@ -80,14 +107,46 @@ export function WarRoomClient({
     return filtered;
   }, [applications, searchQuery, statusFilters]);
 
-  return (
+  // Derive WarRoomStats from PipelineStats for the scene ticker
+  const tickerStats = useMemo(
+    () => ({
+      total: stats.total,
+      screening: stats.screening,
+      interviewing: stats.interviewing,
+      offers: stats.offers,
+      stale: stats.staleCount,
+    }),
+    [stats]
+  );
+
+  // ── Character slot — CRO character + whiteboard ──────────────────────
+  const characterSlot = (
+    <div
+      className="flex items-end justify-center gap-6 w-full h-full px-6 pb-4"
+      style={{ maxWidth: "900px", margin: "0 auto" }}
+    >
+      {/* CRO character silhouette — left side */}
+      <div className="flex-shrink-0">
+        <CROCharacter onConversationOpen={handleOpenDialogue} />
+      </div>
+
+      {/* CRO whiteboard — right side of character area */}
+      <div className="flex-1 min-w-0 max-w-sm">
+        <CROWhiteboard stats={stats} />
+      </div>
+    </div>
+  );
+
+  // ── Table slot — search + kanban ─────────────────────────────────────
+  const tableSlot = (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
         height: "100%",
         minHeight: 0,
-        gap: "16px",
+        padding: "16px 20px",
+        gap: "12px",
       }}
     >
       {/* Top bar: Search + Add button */}
@@ -107,7 +166,6 @@ export function WarRoomClient({
           />
         </div>
 
-        {/* Add new application button */}
         <button
           type="button"
           onClick={handleAddNew}
@@ -152,7 +210,13 @@ export function WarRoomClient({
             (e.currentTarget as HTMLButtonElement).style.outline = "none";
           }}
         >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+            aria-hidden="true"
+          >
             <path
               d="M5 1V9M1 5H9"
               stroke="currentColor"
@@ -173,6 +237,57 @@ export function WarRoomClient({
           onEditApplication={handleEditApplication}
         />
       </div>
+    </div>
+  );
+
+  // ── Render ───────────────────────────────────────────────────────────
+  return (
+    <>
+      {/* Full-screen War Room scene with character + table slots */}
+      <WarRoomScene
+        stats={tickerStats}
+        characterSlot={characterSlot}
+        tableSlot={tableSlot}
+      />
+
+      {/* CRO Dialogue Panel — slides in from right */}
+      {dialogueOpen && (
+        <div
+          role="complementary"
+          aria-label="CRO conversation panel"
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: "min(420px, 90vw)",
+            zIndex: 50,
+            animation: "cro-panel-slide-in 0.25s ease-out forwards",
+          }}
+        >
+          <CRODialoguePanel
+            isOpen={dialogueOpen}
+            onClose={handleCloseDialogue}
+          />
+        </div>
+      )}
+
+      {/* Backdrop overlay when dialogue is open */}
+      {dialogueOpen && (
+        <div
+          role="presentation"
+          onClick={handleCloseDialogue}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(2px)",
+            WebkitBackdropFilter: "blur(2px)",
+            zIndex: 49,
+            animation: "cro-backdrop-fade-in 0.2s ease-out forwards",
+          }}
+        />
+      )}
 
       {/* Create/Edit Modal */}
       <ApplicationModal
@@ -181,6 +296,28 @@ export function WarRoomClient({
         onSubmit={handleModalSubmit}
         application={editingApp}
       />
-    </div>
+
+      {/* Panel animations */}
+      <style>{`
+        @keyframes cro-panel-slide-in {
+          from { transform: translateX(100%); opacity: 0.8; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes cro-backdrop-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes cro-panel-slide-in {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+          }
+          @keyframes cro-backdrop-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+        }
+      `}</style>
+    </>
   );
 }

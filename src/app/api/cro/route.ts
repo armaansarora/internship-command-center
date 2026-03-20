@@ -2,7 +2,7 @@ import { streamText, stepCountIs, convertToModelMessages } from "ai";
 import type { UIMessage } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { requireUser } from "@/lib/supabase/server";
-import { getPipelineStats } from "@/lib/db/queries/applications";
+import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 import { buildCROSystemPrompt } from "@/lib/agents/cro/system-prompt";
 import { buildCROTools } from "@/lib/agents/cro/tools";
 
@@ -14,8 +14,8 @@ export async function POST(req: Request): Promise<Response> {
   const body = (await req.json()) as { messages: UIMessage[] };
   const { messages } = body;
 
-  // Fetch live pipeline stats (stub returns empty state when DB not wired)
-  const stats = await getPipelineStats(user.id);
+  // Fetch live pipeline stats via Supabase REST (Vercel-safe)
+  const stats = await getPipelineStatsRest(user.id);
 
   // Derive display name from email or metadata
   const userName =

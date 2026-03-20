@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 4:34 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 4:46 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `788496d`)
+- **Branch:** `main` (commit `5ba3e70`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 15,958 across 87 source files
+- **Total LOC:** 16,192 across 87 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -36,10 +36,10 @@
 
 ## Acceptance Criteria — Progress
 
-**Progress: 4 verified / 1 likely / 1 unverified** (of 6)
+**Progress: 4 verified / 0 likely / 2 unverified** (of 6)
 
-🟡 User can create an application and see it in the pipeline
-    └─ Partial implementation found
+⬜ User can create an application and see it in the pipeline
+    └─ No application CRUD found in src/
 ✅ Drag-and-drop changes application status
     └─ Drag-and-drop handlers found
 ✅ CRO agent can answer "How's my pipeline looking?" with real data
@@ -120,7 +120,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `788496d`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `5ba3e70`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -128,15 +128,9 @@
 
 ## Env Vars (names only — values in .env.local)
 
-- NEXT_PUBLIC_SUPABASE_URL
-- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-- SUPABASE_SERVICE_ROLE_KEY
-- SUPABASE_DB_URL
-- GOOGLE_CLIENT_ID
-- GOOGLE_CLIENT_SECRET
-- ANTHROPIC_API_KEY
+(no .env.local found)
 
-## Source Tree (87 files, 15,958 LOC)
+## Source Tree (87 files, 16,192 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -145,25 +139,25 @@
 | `src/components/floor-7/crud` | 1055 |
 | `src/components/floor-7/cro-character` | 1033 |
 | `src/app/lobby` | 947 |
+| `src/components/floor-7` | 792 |
 | `src/lib` | 768 |
 | `src/components/penthouse` | 758 |
+| `src/lib/db/queries` | 736 |
 | `src/app` | 730 |
 | `src/components/world/elevator` | 718 |
 | `src/lib/contracts` | 696 |
 | `src/app/(authenticated)/penthouse` | 682 |
-| `src/components/floor-7` | 655 |
-| `src/app/(authenticated)/war-room` | 502 |
 | `src/db` | 500 |
-| `src/lib/agents/cro` | 457 |
+| `src/lib/agents/cro` | 459 |
 | `src/app/(authenticated)/settings` | 425 |
 | `src/styles` | 366 |
 | `src/lib/contracts/departments` | 328 |
-| `src/lib/db/queries` | 313 |
 | `src/components/ui` | 294 |
 | `src/hooks` | 245 |
 | `src/lib/actions` | 207 |
 | `src/app/(authenticated)/c-suite` | 191 |
 | `src/app/(authenticated)/briefing-room` | 175 |
+| `src/app/(authenticated)/war-room` | 174 |
 | `src/app/(authenticated)/situation-room` | 154 |
 | `src/components/icons` | 152 |
 | `src/app/(authenticated)/observatory` | 144 |
@@ -197,7 +191,6 @@ src/app/(authenticated)/settings/page.tsx
 src/app/(authenticated)/settings/settings-client.tsx
 src/app/(authenticated)/situation-room/page.tsx
 src/app/(authenticated)/war-room/page.tsx
-src/app/(authenticated)/war-room/war-room-client.tsx
 src/app/(authenticated)/world-shell.tsx
 src/app/(authenticated)/writing-room/page.tsx
 src/app/api/auth/callback/route.ts
@@ -258,6 +251,7 @@ src/lib/contracts/index.ts
 src/lib/contracts/notifications.ts
 src/lib/contracts/ui.ts
 src/lib/day-night.ts
+src/lib/db/queries/applications-rest.ts
 src/lib/db/queries/applications.ts
 src/lib/skyline-engine.ts
 src/lib/supabase/admin.ts
@@ -328,13 +322,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 343 | 3,956 |
+| `BOOTSTRAP-PROMPT.md` | 393 | 4,703 |
 | `PROJECT-CONTEXT.md` | 350 | 7,939 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
-| `CLAUDE.md` | 159 | 2,731 |
-| **Total** | **1213** | **21,538** |
+| `CLAUDE.md` | 181 | 3,281 |
+| **Total** | **1285** | **22,835** |
 
-> ⚠️ Reading all recommended files consumes ~21,538 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~22,835 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

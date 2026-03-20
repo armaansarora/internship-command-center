@@ -1,4 +1,4 @@
-import type { PipelineStats } from "@/lib/db/queries/applications";
+import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 
 interface AgentMemoryEntry {
   content: string;

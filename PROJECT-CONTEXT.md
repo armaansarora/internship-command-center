@@ -146,9 +146,9 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 | File | Purpose | Lines |
 |---|---|---|
-| `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~340 |
-| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~340 |
-| `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~160 |
+| `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~350 |
+| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~390 |
+| `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~180 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |
 | `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge, multi-tenant ready | ~230 |
