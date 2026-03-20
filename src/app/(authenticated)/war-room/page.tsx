@@ -1,129 +1,230 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/supabase/server";
-import { FloorStub } from "@/components/world/FloorStub";
+import { db, schema } from "@/db/index";
+import { eq, desc } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { FloorShell } from "@/components/world/FloorShell";
+import { WarRoomClient } from "@/components/floor-7/WarRoomClient";
+import type { Application } from "@/db/schema";
 
-export const metadata: Metadata = { title: "The War Room" };
+export const metadata: Metadata = { title: "The War Room | The Tower" };
 
-/** Floor 7 — Applications (Phase 1) */
+/** Floor 7 — Applications Pipeline */
 export default async function WarRoomPage() {
-  await requireUser();
+  const user = await requireUser();
+
+  // Fetch all applications for this user, ordered by position then created
+  const applications = await db
+    .select()
+    .from(schema.applications)
+    .where(eq(schema.applications.userId, user.id))
+    .orderBy(schema.applications.position, desc(schema.applications.createdAt));
+
+  // Server Actions
+  async function moveApplication(
+    id: string,
+    newStatus: string,
+    newPosition: string
+  ): Promise<void> {
+    "use server";
+    const sessionUser = await requireUser();
+    await db
+      .update(schema.applications)
+      .set({
+        status: newStatus as Application["status"],
+        position: newPosition,
+        lastActivityAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        eq(schema.applications.id, id)
+      );
+    // Verify ownership via RLS — Supabase handles this
+    revalidatePath("/war-room");
+  }
+
+  async function deleteApplication(id: string): Promise<void> {
+    "use server";
+    await requireUser();
+    await db
+      .delete(schema.applications)
+      .where(eq(schema.applications.id, id));
+    revalidatePath("/war-room");
+  }
+
+  async function createApplication(formData: FormData): Promise<void> {
+    "use server";
+    const sessionUser = await requireUser();
+
+    const companyName = (formData.get("companyName") as string)?.trim();
+    const role = (formData.get("role") as string)?.trim();
+    const url = (formData.get("url") as string)?.trim() || null;
+    const status = (formData.get("status") as string) ?? "discovered";
+    const source = (formData.get("source") as string)?.trim() || null;
+    const location = (formData.get("location") as string)?.trim() || null;
+    const salary = (formData.get("salary") as string)?.trim() || null;
+    const sector = (formData.get("sector") as string)?.trim() || null;
+    const notes = (formData.get("notes") as string)?.trim() || null;
+    const tierStr = formData.get("tier") as string;
+    const tier = tierStr ? parseInt(tierStr, 10) : null;
+
+    if (!companyName || !role) return;
+
+    await db.insert(schema.applications).values({
+      userId: sessionUser.id,
+      companyName,
+      role,
+      url,
+      status: status as Application["status"],
+      source,
+      location,
+      salary,
+      sector,
+      notes,
+      tier: Number.isNaN(tier ?? NaN) ? null : tier,
+      position: `init_${Date.now()}`,
+      lastActivityAt: new Date(),
+    });
+
+    revalidatePath("/war-room");
+  }
+
+  async function updateApplication(id: string, formData: FormData): Promise<void> {
+    "use server";
+    await requireUser();
+
+    const companyName = (formData.get("companyName") as string)?.trim();
+    const role = (formData.get("role") as string)?.trim();
+    const url = (formData.get("url") as string)?.trim() || null;
+    const status = (formData.get("status") as string) ?? "discovered";
+    const source = (formData.get("source") as string)?.trim() || null;
+    const location = (formData.get("location") as string)?.trim() || null;
+    const salary = (formData.get("salary") as string)?.trim() || null;
+    const sector = (formData.get("sector") as string)?.trim() || null;
+    const notes = (formData.get("notes") as string)?.trim() || null;
+    const tierStr = formData.get("tier") as string;
+    const tier = tierStr ? parseInt(tierStr, 10) : null;
+
+    if (!companyName || !role) return;
+
+    await db
+      .update(schema.applications)
+      .set({
+        companyName,
+        role,
+        url,
+        status: status as Application["status"],
+        source,
+        location,
+        salary,
+        sector,
+        notes,
+        tier: Number.isNaN(tier ?? NaN) ? null : tier,
+        lastActivityAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.applications.id, id));
+
+    revalidatePath("/war-room");
+  }
 
   return (
-    <FloorStub
-      floorId="7"
-      floorLabel="Floor 7"
-      floorName="The War Room"
-      description="Application pipeline. Track, manage, and dominate your job search."
-      phase="Phase 1 — Development Queued"
-      accentColor="rgba(220, 80, 80, 0.9)"
-      accentRgb="220, 60, 60"
-      cardBorderColor="rgba(220, 60, 60, 0.15)"
-      atmosphereRenderer={
-        <>
-          {/* Tactical grid */}
+    <FloorShell floorId="7">
+      <div
+        data-floor="7"
+        style={{
+          height: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          padding: "20px 24px",
+          gap: "16px",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Tactical grid background */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `
+              linear-gradient(rgba(30, 144, 255, 0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(30, 144, 255, 0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        {/* Page header */}
+        <div
+          style={{
+            flexShrink: 0,
+            position: "relative",
+            zIndex: 1,
+            paddingTop: "8px",
+          }}
+        >
           <div
-            className="pointer-events-none absolute inset-0"
-            aria-hidden="true"
             style={{
-              backgroundImage: `
-                linear-gradient(rgba(220, 60, 60, 0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(220, 60, 60, 0.04) 1px, transparent 1px)
-              `,
-              backgroundSize: "48px 48px",
-              opacity: 0.7,
-            }}
-          />
-          {/* Diagonal crosshair lines */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `
-                  linear-gradient(45deg, transparent 49.5%, rgba(220,60,60,0.03) 49.5%, rgba(220,60,60,0.03) 50.5%, transparent 50.5%),
-                  linear-gradient(-45deg, transparent 49.5%, rgba(220,60,60,0.03) 49.5%, rgba(220,60,60,0.03) 50.5%, transparent 50.5%)
-                `,
-              }}
-            />
-          </div>
-          {/* Pulsing rotating crosshair */}
-          <div
-            className="pointer-events-none absolute"
-            aria-hidden="true"
-            style={{
-              top: "50%", left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "180px", height: "180px",
-              opacity: 0.18,
+              display: "flex",
+              alignItems: "baseline",
+              gap: "12px",
+              marginBottom: "4px",
             }}
           >
-            <div
-              className="absolute inset-0 rounded-full"
+            <h1
               style={{
-                border: "1px solid rgba(220, 60, 60, 0.5)",
-                animation: "crosshair-pulse-ring 2.2s ease-in-out infinite",
-              }}
-            />
-            <svg
-              viewBox="0 0 180 180"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{
-                position: "absolute", inset: 0,
-                width: "100%", height: "100%",
-                animation: "crosshair-rotate 18s linear infinite",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: "18px",
+                fontWeight: 700,
+                color: "#E8F4FD",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                margin: 0,
               }}
             >
-              <circle cx="90" cy="90" r="70" stroke="rgba(220,60,60,0.6)" strokeWidth="0.75" />
-              <line x1="20" y1="90" x2="60"  y2="90"  stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
-              <line x1="120" y1="90" x2="160" y2="90" stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
-              <line x1="90" y1="20" x2="90"  y2="60"  stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
-              <line x1="90" y1="120" x2="90" y2="160" stroke="rgba(220,60,60,0.8)" strokeWidth="1" />
-              <line x1="43" y1="43"  x2="52" y2="52"  stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
-              <line x1="137" y1="43" x2="128" y2="52" stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
-              <line x1="43" y1="137" x2="52" y2="128" stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
-              <line x1="137" y1="137" x2="128" y2="128" stroke="rgba(220,60,60,0.5)" strokeWidth="0.75" />
-              <circle cx="90" cy="90" r="3"  fill="rgba(220,60,60,0.7)" />
-              <circle cx="90" cy="90" r="12" stroke="rgba(220,60,60,0.4)" strokeWidth="0.75" />
-            </svg>
+              WAR TABLE
+            </h1>
+            <span
+              aria-hidden="true"
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: "10px",
+                color: "#1E90FF",
+                letterSpacing: "0.12em",
+                opacity: 0.8,
+              }}
+            >
+              // PIPELINE OPS
+            </span>
           </div>
-        </>
-      }
-      previewSlot={
-        <div className="grid grid-cols-3 gap-3">
-          {(["Applications", "Interviews", "Offers"] as const).map((label) => (
-            <div
-              key={label}
-              className="rounded-lg p-3 text-center"
-              style={{
-                background: "rgba(220, 60, 60, 0.04)",
-                border: "1px solid rgba(220, 60, 60, 0.1)",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "1.25rem",
-                  color: "rgba(220, 80, 80, 0.25)",
-                  marginBottom: "4px",
-                }}
-              >
-                00
-              </div>
-              <div
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.1em",
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                }}
-              >
-                {label}
-              </div>
-            </div>
-          ))}
+          <p
+            style={{
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: "12px",
+              color: "#4A7A9B",
+              margin: 0,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Application pipeline. Track, manage, and dominate your internship search.
+          </p>
         </div>
-      }
-    />
+
+        {/* Main content */}
+        <div style={{ flex: 1, minHeight: 0, position: "relative", zIndex: 1 }}>
+          <WarRoomClient
+            applications={applications}
+            onMoveApplication={moveApplication}
+            onDeleteApplication={deleteApplication}
+            onCreateApplication={createApplication}
+            onUpdateApplication={updateApplication}
+          />
+        </div>
+      </div>
+    </FloorShell>
   );
 }

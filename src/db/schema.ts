@@ -104,12 +104,16 @@ export const applications = pgTable("applications", {
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
   salary: text("salary"),
   location: text("location"),
+  position: text("position"),
+  companyName: text("company_name"),
+  lastActivityAt: timestamp("last_activity_at", { withTimezone: true }),
   ...timestamps,
 }, (table) => [
   userIsolation("applications"),
   index("idx_apps_user_status").on(table.userId, table.status),
   index("idx_apps_user_company").on(table.userId, table.companyId),
   index("idx_apps_created").on(table.createdAt),
+  index("idx_apps_user_status_pos").on(table.userId, table.status, table.position),
 ]);
 
 // ===========================================================================
