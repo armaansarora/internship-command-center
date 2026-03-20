@@ -52,11 +52,16 @@ Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 
 - `src/app/lobby/lobby-client.tsx` (925 LOC) — Lobby client component — The Tower entrance.
 - `src/components/floor-7/crud/ApplicationModal.tsx` (721 LOC)
+- `src/components/floor-4/SituationRoomClient.tsx` (574 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (539 LOC)
+- `src/components/floor-4/coo-character/COOCharacter.tsx` (500 LOC)
 - `src/app/(authenticated)/penthouse/penthouse-client.tsx` (479 LOC)
+- `src/components/floor-4/coo-character/COODialoguePanel.tsx` (463 LOC)
+- `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
 - `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (420 LOC)
 - `src/app/(authenticated)/settings/settings-client.tsx` (397 LOC) — SettingsClient — account management and preferences.
 - `src/components/world/Elevator.tsx` (388 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
+- `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
 - `src/components/floor-7/WarRoomClient.tsx` (324 LOC)
 - `src/components/floor-7/war-table/WarTable.tsx` (321 LOC)
@@ -73,6 +78,7 @@ Day/night cycle driven by user's local time. Canvas-based procedural skyline.
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
 - `src/components/world/elevator/ElevatorButton.tsx` (186 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/world/FloorShell.tsx` (185 LOC) — FloorShell — wraps each floor's content with the immersive procedural skyline.
+- `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
