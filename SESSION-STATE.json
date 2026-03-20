@@ -1,21 +1,16 @@
 {
-  "currentTask": "Full doc auto-organization system",
-  "deliverable": "auto-organize-docs",
-  "status": "complete",
+  "currentTask": "Developer tooling (session-end, bootstrap)",
+  "deliverable": "infra",
+  "status": "in_progress",
   "blockers": [],
-  "lastFileTouched": "scripts/auto-organize-docs.ts",
-  "notes": "Built auto-organize-docs.ts: (1) auto-archive stale unreferenced docs, (2) auto-generate CLAUDE.md Key Components from src/ tree, (3) auto-generate doc map table with real line counts, (4) auto-append session logs from SESSION-STATE.json. Wired into Husky pre-commit. Idempotent.",
-  "filesChanged": [
-    "scripts/auto-organize-docs.ts",
-    ".husky/pre-commit",
-    "CLAUDE.md",
-    "PROJECT-CONTEXT.md",
-    "package.json"
+  "lastFileTouched": "unknown",
+  "notes": "This session: 1 commits. Work: session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)",
+  "filesChanged": [],
+  "commitCount": 1,
+  "locAdded": 700,
+  "locRemoved": 437,
+  "newDependencies": [
+    "docs:organize"
   ],
-  "commitCount": 0,
-  "locAdded": 0,
-  "locRemoved": 0,
-  "newDependencies": [],
-  "updatedAt": "2026-03-20T05:50:00.000Z",
-  "sessionLogWritten": true
+  "updatedAt": "2026-03-20T05:55:53.613Z"
 }
