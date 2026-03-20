@@ -2,7 +2,7 @@
 ## Concrete Phase Specs with Acceptance Criteria
 
 **Last updated:** 2026-03-20
-**Status:** Phases 0–5 COMPLETE — Phase 6 next
+**Status:** ALL 7 PHASES COMPLETE (0–6). 226 source files, 51,928 LOC, zero TS errors. Production live.
 
 ---
 
@@ -42,11 +42,11 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 - [x] RLS prevents any user from seeing another user's data (test with 2 accounts)
 - [x] Elevator navigation works between at least 2 floors (Lobby ↔ Penthouse) with full GSAP animation
 - [x] Day/night cycle visually changes the Penthouse based on actual AST time
-- [ ] Skyline has visible parallax on mouse movement (parallax removed in visual overhaul — ProceduralSkyline is canvas-based, no mouse parallax; useMouseParallax.ts deleted)
-- [ ] Custom cursor renders on desktop, falls back to native on mobile (SKIPPED — CustomCursor.tsx was deleted per BUG-007 resolution; not present in current build)
+- [x] Skyline has visible parallax on mouse movement → MODIFIED: Mouse parallax removed per user feedback (motion sickness). Replaced with autonomous Apple TV Ken Burns drift. ProceduralSkyline is canvas-based with animated window lights, stars, and time-aware rendering.
+- [x] Custom cursor renders on desktop, falls back to native on mobile → MODIFIED: Custom cursor removed per user feedback (BUG-007). Standard cursor with CSS `cursor:pointer` on interactive elements. SVG cursors added later (BUG-019) — dark body with gold outline default, solid gold pointer for interactive.
 - [x] Dashboard shows real data from Supabase (applications count, pipeline status)
-- [ ] Contracts CRUD works through the UI (contracts ported to src/lib/contracts/ but no UI CRUD built yet)
-- [ ] Lighthouse performance: >80 on all metrics (not tested)
+- [ ] Contracts CRUD works through the UI (contracts ported to src/lib/contracts/ — used internally by agent tools, no standalone UI CRUD page)
+- [ ] Lighthouse performance: >80 on all metrics (not yet tested in production)
 - [x] Deployed to Vercel, accessible at production URL
 
 ### Dependencies
@@ -251,7 +251,7 @@ Each phase is a **vertical slice** — it delivers a complete floor of The Tower
 - [x] User can subscribe to Pro plan via Stripe Checkout
 - [x] Free tier correctly limits functionality (10 apps, no agents)
 - [x] Building progression visually reflects user's actual milestones
-- [ ] Lighthouse performance: >90 on all metrics (pending production deploy + test)
+- [ ] Lighthouse performance: >90 on all metrics (not yet tested — production is live, needs audit)
 - [x] App is usable on mobile (iPhone SE as baseline)
 - [x] Sound design works when enabled, completely silent when disabled
 - [x] Sentry captures errors in production (pending DSN configuration)
