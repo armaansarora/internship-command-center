@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:11 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 1:28 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,17 +19,20 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `e89f24e`)
+- **Branch:** `main` (commit `5dd569b`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 9,834 across 50 source files
 - **Build:** Clean (zero TS errors)
 
 
-## Changes Since Last Bootstrap
+## Session State (where we left off)
 
-```
-e89f24e fix: elevator button wiring + 4K lobby backgrounds with Ken Burns
-```
+- **Current task:** General development
+- **Deliverable:** unknown
+- **Status:** in_progress
+- **Last file touched:** `unknown`
+- **Notes:** No feature commits this session (tooling/infra only).
+- **State captured:** 2026-03-20T05:28:21.556Z
 
 ## Acceptance Criteria — Progress
 
@@ -170,7 +173,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `e89f24e`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `5dd569b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -319,13 +322,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 387 | 4,369 |
-| `PROJECT-CONTEXT.md` | 401 | 7,588 |
+| `BOOTSTRAP-PROMPT.md` | 378 | 4,183 |
+| `PROJECT-CONTEXT.md` | 402 | 7,908 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1288** | **21,040** |
+| **Total** | **1280** | **21,174** |
 
-> ⚠️ Reading all recommended files consumes ~21,040 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~21,174 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
