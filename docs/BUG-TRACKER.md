@@ -11,12 +11,12 @@ Reverse-chronological log of all fixes. Every fix gets an entry here.
 
 | Date | Session | Bug(s) Fixed | Commit | Notes |
 |------|---------|-------------|--------|-------|
-| 2026-03-20 | Session 14 | BUG-001: Floor navigation | `TBD` | Elevator now shows locked floors at 55% opacity with "Phase N • Coming Soon" in tooltip. Floors still navigable (stub pages handle Coming Soon UI). Removed grey-out lag root cause (was 15 FPS issue from Sprint 1). |
-| 2026-03-20 | Session 14 | BUG-002: Back-to-lobby nav | `TBD` | Lobby button replaced with exit icon (door+arrow SVG). Tooltip reads "Exit to Lobby". Border changed from dashed to solid for clarity. Always visible in elevator panel (desktop + mobile). |
-| 2026-03-20 | Session 14 | BUG-005: Sign out | `TBD` | Added UserMenu component (top-right avatar dropdown). Sign out via POST to /api/auth/signout. Also accessible from /settings page. Dropdown has profile info, settings link, sign out action. |
-| 2026-03-20 | Session 14 | BUG-012: Account/settings page | `TBD` | Created /settings route with SettingsClient. Sections: Profile (name, email, provider badge), Appearance (dark mode indicator, light mode noted as future), Account (export, notifications, connected services placeholders + sign out). |
-| 2026-03-20 | Session 14 | BUG-011: Dark/light mode | `TBD` | Settings page shows theme section. Dark mode is current design — light theme CSS vars not yet defined, noted in UI. Wired for future toggle. |
-| 2026-03-20 | Session 14 | Fix: Root layout overflow-hidden | `TBD` | Removed leftover `overflow-hidden` Tailwind class from body tag in root layout.tsx. Was partially fixed in Sprint 1 (globals.css cleaned) but inline class was missed. |
+| 2026-03-20 | Session 14 | BUG-001: Floor navigation | `742ea47` | Elevator now shows locked floors at 55% opacity with "Phase N • Coming Soon" in tooltip. Floors still navigable (stub pages handle Coming Soon UI). Removed grey-out lag root cause (was 15 FPS issue from Sprint 1). |
+| 2026-03-20 | Session 14 | BUG-002: Back-to-lobby nav | `742ea47` | Lobby button replaced with exit icon (door+arrow SVG). Tooltip reads "Exit to Lobby". Border changed from dashed to solid for clarity. Always visible in elevator panel (desktop + mobile). |
+| 2026-03-20 | Session 14 | BUG-005: Sign out | `742ea47` | Added UserMenu component (top-right avatar dropdown). Sign out via POST to /api/auth/signout. Also accessible from /settings page. Dropdown has profile info, settings link, sign out action. |
+| 2026-03-20 | Session 14 | BUG-012: Account/settings page | `742ea47` | Created /settings route with SettingsClient. Sections: Profile (name, email, provider badge), Appearance (dark mode indicator, light mode noted as future), Account (export, notifications, connected services placeholders + sign out). |
+| 2026-03-20 | Session 14 | BUG-011: Dark/light mode | `742ea47` | Settings page shows theme section. Dark mode is current design — light theme CSS vars not yet defined, noted in UI. Wired for future toggle. |
+| 2026-03-20 | Session 14 | Fix: Root layout overflow-hidden | `742ea47` | Removed leftover `overflow-hidden` Tailwind class from body tag in root layout.tsx. Was partially fixed in Sprint 1 (globals.css cleaned) but inline class was missed. |
 | 2026-03-19 | Session 13 | BUG-006: Performance (15 FPS lag) | `6a2336d` | Rewrote ProceduralSkyline v5: removed mouse tracking, constellation lines, light sweep, scan line, mouse spotlight. Reduced buildings (65/50/35 → 50/40/28), stars (180 → 120), particles (60 → 30), water shimmers (30 → 18). Removed atmospheric particles entirely. Eliminated 3 mousemove RAF loops. |
 | 2026-03-19 | Session 13 | BUG-007: Remove custom cursor | `6a2336d` | Removed CustomCursor from WorldShell. Added global CSS `cursor: pointer` rule for all interactive elements (a, button, [role=button], input, etc.). Eliminated per-frame RAF loop + 4 document event listeners. |
 | 2026-03-19 | Session 13 | BUG-008: Remove text parallax | `6a2336d` | Removed mousemove → transform handlers from lobby contentRef and penthouse headerRef. Text is now static. Eliminated 2 mousemove event listeners. |
@@ -223,19 +223,19 @@ Bugs that have been fixed. Moved here from OPEN ISSUES with fix details.
 **Fixed:** Session 13, `6a2336d` — Replaced mouse parallax with autonomous sinusoidal drift (Ken Burns). Two sine waves, 25-40s periods. prefers-reduced-motion static.
 
 ### BUG-001: Floor navigation `🟢 FIXED`
-**Fixed:** Session 14, `TBD` — Elevator dims locked floors (55% opacity), tooltip shows "Phase N • Coming Soon". All floors navigate to stub pages.
+**Fixed:** Session 14, `742ea47` — Elevator dims locked floors (55% opacity), tooltip shows "Phase N • Coming Soon". All floors navigate to stub pages.
 
 ### BUG-002: Back-to-lobby navigation `🟢 FIXED`
-**Fixed:** Session 14, `TBD` — Lobby button replaced with exit door icon, tooltip "Exit to Lobby". Desktop + mobile.
+**Fixed:** Session 14, `742ea47` — Lobby button replaced with exit door icon, tooltip "Exit to Lobby". Desktop + mobile.
 
 ### BUG-005: Sign out feature `🟢 FIXED`
-**Fixed:** Session 14, `TBD` — UserMenu dropdown (top-right) with Sign Out action. Also on /settings page.
+**Fixed:** Session 14, `742ea47` — UserMenu dropdown (top-right) with Sign Out action. Also on /settings page.
 
 ### BUG-011: Dark/light mode `🟢 FIXED`
-**Fixed:** Session 14, `TBD` — Settings page Appearance section. Dark mode is design system default. Light vars future work.
+**Fixed:** Session 14, `742ea47` — Settings page Appearance section. Dark mode is design system default. Light vars future work.
 
 ### BUG-012: Account/settings page `🟢 FIXED`
-**Fixed:** Session 14, `TBD` — /settings route with profile, appearance, account actions. Accessible from UserMenu.
+**Fixed:** Session 14, `742ea47` — /settings route with profile, appearance, account actions. Accessible from UserMenu.
 
 ---
 
