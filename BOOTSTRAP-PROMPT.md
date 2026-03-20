@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `7cad1e9`)
+- **Branch:** `main` (commit `23521c4`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 8,605 across 46 source files
 - **Build:** Clean (zero TS errors)
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-7cad1e9 docs: update BUG-TRACKER with commit hashes for Sprint 1 fixes
+23521c4 chore: delete dead CustomCursor.tsx (audit pass 1)
 ```
 
 ## Acceptance Criteria — Progress
@@ -179,7 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `7cad1e9`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `23521c4`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -322,13 +322,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 382 | 4,213 |
+| `BOOTSTRAP-PROMPT.md` | 381 | 4,194 |
 | `PROJECT-CONTEXT.md` | 401 | 7,588 |
 | `docs/MASTER-PLAN.md` | 361 | 6,827 |
 | `CLAUDE.md` | 139 | 2,256 |
-| **Total** | **1283** | **20,884** |
+| **Total** | **1282** | **20,865** |
 
-> ⚠️ Reading all recommended files consumes ~20,884 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~20,865 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

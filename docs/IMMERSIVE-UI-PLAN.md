@@ -160,7 +160,7 @@ The current `Elevator.tsx` (301 lines, GSAP-powered) already handles door open/c
 
 **Already installed (Phase 0, keep as-is):**
 - `next` 16, `react` 19, `tailwindcss` 3, `drizzle-orm`, `@supabase/ssr`
-- Custom `DayNightProvider`, `CustomCursor`, `FloorShell`, `Skyline.tsx`, `Elevator.tsx`
+- Custom `DayNightProvider`, `FloorShell`, `Skyline.tsx`, `Elevator.tsx` (CustomCursor removed — BUG-007)
 
 ### 2.2 What NOT to Use (and Why)
 
@@ -241,7 +241,7 @@ src/
 ├── components/
 │   ├── world/                          # EXISTING directory
 │   │   ├── DayNightProvider.tsx         # KEEP — already works
-│   │   ├── CustomCursor.tsx             # KEEP — already works
+│   │   ├── (deleted)                    # CustomCursor.tsx removed — BUG-007
 │   │   ├── FloorShell.tsx               # MODIFY — swap SVG skyline for SkylineScene
 │   │   ├── Skyline.tsx                  # KEEP as fallback — rename to SkylineSVG.tsx
 │   │   ├── Elevator.tsx                 # MODIFY — add skyline shift + dark overlay
