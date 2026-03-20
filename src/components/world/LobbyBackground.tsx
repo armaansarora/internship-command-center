@@ -1,20 +1,19 @@
 "use client";
 
-import { useMemo, useState, type JSX } from "react";
+import { useEffect, useRef, useState, useCallback, type JSX } from "react";
 
 /**
- * LobbyBackground — AI-generated architectural sketch backgrounds.
+ * LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
  *
  * BUG-010: The lobby should NOT share the skyline with the penthouse.
- * Uses one of 4 AI-generated images (white pencil architectural sketches
- * on dark navy) randomly selected on each mount. Atmospheric overlays
- * (vignette, spotlight, grain) are layered on top for depth.
  *
- * Images: /lobby/bg-1.jpg through /lobby/bg-4.jpg
- *   1: Grand chandelier lobby with arched ceiling
- *   2: Elevator hall with parallel doors
- *   3: Reception desk with sunburst windows
- *   4: Spiral atrium looking up
+ * Uses 4 ultra-high-res AI-generated architectural sketches (3840x2560,
+ * white pencil on dark navy). Images rotate with smooth crossfades on
+ * a 20-second timer. Each image gets a unique slow Ken Burns treatment:
+ * gentle zoom + directional pan, like Apple TV's Aerial screensaver.
+ *
+ * Atmospheric overlays (vignette, grain, spotlights) layer on top.
+ * prefers-reduced-motion: disables Ken Burns, static display only.
  */
 
 const LOBBY_IMAGES = [
@@ -24,15 +23,105 @@ const LOBBY_IMAGES = [
   "/lobby/bg-4.jpg",
 ] as const;
 
-export function LobbyBackground(): JSX.Element {
-  // Pick a random image once on mount — useMemo with empty deps
-  // ensures it stays stable across re-renders but changes on remount
-  const selectedImage = useMemo(
-    () => LOBBY_IMAGES[Math.floor(Math.random() * LOBBY_IMAGES.length)],
-    [],
-  );
+/** Each image gets a unique pan/zoom keyframe for variety. */
+const KEN_BURNS_KEYFRAMES: string[] = [
+  // 1: Slow zoom in toward center-right, slight upward drift
+  `@keyframes kb-0 {
+    0%   { transform: scale(1.0)  translate(0%, 0%); }
+    100% { transform: scale(1.15) translate(-3%, -2%); }
+  }`,
+  // 2: Gentle zoom out from upper-left
+  `@keyframes kb-1 {
+    0%   { transform: scale(1.15) translate(-2%, -1%); }
+    100% { transform: scale(1.0)  translate(2%, 1%); }
+  }`,
+  // 3: Slow pan right with subtle zoom
+  `@keyframes kb-2 {
+    0%   { transform: scale(1.05) translate(2%, 0%); }
+    100% { transform: scale(1.12) translate(-3%, -1%); }
+  }`,
+  // 4: Drift upward with zoom in
+  `@keyframes kb-3 {
+    0%   { transform: scale(1.0)  translate(0%, 2%); }
+    100% { transform: scale(1.12) translate(1%, -2%); }
+  }`,
+];
 
-  const [loaded, setLoaded] = useState(false);
+/** Duration of each image's display (matches Ken Burns animation). */
+const DISPLAY_DURATION_S = 20;
+/** Crossfade overlap duration. */
+const CROSSFADE_S = 2.5;
+
+export function LobbyBackground(): JSX.Element {
+  // Shuffle order once on mount for variety
+  const orderRef = useRef<number[]>([]);
+  if (orderRef.current.length === 0) {
+    const arr = [0, 1, 2, 3];
+    // Fisher-Yates shuffle
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    orderRef.current = arr;
+  }
+
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [nextIdx, setNextIdx] = useState<number | null>(null);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Detect reduced motion preference
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
+  // Preload all images
+  useEffect(() => {
+    LOBBY_IMAGES.forEach((src, i) => {
+      const img = new Image();
+      img.onload = () => {
+        setLoadedImages((prev) => new Set(prev).add(i));
+      };
+      img.src = src;
+    });
+  }, []);
+
+  // Rotation timer — advance to next image every DISPLAY_DURATION_S
+  const advanceImage = useCallback(() => {
+    setNextIdx((prev) => {
+      // If prev is null, compute from currentIdx
+      const next = ((prev ?? currentIdx) + 1) % orderRef.current.length;
+      return next;
+    });
+  }, [currentIdx]);
+
+  useEffect(() => {
+    if (reducedMotion) return; // No rotation in reduced motion
+    timerRef.current = setTimeout(advanceImage, DISPLAY_DURATION_S * 1000);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [currentIdx, reducedMotion, advanceImage]);
+
+  // When nextIdx is set, wait for crossfade then promote
+  useEffect(() => {
+    if (nextIdx === null) return;
+    const timer = setTimeout(() => {
+      setCurrentIdx(nextIdx);
+      setNextIdx(null);
+    }, CROSSFADE_S * 1000);
+    return () => clearTimeout(timer);
+  }, [nextIdx]);
+
+  const currentImageIdx = orderRef.current[currentIdx];
+  const nextImageIdx = nextIdx !== null ? orderRef.current[nextIdx] : null;
+  const currentLoaded = loadedImages.has(currentImageIdx);
+  const nextLoaded = nextImageIdx !== null && loadedImages.has(nextImageIdx);
 
   return (
     <div
@@ -40,7 +129,10 @@ export function LobbyBackground(): JSX.Element {
       style={{ zIndex: 0, overflow: "hidden" }}
       aria-hidden="true"
     >
-      {/* ── BASE: Dark foundation (visible before image loads) ── */}
+      {/* ── Inject Ken Burns keyframes ── */}
+      <style>{KEN_BURNS_KEYFRAMES.join("\n")}</style>
+
+      {/* ── BASE: Dark foundation (visible before images load) ── */}
       <div
         className="absolute inset-0"
         style={{
@@ -49,32 +141,44 @@ export function LobbyBackground(): JSX.Element {
         }}
       />
 
-      {/* ── AI IMAGE: Architectural sketch ── */}
-      {/* Hidden img tag for onLoad event, actual display via background-image */}
-      <img
-        src={selectedImage}
-        alt=""
-        aria-hidden="true"
-        onLoad={() => setLoaded(true)}
-        style={{
-          position: "absolute",
-          width: 0,
-          height: 0,
-          opacity: 0,
-          pointerEvents: "none",
-        }}
-      />
+      {/* ── CURRENT IMAGE with Ken Burns ── */}
       <div
+        key={`bg-${currentIdx}`}
         className="absolute inset-0"
         style={{
-          backgroundImage: `url(${selectedImage})`,
+          backgroundImage: `url(${LOBBY_IMAGES[currentImageIdx]})`,
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          opacity: loaded ? 0.35 : 0,
-          transition: "opacity 1.2s ease-out",
+          opacity: currentLoaded ? 0.4 : 0,
+          transition: nextIdx !== null ? `opacity ${CROSSFADE_S}s ease-in-out` : "opacity 1.5s ease-out",
+          ...(nextIdx !== null ? { opacity: 0 } : {}),
+          animation: !reducedMotion && currentLoaded
+            ? `kb-${currentImageIdx} ${DISPLAY_DURATION_S}s ease-in-out forwards`
+            : "none",
+          willChange: "transform, opacity",
         }}
       />
+
+      {/* ── NEXT IMAGE (crossfading in) ── */}
+      {nextImageIdx !== null && (
+        <div
+          key={`bg-next-${nextIdx}`}
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url(${LOBBY_IMAGES[nextImageIdx]})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center center",
+            backgroundRepeat: "no-repeat",
+            opacity: nextLoaded ? 0.4 : 0,
+            transition: `opacity ${CROSSFADE_S}s ease-in-out`,
+            animation: !reducedMotion && nextLoaded
+              ? `kb-${nextImageIdx} ${DISPLAY_DURATION_S}s ease-in-out forwards`
+              : "none",
+            willChange: "transform, opacity",
+          }}
+        />
+      )}
 
       {/* ── CEILING SPOTLIGHT: Warm overhead glow ── */}
       <div
@@ -82,7 +186,7 @@ export function LobbyBackground(): JSX.Element {
         style={{
           height: "40%",
           background:
-            "radial-gradient(ellipse 50% 100% at 50% 0%, rgba(201, 168, 76, 0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 50% 100% at 50% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 70%)",
         }}
       />
 
@@ -96,17 +200,7 @@ export function LobbyBackground(): JSX.Element {
           width: "60%",
           height: "55%",
           background:
-            "radial-gradient(ellipse 100% 100% at 50% 30%, rgba(201, 168, 76, 0.04) 0%, transparent 60%)",
-        }}
-      />
-
-      {/* ── FLOOR REFLECTION: Polished marble zone (bottom 25%) ── */}
-      <div
-        className="absolute inset-x-0 bottom-0"
-        style={{
-          height: "25%",
-          background:
-            "linear-gradient(to bottom, transparent 0%, rgba(201, 168, 76, 0.012) 30%, rgba(201, 168, 76, 0.025) 100%)",
+            "radial-gradient(ellipse 100% 100% at 50% 30%, rgba(201, 168, 76, 0.035) 0%, transparent 60%)",
         }}
       />
 
@@ -116,7 +210,7 @@ export function LobbyBackground(): JSX.Element {
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
           backgroundSize: "150px 150px",
-          opacity: 0.4,
+          opacity: 0.35,
           mixBlendMode: "overlay" as const,
         }}
       />
@@ -125,27 +219,27 @@ export function LobbyBackground(): JSX.Element {
       <div
         className="absolute inset-0"
         style={{
-          boxShadow: "inset 0 0 200px 100px rgba(4, 5, 12, 0.7)",
+          boxShadow: "inset 0 0 250px 120px rgba(4, 5, 12, 0.75)",
         }}
       />
 
-      {/* ── TOP GRADIENT FADE: Blend into header area ── */}
+      {/* ── TOP GRADIENT FADE ── */}
       <div
         className="absolute inset-x-0 top-0"
         style={{
-          height: "15%",
+          height: "18%",
           background:
-            "linear-gradient(to bottom, rgba(8, 7, 14, 0.8) 0%, transparent 100%)",
+            "linear-gradient(to bottom, rgba(8, 7, 14, 0.85) 0%, transparent 100%)",
         }}
       />
 
-      {/* ── BOTTOM GRADIENT FADE: Blend into footer area ── */}
+      {/* ── BOTTOM GRADIENT FADE ── */}
       <div
         className="absolute inset-x-0 bottom-0"
         style={{
-          height: "10%",
+          height: "12%",
           background:
-            "linear-gradient(to top, rgba(8, 7, 14, 0.6) 0%, transparent 100%)",
+            "linear-gradient(to top, rgba(8, 7, 14, 0.65) 0%, transparent 100%)",
         }}
       />
     </div>
