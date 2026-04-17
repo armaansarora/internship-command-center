@@ -5,6 +5,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -108,6 +109,10 @@ export async function getCompaniesByUser(userId: string): Promise<CompanyForAgen
     .order("name", { ascending: true });
 
   if (error) {
+    log.error("companies.get_by_user_failed", undefined, {
+      userId,
+      error: error.message,
+    });
     return [];
   }
   return ((data ?? []) as CompanyRow[]).map(rowToAgentFormat);
@@ -128,7 +133,16 @@ export async function getCompanyById(
     .eq("id", companyId)
     .single();
 
-  if (error || !data) return null;
+  if (error || !data) {
+    if (error) {
+      log.error("companies.get_by_id_failed", undefined, {
+        userId,
+        companyId,
+        error: error.message,
+      });
+    }
+    return null;
+  }
   return rowToAgentFormat(data as CompanyRow);
 }
 
@@ -144,6 +158,12 @@ export async function getResearchStats(userId: string): Promise<ResearchStats> {
     .order("name", { ascending: true });
 
   if (error || !data) {
+    if (error) {
+      log.error("companies.get_research_stats_failed", undefined, {
+        userId,
+        error: error.message,
+      });
+    }
     return {
       companiesResearched: 0,
       staleResearch: 0,
@@ -228,6 +248,11 @@ export async function getCompaniesForAgent(
   const { data, error } = await query;
 
   if (error) {
+    log.error("companies.get_for_agent_failed", undefined, {
+      userId,
+      opts,
+      error: error.message,
+    });
     return [];
   }
   return ((data ?? []) as CompanyRow[]).map(rowToAgentFormat);
@@ -327,6 +352,11 @@ export async function updateCompanyResearch(
     .eq("user_id", userId);
 
   if (error) {
+    log.error("companies.update_research_failed", undefined, {
+      userId,
+      companyId,
+      error: error.message,
+    });
     return { success: false, message: `Update failed: ${error.message}` };
   }
 
@@ -353,6 +383,11 @@ export async function getStaleResearch(
     .order("research_freshness", { ascending: true, nullsFirst: true });
 
   if (error) {
+    log.error("companies.get_stale_research_failed", undefined, {
+      userId,
+      daysOld,
+      error: error.message,
+    });
     return [];
   }
   return ((data ?? []) as CompanyRow[]).map(rowToAgentFormat);
@@ -379,6 +414,11 @@ export async function searchCompaniesByName(
     .limit(10);
 
   if (error) {
+    log.error("companies.search_by_name_failed", undefined, {
+      userId,
+      query,
+      error: error.message,
+    });
     return [];
   }
   return ((data ?? []) as CompanyRow[]).map(rowToAgentFormat);

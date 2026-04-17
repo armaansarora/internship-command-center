@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -73,13 +73,11 @@ export function WarTable({
   // Local optimistic state
   const [localApplications, setLocalApplications] = useState<Application[]>(initialApplications);
   const [activeApplication, setActiveApplication] = useState<Application | null>(null);
-  // Sync with parent when props change (server revalidation)
-  // We use a ref-based approach to avoid re-setting on every render
-  const [lastInitial, setLastInitial] = useState(initialApplications);
-  if (initialApplications !== lastInitial) {
-    setLastInitial(initialApplications);
+
+  // Sync with parent when props change (server revalidation).
+  useEffect(() => {
     setLocalApplications(initialApplications);
-  }
+  }, [initialApplications]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

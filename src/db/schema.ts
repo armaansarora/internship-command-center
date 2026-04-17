@@ -400,8 +400,12 @@ export const progressionMilestones = pgTable("progression_milestones", {
   unlockedAt: timestamp("unlocked_at", { withTimezone: true }).defaultNow(),
   floorUnlocked: text("floor_unlocked"),
   ...timestamps,
-}, () => [
+}, (table) => [
   userIsolation("progression_milestones"),
+  uniqueIndex("uniq_progression_user_milestone").on(
+    table.userId,
+    table.milestone
+  ),
 ]);
 
 // ===========================================================================

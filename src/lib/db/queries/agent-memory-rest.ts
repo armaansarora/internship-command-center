@@ -5,6 +5,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -74,20 +75,30 @@ export async function getAgentMemories(
     .limit(limit);
 
   if (error) {
-    console.error(`Failed to fetch agent memories for ${agent}:`, error.message);
+    log.error("agent_memory.get_by_agent_failed", undefined, {
+      userId,
+      agent,
+      limit,
+      error: error.message,
+    });
     return [];
   }
 
   // Increment access count for retrieved memories
   const ids = (data ?? []).map((r) => r.id as string);
   if (ids.length > 0) {
-    void supabase
-      .from("agent_memory")
-      .update({
-        access_count: (data?.[0]?.access_count as number ?? 0) + 1,
-        last_accessed_at: new Date().toISOString(),
-      })
-      .in("id", ids)
+    const now = new Date().toISOString();
+    void Promise.all(
+      (data ?? []).map((row) =>
+        supabase
+          .from("agent_memory")
+          .update({
+            access_count: ((row.access_count as number | null) ?? 0) + 1,
+            last_accessed_at: now,
+          })
+          .eq("id", row.id as string),
+      ),
+    )
       .then(() => null);
   }
 
@@ -117,7 +128,12 @@ export async function storeAgentMemory(
     .single();
 
   if (error) {
-    console.error("Failed to store agent memory:", error.message);
+    log.error("agent_memory.store_failed", undefined, {
+      userId: input.userId,
+      agent: input.agent,
+      category: input.category,
+      error: error.message,
+    });
     return null;
   }
 
@@ -142,7 +158,11 @@ export async function getAllAgentMemories(
     .limit(limit);
 
   if (error) {
-    console.error("Failed to fetch all agent memories:", error.message);
+    log.error("agent_memory.get_all_failed", undefined, {
+      userId,
+      limit,
+      error: error.message,
+    });
     return [];
   }
 
@@ -163,7 +183,10 @@ export async function getMemoryCountByAgent(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("Failed to count agent memories:", error.message);
+    log.error("agent_memory.count_failed", undefined, {
+      userId,
+      error: error.message,
+    });
     return {};
   }
 

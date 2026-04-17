@@ -2,7 +2,7 @@
 
 import type { JSX } from "react";
 import { useActor } from "@xstate/react";
-import { characterMachine } from "@/lib/agents/cro/character-machine";
+import { characterMachine } from "@/lib/agents/cmo/character-machine";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // ---------------------------------------------------------------------------

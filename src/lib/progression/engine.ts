@@ -110,7 +110,7 @@ export async function checkAndUnlockMilestones(
 
   const admin = getSupabaseAdmin();
 
-  // Insert new milestone rows
+  // Insert new milestone rows with conflict protection.
   const rows = toUnlock.map((m) => ({
     user_id: userId,
     milestone: m.id,
@@ -118,16 +118,61 @@ export async function checkAndUnlockMilestones(
     unlocked_at: new Date().toISOString(),
   }));
 
-  await admin.from("progression_milestones").insert(rows);
+  const { error: upsertError } = await admin
+    .from("progression_milestones")
+    .upsert(rows, { onConflict: "user_id,milestone", ignoreDuplicates: true });
+
+  if (upsertError) {
+    // Backward-compatible fallback for environments that have not yet applied
+    // the unique index migration required by onConflict(user_id,milestone).
+    if (upsertError.code === "42P10") {
+      const { error: insertError } = await admin
+        .from("progression_milestones")
+        .insert(rows);
+      if (insertError) {
+        throw new Error(`Failed to insert progression milestones: ${insertError.message}`);
+      }
+    } else {
+      throw new Error(`Failed to upsert progression milestones: ${upsertError.message}`);
+    }
+  }
+
+  // Recompute from DB to stay correct under concurrent unlock requests.
+  const { count: unlockedCount, error: countError } = await admin
+    .from("progression_milestones")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (countError) {
+    throw new Error(`Failed to count progression milestones: ${countError.message}`);
+  }
 
   // Update progression_level = total unlocked milestones
-  const newLevel = alreadyUnlocked.size + toUnlock.length;
+  const newLevel = unlockedCount ?? alreadyUnlocked.size;
   await admin
     .from("user_profiles")
     .update({ progression_level: newLevel })
     .eq("id", userId);
 
-  return toUnlock;
+  // Return milestones now present in DB that were absent at the beginning.
+  const { data: unlockedNowRows, error: unlockedNowError } = await admin
+    .from("progression_milestones")
+    .select("milestone")
+    .eq("user_id", userId)
+    .in(
+      "milestone",
+      toUnlock.map((m) => m.id),
+    );
+
+  if (unlockedNowError) {
+    throw new Error(`Failed to read unlocked milestones: ${unlockedNowError.message}`);
+  }
+
+  const unlockedNow = new Set(
+    (unlockedNowRows ?? []).map((row: { milestone: string }) => row.milestone),
+  );
+
+  return toUnlock.filter((m) => unlockedNow.has(m.id) && !alreadyUnlocked.has(m.id));
 }
 
 /**

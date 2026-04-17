@@ -53,7 +53,7 @@ export default async function SituationRoomPage() {
   // ── Server Actions ─────────────────────────────────────────────────
   async function approveOutreach(outreachId: string): Promise<void> {
     "use server";
-    await requireUser();
+    const sessionUser = await requireUser();
     const sb = await createClient();
     await sb
       .from("outreach_queue")
@@ -61,20 +61,22 @@ export default async function SituationRoomPage() {
         status: "approved",
         approved_at: new Date().toISOString(),
       })
-      .eq("id", outreachId);
+      .eq("id", outreachId)
+      .eq("user_id", sessionUser.id);
     revalidatePath("/situation-room");
   }
 
   async function dismissNotification(notificationId: string): Promise<void> {
     "use server";
-    await requireUser();
+    const sessionUser = await requireUser();
     const sb = await createClient();
     await sb
       .from("notifications")
       .update({
         is_dismissed: true,
       })
-      .eq("id", notificationId);
+      .eq("id", notificationId)
+      .eq("user_id", sessionUser.id);
     revalidatePath("/situation-room");
   }
 

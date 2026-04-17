@@ -71,7 +71,7 @@ export default async function RolodexLoungePage() {
 
   async function updateContact(id: string, formData: FormData): Promise<void> {
     "use server";
-    await requireUser();
+    const sessionUser = await requireUser();
     const sb = await createClient();
 
     const name = (formData.get("name") as string)?.trim();
@@ -103,16 +103,17 @@ export default async function RolodexLoungePage() {
         company_id: companyId,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", sessionUser.id);
 
     revalidatePath("/rolodex-lounge");
   }
 
   async function deleteContact(id: string): Promise<void> {
     "use server";
-    await requireUser();
+    const sessionUser = await requireUser();
     const sb = await createClient();
-    await sb.from("contacts").delete().eq("id", id);
+    await sb.from("contacts").delete().eq("id", id).eq("user_id", sessionUser.id);
     revalidatePath("/rolodex-lounge");
   }
 
@@ -121,7 +122,7 @@ export default async function RolodexLoungePage() {
     applicationId: string
   ): Promise<void> {
     "use server";
-    await requireUser();
+    const sessionUser = await requireUser();
     const sb = await createClient();
     await sb
       .from("applications")
@@ -129,7 +130,8 @@ export default async function RolodexLoungePage() {
         contact_id: contactId,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", applicationId);
+      .eq("id", applicationId)
+      .eq("user_id", sessionUser.id);
     revalidatePath("/rolodex-lounge");
   }
 

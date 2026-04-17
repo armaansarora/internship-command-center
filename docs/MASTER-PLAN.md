@@ -292,7 +292,7 @@ Masters-level code means real testing. Every phase includes tests for its delive
 | Tool | Purpose |
 |---|---|
 | Vitest | Unit tests, component tests (fast, native ESM, Vite-compatible) |
-| Playwright | E2E tests: auth flows, elevator navigation, agent interactions |
+| Playwright (planned) | E2E tests: auth flows, elevator navigation, agent interactions |
 | MSW (Mock Service Worker) | API mocking for Supabase, Inngest, external services |
 | Testing Library | React component behavior tests |
 
@@ -313,7 +313,7 @@ Masters-level code means real testing. Every phase includes tests for its delive
 3. RLS isolation test runs in EVERY phase (regression)
 4. Agent tools are tested with mocked LLM responses (deterministic)
 5. E2E: auth flow + one critical user journey per phase
-6. CI runs: `vitest run` + `playwright test` on every PR
+6. CI currently runs `tsc`, `eslint`, `vitest run`, and `next build` on every PR (`playwright test` is planned, not yet wired)
 
 ### Test File Convention
 ```

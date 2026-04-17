@@ -4,6 +4,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -80,7 +81,11 @@ export async function getDailySnapshots(
     .limit(limit);
 
   if (error) {
-    console.error("Failed to fetch daily snapshots:", error.message);
+    log.error("daily_snapshots.get_failed", undefined, {
+      userId,
+      limit,
+      error: error.message,
+    });
     return [];
   }
 
@@ -125,7 +130,11 @@ export async function upsertDailySnapshot(
     .single();
 
   if (error) {
-    console.error("Failed to upsert daily snapshot:", error.message);
+    log.error("daily_snapshots.upsert_failed", undefined, {
+      userId,
+      date: snapshot.date,
+      error: error.message,
+    });
     return null;
   }
 

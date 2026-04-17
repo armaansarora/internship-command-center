@@ -1,13 +1,24 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { DayNightProvider } from "@/components/world/DayNightProvider";
 import { Elevator } from "@/components/world/Elevator";
 import { UserMenu } from "@/components/ui/UserMenu";
-import { NotificationSystem } from "@/components/world/NotificationSystem";
 import { SoundProvider } from "@/components/world/SoundProvider";
-import { SoundToggle } from "@/components/ui/SoundToggle";
-import { EasterEggs } from "@/components/world/EasterEggs";
 import { ErrorBoundary } from "@/components/world/ErrorBoundary";
+
+const NotificationSystem = dynamic(
+  () => import("@/components/world/NotificationSystem").then((m) => m.NotificationSystem),
+  { ssr: false },
+);
+const SoundToggle = dynamic(
+  () => import("@/components/ui/SoundToggle").then((m) => m.SoundToggle),
+  { ssr: false },
+);
+const EasterEggs = dynamic(
+  () => import("@/components/world/EasterEggs").then((m) => m.EasterEggs),
+  { ssr: false },
+);
 
 interface WorldShellProps {
   children: React.ReactNode;
@@ -34,16 +45,7 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
         <Elevator />
 
         {/* User menu — top-right, above everything */}
-        <div className="fixed top-4 right-16 z-[40] hidden md:block">
-          <UserMenu
-            displayName={displayName}
-            email={userEmail}
-            avatarUrl={avatarUrl}
-          />
-        </div>
-
-        {/* Mobile user menu — top-right */}
-        <div className="fixed top-3 right-3 z-[40] md:hidden">
+        <div className="fixed top-3 right-3 z-[40] md:top-4 md:right-16">
           <UserMenu
             displayName={displayName}
             email={userEmail}

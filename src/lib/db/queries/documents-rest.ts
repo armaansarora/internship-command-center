@@ -5,6 +5,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -127,7 +128,12 @@ export async function getDocumentsByUser(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("getDocumentsByUser failed:", error.message);
+    log.error("documents.get_by_user_failed", undefined, {
+      userId,
+      type: type ?? null,
+      applicationId: applicationId ?? null,
+      error: error.message,
+    });
     return [];
   }
 

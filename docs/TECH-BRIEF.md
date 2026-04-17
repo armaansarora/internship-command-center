@@ -156,12 +156,12 @@ Source: [Drizzle RLS docs](https://orm.drizzle.team/docs/rls), [Drizzle GitHub #
 - Server: `createServerClient(url, publishableKey, { cookies })` — requires cookie read/write callbacks
 - Middleware: `updateSession()` pattern refreshes auth tokens on every request
 
-**Middleware pattern (`middleware.ts`):**
+**Proxy pattern (`proxy.ts`, Next.js 16):**
 ```ts
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

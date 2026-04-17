@@ -55,9 +55,9 @@ table (so Stripe events don't double-process) and the manual SQL files
 reorganized under `src/db/manual/` so a clean clone of this project can be
 reproduced from scratch.
 
-There are four files in `src/db/manual/`. They are **idempotent** — running them
+There are five files in `src/db/manual/`. They are **idempotent** — running them
 twice does nothing bad. If you have already run the earlier ones (000, 001, 002)
-on an existing database, you only need **003**. If you are setting up a new
+on an existing database, you only need **003** and **004**. If you are setting up a new
 environment from scratch, run them in order.
 
 **What to do**
@@ -75,6 +75,7 @@ environment from scratch, run them in order.
 - `src/db/manual/001_vector_search.sql`
 - `src/db/manual/002_pipeline_stats_rpc.sql`
 - `src/db/manual/003_stripe_webhook_events.sql`
+- `src/db/manual/004_progression_milestones_unique.sql`
 
 **How to tell it worked**
 

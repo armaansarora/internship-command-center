@@ -5,6 +5,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -121,7 +122,15 @@ export async function getContactsByUser(userId: string): Promise<ContactForAgent
     .eq("user_id", userId)
     .order("last_contact_at", { ascending: true, nullsFirst: true });
 
-  if (error || !data) return [];
+  if (error || !data) {
+    if (error) {
+      log.error("contacts.get_by_user_failed", undefined, {
+        userId,
+        error: error.message,
+      });
+    }
+    return [];
+  }
 
   return (data as Array<ContactRow & { companies: { name: string } | null }>).map(
     (row) => rowToAgentFormat(row, row.companies?.name ?? null)
@@ -143,7 +152,15 @@ export async function getContactStats(userId: string): Promise<ContactStats> {
     .select("last_contact_at, company_id")
     .eq("user_id", userId);
 
-  if (error || !data) return emptyContactStats();
+  if (error || !data) {
+    if (error) {
+      log.error("contacts.get_stats_failed", undefined, {
+        userId,
+        error: error.message,
+      });
+    }
+    return emptyContactStats();
+  }
 
   const now = new Date();
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -225,7 +242,16 @@ export async function getContactsForAgent(
 
   const { data, error } = await query;
 
-  if (error || !data) return { contacts: [], total: 0 };
+  if (error || !data) {
+    if (error) {
+      log.error("contacts.get_for_agent_failed", undefined, {
+        userId,
+        opts,
+        error: error.message,
+      });
+    }
+    return { contacts: [], total: 0 };
+  }
 
   let results = (data as Array<ContactRow & { companies: { name: string } | null }>).map(
     (row) => rowToAgentFormat(row, row.companies?.name ?? null)
@@ -413,7 +439,15 @@ export async function getCoolingContacts(userId: string): Promise<ContactForAgen
     .gte("last_contact_at", coldThreshold)
     .order("last_contact_at", { ascending: true });
 
-  if (error || !data) return [];
+  if (error || !data) {
+    if (error) {
+      log.error("contacts.get_cooling_failed", undefined, {
+        userId,
+        error: error.message,
+      });
+    }
+    return [];
+  }
   return (data as Array<ContactRow & { companies: { name: string } | null }>).map(
     (row) => rowToAgentFormat(row, row.companies?.name ?? null)
   );
@@ -440,7 +474,15 @@ export async function getColdContacts(userId: string): Promise<ContactForAgent[]
     .lt("last_contact_at", coldThreshold)
     .order("last_contact_at", { ascending: true, nullsFirst: true });
 
-  if (error || !data) return [];
+  if (error || !data) {
+    if (error) {
+      log.error("contacts.get_cold_failed", undefined, {
+        userId,
+        error: error.message,
+      });
+    }
+    return [];
+  }
   return (data as Array<ContactRow & { companies: { name: string } | null }>)
     .map((row) => rowToAgentFormat(row, row.companies?.name ?? null))
     .sort((a, b) => b.daysSinceContact - a.daysSinceContact);

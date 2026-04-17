@@ -51,7 +51,6 @@ All planning documents are in `/docs/`:
 - **TECH-BRIEF.md** — Research findings, code patterns, dependency list
 - **SCHEMA-DRAFT.md** — 16-table Postgres schema with RLS
 - **CHARACTER-PROMPTS.md** — System prompts for all AI agents
-- **FILE-STRUCTURE.md** — Target project architecture
 
 Operational context in `PROJECT-CONTEXT.md` (root).
 

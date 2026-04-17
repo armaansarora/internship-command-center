@@ -11,5 +11,6 @@ in `../migrations/` are applied.
 | 001   | `001_vector_search.sql`           | Cosine-similarity RPCs (`match_company_embeddings`, `match_job_embeddings`) |
 | 002   | `002_pipeline_stats_rpc.sql`      | Single-round-trip pipeline stats RPC             |
 | 003   | `003_stripe_webhook_events.sql`   | Idempotency table for Stripe webhook             |
+| 004   | `004_progression_milestones_unique.sql` | Unique milestone unlock per user (concurrency safety) |
 
 Scripts are idempotent — they can be re-run safely.

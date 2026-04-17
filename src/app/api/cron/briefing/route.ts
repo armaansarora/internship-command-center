@@ -104,6 +104,7 @@ async function processUser(
 ): Promise<{ userId: string; status: string }> {
   const supabase = getSupabaseAdmin();
   const userId = user.id;
+  const dayStartIso = `${today}T00:00:00.000Z`;
 
   try {
     // ── Idempotency: if we already snapshotted today, skip.
@@ -115,6 +116,19 @@ async function processUser(
       .maybeSingle();
 
     if (existingSnap) {
+      return { userId, status: "skipped" };
+    }
+
+    // Secondary guard: if today's briefing notification already exists, skip.
+    const { data: existingBriefing } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("type", "daily_briefing")
+      .gte("created_at", dayStartIso)
+      .maybeSingle();
+
+    if (existingBriefing) {
       return { userId, status: "skipped" };
     }
 
@@ -141,13 +155,13 @@ async function processUser(
           .from("agent_logs")
           .select("id")
           .eq("user_id", userId)
-          .gte("created_at", `${today}T00:00:00.000Z`),
+          .gte("created_at", dayStartIso),
         supabase
           .from("emails")
           .select("id")
           .eq("user_id", userId)
           .eq("is_processed", true)
-          .gte("created_at", `${today}T00:00:00.000Z`),
+          .gte("created_at", dayStartIso),
       ]);
 
     const recentApps = recentAppsResult.data ?? [];

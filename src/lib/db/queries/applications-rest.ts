@@ -7,6 +7,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getApplicationLimit } from "@/lib/stripe/entitlements";
+import { log } from "@/lib/logger";
+import { buildPipelineStatsFromAggregates } from "./pipeline-stats-from-aggregates";
 import type { Application } from "@/db/schema";
 import type {
   CreateApplicationInput,
@@ -129,7 +131,10 @@ export async function getApplicationsByUserRest(userId: string): Promise<Applica
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("getApplicationsByUserRest failed:", error.message);
+    log.error("applications.get_by_user_failed", undefined, {
+      userId,
+      error: error.message,
+    });
     return [];
   }
   return (data ?? []) as ApplicationRow[];
@@ -150,7 +155,11 @@ export async function getPipelineStatsRest(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("getPipelineStatsRest failed:", error.message);
+    log.error("applications.pipeline_stats_failed", undefined, {
+      userId,
+      error: error.message,
+      useAdmin: options.useAdmin ?? false,
+    });
     return emptyStats();
   }
 
@@ -177,48 +186,19 @@ export async function getPipelineStatsRest(
     (r) => !["accepted", "rejected", "withdrawn"].includes(r.status ?? "")
   ).length;
 
-  const applied = byStatus["applied"] ?? 0;
-  const screening = byStatus["screening"] ?? 0;
-  const interviewScheduled = byStatus["interview_scheduled"] ?? 0;
-  const interviewing = byStatus["interviewing"] ?? 0;
-  const offer = byStatus["offer"] ?? 0;
-
-  const interviewTotal = interviewScheduled + interviewing;
-
-  const appliedToScreeningRate = applied > 0 ? (screening / applied) * 100 : 0;
-  const screeningToInterviewRate =
-    screening > 0 ? (interviewTotal / screening) * 100 : 0;
-  const interviewToOfferRate =
-    interviewTotal > 0 ? (offer / interviewTotal) * 100 : 0;
-
-  const conversionRate = applied > 0 ? (offer / applied) * 100 : 0;
-  const conversionLabel = `${conversionRate.toFixed(0)}%`;
-
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const weeklyActivity = all.filter((r) => {
     const last = r.last_activity_at ?? r.created_at;
     return new Date(last) >= weekAgo;
   }).length;
 
-  return {
-    total: totalActive,
-    discovered: byStatus["discovered"] ?? 0,
-    applied,
-    screening,
-    interviewing: interviewTotal,
-    offers: offer,
-    stale: staleCount,
-    weeklyActivity,
-    conversionRate,
-    scheduledInterviews: interviewScheduled,
+  return buildPipelineStatsFromAggregates(
     byStatus,
-    appliedToScreeningRate,
-    screeningToInterviewRate,
-    interviewToOfferRate,
+    totalActive,
     staleCount,
     warmCount,
-    conversionLabel,
-  };
+    weeklyActivity,
+  );
 }
 
 /**
@@ -258,7 +238,11 @@ export async function queryApplicationsForAgent(
   const { data, error } = await query;
 
   if (error) {
-    console.error("queryApplicationsForAgent failed:", error.message);
+    log.error("applications.query_for_agent_failed", undefined, {
+      userId,
+      error: error.message,
+      opts,
+    });
     return { applications: [], total: 0 };
   }
 
@@ -672,7 +656,10 @@ export async function getApplicationTimelineRest(
     .order("created_at", { ascending: true });
 
   if (error) {
-    console.error("getApplicationTimelineRest failed:", error.message);
+    log.error("applications.timeline_failed", undefined, {
+      userId,
+      error: error.message,
+    });
     return [];
   }
 
@@ -707,7 +694,10 @@ export async function getConversionFunnelRest(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("getConversionFunnelRest failed:", error.message);
+    log.error("applications.conversion_funnel_failed", undefined, {
+      userId,
+      error: error.message,
+    });
     return [];
   }
 
@@ -756,7 +746,11 @@ export async function getDailyActivityRest(
     .gte("last_activity_at", since.toISOString());
 
   if (error) {
-    console.error("getDailyActivityRest failed:", error.message);
+    log.error("applications.daily_activity_failed", undefined, {
+      userId,
+      days,
+      error: error.message,
+    });
     return [];
   }
 
@@ -787,7 +781,10 @@ export async function getAgentUsageStatsRest(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("getAgentUsageStatsRest failed:", error.message);
+    log.error("applications.agent_usage_failed", undefined, {
+      userId,
+      error: error.message,
+    });
     return [];
   }
 

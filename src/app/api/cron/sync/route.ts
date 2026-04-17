@@ -167,17 +167,31 @@ async function processUser(userId: string): Promise<SyncResult> {
     staleContacts = count ?? 0;
 
     if (staleContacts > 0) {
-      const { error: notifError } = await supabase.from("notifications").insert({
-        user_id: userId,
-        type: "stale_contacts",
-        priority: "medium",
-        title: "Network Cooling Alert",
-        body: `${staleContacts} contact${staleContacts === 1 ? "" : "s"} haven't been touched in 14+ days. Open the Rolodex Lounge to re-engage.`,
-        channels: ["in_app"],
-        is_read: false,
-        is_dismissed: false,
-      });
-      if (notifError) throw notifError;
+      const dayStart = new Date();
+      dayStart.setUTCHours(0, 0, 0, 0);
+
+      const { count: existingAlerts, error: existingAlertsError } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("type", "stale_contacts")
+        .gte("created_at", dayStart.toISOString());
+
+      if (existingAlertsError) throw existingAlertsError;
+
+      if ((existingAlerts ?? 0) === 0) {
+        const { error: notifError } = await supabase.from("notifications").insert({
+          user_id: userId,
+          type: "stale_contacts",
+          priority: "medium",
+          title: "Network Cooling Alert",
+          body: `${staleContacts} contact${staleContacts === 1 ? "" : "s"} haven't been touched in 14+ days. Open the Rolodex Lounge to re-engage.`,
+          channels: ["in_app"],
+          is_read: false,
+          is_dismissed: false,
+        });
+        if (notifError) throw notifError;
+      }
     }
   } catch (err) {
     log.error("cron.sync.stale_check_failed", err, { userId });

@@ -6,6 +6,7 @@ import {
   classifyEmail,
   matchEmailToApplication,
 } from "@/lib/gmail/parser";
+import { log } from "@/lib/logger";
 import type { GmailMessage } from "@/lib/gmail/parser";
 
 interface GmailMessageRef {
@@ -138,7 +139,12 @@ export async function syncGmailForUser(
 
       syncedCount++;
       if (result.classification !== "other") classifiedCount++;
-    } catch {
+    } catch (err) {
+      log.warn("gmail.sync.message_failed", {
+        userId,
+        messageId: ref.id,
+        error: err instanceof Error ? err.message : String(err),
+      });
       failedCount++;
     }
   }

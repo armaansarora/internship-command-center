@@ -29,6 +29,7 @@ interface Props {
 export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef  = useRef<Scene | null>(null);
+  const ctxRef    = useRef<CanvasRenderingContext2D | null>(null);
   const rafRef    = useRef(0);
   const sizeRef   = useRef({ w: 0, h: 0 });
   const reduced   = useReducedMotion();
@@ -56,7 +57,10 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       canvas.width  = rect.width  * dpr;
       canvas.height = rect.height * dpr;
       const ctx = canvas.getContext("2d");
-      if (ctx) ctx.scale(dpr, dpr);
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+        ctxRef.current = ctx;
+      }
       sizeRef.current  = { w: rect.width, h: rect.height };
       sceneRef.current = generateScene(rect.width, rect.height);
     };
@@ -75,10 +79,17 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
         rafRef.current = requestAnimationFrame(loop);
         return;
       }
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      const ctx = ctxRef.current ?? canvas.getContext("2d");
+      if (!ctx) {
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+      ctxRef.current = ctx;
       const { w, h } = sizeRef.current;
-      if (!w || !h) return;
+      if (!w || !h) {
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
 
       drawFrame({
         ctx,

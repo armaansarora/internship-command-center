@@ -4,6 +4,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -61,7 +62,10 @@ export async function getUnreadNotifications(userId: string): Promise<Notificati
     .limit(20);
 
   if (error) {
-    console.error("getUnreadNotifications failed:", error.message);
+    log.error("notifications.get_unread_failed", undefined, {
+      userId,
+      error: error.message,
+    });
     return [];
   }
 
@@ -84,7 +88,11 @@ export async function markNotificationRead(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("markNotificationRead failed:", error.message);
+    log.error("notifications.mark_read_failed", undefined, {
+      userId,
+      id,
+      error: error.message,
+    });
     return { success: false };
   }
   return { success: true };
@@ -106,7 +114,11 @@ export async function dismissNotification(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("dismissNotification failed:", error.message);
+    log.error("notifications.dismiss_failed", undefined, {
+      userId,
+      id,
+      error: error.message,
+    });
     return { success: false };
   }
   return { success: true };
@@ -131,8 +143,8 @@ export async function createNotification(
       source_agent: input.sourceAgent ?? null,
       source_entity_id: input.sourceEntityId ?? null,
       source_entity_type: input.sourceEntityType ?? null,
-      channels: input.channels ? JSON.stringify(input.channels) : null,
-      actions: input.actions ? JSON.stringify(input.actions) : null,
+      channels: input.channels ?? null,
+      actions: input.actions ?? null,
       is_read: false,
       is_dismissed: false,
     })
@@ -140,7 +152,11 @@ export async function createNotification(
     .single();
 
   if (error) {
-    console.error("createNotification failed:", error.message);
+    log.error("notifications.create_failed", undefined, {
+      userId: input.userId,
+      type: input.type ?? null,
+      error: error.message,
+    });
     return { success: false };
   }
 

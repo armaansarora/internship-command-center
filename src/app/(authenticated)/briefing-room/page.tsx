@@ -191,6 +191,7 @@ export default async function BriefingRoomPage() {
       .from("interviews")
       .select("application_id, company_id, round")
       .eq("id", interviewId)
+      .eq("user_id", sessionUser.id)
       .single();
 
     if (!interview) return;
@@ -199,6 +200,7 @@ export default async function BriefingRoomPage() {
       .from("applications")
       .select("company_name, role")
       .eq("id", interview.application_id)
+      .eq("user_id", sessionUser.id)
       .single();
 
     const title = `Prep Packet — ${app?.company_name ?? "Unknown"} (${app?.role ?? "Unknown"})`;
@@ -229,7 +231,8 @@ export default async function BriefingRoomPage() {
       await sb
         .from("interviews")
         .update({ prep_packet_id: newDoc.id })
-        .eq("id", interviewId);
+        .eq("id", interviewId)
+        .eq("user_id", sessionUser.id);
     }
 
     revalidatePath("/briefing-room");

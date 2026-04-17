@@ -126,7 +126,7 @@ export default async function WritingRoomPage() {
 
   async function updateDocument(id: string, formData: FormData): Promise<void> {
     "use server";
-    await requireUser();
+    const sessionUser = await requireUser();
     const sb = await createClient();
 
     const title = (formData.get("title") as string)?.trim();
@@ -141,16 +141,17 @@ export default async function WritingRoomPage() {
         content,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", sessionUser.id);
 
     revalidatePath("/writing-room");
   }
 
   async function deleteDocument(id: string): Promise<void> {
     "use server";
-    await requireUser();
+    const sessionUser = await requireUser();
     const sb = await createClient();
-    await sb.from("documents").delete().eq("id", id);
+    await sb.from("documents").delete().eq("id", id).eq("user_id", sessionUser.id);
     revalidatePath("/writing-room");
   }
 

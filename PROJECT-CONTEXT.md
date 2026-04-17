@@ -189,7 +189,7 @@ All code gracefully degrades — Stripe, Upstash, Sentry, OpenWeatherMap all no-
 1. **9 orphaned files** — Built components/hooks not yet imported into the component tree (listed in CLAUDE.md). All functional, just not wired.
 2. **GSAP imports** — 3 files import `gsap` directly instead of through the centralized `gsap-init.ts` tree-shaking module.
 3. **Large files** — 17 files exceed 500 LOC. Consider splitting when touching them.
-4. **No tests** — Testing infrastructure (Vitest + Playwright) is specified in MASTER-PLAN but no test files exist yet.
+4. **Limited test coverage** — 9 Vitest files exist (33 tests) focused on utilities/auth/rate-limit; no Playwright E2E suite yet.
 5. **Lighthouse audit** — Not run yet. Performance scores unknown.
 
 ---
@@ -203,7 +203,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 | File | Purpose | Lines |
 |---|---|---|
 | `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~270 |
-| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~560 |
+| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~550 |
 | `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~310 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |

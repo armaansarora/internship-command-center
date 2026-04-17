@@ -150,8 +150,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/RolodexLoungeScene.tsx` (328 LOC) — RolodexLoungeScene — Floor 6 environment compositor.
 - `src/components/floor-7/WarRoomClient.tsx` (324 LOC)
 - `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
-- `src/components/floor-7/war-table/WarTable.tsx` (318 LOC)
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (316 LOC)
+- `src/components/floor-7/war-table/WarTable.tsx` (316 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (314 LOC)
 - `src/components/world/MilestoneToast.tsx` (310 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
@@ -199,7 +199,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/NotificationSystem.tsx` (129 LOC) — NotificationSystem — in-world spatial notification manager.
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
-- `src/components/world/ProceduralSkyline.tsx` (110 LOC) — Canvas-based procedural renderer
+- `src/components/world/ProceduralSkyline.tsx` (121 LOC) — Canvas-based procedural renderer
 - `src/components/world/SoundProvider.tsx` (103 LOC) — SoundProvider — wraps the application to expose sound controls.
 - `src/components/penthouse/GlassPanel.tsx` (101 LOC) — GlassPanel — frosted-glass card with:
 - `src/components/world/DayNightProvider.tsx` (72 LOC) — DayNightProvider — sets `data-time` on <html> based on the user's local time.
