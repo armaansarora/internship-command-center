@@ -4,25 +4,69 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getStripe, tierFromPriceId } from "@/lib/stripe/server";
 import { requireEnv } from "@/lib/env";
 import { log } from "@/lib/logger";
+import { stripeWebhookDuplicateDecision } from "@/lib/stripe/webhook-duplicate";
 
 /**
  * Stripe webhook.
  *
  * Guarantees:
  *  - Raw body signature verification (Stripe SDK).
- *  - Exactly-once processing via `stripe_webhook_events` primary-key
- *    insert; retries of the same event.id return 200 immediately.
- *  - Every event is audited (status, error, timestamps).
- *  - Returns 2xx to Stripe even on handler failure if the event has
- *    already been persisted, so a transient downstream issue doesn't
- *    spam retries forever — retries can be triggered manually via the
- *    Stripe dashboard.
+ *  - Idempotency via `stripe_webhook_events` primary-key on event.id.
+ *  - Duplicate deliveries: already-processed events are acked; failed events
+ *    are re-processed on retry; in-flight "received" rows ack without work
+ *    unless stale (see webhook-duplicate.ts).
+ *  - Failed handler updates never overwrite a "processed" row (concurrent retries).
  */
 export const runtime = "nodejs";
 
 async function getRawBody(request: Request): Promise<Buffer> {
   const arrayBuffer = await request.arrayBuffer();
   return Buffer.from(arrayBuffer);
+}
+
+async function finalizeWebhookSuccess(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  eventId: string,
+): Promise<void> {
+  await supabase
+    .from("stripe_webhook_events")
+    .update({
+      status: "processed",
+      processed_at: new Date().toISOString(),
+      error: null,
+    })
+    .eq("id", eventId);
+}
+
+async function finalizeWebhookFailure(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  eventId: string,
+  message: string,
+): Promise<void> {
+  await supabase
+    .from("stripe_webhook_events")
+    .update({ status: "failed", error: message })
+    .eq("id", eventId)
+    .neq("status", "processed");
+}
+
+async function executeStripeWebhook(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  event: Stripe.Event,
+): Promise<NextResponse> {
+  try {
+    await handleStripeEvent(event);
+    await finalizeWebhookSuccess(supabase, event.id);
+    return NextResponse.json({ received: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown";
+    log.error("stripe.webhook.handler_failed", err, {
+      eventId: event.id,
+      type: event.type,
+    });
+    await finalizeWebhookFailure(supabase, event.id, message);
+    return NextResponse.json({ error: "Handler failed" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -32,7 +76,7 @@ export async function POST(request: Request): Promise<NextResponse> {
   if (!signature) {
     return NextResponse.json(
       { error: "Missing stripe-signature header" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -42,7 +86,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     event = getStripe().webhooks.constructEvent(
       rawBody,
       signature,
-      STRIPE_WEBHOOK_SECRET
+      STRIPE_WEBHOOK_SECRET,
     );
   } catch (err) {
     log.warn("stripe.webhook.signature_verification_failed", {
@@ -50,14 +94,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     });
     return NextResponse.json(
       { error: "Webhook signature verification failed" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   const supabase = getSupabaseAdmin();
 
-  // ── Idempotency: INSERT the event row. If it already exists, return 200.
-  const { data: existing, error: insertError } = await supabase
+  const { data: inserted, error: insertError } = await supabase
     .from("stripe_webhook_events")
     .insert({
       id: event.id,
@@ -70,53 +113,72 @@ export async function POST(request: Request): Promise<NextResponse> {
     .maybeSingle();
 
   if (insertError) {
-    // Unique violation — we've seen this event before. Acknowledge and stop.
     if (insertError.code === "23505") {
-      log.info("stripe.webhook.duplicate", { eventId: event.id, type: event.type });
-      return NextResponse.json({ received: true, duplicate: true });
+      const { data: row, error: rowError } = await supabase
+        .from("stripe_webhook_events")
+        .select("status, created_at, updated_at")
+        .eq("id", event.id)
+        .maybeSingle();
+
+      if (rowError || !row) {
+        log.error("stripe.webhook.duplicate_lookup_failed", rowError, {
+          eventId: event.id,
+        });
+        return NextResponse.json(
+          { error: "Failed to load webhook event row" },
+          { status: 500 },
+        );
+      }
+
+      const decision = stripeWebhookDuplicateDecision(
+        {
+          status: row.status as string,
+          receivedAt: (row.updated_at ?? row.created_at) as string | null,
+        },
+        Date.now(),
+      );
+
+      if (decision === "ack_duplicate") {
+        log.info("stripe.webhook.duplicate_processed", {
+          eventId: event.id,
+          type: event.type,
+        });
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      if (decision === "ack_in_flight") {
+        log.info("stripe.webhook.duplicate_in_flight", {
+          eventId: event.id,
+          type: event.type,
+        });
+        return NextResponse.json({
+          received: true,
+          duplicate: true,
+          pending: true,
+        });
+      }
+
+      log.info("stripe.webhook.duplicate_retry", { eventId: event.id, type: event.type });
+      return executeStripeWebhook(supabase, event);
     }
+
     log.error("stripe.webhook.persist_failed", insertError, {
       eventId: event.id,
       type: event.type,
     });
-    // Return 500 so Stripe retries — we haven't recorded this yet.
     return NextResponse.json(
       { error: "Failed to record webhook event" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   log.info("stripe.webhook.received", {
     eventId: event.id,
     type: event.type,
-    existing: existing?.status,
+    existing: inserted?.status,
   });
 
-  try {
-    await handleStripeEvent(event);
-
-    await supabase
-      .from("stripe_webhook_events")
-      .update({ status: "processed", processed_at: new Date().toISOString() })
-      .eq("id", event.id);
-
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "unknown";
-    log.error("stripe.webhook.handler_failed", err, {
-      eventId: event.id,
-      type: event.type,
-    });
-
-    await supabase
-      .from("stripe_webhook_events")
-      .update({ status: "failed", error: message })
-      .eq("id", event.id);
-
-    // 500 — Stripe will retry; idempotent INSERT guarantees we don't
-    // double-apply the update on retry.
-    return NextResponse.json({ error: "Handler failed" }, { status: 500 });
-  }
+  return executeStripeWebhook(supabase, event);
 }
 
 /**
@@ -172,7 +234,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
         .limit(1);
       if (lookupError) {
         throw new Error(
-          `Failed to find profile by customer id: ${lookupError.message}`
+          `Failed to find profile by customer id: ${lookupError.message}`,
         );
       }
 
@@ -205,7 +267,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
         .limit(1);
       if (lookupError) {
         throw new Error(
-          `Failed to find profile by customer id: ${lookupError.message}`
+          `Failed to find profile by customer id: ${lookupError.message}`,
         );
       }
 
@@ -218,14 +280,13 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
         .eq("id", userId);
       if (error) {
         throw new Error(
-          `Failed to persist subscription deletion: ${error.message}`
+          `Failed to persist subscription deletion: ${error.message}`,
         );
       }
       return;
     }
 
     default:
-      // Acknowledged but ignored. Recorded in stripe_webhook_events for audit.
       return;
   }
 }

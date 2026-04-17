@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireUser, createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { requireUserApi } from "@/lib/auth/require-user";
+import { jsonPostgrestError } from "@/lib/db/postgrest-error";
 
 /**
  * POST /api/notifications/:id/read
@@ -9,7 +11,9 @@ export async function POST(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Response> {
-  const user = await requireUser();
+  const auth = await requireUserApi();
+  if (!auth.ok) return auth.response;
+  const { user } = auth;
   const supabase = await createClient();
   const { id } = await params;
 
@@ -20,10 +24,7 @@ export async function POST(
     .eq("user_id", user.id);
 
   if (error) {
-    return NextResponse.json(
-      { error: { code: "DB_ERROR", message: error.message } },
-      { status: 500 },
-    );
+    return jsonPostgrestError(error);
   }
 
   return NextResponse.json({ data: { success: true }, error: null });

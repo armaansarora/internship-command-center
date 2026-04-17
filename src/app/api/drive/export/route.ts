@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/supabase/server";
+import { requireUserApi } from "@/lib/auth/require-user";
 import { getDocumentById } from "@/lib/db/queries/documents-rest";
 import { exportDocumentToDrive } from "@/lib/utils/google-drive-export";
 
 export async function POST(req: Request): Promise<Response> {
-  const user = await requireUser();
+  const auth = await requireUserApi();
+  if (!auth.ok) return auth.response;
+  const { user } = auth;
 
   const body = (await req.json()) as { documentId: string };
   const { documentId } = body;

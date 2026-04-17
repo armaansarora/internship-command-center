@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/supabase/server";
+import { requireUserApi } from "@/lib/auth/require-user";
 import { createCheckoutSession } from "@/lib/stripe/server";
 import { STRIPE_PLANS } from "@/lib/stripe/config";
 import { z } from "zod";
@@ -15,8 +15,10 @@ const CheckoutSchema = z.object({
     .refine((value) => VALID_PRICE_IDS.has(value), "Unknown priceId"),
 });
 
-export async function POST(request: Request): Promise<NextResponse> {
-  const user = await requireUser();
+export async function POST(request: Request): Promise<Response> {
+  const auth = await requireUserApi();
+  if (!auth.ok) return auth.response;
+  const { user } = auth;
 
   const body: unknown = await request.json();
   const parsed = CheckoutSchema.safeParse(body);

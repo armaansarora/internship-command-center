@@ -40,9 +40,9 @@ if (sentryDsn) {
     silent: true,
     org: process.env.SENTRY_ORG ?? "",
     project: process.env.SENTRY_PROJECT ?? "",
-    autoInstrumentServerFunctions: false,
+    autoInstrumentServerFunctions: true,
     autoInstrumentMiddleware: false,
-    autoInstrumentAppDirectory: false,
+    autoInstrumentAppDirectory: true,
   });
 } else {
   module.exports = nextConfig;

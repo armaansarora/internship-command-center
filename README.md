@@ -10,7 +10,7 @@ A multi-tenant SaaS that automates the internship and job search process. Users 
 |---|---|
 | Framework | Next.js 16 (App Router) |
 | Database | Supabase Postgres + pgvector |
-| ORM | Drizzle v1 |
+| Schema / migrations | Drizzle v1 (runtime reads/writes use Supabase REST + RLS, not Drizzle queries on Vercel) |
 | Auth | Supabase Auth (Google OAuth) |
 | Background Jobs | Vercel Cron + API routes |
 | AI/LLM | Vercel AI SDK v6 + Anthropic |

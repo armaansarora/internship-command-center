@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 10:58 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 12:00 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -8,7 +8,7 @@
 
 ## Quick Start
 
-1. Clone: `armaansarora/internship-command-center` (branch: `cursor/4db357e9`)
+1. Clone: `armaansarora/internship-command-center` (branch: `cursor/3f614c35`)
 2. Read this file top to bottom
 3. **Read `CLAUDE.md` — contains mandatory agent behavior rules (session state, context management, handoff). NON-NEGOTIABLE.**
 4. Read `PROJECT-CONTEXT.md` for full operational context
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `cursor/4db357e9` (commit `1e5b30f`)
+- **Branch:** `cursor/3f614c35` (commit `dc5c182`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 52,119 across 235 source files
+- **Total LOC:** 52,265 across 238 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -40,12 +40,6 @@
 - **Last file touched:** `HANDOFF.md`
 - **Notes:** Session 22: Final Perplexity Computer session. Full audit completed (0 TS errors, clean build, 0 console.logs, 0 any types, 0 TODOs, 9 known orphans documented). Rewrote CLAUDE.md with comprehensive architecture, vision, gotchas, and orphan inventory. Rewrote PROJECT-CONTEXT.md with accurate state (all 7 phases complete, 226 files, 51,928 LOC). Updated MASTER-PLAN.md phase status and acceptance criteria. Updated BUG-TRACKER.md. Created comprehensive HANDOFF.md for Claude Code onboarding. All docs are accurate, descriptive, and ready for seamless Claude Code handoff.
 - **State captured:** 2026-03-20T21:57:00.000Z
-
-## Changes Since Last Bootstrap
-
-```
-1e5b30f harden: kill Drizzle runtime, collapse C-suite duplication, lock down auth/webhooks/crons
-```
 
 ## Acceptance Criteria — Progress
 
@@ -98,7 +92,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `cursor/4db357e9` (commit `1e5b30f`) |
+| Repo | `armaansarora/internship-command-center` on `cursor/3f614c35` (commit `dc5c182`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -108,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 (no .env.local found)
 
-## Source Tree (235 files, 52,119 LOC)
+## Source Tree (238 files, 52,265 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -158,15 +152,15 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db` | 440 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/auth` | 386 |
+| `src/lib/stripe` | 329 |
 | `src/lib/contracts/departments` | 328 |
 | `src/components/pricing` | 306 |
 | `src/lib/progression` | 304 |
 | `src/hooks` | 298 |
+| `src/app/api/stripe/webhook` | 293 |
 | `src/lib/utils` | 284 |
 | `src/app/(authenticated)/briefing-room` | 264 |
 | `src/app/api/cron/briefing` | 255 |
-| `src/lib/stripe` | 245 |
-| `src/app/api/stripe/webhook` | 232 |
 | `src/lib/actions` | 207 |
 | `src/lib/calendar` | 203 |
 | `src/app/api/cron/sync` | 199 |
@@ -177,34 +171,35 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/validators` | 148 |
 | `src/lib/agents` | 136 |
 | `src/components/transitions` | 132 |
-| `src/app/api/weather` | 128 |
 | `src/app/(authenticated)/war-room` | 116 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/app/(authenticated)` | 104 |
+| `src/app/api/weather` | 99 |
 | `src/app/(authenticated)/situation-room` | 92 |
 | `src/types` | 74 |
-| `src/app/api/notifications` | 58 |
+| `src/app/api/notifications` | 59 |
 | `src/app/api/ceo` | 50 |
-| `src/app/api/drive/export` | 48 |
+| `src/app/api/drive/export` | 50 |
+| `src/app/api/stripe/checkout` | 46 |
 | `src/app/api/cfo` | 44 |
-| `src/app/api/stripe/checkout` | 44 |
 | `src/app/api/progression` | 35 |
-| `src/app/api/notifications/[id]/read` | 31 |
+| `src/app/api/notifications/[id]/read` | 32 |
+| `src/app/api/gmail/auth` | 31 |
 | `src/lib/constants` | 31 |
-| `src/app/api/gmail/auth` | 29 |
 | `src/app/api/auth/callback` | 27 |
 | `src/app/api/cmo` | 23 |
 | `src/app/api/cpo` | 23 |
+| `src/app/api/stripe/portal` | 22 |
 | `src/app/(authenticated)/c-suite` | 20 |
 | `src/app/(authenticated)/observatory` | 20 |
-| `src/app/api/stripe/portal` | 20 |
 | `src` | 20 |
 | `src/app/api/cio` | 19 |
 | `src/app/api/cno` | 19 |
 | `src/app/api/coo` | 19 |
 | `src/app/api/cro` | 19 |
-| `src/app/api/gmail/sync` | 14 |
-| `src/app/api/calendar/sync` | 12 |
+| `src/app/api/gmail/sync` | 16 |
+| `src/lib/db` | 16 |
+| `src/app/api/calendar/sync` | 14 |
 | `src/app/api/auth/signout` | 11 |
 
 <details>
@@ -394,6 +389,7 @@ src/lib/contracts/index.ts
 src/lib/contracts/notifications.ts
 src/lib/contracts/ui.ts
 src/lib/day-night.ts
+src/lib/db/postgrest-error.ts
 src/lib/db/queries/agent-memory-rest.ts
 src/lib/db/queries/applications-rest.ts
 src/lib/db/queries/communications-rest.ts
@@ -426,6 +422,8 @@ src/lib/stripe/agent-access.ts
 src/lib/stripe/config.ts
 src/lib/stripe/entitlements.ts
 src/lib/stripe/server.ts
+src/lib/stripe/webhook-duplicate.test.ts
+src/lib/stripe/webhook-duplicate.ts
 src/lib/supabase/admin.ts
 src/lib/supabase/client.ts
 src/lib/supabase/middleware.ts
@@ -506,13 +504,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 549 | 5,785 |
+| `BOOTSTRAP-PROMPT.md` | 555 | 5,825 |
 | `PROJECT-CONTEXT.md` | 271 | 4,956 |
 | `docs/MASTER-PLAN.md` | 361 | 7,045 |
 | `CLAUDE.md` | 307 | 6,292 |
-| **Total** | **1488** | **24,078** |
+| **Total** | **1494** | **24,118** |
 
-> ⚠️ Reading all recommended files consumes ~24,078 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,118 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

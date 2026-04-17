@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { withAnonymousRateLimit } from "@/lib/rate-limit-middleware";
@@ -22,31 +23,7 @@ interface OpenWeatherResponse {
   main: { temp: number };
 }
 
-// ─── In-memory cache (30 minutes) ──────────────────────────────────────────
-
-interface CacheEntry {
-  data: WeatherResponse;
-  timestamp: number;
-}
-
-const CACHE_TTL_MS = 30 * 60 * 1000;
-const cache = new Map<string, CacheEntry>();
-
-function getCached(key: string): WeatherResponse | null {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
-    cache.delete(key);
-    return null;
-  }
-  return entry.data;
-}
-
-function setCached(key: string, data: WeatherResponse): void {
-  cache.set(key, { data, timestamp: Date.now() });
-}
-
-// ─── OpenWeatherMap condition mapper ──────────────────────────────────────
+const CACHE_REVALIDATE_SECONDS = 30 * 60;
 
 function mapCondition(main: string): WeatherCondition {
   const lower = main.toLowerCase();
@@ -69,7 +46,31 @@ function normaliseCoord(raw: string | null, fallback: string): string {
   return value.toFixed(1);
 }
 
-// ─── Route handler ─────────────────────────────────────────────────────────
+async function fetchOpenWeatherForGrid(lat: string, lon: string): Promise<WeatherResponse> {
+  const apiKey = env().OPENWEATHER_API_KEY;
+  if (!apiKey) {
+    return { condition: "clear" };
+  }
+
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    log.warn("weather.upstream_error", { status: res.status });
+    return { condition: "clear" };
+  }
+
+  const owData = (await res.json()) as OpenWeatherResponse;
+  const main = owData.weather?.[0]?.main ?? "Clear";
+  const icon = owData.weather?.[0]?.icon;
+  const temp = owData.main?.temp;
+
+  return {
+    condition: mapCondition(main),
+    temp,
+    icon,
+  };
+}
 
 export async function GET(request: Request): Promise<Response> {
   const rate = await withAnonymousRateLimit(request);
@@ -78,50 +79,20 @@ export async function GET(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
   const lat = normaliseCoord(searchParams.get("lat"), "40.7");
   const lon = normaliseCoord(searchParams.get("lon"), "-74.0");
-  const cacheKey = `${lat},${lon}`;
-
-  const cached = getCached(cacheKey);
-  if (cached) {
-    return NextResponse.json(cached, { headers: rate.headers });
-  }
-
-  const apiKey = env().OPENWEATHER_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      { condition: "clear" } as WeatherResponse,
-      { headers: rate.headers }
-    );
-  }
 
   try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-    const res = await fetch(url, { next: { revalidate: 0 } });
-
-    if (!res.ok) {
-      log.warn("weather.upstream_error", { status: res.status });
-      return NextResponse.json(
-        { condition: "clear" } as WeatherResponse,
-        { headers: rate.headers }
-      );
-    }
-
-    const owData = (await res.json()) as OpenWeatherResponse;
-    const main = owData.weather?.[0]?.main ?? "Clear";
-    const icon = owData.weather?.[0]?.icon;
-    const temp = owData.main?.temp;
-
-    const response: WeatherResponse = {
-      condition: mapCondition(main),
-      temp,
-      icon,
-    };
-    setCached(cacheKey, response);
+    const getCached = unstable_cache(
+      () => fetchOpenWeatherForGrid(lat, lon),
+      ["api-weather", lat, lon],
+      { revalidate: CACHE_REVALIDATE_SECONDS },
+    );
+    const response = await getCached();
     return NextResponse.json(response, { headers: rate.headers });
   } catch (err) {
     log.error("weather.fetch_failed", err);
     return NextResponse.json(
       { condition: "clear" } as WeatherResponse,
-      { headers: rate.headers }
+      { headers: rate.headers },
     );
   }
 }

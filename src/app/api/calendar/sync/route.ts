@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/supabase/server";
+import { requireUserApi } from "@/lib/auth/require-user";
 import { syncCalendarEvents } from "@/lib/calendar/sync";
 
-export async function POST(): Promise<NextResponse> {
-  const user = await requireUser();
+export async function POST(): Promise<Response> {
+  const auth = await requireUserApi();
+  if (!auth.ok) return auth.response;
+  const { user } = auth;
 
   const count = await syncCalendarEvents(user.id);
 
