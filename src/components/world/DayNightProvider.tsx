@@ -47,20 +47,16 @@ export function DayNightProvider({ children }: { children: React.ReactNode }) {
     const hour = now.getHours();
     const minutes = now.getMinutes();
     const timeState = getTimeState(hour);
-
     setState({ timeState, hour, minutes });
-
-    // Set the data-time attribute on <html> for CSS
-    document.documentElement.setAttribute("data-time", timeState);
   }, []);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    // Initial set
-    updateTime();
+    document.documentElement.setAttribute("data-time", state.timeState);
+  }, [state.timeState]);
 
-    // Update every 60 seconds
+  useEffect(() => {
     intervalRef.current = setInterval(updateTime, 60_000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);

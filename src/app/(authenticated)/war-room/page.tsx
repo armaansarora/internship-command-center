@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/supabase/server";
-import { db, schema } from "@/db/index";
-import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { FloorShell } from "@/components/world/FloorShell";
 import { WarRoomClient } from "@/components/floor-7/WarRoomClient";
-import type { Application } from "@/db/schema";
+import { getApplicationsForWarRoom } from "@/lib/db/queries/applications";
+import {
+  createApplicationAction,
+  updateApplicationAction,
+  deleteApplicationAction,
+  moveApplicationAction,
+} from "@/lib/actions/applications";
 
 export const metadata: Metadata = { title: "The War Room | The Tower" };
 
@@ -13,119 +17,42 @@ export const metadata: Metadata = { title: "The War Room | The Tower" };
 export default async function WarRoomPage() {
   const user = await requireUser();
 
-  // Fetch all applications for this user, ordered by position then created
-  const applications = await db
-    .select()
-    .from(schema.applications)
-    .where(eq(schema.applications.userId, user.id))
-    .orderBy(schema.applications.position, desc(schema.applications.createdAt));
+  const applications = await getApplicationsForWarRoom(user.id);
 
-  // Server Actions
   async function moveApplication(
     id: string,
     newStatus: string,
     newPosition: string
   ): Promise<void> {
     "use server";
-    const sessionUser = await requireUser();
-    await db
-      .update(schema.applications)
-      .set({
-        status: newStatus as Application["status"],
-        position: newPosition,
-        lastActivityAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(
-        eq(schema.applications.id, id)
-      );
-    // Verify ownership via RLS — Supabase handles this
-    revalidatePath("/war-room");
+    const result = await moveApplicationAction(id, newStatus, newPosition);
+    if (!result.error) {
+      revalidatePath("/war-room");
+    }
   }
 
   async function deleteApplication(id: string): Promise<void> {
     "use server";
-    await requireUser();
-    await db
-      .delete(schema.applications)
-      .where(eq(schema.applications.id, id));
-    revalidatePath("/war-room");
+    const result = await deleteApplicationAction(id);
+    if (!result.error) {
+      revalidatePath("/war-room");
+    }
   }
 
   async function createApplication(formData: FormData): Promise<void> {
     "use server";
-    const sessionUser = await requireUser();
-
-    const companyName = (formData.get("companyName") as string)?.trim();
-    const role = (formData.get("role") as string)?.trim();
-    const url = (formData.get("url") as string)?.trim() || null;
-    const status = (formData.get("status") as string) ?? "discovered";
-    const source = (formData.get("source") as string)?.trim() || null;
-    const location = (formData.get("location") as string)?.trim() || null;
-    const salary = (formData.get("salary") as string)?.trim() || null;
-    const sector = (formData.get("sector") as string)?.trim() || null;
-    const notes = (formData.get("notes") as string)?.trim() || null;
-    const tierStr = formData.get("tier") as string;
-    const tier = tierStr ? parseInt(tierStr, 10) : null;
-
-    if (!companyName || !role) return;
-
-    await db.insert(schema.applications).values({
-      userId: sessionUser.id,
-      companyName,
-      role,
-      url,
-      status: status as Application["status"],
-      source,
-      location,
-      salary,
-      sector,
-      notes,
-      tier: Number.isNaN(tier ?? NaN) ? null : tier,
-      position: `init_${Date.now()}`,
-      lastActivityAt: new Date(),
-    });
-
-    revalidatePath("/war-room");
+    const result = await createApplicationAction(formData);
+    if (!result.error) {
+      revalidatePath("/war-room");
+    }
   }
 
   async function updateApplication(id: string, formData: FormData): Promise<void> {
     "use server";
-    await requireUser();
-
-    const companyName = (formData.get("companyName") as string)?.trim();
-    const role = (formData.get("role") as string)?.trim();
-    const url = (formData.get("url") as string)?.trim() || null;
-    const status = (formData.get("status") as string) ?? "discovered";
-    const source = (formData.get("source") as string)?.trim() || null;
-    const location = (formData.get("location") as string)?.trim() || null;
-    const salary = (formData.get("salary") as string)?.trim() || null;
-    const sector = (formData.get("sector") as string)?.trim() || null;
-    const notes = (formData.get("notes") as string)?.trim() || null;
-    const tierStr = formData.get("tier") as string;
-    const tier = tierStr ? parseInt(tierStr, 10) : null;
-
-    if (!companyName || !role) return;
-
-    await db
-      .update(schema.applications)
-      .set({
-        companyName,
-        role,
-        url,
-        status: status as Application["status"],
-        source,
-        location,
-        salary,
-        sector,
-        notes,
-        tier: Number.isNaN(tier ?? NaN) ? null : tier,
-        lastActivityAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(schema.applications.id, id));
-
-    revalidatePath("/war-room");
+    const result = await updateApplicationAction(id, formData);
+    if (!result.error) {
+      revalidatePath("/war-room");
+    }
   }
 
   return (
@@ -198,7 +125,7 @@ export default async function WarRoomPage() {
                 opacity: 0.8,
               }}
             >
-              // PIPELINE OPS
+              PIPELINE OPS
             </span>
           </div>
           <p

@@ -289,7 +289,7 @@ export function CROWhiteboard({ stats }: CROWhiteboardProps): JSX.Element {
           transform: "rotate(1.2deg)",
         }}
       >
-        // CRO METRICS
+        {"// CRO METRICS"}
       </div>
     </div>
   );

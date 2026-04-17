@@ -48,7 +48,7 @@
  */
 
 import { execSync } from "child_process";
-import { readFileSync, writeFileSync, existsSync, readdirSync } from "fs";
+import { readFileSync, writeFileSync, readdirSync } from "fs";
 import { join, dirname, relative } from "path";
 import { fileURLToPath } from "url";
 
@@ -404,7 +404,6 @@ interface SessionState {
 let sessionState: SessionState | null = null;
 
 function autoDetectSessionState(): SessionState {
-  const branch = run("git branch --show-current", { capture: true }) || "main";
   const latestCommit = run("git log --oneline -1", { capture: true });
 
   // Find last session-end commit to scope "this session's work"

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 2:35 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 16, 2026 at 11:43 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -8,7 +8,7 @@
 
 ## Quick Start
 
-1. Clone: `armaansarora/internship-command-center` (branch: `main`)
+1. Clone: `armaansarora/internship-command-center` (branch: `docs-handoff`)
 2. Read this file top to bottom
 3. **Read `CLAUDE.md` — contains mandatory agent behavior rules (session state, context management, handoff). NON-NEGOTIABLE.**
 4. Read `PROJECT-CONTEXT.md` for full operational context
@@ -19,33 +19,40 @@
 ## Status
 
 - **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `36e8f56`)
+- **Branch:** `docs-handoff` (commit `c505d46`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 9,755 across 62 source files
+- **Total LOC:** 16,407 across 95 source files
 - **Build:** Clean (zero TS errors)
+
+### ⚠️ Stale Docs Detected
+- **`docs/MASTER-PLAN.md`**: Last updated 2026-03-20 (28d ago)
+- **`docs/VISION-SPEC.md`**: Last updated 2026-03-18 (30d ago)
+- **`docs/TECH-BRIEF.md`**: Last updated 2026-03-18 (30d ago)
+
+> Update these docs before starting work — stale specs cause wasted effort.
 
 
 ## Session State (where we left off)
 
-- **Current task:** General development
-- **Deliverable:** unknown
+- **Current task:** Phase 1: The War Room — wiring + commit
+- **Deliverable:** 1.1-1.6
 - **Status:** in_progress
-- **Last file touched:** `unknown`
-- **Notes:** No feature commits this session (tooling/infra only).
-- **State captured:** 2026-03-20T06:35:05.065Z
+- **Last file touched:** `src/app/(authenticated)/war-room/page.tsx`
+- **Notes:** All 6 deliverables built: Floor env, CRUD, Kanban DnD, CRO agent, character system, dialogue panel. 24 new files, ~5,800 LOC. Zero TS errors. Committing.
+- **State captured:** 2026-03-20T07:15:00.000Z
 
 ## Acceptance Criteria — Progress
 
-**Progress: 1 verified / 0 likely / 5 unverified** (of 6)
+**Progress: 4 verified / 1 likely / 1 unverified** (of 6)
 
-⬜ User can create an application and see it in the pipeline
-    └─ No application CRUD found in src/
-⬜ Drag-and-drop changes application status
-    └─ No drag-and-drop implementation found
-⬜ CRO agent can answer "How's my pipeline looking?" with real data
-    └─ No CRO agent implementation found
-⬜ CRO character has visible idle animation and talking state
-    └─ No CRO agent implementation found
+🟡 User can create an application and see it in the pipeline
+    └─ Partial implementation found
+✅ Drag-and-drop changes application status
+    └─ Drag-and-drop handlers found
+✅ CRO agent can answer "How's my pipeline looking?" with real data
+    └─ CRO agent file found
+✅ CRO character has visible idle animation and talking state
+    └─ CRO agent file found
 ⬜ Conversation feels in-character (aggressive, numbers-driven tone)
     └─ No conversation system found
 ✅ All data is RLS-scoped — multi-tenant safe
@@ -120,7 +127,7 @@
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `36e8f56`) |
+| Repo | `armaansarora/internship-command-center` on `docs-handoff` (commit `c505d46`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -128,24 +135,40 @@
 
 ## Env Vars (names only — values in .env.local)
 
-(no .env.local found)
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- SUPABASE_DB_URL
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- ANTHROPIC_API_KEY
 
-## Source Tree (62 files, 9,755 LOC)
+## Source Tree (95 files, 16,407 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/components/world` | 1189 |
-| `src/app/lobby` | 947 |
+| `src/components/floor-7/war-table` | 1278 |
+| `src/components/world` | 1197 |
+| `src/components/floor-7/crud` | 1055 |
+| `src/components/floor-7/cro-character` | 1033 |
+| `src/app/lobby` | 944 |
 | `src/lib` | 768 |
 | `src/components/penthouse` | 758 |
-| `src/app` | 728 |
+| `src/app` | 730 |
 | `src/components/world/elevator` | 718 |
 | `src/lib/contracts` | 696 |
 | `src/app/(authenticated)/penthouse` | 682 |
-| `src/db` | 496 |
+| `src/components/floor-7` | 655 |
+| `src/lib/db/queries` | 562 |
+| `src/lib/agents/cro` | 557 |
+| `src/db` | 500 |
 | `src/app/(authenticated)/settings` | 425 |
+| `src/app/(authenticated)/war-room` | 403 |
+| `src/styles` | 366 |
 | `src/lib/contracts/departments` | 328 |
 | `src/components/ui` | 294 |
+| `src/hooks` | 261 |
+| `src/lib/actions` | 207 |
 | `src/app/(authenticated)/c-suite` | 191 |
 | `src/app/(authenticated)/briefing-room` | 175 |
 | `src/app/(authenticated)/situation-room` | 154 |
@@ -153,14 +176,18 @@
 | `src/app/(authenticated)/observatory` | 144 |
 | `src/app/(authenticated)/rolodex-lounge` | 143 |
 | `src/components/transitions` | 132 |
-| `src/app/(authenticated)/war-room` | 130 |
 | `src/lib/supabase` | 121 |
+| `src/lib/utils` | 121 |
+| `src/app/api/cro` | 115 |
 | `src/app/(authenticated)/writing-room` | 98 |
 | `src/app/(authenticated)` | 86 |
 | `src/types` | 74 |
-| `src/app/api/auth/callback` | 42 |
+| `src/lib/validators` | 71 |
+| `src/lib/auth` | 49 |
+| `src/app/api/auth/callback` | 43 |
+| `src/lib/rate-limit` | 39 |
 | `src/lib/constants` | 31 |
-| `src/hooks` | 22 |
+| `src/app/api/webhooks` | 20 |
 | `src` | 20 |
 | `src/app/api/auth/signout` | 11 |
 
@@ -180,15 +207,31 @@ src/app/(authenticated)/settings/page.tsx
 src/app/(authenticated)/settings/settings-client.tsx
 src/app/(authenticated)/situation-room/page.tsx
 src/app/(authenticated)/war-room/page.tsx
+src/app/(authenticated)/war-room/war-room-client.tsx
 src/app/(authenticated)/world-shell.tsx
 src/app/(authenticated)/writing-room/page.tsx
 src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
+src/app/api/cro/route.ts
+src/app/api/webhooks/route.ts
 src/app/globals.css
 src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
+src/components/floor-7/WarRoomClient.tsx
+src/components/floor-7/WarRoomScene.tsx
+src/components/floor-7/WarRoomTicker.tsx
+src/components/floor-7/cro-character/CROCharacter.tsx
+src/components/floor-7/cro-character/CRODialoguePanel.tsx
+src/components/floor-7/cro-character/CROWhiteboard.tsx
+src/components/floor-7/crud/ApplicationModal.tsx
+src/components/floor-7/crud/ApplicationSearch.tsx
+src/components/floor-7/war-table/ApplicationCard.tsx
+src/components/floor-7/war-table/ColumnHeader.tsx
+src/components/floor-7/war-table/PipelineColumn.tsx
+src/components/floor-7/war-table/WarTable.tsx
+src/components/floor-7/war-table/pipeline-config.ts
 src/components/icons/PenthouseIcons.tsx
 src/components/penthouse/ActivityFeed.tsx
 src/components/penthouse/GlassPanel.tsx
@@ -208,7 +251,16 @@ src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
 src/db/index.ts
 src/db/schema.ts
+src/hooks/useCROChat.ts
+src/hooks/useCharacter.ts
 src/hooks/useReducedMotion.ts
+src/lib/actions/applications.ts
+src/lib/agents/cro/agent-run-log.ts
+src/lib/agents/cro/character-machine.ts
+src/lib/agents/cro/system-prompt.ts
+src/lib/agents/cro/tools.ts
+src/lib/auth/safe-next-path.test.ts
+src/lib/auth/safe-next-path.ts
 src/lib/constants/floors.ts
 src/lib/contracts/agent-protocol.ts
 src/lib/contracts/api.ts
@@ -220,13 +272,21 @@ src/lib/contracts/index.ts
 src/lib/contracts/notifications.ts
 src/lib/contracts/ui.ts
 src/lib/day-night.ts
+src/lib/db/queries/application-types.ts
+src/lib/db/queries/applications.ts
+src/lib/db/queries/pipeline-stats-from-aggregates.ts
+src/lib/db/queries/pipeline-stats.test.ts
+src/lib/rate-limit/cro.ts
 src/lib/skyline-engine.ts
 src/lib/supabase/admin.ts
 src/lib/supabase/client.ts
 src/lib/supabase/middleware.ts
 src/lib/supabase/server.ts
 src/lib/utils.ts
+src/lib/utils/lex-order.ts
+src/lib/validators/application.ts
 src/middleware.ts
+src/styles/floor-7.css
 src/types/agents.ts
 src/types/api.ts
 src/types/ui.ts
@@ -236,16 +296,23 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>28 packages</summary>
+<summary>36 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
+@dnd-kit/accessibility: ^3.1.1
+@dnd-kit/core: ^6.3.1
+@dnd-kit/modifiers: ^9.0.0
+@dnd-kit/sortable: ^10.0.0
 @supabase/ssr: ^0.9.0
 @supabase/supabase-js: ^2.99.2
 @tailwindcss/typography: ^0.5.19
 @types/node: ^20
 @types/react: ^19
 @types/react-dom: ^19
+@upstash/ratelimit: ^2.0.8
+@upstash/redis: ^1.37.0
+@xstate/react: ^6.1.0
 ai: ^6.0.116
 autoprefixer: ^10.4.27
 clsx: ^2.1.1
@@ -266,27 +333,29 @@ tailwind-merge: ^3.5.0
 tailwindcss: ^3.4.19
 typescript: ^5
 vitest: ^4.1.0
+xstate: ^5.28.0
 zod: ^4.3.6
 ```
 </details>
 
 ### Stale Dependencies (major version behind)
 
-- **@types/node**: 20.19.37 → 25.5.0 (major)
-- **eslint**: 9.39.4 → 10.0.3 (major)
+- **@types/node**: 20.19.37 → 25.6.0 (major)
+- **eslint**: 9.39.4 → 10.2.0 (major)
 - **tailwindcss**: 3.4.19 → 4.2.2 (major)
+- **typescript**: 5.9.3 → 6.0.3 (major)
 
 ## Context Budget
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 338 | 3,909 |
+| `BOOTSTRAP-PROMPT.md` | 343 | 3,956 |
 | `PROJECT-CONTEXT.md` | 338 | 7,296 |
 | `docs/MASTER-PLAN.md` | 361 | 6,912 |
-| `CLAUDE.md` | 159 | 2,731 |
-| **Total** | **1196** | **20,848** |
+| `CLAUDE.md` | 182 | 3,316 |
+| **Total** | **1224** | **21,480** |
 
-> ⚠️ Reading all recommended files consumes ~20,848 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~21,480 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

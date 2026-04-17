@@ -14,7 +14,6 @@
  */
 
 const BASE = 36;
-const CHARS = "0123456789abcdefghijklmnopqrstuvwxyz"; // 36 chars, index 0–35
 
 /** Convert a base-36 character to its numeric value. */
 function charVal(c: string): number {

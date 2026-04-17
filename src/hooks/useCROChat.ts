@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * useCROChat — A React hook that wraps the AI SDK v5 AbstractChat pattern.
- * Provides the same interface as @ai-sdk/react useChat for the CRO agent.
+ * useCROChat — wraps the AI SDK AbstractChat pattern for the CRO agent.
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { AbstractChat, DefaultChatTransport, generateId } from "ai";
 
@@ -82,9 +81,15 @@ class CROChat extends AbstractChat<UIMessage> {
       id: chatId,
       transport: new DefaultChatTransport({ api }),
       state: {
-        get status() { return state.status; },
-        get error() { return state.error; },
-        get messages() { return state.messages; },
+        get status() {
+          return state.status;
+        },
+        get error() {
+          return state.error;
+        },
+        get messages() {
+          return state.messages;
+        },
         pushMessage: (m) => state.pushMessage(m),
         popMessage: () => state.popMessage(),
         replaceMessage: (i, m) => state.replaceMessage(i, m),
@@ -100,21 +105,26 @@ class CROChat extends AbstractChat<UIMessage> {
 }
 
 export function useCROChat({ id, api }: UseCROChatOptions): UseCROChatReturn {
-  const chatId = useRef(id ?? generateId()).current;
-  const stateRef = useRef(new ReactChatState());
-  const chatRef = useRef<CROChat | null>(null);
+  const [bundle] = useState(() => {
+    const state = new ReactChatState();
+    const chatId = id ?? generateId();
+    const chat = new CROChat(state, api, chatId);
+    return { state, chat };
+  });
 
-  const [, forceUpdate] = useState(0);
+  const [slice, setSlice] = useState(() => ({
+    messages: bundle.state.messages,
+    status: bundle.state.status,
+  }));
 
-  // Wire up notification
-  if (!stateRef.current.setNotify) {
-    // already set
-  }
-  stateRef.current.setNotify(() => forceUpdate((n) => n + 1));
-
-  if (!chatRef.current) {
-    chatRef.current = new CROChat(stateRef.current, api, chatId);
-  }
+  useEffect(() => {
+    const s = bundle.state;
+    const sync = () => {
+      setSlice({ messages: s.messages, status: s.status });
+    };
+    s.setNotify(sync);
+    sync();
+  }, [bundle.state]);
 
   const [input, setInputState] = useState("");
 
@@ -133,19 +143,19 @@ export function useCROChat({ id, api }: UseCROChatOptions): UseCROChatReturn {
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const text = input.trim();
-      if (!text || !chatRef.current) return;
+      if (!text) return;
       setInputState("");
-      chatRef.current.sendMessage({ text });
+      bundle.chat.sendMessage({ text });
     },
-    [input]
+    [input, bundle.chat]
   );
 
   return {
-    messages: stateRef.current.messages,
+    messages: slice.messages,
     input,
     handleInputChange,
     handleSubmit,
-    status: stateRef.current.status,
+    status: slice.status,
     setInput,
   };
 }

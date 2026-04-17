@@ -204,7 +204,6 @@ export function Elevator(): JSX.Element {
       .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
 
     return () => { tl.kill(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── GSAP transition sequence ───────────────────────────────────────────────

@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect, useRef, useCallback, type JSX } from "react";
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
 import { LobbyBackground } from "@/components/world/LobbyBackground";
 import { Elevator } from "@/components/world/Elevator";
@@ -20,16 +20,13 @@ import gsap from "gsap";
 export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isReturningUser, setIsReturningUser] = useState(false);
+  const isReturningUser = useSyncExternalStore(
+    () => () => {},
+    () => typeof document !== "undefined" && document.cookie.includes("sb-"),
+    () => false
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof document !== "undefined") {
-      const hasPriorVisit = document.cookie.includes("sb-");
-      setIsReturningUser(hasPriorVisit);
-    }
-  }, []);
 
   // Mouse tracking for spotlight only — BUG-008: removed content parallax
   useEffect(() => {

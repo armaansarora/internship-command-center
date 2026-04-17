@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type JSX } from "react";
+import { useState, useEffect, useRef, startTransition, type JSX } from "react";
 import { GlassPanel } from "./GlassPanel";
 
 /* ──────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ function useCountUp(target: number): { display: number; pulsing: boolean } {
 
   useEffect(() => {
     if (target === 0) {
-      setDisplay(0);
+      startTransition(() => setDisplay(0));
       return;
     }
     startRef.current = performance.now();
