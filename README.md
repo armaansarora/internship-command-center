@@ -49,6 +49,7 @@ All planning documents are in `/docs/`:
 - **MASTER-PLAN.md** — Phases, deliverables, acceptance criteria, testing strategy
 - **VISION-SPEC.md** — Spatial UI specification (locked)
 - **TECH-BRIEF.md** — Research findings, code patterns, dependency list
+- **ARCHITECTURE-MAP.md** — Current folder boundaries, shared primitives, and mutation flow
 - **SCHEMA-DRAFT.md** — 16-table Postgres schema with RLS
 - **CHARACTER-PROMPTS.md** — System prompts for all AI agents
 

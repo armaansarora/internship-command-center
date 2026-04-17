@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState, useCallback, useMemo, useTransition } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { Document, Application } from "@/db/schema";
 import type { WritingRoomStats } from "./WritingRoomTicker";
 import { WritingRoomScene } from "./WritingRoomScene";
@@ -79,13 +79,15 @@ export function WritingRoomClient({
   stats,
   onCreateDocument,
   onUpdateDocument,
-  ..._rest
+  onDeleteDocument,
 }: WritingRoomClientProps): JSX.Element {
-  void _rest;
+  // Reserved for upcoming inline editor CRUD wiring.
+  void onCreateDocument;
+  void onUpdateDocument;
+  void onDeleteDocument;
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [cmoStatus, setCmoStatus] = useState<"idle" | "thinking" | "talking">("idle");
-  const [, startTransition] = useTransition();
 
   // ── Handlers ─────────────────────────────────────────────────────────
   const handleOpenDialogue = useCallback(() => {
@@ -118,23 +120,6 @@ export function WritingRoomClient({
     void version;
     // version switching is handled within DocumentEditor, noop here
   }, []);
-
-  const handleCreateDocument = useCallback(
-    async (formData: FormData) => {
-      if (onCreateDocument) await onCreateDocument(formData);
-      startTransition(() => {
-        // State will be refreshed by server revalidation
-      });
-    },
-    [onCreateDocument]
-  );
-
-  const handleUpdateDocument = useCallback(
-    async (id: string, formData: FormData) => {
-      if (onUpdateDocument) await onUpdateDocument(id, formData);
-    },
-    [onUpdateDocument]
-  );
 
   // ── Derived data ─────────────────────────────────────────────────────
   const coverLetterDocs = useMemo(
@@ -362,20 +347,6 @@ export function WritingRoomClient({
         }
       `}</style>
 
-      {/*
-        NOTE: onCreateDocument and onUpdateDocument are wired through
-        CMODialoguePanel (via the /api/cmo endpoint which handles
-        document creation) and through direct prop passthrough if
-        needed. Server action CRUD can be added as needed.
-      */}
-      {/*
-        Suppress unused-variable lint for server action props until
-        the API route is wired:
-      */}
-      <span aria-hidden="true" style={{ display: "none" }}>
-        {typeof handleCreateDocument === "function" ? "" : ""}
-        {typeof handleUpdateDocument === "function" ? "" : ""}
-      </span>
     </>
   );
 }

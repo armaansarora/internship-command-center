@@ -116,7 +116,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (652 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
-- `src/components/floor-4/SituationRoomClient.tsx` (583 LOC)
+- `src/components/floor-4/SituationRoomClient.tsx` (586 LOC)
 - `src/app/(authenticated)/settings/settings-client.tsx` (566 LOC) — SettingsClient — account management and preferences.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (539 LOC)
@@ -134,10 +134,10 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/BriefingRoomClient.tsx` (396 LOC)
 - `src/components/world/Elevator.tsx` (387 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/floor-6/RolodexLoungeClient.tsx` (384 LOC)
-- `src/components/floor-5/WritingRoomClient.tsx` (382 LOC)
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
 - `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
+- `src/components/floor-5/WritingRoomClient.tsx` (353 LOC)
 - `src/components/floor-5/WritingRoomScene.tsx` (352 LOC) — WritingRoomScene — Floor 5 environment compositor.
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (344 LOC)
 - `src/components/floor-7/WarRoomClient.tsx` (335 LOC)

@@ -236,9 +236,12 @@ function SectionHeader({
 export function SituationRoomClient({
   briefingData,
   applications,
-  ..._rest
+  approveOutreach,
+  dismissNotification,
 }: SituationRoomClientProps): JSX.Element {
-  void _rest;
+  // Reserved for next interaction pass when action controls are exposed in this UI.
+  void approveOutreach;
+  void dismissNotification;
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [cooStatus, setCooStatus] = useState<"idle" | "thinking" | "talking">("idle");
 
