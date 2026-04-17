@@ -17,8 +17,6 @@ interface CSuiteSceneProps {
   panelSlot?: React.ReactNode;
 }
 
-type CSSVarStyle = React.CSSProperties & Record<`--${string}`, string | number>;
-
 interface NodeConfig {
   id: number;
   name: string;
@@ -42,7 +40,7 @@ function generateAgentNodes(): NodeConfig[] {
  */
 export function CSuiteScene({ stats, contentSlot, panelSlot }: CSuiteSceneProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  const agentNodes = useMemo(generateAgentNodes, []);
+  const agentNodes = useMemo(() => generateAgentNodes(), []);
 
   // SVG agent network dimensions
   const svgW = 220;

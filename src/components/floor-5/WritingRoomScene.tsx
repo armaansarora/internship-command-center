@@ -82,7 +82,7 @@ export function WritingRoomScene({
   editorSlot,
 }: WritingRoomSceneProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  const particles = useMemo(generateDustParticles, []);
+  const particles = useMemo(() => generateDustParticles(), []);
 
   return (
     <div

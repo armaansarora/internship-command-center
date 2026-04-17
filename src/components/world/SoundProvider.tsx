@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useState,
+  startTransition,
 } from "react";
 import { soundEngine, type SoundId } from "@/lib/sound/engine";
 
@@ -49,7 +50,7 @@ export function SoundProvider({ children }: SoundProviderProps): JSX.Element {
       const saved = sessionStorage.getItem(SESSION_KEY);
       if (saved === "true") {
         soundEngine.enable();
-        setEnabledState(true);
+        startTransition(() => setEnabledState(true));
       }
     } catch {
       // sessionStorage may be blocked — stay muted

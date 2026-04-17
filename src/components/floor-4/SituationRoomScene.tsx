@@ -81,7 +81,7 @@ export function SituationRoomScene({
   tableSlot,
 }: SituationRoomSceneProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  const particles = useMemo(generateParticles, []);
+  const particles = useMemo(() => generateParticles(), []);
 
   return (
     <div

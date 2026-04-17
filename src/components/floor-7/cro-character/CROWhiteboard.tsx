@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import type { PipelineStats } from "@/lib/db/queries/applications-rest";
+import type { PipelineStats } from "@/lib/db/queries/applications";
 
 interface CROWhiteboardProps {
   stats: PipelineStats;
@@ -289,7 +289,7 @@ export function CROWhiteboard({ stats }: CROWhiteboardProps): JSX.Element {
           transform: "rotate(1.2deg)",
         }}
       >
-        // CRO METRICS
+        {"// CRO METRICS"}
       </div>
     </div>
   );

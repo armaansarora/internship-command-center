@@ -502,7 +502,7 @@ export function CIOWhiteboard({
           transform: "rotate(1deg)",
         }}
       >
-        // CIO INTEL
+        {"// CIO INTEL"}
       </div>
     </div>
   );

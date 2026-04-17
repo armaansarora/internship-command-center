@@ -1,6 +1,6 @@
 "use client";
 
-import type { JSX } from "react";
+import { useState, useEffect, type JSX } from "react";
 import type { WritingRoomStats } from "@/components/floor-5/WritingRoomTicker";
 
 interface CMOWhiteboardProps {
@@ -109,10 +109,17 @@ function VersionTimeline({
 }: {
   versions: Array<{ version: number; updatedAt: Date }>;
 }): JSX.Element {
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
   const sorted = [...versions].sort((a, b) => a.version - b.version).slice(-4);
 
   function timeAgo(date: Date): string {
-    const diffMs = Date.now() - date.getTime();
+    const diffMs = nowMs - date.getTime();
     const diffHours = Math.floor(diffMs / 3_600_000);
     const diffDays = Math.floor(diffHours / 24);
     if (diffHours < 1) return "< 1h";
@@ -356,7 +363,7 @@ export function CMOWhiteboard({
           transform: "rotate(1.2deg)",
         }}
       >
-        // CMO METRICS
+        {"// CMO METRICS"}
       </div>
     </div>
   );

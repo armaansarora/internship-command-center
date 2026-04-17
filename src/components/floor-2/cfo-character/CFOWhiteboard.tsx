@@ -191,7 +191,7 @@ export function CFOWhiteboard({ stats }: CFOWhiteboardProps): JSX.Element {
           transform: "rotate(0.8deg)",
         }}
       >
-        // CFO METRICS
+        {"// CFO METRICS"}
       </div>
     </div>
   );

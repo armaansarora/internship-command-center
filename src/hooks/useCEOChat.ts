@@ -5,7 +5,7 @@
  * Mirrors the useCROChat pattern with /api/ceo endpoint.
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { AbstractChat, DefaultChatTransport, generateId } from "ai";
 
@@ -91,24 +91,37 @@ class CEOChat extends AbstractChat<UIMessage> {
 }
 
 export function useCEOChat({ id, api }: UseCEOChatOptions): UseCEOChatReturn {
-  const chatId = useRef(id ?? generateId()).current;
-  const stateRef = useRef(new ReactChatState());
-  const chatRef = useRef<CEOChat | null>(null);
+  const [bundle] = useState(() => {
+    const state = new ReactChatState();
+    const chatId = id ?? generateId();
+    const chat = new CEOChat(state, api, chatId);
+    return { state, chat };
+  });
 
-  const [, forceUpdate] = useState(0);
+  const [slice, setSlice] = useState(() => ({
+    messages: bundle.state.messages,
+    status: bundle.state.status,
+  }));
 
-  stateRef.current.setNotify(() => forceUpdate((n) => n + 1));
-
-  if (!chatRef.current) {
-    chatRef.current = new CEOChat(stateRef.current, api, chatId);
-  }
+  useEffect(() => {
+    const s = bundle.state;
+    const sync = () => {
+      setSlice({ messages: s.messages, status: s.status });
+    };
+    s.setNotify(sync);
+    sync();
+  }, [bundle.state]);
 
   const [input, setInputState] = useState("");
 
-  const setInput = useCallback((value: string) => { setInputState(value); }, []);
+  const setInput = useCallback((value: string) => {
+    setInputState(value);
+  }, []);
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => { setInputState(e.target.value); },
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputState(e.target.value);
+    },
     []
   );
 
@@ -116,23 +129,23 @@ export function useCEOChat({ id, api }: UseCEOChatOptions): UseCEOChatReturn {
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const text = input.trim();
-      if (!text || !chatRef.current) return;
+      if (!text) return;
       setInputState("");
-      chatRef.current.sendMessage({ text });
+      bundle.chat.sendMessage({ text });
     },
-    [input]
+    [input, bundle.chat]
   );
 
   const clearMessages = useCallback(() => {
-    stateRef.current.clearMessages();
-  }, []);
+    bundle.state.clearMessages();
+  }, [bundle.state]);
 
   return {
-    messages: stateRef.current.messages,
+    messages: slice.messages,
     input,
     handleInputChange,
     handleSubmit,
-    status: stateRef.current.status,
+    status: slice.status,
     setInput,
     clearMessages,
   };

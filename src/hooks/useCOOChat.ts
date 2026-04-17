@@ -5,7 +5,7 @@
  * Provides the same interface as @ai-sdk/react useChat for the COO agent.
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { AbstractChat, DefaultChatTransport, generateId } from "ai";
 
@@ -100,18 +100,26 @@ class COOChat extends AbstractChat<UIMessage> {
 }
 
 export function useCOOChat({ id, api }: UseCOOChatOptions): UseCOOChatReturn {
-  const chatId = useRef(id ?? generateId()).current;
-  const stateRef = useRef(new ReactCOOChatState());
-  const chatRef = useRef<COOChat | null>(null);
+  const [bundle] = useState(() => {
+    const state = new ReactCOOChatState();
+    const chatId = id ?? generateId();
+    const chat = new COOChat(state, api, chatId);
+    return { state, chat };
+  });
 
-  const [, forceUpdate] = useState(0);
+  const [slice, setSlice] = useState(() => ({
+    messages: bundle.state.messages,
+    status: bundle.state.status,
+  }));
 
-  // Wire up notification
-  stateRef.current.setNotify(() => forceUpdate((n) => n + 1));
-
-  if (!chatRef.current) {
-    chatRef.current = new COOChat(stateRef.current, api, chatId);
-  }
+  useEffect(() => {
+    const s = bundle.state;
+    const sync = () => {
+      setSlice({ messages: s.messages, status: s.status });
+    };
+    s.setNotify(sync);
+    sync();
+  }, [bundle.state]);
 
   const [input, setInputState] = useState("");
 
@@ -130,19 +138,19 @@ export function useCOOChat({ id, api }: UseCOOChatOptions): UseCOOChatReturn {
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const text = input.trim();
-      if (!text || !chatRef.current) return;
+      if (!text) return;
       setInputState("");
-      chatRef.current.sendMessage({ text });
+      bundle.chat.sendMessage({ text });
     },
-    [input]
+    [input, bundle.chat]
   );
 
   return {
-    messages: stateRef.current.messages,
+    messages: slice.messages,
     input,
     handleInputChange,
     handleSubmit,
-    status: stateRef.current.status,
+    status: slice.status,
     setInput,
   };
 }

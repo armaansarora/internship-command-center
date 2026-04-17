@@ -330,7 +330,7 @@ export const agentMemory = pgTable("agent_memory", {
   accessCount: integer("access_count").default(0),
   lastAccessedAt: timestamp("last_accessed_at", { withTimezone: true }),
   ...timestamps,
-}, (table) => [
+}, () => [
   userIsolation("agent_memory"),
 ]);
 
@@ -365,7 +365,7 @@ export const companyEmbeddings = pgTable("company_embeddings", {
   content: text("content"),
   embedding: vector("embedding", { dimensions: 1536 }),
   ...timestamps,
-}, (table) => [
+}, () => [
   userIsolation("company_embeddings"),
 ]);
 
@@ -379,7 +379,7 @@ export const jobEmbeddings = pgTable("job_embeddings", {
   content: text("content"),
   embedding: vector("embedding", { dimensions: 1536 }),
   ...timestamps,
-}, (table) => [
+}, () => [
   userIsolation("job_embeddings"),
 ]);
 
@@ -393,7 +393,7 @@ export const progressionMilestones = pgTable("progression_milestones", {
   unlockedAt: timestamp("unlocked_at", { withTimezone: true }).defaultNow(),
   floorUnlocked: text("floor_unlocked"),
   ...timestamps,
-}, (table) => [
+}, () => [
   userIsolation("progression_milestones"),
 ]);
 

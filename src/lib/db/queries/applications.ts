@@ -1,47 +1,21 @@
 import { db, schema } from "@/db";
-import { eq, and, count, sql, desc, asc, inArray, lt } from "drizzle-orm";
+import { eq, and, desc, asc, inArray } from "drizzle-orm";
 import type { Application } from "@/db/schema";
-import {
-  createApplicationSchema,
-  updateApplicationSchema,
-} from "@/lib/validators/application";
 import type {
   CreateApplicationInput,
   UpdateApplicationInput,
   ApplicationStatus,
 } from "@/lib/validators/application";
-import { getPositionAfter } from "@/lib/utils/lex-order";
+import {
+  buildPipelineStatsFromAggregates,
+  type PipelineStats,
+} from "./pipeline-stats-from-aggregates";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export interface PipelineStats {
-  total: number;
-  discovered: number;
-  applied: number;
-  screening: number;
-  interviewing: number;
-  offers: number;
-  stale: number;
-  weeklyActivity: number;
-  conversionRate: number;
-  scheduledInterviews: number;
-  /** Count per status key — for CRO whiteboard display */
-  byStatus: Record<string, number>;
-  /** Applied-to-screening conversion rate (0–100) */
-  appliedToScreeningRate: number;
-  /** Screen-to-interview conversion rate (0–100) */
-  screeningToInterviewRate: number;
-  /** Interview-to-offer conversion rate (0–100) */
-  interviewToOfferRate: number;
-  /** Number of applications with no activity in 14+ days */
-  staleCount: number;
-  /** Number of applications with no activity in 7–13 days */
-  warmCount: number;
-  /** Overall conversion label for display */
-  conversionLabel: string;
-}
+export type { PipelineStats };
 
 // Re-export for consumers
 export type { Application };
@@ -52,12 +26,6 @@ export type NewApplicationInput = CreateApplicationInput & { userId: string };
 // ---------------------------------------------------------------------------
 
 const STALE_DAYS = 14;
-
-function staleThreshold(): Date {
-  const d = new Date();
-  d.setDate(d.getDate() - STALE_DAYS);
-  return d;
-}
 
 // ---------------------------------------------------------------------------
 // Queries
@@ -149,48 +117,19 @@ export async function getPipelineStats(userId: string): Promise<PipelineStats> {
     (r) => !["accepted", "rejected", "withdrawn"].includes(r.status ?? "")
   ).length;
 
-  const applied = byStatus["applied"] ?? 0;
-  const screening = byStatus["screening"] ?? 0;
-  const interviewScheduled = byStatus["interview_scheduled"] ?? 0;
-  const interviewing = byStatus["interviewing"] ?? 0;
-  const offer = byStatus["offer"] ?? 0;
-
-  const interviewTotal = interviewScheduled + interviewing;
-
-  const appliedToScreeningRate = applied > 0 ? (screening / applied) * 100 : 0;
-  const screeningToInterviewRate =
-    screening > 0 ? (interviewTotal / screening) * 100 : 0;
-  const interviewToOfferRate =
-    interviewTotal > 0 ? (offer / interviewTotal) * 100 : 0;
-
-  const conversionRate = applied > 0 ? (offer / applied) * 100 : 0;
-  const conversionLabel = `${conversionRate.toFixed(0)}%`;
-
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const weeklyActivity = all.filter((r) => {
     const last = r.lastActivityAt ?? r.createdAt;
     return last >= weekAgo;
   }).length;
 
-  return {
-    total: totalActive,
-    discovered: byStatus["discovered"] ?? 0,
-    applied,
-    screening,
-    interviewing: interviewTotal,
-    offers: offer,
-    stale: staleCount,
-    weeklyActivity,
-    conversionRate,
-    scheduledInterviews: interviewScheduled,
+  return buildPipelineStatsFromAggregates(
     byStatus,
-    appliedToScreeningRate,
-    screeningToInterviewRate,
-    interviewToOfferRate,
+    totalActive,
     staleCount,
     warmCount,
-    conversionLabel,
-  };
+    weeklyActivity
+  );
 }
 
 /**

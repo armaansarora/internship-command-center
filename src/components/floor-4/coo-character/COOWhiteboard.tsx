@@ -368,7 +368,7 @@ export function COOWhiteboard({ briefingData }: COOWhiteboardProps): JSX.Element
           transform: "rotate(1.2deg)",
         }}
       >
-        // COO METRICS
+        {"// COO METRICS"}
       </div>
     </div>
   );

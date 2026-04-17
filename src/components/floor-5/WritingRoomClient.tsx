@@ -79,8 +79,9 @@ export function WritingRoomClient({
   stats,
   onCreateDocument,
   onUpdateDocument,
-  onDeleteDocument: _onDeleteDocument,
+  ..._rest
 }: WritingRoomClientProps): JSX.Element {
+  void _rest;
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [, startTransition] = useTransition();
@@ -107,7 +108,8 @@ export function WritingRoomClient({
     setDialogueOpen(true);
   }, []);
 
-  const handleVersionSelect = useCallback((_version: number) => {
+  const handleVersionSelect = useCallback((version: number) => {
+    void version;
     // version switching is handled within DocumentEditor, noop here
   }, []);
 

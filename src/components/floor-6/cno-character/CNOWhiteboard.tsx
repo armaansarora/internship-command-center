@@ -312,7 +312,7 @@ export function CNOWhiteboard({
           transform: "rotate(1deg)",
         }}
       >
-        // CNO METRICS
+        {"// CNO METRICS"}
       </div>
     </div>
   );

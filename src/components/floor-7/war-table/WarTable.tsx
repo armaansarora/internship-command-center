@@ -11,7 +11,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
+import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import type { Application } from "@/db/schema";
 import { ApplicationCard } from "./ApplicationCard";
@@ -73,8 +73,6 @@ export function WarTable({
   // Local optimistic state
   const [localApplications, setLocalApplications] = useState<Application[]>(initialApplications);
   const [activeApplication, setActiveApplication] = useState<Application | null>(null);
-  const [overId, setOverId] = useState<string | null>(null);
-
   // Sync with parent when props change (server revalidation)
   // We use a ref-based approach to avoid re-setting on every render
   const [lastInitial, setLastInitial] = useState(initialApplications);
@@ -126,14 +124,13 @@ export function WarTable({
     [localApplications]
   );
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    setOverId(event.over?.id?.toString() ?? null);
+  const handleDragOver = useCallback(() => {
+    /* reserved for hover highlights */
   }, []);
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
       setActiveApplication(null);
-      setOverId(null);
 
       const { active, over } = event;
       if (!over) return;

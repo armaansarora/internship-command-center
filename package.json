@@ -18,6 +18,7 @@
     "session:state:clear": "tsx scripts/update-session-state.ts --clear",
     "session:end": "tsx scripts/session-end.ts",
     "session:end:dry": "tsx scripts/session-end.ts --dry-run",
+    "env:init": "tsx scripts/init-env.ts",
     "prepare": "husky"
   },
   "dependencies": {

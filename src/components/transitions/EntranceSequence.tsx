@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type JSX } from "react";
+import { useEffect, useRef, useState, startTransition, type JSX } from "react";
 import gsap from "gsap";
 
 /**
@@ -32,9 +32,9 @@ export function EntranceSequence({ children }: { children: React.ReactNode }): J
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (played || prefersReduced) {
-      setShouldAnimate(false);
+      startTransition(() => setShouldAnimate(false));
     } else {
-      setShouldAnimate(true);
+      startTransition(() => setShouldAnimate(true));
     }
   }, []);
 

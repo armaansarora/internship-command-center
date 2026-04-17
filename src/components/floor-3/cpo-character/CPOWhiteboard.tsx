@@ -436,7 +436,7 @@ export function CPOWhiteboard({ stats }: CPOWhiteboardProps): JSX.Element {
           letterSpacing: "0.08em",
         }}
       >
-        // CPO BRIEF
+        {"// CPO BRIEF"}
       </div>
     </div>
   );

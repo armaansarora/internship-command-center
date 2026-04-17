@@ -54,7 +54,7 @@ function generateParticles(): ParticleConfig[] {
  */
 export function ObservatoryScene({ stats, characterSlot, dashboardSlot }: ObservatorySceneProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  const particles = useMemo(generateParticles, []);
+  const particles = useMemo(() => generateParticles(), []);
 
   return (
     <div

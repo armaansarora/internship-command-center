@@ -77,7 +77,7 @@ export function RolodexLoungeScene({
   tableSlot,
 }: RolodexLoungeSceneProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  const embers = useMemo(generateEmbers, []);
+  const embers = useMemo(() => generateEmbers(), []);
 
   return (
     <div

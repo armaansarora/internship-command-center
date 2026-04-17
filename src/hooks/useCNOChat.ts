@@ -6,7 +6,7 @@
  * Follows the exact useCROChat.ts pattern.
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { AbstractChat, DefaultChatTransport, generateId } from "ai";
 
@@ -101,17 +101,26 @@ class CNOChat extends AbstractChat<UIMessage> {
 }
 
 export function useCNOChat({ id, api }: UseCNOChatOptions): UseCNOChatReturn {
-  const chatId = useRef(id ?? generateId()).current;
-  const stateRef = useRef(new ReactCNOChatState());
-  const chatRef = useRef<CNOChat | null>(null);
+  const [bundle] = useState(() => {
+    const state = new ReactCNOChatState();
+    const chatId = id ?? generateId();
+    const chat = new CNOChat(state, api, chatId);
+    return { state, chat };
+  });
 
-  const [, forceUpdate] = useState(0);
+  const [slice, setSlice] = useState(() => ({
+    messages: bundle.state.messages,
+    status: bundle.state.status,
+  }));
 
-  stateRef.current.setNotify(() => forceUpdate((n) => n + 1));
-
-  if (!chatRef.current) {
-    chatRef.current = new CNOChat(stateRef.current, api, chatId);
-  }
+  useEffect(() => {
+    const s = bundle.state;
+    const sync = () => {
+      setSlice({ messages: s.messages, status: s.status });
+    };
+    s.setNotify(sync);
+    sync();
+  }, [bundle.state]);
 
   const [input, setInputState] = useState("");
 
@@ -130,19 +139,19 @@ export function useCNOChat({ id, api }: UseCNOChatOptions): UseCNOChatReturn {
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const text = input.trim();
-      if (!text || !chatRef.current) return;
+      if (!text) return;
       setInputState("");
-      chatRef.current.sendMessage({ text });
+      bundle.chat.sendMessage({ text });
     },
-    [input]
+    [input, bundle.chat]
   );
 
   return {
-    messages: stateRef.current.messages,
+    messages: slice.messages,
     input,
     handleInputChange,
     handleSubmit,
-    status: stateRef.current.status,
+    status: slice.status,
     setInput,
   };
 }

@@ -236,9 +236,9 @@ function SectionHeader({
 export function SituationRoomClient({
   briefingData,
   applications,
-  approveOutreach,
-  dismissNotification,
+  ..._rest
 }: SituationRoomClientProps): JSX.Element {
+  void _rest;
   const [dialogueOpen, setDialogueOpen] = useState(false);
 
   const handleOpenDialogue = useCallback(() => {

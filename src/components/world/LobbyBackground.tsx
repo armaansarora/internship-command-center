@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, type JSX } from "react";
+import { useEffect, useRef, useState, useCallback, startTransition, type JSX } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
  * LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
@@ -53,32 +54,22 @@ const DISPLAY_DURATION_S = 20;
 const CROSSFADE_S = 2.5;
 
 export function LobbyBackground(): JSX.Element {
-  // Shuffle order once on mount for variety
-  const orderRef = useRef<number[]>([]);
-  if (orderRef.current.length === 0) {
+  const [order, setOrder] = useState<number[]>([0, 1, 2, 3]);
+
+  useEffect(() => {
     const arr = [0, 1, 2, 3];
-    // Fisher-Yates shuffle
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    orderRef.current = arr;
-  }
+    startTransition(() => setOrder(arr));
+  }, []);
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [nextIdx, setNextIdx] = useState<number | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  // Detect reduced motion preference
-  useEffect(() => {
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, []);
+  const reducedMotion = useReducedMotion();
 
   // Preload all images
   useEffect(() => {
@@ -95,10 +86,10 @@ export function LobbyBackground(): JSX.Element {
   const advanceImage = useCallback(() => {
     setNextIdx((prev) => {
       // If prev is null, compute from currentIdx
-      const next = ((prev ?? currentIdx) + 1) % orderRef.current.length;
+      const next = ((prev ?? currentIdx) + 1) % order.length;
       return next;
     });
-  }, [currentIdx]);
+  }, [currentIdx, order.length]);
 
   useEffect(() => {
     if (reducedMotion) return; // No rotation in reduced motion
@@ -118,8 +109,8 @@ export function LobbyBackground(): JSX.Element {
     return () => clearTimeout(timer);
   }, [nextIdx]);
 
-  const currentImageIdx = orderRef.current[currentIdx];
-  const nextImageIdx = nextIdx !== null ? orderRef.current[nextIdx] : null;
+  const currentImageIdx = order[currentIdx];
+  const nextImageIdx = nextIdx !== null ? order[nextIdx] : null;
   const currentLoaded = loadedImages.has(currentImageIdx);
   const nextLoaded = nextImageIdx !== null && loadedImages.has(nextImageIdx);
 

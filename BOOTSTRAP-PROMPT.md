@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, March 20, 2026 at 4:49 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 16, 2026 at 11:49 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -18,64 +18,144 @@
 
 ## Status
 
-- **Current state:** Phase 0 COMPLETE
-- **Branch:** `main` (commit `593350c`)
+- **Current state:** Phase 0 IN PROGRESS
+- **Branch:** `main` (commit `47dce00`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 52,154 across 226 source files
+- **Total LOC:** 52,344 across 231 source files
 - **Build:** Clean (zero TS errors)
+
+### ⚠️ Stale Docs Detected
+- **`docs/MASTER-PLAN.md`**: Last updated 2026-03-20 (28d ago)
+- **`docs/VISION-SPEC.md`**: Last updated 2026-03-18 (30d ago)
+- **`docs/TECH-BRIEF.md`**: Last updated 2026-03-18 (30d ago)
+
+> Update these docs before starting work — stale specs cause wasted effort.
 
 
 ## Session State (where we left off)
 
-- **Current task:** CRO Agent implementation
-- **Deliverable:** 1.4-1.6
+- **Current task:** Final handoff preparation — Claude Code transition
+- **Deliverable:** all-phases-complete
 - **Status:** complete
-- **Last file touched:** `src/app/(authenticated)/settings/page.tsx`
-- **Notes:** This session: 2 commits. Work: feat: Phase 6 complete — Polish + Monetization. Stripe subscriptions (Free/Pro/Team), building progression (9 milestones), performance optimization (GSAP tree-shaking), sound design (procedural Web Audio, 17 sounds, 8 ambient), mobile responsive (bottom sheet elevator, 44px touch targets), liquid glass polish (refraction, gold specular), easter eggs (midnight fireworks, rapid-click, confetti, backstory nameplates), weather-reactive skyline (rain/snow/fog/thunder), Sentry error tracking, Upstash rate limiting. 23 new files, 226 total, 51,921 LOC.; fix: lazy-init supabaseAdmin to prevent build-time env var crash
-- **State captured:** 2026-03-20T19:12:35.550Z
+- **Last file touched:** `HANDOFF.md`
+- **Notes:** Session 22: Final Perplexity Computer session. Full audit completed (0 TS errors, clean build, 0 console.logs, 0 any types, 0 TODOs, 9 known orphans documented). Rewrote CLAUDE.md with comprehensive architecture, vision, gotchas, and orphan inventory. Rewrote PROJECT-CONTEXT.md with accurate state (all 7 phases complete, 226 files, 51,928 LOC). Updated MASTER-PLAN.md phase status and acceptance criteria. Updated BUG-TRACKER.md. Created comprehensive HANDOFF.md for Claude Code onboarding. All docs are accurate, descriptive, and ready for seamless Claude Code handoff.
+- **State captured:** 2026-03-20T21:57:00.000Z
 
 ## Changes Since Last Bootstrap
 
 ```
+47dce00 session-end: session 22: Final handoff preparation. Rewrote CLAUDE.md (comprehensive architecture, vision, gotchas, orphan inventory). Rewrote PROJECT-CONTEXT.md (accurate state: all 7 phases complete, 226 files, 51,928 LOC). Updated MASTER-PLAN.md (accurate phase status, acceptance criteria). Rewrote HANDOFF.md (complete Claude Code onboarding document). Updated BUG-TRACKER.md, SESSION-STATE.json. Zero TS errors, clean build.
+67c1786 fix: change cron schedules to once-daily for Vercel Hobby plan
 593350c deploy: trigger Vercel rebuild with Phase 3-6 code (Rolodex, Writing Room, Briefing Room, Observatory, C-Suite, Stripe, Sound, Weather, Easter Eggs)
+bf5c97e fix: add /api/cron/briefing to vercel.json cron schedule (daily 8am ET)
+4275524 session-end: session 20: Phase 6 complete — Polish + Monetization. All 10 deliverables built. 226 files, 51,921 LOC, zero TS errors.
+84f8813 feat: Phase 6 complete — Polish + Monetization. Stripe subscriptions (Free/Pro/Team), building progression (9 milestones), performance optimization (GSAP tree-shaking), sound design (procedural Web Audio, 17 sounds, 8 ambient), mobile responsive (bottom sheet elevator, 44px touch targets), liquid glass polish (refraction, gold specular), easter eggs (midnight fireworks, rapid-click, confetti, backstory nameplates), weather-reactive skyline (rain/snow/fog/thunder), Sentry error tracking, Upstash rate limiting. 23 new files, 226 total, 51,921 LOC.
+0f2fbd7 fix: lazy-init supabaseAdmin to prevent build-time env var crash
+0617063 session-end: session 18: Phase 5 complete — Observatory (Floor 2) + C-Suite (Floor 1) + CEO/CFO agents + Ring the Bell + daily briefing cron + agent memory + in-world notifications. Cross-phase fixes: Application CRUD ported to Supabase REST, all floor CSS imported, 8 agents operational. 203 files, 47,559 LOC, zero TS errors.
+c8b1255 feat: Phase 5 complete — Observatory, C-Suite, CEO/CFO agents, Ring the Bell, daily briefing, notifications
+09806d6 session-end: 2 files changed, 23 insertions(+), 42 deletions(-)
+5e40471 chore: update SESSION-STATE.json — Phase 4 complete
+71e05a6 feat: Phase 4 complete — CMO/CPO agents, Writing Room, Briefing Room, cross-phase wiring
+92275e9 session-end: Phase 3 complete: Floor 6 Rolodex Lounge, CNO/CIO agents, pgvector, cron sync — all phases connected, clean build
+8c19476 Phase 3: Floor 6 Rolodex Lounge + CNO/CIO agents + pgvector + cron sync
+78b99c5 session-end: Phase 1+2: War Room CRO wired to Supabase REST, WarRoomClient integrated. Floor 4 Situation Room + COO Dylan Shorts (5 tools, character system), Gmail OAuth + email parser, Calendar sync, communications-rest.ts. 22 new files, 5777 insertions. tsc clean.
+16aca31 session-end: Phase 1 complete: War Room CRO agent fully wired to Supabase REST, WarRoomClient integrated with CROCharacter/Dialogue/Whiteboard split-screen layout. Phase 2 complete: Floor 4 Situation Room built with COO Dylan Shorts agent (5 tools, 3-layer prompt, character machine), Gmail OAuth + AES-256-GCM token encryption, rule-based email parser, Google Calendar sync, communications-rest.ts query layer (8 functions), all UI components (SituationRoomScene/Client/Ticker, COOCharacter/Dialogue/Whiteboard). 22 new files, 5777 insertions. Zero TS errors, zero any types, zero console.logs, zero TODOs.
+89f12a1 Phase 2: Communications Floor — Gmail + Calendar + COO Dylan Shorts
+5ce7413 Phase 1: Wire War Room CRO agent to real Supabase REST data
+5ba3e70 session-end: session 16: War Room Vercel fix (Drizzle→Supabase REST) + secret leak remediation (git-filter-repo scrub, force-push clean history)
+788496d security: scrub hardcoded secrets from setup-env.sh and PROJECT-CONTEXT.md
+53875a5 docs: update PROJECT-CONTEXT.md — Phase 1 progress, war-room fix, session 16 log
+f1c0276 fix(war-room): switch from Drizzle ORM to Supabase REST client
+86a14d4 redeploy: env var update
+2375294 fix: drizzle config auto-loads .env.local via @next/env
+f78445c chore: add Phase 1 setup scripts (env + migration SQL)
+d9944c6 feat(phase-1): The War Room — full floor implementation
+3a289b7 session 16: pre-phase-1 optimization — removed 5 unused deps (-31MB), deleted 29MB orphaned assets, decomposed 3 monoliths into 12 focused modules, extracted shared constants, added CSS tokens, optimized next.config, compressed lobby images 77%
+bec09b7 fix: session-end push handles missing credentials gracefully — deferred instead of FAIL
+074fa5d session-end: session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
+02977ce session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
+650f008 session 14: doc restructuring — 4-tier architecture, archived 7 stale docs, freshness warnings in bootstrap, rewrote CLAUDE.md/MASTER-PLAN.md/PROJECT-CONTEXT.md
+ea073c3 session-end: session 13: Elevator + lobby background hotfix round — cross-route transitions, 4K Ken Burns backgrounds, elevator button wiring
+ad399e2 session-end: 8 files changed, 299 insertions(+), 197 deletions(-)
+98ea065 fix: elevator button wiring + 4K lobby backgrounds with Ken Burns
+eda698b Hotfix: Elevator cross-route transition + AI lobby backgrounds
+ca820eb fix: rip out next-themes, fix elevator on lobby, fix floor nav greying, remove SVG cursors
+86ec24d fix: exclude cursors/ from auth middleware
+aa0addd fix(sprint-3.5): BUG-015,016,017,018,019 — user-reported critical fixes
+594939e session-end: 2 files changed, 40 insertions(+), 22 deletions(-)
+e4bf5ff Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014
+89771be docs: update BUG-TRACKER with Sprint 2 commit hash
+64e3030 fix(sprint-2): BUG-001,002,005,011,012 — navigation, sign out, settings, user menu
+6a855aa docs: remove stale CustomCursor references (audit pass 2)
+488b44a chore: delete dead CustomCursor.tsx (audit pass 1)
+ee556ad docs: update BUG-TRACKER with commit hashes for Sprint 1 fixes
+c5733f7 fix(sprint-1): BUG-003,004,006,007,008,009 — performance, scroll, cursor, parallax
+bf63d5c session-end: 3 files changed, 33 insertions(+), 25 deletions(-)
+389b409 session-end: 2 files changed, 116 insertions(+), 56 deletions(-)
+a612df0 docs: upgrade BUG-TRACKER.md to living changelog system
+b501fa6 docs: add BUG-TRACKER.md — 14 issues from 5-min user walkthrough
+edaac7d docs: add CHAIN-OF-COMMAND.md — AI hierarchy spec (1,550+ lines)
+645af6e docs: Phase 1 War Room Blueprint — 1,445-line implementation guide + audit
+a9b1fcb session-end: session 11: Phase 0 quality uplift complete — lobby particles, penthouse animated counters, skyline water reflections, animated floor stubs, elevator mobile bar, CSS utilities
+6fc403a session-end: session 11: Phase 0 quality uplift — lobby particles, penthouse counters, skyline water reflections, animated floor stubs, elevator mobile bar
+f47800a feat: Phase 0 quality uplift — animated lobby particles, richer penthouse dashboard, enhanced skyline with water reflections, animated floor stubs, elevator mobile bar + tooltips, CSS utilities
+76fc9ac session-end: session 10: Phase 0 complete visual overhaul — audit clean, PROJECT-CONTEXT updated
+c94e18b docs: update PROJECT-CONTEXT.md for session 10 — Phase 0 visual overhaul complete
+9c2b418 feat: Phase 0 complete visual overhaul — lobby, penthouse, skyline, elevator, floor stubs
+d7a3cf1 session-end: tooling session — 16-step autonomous pipeline complete
+11086a4 audit: expand false-positive list for unused dep detection
+71c4f60 session-end: ultimate 16-step pipeline (verify, detect, generate, commit, validate, handoff)
+7b8bb1d audit: clean up session-end (remove unused imports/vars, update bootstrap session docs)
+4ebd209 session-end: autonomous pipeline with auto-detect + handoff gen
+fdda635 session-end: update session state with immersive UI completion
+49593ca session-end: 1 file changed, 11 insertions(+), 5 deletions(-)
+634141e bootstrap: regenerate with latest commit hash
+f33c78b wave3: star constellations, building light sweep, sign-in card 3D tilt
+bf75821 wave2: lightning flashes, cloud wisps, typewriter tagline, a11y improvements
+cd3acac audit: stagger directory rows, fix lobby layout, enhance penthouse vignette
+8beb783 overhaul: particles, tilt panels, animated counters, mouse spotlight, scan line, parallax UI, radar pulse, hover glow
+62dca1f skyline: shooting stars + breathing city bloom
+e13a953 fix: reduce mullion visibility, tighten lobby spacing
+c247163 lobby: interactive directory hover effects with gold glow
+56e396d skyline: fix center gap with even slot-based distribution
+27f18c8 skyline: denser building distribution, center clustering, more supertalls
+053705d v2: enhanced procedural skyline, remove dead photo-based system, water reflections, varied buildings
+0dc74a5 lobby: compact single-viewport layout, all content above fold
+18cda45 fix: lobby scrolling, card contrast, fixed skyline background
+bfa7f96 Phase 0: immersive UI overhaul — procedural skyline, rebuilt lobby & penthouse
+b3a12a4 session-end: session 9: automation hardening + user flagged immersive UI for overhaul
+3b2d9bb session-end: fix: bootstrap now mandates CLAUDE.md reading — agents can't skip mandatory rules
+d8fe84d session-end: infra: context window management — 40/60/70% thresholds with mandatory handoff
+2294ba1 session-end: infra: automation hardening — agent auto-manages session state, human runs zero commands
+e2388ee infra: bootstrap system overhaul — 10 improvements to session handoff
+0d3831e bootstrap: regenerate with latest commit hash
+da86a43 infra: auto-generated bootstrap, updated CLAUDE.md, removed dead files
+737025e audit: fix RAF cascade in useMouseParallax, clean up double dynamic import
+01364d2 feat: wire real Supabase data into Penthouse dashboard
+3104924 feat: elevator dark wash, glass penthouse panels, cinematic entrance
+00688e7 feat: immersive photorealistic NYC skyline (replaces SVG)
+6d60599 Merge branch 'docs-handoff'
+d52d6a7 docs: immersive UI research + implementation plan + bootstrap prompt
+e1869e1 Merge pull request #1 from armaansarora/docs-handoff
+7549bd3 audit: add post-push.sql trigger, rewrite BOOTSTRAP-PROMPT for Phase 1, update MANUAL-GUIDE
+fd2df4a docs: final PROJECT-CONTEXT update + MANUAL-GUIDE for Armaan
 ```
 
 ## Acceptance Criteria — Progress
 
-No acceptance criteria found for current phase.
+**Progress: 0 verified / 1 likely / 2 unverified** (of 3)
+
+🟡 Contracts CRUD works through the UI (contracts ported to src/lib/contracts/ — used internally by agent tools, no standalone UI CRUD page)
+    └─ Contracts directory exists (no UI CRUD yet)
+⬜ Lighthouse performance: >80 on all metrics (not yet tested in production)
+    └─ Lighthouse audit not automated yet
+⬜ Lighthouse performance: >90 on all metrics (not yet tested — production is live, needs audit)
+    └─ Lighthouse audit not automated yet
+
 
 ## TODO — Next Phase
 
-## Phase 1: The War Room — Applications + CRO Agent
-
-**Goal:** The first functional floor beyond the dashboard. Users can manage applications with a full CRUD interface, and the CRO agent character provides pipeline intelligence.
-
-**Complexity:** L (1-2 weeks)
-
-### Deliverables
-
-| # | Deliverable | Complexity | Description |
-|---|---|---|---|
-| 1.1 | Floor 7 Environment | M | The War Room atmosphere: darker tones, tactical feel, data-dense. Own lighting scheme (cooler, more blue). Window view shows city from floor 7 height. |
-| 1.2 | Application CRUD | M | Create, read, update, delete applications. Status pipeline: Saved → Applied → Phone Screen → Interview → Offer → Rejected. Bulk actions. Search/filter. All RLS-scoped. |
-| 1.3 | Pipeline Visualization | M | Visual pipeline (Kanban or funnel) rendered as part of the room's environment — data on the "war table," not a generic chart. Drag-and-drop status changes. |
-| 1.4 | CRO Agent (Backend) | L | Port CRO agent from old repo (~500 LOC tools + agent logic). Adapt to Supabase queries. Tools: `queryApplications`, `updateStatus`, `suggestFollowUp`, `analyzeConversionRates`. Powered by Vercel AI SDK v6 `ToolLoopAgent`. |
-| 1.5 | CRO Character (Frontend) | M | 2D illustrated character in the room (Option A). Idle animation at whiteboard. Approach interaction: click character → conversation panel opens as face-to-face dialogue. CRO personality: aggressive, numbers-driven. Pipeline data visible on the whiteboard behind them. |
-| 1.6 | Character Interaction System | L | Reusable system for all future characters. Components: character sprite with parallax depth, approach detection, conversation panel (styled as dialogue, not chatbot), AI message streaming, character personality injection into system prompt. |
-
-### Acceptance Criteria
-- [x] User can create an application and see it in the pipeline
-- [x] Drag-and-drop changes application status
-- [x] CRO agent can answer "How's my pipeline looking?" with real data
-- [x] CRO character has visible idle animation and talking state
-- [x] Conversation feels in-character (aggressive, numbers-driven tone)
-- [x] All data is RLS-scoped — multi-tenant safe
-
-### Dependencies
-- Phase 0 complete (auth, elevator, world shell)
-- Character illustration assets (2D sprites for CRO — idle, talking, gesturing)
-
----
+See docs/MASTER-PLAN.md for the next phase.
 
 ## User Instructions (CRITICAL — preserve verbatim)
 
@@ -112,7 +192,7 @@ No acceptance criteria found for current phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `593350c`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `47dce00`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -120,22 +200,28 @@ No acceptance criteria found for current phase.
 
 ## Env Vars (names only — values in .env.local)
 
-(no .env.local found)
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- SUPABASE_DB_URL
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- ANTHROPIC_API_KEY
 
-## Source Tree (226 files, 52,154 LOC)
+## Source Tree (231 files, 52,344 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 3797 |
-| `src/components/world` | 2798 |
+| `src/lib/db/queries` | 3828 |
+| `src/components/world` | 2808 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1790 |
 | `src/components/floor-6/cio-character` | 1455 |
+| `src/hooks` | 1435 |
 | `src/components/floor-3/cpo-character` | 1380 |
-| `src/components/floor-5/cmo-character` | 1369 |
-| `src/hooks` | 1356 |
+| `src/components/floor-5/cmo-character` | 1376 |
 | `src/components/floor-4/coo-character` | 1339 |
-| `src/components/floor-7/war-table` | 1281 |
+| `src/components/floor-7/war-table` | 1278 |
 | `src/components/floor-4` | 1175 |
 | `src/components/floor-6/cno-character` | 1081 |
 | `src/components/world/elevator` | 1056 |
@@ -146,12 +232,12 @@ No acceptance criteria found for current phase.
 | `src/app` | 981 |
 | `src/lib/agents/cpo` | 975 |
 | `src/components/floor-5/crud` | 949 |
-| `src/app/lobby` | 947 |
+| `src/app/lobby` | 944 |
 | `src/lib/agents/cfo` | 925 |
-| `src/components/floor-5` | 909 |
+| `src/components/floor-5` | 911 |
 | `src/components/floor-6/crud` | 889 |
 | `src/components/floor-6` | 886 |
-| `src/components/floor-1` | 809 |
+| `src/components/floor-1` | 807 |
 | `src/components/floor-7` | 792 |
 | `src/lib/agents/cmo` | 766 |
 | `src/components/floor-2/analytics` | 764 |
@@ -175,7 +261,7 @@ No acceptance criteria found for current phase.
 | `src/lib/contracts/departments` | 328 |
 | `src/components/pricing` | 306 |
 | `src/lib/progression` | 304 |
-| `src/lib/utils` | 285 |
+| `src/lib/utils` | 284 |
 | `src/app/(authenticated)/briefing-room` | 264 |
 | `src/lib/stripe` | 223 |
 | `src/lib/actions` | 207 |
@@ -200,13 +286,14 @@ No acceptance criteria found for current phase.
 | `src/lib/validators` | 71 |
 | `src/app/api/notifications` | 58 |
 | `src/app/api/gmail/callback` | 56 |
+| `src/lib/auth` | 49 |
 | `src/app/api/drive/export` | 48 |
 | `src/app/api/cio` | 46 |
 | `src/app/api/cmo` | 46 |
 | `src/app/api/cno` | 46 |
 | `src/app/api/coo` | 46 |
 | `src/app/api/cro` | 46 |
-| `src/app/api/auth/callback` | 42 |
+| `src/app/api/auth/callback` | 43 |
 | `src/app/api/stripe/checkout` | 36 |
 | `src/app/api/progression` | 35 |
 | `src/app/api/notifications/[id]/read` | 31 |
@@ -214,6 +301,7 @@ No acceptance criteria found for current phase.
 | `src/app/(authenticated)/c-suite` | 20 |
 | `src/app/(authenticated)/observatory` | 20 |
 | `src/app/api/stripe/portal` | 20 |
+| `src/app/api/webhooks` | 20 |
 | `src` | 20 |
 | `src/app/api/calendar/sync` | 12 |
 | `src/app/api/gmail/auth` | 12 |
@@ -261,6 +349,7 @@ src/app/api/stripe/checkout/route.ts
 src/app/api/stripe/portal/route.ts
 src/app/api/stripe/webhook/route.ts
 src/app/api/weather/route.ts
+src/app/api/webhooks/route.ts
 src/app/globals.css
 src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
@@ -395,6 +484,8 @@ src/lib/agents/cpo/tools.ts
 src/lib/agents/cro/character-machine.ts
 src/lib/agents/cro/system-prompt.ts
 src/lib/agents/cro/tools.ts
+src/lib/auth/safe-next-path.test.ts
+src/lib/auth/safe-next-path.ts
 src/lib/calendar/sync.ts
 src/lib/constants/floors.ts
 src/lib/contracts/agent-protocol.ts
@@ -417,6 +508,8 @@ src/lib/db/queries/daily-snapshots-rest.ts
 src/lib/db/queries/documents-rest.ts
 src/lib/db/queries/embeddings-rest.ts
 src/lib/db/queries/notifications-rest.ts
+src/lib/db/queries/pipeline-stats-from-aggregates.ts
+src/lib/db/queries/pipeline-stats.test.ts
 src/lib/easter-eggs.ts
 src/lib/gmail/oauth.ts
 src/lib/gmail/parser.ts
@@ -501,42 +594,28 @@ zod: ^4.3.6
 
 ### Stale Dependencies (major version behind)
 
-- **@types/node**: 20.19.37 → 25.5.0 (major)
-- **eslint**: 9.39.4 → 10.1.0 (major)
+- **@types/node**: 20.19.37 → 25.6.0 (major)
+- **eslint**: 9.39.4 → 10.2.0 (major)
+- **stripe**: 20.4.1 → 22.0.2 (major)
 - **tailwindcss**: 3.4.19 → 4.2.2 (major)
+- **typescript**: 5.9.3 → 6.0.3 (major)
 
 ## Context Budget
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 568 | 6,690 |
-| `PROJECT-CONTEXT.md` | 355 | 9,521 |
-| `docs/MASTER-PLAN.md` | 361 | 6,939 |
-| `CLAUDE.md` | 242 | 4,824 |
-| **Total** | **1526** | **27,974** |
+| `BOOTSTRAP-PROMPT.md` | 574 | 6,747 |
+| `PROJECT-CONTEXT.md` | 270 | 4,919 |
+| `docs/MASTER-PLAN.md` | 361 | 7,045 |
+| `CLAUDE.md` | 307 | 6,292 |
+| **Total** | **1512** | **25,003** |
 
-> ⚠️ Reading all recommended files consumes ~27,974 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~25,003 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
 
-> Canonical technical notes live in CLAUDE.md. This section captures additional session-specific discoveries.
 
-- **React 19 + Next.js 16:** JSX namespace must be explicitly imported: `import type { JSX } from "react"`
-- **Elevator SSR safety:** Uses `useReducedMotion()` custom hook (not inline `window.matchMedia`)
-- **Timer cleanup:** `tickTimersRef.current` tracks setTimeout IDs for cleanup on unmount
-- **Drizzle RLS:** Third-argument array pattern, NOT `.withRLS()`
-- **@supabase/ssr:** NOT deprecated auth-helpers
-- **Tailwind:** v3 with JS config (NOT v4 with CSS config)
-- **Old repo reference:** `/home/user/workspace/internship-command-center-8c4c1ad1/src/contracts/`
-- **Vercel auto-deploy:** `main` gets production
-- **War Room DB pattern:** Server components use Supabase REST client (`createClient()` from `@/lib/supabase/server`), NOT Drizzle ORM direct postgres. Drizzle's `db` object requires a direct TCP connection to postgres which fails from Vercel serverless (IPv6-only DB, pooler unreliable). All future server components should follow the Penthouse/War Room pattern: `supabase.from('table').select('*')`.
-- **Supabase DB connectivity from Vercel:** Direct connection (`db.jzrsrruugcajohvvmevg.supabase.co:5432`) is IPv6-only. Supabase transaction pooler (`aws-0-us-east-1.pooler.supabase.com:6543`) returns "Tenant or user not found". Use REST API via Supabase client.
-- **ProceduralSkyline:** Canvas-based renderer replaces all photo-based skyline components. Defaults to "night" outside DayNightProvider context (intentional for lobby). Uses `useDayNight()` hook + `getSkyConfig()` for time-aware rendering
-- **EntranceSequence:** Uses sessionStorage for "played" flag — appropriate for per-session entrance
-- **Floor stubs:** Each has unique CSS atmosphere (grid patterns, gradients, animations) — not empty shells
-- **Lenis:** Installed but not yet wired — planned for Phase 2 smooth scroll integration
-- **Old skyline images:** `public/skyline/` still present as fallback assets, not currently referenced
 
 ## Key Docs
 

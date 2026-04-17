@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   useCallback,
+  startTransition,
   type JSX,
 } from "react";
 import {
@@ -370,9 +371,11 @@ export function EasterEggs({
   useEffect(() => {
     if (reduced) return;
     if (shouldShowMidnightFireworks()) {
-      setShowFireworks(true);
+      startTransition(() => setShowFireworks(true));
       markMidnightFireworksShown();
-      const t = setTimeout(() => setShowFireworks(false), 4000);
+      const t = setTimeout(() => {
+        startTransition(() => setShowFireworks(false));
+      }, 4000);
       return () => clearTimeout(t);
     }
   }, [reduced]);

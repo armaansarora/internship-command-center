@@ -118,7 +118,7 @@ export function CEOWhiteboard({ stats, agentStatuses = DEFAULT_AGENTS, lastBrief
         aria-hidden="true"
         style={{ position: "absolute", bottom: "6px", right: "8px", fontSize: "7px", color: "rgba(61, 48, 16, 0.9)", transform: "rotate(0.5deg)" }}
       >
-        // CEO COMMAND
+        {"// CEO COMMAND"}
       </div>
     </div>
   );

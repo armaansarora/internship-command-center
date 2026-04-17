@@ -21,23 +21,6 @@ export function NotificationSystem(): JSX.Element {
   const seenIds = useRef(new Set<string>());
   const autoDismissTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
-  const addToast = useCallback((notification: ToastNotification) => {
-    if (seenIds.current.has(notification.id)) return;
-    seenIds.current.add(notification.id);
-
-    setToasts((prev) => {
-      // Keep max 3, newest at bottom
-      const next = [notification, ...prev].slice(0, MAX_VISIBLE);
-      return next;
-    });
-
-    // Schedule auto-dismiss
-    const timer = setTimeout(() => {
-      dismissToast(notification.id);
-    }, AUTO_DISMISS_MS);
-    autoDismissTimers.current.set(notification.id, timer);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
     const timer = autoDismissTimers.current.get(id);
@@ -48,6 +31,26 @@ export function NotificationSystem(): JSX.Element {
     // Mark as read server-side (fire and forget)
     void fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch(() => null);
   }, []);
+
+  const addToast = useCallback(
+    (notification: ToastNotification) => {
+      if (seenIds.current.has(notification.id)) return;
+      seenIds.current.add(notification.id);
+
+      setToasts((prev) => {
+        // Keep max 3, newest at bottom
+        const next = [notification, ...prev].slice(0, MAX_VISIBLE);
+        return next;
+      });
+
+      // Schedule auto-dismiss
+      const timer = setTimeout(() => {
+        dismissToast(notification.id);
+      }, AUTO_DISMISS_MS);
+      autoDismissTimers.current.set(notification.id, timer);
+    },
+    [dismissToast]
+  );
 
   // Poll for notifications
   useEffect(() => {
@@ -77,8 +80,9 @@ export function NotificationSystem(): JSX.Element {
 
   // Cleanup timers on unmount
   useEffect(() => {
+    const timers = autoDismissTimers.current;
     return () => {
-      for (const timer of autoDismissTimers.current.values()) {
+      for (const timer of timers.values()) {
         clearTimeout(timer);
       }
     };

@@ -83,7 +83,6 @@ export function useWeather(): UseWeatherResult {
         clearInterval(intervalRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { condition, isLoading };

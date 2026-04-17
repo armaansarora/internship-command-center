@@ -112,7 +112,7 @@ export function BriefingRoomScene({
   tableSlot,
 }: BriefingRoomSceneProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  const particles = useMemo(generateParticles, []);
+  const particles = useMemo(() => generateParticles(), []);
 
   return (
     <div
