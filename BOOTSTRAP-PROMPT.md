@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 10:56 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 10:58 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `cursor/4db357e9` (commit `2fdef50`)
+- **Branch:** `cursor/4db357e9` (commit `1e5b30f`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 52,119 across 235 source files
 - **Build:** Clean (zero TS errors)
@@ -40,6 +40,12 @@
 - **Last file touched:** `HANDOFF.md`
 - **Notes:** Session 22: Final Perplexity Computer session. Full audit completed (0 TS errors, clean build, 0 console.logs, 0 any types, 0 TODOs, 9 known orphans documented). Rewrote CLAUDE.md with comprehensive architecture, vision, gotchas, and orphan inventory. Rewrote PROJECT-CONTEXT.md with accurate state (all 7 phases complete, 226 files, 51,928 LOC). Updated MASTER-PLAN.md phase status and acceptance criteria. Updated BUG-TRACKER.md. Created comprehensive HANDOFF.md for Claude Code onboarding. All docs are accurate, descriptive, and ready for seamless Claude Code handoff.
 - **State captured:** 2026-03-20T21:57:00.000Z
+
+## Changes Since Last Bootstrap
+
+```
+1e5b30f harden: kill Drizzle runtime, collapse C-suite duplication, lock down auth/webhooks/crons
+```
 
 ## Acceptance Criteria — Progress
 
@@ -92,7 +98,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `cursor/4db357e9` (commit `2fdef50`) |
+| Repo | `armaansarora/internship-command-center` on `cursor/4db357e9` (commit `1e5b30f`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -500,13 +506,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 550 | 5,777 |
-| `PROJECT-CONTEXT.md` | 270 | 4,919 |
+| `BOOTSTRAP-PROMPT.md` | 549 | 5,785 |
+| `PROJECT-CONTEXT.md` | 271 | 4,956 |
 | `docs/MASTER-PLAN.md` | 361 | 7,045 |
 | `CLAUDE.md` | 307 | 6,292 |
-| **Total** | **1488** | **24,033** |
+| **Total** | **1488** | **24,078** |
 
-> ⚠️ Reading all recommended files consumes ~24,033 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,078 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
