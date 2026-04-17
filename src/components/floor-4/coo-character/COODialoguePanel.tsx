@@ -10,7 +10,7 @@ import type {
   DynamicToolUIPart,
 } from "ai";
 import { isTextUIPart, isToolUIPart, getToolName } from "ai";
-import { useCOOChat } from "@/hooks/useCOOChat";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -158,7 +158,7 @@ export function COODialoguePanel({
     handleSubmit,
     status,
     setInput,
-  } = useCOOChat({
+  } = useAgentChat({
     id: "coo-chat",
     api: "/api/coo",
   });

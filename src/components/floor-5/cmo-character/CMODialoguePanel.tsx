@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useEffect, useRef, useCallback } from "react";
 import type { UIMessage, UIMessagePart, UIDataTypes, UITools, DynamicToolUIPart } from "ai";
 import { isTextUIPart, isToolUIPart, getToolName } from "ai";
-import { useCMOChat } from "@/hooks/useCMOChat";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -147,7 +147,7 @@ export function CMODialoguePanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, input, handleInputChange, handleSubmit, status, setInput } =
-    useCMOChat({
+    useAgentChat({
       id: "cmo-chat",
       api: "/api/cmo",
     });

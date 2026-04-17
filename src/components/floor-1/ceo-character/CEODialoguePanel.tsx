@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useEffect, useRef, useCallback } from "react";
 import type { UIMessage, UIMessagePart, UIDataTypes, UITools, DynamicToolUIPart } from "ai";
 import { isTextUIPart, isToolUIPart, getToolName } from "ai";
-import { useCEOChat } from "@/hooks/useCEOChat";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 const QUICK_ACTIONS = [
   { label: "Morning briefing",         message: "Good morning. Give me my morning briefing." },
@@ -164,7 +164,7 @@ export function CEODialoguePanel({ isOpen, onClose, initialMessage, onStatusChan
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const initialSentRef = useRef(false);
 
-  const { messages, input, handleInputChange, handleSubmit, status, setInput } = useCEOChat({
+  const { messages, input, handleInputChange, handleSubmit, status, setInput } = useAgentChat({
     id: "ceo-chat",
     api: "/api/ceo",
   });

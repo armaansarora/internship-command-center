@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import type { PipelineStats } from "@/lib/db/queries/applications";
+import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 
 interface CROWhiteboardProps {
   stats: PipelineStats;

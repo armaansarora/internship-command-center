@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useEffect, useRef, useCallback } from "react";
 import type { UIMessage, UIMessagePart, UIDataTypes, UITools, DynamicToolUIPart } from "ai";
 import { isTextUIPart, isToolUIPart, getToolName } from "ai";
-import { useCFOChat } from "@/hooks/useCFOChat";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 // ---------------------------------------------------------------------------
 // Quick actions
@@ -102,7 +102,7 @@ export function CFODialoguePanel({ isOpen, onClose, onStatusChange }: CFODialogu
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, status, setInput } = useCFOChat({
+  const { messages, input, handleInputChange, handleSubmit, status, setInput } = useAgentChat({
     id: "cfo-chat",
     api: "/api/cfo",
   });

@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useEffect, useRef, useCallback } from "react";
 import type { UIMessage, UIMessagePart, UIDataTypes, UITools, DynamicToolUIPart } from "ai";
 import { isTextUIPart, isToolUIPart, getToolName } from "ai";
-import { useCPOChat } from "@/hooks/useCPOChat";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -142,7 +142,7 @@ export function CPODialoguePanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, input, handleInputChange, handleSubmit, status, setInput } =
-    useCPOChat({
+    useAgentChat({
       id: "cpo-chat",
       api: "/api/cpo",
     });

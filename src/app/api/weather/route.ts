@@ -1,4 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { env } from "@/lib/env";
+import { withAnonymousRateLimit } from "@/lib/rate-limit-middleware";
+import { log } from "@/lib/logger";
 
 export type WeatherCondition =
   | "clear"
@@ -26,7 +29,7 @@ interface CacheEntry {
   timestamp: number;
 }
 
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 min
+const CACHE_TTL_MS = 30 * 60 * 1000;
 const cache = new Map<string, CacheEntry>();
 
 function getCached(key: string): WeatherResponse | null {
@@ -50,33 +53,44 @@ function mapCondition(main: string): WeatherCondition {
   if (lower === "thunderstorm") return "thunderstorm";
   if (lower === "rain" || lower === "drizzle") return "rain";
   if (lower === "snow") return "snow";
-  if (lower === "fog" || lower === "mist" || lower === "haze" || lower === "smoke") return "fog";
+  if (lower === "fog" || lower === "mist" || lower === "haze" || lower === "smoke") {
+    return "fog";
+  }
   if (lower === "clouds") return "clouds";
   return "clear";
 }
 
+// Coarsen caller-supplied coordinates to ~11 km grid cells. Prevents a caller
+// from busting the cache by jiggling lat/lon decimals.
+function normaliseCoord(raw: string | null, fallback: string): string {
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return fallback;
+  if (value < -180 || value > 180) return fallback;
+  return value.toFixed(1);
+}
+
 // ─── Route handler ─────────────────────────────────────────────────────────
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  const { searchParams } = new URL(request.url);
+export async function GET(request: Request): Promise<Response> {
+  const rate = await withAnonymousRateLimit(request);
+  if (rate.response) return rate.response;
 
-  // Default to NYC
-  const lat = searchParams.get("lat") ?? "40.7128";
-  const lon = searchParams.get("lon") ?? "-74.0060";
+  const { searchParams } = new URL(request.url);
+  const lat = normaliseCoord(searchParams.get("lat"), "40.7");
+  const lon = normaliseCoord(searchParams.get("lon"), "-74.0");
   const cacheKey = `${lat},${lon}`;
 
-  // Return cached response if available
   const cached = getCached(cacheKey);
   if (cached) {
-    return NextResponse.json(cached);
+    return NextResponse.json(cached, { headers: rate.headers });
   }
 
-  const apiKey = process.env.OPENWEATHER_API_KEY;
-
-  // No API key configured — return clear fallback
+  const apiKey = env().OPENWEATHER_API_KEY;
   if (!apiKey) {
-    const fallback: WeatherResponse = { condition: "clear" };
-    return NextResponse.json(fallback);
+    return NextResponse.json(
+      { condition: "clear" } as WeatherResponse,
+      { headers: rate.headers }
+    );
   }
 
   try {
@@ -84,11 +98,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const res = await fetch(url, { next: { revalidate: 0 } });
 
     if (!res.ok) {
-      const fallback: WeatherResponse = { condition: "clear" };
-      return NextResponse.json(fallback);
+      log.warn("weather.upstream_error", { status: res.status });
+      return NextResponse.json(
+        { condition: "clear" } as WeatherResponse,
+        { headers: rate.headers }
+      );
     }
 
-    const owData: OpenWeatherResponse = await res.json() as OpenWeatherResponse;
+    const owData = (await res.json()) as OpenWeatherResponse;
     const main = owData.weather?.[0]?.main ?? "Clear";
     const icon = owData.weather?.[0]?.icon;
     const temp = owData.main?.temp;
@@ -98,11 +115,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       temp,
       icon,
     };
-
     setCached(cacheKey, response);
-    return NextResponse.json(response);
-  } catch {
-    const fallback: WeatherResponse = { condition: "clear" };
-    return NextResponse.json(fallback);
+    return NextResponse.json(response, { headers: rate.headers });
+  } catch (err) {
+    log.error("weather.fetch_failed", err);
+    return NextResponse.json(
+      { condition: "clear" } as WeatherResponse,
+      { headers: rate.headers }
+    );
   }
 }

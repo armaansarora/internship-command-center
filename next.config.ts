@@ -15,7 +15,6 @@ const nextConfig: NextConfig = {
       "@dnd-kit/sortable",
       "xstate",
       "@xstate/react",
-      "drizzle-orm",
       "zod",
     ],
   },
@@ -24,9 +23,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Wrap with Sentry only when DSN is configured
-if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
-  // Dynamic require to avoid import-time errors when Sentry is not configured
+// Wrap with Sentry only when DSN is configured. Use dynamic require rather
+// than import so the Sentry build-time dependency is skipped in environments
+// that haven't configured telemetry.
+const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+if (sentryDsn) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { withSentryConfig } = require("@sentry/nextjs") as {
     withSentryConfig: (
@@ -36,11 +37,9 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
   };
 
   module.exports = withSentryConfig(nextConfig, {
-    // Suppress source-map upload warnings when token is absent
     silent: true,
     org: process.env.SENTRY_ORG ?? "",
     project: process.env.SENTRY_PROJECT ?? "",
-    // Disable automatic instrumentation file generation
     autoInstrumentServerFunctions: false,
     autoInstrumentMiddleware: false,
     autoInstrumentAppDirectory: false,
@@ -48,3 +47,5 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
 } else {
   module.exports = nextConfig;
 }
+
+export default nextConfig;

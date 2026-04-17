@@ -10,7 +10,7 @@ import type {
   DynamicToolUIPart,
 } from "ai";
 import { isTextUIPart, isToolUIPart, getToolName } from "ai";
-import { useCIOChat } from "@/hooks/useCIOChat";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -158,7 +158,7 @@ export function CIODialoguePanel({
     handleSubmit,
     status,
     setInput,
-  } = useCIOChat({
+  } = useAgentChat({
     id: "cio-chat",
     api: "/api/cio",
   });

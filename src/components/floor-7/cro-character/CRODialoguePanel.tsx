@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useEffect, useRef, useCallback } from "react";
 import type { UIMessage, UIMessagePart, UIDataTypes, UITools, DynamicToolUIPart } from "ai";
 import { isTextUIPart, isToolUIPart, getToolName } from "ai";
-import { useCROChat } from "@/hooks/useCROChat";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -136,7 +136,7 @@ export function CRODialoguePanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, input, handleInputChange, handleSubmit, status, setInput } =
-    useCROChat({
+    useAgentChat({
       id: "cro-chat",
       api: "/api/cro",
     });

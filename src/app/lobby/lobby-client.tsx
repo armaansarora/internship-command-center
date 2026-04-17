@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback, useSyncExternalStore, type JS
 import { FLOORS, type FloorId } from "@/types/ui";
 import { LobbyBackground } from "@/components/world/LobbyBackground";
 import { Elevator } from "@/components/world/Elevator";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import gsap from "gsap";
 
 /**
@@ -27,9 +28,11 @@ export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boo
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = useReducedMotion();
 
-  // Mouse tracking for spotlight only — BUG-008: removed content parallax
+  // Mouse tracking for spotlight only — disabled under reduced motion.
   useEffect(() => {
+    if (prefersReducedMotion) return;
     const onMove = (e: MouseEvent) => {
       if (spotlightRef.current) {
         spotlightRef.current.style.left = `${e.clientX}px`;
@@ -38,36 +41,44 @@ export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boo
     };
     window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
-  }, []);
+  }, [prefersReducedMotion]);
 
-  // Cinematic GSAP entrance animation — enhancement only.
-  // The container already has opacity: 1 via a CSS animation fallback.
-  // GSAP overrides with a more dramatic sequence when available.
+  // Cinematic GSAP entrance animation — enhancement only. Skipped entirely
+  // when the user has requested reduced motion; the CSS fallback keeps the
+  // content visible without animation.
   useEffect(() => {
     if (!containerRef.current) return;
+    if (prefersReducedMotion) {
+      containerRef.current.style.animation = "none";
+      containerRef.current.style.opacity = "1";
+      const els = containerRef.current.querySelectorAll("[data-animate]");
+      els.forEach((el) => {
+        (el as HTMLElement).style.opacity = "1";
+        (el as HTMLElement).style.transform = "none";
+      });
+      return;
+    }
 
-    // Cancel the CSS fallback animation and take over with GSAP
     containerRef.current.style.animation = "none";
     containerRef.current.style.opacity = "0";
 
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-    // Stage 1: Fade in container
     tl.fromTo(containerRef.current, { opacity: 0 }, { opacity: 1, duration: 1 });
 
-    // Stage 2: Content elements cascade in with stagger
     const els = containerRef.current.querySelectorAll("[data-animate]");
     els.forEach((el, i) => {
       tl.fromTo(
         el,
         { y: 30, opacity: 0, scale: 0.97 },
         { y: 0, opacity: 1, scale: 1, duration: 0.65 },
-        `-=${0.55 - i * 0.0}` // stagger: each starts slightly after the previous
+        `-=${0.55 - i * 0.0}`
       );
     });
 
-    return () => { tl.kill(); };
-  }, []);
+    return () => {
+      tl.kill();
+    };
+  }, [prefersReducedMotion]);
 
   async function handleSignIn() {
     setIsLoading(true);

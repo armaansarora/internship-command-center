@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { requireEnv, env } from "@/lib/env";
 import { STRIPE_PLANS, type SubscriptionTier } from "./config";
 
 // ---------------------------------------------------------------------------
@@ -9,11 +10,8 @@ let _stripe: Stripe | null = null;
 
 export function getStripe(): Stripe {
   if (!_stripe) {
-    const key = process.env.STRIPE_SECRET_KEY;
-    if (!key) {
-      throw new Error("Missing STRIPE_SECRET_KEY environment variable");
-    }
-    _stripe = new Stripe(key, { apiVersion: "2026-02-25.clover" });
+    const { STRIPE_SECRET_KEY } = requireEnv(["STRIPE_SECRET_KEY"] as const);
+    _stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2026-02-25.clover" });
   }
   return _stripe;
 }
@@ -81,7 +79,7 @@ export async function createCheckoutSession(
   priceId: string,
 ): Promise<string> {
   const customerId = await createOrRetrieveCustomer(userId, email);
-  const domain = process.env.NEXT_PUBLIC_APP_URL ?? "https://thetower.app";
+  const domain = env().NEXT_PUBLIC_APP_URL;
 
   const session = await getStripe().checkout.sessions.create({
     customer: customerId,
@@ -106,7 +104,7 @@ export async function createCheckoutSession(
 export async function createBillingPortalSession(
   customerId: string,
 ): Promise<string> {
-  const domain = process.env.NEXT_PUBLIC_APP_URL ?? "https://thetower.app";
+  const domain = env().NEXT_PUBLIC_APP_URL;
 
   const portalSession = await getStripe().billingPortal.sessions.create({
     customer: customerId,

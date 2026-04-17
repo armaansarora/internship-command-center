@@ -19,6 +19,48 @@ export const APPLICATION_STATUSES = [
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
+/** Applications considered "closed" — not part of the active pipeline. */
+export const CLOSED_STATUSES = [
+  "accepted",
+  "rejected",
+  "withdrawn",
+] as const satisfies readonly ApplicationStatus[];
+
+export type ClosedStatus = (typeof CLOSED_STATUSES)[number];
+
+/** Applications that still live in the active pipeline funnel. */
+export const ACTIVE_STATUSES = APPLICATION_STATUSES.filter(
+  (s): s is Exclude<ApplicationStatus, ClosedStatus> =>
+    !(CLOSED_STATUSES as readonly string[]).includes(s)
+);
+
+/** Statuses in the pre-interview funnel. */
+export const FUNNEL_STATUSES = [
+  "discovered",
+  "applied",
+  "screening",
+  "interview_scheduled",
+  "interviewing",
+  "under_review",
+  "offer",
+] as const satisfies readonly ApplicationStatus[];
+
+/** Returns true when a status is in the closed set. */
+export function isClosedStatus(status: string): status is ClosedStatus {
+  return (CLOSED_STATUSES as readonly string[]).includes(status);
+}
+
+/** Returns true when a status represents an active (open) opportunity. */
+export function isActiveStatus(status: string): status is Exclude<
+  ApplicationStatus,
+  ClosedStatus
+> {
+  return (
+    (APPLICATION_STATUSES as readonly string[]).includes(status) &&
+    !isClosedStatus(status)
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Create schema
 // ---------------------------------------------------------------------------

@@ -34,10 +34,15 @@ export class ErrorBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    // NEXT_PUBLIC_* is inlined at build time; this tree-shakes when unset.
     if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
-      Sentry.captureException(error, {
-        extra: { componentStack: info.componentStack },
-      });
+      try {
+        Sentry.captureException(error, {
+          extra: { componentStack: info.componentStack },
+        });
+      } catch {
+        // Swallow Sentry init errors — never let telemetry break the UI.
+      }
     }
   }
 

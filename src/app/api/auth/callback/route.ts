@@ -1,42 +1,26 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
+import { log } from "@/lib/logger";
 
+/**
+ * Supabase OAuth redirect handler. Exchanges the provider code for a
+ * session and redirects to a safe in-app path. Falls back to the lobby
+ * with an `auth_failed` marker on any failure.
+ */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = getSafePostAuthPath(searchParams.get("next"));
 
   if (code) {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options),
-              );
-            } catch {
-              // Ignore — can't set cookies from middleware redirect
-            }
-          },
-        },
-      },
-    );
-
+    const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       return NextResponse.redirect(new URL(next, origin).toString());
     }
+    log.warn("auth.callback.exchange_failed", { error: error.message });
   }
 
-  // Auth error — redirect to lobby with error
   return NextResponse.redirect(`${origin}/lobby?error=auth_failed`);
 }

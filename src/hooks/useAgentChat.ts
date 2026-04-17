@@ -1,25 +1,36 @@
 "use client";
 
 /**
- * useCROChat — wraps the AI SDK AbstractChat pattern for the CRO agent.
+ * useAgentChat — single chat hook shared by all C-suite agents.
+ *
+ * Replaces the 8 near-identical `useCxxChat` hooks. Each dialogue panel
+ * passes its own `api` endpoint (e.g. "/api/cro") and a stable chat `id`.
+ *
+ * Hand-rolls `AbstractChat` instead of `@ai-sdk/react`'s `useChat`
+ * because this codebase needs the chat lifecycle to survive outside
+ * the React tree (open/close of the dialogue panel) and needs a
+ * controlled `input` value. Keep this as the ONE place that owns that.
  */
 
 import { useState, useCallback, useEffect } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { AbstractChat, DefaultChatTransport, generateId } from "ai";
 
-interface UseCROChatOptions {
+export interface UseAgentChatOptions {
+  /** Stable id so messages persist across panel open/close within a session. */
   id?: string;
+  /** API endpoint for this agent, e.g. "/api/cro". */
   api: string;
 }
 
-interface UseCROChatReturn {
+export interface UseAgentChatReturn {
   messages: UIMessage[];
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   status: ChatStatus;
   setInput: (value: string) => void;
+  clearMessages: () => void;
 }
 
 class ReactChatState {
@@ -35,11 +46,9 @@ class ReactChatState {
   get status(): ChatStatus {
     return this._status;
   }
-
   get error(): Error | undefined {
     return this._error;
   }
-
   get messages(): UIMessage[] {
     return this._messages;
   }
@@ -48,23 +57,23 @@ class ReactChatState {
     this._messages = [...this._messages, message];
     this._notify?.();
   }
-
   popMessage() {
     this._messages = this._messages.slice(0, -1);
     this._notify?.();
   }
-
   replaceMessage(index: number, message: UIMessage) {
     const next = [...this._messages];
     next[index] = message;
     this._messages = next;
     this._notify?.();
   }
-
+  clearMessages() {
+    this._messages = [];
+    this._notify?.();
+  }
   snapshot<T>(thing: T): T {
     return thing;
   }
-
   setStatus(status: ChatStatus, error?: Error) {
     this._status = status;
     this._error = error;
@@ -72,7 +81,7 @@ class ReactChatState {
   }
 }
 
-class CROChat extends AbstractChat<UIMessage> {
+class AgentChat extends AbstractChat<UIMessage> {
   private readonly _state: ReactChatState;
 
   constructor(state: ReactChatState, api: string, chatId: string) {
@@ -93,22 +102,28 @@ class CROChat extends AbstractChat<UIMessage> {
         pushMessage: (m) => state.pushMessage(m),
         popMessage: () => state.popMessage(),
         replaceMessage: (i, m) => state.replaceMessage(i, m),
-        snapshot: <T>(t: T) => state.snapshot(t),
+        snapshot: <T,>(t: T) => state.snapshot(t),
       },
     });
     this._state = state;
   }
 
-  protected override setStatus({ status, error }: { status: ChatStatus; error?: Error }) {
+  protected override setStatus({
+    status,
+    error,
+  }: {
+    status: ChatStatus;
+    error?: Error;
+  }) {
     this._state.setStatus(status, error);
   }
 }
 
-export function useCROChat({ id, api }: UseCROChatOptions): UseCROChatReturn {
+export function useAgentChat({ id, api }: UseAgentChatOptions): UseAgentChatReturn {
   const [bundle] = useState(() => {
     const state = new ReactChatState();
     const chatId = id ?? generateId();
-    const chat = new CROChat(state, api, chatId);
+    const chat = new AgentChat(state, api, chatId);
     return { state, chat };
   });
 
@@ -119,9 +134,7 @@ export function useCROChat({ id, api }: UseCROChatOptions): UseCROChatReturn {
 
   useEffect(() => {
     const s = bundle.state;
-    const sync = () => {
-      setSlice({ messages: s.messages, status: s.status });
-    };
+    const sync = () => setSlice({ messages: s.messages, status: s.status });
     s.setNotify(sync);
     sync();
   }, [bundle.state]);
@@ -150,6 +163,10 @@ export function useCROChat({ id, api }: UseCROChatOptions): UseCROChatReturn {
     [input, bundle.chat]
   );
 
+  const clearMessages = useCallback(() => {
+    bundle.state.clearMessages();
+  }, [bundle.state]);
+
   return {
     messages: slice.messages,
     input,
@@ -157,5 +174,6 @@ export function useCROChat({ id, api }: UseCROChatOptions): UseCROChatReturn {
     handleSubmit,
     status: slice.status,
     setInput,
+    clearMessages,
   };
 }

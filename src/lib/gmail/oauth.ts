@@ -1,6 +1,9 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { requireEnv } from "@/lib/env";
+import { createOAuthState } from "@/lib/auth/oauth-state";
+import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -28,12 +31,13 @@ interface TokenResponse {
 // ---------------------------------------------------------------------------
 
 function getEncryptionKey(): Buffer {
-  const key = process.env.ENCRYPTION_KEY;
-  if (!key) throw new Error("ENCRYPTION_KEY environment variable is not set");
+  const { ENCRYPTION_KEY } = requireEnv(["ENCRYPTION_KEY"] as const);
   // Accept 32-byte hex string (64 chars) or 32-byte base64
-  if (key.length === 64) return Buffer.from(key, "hex");
-  const buf = Buffer.from(key, "base64");
-  if (buf.length !== 32) throw new Error("ENCRYPTION_KEY must be 32 bytes (hex or base64)");
+  if (ENCRYPTION_KEY.length === 64) return Buffer.from(ENCRYPTION_KEY, "hex");
+  const buf = Buffer.from(ENCRYPTION_KEY, "base64");
+  if (buf.length !== 32) {
+    throw new Error("ENCRYPTION_KEY must be 32 bytes (hex or base64)");
+  }
   return buf;
 }
 
@@ -64,12 +68,20 @@ export function decrypt(encryptedText: string): string {
 // OAuth URL generation
 // ---------------------------------------------------------------------------
 
-export function getGmailAuthUrl(userId: string): string {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  if (!clientId) throw new Error("GOOGLE_CLIENT_ID environment variable is not set");
-
-  const redirectUri = process.env.GMAIL_REDIRECT_URI;
-  if (!redirectUri) throw new Error("GMAIL_REDIRECT_URI environment variable is not set");
+/**
+ * Build a Google OAuth URL with a cryptographically-signed state parameter.
+ * The caller must also set a short-lived cookie containing `nonce` — the
+ * callback verifies both, giving real CSRF protection instead of the
+ * plaintext userId the previous implementation used.
+ */
+export function getGmailAuthUrl(userId: string): {
+  url: string;
+  nonce: string;
+} {
+  const { GOOGLE_CLIENT_ID, GMAIL_REDIRECT_URI } = requireEnv([
+    "GOOGLE_CLIENT_ID",
+    "GMAIL_REDIRECT_URI",
+  ] as const);
 
   const scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -77,11 +89,11 @@ export function getGmailAuthUrl(userId: string): string {
     "https://www.googleapis.com/auth/calendar.events",
   ];
 
-  const state = Buffer.from(JSON.stringify({ userId })).toString("base64url");
+  const { state, nonce } = createOAuthState({ userId });
 
   const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: GMAIL_REDIRECT_URI,
     response_type: "code",
     scope: scopes.join(" "),
     access_type: "offline",
@@ -89,7 +101,10 @@ export function getGmailAuthUrl(userId: string): string {
     state,
   });
 
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+  return {
+    url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
+    nonce,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -97,29 +112,31 @@ export function getGmailAuthUrl(userId: string): string {
 // ---------------------------------------------------------------------------
 
 export async function exchangeCodeForTokens(code: string): Promise<TokenResponse> {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GMAIL_REDIRECT_URI;
-
-  if (!clientId) throw new Error("GOOGLE_CLIENT_ID environment variable is not set");
-  if (!clientSecret) throw new Error("GOOGLE_CLIENT_SECRET environment variable is not set");
-  if (!redirectUri) throw new Error("GMAIL_REDIRECT_URI environment variable is not set");
+  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GMAIL_REDIRECT_URI } = requireEnv([
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GMAIL_REDIRECT_URI",
+  ] as const);
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code,
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: GMAIL_REDIRECT_URI,
       grant_type: "authorization_code",
     }).toString(),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Token exchange failed: ${errorText}`);
+    log.error("gmail.oauth.token_exchange_failed", undefined, {
+      status: response.status,
+      body: errorText.slice(0, 500),
+    });
+    throw new Error("Token exchange failed");
   }
 
   return response.json() as Promise<TokenResponse>;
@@ -130,26 +147,29 @@ export async function exchangeCodeForTokens(code: string): Promise<TokenResponse
 // ---------------------------------------------------------------------------
 
 export async function refreshAccessToken(refreshToken: string): Promise<TokenResponse> {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
-  if (!clientId) throw new Error("GOOGLE_CLIENT_ID environment variable is not set");
-  if (!clientSecret) throw new Error("GOOGLE_CLIENT_SECRET environment variable is not set");
+  const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = requireEnv([
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+  ] as const);
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       refresh_token: refreshToken,
-      client_id: clientId,
-      client_secret: clientSecret,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
       grant_type: "refresh_token",
     }).toString(),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Token refresh failed: ${errorText}`);
+    log.error("gmail.oauth.token_refresh_failed", undefined, {
+      status: response.status,
+      body: errorText.slice(0, 500),
+    });
+    throw new Error("Token refresh failed");
   }
 
   return response.json() as Promise<TokenResponse>;
