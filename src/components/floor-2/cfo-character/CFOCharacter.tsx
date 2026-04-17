@@ -1,7 +1,9 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useActor } from "@xstate/react";
+import { characterMachine } from "@/lib/agents/cfo/character-machine";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // ---------------------------------------------------------------------------
@@ -140,30 +142,60 @@ function CFOSilhouette({
 // ---------------------------------------------------------------------------
 interface CFOCharacterProps {
   onConversationOpen?: () => void;
+  dialogueOpen?: boolean;
+  dialogueStatus?: "idle" | "thinking" | "talking";
 }
 
-export function CFOCharacter({ onConversationOpen }: CFOCharacterProps): JSX.Element {
-  const [state, setState] = useState<string>("idle");
+export function CFOCharacter({
+  onConversationOpen,
+  dialogueOpen,
+  dialogueStatus,
+}: CFOCharacterProps): JSX.Element {
+  const [snapshot, send] = useActor(characterMachine);
   const reducedMotion = useReducedMotion();
+  const state = snapshot.value as string;
+
+  useEffect(() => {
+    if (dialogueOpen === false && snapshot.context.isConversationOpen) {
+      send({ type: "DISMISS" });
+    }
+  }, [dialogueOpen, send, snapshot.context.isConversationOpen]);
+
+  useEffect(() => {
+    if (!dialogueOpen || !dialogueStatus) {
+      return;
+    }
+    if (dialogueStatus === "thinking") {
+      send({ type: "START_THINKING" });
+      return;
+    }
+    if (dialogueStatus === "talking") {
+      send({ type: "START_TALKING" });
+      return;
+    }
+    send({ type: "STOP_TALKING" });
+  }, [dialogueOpen, dialogueStatus, send]);
 
   function handleClick() {
-    setState("greeting");
-    onConversationOpen?.();
-    setTimeout(() => setState("idle"), 800);
+    send({ type: "CLICK" });
+    if (!snapshot.context.isConversationOpen) {
+      onConversationOpen?.();
+    }
   }
 
   function handleMouseEnter() {
-    if (state === "idle") setState("alert");
+    send({ type: "HOVER" });
   }
 
   function handleMouseLeave() {
-    if (state === "alert") setState("idle");
+    send({ type: "LEAVE" });
   }
 
   const stateLabels: Record<string, string> = {
     idle:      "CFO — Click to open analytics review",
     alert:     "CFO is noticing you — click to talk",
     greeting:  "CFO is greeting you",
+    ready:     "CFO is ready to review your numbers",
     thinking:  "CFO is analyzing data",
     talking:   "CFO is speaking",
     returning: "CFO is stepping back",
@@ -178,7 +210,7 @@ export function CFOCharacter({ onConversationOpen }: CFOCharacterProps): JSX.Ele
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         aria-label={stateLabels[state] ?? "CFO Character"}
-        aria-pressed={false}
+        aria-pressed={snapshot.context.isConversationOpen}
         aria-live="polite"
         aria-atomic="true"
         className="relative flex flex-col items-center cursor-pointer select-none bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 rounded-lg"

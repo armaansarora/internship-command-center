@@ -16,12 +16,13 @@ interface CSuiteClientProps {
 export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [briefingMessage, setBriefingMessage] = useState<string | undefined>(undefined);
-  const [ceoState, setCEOState] = useState<string>("idle");
+  const [ceoState, setCEOState] = useState<"idle" | "thinking" | "talking">("idle");
 
   const handleOpenDialogue = useCallback(() => setDialogueOpen(true), []);
   const handleCloseDialogue = useCallback(() => {
     setDialogueOpen(false);
     setBriefingMessage(undefined);
+    setCEOState("idle");
   }, []);
 
   const handleBriefingReady = useCallback((briefing: string) => {
@@ -87,6 +88,7 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
       <CEOCharacter
         onConversationOpen={handleOpenDialogue}
         externalState={ceoState}
+        dialogueOpen={dialogueOpen}
       />
 
       {/* Wall display */}

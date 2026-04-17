@@ -192,6 +192,11 @@ All code gracefully degrades — Stripe, Upstash, Sentry, OpenWeatherMap all no-
 4. **Limited test coverage** — 9 Vitest files exist (33 tests) focused on utilities/auth/rate-limit; no Playwright E2E suite yet.
 5. **Lighthouse audit** — Not run yet. Performance scores unknown.
 
+### Recent Architecture Refactors
+1. **Dialogue panels unified** — Floor dialogue UIs now share `src/components/agents/dialogue/*` primitives with per-floor wrappers.
+2. **Character machines standardized** — All 8 character machine modules now use `src/lib/agents/create-character-machine.ts` with extension hooks for CMO/CPO/CNO.
+3. **Page actions extracted** — Floor page mutations moved from inline page server actions into `src/lib/actions/*` and domain query mutation modules.
+
 ---
 
 ## 6. DOCUMENT MAP
@@ -202,8 +207,8 @@ All planning docs are in `docs/`. Operational files stay in root.
 
 | File | Purpose | Lines |
 |---|---|---|
-| `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~270 |
-| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~550 |
+| `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~280 |
+| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~630 |
 | `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~310 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |

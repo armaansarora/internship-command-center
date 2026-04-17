@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
+import { useEffect } from "react";
 import { useActor } from "@xstate/react";
 import { characterMachine } from "@/lib/agents/coo/character-machine";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -419,16 +420,41 @@ function DeskDrumAnimation({ active }: { active: boolean }): JSX.Element {
 interface COOCharacterProps {
   onConversationOpen?: () => void;
   overdueCount?: number;
+  dialogueOpen?: boolean;
+  dialogueStatus?: "idle" | "thinking" | "talking";
 }
 
 export function COOCharacter({
   onConversationOpen,
   overdueCount = 0,
+  dialogueOpen,
+  dialogueStatus,
 }: COOCharacterProps): JSX.Element {
   const [snapshot, send] = useActor(characterMachine);
   const reducedMotion = useReducedMotion();
 
   const currentState = snapshot.value as string;
+
+  useEffect(() => {
+    if (dialogueOpen === false && snapshot.context.isConversationOpen) {
+      send({ type: "DISMISS" });
+    }
+  }, [dialogueOpen, send, snapshot.context.isConversationOpen]);
+
+  useEffect(() => {
+    if (!dialogueOpen || !dialogueStatus) {
+      return;
+    }
+    if (dialogueStatus === "thinking") {
+      send({ type: "START_THINKING" });
+      return;
+    }
+    if (dialogueStatus === "talking") {
+      send({ type: "START_TALKING" });
+      return;
+    }
+    send({ type: "STOP_TALKING" });
+  }, [dialogueOpen, dialogueStatus, send]);
 
   function handleClick() {
     send({ type: "CLICK" });

@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
+import { useEffect } from "react";
 import { useActor } from "@xstate/react";
 import { cnoCharacterMachine } from "@/lib/agents/cno/character-machine";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -246,16 +247,41 @@ function CharacterSilhouette({
 interface CNOCharacterProps {
   onConversationOpen?: () => void;
   coldAlertsCount?: number;
+  dialogueOpen?: boolean;
+  dialogueStatus?: "idle" | "thinking" | "talking";
 }
 
 export function CNOCharacter({
   onConversationOpen,
   coldAlertsCount = 0,
+  dialogueOpen,
+  dialogueStatus,
 }: CNOCharacterProps): JSX.Element {
   const [snapshot, send] = useActor(cnoCharacterMachine);
   const reducedMotion = useReducedMotion();
 
   const currentState = snapshot.value as string;
+
+  useEffect(() => {
+    if (dialogueOpen === false && snapshot.context.isConversationOpen) {
+      send({ type: "DISMISS" });
+    }
+  }, [dialogueOpen, send, snapshot.context.isConversationOpen]);
+
+  useEffect(() => {
+    if (!dialogueOpen || !dialogueStatus) {
+      return;
+    }
+    if (dialogueStatus === "thinking") {
+      send({ type: "START_THINKING" });
+      return;
+    }
+    if (dialogueStatus === "talking") {
+      send({ type: "START_TALKING" });
+      return;
+    }
+    send({ type: "STOP_TALKING" });
+  }, [dialogueOpen, dialogueStatus, send]);
 
   function handleClick() {
     send({ type: "CLICK" });

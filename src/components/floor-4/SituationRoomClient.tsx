@@ -240,6 +240,7 @@ export function SituationRoomClient({
 }: SituationRoomClientProps): JSX.Element {
   void _rest;
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [cooStatus, setCooStatus] = useState<"idle" | "thinking" | "talking">("idle");
 
   const handleOpenDialogue = useCallback(() => {
     setDialogueOpen(true);
@@ -247,6 +248,11 @@ export function SituationRoomClient({
 
   const handleCloseDialogue = useCallback(() => {
     setDialogueOpen(false);
+    setCooStatus("idle");
+  }, []);
+
+  const handleCooStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
+    setCooStatus(status);
   }, []);
 
   // Build deadline cards from applications
@@ -290,6 +296,8 @@ export function SituationRoomClient({
         <COOCharacter
           onConversationOpen={handleOpenDialogue}
           overdueCount={briefingData.overdueFollowUpsCount}
+          dialogueOpen={dialogueOpen}
+          dialogueStatus={cooStatus}
         />
       </div>
 
@@ -524,6 +532,7 @@ export function SituationRoomClient({
           <COODialoguePanel
             isOpen={dialogueOpen}
             onClose={handleCloseDialogue}
+            onStatusChange={handleCooStatusChange}
           />
         </div>
       )}

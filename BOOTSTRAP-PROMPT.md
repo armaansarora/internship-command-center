@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 12:42 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 1:29 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `2a916d4`)
+- **Branch:** `main` (commit `464ba25`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 51,498 across 229 source files
+- **Total LOC:** 49,424 across 247 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -44,84 +44,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-2a916d4 fix: Stripe webhook retries, JSON API auth, and weather cache
-dc5c182 docs: add post-hardening manual-steps guide
-1e5b30f harden: kill Drizzle runtime, collapse C-suite duplication, lock down auth/webhooks/crons
-2fdef50 fix: harden auth, cron, and entitlement flows
-3350008 Merge branch 'docs-handoff' into main
-a25bd68 feat: Supabase pipeline stats, CRO hardening, lint fixes, CI tests
-c505d46 fix: drizzle config auto-loads .env.local via @next/env
-88fada7 chore: add Phase 1 setup scripts (env + migration SQL)
-4efb3cc feat(phase-1): The War Room — full floor implementation
-12958b1 session 16: pre-phase-1 optimization — removed 5 unused deps (-31MB), deleted 29MB orphaned assets, decomposed 3 monoliths into 12 focused modules, extracted shared constants, added CSS tokens, optimized next.config, compressed lobby images 77%
-36e8f56 fix: session-end push handles missing credentials gracefully — deferred instead of FAIL
-624c495 session-end: session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
-7d95863 session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
-34dbbb0 session 14: doc restructuring — 4-tier architecture, archived 7 stale docs, freshness warnings in bootstrap, rewrote CLAUDE.md/MASTER-PLAN.md/PROJECT-CONTEXT.md
-6dd5c70 session-end: session 13: Elevator + lobby background hotfix round — cross-route transitions, 4K Ken Burns backgrounds, elevator button wiring
-5dd569b session-end: 8 files changed, 299 insertions(+), 197 deletions(-)
-e89f24e fix: elevator button wiring + 4K lobby backgrounds with Ken Burns
-371bd44 Hotfix: Elevator cross-route transition + AI lobby backgrounds
-2a0f64b fix: rip out next-themes, fix elevator on lobby, fix floor nav greying, remove SVG cursors
-9fcb51e fix: exclude cursors/ from auth middleware
-b9c37e1 fix(sprint-3.5): BUG-015,016,017,018,019 — user-reported critical fixes
-e8bea9f session-end: 2 files changed, 40 insertions(+), 22 deletions(-)
-7d39269 Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014
-bdb6548 docs: update BUG-TRACKER with Sprint 2 commit hash
-742ea47 fix(sprint-2): BUG-001,002,005,011,012 — navigation, sign out, settings, user menu
-44a2a6c docs: remove stale CustomCursor references (audit pass 2)
-23521c4 chore: delete dead CustomCursor.tsx (audit pass 1)
-7cad1e9 docs: update BUG-TRACKER with commit hashes for Sprint 1 fixes
-6a2336d fix(sprint-1): BUG-003,004,006,007,008,009 — performance, scroll, cursor, parallax
-de3978e session-end: 3 files changed, 33 insertions(+), 25 deletions(-)
-2802795 session-end: 2 files changed, 116 insertions(+), 56 deletions(-)
-1ce45d0 docs: upgrade BUG-TRACKER.md to living changelog system
-22b7485 docs: add BUG-TRACKER.md — 14 issues from 5-min user walkthrough
-3a695b1 docs: add CHAIN-OF-COMMAND.md — AI hierarchy spec (1,550+ lines)
-23d974f docs: Phase 1 War Room Blueprint — 1,445-line implementation guide + audit
-10bb5a4 session-end: session 11: Phase 0 quality uplift complete — lobby particles, penthouse animated counters, skyline water reflections, animated floor stubs, elevator mobile bar, CSS utilities
-dd71ec4 session-end: session 11: Phase 0 quality uplift — lobby particles, penthouse counters, skyline water reflections, animated floor stubs, elevator mobile bar
-263dc0b feat: Phase 0 quality uplift — animated lobby particles, richer penthouse dashboard, enhanced skyline with water reflections, animated floor stubs, elevator mobile bar + tooltips, CSS utilities
-7cb4985 session-end: session 10: Phase 0 complete visual overhaul — audit clean, PROJECT-CONTEXT updated
-1c48685 docs: update PROJECT-CONTEXT.md for session 10 — Phase 0 visual overhaul complete
-b61d6d0 feat: Phase 0 complete visual overhaul — lobby, penthouse, skyline, elevator, floor stubs
-166f919 session-end: tooling session — 16-step autonomous pipeline complete
-b7b89c2 audit: expand false-positive list for unused dep detection
-190da57 session-end: ultimate 16-step pipeline (verify, detect, generate, commit, validate, handoff)
-57efff1 audit: clean up session-end (remove unused imports/vars, update bootstrap session docs)
-69523a5 session-end: autonomous pipeline with auto-detect + handoff gen
-8c510ee session-end: update session state with immersive UI completion
-0f8835d session-end: 1 file changed, 11 insertions(+), 5 deletions(-)
-2fd4a3b bootstrap: regenerate with latest commit hash
-3e15030 wave3: star constellations, building light sweep, sign-in card 3D tilt
-2ee6d5e wave2: lightning flashes, cloud wisps, typewriter tagline, a11y improvements
-a9a9524 audit: stagger directory rows, fix lobby layout, enhance penthouse vignette
-c73611e overhaul: particles, tilt panels, animated counters, mouse spotlight, scan line, parallax UI, radar pulse, hover glow
-7cabc1a skyline: shooting stars + breathing city bloom
-a9b7fba fix: reduce mullion visibility, tighten lobby spacing
-94773f2 lobby: interactive directory hover effects with gold glow
-af0206b skyline: fix center gap with even slot-based distribution
-3be2c20 skyline: denser building distribution, center clustering, more supertalls
-fdc949d v2: enhanced procedural skyline, remove dead photo-based system, water reflections, varied buildings
-4f2414c lobby: compact single-viewport layout, all content above fold
-a8e10e3 fix: lobby scrolling, card contrast, fixed skyline background
-662a694 Phase 0: immersive UI overhaul — procedural skyline, rebuilt lobby & penthouse
-48922b1 session-end: session 9: automation hardening + user flagged immersive UI for overhaul
-88ae2fa session-end: fix: bootstrap now mandates CLAUDE.md reading — agents can't skip mandatory rules
-b2d68d0 session-end: infra: context window management — 40/60/70% thresholds with mandatory handoff
-3ba2932 session-end: infra: automation hardening — agent auto-manages session state, human runs zero commands
-101a8f1 infra: bootstrap system overhaul — 10 improvements to session handoff
-89ef7fc bootstrap: regenerate with latest commit hash
-2cc2a34 infra: auto-generated bootstrap, updated CLAUDE.md, removed dead files
-9a5153d audit: fix RAF cascade in useMouseParallax, clean up double dynamic import
-f424ffd feat: wire real Supabase data into Penthouse dashboard
-e1d4548 feat: elevator dark wash, glass penthouse panels, cinematic entrance
-0711b3d feat: immersive photorealistic NYC skyline (replaces SVG)
-9f9eb23 Merge branch 'docs-handoff'
-be84d82 docs: immersive UI research + implementation plan + bootstrap prompt
-ecb5af7 Merge pull request #1 from armaansarora/docs-handoff
-6b56140 audit: add post-push.sql trigger, rewrite BOOTSTRAP-PROMPT for Phase 1, update MANUAL-GUIDE
-ce72f38 docs: final PROJECT-CONTEXT update + MANUAL-GUIDE for Armaan
+464ba25 harden: reduce duplication and tighten runtime safety
 ```
 
 ## Acceptance Criteria — Progress
@@ -175,7 +98,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `2a916d4`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `464ba25`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -194,55 +117,57 @@ See docs/MASTER-PLAN.md for the next phase.
 - ENCRYPTION_KEY
 - GMAIL_REDIRECT_URI
 
-## Source Tree (229 files, 51,498 LOC)
+## Source Tree (247 files, 49,424 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 3826 |
+| `src/lib/db/queries` | 4064 |
 | `src/components/world` | 2824 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1790 |
 | `src/lib` | 1469 |
-| `src/components/floor-6/cio-character` | 1455 |
-| `src/components/floor-3/cpo-character` | 1380 |
-| `src/components/floor-5/cmo-character` | 1376 |
-| `src/components/floor-4/coo-character` | 1339 |
 | `src/components/floor-7/war-table` | 1276 |
-| `src/components/floor-4` | 1175 |
-| `src/components/floor-6/cno-character` | 1081 |
+| `src/components/floor-4` | 1184 |
+| `src/components/floor-6/cio-character` | 1119 |
 | `src/components/world/elevator` | 1056 |
 | `src/components/floor-7/crud` | 1055 |
-| `src/components/floor-7/cro-character` | 1033 |
-| `src/components/floor-3` | 1015 |
+| `src/components/floor-5/cmo-character` | 1053 |
+| `src/components/floor-3` | 1026 |
+| `src/components/floor-3/cpo-character` | 1021 |
+| `src/components/floor-4/coo-character` | 989 |
 | `src/app` | 981 |
-| `src/lib/agents/cpo` | 975 |
 | `src/app/lobby` | 955 |
 | `src/components/floor-5/crud` | 949 |
-| `src/lib/agents/cfo` | 925 |
-| `src/components/floor-5` | 911 |
+| `src/components/floor-5` | 922 |
+| `src/components/floor-6` | 895 |
 | `src/components/floor-6/crud` | 889 |
-| `src/components/floor-6` | 886 |
-| `src/components/floor-1` | 807 |
-| `src/components/floor-7` | 792 |
-| `src/lib/agents/cmo` | 766 |
+| `src/lib/agents/cpo` | 883 |
+| `src/lib/agents/cfo` | 826 |
+| `src/components/floor-1` | 809 |
+| `src/components/floor-7` | 803 |
+| `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
-| `src/components/floor-2/cfo-character` | 718 |
+| `src/components/floor-7/cro-character` | 733 |
 | `src/lib/gmail` | 712 |
-| `src/lib/agents/cio` | 711 |
-| `src/components/floor-1/ceo-character` | 692 |
+| `src/components/agents/dialogue` | 685 |
 | `src/app/(authenticated)/penthouse` | 682 |
-| `src/lib/agents/ceo` | 646 |
+| `src/lib/agents/cmo` | 681 |
 | `src/lib/sound` | 641 |
+| `src/lib/agents/cio` | 615 |
 | `src/app/(authenticated)/settings` | 610 |
-| `src/components/floor-2` | 560 |
-| `src/lib/agents/cno` | 555 |
+| `src/components/floor-2` | 576 |
+| `src/lib/agents/ceo` | 547 |
+| `src/components/floor-2/cfo-character` | 517 |
+| `src/components/floor-1/ceo-character` | 493 |
 | `src/components/ui` | 488 |
-| `src/lib/agents/cro` | 459 |
-| `src/lib/agents/coo` | 456 |
+| `src/lib/agents/cno` | 471 |
 | `src/db` | 444 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/auth` | 386 |
+| `src/lib/actions` | 383 |
+| `src/lib/agents/cro` | 360 |
+| `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
 | `src/lib/stripe` | 329 |
 | `src/components/pricing` | 306 |
@@ -250,26 +175,25 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/stripe/webhook` | 293 |
 | `src/lib/utils` | 284 |
 | `src/app/api/cron/briefing` | 269 |
-| `src/app/(authenticated)/briefing-room` | 267 |
+| `src/lib/agents` | 269 |
 | `src/app/api/cron/sync` | 213 |
-| `src/lib/actions` | 207 |
 | `src/lib/calendar` | 203 |
-| `src/app/(authenticated)/writing-room` | 171 |
-| `src/app/(authenticated)/rolodex-lounge` | 152 |
+| `src/app/(authenticated)/briefing-room` | 200 |
 | `src/components/icons` | 152 |
 | `src/lib/supabase` | 151 |
 | `src/lib/validators` | 148 |
-| `src/lib/agents` | 136 |
 | `src/components/transitions` | 132 |
 | `src/app/(authenticated)/war-room` | 116 |
+| `src/app/(authenticated)/writing-room` | 115 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/app/(authenticated)` | 106 |
 | `src/app/api/weather` | 99 |
-| `src/app/(authenticated)/situation-room` | 94 |
 | `src/types` | 74 |
+| `src/app/(authenticated)/situation-room` | 65 |
 | `src/app/api/notifications` | 59 |
 | `src/app/api/drive/export` | 53 |
 | `src/app/api/stripe/checkout` | 51 |
+| `src/app/(authenticated)/rolodex-lounge` | 50 |
 | `src/app/api/ceo` | 50 |
 | `src/app/api/cfo` | 44 |
 | `src/app/api/progression` | 35 |
@@ -339,6 +263,13 @@ src/app/layout.tsx
 src/app/lobby/lobby-client.tsx
 src/app/lobby/page.tsx
 src/app/page.tsx
+src/components/agents/dialogue/AgentChatInput.tsx
+src/components/agents/dialogue/AgentDialoguePanel.tsx
+src/components/agents/dialogue/AgentMessageBubble.tsx
+src/components/agents/dialogue/AgentMessageList.tsx
+src/components/agents/dialogue/AgentQuickActions.tsx
+src/components/agents/dialogue/AgentToolCallIndicator.tsx
+src/components/agents/dialogue/types.ts
 src/components/floor-1/CSuiteClient.tsx
 src/components/floor-1/CSuiteScene.tsx
 src/components/floor-1/CSuiteTicker.tsx
@@ -435,6 +366,11 @@ src/hooks/useAgentChat.ts
 src/hooks/useReducedMotion.ts
 src/hooks/useWeather.ts
 src/lib/actions/applications.ts
+src/lib/actions/contacts.ts
+src/lib/actions/documents.ts
+src/lib/actions/interviews.ts
+src/lib/actions/notifications.ts
+src/lib/actions/outreach.ts
 src/lib/agents/ceo/character-machine.ts
 src/lib/agents/ceo/system-prompt.ts
 src/lib/agents/ceo/tools.ts
@@ -457,6 +393,7 @@ src/lib/agents/cpo/character-machine.ts
 src/lib/agents/cpo/system-prompt.ts
 src/lib/agents/cpo/tools.ts
 src/lib/agents/create-agent-route.ts
+src/lib/agents/create-character-machine.ts
 src/lib/agents/cro/character-machine.ts
 src/lib/agents/cro/system-prompt.ts
 src/lib/agents/cro/tools.ts
@@ -475,11 +412,16 @@ src/lib/db/queries/agent-memory-rest.ts
 src/lib/db/queries/applications-rest.ts
 src/lib/db/queries/communications-rest.ts
 src/lib/db/queries/companies-rest.ts
+src/lib/db/queries/contacts-mutations.ts
 src/lib/db/queries/contacts-rest.ts
 src/lib/db/queries/daily-snapshots-rest.ts
+src/lib/db/queries/documents-mutations.ts
 src/lib/db/queries/documents-rest.ts
 src/lib/db/queries/embeddings-rest.ts
+src/lib/db/queries/interviews-mutations.ts
+src/lib/db/queries/notifications-mutations.ts
 src/lib/db/queries/notifications-rest.ts
+src/lib/db/queries/outreach-mutations.ts
 src/lib/db/queries/pipeline-stats-from-aggregates.ts
 src/lib/db/queries/pipeline-stats.test.ts
 src/lib/db/queries/prep-stats-rest.ts
@@ -585,13 +527,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 553 | 5,822 |
-| `PROJECT-CONTEXT.md` | 271 | 4,959 |
+| `BOOTSTRAP-PROMPT.md` | 634 | 7,714 |
+| `PROJECT-CONTEXT.md` | 276 | 5,097 |
 | `docs/MASTER-PLAN.md` | 361 | 7,068 |
-| `CLAUDE.md` | 307 | 6,292 |
-| **Total** | **1492** | **24,141** |
+| `CLAUDE.md` | 313 | 6,405 |
+| **Total** | **1584** | **26,284** |
 
-> ⚠️ Reading all recommended files consumes ~24,141 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,284 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

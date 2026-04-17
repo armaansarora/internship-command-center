@@ -44,6 +44,7 @@ export function WarRoomClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [croStatus, setCroStatus] = useState<"idle" | "thinking" | "talking">("idle");
   const [, startTransition] = useTransition();
 
   // ── Handlers ─────────────────────────────────────────────────────────
@@ -83,6 +84,11 @@ export function WarRoomClient({
 
   const handleCloseDialogue = useCallback(() => {
     setDialogueOpen(false);
+    setCroStatus("idle");
+  }, []);
+
+  const handleCROStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
+    setCroStatus(status);
   }, []);
 
   // ── Derived data ─────────────────────────────────────────────────────
@@ -127,7 +133,11 @@ export function WarRoomClient({
     >
       {/* CRO character silhouette — left side */}
       <div className="flex-shrink-0">
-        <CROCharacter onConversationOpen={handleOpenDialogue} />
+        <CROCharacter
+          onConversationOpen={handleOpenDialogue}
+          dialogueOpen={dialogueOpen}
+          dialogueStatus={croStatus}
+        />
       </div>
 
       {/* CRO whiteboard — right side of character area */}
@@ -268,6 +278,7 @@ export function WarRoomClient({
           <CRODialoguePanel
             isOpen={dialogueOpen}
             onClose={handleCloseDialogue}
+            onStatusChange={handleCROStatusChange}
           />
         </div>
       )}

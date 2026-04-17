@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { revalidatePath } from "next/cache";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { WritingRoomClient } from "@/components/floor-5/WritingRoomClient";
 import type { DocumentStats } from "@/components/floor-5/WritingRoomClient";
 import type { Application, Document } from "@/db/schema";
+import {
+  createCoverLetterAction,
+  deleteDocumentAction,
+  updateDocumentAction,
+} from "@/lib/actions/documents";
 
 export const metadata: Metadata = { title: "The Writing Room | The Tower" };
 
@@ -95,75 +99,15 @@ export default async function WritingRoomPage() {
     applicationsWithoutLetters: appsWithoutLetters.length,
   };
 
-  // ── Server Actions ─────────────────────────────────────────────────
-
-  async function createDocument(formData: FormData): Promise<void> {
-    "use server";
-    const sessionUser = await requireUser();
-    const sb = await createClient();
-
-    const title = (formData.get("title") as string)?.trim();
-    const content = (formData.get("content") as string)?.trim();
-    const applicationId = (formData.get("applicationId") as string)?.trim() || null;
-    const companyId = (formData.get("companyId") as string)?.trim() || null;
-
-    if (!title || !content) return;
-
-    await sb.from("documents").insert({
-      user_id: sessionUser.id,
-      type: "cover_letter",
-      title,
-      content,
-      application_id: applicationId,
-      company_id: companyId,
-      version: 1,
-      is_active: true,
-      generated_by: "cmo",
-    });
-
-    revalidatePath("/writing-room");
-  }
-
-  async function updateDocument(id: string, formData: FormData): Promise<void> {
-    "use server";
-    const sessionUser = await requireUser();
-    const sb = await createClient();
-
-    const title = (formData.get("title") as string)?.trim();
-    const content = (formData.get("content") as string)?.trim();
-
-    if (!title || !content) return;
-
-    await sb
-      .from("documents")
-      .update({
-        title,
-        content,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-      .eq("user_id", sessionUser.id);
-
-    revalidatePath("/writing-room");
-  }
-
-  async function deleteDocument(id: string): Promise<void> {
-    "use server";
-    const sessionUser = await requireUser();
-    const sb = await createClient();
-    await sb.from("documents").delete().eq("id", id).eq("user_id", sessionUser.id);
-    revalidatePath("/writing-room");
-  }
-
   return (
     <FloorShell floorId="5">
       <WritingRoomClient
         documents={documents}
         applications={applications}
         stats={documentStats}
-        onCreateDocument={createDocument}
-        onUpdateDocument={updateDocument}
-        onDeleteDocument={deleteDocument}
+        onCreateDocument={createCoverLetterAction}
+        onUpdateDocument={updateDocumentAction}
+        onDeleteDocument={deleteDocumentAction}
       />
     </FloorShell>
   );

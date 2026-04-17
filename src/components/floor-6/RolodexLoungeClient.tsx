@@ -50,6 +50,7 @@ export function RolodexLoungeClient({
     sort: "warmth",
   });
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [cnoStatus, setCnoStatus] = useState<"idle" | "thinking" | "talking">("idle");
   const [, startTransition] = useTransition();
 
   // Available for future use in linking contacts to applications
@@ -103,6 +104,11 @@ export function RolodexLoungeClient({
 
   const handleCloseDialogue = useCallback(() => {
     setDialogueOpen(false);
+    setCnoStatus("idle");
+  }, []);
+
+  const handleCnoStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
+    setCnoStatus(status);
   }, []);
 
   const handleSearch = useCallback((params: ContactSearchParams) => {
@@ -195,6 +201,8 @@ export function RolodexLoungeClient({
         <CNOCharacter
           onConversationOpen={handleOpenDialogue}
           coldAlertsCount={contactStats.cold}
+          dialogueOpen={dialogueOpen}
+          dialogueStatus={cnoStatus}
         />
       </div>
 
@@ -339,6 +347,7 @@ export function RolodexLoungeClient({
           <CNODialoguePanel
             isOpen={dialogueOpen}
             onClose={handleCloseDialogue}
+            onStatusChange={handleCnoStatusChange}
           />
         </div>
       )}

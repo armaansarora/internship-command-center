@@ -99,6 +99,7 @@ export function BriefingRoomClient({
     null
   );
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [cpoStatus, setCpoStatus] = useState<"idle" | "thinking" | "talking">("idle");
 
   // ── Derived data ───────────────────────────────────────────────────
   const selectedPacket = useMemo<PrepPacket | null>(() => {
@@ -150,6 +151,11 @@ export function BriefingRoomClient({
 
   const handleCloseDialogue = useCallback(() => {
     setDialogueOpen(false);
+    setCpoStatus("idle");
+  }, []);
+
+  const handleCPOStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
+    setCpoStatus(status);
   }, []);
 
   const handleSelectInterview = useCallback((interview: Interview) => {
@@ -178,7 +184,11 @@ export function BriefingRoomClient({
     >
       {/* CPO character — left side */}
       <div className="flex-shrink-0">
-        <CPOCharacter onConversationOpen={handleOpenDialogue} />
+        <CPOCharacter
+          onConversationOpen={handleOpenDialogue}
+          dialogueOpen={dialogueOpen}
+          dialogueStatus={cpoStatus}
+        />
       </div>
 
       {/* CPO whiteboard — right of character */}
@@ -337,6 +347,7 @@ export function BriefingRoomClient({
           <CPODialoguePanel
             isOpen={dialogueOpen}
             onClose={handleCloseDialogue}
+            onStatusChange={handleCPOStatusChange}
           />
         </div>
       )}

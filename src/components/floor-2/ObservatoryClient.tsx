@@ -55,9 +55,17 @@ function AnalyticsPanel({ children, title }: { children: React.ReactNode; title:
 // ---------------------------------------------------------------------------
 export function ObservatoryClient({ stats }: ObservatoryClientProps): JSX.Element {
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [cfoStatus, setCfoStatus] = useState<"idle" | "thinking" | "talking">("idle");
 
   const handleOpenDialogue = useCallback(() => setDialogueOpen(true), []);
-  const handleCloseDialogue = useCallback(() => setDialogueOpen(false), []);
+  const handleCloseDialogue = useCallback(() => {
+    setDialogueOpen(false);
+    setCfoStatus("idle");
+  }, []);
+
+  const handleCFOStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
+    setCfoStatus(status);
+  }, []);
 
   const tickerStats = useMemo(() => ({
     total: stats.total,
@@ -80,7 +88,11 @@ export function ObservatoryClient({ stats }: ObservatoryClientProps): JSX.Elemen
         gap: "16px",
       }}
     >
-      <CFOCharacter onConversationOpen={handleOpenDialogue} />
+      <CFOCharacter
+        onConversationOpen={handleOpenDialogue}
+        dialogueOpen={dialogueOpen}
+        dialogueStatus={cfoStatus}
+      />
       <div style={{ width: "100%" }}>
         <CFOWhiteboard stats={stats} />
       </div>
@@ -150,7 +162,11 @@ export function ObservatoryClient({ stats }: ObservatoryClientProps): JSX.Elemen
             animation: "cfo-panel-slide-in 0.25s ease-out forwards",
           }}
         >
-          <CFODialoguePanel isOpen={dialogueOpen} onClose={handleCloseDialogue} />
+          <CFODialoguePanel
+            isOpen={dialogueOpen}
+            onClose={handleCloseDialogue}
+            onStatusChange={handleCFOStatusChange}
+          />
         </div>
       )}
 

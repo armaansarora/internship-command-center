@@ -84,6 +84,7 @@ export function WritingRoomClient({
   void _rest;
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [cmoStatus, setCmoStatus] = useState<"idle" | "thinking" | "talking">("idle");
   const [, startTransition] = useTransition();
 
   // ── Handlers ─────────────────────────────────────────────────────────
@@ -93,6 +94,11 @@ export function WritingRoomClient({
 
   const handleCloseDialogue = useCallback(() => {
     setDialogueOpen(false);
+    setCmoStatus("idle");
+  }, []);
+
+  const handleCmoStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
+    setCmoStatus(status);
   }, []);
 
   const handleSelectDocument = useCallback((doc: Document) => {
@@ -211,7 +217,11 @@ export function WritingRoomClient({
 
       {/* CMO character silhouette — desk scene */}
       <div className="flex-shrink-0">
-        <CMOCharacter onConversationOpen={handleOpenDialogue} />
+        <CMOCharacter
+          onConversationOpen={handleOpenDialogue}
+          dialogueOpen={dialogueOpen}
+          dialogueStatus={cmoStatus}
+        />
       </div>
     </div>
   );
@@ -308,6 +318,7 @@ export function WritingRoomClient({
           <CMODialoguePanel
             isOpen={dialogueOpen}
             onClose={handleCloseDialogue}
+            onStatusChange={handleCmoStatusChange}
           />
         </div>
       )}

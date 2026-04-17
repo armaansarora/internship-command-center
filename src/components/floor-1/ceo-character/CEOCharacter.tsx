@@ -1,7 +1,9 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useActor } from "@xstate/react";
+import { characterMachine } from "@/lib/agents/ceo/character-machine";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const KEYFRAMES = `
@@ -122,31 +124,59 @@ function CEOSilhouette({ state, reducedMotion }: { state: string; reducedMotion:
 
 interface CEOCharacterProps {
   onConversationOpen?: () => void;
-  externalState?: string;
+  externalState?: "idle" | "thinking" | "talking";
+  dialogueOpen?: boolean;
 }
 
-export function CEOCharacter({ onConversationOpen, externalState }: CEOCharacterProps): JSX.Element {
-  const [localState, setLocalState] = useState<string>("idle");
+export function CEOCharacter({
+  onConversationOpen,
+  externalState,
+  dialogueOpen,
+}: CEOCharacterProps): JSX.Element {
+  const [snapshot, send] = useActor(characterMachine);
   const reducedMotion = useReducedMotion();
-  const state = externalState ?? localState;
+  const state = snapshot.value as string;
+
+  useEffect(() => {
+    if (dialogueOpen === false && snapshot.context.isConversationOpen) {
+      send({ type: "DISMISS" });
+    }
+  }, [dialogueOpen, send, snapshot.context.isConversationOpen]);
+
+  useEffect(() => {
+    if (!dialogueOpen || !externalState) {
+      return;
+    }
+    if (externalState === "thinking") {
+      send({ type: "START_THINKING" });
+      return;
+    }
+    if (externalState === "talking") {
+      send({ type: "START_TALKING" });
+      return;
+    }
+    send({ type: "STOP_TALKING" });
+  }, [dialogueOpen, externalState, send]);
 
   function handleClick() {
-    setLocalState("greeting");
-    onConversationOpen?.();
-    setTimeout(() => setLocalState("idle"), 800);
+    send({ type: "CLICK" });
+    if (!snapshot.context.isConversationOpen) {
+      onConversationOpen?.();
+    }
   }
 
   function handleMouseEnter() {
-    if (localState === "idle") setLocalState("alert");
+    send({ type: "HOVER" });
   }
   function handleMouseLeave() {
-    if (localState === "alert") setLocalState("idle");
+    send({ type: "LEAVE" });
   }
 
   const stateLabels: Record<string, string> = {
     idle:      "CEO — Click to open executive briefing",
     alert:     "CEO is noticing you",
     greeting:  "CEO is greeting you",
+    ready:     "CEO is ready for your next direction",
     thinking:  "CEO is formulating strategy",
     talking:   "CEO is delivering briefing",
     returning: "CEO is stepping back",
@@ -161,6 +191,7 @@ export function CEOCharacter({ onConversationOpen, externalState }: CEOCharacter
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         aria-label={stateLabels[state] ?? "CEO Character"}
+        aria-pressed={snapshot.context.isConversationOpen}
         aria-live="polite"
         aria-atomic="true"
         className="relative flex flex-col items-center cursor-pointer select-none bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 rounded-lg"

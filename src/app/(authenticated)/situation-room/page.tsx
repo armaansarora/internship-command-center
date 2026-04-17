@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { revalidatePath } from "next/cache";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { SituationRoomClient } from "@/components/floor-4/SituationRoomClient";
 import { getDailyBriefingData } from "@/lib/db/queries/communications-rest";
 import type { Application } from "@/db/schema";
+import { approveOutreachAction } from "@/lib/actions/outreach";
+import { dismissNotificationAction } from "@/lib/actions/notifications";
 
 export const metadata: Metadata = { title: "The Situation Room | The Tower" };
 
@@ -50,43 +51,13 @@ export default async function SituationRoomPage() {
     updatedAt: new Date(row.updated_at),
   }));
 
-  // ── Server Actions ─────────────────────────────────────────────────
-  async function approveOutreach(outreachId: string): Promise<void> {
-    "use server";
-    const sessionUser = await requireUser();
-    const sb = await createClient();
-    await sb
-      .from("outreach_queue")
-      .update({
-        status: "approved",
-        approved_at: new Date().toISOString(),
-      })
-      .eq("id", outreachId)
-      .eq("user_id", sessionUser.id);
-    revalidatePath("/situation-room");
-  }
-
-  async function dismissNotification(notificationId: string): Promise<void> {
-    "use server";
-    const sessionUser = await requireUser();
-    const sb = await createClient();
-    await sb
-      .from("notifications")
-      .update({
-        is_dismissed: true,
-      })
-      .eq("id", notificationId)
-      .eq("user_id", sessionUser.id);
-    revalidatePath("/situation-room");
-  }
-
   return (
     <FloorShell floorId="4">
       <SituationRoomClient
         briefingData={briefingData}
         applications={mappedApplications}
-        approveOutreach={approveOutreach}
-        dismissNotification={dismissNotification}
+        approveOutreach={approveOutreachAction}
+        dismissNotification={dismissNotificationAction}
       />
     </FloorShell>
   );

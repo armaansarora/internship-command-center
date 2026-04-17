@@ -1,13 +1,23 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
+import { useActor } from "@xstate/react";
+import { characterMachine } from "@/lib/agents/cpo/character-machine";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // ---------------------------------------------------------------------------
 // State types
 // ---------------------------------------------------------------------------
-type CPOState = "idle" | "alert" | "talking" | "thinking" | "briefing";
+type CPOState =
+  | "idle"
+  | "alert"
+  | "greeting"
+  | "ready"
+  | "talking"
+  | "thinking"
+  | "briefing"
+  | "returning";
 
 // ---------------------------------------------------------------------------
 // Animation CSS keyframes
@@ -58,6 +68,7 @@ function CPOSilhouette({
 
     switch (state) {
       case "idle":
+      case "ready":
         return {
           animation: "cpo-breathe 5s ease-in-out infinite",
         };
@@ -76,6 +87,11 @@ function CPOSilhouette({
       case "briefing":
         return {
           animation: "cpo-present 2.5s ease-in-out infinite",
+        };
+      case "returning":
+        return {
+          opacity: 0.5,
+          transition: "opacity 0.3s ease-out",
         };
       default:
         return {};
@@ -359,44 +375,65 @@ function CPOSilhouette({
 // ---------------------------------------------------------------------------
 interface CPOCharacterProps {
   onConversationOpen?: () => void;
+  dialogueOpen?: boolean;
+  dialogueStatus?: "idle" | "thinking" | "talking";
 }
 
 export function CPOCharacter({
   onConversationOpen,
+  dialogueOpen,
+  dialogueStatus,
 }: CPOCharacterProps): JSX.Element {
-  const [state, setState] = useState<CPOState>("idle");
-  const [conversationOpen, setConversationOpen] = useState(false);
+  const [snapshot, send] = useActor(characterMachine);
   const reducedMotion = useReducedMotion();
+  const state = snapshot.value as CPOState;
+
+  useEffect(() => {
+    if (dialogueOpen === false && snapshot.context.isConversationOpen) {
+      send({ type: "DISMISS" });
+    }
+  }, [dialogueOpen, send, snapshot.context.isConversationOpen]);
+
+  useEffect(() => {
+    if (!dialogueOpen || !dialogueStatus) {
+      return;
+    }
+    if (dialogueStatus === "thinking") {
+      send({ type: "START_THINKING" });
+      return;
+    }
+    if (dialogueStatus === "talking") {
+      send({ type: "START_TALKING" });
+      return;
+    }
+    send({ type: "STOP_BRIEFING" });
+    send({ type: "STOP_TALKING" });
+  }, [dialogueOpen, dialogueStatus, send]);
 
   const handleClick = useCallback(() => {
-    if (!conversationOpen) {
-      setState("briefing");
-      setConversationOpen(true);
+    send({ type: "CLICK" });
+    if (!snapshot.context.isConversationOpen) {
       onConversationOpen?.();
-    } else {
-      setState("idle");
-      setConversationOpen(false);
     }
-  }, [conversationOpen, onConversationOpen]);
+  }, [onConversationOpen, send, snapshot.context.isConversationOpen]);
 
   const handleMouseEnter = useCallback(() => {
-    if (state === "idle") {
-      setState("alert");
-    }
-  }, [state]);
+    send({ type: "HOVER" });
+  }, [send]);
 
   const handleMouseLeave = useCallback(() => {
-    if (state === "alert") {
-      setState("idle");
-    }
-  }, [state]);
+    send({ type: "LEAVE" });
+  }, [send]);
 
   const stateLabel: Record<CPOState, string> = {
     idle: "CPO — Click to open interview briefing",
     alert: "CPO noticed you — click to talk",
+    greeting: "CPO is greeting you",
+    ready: "CPO is ready for your next prep request",
     talking: "CPO is speaking",
     thinking: "CPO is analyzing your prep",
-    briefing: "CPO is presenting — click to close",
+    briefing: "CPO is presenting interview prep",
+    returning: "CPO is stepping back",
   };
 
   return (
@@ -409,7 +446,7 @@ export function CPOCharacter({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         aria-label={stateLabel[state]}
-        aria-pressed={conversationOpen}
+        aria-pressed={snapshot.context.isConversationOpen}
         aria-live="polite"
         aria-atomic="true"
         className="relative flex flex-col items-center cursor-pointer select-none bg-transparent border-0 p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#4A9EDB] rounded-sm"
