@@ -1,8 +1,14 @@
 # MASTER PLAN — Internship Command Center ("The Tower")
 ## Concrete Phase Specs with Acceptance Criteria
 
-**Last updated:** 2026-03-20
+**Last updated:** 2026-04-17
 **Status:** ALL 7 PHASES COMPLETE (0–6). 226 source files, 51,928 LOC, zero TS errors. Production live.
+
+**Audit note (2026-04-17):**
+- Dialogue UI is now standardized under `src/components/agents/dialogue/*`.
+- Character machines are standardized via `src/lib/agents/create-character-machine.ts`.
+- Authenticated page mutations are extracted to `src/lib/actions/*` + `src/lib/db/queries/*-mutations.ts`.
+- See `docs/ARCHITECTURE-MAP.md` for current module boundaries.
 
 ---
 

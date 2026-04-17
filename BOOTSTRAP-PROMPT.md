@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 1:33 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 1:34 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,17 +19,10 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `38ae826`)
+- **Branch:** `main` (commit `1b99f44`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 49,398 across 247 source files
 - **Build:** Clean (zero TS errors)
-
-### ⚠️ Stale Docs Detected
-- **`docs/MASTER-PLAN.md`**: Last updated 2026-03-20 (29d ago)
-- **`docs/VISION-SPEC.md`**: Last updated 2026-03-18 (31d ago)
-- **`docs/TECH-BRIEF.md`**: Last updated 2026-03-18 (31d ago)
-
-> Update these docs before starting work — stale specs cause wasted effort.
 
 
 ## Session State (where we left off)
@@ -44,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-38ae826 refactor: unify agent dialogue, machines, and domain actions
+1b99f44 chore: tighten audit clarity and project organization
 ```
 
 ## Acceptance Criteria — Progress
@@ -98,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `38ae826`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `1b99f44`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -527,13 +520,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 576 | 6,020 |
+| `BOOTSTRAP-PROMPT.md` | 576 | 6,022 |
 | `PROJECT-CONTEXT.md` | 277 | 5,131 |
-| `docs/MASTER-PLAN.md` | 361 | 7,068 |
+| `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 313 | 6,405 |
-| **Total** | **1527** | **24,624** |
+| **Total** | **1533** | **24,730** |
 
-> ⚠️ Reading all recommended files consumes ~24,624 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,730 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

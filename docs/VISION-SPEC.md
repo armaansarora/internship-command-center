@@ -1,9 +1,14 @@
 # VISION SPEC — The Tower
 ## Immersive Spatial UI Specification (Locked)
 
-**Last updated:** 2026-03-18
+**Last updated:** 2026-04-17
 **Status:** Approved by Armaan. This document is the canonical reference for all UI decisions.
 **Character rendering:** Option A — 2D Illustrated Characters with Parallax Depth (V1)
+
+**Implementation alignment note (2026-04-17):**
+- Floor dialogue experiences now share common primitives while preserving floor-specific theme/personality wrappers.
+- Character interaction behavior remains machine-driven per floor, standardized by a shared machine factory.
+- Architecture details live in `docs/ARCHITECTURE-MAP.md`; this vision doc remains the UX canon.
 
 ---
 

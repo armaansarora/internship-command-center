@@ -1,8 +1,14 @@
 # TECH RESEARCH BRIEF — Synthesized Findings
 ## Tools, Libraries, and Patterns That Maximize Our Output
 
-**Last updated:** 2026-03-18
+**Last updated:** 2026-04-17
 **Purpose:** Quick-reference for every build session. No fluff — just decisions and implementation notes.
+
+**Architecture alignment note (2026-04-17):**
+- Shared dialogue primitives: `src/components/agents/dialogue/*`
+- Shared character machine factory: `src/lib/agents/create-character-machine.ts`
+- Domain server actions: `src/lib/actions/*` with query mutation helpers in `src/lib/db/queries/*-mutations.ts`
+- For navigation/readability, see `docs/ARCHITECTURE-MAP.md`.
 
 ---
 
