@@ -35,13 +35,25 @@ export interface RateLimitCheck {
 export async function withRateLimit(userId: string): Promise<RateLimitCheck> {
   const tier = await getUserTier(userId);
   const limit = TIER_LIMITS[tier];
-  const { success, remaining, reset } = await checkRateLimit(userId, tier);
+  const { configured, success, remaining, reset } = await checkRateLimit(userId, tier);
 
   const headers: RateLimitHeaders = {
     "X-RateLimit-Limit": String(limit),
     "X-RateLimit-Remaining": String(remaining),
     "X-RateLimit-Reset": String(reset),
   };
+
+  if (!configured && process.env.NODE_ENV === "production") {
+    const response = Response.json(
+      { error: "Rate limiter is not configured for this environment." },
+      {
+        status: 503,
+        headers,
+      }
+    );
+
+    return { limited: true, headers, response };
+  }
 
   if (!success) {
     const retryAfter = reset > 0 ? String(Math.ceil((reset - Date.now()) / 1000)) : "60";

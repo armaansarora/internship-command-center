@@ -34,13 +34,17 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Public routes that don't require auth
-  const publicPaths = ["/lobby", "/api/auth/callback", "/api/webhooks"];
-  const isPublicPath = publicPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path),
-  );
+  const pathname = request.nextUrl.pathname;
+  const isApiRoute = pathname.startsWith("/api/");
+  const isPublicPage = pathname === "/lobby";
 
-  if (!user && !isPublicPath) {
+  // API routes enforce auth at the handler level (or via signed secrets).
+  // Do not redirect machine-to-machine calls like webhooks/cron.
+  if (isApiRoute || isPublicPage) {
+    return supabaseResponse;
+  }
+
+  if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/lobby";
     return NextResponse.redirect(url);

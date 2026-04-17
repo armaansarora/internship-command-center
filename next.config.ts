@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
       "zod",
     ],
   },
+  turbopack: {
+    root: process.cwd(),
+  },
 };
 
 // Wrap with Sentry only when DSN is configured

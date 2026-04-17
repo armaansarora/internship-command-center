@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, text, integer, boolean, timestamp,
-  numeric, jsonb, index, pgPolicy, vector,
+  numeric, jsonb, index, uniqueIndex, pgPolicy, vector,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -349,10 +349,17 @@ export const dailySnapshots = pgTable("daily_snapshots", {
   emailsProcessed: integer("emails_processed"),
   agentsRuns: integer("agents_runs"),
   totalCostCents: integer("total_cost_cents"),
+  conversionRate: numeric("conversion_rate", { precision: 5, scale: 2 }),
+  staleCount: integer("stale_count"),
+  appliedCount: integer("applied_count"),
+  screeningCount: integer("screening_count"),
+  interviewCount: integer("interview_count"),
+  offerCount: integer("offer_count"),
   ...timestamps,
 }, (table) => [
   userIsolation("daily_snapshots"),
   index("idx_snap_user_date").on(table.userId, table.date),
+  uniqueIndex("uniq_daily_snapshots_user_date").on(table.userId, table.date),
 ]);
 
 // ===========================================================================

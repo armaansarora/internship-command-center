@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForTokens, storeGoogleTokens } from "@/lib/gmail/oauth";
+import { requireUser } from "@/lib/supabase/server";
 import type { GoogleTokens } from "@/lib/gmail/oauth";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const sessionUser = await requireUser();
   const { searchParams } = request.nextUrl;
 
   const code = searchParams.get("code");
@@ -33,6 +35,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  if (userId !== sessionUser.id) {
+    return NextResponse.redirect(
+      new URL(`/situation-room?error=state_user_mismatch`, request.nextUrl.origin)
+    );
+  }
+
   try {
     const tokenResponse = await exchangeCodeForTokens(code);
 
@@ -42,7 +50,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       expiry_date: Date.now() + tokenResponse.expires_in * 1000,
     };
 
-    await storeGoogleTokens(userId, tokens);
+    await storeGoogleTokens(userId, tokens, { useAdmin: true });
   } catch {
     return NextResponse.redirect(
       new URL(`/situation-room?error=token_exchange_failed`, request.nextUrl.origin)

@@ -12,10 +12,10 @@ A multi-tenant SaaS that automates the internship and job search process. Users 
 | Database | Supabase Postgres + pgvector |
 | ORM | Drizzle v1 |
 | Auth | Supabase Auth (Google OAuth) |
-| Background Jobs | Inngest |
+| Background Jobs | Vercel Cron + API routes |
 | AI/LLM | Vercel AI SDK v6 + Anthropic |
-| Animations | GSAP + Framer Motion |
-| Email | Resend |
+| Animations | GSAP |
+| Email Ingestion | Gmail API + Calendar API |
 | Payments | Stripe |
 | Hosting | Vercel |
 

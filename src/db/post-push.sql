@@ -60,3 +60,31 @@ CREATE INDEX IF NOT EXISTS idx_company_emb ON company_embeddings
   USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS idx_job_emb ON job_embeddings
   USING hnsw (embedding vector_cosine_ops);
+
+-- 5. Guard sensitive billing/auth columns from direct client-side updates
+--    (service role writes are still allowed for Stripe webhooks and OAuth handlers)
+CREATE OR REPLACE FUNCTION public.guard_user_profile_sensitive_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF auth.role() = 'authenticated' THEN
+    IF NEW.subscription_tier IS DISTINCT FROM OLD.subscription_tier THEN
+      RAISE EXCEPTION 'subscription_tier is managed by billing workflows';
+    END IF;
+
+    IF NEW.stripe_customer_id IS DISTINCT FROM OLD.stripe_customer_id THEN
+      RAISE EXCEPTION 'stripe_customer_id is managed by billing workflows';
+    END IF;
+
+    IF NEW.google_tokens IS DISTINCT FROM OLD.google_tokens THEN
+      RAISE EXCEPTION 'google_tokens are managed by OAuth handlers';
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_guard_user_profiles_sensitive ON user_profiles;
+CREATE TRIGGER trg_guard_user_profiles_sensitive
+  BEFORE UPDATE ON user_profiles
+  FOR EACH ROW EXECUTE FUNCTION public.guard_user_profile_sensitive_fields();

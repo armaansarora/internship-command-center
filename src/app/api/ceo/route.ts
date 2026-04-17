@@ -4,6 +4,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { requireUser } from "@/lib/supabase/server";
 import { createClient } from "@/lib/supabase/server";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { requireAgentAccess } from "@/lib/stripe/agent-access";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 import { buildCEOSystemPrompt } from "@/lib/agents/ceo/system-prompt";
 import { buildCEOTools } from "@/lib/agents/ceo/tools";
@@ -12,6 +13,9 @@ export const maxDuration = 120;
 
 export async function POST(req: Request): Promise<Response> {
   const user = await requireUser();
+
+  const accessResponse = await requireAgentAccess(user.id);
+  if (accessResponse) return accessResponse;
 
   const check = await withRateLimit(user.id);
   if (check.response) return check.response;
@@ -32,7 +36,7 @@ export async function POST(req: Request): Promise<Response> {
   const supabase = await createClient();
   const { data: recentLogs } = await supabase
     .from("agent_logs")
-    .select("agent, action, summary, created_at")
+    .select("agent, action, summary:output_summary, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(12);

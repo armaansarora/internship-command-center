@@ -21,6 +21,12 @@ export interface DailySnapshot {
   emailsProcessed: number;
   agentsRuns: number;
   totalCostCents: number;
+  conversionRate: number;
+  staleCount: number;
+  appliedCount: number;
+  screeningCount: number;
+  interviewCount: number;
+  offerCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,6 +48,12 @@ function rowToSnapshot(row: Record<string, unknown>): DailySnapshot {
     emailsProcessed: (row.emails_processed as number) ?? 0,
     agentsRuns: (row.agents_runs as number) ?? 0,
     totalCostCents: (row.total_cost_cents as number) ?? 0,
+    conversionRate: Number(row.conversion_rate ?? 0),
+    staleCount: (row.stale_count as number) ?? 0,
+    appliedCount: (row.applied_count as number) ?? 0,
+    screeningCount: (row.screening_count as number) ?? 0,
+    interviewCount: (row.interview_count as number) ?? 0,
+    offerCount: (row.offer_count as number) ?? 0,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -99,6 +111,12 @@ export async function upsertDailySnapshot(
         emails_processed: snapshot.emailsProcessed,
         agents_runs: snapshot.agentsRuns,
         total_cost_cents: snapshot.totalCostCents,
+        conversion_rate: snapshot.conversionRate,
+        stale_count: snapshot.staleCount,
+        applied_count: snapshot.appliedCount,
+        screening_count: snapshot.screeningCount,
+        interview_count: snapshot.interviewCount,
+        offer_count: snapshot.offerCount,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id,date" },

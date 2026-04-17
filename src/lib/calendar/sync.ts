@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getGoogleTokens } from "@/lib/gmail/oauth";
 
 // ---------------------------------------------------------------------------
@@ -47,6 +48,10 @@ interface CalendarEventsResponse {
   nextPageToken?: string;
 }
 
+interface CalendarSyncOptions {
+  useAdmin?: boolean;
+}
+
 // ---------------------------------------------------------------------------
 // Fetch events from Google Calendar API
 // ---------------------------------------------------------------------------
@@ -87,9 +92,12 @@ export async function fetchCalendarEvents(
 // Full calendar sync: fetch from Google and upsert to DB
 // ---------------------------------------------------------------------------
 
-export async function syncCalendarEvents(userId: string): Promise<number> {
-  const tokens = await getGoogleTokens(userId);
-  const supabase = await createClient();
+export async function syncCalendarEvents(
+  userId: string,
+  options: CalendarSyncOptions = {}
+): Promise<number> {
+  const tokens = await getGoogleTokens(userId, options);
+  const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
 
   const now = new Date();
   const timeMin = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days ago

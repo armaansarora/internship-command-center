@@ -1,5 +1,6 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -9,6 +10,10 @@ export interface GoogleTokens {
   access_token: string;
   refresh_token: string;
   expiry_date: number;
+}
+
+interface TokenStorageOptions {
+  useAdmin?: boolean;
 }
 
 interface TokenResponse {
@@ -156,9 +161,10 @@ export async function refreshAccessToken(refreshToken: string): Promise<TokenRes
 
 export async function storeGoogleTokens(
   userId: string,
-  tokens: GoogleTokens
+  tokens: GoogleTokens,
+  options: TokenStorageOptions = { useAdmin: true }
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
 
   const encryptedTokens = encrypt(JSON.stringify(tokens));
 
@@ -176,8 +182,11 @@ export async function storeGoogleTokens(
 // Retrieve tokens from DB (decrypted, auto-refresh if expired)
 // ---------------------------------------------------------------------------
 
-export async function getGoogleTokens(userId: string): Promise<GoogleTokens> {
-  const supabase = await createClient();
+export async function getGoogleTokens(
+  userId: string,
+  options: TokenStorageOptions = {}
+): Promise<GoogleTokens> {
+  const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
 
   const { data, error } = await supabase
     .from("user_profiles")
@@ -200,7 +209,7 @@ export async function getGoogleTokens(userId: string): Promise<GoogleTokens> {
       refresh_token: tokens.refresh_token, // refresh token may not be returned
       expiry_date: nowMs + refreshed.expires_in * 1000,
     };
-    await storeGoogleTokens(userId, updatedTokens);
+    await storeGoogleTokens(userId, updatedTokens, { useAdmin: true });
     return updatedTokens;
   }
 
@@ -211,11 +220,14 @@ export async function getGoogleTokens(userId: string): Promise<GoogleTokens> {
 // Revoke tokens
 // ---------------------------------------------------------------------------
 
-export async function revokeGoogleTokens(userId: string): Promise<void> {
+export async function revokeGoogleTokens(
+  userId: string,
+  options: TokenStorageOptions = { useAdmin: true }
+): Promise<void> {
   let tokens: GoogleTokens | null = null;
 
   try {
-    tokens = await getGoogleTokens(userId);
+    tokens = await getGoogleTokens(userId, options);
   } catch {
     // Tokens may already be gone — proceed to clear DB entry
   }
@@ -228,7 +240,7 @@ export async function revokeGoogleTokens(userId: string): Promise<void> {
     ).catch(() => undefined);
   }
 
-  const supabase = await createClient();
+  const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
   const { error } = await supabase
     .from("user_profiles")
     .update({ google_tokens: null })

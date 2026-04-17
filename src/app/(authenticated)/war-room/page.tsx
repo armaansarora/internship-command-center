@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { FloorShell } from "@/components/world/FloorShell";
 import { WarRoomClient } from "@/components/floor-7/WarRoomClient";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
+import {
+  createApplicationAction,
+  deleteApplicationAction,
+  moveApplicationAction,
+  updateApplicationAction,
+} from "@/lib/actions/applications";
 import type { Application } from "@/db/schema";
 
 export const metadata: Metadata = { title: "The War Room | The Tower" };
@@ -22,7 +28,7 @@ export default async function WarRoomPage() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("War Room query failed:", error.message);
+    throw new Error(`War Room query failed: ${error.message}`);
   }
 
   // Map snake_case DB rows to camelCase Application type
@@ -58,102 +64,38 @@ export default async function WarRoomPage() {
     newPosition: string
   ): Promise<void> {
     "use server";
-    await requireUser();
-    const sb = await createClient();
-    await sb
-      .from("applications")
-      .update({
-        status: newStatus,
-        position: newPosition,
-        last_activity_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id);
+    const result = await moveApplicationAction(id, newStatus, newPosition);
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
     revalidatePath("/war-room");
   }
 
   async function deleteApplication(id: string): Promise<void> {
     "use server";
-    await requireUser();
-    const sb = await createClient();
-    await sb.from("applications").delete().eq("id", id);
+    const result = await deleteApplicationAction(id);
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
     revalidatePath("/war-room");
   }
 
   async function createApplication(formData: FormData): Promise<void> {
     "use server";
-    const sessionUser = await requireUser();
-    const sb = await createClient();
-
-    const companyName = (formData.get("companyName") as string)?.trim();
-    const role = (formData.get("role") as string)?.trim();
-    const url = (formData.get("url") as string)?.trim() || null;
-    const status = (formData.get("status") as string) ?? "discovered";
-    const source = (formData.get("source") as string)?.trim() || null;
-    const location = (formData.get("location") as string)?.trim() || null;
-    const salary = (formData.get("salary") as string)?.trim() || null;
-    const sector = (formData.get("sector") as string)?.trim() || null;
-    const notes = (formData.get("notes") as string)?.trim() || null;
-    const tierStr = formData.get("tier") as string;
-    const tier = tierStr ? parseInt(tierStr, 10) : null;
-
-    if (!companyName || !role) return;
-
-    await sb.from("applications").insert({
-      user_id: sessionUser.id,
-      company_name: companyName,
-      role,
-      url,
-      status,
-      source,
-      location,
-      salary,
-      sector,
-      notes,
-      tier: Number.isNaN(tier ?? NaN) ? null : tier,
-      position: `init_${Date.now()}`,
-      last_activity_at: new Date().toISOString(),
-    });
+    const result = await createApplicationAction(formData);
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
 
     revalidatePath("/war-room");
   }
 
   async function updateApplication(id: string, formData: FormData): Promise<void> {
     "use server";
-    await requireUser();
-    const sb = await createClient();
-
-    const companyName = (formData.get("companyName") as string)?.trim();
-    const role = (formData.get("role") as string)?.trim();
-    const url = (formData.get("url") as string)?.trim() || null;
-    const status = (formData.get("status") as string) ?? "discovered";
-    const source = (formData.get("source") as string)?.trim() || null;
-    const location = (formData.get("location") as string)?.trim() || null;
-    const salary = (formData.get("salary") as string)?.trim() || null;
-    const sector = (formData.get("sector") as string)?.trim() || null;
-    const notes = (formData.get("notes") as string)?.trim() || null;
-    const tierStr = formData.get("tier") as string;
-    const tier = tierStr ? parseInt(tierStr, 10) : null;
-
-    if (!companyName || !role) return;
-
-    await sb
-      .from("applications")
-      .update({
-        company_name: companyName,
-        role,
-        url,
-        status,
-        source,
-        location,
-        salary,
-        sector,
-        notes,
-        tier: Number.isNaN(tier ?? NaN) ? null : tier,
-        last_activity_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id);
+    const result = await updateApplicationAction(id, formData);
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
 
     revalidatePath("/war-room");
   }

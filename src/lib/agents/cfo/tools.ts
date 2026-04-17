@@ -461,11 +461,11 @@ export function makeGetDailySnapshotTool(userId: string) {
       const { data, error } = await supabase
         .from("daily_snapshots")
         .select(
-          "snapshot_date, total_applications, conversion_rate, stale_count, applied_count, screening_count, interview_count, offer_count"
+          "snapshot_date:date, total_applications, conversion_rate, stale_count, applied_count, screening_count, interview_count, offer_count"
         )
         .eq("user_id", userId)
-        .gte("snapshot_date", since)
-        .order("snapshot_date", { ascending: false });
+        .gte("date", since)
+        .order("date", { ascending: false });
 
       if (error || !data) {
         return {
@@ -478,7 +478,7 @@ export function makeGetDailySnapshotTool(userId: string) {
       const snapshots = (data ?? []).map((s) => ({
         date: s.snapshot_date as string,
         totalApplications: (s.total_applications as number) ?? 0,
-        conversionRate: (s.conversion_rate as number) ?? 0,
+        conversionRate: Number(s.conversion_rate ?? 0),
         staleCount: (s.stale_count as number) ?? 0,
         appliedCount: (s.applied_count as number) ?? 0,
         screeningCount: (s.screening_count as number) ?? 0,

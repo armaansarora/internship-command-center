@@ -42,6 +42,7 @@ function getRateLimiters(): RateLimiters | null {
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export interface RateLimitResult {
+  configured: boolean;
   success: boolean;
   remaining: number;
   reset: number;
@@ -49,7 +50,8 @@ export interface RateLimitResult {
 
 /**
  * Check the rate limit for a user.
- * Returns { success: true, remaining: 999, reset: 0 } when Upstash is not configured.
+ * Development fallback: allows requests when Upstash is not configured.
+ * Production fallback: fails closed when Upstash is not configured.
  */
 export async function checkRateLimit(
   userId: string,
@@ -57,11 +59,26 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const limiters = getRateLimiters();
   if (!limiters) {
-    return { success: true, remaining: 999, reset: 0 };
+    if (process.env.NODE_ENV === "production") {
+      return {
+        configured: false,
+        success: false,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      };
+    }
+
+    return {
+      configured: false,
+      success: true,
+      remaining: 999,
+      reset: 0,
+    };
   }
 
   const result = await limiters[tier].limit(userId);
   return {
+    configured: true,
     success: result.success,
     remaining: result.remaining,
     reset: result.reset,

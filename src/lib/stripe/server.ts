@@ -60,10 +60,14 @@ export async function createOrRetrieveCustomer(
   });
 
   // Persist the customer ID
-  await supabase
+  const { error } = await supabase
     .from("user_profiles")
     .update({ stripe_customer_id: customer.id })
     .eq("id", userId);
+
+  if (error) {
+    throw new Error(`Failed to persist Stripe customer id: ${error.message}`);
+  }
 
   return customer.id;
 }

@@ -5,6 +5,8 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { getApplicationLimit } from "@/lib/stripe/entitlements";
 import type { Application } from "@/db/schema";
 import type {
   CreateApplicationInput,
@@ -34,6 +36,10 @@ export interface PipelineStats {
   staleCount: number;
   warmCount: number;
   conversionLabel: string;
+}
+
+interface PipelineStatsOptions {
+  useAdmin?: boolean;
 }
 
 export interface ApplicationRow {
@@ -133,8 +139,11 @@ export async function getApplicationsByUserRest(userId: string): Promise<Applica
  * Compute pipeline statistics for the CRO agent and dashboard.
  * Uses Supabase REST (Vercel-safe).
  */
-export async function getPipelineStatsRest(userId: string): Promise<PipelineStats> {
-  const supabase = await createClient();
+export async function getPipelineStatsRest(
+  userId: string,
+  options: PipelineStatsOptions = {}
+): Promise<PipelineStats> {
+  const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
   const { data, error } = await supabase
     .from("applications")
     .select("status, last_activity_at, created_at, applied_at")
@@ -441,6 +450,24 @@ export async function createApplicationRest(
   input: NewApplicationRestInput
 ): Promise<Application> {
   const supabase = await createClient();
+  const limit = await getApplicationLimit(input.userId);
+
+  if (Number.isFinite(limit)) {
+    const { count, error: countError } = await supabase
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", input.userId);
+
+    if (countError) {
+      throw new Error(`Unable to validate application limit: ${countError.message}`);
+    }
+
+    if ((count ?? 0) >= limit) {
+      throw new Error(
+        `Application limit reached for your current plan (${limit}). Upgrade to add more.`
+      );
+    }
+  }
 
   const now = new Date().toISOString();
   const isApplied = input.status && input.status !== "discovered";

@@ -72,7 +72,7 @@ export function makeCompileBriefingTool(userId: string) {
       // Fetch recent agent logs
       const { data: logs } = await supabase
         .from("agent_logs")
-        .select("agent, action, summary, created_at")
+        .select("agent, action, summary:output_summary, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -218,7 +218,7 @@ export function makeGetRecentActivityTool(userId: string) {
       // Agent logs
       const { data: logs } = await supabase
         .from("agent_logs")
-        .select("agent, action, summary, created_at")
+        .select("agent, action, summary:output_summary, created_at")
         .eq("user_id", userId)
         .gte("created_at", since)
         .order("created_at", { ascending: false })
@@ -295,7 +295,7 @@ export function makeGetDailyBriefingDataTool(userId: string) {
         getPipelineStatsRest(userId),
         supabase
           .from("agent_logs")
-          .select("agent, action, summary, created_at")
+          .select("agent, action, summary:output_summary, created_at")
           .eq("user_id", userId)
           .gte("created_at", since)
           .order("created_at", { ascending: false })

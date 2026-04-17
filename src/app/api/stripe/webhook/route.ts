@@ -32,88 +32,112 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const supabase = getSupabaseAdmin();
 
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.metadata?.supabase_user_id;
-      if (!userId) break;
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const userId = session.metadata?.supabase_user_id;
+        if (!userId) break;
 
-      // Fetch the subscription to get price ID
-      if (session.subscription) {
-        const subscriptionId =
-          typeof session.subscription === "string"
-            ? session.subscription
-            : session.subscription.id;
+        if (session.subscription) {
+          const subscriptionId =
+            typeof session.subscription === "string"
+              ? session.subscription
+              : session.subscription.id;
 
-        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
-        const priceId = subscription.items.data[0]?.price?.id;
-        if (priceId) {
-          const tier = tierFromPriceId(priceId);
-          await supabase
-            .from("user_profiles")
-            .update({ subscription_tier: tier })
-            .eq("id", userId);
+          const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+          const priceId = subscription.items.data[0]?.price?.id;
+          if (priceId) {
+            const tier = tierFromPriceId(priceId);
+            const { error } = await supabase
+              .from("user_profiles")
+              .update({ subscription_tier: tier })
+              .eq("id", userId);
+
+            if (error) {
+              throw new Error(`Failed to persist checkout tier: ${error.message}`);
+            }
+          }
         }
+        break;
       }
-      break;
+
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId =
+          typeof subscription.customer === "string"
+            ? subscription.customer
+            : subscription.customer.id;
+
+        const priceId = subscription.items.data[0]?.price?.id;
+        if (!priceId) break;
+
+        const tier = tierFromPriceId(priceId);
+
+        const { data: profiles, error: lookupError } = await supabase
+          .from("user_profiles")
+          .select("id")
+          .eq("stripe_customer_id", customerId)
+          .limit(1);
+
+        if (lookupError) {
+          throw new Error(`Failed to find profile by customer id: ${lookupError.message}`);
+        }
+
+        const userId = profiles?.[0]?.id as string | undefined;
+        if (!userId) break;
+
+        const isActive =
+          subscription.status === "active" || subscription.status === "trialing";
+        const { error } = await supabase
+          .from("user_profiles")
+          .update({ subscription_tier: isActive ? tier : "free" })
+          .eq("id", userId);
+
+        if (error) {
+          throw new Error(`Failed to persist subscription update: ${error.message}`);
+        }
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId =
+          typeof subscription.customer === "string"
+            ? subscription.customer
+            : subscription.customer.id;
+
+        const { data: profiles, error: lookupError } = await supabase
+          .from("user_profiles")
+          .select("id")
+          .eq("stripe_customer_id", customerId)
+          .limit(1);
+
+        if (lookupError) {
+          throw new Error(`Failed to find profile by customer id: ${lookupError.message}`);
+        }
+
+        const userId = profiles?.[0]?.id as string | undefined;
+        if (!userId) break;
+
+        const { error } = await supabase
+          .from("user_profiles")
+          .update({ subscription_tier: "free" })
+          .eq("id", userId);
+
+        if (error) {
+          throw new Error(`Failed to persist subscription deletion: ${error.message}`);
+        }
+        break;
+      }
+
+      default:
+        break;
     }
-
-    case "customer.subscription.updated": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId =
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id;
-
-      const priceId = subscription.items.data[0]?.price?.id;
-      if (!priceId) break;
-
-      const tier = tierFromPriceId(priceId);
-
-      // Look up user by stripe_customer_id
-      const { data: profiles } = await supabase
-        .from("user_profiles")
-        .select("id")
-        .eq("stripe_customer_id", customerId)
-        .limit(1);
-
-      const userId = profiles?.[0]?.id as string | undefined;
-      if (!userId) break;
-
-      // Handle cancellation/inactive subscription
-      const isActive = subscription.status === "active" || subscription.status === "trialing";
-      await supabase
-        .from("user_profiles")
-        .update({ subscription_tier: isActive ? tier : "free" })
-        .eq("id", userId);
-      break;
-    }
-
-    case "customer.subscription.deleted": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId =
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id;
-
-      const { data: profiles } = await supabase
-        .from("user_profiles")
-        .select("id")
-        .eq("stripe_customer_id", customerId)
-        .limit(1);
-
-      const userId = profiles?.[0]?.id as string | undefined;
-      if (!userId) break;
-
-      await supabase
-        .from("user_profiles")
-        .update({ subscription_tier: "free" })
-        .eq("id", userId);
-      break;
-    }
-
-    default:
-      break;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to process Stripe webhook event";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

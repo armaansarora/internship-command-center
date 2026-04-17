@@ -3,6 +3,7 @@ import type { UIMessage } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { requireUser } from "@/lib/supabase/server";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { requireAgentAccess } from "@/lib/stripe/agent-access";
 import { getDocumentStats } from "@/lib/db/queries/documents-rest";
 import { buildCMOSystemPrompt } from "@/lib/agents/cmo/system-prompt";
 import { buildCMOTools } from "@/lib/agents/cmo/tools";
@@ -11,6 +12,9 @@ export const maxDuration = 60;
 
 export async function POST(req: Request): Promise<Response> {
   const user = await requireUser();
+
+  const accessResponse = await requireAgentAccess(user.id);
+  if (accessResponse) return accessResponse;
 
   const check = await withRateLimit(user.id);
   if (check.response) return check.response;

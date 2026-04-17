@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { verifyCronRequest } from "@/lib/auth/cron";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 
 /**
@@ -15,13 +16,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function GET(req: Request): Promise<Response> {
-  // Verify cron secret
-  const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  const auth = verifyCronRequest(req);
+  if (!auth.ok) {
     return NextResponse.json(
-      { error: "Unauthorized" },
+      { error: auth.error ?? "Unauthorized" },
       { status: 401 },
     );
   }
@@ -48,7 +46,7 @@ export async function GET(req: Request): Promise<Response> {
       const displayName = (user.display_name as string) ?? "Analyst";
 
       // Get pipeline stats
-      const stats = await getPipelineStatsRest(userId);
+      const stats = await getPipelineStatsRest(userId, { useAdmin: true });
 
       // Get overnight activity (last 24 hours)
       const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -100,17 +98,20 @@ export async function GET(req: Request): Promise<Response> {
       }
 
       // Create notification
-      await supabase.from("notifications").insert({
+      const { error: notificationError } = await supabase.from("notifications").insert({
         user_id: userId,
         type: "daily_briefing",
         priority: stats.staleCount > 3 ? "high" : "medium",
         title: "Morning Briefing",
         body: lines.join(" "),
         source_agent: "ceo",
-        channels: JSON.stringify(["in_app"]),
+        channels: ["in_app"],
         is_read: false,
         is_dismissed: false,
       });
+      if (notificationError) {
+        throw new Error(`Failed to create notification: ${notificationError.message}`);
+      }
 
       // Snapshot today's stats
       const today = new Date().toISOString().split("T")[0];
@@ -128,7 +129,11 @@ export async function GET(req: Request): Promise<Response> {
         .eq("is_processed", true)
         .gte("created_at", `${today}T00:00:00.000Z`);
 
-      await supabase.from("daily_snapshots").upsert(
+      const interviewingCount =
+        (stats.byStatus["interview_scheduled"] ?? 0) +
+        (stats.byStatus["interviewing"] ?? 0);
+
+      const { error: snapshotError } = await supabase.from("daily_snapshots").upsert(
         {
           user_id: userId,
           date: today,
@@ -140,10 +145,19 @@ export async function GET(req: Request): Promise<Response> {
           emails_processed: (emailsToday ?? []).length,
           agents_runs: (agentLogsToday ?? []).length,
           total_cost_cents: 0,
+          conversion_rate: stats.conversionRate,
+          stale_count: stats.staleCount,
+          applied_count: stats.applied,
+          screening_count: stats.screening,
+          interview_count: interviewingCount,
+          offer_count: stats.offers,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "user_id,date" },
       );
+      if (snapshotError) {
+        throw new Error(`Failed to upsert daily snapshot: ${snapshotError.message}`);
+      }
 
       results.push({ userId, status: "success" });
     } catch (err) {

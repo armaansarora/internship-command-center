@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -234,9 +235,10 @@ interface ApplicationRecord {
 
 export async function matchEmailToApplication(
   email: ParsedEmail,
-  userId: string
+  userId: string,
+  options: { useAdmin?: boolean } = {}
 ): Promise<string | undefined> {
-  const supabase = await createClient();
+  const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
 
   const { data: applications, error } = await supabase
     .from("applications")
