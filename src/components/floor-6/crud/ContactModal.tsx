@@ -1,7 +1,8 @@
 "use client";
 
 import type { JSX } from "react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useActionState, useEffect, useRef, useState, useCallback } from "react";
+import { useFormStatus } from "react-dom";
 import { z } from "zod/v4";
 import type { ContactForAgent } from "@/lib/db/queries/contacts-rest";
 
@@ -28,6 +29,42 @@ const ContactFormSchema = z.object({
 
 type ContactFormData = z.infer<typeof ContactFormSchema>;
 type FormErrors = Partial<Record<keyof ContactFormData, string>>;
+
+interface FormState {
+  errors: FormErrors;
+  /** Increments on every successful submit so the host can react with onClose. */
+  successCount: number;
+}
+
+const INITIAL_FORM_STATE: FormState = { errors: {}, successCount: 0 };
+
+function parseAndValidate(formData: FormData): {
+  ok: true;
+  data: ContactFormData;
+} | { ok: false; errors: FormErrors } {
+  const raw: ContactFormData = {
+    name: (formData.get("name") as string) ?? "",
+    email: (formData.get("email") as string) ?? "",
+    title: (formData.get("title") as string) ?? "",
+    companyId: (formData.get("companyId") as string) ?? "",
+    relationship: (formData.get("relationship") as ContactFormData["relationship"]) ?? "",
+    phone: (formData.get("phone") as string) ?? "",
+    linkedinUrl: (formData.get("linkedinUrl") as string) ?? "",
+    introducedBy: (formData.get("introducedBy") as string) ?? "",
+    notes: (formData.get("notes") as string) ?? "",
+  };
+
+  const result = ContactFormSchema.safeParse(raw);
+  if (!result.success) {
+    const fieldErrors: FormErrors = {};
+    for (const issue of result.error.issues) {
+      const key = issue.path[0] as keyof ContactFormData;
+      if (key) fieldErrors[key] = issue.message;
+    }
+    return { ok: false, errors: fieldErrors };
+  }
+  return { ok: true, data: raw };
+}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -107,6 +144,94 @@ function Field({
         </span>
       )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// React 19 form-status-aware buttons. Must be rendered as descendants of the
+// <form>; they read pending state from the closest enclosing form.
+// ---------------------------------------------------------------------------
+function ContactSubmitButton({ isEditing }: { isEditing: boolean }): JSX.Element {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-busy={pending}
+      aria-label={isEditing ? "Save contact changes" : "Add contact to network"}
+      style={{
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: "10px",
+        color: pending ? "#7A5B35" : "#C9A84C",
+        backgroundColor: "rgba(201, 168, 76, 0.1)",
+        border: "1px solid rgba(201, 168, 76, 0.35)",
+        borderRadius: "2px",
+        padding: "7px 20px",
+        cursor: pending ? "not-allowed" : "pointer",
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        fontWeight: 600,
+      }}
+    >
+      {pending ? "SAVING..." : isEditing ? "SAVE CHANGES" : "ADD TO NETWORK"}
+    </button>
+  );
+}
+
+function ContactCancelButton({ onClose }: { onClose: () => void }): JSX.Element {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      disabled={pending}
+      style={{
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: "10px",
+        color: "#C4925A",
+        backgroundColor: "transparent",
+        border: "1px solid #5C3A1E",
+        borderRadius: "2px",
+        padding: "7px 16px",
+        cursor: pending ? "not-allowed" : "pointer",
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        opacity: pending ? 0.5 : 1,
+      }}
+    >
+      Cancel
+    </button>
+  );
+}
+
+function ContactDeleteTriggerButton({
+  onTrigger,
+}: {
+  onTrigger: () => void;
+}): JSX.Element {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="button"
+      onClick={onTrigger}
+      disabled={pending}
+      aria-label="Delete this contact"
+      style={{
+        fontFamily: "IBM Plex Mono, monospace",
+        fontSize: "10px",
+        color: "#EF4444",
+        backgroundColor: "rgba(239, 68, 68, 0.06)",
+        border: "1px solid rgba(239, 68, 68, 0.25)",
+        borderRadius: "2px",
+        padding: "7px 14px",
+        cursor: pending ? "not-allowed" : "pointer",
+        opacity: pending ? 0.5 : 1,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+      }}
+    >
+      Remove
+    </button>
   );
 }
 
@@ -210,12 +335,40 @@ export function ContactModal({
   companies = [],
 }: ContactModalProps): JSX.Element | null {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isEditing = Boolean(contact);
+
+  // React 19 — useActionState pipes our async submit through React's transition
+  // machinery. Pending state is exposed downstream via useFormStatus.
+  const [state, formAction] = useActionState<FormState, FormData>(
+    async (prev, formData) => {
+      const parsed = parseAndValidate(formData);
+      if (!parsed.ok) {
+        return { errors: parsed.errors, successCount: prev.successCount };
+      }
+      try {
+        await onSubmit(formData);
+        return { errors: {}, successCount: prev.successCount + 1 };
+      } catch {
+        return {
+          errors: { name: "Failed to save. Please try again." },
+          successCount: prev.successCount,
+        };
+      }
+    },
+    INITIAL_FORM_STATE
+  );
+
+  const errors = state.errors;
+  const lastSuccessRef = useRef(state.successCount);
+  useEffect(() => {
+    if (state.successCount > lastSuccessRef.current) {
+      lastSuccessRef.current = state.successCount;
+      onClose();
+    }
+  }, [state.successCount, onClose]);
 
   // Escape key to close
   useEffect(() => {
@@ -237,50 +390,8 @@ export function ContactModal({
       }, 50);
     } else {
       setShowDeleteConfirm(false);
-      setErrors({});
     }
   }, [isOpen]);
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const formEl = e.currentTarget;
-      const formData = new FormData(formEl);
-
-      const raw: ContactFormData = {
-        name: (formData.get("name") as string) ?? "",
-        email: (formData.get("email") as string) ?? "",
-        title: (formData.get("title") as string) ?? "",
-        companyId: (formData.get("companyId") as string) ?? "",
-        relationship: (formData.get("relationship") as ContactFormData["relationship"]) ?? "",
-        phone: (formData.get("phone") as string) ?? "",
-        linkedinUrl: (formData.get("linkedinUrl") as string) ?? "",
-        introducedBy: (formData.get("introducedBy") as string) ?? "",
-        notes: (formData.get("notes") as string) ?? "",
-      };
-
-      const result = ContactFormSchema.safeParse(raw);
-      if (!result.success) {
-        const fieldErrors: FormErrors = {};
-        for (const issue of result.error.issues) {
-          const key = issue.path[0] as keyof ContactFormData;
-          if (key) fieldErrors[key] = issue.message;
-        }
-        setErrors(fieldErrors);
-        return;
-      }
-
-      setErrors({});
-      setIsSubmitting(true);
-      try {
-        await onSubmit(formData);
-        onClose();
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [onSubmit, onClose]
-  );
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!contact?.id || !onDelete) return;
@@ -394,12 +505,22 @@ export function ContactModal({
             isDeleting={isDeleting}
           />
         ) : (
-          <>
-            {/* Form body */}
-            <form
-              id="contact-form"
-              onSubmit={handleSubmit}
-              noValidate
+          // React 19 — the entire form (fields + footer buttons) shares one
+          // <form action={...}>; useFormStatus inside SubmitButton/CancelButton
+          // reads pending state from this enclosing form.
+          <form
+            id="contact-form"
+            action={formAction}
+            noValidate
+            style={{
+              flex: 1,
+              minHeight: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Scrollable fields */}
+            <div
               style={{
                 flex: 1,
                 overflowY: "auto",
@@ -554,9 +675,9 @@ export function ContactModal({
                   }}
                 />
               </Field>
-            </form>
+            </div>
 
-            {/* Footer */}
+            {/* Footer (still inside <form> so useFormStatus reaches it) */}
             <div
               style={{
                 display: "flex",
@@ -571,79 +692,19 @@ export function ContactModal({
             >
               {/* Delete button — only when editing */}
               {isEditing && onDelete ? (
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={isSubmitting}
-                  aria-label="Delete this contact"
-                  style={{
-                    fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: "10px",
-                    color: "#EF4444",
-                    backgroundColor: "rgba(239, 68, 68, 0.06)",
-                    border: "1px solid rgba(239, 68, 68, 0.25)",
-                    borderRadius: "2px",
-                    padding: "7px 14px",
-                    cursor: isSubmitting ? "not-allowed" : "pointer",
-                    opacity: isSubmitting ? 0.5 : 1,
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Remove
-                </button>
+                <ContactDeleteTriggerButton
+                  onTrigger={() => setShowDeleteConfirm(true)}
+                />
               ) : (
                 <span />
               )}
 
               <div style={{ display: "flex", gap: "8px" }}>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={isSubmitting}
-                  style={{
-                    fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: "10px",
-                    color: "#C4925A",
-                    backgroundColor: "transparent",
-                    border: "1px solid #5C3A1E",
-                    borderRadius: "2px",
-                    padding: "7px 16px",
-                    cursor: isSubmitting ? "not-allowed" : "pointer",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  form="contact-form"
-                  disabled={isSubmitting}
-                  aria-label={isEditing ? "Save contact changes" : "Add contact to network"}
-                  style={{
-                    fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: "10px",
-                    color: isSubmitting ? "#7A5B35" : "#C9A84C",
-                    backgroundColor: "rgba(201, 168, 76, 0.1)",
-                    border: "1px solid rgba(201, 168, 76, 0.35)",
-                    borderRadius: "2px",
-                    padding: "7px 20px",
-                    cursor: isSubmitting ? "not-allowed" : "pointer",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    fontWeight: 600,
-                  }}
-                >
-                  {isSubmitting
-                    ? "SAVING..."
-                    : isEditing
-                    ? "SAVE CHANGES"
-                    : "ADD TO NETWORK"}
-                </button>
+                <ContactCancelButton onClose={onClose} />
+                <ContactSubmitButton isEditing={isEditing} />
               </div>
             </div>
-          </>
+          </form>
         )}
       </div>
     </>

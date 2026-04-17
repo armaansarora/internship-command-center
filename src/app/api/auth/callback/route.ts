@@ -7,6 +7,9 @@ import { log } from "@/lib/logger";
  * Supabase OAuth redirect handler. Exchanges the provider code for a
  * session and redirects to a safe in-app path. Falls back to the lobby
  * with an `auth_failed` marker on any failure.
+ *
+ * Security: `getSafePostAuthPath` rejects protocol-relative `//evil.com`,
+ * backslash tricks, and absolute URLs (audit M-1).
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

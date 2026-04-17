@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useTransition } from "react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -818,12 +818,23 @@ export function PrepPacketViewer({
   onPrint,
   onExport,
 }: PrepPacketViewerProps): JSX.Element {
+  // React 19 — wrap export/print fire-and-forget actions in transitions so the
+  // buttons can render a pending state without blocking the rest of the UI.
+  const [isPrinting, startPrintTransition] = useTransition();
+  const [isExporting, startExportTransition] = useTransition();
+
   const handlePrint = useCallback(() => {
-    if (packet) onPrint?.(packet.id);
+    if (!packet) return;
+    startPrintTransition(() => {
+      onPrint?.(packet.id);
+    });
   }, [packet, onPrint]);
 
   const handleExport = useCallback(() => {
-    if (packet) onExport?.(packet.id);
+    if (!packet) return;
+    startExportTransition(() => {
+      onExport?.(packet.id);
+    });
   }, [packet, onExport]);
 
   if (!packet) {
@@ -989,6 +1000,8 @@ export function PrepPacketViewer({
               <button
                 type="button"
                 onClick={handlePrint}
+                disabled={isPrinting}
+                aria-busy={isPrinting}
                 aria-label="Print prep packet"
                 style={{
                   fontSize: "8px",
@@ -998,30 +1011,35 @@ export function PrepPacketViewer({
                   border: "1px solid rgba(26, 46, 74, 0.8)",
                   borderRadius: "2px",
                   padding: "4px 8px",
-                  cursor: "pointer",
+                  cursor: isPrinting ? "wait" : "pointer",
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
                   transition: "all 0.15s ease",
+                  opacity: isPrinting ? 0.6 : 1,
                 }}
                 onMouseEnter={(e) => {
+                  if (isPrinting) return;
                   (e.currentTarget as HTMLButtonElement).style.color = "#4A9EDB";
                   (e.currentTarget as HTMLButtonElement).style.borderColor =
                     "rgba(74, 158, 219, 0.3)";
                 }}
                 onMouseLeave={(e) => {
+                  if (isPrinting) return;
                   (e.currentTarget as HTMLButtonElement).style.color = "#4A6A85";
                   (e.currentTarget as HTMLButtonElement).style.borderColor =
                     "rgba(26, 46, 74, 0.8)";
                 }}
                 className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4A9EDB]"
               >
-                PRINT
+                {isPrinting ? "PRINTING…" : "PRINT"}
               </button>
             )}
             {onExport && (
               <button
                 type="button"
                 onClick={handleExport}
+                disabled={isExporting}
+                aria-busy={isExporting}
                 aria-label="Export prep packet"
                 style={{
                   fontSize: "8px",
@@ -1031,22 +1049,25 @@ export function PrepPacketViewer({
                   border: "1px solid rgba(74, 158, 219, 0.25)",
                   borderRadius: "2px",
                   padding: "4px 8px",
-                  cursor: "pointer",
+                  cursor: isExporting ? "wait" : "pointer",
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
                   transition: "all 0.15s ease",
+                  opacity: isExporting ? 0.6 : 1,
                 }}
                 onMouseEnter={(e) => {
+                  if (isExporting) return;
                   (e.currentTarget as HTMLButtonElement).style.backgroundColor =
                     "rgba(74, 158, 219, 0.14)";
                 }}
                 onMouseLeave={(e) => {
+                  if (isExporting) return;
                   (e.currentTarget as HTMLButtonElement).style.backgroundColor =
                     "rgba(74, 158, 219, 0.08)";
                 }}
                 className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4A9EDB]"
               >
-                EXPORT
+                {isExporting ? "EXPORTING…" : "EXPORT"}
               </button>
             )}
           </div>

@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: "The Lobby",
 };
 
+interface LobbyPageProps {
+  searchParams: Promise<{ error?: string }>;
+}
+
 /**
  * The Lobby — ground floor of The Tower.
  *
@@ -14,8 +18,10 @@ export const metadata: Metadata = {
  * The lobby should feel like walking into the building — you can always
  * come back to the ground floor.
  */
-export default async function LobbyPage() {
+export default async function LobbyPage({ searchParams }: LobbyPageProps) {
   const user = await getUser();
+  const params = await searchParams;
+  const initialError = params.error ? decodeURIComponent(params.error) : null;
 
-  return <LobbyClient isAuthenticated={!!user} />;
+  return <LobbyClient isAuthenticated={!!user} initialError={initialError} />;
 }

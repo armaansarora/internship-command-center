@@ -48,3 +48,9 @@ migration-*.sql
 # bootstrap system (ephemeral tracking)
 .bootstrap-last-hash
 .vercel-status.json
+
+# audit reports — contain detailed vulnerability findings; keep local-only for public repo
+audit/
+
+# editor configs
+.vscode/

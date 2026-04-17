@@ -1,8 +1,19 @@
 "use client";
 
 import type { JSX } from "react";
+import type { ChatStatus, UIMessage } from "ai";
 
 export type AgentDialogueStatus = "idle" | "thinking" | "talking";
+
+/**
+ * Fired on every messages/status tick so a parent can drive side-channels
+ * (e.g. CSuiteClient watches CEO dispatch tool-parts to render the
+ * Ring-the-Bell progress cards).
+ */
+export interface AgentChatActivity {
+  messages: UIMessage[];
+  status: ChatStatus;
+}
 
 export interface AgentQuickAction {
   label: string;
@@ -53,6 +64,8 @@ export interface AgentDialoguePanelProps {
   isOpen: boolean;
   onClose: () => void;
   onStatusChange?: (status: AgentDialogueStatus) => void;
+  /** Forward chat messages + status on every render. Used by Ring-the-Bell. */
+  onChatActivity?: (activity: AgentChatActivity) => void;
   chatId: string;
   api: string;
   dialogAriaLabel: string;

@@ -1,21 +1,118 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import type { JSX } from "react";
+import { revalidatePath } from "next/cache";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { BriefingRoomClient } from "@/components/floor-3/BriefingRoomClient";
 import type { Interview } from "@/components/floor-3/crud/InterviewTimeline";
 import type { PrepPacket, PrepQuestion, QuestionCategory } from "@/components/floor-3/crud/PrepPacketViewer";
 import type { PrepStats } from "@/components/floor-3/cpo-character/CPOWhiteboard";
-import {
-  createPrepPacketAction,
-  exportPacketAction,
-  printPacketAction,
-} from "@/lib/actions/interviews";
 
 export const metadata: Metadata = { title: "The Briefing Room | The Tower" };
 
-/** Floor 3 — Interview Prep + CPO Agent */
-export default async function BriefingRoomPage() {
+/** Floor 3 — Interview Prep + CPO Agent.
+ *
+ * Skyline + chrome paint immediately; interview list, prep packets and CPO
+ * stats stream into the Suspense boundary so the floor is never blocked by
+ * the parallel fetch fan-out.
+ */
+export default async function BriefingRoomPage(): Promise<JSX.Element> {
   const user = await requireUser();
+
+  // ── Server Actions ─────────────────────────────────────────────────
+
+  async function createPrepPacket(interviewId: string): Promise<void> {
+    "use server";
+    const sessionUser = await requireUser();
+    const sb = await createClient();
+
+    // Get interview + application info
+    const { data: interview } = await sb
+      .from("interviews")
+      .select("application_id, company_id, round")
+      .eq("id", interviewId)
+      .single();
+
+    if (!interview) return;
+
+    const { data: app } = await sb
+      .from("applications")
+      .select("company_name, role")
+      .eq("id", interview.application_id)
+      .single();
+
+    const title = `Prep Packet — ${app?.company_name ?? "Unknown"} (${app?.role ?? "Unknown"})`;
+
+    const { data: newDoc } = await sb
+      .from("documents")
+      .insert({
+        user_id: sessionUser.id,
+        type: "prep_packet",
+        title,
+        content: JSON.stringify({
+          companyOverview: { industry: "Pending", keyBusinessLines: [] },
+          questions: [],
+          talkingPoints: [],
+          completeness: 0,
+        }),
+        application_id: interview.application_id,
+        company_id: interview.company_id,
+        version: 1,
+        is_active: true,
+        generated_by: "cpo",
+      })
+      .select("id")
+      .single();
+
+    // Link prep packet to interview
+    if (newDoc) {
+      await sb
+        .from("interviews")
+        .update({ prep_packet_id: newDoc.id })
+        .eq("id", interviewId);
+    }
+
+    revalidatePath("/briefing-room");
+  }
+
+  async function exportPacket(packetId: string): Promise<void> {
+    "use server";
+    // Placeholder — will be handled client-side via fetch to /api/drive/export
+    void packetId;
+  }
+
+  async function printPacket(packetId: string): Promise<void> {
+    "use server";
+    // Print is handled client-side via window.print()
+    void packetId;
+  }
+
+  return (
+    <FloorShell floorId="3">
+      <Suspense fallback={<BriefingRoomPlaceholder />}>
+        <BriefingRoomData
+          userId={user.id}
+          createPrepPacket={createPrepPacket}
+          exportPacket={exportPacket}
+          printPacket={printPacket}
+        />
+      </Suspense>
+    </FloorShell>
+  );
+}
+
+async function BriefingRoomData({
+  userId,
+  createPrepPacket,
+  exportPacket,
+  printPacket,
+}: {
+  userId: string;
+  createPrepPacket: (interviewId: string) => Promise<void>;
+  exportPacket: (packetId: string) => Promise<void>;
+  printPacket: (packetId: string) => Promise<void>;
+}): Promise<JSX.Element> {
   const supabase = await createClient();
 
   // Fetch interviews, prep packet documents, and applications in parallel
@@ -23,19 +120,19 @@ export default async function BriefingRoomPage() {
     supabase
       .from("interviews")
       .select("id, application_id, company_id, round, format, scheduled_at, duration_minutes, location, interviewer_name, interviewer_title, status, prep_packet_id, debrief_id, calendar_event_id, notes, created_at, updated_at")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("scheduled_at", { ascending: true }),
     supabase
       .from("documents")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("type", "prep_packet")
       .eq("is_active", true)
       .order("updated_at", { ascending: false }),
     supabase
       .from("applications")
       .select("id, role, company_name, status, company_id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false }),
   ]);
 
@@ -184,16 +281,42 @@ export default async function BriefingRoomPage() {
   }));
 
   return (
-    <FloorShell floorId="3">
-      <BriefingRoomClient
-        interviews={interviews}
-        prepPackets={prepPackets}
-        applications={applications}
-        stats={prepStats}
-        onCreatePacket={createPrepPacketAction}
-        onExportPacket={exportPacketAction}
-        onPrintPacket={printPacketAction}
-      />
-    </FloorShell>
+    <BriefingRoomClient
+      interviews={interviews}
+      prepPackets={prepPackets}
+      applications={applications}
+      stats={prepStats}
+      onCreatePacket={createPrepPacket}
+      onExportPacket={exportPacket}
+      onPrintPacket={printPacket}
+    />
+  );
+}
+
+function BriefingRoomPlaceholder(): JSX.Element {
+  return (
+    <div
+      className="min-h-[60vh] flex items-center justify-center"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading briefing room"
+    >
+      <div className="flex flex-col items-center gap-4" aria-hidden="true">
+        <span className="block w-px h-12 bg-gradient-to-b from-transparent via-[#4A9EDB] to-transparent motion-safe:animate-[brf-pulse_2200ms_ease-in-out_infinite]" />
+        <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#4A6A85]">
+          Compiling intelligence
+        </span>
+      </div>
+      <span className="sr-only">Loading briefing room data…</span>
+      <style>{`
+        @keyframes brf-pulse {
+          0%, 100% { opacity: 0.3; transform: translateY(4px); }
+          50%      { opacity: 1;   transform: translateY(-4px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [class*="animate-"] { animation: none !important; opacity: 1 !important; }
+        }
+      `}</style>
+    </div>
   );
 }

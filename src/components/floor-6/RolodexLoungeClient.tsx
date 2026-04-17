@@ -2,24 +2,53 @@
 
 import type { JSX } from "react";
 import { useState, useCallback, useMemo, useTransition } from "react";
+import dynamic from "next/dynamic";
 import type { ContactForAgent, ContactStats } from "@/lib/db/queries/contacts-rest";
 import { RolodexLoungeScene } from "./RolodexLoungeScene";
 import type { RolodexLoungeStats } from "./RolodexLoungeScene";
 import { CNOCharacter } from "./cno-character/CNOCharacter";
 import { CNODialoguePanel } from "./cno-character/CNODialoguePanel";
 import { CNOWhiteboard } from "./cno-character/CNOWhiteboard";
-import { ContactModal } from "./crud/ContactModal";
+import { CIOCharacter } from "./cio-character/CIOCharacter";
+import { CIODialoguePanel } from "./cio-character/CIODialoguePanel";
+import { CIOWhiteboard } from "./cio-character/CIOWhiteboard";
 import { ContactSearch } from "./crud/ContactSearch";
 import type { ContactSearchParams } from "./crud/ContactSearch";
 import { ContactGrid } from "./contact-grid/ContactGrid";
 
+// 652 LOC modal — code-split.
+const ContactModal = dynamic(
+  () => import("./crud/ContactModal").then((m) => m.ContactModal),
+  { ssr: false }
+);
+
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
+
+/** Mirrors the local ResearchStats shape consumed by CIOWhiteboard. */
+interface CIOResearchStats {
+  totalCompanies: number;
+  researchedCount: number;
+  staleCount: number;
+  freshCount: number;
+  recentActivity: Array<{ companyName: string; action: string; at: Date }>;
+  companies: Array<{
+    id: string;
+    name: string;
+    sector: string | null;
+    lastResearchedAt: Date | null;
+    hasNotes: boolean;
+    domain: string | null;
+  }>;
+}
+
 interface RolodexLoungeClientProps {
   contacts: ContactForAgent[];
   contactStats: ContactStats;
   companies?: Array<{ id: string; name: string }>;
+  /** CIO research stats — derived from companies on the server. */
+  researchStats?: CIOResearchStats;
   onCreateContact: (formData: FormData) => Promise<void>;
   onUpdateContact: (id: string, formData: FormData) => Promise<void>;
   onDeleteContact: (id: string) => Promise<void>;
@@ -36,6 +65,7 @@ export function RolodexLoungeClient({
   contacts,
   contactStats,
   companies = [],
+  researchStats,
   onCreateContact,
   onUpdateContact,
   onDeleteContact,
@@ -51,6 +81,7 @@ export function RolodexLoungeClient({
   });
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [cnoStatus, setCnoStatus] = useState<"idle" | "thinking" | "talking">("idle");
+  const [cioDialogueOpen, setCioDialogueOpen] = useState(false);
   const [, startTransition] = useTransition();
 
   // Available for future use in linking contacts to applications
@@ -109,6 +140,14 @@ export function RolodexLoungeClient({
 
   const handleCnoStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
     setCnoStatus(status);
+  }, []);
+
+  const handleOpenCioDialogue = useCallback(() => {
+    setCioDialogueOpen(true);
+  }, []);
+
+  const handleCloseCioDialogue = useCallback(() => {
+    setCioDialogueOpen(false);
   }, []);
 
   const handleSearch = useCallback((params: ContactSearchParams) => {
@@ -191,12 +230,14 @@ export function RolodexLoungeClient({
   );
 
   // ── Character slot ────────────────────────────────────────────────────
+  // Floor 6 hosts both the CNO (networking warmth) and CIO (research intel).
+  // CNO + warmth board on the left; CIO + intel board on the right.
   const characterSlot = (
     <div
       className="flex items-end justify-center gap-6 w-full h-full px-6 pb-4"
-      style={{ maxWidth: "900px", margin: "0 auto" }}
+      style={{ maxWidth: "1280px", margin: "0 auto" }}
     >
-      {/* CNO character — left side */}
+      {/* CNO character — left */}
       <div className="flex-shrink-0">
         <CNOCharacter
           onConversationOpen={handleOpenDialogue}
@@ -206,13 +247,25 @@ export function RolodexLoungeClient({
         />
       </div>
 
-      {/* CNO whiteboard — right of character */}
+      {/* CNO whiteboard */}
       <div className="flex-1 min-w-0 max-w-sm">
         <CNOWhiteboard
           stats={contactStats}
           coldContacts={coldContacts}
           coolingContacts={coolingContacts}
         />
+      </div>
+
+      {/* CIO whiteboard — only rendered when research data is available */}
+      {researchStats && (
+        <div className="flex-1 min-w-0 max-w-sm">
+          <CIOWhiteboard researchStats={researchStats} />
+        </div>
+      )}
+
+      {/* CIO character — right */}
+      <div className="flex-shrink-0">
+        <CIOCharacter onConversationOpen={handleOpenCioDialogue} />
       </div>
     </div>
   );
@@ -357,6 +410,44 @@ export function RolodexLoungeClient({
         <div
           role="presentation"
           onClick={handleCloseDialogue}
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(2px)",
+            WebkitBackdropFilter: "blur(2px)",
+            zIndex: 49,
+            animation: "cno-backdrop-fade-in 0.2s ease-out forwards",
+          }}
+        />
+      )}
+
+      {/* CIO Dialogue Panel — slides in from right (mirrors CNO pattern) */}
+      {cioDialogueOpen && (
+        <div
+          role="complementary"
+          aria-label="CIO research intelligence panel"
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: "min(420px, 90vw)",
+            zIndex: 50,
+            animation: "cno-panel-slide-in 0.25s ease-out forwards",
+          }}
+        >
+          <CIODialoguePanel
+            isOpen={cioDialogueOpen}
+            onClose={handleCloseCioDialogue}
+          />
+        </div>
+      )}
+
+      {cioDialogueOpen && (
+        <div
+          role="presentation"
+          onClick={handleCloseCioDialogue}
           style={{
             position: "fixed",
             inset: 0,

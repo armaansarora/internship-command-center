@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, text, integer, boolean, timestamp,
-  numeric, jsonb, index, uniqueIndex, pgPolicy, vector,
+  numeric, jsonb, index, uniqueIndex, pgPolicy, vector, unique,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -81,6 +81,9 @@ export const companies = pgTable("companies", {
 }, (table) => [
   userIsolation("companies"),
   index("idx_companies_user_tier").on(table.userId, table.tier),
+  // Trigram index for `searchCompaniesByName` (ilike '%q%') — created in
+  // migration 0002. Drizzle doesn't natively express GIN trgm, so it is
+  // documented here but emitted by raw SQL in the migration.
 ]);
 
 // ===========================================================================
@@ -114,6 +117,11 @@ export const applications = pgTable("applications", {
   index("idx_apps_user_company").on(table.userId, table.companyId),
   index("idx_apps_created").on(table.createdAt),
   index("idx_apps_user_status_pos").on(table.userId, table.status, table.position),
+  // Stale-pipeline / follow-up sort. (Migration 0002.)
+  index("idx_apps_user_last_activity").on(
+    table.userId,
+    table.lastActivityAt.desc().nullsLast(),
+  ),
 ]);
 
 // ===========================================================================
@@ -141,6 +149,12 @@ export const contacts = pgTable("contacts", {
   userIsolation("contacts"),
   index("idx_contacts_user_company").on(table.userId, table.companyId),
   index("idx_contacts_warmth").on(table.warmth),
+  // Cooling/cold contact warmth sort relies on last_contact_at, not the
+  // stored warmth column. (Migration 0002.)
+  index("idx_contacts_user_last_contact").on(
+    table.userId,
+    table.lastContactAt.desc().nullsLast(),
+  ),
 ]);
 
 // ===========================================================================
@@ -149,7 +163,7 @@ export const contacts = pgTable("contacts", {
 export const emails = pgTable("emails", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
-  gmailId: text("gmail_id").unique(),
+  gmailId: text("gmail_id"),
   threadId: text("thread_id"),
   applicationId: uuid("application_id").references(() => applications.id, { onDelete: "set null" }),
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
@@ -169,8 +183,13 @@ export const emails = pgTable("emails", {
   ...timestamps,
 }, (table) => [
   userIsolation("emails"),
+  // Per-user uniqueness: a single user cannot have the same gmail message
+  // twice, but two different users sharing a forwarded thread can both
+  // store it. (Migration 0002 — was previously global UNIQUE.)
+  unique("emails_user_gmail_id_unique").on(table.userId, table.gmailId),
   index("idx_emails_gmail_id").on(table.gmailId),
   index("idx_emails_user_class").on(table.userId, table.classification),
+  index("idx_emails_user_received").on(table.userId, table.receivedAt.desc().nullsLast()),
 ]);
 
 // ===========================================================================
@@ -228,7 +247,7 @@ export const interviews = pgTable("interviews", {
 export const calendarEvents = pgTable("calendar_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
-  googleEventId: text("google_event_id").unique(),
+  googleEventId: text("google_event_id"),
   title: text("title"),
   description: text("description"),
   startAt: timestamp("start_at", { withTimezone: true }),
@@ -239,6 +258,9 @@ export const calendarEvents = pgTable("calendar_events", {
   ...timestamps,
 }, (table) => [
   userIsolation("calendar_events"),
+  // Per-user uniqueness — see emails table for the same rationale.
+  // (Migration 0002.)
+  unique("calendar_events_user_event_id_unique").on(table.userId, table.googleEventId),
   index("idx_cal_user_start").on(table.userId, table.startAt),
 ]);
 
@@ -359,7 +381,10 @@ export const dailySnapshots = pgTable("daily_snapshots", {
 }, (table) => [
   userIsolation("daily_snapshots"),
   index("idx_snap_user_date").on(table.userId, table.date),
-  uniqueIndex("uniq_daily_snapshots_user_date").on(table.userId, table.date),
+  // Required for `.upsert(..., { onConflict: "user_id,date" })` in
+  // daily-snapshots-rest.ts:104 + cron/briefing/route.ts:145.
+  // (Migration 0002.)
+  unique("daily_snapshots_user_date_unique").on(table.userId, table.date),
 ]);
 
 // ===========================================================================
@@ -372,8 +397,12 @@ export const companyEmbeddings = pgTable("company_embeddings", {
   content: text("content"),
   embedding: vector("embedding", { dimensions: 1536 }),
   ...timestamps,
-}, () => [
+}, (table) => [
   userIsolation("company_embeddings"),
+  // Lets us drop the DELETE-then-INSERT upsert pattern in embeddings-rest.ts
+  // for an atomic .upsert(..., { onConflict: "user_id,company_id" }).
+  // (Migration 0002.)
+  unique("company_embeddings_user_company_unique").on(table.userId, table.companyId),
 ]);
 
 // ===========================================================================
@@ -386,8 +415,10 @@ export const jobEmbeddings = pgTable("job_embeddings", {
   content: text("content"),
   embedding: vector("embedding", { dimensions: 1536 }),
   ...timestamps,
-}, () => [
+}, (table) => [
   userIsolation("job_embeddings"),
+  // Same atomic-upsert reason as company_embeddings. (Migration 0002.)
+  unique("job_embeddings_user_application_unique").on(table.userId, table.applicationId),
 ]);
 
 // ===========================================================================
@@ -402,9 +433,33 @@ export const progressionMilestones = pgTable("progression_milestones", {
   ...timestamps,
 }, (table) => [
   userIsolation("progression_milestones"),
-  uniqueIndex("uniq_progression_user_milestone").on(
-    table.userId,
-    table.milestone
+  // Prevents duplicate unlocks under concurrent runs of
+  // checkAndUnlockMilestones (engine.ts:121 inserts blindly).
+  // (Migration 0002.)
+  unique("progression_milestones_user_milestone_unique").on(table.userId, table.milestone),
+]);
+
+// ===========================================================================
+// 16. STRIPE WEBHOOK EVENTS (idempotency + audit log — server-only)
+// ===========================================================================
+// Maps to `public.stripe_webhook_events` created manually via
+// `src/db/manual/003_stripe_webhook_events.sql`. Webhook handlers consult this
+// table before applying side effects so that Stripe retries are no-ops. RLS is
+// locked to the service role only (policy grants to authenticated/anon are
+// WHERE false — hard deny).
+export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
+  id: text("id").primaryKey(), // Stripe event id (evt_…)
+  type: text("type").notNull(),
+  livemode: boolean("livemode").notNull().default(false),
+  receivedAt: timestamp("received_at", { withTimezone: true }).defaultNow().notNull(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+  status: text("status").notNull().default("received"),
+  error: text("error"),
+  payload: jsonb("payload"),
+}, (table) => [
+  index("idx_stripe_webhook_events_type_received").on(
+    table.type,
+    table.receivedAt.desc(),
   ),
 ]);
 
@@ -441,3 +496,5 @@ export type CompanyEmbedding = typeof companyEmbeddings.$inferSelect;
 export type JobEmbedding = typeof jobEmbeddings.$inferSelect;
 export type ProgressionMilestone = typeof progressionMilestones.$inferSelect;
 export type NewProgressionMilestone = typeof progressionMilestones.$inferInsert;
+export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect;
+export type NewStripeWebhookEvent = typeof stripeWebhookEvents.$inferInsert;

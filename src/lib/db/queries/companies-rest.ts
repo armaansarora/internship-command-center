@@ -18,6 +18,10 @@ export interface CompanyRow {
   name: string;
   sector: string | null;
   industry: string | null;
+  // TODO: schema — `employee_count`, `website`, `notes` columns do not exist on
+  // `companies`. Either add them via migration (Agent 1's domain) or remove
+  // these fields from the type entirely. Kept here as `null`-only placeholders
+  // so consumers that read them get a stable shape rather than `undefined`.
   employee_count: string | null;
   headquarters: string | null;
   website: string | null;
@@ -39,6 +43,9 @@ export interface CompanyForAgent {
   name: string;
   sector: string | null;
   industry: string | null;
+  // TODO: schema — see CompanyRow note. `employeeCount`, `website`, `notes`
+  // are exposed on the type for consumer compatibility but the underlying
+  // columns do not exist; values will always be `null` until migrated in.
   employeeCount: string | null;
   headquarters: string | null;
   website: string | null;
@@ -76,9 +83,11 @@ function rowToAgentFormat(row: CompanyRow): CompanyForAgent {
     name: row.name,
     sector: row.sector,
     industry: row.industry,
-    employeeCount: row.employee_count,
+    // TODO: schema — these three columns do not exist on `companies`.
+    // Always emit null until the schema is migrated.
+    employeeCount: null,
     headquarters: row.headquarters,
-    website: row.website,
+    website: null,
     description: row.description,
     cultureSummary: row.culture_summary,
     recentNews: row.recent_news,
@@ -86,7 +95,7 @@ function rowToAgentFormat(row: CompanyRow): CompanyForAgent {
     internshipIntel: row.internship_intel,
     researchFreshness: row.research_freshness,
     tier: row.tier,
-    notes: row.notes,
+    notes: null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -290,16 +299,17 @@ export async function createCompanyRest(
 
   if (data.sector !== undefined) insertRow.sector = data.sector;
   if (data.industry !== undefined) insertRow.industry = data.industry;
-  if (data.employeeCount !== undefined) insertRow.employee_count = data.employeeCount;
+  // TODO: schema — `employee_count`, `website`, `notes` do not exist on
+  // `companies`. Inputs are accepted at the boundary for forward compatibility
+  // but silently dropped here until the migration lands. Do not re-enable these
+  // writes without first adding the columns via Drizzle migration.
   if (data.headquarters !== undefined) insertRow.headquarters = data.headquarters;
-  if (data.website !== undefined) insertRow.website = data.website;
   if (data.description !== undefined) insertRow.description = data.description;
   if (data.cultureSummary !== undefined) insertRow.culture_summary = data.cultureSummary;
   if (data.recentNews !== undefined) insertRow.recent_news = data.recentNews;
   if (data.financialsSummary !== undefined) insertRow.financials_summary = data.financialsSummary;
   if (data.internshipIntel !== undefined) insertRow.internship_intel = data.internshipIntel;
   if (data.tier !== undefined) insertRow.tier = data.tier;
-  if (data.notes !== undefined) insertRow.notes = data.notes;
 
   const { data: created, error } = await supabase
     .from("companies")

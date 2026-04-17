@@ -2,7 +2,7 @@
 
 import type { JSX } from "react";
 import { useCallback, useEffect, useRef } from "react";
-import { useAgentChat } from "@/hooks/useAgentChat";
+import { useAgentChat, type AgentKey } from "@/hooks/useAgentChat";
 import { AgentChatInput } from "./AgentChatInput";
 import { AgentMessageList } from "./AgentMessageList";
 import { AgentQuickActions } from "./AgentQuickActions";
@@ -12,6 +12,7 @@ export function AgentDialoguePanel({
   isOpen,
   onClose,
   onStatusChange,
+  onChatActivity,
   chatId,
   api,
   dialogAriaLabel,
@@ -38,10 +39,14 @@ export function AgentDialoguePanel({
   const formRef = useRef<HTMLFormElement>(null);
   const initialSentRef = useRef(false);
 
-  const { messages, input, handleInputChange, handleSubmit, status, setInput } = useAgentChat({
-    id: chatId,
-    api,
-  });
+  // Derive AgentKey from api path (`/api/ceo` → `ceo`). Each panel is wired
+  // to a known C-suite agent so this is always the trailing path segment.
+  const agentKey = (api.replace(/^.*\/api\//, "").split("/")[0] || "ceo") as AgentKey;
+
+  const { messages, input, handleInputChange, handleSubmit, status, setInput } = useAgentChat(
+    agentKey,
+    { id: chatId, api },
+  );
 
   useEffect(() => {
     if (status === "streaming") {
@@ -54,6 +59,12 @@ export function AgentDialoguePanel({
     }
     onStatusChange?.("idle");
   }, [status, onStatusChange]);
+
+  // Forward every message/status tick so parents can observe tool-call parts
+  // for side-channel UI (e.g. Ring-the-Bell subagent progress).
+  useEffect(() => {
+    onChatActivity?.({ messages, status });
+  }, [messages, status, onChatActivity]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, startTransition, type JSX } from "react";
-import gsap from "gsap";
+import { gsap } from "@/lib/gsap-init";
 
 /**
  * EntranceSequence — cinematic first-login entrance animation.

@@ -153,11 +153,15 @@ export async function upsertCompanyEmbedding(
     .eq("user_id", userId)
     .eq("company_id", companyId);
 
+  // Pass the native number[] directly. PostgREST serializes it to a JSON
+  // array, which pgvector parses natively for `vector(1536)` columns.
+  // Avoid JSON.stringify here — it would double-encode and prevent reads from
+  // returning a typed array.
   const { error } = await supabase.from("company_embeddings").insert({
     user_id: userId,
     company_id: companyId,
     content,
-    embedding: JSON.stringify(embedding),
+    embedding,
   });
 
   if (error) {
@@ -189,8 +193,10 @@ export async function findSimilarCompanies(
     return [];
   }
 
+  // pgvector accepts a JSON array — pass the native number[] and let
+  // PostgREST handle the encoding.
   const { data, error } = await supabase.rpc("match_company_embeddings", {
-    query_embedding: JSON.stringify(queryEmbedding),
+    query_embedding: queryEmbedding,
     match_count: matchCount,
     match_threshold: threshold,
     p_user_id: userId,
@@ -270,11 +276,12 @@ export async function upsertJobEmbedding(
     .eq("user_id", userId)
     .eq("application_id", applicationId);
 
+  // Pass the native number[] directly — pgvector parses it as a vector(1536).
   const { error } = await supabase.from("job_embeddings").insert({
     user_id: userId,
     application_id: applicationId,
     content,
-    embedding: JSON.stringify(embedding),
+    embedding,
   });
 
   if (error) {
@@ -307,7 +314,7 @@ export async function findSimilarJobs(
   }
 
   const { data, error } = await supabase.rpc("match_job_embeddings", {
-    query_embedding: JSON.stringify(queryEmbedding),
+    query_embedding: queryEmbedding,
     match_count: matchCount,
     match_threshold: threshold,
     p_user_id: userId,
@@ -382,12 +389,13 @@ export async function reembedAllCompanies(
     .delete()
     .eq("user_id", userId);
 
-  // Insert all at once
+  // Insert all at once. Pass native number[] embeddings — pgvector parses
+  // them as vector(1536). Avoid JSON.stringify (would double-encode).
   const rows = companies.map((c, i) => ({
     user_id: userId,
     company_id: c.id as string,
     content: embeddings[i].text,
-    embedding: JSON.stringify(embeddings[i].embedding),
+    embedding: embeddings[i].embedding,
   }));
 
   const { error: insertError } = await supabase

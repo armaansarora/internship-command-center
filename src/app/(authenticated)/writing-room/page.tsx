@@ -1,20 +1,107 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import type { JSX } from "react";
+import { revalidatePath } from "next/cache";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { WritingRoomClient } from "@/components/floor-5/WritingRoomClient";
 import type { DocumentStats } from "@/components/floor-5/WritingRoomClient";
 import type { Application, Document } from "@/db/schema";
-import {
-  createCoverLetterAction,
-  deleteDocumentAction,
-  updateDocumentAction,
-} from "@/lib/actions/documents";
 
 export const metadata: Metadata = { title: "The Writing Room | The Tower" };
 
-/** Floor 5 — Cover Letters + CMO Agent */
-export default async function WritingRoomPage() {
+/** Floor 5 — Cover Letters + CMO Agent.
+ *
+ * Skyline paints immediately; documents + applications stream into the
+ * Suspense boundary so the floor's chrome is never blocked by a slow query.
+ */
+export default async function WritingRoomPage(): Promise<JSX.Element> {
   const user = await requireUser();
+
+  // ── Server Actions ─────────────────────────────────────────────────
+
+  async function createDocument(formData: FormData): Promise<void> {
+    "use server";
+    const sessionUser = await requireUser();
+    const sb = await createClient();
+
+    const title = (formData.get("title") as string)?.trim();
+    const content = (formData.get("content") as string)?.trim();
+    const applicationId = (formData.get("applicationId") as string)?.trim() || null;
+    const companyId = (formData.get("companyId") as string)?.trim() || null;
+
+    if (!title || !content) return;
+
+    await sb.from("documents").insert({
+      user_id: sessionUser.id,
+      type: "cover_letter",
+      title,
+      content,
+      application_id: applicationId,
+      company_id: companyId,
+      version: 1,
+      is_active: true,
+      generated_by: "cmo",
+    });
+
+    revalidatePath("/writing-room");
+  }
+
+  async function updateDocument(id: string, formData: FormData): Promise<void> {
+    "use server";
+    await requireUser();
+    const sb = await createClient();
+
+    const title = (formData.get("title") as string)?.trim();
+    const content = (formData.get("content") as string)?.trim();
+
+    if (!title || !content) return;
+
+    await sb
+      .from("documents")
+      .update({
+        title,
+        content,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+
+    revalidatePath("/writing-room");
+  }
+
+  async function deleteDocument(id: string): Promise<void> {
+    "use server";
+    await requireUser();
+    const sb = await createClient();
+    await sb.from("documents").delete().eq("id", id);
+    revalidatePath("/writing-room");
+  }
+
+  return (
+    <FloorShell floorId="5">
+      <Suspense fallback={<WritingRoomPlaceholder />}>
+        <WritingRoomData
+          userId={user.id}
+          createDocument={createDocument}
+          updateDocument={updateDocument}
+          deleteDocument={deleteDocument}
+        />
+      </Suspense>
+    </FloorShell>
+  );
+}
+
+async function WritingRoomData({
+  userId,
+  createDocument,
+  updateDocument,
+  deleteDocument,
+}: {
+  userId: string;
+  createDocument: (formData: FormData) => Promise<void>;
+  updateDocument: (id: string, formData: FormData) => Promise<void>;
+  deleteDocument: (id: string) => Promise<void>;
+}): Promise<JSX.Element> {
   const supabase = await createClient();
 
   // Fetch cover letters and applications in parallel
@@ -22,13 +109,13 @@ export default async function WritingRoomPage() {
     supabase
       .from("documents")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("type", "cover_letter")
       .order("updated_at", { ascending: false }),
     supabase
       .from("applications")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false }),
   ]);
 
@@ -100,15 +187,41 @@ export default async function WritingRoomPage() {
   };
 
   return (
-    <FloorShell floorId="5">
-      <WritingRoomClient
-        documents={documents}
-        applications={applications}
-        stats={documentStats}
-        onCreateDocument={createCoverLetterAction}
-        onUpdateDocument={updateDocumentAction}
-        onDeleteDocument={deleteDocumentAction}
-      />
-    </FloorShell>
+    <WritingRoomClient
+      documents={documents}
+      applications={applications}
+      stats={documentStats}
+      onCreateDocument={createDocument}
+      onUpdateDocument={updateDocument}
+      onDeleteDocument={deleteDocument}
+    />
+  );
+}
+
+function WritingRoomPlaceholder(): JSX.Element {
+  return (
+    <div
+      className="min-h-[60vh] flex items-center justify-center"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading writing room"
+    >
+      <div className="flex flex-col items-center gap-4" aria-hidden="true">
+        <span className="block w-px h-12 bg-gradient-to-b from-transparent via-[var(--gold)] to-transparent motion-safe:animate-[wrt-pulse_2200ms_ease-in-out_infinite]" />
+        <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[var(--gold-dim)]">
+          Sharpening pencils
+        </span>
+      </div>
+      <span className="sr-only">Loading writing room data…</span>
+      <style>{`
+        @keyframes wrt-pulse {
+          0%, 100% { opacity: 0.3; transform: translateY(4px); }
+          50%      { opacity: 1;   transform: translateY(-4px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [class*="animate-"] { animation: none !important; opacity: 1 !important; }
+        }
+      `}</style>
+    </div>
   );
 }

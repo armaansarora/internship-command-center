@@ -1,0 +1,24 @@
+-- =============================================================================
+-- Migration 0005 — INTENTIONAL NO-OP
+--
+-- This file exists only so that `src/db/migrations/meta/0005_snapshot.json`
+-- has a matching SQL file in the journal. drizzle-kit wrote both when it
+-- noticed schema drift, but every change it would have emitted is already
+-- covered by hand-written migrations 0002 and 0003:
+--
+--   * Composite UNIQUE constraints on emails, calendar_events,
+--     daily_snapshots, company_embeddings, job_embeddings,
+--     progression_milestones                              → 0002
+--   * Hot-path indexes on applications, contacts, emails  → 0002
+--   * `stripe_events` table + idempotency index           → 0003
+--
+-- The columns drizzle wanted to ADD on `applications`
+-- (position, company_name, last_activity_at) already exist in production —
+-- they were applied out-of-band via `scripts/phase1-migration.sql`. Re-adding
+-- them here would either duplicate-error or be a no-op via IF NOT EXISTS,
+-- and we don't want to leave drizzle thinking it owns those.
+--
+-- The next `drizzle-kit generate` will read 0005_snapshot.json as the
+-- baseline and only emit *future* deltas. No action needed.
+-- =============================================================================
+SELECT 1 WHERE FALSE;

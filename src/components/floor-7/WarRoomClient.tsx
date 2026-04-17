@@ -2,15 +2,21 @@
 
 import type { JSX } from "react";
 import { useState, useCallback, useMemo, useTransition } from "react";
+import dynamic from "next/dynamic";
 import type { Application } from "@/db/schema";
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 import { WarRoomScene } from "./WarRoomScene";
 import { WarTable } from "./war-table/WarTable";
-import { ApplicationModal } from "./crud/ApplicationModal";
 import { ApplicationSearch } from "./crud/ApplicationSearch";
 import { CROCharacter } from "./cro-character/CROCharacter";
 import { CRODialoguePanel } from "./cro-character/CRODialoguePanel";
 import { CROWhiteboard } from "./cro-character/CROWhiteboard";
+
+// 721 LOC modal — code-split so the initial route bundle doesn't carry it.
+const ApplicationModal = dynamic(
+  () => import("./crud/ApplicationModal").then((m) => m.ApplicationModal),
+  { ssr: false }
+);
 
 // ---------------------------------------------------------------------------
 // Props

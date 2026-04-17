@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useOptimistic, useTransition } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -64,20 +64,74 @@ function generatePositionBetween(
   return lexMidpoint(before, after);
 }
 
+// Optimistic action shapes — applied transactionally to the React 19 useOptimistic state
+type OptimisticAction =
+  | {
+      type: "move";
+      id: string;
+      newStatus: Application["status"];
+      newPosition: string;
+      sameColumnReorder?: { columnId: PipelineColumnId; insertIndex: number };
+    }
+  | { type: "delete"; id: string };
+
+function reduceOptimistic(
+  state: Application[],
+  action: OptimisticAction
+): Application[] {
+  if (action.type === "delete") {
+    return state.filter((a) => a.id !== action.id);
+  }
+
+  // type === "move"
+  const updated = state.map((a) =>
+    a.id === action.id
+      ? { ...a, status: action.newStatus, position: action.newPosition }
+      : a
+  );
+
+  // Same-column reorder — assign synthetic positions so render order matches drop intent
+  if (action.sameColumnReorder) {
+    const { columnId, insertIndex } = action.sameColumnReorder;
+    const colApps = updated
+      .filter((a) => getColumnForStatus(a.status) === columnId)
+      .sort((a, b) => {
+        const pa = a.position ?? "mmmmmm";
+        const pb = b.position ?? "mmmmmm";
+        return pa < pb ? -1 : 1;
+      });
+
+    const oldIndex = colApps.findIndex((a) => a.id === action.id);
+    const newIndex = Math.min(insertIndex, colApps.length - 1);
+
+    if (oldIndex !== -1 && oldIndex !== newIndex) {
+      const reordered = arrayMove(colApps, oldIndex, newIndex);
+      return updated.map((a) => {
+        const ri = reordered.findIndex((r) => r.id === a.id);
+        if (ri === -1) return a;
+        return { ...a, position: `pos_${ri.toString().padStart(6, "0")}` };
+      });
+    }
+  }
+
+  return updated;
+}
+
 export function WarTable({
   applications: initialApplications,
   onMoveApplication,
   onDeleteApplication,
   onEditApplication,
 }: WarTableProps): JSX.Element {
-  // Local optimistic state
-  const [localApplications, setLocalApplications] = useState<Application[]>(initialApplications);
+  // React 19 — useOptimistic handles instant UI updates with automatic revert
+  // when the surrounding transition rejects. No more manual rollback bookkeeping.
+  const [optimisticApplications, applyOptimistic] = useOptimistic<
+    Application[],
+    OptimisticAction
+  >(initialApplications, reduceOptimistic);
+  const [, startTransition] = useTransition();
   const [activeApplication, setActiveApplication] = useState<Application | null>(null);
-
-  // Sync with parent when props change (server revalidation).
-  useEffect(() => {
-    setLocalApplications(initialApplications);
-  }, [initialApplications]);
+  const [, setOverId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -94,7 +148,7 @@ export function WarTable({
     for (const col of PIPELINE_COLUMNS) {
       map.set(col.id, []);
     }
-    for (const app of localApplications) {
+    for (const app of optimisticApplications) {
       const colId = getColumnForStatus(app.status);
       const bucket = map.get(colId) ?? [];
       bucket.push(app);
@@ -112,14 +166,14 @@ export function WarTable({
       );
     }
     return map;
-  }, [localApplications]);
+  }, [optimisticApplications]);
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
-      const app = localApplications.find((a) => a.id === event.active.id);
+      const app = optimisticApplications.find((a) => a.id === event.active.id);
       if (app) setActiveApplication(app);
     },
-    [localApplications]
+    [optimisticApplications]
   );
 
   const handleDragOver = useCallback(() => {
@@ -127,38 +181,38 @@ export function WarTable({
   }, []);
 
   const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
+    (event: DragEndEvent) => {
       setActiveApplication(null);
 
       const { active, over } = event;
       if (!over) return;
 
-      const draggedApp = localApplications.find((a) => a.id === active.id);
+      const draggedApp = optimisticApplications.find((a) => a.id === active.id);
       if (!draggedApp) return;
 
       const activeId = active.id.toString();
-      const overId = over.id.toString();
+      const overIdLocal = over.id.toString();
 
       // Determine target column
       let targetColumnId: PipelineColumnId | null = null;
       let targetAppId: string | null = null;
 
       // Check if dropped over a column droppable
-      const isColumn = PIPELINE_COLUMNS.some((col) => col.id === overId);
+      const isColumn = PIPELINE_COLUMNS.some((col) => col.id === overIdLocal);
       if (isColumn) {
-        targetColumnId = overId as PipelineColumnId;
+        targetColumnId = overIdLocal as PipelineColumnId;
       } else {
         // Dropped over another card — find its column
-        const targetApp = localApplications.find((a) => a.id === overId);
+        const targetApp = optimisticApplications.find((a) => a.id === overIdLocal);
         if (targetApp) {
           targetColumnId = getColumnForStatus(targetApp.status);
-          targetAppId = overId;
+          targetAppId = overIdLocal;
         }
       }
 
       if (!targetColumnId) return;
 
-      const newStatus = getPrimaryStatusForColumn(targetColumnId);
+      const newStatus = getPrimaryStatusForColumn(targetColumnId) as Application["status"];
       const sourceColumnId = getColumnForStatus(draggedApp.status);
 
       const targetColApps = columnApplications.get(targetColumnId) ?? [];
@@ -173,63 +227,40 @@ export function WarTable({
       const appsWithoutDragged = targetColApps.filter((a) => a.id !== activeId);
       const newPosition = generatePositionBetween(appsWithoutDragged, insertIndex);
 
-      // Optimistic update
-      setLocalApplications((prev) => {
-        const updated = prev.map((a) =>
-          a.id === activeId
-            ? { ...a, status: newStatus as Application["status"], position: newPosition }
-            : a
-        );
-
-        // If same column, reorder using arrayMove
-        if (sourceColumnId === targetColumnId) {
-          const colApps = updated
-            .filter((a) => getColumnForStatus(a.status) === targetColumnId)
-            .sort((a, b) => {
-              const pa = a.position ?? "mmmmmm";
-              const pb = b.position ?? "mmmmmm";
-              return pa < pb ? -1 : 1;
-            });
-
-          const oldIndex = colApps.findIndex((a) => a.id === activeId);
-          const newIndex = Math.min(insertIndex, colApps.length - 1);
-
-          if (oldIndex !== -1 && oldIndex !== newIndex) {
-            const reordered = arrayMove(colApps, oldIndex, newIndex);
-            // Assign new positions based on reorder
-            return updated.map((a) => {
-              const ri = reordered.findIndex((r) => r.id === a.id);
-              if (ri === -1) return a;
-              return { ...a, position: `pos_${ri.toString().padStart(6, "0")}` };
-            });
-          }
-        }
-
-        return updated;
-      });
-
-      // Persist to server (fire and forget — parent handles error)
-      try {
+      // React 19 useOptimistic — must be invoked inside a transition. Optimistic
+      // state lives only for this transition's lifetime: if onMoveApplication
+      // throws, React reverts to initialApplications automatically.
+      startTransition(async () => {
+        applyOptimistic({
+          type: "move",
+          id: activeId,
+          newStatus,
+          newPosition,
+          sameColumnReorder:
+            sourceColumnId === targetColumnId
+              ? { columnId: targetColumnId, insertIndex }
+              : undefined,
+        });
         await onMoveApplication(activeId, newStatus, newPosition);
-      } catch {
-        // Revert on failure
-        setLocalApplications(initialApplications);
-      }
+      });
     },
-    [localApplications, columnApplications, onMoveApplication, initialApplications]
+    [
+      optimisticApplications,
+      columnApplications,
+      onMoveApplication,
+      applyOptimistic,
+      startTransition,
+    ]
   );
 
   const handleDelete = useCallback(
-    async (id: string) => {
-      // Optimistic removal
-      setLocalApplications((prev) => prev.filter((a) => a.id !== id));
-      try {
+    (id: string) => {
+      startTransition(async () => {
+        applyOptimistic({ type: "delete", id });
         await onDeleteApplication(id);
-      } catch {
-        setLocalApplications(initialApplications);
-      }
+      });
     },
-    [onDeleteApplication, initialApplications]
+    [onDeleteApplication, applyOptimistic, startTransition]
   );
 
   return (
@@ -257,7 +288,7 @@ export function WarTable({
         accessibility={{
           announcements: {
             onDragStart: ({ active }) => {
-              const app = localApplications.find((a) => a.id === active.id);
+              const app = optimisticApplications.find((a) => a.id === active.id);
               if (app) {
                 return `Picked up application for ${app.companyName ?? "unknown"} — ${app.role}. Use arrow keys to move between columns.`;
               }
@@ -265,7 +296,7 @@ export function WarTable({
             },
             onDragOver: ({ active, over }) => {
               if (!over) return "Not over a drop area.";
-              const app = localApplications.find((a) => a.id === active.id);
+              const app = optimisticApplications.find((a) => a.id === active.id);
               const col = PIPELINE_COLUMNS.find((c) => c.id === over.id);
               if (col && app) {
                 return `${app.companyName ?? "Application"} is over the ${col.tacticalName} column.`;
@@ -274,7 +305,7 @@ export function WarTable({
             },
             onDragEnd: ({ active, over }) => {
               if (!over) return "Application dropped outside a column.";
-              const app = localApplications.find((a) => a.id === active.id);
+              const app = optimisticApplications.find((a) => a.id === active.id);
               const col = PIPELINE_COLUMNS.find((c) => c.id === over.id);
               if (col && app) {
                 return `${app.companyName ?? "Application"} moved to ${col.tacticalName}.`;
@@ -282,7 +313,7 @@ export function WarTable({
               return "Application moved.";
             },
             onDragCancel: ({ active }) => {
-              const app = localApplications.find((a) => a.id === active.id);
+              const app = optimisticApplications.find((a) => a.id === active.id);
               return `Drag cancelled. ${app?.companyName ?? "Application"} returned to original position.`;
             },
           },

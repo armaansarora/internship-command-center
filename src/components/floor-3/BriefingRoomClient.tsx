@@ -2,6 +2,7 @@
 
 import type { JSX } from "react";
 import { useState, useCallback, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { BriefingRoomScene } from "./BriefingRoomScene";
 import type { BriefingRoomStats } from "./BriefingRoomScene";
 import { CPOCharacter } from "./cpo-character/CPOCharacter";
@@ -10,8 +11,13 @@ import { CPOWhiteboard } from "./cpo-character/CPOWhiteboard";
 import type { PrepStats, UpcomingInterview } from "./cpo-character/CPOWhiteboard";
 import { InterviewTimeline } from "./crud/InterviewTimeline";
 import type { Interview } from "./crud/InterviewTimeline";
-import { PrepPacketViewer } from "./crud/PrepPacketViewer";
 import type { PrepPacket } from "./crud/PrepPacketViewer";
+
+// 1114 LOC viewer — largest component in the project. Code-split aggressively.
+const PrepPacketViewer = dynamic(
+  () => import("./crud/PrepPacketViewer").then((m) => m.PrepPacketViewer),
+  { ssr: false }
+);
 
 // ---------------------------------------------------------------------------
 // Props

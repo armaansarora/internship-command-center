@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import gsap from "gsap";
+import { gsap } from "@/lib/gsap-init";
 import { FLOORS, FLOOR_ORDER, ROUTE_TO_FLOOR, type FloorId } from "@/lib/constants/floors";
 import type { ElevatorState } from "@/types/ui";
 import { useReducedMotion } from "@/hooks/useReducedMotion";

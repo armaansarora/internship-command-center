@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import type { JSX } from "react";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { RolodexLoungeClient } from "@/components/floor-6/RolodexLoungeClient";
@@ -12,38 +14,145 @@ import {
 
 export const metadata: Metadata = { title: "The Rolodex Lounge | The Tower" };
 
-/** Floor 6 — Contacts Network + CNO Agent */
-export default async function RolodexLoungePage() {
+/** Floor 6 — Contacts Network + CNO Agent + CIO Agent.
+ *
+ * Skyline + chrome paint immediately; the contact grid + CIO research stats
+ * stream into the Suspense boundary so the floor's atmosphere appears first.
+ */
+export default async function RolodexLoungePage(): Promise<JSX.Element> {
   const user = await requireUser();
-  const supabase = await createClient();
-
-  // Fetch contacts (with warmth computed) and companies in parallel
-  const [contacts, contactStats, companiesResult] = await Promise.all([
-    getContactsByUser(user.id),
-    getContactStats(user.id),
-    supabase
-      .from("companies")
-      .select("id, name")
-      .eq("user_id", user.id)
-      .order("name", { ascending: true }),
-  ]);
-
-  const companies = (companiesResult.data ?? []).map((row) => ({
-    id: row.id as string,
-    name: row.name as string,
-  }));
 
   return (
     <FloorShell floorId="6">
-      <RolodexLoungeClient
-        contacts={contacts}
-        contactStats={contactStats}
-        companies={companies}
-        onCreateContact={createContactAction}
-        onUpdateContact={updateContactAction}
-        onDeleteContact={deleteContactAction}
-        onLinkContactToApplication={linkContactToApplicationAction}
-      />
+      <Suspense fallback={<RolodexLoungePlaceholder />}>
+        <RolodexLoungeData userId={user.id} />
+      </Suspense>
     </FloorShell>
+  );
+}
+
+async function RolodexLoungeData({
+  userId,
+}: {
+  userId: string;
+}): Promise<JSX.Element> {
+  const supabase = await createClient();
+
+  // Fetch contacts (with warmth computed) and companies in parallel.
+  // We pull the full company shape because the CIO whiteboard derives
+  // research-freshness stats from it.
+  const [contacts, contactStats, companiesResult] = await Promise.all([
+    getContactsByUser(userId),
+    getContactStats(userId),
+    supabase
+      .from("companies")
+      .select("id, name, sector, research_freshness, internship_intel, website, updated_at")
+      .eq("user_id", userId)
+      .order("name", { ascending: true }),
+  ]);
+
+  type CompanyRow = {
+    id: string;
+    name: string;
+    sector: string | null;
+    research_freshness: string | null;
+    internship_intel: string | null;
+    website: string | null;
+    updated_at: string | null;
+  };
+
+  const companyRows = (companiesResult.data ?? []) as CompanyRow[];
+
+  const companies = companyRows.map((row) => ({
+    id: row.id,
+    name: row.name,
+  }));
+
+  // ── CIO research stats — shape consumed by CIOWhiteboard ────────────────
+  const FRESH_DAYS = 7;
+  const STALE_DAYS = 30;
+  const now = Date.now();
+
+  const researchedCompanies = companyRows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    sector: row.sector,
+    lastResearchedAt: row.research_freshness ? new Date(row.research_freshness) : null,
+    hasNotes: Boolean(row.internship_intel),
+    domain: row.website,
+  }));
+
+  let freshCount = 0;
+  let staleCount = 0;
+  let researchedCount = 0;
+  for (const c of researchedCompanies) {
+    if (!c.lastResearchedAt) continue;
+    researchedCount++;
+    const ageDays = (now - c.lastResearchedAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (ageDays < FRESH_DAYS) freshCount++;
+    else if (ageDays > STALE_DAYS) staleCount++;
+  }
+
+  const recentActivity = researchedCompanies
+    .filter((c) => c.lastResearchedAt !== null)
+    .sort(
+      (a, b) =>
+        (b.lastResearchedAt?.getTime() ?? 0) - (a.lastResearchedAt?.getTime() ?? 0),
+    )
+    .slice(0, 4)
+    .map((c) => ({
+      companyName: c.name,
+      action: "researched",
+      at: c.lastResearchedAt as Date,
+    }));
+
+  const researchStats = {
+    totalCompanies: researchedCompanies.length,
+    researchedCount,
+    staleCount,
+    freshCount,
+    recentActivity,
+    companies: researchedCompanies,
+  };
+
+  return (
+    <RolodexLoungeClient
+      contacts={contacts}
+      contactStats={contactStats}
+      companies={companies}
+      researchStats={researchStats}
+      onCreateContact={createContactAction}
+      onUpdateContact={updateContactAction}
+      onDeleteContact={deleteContactAction}
+      onLinkContactToApplication={linkContactToApplicationAction}
+    />
+  );
+}
+
+function RolodexLoungePlaceholder(): JSX.Element {
+  return (
+    <div
+      className="min-h-[60vh] flex items-center justify-center"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading rolodex lounge"
+    >
+      <div className="flex flex-col items-center gap-4" aria-hidden="true">
+        <span className="block w-px h-12 bg-gradient-to-b from-transparent via-[var(--gold)] to-transparent motion-safe:animate-[rl-pulse_2200ms_ease-in-out_infinite]" />
+        <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[var(--gold-dim)]">
+          Turning the rolodex
+        </span>
+      </div>
+      <span className="sr-only">Loading rolodex lounge data…</span>
+      <style>{`
+        @keyframes rl-pulse {
+          0%, 100% { opacity: 0.3; transform: translateY(4px); }
+          50%      { opacity: 1;   transform: translateY(-4px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [class*="animate-"] { animation: none !important; opacity: 1 !important; }
+        }
+      `}</style>
+    </div>
   );
 }

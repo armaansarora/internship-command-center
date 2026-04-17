@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
+import type { ChatStatus, UIMessage } from "ai";
 import { AgentDialoguePanel } from "@/components/agents/dialogue/AgentDialoguePanel";
 import type {
   AgentDialogueTheme,
@@ -17,14 +18,20 @@ const QUICK_ACTIONS: AgentQuickAction[] = [
 ];
 
 const TOOL_LABELS: Record<string, string> = {
-  runCROBriefing: "CRO analyzing pipeline...",
-  runCOOBriefing: "COO reviewing operations...",
-  runCNOBriefing: "CNO surveying network...",
-  runCIOBriefing: "CIO fetching intelligence...",
-  runCMOBriefing: "CMO reviewing content...",
-  runCPOBriefing: "CPO checking strategy...",
+  // Orchestrator dispatch tools (real subagent invocations via
+  // `buildCEODispatchTools`). Each runs a nested generateText call.
+  dispatchToCRO: "CRO analyzing pipeline...",
+  dispatchToCOO: "COO reviewing operations...",
+  dispatchToCNO: "CNO surveying network...",
+  dispatchToCIO: "CIO fetching intelligence...",
+  dispatchToCMO: "CMO reviewing content...",
+  dispatchToCPO: "CPO checking strategy...",
+  dispatchToCFO: "CFO running analytics...",
+  // CEO's own tools.
   compileBriefing: "Compiling executive briefing...",
-  queryApplications: "Querying pipeline...",
+  queryAllPipeline: "Querying pipeline...",
+  getRecentActivity: "Scanning recent activity...",
+  getDailyBriefingData: "Compiling daily briefing...",
 };
 
 const CEO_THEME: AgentDialogueTheme = {
@@ -109,6 +116,15 @@ interface CEODialoguePanelProps {
   onClose: () => void;
   initialMessage?: string;
   onStatusChange?: (status: "idle" | "thinking" | "talking") => void;
+  /**
+   * Called whenever the chat's messages or status change. Used by the parent
+   * CSuiteClient to drive the Ring-the-Bell agent progress cards from real
+   * subagent dispatch activity (tool-{name} parts on assistant messages).
+   */
+  onChatActivity?: (activity: {
+    messages: UIMessage[];
+    status: ChatStatus;
+  }) => void;
 }
 
 export function CEODialoguePanel({
@@ -116,12 +132,14 @@ export function CEODialoguePanel({
   onClose,
   initialMessage,
   onStatusChange,
+  onChatActivity,
 }: CEODialoguePanelProps): JSX.Element {
   return (
     <AgentDialoguePanel
       isOpen={isOpen}
       onClose={onClose}
       onStatusChange={onStatusChange}
+      onChatActivity={onChatActivity}
       chatId="ceo-chat"
       api="/api/ceo"
       dialogAriaLabel="CEO executive briefing"

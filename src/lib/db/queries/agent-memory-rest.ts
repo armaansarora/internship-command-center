@@ -32,6 +32,9 @@ interface CreateMemoryInput {
   importance?: number;
 }
 
+/** Per-agent rolling cap so memory tables never grow unbounded. */
+const MAX_MEMORIES_PER_AGENT = 50;
+
 // ---------------------------------------------------------------------------
 // Row mapper
 // ---------------------------------------------------------------------------
@@ -57,6 +60,10 @@ function rowToMemory(row: Record<string, unknown>): AgentMemoryEntry {
 
 /**
  * Retrieve memories for a specific agent, ordered by importance + recency.
+ *
+ * The previous implementation increment-bug used `data[0].access_count + 1`
+ * for every row — that bumped all rows to the same count instead of per-row
+ * +1. We now perform a per-row update using the row's own current count.
  */
 export async function getAgentMemories(
   userId: string,
@@ -84,12 +91,12 @@ export async function getAgentMemories(
     return [];
   }
 
-  // Increment access count for retrieved memories
-  const ids = (data ?? []).map((r) => r.id as string);
-  if (ids.length > 0) {
+  // Per-row access-count bump (fire-and-forget — never block retrieval).
+  const rows = data ?? [];
+  if (rows.length > 0) {
     const now = new Date().toISOString();
     void Promise.all(
-      (data ?? []).map((row) =>
+      rows.map((row) =>
         supabase
           .from("agent_memory")
           .update({
@@ -98,15 +105,38 @@ export async function getAgentMemories(
           })
           .eq("id", row.id as string),
       ),
-    )
-      .then(() => null);
+    );
   }
 
-  return (data ?? []).map(rowToMemory);
+  return rows.map(rowToMemory);
 }
 
 /**
- * Store a new memory entry for an agent.
+ * Retrieve memories shaped for prompt-injection (used by every chat route).
+ *
+ * Strategy: take top-N by importance × recency, where N defaults to 5. This is
+ * a simple "two-signal" ordering that doesn't require an embedding round-trip
+ * — semantic retrieval is a future upgrade once we have query embedding
+ * infrastructure threaded into the chat path.
+ */
+export async function getMemoriesForContext(
+  userId: string,
+  agent: string,
+  topK: number = 5,
+): Promise<Array<{ content: string; category: string }>> {
+  const memories = await getAgentMemories(userId, agent, topK);
+  return memories
+    .filter((m) => m.content && m.content.trim().length > 0)
+    .map((m) => ({
+      content: m.content as string,
+      category: m.category ?? "fact",
+    }));
+}
+
+/**
+ * Store a new memory entry for an agent. Caps total memories per
+ * (user, agent) pair at MAX_MEMORIES_PER_AGENT — when exceeded, deletes the
+ * lowest-importance / least-recently-accessed rows first.
  */
 export async function storeAgentMemory(
   input: CreateMemoryInput,
@@ -137,7 +167,49 @@ export async function storeAgentMemory(
     return null;
   }
 
+  // Enforce the rolling cap. Run in the background — never block the write
+  // path. Two-step: count, then prune oldest-by-recency / weakest-by-
+  // importance if over.
+  void enforceMemoryCap(input.userId, input.agent);
+
   return data ? rowToMemory(data as Record<string, unknown>) : null;
+}
+
+/**
+ * Delete oldest, least-important memories beyond the cap. Best-effort.
+ */
+async function enforceMemoryCap(userId: string, agent: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { data, count } = await supabase
+      .from("agent_memory")
+      .select("id, importance, last_accessed_at, created_at", { count: "exact" })
+      .eq("user_id", userId)
+      .eq("agent", agent);
+
+    if (!count || count <= MAX_MEMORIES_PER_AGENT || !data) return;
+
+    const overflow = count - MAX_MEMORIES_PER_AGENT;
+    // Sort: lowest importance first, then oldest last_accessed_at.
+    const sorted = [...data].sort((a, b) => {
+      const ai = parseFloat((a.importance as string | null) ?? "0.5");
+      const bi = parseFloat((b.importance as string | null) ?? "0.5");
+      if (ai !== bi) return ai - bi;
+      const at = (a.last_accessed_at as string | null) ?? (a.created_at as string);
+      const bt = (b.last_accessed_at as string | null) ?? (b.created_at as string);
+      return new Date(at).getTime() - new Date(bt).getTime();
+    });
+
+    const toDelete = sorted.slice(0, overflow).map((r) => r.id as string);
+    if (toDelete.length === 0) return;
+
+    await supabase.from("agent_memory").delete().in("id", toDelete);
+  } catch (err) {
+    log.warn("agent_memory.enforce_cap_failed", {
+      agent,
+      err: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 /**

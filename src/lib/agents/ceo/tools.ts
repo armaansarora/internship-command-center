@@ -4,47 +4,20 @@ import { createClient } from "@/lib/supabase/server";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 
 // ---------------------------------------------------------------------------
-// Tool 1: dispatchAgent
+// Tool 1: dispatchAgent — DEPRECATED
 // ---------------------------------------------------------------------------
-export function makeDispatchAgentTool() {
-  return tool({
-    description:
-      "Route a specific task to a department agent (CRO, COO, CNO, CIO, CMO, CPO). Use this to delegate work to the right specialist. Returns the dispatch acknowledgment.",
-    inputSchema: z.object({
-      department: z
-        .enum(["CRO", "COO", "CNO", "CIO", "CMO", "CPO"])
-        .describe("The department agent to dispatch"),
-      task: z
-        .string()
-        .max(500)
-        .describe("The task or question to send to the department agent"),
-      priority: z
-        .enum(["high", "normal", "low"])
-        .default("normal")
-        .describe("Priority level for the dispatch"),
-    }),
-    execute: async (input) => {
-      const agentDescriptions: Record<string, string> = {
-        CRO: "Chief Revenue Officer — pipeline management, conversion rates, follow-up strategy",
-        COO: "Chief Operating Officer — schedule, calendar, follow-ups, email triage",
-        CNO: "Chief Network Officer — contacts, networking, relationship management",
-        CIO: "Chief Intelligence Officer — company research, market intelligence, interview prep",
-        CMO: "Chief Marketing Officer — personal brand, resume, LinkedIn, materials",
-        CPO: "Chief People Officer — interview coaching, behavioral prep, offer negotiation",
-      };
-
-      return {
-        dispatched: true,
-        department: input.department,
-        task: input.task,
-        priority: input.priority,
-        agentRole: agentDescriptions[input.department] ?? "Department agent",
-        message: `Task routed to ${input.department}: "${input.task}". The ${input.department} will handle this with ${input.priority} priority.`,
-        timestamp: new Date().toISOString(),
-      };
-    },
-  });
-}
+//
+// The old `dispatchAgent` tool returned a hardcoded acknowledgment string
+// without actually invoking any subagent. Real dispatch is now wired in
+// `src/lib/ai/agents/ceo-orchestrator.ts` as seven typed tools
+// (`dispatchToCRO`, `dispatchToCOO`, etc.) that the CEO route handler
+// injects via `createAgentRouteHandler`'s `buildExtraTools` hook. Each
+// dispatch tool runs a nested `generateText` against the target agent's
+// persona + tools and returns a compressed structured payload.
+//
+// We deliberately do NOT export a dispatchAgent tool here anymore — keeping
+// the placeholder would let the CEO model call it instead of the real
+// orchestrator tools and break the chain of command. Removed.
 
 // ---------------------------------------------------------------------------
 // Tool 2: compileBriefing
@@ -72,7 +45,7 @@ export function makeCompileBriefingTool(userId: string) {
       // Fetch recent agent logs
       const { data: logs } = await supabase
         .from("agent_logs")
-        .select("agent, action, summary:output_summary, created_at")
+        .select("agent, action, output_summary, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -107,7 +80,7 @@ export function makeCompileBriefingTool(userId: string) {
         recentAgentActivity: (logs ?? []).slice(0, 5).map((l) => ({
           agent: l.agent as string,
           action: l.action as string,
-          summary: l.summary as string,
+          summary: l.output_summary as string,
           at: l.created_at as string,
         })),
         unreadNotifications: notifCount ?? 0,
@@ -218,7 +191,7 @@ export function makeGetRecentActivityTool(userId: string) {
       // Agent logs
       const { data: logs } = await supabase
         .from("agent_logs")
-        .select("agent, action, summary:output_summary, created_at")
+        .select("agent, action, output_summary, created_at")
         .eq("user_id", userId)
         .gte("created_at", since)
         .order("created_at", { ascending: false })
@@ -254,7 +227,7 @@ export function makeGetRecentActivityTool(userId: string) {
       const activityLogs = (logs ?? []).map((l) => ({
         agent: l.agent as string,
         action: l.action as string,
-        summary: l.summary as string,
+        summary: l.output_summary as string,
         at: l.created_at as string,
       }));
 
@@ -295,7 +268,7 @@ export function makeGetDailyBriefingDataTool(userId: string) {
         getPipelineStatsRest(userId),
         supabase
           .from("agent_logs")
-          .select("agent, action, summary:output_summary, created_at")
+          .select("agent, action, output_summary, created_at")
           .eq("user_id", userId)
           .gte("created_at", since)
           .order("created_at", { ascending: false })
@@ -333,7 +306,7 @@ export function makeGetDailyBriefingDataTool(userId: string) {
       const agentLogs = (logsResult.data ?? []).map((l) => ({
         agent: l.agent as string,
         action: l.action as string,
-        summary: l.summary as string,
+        summary: l.output_summary as string,
       }));
 
       const todaysInterviews = (interviewsResult.data ?? []).length;
@@ -367,7 +340,8 @@ export function makeGetDailyBriefingDataTool(userId: string) {
 // ---------------------------------------------------------------------------
 export function buildCEOTools(userId: string) {
   return {
-    dispatchAgent: makeDispatchAgentTool(),
+    // dispatchAgent intentionally absent — see deprecation note above. Real
+    // dispatch lives in `ceo-orchestrator.ts` and is mixed in by the route.
     compileBriefing: makeCompileBriefingTool(userId),
     queryAllPipeline: makeQueryAllPipelineTool(userId),
     getRecentActivity: makeGetRecentActivityTool(userId),

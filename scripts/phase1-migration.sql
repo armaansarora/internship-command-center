@@ -1,6 +1,17 @@
 -- ============================================================
 -- Phase 1 Migration: The War Room
--- Run this in Supabase SQL Editor (Dashboard > SQL > New Query)
+--
+-- HISTORICAL — DO NOT RE-RUN.
+--
+-- This file was the original out-of-band script that added
+-- `position`, `company_name`, `last_activity_at` to the
+-- applications table and enabled pgvector. Those columns are now
+-- part of the canonical schema (`src/db/schema.ts`) and the
+-- pgvector extension is enabled by migration 0004
+-- (`src/db/migrations/0004_post_push_and_secure_rpcs.sql`).
+--
+-- Kept only for archival reference. The `IF NOT EXISTS` guards
+-- mean re-running is safe but pointless.
 -- ============================================================
 
 -- 1. Add new columns to applications table

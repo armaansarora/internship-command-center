@@ -1,26 +1,43 @@
 "use client";
 
 /**
- * useAgentChat — single chat hook shared by all C-suite agents.
+ * useAgentChat — A single React hook that wraps the AI SDK v5 AbstractChat
+ * pattern for ALL eight C-suite agents (CEO, CFO, CIO, CMO, CNO, COO, CPO, CRO).
  *
- * Replaces the 8 near-identical `useCxxChat` hooks. Each dialogue panel
- * passes its own `api` endpoint (e.g. "/api/cro") and a stable chat `id`.
+ * Replaces eight near-identical per-agent hooks (~140 LOC each) with one
+ * factory consumed via thin re-exports (`useCEOChat`, `useCROChat`, etc.)
+ * to keep call-sites stable.
  *
- * Hand-rolls `AbstractChat` instead of `@ai-sdk/react`'s `useChat`
- * because this codebase needs the chat lifecycle to survive outside
- * the React tree (open/close of the dialogue panel) and needs a
- * controlled `input` value. Keep this as the ONE place that owns that.
+ * NOTE on the `setNotify(...)` call: it intentionally runs once on mount via
+ * `useEffect` (not during render). Calling it during render would re-register
+ * a fresh callback every commit and discard the previous one.
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { AbstractChat, DefaultChatTransport, generateId } from "ai";
 
+// ---------------------------------------------------------------------------
+// Public types
+// ---------------------------------------------------------------------------
+export type AgentKey =
+  | "ceo"
+  | "cfo"
+  | "cio"
+  | "cmo"
+  | "cno"
+  | "coo"
+  | "cpo"
+  | "cro";
+
 export interface UseAgentChatOptions {
-  /** Stable id so messages persist across panel open/close within a session. */
+  /** Stable chat id; auto-generated if omitted. */
   id?: string;
-  /** API endpoint for this agent, e.g. "/api/cro". */
-  api: string;
+  /**
+   * API endpoint to POST to. Defaults to `/api/${agentKey}` so most callers
+   * never need to pass it.
+   */
+  api?: string;
 }
 
 export interface UseAgentChatReturn {
@@ -30,9 +47,14 @@ export interface UseAgentChatReturn {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   status: ChatStatus;
   setInput: (value: string) => void;
+  /** Reset the conversation. Some panels expose this; others don't. */
   clearMessages: () => void;
 }
 
+// ---------------------------------------------------------------------------
+// React-driven Chat state — bridges the AI SDK's mutable state contract
+// to a force-update callback that triggers React re-renders.
+// ---------------------------------------------------------------------------
 class ReactChatState {
   private _status: ChatStatus = "ready";
   private _error: Error | undefined = undefined;
@@ -81,7 +103,10 @@ class ReactChatState {
   }
 }
 
-class AgentChat extends AbstractChat<UIMessage> {
+// ---------------------------------------------------------------------------
+// Concrete AbstractChat subclass wired to ReactChatState.
+// ---------------------------------------------------------------------------
+class AgentChatImpl extends AbstractChat<UIMessage> {
   private readonly _state: ReactChatState;
 
   constructor(state: ReactChatState, api: string, chatId: string) {
@@ -102,7 +127,7 @@ class AgentChat extends AbstractChat<UIMessage> {
         pushMessage: (m) => state.pushMessage(m),
         popMessage: () => state.popMessage(),
         replaceMessage: (i, m) => state.replaceMessage(i, m),
-        snapshot: <T,>(t: T) => state.snapshot(t),
+        snapshot: <T>(t: T) => state.snapshot(t),
       },
     });
     this._state = state;
@@ -119,25 +144,37 @@ class AgentChat extends AbstractChat<UIMessage> {
   }
 }
 
-export function useAgentChat({ id, api }: UseAgentChatOptions): UseAgentChatReturn {
-  const [bundle] = useState(() => {
-    const state = new ReactChatState();
-    const chatId = id ?? generateId();
-    const chat = new AgentChat(state, api, chatId);
-    return { state, chat };
-  });
+// ---------------------------------------------------------------------------
+// Factory hook
+// ---------------------------------------------------------------------------
+export function useAgentChat(
+  agentKey: AgentKey,
+  opts: UseAgentChatOptions = {},
+): UseAgentChatReturn {
+  const api = opts.api ?? `/api/${agentKey}`;
+  const chatId = useRef(opts.id ?? generateId()).current;
+  const stateRef = useRef<ReactChatState | null>(null);
+  if (!stateRef.current) {
+    stateRef.current = new ReactChatState();
+  }
+  const chatRef = useRef<AgentChatImpl | null>(null);
 
-  const [slice, setSlice] = useState(() => ({
-    messages: bundle.state.messages,
-    status: bundle.state.status,
-  }));
+  const [, forceUpdate] = useState(0);
 
+  // Register the notify callback exactly once. Doing this in render would
+  // re-register on every commit (the bug flagged in audit H3).
   useEffect(() => {
-    const s = bundle.state;
-    const sync = () => setSlice({ messages: s.messages, status: s.status });
-    s.setNotify(sync);
-    sync();
-  }, [bundle.state]);
+    const state = stateRef.current;
+    if (!state) return;
+    state.setNotify(() => forceUpdate((n) => n + 1));
+    return () => {
+      state.setNotify(() => undefined);
+    };
+  }, []);
+
+  if (!chatRef.current && stateRef.current) {
+    chatRef.current = new AgentChatImpl(stateRef.current, api, chatId);
+  }
 
   const [input, setInputState] = useState("");
 
@@ -149,30 +186,30 @@ export function useAgentChat({ id, api }: UseAgentChatOptions): UseAgentChatRetu
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setInputState(e.target.value);
     },
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const text = input.trim();
-      if (!text) return;
+      if (!text || !chatRef.current) return;
       setInputState("");
-      bundle.chat.sendMessage({ text });
+      chatRef.current.sendMessage({ text });
     },
-    [input, bundle.chat]
+    [input],
   );
 
   const clearMessages = useCallback(() => {
-    bundle.state.clearMessages();
-  }, [bundle.state]);
+    stateRef.current?.clearMessages();
+  }, []);
 
   return {
-    messages: slice.messages,
+    messages: stateRef.current.messages,
     input,
     handleInputChange,
     handleSubmit,
-    status: slice.status,
+    status: stateRef.current.status,
     setInput,
     clearMessages,
   };

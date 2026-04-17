@@ -11,7 +11,9 @@ import { log } from "@/lib/logger";
  * snapshot for every connected user.
  *
  * Hardening:
- *   - CRON_SECRET bearer auth (fail-closed in production).
+ *   - CRON_SECRET bearer auth (fail-closed in production). See `verifyCronRequest`
+ *     in `src/lib/auth/cron.ts` — rejects requests in prod when the secret
+ *     is missing (audit C-1: fail-open cron → AI-cost DoS).
  *   - Pagination: processes users in pages of PAGE_SIZE so huge user bases
  *     don't blow the 300-second function budget.
  *   - Idempotency: skips users that already have today's snapshot + briefing

@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod/v4";
 import { createClient } from "@/lib/supabase/server";
+import { generateStructuredPrepPacket } from "@/lib/ai/structured/prep-packet";
 
 // ---------------------------------------------------------------------------
 // Local Types
@@ -96,96 +97,52 @@ export function makeGeneratePrepPacketTool(userId: string) {
     execute: async (input) => {
       const supabase = await createClient();
 
-      // Build the prep packet content
-      const formatContext = input.interviewFormat !== "general"
-        ? `\n**Interview Format:** ${input.interviewFormat.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}`
-        : "";
+      // Pull research from CIO's database when present so the LLM has real
+      // company specifics to weave into questions.
+      const { data: companyRow } = await supabase
+        .from("companies")
+        .select(
+          "description, culture_summary, recent_news, internship_intel, financials_summary",
+        )
+        .eq("user_id", userId)
+        .ilike("name", input.companyName)
+        .limit(1)
+        .single();
 
-      const roundContext = input.interviewRound
-        ? `\n**Round:** ${input.interviewRound}`
-        : "";
+      const companyResearch = companyRow
+        ? [
+            companyRow.description,
+            companyRow.culture_summary,
+            companyRow.recent_news,
+            companyRow.financials_summary,
+            companyRow.internship_intel,
+          ]
+            .filter(Boolean)
+            .join("\n\n")
+        : undefined;
 
-      const content = `# Interview Prep Packet — ${input.companyName}
-**Role:** ${input.role}${formatContext}${roundContext}
+      const structured = await generateStructuredPrepPacket({
+        userId,
+        companyName: input.companyName,
+        role: input.role,
+        interviewFormat: input.interviewFormat,
+        interviewRound: input.interviewRound,
+        companyResearch,
+      });
+
+      // We always persist a packet — fall back to a minimal scaffold if the
+      // LLM call failed (rare; surfaces as a packet that says "regenerate
+      // me" rather than a 500). Same string contract as before.
+      const content = structured
+        ? structured.markdown
+        : `# Interview Prep Packet — ${input.companyName}
+**Role:** ${input.role}
 **Generated:** ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
 
 ---
 
-## 1. Company Overview
-Research ${input.companyName}'s recent earnings, major acquisitions, strategic priorities, and competitive positioning. Know their business model cold. Key areas to cover:
-- Core business lines and revenue drivers
-- Recent news and strategic initiatives
-- Competitive landscape (who they compete with and why they win)
-- Culture and values (from their website, Glassdoor, LinkedIn)
-
----
-
-## 2. Likely Questions — Behavioral (STAR Framework)
-
-1. **Tell me about a time you led a project under tight deadlines.**
-   *Framework: STAR — Situation, Task, Action, Result. Lead with the result.*
-
-2. **Describe a situation where you had to analyze data to make a recommendation.**
-   *Framework: STAR — emphasize your analytical process and how you communicated findings.*
-
-3. **Give an example of when you worked with a difficult team member.**
-   *Framework: STAR — focus on collaboration, communication, and outcome.*
-
-4. **Tell me about a time you failed. What did you learn?**
-   *Framework: STAR — own the failure, focus 70% of answer on the lesson and recovery.*
-
----
-
-## 3. Likely Questions — Role-Specific / Technical
-
-1. **Walk me through a DCF model.**
-   *Direct answer — demonstrate fluency with assumptions, discount rate, terminal value.*
-
-2. **What drives cap rates in the current market environment?**
-   *Direct answer — interest rates, supply/demand, asset class risk premiums.*
-
-3. **How would you evaluate a real estate acquisition opportunity?**
-   *Structured response — market analysis, financial modeling, risk factors, exit strategy.*
-
-4. **What trends are you watching in ${input.companyName}'s sector?**
-   *Direct answer — cite 2-3 specific trends with data. Show you read the news.*
-
----
-
-## 4. Likely Questions — Culture Fit
-
-1. **Why ${input.companyName}?**
-   *"Why this company" answer — be specific. Reference their recent deals, culture, or growth strategy.*
-
-2. **Why this role over a competing offer?**
-   *Connect your skills to the role requirements. Show alignment with their team's mission.*
-
-3. **Where do you see yourself in 5 years?**
-   *Align with a plausible career path at ${input.companyName}. Show ambition without overpromising.*
-
----
-
-## 5. Your Talking Points
-- Lead with your most relevant experience for this specific role
-- Quantify everything: "increased by X%," "managed a $Y portfolio," "reduced time by Z hours"
-- Connect your academic background to their real-world work
-- Prepare one sharp insight about ${input.companyName}'s recent news or strategy
-
----
-
-## 6. Questions to Ask Them (Pick 2-3)
-1. "What does success look like for this intern in the first 90 days?"
-2. "What's the most challenging deal or project the team has worked on recently?"
-3. "How does this role contribute to the firm's broader strategy?"
-4. "What do people who excel in this role have in common?"
-
----
-
-## 7. Day-Of Reminders
-- Review this packet the night before — don't cram morning of
-- Have 2-3 STAR stories ready that can flex across multiple questions
-- Arrive mentally fresh. Confidence > perfection.
-- Have your questions ready. Not asking questions is a red flag.`;
+## Status
+Could not auto-generate this packet. Try regenerating.`;
 
       const { data: created, error } = await supabase
         .from("documents")
@@ -218,6 +175,8 @@ Research ${input.companyName}'s recent earnings, major acquisitions, strategic p
         content,
         companyName: input.companyName,
         role: input.role,
+        behavioralCount: structured?.packet.behavioral_questions.length ?? 0,
+        technicalCount: structured?.packet.technical_questions.length ?? 0,
         message: `Prep packet for ${input.companyName} (${input.role}) created and saved to your Briefing Room.`,
       };
     },

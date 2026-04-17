@@ -21,6 +21,10 @@ export function NotificationSystem(): JSX.Element {
   const seenIds = useRef(new Set<string>());
   const autoDismissTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
+  // Declared BEFORE addToast so the addToast closure captures the live
+  // reference (no eslint-disable needed). dismissToast itself has empty deps
+  // because it only reads from refs and setState dispatchers, both of which
+  // are referentially stable across renders.
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
     const timer = autoDismissTimers.current.get(id);
@@ -29,7 +33,9 @@ export function NotificationSystem(): JSX.Element {
       autoDismissTimers.current.delete(id);
     }
     // Mark as read server-side (fire and forget)
-    void fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch(() => null);
+    void fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch(
+      () => null,
+    );
   }, []);
 
   const addToast = useCallback(
@@ -49,7 +55,7 @@ export function NotificationSystem(): JSX.Element {
       }, AUTO_DISMISS_MS);
       autoDismissTimers.current.set(notification.id, timer);
     },
-    [dismissToast]
+    [dismissToast],
   );
 
   // Poll for notifications

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState, useCallback, startTransition, type JSX } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -12,6 +13,12 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * white pencil on dark navy). Images rotate with smooth crossfades on
  * a 20-second timer. Each image gets a unique slow Ken Burns treatment:
  * gentle zoom + directional pan, like Apple TV's Aerial screensaver.
+ *
+ * Perf (audit C2): images are now served via next/image, so the optimizer
+ * pipes them as WebP/AVIF at viewport resolution from /_next/image. The
+ * first image is `priority` (LCP); the rest lazy-load. The previous
+ * `new Image()` preload loop has been removed — next/image handles this
+ * via `<link rel="preload" as="image">` injection automatically.
  *
  * Atmospheric overlays (vignette, grain, spotlights) layer on top.
  * prefers-reduced-motion: disables Ken Burns, static display only.
@@ -67,20 +74,8 @@ export function LobbyBackground(): JSX.Element {
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [nextIdx, setNextIdx] = useState<number | null>(null);
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reducedMotion = useReducedMotion();
-
-  // Preload all images
-  useEffect(() => {
-    LOBBY_IMAGES.forEach((src, i) => {
-      const img = new Image();
-      img.onload = () => {
-        setLoadedImages((prev) => new Set(prev).add(i));
-      };
-      img.src = src;
-    });
-  }, []);
 
   // Rotation timer — advance to next image every DISPLAY_DURATION_S
   const advanceImage = useCallback(() => {
@@ -111,8 +106,7 @@ export function LobbyBackground(): JSX.Element {
 
   const currentImageIdx = order[currentIdx];
   const nextImageIdx = nextIdx !== null ? order[nextIdx] : null;
-  const currentLoaded = loadedImages.has(currentImageIdx);
-  const nextLoaded = nextImageIdx !== null && loadedImages.has(nextImageIdx);
+  const isCrossfading = nextIdx !== null;
 
   return (
     <div
@@ -132,24 +126,31 @@ export function LobbyBackground(): JSX.Element {
         }}
       />
 
-      {/* ── CURRENT IMAGE with Ken Burns ── */}
+      {/* ── CURRENT IMAGE with Ken Burns (next/image, optimized via /_next/image) ── */}
       <div
         key={`bg-${currentIdx}`}
         className="absolute inset-0"
         style={{
-          backgroundImage: `url(${LOBBY_IMAGES[currentImageIdx]})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center center",
-          backgroundRepeat: "no-repeat",
-          opacity: currentLoaded ? 0.4 : 0,
-          transition: nextIdx !== null ? `opacity ${CROSSFADE_S}s ease-in-out` : "opacity 1.5s ease-out",
-          ...(nextIdx !== null ? { opacity: 0 } : {}),
-          animation: !reducedMotion && currentLoaded
+          opacity: isCrossfading ? 0 : 0.4,
+          transition: isCrossfading
+            ? `opacity ${CROSSFADE_S}s ease-in-out`
+            : "opacity 1.5s ease-out",
+          animation: !reducedMotion
             ? `kb-${currentImageIdx} ${DISPLAY_DURATION_S}s ease-in-out forwards`
             : "none",
           willChange: "transform, opacity",
         }}
-      />
+      >
+        <Image
+          src={LOBBY_IMAGES[currentImageIdx]}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          quality={75}
+          style={{ objectFit: "cover", objectPosition: "center center" }}
+        />
+      </div>
 
       {/* ── NEXT IMAGE (crossfading in) ── */}
       {nextImageIdx !== null && (
@@ -157,18 +158,23 @@ export function LobbyBackground(): JSX.Element {
           key={`bg-next-${nextIdx}`}
           className="absolute inset-0"
           style={{
-            backgroundImage: `url(${LOBBY_IMAGES[nextImageIdx]})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center center",
-            backgroundRepeat: "no-repeat",
-            opacity: nextLoaded ? 0.4 : 0,
+            opacity: 0.4,
             transition: `opacity ${CROSSFADE_S}s ease-in-out`,
-            animation: !reducedMotion && nextLoaded
+            animation: !reducedMotion
               ? `kb-${nextImageIdx} ${DISPLAY_DURATION_S}s ease-in-out forwards`
               : "none",
             willChange: "transform, opacity",
           }}
-        />
+        >
+          <Image
+            src={LOBBY_IMAGES[nextImageIdx]}
+            alt=""
+            fill
+            sizes="100vw"
+            quality={75}
+            style={{ objectFit: "cover", objectPosition: "center center" }}
+          />
+        </div>
       )}
 
       {/* ── CEILING SPOTLIGHT: Warm overhead glow ── */}

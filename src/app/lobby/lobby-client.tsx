@@ -1,12 +1,12 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect, useRef, useCallback, useSyncExternalStore, type JSX } from "react";
+import { useState, useEffect, useRef, useCallback, useTransition, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
 import { LobbyBackground } from "@/components/world/LobbyBackground";
 import { Elevator } from "@/components/world/Elevator";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import gsap from "gsap";
+import { gsap } from "@/lib/gsap-init";
+import { signInWithGoogleAction } from "./actions";
 
 /**
  * Lobby client component — The Tower entrance.
@@ -18,29 +18,59 @@ import gsap from "gsap";
  * GSAP is enhancement-only. A CSS animation provides the initial fade-in fallback
  * so content is always visible even if GSAP is slow to initialize.
  */
-export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const isReturningUser = useSyncExternalStore(
-    () => () => {},
-    () => typeof document !== "undefined" && document.cookie.includes("sb-"),
-    () => false
-  );
+export function LobbyClient({
+  isAuthenticated = false,
+  initialError = null,
+}: {
+  isAuthenticated?: boolean;
+  initialError?: string | null;
+}) {
+  const [error, setError] = useState<string | null>(initialError);
+  const [isReturningUser, setIsReturningUser] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  // Mouse tracking for spotlight only — disabled under reduced motion.
+  // Detect returning user from cookie (no SSR mismatch — empty initial render).
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const hasPriorVisit = document.cookie.includes("sb-");
+      setIsReturningUser(hasPriorVisit);
+    }
+  }, []);
+
+  // Mouse tracking for spotlight — rAF-throttled with translate3d for GPU layer (M1).
+  // Disabled under reduced motion.
   useEffect(() => {
     if (prefersReducedMotion) return;
-    const onMove = (e: MouseEvent) => {
-      if (spotlightRef.current) {
-        spotlightRef.current.style.left = `${e.clientX}px`;
-        spotlightRef.current.style.top = `${e.clientY}px`;
+    let rafId = 0;
+    let pendingX = 0;
+    let pendingY = 0;
+    let scheduled = false;
+
+    const flush = () => {
+      scheduled = false;
+      const el = spotlightRef.current;
+      if (el) {
+        el.style.transform = `translate3d(${pendingX}px, ${pendingY}px, 0) translate(-50%, -50%)`;
       }
     };
+
+    const onMove = (e: MouseEvent) => {
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      if (!scheduled) {
+        scheduled = true;
+        rafId = requestAnimationFrame(flush);
+      }
+    };
+
     window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [prefersReducedMotion]);
 
   // Cinematic GSAP entrance animation — enhancement only. Skipped entirely
@@ -80,23 +110,22 @@ export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boo
     };
   }, [prefersReducedMotion]);
 
-  async function handleSignIn() {
-    setIsLoading(true);
+  function handleSignIn() {
     setError(null);
-
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/api/auth/callback`,
-        queryParams: { access_type: "offline", prompt: "consent" },
-      },
+    startTransition(async () => {
+      try {
+        // Server Action initiates OAuth and redirects — no return value reached
+        // here on success. If it returns, something went wrong server-side.
+        await signInWithGoogleAction();
+      } catch (err) {
+        // Next.js redirect() throws a special error that should propagate;
+        // anything else is a real failure to surface.
+        const message = err instanceof Error ? err.message : "Sign-in failed";
+        if (!/NEXT_REDIRECT/.test(message)) {
+          setError(message);
+        }
+      }
     });
-
-    if (authError) {
-      setError(authError.message);
-      setIsLoading(false);
-    }
   }
 
   return (
@@ -111,16 +140,20 @@ export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boo
       {/* ── LOBBY BACKGROUND — BUG-010: luxury reception, not skyline ── */}
       <LobbyBackground />
 
-      {/* ── MOUSE SPOTLIGHT OVERLAY ── */}
+      {/* ── MOUSE SPOTLIGHT OVERLAY ──
+          Position is applied via transform: translate3d(x, y, 0) translate(-50%, -50%)
+          inside a rAF callback (M1) for GPU-promoted, layout-free updates. */}
       <div
         ref={spotlightRef}
-        className="pointer-events-none fixed -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none fixed"
         style={{
+          left: 0,
+          top: 0,
           width: "600px",
           height: "600px",
           background: "radial-gradient(circle, rgba(201, 168, 76, 0.06) 0%, rgba(201, 168, 76, 0.025) 35%, transparent 70%)",
           zIndex: 2,
-          willChange: "left, top",
+          willChange: "transform",
         }}
       />
 
@@ -287,7 +320,7 @@ export function LobbyClient({ isAuthenticated = false }: { isAuthenticated?: boo
 
           {/* ── SIGN-IN CARD ── */}
           <SignInCard
-            isLoading={isLoading}
+            isLoading={isPending}
             error={error}
             isReturningUser={isReturningUser}
             isAuthenticated={isAuthenticated}
@@ -389,7 +422,8 @@ function ConstructionTicker(): JSX.Element {
         borderBottom: "1px solid rgba(201, 168, 76, 0.15)",
       }}
       aria-label="Under construction notice"
-      role="marquee"
+      role="region"
+      aria-live="off"
     >
       {/* Gold accent line at very top */}
       <div

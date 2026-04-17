@@ -1,13 +1,23 @@
 import { createBrowserClient } from "@supabase/ssr";
 
 /**
- * Browser-side Supabase client. Public keys only — safe to ship.
- * These env vars are inlined by Next.js at build time via NEXT_PUBLIC_*,
- * so we read `process.env` directly here (the `env()` helper is server-side).
+ * NEXT_PUBLIC_* vars are inlined at build time by Next.js, so a missing var
+ * here surfaces as `undefined` in the bundled client. Throwing a descriptive
+ * error beats the cryptic crash you'd get from the prior non-null asserts.
  */
+function requireEnv(name: string, value: string | undefined): string {
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
 export function createClient() {
   return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    requireEnv("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL),
+    requireEnv(
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    ),
   );
 }

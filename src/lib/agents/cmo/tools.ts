@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod/v4";
 import { createClient } from "@/lib/supabase/server";
+import { generateStructuredCoverLetter } from "@/lib/ai/structured/cover-letter";
 
 // ---------------------------------------------------------------------------
 // Tool 1: generateCoverLetter
@@ -46,19 +47,51 @@ export function makeGenerateCoverLetterTool(userId: string) {
       const latestVersion = existing?.[0]?.version ?? 0;
       const newVersion = latestVersion + 1;
 
-      // Build a structured draft — the LLM will elaborate via its own generation
-      const hookInstruction = getToneHook(input.tone, input.companyName, input.role);
-      const jobDescNote = input.jobDescription
-        ? `\n\nJob Description Keywords to Address:\n${input.jobDescription.slice(0, 500)}`
-        : "";
+      // Try to ground the draft in the CIO's research blob if any exists.
+      const { data: companyRow } = await supabase
+        .from("companies")
+        .select(
+          "description, culture_summary, recent_news, internship_intel",
+        )
+        .eq("user_id", userId)
+        .ilike("name", input.companyName)
+        .limit(1)
+        .single();
 
-      const draftContent = buildCoverLetterTemplate({
+      const companyResearch = companyRow
+        ? [
+            companyRow.description,
+            companyRow.culture_summary,
+            companyRow.recent_news,
+            companyRow.internship_intel,
+          ]
+            .filter(Boolean)
+            .join("\n\n")
+        : undefined;
+
+      // Generate the structured letter via the typed Output.object pipeline.
+      const structured = await generateStructuredCoverLetter({
+        userId,
         companyName: input.companyName,
         role: input.role,
         tone: input.tone,
-        hookInstruction,
-        jobDescNote,
+        jobDescription: input.jobDescription,
+        companyResearch,
       });
+
+      // Fall back to the legacy template generator only if the LLM round-trip
+      // failed — guarantees the user always gets *something* persisted.
+      const draftContent = structured
+        ? structured.markdown
+        : buildCoverLetterTemplate({
+            companyName: input.companyName,
+            role: input.role,
+            tone: input.tone,
+            hookInstruction: getToneHook(input.tone, input.companyName, input.role),
+            jobDescNote: input.jobDescription
+              ? `\n\nJob Description Keywords to Address:\n${input.jobDescription.slice(0, 500)}`
+              : "",
+          });
 
       const title = `${input.companyName} — ${input.role} Cover Letter v${newVersion}`;
 
@@ -96,6 +129,7 @@ export function makeGenerateCoverLetterTool(userId: string) {
         version: created.version as number,
         content: draftContent,
         title,
+        toneNotes: structured?.letter.tone_notes,
         message: `Cover letter v${newVersion} generated and saved for ${input.companyName}.`,
       };
     },

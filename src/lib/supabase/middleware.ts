@@ -1,17 +1,29 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { env } from "@/lib/env";
+
+/**
+ * Read a required env var with a readable error if it's missing. Replaces the
+ * old `process.env.X!` non-null assertions which crashed with a cryptic
+ * `TypeError: Cannot read properties of undefined`. Once Agent 3 lands the
+ * full Zod-parsed `@/lib/env` module that covers PUBLISHABLE_KEY, swap these
+ * reads for `env.X`.
+ */
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  const { NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY } = env();
-
   const supabase = createServerClient(
-    NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
     {
       cookies: {
         getAll() {
@@ -37,17 +49,31 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-  const isApiRoute = pathname.startsWith("/api/");
-  const isPublicPage = pathname === "/lobby";
+  // Public routes that don't require auth.
+  //
+  // Each path here intentionally bypasses the Supabase session check so that
+  // unauthenticated callers receive the route's own response instead of being
+  // 307-redirected to /lobby.
+  //
+  //   /lobby                — entry point; redirect target itself, must be public.
+  //   /api/auth/callback    — Supabase OAuth callback runs before a session exists.
+  //   /api/webhooks         — generic webhook prefix (kept for forward compat).
+  //   /api/stripe/webhook   — Stripe POSTs unauthenticated; redirect would break
+  //                           billing (audit M-9 / P2-1).
+  //   /api/cron             — Vercel Cron POSTs without a session; the cron
+  //                           routes self-authenticate via verifyCronAuth().
+  const publicPaths = [
+    "/lobby",
+    "/api/auth/callback",
+    "/api/webhooks",
+    "/api/stripe/webhook",
+    "/api/cron",
+  ];
+  const isPublicPath = publicPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path),
+  );
 
-  // API routes enforce auth at the handler level (or via signed secrets).
-  // Do not redirect machine-to-machine calls like webhooks/cron.
-  if (isApiRoute || isPublicPage) {
-    return supabaseResponse;
-  }
-
-  if (!user) {
+  if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/lobby";
     return NextResponse.redirect(url);

@@ -1,5 +1,13 @@
 -- ================================================================
--- POST-PUSH SQL — Run in Supabase SQL Editor AFTER migration-full.sql
+-- POST-PUSH SQL — reference copy
+--
+-- This file is kept for documentation/manual-recovery only. The
+-- authoritative source is the drizzle migration:
+--   src/db/migrations/0004_post_push_and_secure_rpcs.sql
+--
+-- That migration is what gets applied to production via drizzle-kit.
+-- Edit BOTH files (or only the migration and copy back here) when
+-- changing the auth/updated_at triggers or the HNSW indexes.
 -- ================================================================
 
 -- 1. Enable pgvector (required for agent_memory, company_embeddings, job_embeddings)

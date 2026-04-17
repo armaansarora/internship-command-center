@@ -363,7 +363,7 @@ export function makeGetAgentCostsTool(userId: string) {
 
       const { data: logs } = await supabase
         .from("agent_logs")
-        .select("agent, action, tokens_used, cost_usd, duration_ms, created_at")
+        .select("agent, action, tokens_used, cost_cents, duration_ms, created_at")
         .eq("user_id", userId)
         .gte("created_at", since)
         .order("created_at", { ascending: false });
@@ -393,10 +393,20 @@ export function makeGetAgentCostsTool(userId: string) {
         if (!byAgent[agent]) {
           byAgent[agent] = { invocations: 0, totalTokens: 0, totalCostUsd: 0, avgDurationMs: 0 };
         }
+        // cost_cents is numeric(10,2). Supabase REST returns it as a string, so coerce to number.
+        // Divide by 100 to convert cents to dollars for the USD-denominated tool output.
+        const costCentsRaw = log.cost_cents;
+        const costCents =
+          typeof costCentsRaw === "number"
+            ? costCentsRaw
+            : typeof costCentsRaw === "string"
+              ? parseFloat(costCentsRaw)
+              : 0;
+        const costUsd = (Number.isFinite(costCents) ? costCents : 0) / 100;
         byAgent[agent].invocations++;
         byAgent[agent].totalTokens += (log.tokens_used as number) ?? 0;
-        byAgent[agent].totalCostUsd += (log.cost_usd as number) ?? 0;
-        totalCostUsd += (log.cost_usd as number) ?? 0;
+        byAgent[agent].totalCostUsd += costUsd;
+        totalCostUsd += costUsd;
         totalTokensUsed += (log.tokens_used as number) ?? 0;
 
         if (log.duration_ms) {
@@ -458,10 +468,17 @@ export function makeGetDailySnapshotTool(userId: string) {
         .toISOString()
         .split("T")[0];
 
+      // Schema columns on daily_snapshots:
+      //   date, total_applications, active_pipeline, interviews_scheduled,
+      //   offers, rejections, emails_processed, agents_runs, total_cost_cents
+      // TODO: schema — `conversion_rate`, `stale_count`, `applied_count`,
+      // `screening_count`, `interview_count`, `offer_count` do not exist on the table.
+      // Either add them via migration (Agent 1) or compute conversionRate / stage
+      // breakdowns at read-time from `applications` rather than from snapshots.
       const { data, error } = await supabase
         .from("daily_snapshots")
         .select(
-          "snapshot_date:date, total_applications, conversion_rate, stale_count, applied_count, screening_count, interview_count, offer_count"
+          "date, total_applications, active_pipeline, interviews_scheduled, offers, rejections, emails_processed, agents_runs, total_cost_cents, conversion_rate, stale_count, applied_count, screening_count, interview_count, offer_count"
         )
         .eq("user_id", userId)
         .gte("date", since)
@@ -476,8 +493,15 @@ export function makeGetDailySnapshotTool(userId: string) {
       }
 
       const snapshots = (data ?? []).map((s) => ({
-        date: s.snapshot_date as string,
+        date: s.date as string,
         totalApplications: (s.total_applications as number) ?? 0,
+        activePipeline: (s.active_pipeline as number) ?? 0,
+        interviewsScheduled: (s.interviews_scheduled as number) ?? 0,
+        offers: (s.offers as number) ?? 0,
+        rejections: (s.rejections as number) ?? 0,
+        emailsProcessed: (s.emails_processed as number) ?? 0,
+        agentsRuns: (s.agents_runs as number) ?? 0,
+        totalCostCents: (s.total_cost_cents as number) ?? 0,
         conversionRate: Number(s.conversion_rate ?? 0),
         staleCount: (s.stale_count as number) ?? 0,
         appliedCount: (s.applied_count as number) ?? 0,

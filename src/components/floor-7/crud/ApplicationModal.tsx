@@ -1,7 +1,8 @@
 "use client";
 
 import type { JSX } from "react";
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useActionState, useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import type { Application } from "@/db/schema";
 
 interface ApplicationModalProps {
@@ -12,6 +13,23 @@ interface ApplicationModalProps {
 }
 
 type FormErrors = Partial<Record<string, string>>;
+
+interface FormState {
+  errors: FormErrors;
+  /** Increments on every successful submit so the parent can react with onClose. */
+  successCount: number;
+}
+
+const INITIAL_FORM_STATE: FormState = { errors: {}, successCount: 0 };
+
+function validate(data: FormData): FormErrors {
+  const errs: FormErrors = {};
+  const company = (data.get("companyName") as string)?.trim();
+  const role = (data.get("role") as string)?.trim();
+  if (!company) errs.companyName = "Company name is required";
+  if (!role) errs.role = "Role is required";
+  return errs;
+}
 
 const STATUS_OPTIONS = [
   { value: "discovered", label: "RECON — Discovered" },
@@ -177,6 +195,110 @@ function FocusableSelect({
   );
 }
 
+// React 19 — `useFormStatus` only reads from the closest enclosing <form>.
+// Must be invoked inside a child component, never in the form itself.
+function SubmitButton({ isEditing }: { isEditing: boolean }): JSX.Element {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-busy={pending}
+      style={{
+        padding: "8px 24px",
+        background: pending
+          ? "rgba(30, 144, 255, 0.3)"
+          : "rgba(30, 144, 255, 0.9)",
+        border: "1px solid rgba(30, 144, 255, 0.8)",
+        borderRadius: "2px",
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: "10px",
+        fontWeight: 700,
+        letterSpacing: "0.12em",
+        color: pending ? "rgba(232, 244, 253, 0.5)" : "#E8F4FD",
+        cursor: pending ? "not-allowed" : "pointer",
+        textTransform: "uppercase",
+        transition: "background 0.15s ease, color 0.15s ease",
+        outline: "none",
+      }}
+      onMouseEnter={(e) => {
+        if (!pending) {
+          (e.currentTarget as HTMLButtonElement).style.background =
+            "rgba(30, 144, 255, 1)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!pending) {
+          (e.currentTarget as HTMLButtonElement).style.background =
+            "rgba(30, 144, 255, 0.9)";
+        }
+      }}
+      onFocus={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.outline = "2px solid rgba(30, 144, 255, 0.7)";
+      }}
+      onBlur={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.outline = "none";
+      }}
+    >
+      {pending
+        ? "TRANSMITTING..."
+        : isEditing
+        ? "AMEND DOSSIER"
+        : "FILE DOSSIER"}
+    </button>
+  );
+}
+
+function CancelButton({
+  onClose,
+}: {
+  onClose: () => void;
+}): JSX.Element {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      disabled={pending}
+      style={{
+        padding: "8px 18px",
+        background: "transparent",
+        border: "1px solid rgba(30, 58, 95, 0.8)",
+        borderRadius: "2px",
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: "10px",
+        fontWeight: 600,
+        letterSpacing: "0.1em",
+        color: pending ? "rgba(127, 179, 211, 0.5)" : "#7FB3D3",
+        cursor: pending ? "not-allowed" : "pointer",
+        textTransform: "uppercase",
+        transition: "border-color 0.15s ease, color 0.15s ease",
+        outline: "none",
+      }}
+      onMouseEnter={(e) => {
+        if (pending) return;
+        const el = e.currentTarget as HTMLButtonElement;
+        el.style.borderColor = "rgba(30, 144, 255, 0.4)";
+        el.style.color = "#E8F4FD";
+      }}
+      onMouseLeave={(e) => {
+        if (pending) return;
+        const el = e.currentTarget as HTMLButtonElement;
+        el.style.borderColor = "rgba(30, 58, 95, 0.8)";
+        el.style.color = "#7FB3D3";
+      }}
+      onFocus={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.outline = "2px solid rgba(30, 144, 255, 0.5)";
+      }}
+      onBlur={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.outline = "none";
+      }}
+    >
+      ABORT
+    </button>
+  );
+}
+
 export function ApplicationModal({
   isOpen,
   onClose,
@@ -185,9 +307,38 @@ export function ApplicationModal({
 }: ApplicationModalProps): JSX.Element | null {
   const dialogRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
   const isEditing = Boolean(application);
+
+  // React 19 — useActionState wires our async server action through React's
+  // built-in pending/error tracking. Submit button reads `pending` via
+  // useFormStatus; we read errors and a successCount sentinel to drive close.
+  const [state, formAction] = useActionState<FormState, FormData>(
+    async (prev, formData) => {
+      const errs = validate(formData);
+      if (Object.keys(errs).length > 0) {
+        return { errors: errs, successCount: prev.successCount };
+      }
+      try {
+        await onSubmit(formData);
+        return { errors: {}, successCount: prev.successCount + 1 };
+      } catch {
+        return {
+          errors: { _form: "Failed to save. Please try again." },
+          successCount: prev.successCount,
+        };
+      }
+    },
+    INITIAL_FORM_STATE
+  );
+
+  const errors = state.errors;
+  const lastSuccessRef = useRef(state.successCount);
+  useEffect(() => {
+    if (state.successCount > lastSuccessRef.current) {
+      lastSuccessRef.current = state.successCount;
+      onClose();
+    }
+  }, [state.successCount, onClose]);
 
   // Focus trap + Escape key
   useEffect(() => {
@@ -243,35 +394,6 @@ export function ApplicationModal({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  function validate(data: FormData): FormErrors {
-    const errs: FormErrors = {};
-    const company = (data.get("companyName") as string)?.trim();
-    const role = (data.get("role") as string)?.trim();
-    if (!company) errs.companyName = "Company name is required";
-    if (!role) errs.role = "Role is required";
-    return errs;
-  }
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const errs = validate(formData);
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
-    }
-    setErrors({});
-    setIsSubmitting(true);
-    try {
-      await onSubmit(formData);
-      onClose();
-    } catch {
-      setErrors({ _form: "Failed to save. Please try again." });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
 
   return (
     <div
@@ -425,8 +547,8 @@ export function ApplicationModal({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} noValidate>
+        {/* Form — React 19 server-action style. useFormStatus reads pending. */}
+        <form action={formAction} noValidate>
           <div
             style={{
               padding: "16px 20px",
@@ -610,7 +732,7 @@ export function ApplicationModal({
             )}
           </div>
 
-          {/* Footer actions */}
+          {/* Footer actions — buttons read pending from useFormStatus inside the form */}
           <div
             style={{
               padding: "12px 20px 16px",
@@ -621,90 +743,8 @@ export function ApplicationModal({
               alignItems: "center",
             }}
           >
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: "8px 18px",
-                background: "transparent",
-                border: "1px solid rgba(30, 58, 95, 0.8)",
-                borderRadius: "2px",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: "10px",
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                color: "#7FB3D3",
-                cursor: "pointer",
-                textTransform: "uppercase",
-                transition: "border-color 0.15s ease, color 0.15s ease",
-                outline: "none",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.borderColor = "rgba(30, 144, 255, 0.4)";
-                el.style.color = "#E8F4FD";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLButtonElement;
-                el.style.borderColor = "rgba(30, 58, 95, 0.8)";
-                el.style.color = "#7FB3D3";
-              }}
-              onFocus={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.outline = "2px solid rgba(30, 144, 255, 0.5)";
-              }}
-              onBlur={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.outline = "none";
-              }}
-            >
-              ABORT
-            </button>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              aria-busy={isSubmitting}
-              style={{
-                padding: "8px 24px",
-                background: isSubmitting
-                  ? "rgba(30, 144, 255, 0.3)"
-                  : "rgba(30, 144, 255, 0.9)",
-                border: "1px solid rgba(30, 144, 255, 0.8)",
-                borderRadius: "2px",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: "10px",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                color: isSubmitting ? "rgba(232, 244, 253, 0.5)" : "#E8F4FD",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-                textTransform: "uppercase",
-                transition: "background 0.15s ease, color 0.15s ease",
-                outline: "none",
-              }}
-              onMouseEnter={(e) => {
-                if (!isSubmitting) {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    "rgba(30, 144, 255, 1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSubmitting) {
-                  (e.currentTarget as HTMLButtonElement).style.background =
-                    "rgba(30, 144, 255, 0.9)";
-                }
-              }}
-              onFocus={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.outline = "2px solid rgba(30, 144, 255, 0.7)";
-              }}
-              onBlur={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.outline = "none";
-              }}
-            >
-              {isSubmitting
-                ? "TRANSMITTING..."
-                : isEditing
-                ? "AMEND DOSSIER"
-                : "FILE DOSSIER"}
-            </button>
+            <CancelButton onClose={onClose} />
+            <SubmitButton isEditing={isEditing} />
           </div>
         </form>
 

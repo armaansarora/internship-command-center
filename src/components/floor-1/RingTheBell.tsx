@@ -1,28 +1,51 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSoundEngine } from "@/components/world/SoundProvider";
 
 interface AgentProgress {
   name: string;
   label: string;
+  /**
+   * The CEO orchestrator dispatch tool name that drives this card
+   * (`dispatchToCRO`, `dispatchToCOO`, ...). Matched against tool-call
+   * events forwarded from the dialogue panel.
+   */
+  toolKey: string;
   status: "waiting" | "running" | "completed" | "error";
 }
 
 interface RingTheBellProps {
   onBriefingReady?: (briefing: string) => void;
+  /**
+   * Map of dispatch-tool key → state. Driven by CSuiteClient watching the CEO
+   * dialogue panel's UIMessage stream for `tool-{name}` parts. The bell uses
+   * this to flip its progress cards in lock-step with real subagent activity.
+   * Keys: "dispatchToCRO", "dispatchToCOO", "dispatchToCNO", "dispatchToCIO",
+   * "dispatchToCMO", "dispatchToCPO".
+   */
+  dispatchEvents?: Record<string, "running" | "completed">;
+  /**
+   * True while the CEO dialogue panel is actively streaming a response. Lets
+   * the bell auto-transition from "orchestrating" to "complete" when the
+   * stream ends.
+   */
+  isStreaming?: boolean;
 }
 
-const AGENTS: Array<{ name: string; label: string }> = [
-  { name: "CRO", label: "Revenue Officer" },
-  { name: "COO", label: "Operations Officer" },
-  { name: "CNO", label: "Networking Officer" },
-  { name: "CIO", label: "Intelligence Officer" },
-  { name: "CMO", label: "Marketing Officer" },
-  { name: "CPO", label: "Strategy Officer" },
+const AGENTS: Array<{ name: string; label: string; toolKey: string }> = [
+  { name: "CRO", label: "Revenue Officer",     toolKey: "dispatchToCRO" },
+  { name: "COO", label: "Operations Officer",  toolKey: "dispatchToCOO" },
+  { name: "CNO", label: "Networking Officer",  toolKey: "dispatchToCNO" },
+  { name: "CIO", label: "Intelligence Officer", toolKey: "dispatchToCIO" },
+  { name: "CMO", label: "Marketing Officer",   toolKey: "dispatchToCMO" },
+  { name: "CPO", label: "Strategy Officer",    toolKey: "dispatchToCPO" },
 ];
+
+const BRIEFING_PROMPT =
+  "Ring the bell — compile a full morning briefing. Dispatch to CRO for pipeline status, COO for follow-up actions, CNO for networking opportunities, CIO for company intelligence, CMO for content and outreach, CPO for strategic priorities. Synthesize everything into a single executive briefing.";
 
 function BellIcon({ ringing }: { ringing: boolean }): JSX.Element {
   return (
@@ -115,46 +138,106 @@ function AgentCard({ agent }: { agent: AgentProgress }): JSX.Element {
 }
 
 /**
- * RingTheBell — The primary orchestration trigger for the CEO floor.
- * Dispatches to /api/ceo, shows agent progress cards, delivers briefing.
+ * RingTheBell — Primary orchestration trigger for the CEO floor.
+ *
+ * Fires the briefing prompt to the CEO dialogue panel via
+ * `onBriefingReady`. The panel itself runs the real /api/ceo chat, which
+ * invokes the agent-in-tool orchestrator (`buildCEODispatchTools`). As that
+ * happens, each `dispatchTo<X>` tool call surfaces in the chat's UIMessage
+ * parts; the parent `CSuiteClient` watches those parts and forwards
+ * per-subagent state via the `dispatchEvents` prop. This keeps the bell's
+ * progress cards coupled 1:1 with real subagent activity — no fake loops.
  */
-export function RingTheBell({ onBriefingReady }: RingTheBellProps): JSX.Element {
+export function RingTheBell({
+  onBriefingReady,
+  dispatchEvents,
+  isStreaming,
+}: RingTheBellProps): JSX.Element {
+  // `phase` is the externally-driven UX flow:
+  //   idle → ringing → orchestrating → complete (or back to idle via reset)
   const [phase, setPhase] = useState<"idle" | "ringing" | "orchestrating" | "complete">("idle");
-  const [agentProgress, setAgentProgress] = useState<AgentProgress[]>(
-    AGENTS.map((a) => ({ ...a, status: "waiting" as const }))
-  );
+  // Reset counter — bumped by handleReset to invalidate downgrade-locks. We
+  // can't store the locked state in useState (would require setState-in-effect
+  // again); instead we recompute lock-state per render from dispatchEvents +
+  // resetSeq via a ref that's safe to mutate during render.
+  const [resetSeq, setResetSeq] = useState(0);
   const reducedMotion = useReducedMotion();
   const { playSound } = useSoundEngine();
+
+  // Latch — once a card has flipped to "completed" we don't downgrade it back
+  // to "running" if the model dispatches the same subagent twice in a single
+  // briefing. Stored in a ref keyed on resetSeq so handleReset clears it.
+  const completedLatch = useRef<{ seq: number; keys: Set<string> }>({
+    seq: 0,
+    keys: new Set(),
+  });
+  if (completedLatch.current.seq !== resetSeq) {
+    completedLatch.current = { seq: resetSeq, keys: new Set() };
+  }
+  if (dispatchEvents) {
+    for (const [key, state] of Object.entries(dispatchEvents)) {
+      if (state === "completed") completedLatch.current.keys.add(key);
+    }
+  }
+
+  // Derive agent progress from props + phase. No mirror state, no
+  // setState-in-effect — pure function of inputs. Once `phase === "complete"`
+  // any card still in "waiting" is upgraded to "completed" because the
+  // streaming finished even if the model never dispatched that subagent.
+  const agentProgress: AgentProgress[] = useMemo(() => {
+    return AGENTS.map((a) => {
+      const event = dispatchEvents?.[a.toolKey];
+      let status: AgentProgress["status"] = "waiting";
+      if (completedLatch.current.keys.has(a.toolKey)) {
+        status = "completed";
+      } else if (event === "completed") {
+        status = "completed";
+      } else if (event === "running") {
+        status = "running";
+      }
+      // When the bell hits "complete" sweep the remaining waiting/running
+      // cards forward — the briefing has finished even if the CEO didn't
+      // dispatch every department. The "error" status is never set inside
+      // this memo (it's a prop-forwardable value we reserved for future
+      // use), so no need to guard against it here.
+      if (phase === "complete") {
+        status = "completed";
+      }
+      return { ...a, status };
+    });
+    // resetSeq listed so the memo re-runs after a reset clears the latch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatchEvents, phase, resetSeq]);
+
+  // Drive phase transitions from observable props. We use an effect that
+  // calls setPhase only when the *external* signal (isStreaming) actually
+  // ends — never to mirror state into local state on every render.
+  useEffect(() => {
+    if (phase !== "orchestrating") return;
+    if (isStreaming) return;
+    if (!dispatchEvents || Object.keys(dispatchEvents).length === 0) return;
+    setPhase("complete");
+  }, [isStreaming, phase, dispatchEvents]);
 
   const handleRing = useCallback(async () => {
     if (phase !== "idle") return;
     setPhase("ringing");
     playSound("bell-ring");
 
-    // Step 1: Bell animation
-    await new Promise<void>((resolve) => setTimeout(resolve, reducedMotion ? 0 : 700));
+    // Bell ring delay (UI flourish — animation only, not orchestrator pacing).
+    await new Promise<void>((resolve) =>
+      setTimeout(resolve, reducedMotion ? 0 : 700),
+    );
     setPhase("orchestrating");
 
-    // Step 2: Simulate agent progress (real orchestration goes through /api/ceo)
-    // We light up each agent sequentially to show progress
-    for (let i = 0; i < AGENTS.length; i++) {
-      setAgentProgress((prev) =>
-        prev.map((a, idx) => idx === i ? { ...a, status: "running" } : a)
-      );
-      await new Promise<void>((resolve) => setTimeout(resolve, 600));
-      setAgentProgress((prev) =>
-        prev.map((a, idx) => idx === i ? { ...a, status: "completed" } : a)
-      );
-    }
-
-    setPhase("complete");
-    // Signal parent to open CEO dialogue with ring-the-bell prompt
-    onBriefingReady?.("Ring the bell — compile a full morning briefing from all department heads. CRO: pipeline status. COO: follow-up actions. CNO: networking opportunities. CIO: company intelligence. CMO: content and outreach. CPO: strategic priorities. Go.");
+    // Hand the briefing prompt to the dialogue panel; it owns the real
+    // /api/ceo chat call. Tool dispatch events flow back via dispatchEvents.
+    onBriefingReady?.(BRIEFING_PROMPT);
   }, [phase, reducedMotion, playSound, onBriefingReady]);
 
   const handleReset = useCallback(() => {
     setPhase("idle");
-    setAgentProgress(AGENTS.map((a) => ({ ...a, status: "waiting" as const })));
+    setResetSeq((n) => n + 1);
   }, []);
 
   return (

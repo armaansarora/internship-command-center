@@ -229,8 +229,11 @@ export function parseGmailMessage(raw: GmailMessage): ParsedEmail {
 
 interface ApplicationRecord {
   id: string;
-  company_name: string;
-  company_domain?: string | null;
+  company_name: string | null;
+  // `applications` does not have a `company_domain` column. The domain lives
+  // on the related `companies` row, surfaced here through the PostgREST
+  // nested-select alias (`companies(domain)`).
+  companies?: { domain: string | null } | null;
 }
 
 export async function matchEmailToApplication(
@@ -240,9 +243,13 @@ export async function matchEmailToApplication(
 ): Promise<string | undefined> {
   const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
 
+  // Join to companies via `company_id` so we can read `companies.domain`.
+  // PostgREST nested-select returns the joined row (or `null`) under the
+  // foreign-table key. Apps without a linked company will have `companies: null`
+  // — those fall through to the name-based fuzzy match below.
   const { data: applications, error } = await supabase
     .from("applications")
-    .select("id, company_name, company_domain")
+    .select("id, company_name, companies(domain)")
     .eq("user_id", userId);
 
   if (error || !applications) return undefined;
@@ -250,18 +257,22 @@ export async function matchEmailToApplication(
   const fromDomain = extractDomainFromEmail(email.from);
   if (!fromDomain) return undefined;
 
-  // Try matching by company domain first
-  for (const app of applications as ApplicationRecord[]) {
-    if (app.company_domain) {
-      const appDomain = app.company_domain.toLowerCase().replace(/^www\./, "");
-      if (fromDomain.includes(appDomain) || appDomain.includes(fromDomain)) {
+  const records = applications as unknown as ApplicationRecord[];
+
+  // Try matching by linked company domain first
+  for (const app of records) {
+    const appDomain = app.companies?.domain;
+    if (appDomain) {
+      const normalized = appDomain.toLowerCase().replace(/^www\./, "");
+      if (fromDomain.includes(normalized) || normalized.includes(fromDomain)) {
         return app.id;
       }
     }
   }
 
   // Fall back to matching by normalized company name in email domain
-  for (const app of applications as ApplicationRecord[]) {
+  for (const app of records) {
+    if (!app.company_name) continue;
     const normalizedName = app.company_name.toLowerCase().replace(/[^a-z0-9]/g, "");
     const normalizedDomain = fromDomain.replace(/[^a-z0-9]/g, "");
     if (normalizedDomain.includes(normalizedName) && normalizedName.length >= 4) {

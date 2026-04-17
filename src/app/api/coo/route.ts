@@ -1,18 +1,14 @@
-import { createAgentRoute } from "@/lib/agents/create-agent-route";
+import { createAgentRouteHandler } from "@/lib/ai/agents/shared-route-handler";
 import { getDailyBriefingData } from "@/lib/db/queries/communications-rest";
 import { buildCOOSystemPrompt } from "@/lib/agents/coo/system-prompt";
 import { buildCOOTools } from "@/lib/agents/coo/tools";
 
 export const maxDuration = 60;
 
-export const POST = createAgentRoute({
-  id: "coo",
-  maxDuration,
-  loadContext: async ({ user, userName }) => {
-    const briefingData = await getDailyBriefingData(user.id);
-    return {
-      systemPrompt: buildCOOSystemPrompt(briefingData, userName, []),
-      tools: buildCOOTools(user.id),
-    };
-  },
+export const POST = createAgentRouteHandler({
+  agentKey: "coo",
+  loadContext: (user) => getDailyBriefingData(user.id),
+  buildSystemPrompt: (briefingData, userName, memories) =>
+    buildCOOSystemPrompt(briefingData, userName, memories),
+  buildTools: (userId) => buildCOOTools(userId),
 });

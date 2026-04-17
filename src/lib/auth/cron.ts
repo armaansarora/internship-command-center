@@ -9,12 +9,17 @@ interface CronAuthResult {
 /**
  * Verify that a cron request is authorized.
  *
- * In production, CRON_SECRET is mandatory and must match Authorization: Bearer <secret>.
- * In local development, requests are allowed without a secret.
+ * In production, CRON_SECRET is mandatory. Accepts either:
+ *   - `x-vercel-cron: 1` header (Vercel internal cron signal), OR
+ *   - `Authorization: Bearer <CRON_SECRET>` (external / manual triggers).
+ *
+ * In local development without CRON_SECRET, requests are allowed.
+ * Fails closed in production if CRON_SECRET is unset (audit C-1).
  */
 export function verifyCronRequest(request: Request): CronAuthResult {
   const cronSecret = env().CRON_SECRET;
   const authHeader = request.headers.get("authorization");
+  const cronHeader = request.headers.get("x-vercel-cron");
 
   if (!cronSecret) {
     if (isProd()) {
@@ -26,6 +31,9 @@ export function verifyCronRequest(request: Request): CronAuthResult {
     }
     return { ok: true };
   }
+
+  // Vercel internal cron — trusted by platform.
+  if (cronHeader === "1") return { ok: true };
 
   if (!authHeader) {
     return { ok: false, error: "Missing cron authorization header." };

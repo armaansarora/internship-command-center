@@ -2,6 +2,70 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { env, isProd } from "@/lib/env";
 
+// ── In-memory token-bucket fallback ───────────────────────────────────────────
+//
+// Used by routes that don't justify the Upstash round-trip (e.g. /api/weather,
+// which is hit on every floor change for the skyline). Per-instance only — on
+// Vercel Fluid Compute warm instances share the bucket, but a brand-new cold
+// start gets a fresh bucket. Good enough for "stop runaway clients", not for
+// tight financial limits.
+//
+// TODO: replace with Upstash (multi-instance) once we have a per-IP keying
+// strategy. For now, the only callers are authenticated and bucket per user.
+
+interface InMemoryBucket {
+  count: number;
+  resetAt: number;
+}
+
+const memoryBuckets = new Map<string, InMemoryBucket>();
+const MEMORY_BUCKET_MAX_KEYS = 10_000;
+
+export interface InMemoryRateLimitResult {
+  success: boolean;
+  remaining: number;
+  reset: number;
+}
+
+/**
+ * In-memory sliding-window-ish limiter (fixed-window for simplicity).
+ *
+ * @param key       caller-chosen identity (typically `${routeName}:${userId}`)
+ * @param limit     max requests per window
+ * @param windowMs  window length in milliseconds
+ */
+export function checkInMemoryRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+): InMemoryRateLimitResult {
+  const now = Date.now();
+
+  // Bound the map to prevent unbounded growth from adversarial keys
+  // (audit H-7: weather cache could be exploded by varying coords).
+  if (memoryBuckets.size > MEMORY_BUCKET_MAX_KEYS) {
+    const oldestKey = memoryBuckets.keys().next().value;
+    if (oldestKey !== undefined) memoryBuckets.delete(oldestKey);
+  }
+
+  const existing = memoryBuckets.get(key);
+  if (!existing || existing.resetAt <= now) {
+    memoryBuckets.set(key, { count: 1, resetAt: now + windowMs });
+    return { success: true, remaining: limit - 1, reset: now + windowMs };
+  }
+
+  if (existing.count >= limit) {
+    return { success: false, remaining: 0, reset: existing.resetAt };
+  }
+
+  existing.count += 1;
+  return {
+    success: true,
+    remaining: Math.max(0, limit - existing.count),
+    reset: existing.resetAt,
+  };
+}
+
 // ── Lazy init ─────────────────────────────────────────────────────────────────
 
 type Tier = "free" | "pro" | "team";

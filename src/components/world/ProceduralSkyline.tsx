@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type JSX } from "react";
+import { useCallback, useEffect, useRef, type JSX } from "react";
 import type { FloorId } from "@/types/ui";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useDayNight } from "./DayNightProvider";
@@ -19,6 +19,7 @@ import {
      - canvas ref + DPR resize observer
      - requestAnimationFrame loop
      - day/night + reduced-motion wiring
+     - visibility-aware loop pause (audit C4)
    ───────────────────────────────────────────── */
 
 interface Props {
@@ -70,44 +71,102 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-  // ── RAF render loop — delegates all drawing to drawFrame() ──
+  // ── RAF render loop — uses refs so the loop can run forever without
+  // re-creation on each prop change. drawFrame reads timeState/offset/reduced
+  // from refs (synced in the effect above), keeping closure-stable.
+  const render = useCallback((t: number) => {
+    const canvas = canvasRef.current;
+    const scene = sceneRef.current;
+    if (!canvas || !scene) {
+      rafRef.current = requestAnimationFrame(render);
+      return;
+    }
+    const ctx = ctxRef.current ?? canvas.getContext("2d");
+    if (!ctx) return;
+    ctxRef.current = ctx;
+    const { w, h } = sizeRef.current;
+    if (!w || !h) return;
+
+    drawFrame({
+      ctx,
+      w,
+      h,
+      t,
+      scene,
+      timeState: timeStateRef.current,
+      offset: offsetRef.current,
+      reduced: reducedRef.current,
+    });
+
+    rafRef.current = requestAnimationFrame(render);
+  }, []);
+
+  // ── Single static frame (one-shot, no loop) for reduced-motion users ──
+  const drawStaticFrame = useCallback(() => {
+    const canvas = canvasRef.current;
+    const scene = sceneRef.current;
+    if (!canvas || !scene) return;
+    const ctx = ctxRef.current ?? canvas.getContext("2d");
+    if (!ctx) return;
+    ctxRef.current = ctx;
+    const { w, h } = sizeRef.current;
+    if (!w || !h) return;
+    drawFrame({
+      ctx,
+      w,
+      h,
+      t: 0,
+      scene,
+      timeState: timeStateRef.current,
+      offset: offsetRef.current,
+      reduced: true,
+    });
+  }, []);
+
+  // ── RAF lifecycle with visibility pause + reduced-motion bypass (audit C4) ──
   useEffect(() => {
-    const loop = (t: number) => {
-      const canvas = canvasRef.current;
-      const scene = sceneRef.current;
-      if (!canvas || !scene) {
-        rafRef.current = requestAnimationFrame(loop);
-        return;
-      }
-      const ctx = ctxRef.current ?? canvas.getContext("2d");
-      if (!ctx) {
-        rafRef.current = requestAnimationFrame(loop);
-        return;
-      }
-      ctxRef.current = ctx;
-      const { w, h } = sizeRef.current;
-      if (!w || !h) {
-        rafRef.current = requestAnimationFrame(loop);
-        return;
-      }
+    // prefers-reduced-motion: render one static frame, no loop, no listeners.
+    if (reduced) {
+      const timer = setTimeout(drawStaticFrame, 0);
+      return () => clearTimeout(timer);
+    }
 
-      drawFrame({
-        ctx,
-        w,
-        h,
-        t,
-        scene,
-        timeState: timeStateRef.current,
-        offset: offsetRef.current,
-        reduced: reducedRef.current,
-      });
+    let running = true;
 
-      rafRef.current = requestAnimationFrame(loop);
+    const start = () => {
+      if (!running) return;
+      rafRef.current = requestAnimationFrame(render);
     };
 
-    rafRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+    const stop = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        running = false;
+        stop();
+      } else if (!running) {
+        running = true;
+        start();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange, { passive: true });
+
+    // Start the loop only if the tab is currently visible.
+    if (!document.hidden) {
+      start();
+    } else {
+      running = false;
+    }
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [render, reduced, drawStaticFrame]);
 
   return (
     <canvas
