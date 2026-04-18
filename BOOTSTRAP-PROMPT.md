@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 11:25 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 11:36 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `ba510d3`)
+- **Branch:** `main` (commit `9a50389`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,045 across 264 source files
 - **Build:** Clean (zero TS errors)
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-ba510d3 fix(drizzle): make 0006 migration fully idempotent
+9a50389 feat: god-tier owner bypass on every entitlement gate
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `ba510d3`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `9a50389`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -100,6 +100,7 @@ See docs/MASTER-PLAN.md for the next phase.
 ## Env Vars (names only — values in .env.local)
 
 - AI_GATEWAY_API_KEY
+- OWNER_USER_ID
 
 ## Source Tree (264 files, 53,045 LOC)
 
@@ -531,11 +532,11 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 579 | 5,893 |
+| `BOOTSTRAP-PROMPT.md` | 580 | 5,893 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 313 | 6,447 |
-| **Total** | **1537** | **24,679** |
+| **Total** | **1538** | **24,679** |
 
 > ⚠️ Reading all recommended files consumes ~24,679 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
