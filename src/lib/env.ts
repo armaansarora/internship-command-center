@@ -24,6 +24,13 @@ const EnvSchema = z.object({
   // ── App ──────────────────────────────────────────────────────────────────
   NEXT_PUBLIC_APP_URL: z.string().url().default("https://thetower.app"),
 
+  // ── Owner override ───────────────────────────────────────────────────────
+  // Single Supabase user UUID granted unconditional bypass on every
+  // entitlement gate (agents, rate limits, application caps). Server-only,
+  // never bundled to the client. Leave unset in dev/preview unless you want
+  // god-tier locally too. Set in production only on your own account.
+  OWNER_USER_ID: z.string().uuid().optional(),
+
   // ── Google OAuth (Gmail + Calendar) ──────────────────────────────────────
   GOOGLE_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),

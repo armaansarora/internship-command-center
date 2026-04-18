@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 10:46 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 11:25 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `c13c573`)
+- **Branch:** `main` (commit `ba510d3`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,009 across 263 source files
+- **Total LOC:** 53,045 across 264 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-c13c573 docs: update Step 2 with snapshot-chain fix + interactive-prompt handling
+ba510d3 fix(drizzle): make 0006 migration fully idempotent
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `c13c573`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `ba510d3`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -99,9 +99,9 @@ See docs/MASTER-PLAN.md for the next phase.
 
 ## Env Vars (names only — values in .env.local)
 
-(no .env.local found)
+- AI_GATEWAY_API_KEY
 
-## Source Tree (263 files, 53,009 LOC)
+## Source Tree (264 files, 53,045 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -109,7 +109,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world` | 2895 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1811 |
-| `src/lib` | 1509 |
+| `src/lib` | 1516 |
 | `src/components/floor-7/war-table` | 1307 |
 | `src/components/floor-4` | 1187 |
 | `src/app` | 1172 |
@@ -150,14 +150,14 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
 | `src/lib/ai/structured` | 440 |
-| `src/lib/auth` | 394 |
+| `src/lib/auth` | 411 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/actions` | 383 |
 | `src/lib/agents/cro` | 360 |
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
+| `src/lib/stripe` | 341 |
 | `src/hooks` | 335 |
-| `src/lib/stripe` | 329 |
 | `src/app/(authenticated)/briefing-room` | 323 |
 | `src/components/pricing` | 306 |
 | `src/app/(authenticated)` | 301 |
@@ -405,6 +405,7 @@ src/lib/auth/cron.test.ts
 src/lib/auth/cron.ts
 src/lib/auth/oauth-state.test.ts
 src/lib/auth/oauth-state.ts
+src/lib/auth/owner.ts
 src/lib/auth/require-user.ts
 src/lib/auth/safe-next-path.test.ts
 src/lib/auth/safe-next-path.ts
@@ -530,13 +531,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 579 | 5,889 |
+| `BOOTSTRAP-PROMPT.md` | 579 | 5,893 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 313 | 6,447 |
-| **Total** | **1537** | **24,675** |
+| **Total** | **1537** | **24,679** |
 
-> ⚠️ Reading all recommended files consumes ~24,675 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,679 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
