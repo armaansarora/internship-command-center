@@ -141,30 +141,46 @@ SELECT 'match_company_embeddings is invoker', COUNT(*) FROM pg_proc
 
 **Why:** During the conflict resolution, my old `stripe_events` schema reference was replaced with the better `stripe_webhook_events` from the remote work, but the auto-generated snapshot file (`src/db/migrations/meta/0005_snapshot.json`) still has the old name. This is harmless until you next run `drizzle-kit generate` — at which point it'll create a confusing diff. Better to fix now.
 
-1. In your terminal:
+1. First pull the latest commits (the snapshot chain was repaired in commit `c110871`):
    ```bash
-   cd "~/Documents/The Tower"
+   cd "/Users/armaanarora/Documents/The Tower"
+   git pull origin main
+   ```
+
+2. Run db:generate:
+   ```bash
    npm run db:generate
    ```
 
-2. **What success looks like:** Output says either "No schema changes, nothing to migrate" (best case) or it generates a tiny snapshot-only update (also fine). 
+3. **One of three things will happen:**
 
-3. If it generated a small migration file you don't want, delete it:
+   **(a) "No schema changes, nothing to migrate"** → perfect, you're done. Skip to Step 3.
+
+   **(b) An interactive prompt appears** asking something like:
+   ```
+   Is stripe_events table created or renamed from another table?
+   ❯ + stripe_events                        create table
+     ~ stripe_webhook_events › stripe_events  rename table
+   ```
+   This is drizzle asking to reconcile a leftover schema artifact. Use arrow keys to highlight **`+ stripe_events  create table`** and press **Enter**. (We do NOT want a rename — `stripe_webhook_events` is the canonical name from the prior session and we want to keep it.) After answering, it will generate a small new migration file. **Delete that file** before committing:
    ```bash
-   ls -lt src/db/migrations/*.sql | head -3
-   # If you see a fresh one named 0006_something.sql that you didn't expect:
-   # rm src/db/migrations/0006_*.sql
-   # And remove its entry from src/db/migrations/meta/_journal.json
+   ls -lt src/db/migrations/*.sql | head -2
+   # The newest file (probably 0006_something.sql) is the one to delete:
+   rm src/db/migrations/0006_*.sql
+   # Also remove its entry from src/db/migrations/meta/_journal.json (the last entry in the "entries" array)
+   # Then re-run npm run db:generate to regenerate a clean snapshot.
    ```
 
-4. Commit any snapshot changes:
+   **(c) An actual schema diff appears** that you didn't expect → STOP. Don't accept anything. Message me with the full output.
+
+4. Commit any snapshot changes that resulted:
    ```bash
    git add src/db/migrations/
-   git commit -m "chore: refresh drizzle schema snapshot after rebase"
+   git commit -m "chore: refresh drizzle schema snapshot"
    git push origin main
    ```
 
-**You're done with Step 2 when** `npm run db:generate` says "No schema changes" or you've committed the snapshot.
+**You're done with Step 2 when** `npm run db:generate` says "No schema changes, nothing to migrate" on a fresh run.
 
 ---
 
