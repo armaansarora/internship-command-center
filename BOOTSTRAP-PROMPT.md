@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 5:55 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 10:42 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `eed9dd9`)
+- **Branch:** `main` (commit `9f864f2`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,009 across 263 source files
 - **Build:** Clean (zero TS errors)
@@ -37,89 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-eed9dd9 session-end: audit: session 23 — full-power audit + 94+ findings resolved. 9 CRITICAL (Stripe publicPaths, cron fail-closed, stripe_events idempotency, SECURITY INVOKER, composite uniques, drizzle/next CVE upgrades, column drift fixes, real CEO orchestrator). 26+ HIGH (Anthropic prompt caching, AI Gateway, agent memory retrieve+write, token tracking, Ring the Bell real stream, OAuth HMAC, weather auth+rate-limit, lobby 206KB client removed, JPGs→next/image, 8 chat hooks 1135→152 LOC factory, security headers, Zod env, tower-themed error pages, Node 24 pinned, 4 new SQL migrations). MEDIUM (Suspense on 7 pages, useOptimistic WarTable, useFormStatus/useActionState modals, dynamic() splits, stale closure fix, CIO triad mounted, GSAP tree-shaking, console→logger, structured outputs). 73 files, 4370+/2829- LOC. Build + TS clean. Audit reports gitignored (public repo).
-2065817 docs: align planning references with current architecture
-1b99f44 chore: tighten audit clarity and project organization
-38ae826 refactor: unify agent dialogue, machines, and domain actions
-464ba25 harden: reduce duplication and tighten runtime safety
-2a916d4 fix: Stripe webhook retries, JSON API auth, and weather cache
-dc5c182 docs: add post-hardening manual-steps guide
-1e5b30f harden: kill Drizzle runtime, collapse C-suite duplication, lock down auth/webhooks/crons
-2fdef50 fix: harden auth, cron, and entitlement flows
-3350008 Merge branch 'docs-handoff' into main
-a25bd68 feat: Supabase pipeline stats, CRO hardening, lint fixes, CI tests
-c505d46 fix: drizzle config auto-loads .env.local via @next/env
-88fada7 chore: add Phase 1 setup scripts (env + migration SQL)
-4efb3cc feat(phase-1): The War Room — full floor implementation
-12958b1 session 16: pre-phase-1 optimization — removed 5 unused deps (-31MB), deleted 29MB orphaned assets, decomposed 3 monoliths into 12 focused modules, extracted shared constants, added CSS tokens, optimized next.config, compressed lobby images 77%
-36e8f56 fix: session-end push handles missing credentials gracefully — deferred instead of FAIL
-624c495 session-end: session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
-7d95863 session 15: auto-organize-docs — full doc automation on every commit (archive stale, regenerate components, update doc map, append session logs)
-34dbbb0 session 14: doc restructuring — 4-tier architecture, archived 7 stale docs, freshness warnings in bootstrap, rewrote CLAUDE.md/MASTER-PLAN.md/PROJECT-CONTEXT.md
-6dd5c70 session-end: session 13: Elevator + lobby background hotfix round — cross-route transitions, 4K Ken Burns backgrounds, elevator button wiring
-5dd569b session-end: 8 files changed, 299 insertions(+), 197 deletions(-)
-e89f24e fix: elevator button wiring + 4K lobby backgrounds with Ken Burns
-371bd44 Hotfix: Elevator cross-route transition + AI lobby backgrounds
-2a0f64b fix: rip out next-themes, fix elevator on lobby, fix floor nav greying, remove SVG cursors
-9fcb51e fix: exclude cursors/ from auth middleware
-b9c37e1 fix(sprint-3.5): BUG-015,016,017,018,019 — user-reported critical fixes
-e8bea9f session-end: 2 files changed, 40 insertions(+), 22 deletions(-)
-7d39269 Sprint 3: Visual identity & polish — BUG-010, BUG-013, BUG-014
-bdb6548 docs: update BUG-TRACKER with Sprint 2 commit hash
-742ea47 fix(sprint-2): BUG-001,002,005,011,012 — navigation, sign out, settings, user menu
-44a2a6c docs: remove stale CustomCursor references (audit pass 2)
-23521c4 chore: delete dead CustomCursor.tsx (audit pass 1)
-7cad1e9 docs: update BUG-TRACKER with commit hashes for Sprint 1 fixes
-6a2336d fix(sprint-1): BUG-003,004,006,007,008,009 — performance, scroll, cursor, parallax
-de3978e session-end: 3 files changed, 33 insertions(+), 25 deletions(-)
-2802795 session-end: 2 files changed, 116 insertions(+), 56 deletions(-)
-1ce45d0 docs: upgrade BUG-TRACKER.md to living changelog system
-22b7485 docs: add BUG-TRACKER.md — 14 issues from 5-min user walkthrough
-3a695b1 docs: add CHAIN-OF-COMMAND.md — AI hierarchy spec (1,550+ lines)
-23d974f docs: Phase 1 War Room Blueprint — 1,445-line implementation guide + audit
-10bb5a4 session-end: session 11: Phase 0 quality uplift complete — lobby particles, penthouse animated counters, skyline water reflections, animated floor stubs, elevator mobile bar, CSS utilities
-dd71ec4 session-end: session 11: Phase 0 quality uplift — lobby particles, penthouse counters, skyline water reflections, animated floor stubs, elevator mobile bar
-263dc0b feat: Phase 0 quality uplift — animated lobby particles, richer penthouse dashboard, enhanced skyline with water reflections, animated floor stubs, elevator mobile bar + tooltips, CSS utilities
-7cb4985 session-end: session 10: Phase 0 complete visual overhaul — audit clean, PROJECT-CONTEXT updated
-1c48685 docs: update PROJECT-CONTEXT.md for session 10 — Phase 0 visual overhaul complete
-b61d6d0 feat: Phase 0 complete visual overhaul — lobby, penthouse, skyline, elevator, floor stubs
-166f919 session-end: tooling session — 16-step autonomous pipeline complete
-b7b89c2 audit: expand false-positive list for unused dep detection
-190da57 session-end: ultimate 16-step pipeline (verify, detect, generate, commit, validate, handoff)
-57efff1 audit: clean up session-end (remove unused imports/vars, update bootstrap session docs)
-69523a5 session-end: autonomous pipeline with auto-detect + handoff gen
-8c510ee session-end: update session state with immersive UI completion
-0f8835d session-end: 1 file changed, 11 insertions(+), 5 deletions(-)
-2fd4a3b bootstrap: regenerate with latest commit hash
-3e15030 wave3: star constellations, building light sweep, sign-in card 3D tilt
-2ee6d5e wave2: lightning flashes, cloud wisps, typewriter tagline, a11y improvements
-a9a9524 audit: stagger directory rows, fix lobby layout, enhance penthouse vignette
-c73611e overhaul: particles, tilt panels, animated counters, mouse spotlight, scan line, parallax UI, radar pulse, hover glow
-7cabc1a skyline: shooting stars + breathing city bloom
-a9b7fba fix: reduce mullion visibility, tighten lobby spacing
-94773f2 lobby: interactive directory hover effects with gold glow
-af0206b skyline: fix center gap with even slot-based distribution
-3be2c20 skyline: denser building distribution, center clustering, more supertalls
-fdc949d v2: enhanced procedural skyline, remove dead photo-based system, water reflections, varied buildings
-4f2414c lobby: compact single-viewport layout, all content above fold
-a8e10e3 fix: lobby scrolling, card contrast, fixed skyline background
-662a694 Phase 0: immersive UI overhaul — procedural skyline, rebuilt lobby & penthouse
-48922b1 session-end: session 9: automation hardening + user flagged immersive UI for overhaul
-88ae2fa session-end: fix: bootstrap now mandates CLAUDE.md reading — agents can't skip mandatory rules
-b2d68d0 session-end: infra: context window management — 40/60/70% thresholds with mandatory handoff
-3ba2932 session-end: infra: automation hardening — agent auto-manages session state, human runs zero commands
-101a8f1 infra: bootstrap system overhaul — 10 improvements to session handoff
-89ef7fc bootstrap: regenerate with latest commit hash
-2cc2a34 infra: auto-generated bootstrap, updated CLAUDE.md, removed dead files
-9a5153d audit: fix RAF cascade in useMouseParallax, clean up double dynamic import
-f424ffd feat: wire real Supabase data into Penthouse dashboard
-e1d4548 feat: elevator dark wash, glass penthouse panels, cinematic entrance
-0711b3d feat: immersive photorealistic NYC skyline (replaces SVG)
-9f9eb23 Merge branch 'docs-handoff'
-be84d82 docs: immersive UI research + implementation plan + bootstrap prompt
-ecb5af7 Merge pull request #1 from armaansarora/docs-handoff
-6b56140 audit: add post-push.sql trigger, rewrite BOOTSTRAP-PROMPT for Phase 1, update MANUAL-GUIDE
-ce72f38 docs: final PROJECT-CONTEXT update + MANUAL-GUIDE for Armaan
+9f864f2 docs: dummy-proof deploy checklist for session 23 audit fixes
 ```
 
 ## Acceptance Criteria — Progress
@@ -173,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `eed9dd9`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `9f864f2`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -612,13 +530,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 565 | 5,725 |
+| `BOOTSTRAP-PROMPT.md` | 661 | 8,137 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 313 | 6,447 |
-| **Total** | **1523** | **24,511** |
+| **Total** | **1619** | **26,923** |
 
-> ⚠️ Reading all recommended files consumes ~24,511 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,923 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
