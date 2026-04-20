@@ -208,7 +208,7 @@ export function Elevator(): JSX.Element {
     window.dispatchEvent(new Event("tower:transition:start"));
 
     const tl = gsap.timeline({
-      delay: 0.1,
+      delay: 0.25,
       onComplete: () => {
         setState("idle");
         if (overlay) overlay.style.display = "none";
@@ -217,10 +217,10 @@ export function Elevator(): JSX.Element {
       },
     });
 
-    tl.to(interior, { opacity: 0, duration: 0.1, ease: "power1.out" })
-      .to(leftDoor, { xPercent: -100, duration: 0.35, ease: "power3.out" })
-      .to(rightDoor, { xPercent: 100, duration: 0.35, ease: "power3.out" }, "<")
-      .to(darkWash, { opacity: 0, duration: 0.35, ease: "power2.out" }, "<");
+    tl.to(interior, { opacity: 0, duration: 0.15, ease: "power1.out" })
+      .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
+      .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")
+      .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
 
     return () => { tl.kill(); };
   }, []);
@@ -270,22 +270,24 @@ export function Elevator(): JSX.Element {
 
     timelineRef.current = tl;
 
-    // Phase 1: Dark wash + doors close (faster — modern UX expects <1s transitions)
+    // Phase 1: Dark wash + doors close
+    // Timings deliberately cover the typical page-data-fetch latency
+    // (~200-800ms Supabase round-trip) — shortening them exposes the load time.
     tl.set(leftDoor, { xPercent: -100 })
       .set(rightDoor, { xPercent: 100 })
       .set(interior, { opacity: 0 })
       .set(darkWash, { opacity: 0 })
-      .to(darkWash, { opacity: 0.5, duration: 0.2, ease: "power2.inOut" })
-      .to(leftDoor, { xPercent: 0, duration: 0.3, ease: "power3.inOut" }, "-=0.15")
-      .to(rightDoor, { xPercent: 0, duration: 0.3, ease: "power3.inOut" }, "<")
+      .to(darkWash, { opacity: 0.5, duration: 0.35, ease: "power2.inOut" })
+      .to(leftDoor, { xPercent: 0, duration: 0.5, ease: "power3.inOut" }, "-=0.25")
+      .to(rightDoor, { xPercent: 0, duration: 0.5, ease: "power3.inOut" }, "<")
       .call(() => setState("moving"))
 
       // Phase 2: Interior + counter tick
-      .to(interior, { opacity: 1, duration: 0.12, ease: "power1.in" })
+      .to(interior, { opacity: 1, duration: 0.2, ease: "power1.in" })
       .call(() => {
         tickTimersRef.current.forEach(clearTimeout);
         tickTimersRef.current = [];
-        const tickInterval = 250 / Math.max(sequence.length - 1, 1);
+        const tickInterval = 400 / Math.max(sequence.length - 1, 1);
         sequence.forEach((fId, i) => {
           const timer = setTimeout(() => {
             if (counter) counter.textContent = fId === "PH" ? "PH" : fId;
@@ -297,16 +299,30 @@ export function Elevator(): JSX.Element {
           try { sessionStorage.setItem(ELEVATOR_ARRIVING_KEY, "1"); } catch {}
         }
 
-        router.push(floor.route);
+        // Wrap router.push in startViewTransition when supported. The browser
+        // keeps the OLD DOM painted while the new route renders, then fades
+        // between them — no blank intermediate state, no layout flash. The
+        // elevator overlay covers the visible viewport so the user doesn't
+        // see the crossfade itself, but the API still helps because it
+        // prevents the new page from being "visible-but-empty" between
+        // doors-open and data-arrived.
+        const doNavigate = () => router.push(floor.route);
+        if (typeof document !== "undefined" && "startViewTransition" in document) {
+          (document as Document & {
+            startViewTransition: (cb: () => void) => unknown;
+          }).startViewTransition(doNavigate);
+        } else {
+          doNavigate();
+        }
       })
-      .to({}, { duration: 0.3 })
+      .to({}, { duration: 0.6 })
       .call(() => setState("doors-opening"))
 
       // Phase 3: Doors open (same-instance navigation only)
-      .to(interior, { opacity: 0, duration: 0.1, ease: "power1.out" })
-      .to(leftDoor, { xPercent: -100, duration: 0.35, ease: "power3.out" })
-      .to(rightDoor, { xPercent: 100, duration: 0.35, ease: "power3.out" }, "<")
-      .to(darkWash, { opacity: 0, duration: 0.35, ease: "power2.out" }, "<");
+      .to(interior, { opacity: 0, duration: 0.15, ease: "power1.out" })
+      .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
+      .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")
+      .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, targetFloor]);
