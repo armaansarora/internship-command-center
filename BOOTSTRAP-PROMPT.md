@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Monday, April 20, 2026 at 5:15 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Monday, April 20, 2026 at 5:34 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `3c896f5`)
+- **Branch:** `main` (commit `60009e0`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,064 across 264 source files
+- **Total LOC:** 53,186 across 266 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-3c896f5 fix(csp): allow Fontshare for Satoshi font
+60009e0 fix(logger): serialize plain-object errors (e.g. Supabase PostgrestError)
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `3c896f5`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `60009e0`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,13 +102,14 @@ See docs/MASTER-PLAN.md for the next phase.
 - AI_GATEWAY_API_KEY
 - OWNER_USER_ID
 - STRIPE_WEBHOOK_SECRET
+- SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (264 files, 53,064 LOC)
+## Source Tree (266 files, 53,186 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 4154 |
-| `src/components/world` | 2895 |
+| `src/components/world` | 2913 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1535 |
@@ -152,6 +153,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
 | `src/lib/ai/structured` | 440 |
+| `src/hooks` | 429 |
 | `src/lib/auth` | 411 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/actions` | 383 |
@@ -159,10 +161,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
 | `src/lib/stripe` | 341 |
-| `src/hooks` | 335 |
 | `src/app/(authenticated)/briefing-room` | 323 |
+| `src/app/(authenticated)` | 311 |
 | `src/components/pricing` | 306 |
-| `src/app/(authenticated)` | 301 |
 | `src/app/api/stripe/webhook` | 293 |
 | `src/lib/utils` | 284 |
 | `src/app/api/cron/briefing` | 271 |
@@ -350,6 +351,7 @@ src/components/world/FloorShell.tsx
 src/components/world/FloorStub.tsx
 src/components/world/LobbyBackground.tsx
 src/components/world/MilestoneToast.tsx
+src/components/world/MilestoneToastContainer.tsx
 src/components/world/NotificationSystem.tsx
 src/components/world/NotificationToast.tsx
 src/components/world/ProceduralSkyline.tsx
@@ -360,6 +362,7 @@ src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
 src/db/schema.ts
 src/hooks/useAgentChat.ts
+src/hooks/useProgressionMilestones.ts
 src/hooks/useReducedMotion.ts
 src/hooks/useWeather.ts
 src/lib/actions/applications.ts
@@ -533,13 +536,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 581 | 5,898 |
+| `BOOTSTRAP-PROMPT.md` | 582 | 5,901 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 313 | 6,447 |
-| **Total** | **1539** | **24,684** |
+| `CLAUDE.md` | 314 | 6,480 |
+| **Total** | **1541** | **24,720** |
 
-> ⚠️ Reading all recommended files consumes ~24,684 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,720 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

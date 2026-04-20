@@ -11,6 +11,13 @@ const NotificationSystem = dynamic(
   () => import("@/components/world/NotificationSystem").then((m) => m.NotificationSystem),
   { ssr: false },
 );
+const MilestoneToastContainer = dynamic(
+  () =>
+    import("@/components/world/MilestoneToastContainer").then(
+      (m) => m.MilestoneToastContainer,
+    ),
+  { ssr: false },
+);
 const SoundToggle = dynamic(
   () => import("@/components/ui/SoundToggle").then((m) => m.SoundToggle),
   { ssr: false },
@@ -63,6 +70,9 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
 
         {/* In-world notification system — renders on all authenticated floors */}
         <NotificationSystem />
+
+        {/* Progression milestone toasts (gold celebration on threshold unlocks) */}
+        <MilestoneToastContainer />
 
         {/* Sound toggle — fixed bottom-right */}
         <SoundToggle />

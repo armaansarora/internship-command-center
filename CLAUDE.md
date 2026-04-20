@@ -209,6 +209,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/DayNightProvider.tsx` (72 LOC) — DayNightProvider — sets `data-time` on <html> based on the user's local time.
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
+- `src/components/world/MilestoneToastContainer.tsx` (18 LOC) — Mount-once container for the milestone toast system.
 ## Bootstrap Infrastructure
 - `scripts/auto-organize-docs.ts` — **runs on every commit (Husky)**. Auto-archives stale docs, auto-generates Key Components (this section), auto-updates doc map table, auto-appends session logs. Zero manual doc maintenance.
 - `scripts/generate-bootstrap.ts` — **runs on every commit (Husky)**. Generates BOOTSTRAP-PROMPT.md with: build health, git diff, acceptance criteria tracking, dep freshness, context budget, session state, doc freshness warnings.
