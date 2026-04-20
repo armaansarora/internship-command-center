@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
+import { flushSync } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "@/lib/gsap-init";
 import { FLOORS, FLOOR_ORDER, ROUTE_TO_FLOOR, type FloorId } from "@/lib/constants/floors";
@@ -175,8 +176,15 @@ export function Elevator(): JSX.Element {
         return;
       }
 
-      setTargetFloor(floorId);
-      setState("doors-closing");
+      // flushSync forces React to commit these state updates synchronously,
+      // so the GSAP-bound useEffect fires in the same tick as the click
+      // handler instead of waiting for the next concurrent-render slot.
+      // Without this there is a perceptible 50-100ms pause between the
+      // click and the door-close animation starting.
+      flushSync(() => {
+        setTargetFloor(floorId);
+        setState("doors-closing");
+      });
     },
     [state, activeFloor, router, prefersReducedMotion],
   );
@@ -299,21 +307,15 @@ export function Elevator(): JSX.Element {
           try { sessionStorage.setItem(ELEVATOR_ARRIVING_KEY, "1"); } catch {}
         }
 
-        // Wrap router.push in startViewTransition when supported. The browser
-        // keeps the OLD DOM painted while the new route renders, then fades
-        // between them — no blank intermediate state, no layout flash. The
-        // elevator overlay covers the visible viewport so the user doesn't
-        // see the crossfade itself, but the API still helps because it
-        // prevents the new page from being "visible-but-empty" between
-        // doors-open and data-arrived.
-        const doNavigate = () => router.push(floor.route);
-        if (typeof document !== "undefined" && "startViewTransition" in document) {
-          (document as Document & {
-            startViewTransition: (cb: () => void) => unknown;
-          }).startViewTransition(doNavigate);
-        } else {
-          doNavigate();
-        }
+        // Plain router.push — earlier I tried wrapping this in
+        // document.startViewTransition() to crossfade the underlying DOM,
+        // but the browser's "keep old DOM painted until new commits"
+        // behaviour was leaking the OLD floor through the elevator-doors
+        // gap during the doors-opening phase, producing a flash of the
+        // previous floor before the new one appeared. The elevator overlay
+        // is the only transition we want; the route swap should be a hard
+        // cut underneath the closed doors.
+        router.push(floor.route);
       })
       .to({}, { duration: 0.6 })
       .call(() => setState("doors-opening"))

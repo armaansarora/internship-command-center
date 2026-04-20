@@ -131,7 +131,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/cpo-character/CPOWhiteboard.tsx` (444 LOC)
 - `src/components/floor-3/BriefingRoomScene.tsx` (443 LOC) — BriefingRoomScene — Floor 3 environment compositor.
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
-- `src/components/world/Elevator.tsx` (427 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
+- `src/components/world/Elevator.tsx` (429 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
