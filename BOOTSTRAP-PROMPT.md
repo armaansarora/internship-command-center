@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Monday, April 20, 2026 at 5:34 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Monday, April 20, 2026 at 5:49 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `60009e0`)
+- **Branch:** `main` (commit `a8dc29a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,186 across 266 source files
+- **Total LOC:** 53,148 across 265 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-60009e0 fix(logger): serialize plain-object errors (e.g. Supabase PostgrestError)
+a8dc29a feat: wire MilestoneToast to progression engine
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `60009e0`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `a8dc29a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -104,7 +104,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (266 files, 53,186 LOC)
+## Source Tree (265 files, 53,148 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -162,10 +162,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/progression` | 349 |
 | `src/lib/stripe` | 341 |
 | `src/app/(authenticated)/briefing-room` | 323 |
-| `src/app/(authenticated)` | 311 |
 | `src/components/pricing` | 306 |
 | `src/app/api/stripe/webhook` | 293 |
 | `src/lib/utils` | 284 |
+| `src/app/(authenticated)` | 273 |
 | `src/app/api/cron/briefing` | 271 |
 | `src/lib/agents` | 269 |
 | `src/app/(authenticated)/writing-room` | 228 |
@@ -214,7 +214,6 @@ src/app/(authenticated)/briefing-room/page.tsx
 src/app/(authenticated)/c-suite/page.tsx
 src/app/(authenticated)/error.tsx
 src/app/(authenticated)/layout.tsx
-src/app/(authenticated)/loading.tsx
 src/app/(authenticated)/not-found.tsx
 src/app/(authenticated)/observatory/page.tsx
 src/app/(authenticated)/penthouse/page.tsx
@@ -536,13 +535,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 582 | 5,901 |
+| `BOOTSTRAP-PROMPT.md` | 585 | 5,943 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 314 | 6,480 |
-| **Total** | **1541** | **24,720** |
+| **Total** | **1544** | **24,762** |
 
-> ⚠️ Reading all recommended files consumes ~24,720 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,762 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
