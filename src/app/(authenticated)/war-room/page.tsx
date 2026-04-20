@@ -72,7 +72,7 @@ export default async function WarRoomPage(): Promise<JSX.Element> {
 
   return (
     <FloorShell floorId="7">
-      <Suspense fallback={<WarRoomPlaceholder />}>
+      <Suspense fallback={null}>
         <WarRoomData
           userId={user.id}
           moveApplication={moveApplication}
@@ -155,31 +155,3 @@ async function WarRoomData({
   );
 }
 
-function WarRoomPlaceholder(): JSX.Element {
-  return (
-    <div
-      className="min-h-[60vh] flex items-center justify-center"
-      role="status"
-      aria-live="polite"
-      aria-label="Loading war room"
-    >
-      <div className="flex flex-col items-center gap-4" aria-hidden="true">
-        <span className="block w-px h-12 bg-gradient-to-b from-transparent via-[#1E90FF] to-transparent motion-safe:animate-[wr-pulse_1800ms_ease-in-out_infinite]" />
-        <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#4A7A9B]">
-          Drawing the war table
-        </span>
-      </div>
-      <span className="sr-only">Loading war room data…</span>
-
-      <style>{`
-        @keyframes wr-pulse {
-          0%, 100% { opacity: 0.3; transform: translateY(4px); }
-          50%      { opacity: 1;   transform: translateY(-4px); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          [class*="animate-"] { animation: none !important; opacity: 1 !important; }
-        }
-      `}</style>
-    </div>
-  );
-}

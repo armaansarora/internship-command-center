@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Monday, April 20, 2026 at 5:49 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Monday, April 20, 2026 at 6:01 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `a8dc29a`)
+- **Branch:** `main` (commit `22e2097`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,148 across 265 source files
+- **Total LOC:** 52,943 across 264 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-a8dc29a feat: wire MilestoneToast to progression engine
+22e2097 fix(elevator): remove redundant route-level loading.tsx
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `a8dc29a`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `22e2097`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -104,12 +104,12 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (265 files, 53,148 LOC)
+## Source Tree (264 files, 52,943 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 4154 |
-| `src/components/world` | 2913 |
+| `src/components/world` | 2935 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1535 |
@@ -135,10 +135,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
-| `src/app/(authenticated)/penthouse` | 750 |
 | `src/components/floor-7/cro-character` | 733 |
 | `src/lib/gmail` | 723 |
 | `src/lib/agents/cmo` | 715 |
+| `src/app/(authenticated)/penthouse` | 713 |
 | `src/components/agents/dialogue` | 709 |
 | `src/lib/ai/agents` | 680 |
 | `src/lib/sound` | 641 |
@@ -161,35 +161,35 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
 | `src/lib/stripe` | 341 |
-| `src/app/(authenticated)/briefing-room` | 323 |
 | `src/components/pricing` | 306 |
+| `src/app/(authenticated)/briefing-room` | 296 |
 | `src/app/api/stripe/webhook` | 293 |
 | `src/lib/utils` | 284 |
 | `src/app/(authenticated)` | 273 |
 | `src/app/api/cron/briefing` | 271 |
 | `src/lib/agents` | 269 |
-| `src/app/(authenticated)/writing-room` | 228 |
 | `src/app/api/cron/sync` | 213 |
 | `src/lib/supabase` | 204 |
 | `src/lib/calendar` | 203 |
-| `src/app/(authenticated)/war-room` | 186 |
-| `src/app/(authenticated)/rolodex-lounge` | 159 |
+| `src/app/(authenticated)/writing-room` | 201 |
+| `src/app/(authenticated)/war-room` | 158 |
 | `src/components/icons` | 152 |
 | `src/lib/validators` | 148 |
+| `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
-| `src/app/(authenticated)/situation-room` | 112 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/app/api/weather` | 99 |
+| `src/app/(authenticated)/situation-room` | 85 |
 | `src/app/api/ceo` | 75 |
 | `src/types` | 74 |
-| `src/app/(authenticated)/c-suite` | 60 |
-| `src/app/(authenticated)/observatory` | 60 |
 | `src/app/api/notifications` | 59 |
 | `src/app/api/drive/export` | 53 |
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
 | `src/app/api/progression` | 35 |
 | `src/app/api/gmail/auth` | 34 |
+| `src/app/(authenticated)/c-suite` | 33 |
+| `src/app/(authenticated)/observatory` | 33 |
 | `src/app/api/notifications/[id]/read` | 32 |
 | `src/lib/constants` | 31 |
 | `src/app/api/auth/callback` | 30 |
@@ -219,7 +219,6 @@ src/app/(authenticated)/observatory/page.tsx
 src/app/(authenticated)/penthouse/page.tsx
 src/app/(authenticated)/penthouse/penthouse-client.tsx
 src/app/(authenticated)/penthouse/penthouse-data.ts
-src/app/(authenticated)/penthouse/penthouse-placeholder.tsx
 src/app/(authenticated)/rolodex-lounge/page.tsx
 src/app/(authenticated)/settings/page.tsx
 src/app/(authenticated)/settings/settings-client.tsx
@@ -535,13 +534,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 585 | 5,943 |
+| `BOOTSTRAP-PROMPT.md` | 584 | 5,925 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 314 | 6,480 |
-| **Total** | **1544** | **24,762** |
+| **Total** | **1543** | **24,744** |
 
-> ⚠️ Reading all recommended files consumes ~24,762 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,744 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

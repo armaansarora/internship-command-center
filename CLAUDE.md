@@ -143,10 +143,10 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (344 LOC)
 - `src/components/floor-7/WarRoomClient.tsx` (341 LOC)
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
+- `src/components/world/MilestoneToast.tsx` (332 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
 - `src/components/floor-1/RingTheBell.tsx` (328 LOC) — The CEO orchestrator dispatch tool name that drives this card
 - `src/components/floor-6/RolodexLoungeScene.tsx` (328 LOC) — RolodexLoungeScene — Floor 6 environment compositor.
 - `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
-- `src/components/world/MilestoneToast.tsx` (310 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (297 LOC)

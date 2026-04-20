@@ -24,7 +24,7 @@ export default async function RolodexLoungePage(): Promise<JSX.Element> {
 
   return (
     <FloorShell floorId="6">
-      <Suspense fallback={<RolodexLoungePlaceholder />}>
+      <Suspense fallback={null}>
         <RolodexLoungeData userId={user.id} />
       </Suspense>
     </FloorShell>
@@ -129,30 +129,3 @@ async function RolodexLoungeData({
   );
 }
 
-function RolodexLoungePlaceholder(): JSX.Element {
-  return (
-    <div
-      className="min-h-[60vh] flex items-center justify-center"
-      role="status"
-      aria-live="polite"
-      aria-label="Loading rolodex lounge"
-    >
-      <div className="flex flex-col items-center gap-4" aria-hidden="true">
-        <span className="block w-px h-12 bg-gradient-to-b from-transparent via-[var(--gold)] to-transparent motion-safe:animate-[rl-pulse_2200ms_ease-in-out_infinite]" />
-        <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[var(--gold-dim)]">
-          Turning the rolodex
-        </span>
-      </div>
-      <span className="sr-only">Loading rolodex lounge data…</span>
-      <style>{`
-        @keyframes rl-pulse {
-          0%, 100% { opacity: 0.3; transform: translateY(4px); }
-          50%      { opacity: 1;   transform: translateY(-4px); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          [class*="animate-"] { animation: none !important; opacity: 1 !important; }
-        }
-      `}</style>
-    </div>
-  );
-}

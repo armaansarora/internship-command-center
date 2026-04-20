@@ -282,6 +282,28 @@ export function MilestoneToast({
           from { width: 100%; }
           to   { width: 0%; }
         }
+        @keyframes milestone-slide-in {
+          from { opacity: 0; transform: translate(24px, 8px) scale(0.96); }
+          to   { opacity: 1; transform: translate(0, 0) scale(1); }
+        }
+        @keyframes milestone-slide-out {
+          from { opacity: 1; transform: translate(0, 0) scale(1); }
+          to   { opacity: 0; transform: translate(24px, 4px) scale(0.96); }
+        }
+        @keyframes milestone-confetti-drift {
+          0%   { opacity: 0; transform: translate(0, -8px) rotate(0deg); }
+          15%  { opacity: 1; }
+          100% { opacity: 0; transform: translate(var(--drift, 0px), 56px) rotate(180deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [style*="milestone-slide-in"],
+          [style*="milestone-slide-out"],
+          [style*="milestone-confetti-drift"] {
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        }
       `}</style>
     </div>
   );

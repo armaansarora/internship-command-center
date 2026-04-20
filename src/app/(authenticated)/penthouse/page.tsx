@@ -4,7 +4,6 @@ import type { JSX } from "react";
 import { requireUser } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { PenthouseClient } from "./penthouse-client";
-import { PenthousePlaceholder } from "./penthouse-placeholder";
 import { fetchPenthouseData } from "./penthouse-data";
 
 export const metadata: Metadata = {
@@ -28,7 +27,7 @@ export default async function PenthousePage(): Promise<JSX.Element> {
 
   return (
     <FloorShell floorId="PH">
-      <Suspense fallback={<PenthousePlaceholder />}>
+      <Suspense fallback={null}>
         <PenthouseDataShell
           userId={user.id}
           userName={user.user_metadata?.full_name ?? null}
