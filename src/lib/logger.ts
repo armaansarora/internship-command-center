@@ -73,6 +73,25 @@ function serialiseError(err: unknown): LogFields {
   if (err instanceof Error) {
     return { error: { name: err.name, message: err.message, stack: err.stack } };
   }
+  // Plain objects (e.g. Supabase PostgrestError: { code, message, details, hint })
+  // otherwise stringify as "[object Object]" and hide the real failure reason.
+  if (err && typeof err === "object") {
+    const obj = err as Record<string, unknown>;
+    const keys = [
+      "code",
+      "message",
+      "details",
+      "hint",
+      "status",
+      "statusText",
+      "name",
+    ] as const;
+    const picked: Record<string, unknown> = {};
+    for (const k of keys) {
+      if (k in obj) picked[k] = obj[k];
+    }
+    return { error: Object.keys(picked).length > 0 ? picked : obj };
+  }
   return { error: String(err) };
 }
 

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 17, 2026 at 11:36 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Monday, April 20, 2026 at 5:15 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `9a50389`)
+- **Branch:** `main` (commit `3c896f5`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,045 across 264 source files
+- **Total LOC:** 53,064 across 264 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-9a50389 feat: god-tier owner bypass on every entitlement gate
+3c896f5 fix(csp): allow Fontshare for Satoshi font
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `9a50389`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3c896f5`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -101,8 +101,9 @@ See docs/MASTER-PLAN.md for the next phase.
 
 - AI_GATEWAY_API_KEY
 - OWNER_USER_ID
+- STRIPE_WEBHOOK_SECRET
 
-## Source Tree (264 files, 53,045 LOC)
+## Source Tree (264 files, 53,064 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -110,7 +111,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world` | 2895 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1811 |
-| `src/lib` | 1516 |
+| `src/lib` | 1535 |
 | `src/components/floor-7/war-table` | 1307 |
 | `src/components/floor-4` | 1187 |
 | `src/app` | 1172 |
@@ -525,20 +526,20 @@ zod: ^4.3.6
 - **@types/node**: 20.19.37 → 25.6.0 (major)
 - **eslint**: 9.39.4 → 10.2.1 (major)
 - **stripe**: 20.4.1 → 22.0.2 (major)
-- **tailwindcss**: 3.4.19 → 4.2.2 (major)
+- **tailwindcss**: 3.4.19 → 4.2.3 (major)
 - **typescript**: 5.9.3 → 6.0.3 (major)
 
 ## Context Budget
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 580 | 5,893 |
+| `BOOTSTRAP-PROMPT.md` | 581 | 5,898 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 313 | 6,447 |
-| **Total** | **1538** | **24,679** |
+| **Total** | **1539** | **24,684** |
 
-> ⚠️ Reading all recommended files consumes ~24,679 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,684 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
