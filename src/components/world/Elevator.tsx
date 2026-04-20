@@ -120,6 +120,21 @@ export function Elevator(): JSX.Element {
 
   const prefersReducedMotion = useReducedMotion();
 
+  // ── Prefetch every floor's route on mount so navigation feels instant ─────
+  // Without this, router.push triggers a cold server render AFTER the GSAP
+  // animation completes, causing the doors to open onto empty space for the
+  // 200-800ms it takes Supabase queries to return. Prefetching warms the
+  // route cache so content is ready the moment the doors open.
+  useEffect(() => {
+    FLOORS.forEach((f) => {
+      try {
+        router.prefetch(f.route);
+      } catch {
+        // Prefetch is a best-effort optimisation; failures are silent.
+      }
+    });
+  }, [router]);
+
   // ── Derive active floor from current pathname ──────────────────────────────
   const activeFloor: FloorId = useMemo(() => {
     const match = Object.entries(ROUTE_TO_FLOOR).find(([route]) =>
@@ -189,19 +204,23 @@ export function Elevator(): JSX.Element {
     gsap.set(interior, { opacity: 1 });
     gsap.set(darkWash, { opacity: 0.5 });
 
+    // Cross-route arrival — also gate skyline RAF.
+    window.dispatchEvent(new Event("tower:transition:start"));
+
     const tl = gsap.timeline({
-      delay: 0.25,
+      delay: 0.1,
       onComplete: () => {
         setState("idle");
         if (overlay) overlay.style.display = "none";
         if (darkWash) gsap.set(darkWash, { opacity: 0 });
+        window.dispatchEvent(new Event("tower:transition:end"));
       },
     });
 
-    tl.to(interior, { opacity: 0, duration: 0.15, ease: "power1.out" })
-      .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
-      .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")
-      .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
+    tl.to(interior, { opacity: 0, duration: 0.1, ease: "power1.out" })
+      .to(leftDoor, { xPercent: -100, duration: 0.35, ease: "power3.out" })
+      .to(rightDoor, { xPercent: 100, duration: 0.35, ease: "power3.out" }, "<")
+      .to(darkWash, { opacity: 0, duration: 0.35, ease: "power2.out" }, "<");
 
     return () => { tl.kill(); };
   }, []);
@@ -235,33 +254,38 @@ export function Elevator(): JSX.Element {
 
     overlay.style.display = "block";
 
+    // Tell other expensive RAF loops (ProceduralSkyline) to pause so they
+    // don't compete with this timeline for the main thread.
+    window.dispatchEvent(new Event("tower:transition:start"));
+
     const tl = gsap.timeline({
       onComplete: () => {
         setState("idle");
         setTargetFloor(null);
         if (overlay) overlay.style.display = "none";
         if (darkWash) gsap.set(darkWash, { opacity: 0 });
+        window.dispatchEvent(new Event("tower:transition:end"));
       },
     });
 
     timelineRef.current = tl;
 
-    // Phase 1: Dark wash + doors close
+    // Phase 1: Dark wash + doors close (faster — modern UX expects <1s transitions)
     tl.set(leftDoor, { xPercent: -100 })
       .set(rightDoor, { xPercent: 100 })
       .set(interior, { opacity: 0 })
       .set(darkWash, { opacity: 0 })
-      .to(darkWash, { opacity: 0.5, duration: 0.35, ease: "power2.inOut" })
-      .to(leftDoor, { xPercent: 0, duration: 0.5, ease: "power3.inOut" }, "-=0.25")
-      .to(rightDoor, { xPercent: 0, duration: 0.5, ease: "power3.inOut" }, "<")
+      .to(darkWash, { opacity: 0.5, duration: 0.2, ease: "power2.inOut" })
+      .to(leftDoor, { xPercent: 0, duration: 0.3, ease: "power3.inOut" }, "-=0.15")
+      .to(rightDoor, { xPercent: 0, duration: 0.3, ease: "power3.inOut" }, "<")
       .call(() => setState("moving"))
 
       // Phase 2: Interior + counter tick
-      .to(interior, { opacity: 1, duration: 0.2, ease: "power1.in" })
+      .to(interior, { opacity: 1, duration: 0.12, ease: "power1.in" })
       .call(() => {
         tickTimersRef.current.forEach(clearTimeout);
         tickTimersRef.current = [];
-        const tickInterval = 400 / Math.max(sequence.length - 1, 1);
+        const tickInterval = 250 / Math.max(sequence.length - 1, 1);
         sequence.forEach((fId, i) => {
           const timer = setTimeout(() => {
             if (counter) counter.textContent = fId === "PH" ? "PH" : fId;
@@ -275,14 +299,14 @@ export function Elevator(): JSX.Element {
 
         router.push(floor.route);
       })
-      .to({}, { duration: 0.6 })
+      .to({}, { duration: 0.3 })
       .call(() => setState("doors-opening"))
 
       // Phase 3: Doors open (same-instance navigation only)
-      .to(interior, { opacity: 0, duration: 0.15, ease: "power1.out" })
-      .to(leftDoor, { xPercent: -100, duration: 0.55, ease: "power3.out" })
-      .to(rightDoor, { xPercent: 100, duration: 0.55, ease: "power3.out" }, "<")
-      .to(darkWash, { opacity: 0, duration: 0.55, ease: "power2.out" }, "<");
+      .to(interior, { opacity: 0, duration: 0.1, ease: "power1.out" })
+      .to(leftDoor, { xPercent: -100, duration: 0.35, ease: "power3.out" })
+      .to(rightDoor, { xPercent: 100, duration: 0.35, ease: "power3.out" }, "<")
+      .to(darkWash, { opacity: 0, duration: 0.35, ease: "power2.out" }, "<");
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, targetFloor]);

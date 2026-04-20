@@ -153,7 +153,25 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       }
     };
 
+    // Pause the canvas during elevator transitions — frees the main thread
+    // so the GSAP timeline doesn't compete with this loop for CPU. The
+    // Elevator dispatches `tower:transition:start` / `:end` around its
+    // GSAP timeline.
+    const onTransitionStart = () => {
+      running = false;
+      stop();
+    };
+    const onTransitionEnd = () => {
+      if (document.hidden) return;
+      if (!running) {
+        running = true;
+        start();
+      }
+    };
+
     document.addEventListener("visibilitychange", onVisibilityChange, { passive: true });
+    window.addEventListener("tower:transition:start", onTransitionStart);
+    window.addEventListener("tower:transition:end", onTransitionEnd);
 
     // Start the loop only if the tab is currently visible.
     if (!document.hidden) {
@@ -165,6 +183,8 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
     return () => {
       stop();
       document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("tower:transition:start", onTransitionStart);
+      window.removeEventListener("tower:transition:end", onTransitionEnd);
     };
   }, [render, reduced, drawStaticFrame]);
 

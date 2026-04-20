@@ -132,8 +132,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/BriefingRoomScene.tsx` (443 LOC) — BriefingRoomScene — Floor 3 environment compositor.
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
+- `src/components/world/Elevator.tsx` (411 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
-- `src/components/world/Elevator.tsx` (387 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
 - `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
@@ -170,6 +170,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (201 LOC)
 - `src/components/penthouse/PipelineNodes.tsx` (200 LOC) — PipelineNodes renders:
 - `src/components/world/FloorShell.tsx` (200 LOC) — FloorShell — wraps each floor's content with the immersive procedural skyline.
+- `src/components/world/ProceduralSkyline.tsx` (200 LOC) — Canvas-based procedural renderer
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (198 LOC)
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
@@ -179,7 +180,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
 - `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (183 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
-- `src/components/world/ProceduralSkyline.tsx` (180 LOC) — Canvas-based procedural renderer
 - `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (173 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
