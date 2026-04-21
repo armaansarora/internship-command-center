@@ -171,25 +171,14 @@ export function ProceduralSkyline({
       }
     };
 
-    // Pause the canvas during elevator transitions — frees the main thread
-    // so the GSAP timeline doesn't compete with this loop for CPU. The
-    // Elevator dispatches `tower:transition:start` / `:end` around its
-    // GSAP timeline.
-    const onTransitionStart = () => {
-      running = false;
-      stop();
-    };
-    const onTransitionEnd = () => {
-      if (document.hidden) return;
-      if (!running) {
-        running = true;
-        start();
-      }
-    };
-
+    // NOTE: previously paused the RAF loop on `tower:transition:start`/`:end`
+    // to free the main thread during elevator timelines. With the new
+    // persistent-world architecture the canvas is cheap (no regeneration)
+    // and pausing it creates a visible jump when transition:end fires
+    // mid-offset-tween (the loop wakes and snaps to the current tween
+    // value, producing a fidget). The canvas now runs continuously and the
+    // offset tween is read each frame, so transitions look smooth.
     document.addEventListener("visibilitychange", onVisibilityChange, { passive: true });
-    window.addEventListener("tower:transition:start", onTransitionStart);
-    window.addEventListener("tower:transition:end", onTransitionEnd);
 
     // Start the loop only if the tab is currently visible.
     if (!document.hidden) {
@@ -201,8 +190,6 @@ export function ProceduralSkyline({
     return () => {
       stop();
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("tower:transition:start", onTransitionStart);
-      window.removeEventListener("tower:transition:end", onTransitionEnd);
     };
   }, [render, reduced, drawStaticFrame]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type JSX } from "react";
+import { useEffect, useRef, type JSX } from "react";
 import { usePathname } from "next/navigation";
 import { gsap } from "@/lib/gsap-init";
 import { ProceduralSkyline } from "./ProceduralSkyline";
@@ -89,15 +89,24 @@ export function PersistentWorld(): JSX.Element {
   const colorRef = useRef<AmbientColor>({ ...AMBIENT_COLORS[floorId] });
   const ambientDivRef = useRef<HTMLDivElement>(null);
 
-  // Initial gradient string (also recomputed by the tween onUpdate).
-  const initialGradient = useMemo(
-    () => ambientGradient(AMBIENT_COLORS[floorId]),
-    // Initial value only — subsequent updates handled by the tween below.
+  // Apply the initial gradient to the DOM via ref on mount, so the
+  // JSX-controlled style never contains `background` — that prevents any
+  // subsequent React re-render from thrashing the tween-written value.
+  useEffect(() => {
+    const div = ambientDivRef.current;
+    if (div) div.style.background = ambientGradient(colorRef.current);
+    // Mount only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+  }, []);
 
   // Tween between floor configurations whenever the floor changes.
+  //
+  // Timing note: the Elevator's GSAP timeline is ~2.1s total. router.push()
+  // fires ~0.8s in (doors fully closed). Doors begin opening ~1.4s in.
+  // A 0.7s tween starting at 0.8s finishes at 1.5s — so ~90% of the camera
+  // motion happens behind closed doors, and the last ~100ms tail plays as
+  // the doors part. This gives a strong sense of arrival without any
+  // visible slow drift during the open state.
   useEffect(() => {
     const targetOffset = FLOOR_OFFSETS[floorId];
     const targetColor = AMBIENT_COLORS[floorId];
@@ -110,21 +119,19 @@ export function PersistentWorld(): JSX.Element {
       return;
     }
 
-    // Tween the offset value the canvas RAF loop reads each frame.
     const offsetTween = gsap.to(offsetRef, {
       current: targetOffset,
-      duration: 1.2,
-      ease: "power2.inOut",
+      duration: 0.7,
+      ease: "power3.out",
     });
 
-    // Tween the ambient color and update the DOM gradient inline.
     const colorTween = gsap.to(colorRef.current, {
       r: targetColor.r,
       g: targetColor.g,
       b: targetColor.b,
       intensity: targetColor.intensity,
-      duration: 1.2,
-      ease: "power2.inOut",
+      duration: 0.7,
+      ease: "power3.out",
       onUpdate: () => {
         const div = ambientDivRef.current;
         if (div) div.style.background = ambientGradient(colorRef.current);
@@ -145,7 +152,9 @@ export function PersistentWorld(): JSX.Element {
         <WeatherEffects condition={condition} />
       </div>
 
-      {/* 2 — Ambient color tint — cross-fades between floors */}
+      {/* 2 — Ambient color tint — cross-fades between floors.
+           The `background` is written only via the ref in useEffect/tween,
+           never via JSX — so React re-renders cannot clobber the tween. */}
       <div
         ref={ambientDivRef}
         aria-hidden="true"
@@ -153,7 +162,6 @@ export function PersistentWorld(): JSX.Element {
         style={{
           height: "55%",
           zIndex: 1,
-          background: initialGradient,
         }}
       />
 

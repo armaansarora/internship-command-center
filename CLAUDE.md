@@ -156,17 +156,17 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/CSuiteClient.tsx` (241 LOC) — Watch the CEO chat's UIMessage stream for `tool-dispatchTo<X>` parts and
 - `src/components/world/ErrorBoundary.tsx` (241 LOC) — ErrorBoundary — in-world error display using "the building's lights flicker" metaphor.
 - `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
+- `src/components/world/PersistentWorld.tsx` (236 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
-- `src/components/world/PersistentWorld.tsx` (228 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
-- `src/components/world/ProceduralSkyline.tsx` (218 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (213 LOC)
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/floor-2/ObservatoryClient.tsx` (208 LOC)
+- `src/components/world/ProceduralSkyline.tsx` (205 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (201 LOC)
