@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 1:46 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 4:23 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `04ebbb0`)
+- **Branch:** `main` (commit `89fe22b`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,157 across 265 source files
+- **Total LOC:** 53,167 across 265 source files
 - **Build:** Clean (zero TS errors)
 
 
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-04ebbb0 fix(world): hoist skyline into PersistentWorld + smooth offset tween
+89fe22b fix(world): eliminate canvas pause-fidget during transitions
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `04ebbb0`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `89fe22b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -104,7 +104,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (265 files, 53,157 LOC)
+## Source Tree (265 files, 53,167 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -115,7 +115,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib` | 1535 |
 | `src/components/floor-7/war-table` | 1307 |
 | `src/components/floor-4` | 1187 |
-| `src/app` | 1172 |
+| `src/app` | 1177 |
 | `src/components/floor-6/cio-character` | 1119 |
 | `src/components/floor-7/crud` | 1095 |
 | `src/components/world/elevator` | 1056 |
@@ -164,8 +164,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/pricing` | 306 |
 | `src/app/(authenticated)/briefing-room` | 296 |
 | `src/app/api/stripe/webhook` | 293 |
+| `src/app/(authenticated)` | 285 |
 | `src/lib/utils` | 284 |
-| `src/app/(authenticated)` | 280 |
 | `src/app/api/cron/briefing` | 271 |
 | `src/lib/agents` | 269 |
 | `src/app/api/cron/sync` | 213 |
@@ -535,13 +535,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 584 | 5,923 |
+| `BOOTSTRAP-PROMPT.md` | 584 | 5,926 |
 | `PROJECT-CONTEXT.md` | 278 | 5,167 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 315 | 6,531 |
-| **Total** | **1544** | **24,793** |
+| **Total** | **1544** | **24,796** |
 
-> ⚠️ Reading all recommended files consumes ~24,793 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,796 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

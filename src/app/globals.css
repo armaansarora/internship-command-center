@@ -211,6 +211,11 @@ body {
   font-family: 'Satoshi', system-ui, sans-serif;
   color: var(--text-primary);
   background-color: var(--tower-darkest);
+  /* Clamp body to the viewport horizontally — wide floor content
+     (like the war table's 5-column kanban) must scroll inside its
+     own container, not push the body past 100vw. Vertical scroll is
+     intentionally preserved. */
+  overflow-x: hidden;
   /* BUG-003 fix: removed overflow:hidden so floors can scroll.
      Skyline is position:absolute inside FloorShell, so it
      still fills the viewport without this. */

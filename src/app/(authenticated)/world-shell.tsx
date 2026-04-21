@@ -67,8 +67,13 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
           />
         </div>
 
-        {/* Main content area — full-width on mobile, offset for elevator on desktop */}
-        <main className="flex-1 md:ml-16 pb-20 md:pb-0">
+        {/* Main content area — full-width on mobile, offset for elevator on desktop.
+            `min-w-0` + `overflow-x-hidden` prevent wide floor content (e.g. the
+            war table's horizontal kanban) from pushing this flex child past
+            the viewport and causing body-level horizontal scroll. Internal
+            scroll containers (war table, rolodex grid, etc.) still work
+            because they own their own `overflow-x: auto`. */}
+        <main className="flex-1 min-w-0 overflow-x-hidden md:ml-16 pb-20 md:pb-0">
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>
 
