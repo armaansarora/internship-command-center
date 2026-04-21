@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { DayNightProvider } from "@/components/world/DayNightProvider";
 import { Elevator } from "@/components/world/Elevator";
+import { PersistentWorld } from "@/components/world/PersistentWorld";
 import { UserMenu } from "@/components/ui/UserMenu";
 import { SoundProvider } from "@/components/world/SoundProvider";
 import { ErrorBoundary } from "@/components/world/ErrorBoundary";
@@ -48,6 +49,12 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
     <SoundProvider>
     <DayNightProvider>
       <div className="relative flex min-h-dvh w-full">
+        {/* Persistent world chrome — skyline + weather + window framing.
+            Mounts ONCE here and stays alive across every floor navigation,
+            so the expensive canvas never regenerates and the camera can
+            tween smoothly between floor offsets during elevator transitions. */}
+        <PersistentWorld />
+
         {/* Elevator panel — left side */}
         <Elevator />
 

@@ -158,9 +158,11 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
+- `src/components/world/PersistentWorld.tsx` (228 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
+- `src/components/world/ProceduralSkyline.tsx` (218 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (213 LOC)
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
@@ -169,8 +171,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (201 LOC)
 - `src/components/penthouse/PipelineNodes.tsx` (200 LOC) — PipelineNodes renders:
-- `src/components/world/FloorShell.tsx` (200 LOC) — FloorShell — wraps each floor's content with the immersive procedural skyline.
-- `src/components/world/ProceduralSkyline.tsx` (200 LOC) — Canvas-based procedural renderer
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (198 LOC)
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
@@ -196,6 +196,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
+- `src/components/world/FloorShell.tsx` (104 LOC) — FloorShell — wraps each floor's content with floor identity badge + ambient sound.
 - `src/components/world/SoundProvider.tsx` (103 LOC) — SoundProvider — wraps the application to expose sound controls.
 - `src/components/penthouse/GlassPanel.tsx` (101 LOC) — GlassPanel — frosted-glass card with:
 - `src/components/floor-3/cpo-character/CPODialoguePanel.tsx` (100 LOC)

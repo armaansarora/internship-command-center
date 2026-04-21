@@ -25,9 +25,21 @@ import {
 interface Props {
   floorId: FloorId;
   className?: string;
+  /**
+   * When provided, the render loop reads the camera offset from this ref each
+   * frame instead of FLOOR_OFFSETS[floorId]. PersistentWorld uses this to
+   * smoothly tween between floor positions during elevator transitions, so
+   * the city view literally rises/descends through the building rather than
+   * jumping discretely between floor offsets.
+   */
+  externalOffsetRef?: { current: number };
 }
 
-export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Element {
+export function ProceduralSkyline({
+  floorId,
+  className = "",
+  externalOffsetRef,
+}: Props): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef  = useRef<Scene | null>(null);
   const ctxRef    = useRef<CanvasRenderingContext2D | null>(null);
@@ -40,12 +52,18 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
   const offsetRef = useRef(offset);
   const timeStateRef = useRef(timeState);
   const reducedRef = useRef(reduced);
+  const externalOffsetRefRef = useRef(externalOffsetRef);
 
   useEffect(() => {
-    offsetRef.current = offset;
+    // When an external ref drives the offset, do NOT sync the local ref —
+    // the external tween owns the value.
+    if (!externalOffsetRef) {
+      offsetRef.current = offset;
+    }
     timeStateRef.current = timeState;
     reducedRef.current = reduced;
-  }, [offset, timeState, reduced]);
+    externalOffsetRefRef.current = externalOffsetRef;
+  }, [offset, timeState, reduced, externalOffsetRef]);
 
   // ── Resize observer: regenerate scene on canvas dimension change ──
   useEffect(() => {
@@ -94,7 +112,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       t,
       scene,
       timeState: timeStateRef.current,
-      offset: offsetRef.current,
+      offset: externalOffsetRefRef.current?.current ?? offsetRef.current,
       reduced: reducedRef.current,
     });
 
@@ -118,7 +136,7 @@ export function ProceduralSkyline({ floorId, className = "" }: Props): JSX.Eleme
       t: 0,
       scene,
       timeState: timeStateRef.current,
-      offset: offsetRef.current,
+      offset: externalOffsetRefRef.current?.current ?? offsetRef.current,
       reduced: true,
     });
   }, []);
