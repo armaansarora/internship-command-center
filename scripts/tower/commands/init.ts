@@ -69,6 +69,43 @@ export function registerInit(program: Command): void {
 
       await fs.ensureDir(path.join(repo, cfg.handoffDir));
 
+      // Migrate SESSION-STATE.json if present
+      const ssPath = path.join(repo, "SESSION-STATE.json");
+      if (await fs.pathExists(ssPath)) {
+        try {
+          const ss = await fs.readJson(ssPath);
+          if (ss.deliverable && ss.notes) {
+            const phase = String(ss.deliverable).split(".")[0];
+            const ledDirEntries = await fs.readdir(ledgerDir);
+            const match = ledDirEntries.find((f) =>
+              f.startsWith(`${phase}-`),
+            );
+            if (match) {
+              const content = await fs.readFile(
+                path.join(ledgerDir, match),
+                "utf-8",
+              );
+              const parsed = YAML.parse(content);
+              parsed.decisions = parsed.decisions ?? [];
+              parsed.decisions.push({
+                date: new Date().toISOString().split("T")[0],
+                text: `migrated from SESSION-STATE.json: ${ss.notes}`,
+                why: "session handoff carryover",
+              });
+              await fs.writeFile(
+                path.join(ledgerDir, match),
+                YAML.stringify(parsed),
+              );
+            }
+          }
+          await fs.move(ssPath, `${ssPath}.bak`, { overwrite: true });
+        } catch (err) {
+          console.warn(
+            `⚠ SESSION-STATE.json migration failed: ${(err as Error).message}`,
+          );
+        }
+      }
+
       const giPath = path.join(repo, ".gitignore");
       const giExisting = (await fs
         .readFile(giPath, "utf-8")
