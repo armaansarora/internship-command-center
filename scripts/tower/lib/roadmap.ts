@@ -54,8 +54,9 @@ export function listPhases(roadmap: string): string[] {
 }
 
 function extractField(block: string, field: string): string | null {
+  // Accepts both `**Field:**` and `**Field.**` separators
   const re = new RegExp(
-    `\\*\\*${field}:\\*\\*\\s*(.+?)(?=\\n\\*\\*|\\n###|$)`,
+    `\\*\\*${field}[:.]\\*\\*\\s*(.+?)(?=\\n\\*\\*|\\n###|$)`,
     "is",
   );
   const m = block.match(re);
