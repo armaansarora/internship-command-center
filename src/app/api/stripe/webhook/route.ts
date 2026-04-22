@@ -4,6 +4,8 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getStripe, tierFromPriceId } from "@/lib/stripe/server";
 import { requireEnv } from "@/lib/env";
 import { log } from "@/lib/logger";
+import { logSecurityEvent } from "@/lib/audit/log";
+import { buildSubscriptionAuditEvent } from "@/lib/stripe/webhook-audit";
 import { stripeWebhookDuplicateDecision } from "@/lib/stripe/webhook-duplicate";
 
 /**
@@ -182,6 +184,46 @@ export async function POST(request: Request): Promise<NextResponse> {
 }
 
 /**
+ * Resolve the Tower user id from a Stripe customer reference.
+ *
+ * Returns `null` when no matching profile is found — the webhook deliberately
+ * treats this as "not a Tower customer we track" and acks without work, so
+ * that a Stripe-side misroute does not spam retries.
+ */
+async function findUserIdByStripeCustomer(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  customer: string | Stripe.Customer | Stripe.DeletedCustomer,
+): Promise<string | null> {
+  const customerId = typeof customer === "string" ? customer : customer.id;
+
+  const { data: profiles, error } = await supabase
+    .from("user_profiles")
+    .select("id")
+    .eq("stripe_customer_id", customerId)
+    .limit(1);
+  if (error) {
+    throw new Error(`Failed to find profile by customer id: ${error.message}`);
+  }
+
+  const userId = profiles?.[0]?.id as string | undefined;
+  return userId ?? null;
+}
+
+/**
+ * Write an `audit_logs` row for a Stripe subscription lifecycle event. Fire
+ * and forget — never throws. We `await` it so tests get deterministic
+ * behaviour, but the underlying helper swallows all errors.
+ */
+async function auditSubscriptionEvent(
+  event: Stripe.Event,
+  userId: string,
+): Promise<void> {
+  const auditEvent = buildSubscriptionAuditEvent(event, userId);
+  if (!auditEvent) return;
+  await logSecurityEvent(auditEvent);
+}
+
+/**
  * Dispatch table for Stripe event types. Only the events we care about are
  * listed — everything else gets acknowledged and ignored.
  */
@@ -215,30 +257,45 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       return;
     }
 
+    case "customer.subscription.created": {
+      const subscription = event.data.object as Stripe.Subscription;
+      const userId = await findUserIdByStripeCustomer(supabase, subscription.customer);
+      if (!userId) return;
+
+      // Local state is already reconciled by `checkout.session.completed`
+      // when the subscription originates from a Tower checkout. For
+      // subscriptions created through Stripe's billing portal or the API,
+      // make sure `subscription_tier` matches the new plan so the audit
+      // trail reflects the effective state.
+      const priceId = subscription.items.data[0]?.price?.id;
+      if (priceId) {
+        const tier = tierFromPriceId(priceId);
+        const isActive =
+          subscription.status === "active" || subscription.status === "trialing";
+        const { error } = await supabase
+          .from("user_profiles")
+          .update({ subscription_tier: isActive ? tier : "free" })
+          .eq("id", userId);
+        if (error) {
+          throw new Error(
+            `Failed to persist subscription creation: ${error.message}`,
+          );
+        }
+      }
+
+      await auditSubscriptionEvent(event, userId);
+      return;
+    }
+
     case "customer.subscription.updated": {
       const subscription = event.data.object as Stripe.Subscription;
-      const customerId =
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id;
 
       const priceId = subscription.items.data[0]?.price?.id;
       if (!priceId) return;
 
       const tier = tierFromPriceId(priceId);
 
-      const { data: profiles, error: lookupError } = await supabase
-        .from("user_profiles")
-        .select("id")
-        .eq("stripe_customer_id", customerId)
-        .limit(1);
-      if (lookupError) {
-        throw new Error(
-          `Failed to find profile by customer id: ${lookupError.message}`,
-        );
-      }
-
-      const userId = profiles?.[0]?.id as string | undefined;
+      const userId = await findUserIdByStripeCustomer(supabase, subscription.customer);
       if (!userId) return;
 
       const isActive =
@@ -250,28 +307,15 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       if (error) {
         throw new Error(`Failed to persist subscription update: ${error.message}`);
       }
+
+      await auditSubscriptionEvent(event, userId);
       return;
     }
 
     case "customer.subscription.deleted": {
       const subscription = event.data.object as Stripe.Subscription;
-      const customerId =
-        typeof subscription.customer === "string"
-          ? subscription.customer
-          : subscription.customer.id;
 
-      const { data: profiles, error: lookupError } = await supabase
-        .from("user_profiles")
-        .select("id")
-        .eq("stripe_customer_id", customerId)
-        .limit(1);
-      if (lookupError) {
-        throw new Error(
-          `Failed to find profile by customer id: ${lookupError.message}`,
-        );
-      }
-
-      const userId = profiles?.[0]?.id as string | undefined;
+      const userId = await findUserIdByStripeCustomer(supabase, subscription.customer);
       if (!userId) return;
 
       const { error } = await supabase
@@ -283,6 +327,8 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
           `Failed to persist subscription deletion: ${error.message}`,
         );
       }
+
+      await auditSubscriptionEvent(event, userId);
       return;
     }
 

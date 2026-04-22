@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:20:16.546Z
-  expires: 2026-04-22T22:20:16.541Z
+  acquired: 2026-04-22T20:23:12.315Z
+  expires: 2026-04-22T22:23:12.310Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -102,7 +102,10 @@ tasks:
     notes: "Evidence: Settings > Security stub, docs/SECRETS-ROTATION.md"
   R0.12:
     title: Stripe audit_logs wiring for subscription lifecycle (P1)
-    status: not_started
+    status: complete
+    started: 2026-04-22T20:23:12.315Z
+    completed: 2026-04-22T20:25:31.332Z
+    commit: e388e8b
     notes: "Evidence: src/app/api/stripe/webhook/route.ts"
 blockers: []
 decisions:
@@ -148,3 +151,6 @@ history:
   - 2026-04-22T20:14:12.196Z: task_started R0.9
   - 2026-04-22T20:20:16.546Z: task_started R0.9
   - 2026-04-22T20:20:52.603Z: task_completed R0.9
+  - 2026-04-22T20:21:54.313Z: task_started R0.12
+  - 2026-04-22T20:23:12.315Z: task_started R0.12
+  - 2026-04-22T20:25:31.332Z: task_completed R0.12

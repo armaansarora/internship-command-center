@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:21 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:25 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `a190292`)
+- **Branch:** `main` (commit `e388e8b`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 54,229 across 272 source files
+- **Total LOC:** 54,479 across 274 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-a190292 [R0/0.9] feat: tiered rate limiting across authenticated endpoints
+e388e8b [R0/0.12] chore: write audit_logs for Stripe subscription lifecycle
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `a190292`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `e388e8b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (272 files, 54,229 LOC)
+## Source Tree (274 files, 54,479 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -137,6 +137,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cio` | 615 |
 | `src/lib/ai` | 599 |
 | `src/components/floor-2` | 576 |
+| `src/lib/stripe` | 545 |
 | `src/db` | 531 |
 | `src/lib/agents/ceo` | 521 |
 | `src/components/floor-2/cfo-character` | 517 |
@@ -151,10 +152,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cro` | 360 |
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
-| `src/lib/stripe` | 341 |
+| `src/app/api/stripe/webhook` | 339 |
 | `src/components/pricing` | 306 |
 | `src/app/(authenticated)/briefing-room` | 296 |
-| `src/app/api/stripe/webhook` | 293 |
 | `src/app/(authenticated)` | 285 |
 | `src/lib/utils` | 284 |
 | `src/app/api/cron/briefing` | 271 |
@@ -454,6 +454,8 @@ src/lib/stripe/agent-access.ts
 src/lib/stripe/config.ts
 src/lib/stripe/entitlements.ts
 src/lib/stripe/server.ts
+src/lib/stripe/webhook-audit.test.ts
+src/lib/stripe/webhook-audit.ts
 src/lib/stripe/webhook-duplicate.test.ts
 src/lib/stripe/webhook-duplicate.ts
 src/lib/supabase/admin.ts
@@ -543,13 +545,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 592 | 5,969 |
+| `BOOTSTRAP-PROMPT.md` | 594 | 5,993 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 416 | 8,405 |
-| **Total** | **1656** | **26,800** |
+| **Total** | **1658** | **26,824** |
 
-> ⚠️ Reading all recommended files consumes ~26,800 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,824 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
