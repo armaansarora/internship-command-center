@@ -208,8 +208,8 @@ All planning docs are in `docs/`. Operational files stay in root.
 | File | Purpose | Lines |
 |---|---|---|
 | `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~280 |
-| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~590 |
-| `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~340 |
+| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~570 |
+| `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~420 |
 | `docs/ARCHITECTURE-MAP.md` | This document is the fastest way to understand how the app is organized today. | ~90 |
 | `docs/AUDIT-DEPLOY-CHECKLIST.md` | **Read this first.** This is the dummy-proof, click-by-click, paste-by-paste gui | ~370 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |

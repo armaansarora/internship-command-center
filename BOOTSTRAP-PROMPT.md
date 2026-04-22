@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 3:06 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 3:12 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `76a480c`)
+- **Branch:** `main` (commit `bc25f29`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,167 across 265 source files
 - **Build:** Clean (zero TS errors)
@@ -28,7 +28,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-76a480c chore(tower): gitignore .tower/.cache
+bc25f29 docs(claude): mandate skill cascade for non-trivial work
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `76a480c`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `bc25f29`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -519,17 +519,26 @@ zod: ^4.3.6
 ```
 </details>
 
+### Stale Dependencies (major version behind)
+
+- **@types/node**: 20.19.37 → 25.6.0 (major)
+- **eslint**: 9.39.4 → 10.2.1 (major)
+- **execa**: 8.0.1 → 9.6.1 (major)
+- **stripe**: 20.4.1 → 22.0.2 (major)
+- **tailwindcss**: 3.4.19 → 4.2.4 (major)
+- **typescript**: 5.9.3 → 6.0.3 (major)
+
 ## Context Budget
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 590 | 5,962 |
+| `BOOTSTRAP-PROMPT.md` | 572 | 5,792 |
 | `PROJECT-CONTEXT.md` | 279 | 5,201 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 343 | 6,948 |
-| **Total** | **1579** | **25,283** |
+| `CLAUDE.md` | 416 | 8,405 |
+| **Total** | **1634** | **26,570** |
 
-> ⚠️ Reading all recommended files consumes ~25,283 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,570 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

@@ -228,9 +228,13 @@ Tower CLI is the session dial-tone. The human never runs session commands.
 ### 0. Session Start — Before Any Other Action
 Run first, before reading any other file:
 ```bash
-npm run t status && npm run t resume
+npm run t status && npm run t resume && cat .tower/autopilot.yml 2>/dev/null
 ```
-Costs ~300 tokens, tells you the active phase, progress, last R-tagged commit, open blockers, lock state, and the previous session's handoff notes. Do NOT read BOOTSTRAP-PROMPT.md, docs/NEXT-ROADMAP.md, or CLAUDE.md first unless the tower output is missing or empty.
+Costs ~300 tokens, tells you the active phase, progress, last R-tagged commit, open blockers, lock state, the previous session's handoff notes, and whether autopilot is on. Do NOT read BOOTSTRAP-PROMPT.md, docs/NEXT-ROADMAP.md, or CLAUDE.md first unless the tower output is missing or empty.
+
+**If `.tower/autopilot.yml` exists and `paused: false`:** go straight into Autopilot Mode (§8). Do not ask the user anything. Continue from where the previous session left off.
+
+**Otherwise:** wait for the user's first message before doing anything.
 
 Load targeted context on demand:
 - `npm run t brief <phase>` — just that phase's brief from the roadmap
@@ -314,6 +318,75 @@ Run `npx tsx scripts/check-vercel.ts` after deploy-related work or if the user a
 
 ### 7. Bug Tracker Protocol
 If you fix a bug or discover new issues, update `docs/BUG-TRACKER.md` — dated entry with session number and commit hash.
+
+### 8. Autopilot Mode — Set-and-Forget
+
+**Trigger phrases (any of):**
+- "autopilot"
+- "set and forget"
+- "run the tower"
+- "autopilot R<n>–R<m>" / "autopilot through R<n>" / "autopilot until done"
+- any variant that clearly grants autonomous execution of roadmap phases
+
+**On trigger, Claude immediately:**
+1. Writes `.tower/autopilot.yml`:
+   ```yaml
+   paused: false
+   scope: all               # or "R0-R5" / "R3-only" / etc.
+   started: <ISO timestamp>
+   started_by: <session id>
+   max_blockers: 3
+   ```
+2. Begins work without further questions. Only escalates under the rules below.
+
+**Skill-cascade overrides when autopilot is on:**
+| Skill | Normal behavior | Autopilot behavior |
+|-------|-----------------|--------------------|
+| `brainstorming` | Present design, get user approval per section | Present design to SELF — self-approve if choices fall within the phase's Brief (Intent/Anchors/Proof) and the §5 Reference Library. Still write the design doc. |
+| `writing-plans` | Offer subagent-driven vs parallel-session choice | Default to `subagent-driven-development` when plan has independent tasks; `executing-plans` otherwise. Never ask. |
+| `executing-plans` | Pause after every 3 tasks for review | Do not pause between batches. Run phase to completion. |
+| `subagent-driven-development` | Review between subagents | Review happens internally (Claude reads subagent output, decides, continues). No user gate. |
+| `finishing-a-development-branch` | Present 4 merge/PR/keep/discard options | Always push to origin. No menu. |
+| `tower handoff` | Fire on wrap-up | Fire on phase completion AND at 70% context. After handoff at 70%, exit the session cleanly. |
+
+**Escalation — the ONLY reasons to interrupt autopilot:**
+1. **Missing secret** — env var not set for a credential/API key/OAuth token the phase needs
+2. **Business decision not in roadmap** — e.g., exact pricing tiers, legal copy, user-facing wording where the voice guide is ambiguous. The roadmap's Briefs + Reference Library are the source of truth; escalate only when genuinely silent.
+3. **Destructive action outside normal dev flow** — dropping tables, force-pushing `main`, removing directories that aren't in the current task
+4. **Same test fails 3 attempts in a row** with distinct fix strategies → record blocker, move to next unblocked phase
+5. **Schema migration that would touch >10% of user-owned rows** — get confirmation before running
+6. **User says "pause autopilot" / "stop" / "wait"** — set `paused: true` in the flag file, stop, await instructions
+
+**Self-resolve (do NOT escalate) for:**
+- Design / color / motion / copy choices — pick from Reference Library, document in ledger `decisions`, move on
+- Library picks — use what the roadmap gestures at, or industry-standard, document why, move on
+- Refactor vs rewrite judgment — pick the smaller surface, note rationale, move on
+- Naming, folder layout, file structure — follow existing project conventions, move on
+- Test flakes (retry with stability fix) — flake-fix and continue
+
+**Blocker routing within autopilot:**
+- Non-escalation blocker on phase N? → `tower block R<N>.<n> "<reason>"`, then `tower next`, continue on whatever phase is unblocked.
+- If all phases in scope are blocked? → fire final handoff, set `paused: true`, wait for user.
+
+**Context rotation in autopilot:**
+- At 60%: note in handoff draft, keep working.
+- At 70%: `tower handoff --stdin` with current state, commit, then **exit the session cleanly** with a final message summarizing what's been done and what autopilot will continue with next session.
+- Next session's §0 startup finds `paused: false` and resumes automatically. No user interaction needed between sessions *if* the user is running a daemon loop (see below). If not, the user just types "continue" and autopilot picks up.
+
+**Ending autopilot (any of):**
+- All phases in scope complete → `paused: true`, final summary, done.
+- Accumulated `max_blockers` escalation-tier blockers → `paused: true`, summary + ranked list of what's needed from user.
+- User says stop / pause → `paused: true`, partial summary.
+
+**The initial sign-off is the ONLY interactive moment.** After "autopilot" is said, the only things that surface to the user are (a) genuine escalations per the list, (b) handoffs at context limits, (c) the final completion report.
+
+**Optional daemon for true OS-level set-and-forget:** the user can run a bash loop in their terminal:
+```bash
+while ! grep -q 'paused: true' .tower/autopilot.yml 2>/dev/null; do
+  claude --prompt "Read CLAUDE.md §0 and continue."
+done
+```
+Each iteration is a fresh Claude session that reads autopilot state and continues until 70% context, then exits. The loop restarts until autopilot ends itself. The user goes to sleep; the tower builds itself.
 
 ## Documentation Architecture
 Docs are organized into 3 tiers to prevent staleness and duplication:
