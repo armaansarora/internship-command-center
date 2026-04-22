@@ -169,6 +169,8 @@ The roadmap is a working document; it evolves. Your job is to evolve it honestly
 
 Ten floors are built and shipping; every one reads as a placeholder that proves the plumbing works but not the promise. The Lobby is the closest any floor gets to feeling hand-crafted, but it too needs an overhaul to hit the target aesthetic — it is a *reference*, not the destination.
 
+**Gap scale** (used below): **M** = primitives mostly present, needs curation + polish. **L** = room identity needs a ground-up rethink but the floor chrome survives. **XL** = both identity and implementation need rebuilding; novel art / 3D / animation work required.
+
 **Lobby (L)** — Strongest current floor. GSAP timeline entrance, cursor-following spotlight, 30-particle dust field, frosted-noise glass with 3D tilt, gold shimmer sweeps on directory rows, dual-ring radar pulses, cinematic stagger. But it's still a reception-hall-with-a-sign-in — no Concierge character, no first-run onboarding ritual, no cinematic exterior approach, no spatial arrival. Gap to target aesthetic: M. Still overhauled in this plan, just later and building on the primitives we mature across R1–R3.
 
 **Penthouse (PH)** — Primitives are strong (`GlassPanel`, `StatCard`, `PipelineNodes`, `QuickActionCard`, `PulseRing`) but the layout is a SaaS dashboard with a gold tint. Quick Action cards display "Phase 1/2/3" badges — a tell that the product is still showing scaffolding. No character presence. No CEO at the window. Gap: M.
@@ -195,7 +197,9 @@ Ten floors are built and shipping; every one reads as a placeholder that proves 
 
 ## §2 — North Star Gap Analysis
 
-**North Star:** User describes what they want, and the Tower autonomously discovers jobs, tracks them, drafts tailored resumes and cover letters, applies, prepares interviews, and coaches through offers. Ranked by impact on actual job-search outcomes:
+**North Star:** User describes what they want, and the Tower autonomously discovers jobs, tracks them, drafts tailored resumes and cover letters, applies, prepares interviews, and coaches through offers.
+
+**Ranking criterion:** *Rank* below = estimated impact on the user's actual job-search outcomes (offers per unit time, time-to-offer, interview conversion) assuming a typical early-career applicant. Higher rank = closing this gap would move outcomes more. *Today (0–100)* = how close the current codebase is to that capability being real (100 = shipping, 0 = not started).
 
 | Rank | Capability | Today (0–100) | Why this rank |
 |------|-----------|---------------|---------------|
@@ -254,7 +258,7 @@ Tools chosen per floor; not one-size-fits-all. Each choice is justified against 
 | **PH Penthouse** | Golden-hour boardroom, panoramic calm | Data materializes on glass (Morning Briefing ritual) | **GSAP timeline + Motion layout** + optional **Rive** for CEO idle | GSAP owns the morning briefing scene (precise multi-element choreography); Motion for declarative layout crossfades on stat updates; Rive gives designer-driven CEO poses. |
 | **7 War Room** | Bloomberg Terminal tactical | Kanban drag with Motion layout, live ticker data stream, blueprint flow lines | **Motion** (Kanban/drag) + **Canvas2D** (flow lines) + **GSAP** (entrance) + **Rive** (CRO) | Motion's layout animations are the gold standard for Kanban; Canvas2D owns the custom war-table flow visualization (lines pulsing between stages as applications move); Rive for CRO at whiteboard. |
 | **6 Rolodex Lounge** | Warm library, vintage executive lounge | Physical rolodex spin, card flip on select, warmth as color temperature | **R3F** (3D rolodex centerpiece) + **Motion** (contact grid) + **GSAP** (entrance) + **Rive** (CNO+CIO) | The rolodex *must* be physical — 2D flip is a cop-out. R3F scene = ~500 triangles, trivial. Motion for the grid. |
-| **5 Writing Room** | Library-quiet, warm wood, single desk lamp | Type-in live with pen-glow, paper-rustle, document preview as scroll reveal | **Motion** (editor) + **Remotion** (document preview) + **GSAP** (entrance) + **Rive** (CMO) | Remotion is the unconventional pick — use it to render cover-letter *previews* as a video-quality scroll-through, not HTML. This is signature and nobody does it. |
+| **5 Writing Room** | Library-quiet, warm wood, single desk lamp | Type-in live with pen-glow, paper-rustle, document preview as scroll reveal | **Motion** (editor + scroll-snap preview) + **GSAP** (entrance + pen-glow typing) + **Rive** (CMO) | *Revised from initial Remotion proposal* — Motion + CSS scroll-snap achieves the "video-quality scroll-through" without FFmpeg/headless-Chrome deployment overhead. Remotion is deferred unless we later need true video export. |
 | **4 Situation Room** | Mission control, alert energy but composed | Alert cards with ring response on hover, live world-map of outreach flows | **Canvas2D** (situation map) + **Motion** (alert cards) + **GSAP** (entrance) + **Rive** (COO Dylan Shorts) | Canvas2D gives a custom "map of outreach flight paths" that isn't achievable with declarative libs. |
 | **3 Briefing Room** | Clean preparation space, whiteboard + intel feeds | Teletype scroll (keep), whiteboard fills live during mock, STAR framework coaching | **GSAP** (teletype + entrance) + **Motion** (briefing panels) + **Rive** (CPO poses during drill) + **Web Speech API** (optional voice mock) | GSAP owns the teletype (precise scroll control). Rive for CPO because interview drilling needs expressive state changes. |
 | **2 Observatory** | Panoramic, celestial, cool blue calm | The **Orrery** — user's pipeline as orbiting planets | **R3F** (orrery) + **Motion** (2D panels) + **GSAP** (entrance) + **Rive** (CFO) | R3F is the *reason* this floor exists. Pure 3D, 60fps, instanced spheres. This is the floor that earns 3D in the whole building. |
@@ -279,6 +283,7 @@ A floor is at bar when a new user, spun up cold, can point at it and say **one s
 ### The sequence
 
 0. **R0 — Hardening Sprint**  *(blocks everything; fixes trust-critical plumbing + stands up the Phase Ledger so future sessions can coordinate)*
+    *(New phase added mid-document: **R10 Negotiation Parlor** — a C-Suite annex that materializes on first offer. Scheduled when first real offer arrives, but the design and data model ship with R7 or earlier so we're ready. See §5 R10.)*
 1. **R1 — War Room (Floor 7)**  *(start here — autonomy heartbeat)*
 2. **R2 — Penthouse (PH)**  *(Morning Briefing ritual)*
 3. **R3 — C-Suite (Floor 1)**  *(orchestration upgrade, parallel dispatch)*
@@ -320,6 +325,27 @@ Each plan: **Vision statement · Design tooling · 3–5 signature interactions 
 
 Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium / one or two subsystems touched) · L (large / multiple subsystems + new tooling) · XL (very large / spans the whole building or introduces novel architecture). No day/week mapping — phases finish when they finish.
 
+### §5.0 — Character voice reference
+
+Each character has a distinct voice. All agent system prompts and dialogue copy across phases must honor these. Voice > role: a character can change role but not voice.
+
+| # | Character | Floor | Register | Speech patterns | Mannerisms (for Rive states) |
+|---|---|---|---|---|---|
+| **CEO** | 1 C-Suite | Commanding, executive, impatient-with-meticulous | Short clipped directives. *"Three things this morning."* Reads numbers before emotion. Rarely asks — decides. | Taps desk when thinking. Stands at window. Turns slowly when addressed. |
+| **CFO** | 2 Observatory | Analytical, cautious, precision-obsessed | Speaks in confidence intervals. *"I'm 89% sure the funnel is narrowing."* Never rounds up. Hesitates before claims. | Cleans glasses. Re-reads data. Moves slowly. Uses calipers on charts as prop. |
+| **CPO** | 3 Briefing Room | Coach, warm but sharp, impatient-with-vagueness | Interrupts to *sharpen*, not to shame. *"What Action did you take? I need a verb."* Insists on specifics. | Pacing. Points at whiteboard. Raises eyebrow. Taps question onto board. |
+| **COO (Dylan Shorts)** | 4 Situation Room | Practical realist, calm-under-pressure, blunt | Speaks in timelines and windows. *"You have a 36-hour response window."* Suspicious of hype. Delivers bad news early. | Idle-typing. Alert-turn to maps. Points at calendar. Never smiles theatrically. |
+| **CMO** | 5 Writing Room | Literary perfectionist, metaphorical, verbose | Rewrites obsessively. Argues about tone. *"Bold? Bold how — bold in claim or bold in delivery?"* Speaks in metaphors. | Crumpling drafts. Pen to chin. Staring at ceiling mid-sentence. Nodding at finished paragraphs. |
+| **CNO** | 6 Rolodex Lounge | Warm connector, memory-centric, relational | Recalls names and context. *"I remember you mentioned Sarah at Blackstone — let me introduce you."* Warm without being saccharine. | Inviting gesture. Flipping rolodex. Writing a note-to-self. |
+| **CIO** | 6 Rolodex Lounge | Cerebral researcher, fact-and-caveat, measured | Facts with qualifiers. *"Blackstone's 2024 deal volume is down 12%, but their tech hiring is up."* Prefers primary sources. | Stacking papers. Reading with finger on line. Pointing at pinned dossiers. |
+| **CRO** | 7 War Room | Chess-player, probabilistic, coldly strategic | Always three moves ahead. *"Conversion is 8%; target 12%; need 4 more apps/week."* No small talk. | Pacing behind whiteboard. Erasing and re-drawing. Sharp turns toward user. |
+| **Offer Evaluator** | 10 Negotiation Parlor | Deal Desk, blunt, neutral-to-skeptical | Analyzes without cheerleading. *"Base is below market. Bonus structure is unusual."* Names trade-offs bluntly. | Flipping folders. Tapping chart. Leaning back before verdict. |
+| **Concierge** | L Lobby | Attentive host, active-listener, competent | Asks follow-ups, validates back. *"So RE finance, NYC, Tier 1–2 — who do I introduce you to first?"* Warm without being saccharine. | Nods while listening. Writing to intake form. Smiling with eyes. |
+
+The **CEO (commanding), CPO (sharp coach), CRO (strategic), CMO (literary)** voices are most-used and should ship with the richest Rive state range. CFO/COO/CNO/CIO can ship with 3 poses each in early phases and gain more in polish waves. Concierge and Offer Evaluator only appear in specific contexts (Lobby onboarding, Negotiation Parlor) — scope their state ranges accordingly.
+
+**Do not blend voices.** CRO and CEO both "lead" but CRO runs numbers and CEO runs narrative. CPO and Concierge both "listen" but CPO drills and Concierge welcomes. When in doubt, re-read this table.
+
 ---
 
 ### R0 — Hardening Sprint ⟵ **start here (blocks all other work)**
@@ -332,7 +358,7 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 
 | # | Deliverable | Priority | Est. | Notes |
 |---|---|---|---|---|
-| 0.1 | **Fix session persistence** (the "relogin every session" bug) | **P0** | S | See §10 Q1 for investigation plan. Likely cause: middleware not firing OR JWT expiry too short OR `prompt: "consent"` forcing re-auth. Add e2e test: "user logs in, closes tab, reopens 24h later → still authenticated." |
+| 0.1 | **Fix session persistence** (the "relogin every session" bug) | **P0** | S | See §10 Q1 for investigation plan. **Primary hypothesis: file at `src/proxy.ts` — Next.js 16 final reverted the proxy-rename and expects `src/middleware.ts`. Rename is the first thing to try** (5-min test). Secondary hypotheses: JWT TTL too short, `prompt: "consent"` forcing re-auth, cookie SameSite/Secure misconfig. Add e2e test: "user logs in, closes tab, reopens — still authenticated." |
 | 0.2 | **Encrypt Google OAuth tokens at rest** | P0 | S | Currently `user_profiles.googleTokens` stored as plain jsonb. Wrap with AES-256-GCM using a per-user key derived from a server-side master key + user_id salt. Master key = new env var `TOKEN_ENCRYPTION_KEY` (32-byte random). Decryption only in server-side code that needs Gmail API calls. |
 | 0.3 | **Cron endpoint authentication** | P0 | S | Already has `verifyCronAuth()` per middleware comments — audit that every cron route calls it, add bearer-token check via `CRON_SECRET`. Reject unauthenticated POSTs with 401, log attempts. |
 | 0.4 | **Security headers** | P1 | S | Add to `src/app/layout.tsx` meta + `vercel.json` headers: CSP (`default-src 'self'`, allow inline with nonces for GSAP, allow Supabase + JSearch hosts), HSTS (`max-age=31536000; includeSubDomains; preload`), X-Content-Type-Options, X-Frame-Options DENY, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy (disable camera/mic/geolocation by default). |
@@ -378,10 +404,11 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 5. **Ring-the-CRO.** A floor-specific version of Ring-the-Bell sitting on the war-table. Click → CRO dispatches all five subagents in parallel, whiteboard clears, subagent statuses appear as 5 vertical columns filling top-down with streaming text, results merge back into a 30-second CRO briefing.
 
 **Functionality upgrades toward North Star.**
-- **Job Discovery worker** — Inngest scheduled function, runs every 4 hours. Fetches from JSearch (aggregator) + Greenhouse careers JSON feeds for user's saved target companies + Lever API + Ashby public job feeds. Dedups by URL. Embeds each JD via pgvector and scores against user's saved profile. Writes to `applications` with `status = 'discovered'`.
-- **User Target Profile** — new UI on War Room entry. Simple text field: *"What are you looking for?"* Parsed by CRO into sectors/titles/tiers/locations and persisted on `user_profiles.preferences`. Every job discovery run reads this.
+- **Job Discovery worker** — Inngest scheduled function, runs every 4 hours. Fetches from JSearch (aggregator) + Greenhouse careers JSON feeds for user's saved target companies + Lever API + Ashby public job feeds. Dedups by URL. Embeds each JD via pgvector and scores against user's saved profile. Writes to `applications` with `status = 'discovered'`. **Chunked processing:** max 100 JDs per cron run to respect Vercel function timeout; remainder queues via Inngest step retry.
+- **North Star proof-of-concept loop** *(small but mandatory in R1).* A demonstrable end-to-end autonomy slice: user sets target profile → Job Discovery finds a match → CMO drafts a tailored resume → CMO drafts a cover letter → application enters `outreach_queue` as `pending_approval` → user approves → Resend sends. The user can watch this happen, start to finish, within their first session. Even if every downstream floor is still unbuilt, *this one loop* proves the building is real. Without it, R1 is a pretty Kanban.
+- **User Target Profile — the CRO intake.** *Not a text field.* The CRO's desk (top-of-war-room area) holds a legal pad; clicking it opens a **conversational intake** where the CRO asks the user about sectors, titles, tiers, locations, salary floor, timing. The user's answers land on the pad visually, redacted on the next line as structured tags. Final output is persisted to `user_profiles.preferences`. Every Job Discovery run reads this. The legal pad stays visible on subsequent visits as a rolling memo the user can re-open and edit.
 - **Match Score column** — `applications` gets a virtual `match_score` (0–100) computed from pgvector cosine + tier weight + freshness.
-- **Bulk actions** — shift-click + drag across cards, batch status change, bulk follow-up draft.
+- **Bulk actions — the Batch Stamp.** A rubber stamp sits at the corner of the war table labeled *BATCH*. User shift-drags across cards to mark them with a gold glow, then clicks the stamp to choose the action (advance status / draft follow-ups / mark stale). The stamp lands, action flows through. Feels like a command, not UI pattern-matching.
 - **CRO parallel fan-out** — refactor CRO agent to dispatch all subagents via `Promise.all` in the tool execute layer rather than sequential tool loop. Return compiled result in one message.
 - **Visible memory** — CRO's whiteboard backgrounds pulls live from `agent_memory` filtered by agent='cro'. When CRO learns something new, you see it get written to the whiteboard.
 
@@ -411,13 +438,13 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 1. **The Morning Briefing Scene.** First load of the day (per-user timezone, configurable 7am–9am default). Elevator auto-arrives at PH. CEO is at the window with their back to camera. They turn: "Good morning, Armaan. Three things this morning." Each "thing" materializes as a glass panel over the skyline with count-up numbers. User can dismiss (skip), ask a follow-up (open dialogue panel), or accept (CEO nods, dispatches follow-up work, panel folds away).
 2. **The Weather Window.** Skyline reacts to real weather (already wired in `WeatherEffects.tsx`) *and* to the **pipeline weather** — if conversion rate dropped week-over-week, morning light is slightly grayer; if an offer arrived overnight, golden light amplifies. Subtle, 5% saturation shift.
 3. **Night Shift Report card.** A single glass panel shows what happened while the user was offline: *"7 jobs discovered · 3 emails triaged · 1 offer flagged."* Click to expand into full overnight timeline.
-4. **Panoramic view shift.** Scrolling the dashboard doesn't scroll the window — it tilts the skyline 2° vertically. Feels like tipping your chair back.
-5. **Quick Actions become actions.** Remove the "Phase 1 / Phase 2" badges. Each Quick Action dispatches a real agent call (Add Application → CRO, Research Company → CIO, Prep Interview → CPO, Quick Outreach → CMO). Dispatching shows a live status toast in-world.
+4. **Panoramic view shift.** Scrolling the glass data panels doesn't scroll the skyline — it tilts the view 2° vertically. Feels like tipping your chair back from the window.
+5. **Quick Actions become actions.** Remove the "Phase 1 / Phase 2" badges (replace with an architectural status strip — "FLOOR UNLOCKED" / "CAPACITY INCREASED"). Each Quick Action dispatches a real agent call (Add Application → CRO, Research Company → CIO, Prep Interview → CPO, Quick Outreach → CMO). Dispatch status arrives via pneumatic tube, never a toast.
 
 **Functionality upgrades toward North Star.**
 - **Proactive CEO briefing** — Inngest daily function that *calls the CEO agent* (not just writes a string). CEO compiles the night's activity, writes a `notifications` row with `type='morning_briefing'` and a structured payload (three things, tone, suggested actions). Front-end replaces the toast with the scripted scene above.
 - **The Night Shift data** — aggregate `agent_logs` + new `applications` + new `emails` + changes to `application.status` since last user session. Surface as a single query fed to the Morning Briefing.
-- **Quick Actions → real dispatches** — wire the 4 cards to the 4 existing agent routes. Return value surfaces as an in-world notification, not a toast.
+- **Quick Actions → real dispatches** — wire the 4 cards to the 4 existing agent routes. Return value arrives as a pneumatic-tube canister (§6.1), never a toast.
 
 **Effort:** **L** (primitives exist; the work is scene-direction + wiring, not new libraries).
 
@@ -451,7 +478,7 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 5. **Boardroom seat.** The CEO dialogue panel lives in "a chair at the boardroom table" — bottom-left seat-shaped frame, not a chat sidebar.
 
 **Functionality upgrades toward North Star.**
-- **CEO parallel fan-out** — `src/lib/ai/agents/ceo-orchestrator.ts` refactor: after CEO produces `CeoDecision`, dispatch all departments with `dependsOn: []` in `Promise.all`; those with dependencies wait on `Promise.all(deps).then(...)`. No more sequential `maxSteps: 3` bottleneck.
+- **CEO parallel fan-out** — `src/lib/ai/agents/ceo-orchestrator.ts` refactor: after CEO produces `CeoDecision`, dispatch all departments with `dependsOn: []` in `Promise.all`; those with dependencies wait on `Promise.all(deps).then(...)`. **Schema change required:** add `agent_dispatches` table with `depends_on uuid[]` column or similar — not currently in schema. Spell this out as a sub-deliverable. No more sequential `maxSteps: 3` bottleneck.
 - **Event-streamed dispatch** — use AI SDK v6 `streamText` + data stream parts so the front-end can render node state changes live. `writeData({ type: 'agent-start', agent: 'cro' })` → `{ type: 'agent-complete', agent: 'cro', summary: '...' }`.
 - **Dependency DAG from `dependsOn`** — currently schema-supported but not wired in executor. Wire it.
 - **Unprompted CEO** — threshold-based triggers: when `agent_logs` or pipeline state crosses configured thresholds (3+ stale apps, 2+ rejections same-day, offer arrived), Inngest fires an event, CEO auto-dispatches a briefing, result queues as high-priority notification. Delivered via pneumatic tube (see §6).
@@ -512,7 +539,7 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 
 **Design tooling.**
 - **Motion** — Editor panel transitions, document list drawer, tone-variant picker.
-- **Remotion** — **The Preview.** Render the tailored cover letter as a Remotion composition (scroll-zoom, typewriter fill, subtle page-turn). Embed as an `<iframe>` preview right in the editor. Signature use of Remotion that no SaaS I've seen does.
+- **Motion scroll-snap preview** (was Remotion — revised). Render the tailored cover letter in-app as a scroll-snap stack of page elements, animated via Motion for page-turn + typewriter fill + subtle zoom. No FFmpeg, no headless Chrome, no Remotion deployment footprint. If we ever need true video export (for sharing a cover-letter draft as a video link), promote to Remotion at that point.
 - **GSAP** — Typewriter-with-pen-glow animation (the character writing the letter with a lit pen tip).
 - **Rive** — CMO (leaning over desk, writing, pausing, looking up, crumpling a draft, nodding). High expression range.
 - **Web Fonts** — A serif-italic display font as the cover-letter body face so the preview reads as *writing*, not *UI*.
@@ -521,7 +548,7 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 1. **The Typewriter.** Physical SVG typewriter on the right side of the room. Click → drop-zone opens for a JD URL or text. CMO walks over (Rive transition), sits at the desk, starts typing. Each line fills in with pen-glow. Live, not queued-and-dumped.
 2. **Tone dials.** Three physical knobs labeled *Formal · Conversational · Bold*. Twisting regenerates in-place with a cross-fade; previous draft dims into the desk-paper stack (visible history).
 3. **Paper stack.** Every generated draft physically stacks on the corner of the desk. Click one → it rises to the top, rest fade. A flip-through interaction (arrow keys) scrolls through versions.
-4. **The Resume Mint.** Second signature moment. A smaller sub-station in the room: a "resume stand." Drop a JD → camera zooms to a base-resume page, sections glow as CMO rewrites bullets to match JD keywords, the new page slides out, stamped with a version number. PDF export button below.
+4. **The Resume Press.** Second signature moment. A mechanical press station in the room. Drop a JD → camera zooms to a base-resume page on the press bed, sections glow as CMO rewrites bullets to match the company's keywords, the lever arm pulls down (audible *ka-chunk*), the new page slides out embossed with a version number. PDF export button below.
 5. **Refinement loop.** After a draft, a single input at the bottom: *"What needs to change?"* Type "too formal, add personality" → CMO re-drafts with your feedback threaded in. Visible "v1 → v2" stack.
 
 **Functionality upgrades toward North Star.**
@@ -564,7 +591,7 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 **Functionality upgrades toward North Star.**
 - **Live mock interview agent** — new CPO tool `startMockInterview(applicationId, mode: 'text' | 'voice')`. Loads prep packet, picks 3–5 behavioral questions scoped to company/role, enters turn-taking loop. Each answer graded on STAR completeness (Claude with structured output: `{ situation: 0-10, task: 0-10, action: 0-10, result: 0-10, verbs_count: int, specifics_count: int }`).
 - **Mock debrief generator** — post-drill, compile Q/A pairs + CPO scores + per-answer feedback into a `documents.type='debrief'` record linked to the interview.
-- **Mock history surface** — Briefing Room sidebar shows prior drills as debriefs, score-over-time for each company.
+- **Mock history surface** — the Briefing Room's wall of **Debrief Binders** holds prior drills; click a spine to replay. Score-over-time for each company renders on an adjacent chalkboard.
 - **Packet regeneration trigger** — if application moves to `interview_scheduled` for a company whose packet is >7 days old, auto-regenerate. Notify user via pneumatic tube (see §6).
 
 **Effort:** **L** (live mock interview loop is genuinely new work; teletype keeps).
@@ -652,6 +679,41 @@ Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium
 
 ---
 
+### R10 — The Negotiation Parlor (C-Suite annex)
+
+**Vision.** When an offer hits `applications.status = 'offer'`, a wood-paneled door appears on the C-Suite wall labeled *NEGOTIATION PARLOR*. It didn't exist yesterday. It exists now because an offer exists. Inside: a small room with an oak table, a wall chart showing market comp bands, and three chairs — Offer Evaluator, CFO, CNO — gather for a single purpose. Competing offers sit as folders on the table. Negotiation scripts draft live. User watches the team work.
+
+**Design tooling.**
+- **GSAP** — The door-appearance choreography (wall recedes, panel slides out, handle turns). Camera push-through.
+- **Motion** — Table layout animations as offers arrive and compare.
+- **Rive** — Offer Evaluator (new character — Deal Desk vibe: analytical, blunt) + CFO (analytical) + CNO (warmth, for intel on the recruiter) share the scene.
+- **Canvas2D** — The live comp band chart on the wall.
+
+**Signature interactions.**
+1. **Door appearance.** First-ever offer → user receives a pneumatic tube in the Situation Room: *"The Negotiation Parlor has opened on Floor 1."* Elevator auto-routes on next visit; CEO points to the new door on arrival.
+2. **Offer folder.** Each offer is a physical folder on the table. Click it → unfolds. Fields: base, bonus, equity, housing, start date, location, benefits. Editable (user can correct if parser missed a number).
+3. **Comp band chart.** Behind the table, a live chart shows market bands for this role + location + tier. User's offer pin lands on the chart — red if below 25th percentile, gold if above 75th. Pin can slide as user edits fields.
+4. **Side-by-side compare.** Second offer arrives → second folder lands on the table. Chart shows both pins. Team's dialogue shifts to comparison language. User drags one folder closer to "accept" and the other fades (not deleted — filed as a comparison).
+5. **Negotiation script drafting.** Offer Evaluator writes the counter-offer email live on a notepad beside the folder. User edits, approves, queues to `outreach_queue`. A 24-hour hold before sending (nothing in negotiation should go out unchecked).
+
+**Functionality upgrades toward North Star.**
+- **Offer structured data model** — new `offers` table with `applicationId, baseSalaryCents, bonusCents, equityValueCents, signOnCents, housingValueCents, startDate, locationAddress, benefits jsonb, receivedAt, deadlineAt, status` (decision enum: considering/accepted/declined/expired). Parses from offer email via a CMO tool.
+- **Comp benchmarking** — static reference table for RE-finance + software + adjacent roles (per-tier, per-location bands). Integration with Levels.fyi API if available. Otherwise manually curated seed data.
+- **Negotiation script generator** — Offer Evaluator tool `generateNegotiationEmail(offerId, userPosition)` where `userPosition` = "accept with counter" / "accept as-is" / "decline politely." Structured output with greeting, body, closing.
+- **Competing-offer analysis** — when 2+ offers exist, Offer Evaluator compares side-by-side, flags leverage ("you have a competing Tier-1 offer — use it"), drafts negotiation emails accordingly.
+- **Offer deadline alerts** — pneumatic tube escalation as `deadlineAt` approaches.
+
+**Effort:** **L** (offers table + Offer Evaluator agent + comp data + the parlor scene).
+
+**Success criteria.**
+- Offer arrives via email → CMO parses → stored in `offers` table → Negotiation Parlor door appears within a short time.
+- Comp band chart renders with real benchmarks for at least 3 target sectors.
+- Negotiation script generation produces a usable draft user can send with minor edits.
+- Side-by-side comparison works with 2+ offers.
+- Deadline alerts fire when offer expiration approaches.
+
+---
+
 ### R9 — Observatory (Floor 2)
 
 **Vision.** This is the *contemplation* floor. Panoramic. Cool blue. You come here to see patterns, not take action. The centerpiece is a 3D **Orrery** — the user's entire job-search pipeline rendered as celestial bodies orbiting a central sun. CFO stands at a panoramic window with a chart projected onto it.
@@ -712,9 +774,9 @@ C-Suite's ring-the-bell produces not a text response but a **live orchestration 
 *Why:* Users' trust in agent systems scales with *legibility*. If they can see the work, they trust the work. (Rauno Freiberg principle: show the in-between.)
 *Ties to North Star:* #5 Agent parallelism.
 
-### 6.4 The Signal Log
+### 6.4 The Dispatch Ticker
 
-A small drawer at the bottom of every floor: a scrolling log of *signals* (email received, app moved, threshold crossed, agent dispatched). Like a Bloomberg Terminal news ticker — always visible, never the focus. Hidden by default, keyboard `~` to toggle. Pure CSS + live SSE.
+A thin brass stripe runs along the baseboard of every floor: a live scrolling log of *signals* (email received, app moved, threshold crossed, agent dispatched). Bloomberg-grade density, architecturally integrated — baseboard, not UI overlay. Hidden by default; toggle with `~`. Pure CSS + live SSE.
 
 *Why:* Power users want density. This gives them the Bloomberg feel without crowding the primary surface.
 *Ties to North Star:* Makes autonomous work legible moment-to-moment.
@@ -735,19 +797,20 @@ The Concierge is a new character (not a repurposed department head) living exclu
 *Why:* The first 5 minutes determine retention. Converting "sign up" → "your Tower found 3 jobs while you were reading this" is magic.
 *Ties to North Star:* #1 Job Discovery becomes the first interaction, not the fifth.
 
-### 6.7 The Interview Replay Vault
+### 6.7 The Debrief Binders
 
-Every completed mock interview (R5) stores to a "vault" in the Briefing Room — a set of physical binders on a shelf. User can re-enter any binder to replay the drill, see their scores, retry the same questions. Over time, binder spines age, and the shelf fills — visible progression.
+Every completed mock interview (R6) files itself into the Briefing Room's shelving wall as a physical binder — spine labeled with company + date + score. User can open any binder to replay the drill, see scoring, retry questions. Over time, binder spines age; the shelf fills. Visible progression in the architecture itself.
 
 *Why:* Interview prep improves through repetition. Making prior sessions *physical* in the room incentivizes return.
 *Ties to North Star:* #6 Interview simulation, compounding value over time.
 
-### 6.8 The Offer War Room
+### 6.8 The Negotiation Parlor *(promoted to its own phase — see §5 R10)*
 
-When an offer arrives, the C-Suite gains a temporary **Offer War Room** annex (door appears on the wall). Inside: CFO + CRO + CNO jointly coach the user through negotiation. Competing offers stack as physical folders on the table. Comp benchmarks appear as a live chart on the wall. Negotiation scripts generate and refine in real time.
+When an offer arrives, a door appears on the C-Suite wall labeled **NEGOTIATION PARLOR** and opens into a wood-paneled side room. Inside: the Offer Evaluator agent + CFO + CRO + CNO convene. Competing offers sit as physical folders on an oak table. Comp benchmarks appear on the wall as a live chart. Negotiation scripts draft and refine.
 
-*Why:* Offers are rare and high-stakes. A dedicated scene makes them feel like a *culmination*, not a status change.
-*Ties to North Star:* #7 Offer evaluation. Scope-controlled: the room only exists when relevant, so no upfront cost until R8 or later.
+*Why:* Offers are rare and high-stakes. A dedicated *room* (not a modal, not a toast) makes them feel like a culmination. The door only exists when an offer exists — the building grows to meet the moment.
+
+*Ties to North Star:* #7 Offer evaluation (§2). **Promoted from creative stretch to a proper phase R10 in §5** because the cost of shipping a thin generic version is nearly as high as shipping it well.
 
 ### 6.9 The Monetization Landing (Pro tier inside the building)
 
@@ -792,6 +855,12 @@ The Tower handles real Gmail bodies, real OAuth tokens, real application submiss
 | Timing / inference attacks on pgvector | Low | Low | Embedding contents isolated per user via RLS. Similarity search never returns raw content across users. |
 | Supply-chain (compromised npm package) | Medium | High | `npm audit` in CI, Renovate/Dependabot for alerts, lockfile commits, no `postinstall` scripts allowed in direct deps. |
 | Social engineering / support impersonation | Low | High | No support inbox yet. When we add one: never accept OAuth disconnect / account delete via email. Always force self-service flows. |
+| **CSRF on state-changing routes** | Medium | High | SameSite=Strict on session cookies + CSRF token on every mutating API route (apply-status, drag-reorder, delete-application). Supabase SSR cookies default to Lax — change to Strict and add CSRF header validation to server actions. |
+| **ReDoS on resume PDF parser** | Medium | Medium | Use vetted library (`pdf-parse` or `unpdf`) with explicit time budget (≤3s); reject PDFs that exceed. Regex-review any custom extraction patterns for catastrophic backtracking. |
+| **OAuth scope downgrade drift** | Low | High | On every token refresh, verify returned scope-set matches expected. If user's grant was downgraded (e.g., gmail.send revoked mid-cycle), surface a reconnect prompt — don't silently fail to send. |
+| **IDOR via pgvector similarity** | Medium | Catastrophic | All `jobEmbeddings` / `companyEmbeddings` / `agentMemory` similarity queries must include `WHERE user_id = auth.uid()` at the query layer, not only via RLS. RLS is defense-in-depth; the query-layer check is the real gate because pgvector operations can run in contexts where RLS is bypassed (service role). |
+| **Audit log N+1 under fan-out** | Medium | Low | A CEO briefing fan-out may produce 20+ audit-worthy events within seconds. Buffer audit log writes in a request-scoped batch and flush on transaction close; or use a short-lived in-memory queue with per-second flush. |
+| **Rive asset-pipeline risk** | Medium | High (project-level) | *Not a security threat — a production-schedule risk.* Producing 7+ Rive character files with multiple states each is weeks of design work per character if commissioned. Before R3 character-heavy work starts, lock the Rive sourcing plan (see §10 Q29). Fallback: 2D-static characters across all floors — ugly but ships. |
 
 ### 7.2 Data classification
 
@@ -1421,6 +1490,72 @@ Questions listed in priority order. Numbered so you can just reply *"1: A, 2: B,
 
 *Not shown:* questions about git worktrees, who plays Conductor, etc. Those are Claude's problem, not yours. If Claude ever needs the user to run a command, it will print the exact command in plain English.
 
+### Audit-surfaced decisions (new — raised by the §0 deep-dive audit)
+
+These were surfaced when five auditor agents read the doc from fresh angles. All low-to-medium effort for you to answer.
+
+27. **Rive character production plan.** §3 + audit agree this is a production-schedule risk — 7+ characters × multiple states is real work.
+    - (A) **Stay 2D-static for v1.** Keep current illustrated approach; defer Rive to v2 when revenue justifies. Lowest cost, reads less alive.
+    - (B) **Rive for the 4 most-used characters** (CEO, CMO, CPO, CRO). Others stay 2D-static. Mid-effort; highest-ROI compromise.
+    - (C) **Rive for all characters.** Commission the designer work up front; delays R3 by design-production time.
+    - My recommendation: **(B)**.
+
+28. **Mobile strategy.** §12.2 proposes desktop-first with small-screen fallback.
+    - (A) **Desktop-only** — block mobile users at a friendly splash.
+    - (B) **Desktop-first with graceful tablet + minimal phone view** (as proposed).
+    - (C) **Responsive everywhere** — full Tower on phone. Big build cost.
+    - My recommendation: **(B)**.
+
+29. **Beta scope.** §13.5 proposes Armaan-only for build, private beta of 10–25 friends at R3.
+    - (A) **Armaan-only indefinitely.** Personal tool; no users. Simpler legal, no cost management.
+    - (B) **Private beta at R3** (as proposed). 10–25 invited friends.
+    - (C) **Public launch at R3.** Open sign-ups. Highest risk, highest learning rate.
+    - My recommendation: **(B)**.
+
+30. **Monetization restructure.** §14.1 proposes Free/Pro/Alumni tiers (supersedes old §6.9).
+    - (A) **Adopt the new structure as spec'd** (Free = full tracking + limited creative output; Pro = unlimited; Alumni = $2–5 post-placement).
+    - (B) **Keep the old "10-app cap" structure.** Simpler.
+    - (C) **Free-forever, no paid tiers.** Personal tool, not a business.
+    - My recommendation: **(A)**.
+
+31. **Pro price point.** If going with structure (A) above:
+    - (A) **$19/mo** — undercuts LinkedIn Premium; easier first sale.
+    - (B) **$29/mo** — more margin, positions as premium.
+    - (C) **Usage-based** — $0.50 per cover letter, $2 per mock interview, etc. Hardest to forecast.
+    - My recommendation: **(B)** paired with a 14-day trial.
+
+32. **Consent for anonymized outcome aggregation** (moat-building per §14.2).
+    - (A) **Ask on signup** — opt-in checkbox. Anonymized application outcomes (which keywords landed interviews, which cover letter tones converted, which companies respond fast) aggregate into a corpus. Users who opt in get access to aggregated insights ("Other Tower users applying to Blackstone had a 14% response rate — here's what worked").
+    - (B) **Don't aggregate.** Privacy-first; forgo the moat.
+    - My recommendation: **(A)** — the anonymization bar is high, the moat is real.
+
+33. **Network-effects between users** (per §14.2).
+    - (A) **Build it in R8** (Rolodex evolution) — careful consent design, cross-user warm-intro engine. Real network moat.
+    - (B) **Defer to v2** — simpler now; harder to retrofit later.
+    - My recommendation: **(A)** with explicit consent UX.
+
+34. **EU AI Act posture.** §13.4 classifies us as a limited-risk AI system.
+    - (A) **Treat it as mandatory even if we launch US-only initially.** Self-imposed transparency + logging + human-review contact path.
+    - (B) **Defer until we open to EU users.** Simpler; legal risk if a single EU user signs up.
+    - My recommendation: **(A)**.
+
+35. **R1 proof-of-concept loop priority.** §14.5 / §5 R1 lists this as mandatory.
+    - (A) **Ship it as mandatory** — end-to-end slice blocks R1 completion.
+    - (B) **Ship it as a stretch** — nice to have but not blocking.
+    - My recommendation: **(A)**.
+
+36. **Lobby R3F scope.** §5 R4 describes a 6-second R3F exterior approach scene.
+    - (A) **Full R3F** as spec'd — actual 3D model of the Tower exterior; camera descends through skyline.
+    - (B) **High-quality pre-rendered video** (exported once from Blender/Unreal) — same visual, simpler tech, ships with less risk.
+    - (C) **CSS-only parallax skyline approach** (reuses existing skyline engine) — cheapest, subtler.
+    - My recommendation: **(B)** — the visual is the same but the dev complexity drops dramatically. Promote to (A) only if we add exterior interactivity later.
+
+37. **Data retention for anonymized outcome corpus** (depends on Q32 = A).
+    - (A) **Indefinite** — the more history, the stronger the signal.
+    - (B) **Rolling 3 years** — still gives us trend data; caps storage.
+    - (C) **User-configurable** — default 3 years, user can extend.
+    - My recommendation: **(C)**.
+
 ---
 
 ## §11 — Execution Strategy
@@ -1645,8 +1780,8 @@ Per §0, here's this execution plan doubting itself.
 **F4 — User becomes the bottleneck.** The human has to review everything; if they can't keep up, work queues.
 → *Mitigation:* Reviewer-role sessions can pre-vet PRs before user sees them. Only 1–2 PRs/day need user attention (the ones a Reviewer flagged or approved). Everything else is green-path.
 
-**F5 — The wrong parallelism unit.** Phases turn out to be bigger-than-estimated; 3-way fan-out becomes 5-way and chaotic.
-→ *Mitigation:* Don't spawn more than 3 concurrent Builder worktrees. If a phase is bigger than 15 days of work, split it into sub-phases with new R-IDs and sequence.
+**F5 — The wrong parallelism unit.** Phases turn out to be bigger than estimated; 3-way fan-out becomes chaotic.
+→ *Mitigation:* **Hard cap of 3 concurrent Builder worktrees.** If a phase is larger than scoped, split it into sub-phases with new R-IDs and sequence them. The "Swarm" loadout in §11.11 is a *coordinated* 5-session burst for a tight R0-item cluster only — it is not an exception to the 3-worktree cap for phase-level work; all swarm sessions share a single worktree with pre-agreed file ownership, not separate worktrees.
 
 **F6 — The Doubt Protocol becomes theater.** Sessions rubber-stamp premortems and move on.
 → *Mitigation:* Red Team session audits doubt artifacts at end of phase. If premortems are formulaic, the session is called out. Worst case: user spot-checks one premortem per wave.
@@ -1666,7 +1801,7 @@ When a phase is particularly high-stakes or risky, go beyond Gear 2 to these con
 
 **The Tournament.** Two independent Builder sessions build the same deliverable from scratch. Reviewer compares outputs. User picks the better one. 2x cost, ~1.5x quality, useful for: signature visual moments (Penthouse Morning Briefing choreography, War Room flow lines), novel tech choices (first R3F scene, first Rive pipeline).
 
-**The Swarm.** For R0's P1 items (audit log, data export, security headers, rate limiting, MFA), spin up 5 parallel mini-sessions, each owning one item. Aggressive use of worktrees. High coordination tax — only do this for a tight cluster of tiny independent tasks.
+**The Swarm.** For R0's P1 items (audit log, data export, security headers, rate limiting, MFA), spin up 5 parallel mini-sessions inside **one shared worktree** with pre-agreed file-ownership (see §11.6). Each session owns one R0 deliverable. This does NOT count against the 3-worktree cap because all swarm sessions live in one worktree. High coordination tax — only for a tight cluster of independent R0 tasks.
 
 **The Double-Check.** Before merging anything that touches auth, encryption, or billing: two independent Reviewer sessions must both approve. Expensive, but zero auth/crypto/billing bug is worth it.
 
@@ -1704,6 +1839,255 @@ Apply §0 to §11 itself, right now:
 - *Fresh eyes:* "Why are we optimizing for speed at all?" — because the user wants momentum and the product is most valuable when shipping. But: is 4 weeks vs 8 weeks really worth the coordination overhead?
 
 If any of these challenges lands harder than expected, downgrade gears. The point is to be honest about which gear we're in.
+
+---
+
+## §12 — Product Quality & Robustness
+
+Audit-driven addendum. These are the user-facing quality concerns the main phase plans underspecify. Each subsection is a standing commitment to be threaded into every relevant R-phase, not a separate phase.
+
+### 12.1 Accessibility (WCAG 2.2 AA as the bar)
+
+**Commitment:** Every shipped phase meets WCAG 2.2 AA for standard interactive content. The spatial metaphor creates unique accessibility challenges — honor them explicitly.
+
+- **Keyboard-first navigation.** Every floor is fully operable without a mouse. `Tab` walks through interactive elements in reading order. `Enter`/`Space` activates. `Esc` closes panels. Elevator buttons are keyboard-addressable (`1`, `2`, `PH`, `L` shortcuts). Ring-the-Bell: Enter when focused.
+- **Screen-reader story for the spatial metaphor.** The building, floors, and characters must have meaningful semantics. Each floor is an `<main>` with a proper heading. Characters are live regions when speaking. The elevator is a `<nav>` with clear labels ("Floor 7 — The War Room"). Cinematic animations get `aria-live="polite"` summaries ("Good morning. Three items today.").
+- **Reduced-motion respect** already exists; extend it: when `prefers-reduced-motion`, all GSAP timelines become instant state changes, Rive characters drop to static poses, Canvas particles pause. Keep *information*, drop *motion*.
+- **High-contrast mode.** On `forced-colors: active`, drop the atmospheric layers (skyline, particles, vignettes) and increase text contrast to system colors.
+- **Alt-text for AI-generated content.** Resume bullets, cover letters, prep packets, briefings — every agent output includes a plain-text summary for assistive tech. Not just the content but a description of *what it is* ("Tailored cover letter for Blackstone, version 3, 320 words").
+- **Focus traps in modals and dialogues.** Agent dialogue panels trap focus while open; `Esc` releases.
+
+**Delivery:** Every R-phase includes an accessibility pass as a deliverable (not optional). A shared `.tower/checklists/a11y.md` lives in the repo; every phase ticks the relevant items.
+
+### 12.2 Responsive & mobile strategy
+
+**Current stance:** **Desktop-first for v1. Responsive graceful degradation for tablet (≥768px). Phone (≤767px) shows a "small-screen fallback" view.**
+
+- **Desktop (≥1024px):** Full experience. All floors, cinematic entrances, 3D scenes, parallax.
+- **Tablet (768–1023px):** Reduced particle counts, simplified parallax, Kanban becomes a vertical list with swipe-to-advance, character dialogue stacks below the room instead of beside. All features still work.
+- **Phone (≤767px):** **Small-screen fallback mode** — a stripped-down list view of the building's core functions (pending alerts, pipeline summary, latest briefing, one-tap actions). The "full Tower" experience is labeled explicitly as *"best on desktop."* A persistent banner offers a "email me a link" flow to move back to desktop.
+
+Reason: the spatial metaphor depends on a large canvas. Trying to render the Orrery or the Dispatch Graph on a phone is a bad experience *and* a bad use of our build budget. Commit to desktop-first, make phone useful but minimal.
+
+**§10 Q30** raises the public question of whether phone should be its own phase later.
+
+### 12.3 Error states — catalogued per floor
+
+Every phase ships with its error states as *designed moments*, not stock messages. Common error catalog:
+
+| Failure | Metaphor | Where | Recovery |
+|---|---|---|---|
+| Gmail OAuth revoked mid-sync | Mail slot visibly sealed; red tag on the slot | Situation Room (Floor 4) | Click the sealed slot → reconnect flow opens |
+| Stripe payment declined | Door to Membership Office displays a brass "TRY AGAIN" plaque | Membership Office | In-world retry; 3 strikes → email notification |
+| Claude API rate-limited | Building lights briefly dim; any character says *"Give me a moment — I need to think."* | Any floor | 15-second retry with exponential backoff; after 3 fails, Red Team-style escalation to owner |
+| Resume parse failed | The Resume Press seizes; lever stuck mid-press; user prompted to paste text instead | Writing Room | Text-paste fallback; capture the bad PDF for later debugging (with user consent) |
+| pgvector quota approaching | CIO's dossier wall shows fewer pinned notes; CFO alerts via pneumatic tube | Rolodex + Situation | Oldest embeddings auto-pruned (LRU); user notified |
+| Inngest job died | Morning Briefing absent that day; a polite card in Penthouse *"Overnight shift was interrupted — investigating."* | Penthouse | Retry at next sync; persistent failure pages owner |
+| Network drops mid-elevator animation | Elevator stops; floor indicator freezes; doors reopen to previous floor after 3s | Any | Graceful; no data loss because nav is client-side |
+| Upload file corrupted / too large | Typewriter rejects the paper with a *ding*; error message on paper visible | Writing Room | User retries with smaller file |
+
+**Delivery:** Each phase's plan includes a short "error states" list as a success criterion. No phase ships with a bare `<ErrorBoundary>` fallback.
+
+### 12.4 Empty states — designed, not incidental
+
+Every floor has an empty state that *invites action*, not apologizes.
+
+- **War Room (zero applications):** The table is set — empty file folders, sharpened pencils, a blank whiteboard. CRO says *"Let's get started. Tell me what you're hunting."* → links to CRO intake.
+- **Penthouse (zero briefings yet):** Skyline is crystalline, no data overlays. CEO says *"First day. I'm here when you're ready."*
+- **Rolodex (zero contacts):** The rolodex on the desk is empty; CNO shrugs warmly: *"Who do you know?"* → import-from-LinkedIn CTA.
+- **Writing Room (zero drafts):** Desk is clean, typewriter ready, lamp on. CMO taps the keys once: *"First cover letter's the hardest. Drop a JD."*
+- **Observatory (zero data):** Orrery is a single sun, no planets. CFO says *"Give me some applications and I'll start charting patterns."*
+
+No "No data" text. Every empty state is in-character and pointed at the next action.
+
+### 12.5 Data lifecycle — resets, re-imports, transfers
+
+Explicit flows for data changes the roadmap otherwise glosses:
+
+- **Re-upload base resume.** Old resume_base is archived (version+1, isActive=false). Existing tailored resumes retain their parentId reference. A new tailor pass re-runs only on user request, not automatically.
+- **Wipe pipeline and start over.** User Settings → "Start Fresh" → confirm with a 2-step gate → soft-delete all applications, keep companies/contacts/documents (configurable). 30-day restore window. Audit log entry.
+- **Timezone change.** `user_profiles.timezone` update triggers a cron re-schedule for Morning Briefing and any scheduled reminders. Existing timestamps remain stored in UTC; display recomputes.
+- **Tier downgrade (Pro → Free).** Feature gates re-engage (auto-apply pauses, mock-interview limit re-applies). Draft outreach in `outreach_queue` with `status=approved` are allowed to send; new Pro-only features stop generating. No data deletion.
+- **Account transfer (new email).** Possible via support ticket, not self-serve. Full audit log entry. Old email's Google OAuth tokens revoked server-side.
+- **Account deletion** (see R0/0.7) covers permanent wipe.
+
+### 12.6 Notification policy
+
+Signals arrive through one of three channels, by priority. The defaults are conservative — users can widen them in Settings.
+
+| Channel | Default triggers | Opt-out granularity |
+|---|---|---|
+| **Pneumatic tube (in-world, in-app only)** | Any proactive agent output, status changes on owned items, error escalations | Global or per-agent |
+| **Email (Resend)** | Morning Briefing summary (daily), offer arrival (instant), stale-app 2x threshold (instant), deletion confirmation | Per-trigger |
+| **SMS (future)** | Offer arrival only (opt-in) | All-or-nothing |
+
+**Quiet hours.** 9pm–7am user-local by default. No tubes delivered during quiet hours — they queue and arrive at wake-up. Email digest still sends at configured briefing time.
+
+**Spam ceiling.** Hard cap of 10 emails per user per day regardless of triggers. Excess collapses into a digest.
+
+**Unsubscribe.** Every email has a one-click unsubscribe per-category (GDPR / CAN-SPAM compliant). Account-level opt-out is a single Settings toggle.
+
+### 12.7 Copy & tone guide
+
+A tone guide lives at `docs/COPY-GUIDE.md` (to be written during R1).
+
+- **Voice: Concise, warm, competent.** No exclamation marks except in explicit excitement moments. No emoji in agent dialogue (except the Concierge once, intentionally). No startup-cringe ("let's get those numbers up!").
+- **Per-character voice registers** (see §5 R-phases and the expanded character table in §5).
+- **Forbidden words in product UI:** "dashboard," "users," "modal," "sidebar," "notification" (→ tube), "widget," "panel" (only in building-appropriate contexts like "glass panel"), "tip" (→ "hint" or "note").
+- **Required vocab:** applications, opportunities, briefing, pipeline, floor, room, tube, briefing, roster (never "list of agents").
+- **Error tone:** calm, curious, never apologetic-groveling. *"The Resume Press jammed. Try paste-as-text?"* beats *"Oops! Something went wrong. Please try again."*
+
+All agent outputs should pass a copy-guide pass before ship. AI outputs that don't match the voice are flagged by a small linter agent (future R-phase stretch).
+
+---
+
+## §13 — Operations (testing, observability, cost, legal, launch)
+
+### 13.1 Testing strategy
+
+Tiered — cheaper tests run more often.
+
+| Tier | Tool | Scope | Run when |
+|---|---|---|---|
+| Type check | `tsc --noEmit` | Entire TS graph | Every commit |
+| Unit | Vitest | Pure functions, query builders, validators | Every commit |
+| Component | Vitest + Testing Library + happy-dom | React component behavior | Every commit (fast) |
+| Integration | Vitest + MSW | API routes + DB mock | PR open |
+| E2E (critical paths) | **Playwright** (to add in R0) | Auth flow, elevator nav, ring-the-bell, Concierge onboarding, job discovery → cover letter → outreach queue | Nightly + PR to main |
+| Visual regression | Playwright screenshots or Chromatic | Every floor's happy state + empty state + one error state | Nightly |
+| Accessibility | axe-core in Playwright | Every floor's primary flow | Nightly |
+| Agent output eval | Custom Vitest suite | CMO cover-letter quality, CPO mock scoring consistency, CEO briefing structure | Per-change to agent prompts |
+| Load test (future) | k6 / Artillery | Job Discovery worker at user scale | Pre-launch |
+
+**Agent output evaluation in particular:**
+- A golden dataset of 20 (JD, base-resume) pairs with human-graded ideal cover letters.
+- CMO generates cover letters against the dataset; Claude-as-judge rubric scores each across 5 dimensions (keyword-fit, company-voice-match, story-coherence, CTA strength, brevity).
+- Regression threshold: average score must not drop >5% vs baseline. Breach blocks merge.
+- Same pattern for CPO prep packets and mock interview scoring.
+
+### 13.2 Observability & SLOs
+
+| Concern | Tool | Target |
+|---|---|---|
+| Errors in production | Sentry (already in deps) | Alert owner on any unhandled error |
+| Web Vitals (real user) | Vercel Analytics | LCP <2.5s, CLS <0.1, INP <200ms, p75 |
+| Agent cost per user per day | Custom dashboard reading `agent_logs` | Alert owner if any user exceeds $5/day |
+| DB query p95 | Supabase dashboard + manual spot-checks | <200ms on pipeline queries |
+| Cron job health | Inngest dashboard | Alert on 2+ consecutive failures |
+| Auth / session issues | Custom metric from `auth_events` (new) | Baseline + anomaly alert |
+| Uptime | Vercel platform + a single Better Stack ping | 99.5% SLO for v1 (not committed to users until Pro tier) |
+
+**Pager policy:** Owner-only for v1 (Armaan gets Slack DM or email). No on-call rotation. If/when team forms, SRE rotation kicks in.
+
+**Status page:** Deferred until Pro tier launches.
+
+### 13.3 Cost model (per-user monthly, estimated)
+
+For a *moderately active* user (~20 Job Discovery runs, ~5 cover letters, ~3 mock interviews, daily briefings, baseline browsing):
+
+| Service | Cost est. | Notes |
+|---|---|---|
+| Claude API (Sonnet 4 + Haiku) | $8–15 | Biggest line item. Agents + embeddings. |
+| Gmail API | $0 | Free tier covers vast majority of users |
+| Supabase (DB + Storage + Auth) | $1–2 | Pro tier starts at $25/mo shared across users |
+| Vercel (functions + hosting) | $0.50–1 | Fluid Compute keeps costs low |
+| Upstash (Redis rate limit) | $0.10 | Pennies |
+| Inngest | $0.50 | Hobby tier amortized |
+| Resend (emails) | $0.20 | 3000/mo free, then $20/mo for 50k |
+| ElevenLabs (optional CEO voice) | $3 | Only if enabled |
+| Stripe processing fees | ~2.9% of revenue | — |
+| **Total per active Pro user** | **~$10–20/mo** | Before ElevenLabs |
+
+**Pricing implication:** Pro tier at **$15–25/mo** is tight margin. At $29/mo Pro, we have headroom. Team tier ($49–79/mo) more comfortable. Free tier costs us money — must be bounded (per §14).
+
+### 13.4 Legal & compliance baseline
+
+Must-add before public beta:
+- **Privacy Policy & Terms of Service** (lawyer-reviewed; off-the-shelf SaaS template is a starting point, not a shipping artifact).
+- **GDPR compliance** (covered in R0 export/delete).
+- **CCPA compliance** (similar but US-state specific — "Do Not Sell" flag in user_profiles, no resale anyway so mostly procedural).
+- **EU AI Act** — The Tower has agents making decisions *about* the user (which jobs to pursue, what tone to use, what salary to counter). Classify: *limited-risk* AI system. Required: transparency (user knows when an agent is involved — the building metaphor does this naturally), logging (we have `agent_logs`), and the right to request human review (a "speak to the owner" contact path suffices for v1).
+- **Cookie consent banner** for EU users (minimal — we use only essential cookies for auth; no third-party tracking for v1).
+- **Security.txt** at `/.well-known/security.txt` with contact address.
+
+Deferred (add when enterprise interest appears):
+- DPA (Data Processing Agreement) template.
+- SOC 2 audit path.
+- HIPAA — out of scope; we don't handle PHI.
+
+### 13.5 Beta & launch strategy
+
+**v1 intent:** **Armaan-only** for initial build. When R3 ships (autonomy loop visible), invite a **private beta of 10–25 friends**. Public-Pro-launch deferred until at least R7 ships.
+
+- **Invite flow:** Custom invite code in Stripe metadata + Supabase row-level gate (`user_profiles.access_level` enum: owner, beta, pro, free). Public sign-up disabled until launch.
+- **Feature flags:** Simple `user_profiles.feature_flags jsonb` column gates per-user access to in-progress floors. No external LaunchDarkly until scale demands it.
+- **Rollback plan:** Vercel supports instant rollback per deploy. Drizzle migrations are forward-only but reversible in practice because they're tiny. Pre-launch runbook: rollback < 5 min from alert.
+- **Abuse detection:** Per-user token budget (default $10/day Pro, $2/day Free). Soft-throttle at 80%, hard-cut at 100%. Audit log entry on every throttle.
+- **Cost alerts:** Daily digest to owner; anomaly alert if any user exceeds 3x baseline.
+
+**§10 Q31** lists this as a decision point.
+
+---
+
+## §14 — Growth, Moat, Retention
+
+### 14.1 Monetization restructure (supersedes §6.9 and §10 Q16)
+
+**Old proposal:** Free tier capped at 10 applications, then prompted to upgrade.
+**Problem (per Product audit):** Users hit the cap *before* experiencing the best features (resume tailoring, mock interviews, offer support). Paywall fires on the wrong moment.
+
+**New structure:**
+
+| Tier | Price | Gates | Intent |
+|---|---|---|---|
+| **Free (The Lobby Pass)** | $0 | Unlimited discovery; unlimited Kanban; 1 tailored resume/mo; 1 mock interview/mo; CMO drafts 3 cover letters/mo; no Morning Briefing voice; no offer negotiation | Prove value. Keep users curious. Cap exists on *creative* output, not tracking. |
+| **Pro (The Resident)** | $19 or $29/mo | Unlimited tailored resumes; unlimited mocks; unlimited CMO drafts; Morning Briefing voice (ElevenLabs); proactive outreach drafting; Negotiation Parlor; Rolodex warm-intro engine; priority agent queue | The full autonomous-career-team experience. |
+| **Alumni (The Keyholder)** | $2–5/mo | Rolodex access only; in-building check-ins; job-market alerts for your industry; refer-a-user bonuses | Post-placement retention. Turn one-time buyers into recurring. |
+| **Team (future)** | $49–79/mo | Multi-user household/partner; shared pipeline views; crossref warm intros | For couples searching together; career-coach-led cohorts. Defer until demand. |
+
+**Pricing decision in §10 Q32.**
+
+### 14.2 The moat — what makes us hard to beat
+
+Metaphor alone is not a moat. Competitors can commission Rive, GSAP, R3F. Our defensible edges need to be built explicitly:
+
+1. **Domain learning corpus.** Every cover letter written, mock interview drilled, rejection received, offer evaluated feeds back into a *Tower-specific* training corpus. Over time, the Tower knows things about (say) RE finance recruiting that ChatGPT doesn't — because we saw them land or not land. We should plan: (a) aggregate anonymized outcome data consensually, (b) use it to fine-tune prompts and eventually a Tower-specific model. This is a year-plus play; start the data plumbing now.
+2. **Network effects between users.** If two Tower users are both targeting Blackstone, we know. If one knows the other's warm contact, we can coordinate intros without leaking data (respecting privacy). This requires careful consent design but is a real network-effect moat. Prototype in R8 (Rolodex evolution).
+3. **The Armaan effect.** The product is built by a user, for users like the user. Authentic domain expertise bleeds into every agent's system prompt. A clone without lived job-search pain ships a thinner copy.
+
+**Where the moat lives in the roadmap:** §10 Q33 (user consent for anonymized outcome aggregation), §10 Q34 (network-effects design).
+
+### 14.3 Retention beyond the first offer
+
+Current retention mechanics are fragile (Building Seasons is cute but depends on users returning). Add:
+
+- **Alumni tier** (see 14.1) — the simplest hook: keep them paying something small.
+- **"Next role" mode** — when a user accepts an offer, the Tower shifts. The Negotiation Parlor closes. Floor 1 CEO says *"Congratulations. I'll keep the lights on — want me to start research for your next move in 12–24 months?"* If yes, Job Discovery runs quarterly at low intensity. Low cost, long tail.
+- **Refer-a-friend unlock** — User who lands a job can refer one friend → both get 2 months Pro free. Turns retention into growth.
+- **Industry recruiting cycle awareness** — In September (RE finance full-time cycle opens), the Tower proactively re-engages the user: *"The 2027 RE analyst applications open today. Should I restart Discovery?"* Aligns with the `Building Seasons` concept but grounded in domain reality.
+- **Partner / spouse mode** — One household, two job-searches running side-by-side, cross-referencing warm intros and interview schedules. Team tier UX.
+
+### 14.4 Missing features promoted from audits
+
+These were flagged by Product + Completeness auditors as gaps the roadmap underweighted. Integrating them now:
+
+| Feature | Home floor / phase | Rationale |
+|---|---|---|
+| **ATS keyword optimizer** | R5 (Writing Room) — new CMO tool `analyzeATSFitness(resumeId, jdId)` | Post-tailor pass scores the resume against common ATS parsers (Lever, Greenhouse, Workday) and surfaces missing critical keywords. Without this, tailored resumes may not reach human eyes. |
+| **Application deadline reminders** | R7 (Situation Room) — COO-owned | Calendar-aware: any application with a deadline creates a countdown alert. Final alert at 24h. Integrates with existing pneumatic tube. |
+| **Rejection autopsy** | R9 (Observatory) — new CFO tool `analyzeRejectionPattern()` | When an application flips to rejected, prompt a 3-question debrief. Aggregate across rejections → CFO monthly insight ("65% of Tier-1 rejections happen at phone screen; probable causes: X, Y"). |
+| **Reference-request management** | R10 (Negotiation Parlor) — new CNO tool `draftReferenceRequest()` + tracking | When offer nears acceptance, CNO drafts requests to user's 3 best warmth-scored contacts. Tracks whether references submitted; sends thank-yous. |
+| **Salary negotiation simulator** | R10 (Negotiation Parlor) | CPO agent role-plays the recruiter; user practices counters. Scored on anchoring, concession management, walk-away position. |
+| **Company watchlist** | R1 (War Room) — new CRO capability | User saves companies they *want to work at* but aren't hiring yet. Tower monitors careers pages. When a matching role appears → pneumatic tube escalation. |
+| **Interview recording + playback vault** | R6 (Briefing Room) — extends The Debrief Binders | Opt-in voice recording + transcription via Deepgram for real interviews (not just mocks). Post-interview auto-debrief shows filler-word count, STAR completeness, time on each question. |
+| **LinkedIn profile sync** | R4 (Lobby Concierge) | Promote from "R5+" to R4 onboarding. Lets us populate contacts + profile + experience immediately. |
+| **Post-offer transition floor** | Post-R10, new phase R11 | Onboarding for accepted role: relocation checklist, resignation letter draft, pre-start prep. Extends retention beyond offer signing. |
+
+These are not separate phases; they slot into the existing phases as listed. R1 gains Watchlist; R4 gains LinkedIn sync; R5 gains ATS optimizer; R6 gains recording; R7 gains deadlines; R9 gains rejection autopsy; R10 gains references + negotiation sim.
+
+### 14.5 The North Star proof-of-concept (in R1)
+
+Per the Fresh-eyes audit's biggest concern: users might lose faith over a long rebuild. The counter: R1 ships a *visible* end-to-end autonomy slice. This is listed in R1's "Functionality upgrades" above and is a mandatory deliverable, not a stretch. Without it, R1 is a Kanban with ambition.
 
 ---
 

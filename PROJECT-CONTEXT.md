@@ -216,7 +216,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |
 | `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge, multi-tenant ready | ~230 |
 | `docs/MASTER-PLAN.md` | 7 phases with deliverables, acceptance criteria, testing strategy | ~370 |
-| `docs/NEXT-ROADMAP.md` | **Status:** Proposal — awaiting user sign-off on §10 before the first R-phase st | ~1740 |
+| `docs/NEXT-ROADMAP.md` | **Status:** Proposal — awaiting user sign-off on §10 before the first R-phase st | ~2130 |
 | `docs/POST-HARDENING-MANUAL-STEPS.md` | Everything in this file is **something a computer can't do for you**. The code | ~270 |
 | `docs/SCHEMA-DRAFT.md` | 16-table Postgres schema: RLS, pgvector HNSW indexes, post-push SQL triggers | ~480 |
 | `docs/TECH-BRIEF.md` | Research synthesis + Google OAuth setup, SDK patterns, gotchas | ~430 |
