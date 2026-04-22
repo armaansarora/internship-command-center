@@ -10,6 +10,7 @@ import { registerLock } from "./commands/lock.js";
 import { registerStart } from "./commands/start.js";
 import { registerDone } from "./commands/done.js";
 import { registerBlock } from "./commands/block.js";
+import { registerUndo } from "./commands/undo.js";
 
 const program = new Command();
 
@@ -34,6 +35,7 @@ registerLock(program);
 registerStart(program);
 registerDone(program);
 registerBlock(program);
+registerUndo(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);
