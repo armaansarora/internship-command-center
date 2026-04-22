@@ -1,0 +1,23 @@
+phase: R7
+name: The Situation Room (Floor 4)
+status: not_started
+intent: Mission control for time-sensitive matters. Follow-ups. Deadlines.
+  Application status decay. Every stale follow-up has a drafted response ready
+  to approve with an undo window. Approval-all feels like a COO running the
+  room, not reckless batch-fire. The Pneumatic Tube lives here — proactive push
+  lands as a physical object first.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - Follow-up drafts appear overnight for stale apps. Approve-all sends with
+      visible undo bar. Flight paths render at scale. At least one proactive
+      tube delivery per session during active use. Zero `alert()` or generic
+      toast anywhere.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

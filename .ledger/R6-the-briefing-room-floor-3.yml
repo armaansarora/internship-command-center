@@ -1,0 +1,23 @@
+phase: R6
+name: The Briefing Room (Floor 3)
+status: not_started
+intent: The whiteboard floor. CPO drills the user with mock interview questions.
+  As the user answers (typed or spoken), the whiteboard fills with the STAR
+  framework scaffold live. CPO interrupts to sharpen — *"What Action did you
+  take? I need a verb."* At the end, the whiteboard snapshots into a Debrief
+  Binder on the shelf, filed by company. Over time, the shelf fills.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - User completes a 3-question drill with scored STAR feedback per answer.
+      STAR whiteboard fills are readable and accurate. Debrief contains Q/A +
+      numeric scores + CPO's narrative feedback. Voice mode (if shipped) works
+      end-to-end in Chrome and Safari.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

@@ -1,0 +1,25 @@
+phase: R0
+name: Hardening Sprint
+status: not_started
+intent: The building's utilities work. Auth persists. Secrets are encrypted.
+  Cron is authenticated. Audits are recorded. Users can see, export, and delete
+  their data. The Phase Ledger is live; future sessions know what's real vs.
+  claimed. Invisible to the user, load-bearing for everything after.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - Session survives laptop-lid close + reopen. `SELECT google_tokens` returns
+      ciphertext. `curl` on any cron route without `CRON_SECRET` returns 401.
+      Export delivers a zip by email with signed URL expiry respected. Delete
+      demonstrates actual row removal after soft-delete window. Prompt-injection
+      test fixtures don't make the parser go off-script. `securityheaders.com`
+      grades A. A fresh Claude session opens `.tower/ledger/CURRENT.yaml` and
+      correctly identifies the active phase.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

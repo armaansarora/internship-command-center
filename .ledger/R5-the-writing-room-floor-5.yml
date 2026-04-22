@@ -1,0 +1,25 @@
+phase: R5
+name: The Writing Room (Floor 5)
+status: not_started
+intent: "A quiet floor. A single desk lamp. Paper drafts stacked. A typewriter
+  on the side. A press in the corner. When the user drops a job description, CMO
+  picks up a pen — you watch a cover letter compose itself in real time, as if
+  the character is writing it. When CMO finishes, the paper slides out as a
+  publication-quality preview. For resumes: a mechanical press stamps a new
+  version out of the base resume, sections glowing as CMO rewrites bullets to
+  match the JD."
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - "User can generate a tailored cover letter and resume for one application
+      quickly. Refinement loop: user types feedback → new draft appears shortly.
+      Three tone variants demonstrably different on same input. PDF export reads
+      as publication-quality."
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

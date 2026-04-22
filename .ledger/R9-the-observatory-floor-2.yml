@@ -1,0 +1,24 @@
+phase: R9
+name: The Observatory (Floor 2)
+status: not_started
+intent: The contemplation floor. Panoramic, cool-blue, quiet. The centerpiece is
+  the **Orrery** — the user's pipeline as celestial bodies in orbit. Tier-1
+  companies are inner planets; Tier-4 outer. Status changes flash;
+  interview-scheduled spawns satellites; offers explode into supernovae;
+  rejections fade. CFO stands at a panoramic window; a conversion funnel
+  projects onto the glass. A rejection autopsy lives here — pattern analysis
+  across rejections.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - Orrery renders 100+ applications at 60fps on baseline laptop.
+      Click-to-history is instant. Monthly report auto-generates with CFO
+      commentary that's readable, not boilerplate.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

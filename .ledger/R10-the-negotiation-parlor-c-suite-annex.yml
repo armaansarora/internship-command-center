@@ -1,0 +1,24 @@
+phase: R10
+name: The Negotiation Parlor (C-Suite annex)
+status: not_started
+intent: A door appears on the C-Suite wall when the user's first offer lands.
+  Not before. The Parlor is a wood-paneled side room with an oak table, a comp
+  band chart on the wall, and three chairs — Offer Evaluator, CFO, CNO gather.
+  Offers are folders on the table. Drafts are drafted. Comp is analyzed. Scripts
+  are written. Nothing gets sent without a hold window.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - Offer arriving via email parses into the offers table. Parlor door appears
+      within a short window. Comp chart renders with real benchmarks.
+      Negotiation script generation produces a draft the user can send with
+      minor edits. Side-by-side comparison works with 2+ offers. Deadline alerts
+      fire.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

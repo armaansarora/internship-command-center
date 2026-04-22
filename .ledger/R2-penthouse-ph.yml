@@ -1,0 +1,23 @@
+phase: R2
+name: Penthouse (PH)
+status: not_started
+intent: The CEO is *already at the window* when the user arrives in the morning.
+  Gold-hour skyline. A briefing is unfolding on glass. This isn't a dashboard
+  with a greeting — it's the first minute of a scripted workday. When the user
+  opens the app in the morning, they don't see numbers first — they see the CEO
+  turning from the window.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - User can describe the morning scene from memory after a week. The briefing
+      reads as conversation, not broadcast. A no-news day still produces a
+      Penthouse moment worth returning to. Different overnight activity
+      demonstrably produces different scripts.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

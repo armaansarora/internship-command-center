@@ -1,0 +1,7 @@
+roadmapPath: docs/NEXT-ROADMAP.md
+lockTtlMinutes: 120
+handoffDir: .handoff
+ledgerDir: .ledger
+towerDir: .tower
+tagFormat: "[{phase}/{task}]"
+driftStrict: false

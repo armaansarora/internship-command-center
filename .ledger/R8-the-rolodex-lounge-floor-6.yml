@@ -1,0 +1,22 @@
+phase: R8
+name: The Rolodex Lounge (Floor 6)
+status: not_started
+intent: "A warm lounge. Mahogany. Leather chairs. A physical rotating rolodex as
+  the centerpiece. Contact cards with warmth encoded as temperature (cold/blue →
+  warm/cream → hot/amber). CNO's side feels like a party; CIO's side feels like
+  a library. The floor opens the network-effect moat: over time, users who opt
+  in can (with consent) coordinate warm intros between themselves."
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - Rolodex rotates smoothly with 200+ cards. Side-switch is instant. CNO
+      surfaces warm-intro proposals autonomously. CIO refreshes stale research
+      without prompting. Consent UX passes a Red Team read.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

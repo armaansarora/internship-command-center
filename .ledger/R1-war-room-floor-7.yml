@@ -1,0 +1,27 @@
+phase: R1
+name: War Room (Floor 7)
+status: not_started
+intent: A tactical console carved from mahogany. The CRO is on the floor when
+  the user arrives. Jobs *arrive* (not appear). Applications move through stages
+  with visible consequence — every status change feels like an operation, not a
+  form submit. By the end of a user's first session on this floor, they've
+  watched one opportunity get discovered, one resume get tailored, one cover
+  letter get drafted, one outreach get queued for approval, and one email
+  actually send after they approve. The North Star is real on Floor 7 first,
+  then everywhere else.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - A cold user declares targets and returns later to ≥5 scored opportunities.
+      Dragging a card between stages passes a three-person vibe test against
+      Linear's issue drag. The proof-of-concept loop executes end-to-end in a
+      user's first session. Whiteboard content visibly reflects `agent_memory`
+      writes. Empty state invites. Lighthouse >90 on the War Room route.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

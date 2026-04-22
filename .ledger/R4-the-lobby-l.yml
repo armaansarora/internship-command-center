@@ -1,0 +1,25 @@
+phase: R4
+name: The Lobby (L)
+status: not_started
+intent: The front door of the Tower. The moment when a first-time user *decides*
+  this building is real. Existing users get a quiet welcome-back (zero
+  ceremony). Returning users are already logged in and routed to their last
+  floor. First-time users get a cinematic arrival that earns the building's
+  promise. The Concierge captures a target profile in a conversation, not a
+  form. Their first session ends with a Morning Briefing built from jobs the
+  Tower discovered during onboarding.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - First-click to first-Morning-Briefing is fast and feels continuous.
+      Returning users never see the arrival twice. Concierge extracts a usable
+      target profile in most test runs. Directory cross-section reads live
+      progression without drift.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []

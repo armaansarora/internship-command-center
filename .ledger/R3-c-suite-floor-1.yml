@@ -1,0 +1,25 @@
+phase: R3
+name: C-Suite (Floor 1)
+status: not_started
+intent: The brain of the building. When the user rings the bell, the camera
+  pulls back and the chain of command lights up live — all seven departments,
+  subagents branching under them, edges flowing with dispatch. The user is not
+  chatting with a chatbot; they are watching a boardroom run. When the CEO is
+  between sessions, they're at their desk — maybe glancing at a photo frame,
+  maybe reading, maybe waiting.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - Ringing the bell with *"How's everything looking?"* triggers ≥3
+      departments to dispatch visibly in parallel. Total bell-to-briefing time
+      is modest and felt as *work being done*. `/`-injecting mid-dispatch adapts
+      the plan. ≥3 threshold triggers fire autonomously across an extended test.
+      CEO's briefing references a learning first captured by a sibling agent.
+  met: false
+  verified_by_commit: null
+tasks: {}
+blockers: []
+decisions: []
+history: []
