@@ -13,6 +13,7 @@ import { registerBlock } from "./commands/block.js";
 import { registerUndo } from "./commands/undo.js";
 import { registerDiff } from "./commands/diff.js";
 import { registerHandoff } from "./commands/handoff.js";
+import { registerResume } from "./commands/resume.js";
 
 const program = new Command();
 
@@ -40,6 +41,7 @@ registerBlock(program);
 registerUndo(program);
 registerDiff(program);
 registerHandoff(program);
+registerResume(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);
