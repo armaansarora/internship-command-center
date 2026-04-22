@@ -1,5 +1,7 @@
-paused: false
+paused: true
 scope: R0-only
 started: 2026-04-22T19:15:00Z
 started_by: opus-4.7-session-autopilot-r0
+completed: 2026-04-22T20:55:00Z
 max_blockers: 3
+outcome: R0 complete — 12/12 deliverables shipped; 235 tests passing; tsc clean; pushed to origin/main
