@@ -16,6 +16,7 @@ import { registerHandoff } from "./commands/handoff.js";
 import { registerResume } from "./commands/resume.js";
 import { registerNext } from "./commands/next.js";
 import { registerInit } from "./commands/init.js";
+import { registerValidateMsg } from "./commands/validate-msg.js";
 
 const program = new Command();
 
@@ -46,6 +47,7 @@ registerHandoff(program);
 registerResume(program);
 registerNext(program);
 registerInit(program);
+registerValidateMsg(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);
