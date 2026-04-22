@@ -8,3 +8,6 @@ git add docs/ 2>/dev/null
 # Auto-regenerate BOOTSTRAP-PROMPT.md
 npx tsx scripts/generate-bootstrap.ts 2>/dev/null
 git add BOOTSTRAP-PROMPT.md
+
+# Phase Ledger drift check — warn-only, never blocks a commit
+npx tsx scripts/ledger/verify.ts --warn-only || true

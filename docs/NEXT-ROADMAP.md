@@ -714,33 +714,21 @@ Markdown prose doesn't tell the next Claude session what's built vs. what's clai
 ### Layout
 
 ```
-.tower/
-  ledger/
-    CURRENT.yaml            # active phase pointer + schema version
-    HISTORY.ndjson          # append-only session log, one line per session
-    R0.yaml                 # per-phase state
-    R1.yaml
-    ...
-  research/
-    R0/
-      taste-memo.md
-      references.md
-      sketches/
-      open-questions.md
-    ...
-  doubt/
-    {session_id}/
-      premortem.md          # the 5-artifact bundle from §0 Doubt Protocol
-    ...
-
+.ledger/
+  CURRENT.yml               # active phase pointer + schema version
+  R0-hardening-sprint.yml   # per-phase state
+  R1-war-room-floor-7.yml
+  ...
 scripts/
   ledger/
-    verify.ts               # drift detection: claims vs code reality
-    handoff.ts              # generates NEXT-SESSION.md on commit
-  validate-commit-msg.ts    # Husky commit-msg hook: enforce R{N}/{D}: prefix
-
-NEXT-SESSION.md             # auto-generated on every commit
+    verify.ts               # drift detection: notes-claimed evidence vs repo reality
+  tower/                    # CLI that reads/writes the ledger (start, done, block,
+                            #   handoff, status, resume, …). Commit-msg hook warns
+                            #   when src/ commits are missing a [Rn/n.n] tag.
 ```
+
+The Tower CLI (`npm run t …`) is the only interface agents use to mutate the
+ledger; drift detection runs via Husky pre-commit (warn-only).
 
 ### Per-phase YAML (abbreviated)
 
@@ -784,7 +772,7 @@ Husky commit-msg hook enforces: every commit must prefix `R{N}/{D}:` (deliverabl
 
 ### The handoff file
 
-`scripts/ledger/handoff.ts` runs on every commit (Husky post-commit). Writes `NEXT-SESSION.md` with: active phase, progress delta since last commit, exact next step, files to read first, drift report if any.
+At session-end (or the 70% context threshold), agents run `npm run t handoff -- --stdin` with a JSON payload of decisions, surprises, and next steps. The Tower CLI writes `.handoff/YYYY-MM-DD-HHMM.md`, releases the phase lock, and commits the handoff. The next session reads the latest handoff via `npm run t resume`.
 
 ### What this replaces
 

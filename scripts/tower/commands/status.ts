@@ -1,6 +1,9 @@
 import { Command } from "commander";
+import path from "node:path";
+import fs from "fs-extra";
+import YAML from "yaml";
 import { findRepoRoot } from "../lib/repo.js";
-import { listLedgers, readLedger } from "../lib/ledger.js";
+import { listLedgers, readLedger, LEDGER_DIR } from "../lib/ledger.js";
 import { readRepoHead, taggedCommitsSince } from "../lib/git.js";
 
 export function registerStatus(program: Command): void {
@@ -51,6 +54,18 @@ export function registerStatus(program: Command): void {
 }
 
 async function pickActive(repo: string, phases: string[]): Promise<string> {
+  // Prefer `.ledger/CURRENT.yml` when present — one file read, deterministic.
+  const pointer = path.join(repo, LEDGER_DIR, "CURRENT.yml");
+  if (await fs.pathExists(pointer)) {
+    try {
+      const raw = await fs.readFile(pointer, "utf-8");
+      const parsed = YAML.parse(raw) as { active?: string } | null;
+      const active = parsed?.active;
+      if (active && phases.includes(active)) return active;
+    } catch {
+      // fall through to scan
+    }
+  }
   for (const p of phases) {
     const led = await readLedger(repo, p);
     if (led.status === "in_progress") return p;

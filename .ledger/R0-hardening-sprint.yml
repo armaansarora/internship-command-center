@@ -1,25 +1,111 @@
 phase: R0
 name: Hardening Sprint
-status: not_started
+status: in_progress
 intent: The building's utilities work. Auth persists. Secrets are encrypted.
   Cron is authenticated. Audits are recorded. Users can see, export, and delete
   their data. The Phase Ledger is live; future sessions know what's real vs.
   claimed. Invisible to the user, load-bearing for everything after.
-started: null
+started: 2026-04-22T19:30:58.712Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-22T19:30:58.712Z
+  expires: 2026-04-22T21:30:58.708Z
 acceptance:
   criteria:
-    - Session survives laptop-lid close + reopen. `SELECT google_tokens` returns
-      ciphertext. `curl` on any cron route without `CRON_SECRET` returns 401.
-      Export delivers a zip by email with signed URL expiry respected. Delete
+    - Session survives laptop-lid close + reopen. SELECT google_tokens returns
+      ciphertext. curl on any cron route without CRON_SECRET returns 401. Export
+      delivers a zip by email with signed URL expiry respected. Delete
       demonstrates actual row removal after soft-delete window. Prompt-injection
-      test fixtures don't make the parser go off-script. `securityheaders.com`
-      grades A. A fresh Claude session opens `.tower/ledger/CURRENT.yaml` and
-      correctly identifies the active phase.
+      test fixtures do not make the parser go off-script. securityheaders.com
+      grades A. A fresh Claude session opens .ledger/CURRENT.yml and correctly
+      identifies the active phase.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R0.1:
+    title: Session persistence — root middleware + Playwright E2E (P0)
+    status: not_started
+    notes: "Evidence: src/middleware.ts, playwright.config.ts,
+      tests/e2e/session-persistence.spec.ts"
+  R0.2:
+    title: audit_logs table + logSecurityEvent helper (P1)
+    status: not_started
+    notes: "Evidence: src/lib/audit/log.ts, src/lib/audit/log.test.ts, migration for
+      audit_logs"
+  R0.3:
+    title: Encryption hardening — HKDF per-user keys + tests (P0)
+    status: not_started
+    notes: "Evidence: src/lib/crypto/keys.ts, src/lib/crypto/keys.test.ts,
+      src/lib/gmail/oauth.test.ts"
+  R0.4:
+    title: Cron auth coverage audit + integration test (P0)
+    status: not_started
+    notes: "Evidence: src/app/api/cron/__integration__/cron-auth.test.ts"
+  R0.5:
+    title: Security headers scanner + R0 report (P1)
+    status: not_started
+    notes: "Evidence: scripts/check-security-headers.ts,
+      docs/SECURITY-HEADERS-REPORT.md"
+  R0.6:
+    title: Full user-data export endpoint (P1)
+    status: not_started
+    notes: "Evidence: src/app/api/account/export/route.ts,
+      src/lib/account/export.ts, src/app/api/cron/export-worker/route.ts"
+  R0.7:
+    title: Account deletion — soft-delete + 30-day purge sweeper (P1)
+    status: not_started
+    notes: "Evidence: src/app/api/account/delete/route.ts,
+      src/app/api/cron/purge-sweeper/route.ts"
+  R0.8:
+    title: Gmail prompt-injection defense (P1)
+    status: not_started
+    notes: "Evidence: src/lib/gmail/parser.test.ts,
+      tests/fixtures/injection-attempts/"
+  R0.9:
+    title: Tiered rate limiting across authenticated endpoints (P1)
+    status: not_started
+    notes: "Evidence: src/lib/rate-limit-middleware.ts with tier param, coverage on
+      every user-facing route"
+  R0.10:
+    title: Phase Ledger CURRENT.yml + drift verifier (P0)
+    status: complete
+    started: 2026-04-22T19:30:58.712Z
+    completed: 2026-04-22T19:41:07.559Z
+    commit: 82c62ff
+    notes: "Evidence: .ledger/CURRENT.yml, scripts/ledger/verify.ts,
+      scripts/ledger/verify.test.ts, .husky/pre-commit"
+  R0.11:
+    title: MFA UI stub + SECRETS-ROTATION runbook (P2)
+    status: not_started
+    notes: "Evidence: Settings > Security stub, docs/SECRETS-ROTATION.md"
+  R0.12:
+    title: Stripe audit_logs wiring for subscription lifecycle (P1)
+    status: not_started
+    notes: "Evidence: src/app/api/stripe/webhook/route.ts"
 blockers: []
-decisions: []
-history: []
+decisions:
+  - date: 2026-04-22
+    text: Keep .ledger/ as the phase-ledger path (roadmap §9 aspirational
+      .tower/ledger/ dropped)
+    why: Tower CLI already operational; reality wins
+  - date: 2026-04-22
+    text: Node stdlib AES-256-GCM with HKDF per-user key (not Supabase Vault)
+    why: Already implemented; adds HKDF layer per Climate; avoids KMS vendor lock-in
+  - date: 2026-04-22
+    text: Raw Vercel Cron for R0 durable jobs (defer Inngest/Queues to R3)
+    why: Export + purge are idempotent; retries unnecessary; existing CRON_SECRET
+      auth sufficient
+  - date: 2026-04-22
+    text: CSP stays Report-Only through R0
+    why: Awaiting 2-week clean-report window before enforcing
+  - date: 2026-04-22
+    text: Archive/Purge Chamber spatial UIs deferred to Wave 5 polish
+    why: Settings panels satisfy R0 data-rights requirement; spatial rooms are Brief
+      provocations for later polish
+  - date: 2026-04-22
+    text: MFA backend deferred (P2), UI stub only in R0
+    why: Explicit Brief 'I don't know yet' flag; not on the critical path
+history:
+  - 2026-04-22T19:30:58.712Z: task_started R0.10
+  - 2026-04-22T19:41:07.559Z: task_completed R0.10

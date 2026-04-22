@@ -1,8 +1,10 @@
 import { Command } from "commander";
+import path from "node:path";
+import fs from "fs-extra";
 import YAML from "yaml";
 import { findRepoRoot } from "../lib/repo.js";
 import { loadConfig } from "../lib/config.js";
-import { readLedger, writeLedger } from "../lib/ledger.js";
+import { readLedger, writeLedger, LEDGER_DIR } from "../lib/ledger.js";
 import { acquireLock } from "../lib/lock.js";
 import { getSessionId } from "../lib/session.js";
 import { pushUndo } from "../lib/undo.js";
@@ -52,6 +54,19 @@ export function registerStart(program: Command): void {
       led.history.push({ [now]: `task_started ${taskId}` });
       led.lock = { holder: sess, acquired: now, expires: lock.expires! };
       await writeLedger(repo, led);
+      await writeCurrentPointer(repo, phase);
       console.log(`${taskId} → in_progress`);
     });
+}
+
+/**
+ * Write `.ledger/CURRENT.yml` — a one-file pointer to the active phase so a
+ * fresh Claude session can identify context with a single read. Overwritten
+ * every time `tower start` runs.
+ */
+async function writeCurrentPointer(repo: string, phase: string): Promise<void> {
+  const dir = path.join(repo, LEDGER_DIR);
+  await fs.ensureDir(dir);
+  const body = YAML.stringify({ schema_version: 1, active: phase });
+  await fs.writeFile(path.join(dir, "CURRENT.yml"), body, "utf-8");
 }
