@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:01:27.465Z
-  expires: 2026-04-22T22:01:27.461Z
+  acquired: 2026-04-22T20:04:46.939Z
+  expires: 2026-04-22T22:04:46.935Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -49,7 +49,10 @@ tasks:
       src/lib/gmail/oauth.test.ts"
   R0.4:
     title: Cron auth coverage audit + integration test (P0)
-    status: not_started
+    status: complete
+    started: 2026-04-22T20:04:46.939Z
+    completed: 2026-04-22T20:06:23.808Z
+    commit: d4cbfcb
     notes: "Evidence: src/app/api/cron/__integration__/cron-auth.test.ts"
   R0.5:
     title: Security headers scanner + R0 report (P1)
@@ -125,3 +128,6 @@ history:
   - 2026-04-22T19:59:59.875Z: task_started R0.1
   - 2026-04-22T20:01:27.465Z: task_started R0.1
   - 2026-04-22T20:02:50.887Z: task_completed R0.1
+  - 2026-04-22T20:03:34.209Z: task_started R0.4
+  - 2026-04-22T20:04:46.939Z: task_started R0.4
+  - 2026-04-22T20:06:23.808Z: task_completed R0.4
