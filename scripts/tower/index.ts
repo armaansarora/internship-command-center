@@ -6,6 +6,7 @@ import { registerBrief } from "./commands/brief.js";
 import { registerLog } from "./commands/log.js";
 import { registerBlocked } from "./commands/blocked.js";
 import { registerStatus } from "./commands/status.js";
+import { registerLock } from "./commands/lock.js";
 
 const program = new Command();
 
@@ -26,6 +27,7 @@ registerBrief(program);
 registerLog(program);
 registerBlocked(program);
 registerStatus(program);
+registerLock(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);
