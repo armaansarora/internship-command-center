@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `5b4c6ed`)
+- **Branch:** `main` (commit `2f6cfc4`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 57,149 across 290 source files
 - **Build:** Clean (zero TS errors)
@@ -28,7 +28,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-5b4c6ed [R0/0.6] chore(ledger): mark R0.6 complete
+2f6cfc4 [R0/0.7] feat: account deletion — soft-delete + 30-day purge sweeper
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5b4c6ed`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `2f6cfc4`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -570,13 +570,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 608 | 6,120 |
+| `BOOTSTRAP-PROMPT.md` | 619 | 6,238 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 416 | 8,409 |
-| **Total** | **1672** | **26,955** |
+| **Total** | **1683** | **27,073** |
 
-> ⚠️ Reading all recommended files consumes ~26,955 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~27,073 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

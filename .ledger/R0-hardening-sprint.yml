@@ -1,16 +1,16 @@
 phase: R0
 name: Hardening Sprint
-status: in_progress
+status: complete
 intent: The building's utilities work. Auth persists. Secrets are encrypted.
   Cron is authenticated. Audits are recorded. Users can see, export, and delete
   their data. The Phase Ledger is live; future sessions know what's real vs.
   claimed. Invisible to the user, load-bearing for everything after.
 started: 2026-04-22T19:30:58.712Z
-completed: null
+completed: 2026-04-22T20:52:29.356Z
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:34:00.958Z
-  expires: 2026-04-22T22:34:00.954Z
+  acquired: 2026-04-22T20:40:19.449Z
+  expires: 2026-04-22T22:40:19.444Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -72,7 +72,10 @@ tasks:
       src/lib/account/export.ts, src/app/api/cron/export-worker/route.ts"
   R0.7:
     title: Account deletion — soft-delete + 30-day purge sweeper (P1)
-    status: not_started
+    status: complete
+    started: 2026-04-22T20:40:19.449Z
+    completed: 2026-04-22T20:52:29.356Z
+    commit: 2f6cfc4
     notes: "Evidence: src/app/api/account/delete/route.ts,
       src/app/api/cron/purge-sweeper/route.ts"
   R0.8:
@@ -166,3 +169,6 @@ history:
   - 2026-04-22T20:32:49.176Z: task_started R0.6
   - 2026-04-22T20:34:00.958Z: task_started R0.6
   - 2026-04-22T20:39:32.874Z: task_completed R0.6
+  - 2026-04-22T20:40:19.449Z: task_started R0.7
+  - 2026-04-22T20:52:29.356Z: task_completed R0.7
+  - 2026-04-22T20:52:29.356Z: phase_completed
