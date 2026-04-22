@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { execa } from "execa";
-import path from "node:path";
-import { createFixtureRepo, cleanupFixture } from "../test-helpers.js";
-
-const CLI = path.join(process.cwd(), "scripts/tower/index.ts");
+import {
+  createFixtureRepo,
+  cleanupFixture,
+  runCLI,
+} from "../test-helpers.js";
 
 function mk(
   phase: string,
@@ -48,9 +48,7 @@ describe("tower phases", () => {
       }),
       ".ledger/R2-war.yml": mk("R2", "War", "not_started", {}),
     });
-    const { stdout } = await execa("npx", ["tsx", CLI, "phases"], {
-      cwd: repo,
-    });
+    const { stdout } = await runCLI(["phases"], { cwd: repo });
     expect(stdout).toMatch(/R0.*Harden.*complete.*1\/1/);
     expect(stdout).toMatch(/R1.*Obs.*in_progress.*1\/2/);
     expect(stdout).toMatch(/R2.*War.*not_started.*0\/0/);
@@ -58,11 +56,7 @@ describe("tower phases", () => {
 
   it("exits 0 on empty ledger", async () => {
     repo = await createFixtureRepo();
-    const { stdout, exitCode } = await execa(
-      "npx",
-      ["tsx", CLI, "phases"],
-      { cwd: repo },
-    );
+    const { stdout, exitCode } = await runCLI(["phases"], { cwd: repo });
     expect(exitCode).toBe(0);
     expect(stdout).toMatch(/no phases/i);
   });

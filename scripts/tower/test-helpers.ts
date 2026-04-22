@@ -1,7 +1,18 @@
 import fs from "fs-extra";
 import os from "node:os";
 import path from "node:path";
-import { execa } from "execa";
+import { execa, type Options } from "execa";
+
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const TSX_BIN = path.join(PROJECT_ROOT, "node_modules/.bin/tsx");
+const CLI_ENTRY = path.join(PROJECT_ROOT, "scripts/tower/index.ts");
+
+export async function runCLI(
+  args: string[],
+  opts: Options = {},
+): Promise<ReturnType<typeof execa>> {
+  return execa(TSX_BIN, [CLI_ENTRY, ...args], opts);
+}
 
 export async function createFixtureRepo(
   files: Record<string, string> = {},
