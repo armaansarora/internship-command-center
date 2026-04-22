@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `61e74f9`)
+- **Branch:** `main` (commit `ad2b1d0`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,167 across 265 source files
 - **Build:** Clean (zero TS errors)
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-61e74f9 feat(tower): git log parser + R-tag extraction
+ad2b1d0 feat(tower): roadmap brief parser for NEXT-ROADMAP.md
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `61e74f9`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `ad2b1d0`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
