@@ -2,9 +2,104 @@
 ## Design Overhaul + Autonomous Operation Phase
 
 **Status:** Proposal — awaiting user sign-off on §10 before the first R-phase starts.
+**Speed target:** 4–8 weeks end-to-end with parallel execution (§11), not the 6-month linear estimate shown in historical plans. See §11.
+**Disposition:** This document is a living proposal, not scripture. §0 is required reading — it tells you how to read the rest.
 **Scope:** Every floor redesigned from the ground up — including the Lobby. Every floor also advances the North Star (user describes want → Tower autonomously discovers / tracks / tailors / applies / preps / coaches). The **bar** is the target aesthetic (luxury game UI + Bloomberg Terminal + Apple spatial design) rendered at Awwwards-winner quality. The current Lobby is the strongest *reference point* we have today for motion vocabulary and primitives, but it is a starting point, not a finish line.
 **Author:** Autonomous planning session, 2026-04-21.
 **Naming:** Original master plan used Phase 0–6 (all complete). This doc uses **Rebuild 1–7** (R1–R7) to avoid collision.
+
+---
+
+## §0 — The Doubt Protocol (required reading for every session)
+
+> *"Opinions strongly held, loosely."* — every quality engineering team, ever.
+> *"If you can't argue against your own plan, you don't understand it well enough."*
+
+This roadmap is not truth. It is **the best story we could tell on 2026-04-21 given what we knew.** By the time you read it, what we knew is already stale. Some of what's written here is wrong. Some is unnecessary. Some is missing. Your job as a session working on this is **not** to execute it. Your job is to *doubt it, then execute the version that survives the doubt.*
+
+### The five acts every session runs before touching code
+
+Before any R-phase starts in a new session, produce these five artifacts. Commit them under `.tower/ledger/doubt/{session_id}/`. They take ~20 minutes total. Skipping them is considered shipping bad work.
+
+1. **Pre-mortem.** *"Imagine this phase shipped and failed publicly. What failed? List the 3 most likely failure causes."* One paragraph. Forces you to think about risk before writing a line.
+
+2. **Plan challenge.** *"Generate 3 arguments this approach is wrong."* Steelman each. If you can't generate three, you haven't read the plan critically. Examples: "the Rive animation will feel gimmicky once the novelty wears off," "job discovery should be manual curation, not API aggregation, because curation is the moat," "we are over-designing for a user base of 1."
+
+3. **Assumption audit.** List the 5 biggest load-bearing assumptions in the phase plan. Tag each with confidence: `high` / `medium` / `low` / `untested`. Any assumption below `medium` gets a bullet for how you'd validate it cheaply.
+
+4. **Alternative sketch.** In ≤200 words, propose ONE meaningfully different approach to the same goal. Not a variation — an alternative architecture, framing, or tool. If the phase says "use Motion for Kanban drag," propose "use native HTML5 drag with a custom pointer model" and explain when it'd be better.
+
+5. **Fresh-eyes audit.** Pretend you've never seen this codebase or roadmap before. Read the phase in ~10 min. What confuses you? What feels off? Write it down even if it seems stupid — especially if it seems stupid.
+
+Output format — copy this into `doubt/{session_id}/premortem.md`:
+
+```markdown
+# R{N} Doubt Pass — session {id} — {date}
+
+## Pre-mortem (3 likely failure causes)
+1. …
+2. …
+3. …
+
+## Plan challenges (3 arguments this is wrong)
+1. …
+2. …
+3. …
+
+## Assumption audit (top 5 + confidence)
+- [high/medium/low/untested] …
+- ...
+
+## Alternative sketch (one different approach, ≤200 words)
+…
+
+## Fresh-eyes notes (what confuses me)
+- …
+```
+
+### The "Red Team" session
+
+Once per week (or once per major phase completion — whichever comes first), spin up a dedicated **Red Team session**. Its only mandate: find what's wrong. It reads the roadmap, the ledger, recent PRs, and recent commits. It produces `REDTEAM-{date}.md` under `.tower/ledger/doubt/redteam/` with:
+
+- Bugs it found by reading code (not running it — static skepticism).
+- Metaphor violations (anywhere the building feels broken).
+- Security holes missed in the threat model.
+- Performance cliffs we didn't predict.
+- Sections of the roadmap that are now wrong, with proposed edits.
+- User-value holes: "this whole phase doesn't actually move the North Star — here's why."
+
+Red Team is explicitly empowered to propose *killing* or *reordering* phases. Treat its output as equal-weight to forward-motion sessions. If it recommends a pivot, the user decides — but Red Team's job is to *make the case*, not be polite.
+
+### Adversarial sub-agents within a session
+
+Within any single session, before committing to an approach:
+- **Spawn a Red Team sub-agent** (an `Explore` agent with an adversarial brief) and ask it to find holes in your current proposal.
+- **Spawn a "Why not X?" sub-agent** when you choose between 2-3 options — have it argue the case you didn't pick.
+- Record its output verbatim in the session's handoff file.
+
+This is cheap: ~3 min of token spend for dramatically better decisions. The brainstorming skill recommends proposing 2–3 approaches before settling — adversarial sub-agents are the tool that enforces it.
+
+### What must NOT be doubted
+
+Skepticism has limits. These are the standing commitments — doubting them is scope creep:
+
+- **The building metaphor.** Sacred. Don't question "should we have an elevator" — build better elevators.
+- **The North Star.** Autonomous job-search. Features that don't serve it get cut, not the Star.
+- **The RLS model.** Per-user RLS on every table. Don't propose "just use service role and filter in code."
+- **The Drizzle-schema-only + Supabase REST architecture.** The IPv6 constraint is physical. Don't re-propose Drizzle runtime until the DB network changes.
+- **The tech stack invariants in CLAUDE.md.** Tailwind v3 (not v4), `@supabase/ssr` (not auth-helpers), no `any`, no console.logs, aria on interactives. These are decided.
+
+Everything else is fair game.
+
+### How to handle a disagreement with the roadmap
+
+1. Produce the doubt artifact above.
+2. Name the specific claim you'd change and the evidence/reasoning.
+3. Write a proposed edit — diff-style, not prose ("change §5 R1 deliverable 1.3 from X to Y").
+4. Commit the artifact. Do NOT silently deviate in code. Silent deviation is considered a defect, discovered at integration.
+5. If the change is large, open a question for the user (§10 style) with your recommended resolution.
+
+The roadmap is a working document; it evolves. Your job is to evolve it honestly, not route around it.
 
 ---
 
@@ -1219,6 +1314,273 @@ Questions listed in priority order. Numbered so you can just reply *"1: A, 2: B,
     - (B) **All Mail minus newsletters/promos/spam folders** (comprehensive; slower initial backfill).
     - (C) **Inbox by default, user-selectable expansion** to more labels.
     - My recommendation: **(C)**. Start narrow, let user widen.
+
+### Execution model (§11 — needed to start R0)
+
+23. **Parallelism appetite.** How aggressive do you want to go?
+    - (A) **Gear 1 only** — one session at a time, deep sub-agent fan-out within. Simplest. 16–24 week target.
+    - (B) **Gear 2 for Wave 2+** (parallel worktrees 3-way) as proposed. 8-week target. Requires you to review 2–3 PRs/day.
+    - (C) **"Max Power" all waves** — tournaments, swarms, 4-way fan-out where possible. 5–6 week stretch. Requires you to review 4–5 PRs/day.
+    - My recommendation: **(B)**. Sustainable, real compression, room to shift up/down.
+
+24. **Worktree setup.** §11.4 proposes `~/tower-worktrees/` with one folder per active phase.
+    - (A) **Proceed as spec'd** — I'll set up worktrees during R0.
+    - (B) **Keep everything in the primary repo, use branches only** — simpler, higher risk of `node_modules` collisions and accidental cross-phase edits.
+    - (C) **Use GitHub Codespaces / Vercel dev containers per worktree** — cloud isolation, nice UX, Vercel-native, costs extra $.
+    - My recommendation: **(A)**. Local, free, exactly the isolation you want.
+
+25. **Red Team cadence.**
+    - (A) **Weekly** (Friday) as spec'd.
+    - (B) **After every merged phase** — more frequent, higher quality ceiling, more tokens spent.
+    - (C) **Only before user-facing launches** — cheapest.
+    - My recommendation: **(A)** for waves, **(B)** for high-stakes phases (R0 security, R3 orchestration, R4 Lobby launch).
+
+26. **Doubt Protocol artifacts — commit or gitignore?**
+    - (A) **Commit** under `.tower/ledger/doubt/` — public accountability, visible history, repo grows.
+    - (B) **Gitignore** — transient working notes, don't pollute git.
+    - My recommendation: **(A)**. Doubt artifacts are evidence of rigor. Commit them.
+
+27. **Who plays Conductor?**
+    - (A) **One dedicated Claude session per day** (15–30 min AM) — purely coordination.
+    - (B) **User plays Conductor** — you do the daily standup yourself, assign phases, merge.
+    - (C) **The Conductor role collapses into the first Builder session of the day** — practical for solo dev.
+    - My recommendation: **(C)**. Least overhead. Promote to (A) if we hit F7 (specialization tax).
+
+28. **Tournament & Swarm usage.** §11.10 proposes 2x-cost "Tournament" model for signature visual moments. Which moments do you want tournamented (2 independent builds, pick best)?
+    - (A) **None** — skip tournaments entirely.
+    - (B) **Just 2 moments** — Penthouse Morning Briefing scene + C-Suite Dispatch Trace.
+    - (C) **4 moments** — above + War Room flow lines + R4 Lobby arrival scene.
+    - (D) **Every signature moment in §5.**
+    - My recommendation: **(B)**. Highest-stakes, highest-visibility. Others get Gear-2 single build + Red Team review, which is already very high quality.
+
+---
+
+## §11 — Execution Strategy (MAX POWER)
+
+### 11.1 The thesis
+
+A 6-month linear estimate is what happens when one developer works sequentially. We are not that. Between Claude Code sessions (many concurrent), background sub-agents within each session, and a user who is in the loop at review gates, the real constraint is **coordination**, not throughput. Compressed target: **4–8 weeks end-to-end, R0 through R3 (the autonomy loop) in ~14 days.**
+
+The way to hit that is disciplined parallelism — not chaotic fan-out. Every session knows what it owns, what it can't touch, and when to merge. The Phase Ledger (§9) is the coordination layer. Git worktrees are the isolation layer. Review gates are the quality layer.
+
+Quality is non-negotiable. The user is explicit: *"every small part I will hyper detail on and use MAX POWER on."* Max power ≠ sloppy speed. It means: denser sessions, sharper reviews, more adversarial challenge, faster loops, no cutting corners. Speed comes from parallelism and elimination of waste, not from rushing any single deliverable.
+
+### 11.2 Execution model — three gears
+
+Move between gears based on phase type, not calendar. Each gear has its own parallelism profile.
+
+#### Gear 1 — Foundation (serial, high-intensity)
+**For:** R0 Hardening Sprint. Anything where items are deeply interdependent or where a broken foundation poisons downstream work.
+**Model:** One primary session drives, 6–10 sub-agents fan out for research/testing/audit. User reviews once-per-day.
+**Reason:** You can't parallelize auth fixes with encryption fixes with cron fixes *sensibly* — they all touch the same auth/crypto plumbing. Better to move one tight loop through all of R0 than risk merge conflicts in the security layer.
+**Est. duration:** 5–10 dev-days for R0.
+
+#### Gear 2 — Fan-out (parallel worktrees, independent phases)
+**For:** R1 + R2 + R5 (Writing Room) once R0 lands. These three are independent enough: War Room is floor 7 + Job Discovery worker, Penthouse is floor PH + Morning Briefing scene, Writing Room is floor 5 + resume tailoring tool. Different floors, different agents, mostly different files.
+**Model:** 3–4 concurrent Claude sessions, each in its own git worktree. Each owns one phase end-to-end. A "Conductor" session (no code — metadata only) coordinates merges. Daily integration window.
+**Reason:** These phases touch mostly-disjoint code. Conflicts concentrate in shared primitives + schema migrations, both of which can be scheduled.
+**Est. duration:** 10–15 dev-days wall-clock for R1+R2+R5 running in parallel (vs ~25 sequential).
+
+#### Gear 3 — Integration & polish (serial merge + parallel review)
+**For:** After each fan-out wave. The moment you have 3 branches with working phases, you stop forking and integrate.
+**Model:** One session drives the merge + integration testing. Parallel Red Team session (§0) audits the integrated build. User reviews integrated PR.
+**Reason:** Merge conflicts, E2E regressions, and cross-phase UX holes only show up when things meet. This is where quality gets defended.
+**Est. duration:** 2–3 dev-days per fan-out wave.
+
+Rotate through Gears 1 → 2 → 3 → 2 → 3 → … until done.
+
+### 11.3 Session roles
+
+Not every session is a "builder." Specialize explicitly. Each session is labeled in its `.tower/ledger/doubt/{session_id}/` folder with its role so handoffs are unambiguous.
+
+| Role | Mandate | What it reads | What it writes |
+|---|---|---|---|
+| **Builder (B)** | Execute one phase's deliverables end-to-end. Commits phase code. | Active phase YAML, roadmap phase plan, relevant source files. | Source code, tests, phase YAML updates, NEXT-SESSION handoff. |
+| **Researcher (R)** | Deep-dive a single unknown before a builder session runs. Produces a brief. | External docs, codebase, similar OSS projects. | `.tower/research/{topic}.md` with findings + recommendations. |
+| **Red Team (T)** | Find what's wrong. §0. | All of it. Especially recent PRs and the roadmap. | `.tower/ledger/doubt/redteam/{date}.md` with findings. |
+| **Conductor (C)** | Coordinate concurrent Builders. No code. Updates ledger, schedules merges, resolves conflicts. | All phase YAMLs + open branches + HISTORY.ndjson. | Ledger updates, merge PRs, conflict resolution commits. |
+| **Reviewer (V)** | Read a PR from a Builder. Approve/block. No code except tiny fixups. | The PR diff + related tests. | PR review comments, approval, or block with reasons. |
+| **Integrator (I)** | Gear 3 — merges N branches, fixes conflicts, runs full test suite, handles drift. | All incoming branches. | Merge commits, integration-test results, rollback procedures if needed. |
+
+A single human-day might involve ~5 sessions across 3 roles. A typical fan-out day:
+- 1× Conductor session (15 min) — AM standup: ledger review, assign today's work
+- 2× Builder sessions (parallel, ~4h each) — R1 Builder in worktree `wt-r1`, R2 Builder in `wt-r2`
+- 1× Researcher session (~1h, off to the side) — investigating Rive pipeline for R3
+- 1× Reviewer session (end-of-day) — reads the 2 Builder PRs, blocks or approves
+
+### 11.4 Git worktree topology
+
+One worktree per concurrent workstream. This is how we get parallelism without conflicts.
+
+```
+~/Documents/The Tower/              (main worktree — always tracks main branch)
+~/tower-worktrees/
+  wt-r0/                             git worktree for R0 Hardening
+  wt-r1-war-room/                    git worktree for R1 War Room
+  wt-r2-penthouse/                   git worktree for R2 Penthouse
+  wt-r5-writing/                     git worktree for R5 Writing Room
+  wt-redteam/                        git worktree for standing Red Team (read-only; never commits)
+  wt-primitives/                     git worktree for shared primitives extraction
+```
+
+Each worktree has its own branch (`r0-hardening`, `r1-war-room`, etc.) and its own `node_modules` (`npm ci` per worktree). Each Claude session is pinned to one worktree — no session straddles worktrees.
+
+Create worktrees:
+```
+git worktree add ../tower-worktrees/wt-r1-war-room r1-war-room
+git worktree add ../tower-worktrees/wt-r2-penthouse r2-penthouse
+```
+
+Merge order (when a branch is ready):
+1. Builder opens PR → CI runs → Reviewer approves.
+2. Conductor (or user) merges to `main` via squash-merge (atomic per deliverable).
+3. All other active worktrees `git pull --rebase` from `main` at next natural break.
+4. Drift check (§9 verifier) runs on merge.
+
+### 11.5 What can — and cannot — parallelize
+
+Some categories conflict no matter what. Schedule those serially.
+
+**Serial (single-source-of-truth files — never touch from two worktrees):**
+- `src/db/schema.ts` — schema migrations. Batch these; one migration PR per day maximum.
+- `.tower/ledger/CURRENT.yaml` — coordination pointer.
+- `src/styles/globals.css` — global CSS tokens.
+- `package.json` — dependency additions.
+- `src/types/agents.ts` — shared agent types.
+
+**Safe to parallelize (file ownership by path):**
+- `src/components/floor-N/*` — each floor is owned by one session.
+- `src/lib/agents/{dept}/*` — each department's agent code is owned by one session.
+- `src/app/(authenticated)/{route}` — each route is owned by its phase.
+- `src/app/api/{endpoint}/route.ts` — each endpoint is owned by its phase.
+- New files in `src/lib/{new-module}/` — if you're creating a new module, it's yours until merged.
+
+**Shared primitives (coordinated access):**
+- `src/components/world/primitives/*` — extract in a dedicated primitives sweep BEFORE any floor rebuild. After that, additions go through a Reviewer session to avoid duplicate primitives.
+
+**Conflict-prone but necessary (plan around):**
+- `CLAUDE.md`, `docs/NEXT-ROADMAP.md` — roadmap evolution during execution. Updates batched by Conductor, merged before builders rebase.
+
+### 11.6 The daily cadence
+
+A habit-loop that stays the same week to week. Adjust cycle length to 2-day or 3-day rhythm if needed — but keep the pattern.
+
+| Slot | Role | Activity |
+|---|---|---|
+| AM (15–30 min) | **Conductor** | Read ledger. Read yesterday's HISTORY.ndjson. Assign today's phases. Pick 1–3 worktrees to activate. Write today's NEXT-SESSION.md for each active worktree. |
+| Morning block | **Builder(s)** (parallel) | 3–4 hour focused build window per active worktree. Each Builder starts with Doubt Protocol (§0 acts 1–5), ~20 min, then code. |
+| Midday | **Reviewer** | Review any PRs opened this morning. Block or approve. |
+| Afternoon block | **Builder(s)** continues, or **Researcher** spins up to pull docs for tomorrow's unknowns | |
+| Late PM (30 min) | **Integrator / Conductor** | Merge approved PRs. Run full type-check + test suite on main. Drift check on ledger. |
+| EOD (10 min) | Any | Append to HISTORY.ndjson. Regenerate NEXT-SESSION.md per worktree for tomorrow. |
+
+**Weekly rhythm:**
+- Monday — heavy planning/research, lighter building.
+- Tue–Thu — builder days, max parallelism.
+- Friday — **Red Team session** + integration + user review.
+
+### 11.7 The compressed phase schedule
+
+Target wall-clock, aggressive but achievable with Gear-2 parallelism:
+
+| Wave | Phases | Mode | Wall-clock |
+|---|---|---|---|
+| Wave 1 | **R0** (Hardening) | Gear 1 (serial, high intensity) | 5–10 days |
+| Wave 2 | **R1 + R2 + R5** (War Room, Penthouse, Writing Room) | Gear 2 (3 parallel worktrees) + Gear 3 (integration) | 10–15 days |
+| Wave 3 | **R3 + R6 + R7** (C-Suite, Briefing Room, Situation Room) | Gear 2 (3 parallel) + Gear 3 | 10–15 days |
+| Wave 4 | **R4 + R8 + R9** (Lobby rebuild, Rolodex, Observatory) | Gear 2 (3 parallel) + Gear 3 | 10–15 days |
+| Wave 5 | Polish, monetization hooks, launch prep | Gear 1 | 5 days |
+
+**Total:** 40–60 wall-clock days = 6–12 weeks depending on unknowns. Expected: **8 weeks**. Stretch (aggressive): **5–6 weeks**. These are not 40-hour weeks — they assume dense Claude sessions with the user in a review role. Multi-hour builder sessions with sub-agent fan-out are what drives speed.
+
+Wave 2 ordering rationale: R1 (War Room) unlocks Job Discovery which populates data for R2 (Penthouse Morning Briefing). R5 (Writing Room) depends only on R0 (Storage + resume_base enum) and can run fully in parallel. So three-way fan-out is safe.
+
+Wave 3: R3 (C-Suite orchestration) is independent; R6 (Briefing Room mock drill) depends only on CPO existing (already shipped); R7 (Situation Room follow-ups) depends on outreach_queue (already shipped).
+
+### 11.8 Tooling stack
+
+Specific tools and how to use them.
+
+| Tool | Use | How |
+|---|---|---|
+| **Git worktrees** | Isolate concurrent sessions | `git worktree add` per phase; delete on merge. |
+| **Claude Code `Agent` subagents** | Within-session parallelism | Explore agent for research, general-purpose for multi-step tasks. Already in use. |
+| **Claude Code background tasks** | Long-running builds/tests without blocking | `run_in_background: true` on Bash calls. Notification on complete. |
+| **Husky hooks** | Ledger + commit discipline | Pre-commit verify.ts, commit-msg lint, post-commit handoff.ts. |
+| **Playwright** | E2E regression between waves | Must be added (not yet in stack — blocker for R0 session test). |
+| **Vitest** | Per-phase unit tests | Already in stack. Used per deliverable. |
+| **Drizzle migrations** | Schema changes | Serial only. One migration PR per day max. |
+| **Vercel preview deployments** | Branch-per-worktree live URLs | Auto from branch push. Enables reviewers to click through. |
+| **Inngest (if adopted per Q15)** | Durable background workers | Core for R1 Job Discovery loop. |
+| **Phase Ledger verifier** | Drift detection | CI + session-start. |
+
+### 11.9 Failure modes (this plan's own pre-mortem)
+
+Per §0, here's this execution plan doubting itself.
+
+**F1 — Merge conflict storm.** Three worktrees touch a shared file; two days of progress unravels.
+→ *Mitigation:* the file-ownership discipline in §11.5. Conductor enforces. If a Builder needs to edit a serial file, they coordinate through Conductor first.
+
+**F2 — Context drift between sessions.** Each session starts cold, re-discovers, duplicates effort.
+→ *Mitigation:* Phase Ledger (§9) + NEXT-SESSION.md + the doubt artifacts. Session start protocol makes context-pickup fast.
+
+**F3 — Quality cliff from speed.** Parallelism tempts cutting tests, review, doubt.
+→ *Mitigation:* Red Team session every Friday, non-negotiable. Ledger verifier blocks "done" claims without evidence. PR review mandatory.
+
+**F4 — User becomes the bottleneck.** The human has to review everything; if they can't keep up, work queues.
+→ *Mitigation:* Reviewer-role sessions can pre-vet PRs before user sees them. Only 1–2 PRs/day need user attention (the ones a Reviewer flagged or approved). Everything else is green-path.
+
+**F5 — The wrong parallelism unit.** Phases turn out to be bigger-than-estimated; 3-way fan-out becomes 5-way and chaotic.
+→ *Mitigation:* Don't spawn more than 3 concurrent Builder worktrees. If a phase is bigger than 15 days of work, split it into sub-phases with new R-IDs and sequence.
+
+**F6 — The Doubt Protocol becomes theater.** Sessions rubber-stamp premortems and move on.
+→ *Mitigation:* Red Team session audits doubt artifacts on Friday. If premortems are formulaic, the session is called out. Worst case: user spot-checks one premortem per wave.
+
+**F7 — The "specialist" sessions become a tax.** Conductor/Integrator roles feel like overhead.
+→ *Mitigation:* Collapse roles in small waves. One human-day might = Conductor + Builder + Reviewer in a single longer session. Roles are discipline, not mandatory session-splits.
+
+**F8 — Over-optimistic wall-clock.** 8-week target slips to 16 because "Claude is fast" doesn't mean "shipping is fast."
+→ *Mitigation:* Measure. Every wave, compare estimate to actual. Re-forecast honestly. If Wave 2 took 20 days instead of 15, Wave 3 assumption updates to 20.
+
+**F9 — Claude session context limits hit mid-phase.** Session degrades, has to hand off mid-deliverable.
+→ *Mitigation:* Per CLAUDE.md, sessions hand off at 70% context. Each worktree's NEXT-SESSION.md is robust enough that the next session can resume without context. Phase Ledger ensures deliverable state is preserved.
+
+### 11.10 "Max Power" loadouts for high-stakes moments
+
+When a phase is particularly high-stakes or risky, go beyond Gear 2 to these configurations:
+
+**The Tournament.** Two independent Builder sessions build the same deliverable from scratch. Reviewer compares outputs. User picks the better one. 2x cost, ~1.5x quality, useful for: signature visual moments (Penthouse Morning Briefing choreography, War Room flow lines), novel tech choices (first R3F scene, first Rive pipeline).
+
+**The Swarm.** For R0's P1 items (audit log, data export, security headers, rate limiting, MFA), spin up 5 parallel mini-sessions, each owning one item. Aggressive use of worktrees. High coordination tax — only do this for a tight cluster of tiny independent tasks.
+
+**The Double-Check.** Before merging anything that touches auth, encryption, or billing: two independent Reviewer sessions must both approve. Expensive, but zero auth/crypto/billing bug is worth it.
+
+**The Deep-Think.** For architectural decisions (Inngest vs Vercel Queues, Rive vs Lottie), spin up a dedicated Researcher session with a 2-hour brief. Produce a written comparison memo. User reviews. Then build.
+
+**The Vision Lock.** Before R4 Lobby rebuild, produce 3 Figma-grade visual comps (via Researcher + design references). User picks direction. This is the one floor where "build then iterate" costs more than "align then build" — first impressions matter too much.
+
+### 11.11 What this plan requires from the user
+
+Honest: the aggressive timeline assumes the user shows up to:
+
+- **Daily-ish review (15–30 min).** Approve PRs, answer Conductor questions, merge.
+- **Weekly Red Team check-in (30–60 min).** Read the week's REDTEAM-*.md. Decide on any proposed pivots.
+- **Wave retros (30 min every 10–15 days).** "Did we hit the wave target? What slipped? Update forecast."
+- **Decision gates.** Questions in §10 that block phase starts. Batch-answer when raised.
+
+If the user can't sustain that cadence, drop from Gear 2 (parallel) back to Gear 1 (serial) until capacity returns. Parallelism without review collapses.
+
+### 11.12 Framework for doubting this execution plan
+
+Apply §0 to §11 itself, right now:
+
+- *Pre-mortem:* this plan fails because (1) coordination overhead eats the speedup, (2) parallel worktrees cause merge hell, (3) the human review gate doesn't scale.
+- *Plan challenges:* (1) maybe serial-and-excellent beats parallel-and-compromised, (2) maybe the "8-week" target is hubris on a spatial/character-heavy product, (3) maybe shipping features matters less than one truly-excellent floor.
+- *Assumptions:* Claude sessions can reliably run in parallel without drift (medium confidence). Sub-agents within a session provide meaningful parallelism (high). The user can review 2–3 PRs/day (untested).
+- *Alternative:* a single-session Gear-1 model through the whole rebuild, with deep sub-agent fan-out within each session but no parallel worktrees. Simpler coordination; 40–60% of the speedup of Gear 2.
+- *Fresh eyes:* "Why are we optimizing for speed at all?" — because the user wants momentum and the product is most valuable when shipping. But: is 4 weeks vs 8 weeks really worth the coordination overhead?
+
+If any of these challenges lands harder than expected, downgrade gears. The point is to be honest about which gear we're in.
 
 ---
 
