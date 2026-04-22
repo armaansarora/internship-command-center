@@ -238,7 +238,44 @@ Load targeted context on demand:
 - `npm run t phases` / `tower blocked` / `tower log` — focused queries
 - Specific files via Read — only files the task actually touches
 
-### 1. During Work
+### 1. Skill Cascade — The Flow (MANDATORY for non-trivial work)
+Every non-trivial task goes through this chain. No exceptions, no shortcuts, no cutting corners.
+
+```
+/superpowers:brainstorming
+  → design the approach, get user sign-off, write docs/plans/YYYY-MM-DD-<topic>-design.md
+/superpowers:writing-plans
+  → produce bite-sized TDD plan at docs/plans/YYYY-MM-DD-<topic>.md
+/superpowers:executing-plans          (serial work)
+  /superpowers:subagent-driven-development   (when plan has independent tasks → parallel subagents)
+  → execute task-by-task with TDD, commit per task
+/superpowers:finishing-a-development-branch
+  → verify tests, present merge/PR/discard options, cleanup
+```
+
+**Non-trivial means ANY of:**
+- Starting a new R-phase from the roadmap
+- Any task you're about to wrap with `tower start`
+- Any change touching 3+ files
+- Any new feature, refactor, or bug fix with non-obvious cause
+- Adding a dependency, schema migration, or new API surface
+
+**Trivial (cascade may be skipped):**
+- Single-file edits under 20 lines with no new logic
+- Typo, copy, or comment fixes
+- Answering questions without writing code
+- Running a command the user explicitly asked for (`git push`, `npm test`, etc.)
+
+**Parallel work rule:** when the plan has independent tasks (different phases, different floors, different subsystems), prefer `/superpowers:subagent-driven-development` over `executing-plans` — it dispatches a fresh subagent per task and reviews between them.
+
+**Tower + skill cascade interaction:**
+- `tower start <id>` happens DURING `executing-plans` (inside each task's commit cycle), not before the cascade starts
+- `tower handoff` happens AFTER `finishing-a-development-branch`, as the very last step
+- If you're about to run `tower start` and you haven't been through brainstorming + writing-plans for this work, stop and back up — you skipped the cascade.
+
+**Violation handling:** if mid-work you realize the cascade wasn't run, stop, back up, and run it. Do not keep going "since we're already here." That's exactly the drift the cascade exists to prevent.
+
+### 2. Ledger Mutations (during the execute step)
 - Mark task start: `npm run t start R2.3` (acquires phase lock automatically)
 - Commit with phase tag on the subject line: `[Rn/n.n] type: what you did`
   The commit-msg hook warns (never blocks) on untagged src/ commits or unknown tags.
@@ -246,7 +283,7 @@ Load targeted context on demand:
 - Record a blocker: `npm run t block R2.3 "reason in quotes"`
 - Undo a mistaken mutation: `npm run t undo`
 
-### 2. Session End — Automatic Handoff
+### 3. Session End — Automatic Handoff
 At the 70% context threshold, at task completion, or when the user says wrap up, pipe soft fields to handoff as JSON:
 ```bash
 cat <<'EOF' | npm run t handoff -- --stdin
@@ -262,20 +299,20 @@ EOF
 ```
 This auto-writes `.handoff/YYYY-MM-DD-HHMM.md`, releases the phase lock, commits as `chore(handoff): …`. Next session reads it via `tower resume`.
 
-### 3. Context Window Management
+### 4. Context Window Management
 - **~40% YELLOW** — mention to the user, no action.
 - **~60% ORANGE** — warn, finish current task, avoid starting new large tasks.
 - **~70% RED** — mandatory handoff via `npm run t handoff`, then summarize and hand off.
 
 Estimate conservatively — round up, hand off early rather than late. Large file reads and long tool outputs burn context fastest.
 
-### 4. Never Leave Dirty State
+### 5. Never Leave Dirty State
 If interrupted, the ledger YAML should already describe current state. Use `tower start` / `done` / `block` for ledger mutations — do not hand-edit `.ledger/*.yml` during active work (direct edits are fine for correcting mistakes via `tower undo`).
 
-### 5. Vercel Status — When Relevant
+### 6. Vercel Status — When Relevant
 Run `npx tsx scripts/check-vercel.ts` after deploy-related work or if the user asks about deploy status.
 
-### 6. Bug Tracker Protocol
+### 7. Bug Tracker Protocol
 If you fix a bug or discover new issues, update `docs/BUG-TRACKER.md` — dated entry with session number and commit hash.
 
 ## Documentation Architecture
