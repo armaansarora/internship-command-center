@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 11:06 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 11:12 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `8c634db`)
+- **Branch:** `main` (commit `f26bf39`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,167 across 265 source files
 - **Build:** Clean (zero TS errors)
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-8c634db docs(plans): tower CLI context transfer system — design
+f26bf39 docs(plans): tower CLI implementation plan — 30 TDD tasks
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `8c634db`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `f26bf39`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -481,7 +481,7 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>36 packages</summary>
+<summary>41 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
@@ -493,6 +493,7 @@ src/types/ui.ts
 @supabase/ssr: ^0.9.0
 @supabase/supabase-js: ^2.99.2
 @tailwindcss/typography: ^0.5.19
+@types/fs-extra: ^11.0.4
 @types/node: ^20
 @types/react: ^19
 @types/react-dom: ^19
@@ -502,10 +503,13 @@ src/types/ui.ts
 ai: ^6.0.116
 autoprefixer: ^10.4.27
 clsx: ^2.1.1
+commander: ^14.0.3
 drizzle-kit: ^0.31.10
 drizzle-orm: ^0.45.2
 eslint: ^9
 eslint-config-next: ^16.2.4
+execa: ^9.6.1
+fs-extra: ^11.3.4
 gsap: ^3.14.2
 happy-dom: ^20.8.4
 husky: ^9.1.7
@@ -519,6 +523,7 @@ tailwindcss: ^3.4.19
 typescript: ^5
 vitest: ^4.1.0
 xstate: ^5.28.0
+yaml: ^2.8.3
 zod: ^4.3.6
 ```
 </details>
@@ -535,13 +540,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 584 | 5,922 |
+| `BOOTSTRAP-PROMPT.md` | 584 | 5,923 |
 | `PROJECT-CONTEXT.md` | 279 | 5,201 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 315 | 6,531 |
-| **Total** | **1545** | **24,826** |
+| **Total** | **1545** | **24,827** |
 
-> ⚠️ Reading all recommended files consumes ~24,826 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,827 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
