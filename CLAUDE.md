@@ -223,69 +223,60 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `.bootstrap-last-hash` — tracks last commit hash at generation time (gitignored)
 
 ## Mandatory Agent Behavior (NON-NEGOTIABLE)
-These are automatic obligations. The human should never need to run session commands.
+Tower CLI is the session dial-tone. The human never runs session commands.
 
-### 1. Session State — Update Continuously
-Write `SESSION-STATE.json` directly (no CLI needed) at these trigger points:
-- **Session start**: Set `status` to `in_progress`, `currentTask` to whatever you're working on.
-- **Task pivot**: Whenever you switch to a different task or deliverable.
-- **Blocker hit**: If something blocks progress, set `blocker` immediately.
-- **Before every commit**: Ensure SESSION-STATE.json reflects current reality.
-
-Format:
-```json
-{
-  "currentTask": "Phase 1: The War Room — building task board",
-  "deliverable": "1.3",
-  "status": "in_progress",
-  "blocker": null,
-  "lastFileTouched": "src/app/war-room/page.tsx",
-  "notes": "Task board CRUD complete, wiring up real-time subscriptions next.",
-  "updatedAt": "2026-03-19T07:30:00.000Z"
-}
+### 0. Session Start — Before Any Other Action
+Run first, before reading any other file:
+```bash
+npm run t status && npm run t resume
 ```
+Costs ~300 tokens, tells you the active phase, progress, last R-tagged commit, open blockers, lock state, and the previous session's handoff notes. Do NOT read BOOTSTRAP-PROMPT.md, docs/NEXT-ROADMAP.md, or CLAUDE.md first unless the tower output is missing or empty.
 
-### 2. Session End — Run Automatically Before Closing Out
-Before ending any session, the agent MUST:
-1. Write final SESSION-STATE.json reflecting current state
-2. Update PROJECT-CONTEXT.md with session log entry
-3. Run: `npm run session:end -- --message "session N: description of what was done"`
+Load targeted context on demand:
+- `npm run t brief <phase>` — just that phase's brief from the roadmap
+- `npm run t next` — suggested next task + blockers on it
+- `npm run t phases` / `tower blocked` / `tower log` — focused queries
+- Specific files via Read — only files the task actually touches
 
-This commits + pushes everything. The human does NOTHING.
+### 1. During Work
+- Mark task start: `npm run t start R2.3` (acquires phase lock automatically)
+- Commit with phase tag on the subject line: `[Rn/n.n] type: what you did`
+  The commit-msg hook warns (never blocks) on untagged src/ commits or unknown tags.
+- Mark task done: `npm run t done R2.3` (records HEAD sha into the ledger)
+- Record a blocker: `npm run t block R2.3 "reason in quotes"`
+- Undo a mistaken mutation: `npm run t undo`
 
-### 3. Vercel Status — Check When Relevant
-Run `npx tsx scripts/check-vercel.ts` after any deploy-related work or if the user asks about deploy status. The bootstrap generator picks it up automatically.
+### 2. Session End — Automatic Handoff
+At the 70% context threshold, at task completion, or when the user says wrap up, pipe soft fields to handoff as JSON:
+```bash
+cat <<'EOF' | npm run t handoff -- --stdin
+{
+  "contextUsedPct": 72,
+  "decisions": [{"text": "chose linear decay", "why": "simpler"}],
+  "surprises": ["Vercel scheduled fns don't retry"],
+  "filesInPlay": ["src/lib/decay.ts"],
+  "next": ["resolve B1", "ship R2.3"],
+  "contextNotes": "trigger assumes trailing 7-day window"
+}
+EOF
+```
+This auto-writes `.handoff/YYYY-MM-DD-HHMM.md`, releases the phase lock, commits as `chore(handoff): …`. Next session reads it via `tower resume`.
+
+### 3. Context Window Management
+- **~40% YELLOW** — mention to the user, no action.
+- **~60% ORANGE** — warn, finish current task, avoid starting new large tasks.
+- **~70% RED** — mandatory handoff via `npm run t handoff`, then summarize and hand off.
+
+Estimate conservatively — round up, hand off early rather than late. Large file reads and long tool outputs burn context fastest.
 
 ### 4. Never Leave Dirty State
-If a session is interrupted or errors out, the last valid SESSION-STATE.json should still describe where things stand. Always update state BEFORE doing risky operations, not after.
+If interrupted, the ledger YAML should already describe current state. Use `tower start` / `done` / `block` for ledger mutations — do not hand-edit `.ledger/*.yml` during active work (direct edits are fine for correcting mistakes via `tower undo`).
 
-### 5. Context Window Management — SUPER CONSERVATIVE
-The agent MUST monitor its own context usage and proactively end the session before degradation.
-
-**Trigger thresholds:**
-- **~40% context used → YELLOW.** Mention to the user: "Context is around 40%, still healthy but keeping an eye on it." No action needed yet.
-- **~60% context used → ORANGE.** Warn the user: "Context is at ~60%. I recommend wrapping up the current task and handing off soon." Start finishing current work, avoid starting new large tasks.
-- **~70% context used → RED. Mandatory handoff.** Stop all new work immediately. Execute full session-end procedure (rules 1-2 above). Then tell the user:
-  1. Exactly what was completed
-  2. Exactly what's left
-  3. The new session prompt: `Clone repo armaansarora/internship-command-center (branch: main). Read BOOTSTRAP-PROMPT.md — it's auto-generated and current. Follow the Quick Start section. Cut the fat, keep the meat.`
-
-**How to estimate context usage:**
-- Track cumulative tokens read/written throughout the session
-- Every file read, tool output, and response adds to context
-- Large file reads (100+ lines), long tool outputs, and multi-step conversations burn context fast
-- When in doubt, round UP — better to hand off early than to degrade
-
-**Rules:**
-- NEVER start a new major task past 60%
-- NEVER ignore the 70% threshold — session-end is mandatory, not optional
-- The human should never experience degraded output quality. Hand off BEFORE that happens.
-- After session-end at 70%, the agent's final message must include the new session prompt above
+### 5. Vercel Status — When Relevant
+Run `npx tsx scripts/check-vercel.ts` after deploy-related work or if the user asks about deploy status.
 
 ### 6. Bug Tracker Protocol
-If you fix ANY bug or discover new issues:
-- Update `docs/BUG-TRACKER.md` — add changelog entry, move bug to CLOSED, update statistics
-- This is the living fix log. Every fix gets a dated entry with session number and commit hash.
+If you fix a bug or discover new issues, update `docs/BUG-TRACKER.md` — dated entry with session number and commit hash.
 
 ## Documentation Architecture
 Docs are organized into 3 tiers to prevent staleness and duplication:
