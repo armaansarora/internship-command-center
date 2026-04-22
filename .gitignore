@@ -54,3 +54,5 @@ audit/
 
 # editor configs
 .vscode/
+
+.tower/.cache
