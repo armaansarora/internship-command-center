@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 3:53 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 3:59 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `c53cbc5`)
+- **Branch:** `main` (commit `6377258`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,382 across 267 source files
+- **Total LOC:** 53,625 across 270 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-c53cbc5 [R0/0.2] feat: audit_logs table + logSecurityEvent helper
+6377258 [R0/0.3] feat: per-user HKDF-derived AES-GCM keys + lazy v2 migration
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `c53cbc5`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `6377258`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (267 files, 53,382 LOC)
+## Source Tree (270 files, 53,625 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -119,6 +119,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-1` | 958 |
 | `src/components/floor-6/crud` | 950 |
 | `src/components/floor-5/crud` | 949 |
+| `src/lib/gmail` | 916 |
 | `src/components/floor-5` | 893 |
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
@@ -127,7 +128,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
 | `src/components/floor-7/cro-character` | 733 |
-| `src/lib/gmail` | 723 |
 | `src/lib/agents/cmo` | 715 |
 | `src/app/(authenticated)/penthouse` | 713 |
 | `src/components/agents/dialogue` | 709 |
@@ -178,6 +178,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/drive/export` | 53 |
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
+| `src/lib/crypto` | 50 |
 | `src/app/api/progression` | 35 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/(authenticated)/c-suite` | 33 |
@@ -409,6 +410,8 @@ src/lib/auth/safe-next-path.test.ts
 src/lib/auth/safe-next-path.ts
 src/lib/calendar/sync.ts
 src/lib/constants/floors.ts
+src/lib/crypto/keys.test.ts
+src/lib/crypto/keys.ts
 src/lib/day-night.ts
 src/lib/db/postgrest-error.ts
 src/lib/db/queries/agent-memory-rest.ts
@@ -431,6 +434,7 @@ src/lib/db/queries/prep-stats-rest.ts
 src/lib/easter-eggs.ts
 src/lib/env.test.ts
 src/lib/env.ts
+src/lib/gmail/oauth.test.ts
 src/lib/gmail/oauth.ts
 src/lib/gmail/parser.ts
 src/lib/gmail/sync.ts
@@ -535,13 +539,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 584 | 5,900 |
+| `BOOTSTRAP-PROMPT.md` | 588 | 5,930 |
 | `PROJECT-CONTEXT.md` | 279 | 5,201 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 416 | 8,405 |
-| **Total** | **1646** | **26,678** |
+| **Total** | **1650** | **26,708** |
 
-> ⚠️ Reading all recommended files consumes ~26,678 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,708 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

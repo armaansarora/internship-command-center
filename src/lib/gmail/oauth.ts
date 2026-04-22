@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireEnv } from "@/lib/env";
 import { createOAuthState } from "@/lib/auth/oauth-state";
+import { deriveUserKey } from "@/lib/crypto/keys";
 import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
@@ -62,6 +63,58 @@ export function decrypt(encryptedText: string): string {
   decipher.setAuthTag(tag);
   const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
   return decrypted.toString("utf8");
+}
+
+// ---------------------------------------------------------------------------
+// Per-user AES-256-GCM (v2) — HKDF-derived key per user
+// ---------------------------------------------------------------------------
+// Blob format: `v2:<ivHex>:<ctHex>:<tagHex>` (four colon-separated fields,
+// distinguishable from the legacy three-field form).
+//
+// Backward compatibility:
+//   • `decryptForUser` recognises the `v2:` prefix and uses HKDF(master, userId).
+//   • Any other input is forwarded to the legacy `decrypt` (single-master).
+//   • Corrupted v2 ciphertext throws from GCM auth check — it NEVER falls
+//     through to the legacy path (which would mis-decrypt into garbage or
+//     swallow an auth failure silently).
+//
+// Lazy migration (see `getGoogleTokens`): when a legacy blob is successfully
+// decrypted we re-encrypt with v2 and persist, so the fleet drains to v2
+// organically without a batch re-encryption job.
+
+function getMasterKey(): Buffer {
+  // Re-use the existing env-validation + key-decoding logic so we do not
+  // duplicate "how is ENCRYPTION_KEY formatted" in two places.
+  return getEncryptionKey();
+}
+
+export function encryptForUser(userId: string, plaintext: string): string {
+  const key = deriveUserKey(userId, getMasterKey());
+  const iv = randomBytes(12); // 96-bit IV for GCM
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const ct = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return `v2:${iv.toString("hex")}:${ct.toString("hex")}:${tag.toString("hex")}`;
+}
+
+export function decryptForUser(userId: string, blob: string): string {
+  if (blob.startsWith("v2:")) {
+    const parts = blob.split(":");
+    if (parts.length !== 4) throw new Error("Invalid v2 encrypted blob format");
+    const [, ivHex, ctHex, tagHex] = parts;
+    const key = deriveUserKey(userId, getMasterKey());
+    const iv = Buffer.from(ivHex, "hex");
+    const ct = Buffer.from(ctHex, "hex");
+    const tag = Buffer.from(tagHex, "hex");
+    const decipher = createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+    // `final()` throws on GCM tag mismatch — we let that propagate so
+    // callers see the auth failure rather than silently degrading.
+    const pt = Buffer.concat([decipher.update(ct), decipher.final()]);
+    return pt.toString("utf8");
+  }
+  // Legacy fallback.
+  return decrypt(blob);
 }
 
 // ---------------------------------------------------------------------------
@@ -186,7 +239,8 @@ export async function storeGoogleTokens(
 ): Promise<void> {
   const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
 
-  const encryptedTokens = encrypt(JSON.stringify(tokens));
+  // Per-user HKDF-derived key (v2). Never reuse the bare master key.
+  const encryptedTokens = encryptForUser(userId, JSON.stringify(tokens));
 
   const { error } = await supabase
     .from("user_profiles")
@@ -217,8 +271,20 @@ export async function getGoogleTokens(
   if (error) throw new Error(`Failed to retrieve Google tokens: ${error.message}`);
   if (!data?.google_tokens) throw new Error("No Google tokens found for user");
 
-  const decrypted = decrypt(data.google_tokens as string);
+  const ciphertext = data.google_tokens as string;
+  const decrypted = decryptForUser(userId, ciphertext);
   const tokens = JSON.parse(decrypted) as GoogleTokens;
+
+  // Lazy migration: if we successfully decrypted a legacy (v1) blob, opportunistically
+  // re-encrypt under the v2 per-user key and persist. Failure here is non-fatal —
+  // the in-memory tokens are still valid, so we log and continue.
+  if (!ciphertext.startsWith("v2:")) {
+    try {
+      await storeGoogleTokens(userId, tokens, { useAdmin: true });
+    } catch (e) {
+      log.warn("oauth.lazy_migration_failed", { userId, error: String(e) });
+    }
+  }
 
   // Refresh if expired (with 60-second buffer)
   const nowMs = Date.now();
