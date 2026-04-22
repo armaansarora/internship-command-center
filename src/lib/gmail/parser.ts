@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { detectInjection, recordInjectionAttempt } from "./injection-filter";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,6 +30,13 @@ export interface EmailClassificationResult {
   urgency: EmailUrgency;
   suggestedAction: string;
   matchedApplication?: string; // application UUID if matched
+  /**
+   * True when the pre-classifier regex flagged the body as a likely prompt-
+   * injection attempt. When true, downstream LLM pipelines MUST NOT forward
+   * the body to a model (the detection has already been audit-logged if
+   * `userId` was threaded through).
+   */
+  suspectedInjection?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +129,41 @@ export function classifyEmail(email: {
   from: string;
   snippet: string;
   bodyText: string;
+  /**
+   * Optional — when provided AND the pre-classifier flags injection, an audit
+   * row is written via `recordInjectionAttempt`. Callers that have a user
+   * context (sync loop, cron) should pass it; pure unit tests can omit.
+   */
+  userId?: string;
 }): EmailClassificationResult {
+  // R0.8 — Pre-classifier regex runs BEFORE any content-based classification
+  // so a hostile email is never fed to downstream LLM consumers with a
+  // confidence signal attached. Returning "other" + `suspectedInjection=true`
+  // short-circuits the full pattern suite so the hostile string can't
+  // additionally match e.g. INTERVIEW_PATTERNS and get upgraded to urgency:high.
+  const check = detectInjection(email.bodyText);
+  if (check.detected) {
+    if (email.userId) {
+      // Fire-and-forget — the helper is unconditionally safe (R0.2). We don't
+      // await because `classifyEmail` is called synchronously in hot loops;
+      // letting the audit write run in the background is fine and preserves
+      // the synchronous signature callers rely on.
+      void recordInjectionAttempt({
+        userId: email.userId,
+        pattern: check.pattern!,
+        from: email.from,
+        subject: email.subject,
+        snippet: email.bodyText,
+      });
+    }
+    return {
+      classification: "other",
+      urgency: "low",
+      suggestedAction: "Flagged as suspicious content — review manually.",
+      suspectedInjection: true,
+    };
+  }
+
   const combinedText = `${email.subject} ${email.snippet} ${email.bodyText}`;
 
   // Check interview patterns first (highest priority)

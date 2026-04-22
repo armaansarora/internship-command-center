@@ -104,6 +104,7 @@ export async function syncGmailForUser(
         from: parsed.from,
         snippet: parsed.snippet,
         bodyText: parsed.bodyText,
+        userId,
       });
 
       const matchedApplicationId = await matchEmailToApplication(parsed, userId, {

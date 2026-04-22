@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:23:12.315Z
-  expires: 2026-04-22T22:23:12.310Z
+  acquired: 2026-04-22T20:27:29.271Z
+  expires: 2026-04-22T22:27:29.267Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -74,9 +74,12 @@ tasks:
       src/app/api/cron/purge-sweeper/route.ts"
   R0.8:
     title: Gmail prompt-injection defense (P1)
-    status: not_started
-    notes: "Evidence: src/lib/gmail/parser.test.ts,
-      tests/fixtures/injection-attempts/"
+    status: complete
+    started: 2026-04-22T20:27:29.271Z
+    completed: 2026-04-22T20:31:16.090Z
+    commit: b1ba62a
+    notes: "Evidence: src/lib/gmail/injection-filter.test.ts (29 tests),
+      tests/fixtures/injection-attempts/ (10), tests/fixtures/benign/ (10)"
   R0.9:
     title: Tiered rate limiting across authenticated endpoints (P1)
     status: complete
@@ -154,3 +157,6 @@ history:
   - 2026-04-22T20:21:54.313Z: task_started R0.12
   - 2026-04-22T20:23:12.315Z: task_started R0.12
   - 2026-04-22T20:25:31.332Z: task_completed R0.12
+  - 2026-04-22T20:26:06.520Z: task_started R0.8
+  - 2026-04-22T20:27:29.271Z: task_started R0.8
+  - 2026-04-22T20:31:16.090Z: task_completed R0.8

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:25 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:32 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `e388e8b`)
+- **Branch:** `main` (commit `b1ba62a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 54,479 across 274 source files
+- **Total LOC:** 54,816 across 276 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-e388e8b [R0/0.12] chore: write audit_logs for Stripe subscription lifecycle
+b1ba62a [R0/0.8] feat: Gmail prompt-injection defense (regex + tags + meta + audit)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `e388e8b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b1ba62a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (274 files, 54,479 LOC)
+## Source Tree (276 files, 54,816 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -105,6 +105,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/components/floor-7/war-table` | 1307 |
+| `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1187 |
 | `src/app` | 1177 |
 | `src/components/floor-6/cio-character` | 1119 |
@@ -119,7 +120,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-1` | 958 |
 | `src/components/floor-6/crud` | 950 |
 | `src/components/floor-5/crud` | 949 |
-| `src/lib/gmail` | 916 |
 | `src/components/floor-5` | 893 |
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
@@ -436,6 +436,8 @@ src/lib/db/queries/prep-stats-rest.ts
 src/lib/easter-eggs.ts
 src/lib/env.test.ts
 src/lib/env.ts
+src/lib/gmail/injection-filter.test.ts
+src/lib/gmail/injection-filter.ts
 src/lib/gmail/oauth.test.ts
 src/lib/gmail/oauth.ts
 src/lib/gmail/parser.ts
@@ -545,13 +547,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 594 | 5,993 |
+| `BOOTSTRAP-PROMPT.md` | 596 | 6,014 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 416 | 8,405 |
-| **Total** | **1658** | **26,824** |
+| **Total** | **1660** | **26,845** |
 
-> ⚠️ Reading all recommended files consumes ~26,824 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,845 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
