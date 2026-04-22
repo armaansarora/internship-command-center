@@ -84,16 +84,14 @@ tasks:
     started: 2026-04-22T20:27:29.271Z
     completed: 2026-04-22T20:31:16.090Z
     commit: b1ba62a
-    notes: "Evidence: src/lib/gmail/injection-filter.test.ts (29 tests),
-      tests/fixtures/injection-attempts/ (10), tests/fixtures/benign/ (10)"
+    notes: "Evidence: src/lib/gmail/injection-filter.ts, src/lib/gmail/injection-filter.test.ts, tests/fixtures/injection-attempts, tests/fixtures/benign"
   R0.9:
     title: Tiered rate limiting across authenticated endpoints (P1)
     status: complete
     started: 2026-04-22T20:20:16.546Z
     completed: 2026-04-22T20:20:52.603Z
     commit: a190292
-    notes: "Evidence: src/lib/rate-limit-middleware.ts with tier param, coverage on
-      every user-facing route"
+    notes: "Evidence: src/lib/rate-limit-middleware.ts, src/lib/rate-limit-middleware.test.ts, src/lib/ai/agents/shared-route-handler.ts"
   R0.10:
     title: Phase Ledger CURRENT.yml + drift verifier (P0)
     status: complete
@@ -108,7 +106,7 @@ tasks:
     started: 2026-04-22T20:09:32.365Z
     completed: 2026-04-22T20:13:32.148Z
     commit: 618e6ce
-    notes: "Evidence: Settings > Security stub, docs/SECRETS-ROTATION.md"
+    notes: "Evidence: src/app/(authenticated)/settings/settings-client.tsx, docs/SECRETS-ROTATION.md"
   R0.12:
     title: Stripe audit_logs wiring for subscription lifecycle (P1)
     status: complete
