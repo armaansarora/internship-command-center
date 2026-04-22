@@ -167,7 +167,8 @@ export function createAgentRouteHandler<Context>(
     const accessResponse = await requireAgentAccess(user.id);
     if (accessResponse) return accessResponse;
 
-    const check = await withRateLimit(user.id);
+    // Agent calls are Tier B: 20 rpm for free users, 60 rpm for pro/team.
+    const check = await withRateLimit(user.id, "B");
     if (check.response) return check.response;
 
     let body: { messages: UIMessage[] };

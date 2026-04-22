@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:13 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:21 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `618e6ce`)
+- **Branch:** `main` (commit `a190292`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,934 across 272 source files
+- **Total LOC:** 54,229 across 272 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-618e6ce [R0/0.11] docs: MFA UI stub + secrets-rotation runbook
+a190292 [R0/0.9] feat: tiered rate limiting across authenticated endpoints
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `618e6ce`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `a190292`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (272 files, 53,934 LOC)
+## Source Tree (272 files, 54,229 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world` | 3142 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1811 |
-| `src/lib` | 1535 |
+| `src/lib` | 1790 |
 | `src/components/floor-7/war-table` | 1307 |
 | `src/components/floor-4` | 1187 |
 | `src/app` | 1177 |
@@ -132,7 +132,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/penthouse` | 713 |
 | `src/components/agents/dialogue` | 709 |
 | `src/app/(authenticated)/settings` | 687 |
-| `src/lib/ai/agents` | 680 |
+| `src/lib/ai/agents` | 681 |
 | `src/lib/sound` | 641 |
 | `src/lib/agents/cio` | 615 |
 | `src/lib/ai` | 599 |
@@ -175,20 +175,21 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/situation-room` | 85 |
 | `src/app/api/ceo` | 75 |
 | `src/types` | 74 |
-| `src/app/api/notifications` | 59 |
+| `src/app/api/notifications` | 67 |
 | `src/app/api/drive/export` | 53 |
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
 | `src/lib/crypto` | 50 |
+| `src/app/api/progression` | 44 |
+| `src/app/api/notifications/[id]/read` | 40 |
 | `src` | 36 |
-| `src/app/api/progression` | 35 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/(authenticated)/c-suite` | 33 |
 | `src/app/(authenticated)/observatory` | 33 |
-| `src/app/api/notifications/[id]/read` | 32 |
 | `src/lib/constants` | 31 |
 | `src/app/api/auth/callback` | 30 |
 | `src/app/api/stripe/portal` | 27 |
+| `src/app/api/auth/signout` | 25 |
 | `src/app/api/gmail/sync` | 19 |
 | `src/app/api/calendar/sync` | 17 |
 | `src/app/api/cmo` | 16 |
@@ -198,7 +199,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cno` | 15 |
 | `src/app/api/coo` | 15 |
 | `src/app/api/cro` | 15 |
-| `src/app/api/auth/signout` | 11 |
 
 <details>
 <summary>Full file list</summary>

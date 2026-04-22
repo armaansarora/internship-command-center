@@ -69,7 +69,21 @@ export function checkInMemoryRateLimit(
 // ── Lazy init ─────────────────────────────────────────────────────────────────
 
 type Tier = "free" | "pro" | "team";
-type RateLimiters = Record<Tier, Ratelimit> & { anon: Ratelimit };
+
+/**
+ * Tiered bucket names (R0.9).
+ *
+ * - `tierA`    — cheap reads (60 rpm). Notifications, cached weather, progression.
+ * - `tierBfree` — agent calls, free users (20 rpm).
+ * - `tierBpro`  — agent calls, pro/team users (60 rpm).
+ * - `tierC`    — side-effectful operations (5 rpm). Signout, destructive mutations.
+ */
+export type RateBucket = "tierA" | "tierBfree" | "tierBpro" | "tierC";
+
+type RateLimiters =
+  & Record<Tier, Ratelimit>
+  & Record<RateBucket, Ratelimit>
+  & { anon: Ratelimit };
 
 let _ratelimit: RateLimiters | null = null;
 let _redis: Redis | null = null;
@@ -91,6 +105,9 @@ function getRateLimiters(): RateLimiters | null {
   if (!redis) return null;
 
   _ratelimit = {
+    // Legacy subscription-tier buckets — kept for any external callers and for
+    // callers that use the raw `checkRateLimit(userId, tier)` signature. New
+    // code should prefer `checkTieredRateLimit` + the tier-A/B/C taxonomy.
     free: new Ratelimit({
       redis,
       limiter: Ratelimit.slidingWindow(30, "1 m"),
@@ -107,6 +124,32 @@ function getRateLimiters(): RateLimiters | null {
       redis,
       limiter: Ratelimit.slidingWindow(200, "1 m"),
       prefix: "rl:team",
+      analytics: true,
+    }),
+    // R0.9 tiered buckets. Each class has its own Redis prefix so counters
+    // don't interfere across endpoint classes.
+    tierA: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(60, "1 m"),
+      prefix: "rl:tierA",
+      analytics: true,
+    }),
+    tierBfree: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(20, "1 m"),
+      prefix: "rl:tierBfree",
+      analytics: true,
+    }),
+    tierBpro: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(60, "1 m"),
+      prefix: "rl:tierBpro",
+      analytics: true,
+    }),
+    tierC: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "1 m"),
+      prefix: "rl:tierC",
       analytics: true,
     }),
     anon: new Ratelimit({
@@ -151,6 +194,42 @@ export async function checkRateLimit(
   }
 
   const result = await limiters[tier].limit(userId);
+  return {
+    configured: true,
+    success: result.success,
+    remaining: result.remaining,
+    reset: result.reset,
+  };
+}
+
+/**
+ * Check a tiered rate limit bucket for the given user (R0.9).
+ *
+ * Unlike `checkRateLimit`, the caller picks the bucket explicitly based on
+ * endpoint class (cheap read vs agent call vs side-effect). This avoids
+ * coupling endpoint throttling to subscription tier.
+ *
+ * Development fallback: allows requests when Upstash is not configured.
+ * Production fallback: fails closed when Upstash is not configured.
+ */
+export async function checkTieredRateLimit(
+  userId: string,
+  bucket: RateBucket
+): Promise<RateLimitResult> {
+  const limiters = getRateLimiters();
+  if (!limiters) {
+    if (isProd()) {
+      return {
+        configured: false,
+        success: false,
+        remaining: 0,
+        reset: Date.now() + 60_000,
+      };
+    }
+    return { configured: false, success: true, remaining: 999, reset: 0 };
+  }
+
+  const result = await limiters[bucket].limit(userId);
   return {
     configured: true,
     success: result.success,

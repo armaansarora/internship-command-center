@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:09:32.365Z
-  expires: 2026-04-22T22:09:32.360Z
+  acquired: 2026-04-22T20:20:16.546Z
+  expires: 2026-04-22T22:20:16.541Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -79,7 +79,10 @@ tasks:
       tests/fixtures/injection-attempts/"
   R0.9:
     title: Tiered rate limiting across authenticated endpoints (P1)
-    status: not_started
+    status: complete
+    started: 2026-04-22T20:20:16.546Z
+    completed: 2026-04-22T20:20:52.603Z
+    commit: a190292
     notes: "Evidence: src/lib/rate-limit-middleware.ts with tier param, coverage on
       every user-facing route"
   R0.10:
@@ -142,3 +145,6 @@ history:
   - 2026-04-22T20:09:01.085Z: task_completed R0.5
   - 2026-04-22T20:09:32.365Z: task_started R0.11
   - 2026-04-22T20:13:32.148Z: task_completed R0.11
+  - 2026-04-22T20:14:12.196Z: task_started R0.9
+  - 2026-04-22T20:20:16.546Z: task_started R0.9
+  - 2026-04-22T20:20:52.603Z: task_completed R0.9

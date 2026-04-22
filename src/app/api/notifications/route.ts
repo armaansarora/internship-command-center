@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserApi } from "@/lib/auth/require-user";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { jsonPostgrestError } from "@/lib/db/postgrest-error";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,10 @@ export async function GET(req: Request): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
   const { user } = auth;
+  // Tier A: cheap list-query, 60 rpm.
+  const rate = await withRateLimit(user.id, "A");
+  if (rate.response) return rate.response;
+
   const supabase = await createClient();
   const url = new URL(req.url);
   const unreadOnly = url.searchParams.get("unread") === "true";
@@ -54,5 +59,8 @@ export async function GET(req: Request): Promise<Response> {
     updatedAt: row.updated_at as string,
   }));
 
-  return NextResponse.json({ data: notifications, error: null });
+  return NextResponse.json(
+    { data: notifications, error: null },
+    { headers: rate.headers },
+  );
 }

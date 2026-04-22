@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserApi } from "@/lib/auth/require-user";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { jsonPostgrestError } from "@/lib/db/postgrest-error";
 
 /**
@@ -14,6 +15,10 @@ export async function POST(
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
   const { user } = auth;
+  // Tier A: cheap state flip, 60 rpm.
+  const rate = await withRateLimit(user.id, "A");
+  if (rate.response) return rate.response;
+
   const supabase = await createClient();
   const { id } = await params;
 
@@ -27,5 +32,8 @@ export async function POST(
     return jsonPostgrestError(error);
   }
 
-  return NextResponse.json({ data: { success: true }, error: null });
+  return NextResponse.json(
+    { data: { success: true }, error: null },
+    { headers: rate.headers },
+  );
 }

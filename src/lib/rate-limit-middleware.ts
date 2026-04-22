@@ -1,14 +1,37 @@
-import { checkAnonymousRateLimit, checkRateLimit } from "@/lib/rate-limit";
+import {
+  checkAnonymousRateLimit,
+  checkTieredRateLimit,
+  type RateBucket,
+} from "@/lib/rate-limit";
 import { getUserTier } from "@/lib/stripe/entitlements";
-import type { SubscriptionTier } from "@/lib/stripe/config";
 import { isProd } from "@/lib/env";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const TIER_LIMITS: Record<SubscriptionTier, number> = {
-  free: 30,
-  pro: 100,
-  team: 200,
+/**
+ * Tiered rate-limit envelope per endpoint class (R0.9).
+ *
+ * - `"A"` — cheap reads (60 rpm). Notifications, cached external calls,
+ *           progression lookups.
+ * - `"B"` — agent calls. 20 rpm for free users, 60 rpm for pro/team.
+ *           Default for callers that do not pass a tier, preserving
+ *           backward compatibility.
+ * - `"C"` — side-effectful operations (5 rpm). Signout, destructive mutations,
+ *           anything where re-firing faster than once every 12 seconds is abuse.
+ */
+export type RateTier = "A" | "B" | "C";
+
+interface TierConfig {
+  bucket: RateBucket;
+  limit: number;
+}
+
+/** Static limits per bucket — used to emit meaningful X-RateLimit-Limit. */
+const BUCKET_LIMITS: Record<RateBucket, number> = {
+  tierA: 60,
+  tierBfree: 20,
+  tierBpro: 60,
+  tierC: 5,
 };
 
 const ANON_LIMIT = 20;
@@ -24,21 +47,47 @@ export interface RateLimitCheck {
 }
 
 /**
+ * Resolve the bucket + limit for a given tier. Tier B reads the user's
+ * subscription tier (free → 20 rpm, pro/team → 60 rpm). Tiers A and C skip
+ * the `getUserTier` round-trip entirely — they don't vary by subscription.
+ */
+async function resolveTier(tier: RateTier, userId: string): Promise<TierConfig> {
+  if (tier === "A") return { bucket: "tierA", limit: BUCKET_LIMITS.tierA };
+  if (tier === "C") return { bucket: "tierC", limit: BUCKET_LIMITS.tierC };
+  // Tier B — distinguish free vs pro/team.
+  const subscriptionTier = await getUserTier(userId);
+  if (subscriptionTier === "free") {
+    return { bucket: "tierBfree", limit: BUCKET_LIMITS.tierBfree };
+  }
+  return { bucket: "tierBpro", limit: BUCKET_LIMITS.tierBpro };
+}
+
+/**
  * Checks the rate limit for the given user.
- * - Reads the user's subscription tier from Supabase via getUserTier().
+ * - Picks a bucket based on `tier`: A = cheap reads, B = agent calls
+ *   (free/pro distinction via getUserTier), C = side-effectful ops.
  * - Returns a 429 Response when the limit is exceeded, or null otherwise.
  * - Always returns appropriate X-RateLimit-* headers.
  *
+ * Defaults to tier `"B"` when no tier is passed, so existing callers that
+ * rate-limit agent-like work without an explicit tier continue to behave
+ * the same way.
+ *
  * Usage in an API route:
  * ```ts
- * const check = await withRateLimit(user.id);
- * if (check.response) return check.response;
+ * const rate = await withRateLimit(user.id, "A");
+ * if (rate.response) return rate.response;
  * ```
  */
-export async function withRateLimit(userId: string): Promise<RateLimitCheck> {
-  const tier = await getUserTier(userId);
-  const limit = TIER_LIMITS[tier];
-  const { configured, success, remaining, reset } = await checkRateLimit(userId, tier);
+export async function withRateLimit(
+  userId: string,
+  tier: RateTier = "B",
+): Promise<RateLimitCheck> {
+  const { bucket, limit } = await resolveTier(tier, userId);
+  const { configured, success, remaining, reset } = await checkTieredRateLimit(
+    userId,
+    bucket,
+  );
 
   const headers: RateLimitHeaders = {
     "X-RateLimit-Limit": String(limit),
