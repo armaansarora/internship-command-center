@@ -2,8 +2,63 @@
 ## Design Overhaul + Autonomous Operation Phase
 
 **Status:** Proposal — awaiting user sign-off on §10 before the first R-phase starts.
-**Speed target:** 4–8 weeks end-to-end with parallel execution (§11), not the 6-month linear estimate shown in historical plans. See §11.
+**Speed target:** 7–12 weeks end-to-end. Way better than the 6-month linear estimate. See §11.
 **Disposition:** This document is a living proposal, not scripture. §0 is required reading — it tells you how to read the rest.
+
+---
+
+## 📖 For the Human (Read This First)
+
+If you're the user (Armaan), **this is the only part of the doc you need to read.** The rest is for Claude sessions that will execute the plan.
+
+### What is this doc?
+A plan for building the rest of The Tower. It's long because it's the plan *Claude* will execute — but **you don't have to read most of it.** You read this section + §10 (the questions you need to answer). Claude reads everything else.
+
+### What do you actually have to do?
+Four things. That's it.
+
+1. **Start a Claude session.** Open Claude Code, say *"let's do R0"* (or R1, R2, etc. when R0 is done). Claude handles the rest.
+2. **Answer questions when Claude asks.** They'll be batched — usually *"before I build, I need 5 decisions from you."* You reply with numbers, done.
+3. **Look at what Claude made.** When a phase finishes, Claude shows you. Click around the site. Say what you like, what you don't.
+4. **Say go or say change.** *"Ship it"* = merges to main. *"Change the CEO's line to feel warmer"* = Claude fixes and re-shows.
+
+**Time cost to you: ~1 hour per week.** Mostly reviewing, not coordinating.
+
+### What you DO NOT need to know about
+- **Git worktrees / branches / merges.** Claude handles these silently.
+- **Parallel sessions.** If it helps, Claude will *tell you* to open a second session with a copy-paste command — you just paste.
+- **CI, deploys, rollbacks.** Already automated.
+- **Any technical jargon below** (Gear 1/2/3, worktrees, Red Team, Phase Ledger). Those are Claude's coordination tools. You don't manage them.
+
+### How it will actually feel for you
+A typical week looks like:
+
+- **Monday (15 min).** Open Claude. *"Continue where we left off."* Claude shows the phase plan and asks ~3 questions. You answer.
+- **Mon–Thu (zero time).** Claude builds in whatever sessions you open. You only check if curious.
+- **Friday (30 min).** Claude pings: *"Phase R1 is done. Here's what I made. Here's a demo URL on Vercel."* You click around. Leave notes.
+- **Weekend (optional).** Look at the red-team review — Claude's auto-generated "things that might be broken" check.
+
+That's a week. Repeat ~8–12 times. Done.
+
+### How long it'll take
+- **Default (lowest effort for you):** 10–12 weeks. One phase at a time. Claude uses many mini-agents inside each session to work in parallel. You do nothing special.
+- **Faster mode (optional, tiny extra effort):** 7–9 weeks. Claude runs two phases at once on 2 of the 4 waves. You open a second Claude session with a copy-paste command — that's it.
+- **Original linear estimate was 6 months (24+ weeks).** We're 2–3x faster either way.
+
+### Will it be high-quality?
+Yes. Speed does not mean rushing. The speedup comes from:
+- Claude running for hours without breaks (humans can't do that).
+- Inside one session, Claude spawns many research/test/build mini-agents in parallel.
+- A Friday "red team" check tries to break things before you see them.
+- **Nothing ships without your thumbs-up.** You're always the final gate.
+
+### If you get confused or something feels wrong
+Just say so. Plain English. *"I don't understand what you just said"* or *"this feels off"* is enough. Claude will explain without jargon. If Claude uses a word you don't know, tell Claude to stop using it.
+
+### TL;DR
+**You say go. Claude builds. You check. You approve. You have 1h/week of meetings with the building.**
+
+---
 **Scope:** Every floor redesigned from the ground up — including the Lobby. Every floor also advances the North Star (user describes want → Tower autonomously discovers / tracks / tailors / applies / preps / coaches). The **bar** is the target aesthetic (luxury game UI + Bloomberg Terminal + Apple spatial design) rendered at Awwwards-winner quality. The current Lobby is the strongest *reference point* we have today for motion vocabulary and primitives, but it is a starting point, not a finish line.
 **Author:** Autonomous planning session, 2026-04-21.
 **Naming:** Original master plan used Phase 0–6 (all complete). This doc uses **Rebuild 1–7** (R1–R7) to avoid collision.
@@ -12,8 +67,15 @@
 
 ## §0 — The Doubt Protocol (required reading for every session)
 
-> *"Opinions strongly held, loosely."* — every quality engineering team, ever.
 > *"If you can't argue against your own plan, you don't understand it well enough."*
+
+### Plain English
+
+Don't trust this document. It was written on one day with what we knew then. Some of it is wrong. Before building any phase, every Claude session spends 15–20 minutes asking: *"What could go wrong? What am I assuming? Is there a better way?"* Then it builds the version that survives those questions. This is why The Tower ships high-quality work — it attacks its own plans first.
+
+**If you're the user:** you don't do this. Claude does, automatically, every session.
+
+### The detail (for Claude sessions)
 
 This roadmap is not truth. It is **the best story we could tell on 2026-04-21 given what we knew.** By the time you read it, what we knew is already stale. Some of what's written here is wrong. Some is unnecessary. Some is missing. Your job as a session working on this is **not** to execute it. Your job is to *doubt it, then execute the version that survives the doubt.*
 
@@ -1317,81 +1379,117 @@ Questions listed in priority order. Numbered so you can just reply *"1: A, 2: B,
 
 ### Execution model (§11 — needed to start R0)
 
-23. **Parallelism appetite.** How aggressive do you want to go?
-    - (A) **Gear 1 only** — one session at a time, deep sub-agent fan-out within. Simplest. 16–24 week target.
-    - (B) **Gear 2 for Wave 2+** (parallel worktrees 3-way) as proposed. 8-week target. Requires you to review 2–3 PRs/day.
-    - (C) **"Max Power" all waves** — tournaments, swarms, 4-way fan-out where possible. 5–6 week stretch. Requires you to review 4–5 PRs/day.
-    - My recommendation: **(B)**. Sustainable, real compression, room to shift up/down.
+*These questions are simpler than they look. Pick a letter. All technical setup is Claude's problem, not yours.*
 
-24. **Worktree setup.** §11.4 proposes `~/tower-worktrees/` with one folder per active phase.
-    - (A) **Proceed as spec'd** — I'll set up worktrees during R0.
-    - (B) **Keep everything in the primary repo, use branches only** — simpler, higher risk of `node_modules` collisions and accidental cross-phase edits.
-    - (C) **Use GitHub Codespaces / Vercel dev containers per worktree** — cloud isolation, nice UX, Vercel-native, costs extra $.
-    - My recommendation: **(A)**. Local, free, exactly the isolation you want.
+23. **How fast do you want to go vs how little do you want to do?**
+    - (A) **Slowest / zero effort** — one Claude session at a time. Take 10–12 weeks. You spend ~30 min per phase review. No extra commands ever.
+    - (B) **Middle (recommended)** — default one-at-a-time, but on Wave 2 and Wave 3 (each has 3 independent phases) Claude asks if you want to double up. If yes, Claude gives you 2 copy-paste terminal commands. You open a second Claude window for that wave. Saves ~3 weeks total. **7–9 weeks total, same review effort.**
+    - (C) **Fastest / small extra effort** — double up on every wave except R0 and R4. Same copy-paste pattern but more often. ~6–7 weeks total. You open a second Claude window 3 separate times across the project. **~1.5 hr/week total review effort.**
+    - My recommendation: **(B)**. Real speedup; still feels low-effort.
 
-25. **Red Team cadence.**
-    - (A) **Weekly** (Friday) as spec'd.
-    - (B) **After every merged phase** — more frequent, higher quality ceiling, more tokens spent.
-    - (C) **Only before user-facing launches** — cheapest.
-    - My recommendation: **(A)** for waves, **(B)** for high-stakes phases (R0 security, R3 orchestration, R4 Lobby launch).
+24. **Red-team reviews (the "what might be broken" weekly check).**
+    - (A) **Weekly** — Claude runs it every Friday. You skim the report (10–20 min). Catches more issues.
+    - (B) **After every finished phase only** — less often, lower bar for you, some misses slip between phases.
+    - (C) **Never** — skip red-teaming. Faster but risk higher.
+    - My recommendation: **(A)**. Low cost for you, big quality upside.
 
-26. **Doubt Protocol artifacts — commit or gitignore?**
-    - (A) **Commit** under `.tower/ledger/doubt/` — public accountability, visible history, repo grows.
-    - (B) **Gitignore** — transient working notes, don't pollute git.
-    - My recommendation: **(A)**. Doubt artifacts are evidence of rigor. Commit them.
+25. **Where Claude writes its "doubt notes" (§0 pre-mortems):**
+    - (A) **Committed to the repo** under `.tower/ledger/doubt/` — visible, permanent, anyone (including future-you) can see the thinking.
+    - (B) **Ignored by git** — transient, cleaner repo, but you lose the audit trail.
+    - My recommendation: **(A)**. It's evidence the work was thought through.
 
-27. **Who plays Conductor?**
-    - (A) **One dedicated Claude session per day** (15–30 min AM) — purely coordination.
-    - (B) **User plays Conductor** — you do the daily standup yourself, assign phases, merge.
-    - (C) **The Conductor role collapses into the first Builder session of the day** — practical for solo dev.
-    - My recommendation: **(C)**. Least overhead. Promote to (A) if we hit F7 (specialization tax).
-
-28. **Tournament & Swarm usage.** §11.10 proposes 2x-cost "Tournament" model for signature visual moments. Which moments do you want tournamented (2 independent builds, pick best)?
-    - (A) **None** — skip tournaments entirely.
-    - (B) **Just 2 moments** — Penthouse Morning Briefing scene + C-Suite Dispatch Trace.
+26. **Tournament mode for signature moments.** For specific high-stakes visual scenes, Claude can build *two independent versions* and you pick the better one. Costs ~2x for those scenes. Best for the "wow" moments. Which should be tournamented?
+    - (A) **None** — skip this, trust single-build + red-team review.
+    - (B) **Just 2 moments** — Penthouse Morning Briefing (first thing users see every day) + C-Suite Dispatch Trace (the "ring the bell" reveal).
     - (C) **4 moments** — above + War Room flow lines + R4 Lobby arrival scene.
-    - (D) **Every signature moment in §5.**
-    - My recommendation: **(B)**. Highest-stakes, highest-visibility. Others get Gear-2 single build + Red Team review, which is already very high quality.
+    - (D) **Every signature moment** — most expensive, highest quality.
+    - My recommendation: **(B)**. Highest-stakes, highest-visibility. Everything else is already high-quality with standard review.
+
+*Not shown:* questions about git worktrees, who plays Conductor, etc. Those are Claude's problem, not yours. If Claude ever needs the user to run a command, it will print the exact command in plain English.
 
 ---
 
-## §11 — Execution Strategy (MAX POWER)
+## §11 — Execution Strategy
 
-### 11.1 The thesis
+### Plain English
 
-A 6-month linear estimate is what happens when one developer works sequentially. We are not that. Between Claude Code sessions (many concurrent), background sub-agents within each session, and a user who is in the loop at review gates, the real constraint is **coordination**, not throughput. Compressed target: **4–8 weeks end-to-end, R0 through R3 (the autonomy loop) in ~14 days.**
+Most of the work happens inside **one Claude session at a time**. Inside that session, Claude fires off many mini-agents in parallel — one researches docs, one writes tests, one writes code, one audits for security. This gives us most of the speed-up with zero coordination work from you.
 
-The way to hit that is disciplined parallelism — not chaotic fan-out. Every session knows what it owns, what it can't touch, and when to merge. The Phase Ledger (§9) is the coordination layer. Git worktrees are the isolation layer. Review gates are the quality layer.
+For the few times we'd run *two* sessions at once (to ship two phases in parallel), Claude gives you 2–3 commands to copy-paste — that's your entire involvement in "parallelism." You never manage branches, worktrees, or merges. Claude does.
 
-Quality is non-negotiable. The user is explicit: *"every small part I will hyper detail on and use MAX POWER on."* Max power ≠ sloppy speed. It means: denser sessions, sharper reviews, more adversarial challenge, faster loops, no cutting corners. Speed comes from parallelism and elimination of waste, not from rushing any single deliverable.
+**Target:** 10–12 weeks default, 7–9 weeks if you opt into parallel sessions twice.
 
-### 11.2 Execution model — three gears
+### 11.1 The thesis (detail for Claude sessions)
 
-Move between gears based on phase type, not calendar. Each gear has its own parallelism profile.
+A 6-month linear estimate is what happens when one developer works sequentially. We are not that. Between Claude Code sessions running for hours uninterrupted, within-session sub-agent fan-out, and a user-as-reviewer role (not user-as-coordinator), the real constraint is **not throughput**. Compressed target: **10–12 weeks default; 7–9 weeks with optional parallelism on Wave 2 and Wave 3.**
 
-#### Gear 1 — Foundation (serial, high-intensity)
-**For:** R0 Hardening Sprint. Anything where items are deeply interdependent or where a broken foundation poisons downstream work.
-**Model:** One primary session drives, 6–10 sub-agents fan out for research/testing/audit. User reviews once-per-day.
-**Reason:** You can't parallelize auth fixes with encryption fixes with cron fixes *sensibly* — they all touch the same auth/crypto plumbing. Better to move one tight loop through all of R0 than risk merge conflicts in the security layer.
-**Est. duration:** 5–10 dev-days for R0.
+Critically: the user has told us they want MINIMUM effort. That reshapes the plan. The old draft of §11 asked the user to play Conductor, review 2–3 PRs/day, and manage git worktrees. That is correct for a team of humans. It is wrong here. The real plan is: **Claude plays Conductor. Claude manages worktrees. The user reviews phase-level outcomes, not PR-level changes.**
 
-#### Gear 2 — Fan-out (parallel worktrees, independent phases)
-**For:** R1 + R2 + R5 (Writing Room) once R0 lands. These three are independent enough: War Room is floor 7 + Job Discovery worker, Penthouse is floor PH + Morning Briefing scene, Writing Room is floor 5 + resume tailoring tool. Different floors, different agents, mostly different files.
-**Model:** 3–4 concurrent Claude sessions, each in its own git worktree. Each owns one phase end-to-end. A "Conductor" session (no code — metadata only) coordinates merges. Daily integration window.
-**Reason:** These phases touch mostly-disjoint code. Conflicts concentrate in shared primitives + schema migrations, both of which can be scheduled.
-**Est. duration:** 10–15 dev-days wall-clock for R1+R2+R5 running in parallel (vs ~25 sequential).
+Quality is non-negotiable. Speed comes from Claude's ability to work uninterrupted with parallel sub-agents, not from cutting corners on any single deliverable.
 
-#### Gear 3 — Integration & polish (serial merge + parallel review)
-**For:** After each fan-out wave. The moment you have 3 branches with working phases, you stop forking and integrate.
-**Model:** One session drives the merge + integration testing. Parallel Red Team session (§0) audits the integrated build. User reviews integrated PR.
-**Reason:** Merge conflicts, E2E regressions, and cross-phase UX holes only show up when things meet. This is where quality gets defended.
-**Est. duration:** 2–3 dev-days per fan-out wave.
+### 11.2 Execution modes — default and optional-faster
 
-Rotate through Gears 1 → 2 → 3 → 2 → 3 → … until done.
+Two modes. Default is the right answer unless the user explicitly asks for speed.
 
-### 11.3 Session roles
+#### Default mode — "One session, many mini-agents inside"
 
-Not every session is a "builder." Specialize explicitly. Each session is labeled in its `.tower/ledger/doubt/{session_id}/` folder with its role so handoffs are unambiguous.
+**How it works:**
+- You (the user) open one Claude session at a time.
+- You say *"let's do R0"* or *"continue where we left off."*
+- Claude, inside that single session, spawns 5–10 sub-agents in parallel for things like research, test-writing, code-writing, security audit, doc generation.
+- Claude commits, pushes, tests, and hands off via the Phase Ledger.
+- You do not open multiple Claude windows. You do not touch git. You answer batched questions when asked, and you review the phase when Claude pings you it's done.
+
+**Why it's fast:**
+- A single Claude session can run for hours without interruption. That's faster than most human devs working on the product.
+- Sub-agents within a session run genuinely in parallel. Research + test-writing + implementation of independent pieces all happen at once.
+
+**Expected pace:**
+- R0 (foundation): ~1 week
+- Each of Waves 2/3/4 (3 floors/phases each): ~2 weeks
+- Wave 5 (polish + launch): ~1 week
+- **Total: 10–12 weeks.** Realistic, sustainable, almost zero coordination cost on the user.
+
+#### Optional faster mode — "Two sessions on one wave"
+
+Only turned on when user opts in. Useful for Wave 2 (R1+R2+R5 are independent) and Wave 3 (R3+R6+R7 are independent).
+
+**How it works for the user:**
+1. Claude tells you: *"Wave 2 has three independent phases. Want to ship them in parallel and save ~1 week?"*
+2. You say yes.
+3. Claude gives you 2 copy-paste commands to run in your terminal (creates separate working copies of the project — Claude handles everything inside).
+4. You open a second Claude Code session in the other folder.
+5. Each session works on its own phase. They don't interfere.
+6. When both finish, Claude tells you to run one more command to merge them together.
+
+**Your total effort:** 3 copy-paste commands + a second Claude window for the duration of the wave.
+
+**Why it's faster:**
+- Two phases that touch different files can genuinely run in parallel without conflicts.
+- Saves roughly a week per wave where we do it.
+
+**When we don't do it:**
+- R0 (foundation; must be serial)
+- Wave 5 (polish; touches everything)
+- R4 Lobby (full building integration; easier serial)
+
+**Expected pace with this mode:**
+- Turn it on for Wave 2 + Wave 3. Save ~2 weeks total.
+- **Total: 7–9 weeks.**
+
+### 11.3 The detail gears (for Claude sessions, not user)
+
+Internal to Claude's execution, three "gears" exist. The user never sees these directly.
+
+- **Gear 1 — Foundation (serial).** For R0 only. Single session, deep sub-agent fan-out within. Interdependent items stay in one session to avoid auth-layer merge pain.
+- **Gear 2 — Fan-out (parallel).** For Waves 2 and 3 when the user opts in. Two or three concurrent sessions, each in its own git worktree, owned end-to-end by one session. Claude-as-Conductor (via the Phase Ledger) keeps them coordinated through file ownership rules (§11.5).
+- **Gear 3 — Integration.** After fan-out, one session merges and runs the full test suite + Red Team pass.
+
+Rotate Gears 1 → 2 → 3 → 2 → 3 → … until done. User is unaware of gear transitions unless they choose to look.
+
+### 11.4 Session roles (internal — Claude plays all of these)
+
+Not every session is a "builder." Specialize explicitly. In the default mode, one session plays multiple roles across a day; in fan-out mode, roles may split across sessions. **The user plays none of these roles** — the user is the final Approver, not a daily participant.
 
 | Role | Mandate | What it reads | What it writes |
 |---|---|---|---|
@@ -1402,15 +1500,13 @@ Not every session is a "builder." Specialize explicitly. Each session is labeled
 | **Reviewer (V)** | Read a PR from a Builder. Approve/block. No code except tiny fixups. | The PR diff + related tests. | PR review comments, approval, or block with reasons. |
 | **Integrator (I)** | Gear 3 — merges N branches, fixes conflicts, runs full test suite, handles drift. | All incoming branches. | Merge commits, integration-test results, rollback procedures if needed. |
 
-A single human-day might involve ~5 sessions across 3 roles. A typical fan-out day:
-- 1× Conductor session (15 min) — AM standup: ledger review, assign today's work
-- 2× Builder sessions (parallel, ~4h each) — R1 Builder in worktree `wt-r1`, R2 Builder in `wt-r2`
-- 1× Researcher session (~1h, off to the side) — investigating Rive pipeline for R3
-- 1× Reviewer session (end-of-day) — reads the 2 Builder PRs, blocks or approves
+A typical day in default mode is ONE session playing Builder + Researcher + Reviewer inline. Only in fan-out mode do these split across multiple concurrent sessions.
 
-### 11.4 Git worktree topology
+### 11.5 Git worktree topology (internal — Claude manages this; user does not)
 
-One worktree per concurrent workstream. This is how we get parallelism without conflicts.
+A "worktree" is just a second working copy of the project in a different folder. It lets two Claude sessions work on different branches at the same time without stepping on each other. The user never touches them directly — Claude gives the user 1–2 commands to create them on opt-in to fan-out mode, then runs everything inside.
+
+One worktree per concurrent workstream.
 
 ```
 ~/Documents/The Tower/              (main worktree — always tracks main branch)
@@ -1425,19 +1521,20 @@ One worktree per concurrent workstream. This is how we get parallelism without c
 
 Each worktree has its own branch (`r0-hardening`, `r1-war-room`, etc.) and its own `node_modules` (`npm ci` per worktree). Each Claude session is pinned to one worktree — no session straddles worktrees.
 
-Create worktrees:
+When the user opts into fan-out mode for a wave, Claude prints these 2 commands:
 ```
 git worktree add ../tower-worktrees/wt-r1-war-room r1-war-room
 git worktree add ../tower-worktrees/wt-r2-penthouse r2-penthouse
 ```
+User copy-pastes, opens a second Claude Code in the new folder, done. Merge is another single command Claude prints at the end of the wave. No branches, rebases, or conflict-resolution concepts the user needs to know.
 
-Merge order (when a branch is ready):
-1. Builder opens PR → CI runs → Reviewer approves.
-2. Conductor (or user) merges to `main` via squash-merge (atomic per deliverable).
-3. All other active worktrees `git pull --rebase` from `main` at next natural break.
+Merge order (Claude-driven, user sees a summary at end):
+1. Builder session opens PR → CI runs → Reviewer session approves.
+2. Claude merges to `main` via squash-merge (atomic per deliverable).
+3. All other active worktrees pull the latest main at next natural break.
 4. Drift check (§9 verifier) runs on merge.
 
-### 11.5 What can — and cannot — parallelize
+### 11.6 What can — and cannot — parallelize (internal rules for Claude)
 
 Some categories conflict no matter what. Schedule those serially.
 
@@ -1461,9 +1558,9 @@ Some categories conflict no matter what. Schedule those serially.
 **Conflict-prone but necessary (plan around):**
 - `CLAUDE.md`, `docs/NEXT-ROADMAP.md` — roadmap evolution during execution. Updates batched by Conductor, merged before builders rebase.
 
-### 11.6 The daily cadence
+### 11.7 The daily cadence (what a day looks like — not what user does)
 
-A habit-loop that stays the same week to week. Adjust cycle length to 2-day or 3-day rhythm if needed — but keep the pattern.
+Internal Claude loop. The user doesn't do daily standup — Claude runs one inside its session and writes it down. User appears at phase completion, not daily.
 
 | Slot | Role | Activity |
 |---|---|---|
@@ -1479,25 +1576,41 @@ A habit-loop that stays the same week to week. Adjust cycle length to 2-day or 3
 - Tue–Thu — builder days, max parallelism.
 - Friday — **Red Team session** + integration + user review.
 
-### 11.7 The compressed phase schedule
+### 11.8 The compressed phase schedule
 
-Target wall-clock, aggressive but achievable with Gear-2 parallelism:
+Two schedules. Default = 10–12 weeks. With opt-in fan-out on Waves 2+3 = 7–9 weeks.
+
+**Default schedule (one session at a time):**
+
+| Wave | Phases | Wall-clock |
+|---|---|---|
+| Wave 1 | **R0** (Hardening) | ~1 week |
+| Wave 2 | **R1 + R2 + R5** (War Room → Penthouse → Writing Room, sequential) | ~3 weeks |
+| Wave 3 | **R3 + R6 + R7** (C-Suite → Briefing Room → Situation Room, sequential) | ~3 weeks |
+| Wave 4 | **R4 + R8 + R9** (Lobby rebuild → Rolodex → Observatory, sequential) | ~3 weeks |
+| Wave 5 | Polish, monetization, launch prep | ~1 week |
+
+**Total: 10–12 weeks.**
+
+**Opt-in faster schedule (fan-out on Waves 2 and 3):**
 
 | Wave | Phases | Mode | Wall-clock |
 |---|---|---|---|
-| Wave 1 | **R0** (Hardening) | Gear 1 (serial, high intensity) | 5–10 days |
-| Wave 2 | **R1 + R2 + R5** (War Room, Penthouse, Writing Room) | Gear 2 (3 parallel worktrees) + Gear 3 (integration) | 10–15 days |
-| Wave 3 | **R3 + R6 + R7** (C-Suite, Briefing Room, Situation Room) | Gear 2 (3 parallel) + Gear 3 | 10–15 days |
-| Wave 4 | **R4 + R8 + R9** (Lobby rebuild, Rolodex, Observatory) | Gear 2 (3 parallel) + Gear 3 | 10–15 days |
-| Wave 5 | Polish, monetization hooks, launch prep | Gear 1 | 5 days |
+| Wave 1 | **R0** | serial | ~1 week |
+| Wave 2 | **R1 + R2 + R5** | 2 parallel sessions | ~2 weeks |
+| Wave 3 | **R3 + R6 + R7** | 2 parallel sessions | ~2 weeks |
+| Wave 4 | **R4 + R8 + R9** | serial (Lobby rebuild is high-stakes) | ~2.5 weeks |
+| Wave 5 | Polish, monetization, launch prep | serial | ~1 week |
 
-**Total:** 40–60 wall-clock days = 6–12 weeks depending on unknowns. Expected: **8 weeks**. Stretch (aggressive): **5–6 weeks**. These are not 40-hour weeks — they assume dense Claude sessions with the user in a review role. Multi-hour builder sessions with sub-agent fan-out are what drives speed.
+**Total: 7–9 weeks.**
+
+These are not 40-hour weeks — they assume dense Claude sessions. Your (user's) time commitment is ~1 hour/week across either schedule.
 
 Wave 2 ordering rationale: R1 (War Room) unlocks Job Discovery which populates data for R2 (Penthouse Morning Briefing). R5 (Writing Room) depends only on R0 (Storage + resume_base enum) and can run fully in parallel. So three-way fan-out is safe.
 
 Wave 3: R3 (C-Suite orchestration) is independent; R6 (Briefing Room mock drill) depends only on CPO existing (already shipped); R7 (Situation Room follow-ups) depends on outreach_queue (already shipped).
 
-### 11.8 Tooling stack
+### 11.9 Tooling stack (internal)
 
 Specific tools and how to use them.
 
@@ -1514,7 +1627,7 @@ Specific tools and how to use them.
 | **Inngest (if adopted per Q15)** | Durable background workers | Core for R1 Job Discovery loop. |
 | **Phase Ledger verifier** | Drift detection | CI + session-start. |
 
-### 11.9 Failure modes (this plan's own pre-mortem)
+### 11.10 Failure modes (this plan's own pre-mortem)
 
 Per §0, here's this execution plan doubting itself.
 
@@ -1545,7 +1658,7 @@ Per §0, here's this execution plan doubting itself.
 **F9 — Claude session context limits hit mid-phase.** Session degrades, has to hand off mid-deliverable.
 → *Mitigation:* Per CLAUDE.md, sessions hand off at 70% context. Each worktree's NEXT-SESSION.md is robust enough that the next session can resume without context. Phase Ledger ensures deliverable state is preserved.
 
-### 11.10 "Max Power" loadouts for high-stakes moments
+### 11.11 "Max Power" loadouts for high-stakes moments (opt-in per phase)
 
 When a phase is particularly high-stakes or risky, go beyond Gear 2 to these configurations:
 
@@ -1559,18 +1672,26 @@ When a phase is particularly high-stakes or risky, go beyond Gear 2 to these con
 
 **The Vision Lock.** Before R4 Lobby rebuild, produce 3 Figma-grade visual comps (via Researcher + design references). User picks direction. This is the one floor where "build then iterate" costs more than "align then build" — first impressions matter too much.
 
-### 11.11 What this plan requires from the user
+### 11.12 What this plan requires from the user (THE MINIMAL SET)
 
-Honest: the aggressive timeline assumes the user shows up to:
+Honest. Aggressively minimized from the old draft. The user asked for low effort; this is the actual minimum.
 
-- **Daily-ish review (15–30 min).** Approve PRs, answer Conductor questions, merge.
-- **Weekly Red Team check-in (30–60 min).** Read the week's REDTEAM-*.md. Decide on any proposed pivots.
-- **Wave retros (30 min every 10–15 days).** "Did we hit the wave target? What slipped? Update forecast."
-- **Decision gates.** Questions in §10 that block phase starts. Batch-answer when raised.
+- **Phase kickoff (10 min, once per phase ≈ once every 1–2 weeks).** Claude shows the plan, asks ~3–5 batched questions. User answers. Claude goes.
+- **Phase end review (15–30 min, once per phase).** Claude pings *"R1 is done, here's the demo URL, click around."* User clicks, leaves notes, says ship it or change X.
+- **Weekly red-team check (10–20 min, optional).** Skim the auto-generated REDTEAM-*.md. Agree/disagree with its findings. If the user skips it, Claude's next session treats silence as "no objection."
+- **Decision gates (when raised).** §10 questions come up. Claude batches. User answers when convenient.
 
-If the user can't sustain that cadence, drop from Gear 2 (parallel) back to Gear 1 (serial) until capacity returns. Parallelism without review collapses.
+**Total: ~1 hour per week.** If the user is busier, drop the weekly red-team review. Phase kickoff and end review are the only hard gates.
 
-### 11.12 Framework for doubting this execution plan
+**What the user does NOT do:**
+- Daily PR review (Claude plays Reviewer)
+- Git coordination, merges, rebases (Claude handles)
+- Standup or daily planning (Claude runs internal standup, user sees output at phase-end)
+- Write anything in the ledger (Claude writes, user approves edits at phase-end if flagged)
+
+If the user's review cadence can't keep up even at this level, default to single-session mode (no fan-out) — it needs even less user time.
+
+### 11.13 Framework for doubting this execution plan
 
 Apply §0 to §11 itself, right now:
 
