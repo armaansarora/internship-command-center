@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `4f4cba8`)
+- **Branch:** `main` (commit `180ae58`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 55,593 across 282 source files
 - **Build:** Clean (zero TS errors)
@@ -28,7 +28,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-4f4cba8 [R0/0.8] feat: Gmail prompt-injection defense (regex + tags + meta + audit)
+180ae58 [R0/0.6] feat: full user-data export — zip, signed URL, email delivery
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `4f4cba8`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `180ae58`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -559,13 +559,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 596 | 6,016 |
+| `BOOTSTRAP-PROMPT.md` | 608 | 6,122 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 416 | 8,401 |
-| **Total** | **1660** | **26,843** |
+| **Total** | **1672** | **26,949** |
 
-> ⚠️ Reading all recommended files consumes ~26,843 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,949 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
