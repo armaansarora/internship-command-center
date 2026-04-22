@@ -8,6 +8,7 @@ import { registerBlocked } from "./commands/blocked.js";
 import { registerStatus } from "./commands/status.js";
 import { registerLock } from "./commands/lock.js";
 import { registerStart } from "./commands/start.js";
+import { registerDone } from "./commands/done.js";
 
 const program = new Command();
 
@@ -30,6 +31,7 @@ registerBlocked(program);
 registerStatus(program);
 registerLock(program);
 registerStart(program);
+registerDone(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);
