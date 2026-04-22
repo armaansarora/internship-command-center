@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 11:24 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 11:25 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `6f5e5b4`)
+- **Branch:** `main` (commit `3c9b4b8`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,167 across 265 source files
 - **Build:** FAILING — 2 TS errors
@@ -43,7 +43,7 @@ scripts/tower/test-helpers.ts(14,3): error TS2322: Type 'ExecaReturnValue<string
 ## Changes Since Last Bootstrap
 
 ```
-6f5e5b4 feat(tower): brief command — print single phase from roadmap
+3c9b4b8 feat(tower): log command + pin execa@8 + runCLI helper
 ```
 
 ## Acceptance Criteria — Progress
@@ -97,7 +97,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6f5e5b4`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3c9b4b8`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -547,13 +547,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 589 | 5,948 |
+| `BOOTSTRAP-PROMPT.md` | 596 | 6,046 |
 | `PROJECT-CONTEXT.md` | 279 | 5,201 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 315 | 6,531 |
-| **Total** | **1550** | **24,852** |
+| **Total** | **1557** | **24,950** |
 
-> ⚠️ Reading all recommended files consumes ~24,852 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,950 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
