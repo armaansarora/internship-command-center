@@ -2,8 +2,7 @@
 ## Design Overhaul + Autonomous Operation Phase
 
 **Status:** Proposal — awaiting user sign-off on §10 before the first R-phase starts.
-**Speed target:** 7–12 weeks end-to-end. Way better than the 6-month linear estimate. See §11.
-**Disposition:** This document is a living proposal, not scripture. §0 is required reading — it tells you how to read the rest.
+**Disposition:** This document is a living proposal, not scripture. §0 is required reading — it tells you how to read the rest. **There are no time targets or schedules in this document — phases finish when quality ships, not when a calendar says so.**
 
 ---
 
@@ -22,7 +21,7 @@ Four things. That's it.
 3. **Look at what Claude made.** When a phase finishes, Claude shows you. Click around the site. Say what you like, what you don't.
 4. **Say go or say change.** *"Ship it"* = merges to main. *"Change the CEO's line to feel warmer"* = Claude fixes and re-shows.
 
-**Time cost to you: ~1 hour per week.** Mostly reviewing, not coordinating.
+**Your effort is bounded by phase events, not by a calendar.** When a phase is ready for review, Claude pings. Until then: nothing to do.
 
 ### What you DO NOT need to know about
 - **Git worktrees / branches / merges.** Claude handles these silently.
@@ -31,32 +30,33 @@ Four things. That's it.
 - **Any technical jargon below** (Gear 1/2/3, worktrees, Red Team, Phase Ledger). Those are Claude's coordination tools. You don't manage them.
 
 ### How it will actually feel for you
-A typical week looks like:
+An event-driven loop, not a schedule:
 
-- **Monday (15 min).** Open Claude. *"Continue where we left off."* Claude shows the phase plan and asks ~3 questions. You answer.
-- **Mon–Thu (zero time).** Claude builds in whatever sessions you open. You only check if curious.
-- **Friday (30 min).** Claude pings: *"Phase R1 is done. Here's what I made. Here's a demo URL on Vercel."* You click around. Leave notes.
-- **Weekend (optional).** Look at the red-team review — Claude's auto-generated "things that might be broken" check.
+- **Phase kickoff.** You open Claude, say *"continue"* or *"start R0."* Claude shows the phase plan, asks a batch of questions. You answer. Claude goes.
+- **During the build.** You're free. Claude works without you.
+- **Phase end ping.** Claude messages you: *"Phase R1 is done. Here's a demo URL. Here's what I'd flag."* You click around. Leave notes.
+- **Red-team output** (after each phase or on-demand). Claude auto-generates a "what might be broken" report. You skim if you want.
 
-That's a week. Repeat ~8–12 times. Done.
+Each phase is a discrete event. Repeat until all phases done.
 
-### How long it'll take
-- **Default (lowest effort for you):** 10–12 weeks. One phase at a time. Claude uses many mini-agents inside each session to work in parallel. You do nothing special.
-- **Faster mode (optional, tiny extra effort):** 7–9 weeks. Claude runs two phases at once on 2 of the 4 waves. You open a second Claude session with a copy-paste command — that's it.
-- **Original linear estimate was 6 months (24+ weeks).** We're 2–3x faster either way.
+### Pace
+There is no fixed schedule. Phases take as long as they take. The only lever on speed is:
+- **Default — one phase at a time.** Claude works as fast as it can inside one session, with many mini-agents in parallel. You do nothing special.
+- **Faster mode (optional) — two phases at once** on certain waves. Claude asks first, then gives you a copy-paste command. You paste, open a second Claude window.
+- Either way, **you only ever engage at phase kickoff and phase end**.
 
 ### Will it be high-quality?
-Yes. Speed does not mean rushing. The speedup comes from:
-- Claude running for hours without breaks (humans can't do that).
+Yes. Quality is the only target. The efficiency comes from:
+- Claude running uninterrupted.
 - Inside one session, Claude spawns many research/test/build mini-agents in parallel.
-- A Friday "red team" check tries to break things before you see them.
+- A "red team" pass after each phase tries to break things before you see them.
 - **Nothing ships without your thumbs-up.** You're always the final gate.
 
 ### If you get confused or something feels wrong
 Just say so. Plain English. *"I don't understand what you just said"* or *"this feels off"* is enough. Claude will explain without jargon. If Claude uses a word you don't know, tell Claude to stop using it.
 
 ### TL;DR
-**You say go. Claude builds. You check. You approve. You have 1h/week of meetings with the building.**
+**You say go. Claude builds. You check. You approve. Your only time commitment is the moment a phase finishes.**
 
 ---
 **Scope:** Every floor redesigned from the ground up — including the Lobby. Every floor also advances the North Star (user describes want → Tower autonomously discovers / tracks / tailors / applies / preps / coaches). The **bar** is the target aesthetic (luxury game UI + Bloomberg Terminal + Apple spatial design) rendered at Awwwards-winner quality. The current Lobby is the strongest *reference point* we have today for motion vocabulary and primitives, but it is a starting point, not a finish line.
@@ -71,7 +71,7 @@ Just say so. Plain English. *"I don't understand what you just said"* or *"this 
 
 ### Plain English
 
-Don't trust this document. It was written on one day with what we knew then. Some of it is wrong. Before building any phase, every Claude session spends 15–20 minutes asking: *"What could go wrong? What am I assuming? Is there a better way?"* Then it builds the version that survives those questions. This is why The Tower ships high-quality work — it attacks its own plans first.
+Don't trust this document. It was written on one day with what we knew then. Some of it is wrong. Before building any phase, every Claude session asks: *"What could go wrong? What am I assuming? Is there a better way?"* Then it builds the version that survives those questions. This is why The Tower ships high-quality work — it attacks its own plans first.
 
 **If you're the user:** you don't do this. Claude does, automatically, every session.
 
@@ -81,7 +81,7 @@ This roadmap is not truth. It is **the best story we could tell on 2026-04-21 gi
 
 ### The five acts every session runs before touching code
 
-Before any R-phase starts in a new session, produce these five artifacts. Commit them under `.tower/ledger/doubt/{session_id}/`. They take ~20 minutes total. Skipping them is considered shipping bad work.
+Before any R-phase starts in a new session, produce these five artifacts. Commit them under `.tower/ledger/doubt/{session_id}/`. Skipping them is considered shipping bad work.
 
 1. **Pre-mortem.** *"Imagine this phase shipped and failed publicly. What failed? List the 3 most likely failure causes."* One paragraph. Forces you to think about risk before writing a line.
 
@@ -91,7 +91,7 @@ Before any R-phase starts in a new session, produce these five artifacts. Commit
 
 4. **Alternative sketch.** In ≤200 words, propose ONE meaningfully different approach to the same goal. Not a variation — an alternative architecture, framing, or tool. If the phase says "use Motion for Kanban drag," propose "use native HTML5 drag with a custom pointer model" and explain when it'd be better.
 
-5. **Fresh-eyes audit.** Pretend you've never seen this codebase or roadmap before. Read the phase in ~10 min. What confuses you? What feels off? Write it down even if it seems stupid — especially if it seems stupid.
+5. **Fresh-eyes audit.** Pretend you've never seen this codebase or roadmap before. Read the phase cold. What confuses you? What feels off? Write it down even if it seems stupid — especially if it seems stupid.
 
 Output format — copy this into `doubt/{session_id}/premortem.md`:
 
@@ -121,7 +121,7 @@ Output format — copy this into `doubt/{session_id}/premortem.md`:
 
 ### The "Red Team" session
 
-Once per week (or once per major phase completion — whichever comes first), spin up a dedicated **Red Team session**. Its only mandate: find what's wrong. It reads the roadmap, the ledger, recent PRs, and recent commits. It produces `REDTEAM-{date}.md` under `.tower/ledger/doubt/redteam/` with:
+Once per major phase completion (or on-demand when the user asks), spin up a dedicated **Red Team session**. Its only mandate: find what's wrong. It reads the roadmap, the ledger, recent PRs, and recent commits. It produces `REDTEAM-{session_id}.md` under `.tower/ledger/doubt/redteam/` with:
 
 - Bugs it found by reading code (not running it — static skepticism).
 - Metaphor violations (anywhere the building feels broken).
@@ -139,7 +139,7 @@ Within any single session, before committing to an approach:
 - **Spawn a "Why not X?" sub-agent** when you choose between 2-3 options — have it argue the case you didn't pick.
 - Record its output verbatim in the session's handoff file.
 
-This is cheap: ~3 min of token spend for dramatically better decisions. The brainstorming skill recommends proposing 2–3 approaches before settling — adversarial sub-agents are the tool that enforces it.
+This is cheap — modest token spend for dramatically better decisions. The brainstorming skill recommends proposing 2–3 approaches before settling — adversarial sub-agents are the tool that enforces it.
 
 ### What must NOT be doubted
 
@@ -203,8 +203,8 @@ Ten floors are built and shipping; every one reads as a placeholder that proves 
 | **2** | **Resume tailoring engine** | 5 | Schema has `documents.type = 'resume_tailored'` and zero code writes to it. Per-application tailoring is table-stakes for 2026 job search — its absence is the single most embarrassing gap. |
 | **3** | **Auto-apply / approved-send loop** | 20 | `outreach_queue` with `pending_approval → approved → sent` exists for email. We need the same for cover-letter-attached application sends, plus ATS-aware drafting (Greenhouse/Lever/Workday form maps). |
 | **4** | **Proactive push (CEO speaks unprompted)** | 25 | Cron runs, writes a static notification string. There is no true CEO-authored briefing. Without proactive push, the user has to *remember* to open the Tower — which is the opposite of autonomy. |
-| **5** | **Agent parallelism + dependency ordering** | 45 | Dispatch works sequentially with `maxSteps: 3`. For briefings, CEO should parallel-fan to N departments and wait on `dependsOn` chains. This is a 2-day refactor with huge compound returns. |
-| **6** | **Interview simulation (live mock, not packets)** | 30 | CPO generates prep material but never drills. A text-based mock interview in a tool loop (Q → answer → feedback → next Q) ships in a week and changes how the floor feels. |
+| **5** | **Agent parallelism + dependency ordering** | 45 | Dispatch works sequentially with `maxSteps: 3`. For briefings, CEO should parallel-fan to N departments and wait on `dependsOn` chains. Contained refactor with huge compound returns. |
+| **6** | **Interview simulation (live mock, not packets)** | 30 | CPO generates prep material but never drills. A text-based mock interview in a tool loop (Q → answer → feedback → next Q) is a contained build that changes how the floor feels. |
 | **7** | **Offer evaluation & negotiation** | 0 | No structured comp data, no market benchmarking, no negotiation scripts. Low-frequency use case (users get few offers) but high-stakes; closing it late is fine. |
 | **8** | **Memory: cross-agent semantic retrieval + visible UI** | 75 | Memory is wired but siloed per agent and invisible to the user. Making it *visible* (CRO's whiteboard reading agent_memory, Rolodex cards showing recalled facts) is a UX win with zero backend work. |
 | **9** | **Background worker durability** | 20 | Vercel Cron + in-memory Promise.all is brittle. Moving to Inngest (or Vercel Queues) buys retries, event sourcing, and durable scheduled tasks. Invisible to user; critical for scale. |
@@ -212,7 +212,7 @@ Ten floors are built and shipping; every one reads as a placeholder that proves 
 
 **Biggest compounding unlock:** #1 (Job Discovery). The moment the War Room populates itself overnight, every other agent has something real to do and the product becomes autonomous.
 
-**Cheapest 24-hour win:** #2 (Resume tailoring). The schema, the docs table, the CMO structured-generator pattern, and pgvector are all already there. One new tool + one new document type.
+**Cheapest quick win:** #2 (Resume tailoring). The schema, the docs table, the CMO structured-generator pattern, and pgvector are all already there. One new tool + one new document type.
 
 **Biggest emotional unlock:** #4 (Morning Briefing ritual). The moment the CEO speaks unprompted is the moment the Tower stops being software.
 
@@ -278,7 +278,7 @@ A floor is at bar when a new user, spun up cold, can point at it and say **one s
 
 ### The sequence
 
-0. **R0 — Hardening Sprint**  *(blocks everything; ~1–2 weeks; fixes trust-critical plumbing + stands up the Phase Ledger so future sessions can coordinate)*
+0. **R0 — Hardening Sprint**  *(blocks everything; fixes trust-critical plumbing + stands up the Phase Ledger so future sessions can coordinate)*
 1. **R1 — War Room (Floor 7)**  *(start here — autonomy heartbeat)*
 2. **R2 — Penthouse (PH)**  *(Morning Briefing ritual)*
 3. **R3 — C-Suite (Floor 1)**  *(orchestration upgrade, parallel dispatch)*
@@ -310,7 +310,7 @@ War Room is the one floor that scores top on every axis. It's also the floor whe
 
 ### Pacing note
 
-R1, R2, R3 form a tight triangle — each amplifies the others. Plan to ship them in close succession (ideally 4–6 weeks total), then pause and gut-check before starting R4. R4–R8 can be sequenced more loosely based on observed user behavior (e.g., if early users do lots of mock interviews, promote R5).
+R1, R2, R3 form a tight triangle — each amplifies the others. Plan to ship them in close succession without intervening distractions, then pause and gut-check before starting R4. R4–R9 can be re-sequenced based on observed user behavior (e.g., if early users do lots of mock interviews, promote R6).
 
 ---
 
@@ -318,7 +318,7 @@ R1, R2, R3 form a tight triangle — each amplifies the others. Plan to ship the
 
 Each plan: **Vision statement · Design tooling · 3–5 signature interactions · Functionality upgrades toward North Star · Effort (S/M/L/XL) · Success criteria.**
 
-Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ days).
+Effort scale is **relative, not calendar**: S (trivial / contained) · M (medium / one or two subsystems touched) · L (large / multiple subsystems + new tooling) · XL (very large / spans the whole building or introduces novel architecture). No day/week mapping — phases finish when they finish.
 
 ---
 
@@ -326,7 +326,7 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 **Vision.** Before we design anything new, the building's *utilities* must be sound. The Tower is handling real Gmail content, real OAuth tokens, real applications-to-employers, real resume PDFs. Any new feature on a leaky foundation is malpractice. R0 is invisible to the user but non-negotiable: auth persists, tokens encrypt, crons authenticate, audits record, data can be exported or destroyed. Plus we stand up the **Phase Ledger** (§9) so every future Claude session knows what's been built vs. what's claimed.
 
-**Effort:** **L** (7–10 dev-days, linear — most items are independent).
+**Effort:** **L** (most items are independent; sequence them carefully to avoid auth-layer merge pain).
 
 **Deliverables**
 
@@ -385,7 +385,7 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 - **CRO parallel fan-out** — refactor CRO agent to dispatch all subagents via `Promise.all` in the tool execute layer rather than sequential tool loop. Return compiled result in one message.
 - **Visible memory** — CRO's whiteboard backgrounds pulls live from `agent_memory` filtered by agent='cro'. When CRO learns something new, you see it get written to the whiteboard.
 
-**Effort:** **XL** (design overhaul L + Job Discovery M + Target Profile + CRO parallel fan-out S + visible memory S).
+**Effort:** **XL** (design overhaul + Job Discovery worker + Target Profile + CRO parallel fan-out + visible memory).
 
 **Success criteria.**
 - Cold user types "RE finance summer internships in NYC" on first visit; returns next morning to 10+ scored opportunities already populated.
@@ -421,12 +421,14 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 **Effort:** **L** (primitives exist; the work is scene-direction + wiring, not new libraries).
 
+
+
 **Success criteria.**
 - CEO greets user by name, in character, with real overnight data, within 2 seconds of page paint.
 - User can dismiss the briefing with spacebar / Esc (keyboard-first — Linear vocabulary).
 - Skipping the briefing never prevents access to floor; it just folds away.
 - 100% of Quick Actions actually dispatch a live agent call — no placeholder badges.
-- A week of daily briefings with different overnight activity produces demonstrably different scripts (not templated).
+- Multiple briefings across different overnight activity produce demonstrably different scripts (not templated).
 
 ---
 
@@ -455,13 +457,13 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 - **Unprompted CEO** — threshold-based triggers: when `agent_logs` or pipeline state crosses configured thresholds (3+ stale apps, 2+ rejections same-day, offer arrived), Inngest fires an event, CEO auto-dispatches a briefing, result queues as high-priority notification. Delivered via pneumatic tube (see §6).
 - **Cross-agent memory bridge** — extract high-importance memories into a shared `user_profiles.shared_knowledge` jsonb. CEO's system prompt includes this. Other agents can read it. The "Blackstone prefers non-technical openers" insight reaches CMO without manual plumbing.
 
-**Effort:** **XL** (floor redesign L + parallel dispatch refactor M + event streaming M + Rive CEO L + dispatch-graph Canvas S).
+**Effort:** **XL** (floor redesign + parallel dispatch refactor + event streaming + Rive CEO + dispatch-graph Canvas).
 
 **Success criteria.**
 - Ringing the bell with "How's everything looking?" triggers ≥3 departments to dispatch in parallel; user visibly sees them run concurrently.
 - Total bell-to-briefing time <60s for a "full briefing" command (down from current sequential).
 - Pressing `/` mid-dispatch lets user inject a new instruction and the CEO adapts the plan.
-- Three threshold triggers fire autonomously over a week of test usage (stale threshold, rejection cluster, offer arrived).
+- Three threshold triggers fire autonomously over an extended test run (stale threshold, rejection cluster, offer arrived).
 - CEO's briefing references knowledge first learned by a sibling agent (CMO referencing CRO's pipeline insight).
 
 ---
@@ -492,6 +494,8 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 - **Progress-aware building directory** — the cross-section illustration reads from `progression_milestones` and visually locks / unlocks floors. Matches the existing progression system, just in-world.
 
 **Effort:** **L** (R3F exterior is the heaviest new element; the arrival choreography is precise but contained).
+
+
 
 **Success criteria.**
 - New-user first-click-to-first-Morning-Briefing <3 minutes.
@@ -529,6 +533,8 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 **Effort:** **L** (resume tailoring + refinement loop both use existing structured-generator patterns).
 
+
+
 **Success criteria.**
 - User can generate a tailored resume for an application in <30s from drop.
 - Cover letter refinement loop: user types feedback → new draft appears in <15s, old draft visibly stacks.
@@ -563,6 +569,8 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 **Effort:** **L** (live mock interview loop is genuinely new work; teletype keeps).
 
+
+
 **Success criteria.**
 - User can complete a 3-question mock interview in a single session, see STAR-scored feedback per answer.
 - STAR whiteboard animation is readable — you can literally see your Situation appear under the S column.
@@ -596,6 +604,8 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 - **Pneumatic Tube notification system** — replace current `NotificationToast` with the tube-canister model (see §6.1). All proactive agent push lands here first before fanning out.
 
 **Effort:** **L** (alert engine + undo + tube visual + flight paths).
+
+
 
 **Success criteria.**
 - Follow-up drafts appear automatically overnight for any app past threshold.
@@ -632,6 +642,8 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 **Effort:** **L** (R3F rolodex is the heaviest new component; rest reuses existing).
 
+
+
 **Success criteria.**
 - Rolodex rotates at 60fps with 200+ cards loaded.
 - Side-switch via keyboard is instant (<150ms).
@@ -664,6 +676,8 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 - **Agent cost panel** — show per-agent spend from `agent_logs.cost_cents` (the only analytics floor that should surface this).
 
 **Effort:** **XL** (orrery is a real 3D scene; rest is chart polish).
+
+
 
 **Success criteria.**
 - Orrery renders 100+ applications at 60fps.
@@ -1381,17 +1395,17 @@ Questions listed in priority order. Numbered so you can just reply *"1: A, 2: B,
 
 *These questions are simpler than they look. Pick a letter. All technical setup is Claude's problem, not yours.*
 
-23. **How fast do you want to go vs how little do you want to do?**
-    - (A) **Slowest / zero effort** — one Claude session at a time. Take 10–12 weeks. You spend ~30 min per phase review. No extra commands ever.
-    - (B) **Middle (recommended)** — default one-at-a-time, but on Wave 2 and Wave 3 (each has 3 independent phases) Claude asks if you want to double up. If yes, Claude gives you 2 copy-paste terminal commands. You open a second Claude window for that wave. Saves ~3 weeks total. **7–9 weeks total, same review effort.**
-    - (C) **Fastest / small extra effort** — double up on every wave except R0 and R4. Same copy-paste pattern but more often. ~6–7 weeks total. You open a second Claude window 3 separate times across the project. **~1.5 hr/week total review effort.**
-    - My recommendation: **(B)**. Real speedup; still feels low-effort.
+23. **How much do you want to overlap phases?**
+    - (A) **Never** — one phase at a time. Zero coordination effort from you. Longest wall-clock but simplest.
+    - (B) **Sometimes (recommended)** — default one-at-a-time, but on Wave 2 and Wave 3 (each has 3 independent phases) Claude asks if you want to overlap. If yes, Claude gives you 2 copy-paste terminal commands. You open a second Claude window for that wave.
+    - (C) **As often as safe** — overlap on every wave where it's safe (excludes R0 and R4). Same copy-paste pattern but more often. You open a second Claude window a few times across the project.
+    - My recommendation: **(B)**. Real efficiency; still feels low-effort.
 
-24. **Red-team reviews (the "what might be broken" weekly check).**
-    - (A) **Weekly** — Claude runs it every Friday. You skim the report (10–20 min). Catches more issues.
-    - (B) **After every finished phase only** — less often, lower bar for you, some misses slip between phases.
-    - (C) **Never** — skip red-teaming. Faster but risk higher.
-    - My recommendation: **(A)**. Low cost for you, big quality upside.
+24. **Red-team review cadence.**
+    - (A) **After every finished phase** — Claude runs a red-team pass before handing the phase to you for review. You skim the report.
+    - (B) **Only on user request** — you invoke it manually when suspicious.
+    - (C) **Never** — skip red-teaming entirely. Not recommended.
+    - My recommendation: **(A)**. Low cost, big quality upside.
 
 25. **Where Claude writes its "doubt notes" (§0 pre-mortems):**
     - (A) **Committed to the repo** under `.tower/ledger/doubt/` — visible, permanent, anyone (including future-you) can see the thinking.
@@ -1413,23 +1427,23 @@ Questions listed in priority order. Numbered so you can just reply *"1: A, 2: B,
 
 ### Plain English
 
-Most of the work happens inside **one Claude session at a time**. Inside that session, Claude fires off many mini-agents in parallel — one researches docs, one writes tests, one writes code, one audits for security. This gives us most of the speed-up with zero coordination work from you.
+Most of the work happens inside **one Claude session at a time**. Inside that session, Claude fires off many mini-agents in parallel — one researches docs, one writes tests, one writes code, one audits for security. You do nothing special for this.
 
 For the few times we'd run *two* sessions at once (to ship two phases in parallel), Claude gives you 2–3 commands to copy-paste — that's your entire involvement in "parallelism." You never manage branches, worktrees, or merges. Claude does.
 
-**Target:** 10–12 weeks default, 7–9 weeks if you opt into parallel sessions twice.
+**No calendar targets.** Each phase finishes when quality ships, not when a schedule says. The only pacing lever is whether you opt into parallel sessions for certain waves.
 
 ### 11.1 The thesis (detail for Claude sessions)
 
-A 6-month linear estimate is what happens when one developer works sequentially. We are not that. Between Claude Code sessions running for hours uninterrupted, within-session sub-agent fan-out, and a user-as-reviewer role (not user-as-coordinator), the real constraint is **not throughput**. Compressed target: **10–12 weeks default; 7–9 weeks with optional parallelism on Wave 2 and Wave 3.**
+We are not a single developer working sequentially. Between Claude Code sessions running uninterrupted, within-session sub-agent fan-out, and a user-as-reviewer role (not user-as-coordinator), coordination is the real constraint, not throughput.
 
-Critically: the user has told us they want MINIMUM effort. That reshapes the plan. The old draft of §11 asked the user to play Conductor, review 2–3 PRs/day, and manage git worktrees. That is correct for a team of humans. It is wrong here. The real plan is: **Claude plays Conductor. Claude manages worktrees. The user reviews phase-level outcomes, not PR-level changes.**
+Critically: the user has told us they want MINIMUM effort. That reshapes the plan. The old draft of §11 asked the user to play Conductor, review PRs daily, and manage git worktrees. That is correct for a team of humans. It is wrong here. The real plan is: **Claude plays Conductor. Claude manages worktrees. The user reviews phase-level outcomes, not PR-level changes.**
 
-Quality is non-negotiable. Speed comes from Claude's ability to work uninterrupted with parallel sub-agents, not from cutting corners on any single deliverable.
+Quality is the only target. No deadlines. Speed is a byproduct of Claude's uninterrupted parallel sub-agent work, never of cutting corners on any deliverable.
 
 ### 11.2 Execution modes — default and optional-faster
 
-Two modes. Default is the right answer unless the user explicitly asks for speed.
+Two modes. Default is the right answer unless the user explicitly asks to overlap phases.
 
 #### Default mode — "One session, many mini-agents inside"
 
@@ -1440,22 +1454,18 @@ Two modes. Default is the right answer unless the user explicitly asks for speed
 - Claude commits, pushes, tests, and hands off via the Phase Ledger.
 - You do not open multiple Claude windows. You do not touch git. You answer batched questions when asked, and you review the phase when Claude pings you it's done.
 
-**Why it's fast:**
-- A single Claude session can run for hours without interruption. That's faster than most human devs working on the product.
+**Why it's efficient:**
+- A single Claude session can run uninterrupted for long stretches.
 - Sub-agents within a session run genuinely in parallel. Research + test-writing + implementation of independent pieces all happen at once.
 
-**Expected pace:**
-- R0 (foundation): ~1 week
-- Each of Waves 2/3/4 (3 floors/phases each): ~2 weeks
-- Wave 5 (polish + launch): ~1 week
-- **Total: 10–12 weeks.** Realistic, sustainable, almost zero coordination cost on the user.
+**Trade-off:** Phases are done one after another. Longer end-to-end than overlapping mode, but zero coordination burden on the user.
 
-#### Optional faster mode — "Two sessions on one wave"
+#### Optional parallel mode — "Two sessions on one wave"
 
-Only turned on when user opts in. Useful for Wave 2 (R1+R2+R5 are independent) and Wave 3 (R3+R6+R7 are independent).
+Only turned on when user opts in. Useful for waves where phases are genuinely independent (Wave 2: R1+R2+R5; Wave 3: R3+R6+R7).
 
 **How it works for the user:**
-1. Claude tells you: *"Wave 2 has three independent phases. Want to ship them in parallel and save ~1 week?"*
+1. Claude tells you: *"This wave has independent phases. Want to ship them in parallel?"*
 2. You say yes.
 3. Claude gives you 2 copy-paste commands to run in your terminal (creates separate working copies of the project — Claude handles everything inside).
 4. You open a second Claude Code session in the other folder.
@@ -1464,18 +1474,14 @@ Only turned on when user opts in. Useful for Wave 2 (R1+R2+R5 are independent) a
 
 **Your total effort:** 3 copy-paste commands + a second Claude window for the duration of the wave.
 
-**Why it's faster:**
-- Two phases that touch different files can genuinely run in parallel without conflicts.
-- Saves roughly a week per wave where we do it.
+**Why it helps:**
+- Two phases that touch different files can run in parallel without conflicts.
+- Shortens end-to-end for that wave.
 
 **When we don't do it:**
 - R0 (foundation; must be serial)
 - Wave 5 (polish; touches everything)
-- R4 Lobby (full building integration; easier serial)
-
-**Expected pace with this mode:**
-- Turn it on for Wave 2 + Wave 3. Save ~2 weeks total.
-- **Total: 7–9 weeks.**
+- R4 Lobby (full building integration; safer serial)
 
 ### 11.3 The detail gears (for Claude sessions, not user)
 
@@ -1558,9 +1564,21 @@ Some categories conflict no matter what. Schedule those serially.
 **Conflict-prone but necessary (plan around):**
 - `CLAUDE.md`, `docs/NEXT-ROADMAP.md` — roadmap evolution during execution. Updates batched by Conductor, merged before builders rebase.
 
-### 11.7 The daily cadence (what a day looks like — not what user does)
+### 11.7 The session cadence (internal Claude loop, event-driven)
 
-Internal Claude loop. The user doesn't do daily standup — Claude runs one inside its session and writes it down. User appears at phase completion, not daily.
+No calendar cadence. Every session follows this event-driven shape:
+
+| Event | Role | Activity |
+|---|---|---|
+| Phase start | **Conductor** | Read ledger. Read prior HISTORY.ndjson. Write this session's NEXT-SESSION.md. |
+| Builder block | **Builder** | Doubt Protocol (§0 acts 1–5), then code. Uses sub-agents in parallel for research, tests, and independent code streams. |
+| PR open | **Reviewer** | Reads PR. Approves or blocks. |
+| PR merged | **Integrator / Conductor** | Merges. Runs full type-check + test suite. Drift check on ledger. |
+| Session end | Any | Append to HISTORY.ndjson. Regenerate NEXT-SESSION.md. |
+
+**Phase completion rhythm:**
+- End-of-phase: red-team pass, integration check, user review gate.
+- No fixed weekday. No standing meeting. Events drive transitions.
 
 | Slot | Role | Activity |
 |---|---|---|
@@ -1576,35 +1594,19 @@ Internal Claude loop. The user doesn't do daily standup — Claude runs one insi
 - Tue–Thu — builder days, max parallelism.
 - Friday — **Red Team session** + integration + user review.
 
-### 11.8 The compressed phase schedule
+### 11.8 The wave map
 
-Two schedules. Default = 10–12 weeks. With opt-in fan-out on Waves 2+3 = 7–9 weeks.
+No calendar. Just ordering and mode.
 
-**Default schedule (one session at a time):**
-
-| Wave | Phases | Wall-clock |
-|---|---|---|
-| Wave 1 | **R0** (Hardening) | ~1 week |
-| Wave 2 | **R1 + R2 + R5** (War Room → Penthouse → Writing Room, sequential) | ~3 weeks |
-| Wave 3 | **R3 + R6 + R7** (C-Suite → Briefing Room → Situation Room, sequential) | ~3 weeks |
-| Wave 4 | **R4 + R8 + R9** (Lobby rebuild → Rolodex → Observatory, sequential) | ~3 weeks |
-| Wave 5 | Polish, monetization, launch prep | ~1 week |
-
-**Total: 10–12 weeks.**
-
-**Opt-in faster schedule (fan-out on Waves 2 and 3):**
-
-| Wave | Phases | Mode | Wall-clock |
+| Wave | Phases | Default mode | Opt-in parallel mode |
 |---|---|---|---|
-| Wave 1 | **R0** | serial | ~1 week |
-| Wave 2 | **R1 + R2 + R5** | 2 parallel sessions | ~2 weeks |
-| Wave 3 | **R3 + R6 + R7** | 2 parallel sessions | ~2 weeks |
-| Wave 4 | **R4 + R8 + R9** | serial (Lobby rebuild is high-stakes) | ~2.5 weeks |
-| Wave 5 | Polish, monetization, launch prep | serial | ~1 week |
+| Wave 1 | **R0** (Hardening) | serial | serial only — foundation |
+| Wave 2 | **R1 + R2 + R5** (War Room → Penthouse → Writing Room) | serial | 2–3 parallel sessions |
+| Wave 3 | **R3 + R6 + R7** (C-Suite → Briefing Room → Situation Room) | serial | 2–3 parallel sessions |
+| Wave 4 | **R4 + R8 + R9** (Lobby rebuild → Rolodex → Observatory) | serial | serial recommended (Lobby is high-stakes) |
+| Wave 5 | Polish, monetization, launch prep | serial | serial only |
 
-**Total: 7–9 weeks.**
-
-These are not 40-hour weeks — they assume dense Claude sessions. Your (user's) time commitment is ~1 hour/week across either schedule.
+Each wave starts when the prior wave's red-team pass and user review clear. There is no target duration.
 
 Wave 2 ordering rationale: R1 (War Room) unlocks Job Discovery which populates data for R2 (Penthouse Morning Briefing). R5 (Writing Room) depends only on R0 (Storage + resume_base enum) and can run fully in parallel. So three-way fan-out is safe.
 
@@ -1638,7 +1640,7 @@ Per §0, here's this execution plan doubting itself.
 → *Mitigation:* Phase Ledger (§9) + NEXT-SESSION.md + the doubt artifacts. Session start protocol makes context-pickup fast.
 
 **F3 — Quality cliff from speed.** Parallelism tempts cutting tests, review, doubt.
-→ *Mitigation:* Red Team session every Friday, non-negotiable. Ledger verifier blocks "done" claims without evidence. PR review mandatory.
+→ *Mitigation:* Red Team pass after every phase, non-negotiable. Ledger verifier blocks "done" claims without evidence. PR review mandatory.
 
 **F4 — User becomes the bottleneck.** The human has to review everything; if they can't keep up, work queues.
 → *Mitigation:* Reviewer-role sessions can pre-vet PRs before user sees them. Only 1–2 PRs/day need user attention (the ones a Reviewer flagged or approved). Everything else is green-path.
@@ -1647,13 +1649,13 @@ Per §0, here's this execution plan doubting itself.
 → *Mitigation:* Don't spawn more than 3 concurrent Builder worktrees. If a phase is bigger than 15 days of work, split it into sub-phases with new R-IDs and sequence.
 
 **F6 — The Doubt Protocol becomes theater.** Sessions rubber-stamp premortems and move on.
-→ *Mitigation:* Red Team session audits doubt artifacts on Friday. If premortems are formulaic, the session is called out. Worst case: user spot-checks one premortem per wave.
+→ *Mitigation:* Red Team session audits doubt artifacts at end of phase. If premortems are formulaic, the session is called out. Worst case: user spot-checks one premortem per wave.
 
 **F7 — The "specialist" sessions become a tax.** Conductor/Integrator roles feel like overhead.
 → *Mitigation:* Collapse roles in small waves. One human-day might = Conductor + Builder + Reviewer in a single longer session. Roles are discipline, not mandatory session-splits.
 
-**F8 — Over-optimistic wall-clock.** 8-week target slips to 16 because "Claude is fast" doesn't mean "shipping is fast."
-→ *Mitigation:* Measure. Every wave, compare estimate to actual. Re-forecast honestly. If Wave 2 took 20 days instead of 15, Wave 3 assumption updates to 20.
+**F8 — Ambition outruns quality.** Phases ship with obvious defects because we treated completeness as a metric.
+→ *Mitigation:* Red-team pass is mandatory between phases. No calendar target means no temptation to cut corners to hit a date. If a phase takes longer than expected, that's information, not failure.
 
 **F9 — Claude session context limits hit mid-phase.** Session degrades, has to hand off mid-deliverable.
 → *Mitigation:* Per CLAUDE.md, sessions hand off at 70% context. Each worktree's NEXT-SESSION.md is robust enough that the next session can resume without context. Phase Ledger ensures deliverable state is preserved.
@@ -1668,35 +1670,35 @@ When a phase is particularly high-stakes or risky, go beyond Gear 2 to these con
 
 **The Double-Check.** Before merging anything that touches auth, encryption, or billing: two independent Reviewer sessions must both approve. Expensive, but zero auth/crypto/billing bug is worth it.
 
-**The Deep-Think.** For architectural decisions (Inngest vs Vercel Queues, Rive vs Lottie), spin up a dedicated Researcher session with a 2-hour brief. Produce a written comparison memo. User reviews. Then build.
+**The Deep-Think.** For architectural decisions (Inngest vs Vercel Queues, Rive vs Lottie), spin up a dedicated Researcher session with a focused brief. Produce a written comparison memo. User reviews. Then build.
 
 **The Vision Lock.** Before R4 Lobby rebuild, produce 3 Figma-grade visual comps (via Researcher + design references). User picks direction. This is the one floor where "build then iterate" costs more than "align then build" — first impressions matter too much.
 
 ### 11.12 What this plan requires from the user (THE MINIMAL SET)
 
-Honest. Aggressively minimized from the old draft. The user asked for low effort; this is the actual minimum.
+Three event-driven gates. That's the whole list.
 
-- **Phase kickoff (10 min, once per phase ≈ once every 1–2 weeks).** Claude shows the plan, asks ~3–5 batched questions. User answers. Claude goes.
-- **Phase end review (15–30 min, once per phase).** Claude pings *"R1 is done, here's the demo URL, click around."* User clicks, leaves notes, says ship it or change X.
-- **Weekly red-team check (10–20 min, optional).** Skim the auto-generated REDTEAM-*.md. Agree/disagree with its findings. If the user skips it, Claude's next session treats silence as "no objection."
-- **Decision gates (when raised).** §10 questions come up. Claude batches. User answers when convenient.
+- **Phase kickoff.** Claude shows the plan, asks ~3–5 batched questions. User answers. Claude goes.
+- **Phase end review.** Claude pings *"R1 is done, here's the demo URL, click around."* User clicks, leaves notes, says ship it or change X.
+- **Decision gates (when raised).** §10 questions come up mid-phase. Claude batches. User answers when convenient.
 
-**Total: ~1 hour per week.** If the user is busier, drop the weekly red-team review. Phase kickoff and end review are the only hard gates.
+**Optional gate:**
+- **Red-team review after each phase.** Skim the auto-generated `REDTEAM-{session_id}.md`. Agree/disagree with its findings. Silence treated as "no objection."
+
+There is no daily cadence. The user only appears at events. If the user is unavailable for a stretch, Claude waits. No phase starts without the user's kickoff answers; no phase closes without their review.
 
 **What the user does NOT do:**
-- Daily PR review (Claude plays Reviewer)
+- PR review (Claude plays Reviewer)
 - Git coordination, merges, rebases (Claude handles)
 - Standup or daily planning (Claude runs internal standup, user sees output at phase-end)
 - Write anything in the ledger (Claude writes, user approves edits at phase-end if flagged)
-
-If the user's review cadence can't keep up even at this level, default to single-session mode (no fan-out) — it needs even less user time.
 
 ### 11.13 Framework for doubting this execution plan
 
 Apply §0 to §11 itself, right now:
 
 - *Pre-mortem:* this plan fails because (1) coordination overhead eats the speedup, (2) parallel worktrees cause merge hell, (3) the human review gate doesn't scale.
-- *Plan challenges:* (1) maybe serial-and-excellent beats parallel-and-compromised, (2) maybe the "8-week" target is hubris on a spatial/character-heavy product, (3) maybe shipping features matters less than one truly-excellent floor.
+- *Plan challenges:* (1) maybe serial-and-excellent beats parallel-and-compromised, (2) maybe coordinated parallelism is hubris on a spatial/character-heavy product where integration is the hard part, (3) maybe shipping features matters less than one truly-excellent floor.
 - *Assumptions:* Claude sessions can reliably run in parallel without drift (medium confidence). Sub-agents within a session provide meaningful parallelism (high). The user can review 2–3 PRs/day (untested).
 - *Alternative:* a single-session Gear-1 model through the whole rebuild, with deep sub-agent fan-out within each session but no parallel worktrees. Simpler coordination; 40–60% of the speedup of Gear 2.
 - *Fresh eyes:* "Why are we optimizing for speed at all?" — because the user wants momentum and the product is most valuable when shipping. But: is 4 weeks vs 8 weeks really worth the coordination overhead?
