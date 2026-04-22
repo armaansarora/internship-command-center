@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:27:29.271Z
-  expires: 2026-04-22T22:27:29.267Z
+  acquired: 2026-04-22T20:34:00.958Z
+  expires: 2026-04-22T22:34:00.954Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -64,7 +64,8 @@ tasks:
       docs/SECURITY-HEADERS-REPORT.md"
   R0.6:
     title: Full user-data export endpoint (P1)
-    status: not_started
+    status: in_progress
+    started: 2026-04-22T20:34:00.958Z
     notes: "Evidence: src/app/api/account/export/route.ts,
       src/lib/account/export.ts, src/app/api/cron/export-worker/route.ts"
   R0.7:
@@ -160,3 +161,5 @@ history:
   - 2026-04-22T20:26:06.520Z: task_started R0.8
   - 2026-04-22T20:27:29.271Z: task_started R0.8
   - 2026-04-22T20:31:16.090Z: task_completed R0.8
+  - 2026-04-22T20:32:49.176Z: task_started R0.6
+  - 2026-04-22T20:34:00.958Z: task_started R0.6

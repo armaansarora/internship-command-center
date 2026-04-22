@@ -14,6 +14,16 @@ interface SettingsClientProps {
 }
 
 /**
+ * Local UI state for the Export Data flow.
+ * - "idle"     — resting; CTA visible.
+ * - "queueing" — network call in flight; CTA disabled.
+ * - "queued"   — POST returned 200; show "sealing archive" note.
+ * - "rate"     — POST returned 429; show cooldown copy.
+ * - "error"    — anything else; show generic failure note with retry.
+ */
+type ExportUiState = "idle" | "queueing" | "queued" | "rate" | "error";
+
+/**
  * SettingsClient — account management and preferences.
  *
  * Sections:
@@ -36,6 +46,25 @@ export function SettingsClient({
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
   const [billingLoading, setBillingLoading] = useState(false);
+  const [exportUi, setExportUi] = useState<ExportUiState>("idle");
+
+  const handleExport = useCallback(async () => {
+    setExportUi("queueing");
+    try {
+      const response = await fetch("/api/account/export", { method: "POST" });
+      if (response.status === 429) {
+        setExportUi("rate");
+        return;
+      }
+      if (!response.ok) {
+        setExportUi("error");
+        return;
+      }
+      setExportUi("queued");
+    } catch {
+      setExportUi("error");
+    }
+  }, []);
 
   const handleSignOut = useCallback(() => {
     const form = document.createElement("form");
@@ -468,12 +497,12 @@ export function SettingsClient({
               "0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
           }}
         >
-          {/* Data export placeholder */}
+          {/* Data export — queues a zip, emails a 7-day signed URL (R0.6) */}
           <div
-            className="flex items-center justify-between px-5 py-4"
+            className="flex items-center justify-between px-5 py-4 gap-4"
             style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.04)" }}
           >
-            <div>
+            <div className="min-w-0">
               <div
                 style={{
                   fontFamily: "'Satoshi', sans-serif",
@@ -493,20 +522,61 @@ export function SettingsClient({
                   color: "var(--text-muted)",
                 }}
               >
-                Download all your application data as JSON
+                {exportUi === "queued"
+                  ? "Sealing your archive. You'll receive an email when it's ready."
+                  : exportUi === "rate"
+                    ? "You've already requested recently; please wait a bit."
+                    : exportUi === "error"
+                      ? "Something went wrong. Try again in a moment."
+                      : "Download all your Tower data as a zip (emailed as a 7-day link)."}
               </div>
             </div>
-            <span
+            <button
+              type="button"
+              disabled={exportUi === "queueing" || exportUi === "queued"}
+              onClick={() => void handleExport()}
+              className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "10px",
-                color: "var(--text-muted)",
-                letterSpacing: "0.1em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
+                color:
+                  exportUi === "queueing" || exportUi === "queued"
+                    ? "var(--text-muted)"
+                    : "#C9A84C",
+                background:
+                  exportUi === "queueing" || exportUi === "queued"
+                    ? "rgba(255, 255, 255, 0.02)"
+                    : "rgba(201, 168, 76, 0.08)",
+                border:
+                  exportUi === "queueing" || exportUi === "queued"
+                    ? "1px solid rgba(255, 255, 255, 0.06)"
+                    : "1px solid rgba(201, 168, 76, 0.2)",
+                cursor:
+                  exportUi === "queueing"
+                    ? "wait"
+                    : exportUi === "queued"
+                      ? "default"
+                      : "pointer",
+                opacity: exportUi === "queueing" ? 0.7 : 1,
               }}
+              aria-label={
+                exportUi === "queued"
+                  ? "Export queued"
+                  : "Request data export"
+              }
             >
-              Coming Soon
-            </span>
+              {exportUi === "queueing"
+                ? "Queuing..."
+                : exportUi === "queued"
+                  ? "Queued"
+                  : exportUi === "rate"
+                    ? "Rate limited"
+                    : exportUi === "error"
+                      ? "Retry"
+                      : "Export"}
+            </button>
           </div>
 
           {/* Notification preferences placeholder */}

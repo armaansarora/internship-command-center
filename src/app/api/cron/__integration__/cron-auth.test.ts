@@ -43,6 +43,11 @@ const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
     name: "sync",
     load: () => import("@/app/api/cron/sync/route") as Promise<RouteModule>,
   },
+  {
+    name: "export-worker",
+    load: () =>
+      import("@/app/api/cron/export-worker/route") as Promise<RouteModule>,
+  },
 ];
 
 async function tryLoad(

@@ -37,6 +37,16 @@ export const userProfiles = pgTable("user_profiles", {
   googleTokens: jsonb("google_tokens"),
   preferences: jsonb("preferences"),
   stripeCustomerId: text("stripe_customer_id"),
+  // R0.6 — full user-data export queue. `idle` is the resting state;
+  // POST /api/account/export flips to `queued`; the cron worker transitions
+  // through `running` → `delivered` (or `failed`). `dataExportRequestedAt`
+  // is stamped at queue time; `dataExportLastDeliveredAt` is stamped after
+  // a successful email hand-off.
+  dataExportStatus: text("data_export_status", {
+    enum: ["idle", "queued", "running", "delivered", "failed"],
+  }).default("idle"),
+  dataExportRequestedAt: timestamp("data_export_requested_at", { withTimezone: true }),
+  dataExportLastDeliveredAt: timestamp("data_export_last_delivered_at", { withTimezone: true }),
   subscriptionTier: text("subscription_tier", {
     enum: ["free", "pro", "team"],
   }).default("free"),
