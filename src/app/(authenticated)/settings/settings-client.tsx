@@ -365,7 +365,84 @@ export function SettingsClient({
         />
       </section>
 
-      {/* ── Section 3: Account Actions ── */}
+      {/* ── Section 3: Security ── */}
+      <section className="w-full" aria-labelledby="section-security">
+        <h2
+          id="section-security"
+          className="mb-4"
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            color: "var(--gold)",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+          }}
+        >
+          Security
+        </h2>
+        <div
+          className="rounded-xl overflow-hidden"
+          style={{
+            background: "rgba(10, 12, 25, 0.65)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid rgba(201, 168, 76, 0.1)",
+            boxShadow:
+              "0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+          }}
+        >
+          <div
+            className="flex items-center justify-between px-5 py-4"
+          >
+            <div className="pr-4">
+              <div
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                  lineHeight: 1.3,
+                }}
+              >
+                Two-factor authentication
+              </div>
+              <div
+                className="mt-0.5"
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "13px",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Arriving with the Security Office in a future wave.
+              </div>
+            </div>
+            <button
+              type="button"
+              aria-disabled="true"
+              tabIndex={-1}
+              aria-label="Two-factor authentication — not yet available"
+              className="rounded-lg px-3.5 py-1.5 shrink-0"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "10px",
+                color: "var(--text-muted)",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                background: "rgba(255, 255, 255, 0.02)",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
+                cursor: "not-allowed",
+                opacity: 0.55,
+                pointerEvents: "none",
+              }}
+            >
+              Unavailable
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 4: Account Actions ── */}
       <section className="w-full" aria-labelledby="section-account">
         <h2
           id="section-account"

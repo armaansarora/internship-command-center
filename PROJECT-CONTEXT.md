@@ -219,6 +219,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 | `docs/NEXT-ROADMAP.md` | **Audience.** Any Claude session working on The Tower. And Armaan, once per phas | ~950 |
 | `docs/POST-HARDENING-MANUAL-STEPS.md` | Everything in this file is **something a computer can't do for you**. The code | ~270 |
 | `docs/SCHEMA-DRAFT.md` | 16-table Postgres schema: RLS, pgvector HNSW indexes, post-push SQL triggers | ~480 |
+| `docs/SECRETS-ROTATION.md` | Canonical list: `src/lib/env.ts`. Every secret the Tower runs on is listed below | ~200 |
 | `docs/SECURITY-HEADERS-REPORT.md` | **Date:** 2026-04-22 | ~40 |
 | `docs/TECH-BRIEF.md` | Research synthesis + Google OAuth setup, SDK patterns, gotchas | ~430 |
 | `docs/VISION-SPEC.md` | Locked spatial UI spec: building, floors, characters, cursor, day/night, design tokens | ~260 |

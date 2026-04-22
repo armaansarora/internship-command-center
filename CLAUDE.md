@@ -115,9 +115,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/crud/ApplicationModal.tsx` (761 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
+- `src/app/(authenticated)/settings/settings-client.tsx` (643 LOC) — SettingsClient — account management and preferences.
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
 - `src/components/floor-4/SituationRoomClient.tsx` (586 LOC)
-- `src/app/(authenticated)/settings/settings-client.tsx` (566 LOC) — SettingsClient — account management and preferences.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (539 LOC)
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (526 LOC)

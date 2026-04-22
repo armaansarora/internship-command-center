@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:08:46.374Z
-  expires: 2026-04-22T22:08:46.369Z
+  acquired: 2026-04-22T20:09:32.365Z
+  expires: 2026-04-22T22:09:32.360Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -92,7 +92,10 @@ tasks:
       scripts/ledger/verify.test.ts, .husky/pre-commit"
   R0.11:
     title: MFA UI stub + SECRETS-ROTATION runbook (P2)
-    status: not_started
+    status: complete
+    started: 2026-04-22T20:09:32.365Z
+    completed: 2026-04-22T20:13:32.148Z
+    commit: 618e6ce
     notes: "Evidence: Settings > Security stub, docs/SECRETS-ROTATION.md"
   R0.12:
     title: Stripe audit_logs wiring for subscription lifecycle (P1)
@@ -137,3 +140,5 @@ history:
   - 2026-04-22T20:07:09.610Z: task_started R0.5
   - 2026-04-22T20:08:46.374Z: task_started R0.5
   - 2026-04-22T20:09:01.085Z: task_completed R0.5
+  - 2026-04-22T20:09:32.365Z: task_started R0.11
+  - 2026-04-22T20:13:32.148Z: task_completed R0.11
