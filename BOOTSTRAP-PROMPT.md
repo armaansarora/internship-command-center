@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 11:27 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 11:28 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `eebea9b`)
+- **Branch:** `main` (commit `37dc806`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,167 across 265 source files
 - **Build:** FAILING — 2 TS errors
@@ -43,7 +43,7 @@ scripts/tower/test-helpers.ts(14,3): error TS2322: Type 'ExecaReturnValue<string
 ## Changes Since Last Bootstrap
 
 ```
-eebea9b feat(tower): lock manager + lock/unlock commands
+37dc806 feat(tower): undo cache (LIFO, capped at 10)
 ```
 
 ## Acceptance Criteria — Progress
@@ -97,7 +97,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `eebea9b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `37dc806`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
