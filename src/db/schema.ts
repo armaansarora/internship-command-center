@@ -339,6 +339,34 @@ export const agentLogs = pgTable("agent_logs", {
 ]);
 
 // ===========================================================================
+// 10b. AUDIT LOGS — security-sensitive events (distinct from agent_logs
+// cost telemetry). Reads gated to the owning user; writes are service-role
+// only (no INSERT/UPDATE/DELETE policy). The `event_type` CHECK constraint
+// and the `ip_address` column's inet cast are applied via hand-edit in the
+// generated migration — see drizzle migration 0007_audit_logs.sql.
+// ===========================================================================
+export const auditLogs = pgTable("audit_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(),
+  resourceType: text("resource_type"),
+  resourceId: text("resource_id"),
+  metadata: jsonb("metadata").default(sql`'{}'::jsonb`),
+  ipAddress: text("ip_address"), // text here; altered to inet in hand-edited migration
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  pgPolicy("audit_logs_self_read", {
+    for: "select",
+    to: "authenticated",
+    using: sql`auth.uid() = user_id`,
+  }),
+  // No INSERT/UPDATE/DELETE policy — writes are service-role only.
+  index("idx_audit_logs_user_created").on(table.userId, table.createdAt),
+  index("idx_audit_logs_event_type").on(table.eventType, table.createdAt),
+]);
+
+// ===========================================================================
 // 11. AGENT MEMORY (pgvector)
 // ===========================================================================
 export const agentMemory = pgTable("agent_memory", {
@@ -488,6 +516,8 @@ export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
 export type AgentLog = typeof agentLogs.$inferSelect;
 export type NewAgentLog = typeof agentLogs.$inferInsert;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type NewAuditLog = typeof auditLogs.$inferInsert;
 export type AgentMemoryEntry = typeof agentMemory.$inferSelect;
 export type NewAgentMemoryEntry = typeof agentMemory.$inferInsert;
 export type DailySnapshot = typeof dailySnapshots.$inferSelect;

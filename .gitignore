@@ -50,9 +50,11 @@ migration-*.sql
 .vercel-status.json
 
 # audit reports — contain detailed vulnerability findings; keep local-only for public repo
-audit/
+# Root-anchored so src/lib/audit/ (the runtime security-event helper) is tracked.
+/audit/
 
 # editor configs
 .vscode/
 
 .tower/.cache
+.tower/lock.yml

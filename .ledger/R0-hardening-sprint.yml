@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T19:30:58.712Z
-  expires: 2026-04-22T21:30:58.708Z
+  acquired: 2026-04-22T19:42:01.692Z
+  expires: 2026-04-22T21:42:01.687Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -30,9 +30,12 @@ tasks:
       tests/e2e/session-persistence.spec.ts"
   R0.2:
     title: audit_logs table + logSecurityEvent helper (P1)
-    status: not_started
-    notes: "Evidence: src/lib/audit/log.ts, src/lib/audit/log.test.ts, migration for
-      audit_logs"
+    status: complete
+    started: 2026-04-22T19:42:01.692Z
+    completed: 2026-04-22T19:52:42.832Z
+    commit: c53cbc5
+    notes: "Evidence: src/lib/audit/log.ts, src/lib/audit/log.test.ts,
+      src/db/migrations/0007_audit_logs.sql"
   R0.3:
     title: Encryption hardening — HKDF per-user keys + tests (P0)
     status: not_started
@@ -109,3 +112,5 @@ decisions:
 history:
   - 2026-04-22T19:30:58.712Z: task_started R0.10
   - 2026-04-22T19:41:07.559Z: task_completed R0.10
+  - 2026-04-22T19:42:01.692Z: task_started R0.2
+  - 2026-04-22T19:52:42.832Z: task_completed R0.2
