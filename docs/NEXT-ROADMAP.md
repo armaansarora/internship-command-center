@@ -2,7 +2,7 @@
 ## Design Overhaul + Autonomous Operation Phase
 
 **Status:** Proposal — awaiting user sign-off on §7 before first rebuild phase begins.
-**Scope:** Every non-Lobby floor redesigned from the ground up. Every floor also advances the North Star (user describes want → Tower autonomously discovers / tracks / tailors / applies / preps / coaches). Lobby stays as-is (the design bar).
+**Scope:** Every floor redesigned from the ground up — including the Lobby. Every floor also advances the North Star (user describes want → Tower autonomously discovers / tracks / tailors / applies / preps / coaches). The **bar** is the target aesthetic (luxury game UI + Bloomberg Terminal + Apple spatial design) rendered at Awwwards-winner quality. The current Lobby is the strongest *reference point* we have today for motion vocabulary and primitives, but it is a starting point, not a finish line.
 **Author:** Autonomous planning session, 2026-04-21.
 **Naming:** Original master plan used Phase 0–6 (all complete). This doc uses **Rebuild 1–7** (R1–R7) to avoid collision.
 
@@ -10,9 +10,9 @@
 
 ## §1 — State of the Union
 
-Ten floors are built and shipping; every floor beyond the Lobby reads as a placeholder that proves the plumbing works but not the promise.
+Ten floors are built and shipping; every one reads as a placeholder that proves the plumbing works but not the promise. The Lobby is the closest any floor gets to feeling hand-crafted, but it too needs an overhaul to hit the target aesthetic — it is a *reference*, not the destination.
 
-**Lobby (L)** is the bar. GSAP timeline entrance, cursor-following spotlight, 30-particle dust field, frosted-noise glass with 3D tilt, gold shimmer sweeps on directory rows, dual-ring radar pulses, cinematic stagger of content. It is the one room that feels hand-crafted.
+**Lobby (L)** — Strongest current floor. GSAP timeline entrance, cursor-following spotlight, 30-particle dust field, frosted-noise glass with 3D tilt, gold shimmer sweeps on directory rows, dual-ring radar pulses, cinematic stagger. But it's still a reception-hall-with-a-sign-in — no Concierge character, no first-run onboarding ritual, no cinematic exterior approach, no spatial arrival. Gap to target aesthetic: M. Still overhauled in this plan, just later and building on the primitives we mature across R1–R3.
 
 **Penthouse (PH)** — Primitives are strong (`GlassPanel`, `StatCard`, `PipelineNodes`, `QuickActionCard`, `PulseRing`) but the layout is a SaaS dashboard with a gold tint. Quick Action cards display "Phase 1/2/3" badges — a tell that the product is still showing scaffolding. No character presence. No CEO at the window. Gap: M.
 
@@ -63,7 +63,7 @@ Ten floors are built and shipping; every floor beyond the Lobby reads as a place
 
 ## §3 — Design Language Proposal
 
-The overhaul targets a coherent house style: **luxury game UI + Bloomberg Terminal + Apple spatial design.** Every floor must read as the same building — but each room must be unmistakably its own place. Generic component-library smell is the explicit enemy.
+The overhaul targets a coherent house style: **luxury game UI + Bloomberg Terminal + Apple spatial design.** Every floor must read as the same building — but each room must be unmistakably its own place. Generic component-library smell is the explicit enemy. The current Lobby is the strongest reference we have today, but even it is below bar — primitives extracted from it are starting material, not finished product.
 
 ### Shared primitives (codify once, reuse everywhere)
 
@@ -93,7 +93,7 @@ Tools chosen per floor; not one-size-fits-all. Each choice is justified against 
 
 | Floor | Mood | Motion vocabulary | Tool pick | Why this tool |
 |---|---|---|---|---|
-| **L Lobby** | Luxury reception, gold-hour dusk | Cinematic reveal, spotlight follows, dust motes | **GSAP + CSS** (current — keep) | Already shipping. No touch. |
+| **L Lobby** | Cinematic arrival — exterior approach, revolving door, concierge greeting | Camera pull through skyline into reception, dust motes, first-run onboarding | **GSAP** (arrival timeline) + **R3F** (exterior building approach, very short) + **Rive** (Concierge) + existing CSS primitives | Current Lobby is a static reception; target is a scripted *arrival scene* for new users and a quiet welcome-back for returning. Small R3F scene justified by signature arrival moment. |
 | **PH Penthouse** | Golden-hour boardroom, panoramic calm | Data materializes on glass (Morning Briefing ritual) | **GSAP timeline + Motion layout** + optional **Rive** for CEO idle | GSAP owns the morning briefing scene (precise multi-element choreography); Motion for declarative layout crossfades on stat updates; Rive gives designer-driven CEO poses. |
 | **7 War Room** | Bloomberg Terminal tactical | Kanban drag with Motion layout, live ticker data stream, blueprint flow lines | **Motion** (Kanban/drag) + **Canvas2D** (flow lines) + **GSAP** (entrance) + **Rive** (CRO) | Motion's layout animations are the gold standard for Kanban; Canvas2D owns the custom war-table flow visualization (lines pulsing between stages as applications move); Rive for CRO at whiteboard. |
 | **6 Rolodex Lounge** | Warm library, vintage executive lounge | Physical rolodex spin, card flip on select, warmth as color temperature | **R3F** (3D rolodex centerpiece) + **Motion** (contact grid) + **GSAP** (entrance) + **Rive** (CNO+CIO) | The rolodex *must* be physical — 2D flip is a cop-out. R3F scene = ~500 triangles, trivial. Motion for the grid. |
@@ -111,9 +111,9 @@ Tools chosen per floor; not one-size-fits-all. Each choice is justified against 
 - **Lottie** — Rive beats Lottie in 2026 (smaller runtime, state machines, designer-first). The only Lottie case we'd accept is an existing asset pack we already own. We don't, so default Rive.
 - **Generic shadcn/ui primitives** — banned on floors. Each floor's UI must be custom or Tower-primitive-derived. shadcn stays acceptable for admin pages (settings, Stripe portal, auth error).
 
-### The test for "Lobby-quality"
+### The test for "at bar"
 
-A floor is at bar when a new user, spun up cold, can point at it and say **one specific thing that room does that nothing else does.** Observatory today fails; its Orrery would pass. War Room today has particles; its live data-stream table would pass. Each Per-Floor Phase Plan in §5 names the floor's one specific thing — its signature.
+A floor is at bar when a new user, spun up cold, can point at it and say **one specific thing that room does that nothing else does** — AND name a comparable SaaS / game UI moment it reminds them of (Linear's command menu, Arc's spaces, Raycast's launcher, a AAA game's home screen). Observatory today fails; its Orrery would pass. War Room today has particles; its live flow-line war-table would pass. Current Lobby fails too — it's a *reception hall* but no new user would describe it as "a signature moment." Each Per-Floor Phase Plan in §5 names the floor's one specific thing — its signature — including the Lobby's arrival scene.
 
 ---
 
@@ -121,16 +121,19 @@ A floor is at bar when a new user, spun up cold, can point at it and say **one s
 
 ### The sequence
 
-1. **R1 — War Room (Floor 7)**  *(start here)*
+1. **R1 — War Room (Floor 7)**  *(start here — autonomy heartbeat)*
 2. **R2 — Penthouse (PH)**  *(Morning Briefing ritual)*
 3. **R3 — C-Suite (Floor 1)**  *(orchestration upgrade, parallel dispatch)*
-4. **R4 — Writing Room (Floor 5)**  *(resume tailoring + cover letter refinement loop)*
-5. **R5 — Briefing Room (Floor 3)**  *(live mock interview + drill)*
-6. **R6 — Situation Room (Floor 4)**  *(auto-approved outreach + undo window)*
-7. **R7 — Rolodex Lounge (Floor 6)**  *(warm networking + CIO research docks)*
-8. **R8 — Observatory (Floor 2)**  *(the Orrery + analytics polish)*
+4. **R4 — Lobby (L)**  *(cinematic arrival + Concierge onboarding — first-impression layer for new users arriving now that the building is autonomous)*
+5. **R5 — Writing Room (Floor 5)**  *(resume tailoring + cover letter refinement loop)*
+6. **R6 — Briefing Room (Floor 3)**  *(live mock interview + drill)*
+7. **R7 — Situation Room (Floor 4)**  *(auto-approved outreach + undo window)*
+8. **R8 — Rolodex Lounge (Floor 6)**  *(warm networking + CIO research docks)*
+9. **R9 — Observatory (Floor 2)**  *(the Orrery + analytics polish)*
 
 Observatory intentionally last: it has the highest design lift (XL) and the lowest North-Star payoff (analytics summarize what already happened — nothing depends on it). Better to polish it when the rest of the building is autonomous and the user actually has data worth contemplating.
+
+Lobby positioned at R4 (not R1, not last): (a) the current Lobby is the least-broken floor, so delaying its rebuild costs the least; (b) we want mature primitives (cinematic entrance, Rive, R3F patterns, Concierge character) proven on R1–R3 before reinventing the entrance; (c) by R3 the building is genuinely autonomous, so the new Lobby can *show* that autonomy to first-time users via the Concierge onboarding (§6.6); (d) shipping it mid-sequence gives us a clean "new marketing-ready entrance" moment coinciding with any public launch push.
 
 ### Why War Room first
 
@@ -268,7 +271,43 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 ---
 
-### R4 — Writing Room (Floor 5)
+### R4 — Lobby (L)
+
+**Vision.** The front door of the Tower. The moment where a first-time user *decides* whether this building is real. Current Lobby is a dark reception hall with a sign-in card; target is a **cinematic arrival scene** for new users and a quiet, respectful welcome-back for returning. Pay attention to *who is arriving* — existing auth cookie = low-ceremony fast lane; no auth = full scripted arrival. By R4 the rest of the building is autonomous, so the Lobby can promise autonomy truthfully.
+
+**Design tooling.**
+- **R3F** — A short (~6 second) exterior approach scene on first-ever visit only: camera flies through the skyline, passes the Tower's crown, dollies down past lit windows into the revolving door. 3D model kept cheap (maybe 5–10k tris total).
+- **GSAP** — Arrival choreography timeline (exterior → interior transition → Concierge greeting → sign-in card materializing).
+- **Rive** — **The Concierge** character (new). Warm professional, behind a subtle desk. State machine: idle → greeting → listening → directing → fading-out. 4-5 poses minimum.
+- **CSS / GSAP primitives** — keep existing dust particles, spotlight, directory — but restage them with proper depth (foreground / midground / background layers) instead of flat overlay.
+- **Web Audio** — distant ambient lobby tone (piped classical, footsteps, faint city hum from the door). Muted by default.
+
+**Signature interactions.**
+1. **The Arrival.** First visit ever: camera starts above the NYC skyline, spots the Tower, approaches it at ~30mph, descends past lit office windows (each randomly animated), decelerates into the revolving door, passes through, and resolves onto the lobby interior. Skippable after 1s with spacebar. Never plays again for returning user.
+2. **The Concierge greeting.** First visit: after arrival, Concierge is standing behind the desk. *"Welcome. I'm [name]. Tell me what you're looking for."* User types a freeform description of the job search. Concierge (Rive state change) nods, types into a terminal-style intake form visible to user, fills a structured `user_profiles.preferences` record. "While you complete sign-in, I'll brief the building." Elevator ding; floor indicator lights up.
+3. **Fast lane for returning users.** Existing session cookie → skip the arrival scene, Concierge replaced with a dim silhouette that says *"Welcome back, [name]."*, elevator doors are already open, one click to Penthouse. Zero ceremony, low latency.
+4. **The Directory as a living map.** Current directory listing becomes a *building cross-section* on the right — an illustrated vertical slice of the Tower with each floor's room visible as a tiny diorama. Hovering a floor lights it and whispers its current status ("WAR ROOM — 23 active ops"). New unlocks animate in when a milestone is hit during onboarding.
+5. **Handoff to Morning Briefing.** If this is the user's first-ever session and Job Discovery (R1) has returned results during the onboarding conversation, the elevator auto-carries them to Penthouse where the CEO is already standing at the window with a briefing ready — their first Morning Briefing is *about the jobs the building already found them.* Wall-to-wall autonomous experience from first click.
+
+**Functionality upgrades toward North Star.**
+- **Target profile onboarding** — the Concierge conversation produces a structured profile (role targets, sectors, companies, locations, salary band, base resume if uploaded, preferred tones) and persists it to `user_profiles.preferences`. This is the input every agent has been waiting for.
+- **Base resume upload** — drag a PDF into the Concierge chat → AI parses into structured markdown → saved as `documents.type = 'resume_base'`. Powers all R5 resume tailoring.
+- **First-run Job Discovery trigger** — onboarding completion fires an immediate Inngest job that runs CRO's Job Discovery against the new profile. Results populate before the user reaches the Penthouse.
+- **First-run Morning Briefing** — a one-time override that generates a Morning Briefing scene based on the just-discovered jobs (not overnight data), giving the new user a complete autonomy preview in their first 2 minutes.
+- **Progress-aware building directory** — the cross-section illustration reads from `progression_milestones` and visually locks / unlocks floors. Matches the existing progression system, just in-world.
+
+**Effort:** **L** (R3F exterior is the heaviest new element; the arrival choreography is precise but contained).
+
+**Success criteria.**
+- New-user first-click-to-first-Morning-Briefing <3 minutes.
+- Arrival scene plays at 60fps on MacBook Air M1 baseline.
+- Returning users never see the arrival scene again — strict one-time-per-account.
+- Concierge captures a usable target profile from 95% of test conversations.
+- Directory cross-section's floor states match actual backend progression milestones with zero drift.
+
+---
+
+### R5 — Writing Room (Floor 5)
 
 **Vision.** The quiet floor. A single desk lamp. Paper drafts stacked. A typewriter sculpture on the side. When the user drops a job description, the room goes quiet — CMO picks up a pen — and the user watches a cover letter compose itself in real time as if the character is writing it. When CMO finishes, the paper slides out as a PDF preview with that *Remotion-rendered* cinematic scroll-reveal quality you can't get from HTML.
 
@@ -304,7 +343,7 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 ---
 
-### R5 — Briefing Room (Floor 3)
+### R6 — Briefing Room (Floor 3)
 
 **Vision.** The whiteboard room. CPO drills the user with mock interview questions. User answers into a text box (or voice, if enabled). The whiteboard fills with the STAR framework scaffolding live as the user speaks. After the drill, everything on the whiteboard auto-snapshots into a debrief document and slides off into the filing cabinet.
 
@@ -338,7 +377,7 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 ---
 
-### R6 — Situation Room (Floor 4)
+### R7 — Situation Room (Floor 4)
 
 **Vision.** Mission control when something is on fire — except the control is graceful. Alerts float on a live map of outreach flight paths. COO (Dylan Shorts) stands at the desk coordinating. Every stale follow-up has a drafted response ready to approve with a 2-hour undo window. Pressing "approve all" does *not* feel reckless — it feels like a COO running the room.
 
@@ -372,7 +411,7 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 ---
 
-### R7 — Rolodex Lounge (Floor 6)
+### R8 — Rolodex Lounge (Floor 6)
 
 **Vision.** A warm private lounge. A physical rotating rolodex on a mahogany side table. CNO and CIO share the room with a clear visual divide — CNO's side is warm leather chairs + contact cards, CIO's side is a glass wall of research dossiers. User can sit down on either side.
 
@@ -406,7 +445,7 @@ Effort scale: S (1–3 days) · M (4–7 days) · L (8–14 days) · XL (15+ day
 
 ---
 
-### R8 — Observatory (Floor 2)
+### R9 — Observatory (Floor 2)
 
 **Vision.** This is the *contemplation* floor. Panoramic. Cool blue. You come here to see patterns, not take action. The centerpiece is a 3D **Orrery** — the user's entire job-search pipeline rendered as celestial bodies orbiting a central sun. CFO stands at a panoramic window with a chart projected onto it.
 
@@ -478,9 +517,11 @@ Layer on top of day/night: **quarterly seasons** that *very subtly* shift the sk
 *Why:* Long-term emotional investment. A user who's been in the Tower across seasons has *seen* their building change. Cheap (CSS var overrides in `DayNightProvider`) but creates a one-year narrative arc.
 *Ties to North Star:* Retention = autonomy's multiplier.
 
-### 6.6 The Concierge Onboarding (Lobby evolution)
+### 6.6 The Concierge Onboarding
 
-The Lobby is already perfect for returning users. For new users, the Concierge character (`CNO`? new character?) walks them through the first target-profile setup inline — *"Welcome. Tell me what you're looking for, and I'll brief the building."* Conversational onboarding, not a form. After: elevator auto-takes them to PH, where the first-ever Morning Briefing already has initial discovered jobs.
+*Note: promoted from "creative addition" into the R4 Lobby rebuild above. Kept here for cross-reference.*
+
+The Concierge is a new character (not a repurposed department head) living exclusively in the Lobby. Role: greeter + onboarding guide + first-contact agent. Walks new users through a freeform target-profile conversation, parses it into structured preferences, uploads their base resume, triggers first-run Job Discovery, and hands them off to the CEO's first Morning Briefing.
 
 *Why:* The first 5 minutes determine retention. Converting "sign up" → "your Tower found 3 jobs while you were reading this" is magic.
 *Ties to North Star:* #1 Job Discovery becomes the first interaction, not the fifth.
@@ -620,7 +661,7 @@ One R0 prep task before R1: extract these into primitives and refactor Lobby + P
 
 - Rewriting `PersistentWorld` / skyline engine. They work, they're good, they're the right pattern.
 - Migrating off Drizzle schema-only + Supabase REST. That architecture is correct for our deploy constraints.
-- Redesigning the Lobby. It is the bar.
+- Keeping the Lobby as-is. It is *not* the final bar — it's the strongest current reference, and it gets its own rebuild at R4.
 - Adopting Tailwind v4. Stay on v3 JS config per `CLAUDE.md`.
 - Shipping custom cursor again. Standard cursor with `:hover` states is the ruling per BUG-007.
 - Adding mouse-driven parallax to backgrounds. Autonomous Ken Burns-style drift is the ruling.

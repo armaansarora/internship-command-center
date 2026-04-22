@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 8:32 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Tuesday, April 21, 2026 at 8:55 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `0d0ca7d`)
+- **Branch:** `main` (commit `4f4a196`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,167 across 265 source files
 - **Build:** Clean (zero TS errors)
@@ -37,7 +37,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-0d0ca7d fix(world): clamp body + main to viewport width, eliminate nav slide
+4f4a196 docs: add NEXT-ROADMAP.md — design overhaul + autonomy phase plan
 ```
 
 ## Acceptance Criteria — Progress
@@ -91,7 +91,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `0d0ca7d`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `4f4a196`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -535,13 +535,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 584 | 5,924 |
+| `BOOTSTRAP-PROMPT.md` | 584 | 5,926 |
 | `PROJECT-CONTEXT.md` | 279 | 5,201 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 315 | 6,531 |
-| **Total** | **1545** | **24,828** |
+| **Total** | **1545** | **24,830** |
 
-> ⚠️ Reading all recommended files consumes ~24,828 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~24,830 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
