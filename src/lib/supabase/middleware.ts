@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { log } from "@/lib/logger";
 
 /**
  * Read a required env var with a readable error if it's missing. Replaces the
@@ -20,6 +21,10 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+
+  // Visibility: prove the middleware runs on each request in Vercel logs.
+  // Path only — never log the full request (privacy + log volume).
+  log.debug("middleware.updateSession", { path: request.nextUrl.pathname });
 
   const supabase = createServerClient(
     requireEnv("NEXT_PUBLIC_SUPABASE_URL"),

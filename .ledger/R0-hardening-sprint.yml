@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T19:54:47.382Z
-  expires: 2026-04-22T21:54:47.378Z
+  acquired: 2026-04-22T20:01:27.465Z
+  expires: 2026-04-22T22:01:27.461Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -25,7 +25,10 @@ acceptance:
 tasks:
   R0.1:
     title: Session persistence — root middleware + Playwright E2E (P0)
-    status: not_started
+    status: complete
+    started: 2026-04-22T20:01:27.465Z
+    completed: 2026-04-22T20:02:50.887Z
+    commit: 76c9e3e
     notes: "Evidence: src/middleware.ts, playwright.config.ts,
       tests/e2e/session-persistence.spec.ts"
   R0.2:
@@ -119,3 +122,6 @@ history:
   - 2026-04-22T19:52:42.832Z: task_completed R0.2
   - 2026-04-22T19:54:47.382Z: task_started R0.3
   - 2026-04-22T19:59:12.802Z: task_completed R0.3
+  - 2026-04-22T19:59:59.875Z: task_started R0.1
+  - 2026-04-22T20:01:27.465Z: task_started R0.1
+  - 2026-04-22T20:02:50.887Z: task_completed R0.1

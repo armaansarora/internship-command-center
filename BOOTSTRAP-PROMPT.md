@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 3:59 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:03 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `6377258`)
+- **Branch:** `main` (commit `76c9e3e`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 53,625 across 270 source files
+- **Total LOC:** 53,646 across 271 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-6377258 [R0/0.3] feat: per-user HKDF-derived AES-GCM keys + lazy v2 migration
+76c9e3e [R0/0.1] fix: session persistence — root middleware + Playwright E2E
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6377258`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `76c9e3e`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (270 files, 53,625 LOC)
+## Source Tree (271 files, 53,646 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -160,7 +160,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cron/briefing` | 271 |
 | `src/lib/agents` | 269 |
 | `src/app/api/cron/sync` | 213 |
-| `src/lib/supabase` | 204 |
+| `src/lib/supabase` | 209 |
 | `src/lib/calendar` | 203 |
 | `src/app/(authenticated)/writing-room` | 201 |
 | `src/lib/audit` | 185 |
@@ -179,6 +179,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
 | `src/lib/crypto` | 50 |
+| `src` | 36 |
 | `src/app/api/progression` | 35 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/(authenticated)/c-suite` | 33 |
@@ -187,7 +188,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/constants` | 31 |
 | `src/app/api/auth/callback` | 30 |
 | `src/app/api/stripe/portal` | 27 |
-| `src` | 20 |
 | `src/app/api/gmail/sync` | 19 |
 | `src/app/api/calendar/sync` | 17 |
 | `src/app/api/cmo` | 16 |
@@ -462,6 +462,7 @@ src/lib/utils/google-drive-export.ts
 src/lib/utils/lex-order.ts
 src/lib/validators/application.test.ts
 src/lib/validators/application.ts
+src/middleware.ts
 src/proxy.ts
 src/styles/floor-1.css
 src/styles/floor-2.css
@@ -479,7 +480,7 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>41 packages</summary>
+<summary>42 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
@@ -487,6 +488,7 @@ src/types/ui.ts
 @dnd-kit/accessibility: ^3.1.1
 @dnd-kit/core: ^6.3.1
 @dnd-kit/sortable: ^10.0.0
+@playwright/test: ^1.59.1
 @sentry/nextjs: ^10.45.0
 @supabase/ssr: ^0.9.0
 @supabase/supabase-js: ^2.99.2
@@ -539,13 +541,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 588 | 5,930 |
+| `BOOTSTRAP-PROMPT.md` | 590 | 5,946 |
 | `PROJECT-CONTEXT.md` | 279 | 5,201 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 416 | 8,405 |
-| **Total** | **1650** | **26,708** |
+| **Total** | **1652** | **26,724** |
 
-> ⚠️ Reading all recommended files consumes ~26,708 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,724 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
