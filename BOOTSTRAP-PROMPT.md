@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:06 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:09 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `d4cbfcb`)
+- **Branch:** `main` (commit `0e3ce5e`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 53,857 across 272 source files
 - **Build:** Clean (zero TS errors)
@@ -28,7 +28,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-d4cbfcb [R0/0.4] test: verify every cron route rejects without CRON_SECRET
+0e3ce5e [R0/0.5] chore: security-headers scanner + R0 report
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `d4cbfcb`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `0e3ce5e`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -544,12 +544,12 @@ zod: ^4.3.6
 | File | Lines | ~Tokens |
 |---|---|---|
 | `BOOTSTRAP-PROMPT.md` | 592 | 5,973 |
-| `PROJECT-CONTEXT.md` | 279 | 5,201 |
+| `PROJECT-CONTEXT.md` | 280 | 5,220 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 416 | 8,405 |
-| **Total** | **1654** | **26,751** |
+| **Total** | **1655** | **26,770** |
 
-> ⚠️ Reading all recommended files consumes ~26,751 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,770 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

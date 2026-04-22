@@ -9,8 +9,8 @@ started: 2026-04-22T19:30:58.712Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-22T20:04:46.939Z
-  expires: 2026-04-22T22:04:46.935Z
+  acquired: 2026-04-22T20:08:46.374Z
+  expires: 2026-04-22T22:08:46.369Z
 acceptance:
   criteria:
     - Session survives laptop-lid close + reopen. SELECT google_tokens returns
@@ -56,7 +56,10 @@ tasks:
     notes: "Evidence: src/app/api/cron/__integration__/cron-auth.test.ts"
   R0.5:
     title: Security headers scanner + R0 report (P1)
-    status: not_started
+    status: complete
+    started: 2026-04-22T20:08:46.374Z
+    completed: 2026-04-22T20:09:01.085Z
+    commit: 0e3ce5e
     notes: "Evidence: scripts/check-security-headers.ts,
       docs/SECURITY-HEADERS-REPORT.md"
   R0.6:
@@ -131,3 +134,6 @@ history:
   - 2026-04-22T20:03:34.209Z: task_started R0.4
   - 2026-04-22T20:04:46.939Z: task_started R0.4
   - 2026-04-22T20:06:23.808Z: task_completed R0.4
+  - 2026-04-22T20:07:09.610Z: task_started R0.5
+  - 2026-04-22T20:08:46.374Z: task_started R0.5
+  - 2026-04-22T20:09:01.085Z: task_completed R0.5
