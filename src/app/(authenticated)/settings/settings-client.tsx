@@ -11,6 +11,11 @@ interface SettingsClientProps {
   provider: string;
   subscriptionTier: SubscriptionTier;
   appsUsed: number;
+  /**
+   * R0.7 — `user_profiles.deleted_at` as ISO string (or null). Drives
+   * whether the Data section shows "Delete Account" or "Cancel Deletion".
+   */
+  deletedAt: string | null;
 }
 
 /**
@@ -22,6 +27,32 @@ interface SettingsClientProps {
  * - "error"    — anything else; show generic failure note with retry.
  */
 type ExportUiState = "idle" | "queueing" | "queued" | "rate" | "error";
+
+/**
+ * Local UI state for the Delete Account flow.
+ * - "idle"       — resting; Delete Account CTA visible.
+ * - "confirming" — modal open; user retyping email.
+ * - "deleting"   — POST in flight.
+ * - "scheduled"  — POST returned 200; show scheduled-deletion banner.
+ * - "error"      — POST failed; inline error in modal.
+ */
+type DeleteUiState = "idle" | "confirming" | "deleting" | "scheduled" | "error";
+
+/** Local UI state for the Cancel Deletion flow. */
+type CancelUiState = "idle" | "cancelling" | "cancelled" | "error";
+
+const GRACE_WINDOW_DAYS = 30;
+
+function formatDeletionDate(deletedAtIso: string): string {
+  const scheduled = new Date(
+    new Date(deletedAtIso).getTime() + GRACE_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  );
+  return scheduled.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 
 /**
  * SettingsClient — account management and preferences.
@@ -41,12 +72,22 @@ export function SettingsClient({
   provider,
   subscriptionTier,
   appsUsed,
+  deletedAt,
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
   const [billingLoading, setBillingLoading] = useState(false);
   const [exportUi, setExportUi] = useState<ExportUiState>("idle");
+  const [deleteUi, setDeleteUi] = useState<DeleteUiState>(
+    deletedAt ? "scheduled" : "idle",
+  );
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [cancelUi, setCancelUi] = useState<CancelUiState>("idle");
+  const [effectiveDeletedAt, setEffectiveDeletedAt] = useState<string | null>(
+    deletedAt,
+  );
 
   const handleExport = useCallback(async () => {
     setExportUi("queueing");
@@ -63,6 +104,79 @@ export function SettingsClient({
       setExportUi("queued");
     } catch {
       setExportUi("error");
+    }
+  }, []);
+
+  const openDeleteModal = useCallback(() => {
+    setDeleteError(null);
+    setDeleteConfirmEmail("");
+    setDeleteUi("confirming");
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    if (deleteUi === "deleting") return; // block close mid-flight
+    setDeleteUi(effectiveDeletedAt ? "scheduled" : "idle");
+    setDeleteError(null);
+    setDeleteConfirmEmail("");
+  }, [deleteUi, effectiveDeletedAt]);
+
+  const handleDelete = useCallback(async () => {
+    if (deleteConfirmEmail !== userEmail) {
+      setDeleteError("That doesn't match your email. Type it exactly.");
+      return;
+    }
+    setDeleteUi("deleting");
+    setDeleteError(null);
+    try {
+      const response = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ confirmEmail: deleteConfirmEmail }),
+      });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        setDeleteError(
+          body.error === "email_mismatch"
+            ? "Email didn't match. Try again."
+            : "Something went wrong. Try again in a moment.",
+        );
+        setDeleteUi("error");
+        return;
+      }
+      const body = (await response.json()) as { scheduledDeletionAt?: string };
+      // The server returns the purge timestamp, but we only need `deletedAt`
+      // (now) to drive the UI. Stamp it now so the banner shows today's
+      // 30-day-from-now reading.
+      setEffectiveDeletedAt(new Date().toISOString());
+      setDeleteUi("scheduled");
+      setDeleteError(null);
+      setDeleteConfirmEmail("");
+      // Hint: if the server's scheduledDeletionAt is present, trust it in
+      // future iterations — for now formatDeletionDate derives from now().
+      void body;
+    } catch {
+      setDeleteError("Network error. Try again.");
+      setDeleteUi("error");
+    }
+  }, [deleteConfirmEmail, userEmail]);
+
+  const handleCancelDeletion = useCallback(async () => {
+    setCancelUi("cancelling");
+    try {
+      const response = await fetch("/api/account/delete/cancel", {
+        method: "POST",
+      });
+      if (!response.ok) {
+        setCancelUi("error");
+        return;
+      }
+      setCancelUi("cancelled");
+      setEffectiveDeletedAt(null);
+      setDeleteUi("idle");
+    } catch {
+      setCancelUi("error");
     }
   }, []);
 
@@ -579,6 +693,86 @@ export function SettingsClient({
             </button>
           </div>
 
+          {/* R0.7 — Delete Account / Cancel Deletion row.
+              effectiveDeletedAt !== null → show banner + Cancel button.
+              effectiveDeletedAt === null → show Delete Account CTA that
+              opens the email-retype modal. */}
+          <div
+            className="flex items-center justify-between px-5 py-4 gap-4"
+            style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.04)" }}
+          >
+            <div className="min-w-0">
+              <div
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                  lineHeight: 1.3,
+                }}
+              >
+                {effectiveDeletedAt ? "Account scheduled for deletion" : "Delete Account"}
+              </div>
+              <div
+                className="mt-0.5"
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "13px",
+                  color: "var(--text-muted)",
+                }}
+              >
+                {effectiveDeletedAt
+                  ? cancelUi === "error"
+                    ? "Couldn't cancel. Try again."
+                    : cancelUi === "cancelled"
+                      ? "Deletion cancelled. Your account is safe."
+                      : `Your account will be permanently deleted on ${formatDeletionDate(effectiveDeletedAt)}.`
+                  : "Permanently delete your account after a 30-day grace window."}
+              </div>
+            </div>
+            {effectiveDeletedAt ? (
+              <button
+                type="button"
+                disabled={cancelUi === "cancelling"}
+                onClick={() => void handleCancelDeletion()}
+                className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "10px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "#C9A84C",
+                  background: "rgba(201, 168, 76, 0.08)",
+                  border: "1px solid rgba(201, 168, 76, 0.2)",
+                  cursor: cancelUi === "cancelling" ? "wait" : "pointer",
+                  opacity: cancelUi === "cancelling" ? 0.7 : 1,
+                }}
+                aria-label="Cancel scheduled deletion"
+              >
+                {cancelUi === "cancelling" ? "Cancelling..." : "Cancel Deletion"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={openDeleteModal}
+                className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "10px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "rgba(220, 80, 80, 0.85)",
+                  background: "rgba(220, 60, 60, 0.06)",
+                  border: "1px solid rgba(220, 60, 60, 0.18)",
+                  cursor: "pointer",
+                }}
+                aria-label="Delete account"
+              >
+                Delete Account
+              </button>
+            )}
+          </div>
+
           {/* Notification preferences placeholder */}
           <div
             className="flex items-center justify-between px-5 py-4"
@@ -707,6 +901,155 @@ export function SettingsClient({
 
       {/* Bottom spacer for mobile nav bar */}
       <div className="h-20 md:h-8" aria-hidden="true" />
+
+      {/* R0.7 — Delete Account confirmation modal.
+          Requires typing the account email exactly; server re-checks the
+          match and rate-limits at tier C. */}
+      {(deleteUi === "confirming" ||
+        deleteUi === "deleting" ||
+        deleteUi === "error") && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+          style={{ background: "rgba(0, 0, 0, 0.75)" }}
+          onClick={closeDeleteModal}
+        >
+          <div
+            className="w-full max-w-md rounded-xl p-6"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "rgba(10, 12, 25, 0.95)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              border: "1px solid rgba(220, 60, 60, 0.25)",
+              boxShadow:
+                "0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+            }}
+          >
+            <h3
+              id="delete-modal-title"
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: "20px",
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                lineHeight: 1.2,
+                marginBottom: "8px",
+              }}
+            >
+              Delete your account?
+            </h3>
+            <p
+              style={{
+                fontFamily: "'Satoshi', sans-serif",
+                fontSize: "13px",
+                color: "var(--text-muted)",
+                lineHeight: 1.5,
+                marginBottom: "20px",
+              }}
+            >
+              Your account will be scheduled for deletion in 30 days. You
+              can cancel any time before then by returning to this page. To
+              confirm, retype your email address:{" "}
+              <span
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {userEmail}
+              </span>
+            </p>
+            <label
+              htmlFor="delete-confirm-email"
+              className="sr-only"
+            >
+              Confirm your email address
+            </label>
+            <input
+              id="delete-confirm-email"
+              type="email"
+              value={deleteConfirmEmail}
+              onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+              disabled={deleteUi === "deleting"}
+              autoFocus
+              placeholder={userEmail}
+              className="w-full rounded-lg px-3 py-2 mb-3"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "13px",
+                color: "var(--text-primary)",
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                outline: "none",
+              }}
+            />
+            {deleteError && (
+              <div
+                role="alert"
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "12px",
+                  color: "rgba(220, 80, 80, 0.85)",
+                  marginBottom: "12px",
+                }}
+              >
+                {deleteError}
+              </div>
+            )}
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={deleteUi === "deleting"}
+                className="rounded-lg px-4 py-2 transition-all duration-150"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "11px",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                  background: "transparent",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  cursor: deleteUi === "deleting" ? "wait" : "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDelete()}
+                disabled={
+                  deleteUi === "deleting" || deleteConfirmEmail.length === 0
+                }
+                className="rounded-lg px-4 py-2 transition-all duration-150"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "11px",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "rgba(255, 220, 220, 0.95)",
+                  background: "rgba(220, 60, 60, 0.22)",
+                  border: "1px solid rgba(220, 60, 60, 0.4)",
+                  cursor:
+                    deleteUi === "deleting" || deleteConfirmEmail.length === 0
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity:
+                    deleteUi === "deleting" || deleteConfirmEmail.length === 0
+                      ? 0.6
+                      : 1,
+                }}
+                aria-label="Confirm account deletion"
+              >
+                {deleteUi === "deleting" ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

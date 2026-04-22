@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:39 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:52 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `180ae58`)
+- **Branch:** `main` (commit `5b4c6ed`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 55,593 across 282 source files
+- **Total LOC:** 57,149 across 290 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-180ae58 [R0/0.6] feat: full user-data export — zip, signed URL, email delivery
+5b4c6ed [R0/0.6] chore(ledger): mark R0.6 complete
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `180ae58`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `5b4c6ed`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (282 files, 55,593 LOC)
+## Source Tree (290 files, 57,149 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -109,6 +109,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-4` | 1187 |
 | `src/app` | 1177 |
 | `src/components/floor-6/cio-character` | 1119 |
+| `src/app/(authenticated)/settings` | 1112 |
 | `src/components/floor-7/crud` | 1095 |
 | `src/components/world/elevator` | 1056 |
 | `src/components/floor-5/cmo-character` | 1053 |
@@ -127,7 +128,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
-| `src/app/(authenticated)/settings` | 757 |
 | `src/components/floor-7/cro-character` | 733 |
 | `src/lib/agents/cmo` | 715 |
 | `src/app/(authenticated)/penthouse` | 713 |
@@ -137,14 +137,16 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cio` | 615 |
 | `src/lib/ai` | 599 |
 | `src/components/floor-2` | 576 |
+| `src/db` | 546 |
 | `src/lib/stripe` | 545 |
-| `src/db` | 541 |
 | `src/lib/agents/ceo` | 521 |
 | `src/components/floor-2/cfo-character` | 517 |
 | `src/components/floor-1/ceo-character` | 511 |
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
 | `src/lib/ai/structured` | 440 |
+| `src/app/api/cron/purge-sweeper` | 439 |
+| `src/lib/account` | 432 |
 | `src/hooks` | 429 |
 | `src/lib/auth` | 411 |
 | `src/components/floor-6/contact-grid` | 392 |
@@ -153,15 +155,16 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
 | `src/app/api/stripe/webhook` | 339 |
+| `src/app/api/account/delete/cancel` | 308 |
 | `src/components/pricing` | 306 |
 | `src/app/(authenticated)/briefing-room` | 296 |
 | `src/app/(authenticated)` | 285 |
 | `src/lib/utils` | 284 |
+| `src/app/api/account/delete` | 271 |
 | `src/app/api/cron/briefing` | 271 |
 | `src/lib/agents` | 269 |
-| `src/lib/account` | 259 |
 | `src/app/api/account/export` | 222 |
-| `src/app/api/cron/__integration__` | 216 |
+| `src/app/api/cron/__integration__` | 221 |
 | `src/app/api/cron/sync` | 213 |
 | `src/lib/supabase` | 209 |
 | `src/lib/calendar` | 203 |
@@ -224,6 +227,10 @@ src/app/(authenticated)/situation-room/page.tsx
 src/app/(authenticated)/war-room/page.tsx
 src/app/(authenticated)/world-shell.tsx
 src/app/(authenticated)/writing-room/page.tsx
+src/app/api/account/delete/cancel/route.test.ts
+src/app/api/account/delete/cancel/route.ts
+src/app/api/account/delete/route.test.ts
+src/app/api/account/delete/route.ts
 src/app/api/account/export/route.test.ts
 src/app/api/account/export/route.ts
 src/app/api/auth/callback/route.ts
@@ -240,6 +247,8 @@ src/app/api/cro/route.ts
 src/app/api/cron/__integration__/cron-auth.test.ts
 src/app/api/cron/briefing/route.ts
 src/app/api/cron/export-worker/route.ts
+src/app/api/cron/purge-sweeper/route.test.ts
+src/app/api/cron/purge-sweeper/route.ts
 src/app/api/cron/sync/route.ts
 src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
@@ -366,6 +375,8 @@ src/hooks/useAgentChat.ts
 src/hooks/useProgressionMilestones.ts
 src/hooks/useReducedMotion.ts
 src/hooks/useWeather.ts
+src/lib/account/delete.test.ts
+src/lib/account/delete.ts
 src/lib/account/export.test.ts
 src/lib/account/export.ts
 src/lib/actions/applications.ts
@@ -559,13 +570,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 608 | 6,122 |
+| `BOOTSTRAP-PROMPT.md` | 608 | 6,120 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 416 | 8,401 |
-| **Total** | **1672** | **26,949** |
+| `CLAUDE.md` | 416 | 8,409 |
+| **Total** | **1672** | **26,955** |
 
-> ⚠️ Reading all recommended files consumes ~26,949 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~26,955 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

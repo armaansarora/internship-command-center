@@ -12,11 +12,13 @@ export const metadata: Metadata = { title: "Settings" };
  * BUG-012: Account/settings section with dark/light mode.
  * BUG-011: Dark/light mode toggle.
  * BUG-005: Sign out accessible from here too.
+ * R0.7: Reads user_profiles.deleted_at so the Data section can swap
+ *       Delete Account ↔ Cancel Deletion.
  */
 export default async function SettingsPage() {
   const user = await requireUser();
 
-  const [subscriptionTier, appsCountResult] = await Promise.all([
+  const [subscriptionTier, appsCountResult, deletedAt] = await Promise.all([
     getSubscriptionTier(user.id),
     (async () => {
       const supabase = await createClient();
@@ -25,6 +27,15 @@ export default async function SettingsPage() {
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id);
       return count ?? 0;
+    })(),
+    (async () => {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("user_profiles")
+        .select("deleted_at")
+        .eq("id", user.id)
+        .single();
+      return (data?.deleted_at as string | null | undefined) ?? null;
     })(),
   ]);
 
@@ -37,6 +48,7 @@ export default async function SettingsPage() {
         provider={user.app_metadata?.provider ?? "email"}
         subscriptionTier={subscriptionTier}
         appsUsed={appsCountResult}
+        deletedAt={deletedAt}
       />
     </FloorShell>
   );

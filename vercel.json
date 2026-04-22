@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/export-worker",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/purge-sweeper",
+      "schedule": "0 3 * * *"
     }
   ]
 }

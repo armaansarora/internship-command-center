@@ -48,6 +48,11 @@ const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
     load: () =>
       import("@/app/api/cron/export-worker/route") as Promise<RouteModule>,
   },
+  {
+    name: "purge-sweeper",
+    load: () =>
+      import("@/app/api/cron/purge-sweeper/route") as Promise<RouteModule>,
+  },
 ];
 
 async function tryLoad(

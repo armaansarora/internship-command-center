@@ -47,6 +47,11 @@ export const userProfiles = pgTable("user_profiles", {
   }).default("idle"),
   dataExportRequestedAt: timestamp("data_export_requested_at", { withTimezone: true }),
   dataExportLastDeliveredAt: timestamp("data_export_last_delivered_at", { withTimezone: true }),
+  // R0.7 — account deletion. `POST /api/account/delete` stamps now(); the
+  // cron purge-sweeper hard-deletes rows whose `deleted_at` is older than
+  // 30 days. Null means the account is live; non-null means the 30-day
+  // grace window is ticking down to a hard delete.
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   subscriptionTier: text("subscription_tier", {
     enum: ["free", "pro", "team"],
   }).default("free"),

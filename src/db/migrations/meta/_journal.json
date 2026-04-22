@@ -64,6 +64,13 @@
       "when": 1776890262283,
       "tag": "0008_user_export_status",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1776890891049,
+      "tag": "0010_user_profiles_deleted_at",
+      "breakpoints": true
     }
   ]
 }
