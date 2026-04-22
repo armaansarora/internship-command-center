@@ -15,6 +15,7 @@ import { registerDiff } from "./commands/diff.js";
 import { registerHandoff } from "./commands/handoff.js";
 import { registerResume } from "./commands/resume.js";
 import { registerNext } from "./commands/next.js";
+import { registerInit } from "./commands/init.js";
 
 const program = new Command();
 
@@ -44,6 +45,7 @@ registerDiff(program);
 registerHandoff(program);
 registerResume(program);
 registerNext(program);
+registerInit(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);
