@@ -32,3 +32,11 @@ CREATE INDEX IF NOT EXISTS "idx_dispatches_user_request"
 
 CREATE INDEX IF NOT EXISTS "idx_dispatches_request_status"
   ON "agent_dispatches" ("request_id", "status");
+
+-- R3.2: Cross-agent shared-knowledge bridge on user_profiles.
+-- Two-level jsonb map: { [agentKey]: { [entryKey]: { value, writtenAt, writtenBy } } }.
+-- Writes are agent-scoped (an agent can only write under its own key via the
+-- REST helper); reads can be filtered to see only peers' entries, not self-echo.
+
+ALTER TABLE "user_profiles"
+  ADD COLUMN IF NOT EXISTS "shared_knowledge" jsonb NOT NULL DEFAULT '{}'::jsonb;

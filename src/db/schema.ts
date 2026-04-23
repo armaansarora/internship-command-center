@@ -56,6 +56,11 @@ export const userProfiles = pgTable("user_profiles", {
     enum: ["free", "pro", "team"],
   }).default("free"),
   lastFloorVisited: text("last_floor_visited").default("PH"),
+  // R3.2 — cross-agent shared-knowledge bridge. Keyed two-level:
+  // { [agentKey]: { [entryKey]: { value, writtenAt, writtenBy } } }.
+  // Read/write via src/lib/db/queries/shared-knowledge-rest.ts; never
+  // mutate this jsonb from route handlers directly.
+  sharedKnowledge: jsonb("shared_knowledge").default(sql`'{}'::jsonb`),
   ...timestamps,
 }, () => [
   pgPolicy("user_profiles_self_access", {
