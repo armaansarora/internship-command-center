@@ -41,6 +41,9 @@ const ALLOWLIST = new Set<string>([
   "scripts/r8-acceptance-check.ts",
   // This proof test
   "src/app/__tests__/r8-private-note-grep.proof.test.ts",
+  // Red Team test references the canonical Q7 phrasing that mentions
+  // 'private_note ever appear' from the checklist markdown.
+  "src/app/__tests__/r8-red-team.proof.test.ts",
 ]);
 
 function walk(dir: string): string[] {

@@ -98,8 +98,62 @@ export async function runVerify(
     checks.push(await runLintCheck(repo, opts.strict));
   }
 
+  // Phase-specific acceptance script — if scripts/r{N}-acceptance-check.ts
+  // exists for the phase being verified, run it.  Mirrors R7's pattern:
+  // the 4-gate verifies the generic build health; the phase script
+  // verifies Intent-level invariants that the 4-gate can't see.
+  if (phase) {
+    const phaseCheck = await runPhaseAcceptanceScript(repo, phase);
+    if (phaseCheck) checks.push(phaseCheck);
+  }
+
   const ok = checks.every((c) => c.ok);
   return { phase, checks, ok };
+}
+
+async function runPhaseAcceptanceScript(
+  repo: string,
+  phase: string,
+): Promise<CheckResult | null> {
+  const match = phase.match(/^R(\d+)/i);
+  if (!match) return null;
+  const n = match[1];
+  const scriptRel = `scripts/r${n}-acceptance-check.ts`;
+  const scriptPath = `${repo}/${scriptRel}`;
+  // Check existence without fs import bloat — use Node's own mechanism.
+  const { existsSync } = await import("node:fs");
+  if (!existsSync(scriptPath)) return null;
+
+  try {
+    const result = await execa("npx", ["tsx", scriptRel], {
+      cwd: repo,
+      reject: false,
+    });
+    if (result.exitCode === 0) {
+      return {
+        name: `${phase} acceptance`,
+        ok: true,
+        message: "✓ invariants green",
+      };
+    }
+    const detail = ((result.stdout as string) || (result.stderr as string) || "")
+      .split("\n")
+      .filter((l) => l.trim().length > 0)
+      .slice(-10)
+      .join("\n");
+    return {
+      name: `${phase} acceptance`,
+      ok: false,
+      message: `✗ failed (exit ${result.exitCode})`,
+      detail,
+    };
+  } catch (err) {
+    return {
+      name: `${phase} acceptance`,
+      ok: false,
+      message: `✗ ${(err as Error).message}`,
+    };
+  }
 }
 
 async function pickActivePhase(repo: string): Promise<string | null> {
