@@ -97,36 +97,6 @@ export function ProceduralSkyline({
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-  // ── RAF render loop — uses refs so the loop can run forever without
-  // re-creation on each prop change. drawFrame reads timeState/offset/reduced
-  // from refs (synced in the effect above), keeping closure-stable.
-  const render = useCallback((t: number) => {
-    const canvas = canvasRef.current;
-    const scene = sceneRef.current;
-    if (!canvas || !scene) {
-      rafRef.current = requestAnimationFrame(render);
-      return;
-    }
-    const ctx = ctxRef.current ?? canvas.getContext("2d");
-    if (!ctx) return;
-    ctxRef.current = ctx;
-    const { w, h } = sizeRef.current;
-    if (!w || !h) return;
-
-    drawFrame({
-      ctx,
-      w,
-      h,
-      t,
-      scene,
-      timeState: timeStateRef.current,
-      offset: externalOffsetRefRef.current?.current ?? offsetRef.current,
-      reduced: reducedRef.current,
-    });
-
-    rafRef.current = requestAnimationFrame(render);
-  }, []);
-
   // ── Single static frame (one-shot, no loop) for reduced-motion users ──
   const drawStaticFrame = useCallback(() => {
     const canvas = canvasRef.current;
@@ -158,6 +128,38 @@ export function ProceduralSkyline({
     }
 
     let running = true;
+
+    // RAF render loop — inlined here so its self-reference (requestAnimationFrame
+    // rescheduling) doesn't form the use-before-declare cycle that React 19's
+    // react-hooks/purity rule flags when `render` is a top-level useCallback.
+    // Reads all dynamic data from refs (synced in the sibling effect above), so
+    // the function itself is closure-stable.
+    const render = (t: number) => {
+      const canvas = canvasRef.current;
+      const scene = sceneRef.current;
+      if (!canvas || !scene) {
+        rafRef.current = requestAnimationFrame(render);
+        return;
+      }
+      const ctx = ctxRef.current ?? canvas.getContext("2d");
+      if (!ctx) return;
+      ctxRef.current = ctx;
+      const { w, h } = sizeRef.current;
+      if (!w || !h) return;
+
+      drawFrame({
+        ctx,
+        w,
+        h,
+        t,
+        scene,
+        timeState: timeStateRef.current,
+        offset: externalOffsetRefRef.current?.current ?? offsetRef.current,
+        reduced: reducedRef.current,
+      });
+
+      rafRef.current = requestAnimationFrame(render);
+    };
 
     const start = () => {
       if (!running) return;
@@ -199,7 +201,7 @@ export function ProceduralSkyline({
       stop();
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [render, reduced, drawStaticFrame]);
+  }, [reduced, drawStaticFrame]);
 
   // Clamp the prop-supplied weather delta into the documented range so an
   // accidental value can't render the city neon-green.

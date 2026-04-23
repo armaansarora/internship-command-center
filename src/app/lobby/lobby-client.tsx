@@ -33,11 +33,14 @@ export function LobbyClient({
   const prefersReducedMotion = useReducedMotion();
 
   // Detect returning user from cookie (no SSR mismatch — empty initial render).
+  // The single synchronous setState here is intentional: this is the one-time
+  // hydration handoff from server-rendered "unknown" to the actual cookie value.
+  // The cascading-render cost is a single extra render, paid once on mount.
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      const hasPriorVisit = document.cookie.includes("sb-");
-      setIsReturningUser(hasPriorVisit);
-    }
+    if (typeof document === "undefined") return;
+    const hasPriorVisit = document.cookie.includes("sb-");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional SSR hydration handoff
+    setIsReturningUser(hasPriorVisit);
   }, []);
 
   // Mouse tracking for spotlight — rAF-throttled with translate3d for GPU layer (M1).

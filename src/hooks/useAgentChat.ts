@@ -13,7 +13,7 @@
  * a fresh callback every commit and discard the previous one.
  */
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { AbstractChat, DefaultChatTransport, generateId } from "ai";
 
@@ -160,29 +160,26 @@ export function useAgentChat(
   opts: UseAgentChatOptions = {},
 ): UseAgentChatReturn {
   const api = opts.api ?? `/api/${agentKey}`;
-  const chatId = useRef(opts.id ?? generateId()).current;
-  const stateRef = useRef<ReactChatState | null>(null);
-  if (!stateRef.current) {
-    stateRef.current = new ReactChatState();
-  }
-  const chatRef = useRef<AgentChatImpl | null>(null);
+  // Lazy useState instead of useRef to avoid React 19's no-ref-during-render rule.
+  // Both chatId and the ReactChatState instance must be stable across re-renders;
+  // lazy useState initializers give us that without touching `.current`.
+  const [chatId] = useState(() => opts.id ?? generateId());
+  const [state] = useState(() => new ReactChatState());
+  const chat = useMemo(
+    () => new AgentChatImpl(state, api, chatId),
+    [state, api, chatId],
+  );
 
   const [, forceUpdate] = useState(0);
 
   // Register the notify callback exactly once. Doing this in render would
-  // re-register on every commit (the bug flagged in audit H3).
+  // re-register on every commit.
   useEffect(() => {
-    const state = stateRef.current;
-    if (!state) return;
     state.setNotify(() => forceUpdate((n) => n + 1));
     return () => {
       state.setNotify(() => undefined);
     };
-  }, []);
-
-  if (!chatRef.current && stateRef.current) {
-    chatRef.current = new AgentChatImpl(stateRef.current, api, chatId);
-  }
+  }, [state]);
 
   const [input, setInputState] = useState("");
 
@@ -201,29 +198,32 @@ export function useAgentChat(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const text = input.trim();
-      if (!text || !chatRef.current) return;
+      if (!text) return;
       setInputState("");
-      chatRef.current.sendMessage({ text });
+      chat.sendMessage({ text });
     },
-    [input],
+    [input, chat],
   );
 
   const clearMessages = useCallback(() => {
-    stateRef.current?.clearMessages();
-  }, []);
+    state.clearMessages();
+  }, [state]);
 
-  const sendMessage = useCallback((text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || !chatRef.current) return;
-    chatRef.current.sendMessage({ text: trimmed });
-  }, []);
+  const sendMessage = useCallback(
+    (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      chat.sendMessage({ text: trimmed });
+    },
+    [chat],
+  );
 
   return {
-    messages: stateRef.current.messages,
+    messages: state.messages,
     input,
     handleInputChange,
     handleSubmit,
-    status: stateRef.current.status,
+    status: state.status,
     setInput,
     sendMessage,
     clearMessages,

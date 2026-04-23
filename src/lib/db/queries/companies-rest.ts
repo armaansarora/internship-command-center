@@ -18,10 +18,9 @@ export interface CompanyRow {
   name: string;
   sector: string | null;
   industry: string | null;
-  // TODO: schema — `employee_count`, `website`, `notes` columns do not exist on
-  // `companies`. Either add them via migration (Agent 1's domain) or remove
-  // these fields from the type entirely. Kept here as `null`-only placeholders
-  // so consumers that read them get a stable shape rather than `undefined`.
+  // Note: `employee_count`, `website`, `notes` are type-only placeholders.
+  // The columns don't exist on the `companies` table; these fields always
+  // emit `null` so consumers see a stable shape rather than `undefined`.
   employee_count: string | null;
   headquarters: string | null;
   website: string | null;
@@ -43,9 +42,8 @@ export interface CompanyForAgent {
   name: string;
   sector: string | null;
   industry: string | null;
-  // TODO: schema — see CompanyRow note. `employeeCount`, `website`, `notes`
-  // are exposed on the type for consumer compatibility but the underlying
-  // columns do not exist; values will always be `null` until migrated in.
+  // Note: see CompanyRow above. `employeeCount`, `website`, `notes` are
+  // type-only placeholders; values always emit `null`.
   employeeCount: string | null;
   headquarters: string | null;
   website: string | null;
@@ -83,8 +81,7 @@ function rowToAgentFormat(row: CompanyRow): CompanyForAgent {
     name: row.name,
     sector: row.sector,
     industry: row.industry,
-    // TODO: schema — these three columns do not exist on `companies`.
-    // Always emit null until the schema is migrated.
+    // Columns don't exist; emit stable nulls.
     employeeCount: null,
     headquarters: row.headquarters,
     website: null,
@@ -299,10 +296,10 @@ export async function createCompanyRest(
 
   if (data.sector !== undefined) insertRow.sector = data.sector;
   if (data.industry !== undefined) insertRow.industry = data.industry;
-  // TODO: schema — `employee_count`, `website`, `notes` do not exist on
-  // `companies`. Inputs are accepted at the boundary for forward compatibility
-  // but silently dropped here until the migration lands. Do not re-enable these
-  // writes without first adding the columns via Drizzle migration.
+  // Note: `employee_count`, `website`, `notes` inputs are accepted at the
+  // boundary for forward compatibility but silently dropped here — columns
+  // don't exist on `companies`. Do not re-enable these writes without a
+  // Drizzle migration first.
   if (data.headquarters !== undefined) insertRow.headquarters = data.headquarters;
   if (data.description !== undefined) insertRow.description = data.description;
   if (data.cultureSummary !== undefined) insertRow.culture_summary = data.cultureSummary;

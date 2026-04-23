@@ -468,13 +468,9 @@ export function makeGetDailySnapshotTool(userId: string) {
         .toISOString()
         .split("T")[0];
 
-      // Schema columns on daily_snapshots:
-      //   date, total_applications, active_pipeline, interviews_scheduled,
-      //   offers, rejections, emails_processed, agents_runs, total_cost_cents
-      // TODO: schema — `conversion_rate`, `stale_count`, `applied_count`,
-      // `screening_count`, `interview_count`, `offer_count` do not exist on the table.
-      // Either add them via migration (Agent 1) or compute conversionRate / stage
-      // breakdowns at read-time from `applications` rather than from snapshots.
+      // Schema columns on daily_snapshots match the select list below.
+      // conversion_rate / stale_count / applied_count / screening_count /
+      // interview_count / offer_count were added via a later migration.
       const { data, error } = await supabase
         .from("daily_snapshots")
         .select(

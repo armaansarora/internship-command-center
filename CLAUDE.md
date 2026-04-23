@@ -52,9 +52,8 @@ Character personality prompts: `docs/CHARACTER-PROMPTS.md`
 - `npm run session:end -- --message "..."` — session-end workflow (agent runs this, not human)
 
 ### Fallback CLIs (only if agent automation fails)
-- `npm run session:state -- --task "..." --deliverable "1.2" --status "in_progress"` — manual session state update
-- `npm run session:state:clear` — reset session state
 - `npm run session:end:dry` — dry run of session:end
+- `npm run t handoff --stdin` — tower handoff packet (replaces the legacy SESSION-STATE.json writer; see §8)
 
 ## Conventions
 - Server Components by default; "use client" only when needed
@@ -76,7 +75,7 @@ Character personality prompts: `docs/CHARACTER-PROMPTS.md`
 ## Critical Technical Gotchas
 1. **DB Access from Vercel Serverless:** NEVER use Drizzle ORM's `db` object in server components or API routes deployed to Vercel. The Supabase DB is IPv6-only at `db.jzrsrruugcajohvvmevg.supabase.co:5432` and the pooler returns "Tenant not found." ALL server-side data access MUST use the Supabase REST client: `supabase.from('table').select('*')`. Drizzle is only used for schema definition and migrations (`drizzle-kit push`).
 2. **React 19 + Next.js 16:** JSX namespace must be explicitly imported: `import type { JSX } from "react"`
-3. **GSAP Tree-Shaking:** `src/lib/gsap-init.ts` exists as a centralized import point, BUT currently lobby-client.tsx, EntranceSequence.tsx, and Elevator.tsx import directly from `"gsap"`. This is a known issue — should be wired through gsap-init.ts.
+3. **GSAP Tree-Shaking:** All component GSAP imports route through `src/lib/gsap-init.ts` (the only file that imports `"gsap"` directly). When adding new GSAP-using components, import via `@/lib/gsap-init` — this is the tree-shaking contract.
 4. **ProceduralSkyline:** Canvas-based renderer, defaults to "night" outside DayNightProvider context (intentional for lobby). Uses `useDayNight()` hook + `getSkyConfig()`.
 5. **EntranceSequence:** Uses sessionStorage for "played" flag — appropriate for per-session entrance.
 6. **Vercel Auto-deploy:** `main` branch gets automatic production deployment.
@@ -84,15 +83,9 @@ Character personality prompts: `docs/CHARACTER-PROMPTS.md`
 
 ## Known Orphaned Files (Not Bugs — Intentionally Kept)
 These files are built and functional but not yet imported into the component tree. They exist as ready-to-wire infrastructure:
-- `src/components/floor-6/cio-character/CIODialoguePanel.tsx` — CIO dialogue (CIOCharacter.tsx doesn't import it yet)
-- `src/components/floor-6/cio-character/CIOWhiteboard.tsx` — CIO research display
 - `src/components/world/FloorStub.tsx` — Generic "Coming Soon" floor template
 - `src/components/world/MilestoneToast.tsx` — Gold milestone notification (wired but dynamically loaded)
-- `src/hooks/useCharacter.ts` — Generic character interaction hook
-- `src/lib/db/queries/agent-memory-rest.ts` — Agent memory CRUD (built for Phase 5 memory system)
 - `src/lib/db/queries/daily-snapshots-rest.ts` — Daily snapshot queries
-- `src/lib/db/queries/notifications-rest.ts` — Notification CRUD
-- `src/lib/gsap-init.ts` — Centralized GSAP import (not yet wired — see gotcha #3)
 
 ## Design System (The Tower)
 Immersive spatial UI — building metaphor, not a dashboard. Each page is a "floor."
@@ -112,7 +105,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 
 - `src/components/floor-3/crud/PrepPacketViewer.tsx` (1135 LOC)
 - `src/app/(authenticated)/settings/settings-client.tsx` (1089 LOC) — R0.7 — `user_profiles.deleted_at` as ISO string (or null). Drives
-- `src/app/lobby/lobby-client.tsx` (967 LOC) — Lobby client component — The Tower entrance.
+- `src/app/lobby/lobby-client.tsx` (970 LOC) — Lobby client component — The Tower entrance.
 - `src/components/floor-7/crud/ApplicationModal.tsx` (777 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (762 LOC) — private sticky-note, visible only to the owning user. NEVER
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
@@ -172,8 +165,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/binder/BinderOpen.tsx` (235 LOC) — R6.8 — Flip-open view of a single Debrief binder.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
 - `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
+- `src/components/world/ProceduralSkyline.tsx` (227 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (225 LOC)
-- `src/components/world/ProceduralSkyline.tsx` (225 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/floor-4/situation-map/SituationMapCanvas.tsx` (223 LOC) — Canvas2D renderer for the Situation Map.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
@@ -238,9 +231,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
 - `src/components/floor-6/rolodex/Rolodex.test.tsx` (111 LOC) — P1 invariant — rolodex at 200+ cards keeps the live DOM child count capped.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
-- `src/components/floor-6/dossier-wall/DossierCard.tsx` (108 LOC) — A single dossier folder on the CIO's library wall. Tilts a hair ±2°
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
 - `src/components/floor-4/undo-bar/UndoBar.test.tsx` (107 LOC)
+- `src/components/floor-6/dossier-wall/DossierCard.tsx` (107 LOC) — A single dossier folder on the CIO's library wall. Tilts a hair ±2°
 - `src/components/lobby/concierge/OtisCharacter.test.tsx` (106 LOC) — R4.2 — Otis character primitives.
 - `src/components/lobby/concierge/OtisCharacter.tsx` (106 LOC) — OtisCharacter — the Concierge, standing at the reception desk in the Lobby.
 - `src/components/floor-1/RingTheBell.bellPhase.test.tsx` (105 LOC) — R3.10 — unit tests for the pure side-effect helper + a spot-check that
@@ -292,11 +285,10 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `scripts/auto-organize-docs.ts` — **runs on every commit (Husky)**. Auto-archives stale docs, auto-generates Key Components (this section), auto-updates doc map table, auto-appends session logs. Zero manual doc maintenance.
 - `scripts/generate-bootstrap.ts` — **runs on every commit (Husky)**. Generates BOOTSTRAP-PROMPT.md with: build health, git diff, acceptance criteria tracking, dep freshness, context budget, session state, doc freshness warnings.
 - `scripts/session-end.ts` — chains type check → bootstrap → stage → commit → push into one command
-- `scripts/update-session-state.ts` — CLI fallback to update SESSION-STATE.json manually (prefer agent auto-update)
 - `.husky/pre-commit` — runs auto-organize-docs.ts → generate-bootstrap.ts → stages all modified docs
 - `scripts/check-vercel.ts` — writes Vercel deploy status to .vercel-status.json (agent-invoked)
 - `.github/workflows/bootstrap-check.yml` — CI guard that fails PR if bootstrap is stale
-- `SESSION-STATE.json` — captures mid-session task state for handoff (committed to repo)
+- `.handoff/YYYY-MM-DD-HHMM.md` — tower handoff packets carry mid-session task state (replaced SESSION-STATE.json)
 - `.bootstrap-last-hash` — tracks last commit hash at generation time (gitignored)
 
 ## Mandatory Agent Behavior (NON-NEGOTIABLE)
@@ -484,7 +476,7 @@ Docs are organized into 3 tiers to prevent staleness and duplication:
 
 ### Tier 2: Living Docs (updated by agents each session)
 - `PROJECT-CONTEXT.md` — operational log, credentials, session history
-- `SESSION-STATE.json` — mid-session task state
+- `.handoff/*.md` — tower handoff packets carry mid-session task state
 - `docs/BUG-TRACKER.md` — bug reports and fix log
 
 ### Tier 3: Reference Specs (stable, rarely change)

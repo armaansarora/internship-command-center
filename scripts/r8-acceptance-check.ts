@@ -24,7 +24,7 @@
  *        Migration 0018 exists;
  *        No #EF4444 / #F59E0B / #4ADE80 in floor-6 surface CSS.
  */
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { resolve, join, relative } from "node:path";
 

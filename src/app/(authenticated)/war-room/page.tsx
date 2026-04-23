@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { FloorShell } from "@/components/world/FloorShell";
 import { WarRoomClient } from "@/components/floor-7/WarRoomClient";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
+import { log } from "@/lib/logger";
 import {
   createApplicationAction,
   deleteApplicationAction,
@@ -145,7 +146,7 @@ async function WarRoomData({
 
   if (appsResult.error) {
     // Surface the failure but degrade gracefully — empty grid is better than 500.
-    console.error("War Room query failed:", appsResult.error.message);
+    log.error("war-room.query.failed", appsResult.error, { userId });
   }
 
   // Map snake_case DB rows to camelCase Application type

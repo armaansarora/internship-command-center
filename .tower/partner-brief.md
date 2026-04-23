@@ -57,8 +57,9 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 | R5 The Writing Room (Floor 5) | **complete**, 9/10, acceptance met. R5.4 live-compose streaming + pen-glow ink DEFERRED (Intent-level drift; R5.4 mini-phase prompt prepped for partner to fire before or after R8). Three-tone divergence genuine. Approval gate two-click. |
 | R6 The Briefing Room (Floor 3) | **complete**, 10/10, acceptance met. 838 tests. LiveSTARBoard reactive, real interrupt logic, voice pipeline shipped (three-layer opt-in), physical Binder shelf. |
 | R7 Situation Room (Floor 4) | **complete**, 10/10, acceptance met. 974 tests. Real undo via DB-level send_after, zero toast/alert, quiet-hours server-side, earned arcs on Situation Map. |
-| R8 The Rolodex Lounge (Floor 6) | **queued** — autopilot primed. |
-| R9–R10 | not_started. |
+| R8 The Rolodex Lounge (Floor 6) | **complete**, 15/15, acceptance met. Rolodex virtualizes at 200+ cards (CSS 3D cylinder, ±45° arc). Consent copy survives a lawyer read. Consent guard at server. Red Team first-pass filed. Cross-user MATCHING deferred as R8.x pending human Red Team review — match-candidates endpoint hard-stopped at 403 for all callers. |
+| R9 The Observatory (Floor 2) | **queued** — autopilot primed by tower accept auto-advance. |
+| R10 Negotiation Parlor | not_started. |
 
 ## Running tab of follow-ups
 
@@ -74,9 +75,13 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - `.env.example` updated with `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `OPENAI_API_KEY` (R4/R6 OAuth + voice).
 
 **Still open (need user hand):**
-- **R4 B1 — LinkedIn OAuth credentials.** User provisions in LinkedIn Developer Portal and sets env. Until then, LinkedIn sync unavailable (not a blocker for R8).
-- **R5 B1 — R5.4 live-compose streaming + pen-glow ink.** Run before or after R8 via mini-phase prompt. Non-blocking for R8 (separate floor).
-- **Migration 005 application.** User runs `src/db/manual/005_interview_audio_bucket.sql` in Supabase SQL Editor (takes ~30s). Blocks voice uploads in prod only.
+- **R5 B1 — R5.4 live-compose streaming + pen-glow ink.** Mini-phase prompt ready. Next up now that R8 is done.
+- **R8.x — Human Red Team review** of `.tower/ledger/r8/red-team.md` before flipping `/api/networking/match-candidates` from 403 hard-stop to real results. Autopilot did first-pass; second pass is a human gate.
+
+**RESOLVED since last update:**
+- R4 B1 LinkedIn OAuth credentials ✓ (Vercel env vars saved)
+- Migration 005 — applied in Supabase SQL Editor ✓
+- R8 phase shipped with zero new drift, no R5.4-style acceptance-bypass (autopilot used `tower accept R8`)
 
 **Open decisions (need user call):**
 - **CEO voice (deferred R2/R3/R4).** Voice pipeline now exists from R6 (CPO). Option A: treat CEO voice as a post-R10 polish pass. Option B: add to R10 (Negotiation Parlor). Option C: accept indefinite. My vote: B — R10 is a small floor and CEO voice would land well in negotiation dialogue.

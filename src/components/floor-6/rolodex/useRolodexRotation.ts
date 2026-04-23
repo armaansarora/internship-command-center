@@ -8,7 +8,7 @@ import {
   type WheelEvent,
   type KeyboardEvent,
 } from "react";
-import { gsap } from "gsap";
+import { gsap } from "@/lib/gsap-init";
 
 /**
  * Encapsulates the rolodex rotation mechanics.

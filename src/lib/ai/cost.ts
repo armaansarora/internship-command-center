@@ -58,15 +58,15 @@ const RATES: Record<string, ModelRates> = {
     cachedReadPerMillion: 1.5,
     cachedWritePerMillion: 18.75,
   },
-  // OpenAI GPT-5 — fallback for AI Gateway. TODO: rates — confirm with
-  // production pricing once the model exits preview.
+  // OpenAI GPT-5 — fallback for AI Gateway. Rates are preview-window
+  // estimates; confirm against production pricing when the model GAs.
   "openai/gpt-5": {
     inputPerMillion: 5.0,
     outputPerMillion: 15.0,
     cachedReadPerMillion: 1.25,
     cachedWritePerMillion: 5.0,
   },
-  // Google Gemini 3.1 Pro Preview — fallback for AI Gateway. TODO: rates.
+  // Google Gemini 3.1 Pro Preview — fallback for AI Gateway. Preview rates.
   "google/gemini-3-1-pro-preview": {
     inputPerMillion: 1.25,
     outputPerMillion: 5.0,

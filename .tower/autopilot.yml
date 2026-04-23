@@ -2,31 +2,14 @@ paused: true
 scope: R9-only
 started: null
 started_by: null
-ended: 2026-04-23T18:37:30.967Z
-ended_reason: scope_complete — R8 acceptance.met=true
+ended: 2026-04-23T19:13:14.227Z
+ended_reason: scope_complete — R5.4 mini-phase shipped; R5 now 10/10
 max_blockers: 3
-previous_phase: R8
-previous_outcome: "R8 complete — 15/15 tasks, acceptance.met (verified_by_commit: ad5db7e)."
+previous_phase: R5.4
+previous_outcome: "R5.4 complete — LiveComposePanel + PenGlowCursor shipped, real AI SDK v6 streamText with three parallel streams, proof test asserts ≥10 token deltas per stream + round-trip equivalence with non-streamed generation. R5 now honestly 10/10 (was 9/10 with R5.4 deferred as polish). Zero drift, build green. R8 prior: complete 15/15, match-candidates hard-stopped at 403 pending Red Team."
 next_phase: R9
 next_brief: "docs/NEXT-ROADMAP.md — ### R9 — The Observatory (Floor 2)"
+open_blockers_carrying_forward:
+  - R8.x (Human Red Team second pass of .tower/ledger/r8/red-team.md before flipping match-candidates from 403 to real results) — non-blocking for R9
 verification_before_acceptance:
-  - npm run t accept R8
-partner_constraints:
-  - Use `npm run t accept R8` to flip acceptance.met — it enforces
-    verify-before-flip structurally. Do NOT write acceptance.met:true directly
-    to the YAML.
-  - Consent UX is non-negotiable. Cross-user network features ship opt-in only,
-    with explicit consent language and visible revoke. A Red Team read must
-    pass. If consent surface can't be finished cleanly, ship rolodex-only and
-    open a blocker for cross-user.
-  - Rolodex rotates smoothly at 200+ cards. If chosen tech (R3F / CSS 3D /
-    Lottie) can't hold that, drop to a smaller card budget and flag the ceiling
-    — don't ship a demo that dies at scale.
-  - Warmth decay must feel informative, not punitive. No red/warning visuals on
-    cold cards; cool-blue is descriptive, not accusatory.
-  - Do NOT repeat the R5.4 pattern. Intent-level character flourishes (cards
-    cool physically, rolodex rotates on scroll, `[`/`]` side-switch, dossiers
-    yellow and curl) are NOT polish — if they're in the Intent or Provocation
-    lines, they ship.
-  - Anti-patterns call-out: anything that reads as a CRM, contact list, LinkedIn
-      embed, or uses the word "leads" is a fail.
+  - npm run t accept R9

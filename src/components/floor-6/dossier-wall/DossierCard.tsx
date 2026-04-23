@@ -4,7 +4,6 @@ import type { JSX } from "react";
 import {
   computeDossierAge,
   DOSSIER_AGE_STYLE,
-  type DossierAge,
 } from "./dossier-age";
 
 export interface DossierShape {

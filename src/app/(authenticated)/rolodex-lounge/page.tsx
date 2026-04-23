@@ -71,6 +71,11 @@ async function RolodexLoungeData({
   // ── CIO research stats — shape consumed by CIOWhiteboard ────────────────
   const FRESH_DAYS = 7;
   const STALE_DAYS = 30;
+  // Server component: per-request Date.now() is the correct pattern for
+  // freshness-tier bucketing. React's purity rule targets client components
+  // whose re-renders should be idempotent; server components render once per
+  // request and non-determinism is the norm.
+  // eslint-disable-next-line react-hooks/purity -- per-request timestamp in server component
   const now = Date.now();
 
   const researchedCompanies = companyRows.map((row) => ({

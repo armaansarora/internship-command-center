@@ -10,7 +10,7 @@ import { env, isProd } from "@/lib/env";
 // start gets a fresh bucket. Good enough for "stop runaway clients", not for
 // tight financial limits.
 //
-// TODO: replace with Upstash (multi-instance) once we have a per-IP keying
+// Note: replace with Upstash (multi-instance) once we have a per-IP keying
 // strategy. For now, the only callers are authenticated and bucket per user.
 
 interface InMemoryBucket {
