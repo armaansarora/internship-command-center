@@ -1,53 +1,117 @@
 phase: R6
 name: The Briefing Room (Floor 3)
-status: not_started
+status: complete
 intent: The whiteboard floor. CPO drills the user with mock interview questions.
   As the user answers (typed or spoken), the whiteboard fills with the STAR
   framework scaffold live. CPO interrupts to sharpen — *"What Action did you
   take? I need a verb."* At the end, the whiteboard snapshots into a Debrief
   Binder on the shelf, filed by company. Over time, the shelf fills.
-started: null
-completed: null
-lock: null
+started: 2026-04-23T14:22:57.240Z
+completed: 2026-04-23T15:14:28.157Z
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-23T15:10:15.625Z
+  expires: 2026-04-23T17:10:15.620Z
 acceptance:
   criteria:
     - User completes a 3-question drill with scored STAR feedback per answer.
       STAR whiteboard fills are readable and accurate. Debrief contains Q/A +
       numeric scores + CPO's narrative feedback. Voice mode (if shipped) works
       end-to-end in Chrome and Safari.
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: f44c404
 tasks:
   R6.1:
-    title: Schema + migration 0016 — voice opt-in columns, drill_preferences jsonb, DebriefContent zod type
-    status: pending
+    title: Schema + migration 0016 — voice opt-in columns, drill_preferences jsonb,
+      DebriefContent zod type
+    status: complete
+    started: 2026-04-23T14:22:57.240Z
+    completed: 2026-04-23T14:24:34.191Z
+    commit: 79d1b75
   R6.2:
-    title: Private audio bucket (migration Part 2) + opt-in-gated audio-upload + transcribe + voice-preference PUT (403/410/200 proof)
-    status: pending
+    title: Private audio bucket (migration Part 2) + opt-in-gated audio-upload +
+      transcribe + voice-preference PUT (403/410/200 proof)
+    status: complete
+    started: 2026-04-23T14:35:48.275Z
+    completed: 2026-04-23T14:38:45.540Z
+    commit: 20bd764
   R6.3:
-    title: Pure STAR extractor (src/components/floor-3/star/extract-star.ts) — 30+ unit tests
-    status: pending
+    title: Pure STAR extractor (src/components/floor-3/star/extract-star.ts) — 30+
+      unit tests
+    status: complete
+    started: 2026-04-23T14:26:10.130Z
+    completed: 2026-04-23T14:28:05.264Z
+    commit: d176e5d
   R6.4:
-    title: interrupt-rules.ts + xstate drill-machine.ts with firmness-gated triggers + cooldown + grace-window
-    status: pending
+    title: interrupt-rules.ts + xstate drill-machine.ts with firmness-gated triggers
+      + cooldown + grace-window
+    status: complete
+    started: 2026-04-23T14:30:01.155Z
+    completed: 2026-04-23T14:33:14.199Z
+    commit: d1e7dbb
   R6.5:
-    title: LiveSTARBoard — reactive 4-column whiteboard that paints from extractStar hints
-    status: pending
+    title: LiveSTARBoard — reactive 4-column whiteboard that paints from extractStar
+      hints
+    status: complete
+    started: 2026-04-23T14:45:31.929Z
+    completed: 2026-04-23T14:47:29.158Z
+    commit: 3440c18
   R6.6:
-    title: DrillStage — textarea + 90s/120s timer + opt-in-gated mic toggle + InterruptBubble; wires LiveSTARBoard, drill-machine, interrupt-rules
-    status: pending
+    title: DrillStage — textarea + 90s/120s timer + opt-in-gated mic toggle +
+      InterruptBubble; wires LiveSTARBoard, drill-machine, interrupt-rules
+    status: complete
+    started: 2026-04-23T15:00:41.408Z
+    completed: 2026-04-23T15:08:23.254Z
+    commit: 513a566
   R6.7:
-    title: AI SDK drill-questions + score-answer + routes (start-drill / score-answer / complete-drill) + debriefs-rest queries
-    status: pending
+    title: AI SDK drill-questions + score-answer + routes (start-drill /
+      score-answer / complete-drill) + debriefs-rest queries
+    status: complete
+    started: 2026-04-23T14:40:26.873Z
+    completed: 2026-04-23T14:44:35.993Z
+    commit: 2695e9d
   R6.8:
-    title: DebriefBinderShelf — physical leather spines, filed by company, aging function, flip-open BinderOpen (NOT JSON dump)
-    status: pending
+    title: DebriefBinderShelf — physical leather spines, filed by company, aging
+      function, flip-open BinderOpen (NOT JSON dump)
+    status: complete
+    started: 2026-04-23T14:50:30.835Z
+    completed: 2026-04-23T14:53:16.637Z
+    commit: abbf2c1
   R6.9:
-    title: /api/cron/packet-regenerate hourly — regenerates stale/missing packets for imminent interviews + pneumatic-tube notification
-    status: pending
+    title: /api/cron/packet-regenerate hourly — regenerates stale/missing packets
+      for imminent interviews + pneumatic-tube notification
+    status: complete
+    started: 2026-04-23T14:55:09.466Z
+    completed: 2026-04-23T14:58:39.702Z
+    commit: f7e2f09
   R6.10:
-    title: R6 proof suite (5 invariants) + scripts/r6-acceptance-check.ts + 4-gate verify before acceptance.met
-    status: pending
+    title: R6 proof suite (5 invariants) + scripts/r6-acceptance-check.ts + 4-gate
+      verify before acceptance.met
+    status: complete
+    started: 2026-04-23T15:10:15.625Z
+    completed: 2026-04-23T15:14:28.157Z
+    commit: f44c404
 blockers: []
 decisions: []
-history: []
+history:
+  - 2026-04-23T14:22:57.240Z: task_started R6.1
+  - 2026-04-23T14:24:34.191Z: task_completed R6.1
+  - 2026-04-23T14:26:10.130Z: task_started R6.3
+  - 2026-04-23T14:28:05.264Z: task_completed R6.3
+  - 2026-04-23T14:30:01.155Z: task_started R6.4
+  - 2026-04-23T14:33:14.199Z: task_completed R6.4
+  - 2026-04-23T14:35:48.275Z: task_started R6.2
+  - 2026-04-23T14:38:45.540Z: task_completed R6.2
+  - 2026-04-23T14:40:26.873Z: task_started R6.7
+  - 2026-04-23T14:44:35.993Z: task_completed R6.7
+  - 2026-04-23T14:45:31.929Z: task_started R6.5
+  - 2026-04-23T14:47:29.158Z: task_completed R6.5
+  - 2026-04-23T14:50:30.835Z: task_started R6.8
+  - 2026-04-23T14:53:16.637Z: task_completed R6.8
+  - 2026-04-23T14:55:09.466Z: task_started R6.9
+  - 2026-04-23T14:58:39.702Z: task_completed R6.9
+  - 2026-04-23T15:00:41.408Z: task_started R6.6
+  - 2026-04-23T15:08:23.254Z: task_completed R6.6
+  - 2026-04-23T15:10:15.625Z: task_started R6.10
+  - 2026-04-23T15:14:28.157Z: task_completed R6.10
+  - 2026-04-23T15:14:28.157Z: phase_completed
