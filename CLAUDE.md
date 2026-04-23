@@ -189,6 +189,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
+- `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
