@@ -3,6 +3,12 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { verifyCronRequest } from "@/lib/auth/cron";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 import { log } from "@/lib/logger";
+import {
+  generateMorningBriefing,
+  type MorningBriefingInput,
+} from "@/lib/ai/agents/morning-briefing";
+import { encodeBriefing } from "@/lib/penthouse/briefing-storage";
+import { synthesizeFallbackBriefing } from "@/lib/penthouse/briefing-fallback";
 
 /**
  * GET /api/cron/briefing
@@ -173,51 +179,64 @@ async function processUser(
 
     const newApps = recentApps.filter((a) => a.status === "discovered").length;
     const statusChanges = recentApps.filter((a) => a.status !== "discovered").length;
+    const rejectionsOvernight = recentApps.filter((a) => a.status === "rejected").length;
     const importantEmails = recentEmails.filter(
       (e) =>
         e.classification === "interview_invite" || e.classification === "offer"
     );
 
-    const lines: string[] = [`Morning, ${displayName}.`];
-    if (stats.total === 0) {
-      lines.push("Pipeline is empty. Time to get to work.");
-    } else {
-      lines.push(`Pipeline: ${stats.total} active ops.`);
-      if (newApps > 0) {
-        lines.push(
-          `${newApps} new application${newApps > 1 ? "s" : ""} added overnight.`
-        );
-      }
-      if (statusChanges > 0) {
-        lines.push(`${statusChanges} status change${statusChanges > 1 ? "s" : ""}.`);
-      }
-      if (stats.staleCount > 0) {
-        lines.push(
-          `⚠ ${stats.staleCount} stale op${stats.staleCount > 1 ? "s" : ""} need attention.`
-        );
-      }
-      for (const email of importantEmails) {
-        lines.push(
-          `📬 ${email.classification === "interview_invite" ? "Interview invite" : "Offer"}: ${email.subject ?? "No subject"}`
-        );
-      }
-      if (stats.appliedToScreeningRate > 0) {
-        const rateLabel =
-          stats.appliedToScreeningRate >= 20 ? "healthy" : "below average";
-        lines.push(
-          `Applied→Screen rate: ${stats.appliedToScreeningRate.toFixed(0)}% (${rateLabel}).`
-        );
-      }
-    }
+    // ── Build the structured briefing. Tries the CEO agent first; falls back
+    //    to a deterministic synth if the agent call fails. Either way we end
+    //    up with a schema-valid MorningBriefing that we JSON-prefix into
+    //    notifications.body (see `briefing-storage`). The Penthouse scene
+    //    decodes the prefix on render; legacy consumers just see a longer
+    //    text body.
+    const briefingInput: MorningBriefingInput = {
+      userId,
+      displayName,
+      pipeline: {
+        total: stats.total,
+        applied: stats.applied,
+        screening: stats.screening,
+        interviews:
+          (stats.byStatus["interview_scheduled"] ?? 0) +
+          (stats.byStatus["interviewing"] ?? 0),
+        offers: stats.offers,
+        staleCount: stats.staleCount,
+        appliedToScreeningRate: stats.appliedToScreeningRate,
+      },
+      overnight: {
+        newApps,
+        statusChanges,
+        importantEmails: importantEmails.map((e) => ({
+          kind:
+            e.classification === "interview_invite"
+              ? ("interview_invite" as const)
+              : ("offer" as const),
+          subject: e.subject ?? "No subject",
+        })),
+        rejections: rejectionsOvernight,
+      },
+    };
+    const generated = await generateMorningBriefing(briefingInput);
+    const briefing = generated ?? synthesizeFallbackBriefing(briefingInput);
+    const body = encodeBriefing(briefing);
+
+    const priority: "critical" | "high" | "medium" | "low" =
+      briefing.beats.some((b) => b.data_cue === "offer") ||
+      briefing.beats.some((b) => b.data_cue === "interview_invite") ||
+      stats.staleCount > 3
+        ? "high"
+        : "medium";
 
     const { error: notificationError } = await supabase
       .from("notifications")
       .insert({
         user_id: userId,
         type: "daily_briefing",
-        priority: stats.staleCount > 3 ? "high" : "medium",
+        priority,
         title: "Morning Briefing",
-        body: lines.join(" "),
+        body,
         source_agent: "ceo",
         channels: ["in_app"],
         is_read: false,
