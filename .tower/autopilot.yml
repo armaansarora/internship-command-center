@@ -1,9 +1,9 @@
-paused: false
+paused: true
 scope: R4-only
 started: 2026-04-23T07:14:00.000Z
 started_by: sess-9226e5
-ended: null
-ended_reason: null
+ended: 2026-04-23T06:00:00.000Z
+ended_reason: R4 scope complete — 12/12 tasks shipped, acceptance met, all 4 verification gates green
 max_blockers: 3
 previous_phase: R3
 previous_outcome: "R3 complete — 12/12 tasks. 524 tests (158 new since R2). tsc + build + lint all green at/under baseline. Real Promise.allSettled fan-out in dispatchBatch, agent_dispatches migration with depends_on uuid[] (column shipped, usage deferred), animated DispatchGraph via SMIL, unprompted CEO cron (6h cadence, 3 threshold fns), CIO→CRO shared_knowledge bridge proven by captured-prompt assertion, Stripe + auth untouched. CEO voice DEFERRED (twice now — R2 + R3)."
