@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:39 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:44 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `248d945`)
+- **Branch:** `main` (commit `abc12a8`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 70,574 across 365 source files
+- **Total LOC:** 70,788 across 366 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-248d945 [R3/3.8] feat(ai): unprompted CEO triggers cron (stale / rejection / offer)
+abc12a8 [R3/3.9] feat(ai): CIO→CRO shared-knowledge bridge lights up
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `248d945`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `abc12a8`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,15 +95,15 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (365 files, 70,574 LOC)
+## Source Tree (366 files, 70,788 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 5427 |
 | `src/lib/ai/agents` | 3408 |
 | `src/components/world` | 3162 |
-| `src/styles` | 2505 |
-| `src/components/floor-1` | 1945 |
+| `src/styles` | 2526 |
+| `src/components/floor-1` | 2138 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/components/floor-7/war-table` | 1761 |
@@ -305,6 +305,7 @@ src/components/floor-1/CSuiteScene.tsx
 src/components/floor-1/CSuiteTicker.tsx
 src/components/floor-1/DispatchGraph.test.tsx
 src/components/floor-1/DispatchGraph.tsx
+src/components/floor-1/RingTheBell.bellPhase.test.tsx
 src/components/floor-1/RingTheBell.tsx
 src/components/floor-1/ceo-character/CEOCharacter.tsx
 src/components/floor-1/ceo-character/CEODialoguePanel.tsx
@@ -661,13 +662,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 707 | 7,314 |
+| `BOOTSTRAP-PROMPT.md` | 710 | 7,359 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 443 | 9,351 |
-| **Total** | **1799** | **29,111** |
+| `CLAUDE.md` | 444 | 9,391 |
+| **Total** | **1803** | **29,196** |
 
-> ⚠️ Reading all recommended files consumes ~29,111 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,196 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

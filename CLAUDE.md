@@ -134,8 +134,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/Elevator.tsx` (429 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
+- `src/components/floor-1/CSuiteClient.tsx` (395 LOC) — Watch the CEO chat's UIMessage stream for `tool-dispatchTo<X>` parts and
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (392 LOC)
-- `src/components/floor-1/CSuiteClient.tsx` (386 LOC) — Watch the CEO chat's UIMessage stream for `tool-dispatchTo<X>` parts and
+- `src/components/floor-1/RingTheBell.tsx` (390 LOC) — The CEO orchestrator dispatch tool name that drives this card
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
 - `src/components/floor-1/CSuiteClient.test.tsx` (373 LOC) — Unit tests for the two pure helpers the R3.7 integration relies on:
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
@@ -146,7 +147,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (344 LOC)
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
 - `src/components/world/MilestoneToast.tsx` (332 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
-- `src/components/floor-1/RingTheBell.tsx` (328 LOC) — The CEO orchestrator dispatch tool name that drives this card
 - `src/components/floor-6/RolodexLoungeScene.tsx` (328 LOC) — RolodexLoungeScene — Floor 6 environment compositor.
 - `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
@@ -184,13 +184,13 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
 - `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (183 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
+- `src/components/floor-1/CSuiteScene.tsx` (179 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
 - `src/components/floor-7/war-table/EmptyWarTable.tsx` (178 LOC) — Empty state for a cold war table. Not an apology — an invitation. Matches
 - `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (173 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/app/(authenticated)/penthouse/penthouse-client.tsx` (171 LOC) — Penthouse client — the new R2 scene-first composition.
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
-- `src/components/floor-1/CSuiteScene.tsx` (162 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
@@ -207,6 +207,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
+- `src/components/floor-1/RingTheBell.bellPhase.test.tsx` (105 LOC) — R3.10 — unit tests for the pure side-effect helper + a spot-check that
 - `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (105 LOC)
 - `src/components/penthouse/scenes/afternoon/AfternoonScene.tsx` (105 LOC) — Afternoon scene — CEO already facing the room, glass panel shows the
 - `src/components/world/FloorShell.tsx` (104 LOC) — FloorShell — wraps each floor's content with floor identity badge + ambient sound.

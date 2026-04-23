@@ -19,6 +19,13 @@ interface CSuiteSceneProps {
   graphSlot?: React.ReactNode;
   /** Right panel slot — Ring the Bell + agent network */
   panelSlot?: React.ReactNode;
+  /**
+   * R3.10 — current bell phase, forwarded by CSuiteClient from RingTheBell.
+   * Surfaces on the root div as `data-bell-phase` so floor-1.css can key the
+   * camera-pullback (scale 0.97 + -8px translate) and the atmospheric
+   * brightness dim off this attribute + the sibling `--building-dim` var.
+   */
+  bellPhase?: "idle" | "ringing" | "orchestrating" | "complete";
 }
 
 /**
@@ -36,10 +43,12 @@ export function CSuiteScene({
   contentSlot,
   graphSlot,
   panelSlot,
+  bellPhase,
 }: CSuiteSceneProps): JSX.Element {
   return (
     <div
       data-floor="1"
+      data-bell-phase={bellPhase ?? "idle"}
       className="csuite-bg"
       style={{
         position: "relative",
@@ -49,7 +58,13 @@ export function CSuiteScene({
         overflow: "hidden",
       }}
     >
-      {/* ── Atmospheric overlay ── */}
+      {/* ── Atmospheric overlay ──
+          R3.10 — brightness() multiplies against the --building-dim CSS var
+          that RingTheBell sets on <html>. During the `ringing` phase the var
+          is 0.4 so the whole overlay darkens; it eases back to 1.0 once we
+          hit `orchestrating`. Reduced-motion users never see the var set at
+          all, so brightness() resolves to 1 (the fallback) and the scene
+          stays static. */}
       <div
         aria-hidden="true"
         style={{
@@ -59,6 +74,8 @@ export function CSuiteScene({
           zIndex: 1,
           background:
             "radial-gradient(ellipse 75% 55% at 50% 30%, transparent 35%, rgba(10, 8, 3, 0.55) 100%)",
+          filter: "brightness(var(--building-dim, 1))",
+          transition: "filter 0.6s ease",
         }}
       />
 

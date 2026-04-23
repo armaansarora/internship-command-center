@@ -17,6 +17,8 @@ interface AgentProgress {
   status: "waiting" | "running" | "completed" | "error";
 }
 
+type BellPhase = "idle" | "ringing" | "orchestrating" | "complete";
+
 interface RingTheBellProps {
   onBriefingReady?: (briefing: string) => void;
   /**
@@ -33,6 +35,39 @@ interface RingTheBellProps {
    * stream ends.
    */
   isStreaming?: boolean;
+  /**
+   * R3.10 — surfaces the bell's internal phase transitions to the parent so
+   * other scene elements (CSuiteScene) can react visually. Called with the
+   * new phase whenever it changes (idle → ringing → orchestrating → complete,
+   * or any reset back to idle).
+   */
+  onPhaseChange?: (phase: BellPhase) => void;
+}
+
+/**
+ * R3.10 — Pure helper that decides what value `--building-dim` should take
+ * on the document element for a given bell phase. Extracted as its own export
+ * so the side-effect logic is unit-testable without spinning up a JSDOM
+ * window; the corresponding `useEffect` in RingTheBell just calls
+ * `setProperty`/`removeProperty` based on this return value.
+ *
+ * Returns:
+ *   - `"0.4"` during the `ringing` phase — building visibly dims so the
+ *     orchestration feels like a directed spotlight.
+ *   - `"1"` during `orchestrating` / `complete` — lights lift back up but we
+ *     keep the variable set so consumers have a concrete value to animate
+ *     against (the CSS transition eases 0.4 → 1).
+ *   - `null` in `idle` or under reduced-motion — the caller should clear the
+ *     CSS variable entirely so the base stylesheet keeps its default.
+ */
+export function computeBuildingDim(
+  phase: BellPhase,
+  reducedMotion: boolean,
+): "0.4" | "1" | null {
+  if (reducedMotion) return null;
+  if (phase === "ringing") return "0.4";
+  if (phase === "orchestrating" || phase === "complete") return "1";
+  return null;
 }
 
 const AGENTS: Array<{ name: string; label: string; toolKey: string }> = [
@@ -152,10 +187,11 @@ export function RingTheBell({
   onBriefingReady,
   dispatchEvents,
   isStreaming,
+  onPhaseChange,
 }: RingTheBellProps): JSX.Element {
   // `phase` is the externally-driven UX flow:
   //   idle → ringing → orchestrating → complete (or back to idle via reset)
-  const [phase, setPhase] = useState<"idle" | "ringing" | "orchestrating" | "complete">("idle");
+  const [phase, setPhase] = useState<BellPhase>("idle");
   // Reset counter — bumped by handleReset to invalidate downgrade-locks. We
   // can't store the locked state in useState (would require setState-in-effect
   // again); instead we recompute lock-state per render from dispatchEvents +
@@ -218,6 +254,32 @@ export function RingTheBell({
     if (!dispatchEvents || Object.keys(dispatchEvents).length === 0) return;
     setPhase("complete");
   }, [isStreaming, phase, dispatchEvents]);
+
+  // R3.10 — surface phase changes to the parent scene (CSuiteClient) so it
+  // can plumb the phase down onto CSuiteScene's root for CSS-driven polish.
+  useEffect(() => {
+    onPhaseChange?.(phase);
+  }, [phase, onPhaseChange]);
+
+  // R3.10 — set the `--building-dim` CSS variable on <html> based on the
+  // current bell phase. The Atmosphere overlay consumes it via brightness()
+  // to visibly dim the boardroom during the 600ms ring, then ease back to
+  // 1.0 once orchestrating. Under prefers-reduced-motion we never set the
+  // variable (and clear any prior value) so the scene stays static.
+  useEffect(() => {
+    const root = document.documentElement;
+    const next = computeBuildingDim(phase, reducedMotion);
+    if (next === null) {
+      root.style.removeProperty("--building-dim");
+    } else {
+      root.style.setProperty("--building-dim", next);
+    }
+    // Cleanup on unmount — clear the var so a later visit to the page doesn't
+    // inherit a stale dim setting.
+    return () => {
+      root.style.removeProperty("--building-dim");
+    };
+  }, [phase, reducedMotion]);
 
   const handleRing = useCallback(async () => {
     if (phase !== "idle") return;

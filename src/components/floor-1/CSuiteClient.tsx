@@ -159,6 +159,13 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
   const [ceoState, setCEOState] = useState<"idle" | "thinking" | "talking">("idle");
   const [dispatchEvents, setDispatchEvents] = useState<Record<string, "running" | "completed">>({});
   const [chatStatus, setChatStatus] = useState<ChatStatus>("ready");
+  // R3.10 — mirror of RingTheBell's internal phase. Surfaced via the new
+  // `onPhaseChange` prop on the bell, then forwarded down to CSuiteScene as
+  // `bellPhase` so the scene root can carry `data-bell-phase` for CSS-driven
+  // camera-pullback + atmospheric dim.
+  const [bellPhase, setBellPhase] = useState<
+    "idle" | "ringing" | "orchestrating" | "complete"
+  >("idle");
   // The current bell-ring's correlation id, extracted from dispatchBatch's
   // tool output once it resolves. Null during the streaming window (graph
   // runs on dispatchEvents alone during that time) and also null for
@@ -318,6 +325,7 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
         onBriefingReady={handleBriefingReady}
         dispatchEvents={dispatchEvents}
         isStreaming={isStreaming}
+        onPhaseChange={setBellPhase}
       />
     </div>
   );
@@ -329,6 +337,7 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
         contentSlot={contentSlot}
         graphSlot={graphSlot}
         panelSlot={panelSlot}
+        bellPhase={bellPhase}
       />
 
       {/* CEO Dialogue Panel */}
