@@ -25,6 +25,10 @@
       "schedule": "*/5 * * * *"
     },
     {
+      "path": "/api/cron/draft-follow-ups",
+      "schedule": "0 */2 * * *"
+    },
+    {
       "path": "/api/cron/unprompted-ceo",
       "schedule": "0 */6 * * *"
     },

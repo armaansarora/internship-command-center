@@ -147,6 +147,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/war-table/WarTable.tsx` (353 LOC)
 - `src/components/floor-5/WritingRoomScene.tsx` (352 LOC) — WritingRoomScene — Floor 5 environment compositor.
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (344 LOC)
+- `src/components/world/PneumaticTubeArrivalOverlay.tsx` (341 LOC) — R7.4 — System-wide pneumatic-tube arrival overlay.
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
 - `src/components/world/MilestoneToast.tsx` (332 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
 - `src/components/floor-6/RolodexLoungeScene.tsx` (328 LOC) — RolodexLoungeScene — Floor 6 environment compositor.
@@ -162,9 +163,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
 - `src/components/lobby/concierge/OtisDialoguePanel.tsx` (250 LOC) — OtisDialoguePanel — the Concierge's conversation surface.
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
+- `src/components/world/PersistentWorld.tsx` (243 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/world/ErrorBoundary.tsx` (241 LOC) — ErrorBoundary — in-world error display using "the building's lights flicker" metaphor.
 - `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
-- `src/components/world/PersistentWorld.tsx` (236 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/floor-3/binder/BinderOpen.tsx` (235 LOC) — R6.8 — Flip-open view of a single Debrief binder.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
