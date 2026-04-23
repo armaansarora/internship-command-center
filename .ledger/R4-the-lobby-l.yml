@@ -12,8 +12,8 @@ started: 2026-04-23T05:26:14.574Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T05:47:57.038Z
-  expires: 2026-04-23T07:47:57.033Z
+  acquired: 2026-04-23T05:51:12.130Z
+  expires: 2026-04-23T07:51:12.125Z
 acceptance:
   criteria:
     - First-click to first-Morning-Briefing is fast and feels continuous.
@@ -48,10 +48,10 @@ tasks:
   R4.4:
     title: Concierge flow UI — Otis dialog orchestrator with honored skip button,
       writes target_profile + concierge_completed_at
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:47:57.038Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:50:52.861Z
+    commit: 3aa0fde
   R4.5:
     title: Bootstrap Job Discovery — real first-run trigger endpoint that awaits
       runJobDiscoveryForUser directly (no stubs, no mocked results)
@@ -105,8 +105,8 @@ tasks:
   R4.12:
     title: R4 anti-pattern test — cinematic arrival never plays twice (strict
       one-time-per-account guard)
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T05:51:12.130Z
     completed: null
     commit: null
 blockers:
@@ -140,3 +140,5 @@ history:
   - 2026-04-23T05:46:10.974Z: task_started R4.9
   - 2026-04-23T05:47:30.135Z: task_completed R4.9
   - 2026-04-23T05:47:57.038Z: task_started R4.4
+  - 2026-04-23T05:50:52.861Z: task_completed R4.4
+  - 2026-04-23T05:51:12.130Z: task_started R4.12

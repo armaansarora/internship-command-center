@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:50 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:51 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `09fa8ae`)
+- **Branch:** `main` (commit `3aa0fde`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 76,150 across 401 source files
+- **Total LOC:** 76,257 across 402 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-09fa8ae [R4/4.9] feat(lobby): returning-user fast lane
+3aa0fde [R4/4.4] feat(lobby): Concierge flow — Otis + cinematic + directory wired
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `09fa8ae`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3aa0fde`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (401 files, 76,150 LOC)
+## Source Tree (402 files, 76,257 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -151,6 +151,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/stripe` | 545 |
 | `src/components/floor-1/ceo-character` | 520 |
 | `src/components/floor-2/cfo-character` | 517 |
+| `src/app/lobby/onboarding` | 500 |
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
 | `src/components/penthouse/scenes/morning` | 448 |
@@ -160,7 +161,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/auth` | 411 |
 | `src/lib/supabase` | 402 |
 | `src/components/penthouse/quick-actions` | 398 |
-| `src/app/lobby/onboarding` | 393 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/actions` | 383 |
 | `src/lib/agents/coo` | 357 |
@@ -307,6 +307,7 @@ src/app/lobby/lobby-client.tsx
 src/app/lobby/onboarding/ConciergeFlow.smoke.test.tsx
 src/app/lobby/onboarding/ConciergeFlow.tsx
 src/app/lobby/onboarding/actions.ts
+src/app/lobby/onboarding/one-time-arrival.test.ts
 src/app/lobby/page.tsx
 src/app/not-found.tsx
 src/app/page.tsx
@@ -707,13 +708,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 751 | 7,880 |
+| `BOOTSTRAP-PROMPT.md` | 756 | 7,933 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 455 | 9,760 |
-| **Total** | **1855** | **30,086** |
+| **Total** | **1860** | **30,139** |
 
-> ⚠️ Reading all recommended files consumes ~30,086 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,139 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
