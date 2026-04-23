@@ -17,6 +17,7 @@ import { registerResume } from "./commands/resume.js";
 import { registerNext } from "./commands/next.js";
 import { registerInit } from "./commands/init.js";
 import { registerValidateMsg } from "./commands/validate-msg.js";
+import { registerVerify } from "./commands/verify.js";
 
 const program = new Command();
 
@@ -48,6 +49,7 @@ registerResume(program);
 registerNext(program);
 registerInit(program);
 registerValidateMsg(program);
+registerVerify(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);

@@ -7,8 +7,7 @@ import { detectDrift } from "../lib/drift.js";
 export function registerDiff(program: Command): void {
   program
     .command("diff")
-    .alias("verify")
-    .description("drift report: ledger vs git log")
+    .description("drift report: ledger vs git log (for full acceptance check, use `tower verify`)")
     .option("--strict", "exit non-zero if drift found")
     .action(async (opts: { strict?: boolean }) => {
       const repo = await findRepoRoot();
