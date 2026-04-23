@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:30 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:31 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `d458e80`)
+- **Branch:** `main` (commit `f5f8ff3`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 96,624 across 550 source files
+- **Total LOC:** 96,656 across 551 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-d458e80 [R8/8.11] feat(r8): consent guard + match-candidates 403 (P3/P4 invariants)
+f5f8ff3 [R8/8.12] feat(r8): private sticky-note on Rolodex card + P5 grep allowlist
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `d458e80`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `f5f8ff3`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (550 files, 96,624 LOC)
+## Source Tree (551 files, 96,656 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -109,7 +109,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7/war-table` | 1760 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
-| `src/app/__tests__` | 1490 |
+| `src/app/__tests__` | 1522 |
 | `src/lib/ai/structured` | 1315 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
@@ -315,6 +315,7 @@ src/app/__tests__/r8-cio-reresearch.proof.test.ts
 src/app/__tests__/r8-consent-copy.proof.test.ts
 src/app/__tests__/r8-consent-guard.proof.test.ts
 src/app/__tests__/r8-private-note-grep.proof.test.ts
+src/app/__tests__/r8-red-team.proof.test.ts
 src/app/__tests__/r8-warmth-decay.proof.test.ts
 src/app/api/account/delete/cancel/route.test.ts
 src/app/api/account/delete/cancel/route.ts
@@ -912,13 +913,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 960 | 10,559 |
+| `BOOTSTRAP-PROMPT.md` | 961 | 10,572 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 501 | 11,048 |
-| **Total** | **2110** | **34,053** |
+| **Total** | **2111** | **34,066** |
 
-> ⚠️ Reading all recommended files consumes ~34,053 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,066 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
