@@ -17,7 +17,37 @@ acceptance:
       end-to-end in Chrome and Safari.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R6.1:
+    title: Schema + migration 0016 — voice opt-in columns, drill_preferences jsonb, DebriefContent zod type
+    status: pending
+  R6.2:
+    title: Private audio bucket (migration Part 2) + opt-in-gated audio-upload + transcribe + voice-preference PUT (403/410/200 proof)
+    status: pending
+  R6.3:
+    title: Pure STAR extractor (src/components/floor-3/star/extract-star.ts) — 30+ unit tests
+    status: pending
+  R6.4:
+    title: interrupt-rules.ts + xstate drill-machine.ts with firmness-gated triggers + cooldown + grace-window
+    status: pending
+  R6.5:
+    title: LiveSTARBoard — reactive 4-column whiteboard that paints from extractStar hints
+    status: pending
+  R6.6:
+    title: DrillStage — textarea + 90s/120s timer + opt-in-gated mic toggle + InterruptBubble; wires LiveSTARBoard, drill-machine, interrupt-rules
+    status: pending
+  R6.7:
+    title: AI SDK drill-questions + score-answer + routes (start-drill / score-answer / complete-drill) + debriefs-rest queries
+    status: pending
+  R6.8:
+    title: DebriefBinderShelf — physical leather spines, filed by company, aging function, flip-open BinderOpen (NOT JSON dump)
+    status: pending
+  R6.9:
+    title: /api/cron/packet-regenerate hourly — regenerates stale/missing packets for imminent interviews + pneumatic-tube notification
+    status: pending
+  R6.10:
+    title: R6 proof suite (5 invariants) + scripts/r6-acceptance-check.ts + 4-gate verify before acceptance.met
+    status: pending
 blockers: []
 decisions: []
 history: []

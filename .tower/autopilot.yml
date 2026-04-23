@@ -1,23 +1,25 @@
-paused: true
-scope: R5-only
-started: 2026-04-23T07:02:00.000Z
-started_by: sess-af795e
-ended: 2026-04-23T07:42:00.000Z
-ended_reason: scope_complete — R5 acceptance.met=true; 9/10 tasks shipped, R5.4 polish deferred as B1
+paused: false
+scope: R6-only
+started: null
+started_by: queued-by-partner-for-r6-kickoff
+ended: null
+ended_reason: null
 max_blockers: 3
-previous_phase: R4
-previous_outcome: "R4 complete — 12/12 tasks (1 open blocker B1 for LinkedIn env vars, correctly filed not stubbed). 622 tests (98 new since R3). tsc + build green. Lint 15e/7w (+1 warning vs R3). Otis Concierge shipped as genuinely new character (burgundy #6B2A2E, test-asserted no-gold). Bootstrap Job Discovery calls real runJobDiscoveryForUser — no stubs. Three-layer atomic one-time-per-account guard. Auth + Stripe untouched (returning-user fast lane via proxy.ts redirect). Cinematic arrival CSS+GSAP over ProceduralSkyline, not R3F. CEO voice DEFERRED (3× now)."
-next_phase: R5
-next_brief: docs/NEXT-ROADMAP.md §9 R5 — The Writing Room (Floor 5)
+previous_phase: R5
+previous_outcome: "R5 complete — 9/10 tasks (R5.4 live-compose streaming + pen-glow DEFERRED as B1/polish — PARTNER FLAGGED AS INTENT-LEVEL DRIFT, not true polish). 709 tests. tsc + build green. Lint 15e/11w (+4 warnings vs R4). Three-tone divergence is genuine (distinct system prompts, Jaccard<0.70 asserted). Private Supabase Storage enforced (admin client, no public URLs). Two-click approval gate (choose-tone → approve). Auth/Stripe untouched. R4's LinkedIn B1 carried forward."
+next_phase: R6
+next_brief: docs/NEXT-ROADMAP.md §10 R6 — The Briefing Room (Floor 3)
 open_blockers_carrying_forward:
-  - B1 (LinkedIn OAuth env vars) — do not unblock without credentials
+  - R4 B1 (LinkedIn OAuth env vars) — do not unblock without credentials
+  - R5 B1 (R5.4 live-compose — partner decision pending whether to ship before R6)
 verification_before_acceptance:
   - npm test
   - npx tsc --noEmit
   - npm run build
   - npm run lint
 partner_constraints:
-  - User approval gate MUST fire before any application is sent; no single-click generate-and-send
-  - Three tone variants demonstrably different on same JD — assert output divergence in proof (NOT different temperatures)
-  - Base resume uploads go to PRIVATE Supabase Storage with signed URLs only; blocker if bucket unprovisioned, never public URLs
-  - B1 (LinkedIn) still open — if R5 task wants LinkedIn data, it waits, not stubs
+  - DO NOT repeat R5.4 pattern — Intent-level character flourishes are NEVER "polish." If the brief's Intent paragraph describes a behavior (live whiteboard fill, CPO mid-answer interruption), it ships or the phase does not mark acceptance.met.
+  - tower verify ✗ is BINDING, not advisory — 9/10 tasks is not acceptance.met. If any verify check fails, do not flip the ledger.
+  - Debrief Binder must render as a physical artifact on a shelf (ages visually over time); a JSON dump with a filename is an anti-pattern called out in the brief.
+  - Voice recording is opt-in ONLY — private Supabase Storage, user can disable permanently; if opt-in enforcement cannot be guaranteed, ship text-only and open a blocker instead of shipping a half-gated voice path.
+  - CEO/character voice has been deferred 3× (R2, R3, R4). R6 is a voice-candidate. Pick a clear outcome (ship voice OR explicitly defer with reason), no ambiguous partial.
