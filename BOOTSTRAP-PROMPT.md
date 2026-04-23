@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:20 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:21 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `7a0c58b`)
+- **Branch:** `main` (commit `2552a7b`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 95,003 across 534 source files
+- **Total LOC:** 95,186 across 536 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-7a0c58b [R8/8.5] feat(r8): side-switch [ / ] keys between CNO and CIO (P8 invariant)
+2552a7b [R8/8.6] feat(r8): CIO dossier wall — dossiers yellow and corners curl with age
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `7a0c58b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `2552a7b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (534 files, 95,003 LOC)
+## Source Tree (536 files, 95,186 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -113,9 +113,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
+| `src/app/__tests__` | 1216 |
 | `src/app` | 1177 |
 | `src/lib/situation` | 1164 |
-| `src/app/__tests__` | 1148 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1122 |
 | `src/app/(authenticated)/settings` | 1112 |
@@ -237,6 +237,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
 | `src/app/api/writing-room/approve` | 129 |
+| `src/app/api/cron/warmth-decay` | 115 |
 | `src/app/api/briefing/binder/[id]` | 114 |
 | `src/app/api/documents/[id]/pdf` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
@@ -303,6 +304,7 @@ src/app/__tests__/r5-writing-room.proof.test.ts
 src/app/__tests__/r6-briefing-room.proof.test.ts
 src/app/__tests__/r7-situation-room.proof.test.ts
 src/app/__tests__/r7-undo-proof.test.ts
+src/app/__tests__/r8-warmth-decay.proof.test.ts
 src/app/api/account/delete/cancel/route.test.ts
 src/app/api/account/delete/cancel/route.ts
 src/app/api/account/delete/route.test.ts
@@ -353,6 +355,7 @@ src/app/api/cron/purge-sweeper/route.ts
 src/app/api/cron/sync/route.ts
 src/app/api/cron/unprompted-ceo/route.test.ts
 src/app/api/cron/unprompted-ceo/route.ts
+src/app/api/cron/warmth-decay/route.ts
 src/app/api/documents/[id]/pdf/__tests__/route.test.ts
 src/app/api/documents/[id]/pdf/route.ts
 src/app/api/drive/export/route.ts
@@ -888,13 +891,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 932 | 10,207 |
+| `BOOTSTRAP-PROMPT.md` | 937 | 10,276 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 500 | 11,013 |
-| **Total** | **2081** | **33,666** |
+| **Total** | **2086** | **33,735** |
 
-> ⚠️ Reading all recommended files consumes ~33,666 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,735 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

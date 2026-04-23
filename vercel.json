@@ -35,6 +35,18 @@
     {
       "path": "/api/cron/packet-regenerate",
       "schedule": "15 * * * *"
+    },
+    {
+      "path": "/api/cron/warmth-decay",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/cio-reresearch",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/warm-intro-scan",
+      "schedule": "0 6 * * *"
     }
   ]
 }
