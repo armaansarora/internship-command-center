@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:51 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:55 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `b1bafde`)
+- **Branch:** `main` (commit `3ed9832`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 71,354 across 369 source files
+- **Total LOC:** 71,822 across 370 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-b1bafde [R3/3.10] feat(ui): bell polish — building dim + camera pull-back
+3ed9832 [R3/3.11] feat(ui): /-inject mid-dispatch — direct the CEO while the room is running
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `b1bafde`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3ed9832`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,12 +95,12 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (369 files, 71,354 LOC)
+## Source Tree (370 files, 71,822 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 5427 |
-| `src/lib/ai/agents` | 3408 |
+| `src/lib/ai/agents` | 3876 |
 | `src/components/world` | 3162 |
 | `src/components/floor-1` | 2660 |
 | `src/styles` | 2526 |
@@ -469,6 +469,7 @@ src/lib/agents/cro/target-profile.test.ts
 src/lib/agents/cro/target-profile.ts
 src/lib/agents/cro/tools.ts
 src/lib/ai/agents/ceo-orchestrator.dispatch-batch.proof.test.ts
+src/lib/ai/agents/ceo-orchestrator.r3-proof.test.ts
 src/lib/ai/agents/ceo-orchestrator.shared-knowledge.test.ts
 src/lib/ai/agents/ceo-orchestrator.ts
 src/lib/ai/agents/morning-briefing.proof.test.ts
@@ -665,13 +666,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 711 | 7,370 |
+| `BOOTSTRAP-PROMPT.md` | 714 | 7,412 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 447 | 9,497 |
-| **Total** | **1807** | **29,313** |
+| **Total** | **1810** | **29,355** |
 
-> ⚠️ Reading all recommended files consumes ~29,313 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,355 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
