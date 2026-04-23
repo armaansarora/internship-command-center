@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:32 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:38 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `bfd4195`)
+- **Branch:** `main` (commit `5c663e5`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 72,542 across 375 source files
+- **Total LOC:** 73,486 across 383 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-bfd4195 [R4/4.1] feat(db): user_profiles lobby onboarding columns
+5c663e5 [R4/4.2] feat(lobby): Otis — Concierge character primitives
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `bfd4195`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `5c663e5`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,11 +95,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (375 files, 72,542 LOC)
+## Source Tree (383 files, 73,486 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 5427 |
+| `src/lib/db/queries` | 5633 |
 | `src/lib/ai/agents` | 3876 |
 | `src/components/world` | 3162 |
 | `src/components/floor-1` | 2660 |
@@ -155,6 +155,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/morning` | 448 |
 | `src/app/api/cron/purge-sweeper` | 439 |
 | `src/lib/account` | 432 |
+| `src/lib/agents/concierge` | 411 |
 | `src/lib/auth` | 411 |
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/components/floor-6/contact-grid` | 392 |
@@ -172,6 +173,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
 | `src/components/penthouse/rest` | 268 |
+| `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
 | `src/app/api/cron/sync` | 213 |
@@ -192,6 +194,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
+| `src/app/api/concierge/chat` | 103 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/(authenticated)/situation-room` | 86 |
@@ -260,6 +263,9 @@ src/app/api/cfo/route.ts
 src/app/api/cio/route.ts
 src/app/api/cmo/route.ts
 src/app/api/cno/route.ts
+src/app/api/concierge/chat/route.ts
+src/app/api/concierge/extract/route.test.ts
+src/app/api/concierge/extract/route.ts
 src/app/api/coo/route.ts
 src/app/api/cpo/route.ts
 src/app/api/cro/route.ts
@@ -460,6 +466,10 @@ src/lib/agents/cmo/tools.ts
 src/lib/agents/cno/character-machine.ts
 src/lib/agents/cno/system-prompt.ts
 src/lib/agents/cno/tools.ts
+src/lib/agents/concierge/extract.test.ts
+src/lib/agents/concierge/extract.ts
+src/lib/agents/concierge/system-prompt.test.ts
+src/lib/agents/concierge/system-prompt.ts
 src/lib/agents/coo/character-machine.ts
 src/lib/agents/coo/system-prompt.ts
 src/lib/agents/coo/tools.ts
@@ -533,6 +543,7 @@ src/lib/db/queries/pipeline-stats.test.ts
 src/lib/db/queries/prep-stats-rest.ts
 src/lib/db/queries/shared-knowledge-rest.ts
 src/lib/db/queries/shared-knowledge.test.ts
+src/lib/db/queries/user-profiles-rest.ts
 src/lib/easter-eggs.ts
 src/lib/email/outreach.test.ts
 src/lib/email/outreach.ts
@@ -672,13 +683,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 716 | 7,433 |
+| `BOOTSTRAP-PROMPT.md` | 721 | 7,502 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 451 | 9,642 |
-| **Total** | **1816** | **29,521** |
+| **Total** | **1821** | **29,590** |
 
-> ⚠️ Reading all recommended files consumes ~29,521 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,590 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
