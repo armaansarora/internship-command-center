@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:33 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:38 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `d176e5d`)
+- **Branch:** `main` (commit `d1e7dbb`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 81,899 across 435 source files
+- **Total LOC:** 82,486 across 443 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-d176e5d [R6/6.3] star: pure client-side STAR extractor (30+ tests)
+d1e7dbb [R6/6.4] drill: interrupt rules + xstate drill-machine
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `d176e5d`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `d1e7dbb`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,11 +95,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (435 files, 81,899 LOC)
+## Source Tree (443 files, 82,486 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 5948 |
+| `src/lib/db/queries` | 6029 |
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3162 |
 | `src/components/floor-1` | 2660 |
@@ -191,6 +191,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cron/sync` | 213 |
 | `src/lib/agents/cmo/__tests__` | 212 |
 | `src/app/api/writing-room/choose-tone/__tests__` | 209 |
+| `src/app/api/briefing/audio-upload` | 208 |
 | `src/lib/email` | 206 |
 | `src/app/api/resumes/upload` | 205 |
 | `src/app/api/cron/outreach-sender` | 203 |
@@ -208,8 +209,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/idle` | 153 |
 | `src/components/icons` | 152 |
 | `src/lib/validators` | 148 |
+| `src/app/api/briefing/transcribe` | 139 |
 | `src/app/api/onboarding/bootstrap-discovery` | 137 |
 | `src/types` | 135 |
+| `src/app/api/briefing/voice-preference` | 134 |
 | `src/components/floor-5/wall-inscription` | 134 |
 | `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
@@ -243,6 +246,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/auth/callback` | 30 |
 | `src/app/api/stripe/portal` | 27 |
 | `src/app/api/auth/signout` | 25 |
+| `src/lib/speech` | 25 |
 | `src/app/api/gmail/sync` | 19 |
 | `src/app/api/calendar/sync` | 17 |
 | `src` | 17 |
@@ -282,6 +286,12 @@ src/app/api/account/export/route.test.ts
 src/app/api/account/export/route.ts
 src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
+src/app/api/briefing/audio-upload/route.test.ts
+src/app/api/briefing/audio-upload/route.ts
+src/app/api/briefing/transcribe/route.test.ts
+src/app/api/briefing/transcribe/route.ts
+src/app/api/briefing/voice-preference/route.test.ts
+src/app/api/briefing/voice-preference/route.ts
 src/app/api/calendar/sync/route.ts
 src/app/api/ceo/dispatches/route.test.ts
 src/app/api/ceo/dispatches/route.ts
@@ -601,6 +611,7 @@ src/lib/db/queries/contacts-rest.ts
 src/lib/db/queries/daily-snapshots-rest.ts
 src/lib/db/queries/documents-mutations.ts
 src/lib/db/queries/documents-rest.ts
+src/lib/db/queries/drill-prefs-rest.ts
 src/lib/db/queries/embeddings-rest.ts
 src/lib/db/queries/interviews-mutations.ts
 src/lib/db/queries/job-discovery-rest.ts
@@ -663,6 +674,7 @@ src/lib/resumes/__tests__/parse.test.ts
 src/lib/resumes/parse.ts
 src/lib/skyline-engine.ts
 src/lib/sound/engine.ts
+src/lib/speech/transcribe.ts
 src/lib/stripe/agent-access.ts
 src/lib/stripe/config.ts
 src/lib/stripe/entitlements.ts
@@ -763,13 +775,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 807 | 8,582 |
+| `BOOTSTRAP-PROMPT.md` | 812 | 8,647 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 461 | 9,927 |
-| **Total** | **1917** | **30,955** |
+| **Total** | **1922** | **31,020** |
 
-> ⚠️ Reading all recommended files consumes ~30,955 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,020 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
