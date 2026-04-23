@@ -12,8 +12,8 @@ started: 2026-04-23T07:02:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T07:25:23.098Z
-  expires: 2026-04-23T09:25:23.093Z
+  acquired: 2026-04-23T07:30:12.863Z
+  expires: 2026-04-23T09:30:12.858Z
 acceptance:
   criteria:
     - "User can generate a tailored cover letter and resume for one application
@@ -54,13 +54,14 @@ tasks:
     commit: 0c30e60
   R5.6:
     title: Approval gate UI + outreach_queue cover_letter_send + cron extension
-    status: in_progress
+    status: complete
     started: 2026-04-23T07:25:23.098Z
-    completed: null
+    completed: 2026-04-23T07:30:01.682Z
+    commit: ec5d4ae
   R5.7:
     title: "@react-pdf/renderer — cover letter + resume PDF export"
     status: in_progress
-    started: 2026-04-23T07:15:03.643Z
+    started: 2026-04-23T07:30:12.863Z
     completed: null
   R5.8:
     title: Resume Press mechanical SVG + GSAP actuation
@@ -97,3 +98,5 @@ history:
   - 2026-04-23T07:23:32.769Z: task_started R5.5
   - 2026-04-23T07:25:10.524Z: task_completed R5.5
   - 2026-04-23T07:25:23.098Z: task_started R5.6
+  - 2026-04-23T07:30:01.682Z: task_completed R5.6
+  - 2026-04-23T07:30:12.863Z: task_started R5.7

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:29 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:31 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `0c30e60`)
+- **Branch:** `main` (commit `ec5d4ae`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 79,717 across 418 source files
+- **Total LOC:** 80,221 across 422 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-0c30e60 [R5/5.5] feat(cmo): resume tailoring reads active base_resume by default
+ec5d4ae [R5/5.6] feat(writing-room): approval gate — pending→chose→approve→sent
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `0c30e60`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `ec5d4ae`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (418 files, 79,717 LOC)
+## Source Tree (422 files, 80,221 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -180,6 +180,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents` | 269 |
 | `src/components/penthouse/rest` | 268 |
 | `src/app/api/resumes/upload/__tests__` | 227 |
+| `src/lib/pdf` | 225 |
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
@@ -195,6 +196,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
 | `src/lib/lobby` | 172 |
+| `src/app/api/documents/[id]/pdf/__tests__` | 168 |
 | `src/lib/resumes` | 168 |
 | `src/app/api/writing-room/choose-tone` | 165 |
 | `src/app/api/cron/export-worker` | 157 |
@@ -206,6 +208,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
 | `src/app/api/writing-room/approve` | 129 |
+| `src/app/api/documents/[id]/pdf` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
@@ -297,6 +300,8 @@ src/app/api/cron/purge-sweeper/route.ts
 src/app/api/cron/sync/route.ts
 src/app/api/cron/unprompted-ceo/route.test.ts
 src/app/api/cron/unprompted-ceo/route.ts
+src/app/api/documents/[id]/pdf/__tests__/route.test.ts
+src/app/api/documents/[id]/pdf/route.ts
 src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
@@ -622,6 +627,8 @@ src/lib/lobby/derive-floors-unlocked.ts
 src/lib/logger.test.ts
 src/lib/logger.ts
 src/lib/onboarding/bootstrap.ts
+src/lib/pdf/cover-letter-pdf.tsx
+src/lib/pdf/resume-pdf.tsx
 src/lib/penthouse/briefing-fallback.test.ts
 src/lib/penthouse/briefing-fallback.ts
 src/lib/penthouse/briefing-storage.test.ts
@@ -673,7 +680,7 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>45 packages</summary>
+<summary>46 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
@@ -682,6 +689,7 @@ src/types/ui.ts
 @dnd-kit/core: ^6.3.1
 @dnd-kit/sortable: ^10.0.0
 @playwright/test: ^1.59.1
+@react-pdf/renderer: ^4.5.1
 @sentry/nextjs: ^10.45.0
 @supabase/ssr: ^0.9.0
 @supabase/supabase-js: ^2.99.2
@@ -737,13 +745,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 775 | 8,158 |
+| `BOOTSTRAP-PROMPT.md` | 786 | 8,328 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 457 | 9,823 |
-| **Total** | **1881** | **30,427** |
+| **Total** | **1892** | **30,597** |
 
-> ⚠️ Reading all recommended files consumes ~30,427 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,597 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
