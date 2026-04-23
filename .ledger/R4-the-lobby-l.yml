@@ -1,6 +1,6 @@
 phase: R4
 name: The Lobby (L)
-status: not_started
+status: in_progress
 intent: The front door of the Tower. The moment when a first-time user *decides*
   this building is real. Existing users get a quiet welcome-back (zero
   ceremony). Returning users are already logged in and routed to their last
@@ -8,9 +8,12 @@ intent: The front door of the Tower. The moment when a first-time user *decides*
   promise. The Concierge captures a target profile in a conversation, not a
   form. Their first session ends with a Morning Briefing built from jobs the
   Tower discovered during onboarding.
-started: null
+started: 2026-04-23T05:26:14.574Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-23T05:26:14.574Z
+  expires: 2026-04-23T07:26:14.569Z
 acceptance:
   criteria:
     - First-click to first-Morning-Briefing is fast and feels continuous.
@@ -19,7 +22,94 @@ acceptance:
       progression without drift.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R4.1:
+    title: user_profiles onboarding columns — migration 0013 (arrival_played_at,
+      concierge_target_profile, concierge_completed_at, first_briefing_shown,
+      floors_unlocked)
+    status: in_progress
+    started: 2026-04-23T05:26:14.574Z
+    completed: null
+    commit: null
+  R4.2:
+    title: Otis — Concierge character primitives (new character, burgundy accent,
+      reception-desk scene, not a repurposed C-suite)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.3:
+    title: Concierge conversation engine — streamText chat + structured
+      target-profile extraction (AI SDK v6 generateObject)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.4:
+    title: Concierge flow UI — Otis dialog orchestrator with honored skip button,
+      writes target_profile + concierge_completed_at
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.5:
+    title: Bootstrap Job Discovery — real first-run trigger endpoint that awaits
+      runJobDiscoveryForUser directly (no stubs, no mocked results)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.6:
+    title: First-ever Morning Briefing override — atomic-guarded one-shot on
+      Penthouse mount referencing the just-discovered applications
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.7:
+    title: Cinematic arrival scene — CSS+GSAP aerial approach over
+      ProceduralSkyline, strict one-time-per-account via arrival_played_at
+      atomic claim
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.8:
+    title: Building Directory cross-section — vertical diorama of 9 stacked floors
+      driven by live floors_unlocked
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.9:
+    title: Returning-user fast lane — proxy redirects /lobby to lastFloorVisited
+      when arrival_played_at is set
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.10:
+    title: LinkedIn OAuth BLOCKER — no env vars, no stub; ship R4 without LinkedIn
+      sync per autopilot directive
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.11:
+    title: R4 Proof — end-to-end first-run integration test (concierge → real
+      discovery → first briefing references discovered applications)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R4.12:
+    title: R4 anti-pattern test — cinematic arrival never plays twice (strict
+      one-time-per-account guard)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
 blockers: []
 decisions: []
-history: []
+history:
+  - 2026-04-23T05:26:14.574Z: task_started R4.1

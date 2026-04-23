@@ -1,12 +1,12 @@
-paused: true
-scope: R3-only
-started: 2026-04-22T23:45:00.000Z
-started_by: sess-r3-opus47
-ended: 2026-04-23T04:58:00.000Z
-ended_reason: scope_complete
+paused: false
+scope: R4-only
+started: 2026-04-23T07:14:00.000Z
+started_by: sess-9226e5
+ended: null
+ended_reason: null
 max_blockers: 3
 previous_phase: R3
-previous_outcome: "R3 complete — 12/12 tasks. 524 tests (158 new since R2). tsc clean. npm run build green. Lint 15 errors + 6 warnings (R2 baseline preserved). dispatchBatch ships ≥3 agents in parallel; animated 7-node DispatchGraph; agent_dispatches table with real depends_on uuid[]; CIO→CRO shared-knowledge bridge proves cross-agent learning; unprompted CEO cron at 6h cadence; bell polish (dim + pull-back); /-inject mid-dispatch. Stripe + auth untouched. CEO voice DEFERRED to R4."
+previous_outcome: "R3 complete — 12/12 tasks. 524 tests (158 new since R2). tsc + build + lint all green at/under baseline. Real Promise.allSettled fan-out in dispatchBatch, agent_dispatches migration with depends_on uuid[] (column shipped, usage deferred), animated DispatchGraph via SMIL, unprompted CEO cron (6h cadence, 3 threshold fns), CIO→CRO shared_knowledge bridge proven by captured-prompt assertion, Stripe + auth untouched. CEO voice DEFERRED (twice now — R2 + R3)."
 next_phase: R4
 next_brief: docs/NEXT-ROADMAP.md §8 R4 — The Lobby (L)
 verification_before_acceptance:

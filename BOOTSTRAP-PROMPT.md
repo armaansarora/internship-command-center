@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:58 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:27 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `9d8768f`)
+- **Branch:** `main` (commit `a058e11`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 71,822 across 370 source files
+- **Total LOC:** 71,905 across 371 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-9d8768f chore(handoff): session sess-a5908e — R0
+a058e11 chore(autopilot): R3 scope complete — paused, handed off to R4 brief
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `9d8768f`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `a058e11`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (370 files, 71,822 LOC)
+## Source Tree (371 files, 71,905 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -139,10 +139,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
+| `src/db` | 675 |
 | `src/lib/sound` | 641 |
 | `src/app/(authenticated)/penthouse` | 603 |
 | `src/lib/ai` | 599 |
-| `src/db` | 592 |
 | `src/lib/agents/ceo` | 585 |
 | `src/components/floor-2` | 576 |
 | `src/app/api/cron/unprompted-ceo` | 573 |
@@ -416,6 +416,7 @@ src/components/world/WeatherEffects.tsx
 src/components/world/elevator/ElevatorButton.tsx
 src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
+src/db/schema.r4.test.ts
 src/db/schema.ts
 src/hooks/useAgentChat.ts
 src/hooks/useDispatchProgress.test.ts
@@ -666,13 +667,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 715 | 7,421 |
+| `BOOTSTRAP-PROMPT.md` | 715 | 7,420 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 447 | 9,497 |
-| **Total** | **1811** | **29,364** |
+| **Total** | **1811** | **29,363** |
 
-> ⚠️ Reading all recommended files consumes ~29,364 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,363 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
