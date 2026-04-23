@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 11:51 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 11:55 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `8e1375e`)
+- **Branch:** `main` (commit `b29836b`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 65,197 across 345 source files
+- **Total LOC:** 65,718 across 347 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-8e1375e chore(autopilot): R2 scope complete — paused, handed off to R3 brief
+b29836b [R3] docs: design + plan (C-Suite Floor 1)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `8e1375e`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b29836b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,11 +95,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (345 files, 65,197 LOC)
+## Source Tree (347 files, 65,718 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 4416 |
+| `src/lib/db/queries` | 4905 |
 | `src/components/world` | 3162 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1811 |
@@ -141,9 +141,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cio` | 615 |
 | `src/app/(authenticated)/penthouse` | 603 |
 | `src/lib/ai` | 599 |
+| `src/db` | 587 |
 | `src/hooks` | 584 |
 | `src/components/floor-2` | 576 |
-| `src/db` | 555 |
 | `src/lib/stripe` | 545 |
 | `src/lib/agents/ceo` | 521 |
 | `src/components/floor-2/cfo-character` | 517 |
@@ -482,6 +482,8 @@ src/lib/crypto/keys.test.ts
 src/lib/crypto/keys.ts
 src/lib/day-night.ts
 src/lib/db/postgrest-error.ts
+src/lib/db/queries/agent-dispatches-rest.ts
+src/lib/db/queries/agent-dispatches.test.ts
 src/lib/db/queries/agent-memory-rest.ts
 src/lib/db/queries/applications-rest.ts
 src/lib/db/queries/communications-rest.ts
@@ -639,13 +641,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 688 | 7,072 |
+| `BOOTSTRAP-PROMPT.md` | 688 | 7,080 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 440 | 9,232 |
-| **Total** | **1777** | **28,750** |
+| **Total** | **1777** | **28,758** |
 
-> ⚠️ Reading all recommended files consumes ~28,750 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~28,758 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

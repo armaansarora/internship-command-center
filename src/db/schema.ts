@@ -363,6 +363,36 @@ export const agentLogs = pgTable("agent_logs", {
 ]);
 
 // ===========================================================================
+// 10a. AGENT DISPATCHES — the dispatch tree produced by one CEO bell-ring.
+// Each row is a single CEO→subagent dispatch within a user turn. `request_id`
+// groups every dispatch produced by the same bell-ring so the UI can render
+// a fan-out timeline and the orchestrator can aggregate results. `depends_on`
+// is an empty array today; R3's later phases use it to schedule 2-level
+// dispatches (e.g. a follow-up subagent that waits on another's summary).
+// Status transitions: queued → running → completed|failed. Tokens + timing
+// roll up into the per-request telemetry the War Room's CRO panel reads.
+// ===========================================================================
+export const agentDispatches = pgTable("agent_dispatches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  requestId: text("request_id").notNull(),
+  parentDispatchId: uuid("parent_dispatch_id"),
+  agent: text("agent").notNull(),
+  dependsOn: uuid("depends_on").array().notNull().default(sql`'{}'::uuid[]`),
+  task: text("task").notNull(),
+  status: text("status", { enum: ["queued", "running", "completed", "failed"] }).notNull().default("queued"),
+  summary: text("summary"),
+  tokensUsed: integer("tokens_used").default(0),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  ...timestamps,
+}, (table) => [
+  userIsolation("agent_dispatches"),
+  index("idx_dispatches_user_request").on(table.userId, table.requestId),
+  index("idx_dispatches_request_status").on(table.requestId, table.status),
+]);
+
+// ===========================================================================
 // 10b. AUDIT LOGS — security-sensitive events (distinct from agent_logs
 // cost telemetry). Reads gated to the owning user; writes are service-role
 // only (no INSERT/UPDATE/DELETE policy). The `event_type` CHECK constraint
@@ -540,6 +570,8 @@ export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
 export type AgentLog = typeof agentLogs.$inferSelect;
 export type NewAgentLog = typeof agentLogs.$inferInsert;
+export type AgentDispatch = typeof agentDispatches.$inferSelect;
+export type NewAgentDispatch = typeof agentDispatches.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;
 export type AgentMemoryEntry = typeof agentMemory.$inferSelect;
