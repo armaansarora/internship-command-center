@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:20 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:24 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `e4972d1`)
+- **Branch:** `main` (commit `2b3b1c2`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 81,089 across 427 source files
+- **Total LOC:** 81,241 across 429 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-e4972d1 chore(autopilot): R5 scope complete — paused until next scope
+2b3b1c2 [R6/kickoff] docs: R6 design + plan + ledger stub
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `e4972d1`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `2b3b1c2`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (427 files, 81,089 LOC)
+## Source Tree (429 files, 81,241 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -130,13 +130,13 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/jobs/sources` | 931 |
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
+| `src/db` | 879 |
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
 | `src/components/lobby/cinematic` | 832 |
 | `src/lib/agents/cio` | 817 |
 | `src/lib/penthouse` | 796 |
-| `src/db` | 788 |
 | `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
@@ -207,6 +207,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/icons` | 152 |
 | `src/lib/validators` | 148 |
 | `src/app/api/onboarding/bootstrap-discovery` | 137 |
+| `src/types` | 135 |
 | `src/components/floor-5/wall-inscription` | 134 |
 | `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
@@ -222,7 +223,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
 | `src/lib/resumes/__tests__` | 79 |
-| `src/types` | 74 |
 | `src/lib/onboarding` | 70 |
 | `src/app/api/notifications` | 67 |
 | `src/components/penthouse/scenes` | 62 |
@@ -482,6 +482,7 @@ src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
 src/db/schema.r4.test.ts
 src/db/schema.r5.test.ts
+src/db/schema.r6.test.ts
 src/db/schema.ts
 src/hooks/useAgentChat.ts
 src/hooks/useConciergeChat.ts
@@ -681,6 +682,7 @@ src/styles/floor-6.css
 src/styles/floor-7.css
 src/types/agents.ts
 src/types/api.ts
+src/types/debrief.ts
 src/types/ui.ts
 ```
 </details>
@@ -753,13 +755,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 802 | 8,523 |
+| `BOOTSTRAP-PROMPT.md` | 802 | 8,529 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 461 | 9,927 |
-| **Total** | **1912** | **30,896** |
+| **Total** | **1912** | **30,902** |
 
-> ⚠️ Reading all recommended files consumes ~30,896 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,902 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

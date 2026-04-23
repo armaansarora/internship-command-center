@@ -84,6 +84,26 @@ export const userProfiles = pgTable("user_profiles", {
   // (everyone is in the Lobby at creation); extended by syncFloorsUnlocked
   // as applications, contacts, interviews, etc. appear.
   floorsUnlocked: text("floors_unlocked").array().notNull().default(sql`'{L}'::text[]`),
+  // R6 — Mock interview drill voice opt-in.
+  // voiceRecordingEnabled: default false. User can flip true in Settings or
+  // at drill start. Gated end-to-end by /api/briefing/audio-upload and
+  // /api/briefing/transcribe (403 if false).
+  voiceRecordingEnabled: boolean("voice_recording_enabled")
+    .notNull()
+    .default(false),
+  // voiceRecordingPermanentlyDisabled: one-way latch. Once true, neither the
+  // UI toggle nor the PUT /api/briefing/voice-preference route will re-enable
+  // voice. Intended for users who want voice permanently off regardless of
+  // future UI prompts.
+  voiceRecordingPermanentlyDisabled: boolean("voice_recording_permanently_disabled")
+    .notNull()
+    .default(false),
+  // R6 — Per-user drill tuning. interruptFirmness: gentle|firm|hardass gates
+  // how aggressively CPO's interrupt-rules FSM fires. timerSeconds: default
+  // 90s amber threshold; 120s hard cap.
+  drillPreferences: jsonb("drill_preferences")
+    .notNull()
+    .default(sql`'{"interruptFirmness":"firm","timerSeconds":90}'::jsonb`),
   ...timestamps,
 }, () => [
   pgPolicy("user_profiles_self_access", {
