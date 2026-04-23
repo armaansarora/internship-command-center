@@ -14,8 +14,10 @@ interface PipelineColumnProps {
   color: string;
   applications: Application[];
   isCollapsed?: boolean;
+  selection?: Set<string>;
   onEdit?: (app: Application) => void;
   onDelete?: (id: string) => void;
+  onToggleSelection?: (id: string, event: { shiftKey: boolean }) => void;
 }
 
 export function PipelineColumn({
@@ -24,8 +26,10 @@ export function PipelineColumn({
   color,
   applications,
   isCollapsed: initialCollapsed = false,
+  selection,
   onEdit,
   onDelete,
+  onToggleSelection,
 }: PipelineColumnProps): JSX.Element {
   const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
 
@@ -183,8 +187,10 @@ export function PipelineColumn({
                 <div key={app.id} role="listitem">
                   <ApplicationCard
                     application={app}
+                    isSelected={selection?.has(app.id) ?? false}
                     onEdit={onEdit}
                     onDelete={onDelete}
+                    onToggleSelection={onToggleSelection}
                   />
                 </div>
               ))

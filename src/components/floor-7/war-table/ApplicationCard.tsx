@@ -8,8 +8,10 @@ import type { Application } from "@/db/schema";
 interface ApplicationCardProps {
   application: Application;
   isOverlay?: boolean;
+  isSelected?: boolean;
   onEdit?: (app: Application) => void;
   onDelete?: (id: string) => void;
+  onToggleSelection?: (id: string, event: { shiftKey: boolean }) => void;
 }
 
 type ClassificationStamp =
@@ -89,8 +91,10 @@ function isStale(lastActivityAt: Date | string | null): boolean {
 export function ApplicationCard({
   application,
   isOverlay = false,
+  isSelected = false,
   onEdit,
   onDelete,
+  onToggleSelection,
 }: ApplicationCardProps): JSX.Element {
   const {
     attributes,
@@ -127,22 +131,80 @@ export function ApplicationCard({
       data-dragging={isDragging}
       data-overlay={isOverlay}
     >
+      {/* Selection checkbox — positioned absolutely so dnd-kit's drag listeners
+          on the outer div don't swallow the click. */}
+      {onToggleSelection && !isOverlay && (
+        <button
+          type="button"
+          aria-label={
+            isSelected
+              ? `Deselect ${companyDisplay} — ${application.role}`
+              : `Select ${companyDisplay} — ${application.role} for batch stamp`
+          }
+          aria-pressed={isSelected}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelection(application.id, { shiftKey: e.shiftKey });
+          }}
+          style={{
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            width: "18px",
+            height: "18px",
+            borderRadius: "2px",
+            border: `1px solid ${isSelected ? "#C9A84C" : "rgba(127, 179, 211, 0.35)"}`,
+            background: isSelected
+              ? "rgba(201, 168, 76, 0.9)"
+              : "rgba(10, 22, 40, 0.4)",
+            cursor: "pointer",
+            zIndex: 5,
+            padding: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: isSelected ? "#1A1A2E" : "transparent",
+            fontSize: "12px",
+            lineHeight: 1,
+            transition: "background 0.15s ease, border-color 0.15s ease",
+          }}
+        >
+          {isSelected ? "✓" : ""}
+        </button>
+      )}
+
       {/* Outer card container */}
       <div
         style={{
           position: "relative",
-          background: "rgba(15, 31, 61, 0.8)",
+          background: isSelected
+            ? "rgba(201, 168, 76, 0.08)"
+            : "rgba(15, 31, 61, 0.8)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
-          border: `1px solid ${isDragging || isOverlay ? "rgba(30, 144, 255, 0.5)" : "rgba(30, 58, 95, 1)"}`,
+          border: `1px solid ${
+            isSelected
+              ? "rgba(201, 168, 76, 0.55)"
+              : isDragging || isOverlay
+                ? "rgba(30, 144, 255, 0.5)"
+                : "rgba(30, 58, 95, 1)"
+          }`,
           borderRadius: "2px",
           padding: "12px",
           cursor: isDragging ? "grabbing" : "grab",
           transform: isDragging || isOverlay ? "scale(1.04) rotate(-1.5deg)" : undefined,
           boxShadow: isDragging || isOverlay
             ? "0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(30, 144, 255, 0.2)"
-            : "0 2px 8px rgba(0, 0, 0, 0.3)",
-          transition: "border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease",
+            : isSelected
+              ? "0 2px 10px rgba(201, 168, 76, 0.25)"
+              : "0 2px 8px rgba(0, 0, 0, 0.3)",
+          transition: "border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease, background 0.15s ease",
           userSelect: "none",
           WebkitUserSelect: "none",
         }}

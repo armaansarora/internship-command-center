@@ -11,6 +11,7 @@ import {
   deleteApplicationAction,
   moveApplicationAction,
   updateApplicationAction,
+  bulkMoveAction,
 } from "@/lib/actions/applications";
 import type { Application } from "@/db/schema";
 import { getTargetProfile } from "@/lib/agents/cro/target-profile";
@@ -73,6 +74,18 @@ export default async function WarRoomPage(): Promise<JSX.Element> {
     revalidatePath("/war-room");
   }
 
+  async function stampApplications(
+    ids: string[],
+    newStatus: string
+  ): Promise<void> {
+    "use server";
+    const result = await bulkMoveAction(ids, newStatus);
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+    revalidatePath("/war-room");
+  }
+
   return (
     <FloorShell floorId="7">
       <Suspense fallback={null}>
@@ -82,6 +95,7 @@ export default async function WarRoomPage(): Promise<JSX.Element> {
           deleteApplication={deleteApplication}
           createApplication={createApplication}
           updateApplication={updateApplication}
+          stampApplications={stampApplications}
         />
       </Suspense>
     </FloorShell>
@@ -98,12 +112,14 @@ async function WarRoomData({
   deleteApplication,
   createApplication,
   updateApplication,
+  stampApplications,
 }: {
   userId: string;
   moveApplication: (id: string, newStatus: string, newPosition: string) => Promise<void>;
   deleteApplication: (id: string) => Promise<void>;
   createApplication: (formData: FormData) => Promise<void>;
   updateApplication: (id: string, formData: FormData) => Promise<void>;
+  stampApplications: (ids: string[], newStatus: string) => Promise<void>;
 }): Promise<JSX.Element> {
   const supabase = await createClient();
 
@@ -174,6 +190,7 @@ async function WarRoomData({
       onDeleteApplication={deleteApplication}
       onCreateApplication={createApplication}
       onUpdateApplication={updateApplication}
+      onStampApplications={stampApplications}
     />
   );
 }

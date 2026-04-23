@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T02:11:17.470Z
-  expires: 2026-04-23T04:11:17.466Z
+  acquired: 2026-04-23T02:13:10.742Z
+  expires: 2026-04-23T04:13:10.738Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -76,14 +76,17 @@ tasks:
       Audit log on send.
   R1.7:
     title: CEO Ring-the-Bell — "Run North Star for application" macro
-    status: in_progress
+    status: complete
     started: 2026-04-23T02:11:17.470Z
+    completed: 2026-04-23T02:13:01.828Z
+    commit: 687dd8e
     notes: "Depends on R1.5 + R1.6. Sequential dispatch: tailor-resume →
       draft-letter → create outreach_queue row. Writes result back to CRO
       whiteboard via agent_memory."
   R1.8:
     title: Batch Stamp — multi-select + floating Stamp To bar + gavel sound
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T02:13:10.742Z
     notes: Shift-click multi-select on ApplicationCard. Wires into existing
       SoundProvider for audio. Bulk moveApplicationRest variant.
   R1.9:
@@ -141,3 +144,5 @@ history:
   - 2026-04-23T02:09:06.976Z: task_started R1.6
   - 2026-04-23T02:11:08.400Z: task_completed R1.6
   - 2026-04-23T02:11:17.470Z: task_started R1.7
+  - 2026-04-23T02:13:01.828Z: task_completed R1.7
+  - 2026-04-23T02:13:10.742Z: task_started R1.8

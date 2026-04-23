@@ -7,6 +7,7 @@ import type { Application } from "@/db/schema";
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 import { WarRoomScene } from "./WarRoomScene";
 import { WarTable } from "./war-table/WarTable";
+import { StampBar } from "./war-table/StampBar";
 import { ApplicationSearch } from "./crud/ApplicationSearch";
 import { CROCharacter } from "./cro-character/CROCharacter";
 import { CRODialoguePanel } from "./cro-character/CRODialoguePanel";
@@ -16,6 +17,7 @@ import {
   type WhiteboardMemory,
 } from "./cro-character/CROWhiteboard";
 import type { TargetProfile } from "@/lib/agents/cro/target-profile";
+import { useSoundEngine } from "@/components/world/SoundProvider";
 
 // 721 LOC modal — code-split so the initial route bundle doesn't carry it.
 const ApplicationModal = dynamic(
@@ -42,6 +44,11 @@ interface WarRoomClientProps {
   onDeleteApplication: (id: string) => Promise<void>;
   onCreateApplication: (formData: FormData) => Promise<void>;
   onUpdateApplication: (id: string, formData: FormData) => Promise<void>;
+  /** Batch-stamp action: bulk move selected applications to a new status. */
+  onStampApplications?: (
+    ids: string[],
+    newStatus: string
+  ) => Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -55,6 +62,7 @@ export function WarRoomClient({
   onDeleteApplication,
   onCreateApplication,
   onUpdateApplication,
+  onStampApplications,
 }: WarRoomClientProps): JSX.Element {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<Application | null>(null);
@@ -62,7 +70,10 @@ export function WarRoomClient({
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [croStatus, setCroStatus] = useState<"idle" | "thinking" | "talking">("idle");
+  const [selection, setSelection] = useState<Set<string>>(() => new Set());
+  const [stampPending, setStampPending] = useState(false);
   const [, startTransition] = useTransition();
+  const { playSound } = useSoundEngine();
 
   // ── Handlers ─────────────────────────────────────────────────────────
   const handleAddNew = useCallback(() => {
@@ -107,6 +118,45 @@ export function WarRoomClient({
   const handleCROStatusChange = useCallback((status: "idle" | "thinking" | "talking") => {
     setCroStatus(status);
   }, []);
+
+  // ── Selection & batch stamp ──────────────────────────────────────────
+  const handleToggleSelection = useCallback(
+    (id: string, event: { shiftKey: boolean }) => {
+      setSelection((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+        // shiftKey is reserved for future range-select; single-toggle behavior
+        // covers the primary flow and remains predictable.
+        void event;
+        return next;
+      });
+    },
+    []
+  );
+
+  const handleClearSelection = useCallback(() => {
+    setSelection(new Set());
+  }, []);
+
+  const handleStamp = useCallback(
+    async (newStatus: string) => {
+      const ids = [...selection];
+      if (ids.length === 0 || !onStampApplications) return;
+      setStampPending(true);
+      try {
+        playSound("bell-ring");
+        await onStampApplications(ids, newStatus);
+        setSelection(new Set());
+      } finally {
+        setStampPending(false);
+      }
+    },
+    [selection, onStampApplications, playSound]
+  );
 
   // ── Derived data ─────────────────────────────────────────────────────
   const filteredApplications = useMemo(() => {
@@ -264,9 +314,13 @@ export function WarRoomClient({
       <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
         <WarTable
           applications={filteredApplications}
+          selection={selection}
           onMoveApplication={onMoveApplication}
           onDeleteApplication={onDeleteApplication}
           onEditApplication={handleEditApplication}
+          onToggleSelection={
+            onStampApplications ? handleToggleSelection : undefined
+          }
         />
       </div>
     </div>
@@ -319,6 +373,16 @@ export function WarRoomClient({
             zIndex: 49,
             animation: "cro-backdrop-fade-in 0.2s ease-out forwards",
           }}
+        />
+      )}
+
+      {/* Floating stamp bar — appears only when there's a selection */}
+      {onStampApplications && (
+        <StampBar
+          selectionCount={selection.size}
+          onStamp={handleStamp}
+          onClear={handleClearSelection}
+          disabled={stampPending}
         />
       )}
 

@@ -21,9 +21,11 @@ import type { PipelineColumnId } from "./pipeline-config";
 
 interface WarTableProps {
   applications: Application[];
+  selection?: Set<string>;
   onMoveApplication: (id: string, newStatus: string, newPosition: string) => Promise<void>;
   onDeleteApplication: (id: string) => Promise<void>;
   onEditApplication: (app: Application) => void;
+  onToggleSelection?: (id: string, event: { shiftKey: boolean }) => void;
 }
 
 // Lexicographic position helpers — simple midpoint approach
@@ -119,9 +121,11 @@ function reduceOptimistic(
 
 export function WarTable({
   applications: initialApplications,
+  selection,
   onMoveApplication,
   onDeleteApplication,
   onEditApplication,
+  onToggleSelection,
 }: WarTableProps): JSX.Element {
   // React 19 — useOptimistic handles instant UI updates with automatic revert
   // when the surrounding transition rejects. No more manual rollback bookkeeping.
@@ -327,8 +331,10 @@ export function WarTable({
             color={col.color}
             applications={columnApplications.get(col.id) ?? []}
             isCollapsed={col.collapsed}
+            selection={selection}
             onEdit={onEditApplication}
             onDelete={handleDelete}
+            onToggleSelection={onToggleSelection}
           />
         ))}
 

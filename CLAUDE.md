@@ -117,9 +117,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
+- `src/components/floor-7/war-table/ApplicationCard.tsx` (601 LOC)
 - `src/components/floor-4/SituationRoomClient.tsx` (586 LOC)
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
-- `src/components/floor-7/war-table/ApplicationCard.tsx` (539 LOC)
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (526 LOC)
 - `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (510 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
@@ -133,15 +133,15 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
 - `src/components/world/Elevator.tsx` (429 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
+- `src/components/floor-7/WarRoomClient.tsx` (421 LOC)
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (392 LOC)
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
 - `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
-- `src/components/floor-7/WarRoomClient.tsx` (357 LOC)
 - `src/components/floor-5/WritingRoomClient.tsx` (353 LOC)
+- `src/components/floor-7/war-table/WarTable.tsx` (353 LOC)
 - `src/components/floor-5/WritingRoomScene.tsx` (352 LOC) — WritingRoomScene — Floor 5 environment compositor.
-- `src/components/floor-7/war-table/WarTable.tsx` (347 LOC)
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (344 LOC)
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
 - `src/components/world/MilestoneToast.tsx` (332 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
@@ -167,12 +167,13 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/floor-2/ObservatoryClient.tsx` (208 LOC)
 - `src/components/world/ProceduralSkyline.tsx` (205 LOC) — When provided, the render loop reads the camera offset from this ref each
+- `src/components/floor-7/war-table/PipelineColumn.tsx` (204 LOC)
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
+- `src/components/floor-7/war-table/StampBar.tsx` (202 LOC) — Floating action bar that appears when the user has selected one or more
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (201 LOC)
 - `src/components/penthouse/PipelineNodes.tsx` (200 LOC) — PipelineNodes renders:
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
-- `src/components/floor-7/war-table/PipelineColumn.tsx` (198 LOC)
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
 - `src/components/ui/SoundToggle.tsx` (194 LOC) — SoundToggle — small fixed speaker button (bottom-right).
 - `src/components/floor-6/contact-grid/ContactCard.tsx` (190 LOC)
