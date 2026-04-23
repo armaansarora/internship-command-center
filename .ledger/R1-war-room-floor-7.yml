@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T02:17:08.404Z
-  expires: 2026-04-23T04:17:08.400Z
+  acquired: 2026-04-23T02:18:35.144Z
+  expires: 2026-04-23T04:18:35.140Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -93,13 +93,16 @@ tasks:
       SoundProvider for audio. Bulk moveApplicationRest variant.
   R1.9:
     title: War Room empty state invitation (not apology)
-    status: in_progress
+    status: complete
     started: 2026-04-23T02:17:08.404Z
+    completed: 2026-04-23T02:18:06.154Z
+    commit: "0831426"
     notes: "'This floor is waiting. Tell the CRO your targets — the war table fills
       itself.' CTA opens CRODialoguePanel."
   R1.10:
     title: Playwright E2E — cold user → 5 scored opportunities → full North Star loop
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T02:18:35.144Z
     notes: Mocks Resend. Uses seed-job fallback so test is deterministic.
   R1.11:
     title: Lighthouse >90 on /war-room + bundle audit
@@ -151,3 +154,5 @@ history:
   - 2026-04-23T02:13:10.742Z: task_started R1.8
   - 2026-04-23T02:16:59.322Z: task_completed R1.8
   - 2026-04-23T02:17:08.404Z: task_started R1.9
+  - 2026-04-23T02:18:06.154Z: task_completed R1.9
+  - 2026-04-23T02:18:35.144Z: task_started R1.10
