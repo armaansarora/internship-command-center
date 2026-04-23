@@ -61,6 +61,29 @@ export const userProfiles = pgTable("user_profiles", {
   // Read/write via src/lib/db/queries/shared-knowledge-rest.ts; never
   // mutate this jsonb from route handlers directly.
   sharedKnowledge: jsonb("shared_knowledge").default(sql`'{}'::jsonb`),
+  // R4.1 — Lobby onboarding state. Stamped exactly once per account when
+  // the cinematic arrival plays (claimArrivalPlay uses an atomic
+  // WHERE arrival_played_at IS NULL update); a null value means the
+  // first-visit arrival still owes the user, a timestamp means we already
+  // played it and must never play it again.
+  arrivalPlayedAt: timestamp("arrival_played_at", { withTimezone: true }),
+  // Full extracted Concierge target profile (mirrors the canonical
+  // [target_profile_v1] row in agent_memory for fast reads without a
+  // full memory-query roundtrip). Null until Otis's conversation finishes.
+  conciergeTargetProfile: jsonb("concierge_target_profile"),
+  // Stamp set the moment Otis's conversation completes (or is skipped).
+  // Used by the first-run Morning Briefing override to decide if we are
+  // within the bootstrap window (≤10 m after completion).
+  conciergeCompletedAt: timestamp("concierge_completed_at", { withTimezone: true }),
+  // Idempotency flag for the first-run Morning Briefing override. Flipped
+  // true atomically on first Penthouse mount after onboarding so we never
+  // replay the bootstrap briefing.
+  firstBriefingShown: boolean("first_briefing_shown").notNull().default(false),
+  // Drives the Building Directory cross-section — the lobby diorama that
+  // lights up the floors the user has actually reached. Seeded as ["L"]
+  // (everyone is in the Lobby at creation); extended by syncFloorsUnlocked
+  // as applications, contacts, interviews, etc. appear.
+  floorsUnlocked: text("floors_unlocked").array().notNull().default(sql`'{L}'::text[]`),
   ...timestamps,
 }, () => [
   pgPolicy("user_profiles_self_access", {
