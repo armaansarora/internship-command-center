@@ -168,6 +168,8 @@ async function WarRoomData({
     companyName: row.company_name,
     lastActivityAt: row.last_activity_at ? new Date(row.last_activity_at) : null,
     matchScore: row.match_score ?? null,
+    deadlineAt: row.deadline_at ? new Date(row.deadline_at) : null,
+    deadlineAlertsSent: row.deadline_alerts_sent ?? {},
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   }));

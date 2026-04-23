@@ -104,6 +104,12 @@ export const userProfiles = pgTable("user_profiles", {
   drillPreferences: jsonb("drill_preferences")
     .notNull()
     .default(sql`'{"interruptFirmness":"firm","timerSeconds":90}'::jsonb`),
+  // R7 — Pneumatic-tube quiet-hours preference. Shape:
+  // {"start":"HH:MM","end":"HH:MM"} or null (always deliver immediately).
+  // Wrap-around is allowed (start="22:00", end="07:00" = overnight quiet).
+  // Server reads this at notification insert to compute deliver_after; tubes
+  // queued during quiet hours land at wake-up, never at 3am.
+  quietHours: jsonb("quiet_hours"),
   ...timestamps,
 }, () => [
   pgPolicy("user_profiles_self_access", {
@@ -177,6 +183,17 @@ export const applications = pgTable("applications", {
   // the war-table sort and the CRO whiteboard's "top finds" list. Nullable
   // because rows created pre-R1.3 + manually-entered rows don't have one.
   matchScore: numeric("match_score", { precision: 4, scale: 3 }),
+  // R7 — Optional hard deadline for the application. Feeds the Floor-4 Final
+  // Countdown section and the 3-beat cron (t_24h, t_4h, t_0). Null means no
+  // known deadline; user sets this from the ApplicationModal.
+  deadlineAt: timestamp("deadline_at", { withTimezone: true }),
+  // R7 — Per-app dedupe for the 3-beat deadline cron. Shape:
+  // {"t_24h":"ISO","t_4h":"ISO","t_0":"ISO"} — each key optional, value is
+  // the timestamp the beat was fired. Presence of a key = that beat already
+  // fired and must not fire again.
+  deadlineAlertsSent: jsonb("deadline_alerts_sent")
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   ...timestamps,
 }, (table) => [
   userIsolation("applications"),
@@ -193,6 +210,12 @@ export const applications = pgTable("applications", {
   index("idx_apps_user_match_score").on(
     table.userId,
     table.matchScore.desc().nullsLast(),
+  ),
+  // R7 — Final Countdown sort. (Migration 0017.) Partial index: only apps
+  // with a deadline set.
+  index("idx_apps_user_deadline").on(
+    table.userId,
+    table.deadlineAt,
   ),
 ]);
 
@@ -355,8 +378,19 @@ export const outreachQueue = pgTable("outreach_queue", {
   }).notNull().default("pending_approval"),
   generatedBy: text("generated_by"),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
+  // R7 — REAL undo. Earliest moment the cron sender may pick up this row.
+  // Set to now()+30s by /api/outreach/approve. The cron predicate is
+  // `send_after <= now()`; the undo predicate is `send_after > now()`.
+  // Mutual exclusion is enforced by the database, not the UI — the race
+  // between a late-clicked cancel and an early cron tick is decided
+  // atomically by Postgres.
+  sendAfter: timestamp("send_after", { withTimezone: true }),
   sentAt: timestamp("sent_at", { withTimezone: true }),
   resendMessageId: text("resend_message_id"),
+  // R7 — Audit trail stamped by /api/outreach/undo on successful revert.
+  // Set means the user cancelled within the undo window; status flipped
+  // back to 'pending_approval' at the same time.
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
   // R5.6 — tone-group + selection state for cover_letter_send rows.
   // Application-enforced shape; see migration 0015 header for the JSON schema.
   metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
@@ -383,6 +417,16 @@ export const notifications = pgTable("notifications", {
   isRead: boolean("is_read").default(false),
   isDismissed: boolean("is_dismissed").default(false),
   actions: jsonb("actions"),
+  // R7 — Pneumatic-tube quiet-hours queueing. Set at notification insert
+  // from user's quiet_hours + timezone. Null (legacy rows) = deliver
+  // immediately. Client-side tube subscriber only renders rows where
+  // deliver_after <= now().
+  deliverAfter: timestamp("deliver_after", { withTimezone: true }),
+  // R7 — Stamped atomically by the first client session that claims the
+  // row. Ensures no double-tube for the same notification across tabs/
+  // devices: concurrent sessions race on `UPDATE ... SET delivered_at=now()
+  // WHERE delivered_at IS NULL RETURNING id`; only one wins.
+  deliveredAt: timestamp("delivered_at", { withTimezone: true }),
   ...timestamps,
 }, (table) => [
   userIsolation("notifications"),

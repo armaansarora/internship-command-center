@@ -63,6 +63,8 @@ export interface ApplicationRow {
   company_name: string | null;
   last_activity_at: string | null;
   match_score: string | null;
+  deadline_at: string | null;
+  deadline_alerts_sent: Record<string, string> | null;
   created_at: string;
   updated_at: string;
 }
@@ -422,6 +424,8 @@ function rowToApplication(row: ApplicationRow): Application {
     companyName: row.company_name ?? null,
     lastActivityAt: row.last_activity_at ? new Date(row.last_activity_at) : null,
     matchScore: row.match_score ?? null,
+    deadlineAt: row.deadline_at ? new Date(row.deadline_at) : null,
+    deadlineAlertsSent: row.deadline_alerts_sent ?? {},
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
