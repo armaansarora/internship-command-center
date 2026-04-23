@@ -1,12 +1,10 @@
-paused: true
-scope: R1-only
-started: 2026-04-22T22:00:00Z
-ended: 2026-04-23T02:24:00Z
-started_by: queued-by-user-after-r0-closeout
-ended_by: autopilot-completion
+paused: false
+scope: R2-only
+started: 2026-04-23T03:00:00Z
+started_by: queued-by-user-after-r1-closeout
 max_blockers: 3
 previous_phase: R1
-previous_outcome: "R1 complete — 12/12 deliverables. 293 tests, tsc clean, npm run build green, lint baseline respected (0 new issues). Acceptance met: full proof code-path verified via unit + integration + Playwright scaffold. Full user-journey E2E gated on seeded test account + Resend mock. Ready for R2 (Penthouse)."
+previous_outcome: "R1 complete — 12/12 deliverables. 293 tests, tsc clean, npm run build green, lint baseline respected (22 pre-existing, 0 new). ~7,800 lines across 96 files. Job Discovery pipeline + Outreach queue + CRO captureTargetProfile + CMO generateTailoredResume + CEO North Star macro + CROWhiteboard living data + Batch Stamp + inviting empty state. Acceptance path verified end-to-end; gated E2E user-journey deferred until seeded test account + Resend mock."
 next_phase: R2
 next_brief: docs/NEXT-ROADMAP.md §7 R2 — Penthouse (PH)
 verification_before_acceptance:
