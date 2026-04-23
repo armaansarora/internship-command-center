@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T02:18:35.144Z
-  expires: 2026-04-23T04:18:35.140Z
+  acquired: 2026-04-23T02:20:15.940Z
+  expires: 2026-04-23T04:20:15.936Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -101,12 +101,15 @@ tasks:
       itself.' CTA opens CRODialoguePanel."
   R1.10:
     title: Playwright E2E — cold user → 5 scored opportunities → full North Star loop
-    status: in_progress
+    status: complete
     started: 2026-04-23T02:18:35.144Z
+    completed: 2026-04-23T02:19:58.810Z
+    commit: b7a0e9d
     notes: Mocks Resend. Uses seed-job fallback so test is deterministic.
   R1.11:
     title: Lighthouse >90 on /war-room + bundle audit
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T02:20:15.940Z
     notes: Fix regressions. Ensure ApplicationModal stays code-split.
   R1.12:
     title: Rate-limit + CSRF coverage audit for Floor 7 mutating routes
@@ -156,3 +159,5 @@ history:
   - 2026-04-23T02:17:08.404Z: task_started R1.9
   - 2026-04-23T02:18:06.154Z: task_completed R1.9
   - 2026-04-23T02:18:35.144Z: task_started R1.10
+  - 2026-04-23T02:19:58.810Z: task_completed R1.10
+  - 2026-04-23T02:20:15.940Z: task_started R1.11

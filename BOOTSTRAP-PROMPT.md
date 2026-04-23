@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 10:19 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 10:21 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `0831426`)
+- **Branch:** `main` (commit `b7a0e9d`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 62,006 across 315 source files
 - **Build:** Clean (zero TS errors)
@@ -28,7 +28,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-0831426 [R1/1.9] feat(war-room): inviting empty state — dossier + CTA
+b7a0e9d [R1/1.10] test: North Star integration + Playwright route scaffold
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `0831426`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b7a0e9d`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -599,13 +599,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 647 | 6,531 |
-| `PROJECT-CONTEXT.md` | 281 | 5,254 |
+| `BOOTSTRAP-PROMPT.md` | 648 | 6,540 |
+| `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 427 | 8,696 |
-| **Total** | **1722** | **27,653** |
+| **Total** | **1724** | **27,682** |
 
-> ⚠️ Reading all recommended files consumes ~27,653 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~27,682 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
