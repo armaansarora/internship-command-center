@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 11:14 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 11:15 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `cabfce8`)
+- **Branch:** `main` (commit `80fae84`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 64,269 across 337 source files
+- **Total LOC:** 64,534 across 338 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-cabfce8 feat(tower): verify command — full acceptance gate
+80fae84 [R2/2.6] feat(penthouse): afternoon/evening/latenight scenes + SceneRouter
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `cabfce8`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `80fae84`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (337 files, 64,269 LOC)
+## Source Tree (338 files, 64,534 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -167,6 +167,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/utils` | 284 |
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
+| `src/components/penthouse/rest` | 265 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
 | `src/app/api/cron/sync` | 213 |
@@ -364,6 +365,7 @@ src/components/penthouse/PipelineNodes.tsx
 src/components/penthouse/QuickActionCard.tsx
 src/components/penthouse/StatCard.tsx
 src/components/penthouse/ceo-at-window/CEOAtWindow.tsx
+src/components/penthouse/rest/RestPanel.tsx
 src/components/penthouse/scenes/SceneRouter.tsx
 src/components/penthouse/scenes/afternoon/AfternoonScene.tsx
 src/components/penthouse/scenes/evening/EveningScene.tsx
@@ -628,13 +630,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 663 | 6,777 |
+| `BOOTSTRAP-PROMPT.md` | 677 | 6,928 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 436 | 9,067 |
-| **Total** | **1748** | **28,290** |
+| `CLAUDE.md` | 437 | 9,105 |
+| **Total** | **1763** | **28,479** |
 
-> ⚠️ Reading all recommended files consumes ~28,290 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~28,479 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
