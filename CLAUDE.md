@@ -150,7 +150,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
-- `src/components/penthouse/rest/RestPanel.tsx` (265 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
+- `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-1/CSuiteScene.tsx` (248 LOC) — CSuiteScene — Floor 1 C-Suite boardroom environment.
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
 - `src/components/floor-1/CSuiteClient.tsx` (241 LOC) — Watch the CEO chat's UIMessage stream for `tool-dispatchTo<X>` parts and
@@ -159,7 +159,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/PersistentWorld.tsx` (236 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
-- `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (230 LOC) — Pneumatic-tube dispatch overlay.
+- `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
 - `src/components/world/ProceduralSkyline.tsx` (225 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
@@ -203,7 +203,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
-- `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (107 LOC) — One beat of the Morning Briefing — revealed character-by-character once
+- `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
 - `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (105 LOC)
 - `src/components/penthouse/scenes/afternoon/AfternoonScene.tsx` (105 LOC) — Afternoon scene — CEO already facing the room, glass panel shows the
 - `src/components/world/FloorShell.tsx` (104 LOC) — FloorShell — wraps each floor's content with floor identity badge + ambient sound.

@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 
 /**
  * Idle detail — the small visual reward that a returning user notices
@@ -38,16 +37,13 @@ export function pickIdleDetail(options: {
 }
 
 /**
- * Hook wrapper. Memoises the pick so React doesn't re-shuffle on unrelated
- * re-renders.
+ * Hook wrapper around {@link pickIdleDetail}. The function is pure and cheap,
+ * so we compute directly — the Compiler handles hot-path memoisation.
  */
 export function useIdleDetail(options: {
   userId: string;
   dateIso: string;
   recentRejection?: boolean;
 }): IdleDetailKind {
-  return useMemo(
-    () => pickIdleDetail(options),
-    [options.userId, options.dateIso, options.recentRejection]
-  );
+  return pickIdleDetail(options);
 }

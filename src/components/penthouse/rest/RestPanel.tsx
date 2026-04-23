@@ -40,6 +40,9 @@ export function RestPanel({ isOpen, onClose, stats, pipeline, activity, quickAct
   // transition runs cleanly.
   useEffect(() => {
     if (!isOpen) {
+      // Reset the reveal flag when the drawer closes so the next open
+      // replays the slide-in. Small synchronous setState here is intentional.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRevealed(false);
       return;
     }
@@ -189,7 +192,7 @@ export function RestPanel({ isOpen, onClose, stats, pipeline, activity, quickAct
                 className="text-sm"
                 style={{ color: "var(--text-secondary)", margin: 0 }}
               >
-                Pipeline's empty. The War Room is on Floor 7.
+                Pipeline&apos;s empty. The War Room is on Floor 7.
               </p>
             ) : (
               <>

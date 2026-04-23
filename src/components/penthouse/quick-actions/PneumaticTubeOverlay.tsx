@@ -32,11 +32,12 @@ export function PneumaticTubeOverlay({ dispatch, onDismiss }: Props): JSX.Elemen
   const [phase, setPhase] = useState<"outgoing" | "returning" | "result" | "idle">("idle");
 
   useEffect(() => {
-    if (!dispatch) {
-      setPhase("idle");
-      return;
-    }
+    // When dispatch clears, we return null and rendering stops — phase reset
+    // happens implicitly on the next dispatch cycle, so no synchronous
+    // setState is needed here.
+    if (!dispatch) return;
     if (reduced) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPhase("result");
       return;
     }

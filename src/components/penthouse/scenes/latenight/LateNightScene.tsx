@@ -70,7 +70,7 @@ export function LateNightScene({ onDismiss }: Props): JSX.Element {
             margin: 0,
           }}
         >
-          The CEO's gone home. The desk is still here — jot something down so
+          The CEO&apos;s gone home. The desk is still here — jot something down so
           morning has a starting point.
         </p>
         {submitted ? (

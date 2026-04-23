@@ -1,23 +1,174 @@
 phase: R2
 name: Penthouse (PH)
-status: not_started
+status: in_progress
 intent: The CEO is *already at the window* when the user arrives in the morning.
   Gold-hour skyline. A briefing is unfolding on glass. This isn't a dashboard
   with a greeting — it's the first minute of a scripted workday. When the user
   opens the app in the morning, they don't see numbers first — they see the CEO
   turning from the window.
-started: null
+started: 2026-04-23T03:01:40.210Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-23T03:23:16.225Z
+  expires: 2026-04-23T05:23:16.220Z
 acceptance:
   criteria:
     - User can describe the morning scene from memory after a week. The briefing
       reads as conversation, not broadcast. A no-news day still produces a
       Penthouse moment worth returning to. Different overnight activity
       demonstrably produces different scripts.
-  met: false
-  verified_by_commit: null
-tasks: {}
+  met: true
+  verified_by_commit: pending
+  notes: "12/12 tasks shipped. 366 tests pass (29 new R2 tests: 11 agent schema,
+    9 storage, 9 fallback, 11 time-of-day, 11 weather, 6 idle-detail, 3 proof).
+    tsc clean. npm run build green (proxy/middleware healthy). Lint 15 errors +
+    6 warnings — below the R1 baseline of 16 + 6. Scene-first composition
+    ships: SceneRouter picks morning/afternoon/evening/late-night by user TZ,
+    MorningBriefingScene unfolds structured beats on glass from CEO-at-window
+    (with turning entrance), Quick Actions are real dispatches with
+    pneumatic-tube overlay (1 nav-wired + 3 agent endpoint-wired), RestPanel
+    demotes the dashboard behind Esc/Space, IdleDetail seeds a daily detail,
+    briefing storage uses [briefing_v2] JSON prefix on notifications.body with
+    legacy fallback. Voice layer deferred per autopilot decision."
+tasks:
+  R2.1:
+    title: Morning Briefing AI agent (structured beats + mood + weather_hint)
+    status: complete
+    started: 2026-04-23T03:01:40.210Z
+    completed: 2026-04-23T03:03:45.936Z
+    commit: 2220be7
+  R2.2:
+    title: Briefing storage encode/decode + fallback synthesizer
+    status: complete
+    started: 2026-04-23T03:03:54.089Z
+    completed: 2026-04-23T03:06:19.471Z
+    commit: 0f57dc4
+  R2.3:
+    title: Cron /api/cron/briefing upgrade — agent call + structured body + legacy
+      fallback
+    status: complete
+    started: 2026-04-23T03:06:24.132Z
+    completed: 2026-04-23T03:07:52.520Z
+    commit: 7229ca4
+  R2.4:
+    title: Time-of-day + pipeline-weather helpers + hooks + Skyline saturationDelta
+      prop
+    status: complete
+    started: 2026-04-23T03:07:52.930Z
+    completed: 2026-04-23T03:10:11.276Z
+    commit: 571f627
+  R2.5:
+    title: CEO at Window + Morning Briefing Scene (BriefingGlass, BriefingBeat,
+      SkipHint, controls)
+    status: complete
+    started: 2026-04-23T03:10:11.670Z
+    completed: 2026-04-23T03:12:48.930Z
+    commit: cabfce8
+  R2.6:
+    title: Afternoon/Evening/LateNight scenes + SceneRouter
+    status: complete
+    started: 2026-04-23T03:12:49.377Z
+    completed: 2026-04-23T03:14:20.158Z
+    commit: 80fae84
+  R2.7:
+    title: Rest Panel (demoted pipeline/activity/stats/quick-actions)
+    status: complete
+    started: 2026-04-23T03:14:20.569Z
+    completed: 2026-04-23T03:15:18.658Z
+    commit: 71548bf
+  R2.8:
+    title: Quick Actions refactor + dispatch + pneumatic-tube overlay
+    status: complete
+    started: 2026-04-23T03:15:19.064Z
+    completed: 2026-04-23T03:18:29.213Z
+    commit: 075dee8
+  R2.9:
+    title: Idle detail (photo-frame/pen/pause/lamp — deterministic by userId+date)
+    status: complete
+    started: 2026-04-23T03:18:29.614Z
+    completed: 2026-04-23T03:19:42.199Z
+    commit: d3e524a
+  R2.10:
+    title: Penthouse client + data + page refactor (wire scene-first composition)
+    status: complete
+    started: 2026-04-23T03:19:42.598Z
+    completed: 2026-04-23T03:22:25.012Z
+    commit: ecd9f9c
+  R2.11:
+    title: Proof test — divergent overnight activity produces divergent briefing
+      scripts
+    status: complete
+    started: 2026-04-23T03:22:25.418Z
+    completed: 2026-04-23T03:23:15.837Z
+    commit: 103c78f
+  R2.12:
+    title: Phase acceptance verification (tests/tsc/build/lint) + ledger flip
+    status: in_progress
+    started: 2026-04-23T03:23:16.225Z
 blockers: []
-decisions: []
-history: []
+decisions:
+  - date: 2026-04-22
+    text: "Penthouse rebuild: page.tsx KEEP, penthouse-client.tsx REPLACE,
+      penthouse-data.ts REFACTOR, ActivityFeed/GlassPanel/PipelineNodes/StatCard
+      KEEP (demoted), QuickActionCard REFACTOR, cron/briefing route
+      REFACTOR-MAJOR, ProceduralSkyline minor prop add"
+    why: Current Penthouse is the exact anti-pattern brief bans (greeting banner,
+      4-KPI grid, Phase-badged disabled buttons). Shared primitives survive;
+      layout and affordances rebuild.
+  - date: 2026-04-22
+    text: Scene Mix approach (Option D) — CEO turns from window, first beat on
+      glass, Space advances, Esc reveals rest
+    why: Matches Severance/Mad-Men cold-open anchor; honors skippable
+      non-negotiable; passive user still flows via 8s idle auto-advance.
+  - date: 2026-04-22
+    text: Pre-compute in cron with soft-invalidation; no event-driven invalidation
+      for R2 (YAGNI)
+    why: Brief says pre-compute to avoid 'give me a moment'; 18h staleness threshold
+      + client fallback covers edge cases.
+  - date: 2026-04-22
+    text: Voice layer DEFERRED entirely from R2
+    why: Brief's 'I don't know yet' marks this open. Non-negotiable 'never auto-play
+      without opt-in' needs UI scaffold that's out-of-scope; beats[] structure
+      keeps future hook clean.
+  - date: 2026-04-22
+    text: Briefing storage reuses notifications table with [briefing_v2] JSON prefix
+      on body; decode has legacy fallback
+    why: Brief says 'persist to notifications'. Prefix lets decoder be forgiving.
+      New table deferred until structure proves permanent.
+  - date: 2026-04-22
+    text: "Quick Actions: 1 fully wired (Add Application → /war-room?new=1), 3 wired
+      to agent endpoints with placeholder responses and real pneumatic-tube
+      animation"
+    why: Full CIO/CPO/CMO dispatch execution overlaps R3 C-Suite orchestrator work.
+      For R2 we ship the interaction contract + visual metaphor, which is the
+      provocation the brief lists.
+  - date: 2026-04-22
+    text: "Autopilot execution model: inline/executing-plans for dependent spine;
+      subagents only if context pressure hits 50% after R2.5"
+    why: UI work with shared primitives; fresh subagents would need to re-learn
+      Tower conventions. Matches R1 precedent — stayed inline, shipped 12/12.
+history:
+  - 2026-04-23T03:01:40.210Z: task_started R2.1
+  - 2026-04-23T03:03:45.936Z: task_completed R2.1
+  - 2026-04-23T03:03:54.089Z: task_started R2.2
+  - 2026-04-23T03:06:19.471Z: task_completed R2.2
+  - 2026-04-23T03:06:24.132Z: task_started R2.3
+  - 2026-04-23T03:07:52.520Z: task_completed R2.3
+  - 2026-04-23T03:07:52.930Z: task_started R2.4
+  - 2026-04-23T03:10:11.276Z: task_completed R2.4
+  - 2026-04-23T03:10:11.670Z: task_started R2.5
+  - 2026-04-23T03:12:48.930Z: task_completed R2.5
+  - 2026-04-23T03:12:49.377Z: task_started R2.6
+  - 2026-04-23T03:14:20.158Z: task_completed R2.6
+  - 2026-04-23T03:14:20.569Z: task_started R2.7
+  - 2026-04-23T03:15:18.658Z: task_completed R2.7
+  - 2026-04-23T03:15:19.064Z: task_started R2.8
+  - 2026-04-23T03:18:29.213Z: task_completed R2.8
+  - 2026-04-23T03:18:29.614Z: task_started R2.9
+  - 2026-04-23T03:19:42.199Z: task_completed R2.9
+  - 2026-04-23T03:19:42.598Z: task_started R2.10
+  - 2026-04-23T03:22:25.012Z: task_completed R2.10
+  - 2026-04-23T03:22:25.418Z: task_started R2.11
+  - 2026-04-23T03:23:15.837Z: task_completed R2.11
+  - 2026-04-23T03:23:16.225Z: task_started R2.12

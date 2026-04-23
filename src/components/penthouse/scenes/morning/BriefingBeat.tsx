@@ -40,6 +40,7 @@ export function BriefingBeat({ beat, revealed, delayMs = 0, charMs = 25 }: Props
 
   useEffect(() => {
     if (!revealed) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setChars(0);
       return;
     }
