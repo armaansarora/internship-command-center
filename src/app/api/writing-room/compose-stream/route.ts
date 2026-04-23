@@ -70,8 +70,10 @@ Lead with a HOOK that proves you've done the work. Make the value proposition co
     });
 
     // Telemetry after finish (not awaited here — the stream starts immediately).
-    void result.text
-      .then((finalText: string) => {
+    // AI SDK v6's `result.text` is PromiseLike; Promise.resolve normalizes it.
+    void (async (): Promise<void> => {
+      try {
+        const finalText: string = await Promise.resolve(result.text);
         void recordAgentRun({
           userId: user.id,
           agent: "cmo",
@@ -82,13 +84,13 @@ Lead with a HOOK that proves you've done the work. Make the value proposition co
           inputSummary: `${body.companyName} / ${body.role} (${body.tone})`,
           outputSummary: finalText.slice(0, 120),
         });
-      })
-      .catch((err: unknown) => {
+      } catch (err) {
         log.error("[writing-room/compose-stream] finish handler failed", err, {
           userId: user.id,
           tone: body.tone,
         });
-      });
+      }
+    })();
 
     log.info("compose-stream.started", { userId: user.id, tone: body.tone });
     return result.toTextStreamResponse();

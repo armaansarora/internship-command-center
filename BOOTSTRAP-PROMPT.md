@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:07 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:13 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,24 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `acf1188`)
+- **Branch:** `main` (commit `f1fae2a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 97,660 across 560 source files
-- **Build:** FAILING — 4 TS errors
-
-### Build Errors
-```
-src/app/api/writing-room/compose-stream/route.ts(86,8): error TS2339: Property 'catch' does not exist on type 'PromiseLike<void>'.
-src/lib/ai/structured/cover-letter-stream.ts(66,37): error TS2339: Property 'catch' does not exist on type 'PromiseLike<string>'.
-src/lib/ai/structured/cover-letter-stream.ts(67,28): error TS7006: Parameter 'finalText' implicitly has an 'any' type.
-src/lib/ai/structured/cover-letter-stream.ts(82,5): error TS2739: Type 'PromiseLike<string>' is missing the following properties from type 'Promise<string>': catch, finally, [Symbol.toStringTag]
-```
+- **Total LOC:** 97,642 across 560 source files
+- **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-acf1188 [R5/5.4] feat(api): POST /api/writing-room/compose-stream
+f1fae2a [R5/5.4] feat(ui): LiveComposePanel + PenGlowCursor
 ```
 
 ## Acceptance Criteria — Progress
@@ -90,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `acf1188`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `f1fae2a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (560 files, 97,660 LOC)
+## Source Tree (560 files, 97,642 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -118,7 +110,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/app/__tests__` | 1525 |
-| `src/lib/ai/structured` | 1417 |
+| `src/lib/ai/structured` | 1425 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
@@ -184,8 +176,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/supabase` | 402 |
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/lib/actions` | 396 |
-| `src/components/floor-5/live-compose` | 386 |
 | `src/components/floor-5/resume-press` | 372 |
+| `src/components/floor-5/live-compose` | 358 |
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
 | `src/components/floor-4/final-countdown` | 341 |
@@ -255,10 +247,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/documents/[id]/pdf` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
+| `src/app/api/writing-room/compose-stream` | 105 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
 | `src/app/api/writing-room/compose-stream/__tests__` | 104 |
 | `src/app/api/concierge/chat` | 103 |
-| `src/app/api/writing-room/compose-stream` | 103 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
@@ -933,13 +925,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 978 | 10,870 |
+| `BOOTSTRAP-PROMPT.md` | 982 | 10,931 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 504 | 11,142 |
-| **Total** | **2131** | **34,458** |
+| **Total** | **2135** | **34,519** |
 
-> ⚠️ Reading all recommended files consumes ~34,458 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,519 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

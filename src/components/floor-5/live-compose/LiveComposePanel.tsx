@@ -1,7 +1,8 @@
 "use client";
 
 import type { JSX } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { PenGlowCursor } from "./PenGlowCursor";
 
 /**
@@ -53,20 +54,6 @@ const TONE_ANCHOR: Record<ToneKey, string> = {
   bold: "#DC643C",
 };
 
-function useReducedMotion(override?: boolean): boolean {
-  const [reduced, setReduced] = useState<boolean>(override ?? false);
-  useEffect(() => {
-    if (override !== undefined) return;
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const handler = (e: MediaQueryListEvent): void => setReduced(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, [override]);
-  return reduced;
-}
-
 export function LiveComposePanel({
   companyName,
   role,
@@ -78,7 +65,8 @@ export function LiveComposePanel({
   onToneError,
   endpoint = "/api/writing-room/compose-stream",
 }: LiveComposePanelProps): JSX.Element {
-  const reduced = useReducedMotion(reducedMotion);
+  const hookReduced = useReducedMotion();
+  const reduced = reducedMotion ?? hookReduced;
   const [texts, setTexts] = useState<Record<ToneKey, string>>({
     formal: "",
     conversational: "",
@@ -148,15 +136,6 @@ export function LiveComposePanel({
       onComplete({ ...texts });
     }
   }, [done, texts, onComplete]);
-
-  const penActive = useMemo(
-    () => ({
-      formal: penTick.formal > 0 && !done.formal,
-      conversational: penTick.conversational > 0 && !done.conversational,
-      bold: penTick.bold > 0 && !done.bold,
-    }),
-    [penTick, done],
-  );
 
   return (
     <section
@@ -251,7 +230,9 @@ export function LiveComposePanel({
               }}
             >
               {texts[tone]}
-              {!reduced && !done[tone] ? <PenGlowCursor active={penActive[tone]} /> : null}
+              {!reduced && !done[tone] ? (
+                <PenGlowCursor key={penTick[tone]} />
+              ) : null}
             </div>
             {errors[tone] ? (
               <div

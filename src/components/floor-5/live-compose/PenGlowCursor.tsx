@@ -1,58 +1,49 @@
 "use client";
 
 import type { JSX } from "react";
-import { useEffect, useRef, useState } from "react";
 
 /**
  * R5.4 — PenGlowCursor.
  *
  * A gold ink-well indicator shown at the live edge of a composing card.
- * `active` prop flips true briefly on each token arrival; the cursor
- * brightens on active and dims (via CSS transition) on the auto-timer
- * that clears `active` 250ms after the last token.
+ * The component is CSS-animation-driven — no React state, no effects —
+ * so the parent re-triggers the pulse by rendering a fresh instance via
+ * a `key` prop tied to the per-token tick counter:
  *
- * prefers-reduced-motion: the caller (LiveComposePanel) simply refuses
- * to render this component at all on reduced-motion, which is the
- * cleanest path and keeps the testable surface simple.
+ *   <PenGlowCursor key={penTick[tone]} />
+ *
+ * Each key change unmounts + remounts, and the inline CSS animation
+ * plays from frame 0 — brightening to full glow, then fading back to the
+ * idle 0.35 opacity.
+ *
+ * prefers-reduced-motion: the caller (LiveComposePanel) refuses to
+ * render this component at all under reduced motion, which keeps the
+ * testable surface simple.
  */
-export interface PenGlowCursorProps {
-  /** Flips true when a new token has just arrived. */
-  active: boolean;
-}
-
-export function PenGlowCursor({ active }: PenGlowCursorProps): JSX.Element {
-  const [show, setShow] = useState(active);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (active) {
-      setShow(true);
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => setShow(false), 250);
-    }
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, [active]);
-
+export function PenGlowCursor(): JSX.Element {
   return (
-    <span
-      data-pen-glow="true"
-      data-active={show ? "true" : "false"}
-      aria-hidden="true"
-      style={{
-        display: "inline-block",
-        width: "10px",
-        height: "14px",
-        marginLeft: "2px",
-        verticalAlign: "text-bottom",
-        background:
-          "linear-gradient(180deg, rgba(201,168,76,0.95) 0%, rgba(201,168,76,0.55) 100%)",
-        borderRadius: "1px",
-        boxShadow: show ? "0 0 10px 2px rgba(201,168,76,0.85)" : "0 0 0 0 rgba(201,168,76,0)",
-        opacity: show ? 1 : 0.35,
-        transition: "opacity 200ms ease-out, box-shadow 200ms ease-out",
-      }}
-    />
+    <>
+      <style>{`@keyframes pen-glow-pulse {
+  0% { opacity: 0.35; box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+  15% { opacity: 1; box-shadow: 0 0 10px 2px rgba(201,168,76,0.85); }
+  100% { opacity: 0.35; box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+}`}</style>
+      <span
+        data-pen-glow="true"
+        aria-hidden="true"
+        style={{
+          display: "inline-block",
+          width: "10px",
+          height: "14px",
+          marginLeft: "2px",
+          verticalAlign: "text-bottom",
+          background:
+            "linear-gradient(180deg, rgba(201,168,76,0.95) 0%, rgba(201,168,76,0.55) 100%)",
+          borderRadius: "1px",
+          opacity: 0.35,
+          animation: "pen-glow-pulse 400ms ease-out",
+        }}
+      />
+    </>
   );
 }

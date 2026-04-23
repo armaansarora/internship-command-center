@@ -63,8 +63,16 @@ export function streamCoverLetterProse(input: ComposeInput): StreamedCoverLetter
   });
 
   // Telemetry after completion — fire-and-forget so the stream isn't held up.
-  const telemetryText = result.text.catch(() => "");
-  void telemetryText.then((finalText) => {
+  // AI SDK v6's `result.text` is typed as PromiseLike<string>, so we normalize
+  // via Promise.resolve + await inside an IIFE.
+  const finalTextPromise: Promise<string> = Promise.resolve(result.text);
+  void (async (): Promise<void> => {
+    let finalText = "";
+    try {
+      finalText = await finalTextPromise;
+    } catch {
+      finalText = "";
+    }
     void recordAgentRun({
       userId: input.userId,
       agent: "cmo",
@@ -75,11 +83,11 @@ export function streamCoverLetterProse(input: ComposeInput): StreamedCoverLetter
       inputSummary: `${input.companyName} / ${input.role} (${input.tone})`,
       outputSummary: finalText.slice(0, 120),
     });
-  });
+  })();
 
   return {
     textStream: result.textStream,
-    fullText: result.text,
+    fullText: finalTextPromise,
   };
 }
 
@@ -97,5 +105,5 @@ export async function generateCoverLetterProse(input: ComposeInput): Promise<str
     system,
     prompt,
   });
-  return result.text;
+  return await Promise.resolve(result.text);
 }

@@ -157,9 +157,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
-- `src/components/floor-5/live-compose/LiveComposePanel.tsx` (287 LOC) — R5.4 — LiveComposePanel.
 - `src/components/floor-5/resume-press/ResumePress.tsx` (286 LOC) — R5.8 — The Resume Press.
 - `src/components/lobby/cinematic/CinematicArrival.tsx` (277 LOC) — R4.7 — CinematicArrival.
+- `src/components/floor-5/live-compose/LiveComposePanel.tsx` (268 LOC) — R5.4 — LiveComposePanel.
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
 - `src/components/settings/NetworkingConsent.tsx` (260 LOC)
@@ -279,9 +279,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/undo-bar/UndoBarProvider.tsx` (64 LOC) — The shape exposed to consumer components.
 - `src/components/penthouse/scenes/SceneRouter.tsx` (62 LOC) — Picks the active Penthouse scene based on the user's current time-of-day
 - `src/components/penthouse/scenes/morning/SkipHint.tsx` (62 LOC) — Small floating hint at the bottom of the Morning Briefing Scene telling the
-- `src/components/floor-5/live-compose/PenGlowCursor.tsx` (59 LOC) — R5.4 — PenGlowCursor.
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)
 - `src/components/floor-6/contact-grid/ContactCard.test.tsx` (55 LOC)
+- `src/components/floor-5/live-compose/PenGlowCursor.tsx` (50 LOC) — R5.4 — PenGlowCursor.
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
 - `src/components/floor-6/side-switch/SideSwitch.test.tsx` (44 LOC)
