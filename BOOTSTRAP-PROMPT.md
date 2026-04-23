@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:22 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:23 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `50209fd`)
+- **Branch:** `main` (commit `35120dd`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 95,378 across 538 source files
+- **Total LOC:** 95,727 across 541 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-50209fd [R8/8.7] feat(r8): warmth-decay cron + CNO cold-alert via tube (P6 invariant)
+35120dd [R8/8.8] feat(r8): CIO autonomous re-research cron (P7 invariant)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `50209fd`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `35120dd`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (538 files, 95,378 LOC)
+## Source Tree (541 files, 95,727 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -214,6 +214,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/war-room` | 200 |
 | `src/app/api/briefing/complete-drill` | 198 |
 | `src/app/api/outreach/undo` | 197 |
+| `src/lib/networking` | 189 |
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
 | `src/lib/audio` | 181 |
@@ -222,6 +223,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/documents/[id]/pdf/__tests__` | 168 |
 | `src/lib/resumes` | 168 |
 | `src/app/api/writing-room/choose-tone` | 165 |
+| `src/app/api/cron/warm-intro-scan` | 160 |
 | `src/app/api/cron/export-worker` | 157 |
 | `src/components/penthouse/scenes/latenight` | 156 |
 | `src/lib/validators` | 155 |
@@ -358,6 +360,7 @@ src/app/api/cron/purge-sweeper/route.ts
 src/app/api/cron/sync/route.ts
 src/app/api/cron/unprompted-ceo/route.test.ts
 src/app/api/cron/unprompted-ceo/route.ts
+src/app/api/cron/warm-intro-scan/route.ts
 src/app/api/cron/warmth-decay/route.ts
 src/app/api/documents/[id]/pdf/__tests__/route.test.ts
 src/app/api/documents/[id]/pdf/route.ts
@@ -761,6 +764,8 @@ src/lib/lobby/derive-floors-unlocked.test.ts
 src/lib/lobby/derive-floors-unlocked.ts
 src/lib/logger.test.ts
 src/lib/logger.ts
+src/lib/networking/warm-intro-finder.test.ts
+src/lib/networking/warm-intro-finder.ts
 src/lib/notifications/quiet-hours.test.ts
 src/lib/notifications/quiet-hours.ts
 src/lib/onboarding/bootstrap.ts
@@ -894,13 +899,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 940 | 10,314 |
+| `BOOTSTRAP-PROMPT.md` | 943 | 10,352 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 500 | 11,013 |
-| **Total** | **2089** | **33,773** |
+| **Total** | **2092** | **33,811** |
 
-> ⚠️ Reading all recommended files consumes ~33,773 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,811 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
