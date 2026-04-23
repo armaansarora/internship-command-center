@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:04 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:05 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,13 +19,14 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `e53020b`)
+- **Branch:** `main` (commit `b99f0af`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 97,067 across 555 source files
-- **Build:** FAILING — 3 TS errors
+- **Total LOC:** 97,274 across 557 source files
+- **Build:** FAILING — 4 TS errors
 
 ### Build Errors
 ```
+src/app/api/writing-room/compose-stream/route.ts(86,8): error TS2339: Property 'catch' does not exist on type 'PromiseLike<void>'.
 src/lib/ai/structured/cover-letter-stream.ts(66,37): error TS2339: Property 'catch' does not exist on type 'PromiseLike<string>'.
 src/lib/ai/structured/cover-letter-stream.ts(67,28): error TS7006: Parameter 'finalText' implicitly has an 'any' type.
 src/lib/ai/structured/cover-letter-stream.ts(82,5): error TS2739: Type 'PromiseLike<string>' is missing the following properties from type 'Promise<string>': catch, finally, [Symbol.toStringTag]
@@ -35,7 +36,7 @@ src/lib/ai/structured/cover-letter-stream.ts(82,5): error TS2739: Type 'PromiseL
 ## Changes Since Last Bootstrap
 
 ```
-e53020b chore(handoff): session sess-a5908e — R0
+b99f0af [R5/5.4] feat(stream): cover-letter streaming helper + proof test
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +90,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `e53020b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b99f0af`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (555 files, 97,067 LOC)
+## Source Tree (557 files, 97,274 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -254,7 +255,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
+| `src/app/api/writing-room/compose-stream/__tests__` | 104 |
 | `src/app/api/concierge/chat` | 103 |
+| `src/app/api/writing-room/compose-stream` | 103 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
@@ -406,6 +409,8 @@ src/app/api/writing-room/approve/__tests__/route.test.ts
 src/app/api/writing-room/approve/route.ts
 src/app/api/writing-room/choose-tone/__tests__/route.test.ts
 src/app/api/writing-room/choose-tone/route.ts
+src/app/api/writing-room/compose-stream/__tests__/route.test.ts
+src/app/api/writing-room/compose-stream/route.ts
 src/app/error.tsx
 src/app/globals.css
 src/app/layout.tsx
@@ -924,13 +929,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 964 | 10,613 |
+| `BOOTSTRAP-PROMPT.md` | 973 | 10,760 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 501 | 11,048 |
-| **Total** | **2114** | **34,107** |
+| **Total** | **2123** | **34,254** |
 
-> ⚠️ Reading all recommended files consumes ~34,107 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,254 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
