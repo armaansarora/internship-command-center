@@ -337,6 +337,9 @@ export const outreachQueue = pgTable("outreach_queue", {
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   sentAt: timestamp("sent_at", { withTimezone: true }),
   resendMessageId: text("resend_message_id"),
+  // R5.6 — tone-group + selection state for cover_letter_send rows.
+  // Application-enforced shape; see migration 0015 header for the JSON schema.
+  metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
   ...timestamps,
 }, (table) => [
   userIsolation("outreach_queue"),

@@ -140,6 +140,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
 - `src/components/floor-1/CSuiteClient.test.tsx` (373 LOC) — Unit tests for the two pure helpers the R3.7 integration relies on:
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
+- `src/components/floor-5/ready-to-send/ReadyToSendPanel.tsx` (370 LOC) — R5.6 — ReadyToSendPanel.
 - `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
 - `src/components/floor-5/WritingRoomClient.tsx` (353 LOC)
 - `src/components/floor-7/war-table/WarTable.tsx` (353 LOC)
@@ -206,6 +207,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
 - `src/components/floor-2/analytics/ConversionFunnel.tsx` (137 LOC) — ConversionFunnel — SVG funnel visualization showing pipeline stages.
 - `src/components/floor-1/InjectPrompt.test.tsx` (136 LOC) — R3.11 — unit tests for the floating `/`-inject prompt.
+- `src/components/floor-5/ready-to-send/ReadyToSendPanel.test.tsx` (136 LOC) — R5.6 — ReadyToSendPanel render assertions.
 - `src/components/world/NotificationSystem.tsx` (135 LOC) — NotificationSystem — in-world spatial notification manager.
 - `src/components/lobby/directory/BuildingDirectory.test.tsx` (133 LOC) — R4.8 — BuildingDirectory render tests.
 - `src/components/transitions/EntranceSequence.tsx` (132 LOC) — EntranceSequence — cinematic first-login entrance animation.

@@ -12,8 +12,8 @@ started: 2026-04-23T07:02:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T07:23:32.769Z
-  expires: 2026-04-23T09:23:32.764Z
+  acquired: 2026-04-23T07:25:23.098Z
+  expires: 2026-04-23T09:25:23.093Z
 acceptance:
   criteria:
     - "User can generate a tailored cover letter and resume for one application
@@ -48,13 +48,14 @@ tasks:
     completed: null
   R5.5:
     title: Resume tailoring reads active base_resumes by default
-    status: in_progress
+    status: complete
     started: 2026-04-23T07:23:32.769Z
-    completed: null
+    completed: 2026-04-23T07:25:10.524Z
+    commit: 0c30e60
   R5.6:
     title: Approval gate UI + outreach_queue cover_letter_send + cron extension
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T07:25:23.098Z
     completed: null
   R5.7:
     title: "@react-pdf/renderer — cover letter + resume PDF export"
@@ -94,3 +95,5 @@ history:
   - 2026-04-23T07:20:12.664Z: task_started R5.2
   - 2026-04-23T07:23:25.168Z: task_completed R5.2
   - 2026-04-23T07:23:32.769Z: task_started R5.5
+  - 2026-04-23T07:25:10.524Z: task_completed R5.5
+  - 2026-04-23T07:25:23.098Z: task_started R5.6

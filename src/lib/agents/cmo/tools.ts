@@ -596,14 +596,47 @@ export function makeGenerateThreeToneCoverLettersTool(userId: string) {
 
       const complete = result.complete && variantRows.length === 3;
 
+      // 4. If all three tones landed, open an outreach_queue row in
+      // pending_approval so the Ready-to-Send panel can surface the
+      // approval gate. Nothing is sent yet — body is deliberately empty
+      // until the user picks a tone via /api/writing-room/choose-tone.
+      let outreachQueueId: string | null = null;
+      if (complete) {
+        const subjectLine = `${input.companyName} — ${input.role} application`;
+        const { data: queueRow, error: queueError } = await supabase
+          .from("outreach_queue")
+          .insert({
+            user_id: userId,
+            application_id: input.applicationId,
+            type: "cover_letter_send",
+            subject: subjectLine,
+            body: null, // No body until the user chooses a tone.
+            status: "pending_approval",
+            generated_by: "cmo",
+            metadata: {
+              toneGroupId,
+              selectedCoverLetterId: null,
+              selectedTone: null,
+              resumeTailoredId: null,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        if (!queueError && queueRow) {
+          outreachQueueId = queueRow.id as string;
+        }
+      }
+
       return {
         success: complete,
         toneGroupId,
+        outreachQueueId,
         version: newVersion,
         variants: variantRows,
         message: complete
-          ? `Three tone cover letters (v${newVersion}) saved for ${input.companyName}. User approval gate (R5.6) will surface them side-by-side.`
-          : `Tone generation partial — ${variantRows.length} of 3 tones persisted. Caller should retry missing tones or surface what exists.`,
+          ? `Three tone cover letters (v${newVersion}) saved for ${input.companyName}. Approval gate is pending_approval — user must pick a tone and explicitly approve before send.`
+          : `Tone generation partial — ${variantRows.length} of 3 tones persisted. Approval gate not opened (need 3).`,
       };
     },
   });
