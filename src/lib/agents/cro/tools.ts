@@ -9,6 +9,7 @@ import {
   TargetProfileSchema,
   upsertTargetProfile,
 } from "./target-profile";
+import { runJobDiscoveryForUser } from "@/lib/jobs/discovery";
 
 // ---------------------------------------------------------------------------
 // Tool 1: queryApplications
@@ -249,6 +250,69 @@ export function makeCaptureTargetProfileTool(userId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Tool 6: runJobDiscovery
+// ---------------------------------------------------------------------------
+export function makeRunJobDiscoveryTool(userId: string) {
+  return tool({
+    description:
+      "Run a single Job Discovery pass for the user — pulls fresh postings from Greenhouse + Lever plus the seed library, scores them against the user's target profile, and adds the strongest matches to the war table as `discovered` applications. Call this when the user asks you to find jobs, refresh the pipeline, or kick off discovery. Do not call if the user has no target profile yet — capture that first with captureTargetProfile.",
+    inputSchema: z.object({
+      maxNew: z
+        .number()
+        .int()
+        .min(1)
+        .max(15)
+        .optional()
+        .describe("Soft cap on new applications inserted this run."),
+      minScore: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe(
+          "Minimum match score to accept. Defaults to 0.45. Raising this narrows the funnel."
+        ),
+      seedOnly: z
+        .boolean()
+        .optional()
+        .describe(
+          "Skip external API calls. Used for testing or when rate-limited."
+        ),
+    }),
+    execute: async (input) => {
+      const result = await runJobDiscoveryForUser(userId, {
+        maxNew: input.maxNew,
+        minScore: input.minScore,
+        seedOnly: input.seedOnly,
+      });
+      if (!result.hadTargetProfile) {
+        return {
+          success: false,
+          message:
+            "No target profile on record. Capture the user's targets first with captureTargetProfile, then re-run discovery.",
+        };
+      }
+      return {
+        success: true,
+        candidatesSeen: result.candidatesSeen,
+        freshAfterSourceDedupe: result.candidatesAfterSourceDedupe,
+        newApplications: result.newApplications,
+        skippedDuplicates: result.skippedDuplicates,
+        topScore: result.topScore,
+        topRoles: result.topRoles,
+        message:
+          result.newApplications === 0
+            ? "No new deals cleared the threshold this pass."
+            : `${result.newApplications} new ${
+                result.newApplications === 1 ? "deal" : "deals"
+              } just landed on the war table.`,
+        warnings: result.sourceWarnings.slice(0, 5),
+      };
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Convenience: build all tools for a given user session
 // ---------------------------------------------------------------------------
 export function buildCROTools(userId: string) {
@@ -258,5 +322,6 @@ export function buildCROTools(userId: string) {
     suggestFollowUp: makeSuggestFollowUpTool(userId),
     analyzeConversionRates: makeAnalyzeConversionRatesTool(userId),
     captureTargetProfile: makeCaptureTargetProfileTool(userId),
+    runJobDiscovery: makeRunJobDiscoveryTool(userId),
   };
 }

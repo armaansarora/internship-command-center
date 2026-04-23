@@ -125,6 +125,10 @@ export const applications = pgTable("applications", {
   position: text("position"),
   companyName: text("company_name"),
   lastActivityAt: timestamp("last_activity_at", { withTimezone: true }),
+  // Job Discovery score (0.000–1.000). Populated by CRO on ingest; used by
+  // the war-table sort and the CRO whiteboard's "top finds" list. Nullable
+  // because rows created pre-R1.3 + manually-entered rows don't have one.
+  matchScore: numeric("match_score", { precision: 4, scale: 3 }),
   ...timestamps,
 }, (table) => [
   userIsolation("applications"),
@@ -136,6 +140,11 @@ export const applications = pgTable("applications", {
   index("idx_apps_user_last_activity").on(
     table.userId,
     table.lastActivityAt.desc().nullsLast(),
+  ),
+  // CRO Job Discovery sort. (Migration 0011.)
+  index("idx_apps_user_match_score").on(
+    table.userId,
+    table.matchScore.desc().nullsLast(),
   ),
 ]);
 

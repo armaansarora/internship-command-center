@@ -19,6 +19,11 @@ const QUICK_ACTIONS: AgentQuickAction[] = [
     message:
       "I want to set my targets so the hunt can start. Ask me the short brief.",
   },
+  {
+    label: "Run discovery",
+    message:
+      "Run a Job Discovery pass right now. Show me what lands on the war table.",
+  },
   { label: "How's my pipeline?", message: "Give me a full pipeline briefing." },
   {
     label: "Show stale apps",
@@ -36,6 +41,7 @@ const TOOL_LABELS: Record<string, string> = {
   suggestFollowUp: "Drafting follow-up...",
   analyzeConversionRates: "Running conversion analysis...",
   captureTargetProfile: "Recording target profile...",
+  runJobDiscovery: "Running Job Discovery...",
 };
 
 const CRO_THEME: AgentDialogueTheme = {

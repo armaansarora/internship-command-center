@@ -68,6 +68,7 @@ async function SituationRoomData({
     lastActivityAt: row.last_activity_at
       ? new Date(row.last_activity_at)
       : null,
+    matchScore: row.match_score ?? null,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   }));

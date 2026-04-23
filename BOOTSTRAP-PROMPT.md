@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 9:57 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 10:03 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `ff8e0be`)
+- **Branch:** `main` (commit `00c997f`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 59,040 across 302 source files
+- **Total LOC:** 59,804 across 306 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-ff8e0be [R1/1.1] feat(cro): captureTargetProfile tool + agent_memory target seeding
+00c997f [R1/1.2] feat(jobs): Job Discovery source adapters + scorer
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `ff8e0be`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `00c997f`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,11 +95,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (302 files, 59,040 LOC)
+## Source Tree (306 files, 59,804 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 4154 |
+| `src/lib/db/queries` | 4346 |
 | `src/components/world` | 3142 |
 | `src/styles` | 2493 |
 | `src/components/floor-3/crud` | 1811 |
@@ -116,6 +116,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/lobby` | 1038 |
 | `src/components/floor-3` | 1032 |
 | `src/components/floor-3/cpo-character` | 1021 |
+| `src/lib/jobs` | 991 |
 | `src/components/floor-4/coo-character` | 989 |
 | `src/components/floor-6` | 986 |
 | `src/components/floor-1` | 958 |
@@ -126,11 +127,11 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7` | 809 |
+| `src/lib/agents/cro` | 799 |
 | `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
-| `src/components/floor-7/cro-character` | 739 |
-| `src/lib/agents/cro` | 734 |
+| `src/components/floor-7/cro-character` | 745 |
 | `src/lib/agents/cmo` | 715 |
 | `src/app/(authenticated)/penthouse` | 713 |
 | `src/components/agents/dialogue` | 709 |
@@ -138,9 +139,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/sound` | 641 |
 | `src/lib/agents/cio` | 615 |
 | `src/lib/ai` | 599 |
-| `src/lib/jobs` | 583 |
 | `src/components/floor-2` | 576 |
-| `src/db` | 546 |
+| `src/db` | 555 |
 | `src/lib/stripe` | 545 |
 | `src/lib/agents/ceo` | 521 |
 | `src/components/floor-2/cfo-character` | 517 |
@@ -170,9 +170,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cron/sync` | 213 |
 | `src/lib/supabase` | 209 |
 | `src/lib/calendar` | 203 |
-| `src/app/(authenticated)/writing-room` | 201 |
+| `src/app/(authenticated)/writing-room` | 202 |
 | `src/lib/audit` | 185 |
-| `src/app/(authenticated)/war-room` | 158 |
+| `src/app/(authenticated)/war-room` | 159 |
 | `src/app/api/cron/export-worker` | 157 |
 | `src/components/icons` | 152 |
 | `src/lib/validators` | 148 |
@@ -180,7 +180,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/transitions` | 132 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/app/api/weather` | 99 |
-| `src/app/(authenticated)/situation-room` | 85 |
+| `src/app/(authenticated)/situation-room` | 86 |
+| `src/app/api/cron/job-discovery` | 81 |
 | `src/app/api/ceo` | 75 |
 | `src/types` | 74 |
 | `src/app/api/notifications` | 67 |
@@ -249,6 +250,7 @@ src/app/api/cro/route.ts
 src/app/api/cron/__integration__/cron-auth.test.ts
 src/app/api/cron/briefing/route.ts
 src/app/api/cron/export-worker/route.ts
+src/app/api/cron/job-discovery/route.ts
 src/app/api/cron/purge-sweeper/route.test.ts
 src/app/api/cron/purge-sweeper/route.ts
 src/app/api/cron/sync/route.ts
@@ -451,6 +453,7 @@ src/lib/db/queries/documents-mutations.ts
 src/lib/db/queries/documents-rest.ts
 src/lib/db/queries/embeddings-rest.ts
 src/lib/db/queries/interviews-mutations.ts
+src/lib/db/queries/job-discovery-rest.ts
 src/lib/db/queries/notifications-mutations.ts
 src/lib/db/queries/notifications-rest.ts
 src/lib/db/queries/outreach-mutations.ts
@@ -470,6 +473,8 @@ src/lib/gmail/sync.ts
 src/lib/gsap-init.ts
 src/lib/jobs/company-tiers.test.ts
 src/lib/jobs/company-tiers.ts
+src/lib/jobs/discovery.test.ts
+src/lib/jobs/discovery.ts
 src/lib/jobs/scorer.test.ts
 src/lib/jobs/scorer.ts
 src/lib/jobs/sources/greenhouse.test.ts
@@ -584,13 +589,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 620 | 6,259 |
+| `BOOTSTRAP-PROMPT.md` | 633 | 6,379 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 425 | 8,617 |
-| **Total** | **1693** | **27,302** |
+| **Total** | **1706** | **27,422** |
 
-> ⚠️ Reading all recommended files consumes ~27,302 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~27,422 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

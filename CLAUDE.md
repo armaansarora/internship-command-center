@@ -196,12 +196,12 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
+- `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (104 LOC)
 - `src/components/world/FloorShell.tsx` (104 LOC) — FloorShell — wraps each floor's content with floor identity badge + ambient sound.
 - `src/components/world/SoundProvider.tsx` (103 LOC) — SoundProvider — wraps the application to expose sound controls.
 - `src/components/penthouse/GlassPanel.tsx` (101 LOC) — GlassPanel — frosted-glass card with:
 - `src/components/floor-3/cpo-character/CPODialoguePanel.tsx` (100 LOC)
 - `src/components/floor-6/cio-character/CIODialoguePanel.tsx` (100 LOC)
-- `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (98 LOC)
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (94 LOC)
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
