@@ -14,6 +14,11 @@ interface CRODialoguePanelProps {
 }
 
 const QUICK_ACTIONS: AgentQuickAction[] = [
+  {
+    label: "Declare my targets",
+    message:
+      "I want to set my targets so the hunt can start. Ask me the short brief.",
+  },
   { label: "How's my pipeline?", message: "Give me a full pipeline briefing." },
   {
     label: "Show stale apps",
@@ -30,6 +35,7 @@ const TOOL_LABELS: Record<string, string> = {
   manageApplication: "Updating application...",
   suggestFollowUp: "Drafting follow-up...",
   analyzeConversionRates: "Running conversion analysis...",
+  captureTargetProfile: "Recording target profile...",
 };
 
 const CRO_THEME: AgentDialogueTheme = {

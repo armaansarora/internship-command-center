@@ -1,4 +1,5 @@
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
+import type { TargetProfile } from "./target-profile";
 
 interface AgentMemoryEntry {
   content: string;
@@ -52,7 +53,8 @@ const CRO_RULES = `RESPONSE FORMAT:
 function buildDynamicContext(
   stats: PipelineStats,
   userName: string,
-  memories: AgentMemoryEntry[]
+  memories: AgentMemoryEntry[],
+  targetProfile: TargetProfile | null
 ): string {
   const statusLines = Object.entries(stats.byStatus)
     .filter(([, count]) => count > 0)
@@ -66,6 +68,19 @@ function buildDynamicContext(
           .join("\n")
       : "  None yet.";
 
+  const targetBlock = targetProfile
+    ? `TARGET PROFILE (already on record — the hunt is live):
+  - Roles: ${targetProfile.roles.join(", ")}
+  - Level: ${targetProfile.level.join(", ")}
+  - Geos: ${targetProfile.geos.join(", ")}
+  - Companies of interest: ${targetProfile.companies.join(", ") || "— open field"}
+  - Must-haves: ${targetProfile.musts.join("; ") || "none stated"}
+  - Nice-to-haves: ${targetProfile.nices.join("; ") || "none stated"}
+  Guidance: do NOT re-run intake unless the user asks to revise. You may reference this profile when explaining why a deal landed on the table.`
+    : `TARGET PROFILE: NOT ON RECORD.
+  The war table is empty until the user declares a hunt.
+  Your next move when the user opens this conversation: state that you don't have their targets yet and ask — in one message, tight — for (1) roles they want, (2) level (intern / new grad / early career), (3) cities or remote, (4) companies of real interest, (5) any must-haves. Do NOT pepper them with five separate questions; pose the brief as one. When they respond, extract structured values and call the 'captureTargetProfile' tool exactly once. After the tool returns, acknowledge in one line and invite them to kick off Job Discovery.`;
+
   return `LIVE PIPELINE SNAPSHOT (as of now):
 - Total active ops: ${stats.total}
 ${statusLines || "  - No applications yet"}
@@ -77,6 +92,8 @@ ${statusLines || "  - No applications yet"}
 
 USER: ${userName}
 
+${targetBlock}
+
 MEMORY FROM PRIOR SESSIONS:
 ${memoryLines}`;
 }
@@ -87,9 +104,10 @@ ${memoryLines}`;
 export function buildCROSystemPrompt(
   stats: PipelineStats,
   userName: string,
-  memories: AgentMemoryEntry[]
+  memories: AgentMemoryEntry[],
+  targetProfile: TargetProfile | null = null
 ): string {
-  const dynamicContext = buildDynamicContext(stats, userName, memories);
+  const dynamicContext = buildDynamicContext(stats, userName, memories, targetProfile);
 
   return [CRO_IDENTITY, "", CRO_RULES, "", dynamicContext].join("\n");
 }

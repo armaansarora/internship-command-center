@@ -5,6 +5,10 @@ import {
   updateApplicationStatusRest,
   analyzeConversionRatesRest,
 } from "@/lib/db/queries/applications-rest";
+import {
+  TargetProfileSchema,
+  upsertTargetProfile,
+} from "./target-profile";
 
 // ---------------------------------------------------------------------------
 // Tool 1: queryApplications
@@ -213,6 +217,38 @@ export function makeAnalyzeConversionRatesTool(userId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Tool 5: captureTargetProfile
+// ---------------------------------------------------------------------------
+export function makeCaptureTargetProfileTool(userId: string) {
+  return tool({
+    description:
+      "Record the user's target profile after they have stated what they want. Call this only when you have extracted concrete roles, geographies, and at least one must-have or company from the conversation. This unlocks Job Discovery — no jobs arrive until a profile is stored.",
+    inputSchema: TargetProfileSchema,
+    execute: async (input) => {
+      const stored = await upsertTargetProfile(userId, input);
+      if (!stored) {
+        return {
+          success: false,
+          message:
+            "Could not record the target profile. Ask the user to repeat the key details and try again.",
+        };
+      }
+      return {
+        success: true,
+        rowId: stored.rowId,
+        embedded: Array.isArray(stored.embedding),
+        updatedAt: stored.updatedAt,
+        roles: stored.profile.roles,
+        companies: stored.profile.companies,
+        geos: stored.profile.geos,
+        message:
+          "Target profile recorded. Job Discovery can now begin hunting against these parameters.",
+      };
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Convenience: build all tools for a given user session
 // ---------------------------------------------------------------------------
 export function buildCROTools(userId: string) {
@@ -221,5 +257,6 @@ export function buildCROTools(userId: string) {
     manageApplication: makeManageApplicationTool(userId),
     suggestFollowUp: makeSuggestFollowUpTool(userId),
     analyzeConversionRates: makeAnalyzeConversionRatesTool(userId),
+    captureTargetProfile: makeCaptureTargetProfileTool(userId),
   };
 }
