@@ -383,3 +383,220 @@ No escalation required (no missing secret, no business decision not in roadmap, 
 → Proceeding to implementation via `executing-plans`. Independent tasks (R2.4, R2.7, R2.8, R2.9) may be dispatched in parallel via `subagent-driven-development` if session budget allows.
 
 ---
+
+## 11. Implementation plan (bite-sized per task)
+
+> **For Claude (autopilot):** Each task below is wrapped by `npm run t start R2.N` → implement → commit `[R2/2.N] type: msg` → `npm run t done R2.N`. TDD-first for pure helpers; non-TDD for UI-visual tasks (no component test stack).
+
+### R2.1 — Morning Briefing AI agent
+**Files:**
+- Create: `src/lib/ai/agents/morning-briefing.ts`
+- Create: `src/lib/ai/agents/morning-briefing.test.ts`
+
+**Input shape:**
+```ts
+interface MorningBriefingInput {
+  displayName: string;
+  stats: PipelineStats;          // from getPipelineStatsRest
+  overnightDelta: {
+    newApps: number;
+    statusChanges: number;
+    importantEmails: Array<{ classification: string; subject: string | null }>;
+    staleCount: number;
+  };
+  mood_last_time?: 'cautious' | 'charged' | 'warm' | 'quiet' | 'sharp';
+}
+```
+
+**Output (Zod-validated):** `MorningBriefing` per §4f.
+
+**System prompt:** condensed CEO voice from `docs/CHARACTER-PROMPTS.md` — "commanding but human, terse, never broadcast, never 'Welcome back!'" Include quiet-night guidance: "If nothing happened overnight, speak an observation, not a report."
+
+**Tests:** 5 cases — rich overnight; zero activity; offer landed; rejection landed; stale pileup. For each: assert structure shape + beats.length ∈ [3,6] + mood in enum.
+
+**Commit:** `[R2/2.1] feat(ai): morning-briefing agent with structured beats`
+
+---
+
+### R2.2 — Briefing storage encode/decode
+**Files:**
+- Create: `src/lib/penthouse/briefing-storage.ts`
+- Create: `src/lib/penthouse/briefing-storage.test.ts`
+- Create: `src/lib/penthouse/briefing-fallback.ts`
+- Create: `src/lib/penthouse/briefing-fallback.test.ts`
+
+**API:**
+```ts
+// storage
+export function encodeBriefing(b: MorningBriefing): string   // returns "[briefing_v2]…json…"
+export function decodeBriefing(body: string | null): MorningBriefing | null
+// fallback (client-side synth)
+export function synthesizeFallbackBriefing(input: {
+  displayName: string;
+  stats: PipelineStats;
+}): MorningBriefing  // never null; always returns something
+```
+
+**TDD:** write roundtrip test first; legacy-body back-compat test; malformed body → null; null input → null; fallback produces ≥3 beats on zero-stat input.
+
+**Commit:** `[R2/2.2] feat(penthouse): briefing storage encode/decode + fallback`
+
+---
+
+### R2.3 — Cron briefing upgrade
+**Files:**
+- Modify: `src/app/api/cron/briefing/route.ts` (replace inline line-builder at L181-L211 with agent call)
+- Add integration test at `src/app/api/cron/__integration__/briefing.test.ts` (modify or create)
+
+**Change:** after gathering `recentApps/recentEmails/agentLogsToday/emailsToday`, call `generateMorningBriefing(input)`. On Claude failure, fall back to the existing plain-text line-builder (keep it as a private helper). Encode briefing via `encodeBriefing()`, write to `notifications.body`. Keep all existing idempotency + pagination + cron auth.
+
+**TDD:** mock admin client + mocked agent → assert structured body persisted; mock agent failure → assert legacy body still written (no 500).
+
+**Commit:** `[R2/2.3] feat(cron): briefing uses agent + structured body with legacy fallback`
+
+---
+
+### R2.4 — Time-of-day + pipeline-weather infra
+**Files:**
+- Create: `src/lib/penthouse/time-of-day.ts` + `.test.ts`
+- Create: `src/lib/penthouse/pipeline-weather.ts` + `.test.ts`
+- Create: `src/hooks/useTimeOfDay.ts`
+- Create: `src/hooks/usePipelineWeather.ts`
+- Modify: `src/components/world/ProceduralSkyline.tsx` (add optional `saturationDelta` prop; multiply into render color computation)
+
+**APIs:**
+```ts
+export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'late-night';
+export function timeOfDayFor(now: Date, tz?: string): TimeOfDay;
+
+export interface WeatherInput { newApps: number; responses: number; rejections: number; staleCount: number; }
+export function pipelineWeatherDelta(input: WeatherInput): number;  // in [-0.05, +0.05]
+```
+
+**TDD:** time-of-day boundary cases across 3 TZs (UTC, America/New_York, Asia/Tokyo); weather: 5 deltas → expected range.
+
+**Commit:** `[R2/2.4] feat(penthouse): time-of-day + weather helpers + skyline tint prop`
+
+---
+
+### R2.5 — CEO at Window + Morning Briefing Scene
+**Files:**
+- Create: `src/components/penthouse/ceo-at-window/CEOAtWindow.tsx`
+- Create: `src/components/penthouse/scenes/morning/MorningBriefingScene.tsx`
+- Create: `src/components/penthouse/scenes/morning/BriefingGlass.tsx`
+- Create: `src/components/penthouse/scenes/morning/BriefingBeat.tsx`
+- Create: `src/components/penthouse/scenes/morning/SkipHint.tsx`
+- Create: `src/components/penthouse/scenes/morning/useBriefingControls.ts`
+
+**CEOAtWindow:** composes existing `CEOCharacter` (Floor 1) but positioned in front of a wider window SVG framing, with a "turning" entrance animation (transform: `rotateY(180deg)` → `0deg` over 900ms, easing). Respects `prefers-reduced-motion`.
+
+**MorningBriefingScene:** full-viewport composition. CEOAtWindow on left; BriefingGlass panel on right; SkipHint bottom-center. Beats reveal sequentially: first beat appears 600ms after scene mount; subsequent beats appear on Space OR auto-advance every 8s idle.
+
+**BriefingGlass:** uses `GlassPanel` primitive with larger padding. Gold-hour accent color (`#C9A84C`, warm). Title "Morning Briefing" in Playfair Display with date.
+
+**BriefingBeat:** typewriter reveal (25ms/char default; 0ms reduced-motion). `tone` drives color: steady→gold, warm→amber, urgent→warning, reflective→muted, warning→red-tinted.
+
+**useBriefingControls:** returns `{ index, revealed, advance, skipAll, done }`. Binds keydown Esc (skipAll) + Space (advance or skipAll if at end) + 8s idle timer.
+
+**Commit:** `[R2/2.5] feat(penthouse): morning briefing scene + CEO at window`
+
+---
+
+### R2.6 — Time-of-day scenes + SceneRouter
+**Files:**
+- Create: `src/components/penthouse/scenes/SceneRouter.tsx`
+- Create: `src/components/penthouse/scenes/afternoon/AfternoonScene.tsx`
+- Create: `src/components/penthouse/scenes/evening/EveningScene.tsx`
+- Create: `src/components/penthouse/scenes/latenight/LateNightScene.tsx`
+
+**SceneRouter:** thin switch on `timeOfDay` prop. Each scene lazy-loaded via `next/dynamic` where feasible to keep first-paint tight for the morning path (priority).
+
+**AfternoonScene:** CEO at desk. Glass panel with "Half-day check-in" + overnightDelta since cron briefing + 1 quick prompt ("What changed since this morning?").
+
+**EveningScene:** CEO leaning on desk. Muted lighting. Glass panel with end-of-day summary stats + "Close strong" cue.
+
+**LateNightScene:** CEO absent. Single dim desk lamp SVG. Glass panel small: "The CEO's gone home. Jot something down." + text input for a note.
+
+**Commit:** `[R2/2.6] feat(penthouse): afternoon/evening/latenight scenes + router`
+
+---
+
+### R2.7 — Rest Panel
+**Files:**
+- Create: `src/components/penthouse/rest/RestPanel.tsx`
+
+**Composition:** uses existing `PipelineNodes`, `PipelineBar`, `ActivityFeed`, `StatCard` (muted variant), `QuickActionsRow` (from R2.8). Slide-up transform from `translateY(100%)` → `translateY(0)` on reveal. Accepts `isOpen` + `onClose` props; esc in RestPanel closes it.
+
+**Commit:** `[R2/2.7] feat(penthouse): rest panel with demoted dashboard`
+
+---
+
+### R2.8 — Quick Actions refactor + dispatch
+**Files:**
+- Create: `src/components/penthouse/quick-actions/QuickActionsRow.tsx`
+- Create: `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx`
+- Create: `src/components/penthouse/quick-actions/actionHandlers.ts`
+- Modify: `src/components/penthouse/QuickActionCard.tsx` (remove `disabled`, remove `phase` prop, add `onClick` prop, remove Phase badge render)
+
+**actionHandlers:** exports 4 handlers. "Add Application" = `router.push('/war-room?new=1')`. The other three POST to `/api/{cio,cpo,cmo}` with a minimal body `{ task: 'dispatch-from-penthouse', prompt: '<label>' }` and return a Promise<{ok, message}>. For R2, the endpoint responses can be simple acknowledgments — full agent execution is R3.
+
+**PneumaticTubeOverlay:** absolutely positioned. On dispatch call, slides envelope up-and-right 600ms, then slides incoming envelope back-left 400ms later, revealing a result card. Skipped under `prefers-reduced-motion` (shows toast instead).
+
+**Commit:** `[R2/2.8] feat(penthouse): quick actions dispatch + pneumatic tube overlay`
+
+---
+
+### R2.9 — Idle detail
+**Files:**
+- Create: `src/components/penthouse/idle/IdleDetail.tsx`
+- Create: `src/hooks/useIdleDetail.ts`
+- Create: `src/hooks/useIdleDetail.test.ts`
+
+**useIdleDetail:** takes `userId + date + recentRejection: boolean`. Deterministic hash → pick one of `photo-frame | pen | long-pause | lamp-flicker`. If `recentRejection` → always `long-pause`. First-ever visit hint → `photo-frame`.
+
+**IdleDetail:** renders a small SVG or CSS-based detail near the CEO. `long-pause` signals the parent to hold BriefingGlass reveal for +30s (via context or callback).
+
+**Tests:** deterministic hash stability; rejection override; first-visit override.
+
+**Commit:** `[R2/2.9] feat(penthouse): idle detail (photo frame / pen / pause)`
+
+---
+
+### R2.10 — Penthouse client replacement
+**Files:**
+- Replace: `src/app/(authenticated)/penthouse/penthouse-client.tsx`
+- Modify: `src/app/(authenticated)/penthouse/penthouse-data.ts` (add briefing + overnightDelta + weather fetches; reuse cron's same query patterns)
+- Modify: `src/app/(authenticated)/penthouse/page.tsx` (pass new payload through Suspense)
+- Create: `src/lib/db/queries/morning-briefings-rest.ts` + `.test.ts`
+
+**New penthouse-client:** wraps everything in `<EntranceSequence>`; mounts `<ProceduralSkyline saturationDelta={weather} />` context if needed, `<SceneRouter timeOfDay={tod}>` rendering the scene; `<RestPanel>` rendered with `isOpen={restPanelOpen}`; state managed by scene's `onComplete` or user `Esc`.
+
+**Commit:** `[R2/2.10] feat(penthouse): client replacement — scene-first composition`
+
+---
+
+### R2.11 — Proof test (divergent scripts)
+**Files:**
+- Create: `src/lib/ai/agents/morning-briefing.proof.test.ts`
+
+**Test:** seeded input A (rich overnight) and input B (zero). Calls `generateMorningBriefing` for both. Asserts: scripts differ; A has at least one beat with `data_cue ∈ {'new_app', 'offer', 'stale'}`; B has at least one beat with `data_cue === 'quiet'` or `mood === 'quiet'`; beat count differs or mood differs.
+
+**Commit:** `[R2/2.11] test: briefing proof — different nights produce different scripts`
+
+---
+
+### R2.12 — Acceptance verification
+**Commands:** `npm test` → green. `npx tsc --noEmit` → clean. `npm run build` → green (catches middleware-vs-proxy class). `npm run lint` → baseline respected.
+
+Flip `.ledger/R2-penthouse-ph.yml` → `acceptance.met: true` with verified_by_commit pointing to HEAD.
+
+**Commit:** `[R2] ledger: phase complete — acceptance met`
+
+---
+
+## 12. Autopilot execution notes
+
+- Default to `executing-plans` (inline) for dependent chain; consider `subagent-driven-development` only for R2.4 + R2.7 + R2.9 if context budget pressure hits 50%+ by R2.5 completion.
+- R1 precedent: stay inline; fewer handoff failures, easier to keep conventions straight (Drizzle-schema-only + Supabase REST pattern, timezone-aware timestamps, no console.log, aria-attrs on interactive elements).
+- Tower start/done per task with phase-tagged commits. Blockers via `tower block` only if a task fails 3 distinct fix attempts.
+
