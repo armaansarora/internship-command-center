@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 4:55 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 9:14 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,17 +19,11 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `6a43d31`)
+- **Branch:** `main` (commit `31f1dfc`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 57,149 across 290 source files
+- **Total LOC:** 57,130 across 289 source files
 - **Build:** Clean (zero TS errors)
 
-
-## Changes Since Last Bootstrap
-
-```
-6a43d31 [R0] chore(ledger): clean R0 evidence notes to pure path format
-```
 
 ## Acceptance Criteria — Progress
 
@@ -82,7 +76,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6a43d31`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `31f1dfc`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (290 files, 57,149 LOC)
+## Source Tree (289 files, 57,130 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -189,7 +183,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/crypto` | 50 |
 | `src/app/api/progression` | 44 |
 | `src/app/api/notifications/[id]/read` | 40 |
-| `src` | 36 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/(authenticated)/c-suite` | 33 |
 | `src/app/(authenticated)/observatory` | 33 |
@@ -199,6 +192,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/auth/signout` | 25 |
 | `src/app/api/gmail/sync` | 19 |
 | `src/app/api/calendar/sync` | 17 |
+| `src` | 17 |
 | `src/app/api/cmo` | 16 |
 | `src/app/api/cpo` | 16 |
 | `src/lib/db` | 16 |
@@ -489,7 +483,6 @@ src/lib/utils/google-drive-export.ts
 src/lib/utils/lex-order.ts
 src/lib/validators/application.test.ts
 src/lib/validators/application.ts
-src/middleware.ts
 src/proxy.ts
 src/styles/floor-1.css
 src/styles/floor-2.css
@@ -570,13 +563,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 619 | 6,238 |
+| `BOOTSTRAP-PROMPT.md` | 619 | 6,237 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 416 | 8,409 |
-| **Total** | **1683** | **27,073** |
+| `CLAUDE.md` | 425 | 8,617 |
+| **Total** | **1692** | **27,280** |
 
-> ⚠️ Reading all recommended files consumes ~27,073 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~27,280 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

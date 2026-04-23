@@ -1,7 +1,14 @@
-paused: true
-scope: R0-only
-started: 2026-04-22T19:15:00Z
-started_by: opus-4.7-session-autopilot-r0
-completed: 2026-04-22T20:55:00Z
+paused: false
+scope: R1-only
+started: 2026-04-22T22:00:00Z
+started_by: queued-by-user-after-r0-closeout
 max_blockers: 3
-outcome: R0 complete — 12/12 deliverables shipped; 235 tests passing; tsc clean; pushed to origin/main
+previous_phase: R0
+previous_outcome: "R0 complete — 12/12 deliverables. Initial run missed Next.js build regression (dual middleware.ts + proxy.ts); fixed in follow-up. acceptance.met now true. All green: 235 tests, tsc clean, npm run build green."
+next_phase: R1
+next_brief: docs/NEXT-ROADMAP.md §7 R1 — War Room (Floor 7)
+verification_before_acceptance:
+  - npm test
+  - npx tsc --noEmit
+  - npm run build
+  - npm run lint

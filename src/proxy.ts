@@ -6,14 +6,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+  // Match every path except Next.js internals, static assets, and well-known
+  // bot/monitoring paths. Public vs. protected routing is decided by
+  // updateSession's `publicPaths` list — keep this matcher broad; the helper
+  // handles the nuance.
   matcher: [
-    /*
-     * Match all paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico, sitemap.xml, robots.txt
-     * - Public assets
-     */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|fonts/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|apple-touch-icon.png|manifest.json|sitemap.xml|robots.txt|sw.js|workbox-.*|fonts/|sentry).*)",
   ],
 };

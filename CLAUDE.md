@@ -368,6 +368,15 @@ If you fix a bug or discover new issues, update `docs/BUG-TRACKER.md` — dated 
 - Non-escalation blocker on phase N? → `tower block R<N>.<n> "<reason>"`, then `tower next`, continue on whatever phase is unblocked.
 - If all phases in scope are blocked? → fire final handoff, set `paused: true`, wait for user.
 
+**Phase-complete verification (MANDATORY before marking acceptance.met: true):**
+Before flipping the `acceptance.met` flag on a phase ledger, autopilot MUST run ALL of:
+1. `npm test` — all vitest suites green
+2. `npx tsc --noEmit` — zero type errors
+3. `npm run build` — Next.js production build succeeds (catches the class of regression that R0 hit: both `src/middleware.ts` and `src/proxy.ts` existing at once; vitest and tsc both missed it because the conflict is only surfaced by the Next build step)
+4. `npm run lint` — baseline respected (it's fine if pre-existing warnings remain; no NEW errors)
+
+If any of these fail, do NOT mark acceptance met. Open a blocker via `tower block`, move to next phase if one's available.
+
 **Context rotation in autopilot:**
 - At 60%: note in handoff draft, keep working.
 - At 70%: `tower handoff --stdin` with current state, commit, then **exit the session cleanly** with a final message summarizing what's been done and what autopilot will continue with next session.

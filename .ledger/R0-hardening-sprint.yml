@@ -20,8 +20,12 @@ acceptance:
       test fixtures do not make the parser go off-script. securityheaders.com
       grades A. A fresh Claude session opens .ledger/CURRENT.yml and correctly
       identifies the active phase.
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: pending-r0-closeout-commit
+  notes: "12/12 tasks shipped. 235 tests pass. tsc clean. npm run build green
+    after src/middleware.ts/src/proxy.ts conflict resolved in follow-up commit.
+    Manual verification: user confirmed R0 complete at end of 1h34m autopilot
+    session."
 tasks:
   R0.1:
     title: Session persistence — root middleware + Playwright E2E (P0)
