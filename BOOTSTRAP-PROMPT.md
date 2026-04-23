@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:26 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:32 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `f877abd`)
+- **Branch:** `main` (commit `2b1c688`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 68,727 across 358 source files
+- **Total LOC:** 69,788 across 362 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-f877abd [R3/3.6] feat(ai): teach the CEO when to use dispatchBatch vs single dispatch
+2b1c688 [R3/3.7] feat(ui): wire DispatchGraph + polling into the C-Suite scene
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `f877abd`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `2b1c688`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,13 +95,13 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (358 files, 68,727 LOC)
+## Source Tree (362 files, 69,788 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 5427 |
 | `src/components/world` | 3162 |
-| `src/lib/ai/agents` | 2564 |
+| `src/lib/ai/agents` | 3052 |
 | `src/styles` | 2505 |
 | `src/components/floor-1` | 1945 |
 | `src/components/floor-3/crud` | 1811 |
@@ -145,6 +145,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db` | 592 |
 | `src/lib/agents/ceo` | 585 |
 | `src/components/floor-2` | 576 |
+| `src/app/api/cron/unprompted-ceo` | 573 |
 | `src/lib/stripe` | 545 |
 | `src/components/floor-2/cfo-character` | 517 |
 | `src/components/floor-1/ceo-character` | 511 |
@@ -269,6 +270,8 @@ src/app/api/cron/outreach-sender/route.ts
 src/app/api/cron/purge-sweeper/route.test.ts
 src/app/api/cron/purge-sweeper/route.ts
 src/app/api/cron/sync/route.ts
+src/app/api/cron/unprompted-ceo/route.test.ts
+src/app/api/cron/unprompted-ceo/route.ts
 src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
@@ -467,6 +470,8 @@ src/lib/ai/agents/morning-briefing.ts
 src/lib/ai/agents/north-star.test.ts
 src/lib/ai/agents/north-star.ts
 src/lib/ai/agents/shared-route-handler.ts
+src/lib/ai/agents/unprompted-triggers.test.ts
+src/lib/ai/agents/unprompted-triggers.ts
 src/lib/ai/cost.ts
 src/lib/ai/memory-extractor.ts
 src/lib/ai/model.ts
@@ -653,13 +658,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 701 | 7,237 |
+| `BOOTSTRAP-PROMPT.md` | 702 | 7,254 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 443 | 9,351 |
-| **Total** | **1793** | **29,034** |
+| **Total** | **1794** | **29,051** |
 
-> ⚠️ Reading all recommended files consumes ~29,034 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,051 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
