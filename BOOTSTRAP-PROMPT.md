@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:27 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:30 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `d070148`)
+- **Branch:** `main` (commit `d458e80`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 96,398 across 549 source files
+- **Total LOC:** 96,624 across 550 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-d070148 [R8/8.10] feat(r8): consent UI surface + opt-in / revoke endpoints (P9 drift guard)
+d458e80 [R8/8.11] feat(r8): consent guard + match-candidates 403 (P3/P4 invariants)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `d070148`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `d458e80`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,11 +95,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (549 files, 96,398 LOC)
+## Source Tree (550 files, 96,624 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 6199 |
+| `src/lib/db/queries` | 6222 |
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3510 |
 | `src/components/floor-1` | 2660 |
@@ -109,7 +109,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7/war-table` | 1760 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
-| `src/app/__tests__` | 1382 |
+| `src/app/__tests__` | 1490 |
 | `src/lib/ai/structured` | 1315 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
@@ -125,11 +125,11 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world/elevator` | 1056 |
 | `src/components/floor-5/cmo-character` | 1053 |
 | `src/components/floor-3/cpo-character` | 1021 |
+| `src/components/floor-6/crud` | 999 |
 | `src/lib/jobs` | 991 |
 | `src/components/floor-4/coo-character` | 989 |
 | `src/components/floor-6` | 988 |
 | `src/db` | 975 |
-| `src/components/floor-6/crud` | 950 |
 | `src/components/floor-5/crud` | 949 |
 | `src/lib/jobs/sources` | 931 |
 | `src/components/floor-7` | 897 |
@@ -163,18 +163,18 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/lobby/onboarding` | 500 |
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
-| `src/components/floor-6/contact-grid` | 448 |
+| `src/components/floor-6/rolodex` | 470 |
+| `src/components/floor-6/contact-grid` | 449 |
 | `src/components/penthouse/scenes/morning` | 448 |
 | `src/app/api/cron/purge-sweeper` | 439 |
 | `src/lib/account` | 432 |
-| `src/components/floor-6/rolodex` | 429 |
 | `src/lib/notifications` | 428 |
 | `src/components/floor-3/star` | 413 |
 | `src/lib/agents/concierge` | 411 |
 | `src/lib/auth` | 411 |
 | `src/lib/supabase` | 402 |
 | `src/components/penthouse/quick-actions` | 398 |
-| `src/lib/actions` | 392 |
+| `src/lib/actions` | 396 |
 | `src/components/floor-5/resume-press` | 372 |
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
@@ -314,6 +314,7 @@ src/app/__tests__/r7-undo-proof.test.ts
 src/app/__tests__/r8-cio-reresearch.proof.test.ts
 src/app/__tests__/r8-consent-copy.proof.test.ts
 src/app/__tests__/r8-consent-guard.proof.test.ts
+src/app/__tests__/r8-private-note-grep.proof.test.ts
 src/app/__tests__/r8-warmth-decay.proof.test.ts
 src/app/api/account/delete/cancel/route.test.ts
 src/app/api/account/delete/cancel/route.ts
@@ -911,13 +912,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 955 | 10,494 |
+| `BOOTSTRAP-PROMPT.md` | 960 | 10,559 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 501 | 11,030 |
-| **Total** | **2105** | **33,970** |
+| `CLAUDE.md` | 501 | 11,048 |
+| **Total** | **2110** | **34,053** |
 
-> ⚠️ Reading all recommended files consumes ~33,970 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,053 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

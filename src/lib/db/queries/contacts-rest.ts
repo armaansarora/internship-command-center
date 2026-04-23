@@ -34,6 +34,12 @@ export interface ContactRow {
   warmth: number | null;
   last_contact_at: string | null;
   notes: string | null;
+  /**
+   * R8 — private sticky-note, visible only to the owning user.  NEVER
+   * included in AI-prompt composition, exports, or cross-user surfaces.
+   * The P5 grep invariant keeps this column off every outbound path.
+   */
+  private_note: string | null;
   source: string | null;
   created_at: string;
   updated_at: string;
@@ -51,6 +57,12 @@ export interface ContactForAgent {
   phone: string | null;
   introducedBy: string | null;
   notes: string | null;
+  /**
+   * R8 private sticky-note — user-only.  See ContactRow.private_note.
+   * Allowlisted surfaces ONLY: this file, RolodexCard.tsx, ContactModal.tsx,
+   * schema.ts.  P5 enforces this mechanically.
+   */
+  privateNote: string | null;
   source: string | null;
   lastContactAt: string | null;
   warmthLevel: "warm" | "cooling" | "cold";
@@ -98,6 +110,9 @@ function rowToAgentFormat(row: ContactRow, companyName?: string | null): Contact
     phone: row.phone,
     introducedBy: row.introduced_by,
     notes: row.notes,
+    // R8 private note — only surfaced to the owning user via the same
+    // RLS-guarded fetch; never crosses into exports / AI / cross-user.
+    privateNote: row.private_note,
     source: row.source,
     lastContactAt: row.last_contact_at,
     warmthLevel: calcWarmthLevel(days),

@@ -17,6 +17,7 @@ function make(tier: "warm" | "cooling" | "cold"): ContactForAgent {
     phone: null,
     introducedBy: null,
     notes: null,
+    privateNote: null,
     source: null,
     lastContactAt: null,
     warmthLevel: tier,

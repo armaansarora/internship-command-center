@@ -11,6 +11,15 @@ interface Props {
   focused: boolean;
 }
 
+/** Deterministic ±2.5° tilt for sticky notes, seeded by contact id. */
+function seededNoteTilt(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return ((hash % 11) - 5) * 0.5;
+}
+
 /**
  * A single physical card on the rolodex cylinder. Warmth-coloured via the
  * cool-blue palette — zero red anywhere. The card is a <button> so flick-to-
@@ -82,6 +91,37 @@ export function RolodexCard({ contact, onFlip, focused }: Props): JSX.Element {
       >
         {palette.label}
       </div>
+
+      {/* R8 sharpening detail — private sticky-note visible ONLY to the
+          owning user.  Rendered as a hand-stuck cream square tilted a few
+          degrees.  Never included in any outbound surface (allowlist
+          enforced by P5 grep). */}
+      {contact.privateNote && (
+        <aside
+          aria-label="Private note, visible only to you"
+          style={{
+            position: "absolute",
+            top: -10,
+            right: -8,
+            width: 78,
+            minHeight: 46,
+            padding: "6px 8px",
+            transform: `rotate(${seededNoteTilt(contact.id)}deg)`,
+            background: "#FFF8D4",
+            color: "#3A2817",
+            fontFamily: "'Caveat', 'Bradley Hand', cursive",
+            fontSize: 12,
+            lineHeight: 1.2,
+            boxShadow:
+              "0 2px 6px rgba(0,0,0,0.3), inset 0 -4px 6px rgba(0,0,0,0.04)",
+            pointerEvents: "none",
+            overflow: "hidden",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {contact.privateNote.slice(0, 60)}
+        </aside>
+      )}
     </button>
   );
 }

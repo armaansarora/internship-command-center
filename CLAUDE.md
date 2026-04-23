@@ -114,7 +114,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/app/(authenticated)/settings/settings-client.tsx` (1089 LOC) — R0.7 — `user_profiles.deleted_at` as ISO string (or null). Drives
 - `src/app/lobby/lobby-client.tsx` (967 LOC) — Lobby client component — The Tower entrance.
 - `src/components/floor-7/crud/ApplicationModal.tsx` (777 LOC)
-- `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
+- `src/components/floor-6/crud/ContactModal.tsx` (762 LOC) — private sticky-note, visible only to the owning user. NEVER
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
 - `src/components/floor-4/SituationRoomClient.tsx` (650 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
@@ -229,12 +229,13 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/conflicts/ConflictsSection.tsx` (130 LOC) — Red-amber section at the top of the Floor 4 tableSlot when any calendar
 - `src/components/penthouse/QuickActionCard.tsx` (129 LOC) — @deprecated R2 bans the "Phase 1 / Phase 2" badge. Field kept optional
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)
+- `src/components/floor-6/rolodex/RolodexCard.tsx` (128 LOC) — A single physical card on the rolodex cylinder. Warmth-coloured via the
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
 - `src/components/floor-3/binder/DebriefBinderShelf.tsx` (117 LOC) — R6.8 — The Debrief Binder Shelf.
 - `src/components/floor-1/CSuiteClient.injectPrompt.test.tsx` (112 LOC) — R3.11 — unit tests for the `/`-inject activation gate.
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
-- `src/components/floor-6/rolodex/Rolodex.test.tsx` (110 LOC) — P1 invariant — rolodex at 200+ cards keeps the live DOM child count capped.
+- `src/components/floor-6/rolodex/Rolodex.test.tsx` (111 LOC) — P1 invariant — rolodex at 200+ cards keeps the live DOM child count capped.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
 - `src/components/floor-6/dossier-wall/DossierCard.tsx` (108 LOC) — A single dossier folder on the CIO's library wall. Tilts a hair ±2°
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
@@ -258,7 +259,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/situation-map/SituationMap.tsx` (93 LOC) — Dispatcher that chooses Canvas2D vs list fallback. Arrives at one of:
 - `src/components/penthouse/scenes/morning/BriefingGlass.tsx` (93 LOC) — BriefingGlass — the unfolding pane where the CEO's morning briefing appears.
 - `src/components/penthouse/scenes/morning/MorningBriefingScene.tsx` (90 LOC) — Morning Briefing Scene — Floor PH between ~05:00 and 11:59 local.
-- `src/components/floor-6/rolodex/RolodexCard.tsx` (88 LOC) — A single physical card on the rolodex cylinder. Warmth-coloured via the
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
 - `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
@@ -279,7 +279,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/scenes/SceneRouter.tsx` (62 LOC) — Picks the active Penthouse scene based on the user's current time-of-day
 - `src/components/penthouse/scenes/morning/SkipHint.tsx` (62 LOC) — Small floating hint at the bottom of the Morning Briefing Scene telling the
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)
-- `src/components/floor-6/contact-grid/ContactCard.test.tsx` (54 LOC)
+- `src/components/floor-6/contact-grid/ContactCard.test.tsx` (55 LOC)
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
 - `src/components/floor-6/side-switch/SideSwitch.test.tsx` (44 LOC)

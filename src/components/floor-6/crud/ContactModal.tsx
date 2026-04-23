@@ -25,6 +25,13 @@ const ContactFormSchema = z.object({
     .or(z.literal("")),
   introducedBy: z.string().max(200, "Too long").optional().or(z.literal("")),
   notes: z.string().max(2000, "Notes too long").optional().or(z.literal("")),
+  // R8 — private sticky-note, visible only to the owning user. NEVER
+  // included in AI prompts / exports / cross-user surfaces.  P5 enforces.
+  privateNote: z
+    .string()
+    .max(240, "Sticky-note is short on purpose — keep it under 240 chars")
+    .optional()
+    .or(z.literal("")),
 });
 
 type ContactFormData = z.infer<typeof ContactFormSchema>;
@@ -52,6 +59,7 @@ function parseAndValidate(formData: FormData): {
     linkedinUrl: (formData.get("linkedinUrl") as string) ?? "",
     introducedBy: (formData.get("introducedBy") as string) ?? "",
     notes: (formData.get("notes") as string) ?? "",
+    privateNote: (formData.get("privateNote") as string) ?? "",
   };
 
   const result = ContactFormSchema.safeParse(raw);
@@ -674,6 +682,47 @@ export function ContactModal({
                     e.currentTarget.style.borderColor = "rgba(92, 58, 30, 0.8)";
                   }}
                 />
+              </Field>
+
+              {/* Private sticky-note — R8 sharpening detail. Owner-only. */}
+              <Field
+                id="contact-private-note"
+                label="Private note — just for you"
+                error={errors.privateNote}
+              >
+                <textarea
+                  id="contact-private-note"
+                  name="privateNote"
+                  defaultValue={contact?.privateNote ?? ""}
+                  placeholder="A reminder, a nickname, a line from the last message. Never used by any AI. Never shared."
+                  rows={2}
+                  maxLength={240}
+                  aria-invalid={Boolean(errors.privateNote)}
+                  aria-describedby="private-note-help"
+                  style={{
+                    ...inputStyle,
+                    resize: "vertical",
+                    minHeight: "54px",
+                    background: "rgba(255, 248, 212, 0.08)",
+                  }}
+                  onFocus={(e) => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(92, 58, 30, 0.8)";
+                  }}
+                />
+                <span
+                  id="private-note-help"
+                  style={{
+                    fontSize: "10px",
+                    color: "#7A5B35",
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    marginTop: "4px",
+                    display: "block",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  Visible only to you. Never seen by the CEO, CNO, CIO, or any AI.
+                </span>
               </Field>
             </div>
 

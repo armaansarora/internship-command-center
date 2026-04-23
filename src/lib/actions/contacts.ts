@@ -25,6 +25,10 @@ function parseContactFormData(formData: FormData): ContactMutationInput | null {
     phone: (formData.get("phone") as string | null)?.trim() || null,
     introducedBy: (formData.get("introducedBy") as string | null)?.trim() || null,
     notes: (formData.get("notes") as string | null)?.trim() || null,
+    // R8 private sticky-note — owner-only, never included in any
+    // outbound surface.  Plumbed through the same mutation path as notes
+    // but gated by RLS (auth.uid() = user_id) on every read.
+    privateNote: (formData.get("privateNote") as string | null)?.trim() || null,
     companyId: (formData.get("companyId") as string | null)?.trim() || null,
   };
 }

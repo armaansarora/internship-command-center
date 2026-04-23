@@ -9,6 +9,12 @@ export interface ContactMutationInput {
   phone: string | null;
   introducedBy: string | null;
   notes: string | null;
+  /**
+   * R8 private sticky-note — owner-only. Written here and read on the
+   * owning user's Rolodex only. NEVER included in any outbound surface;
+   * allowlist enforcement is mechanical via the P5 grep invariant.
+   */
+  privateNote: string | null;
   companyId: string | null;
 }
 
@@ -27,6 +33,7 @@ export async function insertContactForUser(
     phone: input.phone,
     introduced_by: input.introducedBy,
     notes: input.notes,
+    private_note: input.privateNote,
     source: "manual",
     warmth: 100,
     company_id: input.companyId,
@@ -51,6 +58,7 @@ export async function updateContactForUser(
       phone: input.phone,
       introduced_by: input.introducedBy,
       notes: input.notes,
+      private_note: input.privateNote,
       company_id: input.companyId,
       updated_at: new Date().toISOString(),
     })

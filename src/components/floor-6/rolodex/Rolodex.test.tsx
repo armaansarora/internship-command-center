@@ -31,6 +31,7 @@ function makeContact(i: number): ContactForAgent {
     phone: null,
     introducedBy: null,
     notes: null,
+    privateNote: null,
     source: null,
     lastContactAt: null,
     warmthLevel: "warm",
