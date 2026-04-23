@@ -18,6 +18,8 @@ import { registerNext } from "./commands/next.js";
 import { registerInit } from "./commands/init.js";
 import { registerValidateMsg } from "./commands/validate-msg.js";
 import { registerVerify } from "./commands/verify.js";
+import { registerAccept } from "./commands/accept.js";
+import { registerLintAutopilot } from "./commands/lint-autopilot.js";
 
 const program = new Command();
 
@@ -50,6 +52,8 @@ registerNext(program);
 registerInit(program);
 registerValidateMsg(program);
 registerVerify(program);
+registerAccept(program);
+registerLintAutopilot(program);
 
 program.parseAsync(process.argv).catch((err) => {
   console.error(err);

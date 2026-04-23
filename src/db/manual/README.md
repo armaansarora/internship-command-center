@@ -12,5 +12,6 @@ in `../migrations/` are applied.
 | 002   | `002_pipeline_stats_rpc.sql`      | Single-round-trip pipeline stats RPC             |
 | 003   | `003_stripe_webhook_events.sql`   | Idempotency table for Stripe webhook             |
 | 004   | `004_progression_milestones_unique.sql` | Unique milestone unlock per user (concurrency safety) |
+| 005   | `005_interview_audio_bucket.sql`  | R6 private storage bucket + SELECT policy for interview audio |
 
 Scripts are idempotent — they can be re-run safely.

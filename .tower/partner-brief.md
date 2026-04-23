@@ -54,31 +54,32 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 | R2 Penthouse (PH) | **complete**, 12/12, acceptance met. 366 tests. Voice deferred. Drift: R2.5/R2.12 commit-tags absent. |
 | R3 C-Suite (Floor 1) | **complete**, 12/12, acceptance met. 524 tests. Real Promise.allSettled fan-out, agent_dispatches schema, DispatchGraph SMIL animation, CIO→CRO shared_knowledge bridge. |
 | R4 The Lobby (L) | **complete**, 12/12, acceptance met. 622 tests. Otis (new character), real bootstrap discovery. B1: LinkedIn env vars missing (correctly escalated). Drift: R4.7/R4.10 commit-tags. |
-| R5 The Writing Room (Floor 5) | **complete**, 9/10, acceptance met (PARTNER FLAGGED DRIFT). R5.4 live-compose streaming + pen-glow DEFERRED as "polish" — actually Intent-level character flourish. Three-tone divergence genuine. Approval gate two-click. |
-| R6 The Briefing Room (Floor 3) | **complete**, 10/10, acceptance met. 838 tests. LiveSTARBoard reactive, real interrupt logic, voice pipeline shipped (three-layer opt-in), physical Binder shelf. Partial fix to structural §8 via scripts/r6-acceptance-check.ts (phase-specific). Drift: R6.6 split into 6.6a+6.6b. |
-| R7 Situation Room (Floor 4) | **queued** — autopilot primed. |
-| R8–R10 | not_started. |
+| R5 The Writing Room (Floor 5) | **complete**, 9/10, acceptance met. R5.4 live-compose streaming + pen-glow ink DEFERRED (Intent-level drift; R5.4 mini-phase prompt prepped for partner to fire before or after R8). Three-tone divergence genuine. Approval gate two-click. |
+| R6 The Briefing Room (Floor 3) | **complete**, 10/10, acceptance met. 838 tests. LiveSTARBoard reactive, real interrupt logic, voice pipeline shipped (three-layer opt-in), physical Binder shelf. |
+| R7 Situation Room (Floor 4) | **complete**, 10/10, acceptance met. 974 tests. Real undo via DB-level send_after, zero toast/alert, quiet-hours server-side, earned arcs on Situation Map. |
+| R8 The Rolodex Lounge (Floor 6) | **queued** — autopilot primed. |
+| R9–R10 | not_started. |
 
 ## Running tab of follow-ups
 
-*(Partner tracks here between autopilot runs. After R7 we pause to clear this list before R8.)*
+*(Partner tracks here between autopilot runs. Snapshot after post-R7 cleanup pass.)*
 
-**Open blockers carrying forward:**
-- **R4 B1 — LinkedIn OAuth.** `LINKEDIN_CLIENT_ID` + `LINKEDIN_CLIENT_SECRET` not provisioned. Autopilot correctly filed blocker; needs user to update `.env.example` + provision credentials.
-- **R5 B1 — R5.4 live-compose streaming + pen-glow ink.** Intent-level drift, filed by autopilot as "polish." The R5 Intent verbatim: *"you watch a cover letter compose itself in real time."* Without it the Writing Room is form+PDF. Ship before Writing Room counts as delivered.
-- **R6 migration 0016 Part 2 — storage bucket `interview-audio-private` + SELECT policy.** Must be applied via psql to target env before voice uploads work in prod. Mirrors R5.0014 pattern.
+**RESOLVED in post-R7 cleanup:**
+- Drift detector now accepts split-subtask (`[R6/6.6a]`), bundled commits, and SHA-fallback when ledger records a commit. All 5 pre-existing drift items cleared.
+- `tower accept <phase>` command enforces verify-before-flip structurally (generalizes R6/R7's phase-specific acceptance-check.ts). Refuses to flip `acceptance.met` when any ✗ present. `--force` bypass records a `acceptance_forced_bypass` entry in ledger history.
+- `tower accept` auto-advances `.tower/autopilot.yml` scope when verify passes — bumps `next_phase`, updates `previous_outcome`, carries forward open blockers. Keeps `paused: true` so user controls the trigger.
+- `tower lint-autopilot` + write-time validator catch R4-style timestamp drift (`ended < started`).
+- Lint warnings: 15e/19w → **15e/0w** via underscore-prefix rule + fixing 3 legit unused imports. Back under R3 baseline.
+- `src/db/manual/005_interview_audio_bucket.sql` written; user runs in Supabase Dashboard → SQL Editor before voice uploads work in prod.
+- `.env.example` updated with `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `OPENAI_API_KEY` (R4/R6 OAuth + voice).
 
-**Drift hygiene (structural):**
-- **R2.5, R2.12, R4.7, R4.10, R6.6** — drift detector misses bundled/split/suffixed commits. Needs update: accept `[R<n>/<n>.<m>a]`, `[R<n>/<n>.<m>b]`, or multiple tasks pointing at the same commit.
-- **Structural §8 enforcement (prior held work #6).** R6 shipped a phase-specific `scripts/r6-acceptance-check.ts`. Generalize into `tower done --phase` refusing to flip `acceptance.met` when `tower verify` returns ✗.
+**Still open (need user hand):**
+- **R4 B1 — LinkedIn OAuth credentials.** User provisions in LinkedIn Developer Portal and sets env. Until then, LinkedIn sync unavailable (not a blocker for R8).
+- **R5 B1 — R5.4 live-compose streaming + pen-glow ink.** Run before or after R8 via mini-phase prompt. Non-blocking for R8 (separate floor).
+- **Migration 005 application.** User runs `src/db/manual/005_interview_audio_bucket.sql` in Supabase SQL Editor (takes ~30s). Blocks voice uploads in prod only.
 
-**Code quality drift:**
-- **Lint warnings climbing.** 15e/6w (R3) → 15e/7w (R4) → 15e/11w (R5) → 15e/15w (R6). Error baseline held; warnings +9 across 4 phases. Decide: new baseline, or pay down debt before R8.
-
-**Operational:**
-- **Auto-advance `autopilot.yml` scope (prior held work #5).** Still requires manual re-prime each phase.
-- **Autopilot.yml timestamp hygiene.** Prior runs had `ended` before `started` timestamps. Data-integrity issue in autopilot's write path.
-- **CEO voice deferred 3× (R2, R3, R4).** R6 shipped voice infrastructure for CPO — the pipeline exists now. CEO voice still unshipped. Decide: fold into R8/R9 explicitly, or accept as indefinite.
+**Open decisions (need user call):**
+- **CEO voice (deferred R2/R3/R4).** Voice pipeline now exists from R6 (CPO). Option A: treat CEO voice as a post-R10 polish pass. Option B: add to R10 (Negotiation Parlor). Option C: accept indefinite. My vote: B — R10 is a small floor and CEO voice would land well in negotiation dialogue.
 
 ## Non-issues (flagged, decided to leave)
 
@@ -92,6 +93,8 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 npm run t status              # orient — active phase, progress, last commit, blockers, lock
 npm run t phases              # overview of every phase
 npm run t verify <phase>      # full acceptance gate (tasks + blockers + drift + tests + tsc + build + lint)
+npm run t accept <phase>      # run verify then flip acceptance.met (refuses on any ✗; auto-advances scope)
+npm run t lint-autopilot      # check .tower/autopilot.yml for timestamp + scope-format issues
 npm run t next                # suggested next task + blocker context
 npm run t blocked             # all open blockers
 cat .tower/autopilot.yml      # autopilot state

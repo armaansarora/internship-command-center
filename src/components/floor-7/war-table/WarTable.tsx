@@ -135,7 +135,6 @@ export function WarTable({
   >(initialApplications, reduceOptimistic);
   const [, startTransition] = useTransition();
   const [activeApplication, setActiveApplication] = useState<Application | null>(null);
-  const [, setOverId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

@@ -1,7 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { readLedger, writeLedger, listLedgers, ledgerPath } from "./ledger.js";
 import { createFixtureRepo, cleanupFixture } from "../test-helpers.js";
-import fs from "fs-extra";
 import path from "node:path";
 
 function baseYaml(phase: string): string {

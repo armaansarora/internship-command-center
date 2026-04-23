@@ -10,9 +10,13 @@ export interface TaggedCommit {
   subject: string;
   committedAt: string;
   tag: CommitTag;
+  tags: CommitTag[];
 }
 
-const TAG_RE = /\[(R\d+)\/(R?\d+\.\d+)\]/g;
+// Accepts [R6/6.6], [R6/R6.6], [R6/6.6a], [R6/6.6b] — letter suffix indicates
+// the same logical task was split across multiple commits (the 'a'/'b' pattern
+// autopilot uses when a single task's work lands in two commits).
+const TAG_RE = /\[(R\d+)\/(R?\d+\.\d+)([a-z])?\]/g;
 
 export function parseCommitTags(message: string): CommitTag[] {
   const tags: CommitTag[] = [];
@@ -45,7 +49,7 @@ export async function taggedCommitsSince(
       const [sha, subject, committedAt] = line.split("\x1f");
       const tags = parseCommitTags(subject);
       return tags.length > 0
-        ? { sha: sha.slice(0, 8), subject, committedAt, tag: tags[0] }
+        ? { sha: sha.slice(0, 8), subject, committedAt, tag: tags[0], tags }
         : null;
     })
     .filter((c): c is TaggedCommit => c !== null);
@@ -63,4 +67,21 @@ export async function readRepoHead(repo: string): Promise<{
   );
   const [sha, subject, committedAt] = stdout.split("\x1f");
   return { sha, subject, committedAt };
+}
+
+// Returns true iff the given commit SHA (full or short) exists in the repo.
+// Used by drift detection to verify ledger-claimed commits are real, independent
+// of whether the commit's subject line carries the expected [phase/task] tag.
+export async function commitExists(repo: string, sha: string): Promise<boolean> {
+  if (!sha) return false;
+  try {
+    const { exitCode } = await execa(
+      "git",
+      ["cat-file", "-e", `${sha}^{commit}`],
+      { cwd: repo, reject: false },
+    );
+    return exitCode === 0;
+  } catch {
+    return false;
+  }
 }

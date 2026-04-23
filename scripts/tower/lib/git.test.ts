@@ -23,6 +23,18 @@ describe("parseCommitTags", () => {
   it("ignores malformed tags", () => {
     expect(parseCommitTags("[R2] [r2/2.3] feat: x")).toEqual([]);
   });
+  it("strips letter suffix for split-subtask commits (a/b pattern)", () => {
+    expect(parseCommitTags("[R6/6.6a] feat: part one")).toEqual([
+      { phase: "R6", task: "R6.6" },
+    ]);
+    expect(parseCommitTags("[R6/6.6b] feat: part two")).toEqual([
+      { phase: "R6", task: "R6.6" },
+    ]);
+  });
+  it("returns multiple tags from bundled commit subjects", () => {
+    const tags = parseCommitTags("[R4/4.7] [R4/4.8] feat: bundled");
+    expect(tags.map((t) => t.task).sort()).toEqual(["R4.7", "R4.8"]);
+  });
 });
 
 describe("taggedCommitsSince", () => {

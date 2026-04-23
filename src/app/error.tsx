@@ -23,7 +23,7 @@ export default function GlobalError({ error, reset }: ErrorPageProps): JSX.Eleme
     // Defer to Sentry boundary in production; in dev surface via console
     // (intentional dev-only — no console.* in shipped runtime paths).
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
+       
       console.error("[error.tsx] caught error:", error);
     }
   }, [error]);

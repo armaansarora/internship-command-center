@@ -23,7 +23,7 @@ export default function AuthenticatedError({
 }: ErrorPageProps): JSX.Element {
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
+       
       console.error("[(authenticated)/error.tsx] caught error:", error);
     }
   }, [error]);

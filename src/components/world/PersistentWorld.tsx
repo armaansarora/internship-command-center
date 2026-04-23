@@ -97,7 +97,7 @@ export function PersistentWorld(): JSX.Element {
     const div = ambientDivRef.current;
     if (div) div.style.background = ambientGradient(colorRef.current);
     // Mount only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Tween between floor configurations whenever the floor changes.

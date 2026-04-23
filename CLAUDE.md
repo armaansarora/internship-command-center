@@ -144,8 +144,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-5/ready-to-send/ReadyToSendPanel.tsx` (370 LOC) — R5.6 — ReadyToSendPanel.
 - `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
 - `src/components/floor-5/WritingRoomClient.tsx` (353 LOC)
-- `src/components/floor-7/war-table/WarTable.tsx` (353 LOC)
 - `src/components/floor-5/WritingRoomScene.tsx` (352 LOC) — WritingRoomScene — Floor 5 environment compositor.
+- `src/components/floor-7/war-table/WarTable.tsx` (352 LOC)
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (344 LOC)
 - `src/components/world/PneumaticTubeArrivalOverlay.tsx` (341 LOC) — R7.4 — System-wide pneumatic-tube arrival overlay.
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
@@ -432,14 +432,16 @@ If you fix a bug or discover new issues, update `docs/BUG-TRACKER.md` — dated 
 - Non-escalation blocker on phase N? → `tower block R<N>.<n> "<reason>"`, then `tower next`, continue on whatever phase is unblocked.
 - If all phases in scope are blocked? → fire final handoff, set `paused: true`, wait for user.
 
-**Phase-complete verification (MANDATORY before marking acceptance.met: true):**
-Before flipping the `acceptance.met` flag on a phase ledger, autopilot MUST run ALL of:
-1. `npm test` — all vitest suites green
-2. `npx tsc --noEmit` — zero type errors
-3. `npm run build` — Next.js production build succeeds (catches the class of regression that R0 hit: both `src/middleware.ts` and `src/proxy.ts` existing at once; vitest and tsc both missed it because the conflict is only surfaced by the Next build step)
-4. `npm run lint` — baseline respected (it's fine if pre-existing warnings remain; no NEW errors)
+**Phase-complete verification (MANDATORY — use `tower accept`):**
+To flip `acceptance.met: true` on a phase ledger, autopilot MUST use:
+```bash
+npm run t accept <Rn>
+```
+This command structurally runs the full verify gate (tasks complete + blockers empty + drift clean + tests + tsc + build + lint) and refuses the flip on any ✗. It also auto-advances `.tower/autopilot.yml` to the next phase's scope.
 
-If any of these fail, do NOT mark acceptance met. Open a blocker via `tower block`, move to next phase if one's available.
+**Do NOT write `acceptance.met: true` directly into the ledger YAML.** That bypass caused the R5.4 drift where acceptance was marked with 9/10 tasks complete. The `tower accept` gate exists specifically to prevent that.
+
+If verify fails, do NOT pass `--force`. Instead: fix the failing check, or open a blocker via `tower block` and move to next phase if one's available. `--force` is reserved for the partner (human) to use when a knowing, explicit bypass is called for.
 
 **Context rotation in autopilot:**
 - At 60%: note in handoff draft, keep working.

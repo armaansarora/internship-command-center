@@ -1,27 +1,24 @@
 paused: true
-scope: R7-only
-started: 2026-04-23T15:36:00.000Z
-started_by: sess-a5908e
-ended: 2026-04-23T16:17:00.000Z
-ended_reason: "R7 scope complete. 10/10 tasks shipped, acceptance.met=true, verified_by_commit=8713a40. Partner's 6 binding constraints honored in full: (1) REAL undo via DB-level send_after guard — cron predicate `send_after <= now` and undo predicate `send_after > now` are mutually exclusive Postgres predicates, the race is decided atomically by the database, NOT by UI timing; P1 proof test asserts Resend is called zero times for an undo inside the window. (2) Zero alert()/toast()/sonner/react-hot-toast anywhere in R7 surfaces — enforced both at test time (P2 proof) and at acceptance-check gate. (3) Pneumatic tube respects quiet hours — computeDeliverAfter computed SERVER-SIDE at notification insert from user's tz + quiet_hours jsonb, tubes queued during quiet hours physically wait for wake-up in the DB row. (4) Situation Map Canvas2D ships with earned-arcs-only invariant (no arc without a real outreach row behind it); honest list fallback gated by reduced-motion/viewport/feature-detect — not a punishment, a smaller truth. (5) Intent-level flourishes (rings-on-click, tube thunk, earned arcs) mechanically verified non-deferrable via acceptance-check.ts — no repeat of the R5.4 pattern. (6) 4-gate verify all green BEFORE acceptance flip: npm test 974/974 | tsc 0 errors | build ✓ | lint 15e/19w (errors match R6 baseline exactly, warnings +4 within autopilot tolerance). Autopilot scope was R7-only — pausing until next scope."
+scope: R8-only
+started: null
+started_by: queued-by-partner-for-r8-kickoff
+ended: null
+ended_reason: null
 max_blockers: 3
-previous_phase: R6
-previous_outcome: "R6 complete — 10/10 tasks, acceptance.met. 838 tests (+129 new). tsc + build green. Lint 15e/15w (warnings +4 vs R5; error baseline held). LiveSTARBoard genuinely reactive (extractStar on every keystroke), CPO interrupt rules real (firmness-scaled, cooldowns, grace window), voice three-layer opt-in with permanent-disable latch, Binder renders as physical leather-spine shelf, Inngest packet-regenerate cron real. acceptance-check.ts exists but is R6-specific — partial fix to structural §8. Drift: R6.6 split into 6.6a+6.6b. Auth/Stripe untouched."
-next_phase: R7
-next_brief: docs/NEXT-ROADMAP.md §11 R7 — The Situation Room (Floor 4)
+previous_phase: R7
+previous_outcome: "R7 complete — 10/10 tasks, acceptance.met. 974 tests. Real undo via DB-level send_after predicate (P1 proof asserts Resend call count=0 inside undo window). Zero alert/toast anywhere. Quiet-hours server-side via computeDeliverAfter. Earned-arcs Situation Map. Auth/Stripe untouched. Post-R7 cleanup pass: drift detector now accepts split/bundled commits, tower accept command enforces verify-before-flip, autopilot.yml auto-advances scope on accept, lint back to 15e/0w (from 15e/19w), migration 005 written, env.example updated. 996 tests green."
+next_phase: R8
+next_brief: docs/NEXT-ROADMAP.md — ### R8 — The Rolodex Lounge (Floor 6)
 open_blockers_carrying_forward:
   - R4 B1 (LinkedIn OAuth env vars) — do not unblock without credentials
-  - R5 B1 (R5.4 live-compose streaming + pen-glow) — scheduled for post-R7 fix pass
-  - R6 migration 0016 Part 2 (interview-audio-private bucket + SELECT policy) — apply via psql before voice uploads work in prod
+  - R5 B1 (R5.4 live-compose streaming + pen-glow) — non-blocking for R8; fire R5.4 mini-phase separately
+  - Migration 005 (src/db/manual/005_interview_audio_bucket.sql) — blocks R6 voice uploads in prod only
 verification_before_acceptance:
-  - npm test
-  - npx tsc --noEmit
-  - npm run build
-  - npm run lint
+  - npm run t accept R8
 partner_constraints:
-  - Undo must be REAL — within the undo window, a clicked cancel must actually prevent Resend from firing. A UI-only countdown that hides an already-sent email is the Proof-breaking failure mode.
-  - Zero alert() or generic toast anywhere in R7's shipping code. Proof explicitly requires this and the brief names it as an anti-pattern.
-  - Pneumatic Tube respects quiet hours — tubes queued during quiet hours arrive at wake-up, never at 3am. Non-negotiable per brief.
-  - Situation Map must render at 50+ outreach nodes without jank. If Canvas2D perf can't hold, ship the simpler list — do not ship a decorative arc animation on an empty canvas.
-  - DO NOT repeat the R5.4 pattern. Intent-level character flourishes (rings responding to interaction, tube thunk, flight paths earned) are NOT "polish." If it's in the Intent paragraph, it ships.
-  - tower verify ✗ is BINDING. If any verification gate fails, do not flip acceptance.met.
+  - Use `npm run t accept R8` to flip acceptance.met — it enforces verify-before-flip structurally. Do NOT write acceptance.met:true directly to the YAML.
+  - Consent UX is non-negotiable. Cross-user network features ship opt-in only, with explicit consent language and visible revoke. A Red Team read must pass. If consent surface can't be finished cleanly, ship rolodex-only and open a blocker for cross-user.
+  - Rolodex rotates smoothly at 200+ cards. If chosen tech (R3F / CSS 3D / Lottie) can't hold that, drop to a smaller card budget and flag the ceiling — don't ship a demo that dies at scale.
+  - Warmth decay must feel informative, not punitive. No red/warning visuals on cold cards; cool-blue is descriptive, not accusatory.
+  - Do NOT repeat the R5.4 pattern. Intent-level character flourishes (cards cool physically, rolodex rotates on scroll, `[`/`]` side-switch, dossiers yellow and curl) are NOT polish — if they're in the Intent or Provocation lines, they ship.
+  - Anti-patterns call-out: anything that reads as a CRM, contact list, LinkedIn embed, or uses the word "leads" is a fail.
