@@ -63,9 +63,10 @@ tasks:
     commit: 0833da3
   R5.4:
     title: Live-compose streaming + pen-glow ink
-    status: not_started
-    started: null
-    completed: null
+    status: complete
+    started: 2026-04-23T19:03:27.003Z
+    completed: 2026-04-23T19:13:14.227Z
+    commit: "6696856"
   R5.5:
     title: Resume tailoring reads active base_resumes by default
     status: complete
@@ -111,7 +112,14 @@ blockers:
       storage, PDF export, Resume Press, wall inscription) all shipped and Proof
       green without it. R5.4 can land in a post-R5 polish pass without blocking
       the phase.
-    resolved: null
+    resolved: 2026-04-23T19:13:14.227Z
+    resolution_commit: "6696856"
+    resolution_note: "R5.4 shipped as partner-scoped mini-phase — AI SDK v6
+      streamText token fan-out (3 tones in parallel), text/plain stream route,
+      LiveComposePanel with pen-glow cursor, prefers-reduced-motion honored.
+      Proof test asserts the three partner non-negotiables: parallel start <100ms,
+      >=10 deltas per stream, streamed==non-streamed equivalence (mocked).
+      1096/1096 tests green, tsc clean, 15/2 lint at baseline, build green."
 decisions: []
 history:
   - at: 2026-04-23T07:02:00.000Z
@@ -141,3 +149,14 @@ history:
   - 2026-04-23T07:34:57.308Z: task_started R5.10
   - 2026-04-23T07:36:20.621Z: task_completed R5.10
   - 2026-04-23T07:40:34.623Z: blocker_opened B1
+  - at: 2026-04-23T19:03:27.003Z
+    event: task_started
+    session: sess-a5908e
+    task: R5.4
+    note: autopilot mini-phase — partner-scoped R5.4-only pickup
+  - 2026-04-23T19:13:14.227Z: task_completed R5.4
+  - at: 2026-04-23T19:13:14.227Z
+    event: blocker_resolved
+    blocker_id: B1
+    task: R5.4
+    commit: "6696856"
