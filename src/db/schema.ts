@@ -110,6 +110,14 @@ export const userProfiles = pgTable("user_profiles", {
   // Server reads this at notification insert to compute deliver_after; tubes
   // queued during quiet hours land at wake-up, never at 3am.
   quietHours: jsonb("quiet_hours"),
+  // R8 — Cross-user Warm Intro Network consent. `consentAt` stamps opt-in;
+  // `revokedAt` stamps the last revoke (may precede a newer consent).
+  // `consentVersion` bumps when the consent copy changes, forcing
+  // re-consent.  The assertConsented guard treats consent as active when
+  // consentAt is set AND (revokedAt IS NULL OR revokedAt < consentAt).
+  networkingConsentAt: timestamp("networking_consent_at", { withTimezone: true }),
+  networkingRevokedAt: timestamp("networking_revoked_at", { withTimezone: true }),
+  networkingConsentVersion: integer("networking_consent_version").default(0),
   ...timestamps,
 }, () => [
   pgPolicy("user_profiles_self_access", {
@@ -238,6 +246,10 @@ export const contacts = pgTable("contacts", {
   warmth: integer("warmth").default(50),
   lastContactAt: timestamp("last_contact_at", { withTimezone: true }),
   notes: text("notes"),
+  // R8 — Private note. The sharpening detail. NEVER exposed to AI-prompt
+  // composition, export pipelines, or cross-user surfaces.  P5 grep
+  // invariant allowlists exactly the files that may reference this column.
+  privateNote: text("private_note"),
   source: text("source", { enum: ["apollo", "hunter", "pdl", "manual"] }),
   ...timestamps,
 }, (table) => [
@@ -669,6 +681,42 @@ export const baseResumes = pgTable("base_resumes", {
 ]);
 
 // ===========================================================================
+// 18. CONTACT EMBEDDINGS (pgvector — R8 warm-intro finder)
+// ===========================================================================
+// Stores a 1536-dim embedding per contact, generated from
+// `${name} ${title ?? ""} ${companyName ?? ""}`. Queried intra-user only —
+// the warm-intro scan cron computes cosine similarity between the
+// contact's embedded-company and the target application's company.
+// Cross-user queries are forbidden (RLS enforces user isolation).
+export const contactEmbeddings = pgTable("contact_embeddings", {
+  contactId: uuid("contact_id").primaryKey().references(() => contacts.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  embedding: vector("embedding", { dimensions: 1536 }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  userIsolation("contact_embeddings"),
+  index("idx_contact_embeddings_user").on(table.userId),
+]);
+
+// ===========================================================================
+// 19. NETWORKING MATCH INDEX (R8 consent infra — empty in R8, live in R8.x)
+// ===========================================================================
+// Cross-user matching table. Populated when a consented user adds an active
+// application; removed when a user revokes consent.  R8 ships the schema
+// + RLS + revoke-clears-rows behavior, but the match-candidates endpoint
+// returns 403 for all callers until the Red Team pass.  R8.x flips the
+// endpoint to read this table for cross-user intro proposals.
+export const networkingMatchIndex = pgTable("networking_match_index", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  targetCompanyName: text("target_company_name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  userIsolation("networking_match_index"),
+  index("idx_networking_match_user").on(table.userId),
+]);
+
+// ===========================================================================
 // TYPE EXPORTS
 // ===========================================================================
 export type UserProfile = typeof userProfiles.$inferSelect;
@@ -703,6 +751,10 @@ export type DailySnapshot = typeof dailySnapshots.$inferSelect;
 export type NewDailySnapshot = typeof dailySnapshots.$inferInsert;
 export type CompanyEmbedding = typeof companyEmbeddings.$inferSelect;
 export type JobEmbedding = typeof jobEmbeddings.$inferSelect;
+export type ContactEmbedding = typeof contactEmbeddings.$inferSelect;
+export type NewContactEmbedding = typeof contactEmbeddings.$inferInsert;
+export type NetworkingMatchIndex = typeof networkingMatchIndex.$inferSelect;
+export type NewNetworkingMatchIndex = typeof networkingMatchIndex.$inferInsert;
 export type ProgressionMilestone = typeof progressionMilestones.$inferSelect;
 export type NewProgressionMilestone = typeof progressionMilestones.$inferInsert;
 export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect;

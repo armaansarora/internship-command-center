@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:07 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:10 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `0eed4c9`)
+- **Branch:** `main` (commit `cdb9a7e`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 93,653 across 518 source files
+- **Total LOC:** 93,741 across 519 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-0eed4c9 [R8] plan: bite-sized TDD plan for R8 Rolodex Lounge (15 tasks, 10 invariants)
+cdb9a7e [R8/0] chore: scaffold R8 ledger (15 tasks, 5 decisions) + advance active phase + unpause autopilot
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `0eed4c9`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `cdb9a7e`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (518 files, 93,653 LOC)
+## Source Tree (519 files, 93,741 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -128,10 +128,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/jobs` | 991 |
 | `src/components/floor-4/coo-character` | 989 |
 | `src/components/floor-6` | 986 |
+| `src/db` | 975 |
 | `src/components/floor-6/crud` | 950 |
 | `src/components/floor-5/crud` | 949 |
 | `src/lib/jobs/sources` | 931 |
-| `src/db` | 923 |
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
 | `src/components/floor-4/undo-bar` | 885 |
@@ -255,6 +255,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/crypto` | 50 |
 | `src/app/api/progression` | 44 |
 | `src/app/api/notifications/[id]/read` | 40 |
+| `src/db/__tests__` | 36 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/(authenticated)/c-suite` | 33 |
 | `src/app/(authenticated)/observatory` | 33 |
@@ -569,6 +570,7 @@ src/components/world/WeatherEffects.tsx
 src/components/world/elevator/ElevatorButton.tsx
 src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
+src/db/__tests__/schema-r8.test.ts
 src/db/schema.r4.test.ts
 src/db/schema.r5.test.ts
 src/db/schema.r6.test.ts
@@ -867,13 +869,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 916 | 9,997 |
+| `BOOTSTRAP-PROMPT.md` | 916 | 10,001 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 491 | 10,701 |
-| **Total** | **2056** | **33,144** |
+| **Total** | **2056** | **33,148** |
 
-> ⚠️ Reading all recommended files consumes ~33,144 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,148 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
