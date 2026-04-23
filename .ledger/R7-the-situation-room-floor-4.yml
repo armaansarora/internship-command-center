@@ -17,7 +17,87 @@ acceptance:
       toast anywhere.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R7.1:
+    title: Migration 0017 — send_after, cancelled_at, deliver_after, delivered_at,
+      quiet_hours, deadline_at, deadline_alerts_sent columns + indexes + backfill
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.2:
+    title: Real-undo backend — /api/outreach/approve + /api/outreach/undo routes;
+      cron outreach-sender send_after predicate; P1 proof test (Resend never
+      called inside undo window)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.3:
+    title: In-world UndoBar component — 30s countdown with Cancel; zero toast
+      or alert; phase machine (in_flight/cancelling/cancelled/too_late)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.4:
+    title: Tube delivery hook + quiet-hours computeDeliverAfter + thunk synth
+      (Web Audio runtime-synthesized) + system-wide PneumaticTubeArrivalOverlay
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.5:
+    title: RingPulseController — alert rings respond to deadline-card / map-node /
+      tube-arrival clicks via imperative pulse(x, y); pure-CSS shockwave
+      keyframe; prefers-reduced-motion respected
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.6:
+    title: Overnight-drafts cron /api/cron/draft-follow-ups (every 2h) — fires
+      only if user's local time ∈ [02:00, 06:00); caps 5/user/night; produces
+      AI-drafted follow-ups per stale app; one batched pneumatic-tube
+      notification
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.7:
+    title: Calendar conflict detection — detectConflicts(interviews + calendar
+      events in 14d window); fires calendar_conflict notification (priority
+      critical, idempotent by event-pair); Floor-4 ConflictsSection at top of
+      tableSlot
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.8:
+    title: Deadline tracking — deadline_at editable from ApplicationModal;
+      Floor-4 Final Countdown section with tiered cards (T<24h red, T<72h
+      amber, T<7d soft); 3-beat cron (t_24h, t_4h, t_0) with per-app dedupe
+      via deadline_alerts_sent jsonb
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.9:
+    title: Situation Map — Canvas2D with node/arc budget (50 nodes, 20 active
+      arcs); honest list fallback for reduced-motion / mobile / no-canvas;
+      arcs are earned (no arc without an outreach row); empty-state text
+      "The Situation Room is quiet."
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R7.10:
+    title: R7 Proof invariants test + scripts/r7-acceptance-check.ts + 4-gate
+      verify (npm test + tsc + build + lint) + ledger flip (only on full green)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
 blockers: []
 decisions: []
 history: []
