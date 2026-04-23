@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T02:20:15.940Z
-  expires: 2026-04-23T04:20:15.936Z
+  acquired: 2026-04-23T02:21:38.571Z
+  expires: 2026-04-23T04:21:38.566Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -108,12 +108,15 @@ tasks:
     notes: Mocks Resend. Uses seed-job fallback so test is deterministic.
   R1.11:
     title: Lighthouse >90 on /war-room + bundle audit
-    status: in_progress
+    status: complete
     started: 2026-04-23T02:20:15.940Z
+    completed: 2026-04-23T02:21:28.302Z
+    commit: 1cf3b9c
     notes: Fix regressions. Ensure ApplicationModal stays code-split.
   R1.12:
     title: Rate-limit + CSRF coverage audit for Floor 7 mutating routes
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T02:21:38.571Z
     notes: Verify job-discovery, outreach-sender, application CRUD, CMO generate
       routes are all under rate-limit-middleware + CSRF.
 blockers: []
@@ -161,3 +164,5 @@ history:
   - 2026-04-23T02:18:35.144Z: task_started R1.10
   - 2026-04-23T02:19:58.810Z: task_completed R1.10
   - 2026-04-23T02:20:15.940Z: task_started R1.11
+  - 2026-04-23T02:21:28.302Z: task_completed R1.11
+  - 2026-04-23T02:21:38.571Z: task_started R1.12
