@@ -1,6 +1,6 @@
 phase: R4
 name: The Lobby (L)
-status: in_progress
+status: complete
 intent: The front door of the Tower. The moment when a first-time user *decides*
   this building is real. Existing users get a quiet welcome-back (zero
   ceremony). Returning users are already logged in and routed to their last
@@ -9,7 +9,7 @@ intent: The front door of the Tower. The moment when a first-time user *decides*
   form. Their first session ends with a Morning Briefing built from jobs the
   Tower discovered during onboarding.
 started: 2026-04-23T05:26:14.574Z
-completed: null
+completed: 2026-04-23T05:52:57.554Z
 lock:
   holder: sess-a5908e
   acquired: 2026-04-23T05:52:05.720Z
@@ -98,10 +98,10 @@ tasks:
   R4.11:
     title: R4 Proof — end-to-end first-run integration test (concierge → real
       discovery → first briefing references discovered applications)
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:52:05.720Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:52:57.554Z
+    commit: 1c22b01
   R4.12:
     title: R4 anti-pattern test — cinematic arrival never plays twice (strict
       one-time-per-account guard)
@@ -144,3 +144,5 @@ history:
   - 2026-04-23T05:51:12.130Z: task_started R4.12
   - 2026-04-23T05:51:44.176Z: task_completed R4.12
   - 2026-04-23T05:52:05.720Z: task_started R4.11
+  - 2026-04-23T05:52:57.554Z: task_completed R4.11
+  - 2026-04-23T05:52:57.554Z: phase_completed
