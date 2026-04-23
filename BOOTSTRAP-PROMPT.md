@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:36 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:40 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `1c2b44d`)
+- **Branch:** `main` (commit `3e674ab`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 81,081 across 427 source files
+- **Total LOC:** 81,089 across 427 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-1c2b44d [R5/5.9] feat(writing-room): wall inscription sharpening detail
+3e674ab [R5/5.10] test(r5): end-to-end Proof — 5 launch-brief invariants
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `1c2b44d`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3e674ab`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (427 files, 81,081 LOC)
+## Source Tree (427 files, 81,089 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -164,7 +164,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/actions` | 383 |
-| `src/components/floor-5/resume-press` | 364 |
+| `src/components/floor-5/resume-press` | 372 |
 | `src/app/__tests__` | 362 |
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
@@ -753,13 +753,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 800 | 8,511 |
+| `BOOTSTRAP-PROMPT.md` | 802 | 8,529 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 461 | 9,927 |
-| **Total** | **1910** | **30,884** |
+| **Total** | **1912** | **30,902** |
 
-> ⚠️ Reading all recommended files consumes ~30,884 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,902 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

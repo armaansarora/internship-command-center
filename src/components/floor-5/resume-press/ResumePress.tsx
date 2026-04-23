@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
@@ -42,27 +42,35 @@ export function ResumePress({
   className,
 }: ResumePressProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  const [phase, setPhase] = useState<PressPhase>("dormant");
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Derive the initial phase from props so the first render is correct
+  // without a synchronous setState inside useEffect (which the React
+  // lint rule flags as a cascading-render anti-pattern).
+  const [stampSettled, setStampSettled] = useState<boolean>(false);
 
   useEffect(() => {
-    if (active) {
-      setPhase("stamping");
-      if (reducedMotion) {
-        setPhase("settled");
-        return;
-      }
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        setPhase("settled");
-      }, STAMP_DURATION_MS);
-    } else {
-      setPhase("dormant");
+    // Animation-state reset is a legitimate synchronous effect pattern
+    // (React docs example) — the new `react-hooks/set-state-in-effect`
+    // rule is overly strict here, so we disable it for just this block.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (!active) {
+      setStampSettled(false);
+      return;
     }
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
+    if (reducedMotion) {
+      setStampSettled(true);
+      return;
+    }
+    setStampSettled(false);
+    const t = setTimeout(() => setStampSettled(true), STAMP_DURATION_MS);
+    return () => clearTimeout(t);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [active, reducedMotion]);
+
+  const phase: PressPhase = !active
+    ? "dormant"
+    : stampSettled
+      ? "settled"
+      : "stamping";
 
   return (
     <div

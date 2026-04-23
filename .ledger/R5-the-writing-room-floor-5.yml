@@ -78,9 +78,10 @@ tasks:
     commit: 1c2b44d
   R5.10:
     title: R5 Proof — end-to-end upload → 3 tones → approval → PDF → send
-    status: in_progress
+    status: complete
     started: 2026-04-23T07:34:57.308Z
-    completed: null
+    completed: 2026-04-23T07:36:20.621Z
+    commit: 3e674ab
 blockers: []
 decisions: []
 history:
@@ -109,3 +110,4 @@ history:
   - 2026-04-23T07:33:50.846Z: task_started R5.9
   - 2026-04-23T07:34:33.654Z: task_completed R5.9
   - 2026-04-23T07:34:57.308Z: task_started R5.10
+  - 2026-04-23T07:36:20.621Z: task_completed R5.10

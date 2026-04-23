@@ -155,7 +155,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
-- `src/components/floor-5/resume-press/ResumePress.tsx` (278 LOC) — R5.8 — The Resume Press.
+- `src/components/floor-5/resume-press/ResumePress.tsx` (286 LOC) — R5.8 — The Resume Press.
 - `src/components/lobby/cinematic/CinematicArrival.tsx` (277 LOC) — R4.7 — CinematicArrival.
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
