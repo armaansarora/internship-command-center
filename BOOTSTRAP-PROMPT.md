@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:17 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:18 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `5b9a0ab`)
+- **Branch:** `main` (commit `921f388`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 94,374 across 526 source files
+- **Total LOC:** 94,658 across 530 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-5b9a0ab [R8/8.3] feat(r8): rolodex centerpiece (CSS 3D + GSAP + virtualization) — P1 invariant
+921f388 [R8/8.4] fix(r8): recolor Floor 6 warmth visuals to cool-blue — zero red/warning on cold cards
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5b9a0ab`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `921f388`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (526 files, 94,374 LOC)
+## Source Tree (530 files, 94,658 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3510 |
 | `src/components/floor-1` | 2660 |
-| `src/styles` | 2576 |
+| `src/styles` | 2592 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/components/floor-7/war-table` | 1760 |
@@ -191,6 +191,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/ceo/dispatches` | 275 |
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
+| `src/components/floor-6/side-switch` | 268 |
 | `src/components/penthouse/rest` | 268 |
 | `src/components/floor-4/rings` | 256 |
 | `src/app/api/resumes/upload/__tests__` | 227 |
@@ -508,6 +509,10 @@ src/components/floor-6/rolodex/Rolodex.test.tsx
 src/components/floor-6/rolodex/Rolodex.tsx
 src/components/floor-6/rolodex/RolodexCard.tsx
 src/components/floor-6/rolodex/useRolodexRotation.ts
+src/components/floor-6/side-switch/SideSwitch.test.tsx
+src/components/floor-6/side-switch/SideSwitch.tsx
+src/components/floor-6/side-switch/useSideSwitch.test.ts
+src/components/floor-6/side-switch/useSideSwitch.ts
 src/components/floor-7/WarRoomClient.tsx
 src/components/floor-7/WarRoomScene.tsx
 src/components/floor-7/WarRoomTicker.tsx
@@ -878,13 +883,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 926 | 10,111 |
+| `BOOTSTRAP-PROMPT.md` | 927 | 10,130 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 495 | 10,856 |
-| **Total** | **2070** | **33,413** |
+| `CLAUDE.md` | 497 | 10,915 |
+| **Total** | **2073** | **33,491** |
 
-> ⚠️ Reading all recommended files consumes ~33,413 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,491 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

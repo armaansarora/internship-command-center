@@ -221,6 +221,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/InjectPrompt.test.tsx` (136 LOC) — R3.11 — unit tests for the floating `/`-inject prompt.
 - `src/components/floor-5/ready-to-send/ReadyToSendPanel.test.tsx` (136 LOC) — R5.6 — ReadyToSendPanel render assertions.
 - `src/components/floor-3/binder/BinderSpine.tsx` (135 LOC) — R6.8 — A single binder spine on the Debrief shelf.
+- `src/components/floor-6/side-switch/SideSwitch.tsx` (135 LOC) — Floor 6 has two rooms — CNO's lounge (left) and CIO's library (right).
 - `src/components/world/NotificationSystem.tsx` (135 LOC) — NotificationSystem — in-world spatial notification manager.
 - `src/components/lobby/directory/BuildingDirectory.test.tsx` (133 LOC) — R4.8 — BuildingDirectory render tests.
 - `src/components/transitions/EntranceSequence.tsx` (132 LOC) — EntranceSequence — cinematic first-login entrance animation.
@@ -277,6 +278,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/contact-grid/ContactCard.test.tsx` (54 LOC)
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
+- `src/components/floor-6/side-switch/SideSwitch.test.tsx` (44 LOC)
 - `src/components/floor-3/drill/DrillVoiceMic.test.tsx` (30 LOC)
 - `src/components/world/MilestoneToastContainer.tsx` (18 LOC) — Mount-once container for the milestone toast system.
 ## Bootstrap Infrastructure

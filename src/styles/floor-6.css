@@ -280,6 +280,22 @@
   }
 }
 
+/* ── R8 side-switch: mobile fallback tabs ─────────────────────────────── */
+/* Desktop hides the tab buttons (keyboard is primary input); mobile shows
+   them and hides the keyboard hint. */
+.side-switch-mobile {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .side-switch-mobile {
+    display: flex;
+  }
+  .side-switch-hint {
+    display: none;
+  }
+}
+
 /* ── Scrollbar styling ──────────────────────────────────────────────────── */
 .lounge-scroll::-webkit-scrollbar {
   width: 4px;
