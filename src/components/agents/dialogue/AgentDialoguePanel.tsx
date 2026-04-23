@@ -13,6 +13,7 @@ export function AgentDialoguePanel({
   onClose,
   onStatusChange,
   onChatActivity,
+  registerInject,
   chatId,
   api,
   dialogAriaLabel,
@@ -43,10 +44,8 @@ export function AgentDialoguePanel({
   // to a known C-suite agent so this is always the trailing path segment.
   const agentKey = (api.replace(/^.*\/api\//, "").split("/")[0] || "ceo") as AgentKey;
 
-  const { messages, input, handleInputChange, handleSubmit, status, setInput } = useAgentChat(
-    agentKey,
-    { id: chatId, api },
-  );
+  const { messages, input, handleInputChange, handleSubmit, status, setInput, sendMessage } =
+    useAgentChat(agentKey, { id: chatId, api });
 
   useEffect(() => {
     if (status === "streaming") {
@@ -87,6 +86,19 @@ export function AgentDialoguePanel({
     const timer = window.setTimeout(() => formRef.current?.requestSubmit(), 100);
     return () => window.clearTimeout(timer);
   }, [initialMessage, isOpen, messages.length, setInput]);
+
+  // R3.11 — register the inject handler with the parent. The parent stores the
+  // returned function in a ref and calls it when the user submits the floating
+  // `/`-inject prompt, pushing the directive into the chat mid-orchestration.
+  // Deregister on unmount by handing back a no-op — simpler than actual
+  // deregistration and avoids a stale handler firing after the panel closes.
+  useEffect(() => {
+    if (!registerInject) return;
+    registerInject((text: string) => {
+      sendMessage(text);
+    });
+    return () => registerInject(() => undefined);
+  }, [registerInject, sendMessage]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

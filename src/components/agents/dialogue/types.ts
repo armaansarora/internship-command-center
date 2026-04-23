@@ -66,6 +66,14 @@ export interface AgentDialoguePanelProps {
   onStatusChange?: (status: AgentDialogueStatus) => void;
   /** Forward chat messages + status on every render. Used by Ring-the-Bell. */
   onChatActivity?: (activity: AgentChatActivity) => void;
+  /**
+   * R3.11 — called once on mount with an `inject(text)` function the parent
+   * can store and invoke later to push a message into the chat from outside
+   * the normal input form (e.g., the `/`-inject floating prompt on Floor 1).
+   * The callback-registration pattern keeps the panel's internal state
+   * machine untouched — the parent owns the ref; the panel only wires up.
+   */
+  registerInject?: (fn: (text: string) => void) => void;
   chatId: string;
   api: string;
   dialogAriaLabel: string;

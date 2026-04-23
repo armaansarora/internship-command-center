@@ -124,6 +124,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (510 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
 - `src/components/floor-5/crud/DocumentEditor.tsx` (500 LOC)
+- `src/components/floor-1/CSuiteClient.tsx` (488 LOC) — R3.11 — pure decision helper for the `/`-keystroke listener. Opens the
 - `src/components/floor-3/cpo-character/CPOCharacter.tsx` (477 LOC)
 - `src/components/floor-6/RolodexLoungeClient.tsx` (475 LOC)
 - `src/components/floor-5/crud/DocumentList.tsx` (449 LOC)
@@ -134,7 +135,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/Elevator.tsx` (429 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
-- `src/components/floor-1/CSuiteClient.tsx` (395 LOC) — Watch the CEO chat's UIMessage stream for `tool-dispatchTo<X>` parts and
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (392 LOC)
 - `src/components/floor-1/RingTheBell.tsx` (390 LOC) — The CEO orchestrator dispatch tool name that drives this card
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
@@ -162,11 +162,11 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
 - `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
+- `src/components/agents/dialogue/AgentDialoguePanel.tsx` (225 LOC)
 - `src/components/world/ProceduralSkyline.tsx` (225 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
-- `src/components/agents/dialogue/AgentDialoguePanel.tsx` (213 LOC)
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/floor-2/ObservatoryClient.tsx` (208 LOC)
@@ -184,10 +184,11 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
 - `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (183 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
+- `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (182 LOC) — Called whenever the chat's messages or status change. Used by the parent
+- `src/components/floor-1/InjectPrompt.tsx` (181 LOC) — InjectPrompt — floating single-line input that opens above the bell when
 - `src/components/floor-1/CSuiteScene.tsx` (179 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
 - `src/components/floor-7/war-table/EmptyWarTable.tsx` (178 LOC) — Empty state for a cold war table. Not an apology — an invitation. Matches
 - `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
-- `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (173 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/app/(authenticated)/penthouse/penthouse-client.tsx` (171 LOC) — Penthouse client — the new R2 scene-first composition.
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
@@ -199,12 +200,14 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
 - `src/components/floor-2/analytics/ConversionFunnel.tsx` (137 LOC) — ConversionFunnel — SVG funnel visualization showing pipeline stages.
+- `src/components/floor-1/InjectPrompt.test.tsx` (136 LOC) — R3.11 — unit tests for the floating `/`-inject prompt.
 - `src/components/world/NotificationSystem.tsx` (135 LOC) — NotificationSystem — in-world spatial notification manager.
 - `src/components/transitions/EntranceSequence.tsx` (132 LOC) — EntranceSequence — cinematic first-login entrance animation.
 - `src/components/penthouse/QuickActionCard.tsx` (129 LOC) — @deprecated R2 bans the "Phase 1 / Phase 2" badge. Field kept optional
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
+- `src/components/floor-1/CSuiteClient.injectPrompt.test.tsx` (112 LOC) — R3.11 — unit tests for the `/`-inject activation gate.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
 - `src/components/floor-1/RingTheBell.bellPhase.test.tsx` (105 LOC) — R3.10 — unit tests for the pure side-effect helper + a spot-check that

@@ -47,6 +47,14 @@ export interface UseAgentChatReturn {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   status: ChatStatus;
   setInput: (value: string) => void;
+  /**
+   * Programmatically push a message into the chat without going through the
+   * input form. Used by R3.11's `/`-inject feature: mid-orchestration the
+   * user can press `/`, type a directive, and have it enter the chat stream
+   * as if they'd typed it in the panel's input. No-op when `text` is empty
+   * or blank.
+   */
+  sendMessage: (text: string) => void;
   /** Reset the conversation. Some panels expose this; others don't. */
   clearMessages: () => void;
 }
@@ -204,6 +212,12 @@ export function useAgentChat(
     stateRef.current?.clearMessages();
   }, []);
 
+  const sendMessage = useCallback((text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || !chatRef.current) return;
+    chatRef.current.sendMessage({ text: trimmed });
+  }, []);
+
   return {
     messages: stateRef.current.messages,
     input,
@@ -211,6 +225,7 @@ export function useAgentChat(
     handleSubmit,
     status: stateRef.current.status,
     setInput,
+    sendMessage,
     clearMessages,
   };
 }

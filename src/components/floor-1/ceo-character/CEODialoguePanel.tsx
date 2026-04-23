@@ -125,6 +125,13 @@ interface CEODialoguePanelProps {
     messages: UIMessage[];
     status: ChatStatus;
   }) => void;
+  /**
+   * R3.11 — called once on mount so the parent can store an `inject(text)`
+   * handler. Used by CSuiteClient's `/`-inject floating prompt to push the
+   * user's mid-orchestration directive into this chat without changing the
+   * panel's internal state machine.
+   */
+  registerInject?: (fn: (text: string) => void) => void;
 }
 
 export function CEODialoguePanel({
@@ -133,6 +140,7 @@ export function CEODialoguePanel({
   initialMessage,
   onStatusChange,
   onChatActivity,
+  registerInject,
 }: CEODialoguePanelProps): JSX.Element {
   return (
     <AgentDialoguePanel
@@ -140,6 +148,7 @@ export function CEODialoguePanel({
       onClose={onClose}
       onStatusChange={onStatusChange}
       onChatActivity={onChatActivity}
+      registerInject={registerInject}
       chatId="ceo-chat"
       api="/api/ceo"
       dialogAriaLabel="CEO executive briefing"

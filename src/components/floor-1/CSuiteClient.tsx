@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import type { UIMessage, ChatStatus } from "ai";
 import { isToolUIPart, getToolName } from "ai";
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
@@ -10,6 +10,7 @@ import { CEOCharacter } from "./ceo-character/CEOCharacter";
 import { CEODialoguePanel } from "./ceo-character/CEODialoguePanel";
 import { CEOWhiteboard } from "./ceo-character/CEOWhiteboard";
 import { RingTheBell } from "./RingTheBell";
+import { InjectPrompt } from "./InjectPrompt";
 import { DispatchGraph, DISPATCH_GRAPH_AGENTS } from "./DispatchGraph";
 import type {
   DispatchEntry,
@@ -17,6 +18,42 @@ import type {
 } from "./DispatchGraph";
 import { useDispatchProgress } from "@/hooks/useDispatchProgress";
 import type { DispatchProgressMap } from "@/hooks/useDispatchProgress";
+
+type BellPhase = "idle" | "ringing" | "orchestrating" | "complete";
+
+/**
+ * R3.11 — pure decision helper for the `/`-keystroke listener. Opens the
+ * inject prompt ONLY when:
+ *   - the dialogue panel is currently mounted (`dialogueOpen`), so there's
+ *     somewhere for the inject to land;
+ *   - the bell has reached `orchestrating` or `complete` (there's something
+ *     in flight to direct — no point injecting into a cold chat);
+ *   - the inject prompt is not already open (don't re-trigger);
+ *   - the user isn't typing in another input / textarea / contenteditable —
+ *     we don't want to hijack `/` while the user is composing a message in
+ *     the CEO panel itself or any other input anywhere on the page.
+ *
+ * Extracted so the branching logic is unit-testable without wiring up a
+ * full JSDOM window + keyboard event synthesis. The `useEffect` handler in
+ * CSuiteClient just passes `document.activeElement` + current state into
+ * this helper and branches on its boolean return.
+ */
+export function shouldOpenInjectOnSlash(
+  bellPhase: BellPhase,
+  dialogueOpen: boolean,
+  injectOpen: boolean,
+  activeElement: Element | null,
+): boolean {
+  if (!dialogueOpen) return false;
+  if (injectOpen) return false;
+  if (bellPhase !== "orchestrating" && bellPhase !== "complete") return false;
+  if (activeElement instanceof HTMLElement) {
+    const tag = activeElement.tagName.toLowerCase();
+    if (tag === "input" || tag === "textarea") return false;
+    if (activeElement.isContentEditable) return false;
+  }
+  return true;
+}
 
 interface CSuiteClientProps {
   stats: PipelineStats;
@@ -163,9 +200,13 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
   // `onPhaseChange` prop on the bell, then forwarded down to CSuiteScene as
   // `bellPhase` so the scene root can carry `data-bell-phase` for CSS-driven
   // camera-pullback + atmospheric dim.
-  const [bellPhase, setBellPhase] = useState<
-    "idle" | "ringing" | "orchestrating" | "complete"
-  >("idle");
+  const [bellPhase, setBellPhase] = useState<BellPhase>("idle");
+  // R3.11 — `/`-inject floating prompt visibility.
+  const [injectOpen, setInjectOpen] = useState(false);
+  // R3.11 — handler the CEO dialogue panel registers on mount via
+  // `registerInject`. When the user submits the inject prompt we call this
+  // to push their directive into the active chat.
+  const injectRef = useRef<((text: string) => void) | null>(null);
   // The current bell-ring's correlation id, extracted from dispatchBatch's
   // tool output once it resolves. Null during the streaming window (graph
   // runs on dispatchEvents alone during that time) and also null for
@@ -177,7 +218,50 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
     setDialogueOpen(false);
     setBriefingMessage(undefined);
     setCEOState("idle");
+    setInjectOpen(false);
   }, []);
+
+  // R3.11 — the CEO dialogue panel calls this on mount with a function we
+  // can invoke to push a message into the chat. Stable identity so the
+  // panel's effect dep array doesn't re-fire on every CSuiteClient render.
+  const registerInject = useCallback((fn: (text: string) => void) => {
+    injectRef.current = fn;
+  }, []);
+
+  const handleInjectClose = useCallback(() => setInjectOpen(false), []);
+
+  const handleInjectSubmit = useCallback((text: string) => {
+    injectRef.current?.(text);
+    setInjectOpen(false);
+  }, []);
+
+  // R3.11 — global `/` listener. Only active while the dialogue panel is
+  // mounted AND the bell has reached orchestrating/complete. The decision
+  // logic is factored into `shouldOpenInjectOnSlash` above so it can be
+  // unit-tested without a full JSDOM event loop.
+  useEffect(() => {
+    if (!dialogueOpen) return;
+    if (bellPhase !== "orchestrating" && bellPhase !== "complete") return;
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "/") return;
+      if (
+        !shouldOpenInjectOnSlash(
+          bellPhase,
+          dialogueOpen,
+          injectOpen,
+          document.activeElement,
+        )
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setInjectOpen(true);
+    }
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dialogueOpen, bellPhase, injectOpen]);
 
   const handleBriefingReady = useCallback((briefing: string) => {
     // Reset dispatch events + requestId for a fresh run so the bell's
@@ -361,6 +445,7 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
             initialMessage={briefingMessage}
             onStatusChange={handleCEOStatusChange}
             onChatActivity={handleChatActivity}
+            registerInject={registerInject}
           />
         </div>
       )}
@@ -380,6 +465,14 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
           }}
         />
       )}
+
+      {/* R3.11 — `/`-inject floating prompt. Rendered at the top level so it
+          layers above the dialogue panel's backdrop (z-index 60 vs 49/50). */}
+      <InjectPrompt
+        open={injectOpen}
+        onClose={handleInjectClose}
+        onSubmit={handleInjectSubmit}
+      />
 
       <style>{`
         @media (prefers-reduced-motion: reduce) {
