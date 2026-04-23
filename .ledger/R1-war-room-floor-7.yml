@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T02:03:54.432Z
-  expires: 2026-04-23T04:03:54.428Z
+  acquired: 2026-04-23T02:06:26.607Z
+  expires: 2026-04-23T04:06:26.602Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -51,13 +51,16 @@ tasks:
       Creates applications at status='discovered' with matchScore column.
   R1.4:
     title: CROWhiteboard — live view from agent_memory (targets + findings + pattern)
-    status: in_progress
+    status: complete
     started: 2026-04-23T02:03:54.432Z
+    completed: 2026-04-23T02:06:22.196Z
+    commit: 3ecf9b9
     notes: Replace static stats. Read via getMemoriesForContext(). Server-render
       with revalidate tag so job-discovery run refreshes display.
   R1.5:
     title: CMO generateTailoredResume tool
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T02:06:26.607Z
     notes: Mirror generateCoverLetter pattern. Reads master_resume from documents.
       Writes documents.type='resume_tailored' linked to application_id.
   R1.6:
@@ -126,3 +129,5 @@ history:
   - 2026-04-23T01:58:06.021Z: task_started R1.3
   - 2026-04-23T02:03:12.082Z: task_completed R1.3
   - 2026-04-23T02:03:54.432Z: task_started R1.4
+  - 2026-04-23T02:06:22.196Z: task_completed R1.4
+  - 2026-04-23T02:06:26.607Z: task_started R1.5

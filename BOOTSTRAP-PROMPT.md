@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 10:06 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 10:08 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `5fdc7ee`)
+- **Branch:** `main` (commit `3ecf9b9`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 60,007 across 306 source files
+- **Total LOC:** 60,512 across 308 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-5fdc7ee [R1/1.3] feat(discovery): Job Discovery worker + cron + CRO tool
+3ecf9b9 [R1/1.4] feat(war-room): CROWhiteboard living data from agent_memory
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5fdc7ee`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3ecf9b9`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (306 files, 60,007 LOC)
+## Source Tree (308 files, 60,512 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -124,15 +124,16 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-5/crud` | 949 |
 | `src/lib/jobs/sources` | 931 |
 | `src/components/floor-5` | 893 |
+| `src/lib/agents/cmo` | 856 |
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 840 |
 | `src/components/floor-7` | 825 |
+| `src/lib/ai/structured` | 804 |
 | `src/lib/agents/cro` | 799 |
 | `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 758 |
-| `src/lib/agents/cmo` | 715 |
 | `src/app/(authenticated)/penthouse` | 713 |
 | `src/components/agents/dialogue` | 709 |
 | `src/lib/ai/agents` | 681 |
@@ -147,7 +148,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-1/ceo-character` | 511 |
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
-| `src/lib/ai/structured` | 440 |
 | `src/app/api/cron/purge-sweeper` | 439 |
 | `src/lib/account` | 432 |
 | `src/hooks` | 429 |
@@ -425,6 +425,8 @@ src/lib/ai/model.ts
 src/lib/ai/prompt-cache.ts
 src/lib/ai/structured/cover-letter.ts
 src/lib/ai/structured/prep-packet.ts
+src/lib/ai/structured/tailored-resume.test.ts
+src/lib/ai/structured/tailored-resume.ts
 src/lib/ai/telemetry.ts
 src/lib/audit/log.test.ts
 src/lib/audit/log.ts
@@ -589,13 +591,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 638 | 6,426 |
+| `BOOTSTRAP-PROMPT.md` | 638 | 6,427 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 425 | 8,617 |
-| **Total** | **1711** | **27,469** |
+| **Total** | **1711** | **27,470** |
 
-> ⚠️ Reading all recommended files consumes ~27,469 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~27,470 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

@@ -2,6 +2,8 @@ import { tool } from "ai";
 import { z } from "zod/v4";
 import { createClient } from "@/lib/supabase/server";
 import { generateStructuredCoverLetter } from "@/lib/ai/structured/cover-letter";
+import { generateStructuredTailoredResume } from "@/lib/ai/structured/tailored-resume";
+import { getTargetProfile } from "@/lib/agents/cro/target-profile";
 
 // ---------------------------------------------------------------------------
 // Tool 1: generateCoverLetter
@@ -442,11 +444,150 @@ export function makeGetApplicationContextTool(userId: string) {
 export function buildCMOTools(userId: string) {
   return {
     generateCoverLetter: makeGenerateCoverLetterTool(userId),
+    generateTailoredResume: makeGenerateTailoredResumeTool(userId),
     getExistingDrafts: makeGetExistingDraftsTool(userId),
     refineDraft: makeRefineDraftTool(userId),
     getCompanyResearch: makeGetCompanyResearchTool(userId),
     getApplicationContext: makeGetApplicationContextTool(userId),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Tool 6: generateTailoredResume
+// ---------------------------------------------------------------------------
+export function makeGenerateTailoredResumeTool(userId: string) {
+  return tool({
+    description:
+      "Tailor the user's master resume for a specific application. Re-frames bullets, re-orders experience and skills to match the target role, and persists the result as a versioned `resume_tailored` document. Requires a masterResume string — the canonical source of truth for facts. If the user hasn't provided their master resume yet, first ask them to paste it. Never fabricate roles, companies, metrics, or skills that aren't in the master.",
+    inputSchema: z.object({
+      applicationId: z
+        .string()
+        .describe("UUID of the application this tailored resume is for."),
+      companyName: z
+        .string()
+        .describe("Company name for the target role."),
+      role: z
+        .string()
+        .describe("Target role title."),
+      jobDescription: z
+        .string()
+        .optional()
+        .describe(
+          "Full job description. Strongly recommended — drives bullet re-framing and skill re-ordering."
+        ),
+      masterResume: z
+        .string()
+        .min(80)
+        .describe(
+          "User's canonical resume text. Every claim in the tailored output must be derivable from this."
+        ),
+    }),
+    execute: async (input) => {
+      const supabase = await createClient();
+
+      const { data: existing } = await supabase
+        .from("documents")
+        .select("id, version")
+        .eq("user_id", userId)
+        .eq("application_id", input.applicationId)
+        .eq("type", "resume_tailored")
+        .order("version", { ascending: false })
+        .limit(1);
+      const latestVersion = existing?.[0]?.version ?? 0;
+      const newVersion = latestVersion + 1;
+
+      const { data: companyRow } = await supabase
+        .from("companies")
+        .select(
+          "description, culture_summary, recent_news, internship_intel"
+        )
+        .eq("user_id", userId)
+        .ilike("name", input.companyName)
+        .limit(1)
+        .single();
+
+      const companyResearch = companyRow
+        ? [
+            companyRow.description,
+            companyRow.culture_summary,
+            companyRow.recent_news,
+            companyRow.internship_intel,
+          ]
+            .filter(Boolean)
+            .join("\n\n")
+        : undefined;
+
+      const stored = await getTargetProfile(userId);
+      const targetNarrative = stored
+        ? `Roles wanted: ${stored.profile.roles.join(
+            ", "
+          )}. Geos: ${stored.profile.geos.join(", ")}. Must-haves: ${
+            stored.profile.musts.join("; ") || "none stated"
+          }.`
+        : undefined;
+
+      const structured = await generateStructuredTailoredResume({
+        userId,
+        companyName: input.companyName,
+        role: input.role,
+        masterResume: input.masterResume,
+        jobDescription: input.jobDescription,
+        companyResearch,
+        targetNarrative,
+      });
+
+      if (!structured) {
+        return {
+          success: false,
+          documentId: null,
+          version: newVersion,
+          message:
+            "Tailored resume generation failed. Ask the user to retry — no draft was saved.",
+        };
+      }
+
+      const title = `${input.companyName} — ${input.role} Resume v${newVersion}`;
+
+      const { data: created, error } = await supabase
+        .from("documents")
+        .insert({
+          user_id: userId,
+          application_id: input.applicationId,
+          type: "resume_tailored",
+          title,
+          content: structured.markdown,
+          version: newVersion,
+          is_active: true,
+          generated_by: "cmo",
+          updated_at: new Date().toISOString(),
+        })
+        .select("id, version")
+        .single();
+
+      if (error || !created) {
+        return {
+          success: false,
+          documentId: null,
+          version: newVersion,
+          content: structured.markdown,
+          title,
+          message: `Draft generated but could not be saved: ${
+            error?.message ?? "unknown error"
+          }. Content returned above.`,
+        };
+      }
+
+      return {
+        success: true,
+        documentId: created.id as string,
+        version: created.version as number,
+        content: structured.markdown,
+        title,
+        tailoringNotes: structured.resume.tailoring_notes,
+        message: `Tailored resume v${newVersion} saved for ${input.companyName}.`,
+      };
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
