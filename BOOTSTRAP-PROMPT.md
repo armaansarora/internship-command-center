@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:38 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:41 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `5c663e5`)
+- **Branch:** `main` (commit `8099183`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 73,486 across 383 source files
+- **Total LOC:** 74,110 across 390 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-5c663e5 [R4/4.2] feat(lobby): Otis — Concierge character primitives
+8099183 [R4/4.3] feat(ai): Concierge — Otis system prompt + extraction engine + routes
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5c663e5`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `8099183`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (383 files, 73,486 LOC)
+## Source Tree (390 files, 74,110 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -173,6 +173,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
 | `src/components/penthouse/rest` | 268 |
+| `src/components/lobby/cinematic` | 245 |
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
@@ -184,11 +185,13 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/writing-room` | 202 |
 | `src/app/(authenticated)/war-room` | 198 |
 | `src/lib/audit` | 185 |
+| `src/lib/lobby` | 172 |
 | `src/app/api/cron/export-worker` | 157 |
 | `src/components/penthouse/scenes/latenight` | 156 |
 | `src/components/penthouse/idle` | 153 |
 | `src/components/icons` | 152 |
 | `src/lib/validators` | 148 |
+| `src/app/api/onboarding/bootstrap-discovery` | 137 |
 | `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
 | `src/components/penthouse/scenes/evening` | 110 |
@@ -201,6 +204,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
 | `src/types` | 74 |
+| `src/lib/onboarding` | 70 |
 | `src/app/api/notifications` | 67 |
 | `src/components/penthouse/scenes` | 62 |
 | `src/app/api/drive/export` | 53 |
@@ -285,6 +289,8 @@ src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
 src/app/api/notifications/[id]/read/route.ts
 src/app/api/notifications/route.ts
+src/app/api/onboarding/bootstrap-discovery/route.test.ts
+src/app/api/onboarding/bootstrap-discovery/route.ts
 src/app/api/progression/route.ts
 src/app/api/stripe/checkout/route.ts
 src/app/api/stripe/portal/route.ts
@@ -381,6 +387,8 @@ src/components/floor-7/war-table/StampBar.tsx
 src/components/floor-7/war-table/WarTable.tsx
 src/components/floor-7/war-table/pipeline-config.ts
 src/components/icons/PenthouseIcons.tsx
+src/components/lobby/cinematic/ArrivalStages.test.ts
+src/components/lobby/cinematic/ArrivalStages.ts
 src/components/lobby/concierge/OtisAvatar.tsx
 src/components/lobby/concierge/OtisCharacter.test.tsx
 src/components/lobby/concierge/OtisCharacter.tsx
@@ -570,8 +578,11 @@ src/lib/jobs/sources/lever.ts
 src/lib/jobs/sources/seed.test.ts
 src/lib/jobs/sources/seed.ts
 src/lib/jobs/types.ts
+src/lib/lobby/derive-floors-unlocked.test.ts
+src/lib/lobby/derive-floors-unlocked.ts
 src/lib/logger.test.ts
 src/lib/logger.ts
+src/lib/onboarding/bootstrap.ts
 src/lib/penthouse/briefing-fallback.test.ts
 src/lib/penthouse/briefing-fallback.ts
 src/lib/penthouse/briefing-storage.test.ts
@@ -683,13 +694,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 721 | 7,502 |
+| `BOOTSTRAP-PROMPT.md` | 732 | 7,629 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 451 | 9,642 |
-| **Total** | **1821** | **29,590** |
+| **Total** | **1832** | **29,717** |
 
-> ⚠️ Reading all recommended files consumes ~29,590 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,717 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
