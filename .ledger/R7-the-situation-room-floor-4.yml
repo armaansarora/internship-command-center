@@ -1,14 +1,17 @@
 phase: R7
 name: The Situation Room (Floor 4)
-status: not_started
+status: in_progress
 intent: Mission control for time-sensitive matters. Follow-ups. Deadlines.
   Application status decay. Every stale follow-up has a drafted response ready
   to approve with an undo window. Approval-all feels like a COO running the
   room, not reckless batch-fire. The Pneumatic Tube lives here — proactive push
   lands as a physical object first.
-started: null
+started: 2026-04-23T15:36:10.226Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-23T16:09:51.754Z
+  expires: 2026-04-23T18:09:51.750Z
 acceptance:
   criteria:
     - Follow-up drafts appear overnight for stale apps. Approve-all sends with
@@ -20,84 +23,105 @@ acceptance:
 tasks:
   R7.1:
     title: Migration 0017 — send_after, cancelled_at, deliver_after, delivered_at,
-      quiet_hours, deadline_at, deadline_alerts_sent columns + indexes + backfill
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+      quiet_hours, deadline_at, deadline_alerts_sent columns + indexes +
+      backfill
+    status: complete
+    started: 2026-04-23T15:36:10.226Z
+    completed: 2026-04-23T15:38:28.441Z
+    commit: cc3aa8f
   R7.2:
     title: Real-undo backend — /api/outreach/approve + /api/outreach/undo routes;
       cron outreach-sender send_after predicate; P1 proof test (Resend never
       called inside undo window)
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-23T15:39:12.342Z
+    completed: 2026-04-23T15:51:14.096Z
+    commit: 84985a5
   R7.3:
-    title: In-world UndoBar component — 30s countdown with Cancel; zero toast
-      or alert; phase machine (in_flight/cancelling/cancelled/too_late)
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    title: In-world UndoBar component — 30s countdown with Cancel; zero toast or
+      alert; phase machine (in_flight/cancelling/cancelled/too_late)
+    status: complete
+    started: 2026-04-23T15:53:57.834Z
+    completed: 2026-04-23T15:59:22.589Z
+    commit: "0420856"
   R7.4:
-    title: Tube delivery hook + quiet-hours computeDeliverAfter + thunk synth
-      (Web Audio runtime-synthesized) + system-wide PneumaticTubeArrivalOverlay
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    title: Tube delivery hook + quiet-hours computeDeliverAfter + thunk synth (Web
+      Audio runtime-synthesized) + system-wide PneumaticTubeArrivalOverlay
+    status: complete
+    started: 2026-04-23T15:41:17.302Z
+    completed: 2026-04-23T15:48:16.399Z
+    commit: 34b499f
   R7.5:
     title: RingPulseController — alert rings respond to deadline-card / map-node /
       tube-arrival clicks via imperative pulse(x, y); pure-CSS shockwave
       keyframe; prefers-reduced-motion respected
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-23T15:52:15.631Z
+    completed: 2026-04-23T15:53:53.476Z
+    commit: 076f355
   R7.6:
-    title: Overnight-drafts cron /api/cron/draft-follow-ups (every 2h) — fires
-      only if user's local time ∈ [02:00, 06:00); caps 5/user/night; produces
+    title: Overnight-drafts cron /api/cron/draft-follow-ups (every 2h) — fires only
+      if user's local time ∈ [02:00, 06:00); caps 5/user/night; produces
       AI-drafted follow-ups per stale app; one batched pneumatic-tube
       notification
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-23T15:39:12.989Z
+    completed: 2026-04-23T15:46:38.255Z
+    commit: d267b65
   R7.7:
     title: Calendar conflict detection — detectConflicts(interviews + calendar
       events in 14d window); fires calendar_conflict notification (priority
       critical, idempotent by event-pair); Floor-4 ConflictsSection at top of
       tableSlot
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-23T15:59:32.848Z
+    completed: 2026-04-23T16:02:31.679Z
+    commit: fb17851
   R7.8:
-    title: Deadline tracking — deadline_at editable from ApplicationModal;
-      Floor-4 Final Countdown section with tiered cards (T<24h red, T<72h
-      amber, T<7d soft); 3-beat cron (t_24h, t_4h, t_0) with per-app dedupe
-      via deadline_alerts_sent jsonb
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    title: Deadline tracking — deadline_at editable from ApplicationModal; Floor-4
+      Final Countdown section with tiered cards (T<24h red, T<72h amber, T<7d
+      soft); 3-beat cron (t_24h, t_4h, t_0) with per-app dedupe via
+      deadline_alerts_sent jsonb
+    status: complete
+    started: 2026-04-23T16:02:36.014Z
+    completed: 2026-04-23T16:06:03.155Z
+    commit: fdeceda
   R7.9:
-    title: Situation Map — Canvas2D with node/arc budget (50 nodes, 20 active
-      arcs); honest list fallback for reduced-motion / mobile / no-canvas;
-      arcs are earned (no arc without an outreach row); empty-state text
-      "The Situation Room is quiet."
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    title: Situation Map — Canvas2D with node/arc budget (50 nodes, 20 active arcs);
+      honest list fallback for reduced-motion / mobile / no-canvas; arcs are
+      earned (no arc without an outreach row); empty-state text "The Situation
+      Room is quiet."
+    status: complete
+    started: 2026-04-23T16:06:13.429Z
+    completed: 2026-04-23T16:09:46.754Z
+    commit: 05f94e1
   R7.10:
-    title: R7 Proof invariants test + scripts/r7-acceptance-check.ts + 4-gate
-      verify (npm test + tsc + build + lint) + ledger flip (only on full green)
-    status: not_started
-    started: null
+    title: R7 Proof invariants test + scripts/r7-acceptance-check.ts + 4-gate verify
+      (npm test + tsc + build + lint) + ledger flip (only on full green)
+    status: in_progress
+    started: 2026-04-23T16:09:51.754Z
     completed: null
     commit: null
 blockers: []
 decisions: []
-history: []
+history:
+  - 2026-04-23T15:36:10.226Z: task_started R7.1
+  - 2026-04-23T15:38:28.441Z: task_completed R7.1
+  - 2026-04-23T15:39:12.342Z: task_started R7.2
+  - 2026-04-23T15:39:12.667Z: task_started R7.4
+  - 2026-04-23T15:39:12.989Z: task_started R7.6
+  - 2026-04-23T15:41:17.302Z: task_started R7.4
+  - 2026-04-23T15:46:38.255Z: task_completed R7.6
+  - 2026-04-23T15:48:16.399Z: task_completed R7.4
+  - 2026-04-23T15:51:14.096Z: task_completed R7.2
+  - 2026-04-23T15:52:15.631Z: task_started R7.5
+  - 2026-04-23T15:53:53.476Z: task_completed R7.5
+  - 2026-04-23T15:53:57.834Z: task_started R7.3
+  - 2026-04-23T15:59:22.589Z: task_completed R7.3
+  - 2026-04-23T15:59:32.848Z: task_started R7.7
+  - 2026-04-23T16:02:31.679Z: task_completed R7.7
+  - 2026-04-23T16:02:36.014Z: task_started R7.8
+  - 2026-04-23T16:06:03.155Z: task_completed R7.8
+  - 2026-04-23T16:06:13.429Z: task_started R7.9
+  - 2026-04-23T16:09:46.754Z: task_completed R7.9
+  - 2026-04-23T16:09:51.754Z: task_started R7.10

@@ -173,8 +173,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (225 LOC)
 - `src/components/world/ProceduralSkyline.tsx` (225 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
+- `src/components/floor-4/situation-map/SituationMapCanvas.tsx` (223 LOC) — Canvas2D renderer for the Situation Map.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
-- `src/components/floor-4/situation-map/SituationMapCanvas.tsx` (219 LOC) — Canvas2D renderer for the Situation Map.
 - `src/components/floor-4/undo-bar/UndoBar.tsx` (219 LOC) — In-world undo bar.
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
 - `src/components/floor-4/situation-map/SituationMapList.tsx` (215 LOC) — Two-column honest fallback for the Situation Map. Shipped when:
@@ -250,6 +250,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/drill/InterruptBubble.tsx` (96 LOC) — R6.6 — InterruptBubble.
 - `src/components/floor-4/conflicts/ConflictsSection.test.tsx` (96 LOC)
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (94 LOC)
+- `src/components/floor-4/situation-map/SituationMap.tsx` (93 LOC) — Dispatcher that chooses Canvas2D vs list fallback. Arrives at one of:
 - `src/components/penthouse/scenes/morning/BriefingGlass.tsx` (93 LOC) — BriefingGlass — the unfolding pane where the CEO's morning briefing appears.
 - `src/components/penthouse/scenes/morning/MorningBriefingScene.tsx` (90 LOC) — Morning Briefing Scene — Floor PH between ~05:00 and 11:59 local.
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
@@ -257,7 +258,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
 - `src/components/floor-3/drill/LiveSTARBoard.tsx` (83 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
-- `src/components/floor-4/situation-map/SituationMap.tsx` (82 LOC) — Dispatcher that chooses Canvas2D vs list fallback. Arrives at one of:
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
 - `src/components/agents/dialogue/AgentChatInput.tsx` (80 LOC)
 - `src/components/floor-3/drill/DrillTimer.test.tsx` (79 LOC)

@@ -34,7 +34,8 @@ export function SituationMapCanvas({ shape, companyNameById }: Props): JSX.Eleme
   void companyNameById;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number>(performance.now());
+  // Lazy-init on mount via useEffect so the render body stays pure.
+  const startTimeRef = useRef<number | null>(null);
   const rings = useRingPulse();
 
   const handleClick = useCallback(
@@ -45,6 +46,9 @@ export function SituationMapCanvas({ shape, companyNameById }: Props): JSX.Eleme
   );
 
   useEffect(() => {
+    if (startTimeRef.current === null) {
+      startTimeRef.current = performance.now();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -181,7 +185,7 @@ export function SituationMapCanvas({ shape, companyNameById }: Props): JSX.Eleme
     };
 
     const loop = (now: number): void => {
-      const elapsed = now - startTimeRef.current;
+      const elapsed = now - (startTimeRef.current ?? now);
       draw(elapsed);
       if (shape.activeCount > 0) {
         rafRef.current = requestAnimationFrame(loop);

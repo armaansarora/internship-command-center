@@ -49,15 +49,36 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 
 | Phase | Status |
 |---|---|
-| R0 Hardening Sprint | **complete**, 12/12, `acceptance.met: true`. Original run missed `npm run build` → dual `src/middleware.ts` + `src/proxy.ts` broke Next 16 build. Post-mortem: deleted middleware.ts, merged matcher into proxy.ts, added §8 verification rule + `tower verify` command. |
-| R1 War Room (Floor 7) | **complete**, 12/12, `acceptance.met: true`. 293 tests, build green. Job Discovery pipeline, Outreach queue, CRO `captureTargetProfile`, CMO `generateTailoredResume`, CEO North Star macro, CROWhiteboard living data, Batch Stamp, inviting empty state. Full user-journey E2E deferred until seeded account + Resend mock exist. |
-| R2 Penthouse (PH) | **in progress** — autopilot running. Last checked 5/12 tasks complete; may be further. |
-| R3–R10 | not_started. |
+| R0 Hardening Sprint | **complete**, 12/12, acceptance met. Dual middleware.ts/proxy.ts regression caught in post-mortem. |
+| R1 War Room (Floor 7) | **complete**, 12/12, acceptance met. 293 tests. |
+| R2 Penthouse (PH) | **complete**, 12/12, acceptance met. 366 tests. Voice deferred. Drift: R2.5/R2.12 commit-tags absent. |
+| R3 C-Suite (Floor 1) | **complete**, 12/12, acceptance met. 524 tests. Real Promise.allSettled fan-out, agent_dispatches schema, DispatchGraph SMIL animation, CIO→CRO shared_knowledge bridge. |
+| R4 The Lobby (L) | **complete**, 12/12, acceptance met. 622 tests. Otis (new character), real bootstrap discovery. B1: LinkedIn env vars missing (correctly escalated). Drift: R4.7/R4.10 commit-tags. |
+| R5 The Writing Room (Floor 5) | **complete**, 9/10, acceptance met (PARTNER FLAGGED DRIFT). R5.4 live-compose streaming + pen-glow DEFERRED as "polish" — actually Intent-level character flourish. Three-tone divergence genuine. Approval gate two-click. |
+| R6 The Briefing Room (Floor 3) | **complete**, 10/10, acceptance met. 838 tests. LiveSTARBoard reactive, real interrupt logic, voice pipeline shipped (three-layer opt-in), physical Binder shelf. Partial fix to structural §8 via scripts/r6-acceptance-check.ts (phase-specific). Drift: R6.6 split into 6.6a+6.6b. |
+| R7 Situation Room (Floor 4) | **queued** — autopilot primed. |
+| R8–R10 | not_started. |
 
-## Held work (do after R2 done, not mid-run)
+## Running tab of follow-ups
 
-- **Auto-advance `autopilot.yml` scope.** Today requires manual re-prime after each phase. Build into `tower handoff`: when `acceptance.met` flips, bump `scope` to next phase automatically. Biggest remaining UX win toward truly-one-sign-off.
-- **Structural §8 enforcement.** Migrate the 4-step verification from CLAUDE.md prose into `tower done --phase` refusing to flip `acceptance.met` without the checks. Structural > prose.
+*(Partner tracks here between autopilot runs. After R7 we pause to clear this list before R8.)*
+
+**Open blockers carrying forward:**
+- **R4 B1 — LinkedIn OAuth.** `LINKEDIN_CLIENT_ID` + `LINKEDIN_CLIENT_SECRET` not provisioned. Autopilot correctly filed blocker; needs user to update `.env.example` + provision credentials.
+- **R5 B1 — R5.4 live-compose streaming + pen-glow ink.** Intent-level drift, filed by autopilot as "polish." The R5 Intent verbatim: *"you watch a cover letter compose itself in real time."* Without it the Writing Room is form+PDF. Ship before Writing Room counts as delivered.
+- **R6 migration 0016 Part 2 — storage bucket `interview-audio-private` + SELECT policy.** Must be applied via psql to target env before voice uploads work in prod. Mirrors R5.0014 pattern.
+
+**Drift hygiene (structural):**
+- **R2.5, R2.12, R4.7, R4.10, R6.6** — drift detector misses bundled/split/suffixed commits. Needs update: accept `[R<n>/<n>.<m>a]`, `[R<n>/<n>.<m>b]`, or multiple tasks pointing at the same commit.
+- **Structural §8 enforcement (prior held work #6).** R6 shipped a phase-specific `scripts/r6-acceptance-check.ts`. Generalize into `tower done --phase` refusing to flip `acceptance.met` when `tower verify` returns ✗.
+
+**Code quality drift:**
+- **Lint warnings climbing.** 15e/6w (R3) → 15e/7w (R4) → 15e/11w (R5) → 15e/15w (R6). Error baseline held; warnings +9 across 4 phases. Decide: new baseline, or pay down debt before R8.
+
+**Operational:**
+- **Auto-advance `autopilot.yml` scope (prior held work #5).** Still requires manual re-prime each phase.
+- **Autopilot.yml timestamp hygiene.** Prior runs had `ended` before `started` timestamps. Data-integrity issue in autopilot's write path.
+- **CEO voice deferred 3× (R2, R3, R4).** R6 shipped voice infrastructure for CPO — the pipeline exists now. CEO voice still unshipped. Decide: fold into R8/R9 explicitly, or accept as indefinite.
 
 ## Non-issues (flagged, decided to leave)
 

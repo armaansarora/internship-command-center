@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:09 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:16 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `fdeceda`)
+- **Branch:** `main` (commit `05f94e1`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 93,496 across 517 source files
+- **Total LOC:** 93,654 across 518 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-fdeceda [R7/7.8] feat(r7): deadline tracking + Final Countdown + 3-beat cron
+05f94e1 [R7/7.9] feat(r7): situation map (Canvas2D + honest list fallback)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `fdeceda`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `05f94e1`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (517 files, 93,496 LOC)
+## Source Tree (518 files, 93,654 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -115,6 +115,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-4` | 1251 |
 | `src/app` | 1177 |
 | `src/lib/situation` | 1164 |
+| `src/app/__tests__` | 1148 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1119 |
 | `src/app/(authenticated)/settings` | 1112 |
@@ -124,7 +125,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world/elevator` | 1056 |
 | `src/components/floor-5/cmo-character` | 1053 |
 | `src/components/floor-3/cpo-character` | 1021 |
-| `src/app/__tests__` | 1003 |
 | `src/lib/jobs` | 991 |
 | `src/components/floor-4/coo-character` | 989 |
 | `src/components/floor-6` | 986 |
@@ -134,7 +134,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db` | 923 |
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
-| `src/components/floor-4/undo-bar` | 887 |
+| `src/components/floor-4/undo-bar` | 885 |
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
@@ -149,8 +149,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-3/binder` | 674 |
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
+| `src/components/floor-4/situation-map` | 634 |
 | `src/app/(authenticated)/penthouse` | 627 |
-| `src/components/floor-4/situation-map` | 619 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
@@ -296,6 +296,7 @@ src/app/(authenticated)/world-shell.tsx
 src/app/(authenticated)/writing-room/page.tsx
 src/app/__tests__/r5-writing-room.proof.test.ts
 src/app/__tests__/r6-briefing-room.proof.test.ts
+src/app/__tests__/r7-situation-room.proof.test.ts
 src/app/__tests__/r7-undo-proof.test.ts
 src/app/api/account/delete/cancel/route.test.ts
 src/app/api/account/delete/cancel/route.ts
@@ -866,13 +867,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 908 | 9,881 |
+| `BOOTSTRAP-PROMPT.md` | 915 | 9,985 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 489 | 10,659 |
-| **Total** | **2046** | **32,986** |
+| **Total** | **2053** | **33,090** |
 
-> ⚠️ Reading all recommended files consumes ~32,986 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,090 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

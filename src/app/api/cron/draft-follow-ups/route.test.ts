@@ -43,7 +43,7 @@ vi.mock("@/lib/logger", () => ({
 // ---------------------------------------------------------------------------
 // Fixture — minimal Supabase admin
 // ---------------------------------------------------------------------------
-interface FixtureRow extends Record<string, unknown> {}
+type FixtureRow = Record<string, unknown>;
 
 interface Fixture {
   users: FixtureRow[];

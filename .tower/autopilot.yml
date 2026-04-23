@@ -1,25 +1,27 @@
-paused: true
-scope: R6-only
-started: 2026-04-23T14:22:57.240Z
-started_by: sess-a5908e
-ended: 2026-04-23T15:16:00.000Z
-ended_reason: "R6 scope complete. 10/10 tasks shipped, acceptance.met=true, verified_by_commit=f44c404. Partner's 4 binding constraints honored: (1) Intent-level behaviors (LiveSTARBoard reactive + CPO mid-answer interrupts) ship working, not deferred — acceptance-check.ts enforces this mechanically; (2) Debrief Binder is a physical leather-spine shelf with aging (dust>5, yellowing>10, lean>15) — no JSON dump; (3) voice is opt-in only with three-layer enforcement (UI toggle + server 403/410 + private bucket via admin client), proven by route contract tests; (4) 4-gate verify (npm test 838/838 | tsc 0 errors | build ✓ | lint 15e/15w within baseline) all green BEFORE the acceptance flip. Autopilot scope was R6-only — pausing until next scope."
+paused: false
+scope: R7-only
+started: null
+started_by: queued-by-partner-for-r7-kickoff
+ended: null
+ended_reason: null
 max_blockers: 3
 previous_phase: R6
-previous_outcome: "R6 complete — 10/10 tasks. 838 tests (+123 new). Full voice path live (MediaRecorder → private bucket → Whisper via ai v6 experimental_transcribe) with migration 0016 Part 2 still owed to the target env before upload works in prod. DrillStage dynamically imported to keep first-paint bundle clean. R5 B1 + R4 B1 both still open; neither blocks R7."
+previous_outcome: "R6 complete — 10/10 tasks, acceptance.met. 838 tests (+129 new). tsc + build green. Lint 15e/15w (warnings +4 vs R5; error baseline held). LiveSTARBoard genuinely reactive (extractStar on every keystroke), CPO interrupt rules real (firmness-scaled, cooldowns, grace window), voice three-layer opt-in with permanent-disable latch, Binder renders as physical leather-spine shelf, Inngest packet-regenerate cron real. acceptance-check.ts exists but is R6-specific — partial fix to structural §8. Drift: R6.6 split into 6.6a+6.6b. Auth/Stripe untouched."
 next_phase: R7
 next_brief: docs/NEXT-ROADMAP.md §11 R7 — The Situation Room (Floor 4)
 open_blockers_carrying_forward:
   - R4 B1 (LinkedIn OAuth env vars) — do not unblock without credentials
-  - R5 B1 (R5.4 live-compose streaming + pen-glow) — partner decision pending whether to ship before R7
-  - Migration 0016 Part 2 — storage bucket interview-audio-private + SELECT policy must be applied via psql before voice uploads work in prod (mirrors R5.0014 pattern)
+  - R5 B1 (R5.4 live-compose streaming + pen-glow) — scheduled for post-R7 fix pass
+  - R6 migration 0016 Part 2 (interview-audio-private bucket + SELECT policy) — apply via psql before voice uploads work in prod
 verification_before_acceptance:
   - npm test
   - npx tsc --noEmit
   - npm run build
   - npm run lint
 partner_constraints:
-  - DO NOT repeat R5.4 pattern — Intent-level character flourishes are NEVER "polish." If the brief's Intent paragraph describes a behavior, it ships or the phase does not mark acceptance.met.
-  - tower verify ✗ is BINDING, not advisory — N/total tasks ≠ acceptance.met.
-  - Physical artifacts (binders, whiteboards, etc.) must render as spatial components; JSON dumps / key-value modals are anti-patterns.
-  - Voice/opt-in gates must be enforced at 3 layers (UI + server + storage RLS); half-gated paths are forbidden.
+  - Undo must be REAL — within the undo window, a clicked cancel must actually prevent Resend from firing. A UI-only countdown that hides an already-sent email is the Proof-breaking failure mode.
+  - Zero alert() or generic toast anywhere in R7's shipping code. Proof explicitly requires this and the brief names it as an anti-pattern.
+  - Pneumatic Tube respects quiet hours — tubes queued during quiet hours arrive at wake-up, never at 3am. Non-negotiable per brief.
+  - Situation Map must render at 50+ outreach nodes without jank. If Canvas2D perf can't hold, ship the simpler list — do not ship a decorative arc animation on an empty canvas.
+  - DO NOT repeat the R5.4 pattern. Intent-level character flourishes (rings responding to interaction, tube thunk, flight paths earned) are NOT "polish." If it's in the Intent paragraph, it ships.
+  - tower verify ✗ is BINDING. If any verification gate fails, do not flip acceptance.met.

@@ -149,11 +149,9 @@ export function useUndoBarController(opts: HookOptions = {}): UndoBarController 
   useEffect(() => {
     if (state.phase !== "in_flight" || state.sendAfterMs === null) return;
     const remaining = state.sendAfterMs - Date.now();
-    if (remaining <= 0) {
-      setState(IDLE);
-      return;
-    }
-    const t = window.setTimeout(() => setState(IDLE), remaining);
+    // Always schedule via setTimeout (even with a small/zero delay) so the
+    // setState lands on a later tick, not synchronously inside this effect.
+    const t = window.setTimeout(() => setState(IDLE), Math.max(0, remaining));
     return () => window.clearTimeout(t);
   }, [state.phase, state.sendAfterMs]);
 

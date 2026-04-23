@@ -30,30 +30,41 @@ export interface SituationMapProps {
 export function SituationMap({ outreach, companies }: SituationMapProps): JSX.Element {
   const reducedMotion = useReducedMotion();
   const [canRenderCanvas, setCanRenderCanvas] = useState<boolean | null>(null);
+  // Snapshot the wall clock in state so the memo's inputs are pure. Refreshed
+  // every minute to keep active-arc cutoffs current without churning every render.
+  const [nowMs, setNowMs] = useState<number>(0);
 
   useEffect(() => {
     // Feature-detect Canvas2D + viewport width. Runs on mount in the client;
     // during SSR (null) we fall through to the list below.
-    const wide = window.matchMedia("(min-width: 720px)").matches;
-    let canvasOk = false;
-    try {
-      const c = document.createElement("canvas");
-      canvasOk = !!c.getContext && !!c.getContext("2d");
-    } catch {
-      canvasOk = false;
-    }
-    setCanRenderCanvas(wide && canvasOk);
+    // Defer the state updates to the next tick so the mount effect doesn't
+    // cascade-render inside its own synchronous path.
+    const initial = window.setTimeout(() => {
+      const wide = window.matchMedia("(min-width: 720px)").matches;
+      let canvasOk = false;
+      try {
+        const c = document.createElement("canvas");
+        canvasOk = !!c.getContext && !!c.getContext("2d");
+      } catch {
+        canvasOk = false;
+      }
+      setCanRenderCanvas(wide && canvasOk);
+      setNowMs(Date.now());
+    }, 0);
+    const t = window.setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(t);
+    };
   }, []);
 
-  const shape = useMemo(
-    () =>
-      shapeOutreachArcs({
-        outreach,
-        companies,
-        nowMs: Date.now(),
-      }),
-    [outreach, companies],
-  );
+  const shape = useMemo(() => {
+    // Before the mount effect populates nowMs we fall back to a fixed
+    // sentinel (0) so the compiler sees only pure inputs. The list view
+    // still renders correctly in that short window; once the effect fires,
+    // the memo recomputes with the real wall-clock time.
+    return shapeOutreachArcs({ outreach, companies, nowMs });
+  }, [outreach, companies, nowMs]);
 
   const companyNameById = useMemo(() => {
     const map: Record<string, string> = {};

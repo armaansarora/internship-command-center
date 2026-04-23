@@ -22,7 +22,7 @@ function stubSupabase(fixtures: {
   };
 
   const chainable = (table: string): unknown => {
-    let result: { data: unknown; error: null } = {
+    const result: { data: unknown; error: null } = {
       data: tableData[table] ?? [],
       error: null,
     };
