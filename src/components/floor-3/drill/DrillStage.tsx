@@ -207,7 +207,6 @@ export function DrillStage(props: DrillStageProps): JSX.Element {
     setLastInterruptAtMs(null);
     setCurrentInterrupt(null);
     answerStartRef.current = Date.now();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, snapshotValue]);
 
   const handleTextChange = useCallback(

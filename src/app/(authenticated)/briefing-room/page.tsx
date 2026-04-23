@@ -8,6 +8,7 @@ import { BriefingRoomClient } from "@/components/floor-3/BriefingRoomClient";
 import type { Interview } from "@/components/floor-3/crud/InterviewTimeline";
 import type { PrepPacket, PrepQuestion, QuestionCategory } from "@/components/floor-3/crud/PrepPacketViewer";
 import type { PrepStats } from "@/components/floor-3/cpo-character/CPOWhiteboard";
+import type { Firmness } from "@/components/floor-3/star/interrupt-rules";
 
 export const metadata: Metadata = { title: "The Briefing Room | The Tower" };
 
@@ -115,26 +116,33 @@ async function BriefingRoomData({
 }): Promise<JSX.Element> {
   const supabase = await createClient();
 
-  // Fetch interviews, prep packet documents, and applications in parallel
-  const [interviewsResult, prepDocsResult, applicationsResult] = await Promise.all([
-    supabase
-      .from("interviews")
-      .select("id, application_id, company_id, round, format, scheduled_at, duration_minutes, location, interviewer_name, interviewer_title, status, prep_packet_id, debrief_id, calendar_event_id, notes, created_at, updated_at")
-      .eq("user_id", userId)
-      .order("scheduled_at", { ascending: true }),
-    supabase
-      .from("documents")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("type", "prep_packet")
-      .eq("is_active", true)
-      .order("updated_at", { ascending: false }),
-    supabase
-      .from("applications")
-      .select("id, role, company_name, status, company_id")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false }),
-  ]);
+  // Fetch interviews, prep packet documents, applications, and voice prefs
+  // in parallel — voice prefs gate whether DrillStage even renders a mic.
+  const [interviewsResult, prepDocsResult, applicationsResult, profileResult] =
+    await Promise.all([
+      supabase
+        .from("interviews")
+        .select("id, application_id, company_id, round, format, scheduled_at, duration_minutes, location, interviewer_name, interviewer_title, status, prep_packet_id, debrief_id, calendar_event_id, notes, created_at, updated_at")
+        .eq("user_id", userId)
+        .order("scheduled_at", { ascending: true }),
+      supabase
+        .from("documents")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("type", "prep_packet")
+        .eq("is_active", true)
+        .order("updated_at", { ascending: false }),
+      supabase
+        .from("applications")
+        .select("id, role, company_name, status, company_id")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("user_profiles")
+        .select("voice_recording_enabled, voice_recording_permanently_disabled, drill_preferences")
+        .eq("id", userId)
+        .single(),
+    ]);
 
   const now = new Date();
   const rawInterviews = interviewsResult.data ?? [];
@@ -280,12 +288,28 @@ async function BriefingRoomData({
     status: row.status as string,
   }));
 
+  // R6.6 — voice opt-in flags + drill prefs for DrillStage. Profile row may
+  // be missing for freshly-signed-up users; fall back to safe defaults.
+  const profile = profileResult.data ?? null;
+  const voiceEnabled = Boolean(profile?.voice_recording_enabled);
+  const voicePermDisabled = Boolean(profile?.voice_recording_permanently_disabled);
+  const drillPrefs = (profile?.drill_preferences ?? {}) as {
+    interruptFirmness?: Firmness;
+    timerSeconds?: number;
+  };
+  const drillFirmness: Firmness = drillPrefs.interruptFirmness ?? "firm";
+  const drillTimerSeconds: number = drillPrefs.timerSeconds ?? 90;
+
   return (
     <BriefingRoomClient
       interviews={interviews}
       prepPackets={prepPackets}
       applications={applications}
       stats={prepStats}
+      voiceEnabled={voiceEnabled}
+      voicePermDisabled={voicePermDisabled}
+      drillFirmness={drillFirmness}
+      drillTimerSeconds={drillTimerSeconds}
       onCreatePacket={createPrepPacket}
       onExportPacket={exportPacket}
       onPrintPacket={printPacket}

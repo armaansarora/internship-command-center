@@ -12,10 +12,18 @@ import type { PrepStats, UpcomingInterview } from "./cpo-character/CPOWhiteboard
 import { InterviewTimeline } from "./crud/InterviewTimeline";
 import type { Interview } from "./crud/InterviewTimeline";
 import type { PrepPacket } from "./crud/PrepPacketViewer";
+import type { Firmness } from "./star/interrupt-rules";
 
 // 1114 LOC viewer — largest component in the project. Code-split aggressively.
 const PrepPacketViewer = dynamic(
   () => import("./crud/PrepPacketViewer").then((m) => m.PrepPacketViewer),
+  { ssr: false }
+);
+
+// DrillStage is lazy-loaded — only pulled in when the user hits START DRILL,
+// so it stays off the Briefing Room first-paint path.
+const DrillStage = dynamic(
+  () => import("./drill/DrillStage").then((m) => m.DrillStage),
   { ssr: false }
 );
 
@@ -31,6 +39,12 @@ export interface BriefingRoomClientProps {
   applications: Array<{ id: string; companyName?: string | null; status: string }>;
   /** Aggregated prep statistics for whiteboard */
   stats: PrepStats;
+  /** R6.6 — voice opt-in flags, read from user_profiles on the server. */
+  voiceEnabled: boolean;
+  voicePermDisabled: boolean;
+  /** R6.6 — firmness + timer target read from user_profiles.drill_preferences */
+  drillFirmness: Firmness;
+  drillTimerSeconds: number;
   /** Server actions */
   onPrintPacket?: (packetId: string) => Promise<void>;
   onExportPacket?: (packetId: string) => Promise<void>;
@@ -96,6 +110,10 @@ export function BriefingRoomClient({
   prepPackets,
   interviews,
   stats,
+  voiceEnabled,
+  voicePermDisabled,
+  drillFirmness,
+  drillTimerSeconds,
   onPrintPacket,
   onExportPacket,
   onCreatePacket,
@@ -106,14 +124,23 @@ export function BriefingRoomClient({
   );
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [cpoStatus, setCpoStatus] = useState<"idle" | "thinking" | "talking">("idle");
+  const [drillInterviewId, setDrillInterviewId] = useState<string | null>(null);
 
   // ── Derived data ───────────────────────────────────────────────────
-  const selectedPacket = useMemo<PrepPacket | null>(() => {
+  const selectedInterview = useMemo<Interview | null>(() => {
     if (!selectedInterviewId) return null;
-    const interview = interviews.find((i) => i.id === selectedInterviewId);
-    if (!interview?.prepPacketId) return null;
-    return prepPackets.find((p) => p.id === interview.prepPacketId) ?? null;
-  }, [selectedInterviewId, interviews, prepPackets]);
+    return interviews.find((i) => i.id === selectedInterviewId) ?? null;
+  }, [selectedInterviewId, interviews]);
+
+  const selectedPacket = useMemo<PrepPacket | null>(() => {
+    if (!selectedInterview?.prepPacketId) return null;
+    return prepPackets.find((p) => p.id === selectedInterview.prepPacketId) ?? null;
+  }, [selectedInterview, prepPackets]);
+
+  // START DRILL button is available on any selected upcoming interview,
+  // regardless of whether a packet exists — per partner constraint, "CPO
+  // can drill you cold".
+  const canStartDrill = selectedInterview?.status === "upcoming";
 
   const tickerStats = useMemo<BriefingRoomStats>(
     () => deriveTickerStats(interviews, stats),
@@ -168,6 +195,19 @@ export function BriefingRoomClient({
     setSelectedInterviewId(interview.id);
   }, []);
 
+  const handleStartDrill = useCallback(() => {
+    if (!selectedInterviewId) return;
+    setDrillInterviewId(selectedInterviewId);
+  }, [selectedInterviewId]);
+
+  const handleExitDrill = useCallback(() => {
+    setDrillInterviewId(null);
+  }, []);
+
+  const handleDrillComplete = useCallback(() => {
+    setDrillInterviewId(null);
+  }, []);
+
   const handlePrintPacket = useCallback(
     async (packetId: string) => {
       await onPrintPacket?.(packetId);
@@ -204,8 +244,55 @@ export function BriefingRoomClient({
     </div>
   );
 
+  // ── Drill mode toggle — swaps the whole content slot for DrillStage ─
+  const drillActiveSlot = drillInterviewId ? (
+    <DrillStage
+      interviewId={drillInterviewId}
+      voiceEnabled={voiceEnabled}
+      voicePermDisabled={voicePermDisabled}
+      firmness={drillFirmness}
+      timerSeconds={drillTimerSeconds}
+      onComplete={handleDrillComplete}
+      onExit={handleExitDrill}
+    />
+  ) : null;
+
+  // The START DRILL action — rendered alongside GENERATE WITH CPO in the
+  // "no packet" state, and as a floating action when a packet exists.
+  const startDrillButton = canStartDrill ? (
+    <button
+      type="button"
+      onClick={handleStartDrill}
+      aria-label="Start drill with CPO"
+      style={{
+        fontSize: "10px",
+        fontFamily: "'JetBrains Mono', monospace",
+        color: "#C9A84C",
+        backgroundColor: "rgba(201, 168, 76, 0.1)",
+        border: "1px solid rgba(201, 168, 76, 0.4)",
+        borderRadius: "2px",
+        padding: "8px 16px",
+        cursor: "pointer",
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        transition: "all 0.15s ease",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+          "rgba(201, 168, 76, 0.2)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+          "rgba(201, 168, 76, 0.1)";
+      }}
+      className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#C9A84C]"
+    >
+      START DRILL →
+    </button>
+  ) : null;
+
   // ── Content slot — interview timeline + prep packet viewer ─────────
-  const tableSlot = (
+  const defaultTableSlot = (
     <div
       style={{
         display: "grid",
@@ -239,6 +326,7 @@ export function BriefingRoomClient({
           display: "flex",
           flexDirection: "column",
           backgroundColor: "rgba(6, 10, 18, 0.3)",
+          position: "relative",
         }}
         aria-label="Prep packet viewer panel"
       >
@@ -269,40 +357,43 @@ export function BriefingRoomClient({
             >
               NO PREP PACKET FOR THIS INTERVIEW
             </span>
-            {onCreatePacket && (
-              <button
-                type="button"
-                onClick={() =>
-                  selectedInterviewId &&
-                  onCreatePacket(selectedInterviewId)
-                }
-                aria-label="Generate prep packet with CPO"
-                style={{
-                  fontSize: "10px",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  color: "#4A9EDB",
-                  backgroundColor: "rgba(74, 158, 219, 0.1)",
-                  border: "1px solid rgba(74, 158, 219, 0.35)",
-                  borderRadius: "2px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  transition: "all 0.15s ease",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                    "rgba(74, 158, 219, 0.18)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                    "rgba(74, 158, 219, 0.1)";
-                }}
-                className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4A9EDB]"
-              >
-                GENERATE WITH CPO
-              </button>
-            )}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+              {onCreatePacket && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    selectedInterviewId &&
+                    onCreatePacket(selectedInterviewId)
+                  }
+                  aria-label="Generate prep packet with CPO"
+                  style={{
+                    fontSize: "10px",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    color: "#4A9EDB",
+                    backgroundColor: "rgba(74, 158, 219, 0.1)",
+                    border: "1px solid rgba(74, 158, 219, 0.35)",
+                    borderRadius: "2px",
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    transition: "all 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                      "rgba(74, 158, 219, 0.18)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                      "rgba(74, 158, 219, 0.1)";
+                  }}
+                  className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4A9EDB]"
+                >
+                  GENERATE WITH CPO
+                </button>
+              )}
+              {startDrillButton}
+            </div>
             <span
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
@@ -315,15 +406,33 @@ export function BriefingRoomClient({
             </span>
           </div>
         ) : (
-          <PrepPacketViewer
-            packet={selectedPacket}
-            onPrint={onPrintPacket ? handlePrintPacket : undefined}
-            onExport={onExportPacket ? handleExportPacket : undefined}
-          />
+          <>
+            <PrepPacketViewer
+              packet={selectedPacket}
+              onPrint={onPrintPacket ? handlePrintPacket : undefined}
+              onExport={onExportPacket ? handleExportPacket : undefined}
+            />
+            {/* START DRILL overlay — visible on upcoming interviews regardless
+                of whether a packet exists. CPO can drill cold. */}
+            {startDrillButton && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 16,
+                  right: 16,
+                  zIndex: 5,
+                }}
+              >
+                {startDrillButton}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
   );
+
+  const tableSlot = drillActiveSlot ?? defaultTableSlot;
 
   // ── Render ────────────────────────────────────────────────────────
   return (

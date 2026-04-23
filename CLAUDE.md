@@ -119,9 +119,10 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (601 LOC)
 - `src/components/floor-4/SituationRoomClient.tsx` (586 LOC)
-- `src/components/floor-3/drill/DrillStage.tsx` (583 LOC) — R6.6 — DrillStage.
+- `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (526 LOC)
+- `src/components/floor-3/BriefingRoomClient.tsx` (511 LOC)
 - `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (510 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
 - `src/components/floor-5/crud/DocumentEditor.tsx` (500 LOC)
@@ -135,7 +136,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/WarRoomClient.tsx` (429 LOC)
 - `src/components/world/Elevator.tsx` (429 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
-- `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (392 LOC)
 - `src/components/floor-1/RingTheBell.tsx` (390 LOC) — The CEO orchestrator dispatch tool name that drives this card
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
