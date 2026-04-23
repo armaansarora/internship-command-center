@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 11:59 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:02 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `076f355`)
+- **Branch:** `main` (commit `0420856`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 90,985 across 500 source files
+- **Total LOC:** 91,721 across 506 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-076f355 [R7/7.5] feat(r7): rings respond to alert clicks (shockwave from origin)
+0420856 [R7/7.3] feat(r7): in-world UndoBar — phase machine + zero toast
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `076f355`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `0420856`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (500 files, 90,985 LOC)
+## Source Tree (506 files, 91,721 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -112,7 +112,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai/structured` | 1315 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
-| `src/components/floor-4` | 1210 |
+| `src/components/floor-4` | 1217 |
 | `src/app` | 1177 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1119 |
@@ -161,6 +161,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/lobby/onboarding` | 500 |
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
+| `src/lib/situation` | 468 |
 | `src/components/penthouse/scenes/morning` | 448 |
 | `src/app/api/cron/purge-sweeper` | 439 |
 | `src/lib/account` | 432 |
@@ -177,10 +178,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/progression` | 349 |
 | `src/app/api/stripe/webhook` | 339 |
 | `src/app/(authenticated)/briefing-room` | 320 |
+| `src/app/api/cron/briefing` | 309 |
 | `src/app/api/account/delete/cancel` | 308 |
 | `src/components/pricing` | 306 |
 | `src/lib/ai/structured/__tests__` | 301 |
-| `src/app/api/cron/briefing` | 290 |
 | `src/app/(authenticated)` | 285 |
 | `src/components/lobby/directory` | 285 |
 | `src/lib/utils` | 284 |
@@ -190,6 +191,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/rest` | 268 |
 | `src/components/floor-4/rings` | 256 |
 | `src/app/api/resumes/upload/__tests__` | 227 |
+| `src/components/floor-4/conflicts` | 226 |
 | `src/lib/pdf` | 225 |
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
@@ -233,11 +235,11 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
+| `src/app/(authenticated)/situation-room` | 104 |
 | `src/app/api/concierge/chat` | 103 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
-| `src/app/(authenticated)/situation-room` | 88 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
 | `src/lib/resumes/__tests__` | 79 |
@@ -447,6 +449,8 @@ src/components/floor-3/star/interrupt-rules.ts
 src/components/floor-4/SituationRoomClient.tsx
 src/components/floor-4/SituationRoomScene.tsx
 src/components/floor-4/SituationRoomTicker.tsx
+src/components/floor-4/conflicts/ConflictsSection.test.tsx
+src/components/floor-4/conflicts/ConflictsSection.tsx
 src/components/floor-4/coo-character/COOCharacter.tsx
 src/components/floor-4/coo-character/COODialoguePanel.tsx
 src/components/floor-4/coo-character/COOWhiteboard.tsx
@@ -741,6 +745,10 @@ src/lib/rate-limit-middleware.ts
 src/lib/rate-limit.ts
 src/lib/resumes/__tests__/parse.test.ts
 src/lib/resumes/parse.ts
+src/lib/situation/conflicts-cron.test.ts
+src/lib/situation/conflicts-cron.ts
+src/lib/situation/detect-conflicts.test.ts
+src/lib/situation/detect-conflicts.ts
 src/lib/skyline-engine.ts
 src/lib/sound/engine.ts
 src/lib/speech/transcribe.ts
@@ -845,13 +853,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 886 | 9,577 |
+| `BOOTSTRAP-PROMPT.md` | 894 | 9,699 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 481 | 10,416 |
-| **Total** | **2016** | **32,439** |
+| `CLAUDE.md` | 483 | 10,477 |
+| **Total** | **2026** | **32,622** |
 
-> ⚠️ Reading all recommended files consumes ~32,439 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~32,622 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

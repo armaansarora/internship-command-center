@@ -12,6 +12,7 @@ import { COOWhiteboard } from "./coo-character/COOWhiteboard";
 import { RingPulseController } from "./rings/RingPulseController";
 import { useRingPulse } from "./rings/useRingPulse";
 import { UndoBarProvider } from "./undo-bar/UndoBarProvider";
+import { ConflictsSection, type ConflictEntry } from "./conflicts/ConflictsSection";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,6 +22,8 @@ interface SituationRoomClientProps {
   applications: Application[];
   approveOutreach?: (outreachId: string) => Promise<void>;
   dismissNotification?: (notificationId: string) => Promise<void>;
+  /** R7 — calendar conflicts surfaced as a section at the top of the tableSlot. */
+  conflicts?: ConflictEntry[];
 }
 
 // ---------------------------------------------------------------------------
@@ -259,6 +262,7 @@ export function SituationRoomClient({
   applications,
   approveOutreach,
   dismissNotification,
+  conflicts = [],
 }: SituationRoomClientProps): JSX.Element {
   // Reserved for next interaction pass when action controls are exposed in this UI.
   void approveOutreach;
@@ -344,8 +348,11 @@ export function SituationRoomClient({
         gap: "20px",
       }}
     >
+      {/* R7.7 — Calendar conflicts at the top (only renders when non-empty) */}
+      <ConflictsSection conflicts={conflicts} />
+
       {/* Empty state */}
-      {deadlineCards.length === 0 && (
+      {deadlineCards.length === 0 && conflicts.length === 0 && (
         <div
           style={{
             display: "flex",

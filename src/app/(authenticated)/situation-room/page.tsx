@@ -35,15 +35,30 @@ async function SituationRoomData({
 }): Promise<JSX.Element> {
   const supabase = await createClient();
 
-  // Fetch applications and briefing data in parallel
-  const [applicationsResult, briefingData] = await Promise.all([
+  // Fetch applications, briefing data, and outstanding conflicts in parallel
+  const [applicationsResult, briefingData, conflictsResult] = await Promise.all([
     supabase
       .from("applications")
       .select("*")
       .eq("user_id", userId)
       .order("last_activity_at", { ascending: true, nullsFirst: true }),
     getDailyBriefingData(userId),
+    supabase
+      .from("notifications")
+      .select("id, body, source_entity_id, created_at")
+      .eq("user_id", userId)
+      .eq("type", "calendar_conflict")
+      .eq("is_dismissed", false)
+      .order("created_at", { ascending: false })
+      .limit(20),
   ]);
+
+  const conflicts = (conflictsResult.data ?? []).map((row) => ({
+    id: row.id as string,
+    body: (row.body as string | null) ?? "",
+    pairId: (row.source_entity_id as string | null) ?? "",
+    createdAt: row.created_at as string,
+  }));
 
   // Map snake_case DB rows to camelCase Application type
   const mappedApplications: Application[] = (
@@ -81,6 +96,7 @@ async function SituationRoomData({
       applications={mappedApplications}
       approveOutreach={approveOutreachAction}
       dismissNotification={dismissNotificationAction}
+      conflicts={conflicts}
     />
   );
 }

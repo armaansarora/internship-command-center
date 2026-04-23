@@ -117,7 +117,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
-- `src/components/floor-4/SituationRoomClient.tsx` (609 LOC)
+- `src/components/floor-4/SituationRoomClient.tsx` (616 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (601 LOC)
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
@@ -219,6 +219,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/NotificationSystem.tsx` (135 LOC) — NotificationSystem — in-world spatial notification manager.
 - `src/components/lobby/directory/BuildingDirectory.test.tsx` (133 LOC) — R4.8 — BuildingDirectory render tests.
 - `src/components/transitions/EntranceSequence.tsx` (132 LOC) — EntranceSequence — cinematic first-login entrance animation.
+- `src/components/floor-4/conflicts/ConflictsSection.tsx` (130 LOC) — Red-amber section at the top of the Floor 4 tableSlot when any calendar
 - `src/components/penthouse/QuickActionCard.tsx` (129 LOC) — @deprecated R2 bans the "Phase 1 / Phase 2" badge. Field kept optional
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
@@ -242,6 +243,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/drill/LiveSTARBoard.test.tsx` (100 LOC)
 - `src/components/floor-6/cio-character/CIODialoguePanel.tsx` (100 LOC)
 - `src/components/floor-3/drill/InterruptBubble.tsx` (96 LOC) — R6.6 — InterruptBubble.
+- `src/components/floor-4/conflicts/ConflictsSection.test.tsx` (96 LOC)
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (94 LOC)
 - `src/components/penthouse/scenes/morning/BriefingGlass.tsx` (93 LOC) — BriefingGlass — the unfolding pane where the CEO's morning briefing appears.
 - `src/components/penthouse/scenes/morning/MorningBriefingScene.tsx` (90 LOC) — Morning Briefing Scene — Floor PH between ~05:00 and 11:59 local.

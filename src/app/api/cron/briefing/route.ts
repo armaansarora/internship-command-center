@@ -9,6 +9,7 @@ import {
 } from "@/lib/ai/agents/morning-briefing";
 import { encodeBriefing } from "@/lib/penthouse/briefing-storage";
 import { synthesizeFallbackBriefing } from "@/lib/penthouse/briefing-fallback";
+import { detectConflictsForUser } from "@/lib/situation/conflicts-cron";
 
 /**
  * GET /api/cron/briefing
@@ -278,6 +279,24 @@ async function processUser(
     );
     if (snapshotError) {
       throw new Error(`snapshot upsert: ${snapshotError.message}`);
+    }
+
+    // R7.7 — Detect + notify calendar conflicts in the next 14 days.
+    // Failures here must not block the daily briefing, so we swallow and log.
+    try {
+      const conflictRes = await detectConflictsForUser(supabase, userId);
+      if (conflictRes.newPairs > 0) {
+        log.info("cron.briefing.conflicts_found", {
+          userId,
+          newPairs: conflictRes.newPairs,
+          totalPairs: conflictRes.totalPairs,
+        });
+      }
+    } catch (conflictErr) {
+      log.warn("cron.briefing.conflicts_failed", {
+        userId,
+        error: conflictErr instanceof Error ? conflictErr.message : String(conflictErr),
+      });
     }
 
     return { userId, status: "success" };
