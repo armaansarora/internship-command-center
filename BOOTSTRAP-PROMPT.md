@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:19 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:23 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `55c9227`)
+- **Branch:** `main` (commit `0833da3`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 77,519 across 406 source files
+- **Total LOC:** 78,256 across 411 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-55c9227 [R5/5.1] feat(schema): base_resumes table + resumes storage bucket
+0833da3 [R5/5.3] feat(cmo): three-tone parallel cover-letter generation
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `55c9227`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `0833da3`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (406 files, 77,519 LOC)
+## Source Tree (411 files, 78,256 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -178,17 +178,20 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
 | `src/components/penthouse/rest` | 268 |
+| `src/app/api/resumes/upload/__tests__` | 227 |
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
 | `src/app/api/cron/sync` | 213 |
 | `src/lib/email` | 206 |
+| `src/app/api/resumes/upload` | 205 |
 | `src/app/api/cron/outreach-sender` | 203 |
 | `src/lib/calendar` | 203 |
 | `src/app/(authenticated)/writing-room` | 202 |
 | `src/app/(authenticated)/war-room` | 198 |
 | `src/lib/audit` | 185 |
 | `src/lib/lobby` | 172 |
+| `src/lib/resumes` | 168 |
 | `src/app/api/cron/export-worker` | 157 |
 | `src/components/penthouse/scenes/latenight` | 156 |
 | `src/components/penthouse/idle` | 153 |
@@ -206,10 +209,12 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/situation-room` | 86 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
+| `src/lib/resumes/__tests__` | 79 |
 | `src/types` | 74 |
 | `src/lib/onboarding` | 70 |
 | `src/app/api/notifications` | 67 |
 | `src/components/penthouse/scenes` | 62 |
+| `src/app/api/resumes/signed-url/[id]` | 58 |
 | `src/app/api/drive/export` | 53 |
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
@@ -295,6 +300,9 @@ src/app/api/notifications/route.ts
 src/app/api/onboarding/bootstrap-discovery/route.test.ts
 src/app/api/onboarding/bootstrap-discovery/route.ts
 src/app/api/progression/route.ts
+src/app/api/resumes/signed-url/[id]/route.ts
+src/app/api/resumes/upload/__tests__/route.test.ts
+src/app/api/resumes/upload/route.ts
 src/app/api/stripe/checkout/route.ts
 src/app/api/stripe/portal/route.ts
 src/app/api/stripe/webhook/route.ts
@@ -614,6 +622,8 @@ src/lib/progression/milestones.ts
 src/lib/rate-limit-middleware.test.ts
 src/lib/rate-limit-middleware.ts
 src/lib/rate-limit.ts
+src/lib/resumes/__tests__/parse.test.ts
+src/lib/resumes/parse.ts
 src/lib/skyline-engine.ts
 src/lib/sound/engine.ts
 src/lib/stripe/agent-access.ts
@@ -650,7 +660,7 @@ src/types/ui.ts
 ## Dependencies
 
 <details>
-<summary>44 packages</summary>
+<summary>45 packages</summary>
 
 ```
 @ai-sdk/anthropic: ^3.0.58
@@ -685,6 +695,7 @@ happy-dom: ^20.8.4
 husky: ^9.1.7
 jszip: ^3.10.1
 next: ^16.2.4
+pdfjs-dist: ^5.6.205
 postcss: ^8.5.8
 react: 19.2.4
 react-dom: 19.2.4
@@ -713,13 +724,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 760 | 7,973 |
+| `BOOTSTRAP-PROMPT.md` | 762 | 8,013 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 455 | 9,760 |
-| **Total** | **1864** | **30,179** |
+| **Total** | **1866** | **30,219** |
 
-> ⚠️ Reading all recommended files consumes ~30,179 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,219 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
