@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T01:47:43.126Z
-  expires: 2026-04-23T03:47:43.121Z
+  acquired: 2026-04-23T01:52:49.900Z
+  expires: 2026-04-23T03:52:49.896Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -27,13 +27,16 @@ acceptance:
 tasks:
   R1.1:
     title: CRO captureTargetProfile tool + agent_memory preference seeding
-    status: in_progress
+    status: complete
     started: 2026-04-23T01:47:43.126Z
+    completed: 2026-04-23T01:52:27.742Z
+    commit: ff8e0be
     notes: Conversational intake — CRO asks role/sectors/geo/must-haves; writes
       preference row with 1536-dim embedding via existing agent-memory-rest.
   R1.2:
     title: Job Discovery source adapters + scorer (Greenhouse/Lever + seed fallback)
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T01:52:49.900Z
     notes: No external API keys required. Scorer = cosine(JD, target-profile) *
       company-tier weight from docs/CHAIN-OF-COMMAND.md.
   R1.3:
@@ -111,3 +114,5 @@ decisions:
     why: Keeps scope to Floor 7; R3's North Star concerns orchestration, not content
 history:
   - 2026-04-23T01:47:43.126Z: task_started R1.1
+  - 2026-04-23T01:52:27.742Z: task_completed R1.1
+  - 2026-04-23T01:52:49.900Z: task_started R1.2
