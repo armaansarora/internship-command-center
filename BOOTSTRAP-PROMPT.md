@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:10 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:11 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `cdb9a7e`)
+- **Branch:** `main` (commit `63bdea2`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 93,741 across 519 source files
+- **Total LOC:** 93,876 across 521 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-cdb9a7e [R8/0] chore: scaffold R8 ledger (15 tasks, 5 decisions) + advance active phase + unpause autopilot
+63bdea2 [R8/8.1] feat(r8): migration 0018 + Drizzle schema — consent, private_note, contact_embeddings, match_index
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `cdb9a7e`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `63bdea2`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (519 files, 93,741 LOC)
+## Source Tree (521 files, 93,876 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -227,6 +227,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/situation-room` | 142 |
 | `src/app/api/briefing/transcribe` | 139 |
 | `src/app/api/onboarding/bootstrap-discovery` | 137 |
+| `src/lib/contacts` | 135 |
 | `src/types` | 135 |
 | `src/app/api/briefing/voice-preference` | 134 |
 | `src/components/floor-5/wall-inscription` | 134 |
@@ -676,6 +677,8 @@ src/lib/auth/safe-next-path.test.ts
 src/lib/auth/safe-next-path.ts
 src/lib/calendar/sync.ts
 src/lib/constants/floors.ts
+src/lib/contacts/warmth.test.ts
+src/lib/contacts/warmth.ts
 src/lib/crypto/keys.test.ts
 src/lib/crypto/keys.ts
 src/lib/day-night.ts
@@ -869,13 +872,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 916 | 10,001 |
+| `BOOTSTRAP-PROMPT.md` | 918 | 10,026 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 491 | 10,701 |
-| **Total** | **2056** | **33,148** |
+| **Total** | **2058** | **33,173** |
 
-> ⚠️ Reading all recommended files consumes ~33,148 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,173 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
