@@ -74,17 +74,23 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - `src/db/manual/005_interview_audio_bucket.sql` written; user runs in Supabase Dashboard → SQL Editor before voice uploads work in prod.
 - `.env.example` updated with `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `OPENAI_API_KEY` (R4/R6 OAuth + voice).
 
-**Still open (need user hand):**
-- **R5 B1 — R5.4 live-compose streaming + pen-glow ink.** Mini-phase prompt ready. Next up now that R8 is done.
-- **R8.x — Human Red Team review** of `.tower/ledger/r8/red-team.md` before flipping `/api/networking/match-candidates` from 403 hard-stop to real results. Autopilot did first-pass; second pass is a human gate.
+**Still open (user decision pending on timing):**
+- **R8.x mini-phase — cross-user match unlock.** My second Red Team read surfaced 3 gaps in the first-pass self-review: no index-populator cron, consent version check not wired, no audit-log UI; plus no rate limit on match-candidates endpoint and no delta re-scan on application change. Full autopilot mini-phase prompt ready. User chose "do now" but timing (before R9 vs after R10) still pending — recommendation: after R10 for max review context.
 
 **RESOLVED since last update:**
 - R4 B1 LinkedIn OAuth credentials ✓ (Vercel env vars saved)
-- Migration 005 — applied in Supabase SQL Editor ✓
-- R8 phase shipped with zero new drift, no R5.4-style acceptance-bypass (autopilot used `tower accept R8`)
+- Migration 005 ✓ (applied in Supabase SQL Editor)
+- R8 phase shipped clean (tower accept R8)
+- R5.4 shipped clean (R5 now honestly 10/10)
+- Post-R5.4 autonomous cleanup (commit `398142c`): real React 19 ref-during-render fixes, R8 gsap regression, 8 TODOs resolved, war-room console.error → logger, CLAUDE.md staleness purged, Husky now runs `tower lint-autopilot --strict`. Lint: **0e/0w**.
 
-**Open decisions (need user call):**
-- **CEO voice (deferred R2/R3/R4).** Voice pipeline now exists from R6 (CPO). Option A: treat CEO voice as a post-R10 polish pass. Option B: add to R10 (Negotiation Parlor). Option C: accept indefinite. My vote: B — R10 is a small floor and CEO voice would land well in negotiation dialogue.
+**Partner decisions locked (2026-04-23, post-R5.4):**
+1. R8.x cross-user matching → ship (user option A). Timing TBD (user recommendation pending: pre-R9 vs post-R10).
+2. CEO voice → ships in R10 (option A).
+3. Full-journey E2E tests → post-R10 with HARSH simulation (hacking attempts, abuse/spam, parallel agents simulating many users). This is the post-R10 hardening phase.
+4. R9 Orrery tech → CSS 3D (option B) BUT architected for easy swap. Data and render layers must be decoupled so a later R3F upgrade is a file-swap, not a rewrite.
+5. Rejection autopsy → user-toggleable setting in Settings. Message encourages participation: "more feedback = better pattern insights." Input surface when on: ultra-low-friction (2-3 tappable choices + optional free text).
+6. Comp data (R10) → real scraped data via Firecrawl (primary) targeting Levels.fyi, with graceful-empty fallback. company_comp_bands cache table, 30-day TTL. Firecrawl free tier (500 credits/month) sufficient if cached well.
 
 ## Non-issues (flagged, decided to leave)
 
