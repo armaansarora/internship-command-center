@@ -235,6 +235,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/scenes/morning/MorningBriefingScene.tsx` (90 LOC) — Morning Briefing Scene — Floor PH between ~05:00 and 11:59 local.
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
 - `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
+- `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
 - `src/components/agents/dialogue/AgentChatInput.tsx` (80 LOC)
@@ -244,6 +245,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/scenes/morning/SkipHint.tsx` (62 LOC) — Small floating hint at the bottom of the Morning Briefing Scene telling the
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
+- `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
 - `src/components/world/MilestoneToastContainer.tsx` (18 LOC) — Mount-once container for the milestone toast system.
 ## Bootstrap Infrastructure
 - `scripts/auto-organize-docs.ts` — **runs on every commit (Husky)**. Auto-archives stale docs, auto-generates Key Components (this section), auto-updates doc map table, auto-appends session logs. Zero manual doc maintenance.

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:33 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:34 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `95787e2`)
+- **Branch:** `main` (commit `72a3f29`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 80,585 across 424 source files
+- **Total LOC:** 80,719 across 426 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-95787e2 [R5/5.7] feat(pdf): @react-pdf/renderer export for cover letters + resumes
+72a3f29 [R5/5.8] feat(writing-room): Resume Press mechanical SVG + stamping animation
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `95787e2`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `72a3f29`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (424 files, 80,585 LOC)
+## Source Tree (426 files, 80,719 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -206,6 +206,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/icons` | 152 |
 | `src/lib/validators` | 148 |
 | `src/app/api/onboarding/bootstrap-discovery` | 137 |
+| `src/components/floor-5/wall-inscription` | 134 |
 | `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
 | `src/app/api/writing-room/approve` | 129 |
@@ -394,6 +395,8 @@ src/components/floor-5/ready-to-send/ReadyToSendPanel.test.tsx
 src/components/floor-5/ready-to-send/ReadyToSendPanel.tsx
 src/components/floor-5/resume-press/ResumePress.test.tsx
 src/components/floor-5/resume-press/ResumePress.tsx
+src/components/floor-5/wall-inscription/WallInscription.test.tsx
+src/components/floor-5/wall-inscription/WallInscription.tsx
 src/components/floor-6/RolodexLoungeClient.tsx
 src/components/floor-6/RolodexLoungeScene.tsx
 src/components/floor-6/RolodexLoungeTicker.tsx
@@ -748,13 +751,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 794 | 8,414 |
+| `BOOTSTRAP-PROMPT.md` | 797 | 8,460 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 459 | 9,870 |
-| **Total** | **1902** | **30,730** |
+| `CLAUDE.md` | 461 | 9,927 |
+| **Total** | **1907** | **30,833** |
 
-> ⚠️ Reading all recommended files consumes ~30,730 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,833 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
