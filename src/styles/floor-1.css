@@ -302,6 +302,18 @@
   animation: cs-progress-fill 0.5s ease-out forwards;
 }
 
+/* ── DispatchGraph — running-node pulse ────────────────────────────── */
+@keyframes dg-node-pulse {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(232, 201, 106, 0.0)); }
+  50%      { filter: drop-shadow(0 0 6px rgba(232, 201, 106, 0.55)); }
+}
+.dg-node-running {
+  animation: dg-node-pulse 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dg-node-running { animation: none; }
+}
+
 /* ── Reduced motion ────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .csuite-ticker-track,
