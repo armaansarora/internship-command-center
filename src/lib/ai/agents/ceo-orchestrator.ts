@@ -36,6 +36,10 @@ import {
   completeDispatch,
   failDispatch,
 } from "@/lib/db/queries/agent-dispatches-rest";
+import {
+  readSharedKnowledge,
+  type SharedKnowledgeFlatMap,
+} from "@/lib/db/queries/shared-knowledge-rest";
 import { getCachedSystem } from "../prompt-cache";
 
 import { buildCROSystemPrompt } from "@/lib/agents/cro/system-prompt";
@@ -108,11 +112,18 @@ interface DispatchSpec<TStats> {
   /**
    * Build the subagent's system prompt. Memories are passed in fresh per call
    * so the subagent sees the same retrieval the standalone route would.
+   *
+   * R3.9 widened the contract with an optional `sharedKnowledge` map of peer
+   * entries (caller excludes self-echo). Builders that don't surface it can
+   * keep their existing 3-param shape — JS / TS structural typing lets a
+   * narrower function satisfy the wider contract because excess args are
+   * simply ignored at the call site.
    */
   buildSystem: (
     stats: TStats,
     userName: string,
     memories: Array<{ content: string; category: string }>,
+    sharedKnowledge?: SharedKnowledgeFlatMap,
   ) => string;
   buildTools: (userId: string) => Record<string, unknown>;
   /** Step cap for the subagent's tool loop. */
@@ -151,12 +162,17 @@ async function runSubagent<TStats>(
   }
 
   try {
-    const [stats, memories] = await Promise.all([
+    // Parallel-load every per-call input. shared_knowledge is a tiny jsonb
+    // round-trip, but it goes through the same Promise.all so a slow read
+    // can't serialize behind the stats loader.
+    const [stats, memories, sharedKnowledge] = await Promise.all([
       spec.loadStats(userId),
       getMemoriesForContext(userId, spec.agent, 5),
+      // Exclude self-echo: a CRO dispatch never reads CRO-written entries.
+      readSharedKnowledge(userId, spec.agent),
     ]);
 
-    const systemPrompt = spec.buildSystem(stats, userName, memories);
+    const systemPrompt = spec.buildSystem(stats, userName, memories, sharedKnowledge);
     const tools = spec.buildTools(userId);
     const modelId = getActiveModelId();
 
@@ -370,8 +386,17 @@ function buildSpecByAgent(): Record<AgentKey, DispatchSpec<unknown>> {
     cro: {
       agent: "cro",
       loadStats: getPipelineStatsRest as DispatchSpec<unknown>["loadStats"],
-      buildSystem: ((s, n, m) =>
-        buildCROSystemPrompt(s as Awaited<ReturnType<typeof getPipelineStatsRest>>, n, m)) as DispatchSpec<unknown>["buildSystem"],
+      // R3.9 — pass shared_knowledge into the CRO so peer intel surfaces in
+      // the prompt tail. targetProfile stays null in CEO context (the route
+      // handler at /api/cro/route.ts is the only caller that loads it).
+      buildSystem: ((s, n, m, k) =>
+        buildCROSystemPrompt(
+          s as Awaited<ReturnType<typeof getPipelineStatsRest>>,
+          n,
+          m,
+          null,
+          k,
+        )) as DispatchSpec<unknown>["buildSystem"],
       buildTools: (uid) => buildCROTools(uid) as Record<string, unknown>,
     },
     coo: {

@@ -1,15 +1,18 @@
 phase: R3
 name: C-Suite (Floor 1)
-status: not_started
+status: in_progress
 intent: The brain of the building. When the user rings the bell, the camera
   pulls back and the chain of command lights up live — all seven departments,
   subagents branching under them, edges flowing with dispatch. The user is not
   chatting with a chatbot; they are watching a boardroom run. When the CEO is
   between sessions, they're at their desk — maybe glancing at a photo frame,
   maybe reading, maybe waiting.
-started: null
+started: 2026-04-23T03:51:58.731Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-23T04:34:04.244Z
+  expires: 2026-04-23T06:34:04.239Z
 acceptance:
   criteria:
     - Ringing the bell with *"How's everything looking?"* triggers ≥3
@@ -19,7 +22,104 @@ acceptance:
       CEO's briefing references a learning first captured by a sibling agent.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R3.1:
+    title: agent_dispatches table — schema, migration, REST helpers, tests (RLS +
+      round-trip)
+    status: complete
+    started: 2026-04-23T03:53:43.937Z
+    completed: 2026-04-23T03:59:54.088Z
+    commit: "4734628"
+  R3.2:
+    title: user_profiles.shared_knowledge jsonb — schema, migration, REST helpers,
+      tests
+    status: complete
+    started: 2026-04-23T03:56:22.578Z
+    completed: 2026-04-23T03:59:53.759Z
+    commit: 812903d
+  R3.3:
+    title: dispatchBatch tool — Promise.allSettled fan-out, writes dispatch rows,
+      proof test
+    status: complete
+    started: 2026-04-23T04:00:20.013Z
+    completed: 2026-04-23T04:09:19.099Z
+    commit: 2f64a1a
+  R3.4:
+    title: DispatchGraph.tsx — animated radial SVG with gold streaks + node states
+    status: complete
+    started: 2026-04-23T04:09:19.416Z
+    completed: 2026-04-23T04:14:20.894Z
+    commit: 2fde9ff
+  R3.5:
+    title: /api/ceo/dispatches GET + useDispatchProgress hook (polling 300ms)
+    status: complete
+    started: 2026-04-23T04:14:21.216Z
+    completed: 2026-04-23T04:19:30.881Z
+    commit: bb8709c
+  R3.6:
+    title: CEO system-prompt teaches dispatchBatch — when to use batch vs single
+    status: complete
+    started: 2026-04-23T04:19:34.059Z
+    completed: 2026-04-23T04:20:42.172Z
+    commit: f877abd
+  R3.7:
+    title: Wire DispatchGraph + polling into CSuiteScene + CSuiteClient (replace
+      static SVG)
+    status: complete
+    started: 2026-04-23T04:22:51.199Z
+    completed: 2026-04-23T04:27:03.588Z
+    commit: 2b1c688
+  R3.8:
+    title: Unprompted CEO cron — stale / rejection-cluster / offer-arrived triggers
+    status: complete
+    started: 2026-04-23T04:27:03.903Z
+    completed: 2026-04-23T04:32:51.133Z
+    commit: 248d945
+  R3.9:
+    title: CIO→CRO shared-knowledge bridge — CIO writes intel, CRO reads in prompt
+    status: in_progress
+    started: 2026-04-23T04:34:04.244Z
+    completed: null
+    commit: null
+  R3.10:
+    title: Bell polish — building dim + camera pull-back on ring
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R3.11:
+    title: /-inject mid-dispatch — keyboard handler + InjectPrompt + dialogue send
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R3.12:
+    title: R3 proof integration test — batched dispatch + overlapping started_at
+    status: not_started
+    started: null
+    completed: null
+    commit: null
 blockers: []
 decisions: []
-history: []
+history:
+  - 2026-04-23T03:51:58.731Z: task_started R3.1
+  - 2026-04-23T03:53:43.937Z: task_started R3.1
+  - 2026-04-23T03:55:52.360Z: task_completed R3.1
+  - 2026-04-23T03:56:22.578Z: task_started R3.2
+  - 2026-04-23T03:59:53.759Z: task_completed R3.2
+  - 2026-04-23T03:59:54.088Z: task_completed R3.1
+  - 2026-04-23T04:00:20.013Z: task_started R3.3
+  - 2026-04-23T04:09:19.099Z: task_completed R3.3
+  - 2026-04-23T04:09:19.416Z: task_started R3.4
+  - 2026-04-23T04:14:20.894Z: task_completed R3.4
+  - 2026-04-23T04:14:21.216Z: task_started R3.5
+  - 2026-04-23T04:19:30.881Z: task_completed R3.5
+  - 2026-04-23T04:19:34.059Z: task_started R3.6
+  - 2026-04-23T04:20:42.172Z: task_completed R3.6
+  - 2026-04-23T04:20:42.493Z: task_started R3.7
+  - 2026-04-23T04:22:51.199Z: task_started R3.7
+  - 2026-04-23T04:27:03.588Z: task_completed R3.7
+  - 2026-04-23T04:27:03.903Z: task_started R3.8
+  - 2026-04-23T04:32:51.133Z: task_completed R3.8
+  - 2026-04-23T04:32:51.447Z: task_started R3.9
+  - 2026-04-23T04:34:04.244Z: task_started R3.9

@@ -141,6 +141,13 @@ vi.mock("@/lib/db/queries/agent-dispatches-rest", () => ({
   failDispatch: failDispatchSpy,
 }));
 
+// R3.9 wired shared-knowledge reads into runSubagent. The R3.3 proof doesn't
+// care what's on the bus — it cares about parallel fan-out timing — so stub
+// the read as a fast-empty so the new Promise.all leg stays neutral.
+vi.mock("@/lib/db/queries/shared-knowledge-rest", () => ({
+  readSharedKnowledge: vi.fn().mockResolvedValue({}),
+}));
+
 vi.mock("@/lib/db/queries/applications-rest", () => ({
   getPipelineStatsRest: getPipelineStatsRestSpy,
 }));

@@ -12,6 +12,39 @@ import {
   findSimilarCompanies as findSimilarCompaniesVector,
   upsertCompanyEmbedding,
 } from "@/lib/db/queries/embeddings-rest";
+import { writeSharedKnowledge } from "@/lib/db/queries/shared-knowledge-rest";
+
+// ---------------------------------------------------------------------------
+// Internal helper — synthesize a one-sentence shared-knowledge summary from
+// the non-null fields the CIO just wrote. Truncated to ~300 chars so the
+// shared_knowledge JSON column stays small and the consuming agent's prompt
+// stays cheap to cache.
+// ---------------------------------------------------------------------------
+function buildIntelSummary(fields: {
+  description?: string;
+  cultureSummary?: string;
+  recentNews?: string;
+  financialsSummary?: string;
+  internshipIntel?: string;
+}): string {
+  const parts: string[] = [];
+  // Order is meaningful — culture and recent news lead because CRO and the
+  // CEO synthesizer most often want them when staging a deal narrative.
+  if (fields.cultureSummary) parts.push(`Culture: ${fields.cultureSummary}`);
+  if (fields.recentNews) parts.push(`Recent: ${fields.recentNews}`);
+  if (fields.financialsSummary)
+    parts.push(`Financials: ${fields.financialsSummary}`);
+  if (fields.internshipIntel)
+    parts.push(`Internships: ${fields.internshipIntel}`);
+  if (fields.description) parts.push(`About: ${fields.description}`);
+
+  const joined = parts.join(". ");
+  if (joined.length <= 300) return joined;
+  // Hard truncate at the nearest space boundary before 297 chars + ellipsis.
+  const slice = joined.slice(0, 297);
+  const lastSpace = slice.lastIndexOf(" ");
+  return `${lastSpace > 240 ? slice.slice(0, lastSpace) : slice}...`;
+}
 
 // ---------------------------------------------------------------------------
 // Tool 1: researchCompany
@@ -363,6 +396,22 @@ export function makeUpdateCompanyIntelTool(userId: string) {
       }
 
       const result = await updateCompanyResearch(userId, companyId, updateData);
+
+      // R3.9 — broadcast the confirmed intel delta to the shared-knowledge
+      // bus so sibling agents (CRO especially) see it on their next dispatch.
+      // Only fire on confirmed success: a failed Supabase update would leave
+      // peers chasing intel the row never received.
+      if (result.success) {
+        const summary = buildIntelSummary(updateData);
+        if (summary.length > 0) {
+          await writeSharedKnowledge(
+            userId,
+            "cio",
+            `company:${companyId}:intel`,
+            summary,
+          );
+        }
+      }
 
       return result;
     },

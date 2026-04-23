@@ -1,9 +1,57 @@
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
+import type { SharedKnowledgeFlatMap } from "@/lib/db/queries/shared-knowledge-rest";
 import type { TargetProfile } from "./target-profile";
 
 interface AgentMemoryEntry {
   content: string;
   category: string;
+}
+
+// ---------------------------------------------------------------------------
+// R3.9 — Cross-agent intel renderer
+//
+// shared_knowledge is the bus by which sibling agents (CIO, CNO, etc.) leave
+// timestamped notes for the CRO to read on its next dispatch. We render it
+// as a tail-of-prompt block so the CRO sees the freshest peer intel right
+// before it forms its plan.
+//
+// Rendering rules:
+//   - Skip the section entirely when undefined/empty (no orphan headers)
+//   - Newest entry first (writtenAt descending)
+//   - Cap at 10 entries — beyond that it's noise on the prompt
+//   - One line per entry: "  [WRITER] entryKey — value"
+//
+// The flat-map key is "{writtenBy}:{entryKey}". We split on the FIRST colon
+// only — entryKeys may themselves contain colons (e.g. "company:UUID:intel"),
+// so a naive .split(":")[1] would lose the rest of the key.
+// ---------------------------------------------------------------------------
+function renderSharedKnowledgeBlock(map: SharedKnowledgeFlatMap): string {
+  const entries = Object.entries(map);
+  if (entries.length === 0) return "";
+
+  const lines = entries
+    .map(([flatKey, entry]) => ({ flatKey, entry }))
+    .sort((a, b) => {
+      // ISO timestamps sort correctly as strings, but be explicit so a
+      // malformed value can't silently invert the order.
+      const aT = Date.parse(a.entry.writtenAt);
+      const bT = Date.parse(b.entry.writtenAt);
+      const aValid = Number.isFinite(aT);
+      const bValid = Number.isFinite(bT);
+      if (aValid && bValid) return bT - aT;
+      if (aValid) return -1;
+      if (bValid) return 1;
+      return 0;
+    })
+    .slice(0, 10)
+    .map(({ flatKey, entry }) => {
+      // Split on FIRST colon only — preserve any colons in the entryKey itself.
+      const sepIdx = flatKey.indexOf(":");
+      const entryKey = sepIdx >= 0 ? flatKey.slice(sepIdx + 1) : flatKey;
+      return `  [${entry.writtenBy.toUpperCase()}] ${entryKey} — ${entry.value}`;
+    });
+
+  return ["CROSS-AGENT INTEL (from your peers):", ...lines].join("\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -105,9 +153,20 @@ export function buildCROSystemPrompt(
   stats: PipelineStats,
   userName: string,
   memories: AgentMemoryEntry[],
-  targetProfile: TargetProfile | null = null
+  targetProfile: TargetProfile | null = null,
+  sharedKnowledge?: SharedKnowledgeFlatMap
 ): string {
   const dynamicContext = buildDynamicContext(stats, userName, memories, targetProfile);
 
-  return [CRO_IDENTITY, "", CRO_RULES, "", dynamicContext].join("\n");
+  // Optional CROSS-AGENT INTEL tail — appended only when peer entries exist.
+  const sharedBlock = sharedKnowledge
+    ? renderSharedKnowledgeBlock(sharedKnowledge)
+    : "";
+
+  const sections = [CRO_IDENTITY, "", CRO_RULES, "", dynamicContext];
+  if (sharedBlock.length > 0) {
+    sections.push("", sharedBlock);
+  }
+
+  return sections.join("\n");
 }
