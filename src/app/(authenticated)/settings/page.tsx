@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: "Settings" };
 export default async function SettingsPage() {
   const user = await requireUser();
 
-  const [subscriptionTier, appsCountResult, deletedAt] = await Promise.all([
+  const [subscriptionTier, appsCountResult, profileData] = await Promise.all([
     getSubscriptionTier(user.id),
     (async () => {
       const supabase = await createClient();
@@ -32,10 +32,16 @@ export default async function SettingsPage() {
       const supabase = await createClient();
       const { data } = await supabase
         .from("user_profiles")
-        .select("deleted_at")
+        .select("deleted_at, networking_consent_at, networking_revoked_at")
         .eq("id", user.id)
         .single();
-      return (data?.deleted_at as string | null | undefined) ?? null;
+      return {
+        deletedAt: (data?.deleted_at as string | null | undefined) ?? null,
+        networkingConsentAt:
+          (data?.networking_consent_at as string | null | undefined) ?? null,
+        networkingRevokedAt:
+          (data?.networking_revoked_at as string | null | undefined) ?? null,
+      };
     })(),
   ]);
 
@@ -48,7 +54,9 @@ export default async function SettingsPage() {
         provider={user.app_metadata?.provider ?? "email"}
         subscriptionTier={subscriptionTier}
         appsUsed={appsCountResult}
-        deletedAt={deletedAt}
+        deletedAt={profileData.deletedAt}
+        networkingConsentAt={profileData.networkingConsentAt}
+        networkingRevokedAt={profileData.networkingRevokedAt}
       />
     </FloorShell>
   );

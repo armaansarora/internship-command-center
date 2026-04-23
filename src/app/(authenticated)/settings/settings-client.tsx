@@ -3,6 +3,7 @@
 import { useCallback, useState, type JSX } from "react";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
+import { NetworkingConsent } from "@/components/settings/NetworkingConsent";
 
 interface SettingsClientProps {
   userName: string | null;
@@ -16,6 +17,9 @@ interface SettingsClientProps {
    * whether the Data section shows "Delete Account" or "Cancel Deletion".
    */
   deletedAt: string | null;
+  /** R8 — Warm Intro Network opt-in state. */
+  networkingConsentAt?: string | null;
+  networkingRevokedAt?: string | null;
 }
 
 /**
@@ -73,6 +77,8 @@ export function SettingsClient({
   subscriptionTier,
   appsUsed,
   deletedAt,
+  networkingConsentAt = null,
+  networkingRevokedAt = null,
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
@@ -583,6 +589,33 @@ export function SettingsClient({
             </button>
           </div>
         </div>
+      </section>
+
+      {/* ── R8 — Warm Intro Network (consent surface) ── */}
+      <section className="w-full" aria-labelledby="section-networking">
+        <h2
+          id="section-networking"
+          className="mb-4"
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            color: "var(--gold)",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+          }}
+        >
+          Networking
+        </h2>
+        <NetworkingConsent
+          initialConsentAt={networkingConsentAt}
+          initialRevokedAt={networkingRevokedAt}
+          onOptIn={async () => {
+            await fetch("/api/networking/opt-in", { method: "POST" });
+          }}
+          onRevoke={async () => {
+            await fetch("/api/networking/revoke", { method: "POST" });
+          }}
+        />
       </section>
 
       {/* ── Section 4: Account Actions ── */}

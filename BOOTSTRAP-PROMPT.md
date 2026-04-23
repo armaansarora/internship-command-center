@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:23 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:26 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `35120dd`)
+- **Branch:** `main` (commit `a17b61a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 95,727 across 541 source files
+- **Total LOC:** 96,190 across 545 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-35120dd [R8/8.8] feat(r8): CIO autonomous re-research cron (P7 invariant)
+a17b61a [R8/8.9] feat(r8): CNO warm-intro finder (intra-user pgvector) + daily scan cron
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `35120dd`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `a17b61a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (541 files, 95,727 LOC)
+## Source Tree (545 files, 96,190 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -109,16 +109,16 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7/war-table` | 1760 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
+| `src/app/__tests__` | 1331 |
 | `src/lib/ai/structured` | 1315 |
 | `src/app/lobby` | 1291 |
-| `src/app/__tests__` | 1267 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
 | `src/app` | 1177 |
 | `src/lib/situation` | 1164 |
+| `src/app/(authenticated)/settings` | 1153 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1122 |
-| `src/app/(authenticated)/settings` | 1112 |
 | `src/components/floor-7/crud` | 1111 |
 | `src/lib/agents/cro` | 1083 |
 | `src/lib/agents/cmo` | 1072 |
@@ -194,6 +194,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents` | 269 |
 | `src/components/floor-6/side-switch` | 268 |
 | `src/components/penthouse/rest` | 268 |
+| `src/components/settings` | 260 |
 | `src/components/floor-4/rings` | 256 |
 | `src/app/api/resumes/upload/__tests__` | 227 |
 | `src/components/floor-4/conflicts` | 226 |
@@ -257,11 +258,13 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/notifications` | 67 |
 | `src/components/penthouse/scenes` | 62 |
 | `src/app/api/resumes/signed-url/[id]` | 58 |
+| `src/app/api/networking/revoke` | 55 |
 | `src/app/api/drive/export` | 53 |
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
 | `src/lib/crypto` | 50 |
 | `src/app/api/progression` | 44 |
+| `src/app/api/networking/opt-in` | 43 |
 | `src/app/api/notifications/[id]/read` | 40 |
 | `src/db/__tests__` | 36 |
 | `src/app/api/gmail/auth` | 34 |
@@ -308,6 +311,7 @@ src/app/__tests__/r6-briefing-room.proof.test.ts
 src/app/__tests__/r7-situation-room.proof.test.ts
 src/app/__tests__/r7-undo-proof.test.ts
 src/app/__tests__/r8-cio-reresearch.proof.test.ts
+src/app/__tests__/r8-consent-copy.proof.test.ts
 src/app/__tests__/r8-warmth-decay.proof.test.ts
 src/app/api/account/delete/cancel/route.test.ts
 src/app/api/account/delete/cancel/route.ts
@@ -368,6 +372,8 @@ src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
+src/app/api/networking/opt-in/route.ts
+src/app/api/networking/revoke/route.ts
 src/app/api/notifications/[id]/read/route.ts
 src/app/api/notifications/route.ts
 src/app/api/onboarding/bootstrap-discovery/route.test.ts
@@ -574,6 +580,7 @@ src/components/penthouse/scenes/morning/MorningBriefingScene.tsx
 src/components/penthouse/scenes/morning/SkipHint.tsx
 src/components/penthouse/scenes/morning/useBriefingControls.ts
 src/components/pricing/PricingCards.tsx
+src/components/settings/NetworkingConsent.tsx
 src/components/transitions/EntranceSequence.tsx
 src/components/ui/SoundToggle.tsx
 src/components/ui/UserMenu.tsx
@@ -899,13 +906,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 943 | 10,352 |
+| `BOOTSTRAP-PROMPT.md` | 948 | 10,407 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 500 | 11,013 |
-| **Total** | **2092** | **33,811** |
+| `CLAUDE.md` | 501 | 11,030 |
+| **Total** | **2098** | **33,883** |
 
-> ⚠️ Reading all recommended files consumes ~33,811 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,883 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
