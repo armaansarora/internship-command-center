@@ -1,10 +1,12 @@
 "use client";
 
 import type { JSX } from "react";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ContactForAgent } from "@/lib/db/queries/contacts-rest";
 import { RolodexCard } from "./RolodexCard";
 import { useRolodexRotation, normalizeDelta } from "./useRolodexRotation";
+import { useSoundEngine } from "@/components/world/SoundProvider";
+import { synthPaperRustle } from "@/lib/audio/synth-paper-rustle";
 
 const CYLINDER_RADIUS = 240;
 const CARD_WIDTH = 160;
@@ -31,6 +33,10 @@ interface RolodexProps {
 export function Rolodex({ contacts, onFlipCard }: RolodexProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const { angleDeg, onWheel, onKeyDown } = useRolodexRotation(contacts.length);
+  const { enabled: soundEnabled } = useSoundEngine();
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const prevFocusedRef = useRef<string | null>(null);
+  const lastRustleAtRef = useRef<number>(0);
 
   const anglePerCard = contacts.length > 0 ? 360 / contacts.length : 0;
 
@@ -61,6 +67,41 @@ export function Rolodex({ contacts, onFlipCard }: RolodexProps): JSX.Element {
     }
     return nearest;
   }, [liveCards, angleDeg]);
+
+  // R8.15 sharpening detail — when the rolodex rotates past a card with a
+  // private note, play a faint paper rustle.  Gated by sound-enabled AND
+  // prefers-reduced-motion; throttled to one rustle per 3 seconds so a
+  // fast spin doesn't turn into a run of sounds.
+  useEffect(() => {
+    if (!soundEnabled) return;
+    if (focusedId === prevFocusedRef.current) return;
+    prevFocusedRef.current = focusedId;
+    if (!focusedId) return;
+    const focused = contacts.find((c) => c.id === focusedId);
+    if (!focused?.privateNote) return;
+
+    if (typeof window === "undefined") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    const nowMs = Date.now();
+    if (nowMs - lastRustleAtRef.current < 3000) return;
+    lastRustleAtRef.current = nowMs;
+
+    try {
+      type WebkitAudioWindow = Window & typeof globalThis & {
+        webkitAudioContext?: typeof AudioContext;
+      };
+      const W = window as WebkitAudioWindow;
+      if (!audioCtxRef.current) {
+        const Ctor = W.AudioContext ?? W.webkitAudioContext;
+        if (!Ctor) return;
+        audioCtxRef.current = new Ctor();
+      }
+      synthPaperRustle(audioCtxRef.current);
+    } catch {
+      // Audio unsupported or blocked — silently skip.
+    }
+  }, [focusedId, contacts, soundEnabled]);
 
   if (contacts.length === 0) {
     return (

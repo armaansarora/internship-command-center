@@ -196,6 +196,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-5/WritingRoomTicker.tsx` (188 LOC) — WritingRoomTicker — bottom scrolling status strip showing live document data.
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
 - `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
+- `src/components/floor-6/rolodex/Rolodex.tsx` (186 LOC) — The centerpiece of Floor 6. A physical cylinder of contact cards. Warmth
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (185 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (182 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-1/InjectPrompt.tsx` (181 LOC) — InjectPrompt — floating single-line input that opens above the bell when
@@ -214,7 +215,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
 - `src/components/lobby/directory/BuildingDirectory.tsx` (152 LOC) — R4.8 — Building Directory.
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
-- `src/components/floor-6/rolodex/Rolodex.tsx` (145 LOC) — The centerpiece of Floor 6. A physical cylinder of contact cards. Warmth
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
 - `src/components/floor-4/final-countdown/FinalCountdownSection.test.tsx` (138 LOC)
