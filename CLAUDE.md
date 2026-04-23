@@ -229,6 +229,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/GlassPanel.tsx` (101 LOC) — GlassPanel — frosted-glass card with:
 - `src/components/penthouse/ceo-at-window/CEOAtWindow.tsx` (101 LOC) — CEOAtWindow — the CEO turning from the window on scene mount.
 - `src/components/floor-3/cpo-character/CPODialoguePanel.tsx` (100 LOC)
+- `src/components/floor-3/drill/LiveSTARBoard.test.tsx` (100 LOC)
 - `src/components/floor-6/cio-character/CIODialoguePanel.tsx` (100 LOC)
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (94 LOC)
 - `src/components/penthouse/scenes/morning/BriefingGlass.tsx` (93 LOC) — BriefingGlass — the unfolding pane where the CEO's morning briefing appears.
@@ -236,6 +237,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
 - `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
+- `src/components/floor-3/drill/LiveSTARBoard.tsx` (83 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
 - `src/components/agents/dialogue/AgentChatInput.tsx` (80 LOC)
