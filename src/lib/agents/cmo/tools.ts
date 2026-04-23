@@ -1,7 +1,10 @@
 import { tool } from "ai";
 import { z } from "zod/v4";
 import { createClient } from "@/lib/supabase/server";
-import { generateStructuredCoverLetter } from "@/lib/ai/structured/cover-letter";
+import {
+  generateStructuredCoverLetter,
+  generateThreeToneCoverLetters,
+} from "@/lib/ai/structured/cover-letter";
 import { generateStructuredTailoredResume } from "@/lib/ai/structured/tailored-resume";
 import { getTargetProfile } from "@/lib/agents/cro/target-profile";
 
@@ -444,12 +447,169 @@ export function makeGetApplicationContextTool(userId: string) {
 export function buildCMOTools(userId: string) {
   return {
     generateCoverLetter: makeGenerateCoverLetterTool(userId),
+    generateThreeToneCoverLetters: makeGenerateThreeToneCoverLettersTool(userId),
     generateTailoredResume: makeGenerateTailoredResumeTool(userId),
     getExistingDrafts: makeGetExistingDraftsTool(userId),
     refineDraft: makeRefineDraftTool(userId),
     getCompanyResearch: makeGetCompanyResearchTool(userId),
     getApplicationContext: makeGetApplicationContextTool(userId),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Tool 7: generateThreeToneCoverLetters (R5.3)
+// ---------------------------------------------------------------------------
+export function makeGenerateThreeToneCoverLettersTool(userId: string) {
+  return tool({
+    description:
+      "Generate three cover letters (formal, conversational, bold) for the same application in parallel, so the user can compare voices side-by-side and pick one. Writes a group-parent document first, then three child documents linked via parent_id. Each tone is generated from its own distinct system prompt — the three outputs are demonstrably different on the same JD, not three temperature re-rolls of the same draft. The tones are not stored under `is_active=true` — the user's Ready-to-Send panel (R5.6) activates whichever they approve. Call this instead of generateCoverLetter when the user asks for options, wants to compare voices, or is on an application that matters.",
+    inputSchema: z.object({
+      applicationId: z
+        .string()
+        .describe("UUID of the application this tone-group is for"),
+      companyName: z
+        .string()
+        .describe("Company name — shared across all three tone variants"),
+      role: z.string().describe("Role title being applied for"),
+      jobDescription: z
+        .string()
+        .optional()
+        .describe("Job description text to inform keyword alignment"),
+    }),
+    execute: async (input) => {
+      const supabase = await createClient();
+
+      // Pull company research once; shared across all three tones.
+      const { data: companyRow } = await supabase
+        .from("companies")
+        .select(
+          "description, culture_summary, recent_news, internship_intel",
+        )
+        .eq("user_id", userId)
+        .ilike("name", input.companyName)
+        .limit(1)
+        .maybeSingle();
+
+      const companyResearch = companyRow
+        ? [
+            companyRow.description,
+            companyRow.culture_summary,
+            companyRow.recent_news,
+            companyRow.internship_intel,
+          ]
+            .filter(Boolean)
+            .join("\n\n")
+        : undefined;
+
+      // Find the next version seed. Each tone-group increments the group
+      // version; individual tone variants share that version.
+      const { data: existing } = await supabase
+        .from("documents")
+        .select("id, version")
+        .eq("user_id", userId)
+        .eq("application_id", input.applicationId)
+        .eq("type", "cover_letter")
+        .order("version", { ascending: false })
+        .limit(1);
+      const latestVersion = existing?.[0]?.version ?? 0;
+      const newVersion = latestVersion + 1;
+
+      // 1. Create the group-parent document. Inactive sentinel that the
+      // tone variants reference via parent_id.
+      const groupTitle = `${input.companyName} — ${input.role} Tone Group v${newVersion}`;
+      const { data: groupRow, error: groupError } = await supabase
+        .from("documents")
+        .insert({
+          user_id: userId,
+          application_id: input.applicationId,
+          type: "cover_letter",
+          title: groupTitle,
+          content: "tone-group",
+          version: newVersion,
+          is_active: false,
+          generated_by: "cmo",
+          updated_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single();
+
+      if (groupError || !groupRow) {
+        return {
+          success: false,
+          toneGroupId: null,
+          variants: [],
+          message: `Could not create tone group: ${
+            groupError?.message ?? "unknown error"
+          }`,
+        };
+      }
+      const toneGroupId = groupRow.id as string;
+
+      // 2. Generate the three tones in parallel.
+      const result = await generateThreeToneCoverLetters({
+        userId,
+        companyName: input.companyName,
+        role: input.role,
+        jobDescription: input.jobDescription,
+        companyResearch,
+      });
+
+      // 3. Persist each successful variant as a child document.
+      const variantRows: Array<{
+        id: string;
+        tone: "formal" | "conversational" | "bold";
+        version: number;
+        title: string;
+        content: string;
+      }> = [];
+
+      for (const variant of result.variants) {
+        const variantTitle = `${input.companyName} — ${input.role} Cover Letter v${newVersion} (${capitalize(variant.tone)})`;
+        const { data: created, error: insertError } = await supabase
+          .from("documents")
+          .insert({
+            user_id: userId,
+            application_id: input.applicationId,
+            type: "cover_letter",
+            title: variantTitle,
+            content: variant.markdown,
+            version: newVersion,
+            is_active: false, // Not active until user approves via Ready-to-Send.
+            parent_id: toneGroupId,
+            generated_by: `cmo-${variant.tone}`,
+            updated_at: new Date().toISOString(),
+          })
+          .select("id, version")
+          .single();
+
+        if (!insertError && created) {
+          variantRows.push({
+            id: created.id as string,
+            tone: variant.tone,
+            version: (created.version as number) ?? newVersion,
+            title: variantTitle,
+            content: variant.markdown,
+          });
+        }
+      }
+
+      const complete = result.complete && variantRows.length === 3;
+
+      return {
+        success: complete,
+        toneGroupId,
+        version: newVersion,
+        variants: variantRows,
+        message: complete
+          ? `Three tone cover letters (v${newVersion}) saved for ${input.companyName}. User approval gate (R5.6) will surface them side-by-side.`
+          : `Tone generation partial — ${variantRows.length} of 3 tones persisted. Caller should retry missing tones or surface what exists.`,
+      };
+    },
+  });
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // ---------------------------------------------------------------------------
