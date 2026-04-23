@@ -12,8 +12,8 @@ started: 2026-04-23T07:02:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T07:20:12.664Z
-  expires: 2026-04-23T09:20:12.660Z
+  acquired: 2026-04-23T07:23:32.769Z
+  expires: 2026-04-23T09:23:32.764Z
 acceptance:
   criteria:
     - "User can generate a tailored cover letter and resume for one application
@@ -31,9 +31,10 @@ tasks:
     commit: 55c9227
   R5.2:
     title: Base resume upload API + PDF parse + ReDoS guard
-    status: in_progress
+    status: complete
     started: 2026-04-23T07:20:12.664Z
-    completed: null
+    completed: 2026-04-23T07:23:25.168Z
+    commit: dc8f53e
   R5.3:
     title: Three-tone parallel cover-letter generation (divergence-proven)
     status: complete
@@ -47,8 +48,8 @@ tasks:
     completed: null
   R5.5:
     title: Resume tailoring reads active base_resumes by default
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T07:23:32.769Z
     completed: null
   R5.6:
     title: Approval gate UI + outreach_queue cover_letter_send + cron extension
@@ -91,3 +92,5 @@ history:
   - 2026-04-23T07:15:04.269Z: task_started R5.9
   - 2026-04-23T07:19:55.757Z: task_completed R5.3
   - 2026-04-23T07:20:12.664Z: task_started R5.2
+  - 2026-04-23T07:23:25.168Z: task_completed R5.2
+  - 2026-04-23T07:23:32.769Z: task_started R5.5

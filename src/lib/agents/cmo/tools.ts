@@ -7,6 +7,7 @@ import {
 } from "@/lib/ai/structured/cover-letter";
 import { generateStructuredTailoredResume } from "@/lib/ai/structured/tailored-resume";
 import { getTargetProfile } from "@/lib/agents/cro/target-profile";
+import { getActiveBaseResume } from "@/lib/db/queries/base-resumes-rest";
 
 // ---------------------------------------------------------------------------
 // Tool 1: generateCoverLetter
@@ -618,7 +619,7 @@ function capitalize(s: string): string {
 export function makeGenerateTailoredResumeTool(userId: string) {
   return tool({
     description:
-      "Tailor the user's master resume for a specific application. Re-frames bullets, re-orders experience and skills to match the target role, and persists the result as a versioned `resume_tailored` document. Requires a masterResume string — the canonical source of truth for facts. If the user hasn't provided their master resume yet, first ask them to paste it. Never fabricate roles, companies, metrics, or skills that aren't in the master.",
+      "Tailor the user's master resume for a specific application. Re-frames bullets, re-orders experience and skills to match the target role, and persists the result as a versioned `resume_tailored` document. Reads the canonical master resume from the user's uploaded base resume (R5.2) by default; the `masterResume` argument is an optional override for cases where the caller already holds the text (e.g., the CRO pipeline or a test harness). If neither a base resume is uploaded nor a masterResume argument is provided, the tool returns `success: false` with reason `no_base_resume` so the UI can prompt for an upload. Never fabricate roles, companies, metrics, or skills that aren't in the master.",
     inputSchema: z.object({
       applicationId: z
         .string()
@@ -638,12 +639,34 @@ export function makeGenerateTailoredResumeTool(userId: string) {
       masterResume: z
         .string()
         .min(80)
+        .optional()
         .describe(
-          "User's canonical resume text. Every claim in the tailored output must be derivable from this."
+          "Optional: override the canonical resume text. When omitted, the tool reads the user's active base_resume from the private resumes bucket's parsed_text cache.",
         ),
     }),
     execute: async (input) => {
       const supabase = await createClient();
+
+      // Resolve master resume text — caller override takes precedence;
+      // otherwise fall back to the user's active uploaded base resume.
+      let masterResumeText: string | null = input.masterResume ?? null;
+      if (!masterResumeText) {
+        const activeBase = await getActiveBaseResume(userId);
+        if (activeBase) {
+          masterResumeText = activeBase.parsedText;
+        }
+      }
+
+      if (!masterResumeText || masterResumeText.length < 80) {
+        return {
+          success: false,
+          reason: "no_base_resume",
+          documentId: null,
+          version: null,
+          message:
+            "No base resume on file. Upload your master resume through the Writing Room's upload panel, or pass `masterResume` inline, then retry.",
+        };
+      }
 
       const { data: existing } = await supabase
         .from("documents")
@@ -664,7 +687,7 @@ export function makeGenerateTailoredResumeTool(userId: string) {
         .eq("user_id", userId)
         .ilike("name", input.companyName)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       const companyResearch = companyRow
         ? [
@@ -690,7 +713,7 @@ export function makeGenerateTailoredResumeTool(userId: string) {
         userId,
         companyName: input.companyName,
         role: input.role,
-        masterResume: input.masterResume,
+        masterResume: masterResumeText,
         jobDescription: input.jobDescription,
         companyResearch,
         targetNarrative,
