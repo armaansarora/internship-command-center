@@ -11,6 +11,7 @@ import { COODialoguePanel } from "./coo-character/COODialoguePanel";
 import { COOWhiteboard } from "./coo-character/COOWhiteboard";
 import { RingPulseController } from "./rings/RingPulseController";
 import { useRingPulse } from "./rings/useRingPulse";
+import { UndoBarProvider } from "./undo-bar/UndoBarProvider";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -530,6 +531,7 @@ export function SituationRoomClient({
   // ── Render ────────────────────────────────────────────────────────
   return (
     <RingPulseController>
+      <UndoBarProvider>
       {/* Full-screen Situation Room scene */}
       <SituationRoomScene
         stats={tickerStats}
@@ -598,6 +600,7 @@ export function SituationRoomClient({
           }
         }
       `}</style>
+      </UndoBarProvider>
     </RingPulseController>
   );
 }

@@ -117,7 +117,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
-- `src/components/floor-4/SituationRoomClient.tsx` (606 LOC)
+- `src/components/floor-4/SituationRoomClient.tsx` (609 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (601 LOC)
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
@@ -174,6 +174,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/ProceduralSkyline.tsx` (225 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
+- `src/components/floor-4/undo-bar/UndoBar.tsx` (219 LOC) — In-world undo bar.
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
@@ -227,6 +228,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
+- `src/components/floor-4/undo-bar/UndoBar.test.tsx` (107 LOC)
 - `src/components/lobby/concierge/OtisCharacter.test.tsx` (106 LOC) — R4.2 — Otis character primitives.
 - `src/components/lobby/concierge/OtisCharacter.tsx` (106 LOC) — OtisCharacter — the Concierge, standing at the reception desk in the Lobby.
 - `src/components/floor-1/RingTheBell.bellPhase.test.tsx` (105 LOC) — R3.10 — unit tests for the pure side-effect helper + a spot-check that
@@ -257,6 +259,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/drill/DrillQuestionCard.tsx` (70 LOC) — R6.6 — DrillQuestionCard.
 - `src/components/floor-4/rings/RingPulseController.tsx` (69 LOC) — Context provider that exposes an imperative `pulse(x, y)` handle to
 - `src/components/floor-3/drill/DrillStage.test.tsx` (65 LOC)
+- `src/components/floor-4/undo-bar/UndoBarProvider.tsx` (64 LOC) — The shape exposed to consumer components.
 - `src/components/penthouse/scenes/SceneRouter.tsx` (62 LOC) — Picks the active Penthouse scene based on the user's current time-of-day
 - `src/components/penthouse/scenes/morning/SkipHint.tsx` (62 LOC) — Small floating hint at the bottom of the Morning Briefing Scene telling the
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)

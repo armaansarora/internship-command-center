@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 11:53 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 11:59 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `84985a5`)
+- **Branch:** `main` (commit `076f355`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 90,095 across 493 source files
+- **Total LOC:** 90,985 across 500 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-84985a5 [R7/7.2] feat(r7): real-undo backend + P1 proof (DB-level send_after guard)
+076f355 [R7/7.5] feat(r7): rings respond to alert clicks (shockwave from origin)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `84985a5`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `076f355`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (493 files, 90,095 LOC)
+## Source Tree (500 files, 90,985 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -112,7 +112,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai/structured` | 1315 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
-| `src/components/floor-4` | 1207 |
+| `src/components/floor-4` | 1210 |
 | `src/app` | 1177 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1119 |
@@ -133,6 +133,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db` | 923 |
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
+| `src/components/floor-4/undo-bar` | 887 |
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
@@ -452,6 +453,13 @@ src/components/floor-4/coo-character/COOWhiteboard.tsx
 src/components/floor-4/rings/RingPulseController.test.tsx
 src/components/floor-4/rings/RingPulseController.tsx
 src/components/floor-4/rings/useRingPulse.ts
+src/components/floor-4/undo-bar/UndoBar.test.tsx
+src/components/floor-4/undo-bar/UndoBar.tsx
+src/components/floor-4/undo-bar/UndoBarProvider.tsx
+src/components/floor-4/undo-bar/approveOutreachWithUndo.test.ts
+src/components/floor-4/undo-bar/approveOutreachWithUndo.ts
+src/components/floor-4/undo-bar/useUndoBarController.test.ts
+src/components/floor-4/undo-bar/useUndoBarController.ts
 src/components/floor-5/WritingRoomClient.tsx
 src/components/floor-5/WritingRoomScene.tsx
 src/components/floor-5/WritingRoomTicker.tsx
@@ -837,13 +845,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 881 | 9,509 |
+| `BOOTSTRAP-PROMPT.md` | 886 | 9,577 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 478 | 10,345 |
-| **Total** | **2008** | **32,300** |
+| `CLAUDE.md` | 481 | 10,416 |
+| **Total** | **2016** | **32,439** |
 
-> ⚠️ Reading all recommended files consumes ~32,300 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~32,439 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
