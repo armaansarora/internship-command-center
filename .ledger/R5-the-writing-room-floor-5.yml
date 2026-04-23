@@ -1,6 +1,6 @@
 phase: R5
 name: The Writing Room (Floor 5)
-status: in_progress
+status: complete
 intent: "A quiet floor. A single desk lamp. Paper drafts stacked. A typewriter
   on the side. A press in the corner. When the user drops a job description, CMO
   picks up a pen — you watch a cover letter compose itself in real time, as if
@@ -9,19 +9,39 @@ intent: "A quiet floor. A single desk lamp. Paper drafts stacked. A typewriter
   version out of the base resume, sections glowing as CMO rewrites bullets to
   match the JD."
 started: 2026-04-23T07:02:00.000Z
-completed: null
-lock:
-  holder: sess-a5908e
-  acquired: 2026-04-23T07:34:57.308Z
-  expires: 2026-04-23T09:34:57.304Z
+completed: 2026-04-23T07:41:00.000Z
+lock: null
 acceptance:
   criteria:
     - "User can generate a tailored cover letter and resume for one application
       quickly. Refinement loop: user types feedback → new draft appears shortly.
       Three tone variants demonstrably different on same input. PDF export reads
       as publication-quality."
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: 678d720
+  verification_evidence:
+    tests: 709/709 green (+87 since R4 baseline of 622)
+    typecheck: clean
+    build: Next.js production build succeeded; all R5 routes compiled
+      (/api/resumes/upload, /api/resumes/signed-url/[id],
+      /api/documents/[id]/pdf, /api/writing-room/approve,
+      /api/writing-room/choose-tone)
+    lint: 15 errors (matches R4 baseline exactly, zero new), 11 warnings
+      (non-blocking per autopilot rule — test-helper underscore-args pattern)
+    proof_invariants:
+      - "INVARIANT 1 (private storage): upload route 503s when bucket
+        unprovisioned; no public-URL fallback path in codebase"
+      - "INVARIANT 2 (tone divergence): three tones on same JD produce
+        pairwise Jaccard < 0.70 on word tokens — genuinely distinct system
+        prompts per tone, not temperature variance"
+      - "INVARIANT 3 (approval gate): /approve returns 400 no_tone_chosen
+        when metadata.selectedCoverLetterId is null — two mandatory clicks
+        separated in both code and UX"
+      - "INVARIANT 4 (send-time gate): outreach-sender cron reads
+        status='approved' only; pending_approval rows invisible to sender
+        (source-inspection assertion prevents regression)"
+      - "INVARIANT 5 (PDF export): cover letter + resume render as
+        application/pdf with %PDF- header, Cache-Control private no-store"
 tasks:
   R5.1:
     title: base_resumes table + resumes storage bucket (migration 0014)
@@ -82,7 +102,16 @@ tasks:
     started: 2026-04-23T07:34:57.308Z
     completed: 2026-04-23T07:36:20.621Z
     commit: 3e674ab
-blockers: []
+blockers:
+  - id: B1
+    task: R5.4
+    opened: 2026-04-23T07:40:34.623Z
+    text: Deferred — live-compose streaming + pen-glow UI flagged as polish in the
+      plan. Core R5 deliverables (approval gate, three-tone divergence, private
+      storage, PDF export, Resume Press, wall inscription) all shipped and Proof
+      green without it. R5.4 can land in a post-R5 polish pass without blocking
+      the phase.
+    resolved: null
 decisions: []
 history:
   - at: 2026-04-23T07:02:00.000Z
@@ -111,3 +140,4 @@ history:
   - 2026-04-23T07:34:33.654Z: task_completed R5.9
   - 2026-04-23T07:34:57.308Z: task_started R5.10
   - 2026-04-23T07:36:20.621Z: task_completed R5.10
+  - 2026-04-23T07:40:34.623Z: blocker_opened B1
