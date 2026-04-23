@@ -12,8 +12,8 @@ started: 2026-04-23T05:26:14.574Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T05:51:12.130Z
-  expires: 2026-04-23T07:51:12.125Z
+  acquired: 2026-04-23T05:52:05.720Z
+  expires: 2026-04-23T07:52:05.716Z
 acceptance:
   criteria:
     - First-click to first-Morning-Briefing is fast and feels continuous.
@@ -98,17 +98,17 @@ tasks:
   R4.11:
     title: R4 Proof — end-to-end first-run integration test (concierge → real
       discovery → first briefing references discovered applications)
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T05:52:05.720Z
     completed: null
     commit: null
   R4.12:
     title: R4 anti-pattern test — cinematic arrival never plays twice (strict
       one-time-per-account guard)
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:51:12.130Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:51:44.176Z
+    commit: a59a5c6
 blockers:
   - id: B1
     task: R4.10
@@ -142,3 +142,5 @@ history:
   - 2026-04-23T05:47:57.038Z: task_started R4.4
   - 2026-04-23T05:50:52.861Z: task_completed R4.4
   - 2026-04-23T05:51:12.130Z: task_started R4.12
+  - 2026-04-23T05:51:44.176Z: task_completed R4.12
+  - 2026-04-23T05:52:05.720Z: task_started R4.11
