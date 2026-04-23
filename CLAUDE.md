@@ -213,6 +213,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
 - `src/components/lobby/directory/BuildingDirectory.tsx` (152 LOC) — R4.8 — Building Directory.
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
+- `src/components/floor-6/rolodex/Rolodex.tsx` (145 LOC) — The centerpiece of Floor 6. A physical cylinder of contact cards. Warmth
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
 - `src/components/floor-4/final-countdown/FinalCountdownSection.test.tsx` (138 LOC)
@@ -231,6 +232,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/binder/DebriefBinderShelf.tsx` (117 LOC) — R6.8 — The Debrief Binder Shelf.
 - `src/components/floor-1/CSuiteClient.injectPrompt.test.tsx` (112 LOC) — R3.11 — unit tests for the `/`-inject activation gate.
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
+- `src/components/floor-6/rolodex/Rolodex.test.tsx` (110 LOC) — P1 invariant — rolodex at 200+ cards keeps the live DOM child count capped.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
 - `src/components/floor-4/undo-bar/UndoBar.test.tsx` (107 LOC)
@@ -253,6 +255,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/situation-map/SituationMap.tsx` (93 LOC) — Dispatcher that chooses Canvas2D vs list fallback. Arrives at one of:
 - `src/components/penthouse/scenes/morning/BriefingGlass.tsx` (93 LOC) — BriefingGlass — the unfolding pane where the CEO's morning briefing appears.
 - `src/components/penthouse/scenes/morning/MorningBriefingScene.tsx` (90 LOC) — Morning Briefing Scene — Floor PH between ~05:00 and 11:59 local.
+- `src/components/floor-6/rolodex/RolodexCard.tsx` (88 LOC) — A single physical card on the rolodex cylinder. Warmth-coloured via the
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
 - `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
