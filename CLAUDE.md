@@ -149,10 +149,12 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/MilestoneToast.tsx` (332 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
 - `src/components/floor-6/RolodexLoungeScene.tsx` (328 LOC) — RolodexLoungeScene — Floor 6 environment compositor.
 - `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
+- `src/components/lobby/cinematic/CinematicArrival.test.tsx` (310 LOC) — R4.7 — CinematicArrival render tests.
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
+- `src/components/lobby/cinematic/CinematicArrival.tsx` (277 LOC) — R4.7 — CinematicArrival.
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
 - `src/components/lobby/concierge/OtisDialoguePanel.tsx` (250 LOC) — OtisDialoguePanel — the Concierge's conversation surface.
@@ -198,12 +200,14 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
+- `src/components/lobby/directory/BuildingDirectory.tsx` (152 LOC) — R4.8 — Building Directory.
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
 - `src/components/floor-2/analytics/ConversionFunnel.tsx` (137 LOC) — ConversionFunnel — SVG funnel visualization showing pipeline stages.
 - `src/components/floor-1/InjectPrompt.test.tsx` (136 LOC) — R3.11 — unit tests for the floating `/`-inject prompt.
 - `src/components/world/NotificationSystem.tsx` (135 LOC) — NotificationSystem — in-world spatial notification manager.
+- `src/components/lobby/directory/BuildingDirectory.test.tsx` (133 LOC) — R4.8 — BuildingDirectory render tests.
 - `src/components/transitions/EntranceSequence.tsx` (132 LOC) — EntranceSequence — cinematic first-login entrance animation.
 - `src/components/penthouse/QuickActionCard.tsx` (129 LOC) — @deprecated R2 bans the "Phase 1 / Phase 2" badge. Field kept optional
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:41 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:44 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `8099183`)
+- **Branch:** `main` (commit `44d8928`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 74,110 across 390 source files
+- **Total LOC:** 75,361 across 396 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-8099183 [R4/4.3] feat(ai): Concierge — Otis system prompt + extraction engine + routes
+44d8928 [R4/4.5] feat(onboarding): bootstrap-discovery — real first-run trigger
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `8099183`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `44d8928`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,12 +95,12 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (390 files, 74,110 LOC)
+## Source Tree (396 files, 75,361 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 5633 |
-| `src/lib/ai/agents` | 3876 |
+| `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3162 |
 | `src/components/floor-1` | 2660 |
 | `src/styles` | 2526 |
@@ -132,6 +132,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cfo` | 850 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
+| `src/components/lobby/cinematic` | 832 |
 | `src/lib/agents/cio` | 817 |
 | `src/lib/ai/structured` | 804 |
 | `src/lib/penthouse` | 796 |
@@ -168,12 +169,12 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/briefing-room` | 296 |
 | `src/app/api/cron/briefing` | 290 |
 | `src/app/(authenticated)` | 285 |
+| `src/components/lobby/directory` | 285 |
 | `src/lib/utils` | 284 |
 | `src/app/api/ceo/dispatches` | 275 |
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
 | `src/components/penthouse/rest` | 268 |
-| `src/components/lobby/cinematic` | 245 |
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
@@ -389,10 +390,14 @@ src/components/floor-7/war-table/pipeline-config.ts
 src/components/icons/PenthouseIcons.tsx
 src/components/lobby/cinematic/ArrivalStages.test.ts
 src/components/lobby/cinematic/ArrivalStages.ts
+src/components/lobby/cinematic/CinematicArrival.test.tsx
+src/components/lobby/cinematic/CinematicArrival.tsx
 src/components/lobby/concierge/OtisAvatar.tsx
 src/components/lobby/concierge/OtisCharacter.test.tsx
 src/components/lobby/concierge/OtisCharacter.tsx
 src/components/lobby/concierge/OtisDialoguePanel.tsx
+src/components/lobby/directory/BuildingDirectory.test.tsx
+src/components/lobby/directory/BuildingDirectory.tsx
 src/components/penthouse/ActivityFeed.tsx
 src/components/penthouse/GlassPanel.tsx
 src/components/penthouse/PipelineNodes.tsx
@@ -496,6 +501,8 @@ src/lib/ai/agents/ceo-orchestrator.dispatch-batch.proof.test.ts
 src/lib/ai/agents/ceo-orchestrator.r3-proof.test.ts
 src/lib/ai/agents/ceo-orchestrator.shared-knowledge.test.ts
 src/lib/ai/agents/ceo-orchestrator.ts
+src/lib/ai/agents/first-run-briefing.test.ts
+src/lib/ai/agents/first-run-briefing.ts
 src/lib/ai/agents/morning-briefing.proof.test.ts
 src/lib/ai/agents/morning-briefing.test.ts
 src/lib/ai/agents/morning-briefing.ts
@@ -694,13 +701,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 732 | 7,629 |
+| `BOOTSTRAP-PROMPT.md` | 743 | 7,772 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 451 | 9,642 |
-| **Total** | **1832** | **29,717** |
+| `CLAUDE.md` | 455 | 9,760 |
+| **Total** | **1847** | **29,978** |
 
-> ⚠️ Reading all recommended files consumes ~29,717 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,978 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
