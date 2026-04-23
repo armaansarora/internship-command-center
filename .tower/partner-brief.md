@@ -74,8 +74,7 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - `src/db/manual/005_interview_audio_bucket.sql` written; user runs in Supabase Dashboard → SQL Editor before voice uploads work in prod.
 - `.env.example` updated with `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `OPENAI_API_KEY` (R4/R6 OAuth + voice).
 
-**Still open (user decision pending on timing):**
-- **R8.x mini-phase — cross-user match unlock.** My second Red Team read surfaced 3 gaps in the first-pass self-review: no index-populator cron, consent version check not wired, no audit-log UI; plus no rate limit on match-candidates endpoint and no delta re-scan on application change. Full autopilot mini-phase prompt ready. User chose "do now" but timing (before R9 vs after R10) still pending — recommendation: after R10 for max review context.
+**R8.x timing LOCKED: post-R10** (user picked option B, 2026-04-23). My second Red Team read found 3 real gaps: no index populator cron, consent version check not wired, no audit log UI. Plus 2 concerns: no rate limit on match-candidates, no delta re-scan on application change. R8.x is a full mini-phase (30-50 min autopilot), queued for after R10 ships. The 403 hard-stop is safe as a holding position indefinitely.
 
 **RESOLVED since last update:**
 - R4 B1 LinkedIn OAuth credentials ✓ (Vercel env vars saved)
@@ -85,7 +84,7 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - Post-R5.4 autonomous cleanup (commit `398142c`): real React 19 ref-during-render fixes, R8 gsap regression, 8 TODOs resolved, war-room console.error → logger, CLAUDE.md staleness purged, Husky now runs `tower lint-autopilot --strict`. Lint: **0e/0w**.
 
 **Partner decisions locked (2026-04-23, post-R5.4):**
-1. R8.x cross-user matching → ship (user option A). Timing TBD (user recommendation pending: pre-R9 vs post-R10).
+1. R8.x cross-user matching → ship AFTER R10 (user option A + timing B). R8.x is a focused mini-phase, not a 5-min flip. Prompt scope pre-drafted in autopilot.yml R8.x comment above.
 2. CEO voice → ships in R10 (option A).
 3. Full-journey E2E tests → post-R10 with HARSH simulation (hacking attempts, abuse/spam, parallel agents simulating many users). This is the post-R10 hardening phase.
 4. R9 Orrery tech → CSS 3D (option B) BUT architected for easy swap. Data and render layers must be decoupled so a later R3F upgrade is a file-swap, not a rewrite.
