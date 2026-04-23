@@ -280,6 +280,52 @@
   }
 }
 
+/* ── R8 dossier wall — paper aging + corner curl ──────────────────────── */
+/* A dossier card is a plain rectangle; the aging `::after` pseudo-element
+   paints a triangular fold at the top-right. Fresh cards have none; aging
+   cards show a subtle fold; stale cards have a pronounced curl and a drop
+   shadow under the lifted corner. */
+.dossier-card {
+  isolation: isolate;
+}
+.dossier-curl-fresh::after {
+  content: none;
+}
+.dossier-curl-aging::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(
+    135deg,
+    transparent 50%,
+    rgba(0, 0, 0, 0.18) 51%,
+    rgba(0, 0, 0, 0.05) 60%
+  );
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  pointer-events: none;
+}
+.dossier-curl-stale::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    transparent 48%,
+    rgba(120, 90, 40, 0.32) 50%,
+    rgba(0, 0, 0, 0.1) 65%,
+    transparent 80%
+  );
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  filter: drop-shadow(-2px 3px 4px rgba(0, 0, 0, 0.25));
+  pointer-events: none;
+}
+
 /* ── R8 side-switch: mobile fallback tabs ─────────────────────────────── */
 /* Desktop hides the tab buttons (keyboard is primary input); mobile shows
    them and hides the keyboard hint. */

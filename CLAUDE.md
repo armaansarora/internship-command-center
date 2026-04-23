@@ -235,6 +235,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
 - `src/components/floor-6/rolodex/Rolodex.test.tsx` (110 LOC) — P1 invariant — rolodex at 200+ cards keeps the live DOM child count capped.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
+- `src/components/floor-6/dossier-wall/DossierCard.tsx` (108 LOC) — A single dossier folder on the CIO's library wall. Tilts a hair ±2°
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
 - `src/components/floor-4/undo-bar/UndoBar.test.tsx` (107 LOC)
 - `src/components/lobby/concierge/OtisCharacter.test.tsx` (106 LOC) — R4.2 — Otis character primitives.
@@ -266,10 +267,12 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/agents/dialogue/AgentChatInput.tsx` (80 LOC)
 - `src/components/floor-3/drill/DrillTimer.test.tsx` (79 LOC)
 - `src/components/penthouse/quick-actions/QuickActionsRow.tsx` (79 LOC) — QuickActionsRow — the 4 Penthouse quick-actions wired to either a direct
+- `src/components/floor-6/dossier-wall/DossierWall.test.tsx` (77 LOC)
 - `src/components/floor-3/drill/DrillTimer.tsx` (73 LOC) — R6.6 — DrillTimer.
 - `src/components/world/DayNightProvider.tsx` (72 LOC) — DayNightProvider — sets `data-time` on <html> based on the user's local time.
 - `src/components/floor-3/drill/DrillQuestionCard.tsx` (70 LOC) — R6.6 — DrillQuestionCard.
 - `src/components/floor-4/rings/RingPulseController.tsx` (69 LOC) — Context provider that exposes an imperative `pulse(x, y)` handle to
+- `src/components/floor-6/dossier-wall/DossierWall.tsx` (66 LOC) — The CIO's library wall — a grid of dossier folders that age in place.
 - `src/components/floor-3/drill/DrillStage.test.tsx` (65 LOC)
 - `src/components/floor-4/undo-bar/UndoBarProvider.tsx` (64 LOC) — The shape exposed to consumer components.
 - `src/components/penthouse/scenes/SceneRouter.tsx` (62 LOC) — Picks the active Penthouse scene based on the user's current time-of-day
