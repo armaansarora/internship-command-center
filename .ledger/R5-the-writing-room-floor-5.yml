@@ -12,8 +12,8 @@ started: 2026-04-23T07:02:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T07:30:12.863Z
-  expires: 2026-04-23T09:30:12.858Z
+  acquired: 2026-04-23T07:32:08.169Z
+  expires: 2026-04-23T09:32:08.164Z
 acceptance:
   criteria:
     - "User can generate a tailored cover letter and resume for one application
@@ -60,13 +60,14 @@ tasks:
     commit: ec5d4ae
   R5.7:
     title: "@react-pdf/renderer — cover letter + resume PDF export"
-    status: in_progress
+    status: complete
     started: 2026-04-23T07:30:12.863Z
-    completed: null
+    completed: 2026-04-23T07:31:54.959Z
+    commit: "95787e2"
   R5.8:
     title: Resume Press mechanical SVG + GSAP actuation
     status: in_progress
-    started: 2026-04-23T07:15:03.958Z
+    started: 2026-04-23T07:32:08.169Z
     completed: null
   R5.9:
     title: Siken wall sharpening inscription
@@ -100,3 +101,5 @@ history:
   - 2026-04-23T07:25:23.098Z: task_started R5.6
   - 2026-04-23T07:30:01.682Z: task_completed R5.6
   - 2026-04-23T07:30:12.863Z: task_started R5.7
+  - 2026-04-23T07:31:54.959Z: task_completed R5.7
+  - 2026-04-23T07:32:08.169Z: task_started R5.8

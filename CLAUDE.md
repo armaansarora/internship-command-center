@@ -155,6 +155,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
+- `src/components/floor-5/resume-press/ResumePress.tsx` (278 LOC) — R5.8 — The Resume Press.
 - `src/components/lobby/cinematic/CinematicArrival.tsx` (277 LOC) — R4.7 — CinematicArrival.
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
@@ -233,6 +234,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/scenes/morning/BriefingGlass.tsx` (93 LOC) — BriefingGlass — the unfolding pane where the CEO's morning briefing appears.
 - `src/components/penthouse/scenes/morning/MorningBriefingScene.tsx` (90 LOC) — Morning Briefing Scene — Floor PH between ~05:00 and 11:59 local.
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
+- `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
 - `src/components/agents/dialogue/AgentChatInput.tsx` (80 LOC)
