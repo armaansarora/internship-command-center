@@ -698,6 +698,22 @@ export function ApplicationModal({
               />
             </FieldWrapper>
 
+            {/* R7.8 — Hard deadline for the application. Optional. Feeds the
+                Final Countdown section on Floor 4 + the 3-beat cron. */}
+            <FieldWrapper label="Deadline" htmlFor="deadlineAt">
+              <FocusableInput
+                id="deadlineAt"
+                name="deadlineAt"
+                type="datetime-local"
+                defaultValue={
+                  application?.deadlineAt
+                    ? new Date(application.deadlineAt).toISOString().slice(0, 16)
+                    : ""
+                }
+                placeholder=""
+              />
+            </FieldWrapper>
+
             {/* Notes — full width */}
             <div style={{ gridColumn: "1 / -1" }}>
               <FieldWrapper label="Field Notes / Intelligence" htmlFor="notes">

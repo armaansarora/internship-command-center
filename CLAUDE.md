@@ -113,11 +113,11 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/crud/PrepPacketViewer.tsx` (1135 LOC)
 - `src/app/(authenticated)/settings/settings-client.tsx` (1056 LOC) — R0.7 — `user_profiles.deleted_at` as ISO string (or null). Drives
 - `src/app/lobby/lobby-client.tsx` (967 LOC) — Lobby client component — The Tower entrance.
-- `src/components/floor-7/crud/ApplicationModal.tsx` (761 LOC)
+- `src/components/floor-7/crud/ApplicationModal.tsx` (777 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
+- `src/components/floor-4/SituationRoomClient.tsx` (639 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
-- `src/components/floor-4/SituationRoomClient.tsx` (616 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (601 LOC)
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
@@ -181,6 +181,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-2/ObservatoryClient.tsx` (208 LOC)
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (204 LOC)
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
+- `src/components/floor-4/final-countdown/FinalCountdownSection.tsx` (203 LOC)
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/floor-7/war-table/StampBar.tsx` (202 LOC) — Floating action bar that appears when the user has selected one or more
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (201 LOC)
@@ -212,6 +213,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
+- `src/components/floor-4/final-countdown/FinalCountdownSection.test.tsx` (138 LOC)
 - `src/components/floor-2/analytics/ConversionFunnel.tsx` (137 LOC) — ConversionFunnel — SVG funnel visualization showing pipeline stages.
 - `src/components/floor-1/InjectPrompt.test.tsx` (136 LOC) — R3.11 — unit tests for the floating `/`-inject prompt.
 - `src/components/floor-5/ready-to-send/ReadyToSendPanel.test.tsx` (136 LOC) — R5.6 — ReadyToSendPanel render assertions.

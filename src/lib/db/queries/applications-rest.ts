@@ -479,6 +479,7 @@ export async function createApplicationRest(
       applied_at: isApplied ? now : null,
       last_activity_at: now,
       updated_at: now,
+      deadline_at: input.deadlineAt ? new Date(input.deadlineAt).toISOString() : null,
     })
     .select()
     .single();
@@ -518,6 +519,11 @@ export async function updateApplicationRest(
   if (input.salary !== undefined) updatePayload.salary = input.salary || null;
   if (input.sector !== undefined) updatePayload.sector = input.sector || null;
   if (input.tier !== undefined) updatePayload.tier = input.tier ?? null;
+  if (input.deadlineAt !== undefined) {
+    updatePayload.deadline_at = input.deadlineAt
+      ? new Date(input.deadlineAt).toISOString()
+      : null;
+  }
 
   const { data, error } = await supabase
     .from("applications")

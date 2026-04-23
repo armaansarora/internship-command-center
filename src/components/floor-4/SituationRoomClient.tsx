@@ -13,6 +13,10 @@ import { RingPulseController } from "./rings/RingPulseController";
 import { useRingPulse } from "./rings/useRingPulse";
 import { UndoBarProvider } from "./undo-bar/UndoBarProvider";
 import { ConflictsSection, type ConflictEntry } from "./conflicts/ConflictsSection";
+import {
+  FinalCountdownSection,
+  type CountdownCard,
+} from "./final-countdown/FinalCountdownSection";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -283,9 +287,23 @@ export function SituationRoomClient({
     setCooStatus(status);
   }, []);
 
-  // Build deadline cards from applications
+  // Build deadline cards from applications (stale follow-up cards)
   const deadlineCards = useMemo(
     () => buildDeadlineCards(applications),
+    [applications]
+  );
+
+  // R7.8 — Build Final Countdown cards from applications with a deadline set.
+  const countdownCards = useMemo<CountdownCard[]>(
+    () =>
+      applications
+        .filter((a) => a.deadlineAt !== null)
+        .map((a) => ({
+          id: a.id,
+          companyName: a.companyName ?? "Unknown company",
+          role: a.role,
+          deadlineAtMs: new Date(a.deadlineAt as unknown as string | Date).getTime(),
+        })),
     [applications]
   );
 
@@ -351,8 +369,13 @@ export function SituationRoomClient({
       {/* R7.7 — Calendar conflicts at the top (only renders when non-empty) */}
       <ConflictsSection conflicts={conflicts} />
 
+      {/* R7.8 — Final Countdown section: apps with deadlines in next 7 days */}
+      <FinalCountdownSection cards={countdownCards} />
+
       {/* Empty state */}
-      {deadlineCards.length === 0 && conflicts.length === 0 && (
+      {deadlineCards.length === 0 &&
+        conflicts.length === 0 &&
+        countdownCards.length === 0 && (
         <div
           style={{
             display: "flex",

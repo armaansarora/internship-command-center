@@ -10,6 +10,7 @@ import {
 import { encodeBriefing } from "@/lib/penthouse/briefing-storage";
 import { synthesizeFallbackBriefing } from "@/lib/penthouse/briefing-fallback";
 import { detectConflictsForUser } from "@/lib/situation/conflicts-cron";
+import { fireDeadlineBeatsForUser } from "@/lib/situation/deadline-cron";
 
 /**
  * GET /api/cron/briefing
@@ -296,6 +297,23 @@ async function processUser(
       log.warn("cron.briefing.conflicts_failed", {
         userId,
         error: conflictErr instanceof Error ? conflictErr.message : String(conflictErr),
+      });
+    }
+
+    // R7.8 — Fire deadline beats (t_24h, t_4h, t_0). Swallow failures so
+    // they don't block the briefing's primary success path.
+    try {
+      const beatRes = await fireDeadlineBeatsForUser(supabase, userId);
+      if (beatRes.beatsFired > 0) {
+        log.info("cron.briefing.deadline_beats_fired", {
+          userId,
+          beatsFired: beatRes.beatsFired,
+        });
+      }
+    } catch (beatErr) {
+      log.warn("cron.briefing.deadline_beats_failed", {
+        userId,
+        error: beatErr instanceof Error ? beatErr.message : String(beatErr),
       });
     }
 
