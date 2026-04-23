@@ -12,8 +12,8 @@ started: 2026-04-23T05:26:14.574Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T05:40:01.823Z
-  expires: 2026-04-23T07:40:01.819Z
+  acquired: 2026-04-23T05:42:03.081Z
+  expires: 2026-04-23T07:42:03.076Z
 acceptance:
   criteria:
     - First-click to first-Morning-Briefing is fast and feels continuous.
@@ -55,32 +55,32 @@ tasks:
   R4.5:
     title: Bootstrap Job Discovery — real first-run trigger endpoint that awaits
       runJobDiscoveryForUser directly (no stubs, no mocked results)
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:40:01.823Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:41:42.973Z
+    commit: 44d8928
   R4.6:
     title: First-ever Morning Briefing override — atomic-guarded one-shot on
       Penthouse mount referencing the just-discovered applications
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T05:42:03.081Z
     completed: null
     commit: null
   R4.7:
     title: Cinematic arrival scene — CSS+GSAP aerial approach over
       ProceduralSkyline, strict one-time-per-account via arrival_played_at
       atomic claim
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:38:39.732Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:45:06.327Z
+    commit: ed115d4
   R4.8:
     title: Building Directory cross-section — vertical diorama of 9 stacked floors
       driven by live floors_unlocked
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:38:40.050Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:44:21.722Z
+    commit: ed115d4
   R4.9:
     title: Returning-user fast lane — proxy redirects /lobby to lastFloorVisited
       when arrival_played_at is set
@@ -91,8 +91,8 @@ tasks:
   R4.10:
     title: LinkedIn OAuth BLOCKER — no env vars, no stub; ship R4 without LinkedIn
       sync per autopilot directive
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T05:41:52.768Z
     completed: null
     commit: null
   R4.11:
@@ -109,7 +109,15 @@ tasks:
     started: null
     completed: null
     commit: null
-blockers: []
+blockers:
+  - id: B1
+    task: R4.10
+    opened: 2026-04-23T05:41:53.090Z
+    text: LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET env vars not provisioned in
+      .env.example or production. LinkedIn sync deferred per autopilot directive
+      — no stub UI, no mock flow. Ship R4 without LinkedIn. Unblock when user
+      provisions credentials + updates .env.example.
+    resolved: null
 decisions: []
 history:
   - 2026-04-23T05:26:14.574Z: task_started R4.1
@@ -121,3 +129,9 @@ history:
   - 2026-04-23T05:38:39.732Z: task_started R4.7
   - 2026-04-23T05:38:40.050Z: task_started R4.8
   - 2026-04-23T05:40:01.823Z: task_started R4.5
+  - 2026-04-23T05:41:42.973Z: task_completed R4.5
+  - 2026-04-23T05:41:52.768Z: task_started R4.10
+  - 2026-04-23T05:41:53.090Z: blocker_opened B1
+  - 2026-04-23T05:42:03.081Z: task_started R4.6
+  - 2026-04-23T05:44:21.722Z: task_completed R4.8
+  - 2026-04-23T05:45:06.327Z: task_completed R4.7

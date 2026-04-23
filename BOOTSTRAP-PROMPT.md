@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:44 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:45 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `44d8928`)
+- **Branch:** `main` (commit `ed115d4`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 75,361 across 396 source files
+- **Total LOC:** 75,385 across 396 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-44d8928 [R4/4.5] feat(onboarding): bootstrap-discovery — real first-run trigger
+ed115d4 [R4/4.8] feat(lobby): Building Directory — live cross-section of unlocked floors
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `44d8928`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `ed115d4`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (396 files, 75,361 LOC)
+## Source Tree (396 files, 75,385 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -143,7 +143,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db` | 675 |
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
-| `src/app/(authenticated)/penthouse` | 603 |
+| `src/app/(authenticated)/penthouse` | 627 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
 | `src/components/floor-2` | 576 |
@@ -701,13 +701,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 743 | 7,772 |
+| `BOOTSTRAP-PROMPT.md` | 750 | 7,869 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 455 | 9,760 |
-| **Total** | **1847** | **29,978** |
+| **Total** | **1854** | **30,075** |
 
-> ⚠️ Reading all recommended files consumes ~29,978 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,075 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

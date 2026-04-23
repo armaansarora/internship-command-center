@@ -4,6 +4,7 @@ import {
 } from "@/lib/penthouse/briefing-storage";
 import { synthesizeFallbackBriefing } from "@/lib/penthouse/briefing-fallback";
 import type { MorningBriefing } from "@/lib/ai/agents/morning-briefing";
+import { maybeGenerateFirstRunBriefing } from "@/lib/ai/agents/first-run-briefing";
 import {
   pipelineWeatherDelta,
   weatherLabel,
@@ -258,6 +259,29 @@ export async function fetchPenthouseScene(user: {
     briefingGenerated = briefing !== null;
   } catch {
     briefing = null;
+  }
+
+  // 3.5 — R4.6 first-run Morning Briefing override. Fires ONCE per account
+  //      during the 10-minute window after the Concierge hands the guest
+  //      to the elevator. Race-safe via atomic claim on `first_briefing_shown`.
+  //      Only runs if the cron hasn't already written a briefing (briefing
+  //      still null here). References the applications the bootstrap
+  //      discovery pipeline just inserted — the autonomy proof.
+  if (!briefing) {
+    try {
+      const firstRun = await maybeGenerateFirstRunBriefing({
+        userId: user.id,
+        displayName: user.displayName,
+      });
+      if (firstRun) {
+        briefing = firstRun;
+        briefingGenerated = true;
+      }
+    } catch {
+      // Keep briefing null; the downstream synthetic fallback keeps the
+      // scene alive. A first-run override that breaks must never break
+      // the Penthouse itself.
+    }
   }
 
   // 4. Overnight signal (last 24h) — apps + emails.
