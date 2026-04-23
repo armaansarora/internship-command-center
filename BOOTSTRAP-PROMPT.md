@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:38 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:04 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,23 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `ad5db7e`)
+- **Branch:** `main` (commit `e53020b`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 96,816 across 553 source files
-- **Build:** Clean (zero TS errors)
+- **Total LOC:** 97,067 across 555 source files
+- **Build:** FAILING — 3 TS errors
+
+### Build Errors
+```
+src/lib/ai/structured/cover-letter-stream.ts(66,37): error TS2339: Property 'catch' does not exist on type 'PromiseLike<string>'.
+src/lib/ai/structured/cover-letter-stream.ts(67,28): error TS7006: Parameter 'finalText' implicitly has an 'any' type.
+src/lib/ai/structured/cover-letter-stream.ts(82,5): error TS2739: Type 'PromiseLike<string>' is missing the following properties from type 'Promise<string>': catch, finally, [Symbol.toStringTag]
+```
 
 
 ## Changes Since Last Bootstrap
 
 ```
-ad5db7e [R8/sharpening] the surprise: paper-rustle audio when rolodex lands on a card with a private note
+e53020b chore(handoff): session sess-a5908e — R0
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `ad5db7e`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `e53020b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (553 files, 96,816 LOC)
+## Source Tree (555 files, 97,067 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -110,7 +117,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/app/__tests__` | 1525 |
-| `src/lib/ai/structured` | 1315 |
+| `src/lib/ai/structured` | 1417 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
@@ -164,6 +171,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/lobby/onboarding` | 500 |
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
+| `src/lib/ai/structured/__tests__` | 450 |
 | `src/components/floor-6/contact-grid` | 449 |
 | `src/components/penthouse/scenes/morning` | 448 |
 | `src/app/api/cron/purge-sweeper` | 439 |
@@ -185,7 +193,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/account/delete/cancel` | 308 |
 | `src/components/pricing` | 306 |
 | `src/lib/networking` | 302 |
-| `src/lib/ai/structured/__tests__` | 301 |
 | `src/components/floor-6/dossier-wall` | 299 |
 | `src/lib/audio` | 297 |
 | `src/app/(authenticated)` | 285 |
@@ -690,7 +697,9 @@ src/lib/ai/cost.ts
 src/lib/ai/memory-extractor.ts
 src/lib/ai/model.ts
 src/lib/ai/prompt-cache.ts
+src/lib/ai/structured/__tests__/live-compose.proof.test.ts
 src/lib/ai/structured/__tests__/three-tone-divergence.proof.test.ts
+src/lib/ai/structured/cover-letter-stream.ts
 src/lib/ai/structured/cover-letter.ts
 src/lib/ai/structured/drill-questions.ts
 src/lib/ai/structured/follow-up-draft.test.ts
@@ -915,13 +924,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 964 | 10,608 |
+| `BOOTSTRAP-PROMPT.md` | 964 | 10,613 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 501 | 11,048 |
-| **Total** | **2114** | **34,102** |
+| **Total** | **2114** | **34,107** |
 
-> ⚠️ Reading all recommended files consumes ~34,102 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,107 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
