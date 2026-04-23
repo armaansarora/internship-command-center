@@ -20,8 +20,24 @@ acceptance:
       Returning users never see the arrival twice. Concierge extracts a usable
       target profile in most test runs. Directory cross-section reads live
       progression without drift.
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: 498a164
+  verified_by:
+    npm_test: 622 passed (98 new since R3; was 524 at R3 close)
+    tsc_noemit: clean
+    npm_build: green (production build succeeded end-to-end)
+    npm_lint: 15 errors / 7 warnings (error baseline held; +1 benign warning)
+  evidence:
+    proof_test: src/app/lobby/r4.proof.test.ts (3 assertions — briefing
+      references discovered company, LLM prompt includes real data,
+      one-shot short-circuits when first_briefing_shown is true)
+    antipattern_test: src/app/lobby/onboarding/one-time-arrival.test.ts
+      and src/components/lobby/cinematic/CinematicArrival.test.tsx
+      (three-layer strict one-time-per-account guard)
+    autonomy_chain: Concierge extract and real bootstrap discovery
+      via runJobDiscoveryForUser (same pipeline the 4-hour cron uses)
+      with first-run Morning Briefing atomic override reading the
+      just-inserted applications and naming specific companies
 tasks:
   R4.1:
     title: user_profiles onboarding columns — migration 0013 (arrival_played_at,
