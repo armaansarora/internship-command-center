@@ -1,13 +1,13 @@
 phase: R2
 name: Penthouse (PH)
-status: in_progress
+status: complete
 intent: The CEO is *already at the window* when the user arrives in the morning.
   Gold-hour skyline. A briefing is unfolding on glass. This isn't a dashboard
   with a greeting — it's the first minute of a scripted workday. When the user
   opens the app in the morning, they don't see numbers first — they see the CEO
   turning from the window.
 started: 2026-04-23T03:01:40.210Z
-completed: null
+completed: 2026-04-23T03:30:14.068Z
 lock:
   holder: sess-a5908e
   acquired: 2026-04-23T03:23:16.225Z
@@ -19,18 +19,7 @@ acceptance:
       Penthouse moment worth returning to. Different overnight activity
       demonstrably produces different scripts.
   met: true
-  verified_by_commit: pending
-  notes: "12/12 tasks shipped. 366 tests pass (29 new R2 tests: 11 agent schema,
-    9 storage, 9 fallback, 11 time-of-day, 11 weather, 6 idle-detail, 3 proof).
-    tsc clean. npm run build green (proxy/middleware healthy). Lint 15 errors +
-    6 warnings — below the R1 baseline of 16 + 6. Scene-first composition
-    ships: SceneRouter picks morning/afternoon/evening/late-night by user TZ,
-    MorningBriefingScene unfolds structured beats on glass from CEO-at-window
-    (with turning entrance), Quick Actions are real dispatches with
-    pneumatic-tube overlay (1 nav-wired + 3 agent endpoint-wired), RestPanel
-    demotes the dashboard behind Esc/Space, IdleDetail seeds a daily detail,
-    briefing storage uses [briefing_v2] JSON prefix on notifications.body with
-    legacy fallback. Voice layer deferred per autopilot decision."
+  verified_by_commit: 00f358a
 tasks:
   R2.1:
     title: Morning Briefing AI agent (structured beats + mood + weather_hint)
@@ -104,8 +93,10 @@ tasks:
     commit: 103c78f
   R2.12:
     title: Phase acceptance verification (tests/tsc/build/lint) + ledger flip
-    status: in_progress
+    status: complete
     started: 2026-04-23T03:23:16.225Z
+    completed: 2026-04-23T03:30:14.068Z
+    commit: 00f358a
 blockers: []
 decisions:
   - date: 2026-04-22
@@ -172,3 +163,5 @@ history:
   - 2026-04-23T03:22:25.418Z: task_started R2.11
   - 2026-04-23T03:23:15.837Z: task_completed R2.11
   - 2026-04-23T03:23:16.225Z: task_started R2.12
+  - 2026-04-23T03:30:14.068Z: task_completed R2.12
+  - 2026-04-23T03:30:14.068Z: phase_completed
