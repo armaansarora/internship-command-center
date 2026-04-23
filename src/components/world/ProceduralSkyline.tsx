@@ -33,12 +33,20 @@ interface Props {
    * jumping discretely between floor offsets.
    */
   externalOffsetRef?: { current: number };
+  /**
+   * R2 — Penthouse pipeline weather. Small saturation offset applied via a
+   * CSS `saturate()` filter on the canvas (clamped [-0.05, +0.05]). Positive
+   * = gold-hour boost; negative = dim / desaturated. 0 or omitted = no shift.
+   * Kept outside the WebGL/2D pipeline so other floors remain untouched.
+   */
+  saturationDelta?: number;
 }
 
 export function ProceduralSkyline({
   floorId,
   className = "",
   externalOffsetRef,
+  saturationDelta,
 }: Props): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef  = useRef<Scene | null>(null);
@@ -193,12 +201,24 @@ export function ProceduralSkyline({
     };
   }, [render, reduced, drawStaticFrame]);
 
+  // Clamp the prop-supplied weather delta into the documented range so an
+  // accidental value can't render the city neon-green.
+  const safeSaturation = clampSaturation(saturationDelta);
+  const filterStyle = safeSaturation !== 0
+    ? { filter: `saturate(${(1 + safeSaturation).toFixed(3)})`, transition: "filter 1.2s ease-out" }
+    : undefined;
+
   return (
     <canvas
       ref={canvasRef}
       className={`absolute inset-0 w-full h-full ${className}`}
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 0, ...filterStyle }}
       aria-hidden="true"
     />
   );
+}
+
+function clampSaturation(delta: number | undefined): number {
+  if (typeof delta !== "number" || !Number.isFinite(delta)) return 0;
+  return Math.min(Math.max(delta, -0.05), 0.05);
 }

@@ -159,6 +159,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/PersistentWorld.tsx` (236 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
+- `src/components/world/ProceduralSkyline.tsx` (225 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
@@ -166,7 +167,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/floor-2/ObservatoryClient.tsx` (208 LOC)
-- `src/components/world/ProceduralSkyline.tsx` (205 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (204 LOC)
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)

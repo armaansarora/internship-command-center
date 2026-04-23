@@ -896,7 +896,7 @@ Not a Brief. Just true things Claude needs when executing.
 - `BOOTSTRAP-PROMPT.md` — auto-generated on every commit; source of truth for build health and current phase.
 - `src/db/schema.ts` — the 16 tables.
 - `src/lib/supabase/middleware.ts` / `src/lib/supabase/server.ts` / `src/lib/supabase/client.ts` — auth layer.
-- `src/proxy.ts` — the currently-named middleware file; see R0/0.1 for why this matters.
+- `src/proxy.ts` — Next.js 16 middleware entry; invokes `updateSession`. The correct filename for Next 16 (reversing the roadmap's original pre-R0 hypothesis).
 - `src/components/world/PersistentWorld.tsx` — the shared world chrome. Don't touch unless you understand it.
 - `src/app/lobby/lobby-client.tsx` — the current best reference for motion vocabulary. Until R4 ships, extract primitives from here into `src/components/world/primitives/`.
 
@@ -913,7 +913,7 @@ Listed in §2 above. These are pre-built infrastructure ready to consume in thei
 5. **EntranceSequence replay.** Uses sessionStorage for "played" flag — per-session first entrance.
 6. **Vercel auto-deploy.** `main` gets automatic production deployment.
 7. **Supabase REST client pattern.** `createClient()` from `@/lib/supabase/server` for server; `@/lib/supabase/client` for client.
-8. **Next 16 middleware filename.** The framework expects `src/middleware.ts`. The current file is `src/proxy.ts`. This is the suspected root cause of the session-persistence bug (R0/0.1).
+8. **Next 16 middleware filename.** The framework expects `src/proxy.ts` (NOT `src/middleware.ts`). If both files exist, `next build` refuses with `"Both middleware file and proxy file are detected. Please use 'src/proxy.ts' only."` The session-persistence bug (R0/0.1) was NOT the filename — R0 shipped a fix via `src/lib/supabase/middleware.ts` updates and an E2E scaffold. See `.ledger/R0-hardening-sprint.yml` R0.1 notes. (Roadmap's original hypothesis pre-R0 was reversed; preserved in §2 / §7 / §11 for historical context.)
 
 ### Agent hierarchy (for Claude sessions touching agent code)
 
