@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:05 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 3:07 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `b99f0af`)
+- **Branch:** `main` (commit `acf1188`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 97,274 across 557 source files
+- **Total LOC:** 97,660 across 560 source files
 - **Build:** FAILING — 4 TS errors
 
 ### Build Errors
@@ -36,7 +36,7 @@ src/lib/ai/structured/cover-letter-stream.ts(82,5): error TS2739: Type 'PromiseL
 ## Changes Since Last Bootstrap
 
 ```
-b99f0af [R5/5.4] feat(stream): cover-letter streaming helper + proof test
+acf1188 [R5/5.4] feat(api): POST /api/writing-room/compose-stream
 ```
 
 ## Acceptance Criteria — Progress
@@ -90,7 +90,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `b99f0af`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `acf1188`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (557 files, 97,274 LOC)
+## Source Tree (560 files, 97,660 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -184,6 +184,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/supabase` | 402 |
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/lib/actions` | 396 |
+| `src/components/floor-5/live-compose` | 386 |
 | `src/components/floor-5/resume-press` | 372 |
 | `src/lib/agents/coo` | 357 |
 | `src/lib/progression` | 349 |
@@ -518,6 +519,9 @@ src/components/floor-5/cmo-character/CMODialoguePanel.tsx
 src/components/floor-5/cmo-character/CMOWhiteboard.tsx
 src/components/floor-5/crud/DocumentEditor.tsx
 src/components/floor-5/crud/DocumentList.tsx
+src/components/floor-5/live-compose/LiveComposePanel.test.tsx
+src/components/floor-5/live-compose/LiveComposePanel.tsx
+src/components/floor-5/live-compose/PenGlowCursor.tsx
 src/components/floor-5/ready-to-send/ReadyToSendPanel.test.tsx
 src/components/floor-5/ready-to-send/ReadyToSendPanel.tsx
 src/components/floor-5/resume-press/ResumePress.test.tsx
@@ -929,13 +933,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 973 | 10,760 |
+| `BOOTSTRAP-PROMPT.md` | 978 | 10,870 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 501 | 11,048 |
-| **Total** | **2123** | **34,254** |
+| `CLAUDE.md` | 504 | 11,142 |
+| **Total** | **2131** | **34,458** |
 
-> ⚠️ Reading all recommended files consumes ~34,254 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,458 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
