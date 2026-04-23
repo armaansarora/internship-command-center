@@ -42,6 +42,7 @@ const TOOL_LABELS: Record<string, string> = {
   analyzeConversionRates: "Running conversion analysis...",
   captureTargetProfile: "Recording target profile...",
   runJobDiscovery: "Running Job Discovery...",
+  runNorthStarForApplication: "Running the full North Star loop...",
 };
 
 const CRO_THEME: AgentDialogueTheme = {

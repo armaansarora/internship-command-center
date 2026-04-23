@@ -10,6 +10,7 @@ import {
   upsertTargetProfile,
 } from "./target-profile";
 import { runJobDiscoveryForUser } from "@/lib/jobs/discovery";
+import { executeNorthStar } from "@/lib/ai/agents/north-star";
 
 // ---------------------------------------------------------------------------
 // Tool 1: queryApplications
@@ -313,6 +314,60 @@ export function makeRunJobDiscoveryTool(userId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Tool 7: runNorthStarForApplication
+// ---------------------------------------------------------------------------
+export function makeRunNorthStarTool(userId: string) {
+  return tool({
+    description:
+      "Run the full North Star loop for a single application — tailor the master resume, draft a cover letter, and queue a cold_email in the outreach queue pending user approval. Use this when the user says 'run the loop on X', 'work up Stripe', or when you're confident the user wants to pursue a specific discovered opportunity. Requires masterResume; ask the user to paste it if you haven't seen it this session.",
+    inputSchema: z.object({
+      applicationId: z
+        .string()
+        .describe("UUID of the application to pursue."),
+      masterResume: z
+        .string()
+        .min(80)
+        .describe(
+          "User's canonical resume text. Required — never invented."
+        ),
+      tone: z
+        .enum(["formal", "conversational", "bold"])
+        .optional()
+        .describe(
+          "Cover-letter tone. Defaults to formal. Use conversational for CRE/SMB, bold for startups."
+        ),
+      jobDescription: z
+        .string()
+        .optional()
+        .describe(
+          "Override the application's stored JD if you have a cleaner version."
+        ),
+    }),
+    execute: async (input) => {
+      const result = await executeNorthStar(userId, {
+        applicationId: input.applicationId,
+        masterResume: input.masterResume,
+        tone: input.tone,
+        jobDescription: input.jobDescription,
+      });
+      return {
+        success: result.ok,
+        applicationId: result.applicationId,
+        companyName: result.companyName,
+        role: result.role,
+        resumeDocumentId: result.resumeDocumentId,
+        coverLetterDocumentId: result.coverLetterDocumentId,
+        outreachQueueId: result.outreachQueueId,
+        steps: result.steps,
+        message: result.ok
+          ? `Loop complete for ${result.companyName}. Resume tailored, cover drafted, outreach queued — awaiting your approval.`
+          : `Loop hit a snag. See steps for detail. Any partial outputs are saved and visible in the war table.`,
+      };
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Convenience: build all tools for a given user session
 // ---------------------------------------------------------------------------
 export function buildCROTools(userId: string) {
@@ -323,5 +378,6 @@ export function buildCROTools(userId: string) {
     analyzeConversionRates: makeAnalyzeConversionRatesTool(userId),
     captureTargetProfile: makeCaptureTargetProfileTool(userId),
     runJobDiscovery: makeRunJobDiscoveryTool(userId),
+    runNorthStarForApplication: makeRunNorthStarTool(userId),
   };
 }
