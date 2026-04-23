@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 11:50 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 11:51 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,11 +19,17 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `d267b65`)
+- **Branch:** `main` (commit `b916664`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 89,773 across 489 source files
 - **Build:** Clean (zero TS errors)
 
+
+## Changes Since Last Bootstrap
+
+```
+b916664 [R7/7.4] feat(r7): tube delivery hook + quiet-hours + thunk synth
+```
 
 ## Acceptance Criteria — Progress
 
@@ -76,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `d267b65`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b916664`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -826,13 +832,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 881 | 9,505 |
+| `BOOTSTRAP-PROMPT.md` | 875 | 9,476 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 476 | 10,285 |
-| **Total** | **2006** | **32,236** |
+| **Total** | **2000** | **32,207** |
 
-> ⚠️ Reading all recommended files consumes ~32,236 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~32,207 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

@@ -49,11 +49,17 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const admin = getSupabaseAdmin();
 
   // Pull approved rows + contact email for delivery.
+  // R7.2 — `send_after <= now()` is the load-bearing predicate. Rows whose
+  // undo window is still open (send_after > now) must be invisible to this
+  // cron; /api/outreach/undo runs with the opposite predicate. Mutual
+  // exclusion is enforced by the database, not the UI.
+  const nowIso = new Date().toISOString();
   const { data: approvedRows, error: fetchErr } = await admin
     .from("outreach_queue")
     .select("id, user_id, application_id, contact_id, subject, body, type")
     .eq("status", "approved")
     .is("sent_at", null)
+    .lte("send_after", nowIso)
     .order("approved_at", { ascending: true })
     .limit(OUTREACH_BATCH_LIMIT);
 
