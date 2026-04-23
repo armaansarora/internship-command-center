@@ -128,10 +128,10 @@ function CharacterSilhouette({
         {/* Card lines */}
         <line x1="30" y1="66" x2="52" y2="66" stroke="#C9A84C" strokeWidth="1" opacity="0.6" />
         <line x1="30" y1="72" x2="48" y2="72" stroke="#D97706" strokeWidth="0.8" opacity="0.4" />
-        {/* Network nodes on desk */}
-        <circle cx="90" cy="75" r="4" fill="#4ADE80" opacity="0.7" filter="url(#cno-glow-soft)" />
-        <circle cx="110" cy="80" r="3" fill="#F59E0B" opacity="0.6" filter="url(#cno-glow-soft)" />
-        <circle cx="130" cy="70" r="2" fill="#EF4444" opacity="0.5" />
+        {/* Network nodes on desk — R8 cool-blue warmth ramp (gold → slate → blue-grey) */}
+        <circle cx="90" cy="75" r="4" fill="#C9A84C" opacity="0.7" filter="url(#cno-glow-soft)" />
+        <circle cx="110" cy="80" r="3" fill="#8892A0" opacity="0.6" filter="url(#cno-glow-soft)" />
+        <circle cx="130" cy="70" r="2" fill="#6E7E8F" opacity="0.5" />
         <line x1="90" y1="75" x2="110" y2="80" stroke="#C9A84C" strokeWidth="0.8" opacity="0.4" />
         <line x1="110" y1="80" x2="130" y2="70" stroke="#C9A84C" strokeWidth="0.8" opacity="0.3" />
         {/* Warmth bar on desk */}
@@ -213,13 +213,14 @@ function CharacterSilhouette({
         <circle cx="74" cy="136" r="2.5" fill="#FDF3E8" opacity="0.9" />
         <circle cx="86" cy="136" r="2.5" fill="#FDF3E8" opacity="0.9" />
 
-        {/* Alert indicator badge */}
+        {/* Attention-draw badge (greeting / has something to share).
+            R8: not an alert — a warm draw-the-eye. Gold, not red. */}
         {(state === "alert" || state === "greeting") && (
           <circle
             cx="98"
             cy="120"
             r="8"
-            fill="#EF4444"
+            fill="#D4A84C"
             opacity="0.9"
           />
         )}
@@ -332,15 +333,16 @@ export function CNOCharacter({
           reducedMotion={reducedMotion}
         />
 
-        {/* Cold alert badge */}
+        {/* Cold-count badge — R8 cool-blue. A count of cards that have gone
+            quiet, not an alarm. Muted slate-blue, descriptive. */}
         {hasColdAlerts && (
           <span
-            aria-label={`${coldAlertsCount} cold contacts need attention`}
+            aria-label={`${coldAlertsCount} contacts have gone quiet`}
             className="absolute top-0 right-0 flex items-center justify-center rounded-full"
             style={{
               width: "20px",
               height: "20px",
-              backgroundColor: "#EF4444",
+              backgroundColor: "#6E7E8F",
               color: "#FDF3E8",
               fontSize: "10px",
               fontFamily: "IBM Plex Mono, monospace",

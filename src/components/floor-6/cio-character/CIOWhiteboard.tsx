@@ -47,13 +47,16 @@ function getFreshnessLevel(lastResearchedAt: Date | null): FreshnessLevel {
 }
 
 function getFreshnessColor(level: FreshnessLevel): string {
+  // R8: dossiers yellow and curl with age, they don't turn red.  Fresh is
+  // still a green "active" signal, but staleness walks through aging paper
+  // colors rather than a warning ramp.
   switch (level) {
     case "fresh":
       return "#22C55E";
     case "stale":
-      return "#EAB308";
+      return "#A68E5E";
     case "old":
-      return "#EF4444";
+      return "#8C6D3F";
     case "unknown":
       return "#334155";
   }
@@ -399,7 +402,7 @@ export function CIOWhiteboard({
             fontSize: "11px",
             fontFamily: "IBM Plex Mono, monospace",
             fontWeight: 700,
-            color: coveragePercent >= 70 ? "#22C55E" : coveragePercent >= 40 ? "#EAB308" : "#EF4444",
+            color: coveragePercent >= 70 ? "#22C55E" : coveragePercent >= 40 ? "#A68E5E" : "#8892A0",
           }}
           aria-label={`Research coverage: ${coveragePercent} percent`}
         >
@@ -430,7 +433,7 @@ export function CIOWhiteboard({
         <StatBadge
           label="STALE"
           value={researchStats.staleCount}
-          valueColor={researchStats.staleCount > 0 ? "#EF4444" : "#1E3A5F"}
+          valueColor={researchStats.staleCount > 0 ? "#A68E5E" : "#1E3A5F"}
         />
       </div>
 

@@ -32,12 +32,14 @@ function getNetworkHealth(stats: RolodexLoungeStats): number {
 function TickerSegment({ stats }: { stats: RolodexLoungeStats }): JSX.Element {
   const health = getNetworkHealth(stats);
 
+  // R8 cool-blue palette for warmth counts. Network health uses gold for
+  // the top tier but steps down through slate rather than red.
   const healthColor =
     health >= 70
-      ? "#4ADE80"
+      ? "#C9A84C"
       : health >= 40
-      ? "#F59E0B"
-      : "#EF4444";
+      ? "#A68E5E"
+      : "#8892A0";
 
   return (
     <span className="inline-flex items-center gap-0" aria-hidden="true">
@@ -46,22 +48,22 @@ function TickerSegment({ stats }: { stats: RolodexLoungeStats }): JSX.Element {
       <span style={{ color: "#FDF3E8" }}>{stats.totalContacts}</span>
       <span style={{ color: "#5C3A1E", margin: "0 20px" }}>|</span>
 
-      {/* Warm */}
+      {/* Warm — gold */}
       <span style={{ color: "#C4925A" }}>WARM:&nbsp;</span>
-      <span style={{ color: "#4ADE80" }}>{stats.warmCount}</span>
+      <span style={{ color: "#C9A84C" }}>{stats.warmCount}</span>
       <span style={{ color: "#5C3A1E", margin: "0 20px" }}>|</span>
 
-      {/* Cooling */}
+      {/* Cooling — pale slate */}
       <span style={{ color: "#C4925A" }}>COOLING:&nbsp;</span>
-      <span style={{ color: "#F59E0B" }}>{stats.coolingCount}</span>
+      <span style={{ color: "#8892A0" }}>{stats.coolingCount}</span>
       <span style={{ color: "#5C3A1E", margin: "0 20px" }}>|</span>
 
-      {/* Cold warning */}
+      {/* Cold — muted blue-grey. No warning glyph. Descriptive only. */}
       {stats.coldCount > 0 ? (
         <>
           <span style={{ color: "#C4925A" }}>COLD:&nbsp;</span>
-          <span style={{ color: "#EF4444" }}>
-            {stats.coldCount}&nbsp;⚠
+          <span style={{ color: "#6E7E8F" }}>
+            {stats.coldCount}
           </span>
           <span style={{ color: "#5C3A1E", margin: "0 20px" }}>|</span>
         </>

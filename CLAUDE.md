@@ -122,8 +122,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (526 LOC)
+- `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (513 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-3/BriefingRoomClient.tsx` (511 LOC)
-- `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (510 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
 - `src/components/floor-5/crud/DocumentEditor.tsx` (500 LOC)
 - `src/components/floor-1/CSuiteClient.tsx` (488 LOC) — R3.11 — pure decision helper for the `/`-keystroke listener. Opens the
@@ -142,7 +142,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/CSuiteClient.test.tsx` (373 LOC) — Unit tests for the two pure helpers the R3.7 integration relies on:
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
 - `src/components/floor-5/ready-to-send/ReadyToSendPanel.tsx` (370 LOC) — R5.6 — ReadyToSendPanel.
-- `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
+- `src/components/floor-6/cno-character/CNOCharacter.tsx` (369 LOC)
 - `src/components/floor-5/WritingRoomClient.tsx` (353 LOC)
 - `src/components/floor-5/WritingRoomScene.tsx` (352 LOC) — WritingRoomScene — Floor 5 environment compositor.
 - `src/components/floor-7/war-table/WarTable.tsx` (352 LOC)
@@ -151,7 +151,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
 - `src/components/world/MilestoneToast.tsx` (332 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
 - `src/components/floor-6/RolodexLoungeScene.tsx` (328 LOC) — RolodexLoungeScene — Floor 6 environment compositor.
-- `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
+- `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (322 LOC)
 - `src/components/lobby/cinematic/CinematicArrival.test.tsx` (310 LOC) — R4.7 — CinematicArrival render tests.
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
@@ -191,11 +191,11 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
 - `src/components/ui/SoundToggle.tsx` (194 LOC) — SoundToggle — small fixed speaker button (bottom-right).
-- `src/components/floor-6/contact-grid/ContactCard.tsx` (190 LOC)
+- `src/components/floor-6/contact-grid/ContactCard.tsx` (192 LOC) — cool-blue warmth ramp. Informative, not punitive. Cold cards look
 - `src/components/floor-5/WritingRoomTicker.tsx` (188 LOC) — WritingRoomTicker — bottom scrolling status strip showing live document data.
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
 - `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
-- `src/components/floor-6/RolodexLoungeTicker.tsx` (183 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
+- `src/components/floor-6/RolodexLoungeTicker.tsx` (185 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (182 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-1/InjectPrompt.tsx` (181 LOC) — InjectPrompt — floating single-line input that opens above the bell when
 - `src/components/floor-1/CSuiteScene.tsx` (179 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
@@ -274,6 +274,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/penthouse/scenes/SceneRouter.tsx` (62 LOC) — Picks the active Penthouse scene based on the user's current time-of-day
 - `src/components/penthouse/scenes/morning/SkipHint.tsx` (62 LOC) — Small floating hint at the bottom of the Morning Briefing Scene telling the
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)
+- `src/components/floor-6/contact-grid/ContactCard.test.tsx` (54 LOC)
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
 - `src/components/floor-3/drill/DrillVoiceMic.test.tsx` (30 LOC)

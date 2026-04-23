@@ -93,7 +93,9 @@ function CoolingAlertRow({
   contact: ContactForAgent;
 }): JSX.Element {
   const isCold = contact.warmthLevel === "cold";
-  const color = isCold ? "#EF4444" : "#F59E0B";
+  // R8 cool-blue palette — cold is a muted blue-grey, not a warning. Cooling
+  // is a pale slate. No red anywhere on a cold card.
+  const color = isCold ? "#6E7E8F" : "#8892A0";
 
   return (
     <div
@@ -103,9 +105,9 @@ function CoolingAlertRow({
         padding: "4px 6px",
         borderRadius: "3px",
         backgroundColor: isCold
-          ? "rgba(239, 68, 68, 0.07)"
-          : "rgba(245, 158, 11, 0.06)",
-        border: `1px solid ${isCold ? "rgba(239, 68, 68, 0.2)" : "rgba(245, 158, 11, 0.18)"}`,
+          ? "rgba(110, 126, 143, 0.07)"
+          : "rgba(136, 146, 160, 0.06)",
+        border: `1px solid ${isCold ? "rgba(110, 126, 143, 0.2)" : "rgba(136, 146, 160, 0.18)"}`,
       }}
     >
       <span
@@ -249,19 +251,19 @@ export function CNOWhiteboard({
           label="WARM"
           count={stats.warm}
           total={stats.total}
-          color="#4ADE80"
+          color="#C9A84C"
         />
         <WarmthBar
           label="COOLING"
           count={stats.cooling}
           total={stats.total}
-          color="#F59E0B"
+          color="#8892A0"
         />
         <WarmthBar
           label="COLD"
           count={stats.cold}
           total={stats.total}
-          color="#EF4444"
+          color="#6E7E8F"
         />
       </div>
 

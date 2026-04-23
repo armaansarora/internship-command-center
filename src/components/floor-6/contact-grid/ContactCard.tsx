@@ -8,22 +8,24 @@ interface ContactCardProps {
   onEdit: (contact: ContactForAgent) => void;
 }
 
+// R8 — cool-blue warmth ramp. Informative, not punitive. Cold cards look
+// like an old photograph; zero red anywhere.
 const WARMTH_CONFIG = {
   warm: {
     dotClass: "warmth-dot-warm",
-    color: "#4ADE80",
+    color: "#C9A84C",
     label: "Warm",
     cardClass: "contact-card contact-card-warm",
   },
   cooling: {
     dotClass: "warmth-dot-cooling",
-    color: "#F59E0B",
+    color: "#8892A0",
     label: "Cooling",
     cardClass: "contact-card contact-card-cooling",
   },
   cold: {
     dotClass: "warmth-dot-cold",
-    color: "#EF4444",
+    color: "#6E7E8F",
     label: "Cold",
     cardClass: "contact-card contact-card-cold",
   },

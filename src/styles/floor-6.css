@@ -15,9 +15,11 @@
 
   --rl-accent-primary:    #C9A84C;
   --rl-accent-secondary:  #E8C87A;
-  --rl-accent-warm:       #4ADE80;
-  --rl-accent-cooling:    #F59E0B;
-  --rl-accent-cold:       #EF4444;
+  /* R8 cool-blue warmth ramp — informative, not punitive. Zero red on
+     cold/cooling. A cold card reads like an old photograph, not an alert. */
+  --rl-accent-warm:       #C9A84C;
+  --rl-accent-cooling:    #8892A0;
+  --rl-accent-cold:       #6E7E8F;
   --rl-accent-amber:      #D97706;
   --rl-accent-gold:       #F59E0B;
 
@@ -173,20 +175,22 @@
   75%       { transform: translateX(5px); }
 }
 
-/* ── Warmth indicator dots ─────────────────────────────────────────────── */
+/* ── Warmth indicator dots — R8 cool-blue palette (zero red) ───────────── */
+/* Warm/cooling/cold are descriptive, never punitive. Cold is a muted
+   blue-grey, not a warning. */
 .warmth-dot-warm {
-  background-color: #4ADE80;
-  box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+  background-color: #C9A84C;
+  box-shadow: 0 0 6px rgba(201, 168, 76, 0.5);
 }
 
 .warmth-dot-cooling {
-  background-color: #F59E0B;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+  background-color: #8892A0;
+  box-shadow: 0 0 6px rgba(136, 146, 160, 0.45);
 }
 
 .warmth-dot-cold {
-  background-color: #EF4444;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+  background-color: #6E7E8F;
+  box-shadow: 0 0 6px rgba(110, 126, 143, 0.4);
 }
 
 /* ── Contact card ───────────────────────────────────────────────────────── */
@@ -211,15 +215,15 @@
 }
 
 .contact-card-warm {
-  border-color: rgba(74, 222, 128, 0.25);
+  border-color: rgba(201, 168, 76, 0.3);
 }
 
 .contact-card-cooling {
-  border-color: rgba(245, 158, 11, 0.25);
+  border-color: rgba(136, 146, 160, 0.3);
 }
 
 .contact-card-cold {
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(110, 126, 143, 0.28);
   opacity: 0.85;
 }
 

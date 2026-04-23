@@ -166,7 +166,7 @@ export function ContactGrid({
     <div className="flex flex-col gap-6">
       {warm.length > 0 && (
         <section aria-label="Warm contacts">
-          <SectionHeader title="Warm" count={warm.length} color="#4ADE80" />
+          <SectionHeader title="Warm" count={warm.length} color="#C9A84C" />
           <div style={GRID_STYLE}>
             {warm.map((c) => (
               <ContactCard key={c.id} contact={c} onEdit={onEditContact} />
@@ -177,7 +177,7 @@ export function ContactGrid({
 
       {cooling.length > 0 && (
         <section aria-label="Cooling contacts">
-          <SectionHeader title="Cooling" count={cooling.length} color="#F59E0B" />
+          <SectionHeader title="Cooling" count={cooling.length} color="#8892A0" />
           <div style={GRID_STYLE}>
             {cooling.map((c) => (
               <ContactCard key={c.id} contact={c} onEdit={onEditContact} />
@@ -188,7 +188,7 @@ export function ContactGrid({
 
       {cold.length > 0 && (
         <section aria-label="Cold contacts">
-          <SectionHeader title="Cold" count={cold.length} color="#EF4444" />
+          <SectionHeader title="Cold" count={cold.length} color="#6E7E8F" />
           <div style={GRID_STYLE}>
             {cold.map((c) => (
               <ContactCard key={c.id} contact={c} onEdit={onEditContact} />

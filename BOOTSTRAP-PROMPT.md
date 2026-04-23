@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:13 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:17 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `8244c3b`)
+- **Branch:** `main` (commit `5b9a0ab`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 94,305 across 525 source files
+- **Total LOC:** 94,374 across 526 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-8244c3b [R8/8.2] feat(r8): warmth pure fn + cool-blue palette (P2 — zero red on cold)
+5b9a0ab [R8/8.3] feat(r8): rolodex centerpiece (CSS 3D + GSAP + virtualization) — P1 invariant
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `8244c3b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `5b9a0ab`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (525 files, 94,305 LOC)
+## Source Tree (526 files, 94,374 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3510 |
 | `src/components/floor-1` | 2660 |
-| `src/styles` | 2572 |
+| `src/styles` | 2576 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/components/floor-7/war-table` | 1760 |
@@ -117,7 +117,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/situation` | 1164 |
 | `src/app/__tests__` | 1148 |
 | `src/components/floor-3` | 1141 |
-| `src/components/floor-6/cio-character` | 1119 |
+| `src/components/floor-6/cio-character` | 1122 |
 | `src/app/(authenticated)/settings` | 1112 |
 | `src/components/floor-7/crud` | 1111 |
 | `src/lib/agents/cro` | 1083 |
@@ -127,7 +127,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-3/cpo-character` | 1021 |
 | `src/lib/jobs` | 991 |
 | `src/components/floor-4/coo-character` | 989 |
-| `src/components/floor-6` | 986 |
+| `src/components/floor-6` | 988 |
 | `src/db` | 975 |
 | `src/components/floor-6/crud` | 950 |
 | `src/components/floor-5/crud` | 949 |
@@ -142,7 +142,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cio` | 817 |
 | `src/lib/penthouse` | 796 |
 | `src/app/api/cron/draft-follow-ups` | 792 |
-| `src/components/floor-6/cno-character` | 781 |
+| `src/components/floor-6/cno-character` | 785 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
@@ -163,6 +163,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/lobby/onboarding` | 500 |
 | `src/components/ui` | 488 |
 | `src/lib/agents/cno` | 471 |
+| `src/components/floor-6/contact-grid` | 448 |
 | `src/components/penthouse/scenes/morning` | 448 |
 | `src/app/api/cron/purge-sweeper` | 439 |
 | `src/lib/account` | 432 |
@@ -173,7 +174,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/auth` | 411 |
 | `src/lib/supabase` | 402 |
 | `src/components/penthouse/quick-actions` | 398 |
-| `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/actions` | 392 |
 | `src/components/floor-5/resume-press` | 372 |
 | `src/lib/agents/coo` | 357 |
@@ -499,6 +499,7 @@ src/components/floor-6/cio-character/CIOWhiteboard.tsx
 src/components/floor-6/cno-character/CNOCharacter.tsx
 src/components/floor-6/cno-character/CNODialoguePanel.tsx
 src/components/floor-6/cno-character/CNOWhiteboard.tsx
+src/components/floor-6/contact-grid/ContactCard.test.tsx
 src/components/floor-6/contact-grid/ContactCard.tsx
 src/components/floor-6/contact-grid/ContactGrid.tsx
 src/components/floor-6/crud/ContactModal.tsx
@@ -877,13 +878,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 921 | 10,053 |
+| `BOOTSTRAP-PROMPT.md` | 926 | 10,111 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 494 | 10,817 |
-| **Total** | **2064** | **33,316** |
+| `CLAUDE.md` | 495 | 10,856 |
+| **Total** | **2070** | **33,413** |
 
-> ⚠️ Reading all recommended files consumes ~33,316 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,413 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
