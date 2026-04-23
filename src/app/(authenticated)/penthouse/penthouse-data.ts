@@ -1,4 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  decodeBriefing,
+} from "@/lib/penthouse/briefing-storage";
+import { synthesizeFallbackBriefing } from "@/lib/penthouse/briefing-fallback";
+import type { MorningBriefing } from "@/lib/ai/agents/morning-briefing";
+import {
+  pipelineWeatherDelta,
+  weatherLabel,
+} from "@/lib/penthouse/pipeline-weather";
+import { timeOfDayFor, type TimeOfDay } from "@/lib/penthouse/time-of-day";
 
 /** Dashboard stats for the Penthouse */
 export interface PenthouseStats {
@@ -146,6 +156,200 @@ export async function fetchPenthouseData(userId: string): Promise<{
   } catch {
     // If Supabase tables don't exist yet or any error, return defaults
     return { stats: defaultStats, pipeline: defaultPipeline, activity: [] };
+  }
+}
+
+/**
+ * Scene payload consumed by the new R2 Penthouse client — bundles the
+ * existing dashboard data with morning-briefing, overnight signal, pipeline
+ * weather, and the user's current time-of-day window.
+ */
+export interface PenthouseScene {
+  /** Existing dashboard state — used inside RestPanel. */
+  stats: PenthouseStats;
+  pipeline: PipelineStageData[];
+  activity: ActivityItemData[];
+
+  /** Pre-computed structured briefing (nullable on first-time users). */
+  briefing: MorningBriefing | null;
+
+  /** Overnight deltas in the last 24h (for scene copy + weather). */
+  overnightDelta: {
+    newApps: number;
+    responses: number;
+    rejections: number;
+    importantEmailCount: number;
+  };
+
+  /** Skyline weather tint + human label. */
+  weather: { delta: number; label: "dim" | "cool" | "gold" };
+
+  /** Time window for the SceneRouter — SSR-computed in the user's timezone. */
+  timeOfDay: TimeOfDay;
+
+  /** User signals for the scene. */
+  user: {
+    userId: string;
+    displayName: string;
+    email: string;
+    timezone: string | null;
+  };
+
+  /** YYYY-MM-DD in the user's timezone — used by useIdleDetail. */
+  dateIso: string;
+
+  /** True if the user had any rejections in the last 24h (idle-detail override). */
+  recentRejection: boolean;
+
+  /** True when today's briefing was already cron-generated. */
+  briefingGenerated: boolean;
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Gather everything the Penthouse scene needs in one round-trip-friendly
+ * function. Returns safe defaults on any failure — the scene must always
+ * render something, never an error page.
+ */
+export async function fetchPenthouseScene(user: {
+  id: string;
+  displayName: string;
+  email: string;
+}): Promise<PenthouseScene> {
+  const supabase = await createClient();
+
+  // 1. Existing dashboard payload (stats, pipeline, activity).
+  const existing = await fetchPenthouseData(user.id);
+
+  // 2. Resolve user timezone (from user_profiles).
+  let timezone: string | null = null;
+  try {
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("timezone")
+      .eq("id", user.id)
+      .maybeSingle();
+    timezone = (profile?.timezone as string | null) ?? null;
+  } catch {
+    timezone = null;
+  }
+
+  const now = new Date();
+  const dateIso = formatDateIsoInTimezone(now, timezone);
+  const timeOfDay = timeOfDayFor(now, timezone ?? undefined);
+
+  // 3. Pull today's briefing from notifications (newest-first, created within
+  //    the last 24h). Decode via briefing-storage.
+  let briefing: MorningBriefing | null = null;
+  let briefingGenerated = false;
+  try {
+    const dayStart = new Date(Date.now() - DAY_MS).toISOString();
+    const { data: rows } = await supabase
+      .from("notifications")
+      .select("body, created_at")
+      .eq("user_id", user.id)
+      .eq("type", "daily_briefing")
+      .gte("created_at", dayStart)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    const body = (rows?.[0]?.body as string | null) ?? null;
+    briefing = decodeBriefing(body);
+    briefingGenerated = briefing !== null;
+  } catch {
+    briefing = null;
+  }
+
+  // 4. Overnight signal (last 24h) — apps + emails.
+  const windowStart = new Date(Date.now() - DAY_MS).toISOString();
+  const [recentAppsResult, recentEmailsResult] = await Promise.all([
+    supabase
+      .from("applications")
+      .select("id, status, updated_at")
+      .eq("user_id", user.id)
+      .gte("updated_at", windowStart),
+    supabase
+      .from("emails")
+      .select("id, classification")
+      .eq("user_id", user.id)
+      .gte("received_at", windowStart),
+  ]);
+  const recentApps = recentAppsResult.data ?? [];
+  const recentEmails = recentEmailsResult.data ?? [];
+
+  const newApps = recentApps.filter((a) => a.status === "discovered").length;
+  const rejections = recentApps.filter((a) => a.status === "rejected").length;
+  const responses = recentApps.filter(
+    (a) => a.status !== "discovered" && a.status !== "rejected" && a.status !== "withdrawn"
+  ).length;
+  const importantEmailCount = recentEmails.filter(
+    (e) => e.classification === "interview_invite" || e.classification === "offer"
+  ).length;
+  const recentRejection = rejections > 0;
+
+  // 5. Synthesize a client-side fallback briefing if cron hasn't run yet.
+  //    The fallback keeps the scene alive; cron will overwrite on its next run.
+  if (!briefing) {
+    briefing = synthesizeFallbackBriefing({
+      displayName: user.displayName,
+      pipeline: {
+        total: existing.stats.inPipeline,
+        applied: 0,
+        screening: 0,
+        interviews: existing.stats.interviews,
+        offers: 0,
+        staleCount: 0,
+        appliedToScreeningRate: 0,
+      },
+      overnight: {
+        newApps,
+        statusChanges: responses,
+        importantEmails: [],
+        rejections,
+      },
+    });
+  }
+
+  // 6. Pipeline weather.
+  const weatherDelta = pipelineWeatherDelta({
+    newApps,
+    responses,
+    rejections,
+    staleCount: 0, // staleCount isn't denormalized here; fallback to 0
+    importantEmailCount,
+  });
+
+  return {
+    ...existing,
+    briefing,
+    overnightDelta: { newApps, responses, rejections, importantEmailCount },
+    weather: { delta: weatherDelta, label: weatherLabel(weatherDelta) },
+    timeOfDay,
+    user: {
+      userId: user.id,
+      displayName: user.displayName,
+      email: user.email,
+      timezone,
+    },
+    dateIso,
+    recentRejection,
+    briefingGenerated,
+  };
+}
+
+/** Format a Date as YYYY-MM-DD in an IANA timezone. Falls back to UTC. */
+function formatDateIsoInTimezone(d: Date, tz: string | null): string {
+  if (!tz) return d.toISOString().slice(0, 10);
+  try {
+    const fmt = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: tz,
+    });
+    return fmt.format(d); // en-CA → YYYY-MM-DD natively
+  } catch {
+    return d.toISOString().slice(0, 10);
   }
 }
 

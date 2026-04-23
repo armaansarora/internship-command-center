@@ -124,7 +124,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (510 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
 - `src/components/floor-5/crud/DocumentEditor.tsx` (500 LOC)
-- `src/app/(authenticated)/penthouse/penthouse-client.tsx` (479 LOC)
 - `src/components/floor-3/cpo-character/CPOCharacter.tsx` (477 LOC)
 - `src/components/floor-6/RolodexLoungeClient.tsx` (475 LOC)
 - `src/components/floor-5/crud/DocumentList.tsx` (449 LOC)
@@ -187,6 +186,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (173 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
+- `src/app/(authenticated)/penthouse/penthouse-client.tsx` (171 LOC) — Penthouse client — the new R2 scene-first composition.
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.

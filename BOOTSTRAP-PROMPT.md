@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 11:19 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Wednesday, April 22, 2026 at 11:22 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `075dee8`)
+- **Branch:** `main` (commit `d3e524a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 65,186 across 344 source files
+- **Total LOC:** 65,076 across 344 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-075dee8 [R2/2.8] feat(penthouse): quick actions dispatch + pneumatic tube
+d3e524a [R2/2.9] feat(penthouse): idle detail (photo-frame/pen/lamp/long-pause)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `075dee8`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `d3e524a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (344 files, 65,186 LOC)
+## Source Tree (344 files, 65,076 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -136,10 +136,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
-| `src/app/(authenticated)/penthouse` | 713 |
 | `src/components/agents/dialogue` | 709 |
 | `src/lib/sound` | 641 |
 | `src/lib/agents/cio` | 615 |
+| `src/app/(authenticated)/penthouse` | 603 |
 | `src/lib/ai` | 599 |
 | `src/hooks` | 595 |
 | `src/components/floor-2` | 576 |
@@ -638,13 +638,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 683 | 7,021 |
+| `BOOTSTRAP-PROMPT.md` | 687 | 7,065 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 440 | 9,215 |
-| **Total** | **1772** | **28,682** |
+| `CLAUDE.md` | 440 | 9,232 |
+| **Total** | **1776** | **28,743** |
 
-> ⚠️ Reading all recommended files consumes ~28,682 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~28,743 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
