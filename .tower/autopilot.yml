@@ -1,16 +1,23 @@
-paused: true
-scope: R4-only
-started: 2026-04-23T07:14:00.000Z
-started_by: sess-9226e5
-ended: 2026-04-23T06:00:00.000Z
-ended_reason: R4 scope complete — 12/12 tasks shipped, acceptance met, all 4 verification gates green
+paused: false
+scope: R5-only
+started: 2026-04-23T07:02:00.000Z
+started_by: sess-af795e
+ended: null
+ended_reason: null
 max_blockers: 3
-previous_phase: R3
-previous_outcome: "R3 complete — 12/12 tasks. 524 tests (158 new since R2). tsc + build + lint all green at/under baseline. Real Promise.allSettled fan-out in dispatchBatch, agent_dispatches migration with depends_on uuid[] (column shipped, usage deferred), animated DispatchGraph via SMIL, unprompted CEO cron (6h cadence, 3 threshold fns), CIO→CRO shared_knowledge bridge proven by captured-prompt assertion, Stripe + auth untouched. CEO voice DEFERRED (twice now — R2 + R3)."
-next_phase: R4
-next_brief: docs/NEXT-ROADMAP.md §8 R4 — The Lobby (L)
+previous_phase: R4
+previous_outcome: "R4 complete — 12/12 tasks (1 open blocker B1 for LinkedIn env vars, correctly filed not stubbed). 622 tests (98 new since R3). tsc + build green. Lint 15e/7w (+1 warning vs R3). Otis Concierge shipped as genuinely new character (burgundy #6B2A2E, test-asserted no-gold). Bootstrap Job Discovery calls real runJobDiscoveryForUser — no stubs. Three-layer atomic one-time-per-account guard. Auth + Stripe untouched (returning-user fast lane via proxy.ts redirect). Cinematic arrival CSS+GSAP over ProceduralSkyline, not R3F. CEO voice DEFERRED (3× now)."
+next_phase: R5
+next_brief: docs/NEXT-ROADMAP.md §9 R5 — The Writing Room (Floor 5)
+open_blockers_carrying_forward:
+  - B1 (LinkedIn OAuth env vars) — do not unblock without credentials
 verification_before_acceptance:
   - npm test
   - npx tsc --noEmit
   - npm run build
   - npm run lint
+partner_constraints:
+  - User approval gate MUST fire before any application is sent; no single-click generate-and-send
+  - Three tone variants demonstrably different on same JD — assert output divergence in proof (NOT different temperatures)
+  - Base resume uploads go to PRIVATE Supabase Storage with signed URLs only; blocker if bucket unprovisioned, never public URLs
+  - B1 (LinkedIn) still open — if R5 task wants LinkedIn data, it waits, not stubs

@@ -1,6 +1,6 @@
 phase: R5
 name: The Writing Room (Floor 5)
-status: not_started
+status: in_progress
 intent: "A quiet floor. A single desk lamp. Paper drafts stacked. A typewriter
   on the side. A press in the corner. When the user drops a job description, CMO
   picks up a pen — you watch a cover letter compose itself in real time, as if
@@ -8,9 +8,12 @@ intent: "A quiet floor. A single desk lamp. Paper drafts stacked. A typewriter
   publication-quality preview. For resumes: a mechanical press stamps a new
   version out of the base resume, sections glowing as CMO rewrites bullets to
   match the JD."
-started: null
+started: 2026-04-23T07:02:00.000Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-23T07:10:25.292Z
+  expires: 2026-04-23T09:10:25.287Z
 acceptance:
   criteria:
     - "User can generate a tailored cover letter and resume for one application
@@ -19,7 +22,63 @@ acceptance:
       as publication-quality."
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R5.1:
+    title: base_resumes table + resumes storage bucket (migration 0014)
+    status: in_progress
+    started: 2026-04-23T07:10:25.292Z
+    completed: null
+  R5.2:
+    title: Base resume upload API + PDF parse + ReDoS guard
+    status: not_started
+    started: null
+    completed: null
+  R5.3:
+    title: Three-tone parallel cover-letter generation (divergence-proven)
+    status: not_started
+    started: null
+    completed: null
+  R5.4:
+    title: Live-compose streaming + pen-glow ink
+    status: not_started
+    started: null
+    completed: null
+  R5.5:
+    title: Resume tailoring reads active base_resumes by default
+    status: not_started
+    started: null
+    completed: null
+  R5.6:
+    title: Approval gate UI + outreach_queue cover_letter_send + cron extension
+    status: not_started
+    started: null
+    completed: null
+  R5.7:
+    title: "@react-pdf/renderer — cover letter + resume PDF export"
+    status: not_started
+    started: null
+    completed: null
+  R5.8:
+    title: Resume Press mechanical SVG + GSAP actuation
+    status: not_started
+    started: null
+    completed: null
+  R5.9:
+    title: Siken wall sharpening inscription
+    status: not_started
+    started: null
+    completed: null
+  R5.10:
+    title: R5 Proof — end-to-end upload → 3 tones → approval → PDF → send
+    status: not_started
+    started: null
+    completed: null
 blockers: []
 decisions: []
-history: []
+history:
+  - at: 2026-04-23T07:02:00.000Z
+    event: phase_started
+    session: sess-af795e
+    note: autopilot kickoff — scope R5-only, partner constraints in
+      .tower/autopilot.yml
+  - 2026-04-23T07:10:25.292Z: task_started R5.1

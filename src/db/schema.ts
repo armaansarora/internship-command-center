@@ -574,6 +574,34 @@ export const stripeWebhookEvents = pgTable("stripe_webhook_events", {
 ]);
 
 // ===========================================================================
+// 17. BASE RESUMES (R5.1 — Writing Room)
+// ===========================================================================
+// User-uploaded PDF base resumes. The binary lives in Supabase Storage
+// (`resumes` bucket, private, service-role only). `parsed_text` is the
+// plain-text cache that CMO's tailoring tool reads from — avoids
+// re-downloading + re-parsing the PDF on every generation. `is_active=true`
+// marks the master resume the user currently considers canonical; flipping
+// it (via setActiveBaseResume) flips all others inactive.
+//
+// Storage path convention: `u/<userId>/base-<uuid>.pdf`. The bucket is
+// created + RLS'd via migration 0014.
+// ===========================================================================
+export const baseResumes = pgTable("base_resumes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  storagePath: text("storage_path").notNull(),
+  originalFilename: text("original_filename").notNull(),
+  fileSizeBytes: integer("file_size_bytes").notNull(),
+  parsedText: text("parsed_text").notNull(),
+  pageCount: integer("page_count").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  ...timestamps,
+}, (table) => [
+  userIsolation("base_resumes"),
+  index("idx_base_resumes_user_active").on(table.userId, table.isActive),
+]);
+
+// ===========================================================================
 // TYPE EXPORTS
 // ===========================================================================
 export type UserProfile = typeof userProfiles.$inferSelect;
@@ -612,3 +640,5 @@ export type ProgressionMilestone = typeof progressionMilestones.$inferSelect;
 export type NewProgressionMilestone = typeof progressionMilestones.$inferInsert;
 export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect;
 export type NewStripeWebhookEvent = typeof stripeWebhookEvents.$inferInsert;
+export type BaseResume = typeof baseResumes.$inferSelect;
+export type NewBaseResume = typeof baseResumes.$inferInsert;
