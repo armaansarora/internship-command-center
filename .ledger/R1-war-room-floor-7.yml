@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T01:58:06.021Z
-  expires: 2026-04-23T03:58:06.017Z
+  acquired: 2026-04-23T02:03:54.432Z
+  expires: 2026-04-23T04:03:54.428Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -43,13 +43,16 @@ tasks:
       company-tier weight from docs/CHAIN-OF-COMMAND.md.
   R1.3:
     title: Job Discovery worker — Vercel Cron + on-demand CRO tool + deduper
-    status: in_progress
+    status: complete
     started: 2026-04-23T01:58:06.021Z
+    completed: 2026-04-23T02:03:12.082Z
+    commit: 5fdc7ee
     notes: Every 4h. Dedupe via cosine > 0.85 against existing job_embeddings.
       Creates applications at status='discovered' with matchScore column.
   R1.4:
     title: CROWhiteboard — live view from agent_memory (targets + findings + pattern)
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T02:03:54.432Z
     notes: Replace static stats. Read via getMemoriesForContext(). Server-render
       with revalidate tag so job-discovery run refreshes display.
   R1.5:
@@ -121,3 +124,5 @@ history:
   - 2026-04-23T01:52:49.900Z: task_started R1.2
   - 2026-04-23T01:57:39.819Z: task_completed R1.2
   - 2026-04-23T01:58:06.021Z: task_started R1.3
+  - 2026-04-23T02:03:12.082Z: task_completed R1.3
+  - 2026-04-23T02:03:54.432Z: task_started R1.4

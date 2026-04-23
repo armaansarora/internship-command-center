@@ -10,7 +10,12 @@ import { WarTable } from "./war-table/WarTable";
 import { ApplicationSearch } from "./crud/ApplicationSearch";
 import { CROCharacter } from "./cro-character/CROCharacter";
 import { CRODialoguePanel } from "./cro-character/CRODialoguePanel";
-import { CROWhiteboard } from "./cro-character/CROWhiteboard";
+import {
+  CROWhiteboard,
+  type WhiteboardFinding,
+  type WhiteboardMemory,
+} from "./cro-character/CROWhiteboard";
+import type { TargetProfile } from "@/lib/agents/cro/target-profile";
 
 // 721 LOC modal — code-split so the initial route bundle doesn't carry it.
 const ApplicationModal = dynamic(
@@ -24,6 +29,11 @@ const ApplicationModal = dynamic(
 interface WarRoomClientProps {
   applications: Application[];
   stats: PipelineStats;
+  whiteboard?: {
+    targetProfile: TargetProfile | null;
+    topDiscovered: WhiteboardFinding[];
+    latestMemory: WhiteboardMemory | null;
+  };
   onMoveApplication: (
     id: string,
     newStatus: string,
@@ -40,6 +50,7 @@ interface WarRoomClientProps {
 export function WarRoomClient({
   applications,
   stats,
+  whiteboard,
   onMoveApplication,
   onDeleteApplication,
   onCreateApplication,
@@ -148,7 +159,12 @@ export function WarRoomClient({
 
       {/* CRO whiteboard — right side of character area */}
       <div className="flex-1 min-w-0 max-w-sm">
-        <CROWhiteboard stats={stats} />
+        <CROWhiteboard
+          stats={stats}
+          targetProfile={whiteboard?.targetProfile ?? null}
+          topDiscovered={whiteboard?.topDiscovered ?? []}
+          latestMemory={whiteboard?.latestMemory ?? null}
+        />
       </div>
     </div>
   );

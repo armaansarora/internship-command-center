@@ -162,6 +162,58 @@ export async function insertDiscoveredApplication(
   };
 }
 
+export interface TopDiscoveredRow {
+  id: string;
+  role: string;
+  companyName: string;
+  location: string | null;
+  matchScore: number;
+}
+
+/**
+ * Top N highest-scoring `discovered`-status applications for the whiteboard.
+ */
+export async function getTopDiscoveredApplications(
+  userId: string,
+  limit: number = 3
+): Promise<TopDiscoveredRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("applications")
+    .select("id, role, company_name, location, match_score")
+    .eq("user_id", userId)
+    .eq("status", "discovered")
+    .not("match_score", "is", null)
+    .order("match_score", { ascending: false, nullsFirst: false })
+    .limit(limit);
+  if (error) {
+    log.warn("job_discovery.top_discovered_failed", {
+      userId,
+      error: error.message,
+    });
+    return [];
+  }
+  return (data ?? [])
+    .map((row) => {
+      const scoreRaw = row.match_score as string | number | null;
+      const scoreNum =
+        typeof scoreRaw === "number"
+          ? scoreRaw
+          : typeof scoreRaw === "string"
+            ? parseFloat(scoreRaw)
+            : NaN;
+      if (!Number.isFinite(scoreNum)) return null;
+      return {
+        id: row.id as string,
+        role: (row.role as string) ?? "",
+        companyName: (row.company_name as string) ?? "",
+        location: (row.location as string | null) ?? null,
+        matchScore: scoreNum,
+      };
+    })
+    .filter((x): x is TopDiscoveredRow => x !== null);
+}
+
 /**
  * Return user ids that have a CRO target-profile row in agent_memory.
  * Used by the cron worker to know whose discovery runs to trigger.

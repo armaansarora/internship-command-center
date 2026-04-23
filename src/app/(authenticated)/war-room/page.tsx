@@ -13,6 +13,9 @@ import {
   updateApplicationAction,
 } from "@/lib/actions/applications";
 import type { Application } from "@/db/schema";
+import { getTargetProfile } from "@/lib/agents/cro/target-profile";
+import { getTopDiscoveredApplications } from "@/lib/db/queries/job-discovery-rest";
+import { getLatestWhiteboardMemory } from "@/lib/db/queries/agent-memory-rest";
 
 export const metadata: Metadata = { title: "The War Room | The Tower" };
 
@@ -104,8 +107,14 @@ async function WarRoomData({
 }): Promise<JSX.Element> {
   const supabase = await createClient();
 
-  // Fan out — applications grid + pipeline stats can run in parallel.
-  const [appsResult, stats] = await Promise.all([
+  // Fan out — applications grid + pipeline stats + whiteboard data in parallel.
+  const [
+    appsResult,
+    stats,
+    storedProfile,
+    topDiscovered,
+    latestMemory,
+  ] = await Promise.all([
     supabase
       .from("applications")
       .select("*")
@@ -113,6 +122,9 @@ async function WarRoomData({
       .order("position", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false }),
     getPipelineStatsRest(userId),
+    getTargetProfile(userId),
+    getTopDiscoveredApplications(userId, 3),
+    getLatestWhiteboardMemory(userId, "cro"),
   ]);
 
   if (appsResult.error) {
@@ -148,6 +160,16 @@ async function WarRoomData({
     <WarRoomClient
       applications={mappedApplications}
       stats={stats}
+      whiteboard={{
+        targetProfile: storedProfile?.profile ?? null,
+        topDiscovered: topDiscovered.map((t) => ({
+          role: t.role,
+          companyName: t.companyName,
+          matchScore: t.matchScore,
+          location: t.location,
+        })),
+        latestMemory,
+      }}
       onMoveApplication={moveApplication}
       onDeleteApplication={deleteApplication}
       onCreateApplication={createApplication}

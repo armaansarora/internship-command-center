@@ -134,14 +134,15 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/Elevator.tsx` (429 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
+- `src/components/floor-7/cro-character/CROWhiteboard.tsx` (392 LOC)
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
 - `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
+- `src/components/floor-7/WarRoomClient.tsx` (357 LOC)
 - `src/components/floor-5/WritingRoomClient.tsx` (353 LOC)
 - `src/components/floor-5/WritingRoomScene.tsx` (352 LOC) — WritingRoomScene — Floor 5 environment compositor.
 - `src/components/floor-7/war-table/WarTable.tsx` (347 LOC)
 - `src/components/floor-7/cro-character/CROCharacter.tsx` (344 LOC)
-- `src/components/floor-7/WarRoomClient.tsx` (341 LOC)
 - `src/components/floor-7/crud/ApplicationSearch.tsx` (334 LOC)
 - `src/components/world/MilestoneToast.tsx` (332 LOC) — MilestoneToast — gold notification that appears when a milestone is unlocked.
 - `src/components/floor-1/RingTheBell.tsx` (328 LOC) — The CEO orchestrator dispatch tool name that drives this card
@@ -149,7 +150,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/cno-character/CNOWhiteboard.tsx` (320 LOC)
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
-- `src/components/floor-7/cro-character/CROWhiteboard.tsx` (297 LOC)
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/CSuiteScene.tsx` (248 LOC) — CSuiteScene — Floor 1 C-Suite boardroom environment.
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.

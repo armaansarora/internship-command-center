@@ -242,6 +242,24 @@ export async function getAllAgentMemories(
 }
 
 /**
+ * Whiteboard-friendly memory — excludes the target_profile marker row and
+ * returns the single freshest non-profile note (pattern, feedback, or fact).
+ * Returns null when no suitable memory exists.
+ */
+export async function getLatestWhiteboardMemory(
+  userId: string,
+  agent: string = "cro"
+): Promise<{ content: string; category: string } | null> {
+  const memories = await getAgentMemories(userId, agent, 15);
+  for (const m of memories) {
+    if (!m.content) continue;
+    if (m.content.startsWith("[target_profile_v1]")) continue;
+    return { content: m.content, category: m.category ?? "fact" };
+  }
+  return null;
+}
+
+/**
  * Get memory count per agent (for dashboard display).
  */
 export async function getMemoryCountByAgent(
