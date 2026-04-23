@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:47 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:53 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `2695e9d`)
+- **Branch:** `main` (commit `3440c18`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 83,358 across 454 source files
+- **Total LOC:** 84,146 across 462 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-2695e9d [R6/6.7] briefing: AI SDK drill-questions + score-answer + complete-drill + debriefs-rest
+3440c18 [R6/6.5] drill: LiveSTARBoard reactive 4-column whiteboard
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `2695e9d`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3440c18`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (454 files, 83,358 LOC)
+## Source Tree (462 files, 84,146 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -141,6 +141,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
+| `src/components/floor-3/binder` | 674 |
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
 | `src/app/(authenticated)/penthouse` | 627 |
@@ -219,6 +220,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/rolodex-lounge` | 132 |
 | `src/components/transitions` | 132 |
 | `src/app/api/writing-room/approve` | 129 |
+| `src/app/api/briefing/binder/[id]` | 114 |
 | `src/app/api/documents/[id]/pdf` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
@@ -291,6 +293,8 @@ src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
 src/app/api/briefing/audio-upload/route.test.ts
 src/app/api/briefing/audio-upload/route.ts
+src/app/api/briefing/binder/[id]/route.test.ts
+src/app/api/briefing/binder/[id]/route.ts
 src/app/api/briefing/complete-drill/route.test.ts
 src/app/api/briefing/complete-drill/route.ts
 src/app/api/briefing/score-answer/route.test.ts
@@ -395,6 +399,12 @@ src/components/floor-2/cfo-character/CFOWhiteboard.tsx
 src/components/floor-3/BriefingRoomClient.tsx
 src/components/floor-3/BriefingRoomScene.tsx
 src/components/floor-3/BriefingRoomTicker.tsx
+src/components/floor-3/binder/BinderOpen.tsx
+src/components/floor-3/binder/BinderSpine.tsx
+src/components/floor-3/binder/DebriefBinderShelf.test.tsx
+src/components/floor-3/binder/DebriefBinderShelf.tsx
+src/components/floor-3/binder/shelf-aging.test.ts
+src/components/floor-3/binder/shelf-aging.ts
 src/components/floor-3/cpo-character/CPOCharacter.tsx
 src/components/floor-3/cpo-character/CPODialoguePanel.tsx
 src/components/floor-3/cpo-character/CPOWhiteboard.tsx
@@ -789,13 +799,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 836 | 8,950 |
+| `BOOTSTRAP-PROMPT.md` | 838 | 8,982 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 463 | 9,963 |
-| **Total** | **1948** | **31,359** |
+| `CLAUDE.md` | 467 | 10,076 |
+| **Total** | **1954** | **31,504** |
 
-> ⚠️ Reading all recommended files consumes ~31,359 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,504 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
