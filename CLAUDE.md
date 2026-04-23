@@ -135,7 +135,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (392 LOC)
+- `src/components/floor-1/CSuiteClient.tsx` (386 LOC) — Watch the CEO chat's UIMessage stream for `tool-dispatchTo<X>` parts and
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
+- `src/components/floor-1/CSuiteClient.test.tsx` (373 LOC) — Unit tests for the two pure helpers the R3.7 integration relies on:
 - `src/components/floor-5/cmo-character/CMOWhiteboard.tsx` (371 LOC)
 - `src/components/floor-6/cno-character/CNOCharacter.tsx` (367 LOC)
 - `src/components/floor-5/WritingRoomClient.tsx` (353 LOC)
@@ -153,9 +155,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
-- `src/components/floor-1/CSuiteScene.tsx` (248 LOC) — CSuiteScene — Floor 1 C-Suite boardroom environment.
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
-- `src/components/floor-1/CSuiteClient.tsx` (241 LOC) — Watch the CEO chat's UIMessage stream for `tool-dispatchTo<X>` parts and
 - `src/components/world/ErrorBoundary.tsx` (241 LOC) — ErrorBoundary — in-world error display using "the building's lights flicker" metaphor.
 - `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
 - `src/components/world/PersistentWorld.tsx` (236 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
@@ -190,6 +190,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/app/(authenticated)/penthouse/penthouse-client.tsx` (171 LOC) — Penthouse client — the new R2 scene-first composition.
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
+- `src/components/floor-1/CSuiteScene.tsx` (162 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)

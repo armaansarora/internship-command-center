@@ -10,6 +10,13 @@ import { CEOCharacter } from "./ceo-character/CEOCharacter";
 import { CEODialoguePanel } from "./ceo-character/CEODialoguePanel";
 import { CEOWhiteboard } from "./ceo-character/CEOWhiteboard";
 import { RingTheBell } from "./RingTheBell";
+import { DispatchGraph, DISPATCH_GRAPH_AGENTS } from "./DispatchGraph";
+import type {
+  DispatchEntry,
+  DispatchNodeStatus,
+} from "./DispatchGraph";
+import { useDispatchProgress } from "@/hooks/useDispatchProgress";
+import type { DispatchProgressMap } from "@/hooks/useDispatchProgress";
 
 interface CSuiteClientProps {
   stats: PipelineStats;
@@ -48,12 +55,115 @@ function extractDispatchEvents(messages: UIMessage[]): Record<string, "running" 
   return events;
 }
 
+/**
+ * Walk the assistant messages in reverse, looking for the most recent
+ * `dispatchBatch` tool part that has reached `output-available`. The tool's
+ * output (generated inside `execute` in R3.3) carries `{ requestId, agents }`
+ * — and requestId is the bell-ring correlation id the polling endpoint needs.
+ *
+ * R3.7 design note on why we walk from the output (not the input):
+ *   R3.3's `dispatchBatch.execute` generates the `requestId` itself via
+ *   `crypto.randomUUID()`. That means the input stream never carries it — we
+ *   only see it once the tool returns. That's too late for fine-grained
+ *   streaming visibility, so we bridge the window with `dispatchEvents`:
+ *   during streaming the graph runs on `tool-dispatchTo*` lifecycle parts,
+ *   then once `dispatchBatch` resolves we start polling to enrich with
+ *   `started_at`/`completed_at` for the return-streak animation. By that
+ *   point all rows are terminal, so the hook resolves in one shot and stops.
+ *
+ * Returns the latest (most-recent-message-first) requestId when it's a
+ * non-empty string, else `null`.
+ *
+ * Exported for direct unit tests.
+ */
+export function extractBatchRequestId(messages: UIMessage[]): string | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    if (msg.role !== "assistant" || !Array.isArray(msg.parts)) continue;
+    for (const part of msg.parts) {
+      if (!isToolUIPart(part)) continue;
+      if (getToolName(part) !== "dispatchBatch") continue;
+      if (part.state !== "output-available") continue;
+      const out = part.output as unknown;
+      if (
+        out !== null &&
+        typeof out === "object" &&
+        "requestId" in out &&
+        typeof (out as { requestId: unknown }).requestId === "string" &&
+        (out as { requestId: string }).requestId.length > 0
+      ) {
+        return (out as { requestId: string }).requestId;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Convert the polling-hook output + the streaming dispatchEvents into a
+ * single `dispatches` map the graph understands.
+ *
+ * Priority rules:
+ *   - `progressMap[agent]` wins when present (richer data — carries
+ *     startedAt / completedAt).
+ *   - Falls back to `dispatchEvents["dispatchTo" + AGENT]` when no polling
+ *     row exists yet (during the streaming window before dispatchBatch
+ *     returns).
+ *   - Else `idle` — graph renders a dim satellite.
+ *
+ * Polling statuses `queued` and `running` both collapse to the graph's
+ * `running` visual token; the graph has no distinct "queued" colour because
+ * the user can't distinguish 300ms queue from 300ms execution.
+ *
+ * Exported for direct unit tests.
+ */
+export function mergeGraphDispatches(
+  progressMap: DispatchProgressMap,
+  dispatchEvents: Record<string, "running" | "completed">,
+): Record<string, DispatchEntry> {
+  const out: Record<string, DispatchEntry> = {};
+  for (const agent of DISPATCH_GRAPH_AGENTS) {
+    const polled = progressMap[agent];
+    if (polled) {
+      const mappedStatus: DispatchNodeStatus =
+        polled.status === "completed"
+          ? "completed"
+          : polled.status === "failed"
+          ? "failed"
+          : "running"; // queued + running both map to "running" visually
+      out[agent] = {
+        status: mappedStatus,
+        startedAt: polled.startedAt,
+        completedAt: polled.completedAt,
+      };
+      continue;
+    }
+    const eventKey = "dispatchTo" + agent.toUpperCase();
+    const event = dispatchEvents[eventKey];
+    if (event) {
+      out[agent] = {
+        status: event, // "running" | "completed"
+        startedAt: null,
+        completedAt: null,
+      };
+      continue;
+    }
+    out[agent] = { status: "idle", startedAt: null, completedAt: null };
+  }
+  return out;
+}
+
 export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [briefingMessage, setBriefingMessage] = useState<string | undefined>(undefined);
   const [ceoState, setCEOState] = useState<"idle" | "thinking" | "talking">("idle");
   const [dispatchEvents, setDispatchEvents] = useState<Record<string, "running" | "completed">>({});
   const [chatStatus, setChatStatus] = useState<ChatStatus>("ready");
+  // The current bell-ring's correlation id, extracted from dispatchBatch's
+  // tool output once it resolves. Null during the streaming window (graph
+  // runs on dispatchEvents alone during that time) and also null for
+  // single-tool flows that don't use dispatchBatch at all.
+  const [batchRequestId, setBatchRequestId] = useState<string | null>(null);
 
   const handleOpenDialogue = useCallback(() => setDialogueOpen(true), []);
   const handleCloseDialogue = useCallback(() => {
@@ -63,9 +173,11 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
   }, []);
 
   const handleBriefingReady = useCallback((briefing: string) => {
-    // Reset dispatch events for a fresh run so the bell's progress cards
-    // start clean. The dialogue panel's auto-submit will drive new events.
+    // Reset dispatch events + requestId for a fresh run so the bell's
+    // progress cards and the graph both start clean. The dialogue panel's
+    // auto-submit will drive new events.
     setDispatchEvents({});
+    setBatchRequestId(null);
     setBriefingMessage(briefing);
     setDialogueOpen(true);
     setCEOState("talking");
@@ -89,6 +201,12 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
         }
         return next;
       });
+
+      // Watch for dispatchBatch resolution so we can start polling for the
+      // timing-enrichment pass. Only update state when the value actually
+      // changes (typical: null → uuid at most once per bell-ring).
+      const nextRequestId = extractBatchRequestId(activity.messages);
+      setBatchRequestId((prev) => (prev === nextRequestId ? prev : nextRequestId));
     },
     [],
   );
@@ -103,6 +221,29 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
 
   const isStreaming =
     chatStatus === "streaming" || chatStatus === "submitted";
+
+  // Polling kicks in only once `batchRequestId` is set (i.e., dispatchBatch
+  // has already returned). Since all dispatch rows are terminal by then, the
+  // first poll fetches the full state and the hook stops on its own. We
+  // keep `isStreaming` folded into the active flag so polling paginates
+  // cleanly into dormancy after streaming ends.
+  const progressMap = useDispatchProgress(
+    batchRequestId,
+    // Poll while we have an id; the hook itself will self-terminate once
+    // every row is terminal. Gating on isStreaming here would wipe the
+    // graph's timing data the moment the stream finishes — we want to
+    // retain the enriched state for the return streak.
+    batchRequestId !== null,
+  );
+
+  // Merge live streaming events (from dispatchEvents) with timing-enriched
+  // polling data (from progressMap). See `mergeGraphDispatches` for priority
+  // rules. Memoized against the three inputs so the graph only re-renders
+  // when something actually changes.
+  const graphDispatches = useMemo(
+    () => mergeGraphDispatches(progressMap, dispatchEvents),
+    [progressMap, dispatchEvents],
+  );
 
   // ── Content slot (left panel) ────────────────────────────────────────────
   const contentSlot = (
@@ -159,7 +300,10 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
     </div>
   );
 
-  // ── Panel slot (right panel) ──────────────────────────────────────────────
+  // ── Graph slot (right panel, top) ─────────────────────────────────────────
+  const graphSlot = <DispatchGraph dispatches={graphDispatches} />;
+
+  // ── Panel slot (right panel, bottom) ──────────────────────────────────────
   const panelSlot = (
     <div
       style={{
@@ -183,6 +327,7 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
       <CSuiteScene
         stats={tickerStats}
         contentSlot={contentSlot}
+        graphSlot={graphSlot}
         panelSlot={panelSlot}
       />
 
