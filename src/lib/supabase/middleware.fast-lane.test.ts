@@ -31,9 +31,9 @@ function mkClient(user: { id: string } | null, profile: ProfileRow | null, profi
     auth: {
       getUser: async () => ({ data: { user } }),
     },
-    from: (_table: string) => ({
-      select: (_cols: string) => ({
-        eq: (_col: string, _val: string) => ({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
           single: async () =>
             profileErr
               ? { data: null, error: { message: "db down" } }

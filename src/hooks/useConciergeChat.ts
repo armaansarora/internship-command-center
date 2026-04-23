@@ -99,25 +99,43 @@ export function useConciergeChat(
   opts: UseConciergeChatOptions = {},
 ): UseConciergeChatReturn {
   const api = opts.api ?? "/api/concierge/chat";
-  const chatId = useRef(opts.id ?? generateId()).current;
+  const chatIdRef = useRef<string | null>(null);
+  if (chatIdRef.current === null) {
+    chatIdRef.current = opts.id ?? generateId();
+  }
   const stateRef = useRef<ConciergeState | null>(null);
-  if (!stateRef.current) stateRef.current = new ConciergeState();
+  if (stateRef.current === null) {
+    stateRef.current = new ConciergeState();
+  }
   const chatRef = useRef<ConciergeChatImpl | null>(null);
 
-  const [, forceUpdate] = useState(0);
+  // Mirror state into React state so consumers get reactive reads without
+  // dereferencing a ref during render (which the lint rule rightly flags).
+  const [messages, setMessages] = useState<UIMessage[]>([]);
+  const [status, setStatus] = useState<ChatStatus>("ready");
+  const [input, setInputState] = useState("");
 
   useEffect(() => {
     const state = stateRef.current;
     if (!state) return;
-    state.setNotify(() => forceUpdate((n) => n + 1));
-    return () => { state.setNotify(() => undefined); };
+    const sync = () => {
+      setMessages(state.messages);
+      setStatus(state.status);
+    };
+    state.setNotify(sync);
+    sync();
+    return () => {
+      state.setNotify(() => undefined);
+    };
   }, []);
 
-  if (!chatRef.current && stateRef.current) {
-    chatRef.current = new ConciergeChatImpl(stateRef.current, api, chatId, opts.body);
-  }
-
-  const [input, setInputState] = useState("");
+  useEffect(() => {
+    if (chatRef.current !== null) return;
+    const state = stateRef.current;
+    const chatId = chatIdRef.current;
+    if (!state || !chatId) return;
+    chatRef.current = new ConciergeChatImpl(state, api, chatId, opts.body);
+  }, [api, opts.body]);
 
   const setInput = useCallback((value: string) => setInputState(value), []);
   const submit = useCallback(() => {
@@ -135,15 +153,14 @@ export function useConciergeChat(
     stateRef.current?.clearMessages();
   }, []);
 
-  const state = stateRef.current!;
-  const isWorking = state.status === "streaming" || state.status === "submitted";
+  const isWorking = status === "streaming" || status === "submitted";
 
   return {
-    messages: state.messages,
+    messages,
     input,
     setInput,
     submit,
-    status: state.status,
+    status,
     isWorking,
     clear,
     sendRaw,
