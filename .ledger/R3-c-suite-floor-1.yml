@@ -1,6 +1,6 @@
 phase: R3
 name: C-Suite (Floor 1)
-status: in_progress
+status: complete
 intent: The brain of the building. When the user rings the bell, the camera
   pulls back and the chain of command lights up live — all seven departments,
   subagents branching under them, edges flowing with dispatch. The user is not
@@ -8,11 +8,11 @@ intent: The brain of the building. When the user rings the bell, the camera
   between sessions, they're at their desk — maybe glancing at a photo frame,
   maybe reading, maybe waiting.
 started: 2026-04-23T03:51:58.731Z
-completed: null
+completed: 2026-04-23T04:55:50.285Z
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T04:34:04.244Z
-  expires: 2026-04-23T06:34:04.239Z
+  acquired: 2026-04-23T04:53:11.101Z
+  expires: 2026-04-23T06:53:11.096Z
 acceptance:
   criteria:
     - Ringing the bell with *"How's everything looking?"* triggers ≥3
@@ -20,8 +20,8 @@ acceptance:
       is modest and felt as *work being done*. `/`-injecting mid-dispatch adapts
       the plan. ≥3 threshold triggers fire autonomously across an extended test.
       CEO's briefing references a learning first captured by a sibling agent.
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: a8b52f9
 tasks:
   R3.1:
     title: agent_dispatches table — schema, migration, REST helpers, tests (RLS +
@@ -77,30 +77,70 @@ tasks:
     commit: 248d945
   R3.9:
     title: CIO→CRO shared-knowledge bridge — CIO writes intel, CRO reads in prompt
-    status: in_progress
+    status: complete
     started: 2026-04-23T04:34:04.244Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T04:40:23.937Z
+    commit: abc12a8
   R3.10:
     title: Bell polish — building dim + camera pull-back on ring
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-23T04:40:24.254Z
+    completed: 2026-04-23T04:44:56.741Z
+    commit: b1bafde
   R3.11:
     title: /-inject mid-dispatch — keyboard handler + InjectPrompt + dialogue send
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-23T04:44:57.054Z
+    completed: 2026-04-23T04:51:56.242Z
+    commit: 3ed9832
   R3.12:
     title: R3 proof integration test — batched dispatch + overlapping started_at
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-23T04:53:11.101Z
+    completed: 2026-04-23T04:55:50.285Z
+    commit: a8b52f9
 blockers: []
-decisions: []
+decisions:
+  - date: "2026-04-22"
+    text: "Polling at 300ms instead of Supabase realtime for dispatch progress"
+    why: "Avoids realtime channel setup overhead for a 3-second orchestration window;
+      polling stops cleanly once all dispatches terminal. Realtime can layer
+      on later if scale demands."
+  - date: "2026-04-22"
+    text: "2D brushed-gold SVG bell retained — no R3F / WebGL bell"
+    why: "The boardroom-runs metaphor is carried by the Dispatch Graph animation
+      + building dim, not by a 3D bell. Saves R3 scope for later milestones if
+      it ever becomes a bottleneck."
+  - date: "2026-04-22"
+    text: "Fixed radial layout for 7 nodes — no d3-force"
+    why: "Force-directed at n=7 risks main-thread jank; fixed layout + SMIL
+      animateMotion streaks deliver the 'watch it work' feel at zero JS
+      per-frame cost."
+  - date: "2026-04-22"
+    text: "CEO voice (TTS/STT) deferred to R4"
+    why: "Same reason as R2 — opt-in / permissions / audio-pipeline scope is its
+      own initiative. R3 was already 12 tasks."
+  - date: "2026-04-22"
+    text: "depends_on uuid[] populated but not exercised in R3"
+    why: "Column ships as a real schema deliverable (default '{}'). All R3
+      dispatches use depends_on=[]. Future milestones can add 2-level dispatch
+      without another migration."
+  - date: "2026-04-22"
+    text: "CIO→CRO bridge only in R3 for shared-knowledge"
+    why: "One producer + one consumer is enough to prove the Proof line about
+      cross-agent learning. Other agents wire in during later milestones."
+  - date: "2026-04-22"
+    text: "registerInject callback over forwardRef for /-injection"
+    why: "Simpler — no forwardRef dance, doesn't change CEODialoguePanel default
+      export. Parent owns the function ref; panel registers on mount."
+  - date: "2026-04-22"
+    text: "Pure helpers extracted (computeBuildingDim, parseInjectKey,
+      shouldOpenInjectOnSlash, mergeGraphDispatches, extractBatchRequestId,
+      tickDispatchProgress) for deterministic testing without
+      @testing-library/react"
+    why: "@testing-library/react is not installed; using happy-dom +
+      renderToStaticMarkup means full hook lifecycle tests are awkward.
+      Pure helpers carry the logic — React-bound shells stay thin."
 history:
   - 2026-04-23T03:51:58.731Z: task_started R3.1
   - 2026-04-23T03:53:43.937Z: task_started R3.1
@@ -123,3 +163,12 @@ history:
   - 2026-04-23T04:32:51.133Z: task_completed R3.8
   - 2026-04-23T04:32:51.447Z: task_started R3.9
   - 2026-04-23T04:34:04.244Z: task_started R3.9
+  - 2026-04-23T04:40:23.937Z: task_completed R3.9
+  - 2026-04-23T04:40:24.254Z: task_started R3.10
+  - 2026-04-23T04:44:56.741Z: task_completed R3.10
+  - 2026-04-23T04:44:57.054Z: task_started R3.11
+  - 2026-04-23T04:51:56.242Z: task_completed R3.11
+  - 2026-04-23T04:51:56.564Z: task_started R3.12
+  - 2026-04-23T04:53:11.101Z: task_started R3.12
+  - 2026-04-23T04:55:50.285Z: task_completed R3.12
+  - 2026-04-23T04:55:50.285Z: phase_completed
