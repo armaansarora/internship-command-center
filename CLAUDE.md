@@ -116,7 +116,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/crud/ApplicationModal.tsx` (777 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
-- `src/components/floor-4/SituationRoomClient.tsx` (639 LOC)
+- `src/components/floor-4/SituationRoomClient.tsx` (650 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (601 LOC)
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
@@ -174,8 +174,10 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/ProceduralSkyline.tsx` (225 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
+- `src/components/floor-4/situation-map/SituationMapCanvas.tsx` (219 LOC) — Canvas2D renderer for the Situation Map.
 - `src/components/floor-4/undo-bar/UndoBar.tsx` (219 LOC) — In-world undo bar.
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
+- `src/components/floor-4/situation-map/SituationMapList.tsx` (215 LOC) — Two-column honest fallback for the Situation Map. Shipped when:
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/floor-2/ObservatoryClient.tsx` (208 LOC)
@@ -238,6 +240,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (105 LOC)
 - `src/components/penthouse/scenes/afternoon/AfternoonScene.tsx` (105 LOC) — Afternoon scene — CEO already facing the room, glass panel shows the
 - `src/components/world/FloorShell.tsx` (104 LOC) — FloorShell — wraps each floor's content with floor identity badge + ambient sound.
+- `src/components/floor-4/situation-map/SituationMapList.test.tsx` (103 LOC)
 - `src/components/world/SoundProvider.tsx` (103 LOC) — SoundProvider — wraps the application to expose sound controls.
 - `src/components/penthouse/GlassPanel.tsx` (101 LOC) — GlassPanel — frosted-glass card with:
 - `src/components/penthouse/ceo-at-window/CEOAtWindow.tsx` (101 LOC) — CEOAtWindow — the CEO turning from the window on scene mount.
@@ -254,6 +257,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
 - `src/components/floor-3/drill/LiveSTARBoard.tsx` (83 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
+- `src/components/floor-4/situation-map/SituationMap.tsx` (82 LOC) — Dispatcher that chooses Canvas2D vs list fallback. Arrives at one of:
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
 - `src/components/agents/dialogue/AgentChatInput.tsx` (80 LOC)
 - `src/components/floor-3/drill/DrillTimer.test.tsx` (79 LOC)

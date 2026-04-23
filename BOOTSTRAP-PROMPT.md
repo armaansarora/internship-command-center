@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:06 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:09 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `fb17851`)
+- **Branch:** `main` (commit `fdeceda`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 92,449 across 511 source files
+- **Total LOC:** 93,496 across 517 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-fb17851 [R7/7.7] feat(r7): calendar conflict detection + Conflicts section
+fdeceda [R7/7.8] feat(r7): deadline tracking + Final Countdown + 3-beat cron
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `fb17851`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `fdeceda`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (511 files, 92,449 LOC)
+## Source Tree (517 files, 93,496 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -112,8 +112,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai/structured` | 1315 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
-| `src/components/floor-4` | 1240 |
+| `src/components/floor-4` | 1251 |
 | `src/app` | 1177 |
+| `src/lib/situation` | 1164 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1119 |
 | `src/app/(authenticated)/settings` | 1112 |
@@ -141,7 +142,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cio` | 817 |
 | `src/lib/penthouse` | 796 |
 | `src/app/api/cron/draft-follow-ups` | 792 |
-| `src/lib/situation` | 785 |
 | `src/components/floor-6/cno-character` | 781 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
@@ -150,6 +150,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
 | `src/app/(authenticated)/penthouse` | 627 |
+| `src/components/floor-4/situation-map` | 619 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
@@ -223,6 +224,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/validators` | 155 |
 | `src/components/penthouse/idle` | 153 |
 | `src/components/icons` | 152 |
+| `src/app/(authenticated)/situation-room` | 142 |
 | `src/app/api/briefing/transcribe` | 139 |
 | `src/app/api/onboarding/bootstrap-discovery` | 137 |
 | `src/types` | 135 |
@@ -236,7 +238,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
-| `src/app/(authenticated)/situation-room` | 104 |
 | `src/app/api/concierge/chat` | 103 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
@@ -460,6 +461,10 @@ src/components/floor-4/final-countdown/FinalCountdownSection.tsx
 src/components/floor-4/rings/RingPulseController.test.tsx
 src/components/floor-4/rings/RingPulseController.tsx
 src/components/floor-4/rings/useRingPulse.ts
+src/components/floor-4/situation-map/SituationMap.tsx
+src/components/floor-4/situation-map/SituationMapCanvas.tsx
+src/components/floor-4/situation-map/SituationMapList.test.tsx
+src/components/floor-4/situation-map/SituationMapList.tsx
 src/components/floor-4/undo-bar/UndoBar.test.tsx
 src/components/floor-4/undo-bar/UndoBar.tsx
 src/components/floor-4/undo-bar/UndoBarProvider.tsx
@@ -755,6 +760,8 @@ src/lib/situation/deadline-beats.ts
 src/lib/situation/deadline-cron.ts
 src/lib/situation/detect-conflicts.test.ts
 src/lib/situation/detect-conflicts.ts
+src/lib/situation/outreach-arcs.test.ts
+src/lib/situation/outreach-arcs.ts
 src/lib/skyline-engine.ts
 src/lib/sound/engine.ts
 src/lib/speech/transcribe.ts
@@ -859,13 +866,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 902 | 9,795 |
+| `BOOTSTRAP-PROMPT.md` | 908 | 9,881 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 485 | 10,524 |
-| **Total** | **2036** | **32,765** |
+| `CLAUDE.md` | 489 | 10,659 |
+| **Total** | **2046** | **32,986** |
 
-> ⚠️ Reading all recommended files consumes ~32,765 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~32,986 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

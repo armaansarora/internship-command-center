@@ -35,8 +35,15 @@ async function SituationRoomData({
 }): Promise<JSX.Element> {
   const supabase = await createClient();
 
-  // Fetch applications, briefing data, and outstanding conflicts in parallel
-  const [applicationsResult, briefingData, conflictsResult] = await Promise.all([
+  // Fetch applications, briefing data, outstanding conflicts, map outreach,
+  // and companies — all in parallel.
+  const [
+    applicationsResult,
+    briefingData,
+    conflictsResult,
+    outreachResult,
+    companiesResult,
+  ] = await Promise.all([
     supabase
       .from("applications")
       .select("*")
@@ -51,6 +58,18 @@ async function SituationRoomData({
       .eq("is_dismissed", false)
       .order("created_at", { ascending: false })
       .limit(20),
+    supabase
+      .from("outreach_queue")
+      .select("id, company_id, status, send_after, approved_at, sent_at")
+      .eq("user_id", userId)
+      .in("status", ["pending_approval", "approved", "sent"])
+      .order("updated_at", { ascending: false })
+      .limit(300),
+    supabase
+      .from("companies")
+      .select("id, name")
+      .eq("user_id", userId)
+      .limit(500),
   ]);
 
   const conflicts = (conflictsResult.data ?? []).map((row) => ({
@@ -58,6 +77,23 @@ async function SituationRoomData({
     body: (row.body as string | null) ?? "",
     pairId: (row.source_entity_id as string | null) ?? "",
     createdAt: row.created_at as string,
+  }));
+
+  const mapOutreach = (outreachResult.data ?? []).map((row) => ({
+    id: row.id as string,
+    companyId: (row.company_id as string | null) ?? null,
+    status: row.status as string,
+    sendAfterMs: row.send_after ? new Date(row.send_after as string).getTime() : null,
+    approvedAtMs: row.approved_at ? new Date(row.approved_at as string).getTime() : null,
+    sentAtMs: row.sent_at ? new Date(row.sent_at as string).getTime() : null,
+  }));
+
+  const mapCompanies = (companiesResult.data ?? []).map((row) => ({
+    id: row.id as string,
+    name: (row.name as string | null) ?? "Unnamed",
+    // warmth not stored on companies; the arcs shaper falls back to 50 which
+    // yields stable id-ordered sort for ties.
+    warmth: 50,
   }));
 
   // Map snake_case DB rows to camelCase Application type
@@ -97,6 +133,8 @@ async function SituationRoomData({
       approveOutreach={approveOutreachAction}
       dismissNotification={dismissNotificationAction}
       conflicts={conflicts}
+      mapOutreach={mapOutreach}
+      mapCompanies={mapCompanies}
     />
   );
 }

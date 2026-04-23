@@ -17,6 +17,8 @@ import {
   FinalCountdownSection,
   type CountdownCard,
 } from "./final-countdown/FinalCountdownSection";
+import { SituationMap } from "./situation-map/SituationMap";
+import type { ShapeInput } from "@/lib/situation/outreach-arcs";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -28,6 +30,10 @@ interface SituationRoomClientProps {
   dismissNotification?: (notificationId: string) => Promise<void>;
   /** R7 — calendar conflicts surfaced as a section at the top of the tableSlot. */
   conflicts?: ConflictEntry[];
+  /** R7.9 — outreach rows for the Situation Map. */
+  mapOutreach?: ShapeInput["outreach"];
+  /** R7.9 — company directory for the map. */
+  mapCompanies?: ShapeInput["companies"];
 }
 
 // ---------------------------------------------------------------------------
@@ -267,6 +273,8 @@ export function SituationRoomClient({
   approveOutreach,
   dismissNotification,
   conflicts = [],
+  mapOutreach = [],
+  mapCompanies = [],
 }: SituationRoomClientProps): JSX.Element {
   // Reserved for next interaction pass when action controls are exposed in this UI.
   void approveOutreach;
@@ -366,6 +374,9 @@ export function SituationRoomClient({
         gap: "20px",
       }}
     >
+      {/* R7.9 — Situation Map — outreach in flight (Canvas2D or list fallback) */}
+      <SituationMap outreach={mapOutreach} companies={mapCompanies} />
+
       {/* R7.7 — Calendar conflicts at the top (only renders when non-empty) */}
       <ConflictsSection conflicts={conflicts} />
 
