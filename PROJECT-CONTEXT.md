@@ -214,7 +214,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 | `docs/AUDIT-DEPLOY-CHECKLIST.md` | **Read this first.** This is the dummy-proof, click-by-click, paste-by-paste gui | ~370 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |
-| `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge, multi-tenant ready | ~230 |
+| `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge, multi-tenant ready | ~260 |
 | `docs/MASTER-PLAN.md` | 7 phases with deliverables, acceptance criteria, testing strategy | ~370 |
 | `docs/NEXT-ROADMAP.md` | **Audience.** Any Claude session working on The Tower. And Armaan, once per phas | ~950 |
 | `docs/POST-HARDENING-MANUAL-STEPS.md` | Everything in this file is **something a computer can't do for you**. The code | ~270 |

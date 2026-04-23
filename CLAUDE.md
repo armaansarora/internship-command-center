@@ -155,6 +155,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
+- `src/components/lobby/concierge/OtisDialoguePanel.tsx` (250 LOC) — OtisDialoguePanel — the Concierge's conversation surface.
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
 - `src/components/world/ErrorBoundary.tsx` (241 LOC) — ErrorBoundary — in-world error display using "the building's lights flicker" metaphor.
 - `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
@@ -188,6 +189,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/InjectPrompt.tsx` (181 LOC) — InjectPrompt — floating single-line input that opens above the bell when
 - `src/components/floor-1/CSuiteScene.tsx` (179 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
 - `src/components/floor-7/war-table/EmptyWarTable.tsx` (178 LOC) — Empty state for a cold war table. Not an apology — an invitation. Matches
+- `src/components/lobby/concierge/OtisAvatar.tsx` (175 LOC) — OtisAvatar — the Concierge's standing silhouette behind a reception desk.
 - `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
 - `src/app/(authenticated)/penthouse/penthouse-client.tsx` (171 LOC) — Penthouse client — the new R2 scene-first composition.
@@ -210,6 +212,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-1/CSuiteClient.injectPrompt.test.tsx` (112 LOC) — R3.11 — unit tests for the `/`-inject activation gate.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
 - `src/components/penthouse/scenes/morning/BriefingBeat.tsx` (108 LOC) — One beat of the Morning Briefing — revealed character-by-character once
+- `src/components/lobby/concierge/OtisCharacter.test.tsx` (106 LOC) — R4.2 — Otis character primitives.
+- `src/components/lobby/concierge/OtisCharacter.tsx` (106 LOC) — OtisCharacter — the Concierge, standing at the reception desk in the Lobby.
 - `src/components/floor-1/RingTheBell.bellPhase.test.tsx` (105 LOC) — R3.10 — unit tests for the pure side-effect helper + a spot-check that
 - `src/components/floor-7/cro-character/CRODialoguePanel.tsx` (105 LOC)
 - `src/components/penthouse/scenes/afternoon/AfternoonScene.tsx` (105 LOC) — Afternoon scene — CEO already facing the room, glass panel shows the

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:28 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:32 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `6c236cc`)
+- **Branch:** `main` (commit `bfd4195`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 71,905 across 371 source files
+- **Total LOC:** 72,542 across 375 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-6c236cc chore(autopilot): R4 kickoff — design, plan, ledger bootstrap
+bfd4195 [R4/4.1] feat(db): user_profiles lobby onboarding columns
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6c236cc`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `bfd4195`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (371 files, 71,905 LOC)
+## Source Tree (375 files, 72,542 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -141,6 +141,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/agents/dialogue` | 729 |
 | `src/db` | 675 |
 | `src/lib/sound` | 641 |
+| `src/components/lobby/concierge` | 637 |
 | `src/app/(authenticated)/penthouse` | 603 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
@@ -374,6 +375,10 @@ src/components/floor-7/war-table/StampBar.tsx
 src/components/floor-7/war-table/WarTable.tsx
 src/components/floor-7/war-table/pipeline-config.ts
 src/components/icons/PenthouseIcons.tsx
+src/components/lobby/concierge/OtisAvatar.tsx
+src/components/lobby/concierge/OtisCharacter.test.tsx
+src/components/lobby/concierge/OtisCharacter.tsx
+src/components/lobby/concierge/OtisDialoguePanel.tsx
 src/components/penthouse/ActivityFeed.tsx
 src/components/penthouse/GlassPanel.tsx
 src/components/penthouse/PipelineNodes.tsx
@@ -667,13 +672,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 716 | 7,435 |
+| `BOOTSTRAP-PROMPT.md` | 716 | 7,433 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 447 | 9,497 |
-| **Total** | **1812** | **29,378** |
+| `CLAUDE.md` | 451 | 9,642 |
+| **Total** | **1816** | **29,521** |
 
-> ⚠️ Reading all recommended files consumes ~29,378 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~29,521 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
