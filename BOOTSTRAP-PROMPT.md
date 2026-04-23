@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:26 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 2:27 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `a17b61a`)
+- **Branch:** `main` (commit `d070148`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 96,190 across 545 source files
+- **Total LOC:** 96,398 across 549 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-a17b61a [R8/8.9] feat(r8): CNO warm-intro finder (intra-user pgvector) + daily scan cron
+d070148 [R8/8.10] feat(r8): consent UI surface + opt-in / revoke endpoints (P9 drift guard)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `a17b61a`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `d070148`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (545 files, 96,190 LOC)
+## Source Tree (549 files, 96,398 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -109,7 +109,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7/war-table` | 1760 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
-| `src/app/__tests__` | 1331 |
+| `src/app/__tests__` | 1382 |
 | `src/lib/ai/structured` | 1315 |
 | `src/app/lobby` | 1291 |
 | `src/lib/gmail` | 1253 |
@@ -184,6 +184,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/briefing-room` | 320 |
 | `src/app/api/account/delete/cancel` | 308 |
 | `src/components/pricing` | 306 |
+| `src/lib/networking` | 302 |
 | `src/lib/ai/structured/__tests__` | 301 |
 | `src/components/floor-6/dossier-wall` | 299 |
 | `src/app/(authenticated)` | 285 |
@@ -215,7 +216,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/war-room` | 200 |
 | `src/app/api/briefing/complete-drill` | 198 |
 | `src/app/api/outreach/undo` | 197 |
-| `src/lib/networking` | 189 |
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
 | `src/lib/audio` | 181 |
@@ -263,6 +263,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
 | `src/lib/crypto` | 50 |
+| `src/app/api/networking/match-candidates` | 44 |
 | `src/app/api/progression` | 44 |
 | `src/app/api/networking/opt-in` | 43 |
 | `src/app/api/notifications/[id]/read` | 40 |
@@ -312,6 +313,7 @@ src/app/__tests__/r7-situation-room.proof.test.ts
 src/app/__tests__/r7-undo-proof.test.ts
 src/app/__tests__/r8-cio-reresearch.proof.test.ts
 src/app/__tests__/r8-consent-copy.proof.test.ts
+src/app/__tests__/r8-consent-guard.proof.test.ts
 src/app/__tests__/r8-warmth-decay.proof.test.ts
 src/app/api/account/delete/cancel/route.test.ts
 src/app/api/account/delete/cancel/route.ts
@@ -372,6 +374,7 @@ src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
+src/app/api/networking/match-candidates/route.ts
 src/app/api/networking/opt-in/route.ts
 src/app/api/networking/revoke/route.ts
 src/app/api/notifications/[id]/read/route.ts
@@ -771,6 +774,8 @@ src/lib/lobby/derive-floors-unlocked.test.ts
 src/lib/lobby/derive-floors-unlocked.ts
 src/lib/logger.test.ts
 src/lib/logger.ts
+src/lib/networking/consent-guard.test.ts
+src/lib/networking/consent-guard.ts
 src/lib/networking/warm-intro-finder.test.ts
 src/lib/networking/warm-intro-finder.ts
 src/lib/notifications/quiet-hours.test.ts
@@ -906,13 +911,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 948 | 10,407 |
+| `BOOTSTRAP-PROMPT.md` | 955 | 10,494 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 501 | 11,030 |
-| **Total** | **2098** | **33,883** |
+| **Total** | **2105** | **33,970** |
 
-> ⚠️ Reading all recommended files consumes ~33,883 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~33,970 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
