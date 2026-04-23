@@ -19,11 +19,17 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `31f1dfc`)
+- **Branch:** `main` (commit `c637c67`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 57,130 across 289 source files
 - **Build:** Clean (zero TS errors)
 
+
+## Changes Since Last Bootstrap
+
+```
+c637c67 [R0] fix: delete middleware.ts, merge matcher into proxy.ts (Next 16)
+```
 
 ## Acceptance Criteria — Progress
 
@@ -76,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `31f1dfc`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `c637c67`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -563,13 +569,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 619 | 6,237 |
+| `BOOTSTRAP-PROMPT.md` | 612 | 6,206 |
 | `PROJECT-CONTEXT.md` | 281 | 5,254 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 425 | 8,617 |
-| **Total** | **1692** | **27,280** |
+| **Total** | **1685** | **27,249** |
 
-> ⚠️ Reading all recommended files consumes ~27,280 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~27,249 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

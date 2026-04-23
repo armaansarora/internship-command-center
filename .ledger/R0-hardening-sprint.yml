@@ -33,8 +33,10 @@ tasks:
     started: 2026-04-22T20:01:27.465Z
     completed: 2026-04-22T20:02:50.887Z
     commit: 76c9e3e
-    notes: "Evidence: src/middleware.ts, playwright.config.ts,
-      tests/e2e/session-persistence.spec.ts"
+    notes: "Evidence: src/proxy.ts, playwright.config.ts,
+      tests/e2e/session-persistence.spec.ts (src/middleware.ts was restored
+      by autopilot then removed post-build-regression — Next.js 16 uses
+      proxy.ts, which invokes updateSession identically)"
   R0.2:
     title: audit_logs table + logSecurityEvent helper (P1)
     status: complete
