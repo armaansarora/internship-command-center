@@ -1,0 +1,45 @@
+/* R7 — Rings-on-click shockwave.
+ *
+ * A radial amber pulse that expands from the click origin set in CSS
+ * variables --sx / --sy. The keyframe is self-contained so a single DOM
+ * node per click can be appended, run once, and cleaned up on animationend.
+ *
+ * `prefers-reduced-motion`: the element is still appended (for observers
+ * and a11y) but the animation is killed and opacity collapses to 0. The
+ * click still registers in the DOM — only the motion is suppressed.
+ */
+
+@keyframes alert-shockwave {
+  0% {
+    opacity: 0.55;
+    transform: translate(var(--sx), var(--sy)) translate(-50%, -50%) scale(0);
+  }
+  60% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--sx), var(--sy)) translate(-50%, -50%) scale(14);
+  }
+}
+
+.alert-shockwave {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 124, 40, 0.6);
+  box-shadow: 0 0 14px rgba(220, 124, 40, 0.35);
+  pointer-events: none;
+  z-index: 60;
+  animation: alert-shockwave 640ms cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alert-shockwave {
+    animation: none;
+    opacity: 0;
+  }
+}

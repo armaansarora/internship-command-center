@@ -9,6 +9,8 @@ import type { SituationRoomStats } from "./SituationRoomScene";
 import { COOCharacter } from "./coo-character/COOCharacter";
 import { COODialoguePanel } from "./coo-character/COODialoguePanel";
 import { COOWhiteboard } from "./coo-character/COOWhiteboard";
+import { RingPulseController } from "./rings/RingPulseController";
+import { useRingPulse } from "./rings/useRingPulse";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -100,10 +102,27 @@ const TIER_STYLES: Record<
 
 function DeadlineCard({ card }: { card: DeadlineCard }): JSX.Element {
   const style = TIER_STYLES[card.tier];
+  const rings = useRingPulse();
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      rings.pulse(e.clientX, e.clientY);
+    },
+    [rings],
+  );
 
   return (
     <article
       aria-label={`${card.tier} follow-up: ${card.companyName} — ${card.role}, ${card.daysSinceActivity} days since activity`}
+      onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          rings.pulse(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+      }}
+      tabIndex={0}
+      role="button"
       style={{
         background: style.background,
         border: `1px solid ${style.border}`,
@@ -113,6 +132,7 @@ function DeadlineCard({ card }: { card: DeadlineCard }): JSX.Element {
         flexDirection: "column",
         gap: "4px",
         fontFamily: "IBM Plex Mono, monospace",
+        cursor: "pointer",
       }}
     >
       {/* Tier badge + days */}
@@ -509,7 +529,7 @@ export function SituationRoomClient({
 
   // ── Render ────────────────────────────────────────────────────────
   return (
-    <>
+    <RingPulseController>
       {/* Full-screen Situation Room scene */}
       <SituationRoomScene
         stats={tickerStats}
@@ -578,7 +598,7 @@ export function SituationRoomClient({
           }
         }
       `}</style>
-    </>
+    </RingPulseController>
   );
 }
 

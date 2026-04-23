@@ -117,8 +117,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/crud/ContactModal.tsx` (713 LOC)
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
+- `src/components/floor-4/SituationRoomClient.tsx` (606 LOC)
 - `src/components/floor-7/war-table/ApplicationCard.tsx` (601 LOC)
-- `src/components/floor-4/SituationRoomClient.tsx` (586 LOC)
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (526 LOC)
@@ -203,6 +203,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/WarRoomTicker.tsx` (170 LOC) — WarRoomTicker — bottom scrolling status strip showing live pipeline data.
 - `src/components/floor-3/drill/DrillVoiceMic.tsx` (158 LOC) — R6.6 — DrillVoiceMic.
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
+- `src/components/floor-4/rings/RingPulseController.test.tsx` (154 LOC)
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
@@ -254,6 +255,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/drill/DrillTimer.tsx` (73 LOC) — R6.6 — DrillTimer.
 - `src/components/world/DayNightProvider.tsx` (72 LOC) — DayNightProvider — sets `data-time` on <html> based on the user's local time.
 - `src/components/floor-3/drill/DrillQuestionCard.tsx` (70 LOC) — R6.6 — DrillQuestionCard.
+- `src/components/floor-4/rings/RingPulseController.tsx` (69 LOC) — Context provider that exposes an imperative `pulse(x, y)` handle to
 - `src/components/floor-3/drill/DrillStage.test.tsx` (65 LOC)
 - `src/components/penthouse/scenes/SceneRouter.tsx` (62 LOC) — Picks the active Penthouse scene based on the user's current time-of-day
 - `src/components/penthouse/scenes/morning/SkipHint.tsx` (62 LOC) — Small floating hint at the bottom of the Morning Briefing Scene telling the
