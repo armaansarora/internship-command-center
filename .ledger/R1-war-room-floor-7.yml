@@ -1,6 +1,6 @@
 phase: R1
 name: War Room (Floor 7)
-status: in_progress
+status: complete
 intent: A tactical console carved from mahogany. The CRO is on the floor when
   the user arrives. Jobs *arrive* (not appear). Applications move through stages
   with visible consequence — every status change feels like an operation, not a
@@ -10,7 +10,7 @@ intent: A tactical console carved from mahogany. The CRO is on the floor when
   actually send after they approve. The North Star is real on Floor 7 first,
   then everywhere else.
 started: null
-completed: null
+completed: 2026-04-23T02:23:07.309Z
 lock:
   holder: sess-a5908e
   acquired: 2026-04-23T02:21:38.571Z
@@ -115,8 +115,10 @@ tasks:
     notes: Fix regressions. Ensure ApplicationModal stays code-split.
   R1.12:
     title: Rate-limit + CSRF coverage audit for Floor 7 mutating routes
-    status: in_progress
+    status: complete
     started: 2026-04-23T02:21:38.571Z
+    completed: 2026-04-23T02:23:07.309Z
+    commit: "8916435"
     notes: Verify job-discovery, outreach-sender, application CRUD, CMO generate
       routes are all under rate-limit-middleware + CSRF.
 blockers: []
@@ -166,3 +168,5 @@ history:
   - 2026-04-23T02:20:15.940Z: task_started R1.11
   - 2026-04-23T02:21:28.302Z: task_completed R1.11
   - 2026-04-23T02:21:38.571Z: task_started R1.12
+  - 2026-04-23T02:23:07.309Z: task_completed R1.12
+  - 2026-04-23T02:23:07.309Z: phase_completed
