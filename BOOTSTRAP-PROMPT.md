@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:38 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:44 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `d1e7dbb`)
+- **Branch:** `main` (commit `20bd764`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 82,486 across 443 source files
+- **Total LOC:** 83,175 across 452 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-d1e7dbb [R6/6.4] drill: interrupt rules + xstate drill-machine
+20bd764 [R6/6.2] briefing: voice opt-in gate + audio-upload + transcribe (403/410/200)
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `d1e7dbb`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `20bd764`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,11 +95,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (443 files, 82,486 LOC)
+## Source Tree (452 files, 83,175 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 6029 |
+| `src/lib/db/queries` | 6111 |
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3162 |
 | `src/components/floor-1` | 2660 |
@@ -117,6 +117,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cro` | 1083 |
 | `src/hooks` | 1079 |
 | `src/lib/agents/cmo` | 1072 |
+| `src/lib/ai/structured` | 1069 |
 | `src/components/world/elevator` | 1056 |
 | `src/components/floor-5/cmo-character` | 1053 |
 | `src/components/floor-3` | 1032 |
@@ -126,7 +127,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-6` | 986 |
 | `src/components/floor-6/crud` | 950 |
 | `src/components/floor-5/crud` | 949 |
-| `src/lib/ai/structured` | 937 |
 | `src/lib/jobs/sources` | 931 |
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
@@ -198,8 +198,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/calendar` | 203 |
 | `src/app/(authenticated)/writing-room` | 202 |
 | `src/app/(authenticated)/war-room` | 198 |
+| `src/app/api/briefing/complete-drill` | 198 |
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
+| `src/app/api/briefing/start-drill` | 179 |
 | `src/lib/lobby` | 172 |
 | `src/app/api/documents/[id]/pdf/__tests__` | 168 |
 | `src/lib/resumes` | 168 |
@@ -224,6 +226,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/concierge/chat` | 103 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
+| `src/app/api/briefing/score-answer` | 98 |
 | `src/app/(authenticated)/situation-room` | 86 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
@@ -288,6 +291,12 @@ src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
 src/app/api/briefing/audio-upload/route.test.ts
 src/app/api/briefing/audio-upload/route.ts
+src/app/api/briefing/complete-drill/route.test.ts
+src/app/api/briefing/complete-drill/route.ts
+src/app/api/briefing/score-answer/route.test.ts
+src/app/api/briefing/score-answer/route.ts
+src/app/api/briefing/start-drill/route.test.ts
+src/app/api/briefing/start-drill/route.ts
 src/app/api/briefing/transcribe/route.test.ts
 src/app/api/briefing/transcribe/route.ts
 src/app/api/briefing/voice-preference/route.test.ts
@@ -579,7 +588,9 @@ src/lib/ai/model.ts
 src/lib/ai/prompt-cache.ts
 src/lib/ai/structured/__tests__/three-tone-divergence.proof.test.ts
 src/lib/ai/structured/cover-letter.ts
+src/lib/ai/structured/drill-questions.ts
 src/lib/ai/structured/prep-packet.ts
+src/lib/ai/structured/score-answer.ts
 src/lib/ai/structured/tailored-resume.test.ts
 src/lib/ai/structured/tailored-resume.ts
 src/lib/ai/telemetry.ts
@@ -609,6 +620,7 @@ src/lib/db/queries/companies-rest.ts
 src/lib/db/queries/contacts-mutations.ts
 src/lib/db/queries/contacts-rest.ts
 src/lib/db/queries/daily-snapshots-rest.ts
+src/lib/db/queries/debriefs-rest.ts
 src/lib/db/queries/documents-mutations.ts
 src/lib/db/queries/documents-rest.ts
 src/lib/db/queries/drill-prefs-rest.ts
@@ -775,13 +787,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 812 | 8,647 |
+| `BOOTSTRAP-PROMPT.md` | 824 | 8,792 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 461 | 9,927 |
-| **Total** | **1922** | **31,020** |
+| **Total** | **1934** | **31,165** |
 
-> ⚠️ Reading all recommended files consumes ~31,020 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,165 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
