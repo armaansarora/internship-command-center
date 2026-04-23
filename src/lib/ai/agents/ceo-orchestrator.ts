@@ -15,6 +15,11 @@
  *           ├── tool: dispatchToCOO  → generateText(COO persona + tools, stepCountIs(5))
  *           └── tool: dispatchToXYZ  ...
  *
+ * R3.3 adds `dispatchBatch` — a single tool call that fans ≥2 subagents out
+ * **in parallel** via `Promise.allSettled`. Each dispatch writes one
+ * `agent_dispatches` row (queued → running → completed|failed) so the front
+ * end can poll the progression while the CEO streams its synthesis.
+ *
  * Each subagent dispatch is logged to `agent_logs` with token + cost so the
  * CFO floor can attribute spend per department. The CEO's own streamText
  * call is logged separately at the route handler.
@@ -25,6 +30,12 @@ import { z } from "zod/v4";
 import { getAgentModel, getActiveModelId } from "../model";
 import { recordAgentRun } from "../telemetry";
 import { getMemoriesForContext } from "@/lib/db/queries/agent-memory-rest";
+import {
+  insertQueuedDispatch,
+  markDispatchRunning,
+  completeDispatch,
+  failDispatch,
+} from "@/lib/db/queries/agent-dispatches-rest";
 import { getCachedSystem } from "../prompt-cache";
 
 import { buildCROSystemPrompt } from "@/lib/agents/cro/system-prompt";
@@ -71,6 +82,9 @@ interface DispatchResult {
   ok: boolean;
 }
 
+/** Closed set of dispatchable department keys. */
+export type AgentKey = "cro" | "coo" | "cno" | "cio" | "cmo" | "cpo" | "cfo";
+
 const DISPATCH_INSTRUCTION = `The CEO is asking you to handle this for the user. Use your tools to gather real data, then deliver a single compressed report (under 250 words) the CEO can incorporate into their executive briefing. Lead with the bottom-line takeaway. Use specifics — numbers, names, deadlines.`;
 
 const DEPARTMENT_DESCRIPTIONS: Record<string, string> = {
@@ -110,14 +124,31 @@ interface DispatchSpec<TStats> {
  * structured DispatchResult — failure is reported via `ok: false` rather than
  * thrown, because we never want a single subagent error to crash the parent
  * CEO streamText call.
+ *
+ * The optional `dispatchId` wires the run into a persisted `agent_dispatches`
+ * row so the front end can poll queued → running → completed|failed. Pass
+ * `""` or leave undefined from single-agent tools that don't participate in a
+ * batch — the row-lifecycle calls fall through as no-ops.
  */
 async function runSubagent<TStats>(
   spec: DispatchSpec<TStats>,
   userId: string,
   userName: string,
   task: string,
+  dispatchId?: string,
 ): Promise<DispatchResult> {
   const start = Date.now();
+  const hasDispatchRow = typeof dispatchId === "string" && dispatchId.length > 0;
+
+  // Stamp started_at as early as possible — the UI polls against this to
+  // render "running" state. Fire-and-forget so we don't add the DB round-trip
+  // to the critical path of the LLM call.
+  if (hasDispatchRow) {
+    // Intentionally not awaited: markDispatchRunning is idempotent from the
+    // caller's perspective and the DB write is small. Any error is logged
+    // inside the helper and does not block the subagent.
+    void markDispatchRunning(dispatchId as string);
+  }
 
   try {
     const [stats, memories] = await Promise.all([
@@ -157,6 +188,10 @@ async function runSubagent<TStats>(
       outputSummary: summary.slice(0, 200),
     });
 
+    if (hasDispatchRow) {
+      void completeDispatch(dispatchId as string, summary, tokensUsed);
+    }
+
     return {
       agent: spec.agent,
       summary,
@@ -164,6 +199,8 @@ async function runSubagent<TStats>(
       ok: true,
     };
   } catch (err) {
+    const errorSummary = err instanceof Error ? err.message : String(err);
+
     void recordAgentRun({
       userId,
       agent: spec.agent,
@@ -173,13 +210,20 @@ async function runSubagent<TStats>(
       durationMs: Date.now() - start,
       inputSummary: task.slice(0, 200),
       outputSummary: null,
-      error: err instanceof Error ? err.message : String(err),
+      error: errorSummary,
       status: "failed",
     });
 
+    if (hasDispatchRow) {
+      void failDispatch(
+        dispatchId as string,
+        `${spec.agent.toUpperCase()} dispatch failed: ${errorSummary}`,
+      );
+    }
+
     return {
       agent: spec.agent,
-      summary: `(${spec.agent.toUpperCase()} dispatch failed: ${err instanceof Error ? err.message : "unknown error"})`,
+      summary: `(${spec.agent.toUpperCase()} dispatch failed: ${errorSummary})`,
       tokensUsed: 0,
       ok: false,
     };
@@ -308,6 +352,76 @@ async function loadCFOStats(userId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Shared spec source of truth
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the dispatch spec for every department, keyed by lowercase agent
+ * code. Both `buildCEODispatchTools` (single-agent fan-in) and
+ * `buildDispatchBatchTool` (parallel fan-out) derive from this object so a
+ * spec change in one place automatically flows to both tool families.
+ *
+ * The return type uses `DispatchSpec<unknown>` at the map boundary — each
+ * spec is internally generic over its own stats shape, but callers only ever
+ * pass the spec straight into `runSubagent`, which is itself generic.
+ */
+function buildSpecByAgent(): Record<AgentKey, DispatchSpec<unknown>> {
+  return {
+    cro: {
+      agent: "cro",
+      loadStats: getPipelineStatsRest as DispatchSpec<unknown>["loadStats"],
+      buildSystem: ((s, n, m) =>
+        buildCROSystemPrompt(s as Awaited<ReturnType<typeof getPipelineStatsRest>>, n, m)) as DispatchSpec<unknown>["buildSystem"],
+      buildTools: (uid) => buildCROTools(uid) as Record<string, unknown>,
+    },
+    coo: {
+      agent: "coo",
+      loadStats: getDailyBriefingData as DispatchSpec<unknown>["loadStats"],
+      buildSystem: ((s, n, m) =>
+        buildCOOSystemPrompt(s as Awaited<ReturnType<typeof getDailyBriefingData>>, n, m)) as DispatchSpec<unknown>["buildSystem"],
+      buildTools: (uid) => buildCOOTools(uid) as Record<string, unknown>,
+    },
+    cno: {
+      agent: "cno",
+      loadStats: getContactStats as DispatchSpec<unknown>["loadStats"],
+      buildSystem: ((s, n, m) =>
+        buildCNOSystemPrompt(s as Awaited<ReturnType<typeof getContactStats>>, n, m)) as DispatchSpec<unknown>["buildSystem"],
+      buildTools: (uid) => buildCNOTools(uid) as Record<string, unknown>,
+    },
+    cio: {
+      agent: "cio",
+      loadStats: getResearchStats as DispatchSpec<unknown>["loadStats"],
+      buildSystem: ((s, n, m) =>
+        buildCIOSystemPrompt(s as Awaited<ReturnType<typeof getResearchStats>>, n, m)) as DispatchSpec<unknown>["buildSystem"],
+      buildTools: (uid) => buildCIOTools(uid) as Record<string, unknown>,
+    },
+    cmo: {
+      agent: "cmo",
+      loadStats: getDocumentStats as DispatchSpec<unknown>["loadStats"],
+      buildSystem: ((s, n, m) =>
+        buildCMOSystemPrompt(s as Awaited<ReturnType<typeof getDocumentStats>>, n, m)) as DispatchSpec<unknown>["buildSystem"],
+      buildTools: (uid) => buildCMOTools(uid) as Record<string, unknown>,
+    },
+    cpo: {
+      agent: "cpo",
+      loadStats: loadPrepStats as DispatchSpec<unknown>["loadStats"],
+      buildSystem: ((s, n, m) =>
+        buildCPOSystemPrompt(s as Awaited<ReturnType<typeof loadPrepStats>>, n, m)) as DispatchSpec<unknown>["buildSystem"],
+      buildTools: (uid) => buildCPOTools(uid) as Record<string, unknown>,
+    },
+    cfo: {
+      agent: "cfo",
+      loadStats: loadCFOStats as DispatchSpec<unknown>["loadStats"],
+      buildSystem: ((s, n, m) => {
+        const stats = s as Awaited<ReturnType<typeof loadCFOStats>>;
+        return buildCFOSystemPrompt(stats.stats, stats.snapshots, n, m);
+      }) as DispatchSpec<unknown>["buildSystem"],
+      buildTools: (uid) => buildCFOTools(uid) as Record<string, unknown>,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Public: build the CEO's dispatch tool set
 // ---------------------------------------------------------------------------
 
@@ -317,76 +431,157 @@ async function loadCFOStats(userId: string) {
  * inside the CEO's own streamText call.
  */
 export function buildCEODispatchTools(userId: string, userName: string) {
+  const specs = buildSpecByAgent();
   return {
-    dispatchToCRO: makeDispatchTool(
-      "cro",
-      {
-        loadStats: getPipelineStatsRest,
-        buildSystem: (s, n, m) => buildCROSystemPrompt(s, n, m),
-        buildTools: (uid) => buildCROTools(uid),
-      },
-      userId,
-      userName,
-    ),
-    dispatchToCOO: makeDispatchTool(
-      "coo",
-      {
-        loadStats: getDailyBriefingData,
-        buildSystem: (s, n, m) => buildCOOSystemPrompt(s, n, m),
-        buildTools: (uid) => buildCOOTools(uid),
-      },
-      userId,
-      userName,
-    ),
-    dispatchToCNO: makeDispatchTool(
-      "cno",
-      {
-        loadStats: getContactStats,
-        buildSystem: (s, n, m) => buildCNOSystemPrompt(s, n, m),
-        buildTools: (uid) => buildCNOTools(uid),
-      },
-      userId,
-      userName,
-    ),
-    dispatchToCIO: makeDispatchTool(
-      "cio",
-      {
-        loadStats: getResearchStats,
-        buildSystem: (s, n, m) => buildCIOSystemPrompt(s, n, m),
-        buildTools: (uid) => buildCIOTools(uid),
-      },
-      userId,
-      userName,
-    ),
-    dispatchToCMO: makeDispatchTool(
-      "cmo",
-      {
-        loadStats: getDocumentStats,
-        buildSystem: (s, n, m) => buildCMOSystemPrompt(s, n, m),
-        buildTools: (uid) => buildCMOTools(uid),
-      },
-      userId,
-      userName,
-    ),
-    dispatchToCPO: makeDispatchTool(
-      "cpo",
-      {
-        loadStats: loadPrepStats,
-        buildSystem: (s, n, m) => buildCPOSystemPrompt(s, n, m),
-        buildTools: (uid) => buildCPOTools(uid),
-      },
-      userId,
-      userName,
-    ),
-    dispatchToCFO: makeDispatchTool(
-      "cfo",
-      {
-        loadStats: loadCFOStats,
-        buildSystem: (s, n, m) => buildCFOSystemPrompt(s.stats, s.snapshots, n, m),
-        buildTools: (uid) => buildCFOTools(uid),
-      },
-      userId,
-      userName,
-    ),
+    dispatchToCRO: makeDispatchTool("cro", specs.cro, userId, userName),
+    dispatchToCOO: makeDispatchTool("coo", specs.coo, userId, userName),
+    dispatchToCNO: makeDispatchTool("cno", specs.cno, userId, userName),
+    dispatchToCIO: makeDispatchTool("cio", specs.cio, userId, userName),
+    dispatchToCMO: makeDispatchTool("cmo", specs.cmo, userId, userName),
+    dispatchToCPO: makeDispatchTool("cpo", specs.cpo, userId, userName),
+    dispatchToCFO: makeDispatchTool("cfo", specs.cfo, userId, userName),
   };
+}
+
+// ---------------------------------------------------------------------------
+// R3.3 — dispatchBatch: parallel fan-out across 2+ departments
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the `dispatchBatch` tool — the CEO's single-call parallel fan-out.
+ *
+ * The tool's input is a `tasks` object where each key is a lowercase
+ * department code and each value is the task string for that department. At
+ * least **two** agents must be named (otherwise the model should pick the
+ * focused single-agent `dispatchToX` tool). The execute step:
+ *
+ *   1. Inserts one queued `agent_dispatches` row per named agent (sequentially
+ *      so id/order pairing is deterministic).
+ *   2. Kicks off every subagent via `runSubagent` with its dispatch id,
+ *      synchronously under `Promise.allSettled` so all LLM calls run
+ *      concurrently under Node's scheduler.
+ *   3. Each `runSubagent` transitions its row queued → running → completed or
+ *      queued → running → failed on its own — the batch tool never writes
+ *      lifecycle state directly.
+ *   4. Returns `{ requestId, agents: DispatchResult[] }` — the CEO synthesizes
+ *      all reports into a single reply to the user.
+ */
+export function buildDispatchBatchTool(userId: string, userName: string) {
+  const specs = buildSpecByAgent();
+
+  return tool({
+    description:
+      "Dispatch 2+ department heads IN PARALLEL in a single call. Use me for status-across-departments briefings (e.g. 'how's everything looking', 'morning briefing', 'full status'). Returns each department's compressed report — synthesize them all in your final reply.",
+    inputSchema: z.object({
+      tasks: z
+        .object({
+          cro: z
+            .string()
+            .min(8)
+            .max(2000)
+            .optional()
+            .describe(
+              "Task for CRO: pipeline status, conversion, follow-up strategy, deal velocity.",
+            ),
+          coo: z
+            .string()
+            .min(8)
+            .max(2000)
+            .optional()
+            .describe(
+              "Task for COO: calendar, deadlines, follow-up cadence, schedule.",
+            ),
+          cno: z
+            .string()
+            .min(8)
+            .max(2000)
+            .optional()
+            .describe(
+              "Task for CNO: networking, contact warmth, relationships.",
+            ),
+          cio: z
+            .string()
+            .min(8)
+            .max(2000)
+            .optional()
+            .describe("Task for CIO: company research, competitive intel."),
+          cmo: z
+            .string()
+            .min(8)
+            .max(2000)
+            .optional()
+            .describe(
+              "Task for CMO: cover letters, narrative positioning.",
+            ),
+          cpo: z
+            .string()
+            .min(8)
+            .max(2000)
+            .optional()
+            .describe("Task for CPO: interview prep, behavioral drills."),
+          cfo: z
+            .string()
+            .min(8)
+            .max(2000)
+            .optional()
+            .describe(
+              "Task for CFO: analytics, benchmarks, agent cost.",
+            ),
+        })
+        .refine(
+          (t) =>
+            Object.values(t).filter(
+              (v): v is string => typeof v === "string" && v.length >= 8,
+            ).length >= 2,
+          "dispatchBatch requires at least 2 agents; use the single-agent dispatchToX tools for focused asks.",
+        ),
+    }),
+    execute: async ({ tasks }) => {
+      const requestId = crypto.randomUUID();
+      const present: Array<[AgentKey, string]> = (
+        Object.entries(tasks) as Array<[AgentKey, string | undefined]>
+      ).filter(
+        (e): e is [AgentKey, string] =>
+          typeof e[1] === "string" && e[1].length >= 8,
+      );
+
+      // Write all queued rows first, sequentially so id order lines up with
+      // present[] order. These writes are small; doing them upfront avoids a
+      // race where the client polls before any row exists.
+      const ids: string[] = [];
+      for (const [agent, task] of present) {
+        const id = await insertQueuedDispatch(userId, requestId, agent, task, []);
+        ids.push(id);
+      }
+
+      // Parallel fan-out. Each runSubagent handles its own marking/completion
+      // via the dispatchId. Use allSettled so one failure doesn't abort peers.
+      //
+      // IMPORTANT: the `.map(...)` must create every promise synchronously
+      // (no intermediate awaits) so that the nested generateText calls all
+      // begin their I/O before any of them resolve — that is what makes the
+      // fan-out parallel rather than sequential.
+      const settled = await Promise.allSettled(
+        present.map(([agent, task], i) => {
+          const spec: DispatchSpec<unknown> = { ...specs[agent], agent };
+          return runSubagent(spec, userId, userName, task, ids[i]);
+        }),
+      );
+
+      const agents: DispatchResult[] = settled.map((s, i) => {
+        const [agent] = present[i];
+        if (s.status === "fulfilled") return s.value;
+        // allSettled.rejected shouldn't happen — runSubagent catches its own
+        // errors and returns ok:false. But be defensive.
+        return {
+          agent,
+          summary: `(${agent.toUpperCase()} dispatch rejected: ${s.reason instanceof Error ? s.reason.message : String(s.reason)})`,
+          tokensUsed: 0,
+          ok: false,
+        };
+      });
+
+      return { requestId, agents };
+    },
+  });
 }

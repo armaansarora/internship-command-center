@@ -4,7 +4,10 @@ import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 import { buildCEOSystemPrompt } from "@/lib/agents/ceo/system-prompt";
 import { buildCEOTools } from "@/lib/agents/ceo/tools";
-import { buildCEODispatchTools } from "@/lib/ai/agents/ceo-orchestrator";
+import {
+  buildCEODispatchTools,
+  buildDispatchBatchTool,
+} from "@/lib/ai/agents/ceo-orchestrator";
 
 export const maxDuration = 120;
 
@@ -63,10 +66,13 @@ export const POST = createAgentRouteHandler<CEOContext>({
   buildSystemPrompt: (ctx, userName, memories) =>
     buildCEOSystemPrompt(ctx.stats, userName, memories, ctx.agentSummaries),
   buildTools: (userId) => buildCEOTools(userId),
-  // Inject the seven dispatch tools — one per subagent. Each tool, when the
-  // CEO model invokes it, runs a nested generateText against that
-  // department's persona and tools.
-  buildExtraTools: (userId, userName) => buildCEODispatchTools(userId, userName),
+  // Inject the seven dispatch tools — one per subagent — plus the
+  // `dispatchBatch` tool that fans ≥2 subagents out in parallel in a single
+  // call. The single-agent tools still work unchanged for focused asks.
+  buildExtraTools: (userId, userName) => ({
+    ...buildCEODispatchTools(userId, userName),
+    dispatchBatch: buildDispatchBatchTool(userId, userName),
+  }),
   // CEO can dispatch up to ~3 subagents per turn. Each dispatch has its own
   // 5-step inner loop, so total work is bounded at 3 × 5 = 15 tool calls
   // per user turn.
