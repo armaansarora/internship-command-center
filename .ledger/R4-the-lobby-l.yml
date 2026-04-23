@@ -12,8 +12,8 @@ started: 2026-04-23T05:26:14.574Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T05:42:03.081Z
-  expires: 2026-04-23T07:42:03.076Z
+  acquired: 2026-04-23T05:46:10.974Z
+  expires: 2026-04-23T07:46:10.970Z
 acceptance:
   criteria:
     - First-click to first-Morning-Briefing is fast and feels continuous.
@@ -62,10 +62,10 @@ tasks:
   R4.6:
     title: First-ever Morning Briefing override — atomic-guarded one-shot on
       Penthouse mount referencing the just-discovered applications
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:42:03.081Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:45:53.754Z
+    commit: 6a9e1dc
   R4.7:
     title: Cinematic arrival scene — CSS+GSAP aerial approach over
       ProceduralSkyline, strict one-time-per-account via arrival_played_at
@@ -84,17 +84,17 @@ tasks:
   R4.9:
     title: Returning-user fast lane — proxy redirects /lobby to lastFloorVisited
       when arrival_played_at is set
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T05:46:10.974Z
     completed: null
     commit: null
   R4.10:
     title: LinkedIn OAuth BLOCKER — no env vars, no stub; ship R4 without LinkedIn
       sync per autopilot directive
-    status: in_progress
+    status: complete
     started: 2026-04-23T05:41:52.768Z
-    completed: null
-    commit: null
+    completed: 2026-04-23T05:45:54.088Z
+    commit: 6a9e1dc
   R4.11:
     title: R4 Proof — end-to-end first-run integration test (concierge → real
       discovery → first briefing references discovered applications)
@@ -135,3 +135,6 @@ history:
   - 2026-04-23T05:42:03.081Z: task_started R4.6
   - 2026-04-23T05:44:21.722Z: task_completed R4.8
   - 2026-04-23T05:45:06.327Z: task_completed R4.7
+  - 2026-04-23T05:45:53.754Z: task_completed R4.6
+  - 2026-04-23T05:45:54.088Z: task_completed R4.10
+  - 2026-04-23T05:46:10.974Z: task_started R4.9

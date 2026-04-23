@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:45 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 1:47 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `ed115d4`)
+- **Branch:** `main` (commit `6a9e1dc`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 75,385 across 396 source files
+- **Total LOC:** 75,578 across 397 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-ed115d4 [R4/4.8] feat(lobby): Building Directory — live cross-section of unlocked floors
+6a9e1dc [R4/4.6] feat(penthouse): first-run Morning Briefing override
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `ed115d4`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `6a9e1dc`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (396 files, 75,385 LOC)
+## Source Tree (397 files, 75,578 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -158,6 +158,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/account` | 432 |
 | `src/lib/agents/concierge` | 411 |
 | `src/lib/auth` | 411 |
+| `src/lib/supabase` | 402 |
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/components/floor-6/contact-grid` | 392 |
 | `src/lib/actions` | 383 |
@@ -179,7 +180,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
 | `src/app/api/cron/sync` | 213 |
-| `src/lib/supabase` | 209 |
 | `src/lib/email` | 206 |
 | `src/app/api/cron/outreach-sender` | 203 |
 | `src/lib/calendar` | 203 |
@@ -615,6 +615,7 @@ src/lib/stripe/webhook-duplicate.test.ts
 src/lib/stripe/webhook-duplicate.ts
 src/lib/supabase/admin.ts
 src/lib/supabase/client.ts
+src/lib/supabase/middleware.fast-lane.test.ts
 src/lib/supabase/middleware.ts
 src/lib/supabase/server.ts
 src/lib/utils/google-drive-export.ts
@@ -701,13 +702,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 750 | 7,869 |
+| `BOOTSTRAP-PROMPT.md` | 750 | 7,872 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 455 | 9,760 |
-| **Total** | **1854** | **30,075** |
+| **Total** | **1854** | **30,078** |
 
-> ⚠️ Reading all recommended files consumes ~30,075 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,078 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

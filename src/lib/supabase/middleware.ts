@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { log } from "@/lib/logger";
+import { FLOORS } from "@/types/ui";
 
 /**
  * Read a required env var with a readable error if it's missing. Replaces the
@@ -84,5 +85,68 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // R4.9 — Returning-user fast lane. If the guest is authenticated AND has
+  // already watched the first-visit cinematic (arrival_played_at is stamped),
+  // /lobby is not their destination anymore; the building sends them up to
+  // the floor they were last on. One extra DB read, but only on the /lobby
+  // path — a small fraction of requests.
+  if (user && isLobbyRoot(request.nextUrl.pathname)) {
+    const target = await resolveFastLaneTarget(supabase, user.id);
+    if (target) {
+      const url = request.nextUrl.clone();
+      url.pathname = target;
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
+}
+
+/** Match `/lobby` and `/lobby/` — not nested sub-paths. */
+function isLobbyRoot(pathname: string): boolean {
+  return pathname === "/lobby" || pathname === "/lobby/";
+}
+
+/**
+ * Derive the fast-lane redirect target for a returning authenticated user.
+ *
+ * Returns `null` when the user has NOT yet played the cinematic — the
+ * middleware lets them continue into /lobby so the arrival can play.
+ * Returns a path like "/penthouse" / "/war-room" when they have.
+ *
+ * Treats any DB error as "no fast lane" so a transient Supabase hiccup
+ * never blocks a guest from reaching the lobby.
+ */
+async function resolveFastLaneTarget(
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string,
+): Promise<string | null> {
+  try {
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .select("arrival_played_at, last_floor_visited")
+      .eq("id", userId)
+      .single();
+    if (error || !data) return null;
+    const arrivalPlayedAt = (data as { arrival_played_at?: string | null })
+      .arrival_played_at ?? null;
+    if (!arrivalPlayedAt) return null;
+    const lastFloor =
+      (data as { last_floor_visited?: string | null }).last_floor_visited ??
+      "PH";
+    return floorIdToRoute(lastFloor);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Map a FloorId to the corresponding authenticated route using the
+ * canonical FLOORS registry so the middleware stays in sync if routes
+ * are renamed. Defaults to /penthouse on any unknown id.
+ */
+function floorIdToRoute(floorId: string): string {
+  const match = FLOORS.find((f) => f.id === floorId);
+  return match?.route ?? "/penthouse";
 }
