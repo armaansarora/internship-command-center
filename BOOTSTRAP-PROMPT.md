@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:13 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 12:18 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,16 +19,16 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `2f64a1a`)
+- **Branch:** `main` (commit `2fde9ff`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 67,645 across 352 source files
+- **Total LOC:** 68,231 across 356 source files
 - **Build:** Clean (zero TS errors)
 
 
 ## Changes Since Last Bootstrap
 
 ```
-2f64a1a [R3/3.3] feat(ai): dispatchBatch — real Promise.allSettled fan-out
+2fde9ff [R3/3.4] feat(ui): DispatchGraph — animated radial agent network
 ```
 
 ## Acceptance Criteria — Progress
@@ -82,7 +82,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `2f64a1a`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `2fde9ff`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -95,7 +95,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (352 files, 67,645 LOC)
+## Source Tree (356 files, 68,231 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -125,6 +125,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-5/crud` | 949 |
 | `src/lib/jobs/sources` | 931 |
 | `src/components/floor-7` | 897 |
+| `src/hooks` | 895 |
 | `src/components/floor-5` | 893 |
 | `src/lib/agents/cmo` | 856 |
 | `src/lib/agents/cro` | 855 |
@@ -142,7 +143,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/penthouse` | 603 |
 | `src/lib/ai` | 599 |
 | `src/db` | 592 |
-| `src/hooks` | 584 |
 | `src/components/floor-2` | 576 |
 | `src/lib/stripe` | 545 |
 | `src/lib/agents/ceo` | 521 |
@@ -166,6 +166,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cron/briefing` | 290 |
 | `src/app/(authenticated)` | 285 |
 | `src/lib/utils` | 284 |
+| `src/app/api/ceo/dispatches` | 275 |
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
 | `src/components/penthouse/rest` | 268 |
@@ -250,6 +251,8 @@ src/app/api/account/export/route.ts
 src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
 src/app/api/calendar/sync/route.ts
+src/app/api/ceo/dispatches/route.test.ts
+src/app/api/ceo/dispatches/route.ts
 src/app/api/ceo/route.ts
 src/app/api/cfo/route.ts
 src/app/api/cio/route.ts
@@ -407,6 +410,8 @@ src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
 src/db/schema.ts
 src/hooks/useAgentChat.ts
+src/hooks/useDispatchProgress.test.ts
+src/hooks/useDispatchProgress.ts
 src/hooks/useIdleDetail.test.ts
 src/hooks/useIdleDetail.ts
 src/hooks/usePipelineWeather.ts
@@ -646,13 +651,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 693 | 7,149 |
+| `BOOTSTRAP-PROMPT.md` | 695 | 7,173 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 442 | 9,309 |
-| **Total** | **1784** | **28,904** |
+| **Total** | **1786** | **28,928** |
 
-> ⚠️ Reading all recommended files consumes ~28,904 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~28,928 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
