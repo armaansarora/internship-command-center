@@ -13,8 +13,8 @@ started: null
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T02:13:10.742Z
-  expires: 2026-04-23T04:13:10.738Z
+  acquired: 2026-04-23T02:17:08.404Z
+  expires: 2026-04-23T04:17:08.400Z
 acceptance:
   criteria:
     - A cold user declares targets and returns later to ≥5 scored opportunities.
@@ -85,13 +85,16 @@ tasks:
       whiteboard via agent_memory."
   R1.8:
     title: Batch Stamp — multi-select + floating Stamp To bar + gavel sound
-    status: in_progress
+    status: complete
     started: 2026-04-23T02:13:10.742Z
+    completed: 2026-04-23T02:16:59.322Z
+    commit: dcaceff
     notes: Shift-click multi-select on ApplicationCard. Wires into existing
       SoundProvider for audio. Bulk moveApplicationRest variant.
   R1.9:
     title: War Room empty state invitation (not apology)
-    status: not_started
+    status: in_progress
+    started: 2026-04-23T02:17:08.404Z
     notes: "'This floor is waiting. Tell the CRO your targets — the war table fills
       itself.' CTA opens CRODialoguePanel."
   R1.10:
@@ -146,3 +149,5 @@ history:
   - 2026-04-23T02:11:17.470Z: task_started R1.7
   - 2026-04-23T02:13:01.828Z: task_completed R1.7
   - 2026-04-23T02:13:10.742Z: task_started R1.8
+  - 2026-04-23T02:16:59.322Z: task_completed R1.8
+  - 2026-04-23T02:17:08.404Z: task_started R1.9

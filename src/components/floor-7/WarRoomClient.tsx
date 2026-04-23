@@ -8,6 +8,7 @@ import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 import { WarRoomScene } from "./WarRoomScene";
 import { WarTable } from "./war-table/WarTable";
 import { StampBar } from "./war-table/StampBar";
+import { EmptyWarTable } from "./war-table/EmptyWarTable";
 import { ApplicationSearch } from "./crud/ApplicationSearch";
 import { CROCharacter } from "./cro-character/CROCharacter";
 import { CRODialoguePanel } from "./cro-character/CRODialoguePanel";
@@ -310,18 +311,25 @@ export function WarRoomClient({
         </button>
       </div>
 
-      {/* Kanban board */}
+      {/* Kanban board OR empty-state invitation */}
       <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
-        <WarTable
-          applications={filteredApplications}
-          selection={selection}
-          onMoveApplication={onMoveApplication}
-          onDeleteApplication={onDeleteApplication}
-          onEditApplication={handleEditApplication}
-          onToggleSelection={
-            onStampApplications ? handleToggleSelection : undefined
-          }
-        />
+        {applications.length === 0 ? (
+          <EmptyWarTable
+            onSummonCRO={handleOpenDialogue}
+            hasTargetProfile={Boolean(whiteboard?.targetProfile)}
+          />
+        ) : (
+          <WarTable
+            applications={filteredApplications}
+            selection={selection}
+            onMoveApplication={onMoveApplication}
+            onDeleteApplication={onDeleteApplication}
+            onEditApplication={handleEditApplication}
+            onToggleSelection={
+              onStampApplications ? handleToggleSelection : undefined
+            }
+          />
+        )}
       </div>
     </div>
   );

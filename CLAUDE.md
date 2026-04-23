@@ -131,9 +131,9 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/cpo-character/CPOWhiteboard.tsx` (444 LOC)
 - `src/components/floor-3/BriefingRoomScene.tsx` (443 LOC) — BriefingRoomScene — Floor 3 environment compositor.
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
+- `src/components/floor-7/WarRoomClient.tsx` (429 LOC)
 - `src/components/world/Elevator.tsx` (429 LOC) — When navigating between lobby ↔ authenticated pages the Elevator unmounts on
 - `src/components/world/EasterEggs.tsx` (423 LOC) — Shown below an idle character.
-- `src/components/floor-7/WarRoomClient.tsx` (421 LOC)
 - `src/components/floor-3/BriefingRoomClient.tsx` (402 LOC)
 - `src/components/floor-7/cro-character/CROWhiteboard.tsx` (392 LOC)
 - `src/components/floor-4/coo-character/COOWhiteboard.tsx` (376 LOC)
@@ -181,6 +181,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
 - `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (183 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
+- `src/components/floor-7/war-table/EmptyWarTable.tsx` (178 LOC) — Empty state for a cold war table. Not an apology — an invitation. Matches
 - `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (173 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-4/SituationRoomTicker.tsx` (171 LOC) — SituationRoomTicker — bottom scrolling status strip showing live
