@@ -12,8 +12,8 @@ started: 2026-04-23T07:02:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-23T07:33:50.846Z
-  expires: 2026-04-23T09:33:50.842Z
+  acquired: 2026-04-23T07:34:57.308Z
+  expires: 2026-04-23T09:34:57.304Z
 acceptance:
   criteria:
     - "User can generate a tailored cover letter and resume for one application
@@ -72,13 +72,14 @@ tasks:
     commit: 72a3f29
   R5.9:
     title: Siken wall sharpening inscription
-    status: in_progress
+    status: complete
     started: 2026-04-23T07:33:50.846Z
-    completed: null
+    completed: 2026-04-23T07:34:33.654Z
+    commit: 1c2b44d
   R5.10:
     title: R5 Proof — end-to-end upload → 3 tones → approval → PDF → send
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-23T07:34:57.308Z
     completed: null
 blockers: []
 decisions: []
@@ -106,3 +107,5 @@ history:
   - 2026-04-23T07:32:08.169Z: task_started R5.8
   - 2026-04-23T07:33:50.522Z: task_completed R5.8
   - 2026-04-23T07:33:50.846Z: task_started R5.9
+  - 2026-04-23T07:34:33.654Z: task_completed R5.9
+  - 2026-04-23T07:34:57.308Z: task_started R5.10
