@@ -3,6 +3,7 @@ import { loadConfig, DEFAULT_CONFIG } from "./config.js";
 import { findRepoRoot } from "./repo.js";
 import { createFixtureRepo, cleanupFixture } from "../test-helpers.js";
 import fs from "fs-extra";
+import os from "node:os";
 import path from "node:path";
 
 describe("findRepoRoot", () => {
@@ -20,7 +21,7 @@ describe("findRepoRoot", () => {
   });
 
   it("throws outside a repo", async () => {
-    const tmpNoGit = await fs.mkdtemp(path.join(require("node:os").tmpdir(), "no-git-"));
+    const tmpNoGit = await fs.mkdtemp(path.join(os.tmpdir(), "no-git-"));
     try {
       await expect(findRepoRoot(tmpNoGit)).rejects.toThrow();
     } finally {

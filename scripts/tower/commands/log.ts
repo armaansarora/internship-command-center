@@ -16,9 +16,8 @@ export function registerLog(program: Command): void {
       }
       for (const c of commits) {
         const when = c.committedAt.split("T")[0];
-        console.log(
-          `${c.sha}  ${when}  [${c.tag.phase}/${c.tag.task}]  ${c.subject}`,
-        );
+        // Subject already includes the [phase/task] prefix.
+        console.log(`${c.sha}  ${when}  ${c.subject}`);
       }
     });
 }

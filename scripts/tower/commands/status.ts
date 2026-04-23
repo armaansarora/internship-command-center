@@ -35,9 +35,8 @@ export function registerStatus(program: Command): void {
       lines.push(`  Phase:        ${active} — ${led.name}`);
       lines.push(`  Progress:     ${done}/${total} tasks complete`);
       if (lastTagged) {
-        lines.push(
-          `  Last commit:  ${lastTagged.sha} [${lastTagged.tag.phase}/${lastTagged.tag.task}] ${lastTagged.subject}`,
-        );
+        // Subject already includes the [phase/task] prefix; don't double-print.
+        lines.push(`  Last commit:  ${lastTagged.sha} ${lastTagged.subject}`);
       } else {
         lines.push(`  Last commit:  ${head.sha} ${head.subject} (untagged)`);
       }

@@ -20,8 +20,8 @@ describe("tower log", () => {
     await commitFile(repo, "c.txt", "c", "[R1/1.2] second");
     const { stdout } = await runCLI(["log"], { cwd: repo });
     const lines = stdout.split("\n").filter(Boolean);
-    expect(lines[0]).toContain("R1.2");
-    expect(lines[1]).toContain("R0.1");
+    expect(lines[0]).toContain("[R1/1.2]");
+    expect(lines[1]).toContain("[R0/0.1]");
     expect(stdout).not.toContain("untagged");
   });
 });

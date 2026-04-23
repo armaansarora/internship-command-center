@@ -42,7 +42,7 @@ describe("tower status", () => {
     const { stdout } = await runCLI(["status"], { cwd: repo });
     expect(stdout).toMatch(/Phase:\s+R2/);
     expect(stdout).toMatch(/Progress:\s+1\/3/);
-    expect(stdout).toMatch(/\[R2\/R2\.1\]/);
+    expect(stdout).toMatch(/\[R2\/2\.1\]/);
     expect(stdout).toMatch(/Blockers:\s+1 open/);
   });
 
