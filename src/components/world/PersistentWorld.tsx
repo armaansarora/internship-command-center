@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { gsap } from "@/lib/gsap-init";
 import { ProceduralSkyline } from "./ProceduralSkyline";
 import { WeatherEffects } from "./WeatherEffects";
+import { PneumaticTubeArrivalOverlay } from "./PneumaticTubeArrivalOverlay";
 import { useWeather } from "@/hooks/useWeather";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { ROUTE_TO_FLOOR } from "@/lib/constants/floors";
@@ -230,6 +231,12 @@ export function PersistentWorld(): JSX.Element {
           zIndex: 15,
         }}
       />
+
+      {/* 7 — Pneumatic-tube arrival overlay (R7.4). System-wide delivery
+           channel for notifications whose channels include "pneumatic_tube".
+           Mounted here (inside PersistentWorld) so every authenticated floor
+           inherits it — the bell-icon-dropdown pattern is gone. */}
+      <PneumaticTubeArrivalOverlay />
     </>
   );
 }
