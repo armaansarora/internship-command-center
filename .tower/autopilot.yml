@@ -1,7 +1,7 @@
-paused: true
+paused: false
 scope: R8-only
-started: null
-started_by: queued-by-partner-for-r8-kickoff
+started: 2026-04-23T16:45:00.000Z
+started_by: sess-r8-kickoff
 ended: null
 ended_reason: null
 max_blockers: 3

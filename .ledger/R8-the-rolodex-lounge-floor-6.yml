@@ -1,12 +1,12 @@
 phase: R8
 name: The Rolodex Lounge (Floor 6)
-status: not_started
+status: in_progress
 intent: "A warm lounge. Mahogany. Leather chairs. A physical rotating rolodex as
   the centerpiece. Contact cards with warmth encoded as temperature (cold/blue →
   warm/cream → hot/amber). CNO's side feels like a party; CIO's side feels like
   a library. The floor opens the network-effect moat: over time, users who opt
   in can (with consent) coordinate warm intros between themselves."
-started: null
+started: 2026-04-23T16:45:00.000Z
 completed: null
 lock: null
 acceptance:
@@ -16,7 +16,155 @@ acceptance:
       without prompting. Consent UX passes a Red Team read.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R8.1:
+    title: Migration 0018 — consent columns (networking_consent_at/revoked_at/version),
+      contacts.private_note, contact_embeddings (pgvector 1536), networking_match_index
+      + RLS + Drizzle schema
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: false
+  R8.2:
+    title: Warmth pure function + cool-blue palette (computeWarmth / computeWarmthTier /
+      WARMTH_PALETTE) — P2 invariant
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.3:
+    title: Rolodex centerpiece — CSS 3D cylinder + GSAP spring + virtualization (≤50 live
+      cards out of 200) — P1 invariant. Provocation-level — the rolodex IS the room.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.4:
+    title: Recolor existing ContactCard + global CSS to cool-blue palette — zero red on
+      cold/cooling. R8 non-negotiable.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.5:
+    title: Side-switch via `[` / `]` keys — camera pan between CNO lounge (left) and CIO
+      library (right) — P8 invariant. Provocation-level.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.6:
+    title: CIO dossier wall — dossiers yellow and corners curl as last_researched_at ages
+      (fresh / aging / stale tiers). Intent-level ("dossiers yellow and curl").
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.7:
+    title: Warmth-decay cron (/api/cron/warmth-decay 0 4 * * *) — writes contacts.warmth,
+      fires CNO cold-alert notification via R7 tube when contact crosses warmth≤30. P6.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.8:
+    title: CIO autonomous re-research cron (/api/cron/cio-reresearch 0 5 * * *) — stale
+      companies refreshed, tube notification per refresh. P7 invariant.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.9:
+    title: Warm-intro scan cron (/api/cron/warm-intro-scan 0 6 * * *) — intra-user pgvector
+      similarity between contact's company and target company; caps ≤2 proposals/user/day.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.10:
+    title: Consent UI surface (Settings → Networking) — verbatim copy from
+      docs/r8/consent-copy.md, opt-in checkbox, visible revoke, POST /api/networking/opt-in
+      and /revoke. P9 drift guard.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.11:
+    title: Consent guard (assertConsented) + /api/networking/match-candidates endpoint —
+      returns 403 "gated-red-team-pending" for all in R8. P3/P4 invariants.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.12:
+    title: Private sticky-note — contacts.private_note UI on card, hand-stuck tilt, crooked
+      cream paper. Allowlist grep ensures never crosses outbound/AI/cross-user surface. P5.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: true
+  R8.13:
+    title: Red Team checklist — .tower/ledger/r8/red-team.md with 10 questions + evidence
+      pointers. P10 invariant.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: false
+  R8.14:
+    title: r8-acceptance-check.ts — 10 mechanical invariants + wire into `tower accept R8`.
+      Mirrors r7-acceptance-check pattern.
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: false
+  R8.15:
+    title: "Sharpening: paper-rustle audio cue when rolodex passes a card with a private
+      note + hand-stuck tilt detail + (optional) CEO business-card Easter egg"
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+    intent_level: false
 blockers: []
-decisions: []
+decisions:
+  - date: "2026-04-23"
+    text: "Cross-user match BEHAVIOR deferred to R8.x post Red Team pass; consent
+      infrastructure + endpoint ships in R8 returning 403 always"
+    why: "Partner constraint — if consent surface can't be finished cleanly, ship
+      rolodex-only and open a blocker for cross-user matching. R8 ships the
+      infrastructure so no code is built twice, and the endpoint hard-codes 403
+      so cross-user data cannot accidentally leak before Red Team."
+  - date: "2026-04-23"
+    text: "CSS 3D + GSAP over R3F for the rolodex"
+    why: "200 cards + spring rotation hits 60fps on CSS 3D with virtualization, and
+      bundle cost is a fraction. R3F is right when we add lighting/shadows; R8 is
+      flat cards on a cylinder."
+  - date: "2026-04-23"
+    text: "Cool-blue palette for cold/cooling — no red anywhere"
+    why: "Partner non-negotiable — warmth decay is informative not punitive. Cold
+      cards look like old photographs, not alerts. Current grid uses #EF4444 (red)
+      on cold — this is the R8.4 recolor target."
+  - date: "2026-04-23"
+    text: "Linear warmth formula — max(0, 100 - days*2). 50 days = 0"
+    why: "Simple, auditable, fits grep invariant. Can be replaced with a smoother
+      curve in R8.x after usage data if it feels wrong."
+  - date: "2026-04-23"
+    text: "Private note never AI-visible, never exported, never cross-user"
+    why: "The sharpening detail from the Brief ('the thing a user puts on a card
+      that only they see'). Allowlist grep in P5 is the mechanical guard — every
+      future reference must be consciously added to the allowlist."
 history: []
