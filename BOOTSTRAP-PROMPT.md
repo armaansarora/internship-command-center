@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:34 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:43 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `afa7584`)
+- **Branch:** `main` (commit `f9b27e1`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 113,178 across 652 source files
+- **Total LOC:** 113,858 across 656 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-afa7584 [R10/10.10] chore(ledger): fix commit pointer for R10.10
+f9b27e1 [R10/10.11] feat(parlor): CEO voice three-layer — settings toggle + button + speechSynthesis
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `afa7584`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `f9b27e1`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,17 +102,17 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (652 files, 113,178 LOC)
+## Source Tree (656 files, 113,858 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 7111 |
 | `src/lib/ai/agents` | 4436 |
+| `src/styles` | 3517 |
 | `src/components/world` | 3512 |
-| `src/styles` | 3448 |
 | `src/components/floor-1` | 2725 |
+| `src/components/parlor` | 2628 |
 | `src/app/__tests__` | 2394 |
-| `src/components/parlor` | 2322 |
 | `src/components/floor-7/war-table` | 1988 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
@@ -195,6 +195,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-5/live-compose` | 358 |
 | `src/lib/agents/coo` | 357 |
 | `src/lib/comp-bands` | 353 |
+| `src/app/(authenticated)/parlor` | 349 |
 | `src/lib/progression` | 349 |
 | `src/components/floor-4/final-countdown` | 341 |
 | `src/app/api/stripe/webhook` | 339 |
@@ -203,6 +204,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/outreach/approve` | 316 |
 | `src/lib/comp-bands/__tests__` | 315 |
 | `src/app/api/account/delete/cancel` | 308 |
+| `src/lib/preferences` | 307 |
 | `src/components/pricing` | 306 |
 | `src/app/api/offers/[id]` | 302 |
 | `src/lib/networking` | 302 |
@@ -210,7 +212,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/audio` | 297 |
 | `src/app/(authenticated)` | 285 |
 | `src/components/lobby/directory` | 285 |
-| `src/lib/preferences` | 284 |
 | `src/lib/utils` | 284 |
 | `src/app/api/offers` | 278 |
 | `src/app/api/ceo/dispatches` | 275 |
@@ -235,7 +236,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/email` | 206 |
 | `src/app/api/resumes/upload` | 205 |
 | `src/app/(authenticated)/writing-room` | 204 |
-| `src/app/(authenticated)/parlor` | 203 |
 | `src/lib/calendar` | 203 |
 | `src/app/(authenticated)/war-room` | 201 |
 | `src/lib/offers` | 199 |
@@ -274,6 +274,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/briefing/binder/[id]` | 114 |
 | `src/app/api/documents/[id]/pdf` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
+| `src/lib/parlor` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/app/(authenticated)/observatory` | 106 |
 | `src/app/api/writing-room/compose-stream` | 105 |
@@ -283,6 +284,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
+| `src/lib/parlor/__tests__` | 90 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
 | `src/lib/resumes/__tests__` | 79 |
@@ -305,11 +307,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db/__tests__` | 36 |
 | `src/lib/agents/offer-evaluator/__tests__` | 36 |
 | `src/app/api/gmail/auth` | 34 |
-| `src/lib/parlor/__tests__` | 34 |
 | `src/app/api/cro` | 31 |
 | `src/lib/constants` | 31 |
 | `src/app/api/auth/callback` | 30 |
-| `src/lib/parlor` | 30 |
 | `src/app/api/stripe/portal` | 27 |
 | `src/app/api/auth/signout` | 25 |
 | `src/lib/speech` | 25 |
@@ -644,6 +644,8 @@ src/components/lobby/directory/BuildingDirectory.test.tsx
 src/components/lobby/directory/BuildingDirectory.tsx
 src/components/parlor/CEOVoicePlayButton.test.tsx
 src/components/parlor/CEOVoicePlayButton.tsx
+src/components/parlor/CFOQuipOverlay.test.tsx
+src/components/parlor/CFOQuipOverlay.tsx
 src/components/parlor/CompBandChart.test.tsx
 src/components/parlor/CompBandChart.tsx
 src/components/parlor/NegotiationDraftPanel.test.tsx
@@ -905,7 +907,9 @@ src/lib/orrery/applications-to-planets.ts
 src/lib/orrery/types.ts
 src/lib/orrery/use-orrery-mode.test.ts
 src/lib/orrery/use-orrery-mode.ts
+src/lib/parlor/__tests__/cfo-quip.test.ts
 src/lib/parlor/__tests__/pin-color.test.ts
+src/lib/parlor/cfo-quip.ts
 src/lib/parlor/pin-color.ts
 src/lib/pdf/cover-letter-pdf.tsx
 src/lib/pdf/resume-pdf.tsx
@@ -1050,13 +1054,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1092 | 12,210 |
+| `BOOTSTRAP-PROMPT.md` | 1099 | 12,287 |
 | `PROJECT-CONTEXT.md` | 283 | 5,309 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2088** | **31,157** |
+| **Total** | **2095** | **31,234** |
 
-> ⚠️ Reading all recommended files consumes ~31,157 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,234 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

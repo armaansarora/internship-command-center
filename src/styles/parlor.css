@@ -807,3 +807,72 @@
   }
 }
 
+/* ------------------------------------------------------------------
+ * R10.12 — CFO quip overlay.
+ *
+ * Understated dialogue bubble shown ONCE, on the user's first entry to
+ * the Parlor after their first offer arrives. Sits in the upper-right
+ * corner so it reads as an aside rather than blocking the oak table or
+ * the convening chairs. Oak-and-gold palette matches the rest of the
+ * parlor; a hair of fade-in softens the arrival. `prefers-reduced-motion`
+ * users get no animation (instant appear/disappear).
+ *
+ * The once-only gate is enforced by the `parlorCfoQuipShown` pref
+ * (server-read on the /parlor route, client-written on dismissal). This
+ * CSS stays stateless — visibility is driven entirely by React's mount
+ * gate.
+ * ------------------------------------------------------------------ */
+
+.parlor-cfo-quip {
+  position: fixed;
+  top: 112px;
+  right: 32px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 320px;
+  padding: 14px 18px 16px;
+  color: #1a0f06;
+  background: linear-gradient(180deg, #e8d9b7 0%, #d3bf94 100%);
+  border: 1px solid rgba(201, 168, 76, 0.5);
+  border-radius: 8px;
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  animation: parlor-cfo-quip-in 280ms ease-out both;
+}
+
+.parlor-cfo-quip-name {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a5a12;
+}
+
+.parlor-cfo-quip-text {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14px;
+  color: #2a1a0b;
+}
+
+@keyframes parlor-cfo-quip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parlor-cfo-quip {
+    animation: none !important;
+  }
+}

@@ -14,6 +14,7 @@ import {
   type CompPin,
 } from "@/components/parlor/CompBandChart";
 import { NegotiationDraftPanel } from "@/components/parlor/NegotiationDraftPanel";
+import { CFOQuipOverlay } from "@/components/parlor/CFOQuipOverlay";
 
 interface ParlorClientProps {
   offers: OfferRow[];
@@ -25,6 +26,21 @@ interface ParlorClientProps {
    * the prop.
    */
   ceoVoiceEnabled?: boolean;
+  /**
+   * R10.12 — Seeded from `user_profiles.preferences.parlorCfoQuipShown.shown`
+   * server-side. When `true` the CFO overlay is never rendered on this
+   * mount (latch-is-closed). When `false` we render the overlay for
+   * exactly one dismissal cycle and POST the latch-closed write on
+   * dismissal. Default `true` when the prop is omitted so no consumer
+   * accidentally re-triggers the beat.
+   */
+  cfoQuipShown?: boolean;
+  /**
+   * R10.12 — Server-computed `{quip}` for the first-entry CFO line. Null
+   * when comp-band lookup failed catastrophically. When null OR when
+   * `cfoQuipShown===true` the overlay stays absent from the DOM.
+   */
+  initialCfoQuip?: { quip: string } | null;
 }
 
 /**
@@ -47,6 +63,15 @@ interface ParlorClientProps {
  * empty response), the chart graceful-empties and the other offers still
  * pin on the shared rails built from any successful convenings.
  *
+ * R10.12 — CFO entry-quip overlay. Rendered at most once per user, ever:
+ * the `parlorCfoQuipShown` pref (server-read in page.tsx, client-written
+ * here on dismissal) enforces the latch. The overlay is a fire-and-forget
+ * beat — we flip the local `quipShown` flag optimistically so a second
+ * mount in the same session (e.g., after hot-nav) won't re-render it,
+ * then POST the pref in the background. Any POST failure is silent: a
+ * retry next visit is safer than surfacing a settings error on a cold
+ * path.
+ *
  * Selection default: first offer in the server-provided list (already
  * sorted newest-first by `getOffersForUser`). Null only when the list
  * is empty — which the server-side gate prevents by redirecting back
@@ -56,6 +81,8 @@ interface ParlorClientProps {
 export function ParlorClient({
   offers,
   ceoVoiceEnabled = false,
+  cfoQuipShown = true,
+  initialCfoQuip = null,
 }: ParlorClientProps): JSX.Element {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(
     offers[0]?.id ?? null,
@@ -67,6 +94,13 @@ export function ParlorClient({
   const [bandsByOfferId, setBandsByOfferId] = useState<
     Record<string, LookupResult>
   >({});
+
+  // R10.12 — Local latch. Seeded from the server pref (which is the source
+  // of truth across sessions). We flip it true on dismissal — that hides
+  // the overlay for the remainder of this mount AND for any subsequent
+  // mount in this session (state persists via React, the pref POST
+  // persists across sessions).
+  const [quipShown, setQuipShown] = useState<boolean>(cfoQuipShown);
 
   const onConvene = useCallback(async () => {
     if (!selectedOfferId) return;
@@ -86,6 +120,30 @@ export function ParlorClient({
       setLoadingByOfferId((m) => ({ ...m, [selectedOfferId]: false }));
     }
   }, [selectedOfferId]);
+
+  /**
+   * R10.12 — Flip the CFO-quip latch and fire the persistence POST.
+   *
+   * Optimistic: we set `quipShown=true` synchronously so the overlay
+   * unmounts even if the POST takes a while (or fails entirely).
+   * Fire-and-forget: no await, no UI for errors. A failed POST means the
+   * user may see the quip again on their next visit — the expected R10.15
+   * behavior is that the latch holds, but a duplicate render is a vastly
+   * better failure mode than blocking the UI on a cold pref write.
+   */
+  const markQuipShown = useCallback((): void => {
+    setQuipShown(true);
+    void fetch("/api/profile/preferences", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        key: "parlorCfoQuipShown",
+        value: { shown: true },
+      }),
+    }).catch(() => {
+      // Silent failure — see docstring.
+    });
+  }, []);
 
   const loading = selectedOfferId
     ? Boolean(loadingByOfferId[selectedOfferId])
@@ -118,6 +176,13 @@ export function ParlorClient({
     [offers],
   );
 
+  // R10.12 — Render the overlay only when ALL of:
+  //   - The server pref says the latch is open (quipShown === false).
+  //   - The server computed a quip (initialCfoQuip !== null). A null quip
+  //     is our signal that bands lookup couldn't produce anything; we'd
+  //     rather skip the beat than ship an empty bubble.
+  const showCfoQuip = !quipShown && initialCfoQuip !== null;
+
   return (
     <ParlorScene
       tableSlot={
@@ -142,6 +207,15 @@ export function ParlorClient({
             offerId={selectedOfferId}
             convening={result}
             ceoVoiceEnabled={ceoVoiceEnabled}
+          />
+        ) : null
+      }
+      signatureSlot={
+        initialCfoQuip ? (
+          <CFOQuipOverlay
+            quip={initialCfoQuip.quip}
+            show={showCfoQuip}
+            onDismiss={markQuipShown}
           />
         ) : null
       }

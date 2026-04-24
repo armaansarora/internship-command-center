@@ -77,6 +77,7 @@
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (228 LOC)
 - `src/components/world/ProceduralSkyline.tsx` (227 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (225 LOC)
+- `src/app/(authenticated)/parlor/parlor-client.tsx` (225 LOC) — R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/floor-2/orrery/PlanetDetailPanel.tsx` (223 LOC) — R9.3 — PlanetDetailPanel.
 - `src/components/floor-4/situation-map/SituationMapCanvas.tsx` (223 LOC) — Canvas2D renderer for the Situation Map.
@@ -106,6 +107,7 @@
 - `src/components/floor-3/BriefingRoomTicker.tsx` (187 LOC) — BriefingRoomTicker — bottom scrolling status strip showing live interview prep data.
 - `src/components/world/elevator/ElevatorButton.tsx` (187 LOC) — ElevatorButton — single floor button with tooltip (desktop) or plain
 - `src/components/floor-6/rolodex/Rolodex.tsx` (186 LOC) — The centerpiece of Floor 6. A physical cylinder of contact cards. Warmth
+- `src/components/parlor/CFOQuipOverlay.test.tsx` (186 LOC) — R10.12 — CFOQuipOverlay behavioral tests.
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (185 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (182 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-1/InjectPrompt.tsx` (181 LOC) — InjectPrompt — floating single-line input that opens above the bell when
@@ -123,7 +125,6 @@
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
 - `src/components/lobby/directory/BuildingDirectory.tsx` (152 LOC) — R4.8 — Building Directory.
-- `src/app/(authenticated)/parlor/parlor-client.tsx` (151 LOC) — R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
 - `src/components/parlor/ParlorDoor.tsx` (149 LOC) — True only on the very first render after an offer parses — drives the
 - `src/components/parlor/CEOVoicePlayButton.tsx` (146 LOC) — R10.11 — CEOVoicePlayButton.
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
@@ -147,6 +148,7 @@
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
 - `src/components/parlor/CompBandChart.tsx` (124 LOC) — R10.8 — Comp-band chart (hand-rolled SVG).
 - `src/components/parlor/ParlorScene.test.tsx` (124 LOC) — R10.6 — ParlorScene composition tests.
+- `src/components/parlor/CFOQuipOverlay.tsx` (120 LOC) — Whether the overlay should render at all. `false` renders null
 - `src/components/floor-2/orrery/Orrery.tsx` (118 LOC) — R9.3 + R9.4 — Orrery (consumer wrapper).
 - `src/components/floor-2/orrery/PatternModeToggle.tsx` (118 LOC) — R9.4 — PatternModeToggle.
 - `src/components/parlor/ThreeChairsConvening.tsx` (118 LOC) — R10.7 — ThreeChairsConvening.
