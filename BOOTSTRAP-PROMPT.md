@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 10:24 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 10:26 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `37b30bd`)
+- **Branch:** `main` (commit `04a9352`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 116,146 across 669 source files
 - **Build:** Clean (zero TS errors)
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-37b30bd fix(ledger): quote multi-sentence history entries — YAML parser fix
+04a9352 chore(sweep): post-R10 cleanup — archive completed-phase docs + trim orphans
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `37b30bd`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `04a9352`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -1072,13 +1072,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1123 | 12,634 |
+| `BOOTSTRAP-PROMPT.md` | 1121 | 12,612 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2107** | **31,275** |
+| **Total** | **2105** | **31,253** |
 
-> ⚠️ Reading all recommended files consumes ~31,275 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,253 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
