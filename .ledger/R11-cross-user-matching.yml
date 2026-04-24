@@ -11,8 +11,8 @@ started: 2026-04-24T16:51:26.171Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T16:55:50.520Z
-  expires: 2026-04-24T18:55:50.516Z
+  acquired: 2026-04-24T17:24:25.222Z
+  expires: 2026-04-24T19:24:25.218Z
 acceptance:
   criteria:
     - /api/networking/match-candidates returns 200 with real match candidates
@@ -44,49 +44,75 @@ tasks:
     title: Match-candidate index schema — new match_candidate_index table (user_id,
       counterparty_anon_key, edge_strength, inserted_at, invalidates_at) with
       RLS so users see only their own index rows. Migration 0022 or 0023.
-    status: in_progress
+    status: complete
     started: 2026-04-24T16:55:50.520Z
+    completed: 2026-04-24T16:59:25.738Z
+    commit: cdf979a
   R11.3:
     title: Index populator cron — /api/cron/match-index nightly cron that rebuilds
       each user's match candidates from contacts + applications. Reuses R7 cron
       surface; budgeted work cap per user.
-    status: not_started
+    status: complete
+    started: 2026-04-24T17:02:25.325Z
+    completed: 2026-04-24T17:08:11.143Z
+    commit: fe51d94
   R11.4:
     title: Delta re-scan triggers — on contact insert/update/warmth change AND on
       application insert/status-change, enqueue a per-user match-index refresh
       job. Reuses R8's existing event surface where possible. Dedupe by user_id
       within a short window.
-    status: not_started
+    status: complete
+    started: 2026-04-24T17:09:40.266Z
+    completed: 2026-04-24T17:12:38.427Z
+    commit: bb164e6
   R11.5:
     title: Match algorithm — the core scoring. Inputs the user's contacts +
       applications; outputs ranked candidates. Heuristic, not ML. Must be
       deterministic and cache-friendly.
-    status: not_started
+    status: complete
+    started: 2026-04-24T16:59:26.055Z
+    completed: 2026-04-24T17:02:24.984Z
+    commit: 7383e7a
   R11.6:
     title: Consent-version gate — extend assertConsented to also check version
       match; add typed 403 consent-version-stale response.
-    status: not_started
+    status: complete
+    started: 2026-04-24T17:13:06.303Z
+    completed: 2026-04-24T17:13:06.641Z
+    commit: bb164e6
   R11.7:
     title: Rate limit — 20 queries/hour per user, Supabase-backed counter or
       in-memory if Vercel Fluid Compute shares instance state; typed 429 with
       retry_after_seconds.
-    status: not_started
+    status: complete
+    started: 2026-04-24T17:13:07.017Z
+    completed: 2026-04-24T17:15:17.357Z
+    commit: d895271
   R11.8:
     title: Unblock /api/networking/match-candidates — replace the
       gated-red-team-pending 403 with real match results. Route handler reads
       from match_candidate_index + applies rate limit + logs to audit_events.
-    status: not_started
+    status: complete
+    started: 2026-04-24T17:15:17.674Z
+    completed: 2026-04-24T17:18:35.344Z
+    commit: d6d41a7
   R11.9:
     title: Audit log surface — match_events table (user_id, counterparty_anon_key,
       fired_at, match_reason) + Settings → Networking → "How your data is used"
       view showing last N events. NOT a raw log dump — readable one-liners ("You
       were matched with a contact at Acme Corp on Apr 24").
-    status: not_started
+    status: complete
+    started: 2026-04-24T17:18:35.663Z
+    completed: 2026-04-24T17:24:24.905Z
+    commit: 41855be
   R11.10:
     title: Proof tests — bind each invariant above. Cross-user RLS isolation,
       consent gate, version gate, rate limit, audit log insert, delta re-scan
       debounce, cron idempotency.
-    status: not_started
+    status: complete
+    started: 2026-04-24T17:24:25.222Z
+    completed: 2026-04-24T17:33:27.228Z
+    commit: 0ede999
   R11.11:
     title: Red Team pass by partner (post-autopilot) — confirm consent copy survives
       a lawyer read, no PII leaks cross-user, all gates fail-closed. May open
@@ -102,3 +128,21 @@ history:
   - 2026-04-24T16:51:26.171Z: task_started R11.1
   - 2026-04-24T16:55:45.663Z: task_completed R11.1
   - 2026-04-24T16:55:50.520Z: task_started R11.2
+  - 2026-04-24T16:59:25.738Z: task_completed R11.2
+  - 2026-04-24T16:59:26.055Z: task_started R11.5
+  - 2026-04-24T17:02:24.984Z: task_completed R11.5
+  - 2026-04-24T17:02:25.325Z: task_started R11.3
+  - 2026-04-24T17:08:11.143Z: task_completed R11.3
+  - 2026-04-24T17:08:11.459Z: task_started R11.4
+  - 2026-04-24T17:09:40.266Z: task_started R11.4
+  - 2026-04-24T17:12:38.427Z: task_completed R11.4
+  - 2026-04-24T17:13:06.303Z: task_started R11.6
+  - 2026-04-24T17:13:06.641Z: task_completed R11.6
+  - 2026-04-24T17:13:07.017Z: task_started R11.7
+  - 2026-04-24T17:15:17.357Z: task_completed R11.7
+  - 2026-04-24T17:15:17.674Z: task_started R11.8
+  - 2026-04-24T17:18:35.344Z: task_completed R11.8
+  - 2026-04-24T17:18:35.663Z: task_started R11.9
+  - 2026-04-24T17:24:24.905Z: task_completed R11.9
+  - 2026-04-24T17:24:25.222Z: task_started R11.10
+  - 2026-04-24T17:33:27.228Z: task_completed R11.10
