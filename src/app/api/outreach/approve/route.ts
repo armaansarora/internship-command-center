@@ -14,12 +14,14 @@
  * between a late-clicked cancel and an early cron tick is resolved
  * atomically by Postgres timestamp comparison, not by UI animation.
  *
- * R10.10 — negotiation outreach (`type === 'negotiation'`) gets a 24-hour
- * minimum send-hold, clamped SERVER-SIDE. This route reads the queued row's
- * `type` column itself (NOT from the request body) and passes
- * `minimumHoldSeconds: 86400` to `approveOutreachForUser` when the type is
- * negotiation. A hand-crafted POST cannot bypass the hold — `type` is not a
- * user-supplied field on this route, and the helper itself enforces
+ * R10.10 + R10.14 — hold-bearing outreach types get a 24-hour minimum
+ * send-hold, clamped SERVER-SIDE. This route reads the queued row's
+ * `type` column itself (NOT from the request body) and looks up the hold
+ * in `HOLD_SECONDS_BY_TYPE`. Today that map carries `negotiation` (R10.10)
+ * and `reference_request` (R10.14); extending it is the canonical way to
+ * add a new hold-bearing type with no handler change. A hand-crafted POST
+ * cannot bypass the hold — `type` is not a user-supplied field on this
+ * route, and the helper itself enforces
  * `send_after >= now() + minimumHoldSeconds` regardless of caller input.
  *
  * This is the load-bearing half of the "real undo" promise. A UI-only
@@ -36,6 +38,17 @@ const BodySchema = z.object({ id: z.string().uuid() });
 export const UNDO_WINDOW_SECONDS = 30;
 /** R10.10 — 24h minimum hold for negotiation outreach. */
 export const NEGOTIATION_HOLD_SECONDS = 86400;
+/** R10.14 — 24h minimum hold for reference-request outreach. */
+export const REFERENCE_REQUEST_HOLD_SECONDS = 86400;
+
+/**
+ * Type → minimum hold seconds. Extending this map is the canonical way
+ * to add a new hold-bearing outreach type; no handler changes needed.
+ */
+const HOLD_SECONDS_BY_TYPE: Record<string, number> = {
+  negotiation: NEGOTIATION_HOLD_SECONDS,
+  reference_request: REFERENCE_REQUEST_HOLD_SECONDS,
+};
 
 export async function POST(req: Request): Promise<NextResponse> {
   const user = await requireUser();
@@ -69,10 +82,8 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const minimumHoldSeconds =
-    (row as { type: string | null }).type === "negotiation"
-      ? NEGOTIATION_HOLD_SECONDS
-      : undefined;
+  const rowType = (row as { type: string | null }).type ?? "";
+  const minimumHoldSeconds = HOLD_SECONDS_BY_TYPE[rowType];
   const sendAfterBase = new Date(Date.now() + UNDO_WINDOW_SECONDS * 1000);
 
   const result = await approveOutreachForUser(

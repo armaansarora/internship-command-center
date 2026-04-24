@@ -213,4 +213,28 @@ describe("POST /api/outreach/approve", () => {
     expect(sendAfterMs - before).toBeGreaterThanOrEqual(86_400_000 - 2000);
     expect(sendAfterMs - before).toBeLessThan(86_400_000 + 10_000);
   });
+
+  it("R10.14 — type=reference_request also gets 24h send-hold clamp", async () => {
+    const { selectChain: _s, updateChain: _u } = wireChains(
+      { data: { type: "reference_request" }, error: null },
+      {
+        data: {
+          id: "ref-1",
+          send_after: new Date(Date.now() + 86400 * 1000).toISOString(),
+        },
+        error: null,
+      },
+    );
+    const req = new NextRequest("http://localhost/api/outreach/approve", {
+      method: "POST",
+      body: JSON.stringify({ id: "11111111-1111-4111-8111-111111111111" }),
+      headers: { "content-type": "application/json" },
+    });
+    const { POST } = await import("./route");
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    const sendAfter = new Date(body.sendAfter).getTime();
+    expect(sendAfter - Date.now()).toBeGreaterThan(23.5 * 3600 * 1000);
+  });
 });
