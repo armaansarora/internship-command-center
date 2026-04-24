@@ -26,6 +26,14 @@ interface SettingsClientProps {
    * `user_profiles.preferences.rejectionReflections.enabled`.
    */
   rejectionReflectionsEnabled?: boolean;
+  /**
+   * R10.11 — CEO voice read-aloud preference (Settings → Analytics →
+   * 'CEO voice'). Default OFF. Seeded server-side from
+   * `user_profiles.preferences.ceoVoice.enabled`. Consumed by the
+   * CEOVoicePlayButton rendered inside the NegotiationDraftPanel —
+   * Layer 1 of the three-layer voice gate.
+   */
+  ceoVoiceEnabled?: boolean;
 }
 
 /**
@@ -86,6 +94,7 @@ export function SettingsClient({
   networkingConsentAt = null,
   networkingRevokedAt = null,
   rejectionReflectionsEnabled = true,
+  ceoVoiceEnabled = false,
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
@@ -139,6 +148,43 @@ export function SettingsClient({
       }
     },
     [reflectionsEnabled],
+  );
+
+  // R10.11 — CEO voice toggle (default OFF). Shares the reflections
+  // optimistic-update pattern: flip state immediately, POST, roll back on
+  // failure. The button this gates lives inside the Negotiation Parlor.
+  const [ceoVoiceOn, setCeoVoiceOn] = useState<boolean>(ceoVoiceEnabled);
+  const [ceoVoiceSaving, setCeoVoiceSaving] = useState(false);
+  const [ceoVoiceError, setCeoVoiceError] = useState<string | null>(null);
+
+  const handleToggleCeoVoice = useCallback(
+    async (next: boolean) => {
+      const previous = ceoVoiceOn;
+      setCeoVoiceOn(next);
+      setCeoVoiceSaving(true);
+      setCeoVoiceError(null);
+      try {
+        const response = await fetch("/api/profile/preferences", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            key: "ceoVoice",
+            value: { enabled: next },
+          }),
+        });
+        if (!response.ok) {
+          setCeoVoiceOn(previous);
+          setCeoVoiceError("Couldn't save. Try again.");
+          return;
+        }
+      } catch {
+        setCeoVoiceOn(previous);
+        setCeoVoiceError("Network error. Try again.");
+      } finally {
+        setCeoVoiceSaving(false);
+      }
+    },
+    [ceoVoiceOn],
   );
 
   const handleExport = useCallback(async () => {
@@ -749,6 +795,74 @@ export function SettingsClient({
                   }}
                 >
                   {reflectionsError}
+                </span>
+              )}
+            </span>
+          </label>
+
+          {/* R10.11 — CEO voice toggle. Three-layer gate Layer 1. Default
+              OFF. The button this unlocks lives in the Negotiation Parlor
+              under each revealed draft. */}
+          <label
+            className="flex items-start gap-3 cursor-pointer select-none"
+            style={{ alignItems: "flex-start", marginTop: "16px" }}
+          >
+            <input
+              type="checkbox"
+              checked={ceoVoiceOn}
+              disabled={ceoVoiceSaving}
+              onChange={(e) => {
+                void handleToggleCeoVoice(e.target.checked);
+              }}
+              aria-describedby="ceo-voice-help"
+              data-testid="ceo-voice-toggle"
+              style={{
+                width: "16px",
+                height: "16px",
+                marginTop: "2px",
+                accentColor: "var(--gold)",
+                cursor: ceoVoiceSaving ? "wait" : "pointer",
+              }}
+            />
+            <span className="min-w-0">
+              <span
+                style={{
+                  display: "block",
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                  lineHeight: 1.3,
+                }}
+              >
+                CEO voice — reads negotiation drafts aloud
+              </span>
+              <span
+                id="ceo-voice-help"
+                style={{
+                  display: "block",
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "12px",
+                  color: "var(--text-muted)",
+                  lineHeight: 1.45,
+                  marginTop: "4px",
+                }}
+              >
+                Hear your CEO read drafts before you send them. You can
+                turn this off anytime.
+              </span>
+              {ceoVoiceError && (
+                <span
+                  role="alert"
+                  style={{
+                    display: "block",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "11px",
+                    color: "#DC3C3C",
+                    marginTop: "6px",
+                  }}
+                >
+                  {ceoVoiceError}
                 </span>
               )}
             </span>

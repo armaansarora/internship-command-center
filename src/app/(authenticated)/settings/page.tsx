@@ -5,6 +5,7 @@ import { SettingsClient } from "./settings-client";
 import { getSubscriptionTier } from "@/lib/stripe/server";
 import { createClient } from "@/lib/supabase/server";
 import { readRejectionReflectionsPref } from "@/lib/preferences/rejection-reflections-pref";
+import { readCeoVoicePref } from "@/lib/preferences/ceo-voice-pref";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -54,6 +55,7 @@ export default async function SettingsPage() {
   const rejectionReflectionsPref = readRejectionReflectionsPref(
     profileData.preferences,
   );
+  const ceoVoicePref = readCeoVoicePref(profileData.preferences);
 
   return (
     <FloorShell floorId="PH">
@@ -68,6 +70,7 @@ export default async function SettingsPage() {
         networkingConsentAt={profileData.networkingConsentAt}
         networkingRevokedAt={profileData.networkingRevokedAt}
         rejectionReflectionsEnabled={rejectionReflectionsPref.enabled}
+        ceoVoiceEnabled={ceoVoicePref.enabled}
       />
     </FloorShell>
   );

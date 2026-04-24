@@ -759,3 +759,51 @@
     animation: none !important;
   }
 }
+
+/* R10.11 — CEO voice read-aloud pill. Understated gold-on-oak button that
+   lives beneath the revealed draft. Matches the parlor's palette without
+   competing with the primary "Draft negotiation" CTA above it. */
+.ceo-voice-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 14px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #7a5a12;
+  background: rgba(232, 201, 106, 0.08);
+  border: 1px solid rgba(122, 90, 18, 0.28);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.ceo-voice-play:hover {
+  color: #5a4410;
+  background: rgba(232, 201, 106, 0.16);
+  border-color: rgba(122, 90, 18, 0.44);
+}
+
+.ceo-voice-play:focus-visible {
+  outline: 2px solid rgba(232, 201, 106, 0.9);
+  outline-offset: 2px;
+}
+
+.ceo-voice-play[aria-pressed="true"] {
+  color: #1a0f06;
+  background: rgba(232, 201, 106, 0.28);
+  border-color: rgba(122, 90, 18, 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ceo-voice-play {
+    transition: none !important;
+  }
+}
+

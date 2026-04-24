@@ -4,6 +4,7 @@ import type { JSX } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { PenGlowCursor } from "@/components/floor-5/live-compose/PenGlowCursor";
+import { CEOVoicePlayButton } from "@/components/parlor/CEOVoicePlayButton";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
 
 /**
@@ -54,6 +55,14 @@ interface NegotiationDraftPanelProps {
   reducedMotion?: boolean;
   /** Override the endpoint (tests). */
   endpoint?: string;
+  /**
+   * R10.11 — Layer 2 of the three-layer voice gate. When true, the
+   * CEOVoicePlayButton is rendered after the reveal finishes; when false
+   * (default), the button is not rendered. The button performs its own
+   * Layer 3 browser-support check internally, so callers don't need to
+   * pre-filter by window.speechSynthesis availability.
+   */
+  ceoVoiceEnabled?: boolean;
 }
 
 interface DraftResult {
@@ -73,6 +82,7 @@ export function NegotiationDraftPanel({
   autoStart = false,
   reducedMotion,
   endpoint,
+  ceoVoiceEnabled = false,
 }: NegotiationDraftPanelProps): JSX.Element {
   const hookReduced = useReducedMotion();
   const reduced = reducedMotion ?? hookReduced;
@@ -225,6 +235,17 @@ export function NegotiationDraftPanel({
               {revealedBody}
               {showCursor ? <PenGlowCursor key={penTick} /> : null}
             </div>
+            {/* R10.11 — Read-aloud button. Three-layer gate:
+                Layer 1/2 arrives as `ceoVoiceEnabled`; Layer 3 (browser
+                support) is checked inside the button. Rendered only once
+                the reveal is complete so the audio matches the final
+                text, not the mid-animation slice. */}
+            {fullyRevealed ? (
+              <CEOVoicePlayButton
+                enabled={ceoVoiceEnabled}
+                text={draft.body}
+              />
+            ) : null}
           </div>
         </div>
       )}

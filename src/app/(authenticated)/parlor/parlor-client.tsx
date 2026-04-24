@@ -17,6 +17,14 @@ import { NegotiationDraftPanel } from "@/components/parlor/NegotiationDraftPanel
 
 interface ParlorClientProps {
   offers: OfferRow[];
+  /**
+   * R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
+   * `user_profiles.preferences.ceoVoice.enabled` server-side. Threaded
+   * down to the NegotiationDraftPanel so the read-aloud button can gate
+   * itself. Default OFF preserves the Layer 1 default when callers drop
+   * the prop.
+   */
+  ceoVoiceEnabled?: boolean;
 }
 
 /**
@@ -45,7 +53,10 @@ interface ParlorClientProps {
  * to /c-suite, but we still guard via `offers[0]?.id ?? null` in case
  * a future code path lets a zero-offer client through.
  */
-export function ParlorClient({ offers }: ParlorClientProps): JSX.Element {
+export function ParlorClient({
+  offers,
+  ceoVoiceEnabled = false,
+}: ParlorClientProps): JSX.Element {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(
     offers[0]?.id ?? null,
   );
@@ -130,6 +141,7 @@ export function ParlorClient({ offers }: ParlorClientProps): JSX.Element {
             key={selectedOfferId}
             offerId={selectedOfferId}
             convening={result}
+            ceoVoiceEnabled={ceoVoiceEnabled}
           />
         ) : null
       }

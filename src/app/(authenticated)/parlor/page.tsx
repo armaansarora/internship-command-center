@@ -6,6 +6,7 @@ import {
   countOffersForUser,
   getOffersForUser,
 } from "@/lib/db/queries/offers-rest";
+import { readCeoVoicePref } from "@/lib/preferences/ceo-voice-pref";
 import { ParlorClient } from "./parlor-client";
 
 export const metadata: Metadata = { title: "The Negotiation Parlor | The Tower" };
@@ -22,11 +23,11 @@ export const metadata: Metadata = { title: "The Negotiation Parlor | The Tower" 
  *   1. Auth (redirects to /lobby via `requireUser`).
  *   2. Count offers (cheap `head: true` query).
  *   3. If zero → redirect away.
- *   4. Otherwise load offers and render the client scene.
+ *   4. Otherwise load offers + ceoVoice pref and render the client scene.
  *
- * R10.7 will add the three-chair convening; R10.8 will populate the
- * back-wall pin-stack chart slot. Both placeholder slots are rendered here
- * so the scene composition is stable across those follow-ups.
+ * R10.7 added the three-chair convening; R10.8 populates the back-wall
+ * chart; R10.11 threads the ceoVoice pref (default OFF) through to the
+ * NegotiationDraftPanel so the read-aloud button can gate itself.
  */
 export default async function ParlorPage(): Promise<JSX.Element> {
   const user = await requireUser();
@@ -34,5 +35,17 @@ export default async function ParlorPage(): Promise<JSX.Element> {
   const count = await countOffersForUser(supabase, user.id);
   if (count === 0) redirect("/c-suite");
   const offers = await getOffersForUser(supabase, user.id);
-  return <ParlorClient offers={offers} />;
+
+  // R10.11 — Seed the CEO voice toggle (Layer 1 of the three-layer gate).
+  // Defensive read: any malformed preferences blob falls back to OFF.
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("preferences")
+    .eq("id", user.id)
+    .maybeSingle();
+  const ceoVoicePref = readCeoVoicePref(
+    (profile as { preferences?: unknown } | null)?.preferences ?? null,
+  );
+
+  return <ParlorClient offers={offers} ceoVoiceEnabled={ceoVoicePref.enabled} />;
 }
