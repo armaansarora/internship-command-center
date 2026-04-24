@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:59 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:01 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `ec80089`)
+- **Branch:** `main` (commit `cdf979a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 117,573 across 676 source files
+- **Total LOC:** 117,892 across 680 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-ec80089 [R11/11.1] feat(r11): consent-version gate + CURRENT_CONSENT_VERSION=2
+cdf979a [R11/11.2] feat(r11): schema + migration for match_candidate_index, match_events, match_rate_limits
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `ec80089`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `cdf979a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (676 files, 117,573 LOC)
+## Source Tree (680 files, 117,892 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -184,8 +184,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/morning` | 448 |
 | `src/app/api/profile/preferences` | 441 |
 | `src/app/api/cron/purge-sweeper` | 439 |
+| `src/lib/networking` | 433 |
 | `src/lib/account` | 432 |
 | `src/lib/notifications` | 428 |
+| `src/lib/networking/__tests__` | 423 |
 | `src/components/floor-3/star` | 413 |
 | `src/lib/agents/concierge` | 411 |
 | `src/lib/auth` | 411 |
@@ -203,7 +205,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/progression` | 349 |
 | `src/components/floor-4/final-countdown` | 341 |
 | `src/app/api/stripe/webhook` | 339 |
-| `src/lib/networking` | 335 |
 | `src/app/api/cron/briefing` | 327 |
 | `src/app/(authenticated)/briefing-room` | 320 |
 | `src/lib/comp-bands/__tests__` | 315 |
@@ -241,7 +242,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/resumes/upload` | 205 |
 | `src/app/(authenticated)/writing-room` | 204 |
 | `src/lib/calendar` | 203 |
-| `src/lib/networking/__tests__` | 202 |
 | `src/app/(authenticated)/war-room` | 201 |
 | `src/lib/offers` | 199 |
 | `src/app/api/briefing/complete-drill` | 198 |
@@ -920,9 +920,13 @@ src/lib/logger.test.ts
 src/lib/logger.ts
 src/lib/networking/__tests__/consent-guard.test.ts
 src/lib/networking/__tests__/consent-version.test.ts
+src/lib/networking/__tests__/match-algorithm.test.ts
+src/lib/networking/__tests__/match-anon.test.ts
 src/lib/networking/consent-guard.test.ts
 src/lib/networking/consent-guard.ts
 src/lib/networking/consent-version.ts
+src/lib/networking/match-algorithm.ts
+src/lib/networking/match-anon.ts
 src/lib/networking/warm-intro-finder.test.ts
 src/lib/networking/warm-intro-finder.ts
 src/lib/notifications/quiet-hours.test.ts
@@ -1083,13 +1087,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1131 | 12,755 |
+| `BOOTSTRAP-PROMPT.md` | 1132 | 12,774 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2115** | **31,396** |
+| **Total** | **2116** | **31,415** |
 
-> ⚠️ Reading all recommended files consumes ~31,396 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,415 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
