@@ -121,6 +121,11 @@ function MetricPill({ label, value, color }: { label: string; value: string; col
 // Main component
 // ---------------------------------------------------------------------------
 export function CFOWhiteboard({ stats }: CFOWhiteboardProps): JSX.Element {
+  // R9.9 — Discreet entry point for the State of the Month PDF (R9.8 route).
+  // Computed from current local time so the link always points at the active
+  // month; format is YYYY-MM per the route's Zod validator.
+  const currentMonth = new Date().toISOString().slice(0, 7);
+
   return (
     <div
       role="region"
@@ -176,6 +181,28 @@ export function CFOWhiteboard({ stats }: CFOWhiteboardProps): JSX.Element {
           CONV TREND
         </span>
         <MiniTrend convRate={stats.conversionRate} />
+      </div>
+
+      {/* R9.9 — Discreet download surface for the State of the Month PDF. */}
+      <div
+        style={{
+          marginTop: "16px",
+          paddingTop: "12px",
+          borderTop: "1px solid rgba(60, 140, 220, 0.1)",
+          fontSize: "9px",
+          fontFamily: "JetBrains Mono, IBM Plex Mono, monospace",
+          color: "rgba(74, 122, 155, 0.65)",
+          letterSpacing: "0.08em",
+          textAlign: "center",
+        }}
+      >
+        <a
+          href={`/api/reports/state-of-month?month=${currentMonth}`}
+          aria-label={`Download State of the Month PDF for ${currentMonth}`}
+          style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}
+        >
+          DOWNLOAD STATE OF THE MONTH ↓
+        </a>
       </div>
 
       {/* Decorative label */}

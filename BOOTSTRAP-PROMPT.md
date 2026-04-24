@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 9:11 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 9:19 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `b438760`)
+- **Branch:** `main` (commit `8865ad7`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 104,417 across 591 source files
+- **Total LOC:** 104,819 across 592 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-b438760 [R9/9.7] feat(cfo): weekly threshold cron via R7 pneumatic tube
+8865ad7 [R9/9.8] feat(report): State of the Month PDF via @react-pdf/renderer
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `b438760`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `8865ad7`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (591 files, 104,417 LOC)
+## Source Tree (592 files, 104,819 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -144,6 +144,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
 | `src/components/floor-4/undo-bar` | 885 |
+| `src/components/floor-2` | 878 |
 | `src/lib/pdf` | 865 |
 | `src/lib/agents/cfo` | 846 |
 | `src/lib/agents/cpo` | 842 |
@@ -166,11 +167,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
-| `src/components/floor-2` | 576 |
 | `src/app/api/cron/unprompted-ceo` | 573 |
 | `src/lib/stripe` | 545 |
+| `src/components/floor-2/cfo-character` | 544 |
 | `src/components/floor-1/ceo-character` | 520 |
-| `src/components/floor-2/cfo-character` | 517 |
 | `src/components/floor-6/rolodex` | 511 |
 | `src/components/floor-5/ready-to-send` | 506 |
 | `src/app/lobby/onboarding` | 500 |
@@ -262,6 +262,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/documents/[id]/pdf` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/app/api/gmail/callback` | 108 |
+| `src/app/(authenticated)/observatory` | 106 |
 | `src/app/api/writing-room/compose-stream` | 105 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
 | `src/app/api/writing-room/compose-stream/__tests__` | 104 |
@@ -288,7 +289,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db/__tests__` | 36 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/(authenticated)/c-suite` | 33 |
-| `src/app/(authenticated)/observatory` | 33 |
 | `src/app/api/cro` | 31 |
 | `src/lib/constants` | 31 |
 | `src/app/api/auth/callback` | 30 |
@@ -463,6 +463,7 @@ src/components/floor-1/RingTheBell.tsx
 src/components/floor-1/ceo-character/CEOCharacter.tsx
 src/components/floor-1/ceo-character/CEODialoguePanel.tsx
 src/components/floor-1/ceo-character/CEOWhiteboard.tsx
+src/components/floor-2/ObservatoryClient.test.tsx
 src/components/floor-2/ObservatoryClient.tsx
 src/components/floor-2/ObservatoryScene.tsx
 src/components/floor-2/ObservatoryTicker.tsx
@@ -971,13 +972,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1015 | 11,299 |
+| `BOOTSTRAP-PROMPT.md` | 1020 | 11,352 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 506 | 11,299 |
-| **Total** | **2170** | **35,045** |
+| `CLAUDE.md` | 507 | 11,350 |
+| **Total** | **2176** | **35,149** |
 
-> ⚠️ Reading all recommended files consumes ~35,045 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~35,149 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

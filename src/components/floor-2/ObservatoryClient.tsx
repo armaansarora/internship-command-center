@@ -3,10 +3,12 @@
 import type { JSX } from "react";
 import { useState, useCallback, useMemo } from "react";
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
+import type { ApplicationInput } from "@/lib/orrery/types";
 import { ObservatoryScene } from "./ObservatoryScene";
 import { CFOCharacter } from "./cfo-character/CFOCharacter";
 import { CFODialoguePanel } from "./cfo-character/CFODialoguePanel";
 import { CFOWhiteboard } from "./cfo-character/CFOWhiteboard";
+import { Orrery } from "./orrery/Orrery";
 import { ConversionFunnel } from "./analytics/ConversionFunnel";
 import { PipelineVelocity } from "./analytics/PipelineVelocity";
 import { WeeklyTrend } from "./analytics/WeeklyTrend";
@@ -17,6 +19,13 @@ import { ActivityHeatmap } from "./analytics/ActivityHeatmap";
 // ---------------------------------------------------------------------------
 interface ObservatoryClientProps {
   stats: PipelineStats;
+  /**
+   * R9.9 — raw application data the Orrery transforms into planets. The
+   * Orrery is the centerpiece of Floor 2 (per partner brief: "the chart
+   * grid is supporting material, not the centerpiece"). Empty array is
+   * valid — the Orrery shows its empty-state aria-label.
+   */
+  apps: ApplicationInput[];
 }
 
 // ---------------------------------------------------------------------------
@@ -53,7 +62,7 @@ function AnalyticsPanel({ children, title }: { children: React.ReactNode; title:
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
-export function ObservatoryClient({ stats }: ObservatoryClientProps): JSX.Element {
+export function ObservatoryClient({ stats, apps }: ObservatoryClientProps): JSX.Element {
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [cfoStatus, setCfoStatus] = useState<"idle" | "thinking" | "talking">("idle");
 
@@ -100,42 +109,72 @@ export function ObservatoryClient({ stats }: ObservatoryClientProps): JSX.Elemen
   );
 
   // ── Dashboard slot ──────────────────────────────────────────────────────
+  // R9.9 — Orrery is the centerpiece. The chart grid is demoted to supporting
+  // material below it; WeeklyTrend + ActivityHeatmap collapse into "More
+  // analytics" so the Orrery owns the first viewport. This composition is
+  // structurally guarded by ObservatoryClient.test.tsx (DOM-order assertions).
   const dashboardSlot = (
-    <div style={{ maxWidth: "900px" }}>
-      {/* Grid: Funnel + Velocity */}
+    <div style={{ width: "100%", maxWidth: "1100px", margin: "0 auto" }}>
+      {/* PRIMARY — the signature moment */}
+      <div
+        style={{
+          width: "100%",
+          maxHeight: "70vh",
+          marginBottom: "32px",
+        }}
+        aria-label="Pipeline orrery — the centerpiece of the Observatory"
+      >
+        <Orrery apps={apps} />
+      </div>
+
+      {/* SUPPORTING — context strips, not centerpieces */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: "14px",
-          marginBottom: "0",
+          marginBottom: "14px",
         }}
       >
         <AnalyticsPanel title="CONVERSION FUNNEL">
           <ConversionFunnel stats={stats} />
         </AnalyticsPanel>
-
         <AnalyticsPanel title="PIPELINE VELOCITY">
           <PipelineVelocity />
         </AnalyticsPanel>
       </div>
 
-      {/* Grid: Weekly Trend + Heatmap */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "14px",
-        }}
-      >
-        <AnalyticsPanel title="WEEKLY TREND (8 WEEKS)">
-          <WeeklyTrend />
-        </AnalyticsPanel>
-
-        <AnalyticsPanel title="ACTIVITY HEATMAP">
-          <ActivityHeatmap />
-        </AnalyticsPanel>
-      </div>
+      {/* MORE — collapsed by default, opt-in expansion */}
+      <details style={{ marginTop: "8px" }}>
+        <summary
+          style={{
+            cursor: "pointer",
+            fontSize: "10px",
+            fontFamily: "JetBrains Mono, IBM Plex Mono, monospace",
+            color: "rgba(74, 122, 155, 0.8)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            padding: "8px 0",
+          }}
+        >
+          More analytics
+        </summary>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "14px",
+            marginTop: "14px",
+          }}
+        >
+          <AnalyticsPanel title="WEEKLY TREND (8 WEEKS)">
+            <WeeklyTrend />
+          </AnalyticsPanel>
+          <AnalyticsPanel title="ACTIVITY HEATMAP">
+            <ActivityHeatmap />
+          </AnalyticsPanel>
+        </div>
+      </details>
     </div>
   );
 

@@ -12,8 +12,8 @@ started: 2026-04-23T20:35:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T01:03:20.016Z
-  expires: 2026-04-24T03:03:20.011Z
+  acquired: 2026-04-24T01:14:42.133Z
+  expires: 2026-04-24T03:14:42.128Z
 acceptance:
   criteria:
     - Orrery renders 100+ applications at 60fps on baseline laptop.
@@ -75,15 +75,15 @@ tasks:
   R9.8:
     title: State of the Month PDF — reuses @react-pdf/renderer (no second PDF lib),
       inline SVG orrery snapshot
-    status: in_progress
+    status: complete
     started: 2026-04-24T01:03:20.016Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T01:11:55.137Z
+    commit: 8865ad7
   R9.9:
     title: Wire Orrery into ObservatoryClient as primary dashboardSlot — chart grid
       demoted to supporting strip (anti-pattern guard)
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-24T01:14:42.133Z
     completed: null
     commit: null
   R9.10:
@@ -141,3 +141,6 @@ history:
   - 2026-04-24T01:00:35.265Z: task_started R9.7
   - 2026-04-24T01:02:52.879Z: task_completed R9.7
   - 2026-04-24T01:03:20.016Z: task_started R9.8
+  - 2026-04-24T01:11:55.137Z: task_completed R9.8
+  - 2026-04-24T01:12:33.190Z: task_started R9.9
+  - 2026-04-24T01:14:42.133Z: task_started R9.9

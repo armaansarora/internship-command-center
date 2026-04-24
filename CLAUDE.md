@@ -157,10 +157,12 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/lobby/cinematic/CinematicArrival.tsx` (277 LOC) — R4.7 — CinematicArrival.
 - `src/components/floor-5/live-compose/LiveComposePanel.tsx` (268 LOC) — R5.4 — LiveComposePanel.
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
+- `src/components/floor-2/ObservatoryClient.test.tsx` (263 LOC) — R9.9 — ObservatoryClient composition tests.
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
 - `src/components/floor-7/rejection/RejectionReflectionStrip.tsx` (262 LOC) — R9.6 — Inline rejection-autopsy strip.
 - `src/components/settings/NetworkingConsent.tsx` (260 LOC)
 - `src/components/lobby/concierge/OtisDialoguePanel.tsx` (250 LOC) — OtisDialoguePanel — the Concierge's conversation surface.
+- `src/components/floor-2/ObservatoryClient.tsx` (247 LOC) — R9.9 — raw application data the Orrery transforms into planets. The
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
 - `src/components/world/PersistentWorld.tsx` (243 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/world/ErrorBoundary.tsx` (241 LOC) — ErrorBoundary — in-world error display using "the building's lights flicker" metaphor.
@@ -169,6 +171,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/binder/BinderOpen.tsx` (235 LOC) — R6.8 — Flip-open view of a single Debrief binder.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
 - `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
+- `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (228 LOC)
 - `src/components/world/ProceduralSkyline.tsx` (227 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (225 LOC)
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
@@ -182,13 +185,11 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/situation-map/SituationMapList.tsx` (215 LOC) — Two-column honest fallback for the Situation Map. Shipped when:
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
-- `src/components/floor-2/ObservatoryClient.tsx` (208 LOC)
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (204 LOC)
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
 - `src/components/floor-4/final-countdown/FinalCountdownSection.tsx` (203 LOC)
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/floor-7/war-table/StampBar.tsx` (202 LOC) — Floating action bar that appears when the user has selected one or more
-- `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (201 LOC)
 - `src/components/penthouse/PipelineNodes.tsx` (200 LOC) — PipelineNodes renders:
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
