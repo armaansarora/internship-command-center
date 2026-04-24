@@ -14,8 +14,8 @@ started: 2026-04-24T20:03:28.482Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T20:03:28.482Z
-  expires: 2026-04-24T22:03:28.476Z
+  acquired: 2026-04-24T20:04:34.023Z
+  expires: 2026-04-24T22:04:34.019Z
 acceptance:
   criteria:
     - Playwright harness installed, configured, and running locally + in CI
@@ -42,13 +42,16 @@ tasks:
     title: Playwright harness setup — install, config, tsconfig integration, npm
       scripts, tests/e2e/ dir layout, fixture pattern, CI workflow at
       .github/workflows/hardening-e2e.yml.
-    status: in_progress
+    status: complete
     started: 2026-04-24T20:03:28.482Z
+    completed: 2026-04-24T20:04:29.299Z
+    commit: "2724494"
   R12.2:
     title: Auth + session harness — seeded test user creation pattern, Supabase mock
       at fetch layer, session-persistence helpers, cleanup. NO real prod DB
       writes; everything mocked or isolated.
-    status: not_started
+    status: in_progress
+    started: 2026-04-24T20:04:34.023Z
   R12.3:
     title: Security scenarios (≥5) — JWT manipulation, RLS escape attempts,
       consent-gate bypass (direct POST without consent flag), send-hold bypass
@@ -106,3 +109,5 @@ blockers: []
 decisions: []
 history:
   - 2026-04-24T20:03:28.482Z: task_started R12.1
+  - 2026-04-24T20:04:29.299Z: task_completed R12.1
+  - 2026-04-24T20:04:34.023Z: task_started R12.2
