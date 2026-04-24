@@ -1,12 +1,18 @@
 "use client";
 
 import type { JSX } from "react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
+import type { LookupResult } from "@/lib/comp-bands/lookup";
 import { ParlorScene } from "@/components/parlor/ParlorScene";
 import { OakTable } from "@/components/parlor/OakTable";
 import { ThreeChairsConvening } from "@/components/parlor/ThreeChairsConvening";
+import {
+  CompBandChart,
+  type CompBands,
+  type CompPin,
+} from "@/components/parlor/CompBandChart";
 
 interface ParlorClientProps {
   offers: OfferRow[];
@@ -22,7 +28,15 @@ interface ParlorClientProps {
  * maps are keyed by offer id so switching selection between offers
  * preserves each one's convening result (or loading flag). The button
  * POSTs to `/api/offers/:id/convene`; on success we render the three
- * chairs. R10.8 will populate the `chartSlot` with the pin-stack chart.
+ * chairs.
+ *
+ * R10.8 populates the chartSlot with the CompBandChart. Bands arrive with
+ * the convene response (the same payload the Offer Evaluator saw); we
+ * stash them keyed by offer id so they persist across folder switches and
+ * adapt `LookupResult.ok:true` to the chart's local `CompBands` shape.
+ * When there are no bands yet (no convening, or a no_key/over_budget/
+ * empty response), the chart graceful-empties and the other offers still
+ * pin on the shared rails built from any successful convenings.
  *
  * Selection default: first offer in the server-provided list (already
  * sorted newest-first by `getOffersForUser`). Null only when the list
@@ -38,6 +52,9 @@ export function ParlorClient({ offers }: ParlorClientProps): JSX.Element {
   const [resultByOfferId, setResultByOfferId] = useState<
     Record<string, ParlorConveningResult>
   >({});
+  const [bandsByOfferId, setBandsByOfferId] = useState<
+    Record<string, LookupResult>
+  >({});
 
   const onConvene = useCallback(async () => {
     if (!selectedOfferId) return;
@@ -47,8 +64,12 @@ export function ParlorClient({ offers }: ParlorClientProps): JSX.Element {
         method: "POST",
       });
       if (!res.ok) return;
-      const body = (await res.json()) as { result: ParlorConveningResult };
+      const body = (await res.json()) as {
+        result: ParlorConveningResult;
+        bands: LookupResult;
+      };
       setResultByOfferId((m) => ({ ...m, [selectedOfferId]: body.result }));
+      setBandsByOfferId((m) => ({ ...m, [selectedOfferId]: body.bands }));
     } finally {
       setLoadingByOfferId((m) => ({ ...m, [selectedOfferId]: false }));
     }
@@ -61,6 +82,30 @@ export function ParlorClient({ offers }: ParlorClientProps): JSX.Element {
     ? (resultByOfferId[selectedOfferId] ?? null)
     : null;
 
+  // Adapt the LookupResult for the currently-selected offer into the
+  // chart's local CompBands shape. Non-ok lookups (no_key / over_budget /
+  // empty) render as the chart's empty-state.
+  const chartBands: CompBands | null = useMemo(() => {
+    if (!selectedOfferId) return null;
+    const lookup = bandsByOfferId[selectedOfferId];
+    if (!lookup || !lookup.ok) return null;
+    return {
+      p25: lookup.base.p25,
+      p50: lookup.base.p50,
+      p75: lookup.base.p75,
+      sampleSize: lookup.sampleSize,
+      source: lookup.source,
+    };
+  }, [selectedOfferId, bandsByOfferId]);
+
+  // Pin every offer on the chart so the user can compare their stack at a
+  // glance. Label uses company_name — duplicate-company edge case surfaces
+  // via the chart's label-collision dodge rather than silent overlap.
+  const chartPins: CompPin[] = useMemo(
+    () => offers.map((o) => ({ label: o.company_name, base: o.base })),
+    [offers],
+  );
+
   return (
     <ParlorScene
       tableSlot={
@@ -70,7 +115,7 @@ export function ParlorClient({ offers }: ParlorClientProps): JSX.Element {
           onSelect={setSelectedOfferId}
         />
       }
-      chartSlot={<div data-testid="parlor-chart-slot" />}
+      chartSlot={<CompBandChart bands={chartBands} pins={chartPins} />}
       chairsSlot={
         <ThreeChairsConvening
           loading={loading}

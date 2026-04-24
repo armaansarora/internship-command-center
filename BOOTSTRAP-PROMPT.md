@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:02 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:09 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `850472a`)
+- **Branch:** `main` (commit `30355d1`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 110,053 across 636 source files
+- **Total LOC:** 110,482 across 640 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-850472a chore(docs): split full Key Components map out of CLAUDE.md
+30355d1 [R10/10.7] feat(parlor): three-chair convening (Offer Evaluator + CFO + CNO)
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `850472a`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `30355d1`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,14 +102,14 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (636 files, 110,053 LOC)
+## Source Tree (640 files, 110,482 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 7070 |
 | `src/lib/ai/agents` | 4436 |
 | `src/components/world` | 3512 |
-| `src/styles` | 3209 |
+| `src/styles` | 3260 |
 | `src/components/floor-1` | 2725 |
 | `src/components/floor-7/war-table` | 1988 |
 | `src/components/floor-2/orrery` | 1915 |
@@ -119,13 +119,13 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/lib/ai/structured` | 1425 |
+| `src/components/parlor` | 1423 |
 | `src/app/(authenticated)/settings` | 1302 |
 | `src/app/lobby` | 1294 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
 | `src/app` | 1177 |
 | `src/lib/situation` | 1164 |
-| `src/components/parlor` | 1154 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1122 |
 | `src/components/floor-7/crud` | 1111 |
@@ -246,6 +246,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/comp-bands/lookup` | 177 |
 | `src/lib/preferences/__tests__` | 173 |
 | `src/lib/lobby` | 172 |
+| `src/app/(authenticated)/parlor` | 168 |
 | `src/app/api/documents/[id]/pdf/__tests__` | 168 |
 | `src/lib/resumes` | 168 |
 | `src/app/api/writing-room/choose-tone` | 165 |
@@ -267,7 +268,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/transitions` | 132 |
 | `src/app/api/writing-room/approve` | 129 |
 | `src/lib/ai/agents/__tests__` | 129 |
-| `src/app/(authenticated)/parlor` | 123 |
 | `src/app/api/cron/warmth-decay` | 115 |
 | `src/app/api/briefing/binder/[id]` | 114 |
 | `src/app/api/documents/[id]/pdf` | 111 |
@@ -302,9 +302,11 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/db/__tests__` | 36 |
 | `src/lib/agents/offer-evaluator/__tests__` | 36 |
 | `src/app/api/gmail/auth` | 34 |
+| `src/lib/parlor/__tests__` | 34 |
 | `src/app/api/cro` | 31 |
 | `src/lib/constants` | 31 |
 | `src/app/api/auth/callback` | 30 |
+| `src/lib/parlor` | 30 |
 | `src/app/api/stripe/portal` | 27 |
 | `src/app/api/auth/signout` | 25 |
 | `src/lib/speech` | 25 |
@@ -633,6 +635,8 @@ src/components/lobby/concierge/OtisCharacter.tsx
 src/components/lobby/concierge/OtisDialoguePanel.tsx
 src/components/lobby/directory/BuildingDirectory.test.tsx
 src/components/lobby/directory/BuildingDirectory.tsx
+src/components/parlor/CompBandChart.test.tsx
+src/components/parlor/CompBandChart.tsx
 src/components/parlor/OakTable.tsx
 src/components/parlor/OfferFolder.test.tsx
 src/components/parlor/OfferFolder.tsx
@@ -888,6 +892,8 @@ src/lib/orrery/applications-to-planets.ts
 src/lib/orrery/types.ts
 src/lib/orrery/use-orrery-mode.test.ts
 src/lib/orrery/use-orrery-mode.ts
+src/lib/parlor/__tests__/pin-color.test.ts
+src/lib/parlor/pin-color.ts
 src/lib/pdf/cover-letter-pdf.tsx
 src/lib/pdf/resume-pdf.tsx
 src/lib/pdf/state-of-month-pdf.test.ts
@@ -1029,13 +1035,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1065 | 11,846 |
+| `BOOTSTRAP-PROMPT.md` | 1078 | 12,024 |
 | `PROJECT-CONTEXT.md` | 283 | 5,309 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2061** | **30,793** |
+| **Total** | **2074** | **30,971** |
 
-> ⚠️ Reading all recommended files consumes ~30,793 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~30,971 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

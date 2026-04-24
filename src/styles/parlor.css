@@ -568,3 +568,54 @@
     animation: none !important;
   }
 }
+
+/* ------------------------------------------------------------------
+ * R10.8 — Comp-band chart.
+ *
+ * Back-wall SVG showing p25/p50/p75 rails and the user's offer(s) as
+ * pins coloured red (below p25) / gold (above p75) / ink (in-band).
+ * Hand-rolled SVG per R10 brief — no chart library. The chart sits in
+ * ParlorScene's back-wall slot so the sconce-lit wood reads through
+ * the translucent pins.
+ * ------------------------------------------------------------------ */
+
+.parlor-chart {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.parlor-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 24px 28px;
+  color: #e8d9b7;
+  background: linear-gradient(180deg, rgba(232, 201, 106, 0.06), rgba(232, 201, 106, 0));
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  border-radius: 6px;
+  text-align: center;
+  font-family: "Satoshi", system-ui, sans-serif;
+}
+
+.parlor-chart-empty h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #e8c96a;
+}
+
+.parlor-chart-empty p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.82;
+}

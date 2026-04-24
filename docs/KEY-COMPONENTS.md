@@ -122,6 +122,7 @@
 - `src/components/lobby/directory/BuildingDirectory.tsx` (152 LOC) — R4.8 — Building Directory.
 - `src/components/parlor/ParlorDoor.tsx` (149 LOC) — True only on the very first render after an offer parses — drives the
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
+- `src/components/parlor/CompBandChart.test.tsx` (145 LOC) — R10.8 — CompBandChart render tests.
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
 - `src/components/floor-4/final-countdown/FinalCountdownSection.test.tsx` (138 LOC)
@@ -135,10 +136,12 @@
 - `src/components/transitions/EntranceSequence.tsx` (132 LOC) — EntranceSequence — cinematic first-login entrance animation.
 - `src/components/floor-4/conflicts/ConflictsSection.tsx` (130 LOC) — Red-amber section at the top of the Floor 4 tableSlot when any calendar
 - `src/components/penthouse/QuickActionCard.tsx` (129 LOC) — @deprecated R2 bans the "Phase 1 / Phase 2" badge. Field kept optional
+- `src/app/(authenticated)/parlor/parlor-client.tsx` (129 LOC) — R10.6 — ParlorClient.
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)
 - `src/components/floor-6/rolodex/RolodexCard.tsx` (128 LOC) — A single physical card on the rolodex cylinder. Warmth-coloured via the
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
+- `src/components/parlor/CompBandChart.tsx` (124 LOC) — R10.8 — Comp-band chart (hand-rolled SVG).
 - `src/components/parlor/ParlorScene.test.tsx` (124 LOC) — R10.6 — ParlorScene composition tests.
 - `src/components/floor-2/orrery/Orrery.tsx` (118 LOC) — R9.3 + R9.4 — Orrery (consumer wrapper).
 - `src/components/floor-2/orrery/PatternModeToggle.tsx` (118 LOC) — R9.4 — PatternModeToggle.
@@ -173,7 +176,6 @@
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
 - `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
-- `src/app/(authenticated)/parlor/parlor-client.tsx` (84 LOC) — R10.6 — ParlorClient.
 - `src/components/floor-3/drill/LiveSTARBoard.tsx` (83 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
