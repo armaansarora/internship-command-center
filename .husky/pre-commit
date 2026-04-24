@@ -16,5 +16,16 @@ npx tsx scripts/tower/index.ts lint-autopilot --strict || {
   exit 1
 }
 
+# Acceptance gate — mechanical backstop for the R9 bypass pattern where
+# autopilot hand-edits a .ledger/*.yml to flip acceptance.met:true without
+# going through `tower accept`. If any staged ledger file flips
+# acceptance.met from false to true, run tower verify on that phase. If
+# verify fails, block the commit.
+npx tsx scripts/tower/pre-commit-acceptance-gate.ts || {
+  echo ""
+  echo "Any attempt to flip acceptance.met:true must pass tower verify."
+  exit 1
+}
+
 # Phase Ledger drift check — warn-only, never blocks a commit
 npx tsx scripts/ledger/verify.ts --warn-only || true
