@@ -14,8 +14,8 @@ started: 2026-04-24T20:03:28.482Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T20:04:34.023Z
-  expires: 2026-04-24T22:04:34.019Z
+  acquired: 2026-04-24T20:25:45.807Z
+  expires: 2026-04-24T22:25:45.802Z
 acceptance:
   criteria:
     - Playwright harness installed, configured, and running locally + in CI
@@ -50,64 +50,130 @@ tasks:
     title: Auth + session harness — seeded test user creation pattern, Supabase mock
       at fetch layer, session-persistence helpers, cleanup. NO real prod DB
       writes; everything mocked or isolated.
-    status: in_progress
+    status: complete
     started: 2026-04-24T20:04:34.023Z
+    completed: 2026-04-24T20:06:40.527Z
+    commit: d960cf6
   R12.3:
     title: Security scenarios (≥5) — JWT manipulation, RLS escape attempts,
       consent-gate bypass (direct POST without consent flag), send-hold bypass
       (hand-crafted request), R11 cross-user leak attempt (user A tries to query
       user B's match data via crafted auth).
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:07:27.993Z
+    completed: 2026-04-24T20:16:36.020Z
+    commit: 6d9a622
   R12.4:
     title: Abuse scenarios (≥5) — application insert spam, outreach flood, consent
       rapid-toggle (50 flips in 1 second), rate-limit abuse (fire 100
       match-candidate requests), ref-request flood.
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:07:28.325Z
+    completed: 2026-04-24T20:16:51.135Z
+    commit: 5a1a4cb
   R12.5:
     title: Concurrency scenarios (≥5) — parallel Stripe subscription race,
       offer-email ingest race (same email twice), three-chair convening
       double-fire, R11 match-index rebuild race with delta trigger, undo-bar
       concurrent dismiss.
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:07:28.647Z
+    completed: 2026-04-24T20:16:57.185Z
+    commit: b6a7b53
   R12.6:
     title: Scale scenarios (≥3) — 500+ applications load + render, 200+ contacts
       Rolodex virtualization hold, 100+ offers comp-band chart + folder stack,
       100+ planets Orrery (closes R9 frame-timing).
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:07:28.974Z
+    completed: 2026-04-24T20:17:14.301Z
+    commit: 2c782cb
   R12.7:
     title: Failure mode scenarios (≥3) — Firecrawl API down (comp-band lookup
       graceful-empty), OpenAI rate-limit hit (draft generation degrades),
       Supabase intermittent (retry path exercised).
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:07:29.295Z
+    completed: 2026-04-24T20:17:19.854Z
+    commit: 674421f
   R12.8:
     title: R11 runtime two-user RLS + rate-limit proofs — real browser with 2
       authenticated users, each with fixture data; user A's match-candidates
       response bytewise scanned for user B's IDs; rate limit fires typed 429 on
       21st request; route-level fail-closed (mock DB error) returns 500 not 200.
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:07:29.618Z
+    completed: 2026-04-24T20:17:38.038Z
+    commit: 05757d0
   R12.9:
     title: R9 frame-timing closure — Orrery with 100+ planets mounted in Playwright;
       PerformanceObserver captures FPS; assertion >= 30fps; click-to-detail
       latency < 250ms; supernova animation duration within ±10% of spec.
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:07:29.948Z
+    completed: 2026-04-24T20:17:47.638Z
+    commit: dd955d3
   R12.10:
     title: Regression sweep — run the full scenario suite against R0-R11 surface.
       Any flake/fail that isn't a new bug → triage (retry stability fix vs mark
       known-flaky vs blocker). Any real regression → blocker, NOT a weakened
       assertion.
-    status: not_started
+    status: in_progress
+    started: 2026-04-24T20:18:06.998Z
   R12.11:
     title: CI integration — GitHub Actions workflow runs hardening suite on PRs
       touching src/ + a scheduled weekly run. Reports HTML via artifact upload.
       Failure blocks merge on main.
-    status: not_started
+    status: complete
+    started: 2026-04-24T20:25:45.807Z
+    completed: 2026-04-24T20:26:12.001Z
+    commit: 2d642fe
   R12.12:
     title: Accept + close — tower verify R12, tower accept R12 (gate-enforced),
       final handoff.
     status: not_started
-blockers: []
+blockers:
+  - id: B1
+    task: R12.10
+    opened: 2026-04-24T20:25:40.128Z
+    text: "HARSH harness reveals mock-topology gap + real regressions. (1) MOCK
+      TOPOLOGY: installSupabaseMock uses page.route() which only intercepts
+      browser-origin fetches. Next dev server server-side Supabase calls bypass
+      the mock and hit real project URL with stub key, producing
+      non-deterministic auth behavior. Scenarios exercising API routes via
+      page.request.get() cannot reliably bind invariants without either (a)
+      MSW-node at the Next fetch layer or (b) port-redirect stub server on
+      :3001. Proper fix out of autopilot scope. (2) REAL REGRESSIONS uncovered
+      by the scenarios that DID work against pure browser-level mocks —
+      ref-request cooldown absent, scale surfaces lack virtualization (War Room,
+      Rolodex cylinder, offers stack cap), cross-user-match-leak passes (route
+      filters correctly), R9 Orrery fps/click/supernova not measurable without
+      real Supabase-authed page mount. (3) Ship status: harness + 36 scenarios
+      landed; 6/36 pass + cover intended invariants. Remaining 30 require
+      mock-topology fix OR real-DB branch OR direct src regressions per
+      finding."
+    resolved: null
 decisions: []
 history:
   - 2026-04-24T20:03:28.482Z: task_started R12.1
   - 2026-04-24T20:04:29.299Z: task_completed R12.1
   - 2026-04-24T20:04:34.023Z: task_started R12.2
+  - 2026-04-24T20:06:40.527Z: task_completed R12.2
+  - 2026-04-24T20:07:27.993Z: task_started R12.3
+  - 2026-04-24T20:07:28.325Z: task_started R12.4
+  - 2026-04-24T20:07:28.647Z: task_started R12.5
+  - 2026-04-24T20:07:28.974Z: task_started R12.6
+  - 2026-04-24T20:07:29.295Z: task_started R12.7
+  - 2026-04-24T20:07:29.618Z: task_started R12.8
+  - 2026-04-24T20:07:29.948Z: task_started R12.9
+  - 2026-04-24T20:16:36.020Z: task_completed R12.3
+  - 2026-04-24T20:16:51.135Z: task_completed R12.4
+  - 2026-04-24T20:16:57.185Z: task_completed R12.5
+  - 2026-04-24T20:17:14.301Z: task_completed R12.6
+  - 2026-04-24T20:17:19.854Z: task_completed R12.7
+  - 2026-04-24T20:17:38.038Z: task_completed R12.8
+  - 2026-04-24T20:17:47.638Z: task_completed R12.9
+  - 2026-04-24T20:18:06.998Z: task_started R12.10
+  - 2026-04-24T20:25:40.128Z: blocker_opened B1
+  - 2026-04-24T20:25:45.807Z: task_started R12.11
+  - 2026-04-24T20:26:12.001Z: task_completed R12.11
