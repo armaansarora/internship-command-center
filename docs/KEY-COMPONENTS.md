@@ -51,6 +51,7 @@
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
 - `src/components/floor-2/orrery/OrreryRender.test.tsx` (297 LOC) — R9.2 — OrreryRender SSR + invariant tests.
+- `src/components/parlor/simulator/NegotiationSimulator.test.tsx` (295 LOC) — React 19 + happy-dom: setting `.value` directly bypasses React's onChange
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
 - `src/components/floor-5/resume-press/ResumePress.tsx` (286 LOC) — R5.8 — The Resume Press.
@@ -124,7 +125,6 @@
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
 - `src/components/floor-4/rings/RingPulseController.test.tsx` (154 LOC)
 - `src/components/parlor/ReferenceRequestPanel.test.tsx` (154 LOC)
-- `src/components/parlor/simulator/NegotiationSimulator.test.tsx` (154 LOC) — React 19 + happy-dom: setting `.value` directly bypasses React's onChange
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
