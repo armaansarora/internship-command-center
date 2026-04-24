@@ -62,6 +62,7 @@
 - `src/components/floor-7/rejection/RejectionReflectionStrip.tsx` (262 LOC) — R9.6 — Inline rejection-autopsy strip.
 - `src/components/settings/NetworkingConsent.tsx` (260 LOC)
 - `src/components/parlor/NegotiationDraftPanel.tsx` (255 LOC) — R10.9 — NegotiationDraftPanel.
+- `src/components/parlor/simulator/NegotiationSimulator.tsx` (252 LOC) — R10.13 — NegotiationSimulator.
 - `src/components/lobby/concierge/OtisDialoguePanel.tsx` (250 LOC) — OtisDialoguePanel — the Concierge's conversation surface.
 - `src/components/parlor/CEOVoicePlayButton.test.tsx` (249 LOC) — R10.11 — CEOVoicePlayButton behavioral tests.
 - `src/components/parlor/NegotiationDraftPanel.test.tsx` (249 LOC) — R10.9 — NegotiationDraftPanel render + reveal tests.
@@ -121,6 +122,7 @@
 - `src/components/floor-3/drill/DrillVoiceMic.tsx` (158 LOC) — R6.6 — DrillVoiceMic.
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
 - `src/components/floor-4/rings/RingPulseController.test.tsx` (154 LOC)
+- `src/components/parlor/simulator/NegotiationSimulator.test.tsx` (154 LOC) — React 19 + happy-dom: setting `.value` directly bypasses React's onChange
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
