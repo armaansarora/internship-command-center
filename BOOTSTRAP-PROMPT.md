@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 11:50 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 11:51 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `c379e39`)
+- **Branch:** `main` (commit `50dbb72`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 116,365 across 670 source files
+- **Total LOC:** 116,633 across 671 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-c379e39 chore(autopilot): hold R11 paused until user explicitly fires
+50dbb72 test(post-r10): tighten "email parses INTO offers table" with parser→route→insert round-trip
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `c379e39`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `50dbb72`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (670 files, 116,365 LOC)
+## Source Tree (671 files, 116,633 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -111,7 +111,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai/agents` | 4436 |
 | `src/styles` | 3969 |
 | `src/components/world` | 3308 |
-| `src/components/parlor` | 3014 |
+| `src/components/parlor` | 3282 |
 | `src/components/floor-1` | 2725 |
 | `src/app/__tests__` | 2422 |
 | `src/components/floor-7/war-table` | 1988 |
@@ -662,6 +662,7 @@ src/components/parlor/CompBandChart.test.tsx
 src/components/parlor/CompBandChart.tsx
 src/components/parlor/NegotiationDraftPanel.test.tsx
 src/components/parlor/NegotiationDraftPanel.tsx
+src/components/parlor/OakTable.comparison.test.tsx
 src/components/parlor/OakTable.tsx
 src/components/parlor/OfferFolder.test.tsx
 src/components/parlor/OfferFolder.tsx
@@ -1075,13 +1076,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1122 | 12,648 |
+| `BOOTSTRAP-PROMPT.md` | 1124 | 12,670 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2106** | **31,289** |
+| **Total** | **2108** | **31,311** |
 
-> ⚠️ Reading all recommended files consumes ~31,289 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,311 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

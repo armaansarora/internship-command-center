@@ -56,6 +56,7 @@
 - `src/components/floor-5/resume-press/ResumePress.tsx` (286 LOC) — R5.8 — The Resume Press.
 - `src/components/lobby/cinematic/CinematicArrival.tsx` (277 LOC) — R4.7 — CinematicArrival.
 - `src/components/floor-5/live-compose/LiveComposePanel.tsx` (268 LOC) — R5.4 — LiveComposePanel.
+- `src/components/parlor/OakTable.comparison.test.tsx` (268 LOC) — R10 post-mortem (test-tightening pass) — OakTable side-by-side comparison.
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
 - `src/components/floor-2/ObservatoryClient.test.tsx` (263 LOC) — R9.9 — ObservatoryClient composition tests.
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
