@@ -20,7 +20,7 @@ acceptance:
       minor edits. Side-by-side comparison works with 2+ offers. Deadline alerts
       fire.
   met: true
-  verified_by_commit: d988f05
+  verified_by_commit: d31b652
 tasks:
   R10.0:
     title: Design doc + autopilot flip (self-approved against brief + 8 partner
@@ -125,7 +125,7 @@ tasks:
     status: complete
     started: 2026-04-24T04:46:39.337Z
     completed: 2026-04-24T04:46:57.181Z
-    commit: d988f05
+    commit: f684fdb
   R10.14:
     title: "[STRETCH] CNO reference-request drafting — CNO drafts requests to
       top-warmth contacts, tracks submission, drafts thank-yous. Ships only if
@@ -133,14 +133,14 @@ tasks:
     status: complete
     started: 2026-04-24T04:46:57.502Z
     completed: 2026-04-24T04:46:57.838Z
-    commit: d988f05
+    commit: 47e4629
   R10.15:
     title: Accept + close — tower verify R10, manual smoke, tower accept R10
       (gate-enforced flip of acceptance.met), final handoff
     status: complete
     started: 2026-04-24T04:46:58.164Z
     completed: 2026-04-24T04:48:35.639Z
-    commit: d988f05
+    commit: 98e3c68
 blockers: []
 decisions:
   - date: 2026-04-23
@@ -211,3 +211,12 @@ history:
   - 2026-04-24T04:48:35.639Z: task_completed R10.15
   - 2026-04-24T04:48:35.639Z: phase_completed
   - 2026-04-24T04:49:43.773Z: acceptance_met verified_by d988f05
+  - 2026-04-24T14:22:00.000Z: post_mortem_pointer_correction — R10.13 commit
+      d988f05→f684fdb (wire NegotiationSimulator), R10.14 commit d988f05→47e4629
+      (wire ReferenceRequestPanel), R10.15 commit d988f05→98e3c68 (autopilot
+      pause). Original stale pointers were d988f05 (the stretch-skip commit)
+      because autopilot task_completed events fired at skip-time before the
+      real stretch work landed in session 3.
+  - 2026-04-24T14:22:00.000Z: acceptance_reverified verified_by d31b652 —
+      tower verify R10 runs clean after R10 post-mortem fix landed
+      (fix(deadline-cron): fire deadline alerts for offers).
