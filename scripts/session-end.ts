@@ -35,7 +35,9 @@
  *    15.  Wait for Vercel deploy + re-check (if commit was just pushed)
  *
  *   PHASE F — HANDOFF
- *    16.  Generate handoff prompt + full report card → stdout + HANDOFF.md
+ *    16.  Generate handoff prompt + full report card → stdout only
+ *         (tower handoff + .handoff/*.md is the canonical session-end path
+ *         since 2026-04-21; this script no longer writes HANDOFF.md).
  *
  * The agent copies the handoff prompt from stdout and gives it to the user.
  * That's it. No babysitting.
@@ -854,9 +856,10 @@ reportLines.push("```");
 reportLines.push(handoff);
 reportLines.push("```");
 
-const reportCard = reportLines.join("\n");
-writeFileSync(join(ROOT, "HANDOFF.md"), reportCard);
-ok("Report card + handoff prompt written to HANDOFF.md");
+// reportCard (joined lines) was previously written to HANDOFF.md. Since
+// 2026-04-21 the canonical session-end path is `tower handoff` +
+// .handoff/*.md packets, so the file write was removed. The `reportLines`
+// array is still used for the stdout print below.
 
 // ─── Print to stdout ────────────────────────────────────────────────────────
 

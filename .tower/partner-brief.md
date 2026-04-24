@@ -91,7 +91,11 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - Apply `src/db/migrations/0020_r10_negotiation_parlor.sql` in Supabase (offers + company_comp_bands + comp_bands_budget tables + outreach_queue enum entry).
 - Apply `src/db/migrations/0021_r10_offer_deadline_alerts.sql` in Supabase (additive: adds offers.deadline_alerts_sent jsonb column, needed for deadline-beat cron to fire for offers).
 - Add `FIRECRAWL_API_KEY` via `vercel env add FIRECRAWL_API_KEY production` (and preview/development). Without it, `/api/comp-bands/lookup` returns graceful-empty (no crash). Needed for real Levels.fyi scrapes.
-- **Decide**: root `HANDOFF.md` is still written by `scripts/session-end.ts:858` — superseded by `.handoff/*.md` packets since 2026-04-21. Options: (a) leave both coexisting, (b) delete HANDOFF.md + remove the write, (c) deprecate session-end.ts entirely. Post-R10 sweep did not touch this — user decision.
+- ~~Decide~~: HANDOFF.md cleanup done via option (b) 2026-04-24. File deleted, writeFileSync removed from session-end.ts, stale refs in generate-bootstrap.ts + audit/06-deployment.md updated. Option (c) — deprecating session-end.ts entirely — deferred to the larger codebase-cleanup pass (tracked below).
+
+**Queued for the big codebase-cleanup pass (when user kicks off):**
+- Deprecate `scripts/session-end.ts` entirely (option iii of the HANDOFF.md cleanup). Needs: confirm nothing calls `npm run session:end` manually, then delete the script + remove the npm script entry + remove the `session:end:dry` variant. Would also touch CLAUDE.md §Fallback-CLIs. ~15 min partner work.
+- Broader folder/file reorganization (user-flagged 2026-04-23). Candidates: `src/lib/` has grown unevenly — some feature-scoped dirs, some generic-utility dirs; an explicit `src/lib/agents/` vs `src/lib/ai/` convention would help. `src/components/` floor-based but some cross-floor chrome lives in `world/` — could stratify. To scope at cleanup-time.
 
 **Post-R10 cleanup sweep — RESOLVED (2026-04-24, partner autonomous work post-R10 swarm):**
 - 12 completed-phase plans (R0–R5) archived to `docs/archive/plans/`; R5.4, R6, R7, R8, R9, R10 newest plans + R10.13/14 stretch plan remain in `docs/plans/`.

@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 11:03 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 11:30 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `bd9a81b`)
+- **Branch:** `main` (commit `18eb181`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 116,146 across 669 source files
 - **Build:** Clean (zero TS errors)
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-bd9a81b fix(ledger): quote R10.13/R10.14 commit SHAs — YAML scientific-notation gotcha
+18eb181 docs(env): document FIRECRAWL_API_KEY placeholder in .env.example
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `bd9a81b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `18eb181`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -1073,13 +1073,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1121 | 12,615 |
+| `BOOTSTRAP-PROMPT.md` | 1122 | 12,621 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2105** | **31,256** |
+| **Total** | **2106** | **31,262** |
 
-> ⚠️ Reading all recommended files consumes ~31,256 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,262 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
@@ -1118,4 +1118,4 @@ zod: ^4.3.6
 
 ## Session State Management
 
-`npm run session:end` handles this automatically — it auto-detects session state from git history and writes `SESSION-STATE.json`. No manual state management needed. The handoff prompt is printed to stdout and saved to `HANDOFF.md`.
+Since 2026-04-21, session state lives in the Tower CLI ledger at `.ledger/Rn-*.yml` and session handoffs in `.handoff/YYYY-MM-DD-HHMM.md` packets. Fire `npm run t handoff --stdin` at session end; the next session reads it via `npm run t resume`. The old `session:end` + `SESSION-STATE.json` + `HANDOFF.md` flow is deprecated.

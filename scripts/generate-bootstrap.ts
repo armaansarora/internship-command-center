@@ -653,7 +653,7 @@ ${techNotes}
 
 ## Session State Management
 
-\`npm run session:end\` handles this automatically — it auto-detects session state from git history and writes \`SESSION-STATE.json\`. No manual state management needed. The handoff prompt is printed to stdout and saved to \`HANDOFF.md\`.
+Since 2026-04-21, session state lives in the Tower CLI ledger at \`.ledger/Rn-*.yml\` and session handoffs in \`.handoff/YYYY-MM-DD-HHMM.md\` packets. Fire \`npm run t handoff --stdin\` at session end; the next session reads it via \`npm run t resume\`. The old \`session:end\` + \`SESSION-STATE.json\` + \`HANDOFF.md\` flow is deprecated.
 `;
 
 writeFileSync(join(ROOT, "BOOTSTRAP-PROMPT.md"), output);
