@@ -1,9 +1,9 @@
-paused: false
+paused: true
 scope: R12-only
-started: null
-started_by: null
-ended: null
-ended_reason: null
+started: "2026-04-24T19:50:00Z"
+started_by: sess-a5908e
+ended: "2026-04-24T20:30:00Z"
+ended_reason: "R12.10 B1 open blocker (mock-topology); all tasks structurally shipped (12/12 commits), 6/36 scenarios pass runtime. tower accept R12 will refuse while B1 open. Partner choice: (a) MSW-node at Next fetch, (b) port-redirect stub Supabase server, (c) Supabase branch via MCP."
 max_blockers: 3
 previous_phase: R11
 previous_outcome: "R11 complete — 12/12 tasks, acceptance.met (verified_by_commit: 6b9be81). All 10 Intent behaviors shipped, consent copy passes 7/7 lawyer-read, consent version bumped 1→2. Partner Red Team closed 2 BLOCKs inline (audit-log atomic, revoke cascade into match_candidate_index) + 1 FLAG documented (anon-key not user-scoped, intentional trade-off). 1635 tests green."
