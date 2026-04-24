@@ -3,20 +3,21 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 /**
- * R8 P3 / P4 — the match-candidates endpoint enforces the consent
- * contract at the server boundary.  We can't run a real HTTP request
- * from vitest without a test server, so we assert the mechanical
+ * R8 P3 / P4 (updated by R11.8) — the match-candidates endpoint enforces
+ * the consent contract at the server boundary.  We can't run a real HTTP
+ * request from vitest without a test server, so we assert the mechanical
  * properties of the module:
  *
  * - The route exports GET.
  * - The route imports and calls `assertConsented` (the P3/P4 guard).
- * - The route returns 403 "gated-red-team-pending" downstream of the
- *   guard (the R8 hard-stop that prevents cross-user data from shipping
- *   before the Red Team pass).
+ * - The route applies a rate-limit gate (`checkAndBumpRateLimit`) after
+ *   the consent guard and returns 429 when blocked (R11.7 invariant).
+ * - The route returns 401 when unauthenticated.
  *
- * The pure `isConsentedShape` is exhaustively tested alongside the
- * guard — see src/lib/networking/consent-guard.test.ts — so the
- * integration assertion here is deliberately small.
+ * R11.8 replaced the original "gated-red-team-pending" 403 hard-stop with
+ * the real match flow, so the old canary is gone.  The remaining gates
+ * (consent, version, rate-limit, audit log) are covered by
+ * `src/app/api/networking/match-candidates/__tests__/route.test.ts`.
  */
 
 const ROUTE = resolve(
@@ -36,10 +37,11 @@ describe("R8 P3 / P4 — match-candidates endpoint", () => {
     expect(body).toMatch(/assertConsented\(.+\)/);
   });
 
-  it("returns 403 gated-red-team-pending downstream of the guard", () => {
+  it("applies the rate-limit gate after the consent guard (R11.7)", () => {
     const body = readFileSync(ROUTE, "utf8");
-    expect(body).toContain("gated-red-team-pending");
-    expect(body).toMatch(/status:\s*403/);
+    expect(body).toContain("checkAndBumpRateLimit");
+    expect(body).toMatch(/status:\s*429/);
+    expect(body).toContain("rate-limited");
   });
 
   it("also returns 401 when unauthenticated", () => {

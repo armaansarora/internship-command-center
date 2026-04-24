@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:32 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:33 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `41855be`)
+- **Branch:** `main` (commit `e3b823e`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 119,997 across 693 source files
+- **Total LOC:** 119,999 across 693 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-41855be [R11/11.9] feat(r11): audit log UI + consent copy v2 with rate-limit + audit language
+e3b823e [R11/11.10] test(r11): cross-user RLS + no-contact-leak proof tests
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `41855be`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `e3b823e`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (693 files, 119,997 LOC)
+## Source Tree (693 files, 119,999 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -113,7 +113,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world` | 3308 |
 | `src/components/parlor` | 3282 |
 | `src/components/floor-1` | 2725 |
-| `src/app/__tests__` | 2634 |
+| `src/app/__tests__` | 2636 |
 | `src/components/floor-7/war-table` | 1988 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
@@ -1104,13 +1104,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1151 | 13,032 |
+| `BOOTSTRAP-PROMPT.md` | 1153 | 13,063 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2135** | **31,673** |
+| **Total** | **2137** | **31,704** |
 
-> ⚠️ Reading all recommended files consumes ~31,673 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,704 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

@@ -18,9 +18,9 @@ import { CURRENT_CONSENT_VERSION } from "./consent-version";
  * (legacy row) and also yields `consent-version-stale`.
  *
  * Any cross-user endpoint MUST call `assertConsented(userId)` and return
- * the NextResponse it hands back when non-null.  R8 additionally
- * hard-codes a 403 "gated-red-team-pending" downstream of this guard so
- * that no cross-user DATA ships until the Red Team pass lands.
+ * the NextResponse it hands back when non-null.  R11.8 replaced the R8
+ * "gated-red-team-pending" downstream 403 stub with the real match flow
+ * (rate-limit gate + match_candidate_index read + match_events audit log).
  */
 
 export interface ConsentShape {
