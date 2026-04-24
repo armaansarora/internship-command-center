@@ -1,6 +1,6 @@
 phase: R9
 name: The Observatory (Floor 2)
-status: in_progress
+status: complete
 intent: The contemplation floor. Panoramic, cool-blue, quiet. The centerpiece is
   the **Orrery** — the user's pipeline as celestial bodies in orbit. Tier-1
   companies are inner planets; Tier-4 outer. Status changes flash;
@@ -9,19 +9,26 @@ intent: The contemplation floor. Panoramic, cool-blue, quiet. The centerpiece is
   projects onto the glass. A rejection autopsy lives here — pattern analysis
   across rejections.
 started: 2026-04-23T20:35:00.000Z
-completed: null
+completed: 2026-04-24T01:21:15.746Z
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T01:14:42.133Z
-  expires: 2026-04-24T03:14:42.128Z
+  acquired: 2026-04-24T01:20:07.943Z
+  expires: 2026-04-24T03:20:07.938Z
 acceptance:
   criteria:
     - Orrery renders 100+ applications at 60fps on baseline laptop.
       Click-to-history is instant. Monthly report auto-generates with CFO
       commentary that's readable, not boilerplate.
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: c31c658
 tasks:
+  R9.0:
+    title: Design doc + executable implementation plan (autopilot self-approved
+      against Brief + Reference Library + 6 partner constraints)
+    status: complete
+    started: 2026-04-23T20:35:00.000Z
+    completed: 2026-04-23T20:42:00.000Z
+    commit: 9ffeb67
   R9.1:
     title: Data layer — typed OrreryPlanet contract + applicationsToPlanets
       transformer (pure, R3F-swap-ready)
@@ -82,16 +89,16 @@ tasks:
   R9.9:
     title: Wire Orrery into ObservatoryClient as primary dashboardSlot — chart grid
       demoted to supporting strip (anti-pattern guard)
-    status: in_progress
+    status: complete
     started: 2026-04-24T01:14:42.133Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T01:19:27.934Z
+    commit: c31c658
   R9.10:
     title: Final pass — full vitest, tsc, lint, build, drift; tower accept R9
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T01:20:07.943Z
+    completed: 2026-04-24T01:21:15.746Z
+    commit: c31c658
 blockers: []
 decisions:
   - date: 2026-04-23
@@ -144,3 +151,8 @@ history:
   - 2026-04-24T01:11:55.137Z: task_completed R9.8
   - 2026-04-24T01:12:33.190Z: task_started R9.9
   - 2026-04-24T01:14:42.133Z: task_started R9.9
+  - 2026-04-24T01:19:27.934Z: task_completed R9.9
+  - 2026-04-24T01:20:07.943Z: task_started R9.10
+  - 2026-04-24T01:21:15.746Z: task_completed R9.10
+  - 2026-04-24T01:21:15.746Z: phase_completed
+  - 2026-04-24T01:23:06.142Z: acceptance_met verified_by c31c658

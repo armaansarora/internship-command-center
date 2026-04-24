@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 9:19 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 9:23 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `8865ad7`)
+- **Branch:** `main` (commit `c31c658`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 104,819 across 592 source files
 - **Build:** Clean (zero TS errors)
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-8865ad7 [R9/9.8] feat(report): State of the Month PDF via @react-pdf/renderer
+c31c658 [R9/9.9] feat(observatory): Orrery promoted to centerpiece; charts demoted to supporting
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `8865ad7`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `c31c658`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -972,13 +972,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1020 | 11,352 |
+| `BOOTSTRAP-PROMPT.md` | 1021 | 11,369 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 507 | 11,350 |
-| **Total** | **2176** | **35,149** |
+| **Total** | **2177** | **35,166** |
 
-> ⚠️ Reading all recommended files consumes ~35,149 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~35,166 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
