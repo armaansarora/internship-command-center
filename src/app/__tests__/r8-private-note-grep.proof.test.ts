@@ -58,6 +58,11 @@ const ALLOWLIST = new Set<string>([
   // R10.14 — ReferenceRequestPanel test fixture includes
   // `privateNote: null` for type-shape completeness of ContactForAgent.
   "src/components/parlor/ReferenceRequestPanel.test.tsx",
+  // R11.10 — structural proof test. Names `contacts.private_note` as a
+  // FORBIDDEN string in the R11 match flow (asserts it never appears in
+  // files touching match_candidate_index). The R11 proof NEEDS to quote
+  // the string to search for it; no private_note data is handled.
+  "src/app/__tests__/r11-no-contact-leak.proof.test.ts",
 ]);
 
 // R10.14 — AI-prompt composition path exemptions.
