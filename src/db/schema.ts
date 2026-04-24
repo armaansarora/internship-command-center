@@ -771,6 +771,9 @@ export const offers = pgTable("offers", {
   benefits: jsonb("benefits").notNull().default(sql`'{}'::jsonb`),
   receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
   deadlineAt: timestamp("deadline_at", { withTimezone: true }),
+  deadlineAlertsSent: jsonb("deadline_alerts_sent")
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   status: text("status", {
     enum: ["received", "negotiating", "accepted", "declined", "expired", "withdrawn"],
   }).notNull().default("received"),
