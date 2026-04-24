@@ -129,7 +129,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
 - `src/components/floor-7/WarRoomClient.tsx` (429 LOC)
 
-> 172 smaller components omitted — full list in `docs/KEY-COMPONENTS.md`.
+> 174 smaller components omitted — full list in `docs/KEY-COMPONENTS.md`.
 
 ## Bootstrap Infrastructure
 - `scripts/auto-organize-docs.ts` — **runs on every commit (Husky)**. Auto-archives stale docs, auto-generates Key Components (this section), auto-updates doc map table, auto-appends session logs. Zero manual doc maintenance.

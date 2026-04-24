@@ -399,3 +399,172 @@
     animation: none !important;
   }
 }
+
+/* ------------------------------------------------------------------
+ * R10.7 — Three-chair convening.
+ *
+ * Three glass-panel chairs arranged in a horizontal row (1fr 1fr 1fr).
+ * Palette: oak wood background + gold (#C9A84C) accents + ink (#2a1a0b)
+ * text on the warm-cream glass. Matches the OfferFolder's parchment
+ * inversion — the chairs read as "the other half of the oak table."
+ *
+ * Empty state collapses to a single centered Convene button; loading
+ * state is a polite aria-live strip; result state fans into the grid.
+ * ------------------------------------------------------------------ */
+
+.parlor-chairs-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 160px;
+}
+
+.parlor-chairs-convene-btn {
+  padding: 14px 28px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #1a0f06;
+  background: linear-gradient(180deg, #e8c96a 0%, #c9a84c 100%);
+  border: 1px solid rgba(120, 90, 42, 0.6);
+  border-radius: 4px;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.parlor-chairs-convene-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.parlor-chairs-convene-btn:focus-visible {
+  outline: 2px solid rgba(232, 201, 106, 0.9);
+  outline-offset: 3px;
+}
+
+.parlor-chairs-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 160px;
+  padding: 24px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  color: #e8d9b7;
+  opacity: 0.85;
+}
+
+.parlor-chairs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.parlor-chair {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 18px 20px;
+  color: #2a1a0b;
+  background: linear-gradient(180deg, #e8d9b7 0%, #d3bf94 100%);
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  border-radius: 6px;
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.parlor-chair h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #1a0f06;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed rgba(120, 90, 42, 0.45);
+}
+
+.parlor-chair-verdict {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #3a2714;
+}
+
+.parlor-chair-verdict[data-verdict="STRONG"] {
+  color: #2b5f2b;
+}
+
+.parlor-chair-verdict[data-verdict="MARKET"] {
+  color: #3a2714;
+}
+
+.parlor-chair-verdict[data-verdict="UNDER"] {
+  color: #6a2a1e;
+}
+
+.parlor-chair-verdict[data-verdict="THIN_DATA"] {
+  color: #7a5a12;
+}
+
+.parlor-chair-narrative {
+  margin: 0;
+  color: #2a1a0b;
+}
+
+.parlor-chair-total {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3a2714;
+}
+
+.parlor-chair-vesting {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+.parlor-chair-risks,
+.parlor-chair-contacts {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #3a2714;
+  font-size: 12px;
+}
+
+.parlor-chair-contact-name {
+  font-weight: 600;
+}
+
+.parlor-chair-contact-note {
+  opacity: 0.78;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parlor-chairs-convene-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}

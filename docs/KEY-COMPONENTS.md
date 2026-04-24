@@ -85,6 +85,7 @@
 - `src/components/floor-4/situation-map/SituationMapList.tsx` (215 LOC) — Two-column honest fallback for the Situation Map. Shipped when:
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
+- `src/components/parlor/ThreeChairsConvening.test.tsx` (206 LOC) — R10.7 — ThreeChairsConvening render + interaction tests.
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (204 LOC)
 - `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
 - `src/components/floor-4/final-countdown/FinalCountdownSection.tsx` (203 LOC)
@@ -141,6 +142,7 @@
 - `src/components/parlor/ParlorScene.test.tsx` (124 LOC) — R10.6 — ParlorScene composition tests.
 - `src/components/floor-2/orrery/Orrery.tsx` (118 LOC) — R9.3 + R9.4 — Orrery (consumer wrapper).
 - `src/components/floor-2/orrery/PatternModeToggle.tsx` (118 LOC) — R9.4 — PatternModeToggle.
+- `src/components/parlor/ThreeChairsConvening.tsx` (118 LOC) — R10.7 — ThreeChairsConvening.
 - `src/components/floor-3/binder/DebriefBinderShelf.tsx` (117 LOC) — R6.8 — The Debrief Binder Shelf.
 - `src/components/floor-1/CSuiteClient.injectPrompt.test.tsx` (112 LOC) — R3.11 — unit tests for the `/`-inject activation gate.
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
@@ -171,6 +173,7 @@
 - `src/components/floor-4/coo-character/COODialoguePanel.tsx` (87 LOC)
 - `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
+- `src/app/(authenticated)/parlor/parlor-client.tsx` (84 LOC) — R10.6 — ParlorClient.
 - `src/components/floor-3/drill/LiveSTARBoard.tsx` (83 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
@@ -194,7 +197,6 @@
 - `src/components/floor-5/live-compose/PenGlowCursor.tsx` (50 LOC) — R5.4 — PenGlowCursor.
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
-- `src/app/(authenticated)/parlor/parlor-client.tsx` (46 LOC) — R10.6 — ParlorClient.
 - `src/components/floor-6/side-switch/SideSwitch.test.tsx` (44 LOC)
 - `src/components/parlor/OakTable.tsx` (44 LOC) — R10.6 — The Oak Table at the center of the Parlor.
 - `src/components/floor-5/live-compose/LiveComposePanel.test.tsx` (40 LOC) — R5.4 — LiveComposePanel render tests (SSR, matches R8 pattern).
