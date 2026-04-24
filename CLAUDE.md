@@ -123,6 +123,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/cpo-character/CPOCharacter.tsx` (477 LOC)
 - `src/components/floor-6/RolodexLoungeClient.tsx` (475 LOC)
 - `src/components/floor-5/crud/DocumentList.tsx` (449 LOC)
+- `src/components/floor-2/orrery/Orrery.test.tsx` (445 LOC) — R9.3 — Orrery consumer wrapper tests.
 - `src/components/floor-3/cpo-character/CPOWhiteboard.tsx` (444 LOC)
 - `src/components/floor-3/BriefingRoomScene.tsx` (443 LOC) — BriefingRoomScene — Floor 3 environment compositor.
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
@@ -169,6 +170,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/ProceduralSkyline.tsx` (227 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (225 LOC)
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
+- `src/components/floor-2/orrery/PlanetDetailPanel.tsx` (223 LOC) — R9.3 — PlanetDetailPanel.
 - `src/components/floor-4/situation-map/SituationMapCanvas.tsx` (223 LOC) — Canvas2D renderer for the Situation Map.
 - `src/components/world/NotificationToast.tsx` (221 LOC)
 - `src/components/floor-4/undo-bar/UndoBar.tsx` (219 LOC) — In-world undo bar.
@@ -249,6 +251,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/cpo-character/CPODialoguePanel.tsx` (100 LOC)
 - `src/components/floor-3/drill/LiveSTARBoard.test.tsx` (100 LOC)
 - `src/components/floor-6/cio-character/CIODialoguePanel.tsx` (100 LOC)
+- `src/components/floor-2/orrery/Orrery.tsx` (98 LOC) — R9.3 — Orrery (consumer wrapper).
 - `src/components/floor-3/drill/InterruptBubble.tsx` (96 LOC) — R6.6 — InterruptBubble.
 - `src/components/floor-4/conflicts/ConflictsSection.test.tsx` (96 LOC)
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (94 LOC)

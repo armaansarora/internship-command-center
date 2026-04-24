@@ -12,8 +12,8 @@ started: 2026-04-23T20:35:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T00:23:46.017Z
-  expires: 2026-04-24T02:23:46.012Z
+  acquired: 2026-04-24T00:27:13.563Z
+  expires: 2026-04-24T02:27:13.559Z
 acceptance:
   criteria:
     - Orrery renders 100+ applications at 60fps on baseline laptop.
@@ -32,15 +32,15 @@ tasks:
   R9.2:
     title: Render layer — CSS 3D Orrery primitive (sole CSS-3D file in codebase,
       single GSAP timeline drives all orbits, perf invariants)
-    status: in_progress
+    status: complete
     started: 2026-04-24T00:23:46.017Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T00:26:47.492Z
+    commit: 0ff7c27
   R9.3:
     title: Click-to-history camera dolly + PlanetDetailPanel (consumer wrapper, ESC
       dismiss, reduced-motion fallback)
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-24T00:27:13.563Z
     completed: null
     commit: null
   R9.4:
@@ -127,3 +127,5 @@ history:
   - 2026-04-24T00:21:05.401Z: task_completed R9.1
   - 2026-04-24T00:21:39.120Z: task_started R9.2
   - 2026-04-24T00:23:46.017Z: task_started R9.2
+  - 2026-04-24T00:26:47.492Z: task_completed R9.2
+  - 2026-04-24T00:27:13.563Z: task_started R9.3
