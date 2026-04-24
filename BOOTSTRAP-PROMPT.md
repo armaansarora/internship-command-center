@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:25 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:29 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `6ea64df`)
+- **Branch:** `main` (commit `f684fdb`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 115,090 across 664 source files
+- **Total LOC:** 115,264 across 666 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-6ea64df [R10/10.13] fix(parlor): auto-scroll simulator dialog on new turn
+f684fdb [R10/10.13] feat(parlor): wire NegotiationSimulator into ParlorClient
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6ea64df`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `f684fdb`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (664 files, 115,090 LOC)
+## Source Tree (666 files, 115,264 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -118,7 +118,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/hooks` | 1647 |
-| `src/lib/ai/structured` | 1588 |
+| `src/lib/ai/structured` | 1645 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/app/(authenticated)/settings` | 1419 |
 | `src/app/lobby` | 1294 |
@@ -151,6 +151,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
 | `src/components/lobby/cinematic` | 832 |
+| `src/lib/ai/structured/__tests__` | 831 |
 | `src/lib/agents/cio` | 817 |
 | `src/lib/penthouse` | 796 |
 | `src/app/api/cron/draft-follow-ups` | 792 |
@@ -158,7 +159,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
-| `src/lib/ai/structured/__tests__` | 714 |
 | `src/components/floor-3/binder` | 674 |
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
@@ -801,6 +801,7 @@ src/lib/ai/model.ts
 src/lib/ai/prompt-cache.ts
 src/lib/ai/structured/__tests__/live-compose.proof.test.ts
 src/lib/ai/structured/__tests__/negotiation-draft.test.ts
+src/lib/ai/structured/__tests__/reference-request.test.ts
 src/lib/ai/structured/__tests__/simulator-turn.test.ts
 src/lib/ai/structured/__tests__/three-tone-divergence.proof.test.ts
 src/lib/ai/structured/cover-letter-stream.ts
@@ -810,6 +811,7 @@ src/lib/ai/structured/follow-up-draft.test.ts
 src/lib/ai/structured/follow-up-draft.ts
 src/lib/ai/structured/negotiation-draft.ts
 src/lib/ai/structured/prep-packet.ts
+src/lib/ai/structured/reference-request.ts
 src/lib/ai/structured/score-answer.ts
 src/lib/ai/structured/simulator-turn.ts
 src/lib/ai/structured/tailored-resume.test.ts
@@ -1065,13 +1067,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1114 | 12,494 |
+| `BOOTSTRAP-PROMPT.md` | 1114 | 12,495 |
 | `PROJECT-CONTEXT.md` | 283 | 5,309 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2110** | **31,441** |
+| **Total** | **2110** | **31,442** |
 
-> ⚠️ Reading all recommended files consumes ~31,441 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,442 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
