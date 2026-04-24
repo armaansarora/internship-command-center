@@ -1,14 +1,17 @@
 phase: R10
 name: The Negotiation Parlor (C-Suite annex)
-status: not_started
+status: in_progress
 intent: A door appears on the C-Suite wall when the user's first offer lands.
   Not before. The Parlor is a wood-paneled side room with an oak table, a comp
   band chart on the wall, and three chairs — Offer Evaluator, CFO, CNO gather.
   Offers are folders on the table. Drafts are drafted. Comp is analyzed. Scripts
   are written. Nothing gets sent without a hold window.
-started: null
+started: 2026-04-24T02:24:03.890Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-24T02:24:03.890Z
+  expires: 2026-04-24T04:24:03.885Z
 acceptance:
   criteria:
     - Offer arriving via email parses into the offers table. Parlor door appears
@@ -18,7 +21,46 @@ acceptance:
       fire.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R10.0:
+    title: Design doc + autopilot flip (self-approved against brief + 8 partner
+      constraints in .tower/autopilot.yml)
+    status: in_progress
+    started: 2026-04-24T02:24:03.890Z
+    completed: null
+    commit: null
 blockers: []
-decisions: []
-history: []
+decisions:
+  - date: 2026-04-23
+    text: Offers = new dedicated table (not extension of applications)
+    why: Offer lifecycle diverges sharply — comp structure, deadline, negotiation
+      surface. Colocating would bloat applications' hot path.
+  - date: 2026-04-23
+    text: company_comp_bands = global cache (not user-scoped)
+    why: Comp bands are public data. User-scoping quadratic-ifies scrapes with no
+      privacy benefit. Read-all-authenticated policy is safe.
+  - date: 2026-04-23
+    text: Three-chair convening is ephemeral (not persisted)
+    why: Regenerating on demand is cheap and stays fresh; a convenings table would
+      be more code for no user-facing value.
+  - date: 2026-04-23
+    text: /parlor is a standalone route, not an elevator floor
+    why: Brief frames the Parlor as a C-Suite annex that materializes. Adding to the
+      elevator breaks the metaphor.
+  - date: 2026-04-23
+    text: Firecrawl via direct HTTP (no npm dep)
+    why: One fetch call — no need for a client library; avoids dep churn.
+  - date: 2026-04-23
+    text: CEO voice via browser speechSynthesis (no server TTS)
+    why: Free, fast, private, good enough for reading drafts. Server TTS adds cost +
+      latency for zero quality gain at this task.
+  - date: 2026-04-23
+    text: 24h negotiation hold clamped server-side by type (not free parameter)
+    why: Non-bypassable is the partner intent. A free parameter is bypassable by
+      hand-crafted request.
+  - date: 2026-04-23
+    text: CFO Parlor quip fires once, ever (tracked in preferences)
+    why: Brief says 'make each visit memorable' — a quip on every visit becomes
+      noise. Once is memorable; always is dull.
+history:
+  - 2026-04-24T02:24:03.890Z: task_started R10.0

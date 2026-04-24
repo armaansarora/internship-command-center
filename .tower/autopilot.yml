@@ -1,58 +1,73 @@
-paused: true
+paused: false
 scope: R10-only
-started: null
-started_by: null
-ended: 2026-04-24T01:23:06.146Z
-ended_reason: scope_complete — R9 acceptance.met=true
+started: 2026-04-23T21:30:00.000Z
+started_by: sess-r10-autopilot
+ended: null
+ended_reason: null
 max_blockers: 3
 previous_phase: R9
 previous_outcome: "R9 complete — 11/11 tasks, acceptance.met (verified_by_commit: c31c658)."
-next_phase: R10
+current_phase: R10
 next_brief: "docs/NEXT-ROADMAP.md — ### R10 — The Negotiation Parlor (C-Suite annex)"
 verification_before_acceptance:
-  - npm run t accept R9
+  - npm run t accept R10
 partner_constraints:
-  - Use `npm run t accept R9` to flip acceptance.met — it enforces
-    verify-before-flip structurally. Do NOT write acceptance.met:true directly
-    to the YAML.
-  - The Orrery uses CSS 3D transforms (NOT R3F, NOT Three.js, NOT Theatre.js).
-    Rationale -- R8's Rolodex proved CSS 3D holds 200+ elements with
-    virtualization and zero new deps. Same technique, different geometry.
-  - CRITICAL -- architect for easy tech swap. The render layer (CSS 3D
-    cylinder/orrery geometry) and the data layer (application → planet mapping)
-    MUST be decoupled. A later upgrade to R3F must be a file-swap of the render
-    component only, not a rewrite of callers. Export a typed OrreryPlanet[]
-    interface and a render component that consumes it; the render component is
-    the ONLY thing that touches CSS 3D. Caller code references the data
-    interface, never the render primitives.
-  - Perf gate -- 60fps at 100+ planets on baseline hardware. Proof test asserts
-    either (a) measured frame time on a synthetic 100-planet fixture stays under
-    16.67ms mean over 60 samples, or (b) a virtualization gate mirrors R8's ±45°
-    arc approach. If neither can be shown, ship with a smaller planet budget and
-    flag the ceiling in ledger decisions.
+  # ─── R10 pre-locked decisions (user, 2026-04-23, at autopilot trigger) ───
   - |
-    Rejection autopsy is OPT-IN via a Settings toggle
-    (Settings → Analytics → 'Rejection reflection prompts').
-    Default ON with clear opt-out copy. Setting copy says verbatim:
-    'More reflections = better pattern insights from CFO. You can
-    turn this off anytime.' When ON, the prompt surface on rejection
-    is ULTRA-LOW-FRICTION: 2-3 tappable multiple-choice chips (e.g.,
-    'Pass did not match', 'No response', 'Rejected after interview')
-    plus one optional free-text field. No required fields. Submit
-    button defaults to 'Skip' when nothing is typed. The whole thing
-    lives inline on the application card, not a modal.
-  - CFO threshold triggers reuse the R8 warmth-decay cron pattern -- don't
-    redesign. When conversion rate drops >5% week-over-week, CFO auto-composes
-    an analysis note and fires a pneumatic tube notification (reusing R7's tube
-    delivery infrastructure). Do NOT build a new delivery system.
-  - "@react-pdf/renderer is already a dep (shipped in R5.7). Reuse it for the
-    State of the Month report -- do NOT pick a second PDF library."
-  - Anti-patterns from brief -- a Tableau-style dashboard, a chart library like
-    Recharts with a gold tint, numbers without a story. The Orrery must be the
-    signature moment; charts are supporting material, not the centerpiece.
-  - Do NOT repeat the R5.4 pattern -- Intent-level character flourishes
-    (click-a-planet → camera dolly + history reveal, supernova for offers,
-    pattern-overlay smooth morph) are NOT polish. If they're in the Intent or
-    Proof lines, they ship.
-  - Do NOT touch the R8 cross-user match flow (src/lib/networking,
-    src/app/api/networking). R8.x is scheduled for post-R10.
+    (a) COMP BENCHMARKS — Firecrawl scrapes Levels.fyi into a
+    `company_comp_bands` cache table, 30-day TTL. Firecrawl free tier is
+    500 credits/month — cap the target list to the top ~20 companies per
+    sector the user has touched, and cache aggressively. On Levels.fyi
+    empty/miss: graceful-empty fallback (no pin, honest "not enough
+    benchmark data" copy — not a fake band).
+  - |
+    (b) CEO VOICE ships here — the Parlor is the natural home for CEO
+    voice. It reads negotiation drafts aloud (opt-in toggle, SAME
+    three-layer pattern R6 voice uses — Settings toggle → per-surface
+    enable check → graceful fallback when unavailable). Voice is never
+    required.
+  - |
+    (c) SEND-HOLD — reuse R7's `send_after` column on outreach/negotiation
+    emails for the 24h minimum hold on negotiation drafts. Do NOT rebuild
+    scheduling infrastructure.
+  - |
+    (d) PDF — reuse R9's `@react-pdf/renderer` if any PDF artifact is
+    needed (e.g., offer comparison export). Do NOT pick a second PDF lib.
+  # ─── R10 non-negotiables ───
+  - |
+    PARLOR DOOR MATERIALIZATION — the Parlor door must be ABSENT from the
+    DOM before the first offer parses. Not hidden. Not `display:none`.
+    Not disabled. ABSENT. The CSuiteScene conditionally renders the door
+    only when `offers.length > 0` is true (server-side gate). Before any
+    offer exists, the C-Suite wall reads as a solid wood-panel wall with
+    no door. After the first offer, the door materializes with a single
+    cinematic beat.
+  - |
+    COMP CHART PINS — red below the 25th percentile, gold above the 75th,
+    ink between. Multiple offers stack as folders on the oak table, and
+    both (or all) pins appear simultaneously on the chart.
+  - |
+    OFFERS SCHEMA — migration 0020 with the exact columns named in the
+    brief: base, bonus, equity, sign-on, housing, start_date, location,
+    benefits jsonb, received_at, deadline_at, status enum. Plus: id (uuid
+    PK), user_id (uuid FK → auth.users), application_id (uuid nullable
+    FK → applications), created_at, updated_at. RLS `auth.uid() =
+    user_id` on all four CRUD verbs.
+  # ─── R10 scope ───
+  - |
+    SCOPE MVP (must-ship) — door-materialization + offers schema + comp
+    chart + three-chair convening (Offer Evaluator + CFO + CNO) +
+    negotiation-script drafting with send-hold.
+  - |
+    STRETCH (within phase, best-effort after MVP ships) — negotiation
+    simulator (CPO as recruiter), CNO reference-request drafting.
+  - |
+    OUT OF SCOPE — §8 living expansions (post-offer transition layer,
+    alumni floor, industry-cycle awareness, partner/spouse mode, moat
+    layer). Not even stubbed.
+  # ─── R10 anti-patterns (trip-wire against) ───
+  - |
+    ANTI-PATTERNS — do not ship: (i) a generic "Comp benchmarks" page,
+    (ii) a "Negotiation templates" library, (iii) boilerplate email
+    drafts, (iv) a door that exists before it should. Any of these = the
+    build has drifted; back up.
