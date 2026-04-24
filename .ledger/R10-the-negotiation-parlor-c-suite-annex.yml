@@ -1,13 +1,13 @@
 phase: R10
 name: The Negotiation Parlor (C-Suite annex)
-status: in_progress
+status: complete
 intent: A door appears on the C-Suite wall when the user's first offer lands.
   Not before. The Parlor is a wood-paneled side room with an oak table, a comp
   band chart on the wall, and three chairs — Offer Evaluator, CFO, CNO gather.
   Offers are folders on the table. Drafts are drafted. Comp is analyzed. Scripts
   are written. Nothing gets sent without a hold window.
 started: 2026-04-24T02:24:03.890Z
-completed: null
+completed: 2026-04-24T02:24:39.923Z
 lock:
   holder: sess-a5908e
   acquired: 2026-04-24T02:24:03.890Z
@@ -25,10 +25,10 @@ tasks:
   R10.0:
     title: Design doc + autopilot flip (self-approved against brief + 8 partner
       constraints in .tower/autopilot.yml)
-    status: in_progress
+    status: complete
     started: 2026-04-24T02:24:03.890Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T02:24:39.923Z
+    commit: 2bfbc54
 blockers: []
 decisions:
   - date: 2026-04-23
@@ -64,3 +64,5 @@ decisions:
       noise. Once is memorable; always is dull.
 history:
   - 2026-04-24T02:24:03.890Z: task_started R10.0
+  - 2026-04-24T02:24:39.923Z: task_completed R10.0
+  - 2026-04-24T02:24:39.923Z: phase_completed
