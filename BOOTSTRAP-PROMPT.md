@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 9:02 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 9:11 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `e5d75d2`)
+- **Branch:** `main` (commit `b438760`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 103,175 across 587 source files
+- **Total LOC:** 104,417 across 591 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-e5d75d2 [R9/9.6] feat(autopsy): opt-in rejection reflection chips + settings toggle (migration 0019)
+b438760 [R9/9.7] feat(cfo): weekly threshold cron via R7 pneumatic tube
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `e5d75d2`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `b438760`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (587 files, 103,175 LOC)
+## Source Tree (591 files, 104,417 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -144,6 +144,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
 | `src/components/floor-4/undo-bar` | 885 |
+| `src/lib/pdf` | 865 |
 | `src/lib/agents/cfo` | 846 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
@@ -161,6 +162,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-4/situation-map` | 634 |
 | `src/app/(authenticated)/penthouse` | 627 |
 | `src/components/floor-7/rejection` | 620 |
+| `src/app/api/reports/state-of-month` | 602 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
@@ -213,7 +215,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/rejection-reflections` | 232 |
 | `src/app/api/resumes/upload/__tests__` | 227 |
 | `src/components/floor-4/conflicts` | 226 |
-| `src/lib/pdf` | 225 |
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
@@ -412,6 +413,8 @@ src/app/api/profile/preferences/route.ts
 src/app/api/progression/route.ts
 src/app/api/rejection-reflections/route.test.ts
 src/app/api/rejection-reflections/route.ts
+src/app/api/reports/state-of-month/route.test.ts
+src/app/api/reports/state-of-month/route.ts
 src/app/api/resumes/signed-url/[id]/route.ts
 src/app/api/resumes/upload/__tests__/route.test.ts
 src/app/api/resumes/upload/route.ts
@@ -836,6 +839,8 @@ src/lib/orrery/use-orrery-mode.test.ts
 src/lib/orrery/use-orrery-mode.ts
 src/lib/pdf/cover-letter-pdf.tsx
 src/lib/pdf/resume-pdf.tsx
+src/lib/pdf/state-of-month-pdf.test.ts
+src/lib/pdf/state-of-month-pdf.tsx
 src/lib/penthouse/briefing-fallback.test.ts
 src/lib/penthouse/briefing-fallback.ts
 src/lib/penthouse/briefing-storage.test.ts
@@ -966,13 +971,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1012 | 11,260 |
+| `BOOTSTRAP-PROMPT.md` | 1015 | 11,299 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 506 | 11,299 |
-| **Total** | **2167** | **35,006** |
+| **Total** | **2170** | **35,045** |
 
-> ⚠️ Reading all recommended files consumes ~35,006 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~35,045 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
