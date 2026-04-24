@@ -10,8 +10,8 @@ started: 2026-04-24T02:24:03.890Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T02:24:03.890Z
-  expires: 2026-04-24T04:24:03.885Z
+  acquired: 2026-04-24T03:04:59.786Z
+  expires: 2026-04-24T05:04:59.781Z
 acceptance:
   criteria:
     - Offer arriving via email parses into the offers table. Parlor door appears
@@ -33,51 +33,51 @@ tasks:
     title: Migration 0020 (offers + company_comp_bands + comp_bands_budget +
       outreach_queue type enum) + Drizzle schema + R10 preference keys
       (ceoVoice, parlorDoorSeen, parlorCfoQuipShown)
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T02:38:20.986Z
+    completed: 2026-04-24T02:43:17.854Z
+    commit: dbf55b9
   R10.2:
-    title: Offers REST queries — countOffersForUser, getOffersForUser,
-      getOfferById, insertOffer, updateOfferStatus, normalizeCompanyName
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    title: Offers REST queries — countOffersForUser, getOffersForUser, getOfferById,
+      insertOffer, updateOfferStatus, normalizeCompanyName
+    status: complete
+    started: 2026-04-24T02:45:42.845Z
+    completed: 2026-04-24T02:47:10.583Z
+    commit: 6bc9152
   R10.3:
     title: Offers API (POST/GET /api/offers, GET/PATCH /api/offers/:id) +
       parseOfferEmail extractor (regex-driven, no LLM)
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T02:49:11.807Z
+    completed: 2026-04-24T02:52:42.439Z
+    commit: 1cfa4ea
   R10.4:
-    title: Firecrawl Levels.fyi scraper + comp_bands-rest helpers +
-      cache-first lookup resolver + monthly budget counter +
-      /api/comp-bands/lookup + dev seed script
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    title: Firecrawl Levels.fyi scraper + comp_bands-rest helpers + cache-first
+      lookup resolver + monthly budget counter + /api/comp-bands/lookup + dev
+      seed script
+    status: complete
+    started: 2026-04-24T02:54:44.098Z
+    completed: 2026-04-24T03:01:27.216Z
+    commit: 3abb5d4
   R10.5:
-    title: Parlor door — ParlorDoor component + materialization animation +
-      doorSlot in CSuiteScene + server-side gate in /c-suite/page.tsx +
-      PROOF absence invariant test
-    status: not_started
-    started: null
+    title: Parlor door — ParlorDoor component + materialization animation + doorSlot
+      in CSuiteScene + server-side gate in /c-suite/page.tsx + PROOF absence
+      invariant test
+    status: in_progress
+    started: 2026-04-24T03:04:59.786Z
     completed: null
     commit: null
   R10.6:
-    title: /parlor route + ParlorScene + OakTable + OfferFolder +
-      route-gate PROOF test (redirect when offerCount===0)
+    title: /parlor route + ParlorScene + OakTable + OfferFolder + route-gate PROOF
+      test (redirect when offerCount===0)
     status: not_started
     started: null
     completed: null
     commit: null
   R10.7:
     title: Three-chair convening — Offer Evaluator persona + convenePipelineForOffer
-      (Promise.allSettled fan-out to OE/CFO/CNO) + POST /api/offers/:id/convene +
-      ThreeChairsConvening UI
+      (Promise.allSettled fan-out to OE/CFO/CNO) + POST /api/offers/:id/convene
+      + ThreeChairsConvening UI
     status: not_started
     started: null
     completed: null
@@ -90,17 +90,17 @@ tasks:
     completed: null
     commit: null
   R10.9:
-    title: Negotiation-script draft — draftNegotiationEmail generateObject +
-      POST /api/offers/:id/negotiation-draft + NegotiationDraftPanel reusing
-      R5.4 LiveCompose
+    title: Negotiation-script draft — draftNegotiationEmail generateObject + POST
+      /api/offers/:id/negotiation-draft + NegotiationDraftPanel reusing R5.4
+      LiveCompose
     status: not_started
     started: null
     completed: null
     commit: null
   R10.10:
     title: 24h send-hold clamp — approveOutreachForUser gains minimumHoldSeconds
-      opt; /api/outreach/approve auto-clamps when queued row.type==='negotiation';
-      PROOF test binding the invariant
+      opt; /api/outreach/approve auto-clamps when queued
+      row.type==='negotiation'; PROOF test binding the invariant
     status: not_started
     started: null
     completed: null
@@ -113,23 +113,23 @@ tasks:
     completed: null
     commit: null
   R10.12:
-    title: Signature — CFO quip on first Parlor entry (once, ever). positionFor
-      + cfoQuipForPosition pure helpers + CFOQuipOverlay + wire into ParlorClient
+    title: Signature — CFO quip on first Parlor entry (once, ever). positionFor +
+      cfoQuipForPosition pure helpers + CFOQuipOverlay + wire into ParlorClient
     status: not_started
     started: null
     completed: null
     commit: null
   R10.13:
-    title: '[STRETCH] Negotiation simulator — CPO plays recruiter, per-turn scoring
-      on anchoring/concession/walk-away. Ships only if budget permits.'
+    title: "[STRETCH] Negotiation simulator — CPO plays recruiter, per-turn scoring
+      on anchoring/concession/walk-away. Ships only if budget permits."
     status: not_started
     started: null
     completed: null
     commit: null
   R10.14:
-    title: '[STRETCH] CNO reference-request drafting — CNO drafts requests to
+    title: "[STRETCH] CNO reference-request drafting — CNO drafts requests to
       top-warmth contacts, tracks submission, drafts thank-yous. Ships only if
-      budget permits after R10.13.'
+      budget permits after R10.13."
     status: not_started
     started: null
     completed: null
@@ -177,5 +177,13 @@ decisions:
 history:
   - 2026-04-24T02:24:03.890Z: task_started R10.0
   - 2026-04-24T02:24:39.923Z: task_completed R10.0
-  - 2026-04-24T02:24:39.923Z: phase_auto_completed (reverted — R10.1-10.15 were
-      seeded immediately after)
+  - 2026-04-24T02:24:39.923Z: phase_auto_completed (reverted — R10.1-10.15 were seeded immediately after)
+  - 2026-04-24T02:38:20.986Z: task_started R10.1
+  - 2026-04-24T02:43:17.854Z: task_completed R10.1
+  - 2026-04-24T02:45:42.845Z: task_started R10.2
+  - 2026-04-24T02:47:10.583Z: task_completed R10.2
+  - 2026-04-24T02:49:11.807Z: task_started R10.3
+  - 2026-04-24T02:52:42.439Z: task_completed R10.3
+  - 2026-04-24T02:54:44.098Z: task_started R10.4
+  - 2026-04-24T03:01:27.216Z: task_completed R10.4
+  - 2026-04-24T03:04:59.786Z: task_started R10.5

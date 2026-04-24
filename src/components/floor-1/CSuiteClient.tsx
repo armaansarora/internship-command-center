@@ -18,6 +18,8 @@ import type {
 } from "./DispatchGraph";
 import { useDispatchProgress } from "@/hooks/useDispatchProgress";
 import type { DispatchProgressMap } from "@/hooks/useDispatchProgress";
+import { ParlorDoor } from "@/components/parlor/ParlorDoor";
+import { PARLOR_DOOR_SEEN_PREF_KEY } from "@/lib/preferences/parlor-door-seen-pref";
 
 type BellPhase = "idle" | "ringing" | "orchestrating" | "complete";
 
@@ -57,6 +59,20 @@ export function shouldOpenInjectOnSlash(
 
 interface CSuiteClientProps {
   stats: PipelineStats;
+  /**
+   * R10.5 — Gate for the Negotiation Parlor door. True only when the
+   * server computed `offerCount > 0`. When false we pass NO `doorSlot`
+   * prop to CSuiteScene — the door is ABSENT from the DOM, not hidden.
+   * Invariant locked in `r10-parlor-door-absence.proof.test.tsx`.
+   */
+  hasParlorDoor?: boolean;
+  /**
+   * R10.5 — True on the very first render after an offer parses.
+   * Drives the 2.3s cinematic materialization beat. After the beat
+   * completes the client POSTs `parlorDoorSeen=true` so subsequent
+   * visits arrive with `firstAppearance=false`.
+   */
+  firstAppearance?: boolean;
 }
 
 /**
@@ -190,7 +206,11 @@ export function mergeGraphDispatches(
   return out;
 }
 
-export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
+export function CSuiteClient({
+  stats,
+  hasParlorDoor = false,
+  firstAppearance = false,
+}: CSuiteClientProps): JSX.Element {
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [briefingMessage, setBriefingMessage] = useState<string | undefined>(undefined);
   const [ceoState, setCEOState] = useState<"idle" | "thinking" | "talking">("idle");
@@ -414,6 +434,36 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
     </div>
   );
 
+  // ── Door slot (C-Suite left column, bottom-right) ───────────────────────
+  // R10.5 — The Negotiation Parlor door. MUST be truly undefined when the
+  // user has zero offers — the CSuiteScene's absence invariant depends on
+  // NOT receiving the prop (see r10-parlor-door-absence.proof.test.tsx).
+  // Don't pass `null`, don't pass `false && <ParlorDoor />` — just don't
+  // pass the prop at all.
+  const handleFirstAppearanceDone = useCallback(async (): Promise<void> => {
+    try {
+      await fetch("/api/profile/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: PARLOR_DOOR_SEEN_PREF_KEY,
+          value: { seen: true },
+        }),
+      });
+    } catch {
+      // Silent — the worst-case outcome is the user sees the animation
+      // again on their next visit, which is mildly annoying but harmless.
+      // Avoid pushing a noisy toast for a purely cosmetic latch.
+    }
+  }, []);
+
+  const doorSlot = hasParlorDoor ? (
+    <ParlorDoor
+      firstAppearance={firstAppearance}
+      onFirstAppearanceDone={handleFirstAppearanceDone}
+    />
+  ) : undefined;
+
   return (
     <>
       <CSuiteScene
@@ -422,6 +472,7 @@ export function CSuiteClient({ stats }: CSuiteClientProps): JSX.Element {
         graphSlot={graphSlot}
         panelSlot={panelSlot}
         bellPhase={bellPhase}
+        {...(doorSlot !== undefined ? { doorSlot } : {})}
       />
 
       {/* CEO Dialogue Panel */}

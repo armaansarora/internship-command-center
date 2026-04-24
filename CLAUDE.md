@@ -114,13 +114,13 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/elevator/ElevatorPanel.tsx` (635 LOC) — ElevatorPanel (desktop) — the glass nav panel with floor buttons, tower
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
+- `src/components/floor-1/CSuiteClient.tsx` (539 LOC) — R3.11 — pure decision helper for the `/`-keystroke listener. Opens the
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (526 LOC)
 - `src/components/floor-2/orrery/Orrery.test.tsx` (514 LOC) — R9.3 + R9.4 — Orrery consumer wrapper tests.
 - `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (513 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-3/BriefingRoomClient.tsx` (511 LOC)
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
 - `src/components/floor-5/crud/DocumentEditor.tsx` (500 LOC)
-- `src/components/floor-1/CSuiteClient.tsx` (488 LOC) — R3.11 — pure decision helper for the `/`-keystroke listener. Opens the
 - `src/components/floor-3/cpo-character/CPOCharacter.tsx` (477 LOC)
 - `src/components/floor-6/RolodexLoungeClient.tsx` (475 LOC)
 - `src/components/floor-5/crud/DocumentList.tsx` (449 LOC)
@@ -194,6 +194,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
 - `src/components/ui/SoundToggle.tsx` (194 LOC) — SoundToggle — small fixed speaker button (bottom-right).
+- `src/components/floor-1/CSuiteScene.tsx` (193 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
 - `src/components/floor-6/contact-grid/ContactCard.tsx` (192 LOC) — cool-blue warmth ramp. Informative, not punitive. Cold cards look
 - `src/components/floor-7/war-table/ApplicationCard.test.tsx` (191 LOC) — R9.6 — ApplicationCard prop wiring tests for the rejection-reflection
 - `src/components/floor-5/WritingRoomTicker.tsx` (188 LOC) — WritingRoomTicker — bottom scrolling status strip showing live document data.
@@ -203,7 +204,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/RolodexLoungeTicker.tsx` (185 LOC) — RolodexLoungeTicker — bottom scrolling status strip showing live networking data.
 - `src/components/floor-1/ceo-character/CEODialoguePanel.tsx` (182 LOC) — Called whenever the chat's messages or status change. Used by the parent
 - `src/components/floor-1/InjectPrompt.tsx` (181 LOC) — InjectPrompt — floating single-line input that opens above the bell when
-- `src/components/floor-1/CSuiteScene.tsx` (179 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
+- `src/components/parlor/ParlorDoor.test.tsx` (180 LOC) — R10.5 — ParlorDoor render + accessibility tests.
 - `src/components/floor-7/war-table/EmptyWarTable.tsx` (178 LOC) — Empty state for a cold war table. Not an apology — an invitation. Matches
 - `src/components/lobby/concierge/OtisAvatar.tsx` (175 LOC) — OtisAvatar — the Concierge's standing silhouette behind a reception desk.
 - `src/components/world/WeatherEffects.tsx` (174 LOC) — WeatherEffects — absolutely positioned over the skyline, behind floor content.
@@ -217,6 +218,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
 - `src/components/icons/PenthouseIcons.tsx` (152 LOC)
 - `src/components/lobby/directory/BuildingDirectory.tsx` (152 LOC) — R4.8 — Building Directory.
+- `src/components/parlor/ParlorDoor.tsx` (149 LOC) — True only on the very first render after an offer parses — drives the
 - `src/components/floor-2/ObservatoryTicker.tsx` (145 LOC)
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)

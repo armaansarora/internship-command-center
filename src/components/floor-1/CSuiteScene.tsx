@@ -26,6 +26,13 @@ interface CSuiteSceneProps {
    * brightness dim off this attribute + the sibling `--building-dim` var.
    */
   bellPhase?: "idle" | "ringing" | "orchestrating" | "complete";
+  /**
+   * R10.5 — The Negotiation Parlor door. MUST be undefined when the user
+   * has zero offers — the door must be ABSENT from the DOM entirely, not
+   * hidden via CSS. The invariant is locked in
+   * `src/app/__tests__/r10-parlor-door-absence.proof.test.tsx`.
+   */
+  doorSlot?: React.ReactNode;
 }
 
 /**
@@ -44,6 +51,7 @@ export function CSuiteScene({
   graphSlot,
   panelSlot,
   bellPhase,
+  doorSlot,
 }: CSuiteSceneProps): JSX.Element {
   return (
     <div
@@ -128,6 +136,7 @@ export function CSuiteScene({
           {/* Left — CEO character + briefing */}
           <div
             style={{
+              position: "relative",
               borderRight: "1px solid rgba(201, 168, 76, 0.1)",
               display: "flex",
               flexDirection: "column",
@@ -139,6 +148,11 @@ export function CSuiteScene({
             aria-label="CEO area"
           >
             {contentSlot}
+            {/* R10.5 — The Parlor door. ABSENT from the DOM when the user has
+                zero offers — see r10-parlor-door-absence.proof.test.tsx. The
+                slot itself is the gating mechanism; do NOT always-render and
+                then hide via CSS. */}
+            {doorSlot && <div data-testid="csuite-door-slot">{doorSlot}</div>}
           </div>
 
           {/* Right — live DispatchGraph + Ring the Bell */}
