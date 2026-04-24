@@ -386,7 +386,12 @@ export async function startStubServer(opts: StartOptions = {}): Promise<StubServ
 
   return new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(opts.port ?? 0, "127.0.0.1", () => {
+    // Listen on the dual-stack wildcard (no host). Node binds IPv6 by
+    // default, which accepts IPv4 connections via v4-mapped addresses on
+    // macOS/Linux. Listening only on 127.0.0.1 caused fetch() from
+    // Playwright's test runner to hang because Node's undici resolves
+    // `localhost` to `::1` first and got ECONNREFUSED before retrying v4.
+    server.listen(opts.port ?? 0, () => {
       const addr = server.address();
       if (typeof addr !== "object" || addr === null) {
         reject(new Error("listener address is not an inet address"));

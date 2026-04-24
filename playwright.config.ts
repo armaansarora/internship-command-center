@@ -11,6 +11,8 @@ export default defineConfig({
   reporter: process.env.CI
     ? [["html", { outputFolder: "playwright-report", open: "never" }], ["list"]]
     : [["list"]],
+  globalSetup: "./tests/e2e/global-setup.ts",
+  globalTeardown: "./tests/e2e/global-teardown.ts",
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     trace: "retain-on-failure",
@@ -26,12 +28,11 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         env: {
-          NEXT_PUBLIC_SUPABASE_URL:
-            process.env.NEXT_PUBLIC_SUPABASE_URL ??
-            "https://jzrsrruugcajohvvmevg.supabase.co",
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
-            process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-            "sb_publishable_stub_for_e2e",
+          // R12.10 — Both browser and Next.js server-side Supabase SDK calls
+          // converge on the stub server booted by globalSetup. NEVER point
+          // this at the real project — see partner constraint (b).
+          NEXT_PUBLIC_SUPABASE_URL: "http://localhost:3001",
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_stub_for_e2e_local",
           NEXT_PUBLIC_APP_URL:
             process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
           SUPABASE_SERVICE_ROLE_KEY:
