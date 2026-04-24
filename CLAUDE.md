@@ -148,6 +148,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/lobby/cinematic/CinematicArrival.test.tsx` (310 LOC) — R4.7 — CinematicArrival render tests.
 - `src/components/pricing/PricingCards.tsx` (306 LOC)
 - `src/components/floor-7/WarRoomScene.tsx` (298 LOC) — WarRoomScene — Floor 7 environment compositor.
+- `src/components/floor-2/orrery/OrreryRender.test.tsx` (297 LOC) — R9.2 — OrreryRender SSR + invariant tests.
 - `src/components/ui/UserMenu.tsx` (294 LOC) — UserMenu — account dropdown (top-right of authenticated pages).
 - `src/components/floor-1/DispatchGraph.tsx` (293 LOC) — Canonical order of the 7 department heads the CEO dispatches to. The radial
 - `src/components/floor-5/resume-press/ResumePress.tsx` (286 LOC) — R5.8 — The Resume Press.
@@ -172,6 +173,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/world/NotificationToast.tsx` (221 LOC)
 - `src/components/floor-4/undo-bar/UndoBar.tsx` (219 LOC) — In-world undo bar.
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
+- `src/components/floor-2/orrery/OrreryRender.tsx` (218 LOC) — R9.2 — OrreryRender.
 - `src/components/floor-4/situation-map/SituationMapList.tsx` (215 LOC) — Two-column honest fallback for the Situation Map. Shipped when:
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.

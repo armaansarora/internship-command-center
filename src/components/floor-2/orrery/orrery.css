@@ -1,0 +1,187 @@
+/* ======================================================================
+   R9.2 — THE ORRERY (Floor 2 / Observatory)
+   The ONE file in the codebase that uses CSS 3D transform-style:preserve-3d
+   for the orrery. Callers consume OrreryPlanet[] only; this stylesheet plus
+   OrreryRender.tsx are the swap-out boundary for a future R3F port.
+   ====================================================================== */
+
+/* ── Color tokens ───────────────────────────────────────────────────────
+   Status colors shade the planet body when mode="stage". Tier colors take
+   over in mode="tier" (cool-blue monochromatic ramp, inner brighter, outer
+   dimmer). Velocity colors take over in mode="velocity" (recent gold/amber
+   warm; cold cool-blue). Token names are addressed by the data layer via
+   `colorToken: --orrery-...` so render never hard-codes. */
+:root {
+  /* Status palette */
+  --orrery-status-discovered:           rgba(127, 179, 211, 0.55);
+  --orrery-status-applied:              rgba(100, 180, 255, 0.85);
+  --orrery-status-screening:            rgba(132, 198, 255, 0.92);
+  --orrery-status-interview_scheduled:  rgba(168, 216, 255, 0.95);
+  --orrery-status-interviewing:         rgba(0, 212, 255, 1.00);
+  --orrery-status-under_review:         rgba(245, 158, 11, 0.95);
+  --orrery-status-offer:                rgba(232, 196, 90, 1.00);
+  --orrery-status-accepted:             rgba(201, 168, 76, 1.00);
+  --orrery-status-rejected:             rgba(74, 122, 155, 0.45);
+  --orrery-status-withdrawn:            rgba(74, 122, 155, 0.35);
+
+  /* Tier palette — cool-blue monochromatic. Inner (tier 1) brighter, outer
+     (tier 4) dimmer, matching the radial gradient of a starfield. */
+  --orrery-tier-1: rgba(168, 216, 255, 1.00);
+  --orrery-tier-2: rgba(132, 198, 255, 0.85);
+  --orrery-tier-3: rgba(100, 180, 255, 0.65);
+  --orrery-tier-4: rgba(74, 144, 226, 0.50);
+
+  /* Velocity palette — warm/amber when recent (still moving), cool fades */
+  --orrery-velocity-recent: rgba(232, 196, 90, 1.00);
+  --orrery-velocity-active: rgba(168, 216, 255, 0.90);
+  --orrery-velocity-aging:  rgba(127, 179, 211, 0.65);
+  --orrery-velocity-cold:   rgba(74, 122, 155, 0.45);
+
+  /* Generic glow token for planet body shadows */
+  --orrery-glow: rgba(201, 168, 76, 0.30);
+}
+
+/* ── Scene container ────────────────────────────────────────────────────
+   Square aspect, perspective for the 3D tilt. `contain` prevents layout
+   thrash when the GSAP camera-dolly tween scales the scene. */
+.orrery-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  perspective: 1200px;
+  perspective-origin: center center;
+  contain: layout paint;
+  transform-origin: center center;
+}
+
+/* ── Orbit ring ─────────────────────────────────────────────────────────
+   The ONE element that owns transform-style: preserve-3d. Tilted to 60°
+   around X for the Apollo-13 / Interstellar tilted-plate look. The orbit
+   is the only thing GSAP rotates, and the only thing carrying will-change.
+   Per-planet will-change is forbidden — that's the perf invariant. */
+.orrery-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateX(60deg);
+  transform-style: preserve-3d;
+  border-radius: 50%;
+  border: 1px solid rgba(60, 140, 220, 0.08);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ── Planet ──────────────────────────────────────────────────────────────
+   Each planet is a <button> for keyboard a11y. NO `will-change` on planets
+   — only the orbit ring. Opacity transitions cover the rejected/withdrawn
+   fade-out. Inline styles set background (color token), width/height
+   (sizePx), and the polar-to-cartesian transform. */
+.orrery-planet {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  contain: layout paint;
+  transition: opacity 1.5s ease-out;
+  box-shadow: 0 0 8px var(--orrery-glow, rgba(201, 168, 76, 0.30));
+  background-clip: padding-box;
+}
+
+.orrery-planet:focus-visible {
+  outline: 2px solid var(--orrery-status-offer, rgba(232, 196, 90, 1.00));
+  outline-offset: 3px;
+}
+
+/* Faded planets — rejected / withdrawn — visually demoted but still in DOM
+   so history reads clean. Pointer-events off so they aren't click-targets. */
+.orrery-planet.orrery-fading {
+  opacity: 0.20;
+  pointer-events: none;
+}
+
+/* Satellite ring — interviews-in-flight get a slowly-rotating dashed halo
+   around the planet body. Pure CSS animation (cheap), no JS. */
+.orrery-planet.orrery-satellite::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(168, 216, 255, 0.65);
+  animation: orrery-satellite-spin 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes orrery-satellite-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Supernova — the once-per-lifetime gold burst when a user gets an offer.
+   2.4s ease-out radial gold expansion. The supernova-once invariant lives
+   in the data transformer (R9.1), not here. */
+.orrery-planet.orrery-supernova {
+  animation: orrery-supernova-burst 2.4s ease-out 1;
+}
+
+@keyframes orrery-supernova-burst {
+  0% {
+    box-shadow:
+      0 0 8px var(--orrery-glow),
+      0 0 0 0 rgba(232, 196, 90, 0.85);
+    transform: rotate(var(--orrery-planet-rotate, 0deg))
+               translateY(-50%)
+               rotate(calc(-1 * var(--orrery-planet-rotate, 0deg)))
+               scale(1);
+  }
+  40% {
+    transform: rotate(var(--orrery-planet-rotate, 0deg))
+               translateY(-50%)
+               rotate(calc(-1 * var(--orrery-planet-rotate, 0deg)))
+               scale(1.6);
+  }
+  100% {
+    box-shadow:
+      0 0 24px rgba(232, 196, 90, 0.85),
+      0 0 0 80px rgba(232, 196, 90, 0);
+    transform: rotate(var(--orrery-planet-rotate, 0deg))
+               translateY(-50%)
+               rotate(calc(-1 * var(--orrery-planet-rotate, 0deg)))
+               scale(1);
+  }
+}
+
+/* ── Reduced-motion path ────────────────────────────────────────────────
+   The render layer drops the GSAP rotation timeline when reducedMotion is
+   true AND adds the `orrery-reduced` class to the scene root so CSS-driven
+   animations (satellite spin, supernova burst) are also suppressed. The
+   class is the structural signal; the @media query is the OS-level safety
+   net for users who never round-tripped through React state. */
+.orrery-reduced .orrery-orbit {
+  animation: none !important;
+}
+
+.orrery-reduced .orrery-planet.orrery-satellite::after {
+  animation: none !important;
+}
+
+.orrery-reduced .orrery-planet.orrery-supernova {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orrery-orbit {
+    animation: none !important;
+  }
+
+  .orrery-planet.orrery-satellite::after {
+    animation: none !important;
+  }
+
+  .orrery-planet.orrery-supernova {
+    animation: none !important;
+  }
+}

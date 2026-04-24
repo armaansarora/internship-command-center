@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:21 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:26 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `9ffeb67`)
+- **Branch:** `main` (commit `3e5cd0c`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 98,275 across 563 source files
+- **Total LOC:** 98,978 across 566 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-9ffeb67 [R9/9.0] docs: R9 implementation plan (10 tasks, 3 waves)
+3e5cd0c [R9/9.1] feat(orrery): typed OrreryPlanet contract + transformer
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `9ffeb67`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3e5cd0c`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (563 files, 98,275 LOC)
+## Source Tree (566 files, 98,978 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -153,6 +153,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
+| `src/components/floor-2/orrery` | 703 |
 | `src/components/floor-3/binder` | 674 |
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
@@ -457,6 +458,9 @@ src/components/floor-2/analytics/WeeklyTrend.tsx
 src/components/floor-2/cfo-character/CFOCharacter.tsx
 src/components/floor-2/cfo-character/CFODialoguePanel.tsx
 src/components/floor-2/cfo-character/CFOWhiteboard.tsx
+src/components/floor-2/orrery/OrreryRender.test.tsx
+src/components/floor-2/orrery/OrreryRender.tsx
+src/components/floor-2/orrery/orrery.css
 src/components/floor-3/BriefingRoomClient.tsx
 src/components/floor-3/BriefingRoomScene.tsx
 src/components/floor-3/BriefingRoomTicker.tsx
@@ -936,13 +940,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 981 | 10,843 |
+| `BOOTSTRAP-PROMPT.md` | 985 | 10,882 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 496 | 10,957 |
-| **Total** | **2126** | **34,246** |
+| `CLAUDE.md` | 498 | 11,013 |
+| **Total** | **2132** | **34,341** |
 
-> ⚠️ Reading all recommended files consumes ~34,246 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,341 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
