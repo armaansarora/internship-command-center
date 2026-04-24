@@ -58,3 +58,7 @@ migration-*.sql
 
 .tower/.cache
 .tower/lock.yml
+
+# Playwright (R12 hardening harness) — local artifacts only, never commit.
+test-results/
+playwright-report/

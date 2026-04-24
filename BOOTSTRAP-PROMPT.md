@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 4:28 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 5:42 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `c2ac87e`)
+- **Branch:** `main` (commit `023ea0f`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 120,344 across 694 source files
+- **Total LOC:** 120,849 across 696 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-c2ac87e chore(handoff): session sess-a5908e — R12
+023ea0f [R12/12.12] chore(autopilot): pause R12 after R12.1-R12.11 ship with R12.10 B1 blocker
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `c2ac87e`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `023ea0f`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,18 +103,18 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (694 files, 120,344 LOC)
+## Source Tree (696 files, 120,849 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 7001 |
 | `src/lib/ai/agents` | 4436 |
-| `src/styles` | 3969 |
+| `src/styles` | 3997 |
+| `src/components/parlor` | 3416 |
 | `src/components/world` | 3308 |
-| `src/components/parlor` | 3282 |
 | `src/components/floor-1` | 2725 |
 | `src/app/__tests__` | 2656 |
-| `src/components/floor-7/war-table` | 1988 |
+| `src/components/floor-7/war-table` | 2166 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
@@ -214,6 +214,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/preferences` | 307 |
 | `src/components/pricing` | 306 |
 | `src/app/api/offers/[id]` | 302 |
+| `src/app/api/contacts/[id]/reference-request/__tests__` | 298 |
 | `src/components/floor-6/dossier-wall` | 298 |
 | `src/lib/audio` | 297 |
 | `src/app/(authenticated)` | 285 |
@@ -248,7 +249,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/offers` | 199 |
 | `src/app/api/briefing/complete-drill` | 198 |
 | `src/app/api/outreach/undo` | 197 |
-| `src/app/api/contacts/[id]/reference-request/__tests__` | 193 |
 | `src/app/api/cron/cfo-threshold` | 193 |
 | `src/app/api/cron/match-index/__tests__` | 191 |
 | `src/lib/audit` | 185 |
@@ -265,6 +265,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/latenight` | 156 |
 | `src/lib/validators` | 155 |
 | `src/components/penthouse/idle` | 153 |
+| `src/app/api/contacts/[id]/reference-request` | 152 |
 | `src/components/icons` | 152 |
 | `src/lib/voice/__tests__` | 145 |
 | `src/app/(authenticated)/situation-room` | 142 |
@@ -298,7 +299,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
 | `src/app/api/offers/ingest-email` | 98 |
-| `src/app/api/contacts/[id]/reference-request` | 92 |
 | `src/lib/parlor/__tests__` | 90 |
 | `src/db/__tests__` | 89 |
 | `src/app/api/offers/[id]/simulate` | 84 |
@@ -653,6 +653,7 @@ src/components/floor-7/war-table/ApplicationCard.test.tsx
 src/components/floor-7/war-table/ApplicationCard.tsx
 src/components/floor-7/war-table/ColumnHeader.tsx
 src/components/floor-7/war-table/EmptyWarTable.tsx
+src/components/floor-7/war-table/PipelineColumn.cap.test.tsx
 src/components/floor-7/war-table/PipelineColumn.tsx
 src/components/floor-7/war-table/StampBar.tsx
 src/components/floor-7/war-table/WarTable.tsx
@@ -676,6 +677,7 @@ src/components/parlor/CompBandChart.test.tsx
 src/components/parlor/CompBandChart.tsx
 src/components/parlor/NegotiationDraftPanel.test.tsx
 src/components/parlor/NegotiationDraftPanel.tsx
+src/components/parlor/OakTable.cap.test.tsx
 src/components/parlor/OakTable.comparison.test.tsx
 src/components/parlor/OakTable.tsx
 src/components/parlor/OfferFolder.test.tsx
@@ -1106,13 +1108,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1155 | 13,086 |
+| `BOOTSTRAP-PROMPT.md` | 1155 | 13,081 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2139** | **31,727** |
+| **Total** | **2139** | **31,722** |
 
-> ⚠️ Reading all recommended files consumes ~31,727 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,722 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

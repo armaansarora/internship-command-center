@@ -25,5 +25,18 @@ export default defineConfig({
         url: "http://localhost:3000",
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        env: {
+          NEXT_PUBLIC_SUPABASE_URL:
+            process.env.NEXT_PUBLIC_SUPABASE_URL ??
+            "https://jzrsrruugcajohvvmevg.supabase.co",
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+            process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+            "sb_publishable_stub_for_e2e",
+          NEXT_PUBLIC_APP_URL:
+            process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+          SUPABASE_SERVICE_ROLE_KEY:
+            process.env.SUPABASE_SERVICE_ROLE_KEY ??
+            "service_role_stub_for_e2e",
+        },
       },
 });

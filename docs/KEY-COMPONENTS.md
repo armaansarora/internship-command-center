@@ -57,6 +57,7 @@
 - `src/components/settings/NetworkingConsent.tsx` (287 LOC)
 - `src/components/floor-5/resume-press/ResumePress.tsx` (286 LOC) — R5.8 — The Resume Press.
 - `src/components/lobby/cinematic/CinematicArrival.tsx` (277 LOC) — R4.7 — CinematicArrival.
+- `src/components/floor-7/war-table/PipelineColumn.tsx` (270 LOC) — R12 Red Team scale fix: render at most this many cards per column.
 - `src/components/floor-5/live-compose/LiveComposePanel.tsx` (268 LOC) — R5.4 — LiveComposePanel.
 - `src/components/parlor/OakTable.comparison.test.tsx` (268 LOC) — R10 post-mortem (test-tightening pass) — OakTable side-by-side comparison.
 - `src/components/penthouse/rest/RestPanel.tsx` (268 LOC) — Rest Panel — the demoted dashboard that lived as the Penthouse's primary
@@ -94,7 +95,6 @@
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/parlor/ThreeChairsConvening.test.tsx` (206 LOC) — R10.7 — ThreeChairsConvening render + interaction tests.
-- `src/components/floor-7/war-table/PipelineColumn.tsx` (204 LOC)
 - `src/components/floor-4/final-countdown/FinalCountdownSection.tsx` (203 LOC)
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/floor-7/war-table/StampBar.tsx` (202 LOC) — Floating action bar that appears when the user has selected one or more
@@ -159,6 +159,7 @@
 - `src/components/parlor/ThreeChairsConvening.tsx` (118 LOC) — R10.7 — ThreeChairsConvening.
 - `src/components/floor-3/binder/DebriefBinderShelf.tsx` (117 LOC) — R6.8 — The Debrief Binder Shelf.
 - `src/components/floor-1/CSuiteClient.injectPrompt.test.tsx` (112 LOC) — R3.11 — unit tests for the `/`-inject activation gate.
+- `src/components/floor-7/war-table/PipelineColumn.cap.test.tsx` (112 LOC) — R12 Red Team scale fix — PipelineColumn render cap test.
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
 - `src/components/floor-6/rolodex/Rolodex.test.tsx` (111 LOC) — P1 invariant — rolodex at 200+ cards keeps the live DOM child count capped.
 - `src/components/penthouse/scenes/evening/EveningScene.tsx` (110 LOC) — Evening scene — the CEO reflects on the day rather than staging a new one.
@@ -178,6 +179,7 @@
 - `src/components/floor-3/cpo-character/CPODialoguePanel.tsx` (100 LOC)
 - `src/components/floor-3/drill/LiveSTARBoard.test.tsx` (100 LOC)
 - `src/components/floor-6/cio-character/CIODialoguePanel.tsx` (100 LOC)
+- `src/components/parlor/OakTable.cap.test.tsx` (98 LOC) — R12 Red Team scale fix — OakTable render cap test.
 - `src/components/floor-3/drill/InterruptBubble.tsx` (96 LOC) — R6.6 — InterruptBubble.
 - `src/components/floor-4/conflicts/ConflictsSection.test.tsx` (96 LOC)
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (94 LOC)
@@ -192,6 +194,7 @@
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)
 - `src/components/agents/dialogue/AgentChatInput.tsx` (80 LOC)
+- `src/components/parlor/OakTable.tsx` (80 LOC) — R12 Red Team scale fix: cap the visible folder stack at this many
 - `src/components/floor-3/drill/DrillTimer.test.tsx` (79 LOC)
 - `src/components/penthouse/quick-actions/QuickActionsRow.tsx` (79 LOC) — QuickActionsRow — the 4 Penthouse quick-actions wired to either a direct
 - `src/components/floor-6/dossier-wall/DossierWall.test.tsx` (77 LOC)
@@ -214,7 +217,6 @@
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
 - `src/components/floor-6/side-switch/SideSwitch.test.tsx` (44 LOC)
-- `src/components/parlor/OakTable.tsx` (44 LOC) — R10.6 — The Oak Table at the center of the Parlor.
 - `src/components/floor-5/live-compose/LiveComposePanel.test.tsx` (40 LOC) — R5.4 — LiveComposePanel render tests (SSR, matches R8 pattern).
 - `src/components/floor-3/drill/DrillVoiceMic.test.tsx` (30 LOC)
 - `src/components/world/MilestoneToastContainer.tsx` (18 LOC) — Mount-once container for the milestone toast system.

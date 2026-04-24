@@ -82,6 +82,36 @@ function insertChain(result: { data: unknown; error: unknown }) {
   return chain;
 }
 
+/**
+ * Cooldown SELECT chain for the route's pre-insert duplicate check:
+ *   client.from("outreach_queue").select(...).eq(...).eq(...).eq(...).gte(...)
+ * Resolves at .gte() with { data: rows, error }.
+ */
+function cooldownSelectChain(rows: Array<{
+  id: string;
+  created_at: string;
+  metadata: { offer_id?: string };
+}>, error: { message: string } | null = null) {
+  const chain: Record<string, ReturnType<typeof vi.fn>> = {};
+  chain.select = vi.fn(() => chain);
+  chain.eq = vi.fn(() => chain);
+  chain.gte = vi.fn(() => Promise.resolve({ data: rows, error }));
+  return chain;
+}
+
+/**
+ * Convenience: stub the two from("outreach_queue") calls in the happy
+ * path — first the empty cooldown SELECT, then the insert chain.
+ */
+function stubHappyPath(insertResult: { data: unknown; error: unknown }) {
+  const cooldown = cooldownSelectChain([]);
+  const insertC = insertChain(insertResult);
+  supabaseFromMock
+    .mockReturnValueOnce(cooldown)
+    .mockReturnValueOnce(insertC);
+  return { cooldown, insertC };
+}
+
 describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -138,7 +168,7 @@ describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
   });
 
   it("returns 200 + inserted row on happy path", async () => {
-    const chain = insertChain({
+    const { insertC: chain } = stubHappyPath({
       data: {
         id: "ot-ref-1",
         subject: "Quick ask — Acme reference",
@@ -152,7 +182,6 @@ describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
       },
       error: null,
     });
-    supabaseFromMock.mockReturnValueOnce(chain);
     const res = await POST(
       makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
       ctx,
@@ -178,15 +207,91 @@ describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
   });
 
   it("returns 500 when the insert fails", async () => {
-    const chain = insertChain({
+    stubHappyPath({
       data: null,
       error: { message: "boom" },
     });
-    supabaseFromMock.mockReturnValueOnce(chain);
     const res = await POST(
       makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
       ctx,
     );
     expect(res.status).toBe(500);
+  });
+
+  // R12 Red Team — cooldown gate (prevents ref-request spam).
+  describe("cooldown (6h) — prevents same-(contact, offer) re-draft spam", () => {
+    it("returns 429 when a prior reference_request for this (contact, offer) is within window", async () => {
+      const recentIso = new Date(
+        Date.now() - 60 * 60 * 1000, // 1h ago — well inside 6h cooldown
+      ).toISOString();
+      const cooldown = cooldownSelectChain([
+        {
+          id: "prior-1",
+          created_at: recentIso,
+          metadata: { offer_id: "11111111-1111-4111-8111-111111111111" },
+        },
+      ]);
+      supabaseFromMock.mockReturnValueOnce(cooldown);
+      const res = await POST(
+        makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
+        ctx,
+      );
+      expect(res.status).toBe(429);
+      const body = (await res.json()) as {
+        error: string;
+        retry_after_seconds: number;
+      };
+      expect(body.error).toBe("cooldown_active");
+      expect(body.retry_after_seconds).toBeGreaterThan(0);
+      expect(body.retry_after_seconds).toBeLessThanOrEqual(6 * 60 * 60);
+      // Insert never reached — draft never generated.
+      expect(draftRefMock).not.toHaveBeenCalled();
+    });
+
+    it("allows when prior reference_request is for a DIFFERENT offer (same contact)", async () => {
+      const recentIso = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const cooldown = cooldownSelectChain([
+        {
+          id: "prior-1",
+          created_at: recentIso,
+          // Different offer id — same contact but cooldown only blocks
+          // the (contact, offer) pair.
+          metadata: { offer_id: "99999999-9999-4999-8999-999999999999" },
+        },
+      ]);
+      const insertC = insertChain({
+        data: {
+          id: "ot-ref-2",
+          type: "reference_request",
+          status: "pending_approval",
+          metadata: {
+            offer_id: "11111111-1111-4111-8111-111111111111",
+            contact_id: "c1",
+          },
+        },
+        error: null,
+      });
+      supabaseFromMock
+        .mockReturnValueOnce(cooldown)
+        .mockReturnValueOnce(insertC);
+      const res = await POST(
+        makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
+        ctx,
+      );
+      expect(res.status).toBe(200);
+      expect(insertC.insert).toHaveBeenCalledOnce();
+    });
+
+    it("returns 500 when the cooldown query itself errors (fail-closed)", async () => {
+      const cooldown = cooldownSelectChain([], { message: "cooldown query broken" });
+      supabaseFromMock.mockReturnValueOnce(cooldown);
+      const res = await POST(
+        makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
+        ctx,
+      );
+      expect(res.status).toBe(500);
+      // Insert never reached on cooldown-query failure.
+      expect(draftRefMock).not.toHaveBeenCalled();
+    });
   });
 });

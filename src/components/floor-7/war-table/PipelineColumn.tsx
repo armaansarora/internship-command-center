@@ -8,6 +8,17 @@ import type { Application } from "@/db/schema";
 import { ApplicationCard } from "./ApplicationCard";
 import { ColumnHeader } from "./ColumnHeader";
 
+/**
+ * R12 Red Team scale fix: render at most this many cards per column.
+ * Beyond this cap, an overflow banner counts the hidden cards and
+ * suggests filtering. Without the cap, a 500+ application column blows
+ * up the DOM (each ApplicationCard is non-trivial — flag/menu/avatar/
+ * nested elements). Drag-and-drop continues to work for visible cards;
+ * a user with 100+ apps in a column needs filter/sort/search anyway,
+ * which is a separate UX surface (post-launch design phase).
+ */
+const MAX_VISIBLE_PER_COLUMN = 100;
+
 interface PipelineColumnProps {
   columnId: string;
   tacticalName: string;
@@ -38,7 +49,15 @@ export function PipelineColumn({
     data: { columnId },
   });
 
-  const itemIds = applications.map((a) => a.id);
+  // R12 cap — render only the first N cards per column to bound DOM
+  // size at scale. Drag-and-drop continues to work for visible cards;
+  // hidden cards are reachable by filtering or column collapse.
+  const visibleApplications =
+    applications.length > MAX_VISIBLE_PER_COLUMN
+      ? applications.slice(0, MAX_VISIBLE_PER_COLUMN)
+      : applications;
+  const overflowCount = applications.length - visibleApplications.length;
+  const itemIds = visibleApplications.map((a) => a.id);
 
   return (
     <div
@@ -183,17 +202,64 @@ export function PipelineColumn({
                 </span>
               </div>
             ) : (
-              applications.map((app) => (
-                <div key={app.id} role="listitem">
-                  <ApplicationCard
-                    application={app}
-                    isSelected={selection?.has(app.id) ?? false}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onToggleSelection={onToggleSelection}
-                  />
-                </div>
-              ))
+              <>
+                {visibleApplications.map((app) => (
+                  <div key={app.id} role="listitem">
+                    <ApplicationCard
+                      application={app}
+                      isSelected={selection?.has(app.id) ?? false}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onToggleSelection={onToggleSelection}
+                    />
+                  </div>
+                ))}
+                {overflowCount > 0 ? (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    data-testid="war-column-overflow-banner"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "12px 8px",
+                      marginTop: "4px",
+                      border: `1px dashed ${color}55`,
+                      borderRadius: "2px",
+                      background: `${color}08`,
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: color,
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {`+ ${overflowCount} more`}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: "9px",
+                        color: "#4A7A9B",
+                        letterSpacing: "0.04em",
+                        textAlign: "center",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {`column capped at ${MAX_VISIBLE_PER_COLUMN}.`}
+                      <br />
+                      {`filter to surface specific applications.`}
+                    </span>
+                  </div>
+                ) : null}
+              </>
             )}
           </SortableContext>
         </div>

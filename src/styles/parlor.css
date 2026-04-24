@@ -265,6 +265,34 @@
     inset 0 2px 0 rgba(232, 201, 106, 0.18);
 }
 
+/* R12 — overflow banner when offers exceed MAX_VISIBLE_OFFERS (50). */
+.parlor-oak-table-overflow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  background: rgba(232, 201, 106, 0.08);
+  border: 1px dashed rgba(201, 168, 76, 0.4);
+  border-radius: 4px;
+  width: 100%;
+  text-align: center;
+}
+.parlor-oak-table-overflow__count {
+  font-family: "JetBrains Mono", "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9a84c;
+  letter-spacing: 0.06em;
+}
+.parlor-oak-table-overflow__hint {
+  font-family: "JetBrains Mono", "IBM Plex Mono", monospace;
+  font-size: 10px;
+  color: rgba(232, 201, 106, 0.55);
+  letter-spacing: 0.04em;
+}
+
 /* ------------------------------------------------------------------
  * Offer folder — manila folder resting on the oak.
  *
