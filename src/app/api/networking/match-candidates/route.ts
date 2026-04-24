@@ -63,10 +63,15 @@ export async function GET() {
 
   const candidates = rows ?? [];
 
-  // Audit log — one row per surfaced candidate.  Best-effort: if the
-  // insert fails we still return the candidates (the read already paid the
-  // rate-limit counter, so silent-dropping the audit write would be
-  // worse than a 500).
+  // Audit log — ATOMIC with the match surfacing.  If the insert fails we
+  // refuse to return candidates (500 audit-insert-failed) because the
+  // whole point of the audit log is that every cross-user surfacing is
+  // traceable.  Post-R11 Red Team (2026-04-24) flipped this from
+  // fire-and-forget to fail-closed: a silent-dropped audit write is
+  // exactly the hole the audit log exists to close, so any mismatch
+  // between "user received candidate data" and "match_events row exists"
+  // is unacceptable.  The rate-limit counter stays bumped (the user
+  // retries against the already-paid bucket); that is the lesser harm.
   if (candidates.length > 0) {
     const { error: logErr } = await sb.from("match_events").insert(
       candidates.map((c) => ({
@@ -78,10 +83,13 @@ export async function GET() {
       })),
     );
     if (logErr) {
-      log.warn("match_candidates.audit_insert_failed", {
+      log.error("match_candidates.audit_insert_failed", logErr, {
         userId: user.id,
-        error: logErr.message,
       });
+      return NextResponse.json(
+        { ok: false, reason: "audit-insert-failed" },
+        { status: 500 },
+      );
     }
   }
 

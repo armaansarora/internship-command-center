@@ -68,6 +68,21 @@ const ALLOWLIST = new Set<string>([
   // what R11.8 shipped downstream of the guard.  The file itself only
   // queries `user_profiles` (always scoped by id).  Docstring-only.
   "src/lib/networking/consent-guard.ts",
+  // Match-anon — post-R11 Red Team trade-off docstring mentions
+  // `match_events` + `match_candidate_index` in a design-note block
+  // explaining why the anon-key is not user-scoped (load-bearing for
+  // the revoke cascade).  File itself exports a pure HMAC helper, no
+  // table access.  Docstring-only.
+  "src/lib/networking/match-anon.ts",
+  // Revoke route — post-R11 Red Team fix adds a cascade DELETE from
+  // `match_candidate_index` scoped by `counterparty_anon_key IN (...)`
+  // where the anon-keys are derived from the revoking user's contacts
+  // (via `.from("contacts").select("id").eq("user_id", user.id)`).
+  // The DELETE's WHERE does NOT include `user_id` BY DESIGN — the
+  // cascade's entire purpose is to purge the revoker's anon-keys from
+  // every OTHER user's cache.  The set of keys passed to IN(...) is
+  // user-scoped upstream; that is the privacy guarantee.
+  "src/app/api/networking/revoke/route.ts",
 ]);
 
 describe("R11 P1 — cross-user RLS scoping", () => {

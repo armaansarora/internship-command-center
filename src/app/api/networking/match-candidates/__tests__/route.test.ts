@@ -183,7 +183,12 @@ describe("GET /api/networking/match-candidates", () => {
     expect(mockInsert).not.toHaveBeenCalled();
   });
 
-  it("still returns 200 if audit insert fails (best-effort)", async () => {
+  it("returns 500 audit-insert-failed if match_events insert fails (Red Team fail-closed)", async () => {
+    // Post-R11 Red Team fix: audit log is atomic with match surfacing.
+    // If match_events insert fails, we MUST NOT return candidates — the
+    // audit log is the only mechanism that makes cross-user surfacing
+    // traceable, and a silent-dropped audit row is indistinguishable
+    // from a clean run on the request/response wire.
     mockGetUser.mockResolvedValue({ data: { user: { id: "u-1" } }, error: null });
     mockAssertConsented.mockResolvedValue(null);
     mockCheckAndBumpRateLimit.mockResolvedValue({ ok: true, remaining: 19 });
@@ -200,7 +205,9 @@ describe("GET /api/networking/match-candidates", () => {
     mockInsert.mockResolvedValue({ data: null, error: { message: "audit broken" } });
     const { GET } = await import("../route");
     const res = await GET();
-    expect(res.status).toBe(200);
-    expect((await res.json()).ok).toBe(true);
+    expect(res.status).toBe(500);
+    const body = (await res.json()) as { ok: boolean; reason: string };
+    expect(body.ok).toBe(false);
+    expect(body.reason).toBe("audit-insert-failed");
   });
 });

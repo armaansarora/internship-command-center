@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:37 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 3:11 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `55ec4d7`)
+- **Branch:** `main` (commit `317fd38`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 120,004 across 693 source files
+- **Total LOC:** 120,344 across 694 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-55ec4d7 chore(handoff): session sess-a5908e — R11
+317fd38 [R11] chore(autopilot): pause R11 after R11.1–R11.10 ship
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `55ec4d7`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `317fd38`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (693 files, 120,004 LOC)
+## Source Tree (694 files, 120,344 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -113,7 +113,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world` | 3308 |
 | `src/components/parlor` | 3282 |
 | `src/components/floor-1` | 2725 |
-| `src/app/__tests__` | 2641 |
+| `src/app/__tests__` | 2656 |
 | `src/components/floor-7/war-table` | 1988 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
@@ -155,10 +155,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7/cro-character` | 841 |
 | `src/components/lobby/cinematic` | 832 |
 | `src/lib/agents/cio` | 817 |
+| `src/lib/networking` | 802 |
 | `src/lib/penthouse` | 796 |
 | `src/app/api/cron/draft-follow-ups` | 792 |
 | `src/components/floor-6/cno-character` | 785 |
-| `src/lib/networking` | 765 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
@@ -232,13 +232,14 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-4/conflicts` | 226 |
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
+| `src/app/api/networking/revoke/__tests__` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
+| `src/app/api/networking/match-candidates/__tests__` | 214 |
 | `src/app/api/cron/sync` | 213 |
 | `src/lib/agents/cmo/__tests__` | 212 |
 | `src/app/api/cron/outreach-sender` | 209 |
 | `src/app/api/writing-room/choose-tone/__tests__` | 209 |
 | `src/app/api/briefing/audio-upload` | 208 |
-| `src/app/api/networking/match-candidates/__tests__` | 207 |
 | `src/lib/email` | 206 |
 | `src/app/api/resumes/upload` | 205 |
 | `src/app/(authenticated)/writing-room` | 204 |
@@ -286,16 +287,17 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/parlor` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/app/(authenticated)/observatory` | 106 |
+| `src/app/api/networking/revoke` | 106 |
 | `src/app/api/writing-room/compose-stream` | 105 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
 | `src/app/api/writing-room/compose-stream/__tests__` | 104 |
 | `src/app/api/concierge/chat` | 103 |
 | `src/app/api/cron/match-index` | 102 |
+| `src/app/api/networking/match-candidates` | 102 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
 | `src/app/api/offers/ingest-email` | 98 |
-| `src/app/api/networking/match-candidates` | 94 |
 | `src/app/api/contacts/[id]/reference-request` | 92 |
 | `src/lib/parlor/__tests__` | 90 |
 | `src/db/__tests__` | 89 |
@@ -309,7 +311,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/voice` | 63 |
 | `src/components/penthouse/scenes` | 62 |
 | `src/app/api/resumes/signed-url/[id]` | 58 |
-| `src/app/api/networking/revoke` | 55 |
 | `src/app/api/drive/export` | 53 |
 | `src/app/api/cfo` | 52 |
 | `src/app/api/stripe/checkout` | 51 |
@@ -445,6 +446,7 @@ src/app/api/gmail/sync/route.ts
 src/app/api/networking/match-candidates/__tests__/route.test.ts
 src/app/api/networking/match-candidates/route.ts
 src/app/api/networking/opt-in/route.ts
+src/app/api/networking/revoke/__tests__/route.test.ts
 src/app/api/networking/revoke/route.ts
 src/app/api/notifications/[id]/read/route.ts
 src/app/api/notifications/route.ts
@@ -1104,13 +1106,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1153 | 13,059 |
+| `BOOTSTRAP-PROMPT.md` | 1153 | 13,050 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2137** | **31,700** |
+| **Total** | **2137** | **31,691** |
 
-> ⚠️ Reading all recommended files consumes ~31,700 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,691 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
