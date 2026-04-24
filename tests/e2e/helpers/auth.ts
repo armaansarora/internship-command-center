@@ -60,9 +60,12 @@ export async function signInAs(
 ): Promise<void> {
   await installSupabaseMock(page, { ...mockOptions, authedUser: user });
   const context: BrowserContext = page.context();
+  // Playwright's addCookies requires either `url` OR `domain`+`path`, never
+  // both. We use `url` so each cookie gets scoped to the running origin
+  // regardless of the webServer port.
   await context.addCookies(
-    buildAuthCookies(user).map((c) => ({
-      ...c,
+    buildAuthCookies(user).map(({ domain: _domain, path: _path, ...rest }) => ({
+      ...rest,
       url: "http://localhost:3000",
     })),
   );
