@@ -1,6 +1,6 @@
 phase: R11
 name: Cross-user warm-intro matching
-status: in_progress
+status: complete
 intent: Unblock the /api/networking/match-candidates 403 hard-stop with
   production-ready cross-user matching. Ships the full Red Team checklist — no
   half-shipping privacy-touching features. Matching surfaces Rolodex-edge
@@ -8,11 +8,11 @@ intent: Unblock the /api/networking/match-candidates 403 hard-stop with
   consent + consent-version + audit-log + rate-limit + delta-re-scan invariants.
   Replaces the R8-era 403 holding pattern with the real thing.
 started: 2026-04-24T16:51:26.171Z
-completed: null
+completed: 2026-04-24T19:12:05.995Z
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T17:24:25.222Z
-  expires: 2026-04-24T19:24:25.218Z
+  acquired: 2026-04-24T19:11:17.419Z
+  expires: 2026-04-24T21:11:17.414Z
 acceptance:
   criteria:
     - /api/networking/match-candidates returns 200 with real match candidates
@@ -29,8 +29,8 @@ acceptance:
       server-side with typed 429. Documented in the consent copy.
     - Proof test binds each invariant (consent gate, version gate, rate limit,
       audit log insert, RLS cross-user isolation).
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: 6b9be81
 tasks:
   R11.1:
     title: Consent-version schema — add consent_version column to user profile +
@@ -117,11 +117,17 @@ tasks:
     title: Red Team pass by partner (post-autopilot) — confirm consent copy survives
       a lawyer read, no PII leaks cross-user, all gates fail-closed. May open
       R11.12 blockers.
-    status: not_started
+    status: complete
+    started: 2026-04-24T19:10:47.578Z
+    completed: 2026-04-24T19:11:13.354Z
+    commit: 6b9be81
   R11.12:
     title: Accept + close — tower verify R11, tower accept R11 (gate-enforced),
       final handoff.
-    status: not_started
+    status: complete
+    started: 2026-04-24T19:11:17.419Z
+    completed: 2026-04-24T19:12:05.995Z
+    commit: 6b9be81
 blockers: []
 decisions: []
 history:
@@ -146,3 +152,9 @@ history:
   - 2026-04-24T17:24:24.905Z: task_completed R11.9
   - 2026-04-24T17:24:25.222Z: task_started R11.10
   - 2026-04-24T17:33:27.228Z: task_completed R11.10
+  - 2026-04-24T19:10:47.578Z: task_started R11.11
+  - 2026-04-24T19:11:13.354Z: task_completed R11.11
+  - 2026-04-24T19:11:17.419Z: task_started R11.12
+  - 2026-04-24T19:12:05.995Z: task_completed R11.12
+  - 2026-04-24T19:12:05.995Z: phase_completed
+  - 2026-04-24T19:12:39.566Z: acceptance_met verified_by 6b9be81

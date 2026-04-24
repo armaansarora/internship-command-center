@@ -1,9 +1,9 @@
 paused: true
-scope: R11-only
+scope: all
 started: 2026-04-24T12:54:00Z
 started_by: sess-r11-autopilot
-ended: 2026-04-24T17:37:00Z
-ended_reason: "R11.1–R11.10 shipped clean; awaiting partner Red Team (R11.11) and accept (R11.12). Verify: 6/7 green (tests/tsc/build/lint/drift/blockers all ✓, tasks 10/12 per plan). Do NOT auto-resume; partner must Red Team first, then run `npm run t accept R11`."
+ended: 2026-04-24T19:30:00Z
+ended_reason: "R11 complete — 12/12 tasks, acceptance.met=true (verified_by_commit: 6b9be81). Partner Red Team closed 2 BLOCKs inline (audit-log atomic, revoke cascade into match_candidate_index) + 1 FLAG documented (anon-key not user-scoped, intentional trade-off). All 10 Intent behaviors shipped, consent copy passes lawyer read, consent version bumped 1→2. 1635 tests green. No next scope queued — partner scopes next phase (R12 hardening OR §8 living expansions)."
 max_blockers: 3
 previous_phase: R10
 previous_outcome: "R10 complete — 16/16 tasks, acceptance.met (verified_by_commit: d31b652, post-mortem deadline-cron fix landed + ledger pointer correction). All 10 Intent behaviors shipped including both stretch tasks R10.13 (simulator) + R10.14 (ref-request). Post-mortem swarm fired 2026-04-24: 1 BLOCK fixed (acceptance gate post-hoc bypass), 1 MISSING fixed (offer deadline alerts), 3 weak proof tests logged as non-blocking caveats."
