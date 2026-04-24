@@ -4,6 +4,7 @@ import { FloorShell } from "@/components/world/FloorShell";
 import { SettingsClient } from "./settings-client";
 import { getSubscriptionTier } from "@/lib/stripe/server";
 import { createClient } from "@/lib/supabase/server";
+import { readRejectionReflectionsPref } from "@/lib/preferences/rejection-reflections-pref";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -14,6 +15,8 @@ export const metadata: Metadata = { title: "Settings" };
  * BUG-005: Sign out accessible from here too.
  * R0.7: Reads user_profiles.deleted_at so the Data section can swap
  *       Delete Account ↔ Cancel Deletion.
+ * R9.6: Reads user_profiles.preferences.rejectionReflections so the
+ *       Analytics section seeds the toggle correctly.
  */
 export default async function SettingsPage() {
   const user = await requireUser();
@@ -32,7 +35,9 @@ export default async function SettingsPage() {
       const supabase = await createClient();
       const { data } = await supabase
         .from("user_profiles")
-        .select("deleted_at, networking_consent_at, networking_revoked_at")
+        .select(
+          "deleted_at, networking_consent_at, networking_revoked_at, preferences",
+        )
         .eq("id", user.id)
         .single();
       return {
@@ -41,9 +46,14 @@ export default async function SettingsPage() {
           (data?.networking_consent_at as string | null | undefined) ?? null,
         networkingRevokedAt:
           (data?.networking_revoked_at as string | null | undefined) ?? null,
+        preferences: (data?.preferences as unknown) ?? null,
       };
     })(),
   ]);
+
+  const rejectionReflectionsPref = readRejectionReflectionsPref(
+    profileData.preferences,
+  );
 
   return (
     <FloorShell floorId="PH">
@@ -57,6 +67,7 @@ export default async function SettingsPage() {
         deletedAt={profileData.deletedAt}
         networkingConsentAt={profileData.networkingConsentAt}
         networkingRevokedAt={profileData.networkingRevokedAt}
+        rejectionReflectionsEnabled={rejectionReflectionsPref.enabled}
       />
     </FloorShell>
   );

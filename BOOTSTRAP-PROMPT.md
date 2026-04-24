@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:43 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:57 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `9ca0ae9`)
+- **Branch:** `main` (commit `290924b`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 100,703 across 574 source files
+- **Total LOC:** 102,888 across 585 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-9ca0ae9 [R9/9.4] feat(orrery): pattern modes (stage/tier/velocity) + smooth morph
+290924b [R9/9.5] test(orrery): perf invariants (single timeline, CSS contain, will-change scope)
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `9ca0ae9`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `290924b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,29 +102,29 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (574 files, 100,703 LOC)
+## Source Tree (585 files, 102,888 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 6219 |
+| `src/lib/db/queries` | 6657 |
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3512 |
 | `src/components/floor-1` | 2660 |
 | `src/styles` | 2638 |
+| `src/components/floor-7/war-table` | 1988 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
-| `src/components/floor-7/war-table` | 1760 |
 | `src/app/__tests__` | 1689 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/lib/ai/structured` | 1425 |
+| `src/app/(authenticated)/settings` | 1302 |
 | `src/app/lobby` | 1294 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
 | `src/app` | 1177 |
 | `src/lib/situation` | 1164 |
-| `src/app/(authenticated)/settings` | 1153 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1122 |
 | `src/components/floor-7/crud` | 1111 |
@@ -134,11 +134,11 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-5/cmo-character` | 1053 |
 | `src/components/floor-3/cpo-character` | 1021 |
 | `src/components/floor-6/crud` | 999 |
+| `src/db` | 999 |
 | `src/lib/jobs` | 991 |
 | `src/components/floor-4/coo-character` | 989 |
 | `src/components/floor-6` | 988 |
 | `src/lib/orrery` | 979 |
-| `src/db` | 975 |
 | `src/components/floor-5/crud` | 949 |
 | `src/lib/jobs/sources` | 931 |
 | `src/components/floor-7` | 897 |
@@ -160,6 +160,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/lobby/concierge` | 637 |
 | `src/components/floor-4/situation-map` | 634 |
 | `src/app/(authenticated)/penthouse` | 627 |
+| `src/components/floor-7/rejection` | 620 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
@@ -188,6 +189,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-5/resume-press` | 372 |
 | `src/components/floor-5/live-compose` | 358 |
 | `src/lib/agents/coo` | 357 |
+| `src/app/api/profile/preferences` | 356 |
 | `src/lib/progression` | 349 |
 | `src/components/floor-4/final-countdown` | 341 |
 | `src/app/api/stripe/webhook` | 339 |
@@ -208,6 +210,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/rest` | 268 |
 | `src/components/settings` | 260 |
 | `src/components/floor-4/rings` | 256 |
+| `src/app/api/rejection-reflections` | 232 |
 | `src/app/api/resumes/upload/__tests__` | 227 |
 | `src/components/floor-4/conflicts` | 226 |
 | `src/lib/pdf` | 225 |
@@ -243,6 +246,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/situation-room` | 142 |
 | `src/app/api/cron/cio-reresearch` | 141 |
 | `src/app/api/briefing/transcribe` | 139 |
+| `src/lib/preferences` | 138 |
 | `src/app/(authenticated)/rolodex-lounge` | 137 |
 | `src/app/api/onboarding/bootstrap-discovery` | 137 |
 | `src/lib/contacts` | 135 |
@@ -400,7 +404,11 @@ src/app/api/outreach/approve/route.test.ts
 src/app/api/outreach/approve/route.ts
 src/app/api/outreach/undo/route.test.ts
 src/app/api/outreach/undo/route.ts
+src/app/api/profile/preferences/route.test.ts
+src/app/api/profile/preferences/route.ts
 src/app/api/progression/route.ts
+src/app/api/rejection-reflections/route.test.ts
+src/app/api/rejection-reflections/route.ts
 src/app/api/resumes/signed-url/[id]/route.ts
 src/app/api/resumes/upload/__tests__/route.test.ts
 src/app/api/resumes/upload/route.ts
@@ -572,6 +580,9 @@ src/components/floor-7/cro-character/CRODialoguePanel.tsx
 src/components/floor-7/cro-character/CROWhiteboard.tsx
 src/components/floor-7/crud/ApplicationModal.tsx
 src/components/floor-7/crud/ApplicationSearch.tsx
+src/components/floor-7/rejection/RejectionReflectionStrip.test.tsx
+src/components/floor-7/rejection/RejectionReflectionStrip.tsx
+src/components/floor-7/war-table/ApplicationCard.test.tsx
 src/components/floor-7/war-table/ApplicationCard.tsx
 src/components/floor-7/war-table/ColumnHeader.tsx
 src/components/floor-7/war-table/EmptyWarTable.tsx
@@ -773,6 +784,8 @@ src/lib/db/queries/outreach-mutations.ts
 src/lib/db/queries/pipeline-stats-from-aggregates.ts
 src/lib/db/queries/pipeline-stats.test.ts
 src/lib/db/queries/prep-stats-rest.ts
+src/lib/db/queries/rejection-reflections-rest.test.ts
+src/lib/db/queries/rejection-reflections-rest.ts
 src/lib/db/queries/shared-knowledge-rest.ts
 src/lib/db/queries/shared-knowledge.test.ts
 src/lib/db/queries/user-profiles-rest.ts
@@ -828,6 +841,8 @@ src/lib/penthouse/pipeline-weather.test.ts
 src/lib/penthouse/pipeline-weather.ts
 src/lib/penthouse/time-of-day.test.ts
 src/lib/penthouse/time-of-day.ts
+src/lib/preferences/rejection-reflections-pref.test.ts
+src/lib/preferences/rejection-reflections-pref.ts
 src/lib/progression/engine.ts
 src/lib/progression/milestones.ts
 src/lib/rate-limit-middleware.test.ts
@@ -948,13 +963,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 996 | 11,029 |
+| `BOOTSTRAP-PROMPT.md` | 997 | 11,045 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 503 | 11,163 |
-| **Total** | **2148** | **34,639** |
+| `CLAUDE.md` | 506 | 11,299 |
+| **Total** | **2152** | **34,791** |
 
-> ⚠️ Reading all recommended files consumes ~34,639 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,791 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

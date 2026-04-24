@@ -20,6 +20,12 @@ interface SettingsClientProps {
   /** R8 — Warm Intro Network opt-in state. */
   networkingConsentAt?: string | null;
   networkingRevokedAt?: string | null;
+  /**
+   * R9.6 — Rejection autopsy preference (Settings → Analytics →
+   * 'Rejection reflection prompts'). Default ON. Seeded server-side from
+   * `user_profiles.preferences.rejectionReflections.enabled`.
+   */
+  rejectionReflectionsEnabled?: boolean;
 }
 
 /**
@@ -79,6 +85,7 @@ export function SettingsClient({
   deletedAt,
   networkingConsentAt = null,
   networkingRevokedAt = null,
+  rejectionReflectionsEnabled = true,
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
@@ -93,6 +100,45 @@ export function SettingsClient({
   const [cancelUi, setCancelUi] = useState<CancelUiState>("idle");
   const [effectiveDeletedAt, setEffectiveDeletedAt] = useState<string | null>(
     deletedAt,
+  );
+
+  // R9.6 — Rejection autopsy toggle. Optimistic-update state + tiny error
+  // surface; the backing fetch hits the generic /api/profile/preferences
+  // merge endpoint.
+  const [reflectionsEnabled, setReflectionsEnabled] = useState<boolean>(
+    rejectionReflectionsEnabled,
+  );
+  const [reflectionsSaving, setReflectionsSaving] = useState(false);
+  const [reflectionsError, setReflectionsError] = useState<string | null>(null);
+
+  const handleToggleReflections = useCallback(
+    async (next: boolean) => {
+      const previous = reflectionsEnabled;
+      setReflectionsEnabled(next);
+      setReflectionsSaving(true);
+      setReflectionsError(null);
+      try {
+        const response = await fetch("/api/profile/preferences", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            key: "rejectionReflections",
+            value: { enabled: next },
+          }),
+        });
+        if (!response.ok) {
+          setReflectionsEnabled(previous);
+          setReflectionsError("Couldn't save. Try again.");
+          return;
+        }
+      } catch {
+        setReflectionsEnabled(previous);
+        setReflectionsError("Network error. Try again.");
+      } finally {
+        setReflectionsSaving(false);
+      }
+    },
+    [reflectionsEnabled],
   );
 
   const handleExport = useCallback(async () => {
@@ -616,6 +662,98 @@ export function SettingsClient({
             await fetch("/api/networking/revoke", { method: "POST" });
           }}
         />
+      </section>
+
+      {/* ── Section 3.5: Analytics (R9.6 — rejection reflections) ── */}
+      <section className="w-full" aria-labelledby="section-analytics">
+        <h2
+          id="section-analytics"
+          className="mb-4"
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            color: "var(--gold)",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+          }}
+        >
+          Analytics
+        </h2>
+        <div
+          className="rounded-xl p-5"
+          style={{
+            background: "rgba(10, 12, 25, 0.65)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid rgba(201, 168, 76, 0.1)",
+            boxShadow:
+              "0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+          }}
+        >
+          <label
+            className="flex items-start gap-3 cursor-pointer select-none"
+            style={{ alignItems: "flex-start" }}
+          >
+            <input
+              type="checkbox"
+              checked={reflectionsEnabled}
+              disabled={reflectionsSaving}
+              onChange={(e) => {
+                void handleToggleReflections(e.target.checked);
+              }}
+              aria-describedby="rejection-reflections-help"
+              style={{
+                width: "16px",
+                height: "16px",
+                marginTop: "2px",
+                accentColor: "var(--gold)",
+                cursor: reflectionsSaving ? "wait" : "pointer",
+              }}
+            />
+            <span className="min-w-0">
+              <span
+                style={{
+                  display: "block",
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                  lineHeight: 1.3,
+                }}
+              >
+                Rejection reflection prompts
+              </span>
+              <span
+                id="rejection-reflections-help"
+                style={{
+                  display: "block",
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "12px",
+                  color: "var(--text-muted)",
+                  lineHeight: 1.45,
+                  marginTop: "4px",
+                }}
+              >
+                More reflections = better pattern insights from CFO. You can
+                turn this off anytime.
+              </span>
+              {reflectionsError && (
+                <span
+                  role="alert"
+                  style={{
+                    display: "block",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "11px",
+                    color: "#DC3C3C",
+                    marginTop: "6px",
+                  }}
+                >
+                  {reflectionsError}
+                </span>
+              )}
+            </span>
+          </label>
+        </div>
       </section>
 
       {/* ── Section 4: Account Actions ── */}

@@ -12,8 +12,8 @@ started: 2026-04-23T20:35:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T00:40:42.643Z
-  expires: 2026-04-24T02:40:42.638Z
+  acquired: 2026-04-24T00:56:54.912Z
+  expires: 2026-04-24T02:56:54.907Z
 acceptance:
   criteria:
     - Orrery renders 100+ applications at 60fps on baseline laptop.
@@ -53,16 +53,16 @@ tasks:
   R9.5:
     title: 60fps perf gate proof test — single-timeline + CSS-contain + scoped
       will-change invariants
-    status: in_progress
+    status: complete
     started: 2026-04-24T00:40:42.643Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T00:44:03.076Z
+    commit: 290924b
   R9.6:
     title: Rejection autopsy — migration 0019 (rejection_reflections), Settings
       toggle (default ON, exact partner copy), inline chip strip on
       ApplicationCard
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-24T00:56:54.912Z
     completed: null
     commit: null
   R9.7:
@@ -133,3 +133,6 @@ history:
   - 2026-04-24T00:32:22.296Z: task_started R9.4
   - 2026-04-24T00:40:19.043Z: task_completed R9.4
   - 2026-04-24T00:40:42.643Z: task_started R9.5
+  - 2026-04-24T00:44:03.076Z: task_completed R9.5
+  - 2026-04-24T00:44:29.739Z: task_started R9.6
+  - 2026-04-24T00:56:54.912Z: task_started R9.6

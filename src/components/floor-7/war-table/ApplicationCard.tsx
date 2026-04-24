@@ -4,6 +4,7 @@ import type { JSX } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Application } from "@/db/schema";
+import { RejectionReflectionStrip } from "@/components/floor-7/rejection/RejectionReflectionStrip";
 
 interface ApplicationCardProps {
   application: Application;
@@ -12,6 +13,19 @@ interface ApplicationCardProps {
   onEdit?: (app: Application) => void;
   onDelete?: (id: string) => void;
   onToggleSelection?: (id: string, event: { shiftKey: boolean }) => void;
+  /**
+   * R9.6 — When true AND `application.status === "rejected"`, the inline
+   * rejection-autopsy strip renders below the card body. The PARENT owns
+   * the dismissal: after a submit/skip callback fires, flip this back to
+   * false for that card. Persistence lives in the
+   * `rejection_reflections` row, not in this prop.
+   */
+  showReflectionStrip?: boolean;
+  onReflectionSubmit?: (
+    id: string,
+    input: { reasons: string[]; freeText: string },
+  ) => Promise<void> | void;
+  onReflectionSkip?: (id: string) => void;
 }
 
 type ClassificationStamp =
@@ -95,6 +109,9 @@ export function ApplicationCard({
   onEdit,
   onDelete,
   onToggleSelection,
+  showReflectionStrip = false,
+  onReflectionSubmit,
+  onReflectionSkip,
 }: ApplicationCardProps): JSX.Element {
   const {
     attributes,
@@ -477,6 +494,26 @@ export function ApplicationCard({
         >
           ▸ {stamp}
         </div>
+
+        {/* R9.6 — Inline rejection-autopsy strip. Opt-in (via Settings →
+            Analytics → 'Rejection reflection prompts'). Parent owns the
+            dismissal: after submit/skip, parent flips showReflectionStrip
+            back to false so the strip doesn't reappear in-session. */}
+        {!isOverlay &&
+          showReflectionStrip &&
+          application.status === "rejected" && (
+            <RejectionReflectionStrip
+              applicationId={application.id}
+              onSubmit={async (input) => {
+                if (onReflectionSubmit) {
+                  await onReflectionSubmit(application.id, input);
+                }
+              }}
+              onSkip={() => {
+                if (onReflectionSkip) onReflectionSkip(application.id);
+              }}
+            />
+          )}
 
         {/* Quick action buttons — visible on hover only */}
         {!isOverlay && (onEdit || onDelete) && (

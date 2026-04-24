@@ -717,6 +717,28 @@ export const networkingMatchIndex = pgTable("networking_match_index", {
 ]);
 
 // ===========================================================================
+// 20. REJECTION REFLECTIONS (R9.6 — Observatory autopsy)
+// ===========================================================================
+// Opt-in (Settings → Analytics → 'Rejection reflection prompts', default ON)
+// per-application reflection rows. Captured inline on the application card
+// when an app flips to status=rejected. `reasons` is a multi-select of chip
+// labels; `free_text` is the optional supplemental note. UNIQUE(application_id)
+// enforces one reflection per app — submitting again upserts via the API
+// route's caller-side dedupe, not at the DB level. CFO aggregates over this
+// table to surface patterns ("3 of your last 5 rejections were 'No response'").
+export const rejectionReflections = pgTable("rejection_reflections", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  applicationId: uuid("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }).unique(),
+  reasons: text("reasons").array().notNull().default(sql`'{}'::text[]`),
+  freeText: text("free_text"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  userIsolation("rejection_reflections"),
+  index("idx_rejection_reflections_user_created").on(table.userId, table.createdAt.desc()),
+]);
+
+// ===========================================================================
 // TYPE EXPORTS
 // ===========================================================================
 export type UserProfile = typeof userProfiles.$inferSelect;
@@ -761,3 +783,5 @@ export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect;
 export type NewStripeWebhookEvent = typeof stripeWebhookEvents.$inferInsert;
 export type BaseResume = typeof baseResumes.$inferSelect;
 export type NewBaseResume = typeof baseResumes.$inferInsert;
+export type RejectionReflection = typeof rejectionReflections.$inferSelect;
+export type NewRejectionReflection = typeof rejectionReflections.$inferInsert;
