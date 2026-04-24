@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 6:11 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:11 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,11 +19,24 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `172ffc2`)
+- **Branch:** `main` (commit `3004b44`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 97,645 across 560 source files
 - **Build:** Clean (zero TS errors)
 
+### ⚠️ Stale Docs Detected
+- **`docs/MASTER-PLAN.md`**: Last updated 2026-04-17 (7d ago)
+- **`docs/VISION-SPEC.md`**: Last updated 2026-04-17 (7d ago)
+- **`docs/TECH-BRIEF.md`**: Last updated 2026-04-17 (7d ago)
+
+> Update these docs before starting work — stale specs cause wasted effort.
+
+
+## Changes Since Last Bootstrap
+
+```
+3004b44 chore(partner-brief): GOD-oversight upgrade — swarm protocols + standing authority + decision fast-lane
+```
 
 ## Acceptance Criteria — Progress
 
@@ -76,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `172ffc2`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3004b44`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -919,13 +932,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 974 | 10,754 |
+| `BOOTSTRAP-PROMPT.md` | 968 | 10,728 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 496 | 10,957 |
-| **Total** | **2119** | **34,157** |
+| **Total** | **2113** | **34,131** |
 
-> ⚠️ Reading all recommended files consumes ~34,157 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,131 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
