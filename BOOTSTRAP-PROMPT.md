@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:23 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:25 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `5dc3247`)
+- **Branch:** `main` (commit `6ea64df`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 115,083 across 664 source files
+- **Total LOC:** 115,090 across 664 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-5dc3247 [R10/10.13] style(parlor): simulator panel + score-badge dots
+6ea64df [R10/10.13] fix(parlor): auto-scroll simulator dialog on new turn
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5dc3247`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `6ea64df`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (664 files, 115,083 LOC)
+## Source Tree (664 files, 115,090 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -195,8 +195,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/offers/[id]/negotiation-draft` | 370 |
 | `src/components/floor-5/live-compose` | 358 |
 | `src/lib/agents/coo` | 357 |
+| `src/app/(authenticated)/parlor` | 356 |
 | `src/lib/comp-bands` | 353 |
-| `src/app/(authenticated)/parlor` | 349 |
 | `src/lib/progression` | 349 |
 | `src/components/floor-4/final-countdown` | 341 |
 | `src/app/api/stripe/webhook` | 339 |

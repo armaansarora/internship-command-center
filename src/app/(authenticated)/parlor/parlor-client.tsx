@@ -14,6 +14,7 @@ import {
   type CompPin,
 } from "@/components/parlor/CompBandChart";
 import { NegotiationDraftPanel } from "@/components/parlor/NegotiationDraftPanel";
+import { NegotiationSimulator } from "@/components/parlor/simulator/NegotiationSimulator";
 import { CFOQuipOverlay } from "@/components/parlor/CFOQuipOverlay";
 
 interface ParlorClientProps {
@@ -202,12 +203,18 @@ export function ParlorClient({
       }
       draftSlot={
         selectedOfferId ? (
-          <NegotiationDraftPanel
-            key={selectedOfferId}
-            offerId={selectedOfferId}
-            convening={result}
-            ceoVoiceEnabled={ceoVoiceEnabled}
-          />
+          <>
+            <NegotiationDraftPanel
+              key={`draft-${selectedOfferId}`}
+              offerId={selectedOfferId}
+              convening={result}
+              ceoVoiceEnabled={ceoVoiceEnabled}
+            />
+            <NegotiationSimulator
+              key={`sim-${selectedOfferId}`}
+              offer={offers.find((o) => o.id === selectedOfferId)!}
+            />
+          </>
         ) : null
       }
       signatureSlot={

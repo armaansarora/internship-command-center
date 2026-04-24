@@ -74,11 +74,11 @@
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/floor-3/binder/BinderOpen.tsx` (235 LOC) — R6.8 — Flip-open view of a single Debrief binder.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
+- `src/app/(authenticated)/parlor/parlor-client.tsx` (232 LOC) — R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
 - `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (228 LOC)
 - `src/components/world/ProceduralSkyline.tsx` (227 LOC) — When provided, the render loop reads the camera offset from this ref each
 - `src/components/agents/dialogue/AgentDialoguePanel.tsx` (225 LOC)
-- `src/app/(authenticated)/parlor/parlor-client.tsx` (225 LOC) — R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
 - `src/components/floor-2/ObservatoryScene.tsx` (223 LOC) — ObservatoryScene — Floor 2 environment compositor.
 - `src/components/floor-2/orrery/PlanetDetailPanel.tsx` (223 LOC) — R9.3 — PlanetDetailPanel.
 - `src/components/floor-4/situation-map/SituationMapCanvas.tsx` (223 LOC) — Canvas2D renderer for the Situation Map.
