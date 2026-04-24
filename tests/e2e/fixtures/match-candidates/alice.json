@@ -1,0 +1,37 @@
+[
+  {
+    "user_id": "00000000-0000-0000-0000-000000000001",
+    "counterparty_anon_key": "A-ANON-001",
+    "company_context": "Acme Rockets",
+    "edge_strength": 0.95,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000001",
+    "counterparty_anon_key": "A-ANON-002",
+    "company_context": "Acme Rockets",
+    "edge_strength": 0.88,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000001",
+    "counterparty_anon_key": "A-ANON-003",
+    "company_context": "Stark Industries",
+    "edge_strength": 0.76,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000001",
+    "counterparty_anon_key": "A-ANON-004",
+    "company_context": "Wayne Enterprises",
+    "edge_strength": 0.62,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000001",
+    "counterparty_anon_key": "A-ANON-005",
+    "company_context": "Wayne Enterprises",
+    "edge_strength": 0.51,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  }
+]

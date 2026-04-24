@@ -1,0 +1,37 @@
+[
+  {
+    "user_id": "00000000-0000-0000-0000-000000000002",
+    "counterparty_anon_key": "B-ANON-001",
+    "company_context": "Umbrella Corp",
+    "edge_strength": 0.97,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000002",
+    "counterparty_anon_key": "B-ANON-002",
+    "company_context": "Umbrella Corp",
+    "edge_strength": 0.83,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000002",
+    "counterparty_anon_key": "B-ANON-003",
+    "company_context": "Tyrell Corporation",
+    "edge_strength": 0.72,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000002",
+    "counterparty_anon_key": "B-ANON-004",
+    "company_context": "Tyrell Corporation",
+    "edge_strength": 0.59,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  },
+  {
+    "user_id": "00000000-0000-0000-0000-000000000002",
+    "counterparty_anon_key": "B-ANON-005",
+    "company_context": "Weyland-Yutani",
+    "edge_strength": 0.44,
+    "invalidates_at": "2099-01-01T00:00:00Z"
+  }
+]
