@@ -74,6 +74,7 @@
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/floor-3/binder/BinderOpen.tsx` (235 LOC) — R6.8 — Flip-open view of a single Debrief binder.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
+- `src/components/parlor/ReferenceRequestPanel.tsx` (232 LOC) — R10.14 — ReferenceRequestPanel.
 - `src/app/(authenticated)/parlor/parlor-client.tsx` (232 LOC) — R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
 - `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (228 LOC)
@@ -122,6 +123,7 @@
 - `src/components/floor-3/drill/DrillVoiceMic.tsx` (158 LOC) — R6.6 — DrillVoiceMic.
 - `src/components/penthouse/scenes/latenight/LateNightScene.tsx` (156 LOC) — Late-night scene — CEO has gone home. No character on-screen. A dim desk
 - `src/components/floor-4/rings/RingPulseController.test.tsx` (154 LOC)
+- `src/components/parlor/ReferenceRequestPanel.test.tsx` (154 LOC)
 - `src/components/parlor/simulator/NegotiationSimulator.test.tsx` (154 LOC) — React 19 + happy-dom: setting `.value` directly bypasses React's onChange
 - `src/components/penthouse/idle/IdleDetail.tsx` (153 LOC) — IdleDetail — renders the small on-desk detail near the CEO.
 - `src/components/floor-7/war-table/ColumnHeader.tsx` (152 LOC)
