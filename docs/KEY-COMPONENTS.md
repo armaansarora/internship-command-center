@@ -191,6 +191,7 @@
 - `src/components/floor-6/dossier-wall/DossierWall.test.tsx` (77 LOC)
 - `src/components/parlor/OfferFolder.tsx` (77 LOC) — R10.6 — A single manila folder on the Oak Table.
 - `src/components/floor-3/drill/DrillTimer.tsx` (73 LOC) — R6.6 — DrillTimer.
+- `src/components/parlor/simulator/TurnScoreBadge.test.tsx` (73 LOC)
 - `src/components/world/DayNightProvider.tsx` (72 LOC) — DayNightProvider — sets `data-time` on <html> based on the user's local time.
 - `src/components/floor-3/drill/DrillQuestionCard.tsx` (70 LOC) — R6.6 — DrillQuestionCard.
 - `src/components/floor-4/rings/RingPulseController.tsx` (69 LOC) — Context provider that exposes an imperative `pulse(x, y)` handle to
@@ -203,6 +204,7 @@
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)
 - `src/components/floor-6/contact-grid/ContactCard.test.tsx` (55 LOC)
 - `src/components/floor-5/live-compose/PenGlowCursor.tsx` (50 LOC) — R5.4 — PenGlowCursor.
+- `src/components/parlor/simulator/TurnScoreBadge.tsx` (50 LOC)
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
 - `src/components/floor-6/side-switch/SideSwitch.test.tsx` (44 LOC)
