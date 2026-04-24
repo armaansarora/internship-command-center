@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:01 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:07 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `cdf979a`)
+- **Branch:** `main` (commit `7383e7a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 117,892 across 680 source files
+- **Total LOC:** 118,870 across 684 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-cdf979a [R11/11.2] feat(r11): schema + migration for match_candidate_index, match_events, match_rate_limits
+7383e7a [R11/11.5] feat(r11): heuristic match algorithm + HMAC anonymization
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `cdf979a`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `7383e7a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (680 files, 117,892 LOC)
+## Source Tree (684 files, 118,870 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -143,6 +143,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/orrery` | 979 |
 | `src/components/floor-5/crud` | 949 |
 | `src/lib/jobs/sources` | 931 |
+| `src/lib/networking/__tests__` | 907 |
 | `src/components/floor-7` | 897 |
 | `src/components/floor-5` | 893 |
 | `src/components/floor-4/undo-bar` | 885 |
@@ -165,6 +166,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
 | `src/components/floor-4/situation-map` | 634 |
+| `src/lib/networking` | 634 |
 | `src/app/(authenticated)/penthouse` | 627 |
 | `src/components/floor-7/rejection` | 620 |
 | `src/app/api/reports/state-of-month` | 602 |
@@ -184,10 +186,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/morning` | 448 |
 | `src/app/api/profile/preferences` | 441 |
 | `src/app/api/cron/purge-sweeper` | 439 |
-| `src/lib/networking` | 433 |
 | `src/lib/account` | 432 |
 | `src/lib/notifications` | 428 |
-| `src/lib/networking/__tests__` | 423 |
 | `src/components/floor-3/star` | 413 |
 | `src/lib/agents/concierge` | 411 |
 | `src/lib/auth` | 411 |
@@ -248,6 +248,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/outreach/undo` | 197 |
 | `src/app/api/contacts/[id]/reference-request/__tests__` | 193 |
 | `src/app/api/cron/cfo-threshold` | 193 |
+| `src/app/api/cron/match-index/__tests__` | 191 |
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
 | `src/app/api/briefing/start-drill` | 179 |
@@ -287,6 +288,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes/afternoon` | 105 |
 | `src/app/api/writing-room/compose-stream/__tests__` | 104 |
 | `src/app/api/concierge/chat` | 103 |
+| `src/app/api/cron/match-index` | 102 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
@@ -418,6 +420,8 @@ src/app/api/cron/draft-follow-ups/route.test.ts
 src/app/api/cron/draft-follow-ups/route.ts
 src/app/api/cron/export-worker/route.ts
 src/app/api/cron/job-discovery/route.ts
+src/app/api/cron/match-index/__tests__/route.test.ts
+src/app/api/cron/match-index/route.ts
 src/app/api/cron/outreach-sender/route.ts
 src/app/api/cron/packet-regenerate/route.test.ts
 src/app/api/cron/packet-regenerate/route.ts
@@ -922,11 +926,13 @@ src/lib/networking/__tests__/consent-guard.test.ts
 src/lib/networking/__tests__/consent-version.test.ts
 src/lib/networking/__tests__/match-algorithm.test.ts
 src/lib/networking/__tests__/match-anon.test.ts
+src/lib/networking/__tests__/rebuild-match-index.test.ts
 src/lib/networking/consent-guard.test.ts
 src/lib/networking/consent-guard.ts
 src/lib/networking/consent-version.ts
 src/lib/networking/match-algorithm.ts
 src/lib/networking/match-anon.ts
+src/lib/networking/rebuild-match-index.ts
 src/lib/networking/warm-intro-finder.test.ts
 src/lib/networking/warm-intro-finder.ts
 src/lib/notifications/quiet-hours.test.ts
@@ -1087,13 +1093,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1132 | 12,774 |
+| `BOOTSTRAP-PROMPT.md` | 1136 | 12,831 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2116** | **31,415** |
+| **Total** | **2120** | **31,472** |
 
-> ⚠️ Reading all recommended files consumes ~31,415 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,472 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
