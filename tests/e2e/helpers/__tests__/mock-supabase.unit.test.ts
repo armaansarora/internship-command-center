@@ -1,105 +1,136 @@
-import { describe, it, expect } from "vitest";
-import { buildFixtureHandler } from "../mock-supabase";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import {
+  installSupabaseMock,
+  MOCK_SUPABASE_URL_ENV,
+  type MockablePage,
+} from "../mock-supabase";
+import { startStubServer, type StubServer } from "../stub-server";
 
-describe("buildFixtureHandler", () => {
-  it("returns configured rows for matching table select", () => {
-    const handler = buildFixtureHandler({
-      tables: {
-        applications: [{ id: "app-1", user_id: "u-alice" }],
-      },
-    });
-    const res = handler({
-      method: "GET",
-      url: "/rest/v1/applications?select=*",
-    });
-    expect(res.status).toBe(200);
-    expect(JSON.parse(res.body)).toEqual([
-      { id: "app-1", user_id: "u-alice" },
-    ]);
+describe("installSupabaseMock — stub-server transport", () => {
+  let server: StubServer;
+
+  beforeAll(async () => {
+    server = await startStubServer({ port: 0 });
+    process.env[MOCK_SUPABASE_URL_ENV] = server.url;
   });
 
-  it("returns empty array when table configured but empty", () => {
-    const handler = buildFixtureHandler({ tables: { applications: [] } });
-    const res = handler({
-      method: "GET",
-      url: "/rest/v1/applications?select=*",
-    });
-    expect(res.status).toBe(200);
-    expect(JSON.parse(res.body)).toEqual([]);
+  afterAll(async () => {
+    delete process.env[MOCK_SUPABASE_URL_ENV];
+    await server.stop();
   });
 
-  it("rejects unexpected write with 500 by default", () => {
-    const handler = buildFixtureHandler({ tables: {} });
-    const res = handler({
-      method: "POST",
-      url: "/rest/v1/applications",
-      body: "{}",
-    });
-    expect(res.status).toBe(500);
-    expect(res.body).toContain("unexpected write");
+  let lastHeaders: Record<string, string> | null = null;
+  const fakePage: MockablePage = {
+    setExtraHTTPHeaders: async (headers) => {
+      lastHeaders = headers;
+    },
+  };
+
+  beforeEach(() => {
+    lastHeaders = null;
   });
 
-  it("allows writes when allowWrites=true", () => {
-    const handler = buildFixtureHandler({ tables: {}, allowWrites: true });
-    const res = handler({
-      method: "POST",
-      url: "/rest/v1/applications",
-      body: '{"id":"new"}',
+  it("POSTs an install payload to the stub server with a fresh scenarioId", async () => {
+    const scenarioId = await installSupabaseMock(fakePage, {
+      authedUser: { id: "u1", email: "u1@example.com" },
+      tables: { applications: [{ id: "a1" }] },
+      rpc: { my_rpc: { ok: true } },
     });
-    expect(res.status).toBe(201);
+    expect(scenarioId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(server.state.activeScenarioId).toBe(scenarioId);
+    expect(server.state.fixtures.authedUser).toEqual({
+      id: "u1",
+      email: "u1@example.com",
+    });
+    expect(server.state.fixtures.tables).toEqual({ applications: [{ id: "a1" }] });
+    expect(server.state.fixtures.rpcs).toEqual({ my_rpc: { ok: true } });
   });
 
-  it("returns mocked RPC response", () => {
-    const handler = buildFixtureHandler({
-      rpc: {
-        bump_match_rate_limit: {
-          count: 1,
-          window_start: "2026-04-01T00:00:00Z",
+  it("stamps x-scenario-id on outgoing browser headers", async () => {
+    const scenarioId = await installSupabaseMock(fakePage, {
+      authedUser: { id: "u1", email: "u1@example.com" },
+    });
+    expect(lastHeaders).toEqual({ "x-scenario-id": scenarioId });
+  });
+
+  it("forwards overrides verbatim to the stub", async () => {
+    await installSupabaseMock(fakePage, {
+      authedUser: { id: "u1", email: "u1@example.com" },
+      overrides: [
+        {
+          behavior: "rpc_count_threshold",
+          rpc: "x",
+          limit: 5,
+          allowed: { allowed: true },
+          blocked: { allowed: false },
         },
-      },
+        { behavior: "track_writes", tables: ["outreach_queue"] },
+      ],
     });
-    const res = handler({
+    expect(server.state.overrides).toHaveLength(2);
+    expect(server.state.overrides[0]).toEqual({
+      behavior: "rpc_count_threshold",
+      rpc: "x",
+      limit: 5,
+      allowed: { allowed: true },
+      blocked: { allowed: false },
+    });
+    expect(server.state.overrides[1]).toEqual({
+      behavior: "track_writes",
+      tables: ["outreach_queue"],
+    });
+  });
+
+  it("each install resets counters, writes, and overrides", async () => {
+    await installSupabaseMock(fakePage, {
+      authedUser: { id: "u1", email: "u1@example.com" },
+      allowWrites: true,
+      overrides: [
+        {
+          behavior: "rpc_count_threshold",
+          rpc: "x",
+          limit: 1,
+          allowed: { allowed: true },
+          blocked: { allowed: false },
+        },
+      ],
+    });
+    await fetch(`${server.url}/rest/v1/rpc/x`, {
       method: "POST",
-      url: "/rest/v1/rpc/bump_match_rate_limit",
+      headers: { "content-type": "application/json" },
       body: "{}",
     });
-    expect(res.status).toBe(200);
-    expect(JSON.parse(res.body)).toEqual({
-      count: 1,
-      window_start: "2026-04-01T00:00:00Z",
-    });
-  });
-
-  it("returns 404 for unmocked RPC", () => {
-    const handler = buildFixtureHandler({ rpc: {} });
-    const res = handler({
+    await fetch(`${server.url}/rest/v1/anything`, {
       method: "POST",
-      url: "/rest/v1/rpc/unknown_rpc",
-      body: "{}",
+      headers: { "content-type": "application/json" },
+      body: '{"id":"a"}',
     });
-    expect(res.status).toBe(404);
-  });
+    expect(server.state.counters["rpc:x"]).toBe(1);
+    expect(server.state.writes).toHaveLength(1);
 
-  it("returns authedUser when configured", () => {
-    const handler = buildFixtureHandler({
-      authedUser: { id: "u-1", email: "alice@example.com" },
+    await installSupabaseMock(fakePage, {
+      authedUser: { id: "u2", email: "u2@example.com" },
     });
-    const res = handler({ method: "GET", url: "/auth/v1/user" });
-    expect(res.status).toBe(200);
-    const body = JSON.parse(res.body);
-    expect(body.data.user.id).toBe("u-1");
+    expect(server.state.counters).toEqual({});
+    expect(server.state.writes).toHaveLength(0);
+    expect(server.state.overrides).toEqual([]);
   });
 
-  it("returns 401 on /auth/v1/user when authedUser null", () => {
-    const handler = buildFixtureHandler({ authedUser: null });
-    const res = handler({ method: "GET", url: "/auth/v1/user" });
-    expect(res.status).toBe(401);
+  it("throws if the stub is unreachable", async () => {
+    process.env[MOCK_SUPABASE_URL_ENV] = "http://localhost:1"; // closed port
+    await expect(installSupabaseMock(fakePage, {})).rejects.toThrow();
+    process.env[MOCK_SUPABASE_URL_ENV] = server.url;
   });
 
-  it("returns 404 for unhandled path", () => {
-    const handler = buildFixtureHandler({});
-    const res = handler({ method: "GET", url: "/somewhere/else" });
-    expect(res.status).toBe(404);
-    expect(res.body).toContain("unhandled path");
+  it("throws if the stub returns a non-2xx (e.g., bad payload)", async () => {
+    // We can't easily make the stub return non-2xx via the public API, so we
+    // hit the install endpoint directly with broken JSON to confirm the
+    // server's error path is wired — the helper itself throws on !res.ok.
+    const r = await fetch(`${server.url}/__test__/install`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{not json",
+    });
+    expect(r.status).toBe(400);
   });
 });

@@ -1,6 +1,5 @@
-import { test, expect, type Route } from "@playwright/test";
-import { buildAuthCookies } from "../helpers/auth";
-import { buildFixtureHandler } from "../helpers/mock-supabase";
+import { test, expect } from "@playwright/test";
+import { signInAs } from "../helpers/auth";
 import { USERS, TIMES } from "../helpers/fixtures";
 
 /**
@@ -20,19 +19,16 @@ import { USERS, TIMES } from "../helpers/fixtures";
  *   2. No hydration-mismatch console errors.
  *   3. The page's final DOM is present (no React crash/error boundary).
  *
- * The 503-on-every-other pattern uses a closure counter inside a custom
- * page.route handler (we cannot reuse installSupabaseMock directly because
- * that helper always fulfills with the fixture handler's response — here
- * we want to alternate between 503 and the fixture's answer).
+ * R12.10 update: closure-counter page.route handler replaced with the
+ * stub-server `intermittent_failure` override. The stub increments a
+ * shared REST/RPC counter and returns the configured 503 every 2nd call,
+ * which exercises BOTH browser-origin AND Next.js server-side fetches —
+ * the legacy page.route() flow only caught browser fetches.
  */
 test.describe("Supabase intermittent 503 — /penthouse render — recoverable, no hydration mismatch or React crash", () => {
   test("50% Supabase 503 injection — Penthouse renders without uncaught errors", async ({
     page,
-    context,
   }) => {
-    // ---------------------------------------------------------------------
-    // Capture uncaught errors + console errors so we can assert at the end.
-    // ---------------------------------------------------------------------
     const pageErrors: Error[] = [];
     page.on("pageerror", (err) => {
       pageErrors.push(err);
@@ -42,7 +38,6 @@ test.describe("Supabase intermittent 503 — /penthouse render — recoverable, 
     page.on("console", (msg) => {
       if (msg.type() !== "error") return;
       const text = msg.text();
-      // Next.js / React hydration-mismatch signals.
       if (
         text.includes("Hydration") ||
         text.includes("hydration") ||
@@ -53,10 +48,7 @@ test.describe("Supabase intermittent 503 — /penthouse render — recoverable, 
       }
     });
 
-    // ---------------------------------------------------------------------
-    // Build the fixture handler (what the "successful" branch returns).
-    // ---------------------------------------------------------------------
-    const fixtureHandler = buildFixtureHandler({
+    await signInAs(page, USERS.alice, {
       tables: {
         user_profiles: [
           {
@@ -73,71 +65,27 @@ test.describe("Supabase intermittent 503 — /penthouse render — recoverable, 
       },
       rpc: {},
       allowWrites: true,
-      authedUser: USERS.alice,
-    });
-
-    // ---------------------------------------------------------------------
-    // Intermittent 503 injector — a closure counter returns 503 on every
-    // second Supabase request, fixture response on the others.
-    // ---------------------------------------------------------------------
-    let callCount = 0;
-    const supabasePattern = /\.supabase\.co\/(auth|rest|realtime)\//;
-    await page.route(supabasePattern, async (route: Route) => {
-      callCount += 1;
-      if (callCount % 2 === 0) {
-        // Inject failure — this exercises the app's retry / graceful
-        // fallback path.
-        await route.fulfill({
+      overrides: [
+        {
+          behavior: "intermittent_failure",
+          everyNth: 2,
           status: 503,
-          body: JSON.stringify({ message: "service unavailable" }),
-          contentType: "application/json",
-        });
-        return;
-      }
-      const request = route.request();
-      const res = fixtureHandler({
-        method: request.method(),
-        url: request.url(),
-        body: request.postData() ?? undefined,
-      });
-      await route.fulfill({
-        status: res.status,
-        body: res.body,
-        contentType: res.contentType,
-      });
+          body: { message: "service unavailable" },
+        },
+      ],
     });
 
-    // ---------------------------------------------------------------------
-    // Sign-in cookies (bypass the interactive lobby flow).
-    // ---------------------------------------------------------------------
-    await context.addCookies(
-      buildAuthCookies(USERS.alice).map((c) => ({
-        ...c,
-        url: "http://localhost:3000",
-      })),
-    );
-
-    // ---------------------------------------------------------------------
-    // Navigate. `networkidle` waits until the fan-out settles so intermittent
-    // failures have a chance to surface or recover before we assert.
-    // ---------------------------------------------------------------------
     const response = await page.goto("http://localhost:3000/penthouse", {
       waitUntil: "networkidle",
       timeout: 25_000,
     });
 
-    // Acceptable: the server renders (200) or redirects to lobby if SSR
-    // auth check lost the race against the mock. A 500 rendered page
-    // would be the regression we are binding against.
     const finalStatus = response?.status() ?? 0;
     expect(
       finalStatus,
       `expected 200/3xx from /penthouse under intermittent Supabase, got ${finalStatus}`,
     ).toBeLessThan(500);
 
-    // ---------------------------------------------------------------------
-    // Assert: no uncaught React / hydration errors.
-    // ---------------------------------------------------------------------
     expect(
       pageErrors,
       `uncaught pageerror events under intermittent Supabase: ${pageErrors
@@ -150,22 +98,25 @@ test.describe("Supabase intermittent 503 — /penthouse render — recoverable, 
       `hydration mismatches detected: ${hydrationErrors.join(" | ")}`,
     ).toHaveLength(0);
 
-    // ---------------------------------------------------------------------
-    // Assert: final DOM exists, no React error-boundary / Next error screen.
-    // `<html>` always exists even on error screens, so sniff for typical
-    // crash-screen markers instead. Next.js default error page contains
-    // "Application error" text; React error boundary renders a fallback.
-    // ---------------------------------------------------------------------
     const docText = await page.evaluate(() => document.body.innerText);
     expect(
       docText,
       "Next.js default error screen rendered — unexpected under graceful degradation",
     ).not.toContain("Application error: a server-side exception has occurred");
 
-    // Sanity: the mock actually fired (the app made Supabase requests).
+    // Sanity: the stub recorded REST calls during the render. /__test__/state
+    // exposes the shared counter so we can assert the failure injector
+    // actually fired.
+    const stateRes = await page.request.get(
+      "http://localhost:3001/__test__/state",
+    );
+    const stubState = (await stateRes.json()) as {
+      counters: Record<string, number>;
+    };
+    const restCallCount = stubState.counters["intermittent:rest_call_count"] ?? 0;
     expect(
-      callCount,
-      "no Supabase requests were intercepted — mock not wired to app",
+      restCallCount,
+      "no Supabase requests reached the stub — mock topology not wired",
     ).toBeGreaterThan(0);
   });
 });

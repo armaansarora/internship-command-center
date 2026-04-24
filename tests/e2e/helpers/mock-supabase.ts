@@ -1,4 +1,19 @@
-import type { Page, Route } from "@playwright/test";
+/**
+ * Browser-side helper for installing a Supabase mock — backed by the
+ * Node-side stub server (tests/e2e/helpers/stub-server.ts) booted in
+ * Playwright globalSetup. Each call generates a fresh scenarioId, POSTs the
+ * fixture bundle to the stub's /__test__/install endpoint, and stamps the
+ * scenarioId onto the page's outbound HTTP headers so the same active
+ * scenario covers both browser-origin AND Next.js dev-server server-side
+ * fetches.
+ *
+ * See docs/plans/2026-04-24-mock-topology-stub-server-design.md for why this
+ * shape replaced the legacy page.route()-only flow.
+ */
+
+import { randomUUID } from "node:crypto";
+import type { Page } from "@playwright/test";
+import type { StubOverride } from "./stub-server";
 
 export type FixtureTables = Record<string, Array<Record<string, unknown>>>;
 export type FixtureRpc = Record<string, unknown>;
@@ -8,99 +23,75 @@ export interface MockOptions {
   rpc?: FixtureRpc;
   allowWrites?: boolean;
   authedUser?: { id: string; email: string } | null;
-}
-
-export interface HandlerRequest {
-  method: string;
-  url: string;
-  body?: string;
-}
-
-export interface HandlerResponse {
-  status: number;
-  body: string;
-  contentType: string;
+  /**
+   * Declarative behaviors interpreted by the stub server at request time.
+   * Use these for stateful overlays that the legacy page.route() flow
+   * expressed as closures — see stub-server.ts StubOverride for the
+   * full DSL.
+   */
+  overrides?: StubOverride[];
 }
 
 /**
- * Pure-function fixture handler — unit-testable without a Playwright
- * context. installSupabaseMock() below wires this into page.route() for
- * browser scenarios. Keeping the handler separate lets us unit-test the
- * mock logic with vitest and assert responses without spinning a browser.
+ * Env var read at runtime — globalSetup sets this to the stub's actual URL
+ * (port may differ between unit tests and the live e2e suite). Falls back to
+ * the canonical e2e port :3001 so scripts that bypass globalSetup still work.
  */
-export function buildFixtureHandler(options: MockOptions) {
-  return function handler(req: HandlerRequest): HandlerResponse {
-    const url = new URL(req.url, "https://stub.local");
-    const path = url.pathname;
+export const MOCK_SUPABASE_URL_ENV = "STUB_SUPABASE_URL";
 
-    if (path === "/auth/v1/user" || path === "/auth/v1/session") {
-      if (options.authedUser) {
-        return json(200, {
-          data: { user: options.authedUser },
-          error: null,
-        });
-      }
-      return json(401, {
-        data: { user: null },
-        error: { message: "unauthorized" },
-      });
-    }
-
-    if (path.startsWith("/rest/v1/rpc/")) {
-      const rpcName = path.substring("/rest/v1/rpc/".length);
-      if (options.rpc && rpcName in options.rpc) {
-        return json(200, options.rpc[rpcName]);
-      }
-      return json(404, { error: `rpc ${rpcName} not mocked` });
-    }
-
-    if (path.startsWith("/rest/v1/")) {
-      const table = path.substring("/rest/v1/".length).split("?")[0];
-      if (req.method === "GET" || req.method === "HEAD") {
-        const rows = options.tables?.[table] ?? [];
-        return json(200, rows);
-      }
-      if (!options.allowWrites) {
-        return json(500, { error: `unexpected write to ${table}` });
-      }
-      return json(201, { ok: true });
-    }
-
-    return json(404, { error: `unhandled path: ${path}` });
-  };
-}
-
-function json(status: number, body: unknown): HandlerResponse {
-  return {
-    status,
-    body: JSON.stringify(body),
-    contentType: "application/json",
-  };
+function stubBaseUrl(): string {
+  return process.env[MOCK_SUPABASE_URL_ENV] ?? "http://localhost:3001";
 }
 
 /**
- * Install the fixture handler onto a Playwright page. Intercepts the real
- * Supabase project URL and any local-dev analogue. Fails the test on
- * unmocked requests (partner constraint b — no prod DB contact).
+ * Page-shaped subset we actually use — keeps tests injectable with a
+ * minimal fake without a real Playwright Page.
+ */
+export type MockablePage = Pick<Page, "setExtraHTTPHeaders">;
+
+/**
+ * Install a Supabase fixture for the current Playwright test. Returns the
+ * scenarioId so the caller can read /__test__/writes for assertions on
+ * observed mutations.
+ *
+ * Behavioral guarantees:
+ *  - The stub's active scenarioId is swapped to a fresh value, ensuring no
+ *    cross-test bleed.
+ *  - Counters and observed writes are reset before this call returns.
+ *  - The browser stamps `x-scenario-id` on outbound requests for diagnostic
+ *    visibility (the stub's source of truth is its activeScenarioId, not
+ *    the header — but the header is helpful when reading server logs).
  */
 export async function installSupabaseMock(
-  page: Page,
-  options: MockOptions,
-): Promise<void> {
-  const handler = buildFixtureHandler(options);
-  const supabasePattern = /\.supabase\.co\/(auth|rest|realtime)\//;
+  page: MockablePage,
+  options: MockOptions = {},
+): Promise<string> {
+  const scenarioId = randomUUID();
+  await page.setExtraHTTPHeaders({ "x-scenario-id": scenarioId });
 
-  await page.route(supabasePattern, async (route: Route) => {
-    const request = route.request();
-    const res = handler({
-      method: request.method(),
-      url: request.url(),
-      body: request.postData() ?? undefined,
-    });
-    await route.fulfill({
-      status: res.status,
-      body: res.body,
-      contentType: res.contentType,
-    });
+  const payload = {
+    scenarioId,
+    authedUser: options.authedUser ?? null,
+    tables: options.tables ?? {},
+    rpc: options.rpc ?? {},
+    allowWrites: options.allowWrites ?? false,
+    overrides: options.overrides ?? [],
+  };
+
+  const res = await fetch(`${stubBaseUrl()}/__test__/install`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`stub install failed: ${res.status} ${text}`);
+  }
+
+  return scenarioId;
 }
+
+// Re-export StubOverride so scenario authors can import everything from the
+// helper module without reaching into stub-server directly.
+export type { StubOverride } from "./stub-server";

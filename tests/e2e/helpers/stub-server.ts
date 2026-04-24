@@ -65,6 +65,15 @@ export type StubOverride =
   | {
       behavior: "track_writes";
       tables: string[];
+    }
+  | {
+      behavior: "intermittent_failure";
+      // Failure injection applied to REST + RPC requests (excludes auth and
+      // /__test__). Returns the configured failure response on every Nth call
+      // (1-indexed). Useful for graceful-degradation scenarios.
+      everyNth: number;
+      status: number;
+      body: unknown;
     };
 
 export interface StubFixtures {
@@ -143,11 +152,15 @@ export function handleStubRequest(state: StubState, req: StubRequest): StubRespo
   }
 
   if (path.startsWith("/rest/v1/rpc/")) {
+    const intermittent = checkIntermittentFailure(state);
+    if (intermittent) return intermittent;
     const rpcName = path.substring("/rest/v1/rpc/".length);
     return handleRpc(state, rpcName);
   }
 
   if (path.startsWith("/rest/v1/")) {
+    const intermittent = checkIntermittentFailure(state);
+    if (intermittent) return intermittent;
     const table = path.substring("/rest/v1/".length).split("?")[0];
     return handleRest(state, req, url, table);
   }
@@ -295,6 +308,29 @@ function handleRest(
     return json(500, { error: `unexpected write to ${table}` });
   }
   return json(201, { ok: true });
+}
+
+/**
+ * Walk the override list looking for an `intermittent_failure` behavior.
+ * Increments a shared REST-call counter on every match and returns the
+ * configured failure response on every Nth call. The counter is per-scenario
+ * (reset on /__test__/install) and counts both REST and RPC requests.
+ */
+function checkIntermittentFailure(state: StubState): StubResponse | null {
+  for (const override of state.overrides) {
+    if (override.behavior !== "intermittent_failure") continue;
+    const key = "intermittent:rest_call_count";
+    state.counters[key] = (state.counters[key] ?? 0) + 1;
+    const count = state.counters[key];
+    if (count % override.everyNth === 0) {
+      return {
+        status: override.status,
+        body: JSON.stringify(override.body),
+        contentType: "application/json",
+      };
+    }
+  }
+  return null;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────

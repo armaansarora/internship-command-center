@@ -450,6 +450,115 @@ describe("stub-server pure handler", () => {
     });
   });
 
+  describe("override: intermittent_failure", () => {
+    it("fails every Nth REST request, fixture response on the others", () => {
+      install(state, {
+        scenarioId: "s1",
+        authedUser: { id: "u1", email: "u1@example.com" },
+        tables: { applications: [{ id: "a1" }] },
+        rpc: {},
+        overrides: [
+          {
+            behavior: "intermittent_failure",
+            everyNth: 2,
+            status: 503,
+            body: { message: "service unavailable" },
+          },
+        ],
+      });
+      const r1 = handleStubRequest(state, {
+        method: "GET",
+        url: "/rest/v1/applications",
+        headers: {},
+        body: undefined,
+      });
+      const r2 = handleStubRequest(state, {
+        method: "GET",
+        url: "/rest/v1/applications",
+        headers: {},
+        body: undefined,
+      });
+      const r3 = handleStubRequest(state, {
+        method: "GET",
+        url: "/rest/v1/applications",
+        headers: {},
+        body: undefined,
+      });
+      const r4 = handleStubRequest(state, {
+        method: "GET",
+        url: "/rest/v1/applications",
+        headers: {},
+        body: undefined,
+      });
+      expect(r1.status).toBe(200);
+      expect(r2.status).toBe(503);
+      expect(r3.status).toBe(200);
+      expect(r4.status).toBe(503);
+    });
+
+    it("counts RPC and REST calls together", () => {
+      install(state, {
+        scenarioId: "s1",
+        authedUser: { id: "u1", email: "u1@example.com" },
+        tables: { applications: [] },
+        rpc: { something: { ok: true } },
+        overrides: [
+          {
+            behavior: "intermittent_failure",
+            everyNth: 2,
+            status: 503,
+            body: { message: "down" },
+          },
+        ],
+      });
+      const r1 = handleStubRequest(state, {
+        method: "GET",
+        url: "/rest/v1/applications",
+        headers: {},
+        body: undefined,
+      });
+      const r2 = handleStubRequest(state, {
+        method: "POST",
+        url: "/rest/v1/rpc/something",
+        headers: {},
+        body: "{}",
+      });
+      expect(r1.status).toBe(200);
+      expect(r2.status).toBe(503);
+    });
+
+    it("does not affect /auth/v1/* or /__test__/*", () => {
+      install(state, {
+        scenarioId: "s1",
+        authedUser: { id: "u1", email: "u1@example.com" },
+        tables: {},
+        rpc: {},
+        overrides: [
+          {
+            behavior: "intermittent_failure",
+            everyNth: 1,
+            status: 503,
+            body: { down: true },
+          },
+        ],
+      });
+      const auth = handleStubRequest(state, {
+        method: "GET",
+        url: "/auth/v1/user",
+        headers: {},
+        body: undefined,
+      });
+      const health = handleStubRequest(state, {
+        method: "GET",
+        url: "/__test__/health",
+        headers: {},
+        body: undefined,
+      });
+      expect(auth.status).toBe(200);
+      expect(health.status).toBe(200);
+    });
+  });
+
   describe("override: track_writes", () => {
     it("records writes to specified tables (passive — does not change response)", () => {
       install(state, {
