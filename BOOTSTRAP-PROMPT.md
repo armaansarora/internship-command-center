@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:14 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:21 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `750eb37`)
+- **Branch:** `main` (commit `9ffeb67`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 97,645 across 560 source files
+- **Total LOC:** 98,275 across 563 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-750eb37 [R9/9.0] docs: R9 Observatory design (autopilot self-approved)
+9ffeb67 [R9/9.0] docs: R9 implementation plan (10 tasks, 3 waves)
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `750eb37`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `9ffeb67`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (560 files, 97,645 LOC)
+## Source Tree (563 files, 98,275 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -157,6 +157,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
 | `src/components/floor-4/situation-map` | 634 |
+| `src/lib/orrery` | 630 |
 | `src/app/(authenticated)/penthouse` | 627 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
@@ -802,6 +803,9 @@ src/lib/networking/warm-intro-finder.ts
 src/lib/notifications/quiet-hours.test.ts
 src/lib/notifications/quiet-hours.ts
 src/lib/onboarding/bootstrap.ts
+src/lib/orrery/applications-to-planets.test.ts
+src/lib/orrery/applications-to-planets.ts
+src/lib/orrery/types.ts
 src/lib/pdf/cover-letter-pdf.tsx
 src/lib/pdf/resume-pdf.tsx
 src/lib/penthouse/briefing-fallback.test.ts
@@ -924,7 +928,7 @@ zod: ^4.3.6
 - **@types/node**: 20.19.37 → 25.6.0 (major)
 - **eslint**: 9.39.4 → 10.2.1 (major)
 - **execa**: 8.0.1 → 9.6.1 (major)
-- **stripe**: 20.4.1 → 22.0.2 (major)
+- **stripe**: 20.4.1 → 22.1.0 (major)
 - **tailwindcss**: 3.4.19 → 4.2.4 (major)
 - **typescript**: 5.9.3 → 6.0.3 (major)
 
@@ -932,13 +936,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 981 | 10,855 |
+| `BOOTSTRAP-PROMPT.md` | 981 | 10,843 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 496 | 10,957 |
-| **Total** | **2126** | **34,258** |
+| **Total** | **2126** | **34,246** |
 
-> ⚠️ Reading all recommended files consumes ~34,258 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,246 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

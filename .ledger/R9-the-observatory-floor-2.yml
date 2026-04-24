@@ -1,6 +1,6 @@
 phase: R9
 name: The Observatory (Floor 2)
-status: not_started
+status: in_progress
 intent: The contemplation floor. Panoramic, cool-blue, quiet. The centerpiece is
   the **Orrery** — the user's pipeline as celestial bodies in orbit. Tier-1
   companies are inner planets; Tier-4 outer. Status changes flash;
@@ -8,9 +8,12 @@ intent: The contemplation floor. Panoramic, cool-blue, quiet. The centerpiece is
   rejections fade. CFO stands at a panoramic window; a conversion funnel
   projects onto the glass. A rejection autopsy lives here — pattern analysis
   across rejections.
-started: null
+started: 2026-04-23T20:35:00.000Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-24T00:18:42.094Z
+  expires: 2026-04-24T02:18:42.089Z
 acceptance:
   criteria:
     - Orrery renders 100+ applications at 60fps on baseline laptop.
@@ -18,7 +21,106 @@ acceptance:
       commentary that's readable, not boilerplate.
   met: false
   verified_by_commit: null
-tasks: {}
+tasks:
+  R9.1:
+    title: Data layer — typed OrreryPlanet contract + applicationsToPlanets
+      transformer (pure, R3F-swap-ready)
+    status: in_progress
+    started: 2026-04-24T00:18:42.094Z
+    completed: null
+    commit: null
+  R9.2:
+    title: Render layer — CSS 3D Orrery primitive (sole CSS-3D file in codebase,
+      single GSAP timeline drives all orbits, perf invariants)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.3:
+    title: Click-to-history camera dolly + PlanetDetailPanel (consumer wrapper, ESC
+      dismiss, reduced-motion fallback)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.4:
+    title: Pattern overlay modes (stage/tier/velocity) + smooth GSAP morph,
+      localStorage persistence
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.5:
+    title: 60fps perf gate proof test — single-timeline + CSS-contain + scoped
+      will-change invariants
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.6:
+    title: Rejection autopsy — migration 0019 (rejection_reflections), Settings
+      toggle (default ON, exact partner copy), inline chip strip on
+      ApplicationCard
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.7:
+    title: CFO threshold cron — reuses R8 warmth-decay pattern, fires R7
+      pneumatic-tube notification on >5% WoW conversion drop
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.8:
+    title: State of the Month PDF — reuses @react-pdf/renderer (no second PDF lib),
+      inline SVG orrery snapshot
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.9:
+    title: Wire Orrery into ObservatoryClient as primary dashboardSlot — chart grid
+      demoted to supporting strip (anti-pattern guard)
+    status: not_started
+    started: null
+    completed: null
+    commit: null
+  R9.10:
+    title: Final pass — full vitest, tsc, lint, build, drift; tower accept R9
+    status: not_started
+    started: null
+    completed: null
+    commit: null
 blockers: []
-decisions: []
-history: []
+decisions:
+  - date: 2026-04-23
+    text: CSS 3D with decoupled render/data layers (partner constraint).
+      OrreryRender.tsx is the ONLY file touching CSS 3D transforms; data layer
+      (OrreryPlanet[] interface + transformer) is pure and independently
+      testable.
+    why: R3F upgrade later is a single-file swap, not a rewrite of callers.
+  - date: 2026-04-23
+    text: Perf gate uses architectural-invariant test (single GSAP timeline, CSS
+      contain on planet, will-change scoped to orbit groups) instead of JSDOM
+      frame-time measurement.
+    why: JSDOM cannot measure real frame times; virtualization (±60° front arc) is
+      the fallback if invariants prove insufficient.
+  - date: 2026-04-23
+    text: Rejection autopsy is opt-in via Settings toggle (default ON, exact partner
+      copy). Three chips + optional free text on application card inline; Skip
+      default; Save once chip selected. NEVER a modal.
+    why: Partner constraint D — must be ultra-low-friction; modal would feel
+      punitive.
+  - date: 2026-04-23
+    text: CFO threshold trigger reuses R8 warmth-decay cron architecture and R7
+      pneumatic-tube delivery. Mondays 09:00 UTC. Idempotent per ISO week via
+      source_entity_id bucket.
+    why: Partner constraint E — do not redesign delivery; reuse existing infra.
+  - date: 2026-04-23
+    text: State of the Month reuses @react-pdf/renderer (R5.7 dep). Inline SVG
+      primitives for orrery snapshot, no rasterization.
+    why: Partner constraint F — do NOT pick a second PDF library.
+history:
+  - 2026-04-24T00:17:33.414Z: task_started R9.1
+  - 2026-04-24T00:18:42.094Z: task_started R9.1
