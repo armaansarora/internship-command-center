@@ -104,7 +104,7 @@ tasks:
     status: complete
     started: 2026-04-24T04:20:12.062Z
     completed: 2026-04-24T04:24:00.935Z
-    commit: 96208f3
+    commit: d2eda43
   R10.11:
     title: CEO voice three-layer — pickCeoVoice helpers + CEOVoicePlayButton +
       Settings toggle for ceoVoice preference + PROOF test for the three gates
