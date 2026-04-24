@@ -2,29 +2,34 @@
  * R10 post-mortem (test-tightening pass) — POST /api/offers integration test.
  *
  * The R10 Proof line says: "Offer arriving via email parses INTO the offers
- * table." The original parser test (src/lib/offers/parse-offer-email.test.ts)
- * only proved the parser's output shape against an in-memory object — it never
- * round-tripped through the route or the offers-rest INSERT helper. This file
- * closes that gap: build a realistic offer email, run it through
- * `parseOfferEmail`, POST the parsed data to /api/offers, and assert that
- * the captured `insertOffer` call carries the parsed values + the
- * authenticated `userId`.
+ * table." Originally this was only half-proven: the parser test asserted
+ * parser output shape against an in-memory object; no test round-tripped
+ * through an actual route handler and the insertOffer helper.
  *
- * Two integration gaps surfaced while writing this test (do NOT silently fix;
- * they're real and belong on the post-R10 hardening backlog):
+ * Weak-test tightening (first pass) closed the gap by running the parser in
+ * the test harness and POSTing structured JSON to /api/offers. The audit
+ * correctly called that out as still-weak: "offer arriving via email" was
+ * never literally bound at the route layer — the test was exercising the
+ * parser-then-post chain with the parser call in the test itself, not behind
+ * a route.
  *
- *   GAP A — there is no `emailText` surface on POST /api/offers. The endpoint
- *   accepts pre-parsed structured data only. Any "email arriving" today must
- *   route through a Penthouse ingest layer that calls `parseOfferEmail` first
- *   and then POSTs the structured shape. This test exercises that real chain
- *   (parser → POST → insert) rather than a hypothetical raw-email surface.
+ * Gap-A close (this pass) — `POST /api/offers/ingest-email` was added as a
+ * first-class route that takes raw email text, runs `parseOfferEmail`, and
+ * inserts. This file now binds BOTH paths:
  *
- *   GAP B — `parseOfferEmail` returns date-only ISO ("2026-05-01") for
- *   `deadlineAt`, but the route's Zod schema requires `z.string().datetime()`
- *   (full ISO). Posting the parser output verbatim yields a 400. Callers must
- *   coerce. This test coerces explicitly with a comment on the line; an
- *   additional `it()` below pins the gap as a regression-trip-wire so a
- *   future schema change doesn't silently break callers (or vice versa).
+ *   Path 1 — ingest-email round-trip: POST raw email text → route parses
+ *            → route inserts. This is the real end-to-end chain the Proof
+ *            line demands.
+ *   Path 2 — structured POST: retained as a non-regression test for the
+ *            original pre-parsed structured-JSON entry point (used by the
+ *            manual entry form in the Penthouse).
+ *
+ * Gap-B (parser yields YYYY-MM-DD for deadlineAt; structured route schema
+ * requires datetime) is now internalized — the ingest-email route coerces
+ * date-only to midnight-UTC datetime before calling insertOffer. The
+ * structured route's schema still rejects date-only verbatim; that's
+ * pinned below as a regression trip-wire so a future schema change doesn't
+ * silently break callers.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -53,7 +58,8 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => ({})),
 }));
 
-import { POST } from "../route";
+import { POST as PostStructured } from "../route";
+import { POST as PostIngestEmail } from "../ingest-email/route";
 import { parseOfferEmail } from "@/lib/offers/parse-offer-email";
 
 /**
@@ -81,7 +87,7 @@ Best,
 Recruiting
 `;
 
-describe("R10 post-mortem — POST /api/offers integration (parser → route → insert)", () => {
+describe("R10 post-mortem — POST /api/offers/ingest-email (raw email → offers table)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireUserApiMock.mockImplementation(async () => ({
@@ -111,24 +117,122 @@ describe("R10 post-mortem — POST /api/offers integration (parser → route →
     }));
   });
 
-  it("parses the email AND inserts the parsed values into the offers table with the authenticated userId", async () => {
+  it("parses raw email text at the route + inserts parsed values into offers with authenticated userId + returns 201", async () => {
+    const req = new Request("http://localhost/api/offers/ingest-email", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        subject: "Offer of employment",
+        emailText: offerEmail,
+      }),
+    });
+    const res = await PostIngestEmail(req);
+    expect(res.status).toBe(201);
+
+    // The captured insertOffer call carries the parsed values — no parser
+    // call in the test harness. The route did the work end-to-end.
+    expect(insertOfferMock).toHaveBeenCalledTimes(1);
+    const [, insertInput] = insertOfferMock.mock.calls[0]!;
+    expect(insertInput.userId).toBe("u1");
+    expect(insertInput.companyName).toMatch(/acme/i);
+    expect(insertInput.role).toMatch(/software engineer/i);
+    expect(insertInput.location).toBe("New York, NY");
+    expect(insertInput.base).toBe(150000);
+    expect(insertInput.signOn).toBe(25000);
+    expect(insertInput.equity).toBe(40000);
+    // Route coerces YYYY-MM-DD → midnight-UTC datetime for the timestamptz column.
+    expect(insertInput.deadlineAt).toBe("2026-05-01T00:00:00.000Z");
+    // startDate stays date-only (offers.start_date is a date column).
+    expect(insertInput.startDate).toBe("2026-06-01");
+
+    const body = (await res.json()) as { offer: { id: string; user_id: string; base: number } };
+    expect(body.offer.id).toBe("new-offer-1");
+    expect(body.offer.user_id).toBe("u1");
+    expect(body.offer.base).toBe(150000);
+  });
+
+  it("returns 422 unparseable when the email lacks company + base salary (never reaches insertOffer)", async () => {
+    const req = new Request("http://localhost/api/offers/ingest-email", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        subject: "Re: chat",
+        emailText: "Thanks for catching up today! Talk soon.",
+      }),
+    });
+    const res = await PostIngestEmail(req);
+    expect(res.status).toBe(422);
+    const body = (await res.json()) as { error: string; reason: string };
+    expect(body.error).toBe("unparseable");
+    expect(body.reason).toMatch(/company name/i);
+    expect(insertOfferMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 401 when unauthenticated and never parses or inserts", async () => {
+    requireUserApiMock.mockImplementationOnce(async () => ({
+      ok: false as const,
+      response: new Response(JSON.stringify({ error: "unauth" }), { status: 401 }),
+    }));
+    const req = new Request("http://localhost/api/offers/ingest-email", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ subject: "anything", emailText: offerEmail }),
+    });
+    const res = await PostIngestEmail(req);
+    expect(res.status).toBe(401);
+    expect(insertOfferMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects missing emailText with 400 (never reaches parser)", async () => {
+    const req = new Request("http://localhost/api/offers/ingest-email", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ subject: "only subject, no body" }),
+    });
+    const res = await PostIngestEmail(req);
+    expect(res.status).toBe(400);
+    expect(insertOfferMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/offers (structured JSON — original route, non-regression)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    requireUserApiMock.mockImplementation(async () => ({
+      ok: true as const,
+      user: { id: "u1", firstName: "Armaan" },
+    }));
+    insertOfferMock.mockImplementation(async (_client, input) => ({
+      id: "new-offer-1",
+      user_id: input.userId,
+      application_id: input.applicationId ?? null,
+      company_name: input.companyName,
+      role: input.role,
+      level: input.level ?? null,
+      location: input.location,
+      base: input.base,
+      bonus: input.bonus ?? 0,
+      equity: input.equity ?? 0,
+      sign_on: input.signOn ?? 0,
+      housing: input.housing ?? 0,
+      start_date: input.startDate ?? null,
+      benefits: input.benefits ?? {},
+      received_at: "2026-04-24T00:00:00.000Z",
+      deadline_at: input.deadlineAt ?? null,
+      status: "received",
+      created_at: "2026-04-24T00:00:00.000Z",
+      updated_at: "2026-04-24T00:00:00.000Z",
+    }));
+  });
+
+  it("accepts pre-parsed structured JSON and inserts with the authenticated userId", async () => {
     const parsed = await parseOfferEmail({
       subject: "Offer of employment",
       body: offerEmail,
     });
     expect(parsed).not.toBeNull();
-    // Sanity: parser pulled the headline numbers we'll assert downstream.
-    expect(parsed!.companyName).toMatch(/acme/i);
-    expect(parsed!.base).toBe(150000);
-    expect(parsed!.signOn).toBe(25000);
-    expect(parsed!.equity).toBeGreaterThan(0);
-    expect(parsed!.deadlineAt).toBe("2026-05-01");
 
-    // GAP B coercion — parser yields date-only ISO; the route schema requires
-    // datetime. The Penthouse ingest layer would do this; we do it inline.
     const deadlineAtIso = `${parsed!.deadlineAt}T00:00:00.000Z`;
-    const startDate = parsed!.startDate; // route schema accepts z.string().date()
-
     const req = new Request("http://localhost/api/offers", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -141,31 +245,19 @@ describe("R10 post-mortem — POST /api/offers integration (parser → route →
         equity: parsed!.equity,
         signOn: parsed!.signOn,
         housing: parsed!.housing,
-        startDate,
+        startDate: parsed!.startDate,
         deadlineAt: deadlineAtIso,
       }),
     });
-    const res = await POST(req);
+    const res = await PostStructured(req);
     expect(res.status).toBe(200);
 
-    // The captured insertOffer call carries the parsed values + the
-    // authenticated userId — this is the round-trip the proof line demands.
     expect(insertOfferMock).toHaveBeenCalledTimes(1);
     const [, insertInput] = insertOfferMock.mock.calls[0]!;
     expect(insertInput.userId).toBe("u1");
     expect(insertInput.companyName).toMatch(/acme/i);
-    expect(insertInput.role).toMatch(/software engineer/i);
-    expect(insertInput.location).toBe("New York, NY");
     expect(insertInput.base).toBe(150000);
-    expect(insertInput.signOn).toBe(25000);
-    expect(insertInput.equity).toBeGreaterThan(0);
     expect(insertInput.deadlineAt).toBe(deadlineAtIso);
-
-    // The response body wraps the inserted row.
-    const body = (await res.json()) as { offer: { id: string; user_id: string; base: number } };
-    expect(body.offer.id).toBe("new-offer-1");
-    expect(body.offer.user_id).toBe("u1");
-    expect(body.offer.base).toBe(150000);
   });
 
   it("returns 401 when unauthenticated and never reaches insertOffer", async () => {
@@ -183,17 +275,19 @@ describe("R10 post-mortem — POST /api/offers integration (parser → route →
         base: 150000,
       }),
     });
-    const res = await POST(req);
+    const res = await PostStructured(req);
     expect(res.status).toBe(401);
     expect(insertOfferMock).not.toHaveBeenCalled();
   });
 
   /**
-   * GAP B trip-wire — pin the parser/route schema mismatch so any future
-   * change (parser starts returning datetime, OR route schema relaxes to
-   * z.string().date()) flips this test red and forces a deliberate update.
+   * Gap-B trip-wire — pin the parser/structured-route schema mismatch so any
+   * future change (parser starts returning datetime, OR route schema relaxes
+   * to z.string().date()) flips this test red and forces a deliberate update.
+   * The ingest-email route internalizes this coercion, so this trip-wire
+   * applies only to callers using the original structured POST directly.
    */
-  it("pins the parser/route deadlineAt-format gap (parser yields date-only; route requires datetime)", async () => {
+  it("pins the date-only/datetime mismatch on the structured route (raw parser output yields 400)", async () => {
     const parsed = await parseOfferEmail({
       subject: "Offer of employment",
       body: offerEmail,
@@ -211,7 +305,7 @@ describe("R10 post-mortem — POST /api/offers integration (parser → route →
         deadlineAt: parsed!.deadlineAt, // raw parser output, no coercion
       }),
     });
-    const res = await POST(req);
+    const res = await PostStructured(req);
     expect(res.status).toBe(400);
     expect(insertOfferMock).not.toHaveBeenCalled();
   });
