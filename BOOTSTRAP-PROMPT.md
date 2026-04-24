@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 8:58 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:05 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `88e460f`)
+- **Branch:** `main` (commit `ce0296a`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 113,858 across 656 source files
+- **Total LOC:** 114,078 across 658 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-88e460f [R10/10.13] chore(plan): R10.13+R10.14 stretch design
+ce0296a [R10/10.13] chore(plan): R10.13+R10.14 TDD implementation plan
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `88e460f`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `ce0296a`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (656 files, 113,858 LOC)
+## Source Tree (658 files, 114,078 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -118,8 +118,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/hooks` | 1647 |
+| `src/lib/ai/structured` | 1588 |
 | `src/components/floor-3/drill` | 1581 |
-| `src/lib/ai/structured` | 1490 |
 | `src/app/(authenticated)/settings` | 1419 |
 | `src/app/lobby` | 1294 |
 | `src/lib/gmail` | 1253 |
@@ -158,6 +158,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
+| `src/lib/ai/structured/__tests__` | 714 |
 | `src/components/floor-3/binder` | 674 |
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
@@ -166,7 +167,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7/rejection` | 620 |
 | `src/app/api/reports/state-of-month` | 602 |
 | `src/lib/ai` | 599 |
-| `src/lib/ai/structured/__tests__` | 592 |
 | `src/lib/agents/ceo` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
 | `src/app/api/cron/unprompted-ceo` | 573 |
@@ -792,6 +792,7 @@ src/lib/ai/model.ts
 src/lib/ai/prompt-cache.ts
 src/lib/ai/structured/__tests__/live-compose.proof.test.ts
 src/lib/ai/structured/__tests__/negotiation-draft.test.ts
+src/lib/ai/structured/__tests__/simulator-turn.test.ts
 src/lib/ai/structured/__tests__/three-tone-divergence.proof.test.ts
 src/lib/ai/structured/cover-letter-stream.ts
 src/lib/ai/structured/cover-letter.ts
@@ -801,6 +802,7 @@ src/lib/ai/structured/follow-up-draft.ts
 src/lib/ai/structured/negotiation-draft.ts
 src/lib/ai/structured/prep-packet.ts
 src/lib/ai/structured/score-answer.ts
+src/lib/ai/structured/simulator-turn.ts
 src/lib/ai/structured/tailored-resume.test.ts
 src/lib/ai/structured/tailored-resume.ts
 src/lib/ai/telemetry.ts
@@ -1054,13 +1056,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1103 | 12,327 |
+| `BOOTSTRAP-PROMPT.md` | 1103 | 12,331 |
 | `PROJECT-CONTEXT.md` | 283 | 5,309 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2099** | **31,274** |
+| **Total** | **2099** | **31,278** |
 
-> ⚠️ Reading all recommended files consumes ~31,274 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,278 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
