@@ -12,8 +12,8 @@ started: 2026-04-23T20:35:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T00:56:54.912Z
-  expires: 2026-04-24T02:56:54.907Z
+  acquired: 2026-04-24T01:00:35.265Z
+  expires: 2026-04-24T03:00:35.260Z
 acceptance:
   criteria:
     - Orrery renders 100+ applications at 60fps on baseline laptop.
@@ -61,15 +61,15 @@ tasks:
     title: Rejection autopsy — migration 0019 (rejection_reflections), Settings
       toggle (default ON, exact partner copy), inline chip strip on
       ApplicationCard
-    status: in_progress
+    status: complete
     started: 2026-04-24T00:56:54.912Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T00:57:27.418Z
+    commit: e5d75d2
   R9.7:
     title: CFO threshold cron — reuses R8 warmth-decay pattern, fires R7
       pneumatic-tube notification on >5% WoW conversion drop
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-24T01:00:35.265Z
     completed: null
     commit: null
   R9.8:
@@ -136,3 +136,6 @@ history:
   - 2026-04-24T00:44:03.076Z: task_completed R9.5
   - 2026-04-24T00:44:29.739Z: task_started R9.6
   - 2026-04-24T00:56:54.912Z: task_started R9.6
+  - 2026-04-24T00:57:27.418Z: task_completed R9.6
+  - 2026-04-24T00:58:06.771Z: task_started R9.7
+  - 2026-04-24T01:00:35.265Z: task_started R9.7

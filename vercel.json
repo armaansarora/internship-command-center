@@ -47,6 +47,10 @@
     {
       "path": "/api/cron/warm-intro-scan",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/cfo-threshold",
+      "schedule": "0 9 * * 1"
     }
   ]
 }

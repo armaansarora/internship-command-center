@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:57 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 9:02 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `290924b`)
+- **Branch:** `main` (commit `e5d75d2`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 102,888 across 585 source files
+- **Total LOC:** 103,175 across 587 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-290924b [R9/9.5] test(orrery): perf invariants (single timeline, CSS contain, will-change scope)
+e5d75d2 [R9/9.6] feat(autopsy): opt-in rejection reflection chips + settings toggle (migration 0019)
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `290924b`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `e5d75d2`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (585 files, 102,888 LOC)
+## Source Tree (587 files, 103,175 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -115,7 +115,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
-| `src/app/__tests__` | 1689 |
+| `src/app/__tests__` | 1783 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/lib/ai/structured` | 1425 |
@@ -230,6 +230,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/war-room` | 201 |
 | `src/app/api/briefing/complete-drill` | 198 |
 | `src/app/api/outreach/undo` | 197 |
+| `src/app/api/cron/cfo-threshold` | 193 |
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
 | `src/app/api/briefing/start-drill` | 179 |
@@ -333,6 +334,7 @@ src/app/__tests__/r8-consent-guard.proof.test.ts
 src/app/__tests__/r8-private-note-grep.proof.test.ts
 src/app/__tests__/r8-red-team.proof.test.ts
 src/app/__tests__/r8-warmth-decay.proof.test.ts
+src/app/__tests__/r9-cfo-threshold.proof.test.ts
 src/app/__tests__/r9-orrery-perf.proof.test.ts
 src/app/api/account/delete/cancel/route.test.ts
 src/app/api/account/delete/cancel/route.ts
@@ -372,6 +374,7 @@ src/app/api/cpo/route.ts
 src/app/api/cro/route.ts
 src/app/api/cron/__integration__/cron-auth.test.ts
 src/app/api/cron/briefing/route.ts
+src/app/api/cron/cfo-threshold/route.ts
 src/app/api/cron/cio-reresearch/route.ts
 src/app/api/cron/draft-follow-ups/route.test.ts
 src/app/api/cron/draft-follow-ups/route.ts
@@ -963,13 +966,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 997 | 11,045 |
+| `BOOTSTRAP-PROMPT.md` | 1012 | 11,260 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 506 | 11,299 |
-| **Total** | **2152** | **34,791** |
+| **Total** | **2167** | **35,006** |
 
-> ⚠️ Reading all recommended files consumes ~34,791 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~35,006 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
