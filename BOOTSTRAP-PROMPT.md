@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:47 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:52 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `dbf55b9`)
+- **Branch:** `main` (commit `6bc9152`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 105,457 across 598 source files
+- **Total LOC:** 106,236 across 604 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-dbf55b9 [R10/10.1] feat(db): migration 0020 + offers/comp_bands schema + R10 prefs
+6bc9152 [R10/10.2] feat(db): offers REST queries + company-name normalizer
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `dbf55b9`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `6bc9152`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (598 files, 105,457 LOC)
+## Source Tree (604 files, 106,236 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -199,12 +199,14 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/briefing-room` | 320 |
 | `src/app/api/account/delete/cancel` | 308 |
 | `src/components/pricing` | 306 |
+| `src/app/api/offers/[id]` | 302 |
 | `src/lib/networking` | 302 |
 | `src/components/floor-6/dossier-wall` | 298 |
 | `src/lib/audio` | 297 |
 | `src/app/(authenticated)` | 285 |
 | `src/components/lobby/directory` | 285 |
 | `src/lib/utils` | 284 |
+| `src/app/api/offers` | 278 |
 | `src/app/api/ceo/dispatches` | 275 |
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
@@ -230,6 +232,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/writing-room` | 204 |
 | `src/lib/calendar` | 203 |
 | `src/app/(authenticated)/war-room` | 201 |
+| `src/lib/offers` | 199 |
 | `src/app/api/briefing/complete-drill` | 198 |
 | `src/app/api/outreach/undo` | 197 |
 | `src/app/api/cron/cfo-threshold` | 193 |
@@ -403,6 +406,10 @@ src/app/api/networking/opt-in/route.ts
 src/app/api/networking/revoke/route.ts
 src/app/api/notifications/[id]/read/route.ts
 src/app/api/notifications/route.ts
+src/app/api/offers/[id]/route.test.ts
+src/app/api/offers/[id]/route.ts
+src/app/api/offers/route.test.ts
+src/app/api/offers/route.ts
 src/app/api/onboarding/bootstrap-discovery/route.test.ts
 src/app/api/onboarding/bootstrap-discovery/route.ts
 src/app/api/outreach/approve/route.test.ts
@@ -835,6 +842,8 @@ src/lib/networking/warm-intro-finder.test.ts
 src/lib/networking/warm-intro-finder.ts
 src/lib/notifications/quiet-hours.test.ts
 src/lib/notifications/quiet-hours.ts
+src/lib/offers/parse-offer-email.test.ts
+src/lib/offers/parse-offer-email.ts
 src/lib/onboarding/bootstrap.ts
 src/lib/orrery/applications-to-planets.test.ts
 src/lib/orrery/applications-to-planets.ts
@@ -979,13 +988,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1026 | 11,432 |
+| `BOOTSTRAP-PROMPT.md` | 1028 | 11,453 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 507 | 11,350 |
-| **Total** | **2182** | **35,229** |
+| **Total** | **2184** | **35,250** |
 
-> ⚠️ Reading all recommended files consumes ~35,229 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~35,250 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
