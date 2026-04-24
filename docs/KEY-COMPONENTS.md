@@ -62,6 +62,7 @@
 - `src/components/floor-7/rejection/RejectionReflectionStrip.tsx` (262 LOC) — R9.6 — Inline rejection-autopsy strip.
 - `src/components/settings/NetworkingConsent.tsx` (260 LOC)
 - `src/components/lobby/concierge/OtisDialoguePanel.tsx` (250 LOC) — OtisDialoguePanel — the Concierge's conversation surface.
+- `src/components/parlor/NegotiationDraftPanel.test.tsx` (249 LOC) — R10.9 — NegotiationDraftPanel render + reveal tests.
 - `src/components/floor-2/ObservatoryClient.tsx` (247 LOC) — R9.9 — raw application data the Orrery transforms into planets. The
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
 - `src/components/world/PersistentWorld.tsx` (243 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
@@ -69,6 +70,7 @@
 - `src/components/floor-6/crud/ContactSearch.tsx` (237 LOC)
 - `src/components/floor-2/cfo-character/CFOCharacter.tsx` (235 LOC)
 - `src/components/floor-3/binder/BinderOpen.tsx` (235 LOC) — R6.8 — Flip-open view of a single Debrief binder.
+- `src/components/parlor/NegotiationDraftPanel.tsx` (234 LOC) — R10.9 — NegotiationDraftPanel.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
 - `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (228 LOC)
@@ -125,6 +127,7 @@
 - `src/components/parlor/CompBandChart.test.tsx` (145 LOC) — R10.8 — CompBandChart render tests.
 - `src/components/floor-1/CSuiteTicker.tsx` (141 LOC)
 - `src/components/agents/dialogue/AgentMessageList.tsx` (140 LOC)
+- `src/app/(authenticated)/parlor/parlor-client.tsx` (139 LOC) — R10.6 — ParlorClient.
 - `src/components/floor-4/final-countdown/FinalCountdownSection.test.tsx` (138 LOC)
 - `src/components/floor-2/analytics/ConversionFunnel.tsx` (137 LOC) — ConversionFunnel — SVG funnel visualization showing pipeline stages.
 - `src/components/floor-1/InjectPrompt.test.tsx` (136 LOC) — R3.11 — unit tests for the floating `/`-inject prompt.
@@ -136,7 +139,6 @@
 - `src/components/transitions/EntranceSequence.tsx` (132 LOC) — EntranceSequence — cinematic first-login entrance animation.
 - `src/components/floor-4/conflicts/ConflictsSection.tsx` (130 LOC) — Red-amber section at the top of the Floor 4 tableSlot when any calendar
 - `src/components/penthouse/QuickActionCard.tsx` (129 LOC) — @deprecated R2 bans the "Phase 1 / Phase 2" badge. Field kept optional
-- `src/app/(authenticated)/parlor/parlor-client.tsx` (129 LOC) — R10.6 — ParlorClient.
 - `src/components/floor-5/cmo-character/CMODialoguePanel.tsx` (128 LOC)
 - `src/components/floor-6/rolodex/RolodexCard.tsx` (128 LOC) — A single physical card on the rolodex cylinder. Warmth-coloured via the
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.

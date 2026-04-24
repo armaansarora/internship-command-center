@@ -13,6 +13,7 @@ import {
   type CompBands,
   type CompPin,
 } from "@/components/parlor/CompBandChart";
+import { NegotiationDraftPanel } from "@/components/parlor/NegotiationDraftPanel";
 
 interface ParlorClientProps {
   offers: OfferRow[];
@@ -122,6 +123,15 @@ export function ParlorClient({ offers }: ParlorClientProps): JSX.Element {
           result={result}
           onConvene={onConvene}
         />
+      }
+      draftSlot={
+        selectedOfferId ? (
+          <NegotiationDraftPanel
+            key={selectedOfferId}
+            offerId={selectedOfferId}
+            convening={result}
+          />
+        ) : null
       }
     />
   );

@@ -619,3 +619,143 @@
   line-height: 1.45;
   opacity: 0.82;
 }
+
+/* ------------------------------------------------------------------
+ * R10.9 — Negotiation draft panel (parlor-draft-area).
+ *
+ * Side-drawer that holds the draft-reveal surface: CTA button, loading
+ * beat, subject + body with the pen-glow cursor tracing the body as
+ * characters appear. Palette matches the chair-area (warm-cream glass on
+ * oak); the text is the ink (#2a1a0b) against a parchment-ish panel.
+ * ------------------------------------------------------------------ */
+
+.parlor-negotiation-draft {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 18px 20px;
+  color: #2a1a0b;
+  background: linear-gradient(180deg, #e8d9b7 0%, #d3bf94 100%);
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  border-radius: 6px;
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.parlor-negotiation-draft-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.parlor-negotiation-draft-header h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #1a0f06;
+}
+
+.parlor-negotiation-draft-tag {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #7a5a12;
+}
+
+.parlor-negotiation-draft-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.parlor-negotiation-draft-cta {
+  padding: 12px 22px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #1a0f06;
+  background: linear-gradient(180deg, #e8c96a 0%, #c9a84c 100%);
+  border: 1px solid rgba(120, 90, 42, 0.6);
+  border-radius: 4px;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.parlor-negotiation-draft-cta:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.parlor-negotiation-draft-cta:focus-visible {
+  outline: 2px solid rgba(232, 201, 106, 0.9);
+  outline-offset: 3px;
+}
+
+.parlor-negotiation-draft-loading {
+  margin: 0;
+  padding: 8px 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15px;
+  color: #3a2714;
+  opacity: 0.78;
+}
+
+.parlor-negotiation-draft-error {
+  margin: 0;
+  font-size: 12px;
+  color: #6a2a1e;
+}
+
+.parlor-negotiation-draft-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.parlor-negotiation-draft-label {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #7a5a12;
+  margin-bottom: 4px;
+}
+
+.parlor-negotiation-draft-subject p {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a0f06;
+}
+
+.parlor-negotiation-draft-text {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #2a1a0b;
+  white-space: pre-wrap;
+  min-height: 120px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parlor-negotiation-draft-cta {
+    transition: none !important;
+    animation: none !important;
+  }
+}
