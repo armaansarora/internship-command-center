@@ -1,9 +1,9 @@
-paused: false
+paused: true
 scope: R10-only
 started: 2026-04-23T21:30:00.000Z
 started_by: sess-r10-autopilot
-ended: null
-ended_reason: null
+ended: 2026-04-24T04:52:00.000Z
+ended_reason: "R10 scope complete — acceptance.met verified_by_commit d988f05. MVP shipped (R10.1–R10.12); R10.13/R10.14 stretch skipped per autopilot budget; R10.15 ledger-close run. Awaits user migration 0020 apply + FIRECRAWL_API_KEY env var for prod."
 max_blockers: 3
 previous_phase: R9
 previous_outcome: "R9 complete — 11/11 tasks, acceptance.met (verified_by_commit: c31c658)."
