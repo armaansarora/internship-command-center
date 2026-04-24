@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:14 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:18 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `bb164e6`)
+- **Branch:** `main` (commit `d895271`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 119,257 across 688 source files
+- **Total LOC:** 119,514 across 689 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-bb164e6 [R11/11.4] feat(r11): delta re-scan triggers on contact + application mutations
+d895271 [R11/11.7] feat(r11): 20/hour rate limit with atomic RPC + fail-closed
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `bb164e6`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `d895271`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (688 files, 119,257 LOC)
+## Source Tree (689 files, 119,514 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -238,6 +238,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/cron/outreach-sender` | 209 |
 | `src/app/api/writing-room/choose-tone/__tests__` | 209 |
 | `src/app/api/briefing/audio-upload` | 208 |
+| `src/app/api/networking/match-candidates/__tests__` | 207 |
 | `src/lib/email` | 206 |
 | `src/app/api/resumes/upload` | 205 |
 | `src/app/(authenticated)/writing-room` | 204 |
@@ -293,6 +294,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
 | `src/app/api/offers/ingest-email` | 98 |
+| `src/app/api/networking/match-candidates` | 94 |
 | `src/app/api/contacts/[id]/reference-request` | 92 |
 | `src/lib/parlor/__tests__` | 90 |
 | `src/db/__tests__` | 89 |
@@ -312,7 +314,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/stripe/checkout` | 51 |
 | `src/lib/agents/offer-evaluator` | 50 |
 | `src/lib/crypto` | 50 |
-| `src/app/api/networking/match-candidates` | 44 |
 | `src/app/api/networking/opt-in` | 44 |
 | `src/app/api/progression` | 44 |
 | `src/app/api/notifications/[id]/read` | 40 |
@@ -438,6 +439,7 @@ src/app/api/drive/export/route.ts
 src/app/api/gmail/auth/route.ts
 src/app/api/gmail/callback/route.ts
 src/app/api/gmail/sync/route.ts
+src/app/api/networking/match-candidates/__tests__/route.test.ts
 src/app/api/networking/match-candidates/route.ts
 src/app/api/networking/opt-in/route.ts
 src/app/api/networking/revoke/route.ts
@@ -1097,13 +1099,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1144 | 12,928 |
+| `BOOTSTRAP-PROMPT.md` | 1146 | 12,953 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2128** | **31,569** |
+| **Total** | **2130** | **31,594** |
 
-> ⚠️ Reading all recommended files consumes ~31,569 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,594 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
