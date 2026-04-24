@@ -44,6 +44,32 @@ const ALLOWLIST = new Set<string>([
   // Red Team test references the canonical Q7 phrasing that mentions
   // 'private_note ever appear' from the checklist markdown.
   "src/app/__tests__/r8-red-team.proof.test.ts",
+  // R10.14 — defensive privateNote destructure before LLM prompt.
+  // draftReferenceRequest strips privateNote off the contact object
+  // before JSON.stringify reaches the LLM (P5 invariant preserved).
+  "src/lib/ai/structured/reference-request.ts",
+  // R10.14 — regression test for the P5 strip: seeds a contact with
+  // privateNote: "SECRET: ..." and asserts the prompt never contains
+  // that string. The word 'privateNote' appears only in fixture/asserts.
+  "src/lib/ai/structured/__tests__/reference-request.test.ts",
+  // R10.14 — route comment documents the P5 guarantee for the
+  // reference-request endpoint. No privateNote data crosses the boundary.
+  "src/app/api/contacts/[id]/reference-request/route.ts",
+  // R10.14 — ReferenceRequestPanel test fixture includes
+  // `privateNote: null` for type-shape completeness of ContactForAgent.
+  "src/components/parlor/ReferenceRequestPanel.test.tsx",
+]);
+
+// R10.14 — AI-prompt composition path exemptions.
+// The blanket "src/lib/ai/**" grep rejects ANY reference to privateNote,
+// but reference-request.ts must NAME the field in order to destructure
+// it OUT before serialization (the P5 defensive strip). Its sibling test
+// must also NAME the field to assert the strip holds. These two files
+// are the ONLY permitted mentions inside src/lib/ai/**; any future file
+// under src/lib/ai/ that references privateNote is a real leak.
+const AI_PROMPT_ALLOWLIST = new Set<string>([
+  "src/lib/ai/structured/reference-request.ts",
+  "src/lib/ai/structured/__tests__/reference-request.test.ts",
 ]);
 
 function walk(dir: string): string[] {
@@ -70,8 +96,10 @@ describe("R8 P5 — private_note allowlist", () => {
     const files = walk(resolve(ROOT, "src/lib/ai"));
     const offenders: string[] = [];
     for (const f of files) {
+      const rel = relative(ROOT, f);
+      if (AI_PROMPT_ALLOWLIST.has(rel)) continue;
       const body = readFileSync(f, "utf8");
-      if (PATTERN.test(body)) offenders.push(relative(ROOT, f));
+      if (PATTERN.test(body)) offenders.push(rel);
     }
     expect(offenders).toEqual([]);
   });
