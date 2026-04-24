@@ -63,6 +63,11 @@ const ALLOWLIST = new Set<string>([
   // Never queries the table directly; the parent page does the scoped
   // REST fetch (see src/app/(authenticated)/settings/page.tsx).
   "src/app/(authenticated)/settings/settings-client.tsx",
+  // Consent guard — JSDoc at the top of the file mentions both
+  // `match_candidate_index` and `match_events` in a sentence describing
+  // what R11.8 shipped downstream of the guard.  The file itself only
+  // queries `user_profiles` (always scoped by id).  Docstring-only.
+  "src/lib/networking/consent-guard.ts",
 ]);
 
 describe("R11 P1 — cross-user RLS scoping", () => {
