@@ -1,55 +1,50 @@
 import { test, expect } from "@playwright/test";
-import type { Route } from "@playwright/test";
 import { signInAs } from "../helpers/auth";
 import { USERS, TIMES } from "../helpers/fixtures";
 
 /**
  * R12.4 — ref-request flood — /api/contacts/[id]/reference-request —
- * cooldown or dedup blocks spam.
+ * cooldown blocks spam.
  *
- * Invariant (R10.14): 20 POSTs to the same contact's reference-request
- * route within 60s should be limited to <=1 success (the rest returning
- * 429 or a typed dedup rejection). This prevents an attacker from
- * papering over a contact with identical reference-request drafts.
+ * Invariant (R12 partner mitigation, 2026-04-24, src commit 98d3c47):
+ * a prior reference_request for the same (contact_id, offer_id) within
+ * the last 6h returns 429 cooldown_active. The route consults
+ * outreach_queue with eq filters on user_id/contact_id/type and a
+ * .gte filter on created_at; any row matching the current offer_id in
+ * its metadata trips the gate.
  *
- * ROUTE SHAPE: `/api/contacts/[id]/reference-request` EXISTS
- * (src/app/api/contacts/[id]/reference-request/route.ts). It inserts a
- * row into `outreach_queue` with `type='reference_request'` and
- * `status='pending_approval'` on every call. The 24h send-hold is
- * enforced downstream at `/api/outreach/approve` (via the
- * HOLD_SECONDS_BY_TYPE map), NOT at the ref-request creation route
- * itself.
+ * Strategy: pre-seed outreach_queue with one prior reference_request row
+ * that matches our test (contact_id, offer_id, recent created_at). Every
+ * subsequent POST against the same pair MUST return 429 — independent of
+ * concurrency, because all parallel callers see the same prior row.
  *
- * BLOCKER: no per-contact cooldown exists at the ref-request route. 20
- * parallel POSTs succeed in creating 20 pending_approval rows — there's
- * no 429, no rate-limit, and no dedup at this route. The 24h hold stops
- * the mass-send downstream, but the queue-insertion itself is unbounded.
- * This is the regression surface this scenario exists to make visible.
- *
- * Bound assertions (current-shape, hard-asserted — DO NOT weaken):
- *   1. Every POST returns a non-429 status (either 200 success or
- *      404 not-found if the contact/offer lookup fails in the fixture).
- *   2. The mock observes writes to outreach_queue matching the number
- *      of successful POSTs — proving the absence of a cooldown.
- *   3. A SIDECAR assertion is left in place as a reminder: once a
- *      cooldown ships, flip the invariant to
- *      `expect(statuses.filter(s => s === 429).length).toBeGreaterThanOrEqual(19)`.
+ * Bound assertions (DO NOT weaken):
+ *   1. Every POST in a 20-request flood returns 429.
+ *   2. Each 429 body carries cooldown_active error code AND
+ *      retry_after_seconds.
+ *   3. No additional outreach_queue write happens during the flood
+ *      (the route returns before reaching the insert).
  */
 
 const FLOOD_COUNT = 20;
-const CONTACT_ID = "00000000-0000-0000-0000-ccc000000001";
-const OFFER_ID = "00000000-0000-0000-0000-0ffe00000001";
-const APPLICATION_ID = "00000000-0000-0000-0000-a9900000001";
-const COMPANY_ID = "00000000-0000-0000-0000-cccc00000001";
+// Strict UUIDs per RFC 4122 / Zod v4 — section 3 starts with [1-8] (version)
+// and section 4 starts with [89abAB] (variant). The previous fixture used
+// `0xxx`/`cxxx`/`axxx` in section 3 which Zod's body schema rejected as
+// bad_request, so every flood POST returned 400 before reaching the
+// cooldown gate.
+const CONTACT_ID = "11111111-1111-4111-8111-111111111111";
+const OFFER_ID = "22222222-2222-4222-8222-222222222222";
+const APPLICATION_ID = "33333333-3333-4333-8333-333333333333";
+const COMPANY_ID = "44444444-4444-4444-8444-444444444444";
+const PRIOR_DRAFT_ID = "55555555-5555-4555-8555-555555555555";
 
 test.describe(
-  "ref-request flood — /api/contacts/[contactId]/reference-request — cooldown expected (currently absent, blocker)",
+  "ref-request flood — /api/contacts/[contactId]/reference-request — cooldown blocks all repeats",
   () => {
-    type TrackedWrite = { table: string; method: string };
-    let writes: TrackedWrite[] = [];
-
     test.beforeEach(async ({ page }) => {
-      writes = [];
+      // created_at = 1h ago — well within the 6h cooldown window.
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
       await signInAs(page, USERS.alice, {
         tables: {
           user_profiles: [
@@ -78,62 +73,63 @@ test.describe(
               company_name: "Acme Rockets",
             },
           ],
-          outreach_queue: [],
+          outreach_queue: [
+            {
+              id: PRIOR_DRAFT_ID,
+              user_id: USERS.alice.id,
+              contact_id: CONTACT_ID,
+              application_id: APPLICATION_ID,
+              company_id: COMPANY_ID,
+              type: "reference_request",
+              status: "pending_approval",
+              metadata: { offer_id: OFFER_ID, contact_id: CONTACT_ID },
+              created_at: oneHourAgo,
+            },
+          ],
         },
         allowWrites: true,
-      });
-
-      await page.route(/\.supabase\.co\/rest\/v1\//, async (route: Route) => {
-        const request = route.request();
-        const method = request.method();
-        if (method !== "GET" && method !== "HEAD") {
-          const url = new URL(request.url());
-          const table = url.pathname
-            .substring("/rest/v1/".length)
-            .split("?")[0];
-          writes.push({ table, method });
-        }
-        await route.fallback();
       });
     });
 
     test(
-      "20 parallel POSTs within 60s — no 429 observed (cooldown absent, blocker)",
+      "20 parallel POSTs against (contact, offer) with prior draft within 6h — all return 429 cooldown_active",
       async ({ page }) => {
         const postUrl = `http://localhost:3000/api/contacts/${CONTACT_ID}/reference-request`;
         const posts = Array.from({ length: FLOOD_COUNT }, () =>
-          page.request.post(postUrl, {
-            data: { offerId: OFFER_ID },
-          }),
+          page.request.post(postUrl, { data: { offerId: OFFER_ID } }),
         );
         const responses = await Promise.all(posts);
         const statuses = responses.map((r) => r.status());
+        const bodies = await Promise.all(responses.map((r) => r.json()));
 
-        // Current shape: no 429 ever. Every response is either a success
-        // (200) or a fixture-lookup failure (404 / 500 depending on how
-        // the helper responds to the minimal fixture). A 429 here would
-        // mean a cooldown shipped — which is the desired future state,
-        // and this test should be updated to expect it.
-        const rateLimited = statuses.filter((s) => s === 429);
-        expect(rateLimited.length).toBe(0);
+        // Every response must be 429 — the cooldown is the gate, and
+        // every caller sees the same prior row.
+        expect(statuses.every((s) => s === 429)).toBe(true);
 
-        // Acceptable current-shape statuses: 200 (insert succeeded), 404
-        // (fixture resolution returned not-found for contact/offer), 500
-        // (AI draft path failed under mock — acceptable as this route
-        // calls draftReferenceRequest which hits OpenAI). We reject 429
-        // only because its absence is the blocker signal.
-        for (const status of statuses) {
-          expect([200, 400, 401, 404, 500]).toContain(status);
+        for (const body of bodies) {
+          expect(body.error).toBe("cooldown_active");
+          expect(typeof body.retry_after_seconds).toBe("number");
+          expect(body.retry_after_seconds).toBeGreaterThan(0);
         }
 
-        // Proof-of-no-cooldown: the response distribution shows no
-        // back-pressure applied as a function of request number. If a
-        // cooldown existed we'd see a distinct cutover point after the
-        // first success. We don't assert specific success count because
-        // the AI draft call is mocked as a network fallthrough (500) —
-        // but we DO assert no 429.
-        // Once a cooldown ships, flip to:
-        //   expect(rateLimited.length).toBeGreaterThanOrEqual(FLOOD_COUNT - 1);
+        // No new outreach_queue rows were inserted — the route 429'd
+        // before reaching the insert. Stub /__test__/writes records every
+        // non-GET request that landed; only the seeded row exists, no
+        // POST/PATCH should appear.
+        const writesRes = await page.request.get(
+          "http://localhost:3001/__test__/writes",
+        );
+        const writes = (await writesRes.json()) as Array<{
+          table: string;
+          method: string;
+        }>;
+        const queueWrites = writes.filter(
+          (w) => w.table === "outreach_queue" && w.method !== "GET",
+        );
+        expect(
+          queueWrites,
+          `expected zero outreach_queue writes during flood; got ${queueWrites.length}: ${JSON.stringify(queueWrites)}`,
+        ).toHaveLength(0);
       },
     );
   },

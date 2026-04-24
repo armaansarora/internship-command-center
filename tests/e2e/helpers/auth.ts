@@ -6,52 +6,96 @@ export interface E2EUser {
   email: string;
 }
 
+/**
+ * Cookie shape Supabase SSR (`@supabase/ssr` 0.7+) expects when reading
+ * a session from a Next.js Server Component / route handler:
+ *
+ *   - Name: `sb-<projectRef>-auth-token`. With `NEXT_PUBLIC_SUPABASE_URL`
+ *     pointing at `http://localhost:3001`, projectRef is the first label
+ *     of the hostname → `localhost` → cookie name is
+ *     `sb-localhost-auth-token`.
+ *
+ *   - Value: a `base64-` prefix followed by a base64url-encoded JSON
+ *     session: `{ access_token, refresh_token, expires_at, expires_in,
+ *     token_type: "bearer", user: {...} }`.
+ *
+ * The access_token is a JWT, but the stub server doesn't verify the
+ * signature — it just returns the configured authedUser on /auth/v1/user
+ * regardless of the bearer. The cookie's only job here is to exist in a
+ * shape Supabase SSR will accept and forward.
+ */
+const STORAGE_KEY = "sb-localhost-auth-token";
+
+interface SessionPayload {
+  access_token: string;
+  refresh_token: string;
+  expires_at: number;
+  expires_in: number;
+  token_type: "bearer";
+  user: { id: string; email: string };
+}
+
+function base64urlEncode(s: string): string {
+  return Buffer.from(s, "utf8").toString("base64url");
+}
+
+function buildSessionPayload(user: E2EUser): SessionPayload {
+  const header = base64urlEncode(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+  const payload = base64urlEncode(
+    JSON.stringify({
+      sub: user.id,
+      email: user.email,
+      role: "authenticated",
+      aud: "authenticated",
+      iss: "stub-supabase",
+      exp: 9999999999,
+      iat: 0,
+    }),
+  );
+  const signature = "stub-signature";
+  return {
+    access_token: `${header}.${payload}.${signature}`,
+    refresh_token: `refresh-${user.id}`,
+    expires_at: 9999999999,
+    expires_in: 3600,
+    token_type: "bearer",
+    user: { id: user.id, email: user.email },
+  };
+}
+
 export interface Cookie {
   name: string;
   value: string;
-  domain: string;
-  path: string;
+  url: string;
   httpOnly: boolean;
   secure: boolean;
   sameSite: "Lax" | "Strict" | "None";
 }
 
 /**
- * Build deterministic synthetic auth cookies. The value is NOT a real
- * Supabase JWT — it's a base64url-encoded stub our mock handler can unpack
- * in principle, though in practice we intercept the upstream auth/v1/user
- * call so the cookie value is opaque to our test path and only needs to
- * exist for @supabase/ssr to proceed with downstream REST calls.
+ * Build a single SSR-shaped auth cookie that Supabase's storage adapter
+ * will accept. Returned in Playwright's url-scoped form so it works with
+ * any local origin.
  */
 export function buildAuthCookies(user: E2EUser): Cookie[] {
-  const header = Buffer.from(
-    JSON.stringify({ alg: "HS256", typ: "JWT" }),
-  ).toString("base64url");
-  const payload = Buffer.from(
-    JSON.stringify({ sub: user.id, email: user.email, exp: 9999999999 }),
-  ).toString("base64url");
-  const signature = "stub-signature";
-  const accessToken = `${header}.${payload}.${signature}`;
-  const refreshToken = `refresh-${user.id}`;
-
-  const base = {
-    domain: "localhost",
-    path: "/",
-    httpOnly: true,
-    secure: false,
-    sameSite: "Lax" as const,
-  };
-
+  const sessionJson = JSON.stringify(buildSessionPayload(user));
+  const value = `base64-${base64urlEncode(sessionJson)}`;
   return [
-    { name: "sb-access-token", value: accessToken, ...base },
-    { name: "sb-refresh-token", value: refreshToken, ...base },
+    {
+      name: STORAGE_KEY,
+      value,
+      url: "http://localhost:3000",
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax",
+    },
   ];
 }
 
 /**
  * Sign a Playwright page in as a seeded user — installs the Supabase fetch
  * mock first so the very first auth/v1/user call returns the user, then
- * drops synthetic auth cookies into the browser context.
+ * drops the SSR-shaped session cookie into the browser context.
  */
 export async function signInAs(
   page: Page,
@@ -60,13 +104,5 @@ export async function signInAs(
 ): Promise<void> {
   await installSupabaseMock(page, { ...mockOptions, authedUser: user });
   const context: BrowserContext = page.context();
-  // Playwright's addCookies requires either `url` OR `domain`+`path`, never
-  // both. We use `url` so each cookie gets scoped to the running origin
-  // regardless of the webServer port.
-  await context.addCookies(
-    buildAuthCookies(user).map(({ domain: _domain, path: _path, ...rest }) => ({
-      ...rest,
-      url: "http://localhost:3000",
-    })),
-  );
+  await context.addCookies(buildAuthCookies(user));
 }

@@ -99,7 +99,9 @@ test.describe("scale — 100 offers — chart + stack cap + full accounting", ()
     ).toBeLessThanOrEqual(5);
   });
 
-  test("100 offers → listitem accounting equals 100", async ({ page }) => {
+  test("100 offers → listitems capped at 50 + overflow banner present (R12 partner mitigation)", async ({
+    page,
+  }) => {
     await page.goto("/parlor", { waitUntil: "networkidle" });
     await page.waitForLoadState("domcontentloaded");
 
@@ -107,14 +109,27 @@ test.describe("scale — 100 offers — chart + stack cap + full accounting", ()
       .locator(".parlor-oak-table")
       .waitFor({ state: "attached", timeout: 5_000 });
 
+    // R12 partner mitigation (commit 98d3c47): OakTable caps rendered
+    // folders at 50 with an overflow banner. The pre-mitigation
+    // assertion was "all 100 listitems present for ARIA accounting" —
+    // the shipped behavior trades a11y completeness for DOM bound.
     const listitems = await page
       .locator('.parlor-oak-table [role="listitem"]')
       .count();
 
     expect(
       listitems,
-      `Expected ARIA tree to account for all 100 offers, got ${listitems}. ` +
-        `Every offer must be a listitem even if the visual stack is capped.`,
-    ).toBe(100);
+      `Expected OakTable to cap listitems at 50 with 100 in data; got ${listitems}.`,
+    ).toBe(50);
+
+    // Overflow banner with hidden count.
+    const bannerText = await page
+      .locator(".parlor-oak-table-overflow-banner")
+      .textContent({ timeout: 5_000 });
+    expect(
+      bannerText,
+      "Expected .parlor-oak-table-overflow-banner with hidden-count copy.",
+    ).toBeTruthy();
+    expect(bannerText).toContain("more offer");
   });
 });

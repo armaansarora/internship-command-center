@@ -54,7 +54,7 @@ describe("stub-server pure handler", () => {
     expect(res.status).toBe(400);
   });
 
-  it("/auth/v1/user returns the authedUser after install", () => {
+  it("/auth/v1/user returns the authedUser at response root after install", () => {
     install(state, {
       scenarioId: "s1",
       authedUser: { id: "u1", email: "u1@example.com" },
@@ -68,8 +68,12 @@ describe("stub-server pure handler", () => {
       body: undefined,
     });
     expect(res.status).toBe(200);
-    const body = JSON.parse(res.body) as { data: { user: { id: string } } };
-    expect(body.data.user.id).toBe("u1");
+    // Supabase auth-js _userResponse expects user fields at root (or
+    // nested under .user). Returning at the root matches GoTrue's
+    // upstream contract.
+    const body = JSON.parse(res.body) as { id: string; email: string };
+    expect(body.id).toBe("u1");
+    expect(body.email).toBe("u1@example.com");
   });
 
   it("/auth/v1/session returns the authedUser like /user", () => {
@@ -556,6 +560,66 @@ describe("stub-server pure handler", () => {
       });
       expect(auth.status).toBe(200);
       expect(health.status).toBe(200);
+    });
+  });
+
+  describe("override: writes_become_rows", () => {
+    it("parsed POST body becomes a row visible on subsequent GET", () => {
+      install(state, {
+        scenarioId: "s1",
+        authedUser: { id: "u1", email: "u1@example.com" },
+        tables: { outreach_queue: [] },
+        rpc: {},
+        allowWrites: true,
+        overrides: [{ behavior: "writes_become_rows", table: "outreach_queue" }],
+      });
+      const post = handleStubRequest(state, {
+        method: "POST",
+        url: "/rest/v1/outreach_queue",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          user_id: "u1",
+          contact_id: "c1",
+          type: "reference_request",
+          metadata: { offer_id: "o1" },
+        }),
+      });
+      expect(post.status).toBe(201);
+      const inserted = JSON.parse(post.body) as Array<Record<string, unknown>>;
+      expect(inserted).toHaveLength(1);
+      expect(inserted[0].user_id).toBe("u1");
+      expect(typeof inserted[0].created_at).toBe("string");
+      expect(typeof inserted[0].id).toBe("string");
+
+      const get = handleStubRequest(state, {
+        method: "GET",
+        url: "/rest/v1/outreach_queue?user_id=eq.u1&contact_id=eq.c1",
+        headers: {},
+        body: undefined,
+      });
+      const rows = JSON.parse(get.body) as Array<Record<string, unknown>>;
+      expect(rows).toHaveLength(1);
+      expect(rows[0].metadata).toEqual({ offer_id: "o1" });
+    });
+
+    it("preserves existing created_at when present in body", () => {
+      install(state, {
+        scenarioId: "s1",
+        authedUser: { id: "u1", email: "u1@example.com" },
+        tables: {},
+        rpc: {},
+        allowWrites: true,
+        overrides: [{ behavior: "writes_become_rows", table: "x" }],
+      });
+      const post = handleStubRequest(state, {
+        method: "POST",
+        url: "/rest/v1/x",
+        headers: {},
+        body: JSON.stringify({ id: "fixed", created_at: "2026-01-01T00:00:00Z" }),
+      });
+      const inserted = JSON.parse(post.body) as Array<Record<string, unknown>>;
+      expect(inserted[0].id).toBe("fixed");
+      expect(inserted[0].created_at).toBe("2026-01-01T00:00:00Z");
     });
   });
 

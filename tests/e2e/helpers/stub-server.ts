@@ -74,6 +74,16 @@ export type StubOverride =
       everyNth: number;
       status: number;
       body: unknown;
+    }
+  | {
+      behavior: "writes_become_rows";
+      // Treat the named table as stateful: every non-GET write parses the
+      // request body as JSON and appends it to state.fixtures.tables[table]
+      // so subsequent GETs see the inserted rows. Adds a created_at = now()
+      // ISO if the body lacks one — needed for routes that filter on
+      // created_at. Used by ref-request-flood.spec.ts to bind the
+      // (contact_id, offer_id) cooldown invariant on outreach_queue.
+      table: string;
     };
 
 export interface StubFixtures {
@@ -219,26 +229,66 @@ function handleAdmin(state: StubState, req: StubRequest, path: string): StubResp
 
 function handleAuth(state: StubState, path: string): StubResponse {
   const user = state.fixtures.authedUser;
-  if (path === "/auth/v1/user" || path === "/auth/v1/session") {
+  if (path === "/auth/v1/user") {
     if (user) {
-      return json(200, { data: { user }, error: null });
+      // GoTrue's _userResponse expects the user object at the response
+      // ROOT (or nested under `.user`). Returning `{data:{user}}` causes
+      // the SDK to read user.id as undefined.
+      return json(200, {
+        id: user.id,
+        aud: "authenticated",
+        role: "authenticated",
+        email: user.email,
+        app_metadata: {},
+        user_metadata: {},
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+      });
     }
-    return json(401, { data: { user: null }, error: { message: "unauthorized" } });
+    return json(401, { code: 401, msg: "unauthorized" });
   }
-  if (path === "/auth/v1/token" || path.startsWith("/auth/v1/token")) {
+  if (path === "/auth/v1/session") {
     if (user) {
-      // Supabase v6 SDK refresh-token response shape: top-level access_token,
-      // refresh_token, user.
+      // Session shape: top-level access_token, refresh_token, user.
       return json(200, {
         access_token: "stub-access-token",
         refresh_token: "stub-refresh-token",
         token_type: "bearer",
         expires_in: 3600,
         expires_at: 9999999999,
-        user,
+        user: {
+          id: user.id,
+          aud: "authenticated",
+          role: "authenticated",
+          email: user.email,
+          app_metadata: {},
+          user_metadata: {},
+        },
       });
     }
-    return json(401, { error: "no_user" });
+    return json(401, { code: 401, msg: "no_session" });
+  }
+  if (path === "/auth/v1/token" || path.startsWith("/auth/v1/token")) {
+    if (user) {
+      // Supabase v6 SDK refresh-token response shape: top-level
+      // access_token, refresh_token, user.
+      return json(200, {
+        access_token: "stub-access-token",
+        refresh_token: "stub-refresh-token",
+        token_type: "bearer",
+        expires_in: 3600,
+        expires_at: 9999999999,
+        user: {
+          id: user.id,
+          aud: "authenticated",
+          role: "authenticated",
+          email: user.email,
+          app_metadata: {},
+          user_metadata: {},
+        },
+      });
+    }
+    return json(401, { code: 401, msg: "no_user" });
   }
   if (path === "/auth/v1/logout") {
     return json(204, {});
@@ -288,7 +338,14 @@ function handleRest(
     for (const override of state.overrides) {
       if (override.behavior === "table_filter_branch" && override.table === table) {
         const got = url.searchParams.get(override.filterParam) ?? "";
-        const rows = got === override.filterValue ? override.onMatch : override.onNoMatch;
+        const matches = got === override.filterValue;
+        if (process.env.STUB_DEBUG) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `[stub] table_filter_branch on ${table}: param=${override.filterParam} got="${got}" expected="${override.filterValue}" → ${matches ? "match" : "noMatch"}`,
+          );
+        }
+        const rows = matches ? override.onMatch : override.onNoMatch;
         return json(200, rows);
       }
     }
@@ -307,7 +364,51 @@ function handleRest(
   if (!state.fixtures.allowWrites) {
     return json(500, { error: `unexpected write to ${table}` });
   }
+
+  // writes_become_rows: parse body and append into the fixture so reads
+  // see the row.
+  for (const override of state.overrides) {
+    if (override.behavior === "writes_become_rows" && override.table === table) {
+      const parsed = parseWriteBody(req.body);
+      if (parsed) {
+        const row: Record<string, unknown> = { ...parsed };
+        if (row.created_at === undefined) {
+          row.created_at = new Date().toISOString();
+        }
+        if (row.id === undefined) {
+          row.id = `stub-${state.writes.length}`;
+        }
+        const existing = state.fixtures.tables[table] ?? [];
+        state.fixtures.tables[table] = [...existing, row];
+        // Supabase .insert().select().single() expects an array of rows back
+        // wrapped in the {data: ...} envelope at the SDK level. The PostgREST
+        // wire shape is just the array (with Prefer: return=representation).
+        return {
+          status: 201,
+          body: JSON.stringify([row]),
+          contentType: "application/json",
+        };
+      }
+    }
+  }
+
   return json(201, { ok: true });
+}
+
+function parseWriteBody(body: string | undefined): Record<string, unknown> | null {
+  if (!body) return null;
+  try {
+    const parsed = JSON.parse(body);
+    if (Array.isArray(parsed)) {
+      return parsed[0] ?? null;
+    }
+    if (typeof parsed === "object" && parsed !== null) {
+      return parsed as Record<string, unknown>;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 /**

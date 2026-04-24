@@ -14,8 +14,8 @@ started: 2026-04-24T20:03:28.482Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T20:25:45.807Z
-  expires: 2026-04-24T22:25:45.802Z
+  acquired: 2026-04-24T22:31:13.324Z
+  expires: 2026-04-25T00:31:13.318Z
 acceptance:
   criteria:
     - Playwright harness installed, configured, and running locally + in CI
@@ -119,7 +119,7 @@ tasks:
       known-flaky vs blocker). Any real regression → blocker, NOT a weakened
       assertion.
     status: in_progress
-    started: 2026-04-24T20:18:06.998Z
+    started: 2026-04-24T22:31:13.324Z
   R12.11:
     title: CI integration — GitHub Actions workflow runs hardening suite on PRs
       touching src/ + a scheduled weekly run. Reports HTML via artifact upload.
@@ -177,3 +177,4 @@ history:
   - 2026-04-24T20:25:40.128Z: blocker_opened B1
   - 2026-04-24T20:25:45.807Z: task_started R12.11
   - 2026-04-24T20:26:12.001Z: task_completed R12.11
+  - 2026-04-24T22:31:13.324Z: task_started R12.10

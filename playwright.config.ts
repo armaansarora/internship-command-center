@@ -3,11 +3,15 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: /.*\.spec\.ts$/,
-  timeout: 30_000,
+  timeout: 60_000,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  workers: process.env.CI ? 1 : undefined,
+  // R12.10 — single worker required: the stub Supabase server holds a
+  // single activeScenarioId at a time. Multiple workers running in
+  // parallel would race on installSupabaseMock and produce flaky cross-
+  // scenario pollution. CI already pins to 1; this also pins local runs.
+  workers: 1,
   reporter: process.env.CI
     ? [["html", { outputFolder: "playwright-report", open: "never" }], ["list"]]
     : [["list"]],

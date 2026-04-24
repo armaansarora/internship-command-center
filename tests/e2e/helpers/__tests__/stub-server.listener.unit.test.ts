@@ -51,7 +51,7 @@ describe("stub-server HTTP listener", () => {
 
     const u = await fetch(`${server.url}/auth/v1/user`);
     expect(u.status).toBe(200);
-    expect((await u.json()).data.user.id).toBe("u1");
+    expect((await u.json()).id).toBe("u1");
 
     const t = await fetch(`${server.url}/rest/v1/applications?select=*`);
     expect(await t.json()).toEqual([{ id: "a1" }]);
