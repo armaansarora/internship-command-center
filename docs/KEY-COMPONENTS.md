@@ -60,9 +60,9 @@
 - `src/components/floor-2/ObservatoryClient.test.tsx` (263 LOC) — R9.9 — ObservatoryClient composition tests.
 - `src/components/floor-1/DispatchGraph.test.tsx` (262 LOC) — Parse the SSR-rendered markup into a DOM document so we can query it with
 - `src/components/floor-7/rejection/RejectionReflectionStrip.tsx` (262 LOC) — R9.6 — Inline rejection-autopsy strip.
+- `src/components/parlor/simulator/NegotiationSimulator.tsx` (260 LOC) — R10.13 — NegotiationSimulator.
 - `src/components/settings/NetworkingConsent.tsx` (260 LOC)
 - `src/components/parlor/NegotiationDraftPanel.tsx` (255 LOC) — R10.9 — NegotiationDraftPanel.
-- `src/components/parlor/simulator/NegotiationSimulator.tsx` (252 LOC) — R10.13 — NegotiationSimulator.
 - `src/components/lobby/concierge/OtisDialoguePanel.tsx` (250 LOC) — OtisDialoguePanel — the Concierge's conversation surface.
 - `src/components/parlor/CEOVoicePlayButton.test.tsx` (249 LOC) — R10.11 — CEOVoicePlayButton behavioral tests.
 - `src/components/parlor/NegotiationDraftPanel.test.tsx` (249 LOC) — R10.9 — NegotiationDraftPanel render + reveal tests.

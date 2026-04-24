@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 import type {
   HistoryTurn,
@@ -55,6 +55,14 @@ export function NegotiationSimulator({ offer, endpoint }: Props): JSX.Element {
   const [pending, setPending] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+  }, [history]);
 
   const url = endpoint ?? `/api/offers/${offer.id}/simulate`;
 
@@ -190,7 +198,7 @@ export function NegotiationSimulator({ offer, endpoint }: Props): JSX.Element {
       )}
 
       {phase !== "stance" && (
-        <div className="parlor-simulator-dialog" role="log" aria-live="polite">
+        <div ref={dialogRef} className="parlor-simulator-dialog" role="log" aria-live="polite">
           {(() => {
             let userTurnCount = 0;
             return history.map((turn, i) => {
