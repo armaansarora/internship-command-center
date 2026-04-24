@@ -1,105 +1,108 @@
 phase: R12
 name: Post-R11 Hardening (HARSH E2E)
-status: not_started
+status: in_progress
 intent: Stand up a real browser-based E2E harness (Playwright) and run HARSH
-  scenarios against the full R0-R11 surface. Closes accumulated proof-test
-  debt that jsdom couldn't bind (R9 frame timing, R11 cross-user RLS runtime
-  proof, R11 rate-limit end-to-end) AND hardens the build against realistic
-  adversarial inputs (security bypasses, abuse patterns, concurrency races,
-  scale breakdowns, third-party failures). Must-ship is 20+ scenarios
-  across five categories — NOT a test-count target but a coverage target
-  against known drift surfaces. Accept when every scenario passes + all
-  R9/R11 carryover caveats are runtime-bound + full suite green.
-started: null
+  scenarios against the full R0-R11 surface. Closes accumulated proof-test debt
+  that jsdom couldn't bind (R9 frame timing, R11 cross-user RLS runtime proof,
+  R11 rate-limit end-to-end) AND hardens the build against realistic adversarial
+  inputs (security bypasses, abuse patterns, concurrency races, scale
+  breakdowns, third-party failures). Must-ship is 20+ scenarios across five
+  categories — NOT a test-count target but a coverage target against known drift
+  surfaces. Accept when every scenario passes + all R9/R11 carryover caveats are
+  runtime-bound + full suite green.
+started: 2026-04-24T20:03:28.482Z
 completed: null
-lock: null
+lock:
+  holder: sess-a5908e
+  acquired: 2026-04-24T20:03:28.482Z
+  expires: 2026-04-24T22:03:28.476Z
 acceptance:
   criteria:
-    - Playwright harness installed, configured, and running locally + in
-      CI (GitHub Actions workflow added). Test isolation via per-scenario
-      Supabase mock at the fetch layer (NOT against prod DB).
-    - Authenticated E2E flow works — test user can sign in, navigate the
-      tower, interact with real components. Session persistence covered.
-    - "Every HARSH scenario category has ≥5 scenarios shipped: security
-      bypass attempts, abuse patterns, concurrency races, scale
-      stress, third-party failure modes."
-    - R9 frame-timing caveat closed — Orrery performance measured at
-      100+ planets, FPS assertion, click-latency measured.
-    - R11 cross-user RLS runtime proof — two distinct authenticated
-      users, each with data; one user's query to match-candidates MUST
-      NOT surface the other user's anon-keys / row IDs / PII.
-    - R11 rate-limit end-to-end — 21 real sequential requests against
-      the live route trip the Postgres RPC and return typed 429.
-    - Any scenario that surfaces a real regression opens a blocker;
-      NOT silently weakened.
+    - Playwright harness installed, configured, and running locally + in CI
+      (GitHub Actions workflow added). Test isolation via per-scenario Supabase
+      mock at the fetch layer (NOT against prod DB).
+    - Authenticated E2E flow works — test user can sign in, navigate the tower,
+      interact with real components. Session persistence covered.
+    - "Every HARSH scenario category has ≥5 scenarios shipped: security bypass
+      attempts, abuse patterns, concurrency races, scale stress, third-party
+      failure modes."
+    - R9 frame-timing caveat closed — Orrery performance measured at 100+
+      planets, FPS assertion, click-latency measured.
+    - R11 cross-user RLS runtime proof — two distinct authenticated users, each
+      with data; one user's query to match-candidates MUST NOT surface the other
+      user's anon-keys / row IDs / PII.
+    - R11 rate-limit end-to-end — 21 real sequential requests against the live
+      route trip the Postgres RPC and return typed 429.
+    - Any scenario that surfaces a real regression opens a blocker; NOT silently
+      weakened.
   met: false
   verified_by_commit: null
 tasks:
   R12.1:
-    title: Playwright harness setup — install, config, tsconfig integration,
-      npm scripts, tests/e2e/ dir layout, fixture pattern, CI workflow at
+    title: Playwright harness setup — install, config, tsconfig integration, npm
+      scripts, tests/e2e/ dir layout, fixture pattern, CI workflow at
       .github/workflows/hardening-e2e.yml.
-    status: not_started
+    status: in_progress
+    started: 2026-04-24T20:03:28.482Z
   R12.2:
-    title: Auth + session harness — seeded test user creation pattern,
-      Supabase mock at fetch layer, session-persistence helpers, cleanup.
-      NO real prod DB writes; everything mocked or isolated.
+    title: Auth + session harness — seeded test user creation pattern, Supabase mock
+      at fetch layer, session-persistence helpers, cleanup. NO real prod DB
+      writes; everything mocked or isolated.
     status: not_started
   R12.3:
     title: Security scenarios (≥5) — JWT manipulation, RLS escape attempts,
-      consent-gate bypass (direct POST without consent flag), send-hold
-      bypass (hand-crafted request), R11 cross-user leak attempt (user A
-      tries to query user B's match data via crafted auth).
+      consent-gate bypass (direct POST without consent flag), send-hold bypass
+      (hand-crafted request), R11 cross-user leak attempt (user A tries to query
+      user B's match data via crafted auth).
     status: not_started
   R12.4:
-    title: Abuse scenarios (≥5) — application insert spam, outreach flood,
-      consent rapid-toggle (50 flips in 1 second), rate-limit abuse (fire
-      100 match-candidate requests), ref-request flood.
+    title: Abuse scenarios (≥5) — application insert spam, outreach flood, consent
+      rapid-toggle (50 flips in 1 second), rate-limit abuse (fire 100
+      match-candidate requests), ref-request flood.
     status: not_started
   R12.5:
     title: Concurrency scenarios (≥5) — parallel Stripe subscription race,
       offer-email ingest race (same email twice), three-chair convening
-      double-fire, R11 match-index rebuild race with delta trigger,
-      undo-bar concurrent dismiss.
+      double-fire, R11 match-index rebuild race with delta trigger, undo-bar
+      concurrent dismiss.
     status: not_started
   R12.6:
-    title: Scale scenarios (≥3) — 500+ applications load + render, 200+
-      contacts Rolodex virtualization hold, 100+ offers comp-band chart
-      + folder stack, 100+ planets Orrery (closes R9 frame-timing).
+    title: Scale scenarios (≥3) — 500+ applications load + render, 200+ contacts
+      Rolodex virtualization hold, 100+ offers comp-band chart + folder stack,
+      100+ planets Orrery (closes R9 frame-timing).
     status: not_started
   R12.7:
-    title: Failure mode scenarios (≥3) — Firecrawl API down (comp-band
-      lookup graceful-empty), OpenAI rate-limit hit (draft generation
-      degrades), Supabase intermittent (retry path exercised).
+    title: Failure mode scenarios (≥3) — Firecrawl API down (comp-band lookup
+      graceful-empty), OpenAI rate-limit hit (draft generation degrades),
+      Supabase intermittent (retry path exercised).
     status: not_started
   R12.8:
-    title: R11 runtime two-user RLS + rate-limit proofs — real browser
-      with 2 authenticated users, each with fixture data; user A's
-      match-candidates response bytewise scanned for user B's IDs; rate
-      limit fires typed 429 on 21st request; route-level fail-closed
-      (mock DB error) returns 500 not 200.
+    title: R11 runtime two-user RLS + rate-limit proofs — real browser with 2
+      authenticated users, each with fixture data; user A's match-candidates
+      response bytewise scanned for user B's IDs; rate limit fires typed 429 on
+      21st request; route-level fail-closed (mock DB error) returns 500 not 200.
     status: not_started
   R12.9:
-    title: R9 frame-timing closure — Orrery with 100+ planets mounted in
-      Playwright; PerformanceObserver captures FPS; assertion >= 30fps;
-      click-to-detail latency < 250ms; supernova animation duration
-      within ±10% of spec.
+    title: R9 frame-timing closure — Orrery with 100+ planets mounted in Playwright;
+      PerformanceObserver captures FPS; assertion >= 30fps; click-to-detail
+      latency < 250ms; supernova animation duration within ±10% of spec.
     status: not_started
   R12.10:
-    title: Regression sweep — run the full scenario suite against R0-R11
-      surface. Any flake/fail that isn't a new bug → triage (retry
-      stability fix vs mark known-flaky vs blocker). Any real regression
-      → blocker, NOT a weakened assertion.
+    title: Regression sweep — run the full scenario suite against R0-R11 surface.
+      Any flake/fail that isn't a new bug → triage (retry stability fix vs mark
+      known-flaky vs blocker). Any real regression → blocker, NOT a weakened
+      assertion.
     status: not_started
   R12.11:
-    title: "CI integration — GitHub Actions workflow runs hardening suite
-      on PRs touching src/ + a scheduled weekly run. Reports HTML via
-      artifact upload. Failure blocks merge on main."
+    title: CI integration — GitHub Actions workflow runs hardening suite on PRs
+      touching src/ + a scheduled weekly run. Reports HTML via artifact upload.
+      Failure blocks merge on main.
     status: not_started
   R12.12:
-    title: Accept + close — tower verify R12, tower accept R12
-      (gate-enforced), final handoff.
+    title: Accept + close — tower verify R12, tower accept R12 (gate-enforced),
+      final handoff.
     status: not_started
 blockers: []
 decisions: []
-history: []
+history:
+  - 2026-04-24T20:03:28.482Z: task_started R12.1
