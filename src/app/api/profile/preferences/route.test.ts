@@ -248,3 +248,70 @@ describe("POST /api/profile/preferences — merge semantics", () => {
     expect(updateSpy).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * R10.1 — Whitelist extensions. Three new keys join the registry: ceoVoice
+ * (CEO voice read-aloud opt-in), parlorDoorSeen (door-materialization latch),
+ * parlorCfoQuipShown (CFO entry-quip latch). The shape and failure modes are
+ * identical to the R9.6 key — known key + valid body → 200 with a patched
+ * preferences blob; known key + invalid body → 400 invalid_value; unknown
+ * key → 400 unknown_key.
+ */
+describe("POST /api/profile/preferences — R10 whitelist", () => {
+  it("accepts ceoVoice { enabled: true } and patches preferences", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    chainSelect({ data: { preferences: {} }, error: null });
+    chainUpdate({ error: null });
+
+    const res = await POST(
+      makeRequest({ key: "ceoVoice", value: { enabled: true } }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    const [payload] = updateSpy.mock.calls[0] as [Record<string, unknown>];
+    const next = payload.preferences as Record<string, unknown>;
+    expect(next.ceoVoice).toEqual({ enabled: true });
+  });
+
+  it("rejects ceoVoice { enabled: 'yes' } with 400 invalid_value", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+
+    const res = await POST(
+      makeRequest({ key: "ceoVoice", value: { enabled: "yes" } }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("invalid_value");
+    expect(fromSpy).not.toHaveBeenCalled();
+  });
+
+  it("accepts parlorDoorSeen { seen: true } and patches preferences", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    chainSelect({ data: { preferences: {} }, error: null });
+    chainUpdate({ error: null });
+
+    const res = await POST(
+      makeRequest({ key: "parlorDoorSeen", value: { seen: true } }),
+    );
+
+    expect(res.status).toBe(200);
+    const [payload] = updateSpy.mock.calls[0] as [Record<string, unknown>];
+    const next = payload.preferences as Record<string, unknown>;
+    expect(next.parlorDoorSeen).toEqual({ seen: true });
+  });
+
+  it("still rejects unknown keys with 400 unknown_key (regression)", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+
+    const res = await POST(
+      makeRequest({ key: "notAKey", value: {} }),
+    );
+
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("unknown_key");
+    expect(fromSpy).not.toHaveBeenCalled();
+  });
+});

@@ -1,5 +1,5 @@
 import {
-  pgTable, uuid, text, integer, boolean, timestamp,
+  pgTable, uuid, text, integer, boolean, timestamp, date,
   numeric, jsonb, index, pgPolicy, vector, unique,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -381,7 +381,14 @@ export const outreachQueue = pgTable("outreach_queue", {
   contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
   companyId: uuid("company_id").references(() => companies.id, { onDelete: "set null" }),
   type: text("type", {
-    enum: ["cold_email", "follow_up", "thank_you", "networking", "cover_letter_send"],
+    enum: [
+      "cold_email", "follow_up", "thank_you", "networking", "cover_letter_send",
+      // R10.1 — Negotiation Parlor queue rows. `negotiation` carries the
+      // drafted negotiation script with the same 24h send-hold R7 wires in
+      // via `sendAfter`; `reference_request` carries CNO-drafted reference
+      // asks sent from the Parlor's CNO chair.
+      "negotiation", "reference_request",
+    ],
   }),
   subject: text("subject"),
   body: text("body"),
@@ -739,6 +746,100 @@ export const rejectionReflections = pgTable("rejection_reflections", {
 ]);
 
 // ===========================================================================
+// 21. OFFERS (R10 — Negotiation Parlor ledger)
+// ===========================================================================
+// Per-user offer ledger. `applicationId` is nullable because offers can
+// arrive from companies the user never tracked (partner referrals, direct
+// recruiter pings). `status` mirrors the Parlor door-materialization gate
+// and the comp-chart pin stacking — the Parlor door itself is rendered
+// server-side only when there is at least one row with status != 'withdrawn'.
+// See migration 0020 for the CHECK constraint and updated_at trigger.
+export const offers = pgTable("offers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  applicationId: uuid("application_id").references(() => applications.id, { onDelete: "set null" }),
+  companyName: text("company_name").notNull(),
+  role: text("role").notNull(),
+  level: text("level"),
+  location: text("location").notNull(),
+  base: integer("base").notNull(),
+  bonus: integer("bonus").notNull().default(0),
+  equity: integer("equity").notNull().default(0),
+  signOn: integer("sign_on").notNull().default(0),
+  housing: integer("housing").notNull().default(0),
+  startDate: date("start_date"),
+  benefits: jsonb("benefits").notNull().default(sql`'{}'::jsonb`),
+  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+  deadlineAt: timestamp("deadline_at", { withTimezone: true }),
+  status: text("status", {
+    enum: ["received", "negotiating", "accepted", "declined", "expired", "withdrawn"],
+  }).notNull().default("received"),
+  ...timestamps,
+}, (table) => [
+  userIsolation("offers"),
+  index("idx_offers_user_received").on(table.userId, table.receivedAt.desc()),
+]);
+
+// ===========================================================================
+// 22. COMPANY COMP BANDS (R10 — Negotiation Parlor, global cache)
+// ===========================================================================
+// Shared across all authenticated users. Scraped from Levels.fyi via
+// Firecrawl with a 30-day TTL; `sampleSize` records the number of data
+// points that backed the percentiles. RLS grants read-only access to
+// authenticated users; writes are service-role only. The lookup tuple is
+// (companyNameNormalized, role, location, level); percentile columns are
+// nullable because a cache row can exist without data (e.g. empty-result
+// scrape cached to avoid re-hitting Firecrawl for 30 days).
+export const companyCompBands = pgTable("company_comp_bands", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  companyNameNormalized: text("company_name_normalized").notNull(),
+  role: text("role").notNull(),
+  location: text("location").notNull(),
+  level: text("level").notNull().default(""),
+  baseP25: integer("base_p25"),
+  baseP50: integer("base_p50"),
+  baseP75: integer("base_p75"),
+  bonusP25: integer("bonus_p25"),
+  bonusP50: integer("bonus_p50"),
+  bonusP75: integer("bonus_p75"),
+  equityP25: integer("equity_p25"),
+  equityP50: integer("equity_p50"),
+  equityP75: integer("equity_p75"),
+  sampleSize: integer("sample_size").notNull().default(0),
+  source: text("source").notNull().default("levels.fyi"),
+  scrapedAt: timestamp("scraped_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true })
+    .notNull()
+    .default(sql`(now() + interval '30 days')`),
+}, (table) => [
+  unique("comp_bands_unique").on(
+    table.companyNameNormalized,
+    table.role,
+    table.location,
+    table.level,
+  ),
+  index("idx_comp_bands_lookup").on(
+    table.companyNameNormalized,
+    table.role,
+    table.location,
+  ),
+]);
+
+// ===========================================================================
+// 23. COMP BANDS BUDGET (R10 — monthly scrape-credit counter)
+// ===========================================================================
+// Firecrawl free tier is 500 credits/month. This table tracks how many
+// we've spent in the current month keyed by `monthKey` (e.g. "2026-04")
+// so the scraper can gate itself below the ceiling. No user access —
+// RLS is enabled with no policies, which means authenticated clients
+// cannot read or write. Service role only.
+export const compBandsBudget = pgTable("comp_bands_budget", {
+  monthKey: text("month_key").primaryKey(),
+  scrapeCount: integer("scrape_count").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ===========================================================================
 // TYPE EXPORTS
 // ===========================================================================
 export type UserProfile = typeof userProfiles.$inferSelect;
@@ -785,3 +886,10 @@ export type BaseResume = typeof baseResumes.$inferSelect;
 export type NewBaseResume = typeof baseResumes.$inferInsert;
 export type RejectionReflection = typeof rejectionReflections.$inferSelect;
 export type NewRejectionReflection = typeof rejectionReflections.$inferInsert;
+// R10 — Negotiation Parlor
+export type Offer = typeof offers.$inferSelect;
+export type NewOffer = typeof offers.$inferInsert;
+export type CompBands = typeof companyCompBands.$inferSelect;
+export type NewCompBands = typeof companyCompBands.$inferInsert;
+export type CompBandsBudget = typeof compBandsBudget.$inferSelect;
+export type NewCompBandsBudget = typeof compBandsBudget.$inferInsert;

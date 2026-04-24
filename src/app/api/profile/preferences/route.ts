@@ -6,6 +6,18 @@ import {
   REJECTION_REFLECTIONS_PREF_KEY,
   RejectionReflectionsPrefSchema,
 } from "@/lib/preferences/rejection-reflections-pref";
+import {
+  CEO_VOICE_PREF_KEY,
+  CeoVoicePrefSchema,
+} from "@/lib/preferences/ceo-voice-pref";
+import {
+  PARLOR_DOOR_SEEN_PREF_KEY,
+  ParlorDoorSeenPrefSchema,
+} from "@/lib/preferences/parlor-door-seen-pref";
+import {
+  PARLOR_CFO_QUIP_PREF_KEY,
+  ParlorCfoQuipPrefSchema,
+} from "@/lib/preferences/parlor-cfo-quip-pref";
 
 /**
  * POST /api/profile/preferences
@@ -22,12 +34,18 @@ import {
  * last writer wins, which is fine for user-driven preference toggles that
  * are rarely concurrent.
  *
- * Whitelisted keys (R9.6):
- *   - "rejectionReflections" → { enabled: boolean }
+ * Whitelisted keys:
+ *   - "rejectionReflections" → { enabled: boolean }   (R9.6)
+ *   - "ceoVoice"             → { enabled: boolean }   (R10.1)
+ *   - "parlorDoorSeen"       → { seen: boolean }      (R10.1)
+ *   - "parlorCfoQuipShown"   → { shown: boolean }     (R10.1)
  */
 
 const PREF_VALUE_SCHEMAS: Record<string, z.ZodTypeAny> = {
   [REJECTION_REFLECTIONS_PREF_KEY]: RejectionReflectionsPrefSchema,
+  [CEO_VOICE_PREF_KEY]: CeoVoicePrefSchema,
+  [PARLOR_DOOR_SEEN_PREF_KEY]: ParlorDoorSeenPrefSchema,
+  [PARLOR_CFO_QUIP_PREF_KEY]: ParlorCfoQuipPrefSchema,
 };
 
 const BodySchema = z.object({
