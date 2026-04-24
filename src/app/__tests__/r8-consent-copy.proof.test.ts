@@ -28,6 +28,8 @@ const CANARIES: RegExp[] = [
   /Your contacts, your messages, your cover letters, your interview notes, your private sticky-notes/,
   /Revoking is instant/,
   /Anyone else['`’]s data with you unless they['`’]ve also opted in/,
+  /Match queries are rate-limited to 20 per hour/,
+  /Every match surfaced to you is logged/,
 ];
 
 describe("R8 P9 — consent copy drift guard", () => {

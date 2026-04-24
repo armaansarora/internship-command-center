@@ -4,6 +4,10 @@ import { useCallback, useState, type JSX } from "react";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
 import { NetworkingConsent } from "@/components/settings/NetworkingConsent";
+import {
+  NetworkingAudit,
+  type MatchEvent,
+} from "@/components/settings/NetworkingAudit";
 
 interface SettingsClientProps {
   userName: string | null;
@@ -34,6 +38,14 @@ interface SettingsClientProps {
    * Layer 1 of the three-layer voice gate.
    */
   ceoVoiceEnabled?: boolean;
+  /**
+   * R11.9 — last 20 `match_events` rows for this user (already transformed
+   * into the camelCase shape consumed by `NetworkingAudit`). Empty array
+   * when the user has never been surfaced a warm-intro candidate. The
+   * parent page component performs the REST fetch so this client stays
+   * presentational.
+   */
+  matchEvents?: MatchEvent[];
 }
 
 /**
@@ -95,6 +107,7 @@ export function SettingsClient({
   networkingRevokedAt = null,
   rejectionReflectionsEnabled = true,
   ceoVoiceEnabled = false,
+  matchEvents = [],
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
@@ -708,6 +721,7 @@ export function SettingsClient({
             await fetch("/api/networking/revoke", { method: "POST" });
           }}
         />
+        <NetworkingAudit events={matchEvents} />
       </section>
 
       {/* ── Section 3.5: Analytics (R9.6 — rejection reflections) ── */}

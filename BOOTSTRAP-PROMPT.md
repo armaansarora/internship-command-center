@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:18 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 1:23 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `d895271`)
+- **Branch:** `main` (commit `d6d41a7`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 119,514 across 689 source files
+- **Total LOC:** 119,787 across 691 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-d895271 [R11/11.7] feat(r11): 20/hour rate limit with atomic RPC + fail-closed
+d6d41a7 [R11/11.8] feat(r11): unblock match-candidates with real flow + audit + rate limit
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `d895271`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `d6d41a7`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (689 files, 119,514 LOC)
+## Source Tree (691 files, 119,787 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -113,7 +113,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world` | 3308 |
 | `src/components/parlor` | 3282 |
 | `src/components/floor-1` | 2725 |
-| `src/app/__tests__` | 2422 |
+| `src/app/__tests__` | 2424 |
 | `src/components/floor-7/war-table` | 1988 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
@@ -121,7 +121,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/ai/structured` | 1650 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
-| `src/app/(authenticated)/settings` | 1419 |
+| `src/app/(authenticated)/settings` | 1450 |
 | `src/lib/situation` | 1398 |
 | `src/app/lobby` | 1294 |
 | `src/lib/gmail` | 1253 |
@@ -195,6 +195,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/lib/actions` | 396 |
 | `src/app/(authenticated)/parlor` | 390 |
+| `src/components/settings` | 374 |
 | `src/components/floor-5/resume-press` | 372 |
 | `src/app/api/offers/[id]/negotiation-draft` | 370 |
 | `src/app/api/offers/[id]/simulate/__tests__` | 367 |
@@ -224,7 +225,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents` | 269 |
 | `src/components/floor-6/side-switch` | 268 |
 | `src/components/penthouse/rest` | 268 |
-| `src/components/settings` | 260 |
 | `src/app/api/offers/[id]/convene` | 258 |
 | `src/components/floor-4/rings` | 256 |
 | `src/app/api/rejection-reflections` | 232 |
@@ -278,6 +278,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/transitions` | 132 |
 | `src/app/api/writing-room/approve` | 129 |
 | `src/lib/ai/agents/__tests__` | 129 |
+| `src/components/settings/__tests__` | 126 |
 | `src/app/api/cron/warmth-decay` | 115 |
 | `src/app/api/briefing/binder/[id]` | 114 |
 | `src/app/api/documents/[id]/pdf` | 111 |
@@ -708,7 +709,9 @@ src/components/penthouse/scenes/morning/MorningBriefingScene.tsx
 src/components/penthouse/scenes/morning/SkipHint.tsx
 src/components/penthouse/scenes/morning/useBriefingControls.ts
 src/components/pricing/PricingCards.tsx
+src/components/settings/NetworkingAudit.tsx
 src/components/settings/NetworkingConsent.tsx
+src/components/settings/__tests__/NetworkingAudit.test.tsx
 src/components/transitions/EntranceSequence.tsx
 src/components/ui/SoundToggle.tsx
 src/components/ui/UserMenu.tsx
@@ -1099,13 +1102,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1146 | 12,953 |
+| `BOOTSTRAP-PROMPT.md` | 1148 | 12,986 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2130** | **31,594** |
+| **Total** | **2132** | **31,627** |
 
-> ⚠️ Reading all recommended files consumes ~31,594 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,627 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

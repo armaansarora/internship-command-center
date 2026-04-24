@@ -38,6 +38,15 @@ You can revoke at any time. Revoking is instant. Within 60 seconds, your
 name and applications are removed from the match index. Past intros
 already accepted remain.
 
+## Rate limit note
+
+Match queries are rate-limited to 20 per hour to prevent scraping.
+
+## Audit log note
+
+Every match surfaced to you is logged in Settings → Networking under
+"How your data is used".
+
 ## Checkbox label
 
 I have read the above and opt in to the Warm Intro Network.

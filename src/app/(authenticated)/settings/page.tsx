@@ -22,7 +22,7 @@ export const metadata: Metadata = { title: "Settings" };
 export default async function SettingsPage() {
   const user = await requireUser();
 
-  const [subscriptionTier, appsCountResult, profileData] = await Promise.all([
+  const [subscriptionTier, appsCountResult, profileData, matchEventsData] = await Promise.all([
     getSubscriptionTier(user.id),
     (async () => {
       const supabase = await createClient();
@@ -50,6 +50,22 @@ export default async function SettingsPage() {
         preferences: (data?.preferences as unknown) ?? null,
       };
     })(),
+    (async () => {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("match_events")
+        .select("id, company_context, fired_at, edge_strength, match_reason")
+        .eq("user_id", user.id)
+        .order("fired_at", { ascending: false })
+        .limit(20);
+      return (data ?? []).map((r) => ({
+        id: r.id as string,
+        companyContext: r.company_context as string,
+        firedAt: r.fired_at as string,
+        edgeStrength: r.edge_strength as string,
+        matchReason: r.match_reason as string,
+      }));
+    })(),
   ]);
 
   const rejectionReflectionsPref = readRejectionReflectionsPref(
@@ -71,6 +87,7 @@ export default async function SettingsPage() {
         networkingRevokedAt={profileData.networkingRevokedAt}
         rejectionReflectionsEnabled={rejectionReflectionsPref.enabled}
         ceoVoiceEnabled={ceoVoicePref.enabled}
+        matchEvents={matchEventsData}
       />
     </FloorShell>
   );

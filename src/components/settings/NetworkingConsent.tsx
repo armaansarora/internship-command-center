@@ -43,6 +43,11 @@ const COPY = {
     "You can revoke at any time. Revoking is instant. Within 60 seconds, " +
     "your name and applications are removed from the match index. Past " +
     "intros already accepted remain.",
+  rateLimitNote:
+    "Match queries are rate-limited to 20 per hour to prevent scraping.",
+  auditNote:
+    "Every match surfaced to you is logged in Settings → Networking under " +
+    "“How your data is used”.",
   checkboxLabel:
     "I have read the above and opt in to the Warm Intro Network.",
   optInButton: "Opt In",
@@ -141,6 +146,28 @@ export function NetworkingConsent({
         }}
       >
         <strong>{COPY.revokeNote}</strong>
+      </p>
+
+      <p
+        style={{
+          fontSize: 12,
+          lineHeight: 1.55,
+          marginTop: 10,
+          color: "#C4925A",
+        }}
+      >
+        {COPY.rateLimitNote}
+      </p>
+
+      <p
+        style={{
+          fontSize: 12,
+          lineHeight: 1.55,
+          marginTop: 6,
+          color: "#C4925A",
+        }}
+      >
+        {COPY.auditNote}
       </p>
 
       {isActive ? (
