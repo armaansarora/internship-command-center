@@ -30,7 +30,12 @@ export async function draftReferenceRequest(input: {
   contact: ContactForAgent;
   offer: OfferRow;
 }): Promise<ReferenceRequestDraft> {
-  const contactJson = JSON.stringify(input.contact, null, 2);
+  // R8/P5 — strip privateNote before serializing. privateNote is an
+  // owner-only sticky-note; sending it to the LLM would violate the P5
+  // grep invariant (see src/lib/db/queries/contacts-rest.ts:60-64). The
+  // allowlist does NOT include this file.
+  const { privateNote: _privateNote, ...safeContact } = input.contact;
+  const contactJson = JSON.stringify(safeContact, null, 2);
   const offerJson = JSON.stringify(input.offer, null, 2);
 
   const { object } = await generateObject({

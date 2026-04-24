@@ -113,4 +113,28 @@ describe("R10.14 draftReferenceRequest", () => {
     expect(call.system.toLowerCase()).toContain("i hope this email finds you well");
     expect(call.system).toMatch(/180 words/);
   });
+
+  it("R8/P5 — privateNote is NEVER included in the prompt sent to the LLM", async () => {
+    const { generateObject } = await import("ai");
+    const mock = vi.mocked(generateObject);
+    mock.mockClear();
+
+    await draftReferenceRequest({
+      userFirstName: "Armaan",
+      contact: makeContact({
+        privateNote: "SECRET: Sarah hates Globex's CEO",
+      }),
+      offer: makeOffer(),
+    });
+
+    const call = mock.mock.calls[0]![0] as unknown as {
+      prompt: string;
+      system: string;
+    };
+    expect(call.prompt).not.toContain("SECRET");
+    expect(call.prompt).not.toContain("hates Globex");
+    expect(call.prompt).not.toContain("privateNote");
+    expect(call.system).not.toContain("SECRET");
+    expect(call.system).not.toContain("privateNote");
+  });
 });

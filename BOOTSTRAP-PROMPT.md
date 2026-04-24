@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:31 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:36 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `eb8f5e6`)
+- **Branch:** `main` (commit `be85108`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 115,299 across 666 source files
+- **Total LOC:** 115,328 across 666 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-eb8f5e6 [R10/10.14] feat(parlor): draftReferenceRequest generateObject helper
+be85108 [R10/10.14] refactor(api): outreach-approve clamp is now type→seconds map
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `eb8f5e6`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `be85108`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (666 files, 115,299 LOC)
+## Source Tree (666 files, 115,328 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -117,8 +117,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
+| `src/lib/ai/structured` | 1650 |
 | `src/hooks` | 1647 |
-| `src/lib/ai/structured` | 1645 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/app/(authenticated)/settings` | 1419 |
 | `src/app/lobby` | 1294 |
@@ -147,11 +147,11 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-4/undo-bar` | 885 |
 | `src/components/floor-2` | 878 |
 | `src/lib/pdf` | 865 |
+| `src/lib/ai/structured/__tests__` | 855 |
 | `src/lib/agents/cfo` | 846 |
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
 | `src/components/lobby/cinematic` | 832 |
-| `src/lib/ai/structured/__tests__` | 831 |
 | `src/lib/agents/cio` | 817 |
 | `src/lib/penthouse` | 796 |
 | `src/app/api/cron/draft-follow-ups` | 792 |
