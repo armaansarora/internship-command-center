@@ -1,9 +1,9 @@
-paused: false
+paused: true
 scope: R12-only
 started: "2026-04-24T19:50:00Z"
 started_by: sess-a5908e
-ended: "2026-04-24T20:30:00Z"
-ended_reason: "R12.10 B1 open blocker (mock-topology); all tasks structurally shipped (12/12 commits), 6/36 scenarios pass runtime. tower accept R12 will refuse while B1 open. Partner choice: (a) MSW-node at Next fetch, (b) port-redirect stub Supabase server, (c) Supabase branch via MCP."
+ended: "2026-04-25T00:00:00Z"
+ended_reason: "Session 2 closed B1 (mock topology). 41/45 scenarios green (vs 6/45 session 1). The 2 remaining failures (contacts-rolodex-200 × 2 sub-tests) are a NEW real regression — the Rolodex 3D cylinder is not wired into RolodexLoungeClient (uses ContactGrid). Filed as B2. Per partner brief, src/ feature work is out of autopilot scope this session. tower accept R12 refuses while B2 open. Partner: mount Rolodex.tsx in src/components/floor-6/RolodexLoungeClient.tsx, then resolve B2 and tower accept R12."
 max_blockers: 3
 previous_phase: R11
 previous_outcome: "R11 complete — 12/12 tasks, acceptance.met (verified_by_commit: 6b9be81). All 10 Intent behaviors shipped, consent copy passes 7/7 lawyer-read, consent version bumped 1→2. Partner Red Team closed 2 BLOCKs inline (audit-log atomic, revoke cascade into match_candidate_index) + 1 FLAG documented (anon-key not user-scoped, intentional trade-off). 1635 tests green."

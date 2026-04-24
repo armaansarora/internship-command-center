@@ -152,6 +152,18 @@ blockers:
       landed; 6/36 pass + cover intended invariants. Remaining 30 require
       mock-topology fix OR real-DB branch OR direct src regressions per
       finding."
+    resolved: 2026-04-24T23:38:13.676Z
+  - id: B2
+    task: R12.10
+    opened: 2026-04-24T23:38:22.018Z
+    text: Rolodex cylinder not wired into RolodexLoungeClient — uses ContactGrid
+      instead. tests/e2e/scale/contacts-rolodex-200.spec.ts asserts
+      `.rolodex-cylinder` mounts at /rolodex-lounge with 200 contacts; element
+      is absent. Real regression NOT in the 3 partner closed at 98d3c47. Fix
+      requires src/components/floor-6/RolodexLoungeClient.tsx to mount
+      Rolodex.tsx at scale instead of (or alongside) ContactGrid. Out of
+      autopilot scope per partner constraint 'no src/ feature work this
+      session'.
     resolved: null
 decisions: []
 history:
@@ -178,3 +190,5 @@ history:
   - 2026-04-24T20:25:45.807Z: task_started R12.11
   - 2026-04-24T20:26:12.001Z: task_completed R12.11
   - 2026-04-24T22:31:13.324Z: task_started R12.10
+  - 2026-04-24T23:38:13.676Z: blocker_resolved B1
+  - 2026-04-24T23:38:22.018Z: blocker_opened B2
