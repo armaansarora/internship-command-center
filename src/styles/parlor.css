@@ -876,3 +876,263 @@
     animation: none !important;
   }
 }
+
+/* ------------------------------------------------------------------
+ * R10.13 — Negotiation simulator.
+ *
+ * Sits in the parlor-draft-area (right-rail) below the NegotiationDraftPanel.
+ * Same parchment-on-oak palette as the chairs + draft; the dialog reads as
+ * another card at the table, not a separate surface.
+ * ------------------------------------------------------------------ */
+
+.parlor-simulator {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 18px 18px 20px;
+  color: #2a1a0b;
+  background: linear-gradient(180deg, #e8d9b7 0%, #d3bf94 100%);
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  border-radius: 6px;
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.parlor-simulator-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.parlor-simulator-header h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a0f06;
+}
+
+.parlor-simulator-tag {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #7a5a12;
+}
+
+.parlor-simulator-stance-copy {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  opacity: 0.84;
+}
+
+.parlor-simulator-stance-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.parlor-simulator-stance-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #7a5a12;
+}
+
+.parlor-simulator-stance-fields input {
+  padding: 6px 8px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: #1a0f06;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(120, 90, 42, 0.4);
+  border-radius: 3px;
+}
+
+.parlor-simulator-start,
+.parlor-simulator-reset {
+  padding: 10px 18px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #1a0f06;
+  background: linear-gradient(180deg, #e8c96a 0%, #c9a84c 100%);
+  border: 1px solid rgba(120, 90, 42, 0.6);
+  border-radius: 4px;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.parlor-simulator-start:hover,
+.parlor-simulator-reset:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.parlor-simulator-start:focus-visible,
+.parlor-simulator-reset:focus-visible {
+  outline: 2px solid rgba(232, 201, 106, 0.9);
+  outline-offset: 3px;
+}
+
+.parlor-simulator-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.parlor-simulator-turn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+}
+
+.parlor-simulator-turn-recruiter { background: rgba(255, 255, 255, 0.45); }
+.parlor-simulator-turn-user { background: rgba(201, 168, 76, 0.12); }
+
+.parlor-simulator-turn-role {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: #7a5a12;
+}
+
+.parlor-simulator-turn-text {
+  margin: 0;
+  font-size: 13px;
+  color: #2a1a0b;
+  white-space: pre-wrap;
+}
+
+.parlor-simulator-loading,
+.parlor-simulator-error {
+  margin: 0;
+  padding: 6px 0;
+  font-size: 12px;
+}
+.parlor-simulator-error { color: #6a2a1e; }
+
+.parlor-simulator-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.parlor-simulator-compose textarea {
+  padding: 8px 10px;
+  font-family: "Satoshi", system-ui, sans-serif;
+  font-size: 13px;
+  color: #1a0f06;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(120, 90, 42, 0.4);
+  border-radius: 3px;
+  resize: vertical;
+}
+
+.parlor-simulator-compose button {
+  align-self: flex-end;
+  padding: 6px 14px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a0f06;
+  background: linear-gradient(180deg, #e8c96a 0%, #c9a84c 100%);
+  border: 1px solid rgba(120, 90, 42, 0.6);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.parlor-simulator-compose button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.parlor-simulator-done {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.parlor-simulator-done-copy {
+  margin: 0;
+  font-size: 13px;
+  color: #2a1a0b;
+}
+
+/* Score badge dots. */
+.parlor-sim-score {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 3px;
+}
+
+.parlor-sim-score-axes {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.parlor-sim-score-axis {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.parlor-sim-score-axis-label {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #7a5a12;
+}
+
+.parlor-sim-score-dots {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.parlor-sim-score-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(120, 90, 42, 0.22);
+}
+
+.parlor-sim-score-dot[data-filled="true"] {
+  background: #c9a84c;
+  box-shadow: 0 0 3px rgba(232, 201, 106, 0.6);
+}
+
+.parlor-sim-score-critique {
+  margin: 0;
+  font-size: 11px;
+  font-style: italic;
+  color: #3a2714;
+  opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parlor-simulator-start,
+  .parlor-simulator-reset,
+  .parlor-simulator-compose button {
+    transition: none !important;
+  }
+}
