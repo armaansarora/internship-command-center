@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:31 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 8:40 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `0ff7c27`)
+- **Branch:** `main` (commit `f0daf53`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 99,744 across 569 source files
+- **Total LOC:** 100,539 across 573 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-0ff7c27 [R9/9.2] feat(orrery): CSS 3D render primitive (sole CSS-3D file)
+f0daf53 [R9/9.3] feat(orrery): click-to-history camera dolly + detail panel
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `0ff7c27`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `f0daf53`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (569 files, 99,744 LOC)
+## Source Tree (573 files, 100,539 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -111,13 +111,13 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/world` | 3512 |
 | `src/components/floor-1` | 2660 |
 | `src/styles` | 2638 |
+| `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/components/floor-7/war-table` | 1760 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/app/__tests__` | 1525 |
-| `src/components/floor-2/orrery` | 1469 |
 | `src/lib/ai/structured` | 1425 |
 | `src/app/lobby` | 1294 |
 | `src/lib/gmail` | 1253 |
@@ -137,6 +137,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/jobs` | 991 |
 | `src/components/floor-4/coo-character` | 989 |
 | `src/components/floor-6` | 988 |
+| `src/lib/orrery` | 979 |
 | `src/db` | 975 |
 | `src/components/floor-5/crud` | 949 |
 | `src/lib/jobs/sources` | 931 |
@@ -158,7 +159,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/sound` | 641 |
 | `src/components/lobby/concierge` | 637 |
 | `src/components/floor-4/situation-map` | 634 |
-| `src/lib/orrery` | 630 |
 | `src/app/(authenticated)/penthouse` | 627 |
 | `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
@@ -462,6 +462,8 @@ src/components/floor-2/orrery/Orrery.test.tsx
 src/components/floor-2/orrery/Orrery.tsx
 src/components/floor-2/orrery/OrreryRender.test.tsx
 src/components/floor-2/orrery/OrreryRender.tsx
+src/components/floor-2/orrery/PatternModeToggle.test.tsx
+src/components/floor-2/orrery/PatternModeToggle.tsx
 src/components/floor-2/orrery/PlanetDetailPanel.tsx
 src/components/floor-2/orrery/orrery.css
 src/components/floor-3/BriefingRoomClient.tsx
@@ -813,6 +815,8 @@ src/lib/onboarding/bootstrap.ts
 src/lib/orrery/applications-to-planets.test.ts
 src/lib/orrery/applications-to-planets.ts
 src/lib/orrery/types.ts
+src/lib/orrery/use-orrery-mode.test.ts
+src/lib/orrery/use-orrery-mode.ts
 src/lib/pdf/cover-letter-pdf.tsx
 src/lib/pdf/resume-pdf.tsx
 src/lib/penthouse/briefing-fallback.test.ts
@@ -943,13 +947,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 989 | 10,936 |
+| `BOOTSTRAP-PROMPT.md` | 992 | 10,976 |
 | `PROJECT-CONTEXT.md` | 282 | 5,274 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 501 | 11,094 |
-| **Total** | **2139** | **34,476** |
+| `CLAUDE.md` | 503 | 11,163 |
+| **Total** | **2144** | **34,585** |
 
-> ⚠️ Reading all recommended files consumes ~34,476 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~34,585 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

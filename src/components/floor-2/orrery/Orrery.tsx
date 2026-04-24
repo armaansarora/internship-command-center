@@ -1,29 +1,36 @@
 "use client";
 
 import type { CSSProperties, JSX } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import type { OrreryPlanet, PatternMode } from "@/lib/orrery/types";
+import { applicationsToPlanets } from "@/lib/orrery/applications-to-planets";
+import type { ApplicationInput, PatternMode } from "@/lib/orrery/types";
+import { useOrreryMode } from "@/lib/orrery/use-orrery-mode";
 import { OrreryRender } from "./OrreryRender";
+import { PatternModeToggle } from "./PatternModeToggle";
 import { PlanetDetailPanel } from "./PlanetDetailPanel";
 
 /**
- * R9.3 — Orrery (consumer wrapper).
+ * R9.3 + R9.4 — Orrery (consumer wrapper).
  *
- * Holds the focus state, wires OrreryRender's planet click to a slide-up
- * PlanetDetailPanel, and dismisses on ESC, click-on-backdrop, or close-button.
- * The render layer (OrreryRender) handles the camera dolly when focusPlanetId
- * is set; this wrapper owns the data binding only.
+ * Owns the focus state for click-to-history, owns the active layout mode
+ * (via useOrreryMode → localStorage), and re-derives the planet array on
+ * every mode change. The morph between modes is CSS-transition-driven on
+ * `.orrery-planet` (orrery.css) — no second GSAP timeline.
  *
  * Layout: a `position: relative` container so the absolutely-positioned
  * PlanetDetailPanel and backdrop can pin to the orrery scene rather than the
- * viewport. The backdrop is a transparent dismiss surface layered between
- * the orrery (z=1) and the panel (z=3); the backdrop is z=2.
+ * viewport. The PatternModeToggle sits in the upper-right of the container
+ * so users can flip layouts without leaving the orrery's eyeline.
+ *
+ * Backwards compatibility: callers pass `apps: ApplicationInput[]`, the raw
+ * pipeline data. The transformer runs inside this component so a mode change
+ * triggers the re-derivation that drives the morph.
  */
 
 interface Props {
-  planets: OrreryPlanet[];
-  mode: PatternMode;
+  apps: ApplicationInput[];
+  initialMode?: PatternMode;
 }
 
 const containerStyle: CSSProperties = {
@@ -31,6 +38,13 @@ const containerStyle: CSSProperties = {
   width: "100%",
   aspectRatio: "1 / 1",
   maxHeight: "70vh",
+};
+
+const toggleAnchorStyle: CSSProperties = {
+  position: "absolute",
+  top: "12px",
+  right: "12px",
+  zIndex: 4,
 };
 
 const backdropStyle: CSSProperties = {
@@ -43,9 +57,12 @@ const backdropStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-export function Orrery({ planets, mode }: Props): JSX.Element {
+export function Orrery({ apps, initialMode = "stage" }: Props): JSX.Element {
+  const [mode, setMode] = useOrreryMode(initialMode);
   const [focusId, setFocusId] = useState<string | null>(null);
   const reduced = useReducedMotion();
+
+  const planets = useMemo(() => applicationsToPlanets(apps, mode), [apps, mode]);
 
   const focusPlanet = planets.find((p) => p.id === focusId) ?? null;
 
@@ -81,6 +98,9 @@ export function Orrery({ planets, mode }: Props): JSX.Element {
         reducedMotion={reduced}
         onPlanetClick={handlePlanetClick}
       />
+      <div style={toggleAnchorStyle}>
+        <PatternModeToggle mode={mode} onChange={setMode} />
+      </div>
       {focusPlanet ? (
         <>
           <div

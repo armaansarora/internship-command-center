@@ -12,8 +12,8 @@ started: 2026-04-23T20:35:00.000Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T00:27:13.563Z
-  expires: 2026-04-24T02:27:13.559Z
+  acquired: 2026-04-24T00:32:22.296Z
+  expires: 2026-04-24T02:32:22.291Z
 acceptance:
   criteria:
     - Orrery renders 100+ applications at 60fps on baseline laptop.
@@ -39,15 +39,15 @@ tasks:
   R9.3:
     title: Click-to-history camera dolly + PlanetDetailPanel (consumer wrapper, ESC
       dismiss, reduced-motion fallback)
-    status: in_progress
+    status: complete
     started: 2026-04-24T00:27:13.563Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T00:31:51.113Z
+    commit: f0daf53
   R9.4:
     title: Pattern overlay modes (stage/tier/velocity) + smooth GSAP morph,
       localStorage persistence
-    status: not_started
-    started: null
+    status: in_progress
+    started: 2026-04-24T00:32:22.296Z
     completed: null
     commit: null
   R9.5:
@@ -129,3 +129,5 @@ history:
   - 2026-04-24T00:23:46.017Z: task_started R9.2
   - 2026-04-24T00:26:47.492Z: task_completed R9.2
   - 2026-04-24T00:27:13.563Z: task_started R9.3
+  - 2026-04-24T00:31:51.113Z: task_completed R9.3
+  - 2026-04-24T00:32:22.296Z: task_started R9.4

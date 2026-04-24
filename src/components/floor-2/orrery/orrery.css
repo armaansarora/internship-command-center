@@ -74,8 +74,14 @@
 /* ── Planet ──────────────────────────────────────────────────────────────
    Each planet is a <button> for keyboard a11y. NO `will-change` on planets
    — only the orbit ring. Opacity transitions cover the rejected/withdrawn
-   fade-out. Inline styles set background (color token), width/height
-   (sizePx), and the polar-to-cartesian transform. */
+   fade-out. R9.4 extends the transition list with transform/background/
+   width/height so a mode flip (stage → tier → velocity) morphs smoothly
+   through the planet's new polar coords + color token + size. The morph
+   is CSS-driven (not GSAP) so the perf invariant — exactly one
+   `gsap.timeline()` in OrreryRender — survives R9.4. Inline styles set
+   background (color token), width/height (sizePx), and the polar-to-
+   cartesian transform; React updates them on mode change and the browser
+   tweens. */
 .orrery-planet {
   position: absolute;
   top: 0;
@@ -86,7 +92,12 @@
   cursor: pointer;
   pointer-events: auto;
   contain: layout paint;
-  transition: opacity 1.5s ease-out;
+  transition:
+    opacity 1.5s ease-out,
+    transform 800ms cubic-bezier(0.4, 0, 0.2, 1),
+    background 800ms ease-out,
+    width 800ms ease-out,
+    height 800ms ease-out;
   box-shadow: 0 0 8px var(--orrery-glow, rgba(201, 168, 76, 0.30));
   background-clip: padding-box;
 }
@@ -172,6 +183,13 @@
   animation: none !important;
 }
 
+/* R9.4 — under reduced motion the morph between layout modes drops to 0s
+   so a stage→tier flip is an instant snap, not an 800ms slide. The opacity
+   fade for rejected/withdrawn planets stays as-is (it's signal, not motion). */
+.orrery-reduced .orrery-planet {
+  transition-duration: 0s, 1.5s, 0s, 0s, 0s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .orrery-orbit {
     animation: none !important;
@@ -183,5 +201,9 @@
 
   .orrery-planet.orrery-supernova {
     animation: none !important;
+  }
+
+  .orrery-planet {
+    transition-duration: 0s, 1.5s, 0s, 0s, 0s;
   }
 }

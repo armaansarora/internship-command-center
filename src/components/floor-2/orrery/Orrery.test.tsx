@@ -2,23 +2,29 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createRoot, type Root } from "react-dom/client";
 import { act } from "react";
-import type { OrreryPlanet } from "@/lib/orrery/types";
+import type { ApplicationInput, Status } from "@/lib/orrery/types";
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.3 — Orrery consumer wrapper tests.
+ * R9.3 + R9.4 — Orrery consumer wrapper tests.
  *
  * The Orrery component is the click-to-history surface for the Observatory.
- * It owns focus state, wires OrreryRender → PlanetDetailPanel, listens for
- * ESC, and reveals a backdrop that dismisses on click. These tests exercise
- * the full focus lifecycle (open via planet click, close via ESC / backdrop /
- * close button) and the panel's content formatting (status humanization,
- * tier label, match-score percentage, "—" for null).
+ * It owns focus state, owns the active layout mode (R9.4 via useOrreryMode),
+ * wires OrreryRender → PlanetDetailPanel, listens for ESC, reveals a backdrop
+ * that dismisses on click. These tests exercise the full focus lifecycle
+ * (open via planet click, close via ESC / backdrop / close button) and the
+ * panel's content formatting (status humanization, tier label, match-score
+ * percentage, "—" for null), plus the R9.4 PatternModeToggle wiring.
  *
  * @testing-library/react isn't installed in this repo (see CLAUDE.md), so we
  * use the manual createRoot + react act() pattern that the rest of the codebase
  * uses (see useUndoBarController.test.ts and CinematicArrival.test.tsx).
+ *
+ * Fixture shape: as of R9.4 the wrapper takes `apps: ApplicationInput[]` (the
+ * raw pipeline data) instead of pre-derived `OrreryPlanet[]`. The internal
+ * useMemo runs the transformer; this is what enables a mode-change to
+ * re-derive the layout and trigger the CSS-driven morph.
  */
 
 // Default mock: motion on. Per-test overrides via vi.resetModules + vi.doMock.
@@ -62,23 +68,17 @@ vi.mock("@/lib/gsap-init", () => {
 
 import { Orrery } from "./Orrery";
 
-function makePlanet(over: Partial<OrreryPlanet> = {}): OrreryPlanet {
+function makeApp(over: Partial<ApplicationInput> = {}): ApplicationInput {
   return {
     id: "a",
-    label: "Acme",
+    companyName: "Acme",
     role: "Analyst",
     tier: 1,
-    status: "applied",
-    radius: 0.25,
-    angleDeg: 45,
-    sizePx: 22,
-    colorToken: "--orrery-status-applied",
-    hasSatellite: false,
-    isSupernova: false,
-    isFading: false,
+    status: "applied" as Status,
     matchScore: 0.8,
     appliedAt: "2026-04-01T00:00:00Z",
     lastActivityAt: "2026-04-10T00:00:00Z",
+    hasOfferEverFired: false,
     ...over,
   };
 }
@@ -134,24 +134,45 @@ function findBackdrop(host: HTMLElement): HTMLElement | null {
   return host.querySelector<HTMLElement>('[data-testid="orrery-backdrop"]');
 }
 
+function findToggle(host: HTMLElement): HTMLElement | null {
+  return host.querySelector<HTMLElement>('[role="group"][aria-label="Orrery pattern mode"]');
+}
+
+function findToggleButton(host: HTMLElement, label: RegExp): HTMLButtonElement {
+  const group = findToggle(host);
+  if (!group) throw new Error("Pattern toggle group not found");
+  const buttons = group.querySelectorAll<HTMLButtonElement>("button");
+  for (const btn of Array.from(buttons)) {
+    if (label.test(btn.textContent ?? "")) return btn;
+  }
+  throw new Error(`No toggle button matched ${label}`);
+}
+
 let cleanups: Array<() => void> = [];
 
 beforeEach(() => {
   cleanups = [];
+  try {
+    window.localStorage.clear();
+  } catch {
+    // ignore
+  }
 });
 
 afterEach(() => {
   for (const cleanup of cleanups) cleanup();
   cleanups = [];
+  try {
+    window.localStorage.clear();
+  } catch {
+    // ignore
+  }
 });
 
 describe("Orrery — initial render", () => {
   it("renders without a dialog visible", () => {
     const m = mount(
-      <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-        mode="stage"
-      />,
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
     );
     cleanups.push(m.unmount);
     expect(findDialog(m.host)).toBeNull();
@@ -159,23 +180,25 @@ describe("Orrery — initial render", () => {
 
   it("does not render a backdrop until a planet is focused", () => {
     const m = mount(
-      <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-        mode="stage"
-      />,
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
     );
     cleanups.push(m.unmount);
     expect(findBackdrop(m.host)).toBeNull();
+  });
+
+  it("renders the PatternModeToggle as part of the wrapper", () => {
+    const m = mount(
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
+    );
+    cleanups.push(m.unmount);
+    expect(findToggle(m.host)).not.toBeNull();
   });
 });
 
 describe("Orrery — open via planet click", () => {
   it("clicking a planet opens the detail dialog", () => {
     const m = mount(
-      <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-        mode="stage"
-      />,
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
     );
     cleanups.push(m.unmount);
     const btn = findPlanetButton(m.host, /Analyst at Acme/);
@@ -188,14 +211,13 @@ describe("Orrery — open via planet click", () => {
   it("the dialog header contains both role and company", () => {
     const m = mount(
       <Orrery
-        planets={[
-          makePlanet({
+        apps={[
+          makeApp({
             id: "p1",
-            label: "Acme Robotics",
+            companyName: "Acme Robotics",
             role: "Software Engineer Intern",
           }),
         ]}
-        mode="stage"
       />,
     );
     cleanups.push(m.unmount);
@@ -214,8 +236,7 @@ describe("Orrery — open via planet click", () => {
   it("dialog shows 'Tier 1' for a tier-1 planet", () => {
     const m = mount(
       <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst", tier: 1 })]}
-        mode="stage"
+        apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst", tier: 1 })]}
       />,
     );
     cleanups.push(m.unmount);
@@ -229,15 +250,14 @@ describe("Orrery — open via planet click", () => {
   it("formats matchScore as a percentage when set", () => {
     const m = mount(
       <Orrery
-        planets={[
-          makePlanet({
+        apps={[
+          makeApp({
             id: "p1",
-            label: "Acme",
+            companyName: "Acme",
             role: "Analyst",
             matchScore: 0.83,
           }),
         ]}
-        mode="stage"
       />,
     );
     cleanups.push(m.unmount);
@@ -251,15 +271,14 @@ describe("Orrery — open via planet click", () => {
   it("shows '—' for matchScore when null", () => {
     const m = mount(
       <Orrery
-        planets={[
-          makePlanet({
+        apps={[
+          makeApp({
             id: "p1",
-            label: "Acme",
+            companyName: "Acme",
             role: "Analyst",
             matchScore: null,
           }),
         ]}
-        mode="stage"
       />,
     );
     cleanups.push(m.unmount);
@@ -273,15 +292,14 @@ describe("Orrery — open via planet click", () => {
   it("humanizes underscored statuses (interview_scheduled → 'Interview scheduled')", () => {
     const m = mount(
       <Orrery
-        planets={[
-          makePlanet({
+        apps={[
+          makeApp({
             id: "p1",
-            label: "Acme",
+            companyName: "Acme",
             role: "Analyst",
             status: "interview_scheduled",
           }),
         ]}
-        mode="stage"
       />,
     );
     cleanups.push(m.unmount);
@@ -294,10 +312,7 @@ describe("Orrery — open via planet click", () => {
 
   it("renders a backdrop when a planet is focused", () => {
     const m = mount(
-      <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-        mode="stage"
-      />,
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
     );
     cleanups.push(m.unmount);
     act(() => {
@@ -310,10 +325,7 @@ describe("Orrery — open via planet click", () => {
 describe("Orrery — close paths", () => {
   it("pressing Escape on document closes the dialog", () => {
     const m = mount(
-      <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-        mode="stage"
-      />,
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
     );
     cleanups.push(m.unmount);
     act(() => {
@@ -328,10 +340,7 @@ describe("Orrery — close paths", () => {
 
   it("clicking the close button closes the dialog", () => {
     const m = mount(
-      <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-        mode="stage"
-      />,
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
     );
     cleanups.push(m.unmount);
     act(() => {
@@ -345,10 +354,7 @@ describe("Orrery — close paths", () => {
 
   it("clicking the backdrop closes the dialog", () => {
     const m = mount(
-      <Orrery
-        planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-        mode="stage"
-      />,
+      <Orrery apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]} />,
     );
     cleanups.push(m.unmount);
     act(() => {
@@ -365,7 +371,7 @@ describe("Orrery — close paths", () => {
 
 describe("Orrery — empty fixture", () => {
   it("with no planets, no dialog can be opened (sanity)", () => {
-    const m = mount(<Orrery planets={[]} mode="stage" />);
+    const m = mount(<Orrery apps={[]} />);
     cleanups.push(m.unmount);
     expect(findDialog(m.host)).toBeNull();
     // Pressing escape on empty mount should not throw.
@@ -375,6 +381,70 @@ describe("Orrery — empty fixture", () => {
       });
     }).not.toThrow();
     expect(findDialog(m.host)).toBeNull();
+  });
+
+  it("renders the toggle even with zero apps", () => {
+    const m = mount(<Orrery apps={[]} />);
+    cleanups.push(m.unmount);
+    expect(findToggle(m.host)).not.toBeNull();
+  });
+});
+
+describe("Orrery — PatternModeToggle wiring (R9.4)", () => {
+  it("starts in stage mode by default", () => {
+    const m = mount(<Orrery apps={[]} />);
+    cleanups.push(m.unmount);
+    const stageBtn = findToggleButton(m.host, /stage/i);
+    expect(stageBtn.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("clicking the tier button switches the active pressed state", () => {
+    const m = mount(<Orrery apps={[]} />);
+    cleanups.push(m.unmount);
+    const tierBtn = findToggleButton(m.host, /tier/i);
+    act(() => {
+      tierBtn.click();
+    });
+    expect(findToggleButton(m.host, /tier/i).getAttribute("aria-pressed")).toBe("true");
+    expect(findToggleButton(m.host, /stage/i).getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("clicking a mode persists the choice to localStorage", () => {
+    const m = mount(<Orrery apps={[]} />);
+    cleanups.push(m.unmount);
+    act(() => {
+      findToggleButton(m.host, /velocity/i).click();
+    });
+    expect(window.localStorage.getItem("orrery.mode")).toBe("velocity");
+  });
+
+  it("respects initialMode prop when no localStorage entry", () => {
+    const m = mount(<Orrery apps={[]} initialMode="tier" />);
+    cleanups.push(m.unmount);
+    expect(findToggleButton(m.host, /tier/i).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("hydrates from localStorage on mount, ignoring initialMode", () => {
+    window.localStorage.setItem("orrery.mode", "velocity");
+    const m = mount(<Orrery apps={[]} initialMode="stage" />);
+    cleanups.push(m.unmount);
+    expect(findToggleButton(m.host, /velocity/i).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("changing mode keeps planets reactive — ARIA scene label still names them", () => {
+    const apps = [
+      makeApp({ id: "p1", companyName: "Acme", role: "Analyst", tier: 1 }),
+      makeApp({ id: "p2", companyName: "Beta", role: "PM", tier: 3 }),
+    ];
+    const m = mount(<Orrery apps={apps} />);
+    cleanups.push(m.unmount);
+    // Switching mode does not unmount the planets — same DOM nodes, new
+    // inline transform/background lets the CSS transition run.
+    act(() => {
+      findToggleButton(m.host, /tier/i).click();
+    });
+    expect(findPlanetButton(m.host, /Analyst at Acme/)).toBeTruthy();
+    expect(findPlanetButton(m.host, /PM at Beta/)).toBeTruthy();
   });
 });
 
@@ -424,8 +494,7 @@ describe("Orrery — reduced-motion path", () => {
     act(() => {
       root.render(
         <ReducedOrrery
-          planets={[makePlanet({ id: "p1", label: "Acme", role: "Analyst" })]}
-          mode="stage"
+          apps={[makeApp({ id: "p1", companyName: "Acme", role: "Analyst" })]}
         />,
       );
     });

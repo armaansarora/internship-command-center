@@ -115,6 +115,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/drill/DrillStage.tsx` (582 LOC) — R6.6 — DrillStage.
 - `src/components/floor-5/cmo-character/CMOCharacter.tsx` (554 LOC)
 - `src/components/floor-4/coo-character/COOCharacter.tsx` (526 LOC)
+- `src/components/floor-2/orrery/Orrery.test.tsx` (514 LOC) — R9.3 + R9.4 — Orrery consumer wrapper tests.
 - `src/components/floor-6/cio-character/CIOWhiteboard.tsx` (513 LOC) — derived from ResearchStats from companies-rest.ts
 - `src/components/floor-3/BriefingRoomClient.tsx` (511 LOC)
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
@@ -123,7 +124,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/cpo-character/CPOCharacter.tsx` (477 LOC)
 - `src/components/floor-6/RolodexLoungeClient.tsx` (475 LOC)
 - `src/components/floor-5/crud/DocumentList.tsx` (449 LOC)
-- `src/components/floor-2/orrery/Orrery.test.tsx` (445 LOC) — R9.3 — Orrery consumer wrapper tests.
 - `src/components/floor-3/cpo-character/CPOWhiteboard.tsx` (444 LOC)
 - `src/components/floor-3/BriefingRoomScene.tsx` (443 LOC) — BriefingRoomScene — Floor 3 environment compositor.
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
@@ -176,6 +176,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/undo-bar/UndoBar.tsx` (219 LOC) — In-world undo bar.
 - `src/components/floor-2/analytics/ActivityHeatmap.tsx` (218 LOC) — ActivityHeatmap — 7×4 grid (4 weeks × 7 days) showing daily activity.
 - `src/components/floor-2/orrery/OrreryRender.tsx` (218 LOC) — R9.2 — OrreryRender.
+- `src/components/floor-2/orrery/PatternModeToggle.test.tsx` (217 LOC) — R9.4 — PatternModeToggle render + a11y + interaction tests.
 - `src/components/floor-4/situation-map/SituationMapList.tsx` (215 LOC) — Two-column honest fallback for the Situation Map. Shipped when:
 - `src/components/floor-1/ceo-character/CEOCharacter.tsx` (212 LOC)
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
@@ -230,6 +231,8 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/rolodex/RolodexCard.tsx` (128 LOC) — A single physical card on the rolodex cylinder. Warmth-coloured via the
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
+- `src/components/floor-2/orrery/Orrery.tsx` (118 LOC) — R9.3 + R9.4 — Orrery (consumer wrapper).
+- `src/components/floor-2/orrery/PatternModeToggle.tsx` (118 LOC) — R9.4 — PatternModeToggle.
 - `src/components/floor-3/binder/DebriefBinderShelf.tsx` (117 LOC) — R6.8 — The Debrief Binder Shelf.
 - `src/components/floor-1/CSuiteClient.injectPrompt.test.tsx` (112 LOC) — R3.11 — unit tests for the `/`-inject activation gate.
 - `src/components/floor-3/binder/DebriefBinderShelf.test.tsx` (111 LOC)
@@ -251,7 +254,6 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/cpo-character/CPODialoguePanel.tsx` (100 LOC)
 - `src/components/floor-3/drill/LiveSTARBoard.test.tsx` (100 LOC)
 - `src/components/floor-6/cio-character/CIODialoguePanel.tsx` (100 LOC)
-- `src/components/floor-2/orrery/Orrery.tsx` (98 LOC) — R9.3 — Orrery (consumer wrapper).
 - `src/components/floor-3/drill/InterruptBubble.tsx` (96 LOC) — R6.6 — InterruptBubble.
 - `src/components/floor-4/conflicts/ConflictsSection.test.tsx` (96 LOC)
 - `src/components/floor-6/cno-character/CNODialoguePanel.tsx` (94 LOC)
