@@ -332,6 +332,11 @@ export async function createContactRest(
     };
   }
 
+  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  void import("@/lib/networking/match-delta")
+    .then((m) => m.enqueueMatchRescan(userId))
+    .catch(() => {});
+
   return {
     success: true,
     contactId: (inserted as { id: string }).id,
@@ -386,6 +391,11 @@ export async function updateContactActivity(
     };
   }
 
+  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  void import("@/lib/networking/match-delta")
+    .then((m) => m.enqueueMatchRescan(userId))
+    .catch(() => {});
+
   return {
     success: true,
     message: `Interaction logged for contact. Warmth reset to warm.`,
@@ -421,6 +431,11 @@ export async function linkContactToApplication(
       message: `Failed to link contact to application: ${error.message}`,
     };
   }
+
+  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  void import("@/lib/networking/match-delta")
+    .then((m) => m.enqueueMatchRescan(userId))
+    .catch(() => {});
 
   return {
     success: true,

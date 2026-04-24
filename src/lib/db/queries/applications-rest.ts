@@ -306,6 +306,11 @@ export async function updateApplicationStatusRest(
     return { success: false, message: `Update failed: ${error.message}` };
   }
 
+  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  void import("@/lib/networking/match-delta")
+    .then((m) => m.enqueueMatchRescan(userId))
+    .catch(() => {});
+
   const statusMsg = newStatus && newStatus.length > 0
     ? `Application updated to ${newStatus}.`
     : "Application updated.";
@@ -488,6 +493,11 @@ export async function createApplicationRest(
     throw new Error(`createApplicationRest failed: ${error?.message ?? "no data returned"}`);
   }
 
+  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  void import("@/lib/networking/match-delta")
+    .then((m) => m.enqueueMatchRescan(input.userId))
+    .catch(() => {});
+
   return rowToApplication(data as ApplicationRow);
 }
 
@@ -536,6 +546,11 @@ export async function updateApplicationRest(
   if (error || !data) {
     throw new Error(`updateApplicationRest failed: ${error?.message ?? "no data returned"}`);
   }
+
+  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  void import("@/lib/networking/match-delta")
+    .then((m) => m.enqueueMatchRescan(userId))
+    .catch(() => {});
 
   return rowToApplication(data as ApplicationRow);
 }
