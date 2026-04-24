@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 11:35 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 11:50 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `76c6118`)
+- **Branch:** `main` (commit `c379e39`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 116,146 across 669 source files
+- **Total LOC:** 116,365 across 670 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-76c6118 chore(autopilot): prime R11 (cross-user matching) — paused:false, scope:R11-only
+c379e39 chore(autopilot): hold R11 paused until user explicitly fires
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `76c6118`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `c379e39`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (669 files, 116,146 LOC)
+## Source Tree (670 files, 116,365 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -230,6 +230,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/concierge/extract` | 224 |
 | `src/app/api/account/export` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
+| `src/app/api/offers/__tests__` | 219 |
 | `src/app/api/cron/sync` | 213 |
 | `src/lib/agents/cmo/__tests__` | 212 |
 | `src/app/api/cron/outreach-sender` | 209 |
@@ -444,6 +445,7 @@ src/app/api/offers/[id]/route.test.ts
 src/app/api/offers/[id]/route.ts
 src/app/api/offers/[id]/simulate/__tests__/route.test.ts
 src/app/api/offers/[id]/simulate/route.ts
+src/app/api/offers/__tests__/route.integration.test.ts
 src/app/api/offers/route.test.ts
 src/app/api/offers/route.ts
 src/app/api/onboarding/bootstrap-discovery/route.test.ts
@@ -1073,13 +1075,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1122 | 12,646 |
+| `BOOTSTRAP-PROMPT.md` | 1122 | 12,648 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2106** | **31,287** |
+| **Total** | **2106** | **31,289** |
 
-> ⚠️ Reading all recommended files consumes ~31,287 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,289 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
