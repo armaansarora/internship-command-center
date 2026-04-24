@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:05 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:06 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `ce0296a`)
+- **Branch:** `main` (commit `e46f476`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 114,078 across 658 source files
+- **Total LOC:** 114,286 across 660 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-ce0296a [R10/10.13] chore(plan): R10.13+R10.14 TDD implementation plan
+e46f476 [R10/10.13] feat(parlor): simulator-turn generateObject helper
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `ce0296a`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `e46f476`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,7 +102,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (658 files, 114,078 LOC)
+## Source Tree (660 files, 114,286 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -270,6 +270,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/transitions` | 132 |
 | `src/app/api/writing-room/approve` | 129 |
 | `src/lib/ai/agents/__tests__` | 129 |
+| `src/app/api/offers/[id]/simulate/__tests__` | 124 |
 | `src/app/api/cron/warmth-decay` | 115 |
 | `src/app/api/briefing/binder/[id]` | 114 |
 | `src/app/api/documents/[id]/pdf` | 111 |
@@ -285,6 +286,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
 | `src/lib/parlor/__tests__` | 90 |
+| `src/app/api/offers/[id]/simulate` | 84 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
 | `src/lib/resumes/__tests__` | 79 |
@@ -434,6 +436,8 @@ src/app/api/offers/[id]/negotiation-draft/route.test.ts
 src/app/api/offers/[id]/negotiation-draft/route.ts
 src/app/api/offers/[id]/route.test.ts
 src/app/api/offers/[id]/route.ts
+src/app/api/offers/[id]/simulate/__tests__/route.test.ts
+src/app/api/offers/[id]/simulate/route.ts
 src/app/api/offers/route.test.ts
 src/app/api/offers/route.ts
 src/app/api/onboarding/bootstrap-discovery/route.test.ts
@@ -1056,13 +1060,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1103 | 12,331 |
+| `BOOTSTRAP-PROMPT.md` | 1105 | 12,361 |
 | `PROJECT-CONTEXT.md` | 283 | 5,309 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2099** | **31,278** |
+| **Total** | **2101** | **31,308** |
 
-> ⚠️ Reading all recommended files consumes ~31,278 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,308 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
