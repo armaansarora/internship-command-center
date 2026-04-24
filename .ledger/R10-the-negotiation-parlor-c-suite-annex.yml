@@ -10,8 +10,8 @@ started: 2026-04-24T02:24:03.890Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T03:11:58.089Z
-  expires: 2026-04-24T05:11:58.084Z
+  acquired: 2026-04-24T04:20:12.062Z
+  expires: 2026-04-24T06:20:12.056Z
 acceptance:
   criteria:
     - Offer arriving via email parses into the offers table. Parlor door appears
@@ -78,33 +78,33 @@ tasks:
     title: Three-chair convening — Offer Evaluator persona + convenePipelineForOffer
       (Promise.allSettled fan-out to OE/CFO/CNO) + POST /api/offers/:id/convene
       + ThreeChairsConvening UI
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T03:52:53.794Z
+    completed: 2026-04-24T04:03:52.587Z
+    commit: 30355d1
   R10.8:
     title: CompBandChart SVG — percentile bars + red/gold/ink pins + multi-offer
       stack + empty-state copy. colorForPercentile pure helper.
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:04:07.864Z
+    completed: 2026-04-24T04:09:58.369Z
+    commit: 676af93
   R10.9:
     title: Negotiation-script draft — draftNegotiationEmail generateObject + POST
       /api/offers/:id/negotiation-draft + NegotiationDraftPanel reusing R5.4
       LiveCompose
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:10:09.801Z
+    completed: 2026-04-24T04:18:20.054Z
+    commit: 96208f3
   R10.10:
     title: 24h send-hold clamp — approveOutreachForUser gains minimumHoldSeconds
       opt; /api/outreach/approve auto-clamps when queued
       row.type==='negotiation'; PROOF test binding the invariant
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:20:12.062Z
+    completed: 2026-04-24T04:24:00.935Z
+    commit: 96208f3
   R10.11:
     title: CEO voice three-layer — pickCeoVoice helpers + CEOVoicePlayButton +
       Settings toggle for ceoVoice preference + PROOF test for the three gates
@@ -190,3 +190,12 @@ history:
   - 2026-04-24T03:10:31.761Z: task_completed R10.5
   - 2026-04-24T03:11:58.089Z: task_started R10.6
   - 2026-04-24T03:17:30.863Z: task_completed R10.6
+  - 2026-04-24T03:52:53.794Z: task_started R10.7
+  - 2026-04-24T04:03:52.587Z: task_completed R10.7
+  - 2026-04-24T04:04:07.864Z: task_started R10.8
+  - 2026-04-24T04:09:58.369Z: task_completed R10.8
+  - 2026-04-24T04:10:09.801Z: task_started R10.9
+  - 2026-04-24T04:18:20.054Z: task_completed R10.9
+  - 2026-04-24T04:18:20.389Z: task_started R10.10
+  - 2026-04-24T04:20:12.062Z: task_started R10.10
+  - 2026-04-24T04:24:00.935Z: task_completed R10.10

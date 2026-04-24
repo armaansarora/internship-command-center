@@ -96,11 +96,24 @@ function userAuthClient() {
   return {
     from(table: string) {
       if (table !== "outreach_queue") throw new Error(`unexpected table ${table}`);
+      // A single top-level .from() returns a chain that can walk either the
+      // SELECT path (.select().eq()*.maybeSingle()) — used by the R10.10
+      // type lookup in /api/outreach/approve — or the UPDATE path
+      // (.update(patch).eq()*.select().single()) used by both the approve
+      // helper and the undo route.
       const filters: MutFilter[] = [];
       let pendingPatch: Partial<OutreachRow> | null = null;
+      let mode: "none" | "select" | "update" = "none";
       const api = {
         update(patch: Partial<OutreachRow>) {
+          mode = "update";
           pendingPatch = patch;
+          return api;
+        },
+        select() {
+          // In SELECT mode `.select()` opens the chain; in UPDATE mode
+          // `.select()` is the postfix returning-clause helper.
+          if (mode === "none") mode = "select";
           return api;
         },
         eq(col: string, val: unknown) {
@@ -111,10 +124,23 @@ function userAuthClient() {
           filters.push({ kind: "gt", col, val });
           return api;
         },
-        select() {
-          return api;
+        async maybeSingle() {
+          // SELECT path — used for R10.10 type lookup. Returns the row's
+          // relevant projected columns, or null if predicates miss.
+          const ok = matches(row, filters);
+          if (!ok) return { data: null, error: null };
+          return {
+            data: {
+              id: row.id,
+              type: row.type,
+              send_after: row.send_after,
+              status: row.status,
+            },
+            error: null,
+          };
         },
         async single() {
+          // UPDATE path — applies the pending patch iff predicates match.
           const ok = matches(row, filters);
           if (!ok || !pendingPatch) {
             return {
