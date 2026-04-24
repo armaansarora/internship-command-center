@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:55 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:59 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `5c58bf7`)
+- **Branch:** `main` (commit `ec80089`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 117,445 across 675 source files
+- **Total LOC:** 117,573 across 676 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-5c58bf7 [R11] docs(r11): TDD implementation plan
+ec80089 [R11/11.1] feat(r11): consent-version gate + CURRENT_CONSENT_VERSION=2
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `5c58bf7`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `ec80089`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (675 files, 117,445 LOC)
+## Source Tree (676 files, 117,573 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -126,11 +126,11 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/lobby` | 1294 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
+| `src/db` | 1185 |
 | `src/app` | 1177 |
 | `src/components/floor-3` | 1141 |
 | `src/components/floor-6/cio-character` | 1122 |
 | `src/components/floor-7/crud` | 1111 |
-| `src/db` | 1110 |
 | `src/lib/agents/cro` | 1083 |
 | `src/lib/agents/cmo` | 1072 |
 | `src/components/world/elevator` | 1056 |
@@ -293,6 +293,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/offers/ingest-email` | 98 |
 | `src/app/api/contacts/[id]/reference-request` | 92 |
 | `src/lib/parlor/__tests__` | 90 |
+| `src/db/__tests__` | 89 |
 | `src/app/api/offers/[id]/simulate` | 84 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
@@ -313,7 +314,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/networking/opt-in` | 44 |
 | `src/app/api/progression` | 44 |
 | `src/app/api/notifications/[id]/read` | 40 |
-| `src/db/__tests__` | 36 |
 | `src/lib/agents/offer-evaluator/__tests__` | 36 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/api/cro` | 31 |
@@ -724,6 +724,7 @@ src/components/world/WeatherEffects.tsx
 src/components/world/elevator/ElevatorButton.tsx
 src/components/world/elevator/ElevatorDoors.tsx
 src/components/world/elevator/ElevatorPanel.tsx
+src/db/__tests__/schema-r11.test.ts
 src/db/__tests__/schema-r8.test.ts
 src/db/schema.r4.test.ts
 src/db/schema.r5.test.ts
@@ -1082,13 +1083,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1127 | 12,706 |
+| `BOOTSTRAP-PROMPT.md` | 1131 | 12,755 |
 | `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2111** | **31,347** |
+| **Total** | **2115** | **31,396** |
 
-> ⚠️ Reading all recommended files consumes ~31,347 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,396 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

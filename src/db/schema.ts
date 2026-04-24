@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, text, integer, boolean, timestamp, date,
-  numeric, jsonb, index, pgPolicy, vector, unique,
+  numeric, jsonb, index, pgPolicy, vector, unique, primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -118,6 +118,12 @@ export const userProfiles = pgTable("user_profiles", {
   networkingConsentAt: timestamp("networking_consent_at", { withTimezone: true }),
   networkingRevokedAt: timestamp("networking_revoked_at", { withTimezone: true }),
   networkingConsentVersion: integer("networking_consent_version").default(0),
+  // R11 — Cross-user warm-intro matching. Stamped each time the per-user
+  // match-candidate scan (re)builds this user's ranked candidate index in
+  // `match_candidate_index`. The scan scheduler compares this timestamp
+  // against the TTL window (invalidatesAt on each row) to decide whether
+  // a rescan is due. Null means no scan has ever run for this account.
+  matchIndexLastRescanAt: timestamp("match_index_last_rescan_at", { withTimezone: true }),
   ...timestamps,
 }, () => [
   pgPolicy("user_profiles_self_access", {
@@ -724,6 +730,69 @@ export const networkingMatchIndex = pgTable("networking_match_index", {
 ]);
 
 // ===========================================================================
+// 19a. MATCH CANDIDATE INDEX (R11 — ranked candidates with TTL)
+// ===========================================================================
+// Per-user ranked cache of cross-user warm-intro candidates. Populated by
+// the match-candidate scan from `networking_match_index` intersections;
+// each row is a single counterparty surfaced for a single company context
+// with an `edge_strength` score in [0, 1]. `invalidates_at` is the row's
+// TTL expiry — the UI filters rows where invalidates_at > now() and the
+// sweeper cron deletes expired rows. `counterparty_anon_key` is a stable
+// hash of the other user's id scoped to this user's account so the client
+// never learns counterparty identity until an intro is mutually accepted.
+export const matchCandidateIndex = pgTable("match_candidate_index", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  counterpartyAnonKey: text("counterparty_anon_key").notNull(),
+  companyContext: text("company_context").notNull(),
+  edgeStrength: numeric("edge_strength", { precision: 4, scale: 3 }).notNull(),
+  insertedAt: timestamp("inserted_at", { withTimezone: true }).notNull().defaultNow(),
+  invalidatesAt: timestamp("invalidates_at", { withTimezone: true }).notNull(),
+}, (table) => [
+  userIsolation("match_candidate_index"),
+  index("idx_match_candidate_user_invalidates").on(table.userId, table.invalidatesAt),
+]);
+
+// ===========================================================================
+// 19b. MATCH EVENTS (R11 — audit log of fired matches)
+// ===========================================================================
+// Append-only audit trail of every match surfaced to this user. `match_reason`
+// is a short human-readable rationale string (e.g. "shared alumni network at
+// Acme"). Used by CFO analytics to attribute intros to specific match paths
+// and by the Red Team for privacy audits — a user can always enumerate which
+// candidates were surfaced to them and why.
+export const matchEvents = pgTable("match_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  counterpartyAnonKey: text("counterparty_anon_key").notNull(),
+  companyContext: text("company_context").notNull(),
+  edgeStrength: numeric("edge_strength", { precision: 4, scale: 3 }).notNull(),
+  firedAt: timestamp("fired_at", { withTimezone: true }).notNull().defaultNow(),
+  matchReason: text("match_reason").notNull(),
+}, (table) => [
+  userIsolation("match_events"),
+  index("idx_match_events_user_fired").on(table.userId, table.firedAt.desc()),
+]);
+
+// ===========================================================================
+// 19c. MATCH RATE LIMITS (R11 — hourly bucket counter per user)
+// ===========================================================================
+// Bucketed per-user hourly counter for match-candidate calls. The composite
+// primary key `(user_id, hour_bucket)` makes the counter UPSERT-safe without
+// extra locking; the `bump_match_rate_limit` RPC atomically inserts-or-
+// increments and returns whether the caller is under the limit. Rows older
+// than a day are swept by the cleanup cron — the table stays small.
+export const matchRateLimits = pgTable("match_rate_limits", {
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  hourBucket: timestamp("hour_bucket", { withTimezone: true }).notNull(),
+  count: integer("count").notNull().default(0),
+}, (table) => [
+  userIsolation("match_rate_limits"),
+  index("idx_match_rate_limits_bucket").on(table.hourBucket),
+  primaryKey({ columns: [table.userId, table.hourBucket] }),
+]);
+
+// ===========================================================================
 // 20. REJECTION REFLECTIONS (R9.6 — Observatory autopsy)
 // ===========================================================================
 // Opt-in (Settings → Analytics → 'Rejection reflection prompts', default ON)
@@ -881,6 +950,12 @@ export type ContactEmbedding = typeof contactEmbeddings.$inferSelect;
 export type NewContactEmbedding = typeof contactEmbeddings.$inferInsert;
 export type NetworkingMatchIndex = typeof networkingMatchIndex.$inferSelect;
 export type NewNetworkingMatchIndex = typeof networkingMatchIndex.$inferInsert;
+// R11 — Cross-user warm-intro matching
+export type MatchCandidateIndex = typeof matchCandidateIndex.$inferSelect;
+export type NewMatchCandidateIndex = typeof matchCandidateIndex.$inferInsert;
+export type MatchEvent = typeof matchEvents.$inferSelect;
+export type NewMatchEvent = typeof matchEvents.$inferInsert;
+export type MatchRateLimit = typeof matchRateLimits.$inferSelect;
 export type ProgressionMilestone = typeof progressionMilestones.$inferSelect;
 export type NewProgressionMilestone = typeof progressionMilestones.$inferInsert;
 export type StripeWebhookEvent = typeof stripeWebhookEvents.$inferSelect;
