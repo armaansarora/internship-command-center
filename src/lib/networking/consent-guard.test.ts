@@ -7,6 +7,7 @@ describe("R8 — isConsentedShape", () => {
       isConsentedShape({
         networking_consent_at: null,
         networking_revoked_at: null,
+        networking_consent_version: null,
       }),
     ).toBe(false);
   });
@@ -16,6 +17,7 @@ describe("R8 — isConsentedShape", () => {
       isConsentedShape({
         networking_consent_at: "2026-04-01T00:00:00Z",
         networking_revoked_at: null,
+        networking_consent_version: 1,
       }),
     ).toBe(true);
   });
@@ -25,6 +27,7 @@ describe("R8 — isConsentedShape", () => {
       isConsentedShape({
         networking_consent_at: "2026-04-01T00:00:00Z",
         networking_revoked_at: "2026-04-05T00:00:00Z",
+        networking_consent_version: 1,
       }),
     ).toBe(false);
   });
@@ -34,6 +37,7 @@ describe("R8 — isConsentedShape", () => {
       isConsentedShape({
         networking_consent_at: "2026-04-10T00:00:00Z",
         networking_revoked_at: "2026-04-05T00:00:00Z",
+        networking_consent_version: 1,
       }),
     ).toBe(true);
   });
@@ -46,6 +50,7 @@ describe("R8 — isConsentedShape", () => {
       isConsentedShape({
         networking_consent_at: "2026-04-01T00:00:00Z",
         networking_revoked_at: "2026-04-01T00:00:00Z",
+        networking_consent_version: 1,
       }),
     ).toBe(false);
   });

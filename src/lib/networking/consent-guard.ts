@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { CURRENT_CONSENT_VERSION } from "./consent-version";
 
 /**
  * R8 §7.3 — the load-bearing guard for cross-user networking features.
@@ -10,6 +11,12 @@ import { createClient } from "@/lib/supabase/server";
  *
  * i.e. the most recent action on file is consent, not revoke.
  *
+ * R11.1 additionally gates on `networking_consent_version`: when the
+ * stored version is below `CURRENT_CONSENT_VERSION`, the guard returns
+ * 403 `consent-version-stale` so the UI can surface a re-consent
+ * prompt.  Missing / null version is treated as an older version
+ * (legacy row) and also yields `consent-version-stale`.
+ *
  * Any cross-user endpoint MUST call `assertConsented(userId)` and return
  * the NextResponse it hands back when non-null.  R8 additionally
  * hard-codes a 403 "gated-red-team-pending" downstream of this guard so
@@ -19,6 +26,7 @@ import { createClient } from "@/lib/supabase/server";
 export interface ConsentShape {
   networking_consent_at: string | null;
   networking_revoked_at: string | null;
+  networking_consent_version: number | null;
 }
 
 /** Pure evaluator — no I/O. Directly testable. */
@@ -35,15 +43,21 @@ export async function readConsent(userId: string): Promise<ConsentShape | null> 
   const sb = await createClient();
   const { data } = await sb
     .from("user_profiles")
-    .select("networking_consent_at, networking_revoked_at")
+    .select(
+      "networking_consent_at, networking_revoked_at, networking_consent_version",
+    )
     .eq("id", userId)
     .maybeSingle();
   return (data as ConsentShape | null) ?? null;
 }
 
 /**
- * Returns null when consent is active; returns a 403 NextResponse when it
- * isn't.  Callers `if (guard) return guard;`.
+ * Returns null when consent is active AND on the current version;
+ * returns a 403 NextResponse otherwise.  Callers `if (guard) return guard;`.
+ *
+ * Reasons:
+ *   - `consent-required`       — missing row, never consented, or revoked
+ *   - `consent-version-stale`  — consented, but on an older copy version
  */
 export async function assertConsented(
   userId: string,
@@ -52,6 +66,12 @@ export async function assertConsented(
   if (!row || !isConsentedShape(row)) {
     return NextResponse.json(
       { ok: false, reason: "consent-required" },
+      { status: 403 },
+    );
+  }
+  if ((row.networking_consent_version ?? 0) < CURRENT_CONSENT_VERSION) {
+    return NextResponse.json(
+      { ok: false, reason: "consent-version-stale" },
       { status: 403 },
     );
   }
