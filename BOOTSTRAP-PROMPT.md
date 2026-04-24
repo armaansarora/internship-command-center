@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:43 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 10:47 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `f54c638`)
+- **Branch:** `main` (commit `dbf55b9`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 105,140 across 596 source files
+- **Total LOC:** 105,457 across 598 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-f54c638 [R10] chore(ledger): restore R10 to in_progress + seed R10.1–R10.15 tasks
+dbf55b9 [R10/10.1] feat(db): migration 0020 + offers/comp_bands schema + R10 prefs
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `f54c638`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `dbf55b9`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,11 +102,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (596 files, 105,140 LOC)
+## Source Tree (598 files, 105,457 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 6657 |
+| `src/lib/db/queries` | 6974 |
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3512 |
 | `src/components/floor-1` | 2660 |
@@ -788,6 +788,8 @@ src/lib/db/queries/interviews-mutations.ts
 src/lib/db/queries/job-discovery-rest.ts
 src/lib/db/queries/notifications-mutations.ts
 src/lib/db/queries/notifications-rest.ts
+src/lib/db/queries/offers-rest.test.ts
+src/lib/db/queries/offers-rest.ts
 src/lib/db/queries/outreach-mutations.ts
 src/lib/db/queries/pipeline-stats-from-aggregates.ts
 src/lib/db/queries/pipeline-stats.test.ts
@@ -977,13 +979,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1021 | 11,366 |
+| `BOOTSTRAP-PROMPT.md` | 1026 | 11,432 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 507 | 11,350 |
-| **Total** | **2177** | **35,163** |
+| **Total** | **2182** | **35,229** |
 
-> ⚠️ Reading all recommended files consumes ~35,163 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~35,229 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
