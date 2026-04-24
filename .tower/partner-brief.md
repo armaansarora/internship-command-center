@@ -30,6 +30,7 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - Do not edit `CLAUDE.md §8` while autopilot is running (it re-reads CLAUDE.md every session start).
 - Do not touch `src/` files in the active phase's territory while autopilot is running.
 - Do not run tower mutation commands (`tower start`, `tower done`, `tower block`, `tower undo`, `tower handoff`) unless explicitly cleaning up after autopilot has paused itself.
+- **Before any `git push` to main during partner work, re-check `.tower/autopilot.yml` `paused` state.** A "firing later" told 20 min ago can become "firing right now." Even commits that don't touch autopilot territory cause push-rebase friction for the live session. Quick check: `grep paused .tower/autopilot.yml`. If `paused: false`, hold the push or commit to a scratch branch.
 - Do not make Armaan's business decisions (pricing tiers, legal copy, brand voice outside the Reference Library). Those are his.
 
 ## How Armaan wants you to communicate
@@ -85,8 +86,24 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - R9 shipped: all 9 Intent-level behaviors real, zero stubs, zero drift, auth/Stripe/networking untouched, 1307 tests (+211).
 - **R9 bypass fix (post-R9 partner autonomous work):** shipped `scripts/tower/pre-commit-acceptance-gate.ts` + Husky hook. Any commit that flips `acceptance.met: false → true` on any ledger file now triggers `tower verify <phase>` (fast checks). Commit is rejected if verify fails. This is the mechanical backstop for the R9 class of bypass. 4 new tests covering the gate.
 
-**Needs user hand (before R10 run):**
-- Apply migration 0019_r9_observatory.sql in Supabase (creates `rejection_reflections` table). Same pattern as migration 005 — paste from `src/db/migrations/0019_r9_observatory.sql` into Supabase SQL Editor. Not a blocker for R10 run itself, but rejection-autopsy writes fail in prod until applied.
+**Needs user hand:**
+- Apply `src/db/migrations/0019_r9_observatory.sql` in Supabase (creates `rejection_reflections` table). Same pattern as migration 005 — paste into Supabase Dashboard → SQL Editor. Not a blocker for R10 run itself, but rejection-autopsy writes fail in prod until applied.
+- Apply `src/db/migrations/0020_r10_negotiation_parlor.sql` in Supabase (creates `offers` + `company_comp_bands` + `comp_bands_budget` tables; adds `outreach_queue` enum entry). Required before Parlor is functional in prod. Paste pattern identical to 0019.
+- Add `FIRECRAWL_API_KEY` via `vercel env add FIRECRAWL_API_KEY production` (and preview/development). Without it, `/api/comp-bands/lookup` returns graceful-empty (no crash). Needed for real Levels.fyi scrapes.
+
+**Post-R10 cleanup sweep (queued — fire after user says "R10 finished" + post-mortem swarm runs):**
+
+*Scoping snapshot from 2026-04-24 partner scan. Confirm still-relevant at sweep time.*
+
+- **docs/plans/** — 20+ design + implementation plan docs for completed R-phases (R0 through R10). Most recent plan per phase can stay as in-repo reference; older drafts and per-subphase duplicates move to `docs/archive/plans/`. R0–R8 plans are prime candidates.
+- **root `HANDOFF.md`** (10.8K, dated 2026-04-17) — pre-tower-cli artifact. Legacy single-file handoff. Delete; `.handoff/*.md` packets replaced it on 2026-04-21.
+- **`.handoff/*.md`** — 12 packets accumulated; oldest is `2026-04-22-2055.md`. Rotate: keep last 3–5 for immediate recovery, move the rest to `.handoff/archive/` (gitignored via `.gitignore` pattern) or delete outright since they're only needed one session-boundary back.
+- **`.tower/pre-r9-checklist.md`** — R9 shipped; content useful only as historical reference. Move to `.tower/archive/pre-r9-checklist.md` or delete.
+- **`docs/R1-AUDIT.md`, `docs/AUDIT-DEPLOY-CHECKLIST.md`, `docs/POST-HARDENING-MANUAL-STEPS.md`, `docs/SECRETS-ROTATION.md`, `docs/SECURITY-HEADERS-REPORT.md`, `docs/WAR-ROOM-BLUEPRINT.md`, `docs/r8/`** — R0/R1/R8-era docs. Audit for still-relevant content; archive whatever's purely historical.
+- **`src/` orphans** — CLAUDE.md lists 3 known intentional orphans (`FloorStub.tsx`, `MilestoneToast.tsx`, `daily-snapshots-rest.ts`). Post-R10 these have been through 10 phase cycles without being wired; verify if they're still genuinely intentional or just dead code at this point. Delete if dead.
+- **`docs/archive/research/IMMERSIVE-UI-PLAN.md`** (37.4K) — pre-build planning doc already in archive. Safe to keep since it's already out of the hot path, but check if it's still referenced anywhere.
+
+*Ordering for the sweep: do root + `.handoff/` first (clearly dead), then docs/plans archival pass, then the `.tower/` + docs/ R-era docs pass, then src/ orphan verification last (needs tests to confirm they're not silently imported).*
 
 **Partner decisions locked (2026-04-23, post-R5.4):**
 1. R8.x cross-user matching → ship AFTER R10 (user option A + timing B). R8.x is a focused mini-phase, not a 5-min flip. Prompt scope pre-drafted in autopilot.yml R8.x comment above.

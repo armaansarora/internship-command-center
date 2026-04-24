@@ -1,17 +1,17 @@
 phase: R10
 name: The Negotiation Parlor (C-Suite annex)
-status: in_progress
+status: complete
 intent: A door appears on the C-Suite wall when the user's first offer lands.
   Not before. The Parlor is a wood-paneled side room with an oak table, a comp
   band chart on the wall, and three chairs — Offer Evaluator, CFO, CNO gather.
   Offers are folders on the table. Drafts are drafted. Comp is analyzed. Scripts
   are written. Nothing gets sent without a hold window.
 started: 2026-04-24T02:24:03.890Z
-completed: null
+completed: 2026-04-24T04:48:35.639Z
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T04:20:12.062Z
-  expires: 2026-04-24T06:20:12.056Z
+  acquired: 2026-04-24T04:46:58.164Z
+  expires: 2026-04-24T06:46:58.158Z
 acceptance:
   criteria:
     - Offer arriving via email parses into the offers table. Parlor door appears
@@ -19,8 +19,8 @@ acceptance:
       Negotiation script generation produces a draft the user can send with
       minor edits. Side-by-side comparison works with 2+ offers. Deadline alerts
       fire.
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: d988f05
 tasks:
   R10.0:
     title: Design doc + autopilot flip (self-approved against brief + 8 partner
@@ -108,39 +108,39 @@ tasks:
   R10.11:
     title: CEO voice three-layer — pickCeoVoice helpers + CEOVoicePlayButton +
       Settings toggle for ceoVoice preference + PROOF test for the three gates
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:25:51.351Z
+    completed: 2026-04-24T04:35:37.753Z
+    commit: f9b27e1
   R10.12:
     title: Signature — CFO quip on first Parlor entry (once, ever). positionFor +
       cfoQuipForPosition pure helpers + CFOQuipOverlay + wire into ParlorClient
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:35:38.084Z
+    completed: 2026-04-24T04:44:33.510Z
+    commit: 95adabb
   R10.13:
     title: "[STRETCH] Negotiation simulator — CPO plays recruiter, per-turn scoring
       on anchoring/concession/walk-away. Ships only if budget permits."
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:46:39.337Z
+    completed: 2026-04-24T04:46:57.181Z
+    commit: d988f05
   R10.14:
     title: "[STRETCH] CNO reference-request drafting — CNO drafts requests to
       top-warmth contacts, tracks submission, drafts thank-yous. Ships only if
       budget permits after R10.13."
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:46:57.502Z
+    completed: 2026-04-24T04:46:57.838Z
+    commit: d988f05
   R10.15:
     title: Accept + close — tower verify R10, manual smoke, tower accept R10
       (gate-enforced flip of acceptance.met), final handoff
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T04:46:58.164Z
+    completed: 2026-04-24T04:48:35.639Z
+    commit: d988f05
 blockers: []
 decisions:
   - date: 2026-04-23
@@ -199,3 +199,15 @@ history:
   - 2026-04-24T04:18:20.389Z: task_started R10.10
   - 2026-04-24T04:20:12.062Z: task_started R10.10
   - 2026-04-24T04:24:00.935Z: task_completed R10.10
+  - 2026-04-24T04:25:51.351Z: task_started R10.11
+  - 2026-04-24T04:35:37.753Z: task_completed R10.11
+  - 2026-04-24T04:35:38.084Z: task_started R10.12
+  - 2026-04-24T04:44:33.510Z: task_completed R10.12
+  - 2026-04-24T04:46:39.337Z: task_started R10.13
+  - 2026-04-24T04:46:57.181Z: task_completed R10.13
+  - 2026-04-24T04:46:57.502Z: task_started R10.14
+  - 2026-04-24T04:46:57.838Z: task_completed R10.14
+  - 2026-04-24T04:46:58.164Z: task_started R10.15
+  - 2026-04-24T04:48:35.639Z: task_completed R10.15
+  - 2026-04-24T04:48:35.639Z: phase_completed
+  - 2026-04-24T04:49:43.773Z: acceptance_met verified_by d988f05
