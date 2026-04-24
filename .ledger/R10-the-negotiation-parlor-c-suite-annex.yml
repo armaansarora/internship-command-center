@@ -10,8 +10,8 @@ started: 2026-04-24T02:24:03.890Z
 completed: null
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T03:04:59.786Z
-  expires: 2026-04-24T05:04:59.781Z
+  acquired: 2026-04-24T03:11:58.089Z
+  expires: 2026-04-24T05:11:58.084Z
 acceptance:
   criteria:
     - Offer arriving via email parses into the offers table. Parlor door appears
@@ -63,17 +63,17 @@ tasks:
     title: Parlor door — ParlorDoor component + materialization animation + doorSlot
       in CSuiteScene + server-side gate in /c-suite/page.tsx + PROOF absence
       invariant test
-    status: in_progress
+    status: complete
     started: 2026-04-24T03:04:59.786Z
-    completed: null
-    commit: null
+    completed: 2026-04-24T03:10:31.761Z
+    commit: f0a537b
   R10.6:
     title: /parlor route + ParlorScene + OakTable + OfferFolder + route-gate PROOF
       test (redirect when offerCount===0)
-    status: not_started
-    started: null
-    completed: null
-    commit: null
+    status: complete
+    started: 2026-04-24T03:11:58.089Z
+    completed: 2026-04-24T03:17:30.863Z
+    commit: c287f92
   R10.7:
     title: Three-chair convening — Offer Evaluator persona + convenePipelineForOffer
       (Promise.allSettled fan-out to OE/CFO/CNO) + POST /api/offers/:id/convene
@@ -187,3 +187,6 @@ history:
   - 2026-04-24T02:54:44.098Z: task_started R10.4
   - 2026-04-24T03:01:27.216Z: task_completed R10.4
   - 2026-04-24T03:04:59.786Z: task_started R10.5
+  - 2026-04-24T03:10:31.761Z: task_completed R10.5
+  - 2026-04-24T03:11:58.089Z: task_started R10.6
+  - 2026-04-24T03:17:30.863Z: task_completed R10.6
