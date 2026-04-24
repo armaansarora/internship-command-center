@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
 import type { LookupResult } from "@/lib/comp-bands/lookup";
+import type { ContactForAgent } from "@/lib/db/queries/contacts-rest";
 import { ParlorScene } from "@/components/parlor/ParlorScene";
 import { OakTable } from "@/components/parlor/OakTable";
 import { ThreeChairsConvening } from "@/components/parlor/ThreeChairsConvening";
@@ -16,6 +17,7 @@ import {
 import { NegotiationDraftPanel } from "@/components/parlor/NegotiationDraftPanel";
 import { NegotiationSimulator } from "@/components/parlor/simulator/NegotiationSimulator";
 import { CFOQuipOverlay } from "@/components/parlor/CFOQuipOverlay";
+import { ReferenceRequestPanel } from "@/components/parlor/ReferenceRequestPanel";
 
 interface ParlorClientProps {
   offers: OfferRow[];
@@ -42,6 +44,10 @@ interface ParlorClientProps {
    * `cfoQuipShown===true` the overlay stays absent from the DOM.
    */
   initialCfoQuip?: { quip: string } | null;
+  /** R10.14 — top-3 warm contacts for the reference-request panel. */
+  topWarmContacts?: ContactForAgent[];
+  /** R10.14 — cooling fallback, populated only when warm is empty. */
+  fallbackCoolingContacts?: ContactForAgent[];
 }
 
 /**
@@ -84,6 +90,8 @@ export function ParlorClient({
   ceoVoiceEnabled = false,
   cfoQuipShown = true,
   initialCfoQuip = null,
+  topWarmContacts = [],
+  fallbackCoolingContacts = [],
 }: ParlorClientProps): JSX.Element {
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(
     offers[0]?.id ?? null,
@@ -213,6 +221,12 @@ export function ParlorClient({
             <NegotiationSimulator
               key={`sim-${selectedOfferId}`}
               offer={offers.find((o) => o.id === selectedOfferId)!}
+            />
+            <ReferenceRequestPanel
+              key={`ref-${selectedOfferId}`}
+              topWarmContacts={topWarmContacts}
+              fallbackCoolingContacts={fallbackCoolingContacts}
+              selectedOfferId={selectedOfferId}
             />
           </>
         ) : null

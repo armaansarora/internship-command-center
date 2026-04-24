@@ -67,6 +67,7 @@
 - `src/components/parlor/CEOVoicePlayButton.test.tsx` (249 LOC) — R10.11 — CEOVoicePlayButton behavioral tests.
 - `src/components/parlor/NegotiationDraftPanel.test.tsx` (249 LOC) — R10.9 — NegotiationDraftPanel render + reveal tests.
 - `src/components/floor-2/ObservatoryClient.tsx` (247 LOC) — R9.9 — raw application data the Orrery transforms into planets. The
+- `src/app/(authenticated)/parlor/parlor-client.tsx` (246 LOC) — R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
 - `src/components/world/LobbyBackground.tsx` (245 LOC) — LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
 - `src/components/world/PersistentWorld.tsx` (243 LOC) — PersistentWorld — mounts the expensive world chrome ONCE inside WorldShell
 - `src/components/world/ErrorBoundary.tsx` (241 LOC) — ErrorBoundary — in-world error display using "the building's lights flicker" metaphor.
@@ -75,7 +76,6 @@
 - `src/components/floor-3/binder/BinderOpen.tsx` (235 LOC) — R6.8 — Flip-open view of a single Debrief binder.
 - `src/components/world/elevator/ElevatorDoors.tsx` (234 LOC) — ElevatorDoors — the full-screen transition overlay composed of:
 - `src/components/parlor/ReferenceRequestPanel.tsx` (232 LOC) — R10.14 — ReferenceRequestPanel.
-- `src/app/(authenticated)/parlor/parlor-client.tsx` (232 LOC) — R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
 - `src/components/penthouse/quick-actions/PneumaticTubeOverlay.tsx` (231 LOC) — Pneumatic-tube dispatch overlay.
 - `src/components/floor-2/cfo-character/CFOWhiteboard.tsx` (228 LOC)
 - `src/components/world/ProceduralSkyline.tsx` (227 LOC) — When provided, the render loop reads the camera offset from this ref each

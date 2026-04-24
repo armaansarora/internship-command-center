@@ -7,6 +7,7 @@ import {
   countOffersForUser,
   getOffersForUser,
 } from "@/lib/db/queries/offers-rest";
+import { getContactsForAgent } from "@/lib/db/queries/contacts-rest";
 import { readCeoVoicePref } from "@/lib/preferences/ceo-voice-pref";
 import { readParlorCfoQuipPref } from "@/lib/preferences/parlor-cfo-quip-pref";
 import { lookupCompBands } from "@/lib/comp-bands/lookup";
@@ -52,6 +53,23 @@ export default async function ParlorPage(): Promise<JSX.Element> {
   const count = await countOffersForUser(supabase, user.id);
   if (count === 0) redirect("/c-suite");
   const offers = await getOffersForUser(supabase, user.id);
+
+  // R10.14 — top-3 warm contacts for the reference-request panel.
+  // Tiered fallback: if no warm contacts, fetch cooling contacts so the
+  // panel can coach the user to re-warm before asking for a reference.
+  const { contacts: topWarmContacts } = await getContactsForAgent(user.id, {
+    warmth: "warm",
+    sortBy: "recent_desc",
+    limit: 3,
+  });
+  const { contacts: fallbackCoolingContacts } =
+    topWarmContacts.length === 0
+      ? await getContactsForAgent(user.id, {
+          warmth: "cooling",
+          sortBy: "recent_desc",
+          limit: 3,
+        })
+      : { contacts: [] };
 
   // R10.11 + R10.12 — Seed preferences. Defensive reads so any malformed
   // preferences blob falls back to safe defaults (voice OFF, quip shown
@@ -118,6 +136,8 @@ export default async function ParlorPage(): Promise<JSX.Element> {
       ceoVoiceEnabled={ceoVoicePref.enabled}
       cfoQuipShown={cfoQuipPref.shown}
       initialCfoQuip={initialCfoQuip}
+      topWarmContacts={topWarmContacts}
+      fallbackCoolingContacts={fallbackCoolingContacts}
     />
   );
 }
