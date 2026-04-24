@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 12:51 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 8:50 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,15 +19,15 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `98e3c68`)
+- **Branch:** `main` (commit `4a92202`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 113,858 across 656 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
-- **`docs/MASTER-PLAN.md`**: Last updated 2026-04-17 (7d ago)
-- **`docs/VISION-SPEC.md`**: Last updated 2026-04-17 (7d ago)
-- **`docs/TECH-BRIEF.md`**: Last updated 2026-04-17 (7d ago)
+- **`docs/MASTER-PLAN.md`**: Last updated 2026-04-17 (8d ago)
+- **`docs/VISION-SPEC.md`**: Last updated 2026-04-17 (8d ago)
+- **`docs/TECH-BRIEF.md`**: Last updated 2026-04-17 (8d ago)
 
 > Update these docs before starting work — stale specs cause wasted effort.
 
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-98e3c68 [R10/10.15] chore(autopilot): paused=true — R10 scope complete
+4a92202 chore(handoff): session sess-a5908e — R0
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `98e3c68`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `4a92202`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -1054,13 +1054,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1103 | 12,339 |
+| `BOOTSTRAP-PROMPT.md` | 1103 | 12,334 |
 | `PROJECT-CONTEXT.md` | 283 | 5,309 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2099** | **31,286** |
+| **Total** | **2099** | **31,281** |
 
-> ⚠️ Reading all recommended files consumes ~31,286 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,281 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
