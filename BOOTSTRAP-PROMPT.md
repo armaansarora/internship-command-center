@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 10:21 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 10:24 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `6381c0f`)
+- **Branch:** `main` (commit `37b30bd`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 116,519 across 671 source files
+- **Total LOC:** 116,146 across 669 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-6381c0f chore(ledger): R10 pointer correction + re-verify — R10 post-mortem
+37b30bd fix(ledger): quote multi-sentence history entries — YAML parser fix
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `6381c0f`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `37b30bd`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,14 +102,14 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (671 files, 116,519 LOC)
+## Source Tree (669 files, 116,146 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 7140 |
+| `src/lib/db/queries` | 6971 |
 | `src/lib/ai/agents` | 4436 |
 | `src/styles` | 3969 |
-| `src/components/world` | 3512 |
+| `src/components/world` | 3308 |
 | `src/components/parlor` | 3014 |
 | `src/components/floor-1` | 2725 |
 | `src/app/__tests__` | 2422 |
@@ -704,7 +704,6 @@ src/components/world/EasterEggs.tsx
 src/components/world/Elevator.tsx
 src/components/world/ErrorBoundary.tsx
 src/components/world/FloorShell.tsx
-src/components/world/FloorStub.tsx
 src/components/world/LobbyBackground.tsx
 src/components/world/MilestoneToast.tsx
 src/components/world/MilestoneToastContainer.tsx
@@ -861,7 +860,6 @@ src/lib/db/queries/comp-bands-rest.ts
 src/lib/db/queries/companies-rest.ts
 src/lib/db/queries/contacts-mutations.ts
 src/lib/db/queries/contacts-rest.ts
-src/lib/db/queries/daily-snapshots-rest.ts
 src/lib/db/queries/debriefs-rest.ts
 src/lib/db/queries/documents-mutations.ts
 src/lib/db/queries/documents-rest.ts
@@ -1074,13 +1072,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1123 | 12,635 |
-| `PROJECT-CONTEXT.md` | 283 | 5,309 |
+| `BOOTSTRAP-PROMPT.md` | 1123 | 12,634 |
+| `PROJECT-CONTEXT.md` | 277 | 5,128 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2119** | **31,582** |
+| `CLAUDE.md` | 340 | 6,341 |
+| **Total** | **2107** | **31,275** |
 
-> ⚠️ Reading all recommended files consumes ~31,582 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,275 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

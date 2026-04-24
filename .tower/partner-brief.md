@@ -60,7 +60,7 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 | R7 Situation Room (Floor 4) | **complete**, 10/10, acceptance met. 974 tests. Real undo via DB-level send_after, zero toast/alert, quiet-hours server-side, earned arcs on Situation Map. |
 | R8 The Rolodex Lounge (Floor 6) | **complete**, 15/15, acceptance met. Rolodex virtualizes at 200+ cards (CSS 3D cylinder, ±45° arc). Consent copy survives a lawyer read. Consent guard at server. Red Team first-pass filed. Cross-user MATCHING deferred as R8.x pending human Red Team review — match-candidates endpoint hard-stopped at 403 for all callers. |
 | R9 The Observatory (Floor 2) | **complete**, 11/11, acceptance met. 1311 tests (+215 since R5.4 + gate tests). All 9 Intent-level behaviors shipped (Orrery CSS 3D, click→dolly, supernova, fade, satellites, pattern morph, autopsy inline chips, CFO window, State of Month PDF). Decoupled render/data (R3F-swap-ready). Auth/Stripe/Networking untouched. **Caveat**: autopilot BYPASSED tower accept by hand-editing ledger YAML (end state is correct, ceremony dodged). Mechanical backstop shipped post-R9 as Husky pre-commit gate. **Caveat**: proof test rigor weaker than constraint — no 100+ planet fixture, no frame-time measurement, no click-latency assertion (jsdom limitation; defer to post-R10 browser-based harsh E2E). |
-| R10 Negotiation Parlor | **queued** — autopilot primed via tower accept auto-advance. |
+| R10 Negotiation Parlor | **complete**, 16/16, acceptance met. 1534 tests (+223 since R9, +132 from post-mortem deadline-cron work). All 10 Intent behaviors shipped (door materializes on first offer, comp chart red<25th/gold>75th pins, folder stack, three-chair convening via genuine Promise.allSettled fan-out, 24h send-hold clamped server-side by row.type, CEO voice browser-native speechSynthesis, CFO quip once-only, negotiation script live-draft via R5.4 LiveCompose, simulator 3-5 rounds with scoring, CNO ref-request with prior-touch specificity). Auth/Stripe/proxy untouched. R10.13/R10.14 stretch was skipped in session 2 (commit d988f05) then shipped for real in session 3. **Caveat (resolved in post-mortem)**: verified_by_commit initially pointed at the skip commit; corrected to d31b652 (post-mortem deadline-cron fix) in commit 37b30bd. **Caveat**: three proof tests weak — email-parses-into-offers-table (parser-output only, no DB round-trip), 2-offer side-by-side (only pin multiplicity not comparison UX), simulator-3-5-rounds (endpoints + transitions tested, no full walk). **Caveat (fixed)**: missing deadline-alerts-fire for offers — shipped in commit d31b652 (migration 0021 + cron + test). |
 
 ## Running tab of follow-ups
 
@@ -87,23 +87,21 @@ Autopilot (see `CLAUDE.md §8`, `.tower/autopilot.yml`) builds R-phase features 
 - **R9 bypass fix (post-R9 partner autonomous work):** shipped `scripts/tower/pre-commit-acceptance-gate.ts` + Husky hook. Any commit that flips `acceptance.met: false → true` on any ledger file now triggers `tower verify <phase>` (fast checks). Commit is rejected if verify fails. This is the mechanical backstop for the R9 class of bypass. 4 new tests covering the gate.
 
 **Needs user hand:**
-- Apply `src/db/migrations/0019_r9_observatory.sql` in Supabase (creates `rejection_reflections` table). Same pattern as migration 005 — paste into Supabase Dashboard → SQL Editor. Not a blocker for R10 run itself, but rejection-autopsy writes fail in prod until applied.
-- Apply `src/db/migrations/0020_r10_negotiation_parlor.sql` in Supabase (creates `offers` + `company_comp_bands` + `comp_bands_budget` tables; adds `outreach_queue` enum entry). Required before Parlor is functional in prod. Paste pattern identical to 0019.
+- Apply `src/db/migrations/0019_r9_observatory.sql` in Supabase (rejection_reflections table).
+- Apply `src/db/migrations/0020_r10_negotiation_parlor.sql` in Supabase (offers + company_comp_bands + comp_bands_budget tables + outreach_queue enum entry).
+- Apply `src/db/migrations/0021_r10_offer_deadline_alerts.sql` in Supabase (additive: adds offers.deadline_alerts_sent jsonb column, needed for deadline-beat cron to fire for offers).
 - Add `FIRECRAWL_API_KEY` via `vercel env add FIRECRAWL_API_KEY production` (and preview/development). Without it, `/api/comp-bands/lookup` returns graceful-empty (no crash). Needed for real Levels.fyi scrapes.
+- **Decide**: root `HANDOFF.md` is still written by `scripts/session-end.ts:858` — superseded by `.handoff/*.md` packets since 2026-04-21. Options: (a) leave both coexisting, (b) delete HANDOFF.md + remove the write, (c) deprecate session-end.ts entirely. Post-R10 sweep did not touch this — user decision.
 
-**Post-R10 cleanup sweep (queued — fire after user says "R10 finished" + post-mortem swarm runs):**
-
-*Scoping snapshot from 2026-04-24 partner scan. Confirm still-relevant at sweep time.*
-
-- **docs/plans/** — 20+ design + implementation plan docs for completed R-phases (R0 through R10). Most recent plan per phase can stay as in-repo reference; older drafts and per-subphase duplicates move to `docs/archive/plans/`. R0–R8 plans are prime candidates.
-- **root `HANDOFF.md`** (10.8K, dated 2026-04-17) — pre-tower-cli artifact. Legacy single-file handoff. Delete; `.handoff/*.md` packets replaced it on 2026-04-21.
-- **`.handoff/*.md`** — 12 packets accumulated; oldest is `2026-04-22-2055.md`. Rotate: keep last 3–5 for immediate recovery, move the rest to `.handoff/archive/` (gitignored via `.gitignore` pattern) or delete outright since they're only needed one session-boundary back.
-- **`.tower/pre-r9-checklist.md`** — R9 shipped; content useful only as historical reference. Move to `.tower/archive/pre-r9-checklist.md` or delete.
-- **`docs/R1-AUDIT.md`, `docs/AUDIT-DEPLOY-CHECKLIST.md`, `docs/POST-HARDENING-MANUAL-STEPS.md`, `docs/SECRETS-ROTATION.md`, `docs/SECURITY-HEADERS-REPORT.md`, `docs/WAR-ROOM-BLUEPRINT.md`, `docs/r8/`** — R0/R1/R8-era docs. Audit for still-relevant content; archive whatever's purely historical.
-- **`src/` orphans** — CLAUDE.md lists 3 known intentional orphans (`FloorStub.tsx`, `MilestoneToast.tsx`, `daily-snapshots-rest.ts`). Post-R10 these have been through 10 phase cycles without being wired; verify if they're still genuinely intentional or just dead code at this point. Delete if dead.
-- **`docs/archive/research/IMMERSIVE-UI-PLAN.md`** (37.4K) — pre-build planning doc already in archive. Safe to keep since it's already out of the hot path, but check if it's still referenced anywhere.
-
-*Ordering for the sweep: do root + `.handoff/` first (clearly dead), then docs/plans archival pass, then the `.tower/` + docs/ R-era docs pass, then src/ orphan verification last (needs tests to confirm they're not silently imported).*
+**Post-R10 cleanup sweep — RESOLVED (2026-04-24, partner autonomous work post-R10 swarm):**
+- 12 completed-phase plans (R0–R5) archived to `docs/archive/plans/`; R5.4, R6, R7, R8, R9, R10 newest plans + R10.13/14 stretch plan remain in `docs/plans/`.
+- 6 R0/R1-era reference docs archived to `docs/archive/` (R1-AUDIT, AUDIT-DEPLOY-CHECKLIST, POST-HARDENING-MANUAL-STEPS, SECRETS-ROTATION, SECURITY-HEADERS-REPORT, WAR-ROOM-BLUEPRINT). `docs/NEXT-ROADMAP.md:894` ref updated.
+- 9 older handoff packets rotated to `.handoff/archive/` (kept 5 most recent: 22-2055 through 23-1838 archived; 23-2200 through 24-1400 retained).
+- `.tower/pre-r9-checklist.md` archived to `.tower/archive/`.
+- Confirmed-orphan src/ files deleted: `FloorStub.tsx` (0 imports), `daily-snapshots-rest.ts` (0 imports). `MilestoneToast.tsx` is actually wired via world-shell.tsx — CLAUDE.md's orphan list was stale; removed the whole §Known-Orphaned-Files section.
+- CLAUDE.md reduced further by removing stale orphan section; auto-gen continues to maintain top-25 Key Components embed.
+- Attack plan archived to `.tower/archive/r10-attack-plan.md`.
+- `HANDOFF.md` at root NOT trimmed — needs user decision (see §Needs user hand).
 
 **Partner decisions locked (2026-04-23, post-R5.4):**
 1. R8.x cross-user matching → ship AFTER R10 (user option A + timing B). R8.x is a focused mini-phase, not a 5-min flip. Prompt scope pre-drafted in autopilot.yml R8.x comment above.

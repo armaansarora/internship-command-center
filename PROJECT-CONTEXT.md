@@ -209,24 +209,18 @@ All planning docs are in `docs/`. Operational files stay in root.
 |---|---|---|
 | `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~280 |
 | `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~1120 |
-| `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~350 |
+| `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~340 |
 | `docs/ARCHITECTURE-MAP.md` | This document is the fastest way to understand how the app is organized today. | ~90 |
-| `docs/AUDIT-DEPLOY-CHECKLIST.md` | **Read this first.** This is the dummy-proof, click-by-click, paste-by-paste gui | ~370 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |
 | `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge, multi-tenant ready | ~290 |
 | `docs/KEY-COMPONENTS.md` | - `src/app/(authenticated)/settings/settings-client.tsx` (1341 LOC) — R0.7 — `us | ~220 |
 | `docs/MASTER-PLAN.md` | 7 phases with deliverables, acceptance criteria, testing strategy | ~370 |
 | `docs/NEXT-ROADMAP.md` | **Audience.** Any Claude session working on The Tower. And Armaan, once per phas | ~950 |
-| `docs/POST-HARDENING-MANUAL-STEPS.md` | Everything in this file is **something a computer can't do for you**. The code | ~270 |
-| `docs/R1-AUDIT.md` | **Generated:** 2026-04-22 (autopilot) | ~110 |
 | `docs/SCHEMA-DRAFT.md` | 16-table Postgres schema: RLS, pgvector HNSW indexes, post-push SQL triggers | ~480 |
-| `docs/SECRETS-ROTATION.md` | Canonical list: `src/lib/env.ts`. Every secret the Tower runs on is listed below | ~200 |
-| `docs/SECURITY-HEADERS-REPORT.md` | **Date:** 2026-04-22 | ~40 |
 | `docs/TECH-BRIEF.md` | Research synthesis + Google OAuth setup, SDK patterns, gotchas | ~430 |
 | `docs/VISION-SPEC.md` | Locked spatial UI spec: building, floors, characters, cursor, day/night, design tokens | ~260 |
-| `docs/WAR-ROOM-BLUEPRINT.md` | Phase 1 implementation guide — architecture, CRO agent, DnD, design tokens | ~1480 |
-| `docs/archive/` | Completed plans + research (7 files, reference only) | varies |
+| `docs/archive/` | Completed plans + research (25 files, reference only) | varies |
 
 
 ## 7. OPEN QUESTIONS

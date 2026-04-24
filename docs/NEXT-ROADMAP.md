@@ -891,7 +891,7 @@ Not a Brief. Just true things Claude needs when executing.
 - `docs/CHAIN-OF-COMMAND.md` — CEO → department → subagent hierarchy (3,000+ lines; has the RE-finance tier list, recruiting calendar, scope-enforcement rules).
 - `docs/CHARACTER-PROMPTS.md` — system prompts for 8 C-suite agents (may be stale relative to §5; read critically).
 - `docs/SCHEMA-DRAFT.md` — 16-table schema with RLS.
-- `docs/WAR-ROOM-BLUEPRINT.md` — Phase 1 implementation guide from the original roadmap.
+- `docs/archive/WAR-ROOM-BLUEPRINT.md` — Phase 1 implementation guide from the original roadmap (archived post-R10 cleanup).
 - `docs/BUG-TRACKER.md` — fix log.
 - `BOOTSTRAP-PROMPT.md` — auto-generated on every commit; source of truth for build health and current phase.
 - `src/db/schema.ts` — the 16 tables.

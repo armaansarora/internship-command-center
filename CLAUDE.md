@@ -81,12 +81,6 @@ Character personality prompts: `docs/CHARACTER-PROMPTS.md`
 6. **Vercel Auto-deploy:** `main` branch gets automatic production deployment.
 7. **Supabase REST client pattern:** `createClient()` from `@/lib/supabase/server` for server components, `@/lib/supabase/client` for client components.
 
-## Known Orphaned Files (Not Bugs — Intentionally Kept)
-These files are built and functional but not yet imported into the component tree. They exist as ready-to-wire infrastructure:
-- `src/components/world/FloorStub.tsx` — Generic "Coming Soon" floor template
-- `src/components/world/MilestoneToast.tsx` — Gold milestone notification (wired but dynamically loaded)
-- `src/lib/db/queries/daily-snapshots-rest.ts` — Daily snapshot queries
-
 ## Design System (The Tower)
 Immersive spatial UI — building metaphor, not a dashboard. Each page is a "floor."
 - Primary dark: `#1A1A2E`
@@ -129,7 +123,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
 - `src/components/floor-7/WarRoomClient.tsx` (429 LOC)
 
-> 188 smaller components omitted — full list in `docs/KEY-COMPONENTS.md`.
+> 187 smaller components omitted — full list in `docs/KEY-COMPONENTS.md`.
 
 ## Bootstrap Infrastructure
 - `scripts/auto-organize-docs.ts` — **runs on every commit (Husky)**. Auto-archives stale docs, auto-generates Key Components (this section), auto-updates doc map table, auto-appends session logs. Zero manual doc maintenance.

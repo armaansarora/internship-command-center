@@ -93,7 +93,6 @@
 - `src/components/floor-2/analytics/PipelineVelocity.tsx` (210 LOC) — PipelineVelocity — bar chart showing average days per pipeline stage.
 - `src/components/parlor/ThreeChairsConvening.test.tsx` (206 LOC) — R10.7 — ThreeChairsConvening render + interaction tests.
 - `src/components/floor-7/war-table/PipelineColumn.tsx` (204 LOC)
-- `src/components/world/FloorStub.tsx` (204 LOC) — Full CSS color used for:
 - `src/components/floor-4/final-countdown/FinalCountdownSection.tsx` (203 LOC)
 - `src/components/floor-6/contact-grid/ContactGrid.tsx` (202 LOC)
 - `src/components/floor-7/war-table/StampBar.tsx` (202 LOC) — Floating action bar that appears when the user has selected one or more
