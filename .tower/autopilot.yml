@@ -1,97 +1,96 @@
 paused: true
-scope: all
-started: 2026-04-24T12:54:00Z
-started_by: sess-r11-autopilot
-ended: 2026-04-24T19:30:00Z
-ended_reason: "R11 complete — 12/12 tasks, acceptance.met=true (verified_by_commit: 6b9be81). Partner Red Team closed 2 BLOCKs inline (audit-log atomic, revoke cascade into match_candidate_index) + 1 FLAG documented (anon-key not user-scoped, intentional trade-off). All 10 Intent behaviors shipped, consent copy passes lawyer read, consent version bumped 1→2. 1635 tests green. No next scope queued — partner scopes next phase (R12 hardening OR §8 living expansions)."
+scope: R12-only
+started: null
+started_by: null
+ended: null
+ended_reason: null
 max_blockers: 3
-previous_phase: R10
-previous_outcome: "R10 complete — 16/16 tasks, acceptance.met (verified_by_commit: d31b652, post-mortem deadline-cron fix landed + ledger pointer correction). All 10 Intent behaviors shipped including both stretch tasks R10.13 (simulator) + R10.14 (ref-request). Post-mortem swarm fired 2026-04-24: 1 BLOCK fixed (acceptance gate post-hoc bypass), 1 MISSING fixed (offer deadline alerts), 3 weak proof tests logged as non-blocking caveats."
-current_phase: R11
-next_brief: ".tower/partner-brief.md §Current-state-of-build R8 row + docs/plans/2026-04-23-r8-rolodex-lounge.md for R8 context"
+previous_phase: R11
+previous_outcome: "R11 complete — 12/12 tasks, acceptance.met (verified_by_commit: 6b9be81). All 10 Intent behaviors shipped, consent copy passes 7/7 lawyer-read, consent version bumped 1→2. Partner Red Team closed 2 BLOCKs inline (audit-log atomic, revoke cascade into match_candidate_index) + 1 FLAG documented (anon-key not user-scoped, intentional trade-off). 1635 tests green."
+current_phase: R12
+next_brief: ".tower/partner-brief.md §Post-R10-hardening + partner decision #3 (2026-04-23 locked) — HARSH E2E simulation with Playwright-based browser harness."
 verification_before_acceptance:
-  - npm run t accept R11
+  - npm run t accept R12
 partner_constraints:
-  # ─── R11 pre-locked decisions (user, 2026-04-24) ───
-  # Originally scoped in partner-brief as "R8.x cross-user matching" — promoted
-  # to R11 as its own phase since R8 is already accepted (re-opening would trip
-  # the Husky acceptance gate). Conceptually still "the R8.x work."
+  # ─── R12 pre-locked decisions (user, 2026-04-24) ───
   - |
-    (a) FULL SCOPE — not the slim version. Ship matching behind the 403
-    hard-stop AND all 3 Red Team gaps (index populator cron, consent
-    version check, audit log UI) AND both concerns (rate limit, delta
-    re-scan on application/contact change). This is a privacy-touching
-    feature; do it right once.
+    (a) HARNESS — Playwright. Rationale: best network-level primitives
+    (route.fulfill for mocking fetch), parallel browser contexts for
+    concurrency scenarios, retry-on-flake built in, real Chromium so
+    frame-timing assertions are valid (closes R9 jsdom caveat). Do NOT
+    add adjacent frameworks (Percy, Chromatic, Cypress, etc.).
   - |
-    (b) CONSENT GATE REUSE — R8 already shipped `assertConsented`
-    (src/lib/networking/consent-guard.ts). R8.x EXTENDS it with version
-    check; does NOT rebuild it. Add a CURRENT_CONSENT_VERSION constant
-    and a typed 403 reason "consent-version-stale" for users whose
-    stored version is below current. User then re-consents in Settings
-    and the stored version bumps.
+    (b) NO PROD DB — scenarios run against mocked Supabase at the fetch
+    layer (page.route() intercepts). NEVER write to the real Supabase
+    project during a test run. If a scenario NEEDS real DB integration,
+    flag for partner (me) to run via Supabase MCP after autopilot hands
+    off — don't shortcut into prod from within a test session.
   - |
-    (c) CRON REUSE — match-index populator lives at /api/cron/match-index/
-    and follows the same shape as R7's /api/cron/briefing (per-user
-    iteration, graceful-fail per user, budget cap). Do NOT rebuild cron
-    infrastructure.
+    (c) FIXTURES ARE DETERMINISTIC — seeded data with stable UUIDs, no
+    Date.now() in fixtures. Scenarios must be re-runnable with identical
+    outcomes. tests/e2e/fixtures/ holds canonical seed files.
   - |
-    (d) DELTA RE-SCAN SURFACE — on contact insert/update/warmth change
-    AND on application insert/status change, enqueue a per-user re-scan.
-    Reuse R8's existing event plumbing if present; otherwise a simple
-    per-user debounce (no re-scan if one fired in the last 5 minutes for
-    that user). No Kafka-style queueing.
+    (d) CI INTEGRATION — GitHub Actions workflow at
+    .github/workflows/hardening-e2e.yml. Runs on PRs that touch src/ +
+    scheduled weekly run. Upload HTML reports as artifacts. Failure on
+    main → merge block (add required-check to branch protection in a
+    separate partner commit, not autopilot's job).
+  # ─── R12 non-negotiables ───
   - |
-    (e) ALGORITHM — heuristic, not ML. Score = edge strength (warmth) ×
-    company overlap (does the counterparty work at a company the user
-    has a recent application to?) × recency. Deterministic + cache-
-    friendly. Seed fixture for tests.
+    SCENARIO DESIGN — each HARSH scenario must have a clear invariant
+    it binds (what the defender is protecting). Name the attack/failure
+    mode, the victim, and the expected defense behavior in a
+    test.describe block. No "runs without crashing" scenarios — those
+    belong in unit tests.
   - |
-    (f) AUDIT LOG — `match_events` table with anonymized counterparty_
-    anon_key (hash of contact_id + salt, NOT the contact id). Settings →
-    Networking → "How your data is used" surface showing last 20 events
-    as human-readable one-liners ("You were matched with a contact at
-    Acme on Apr 24"). NOT a raw log dump.
-  # ─── R11 non-negotiables ───
+    FAILURE HANDLING — if a scenario surfaces a real regression or a
+    real defense gap, file it as a blocker via `tower block R12.X`. Do
+    NOT weaken the assertion to make the test pass. Do NOT add a
+    retry-until-green wrapper. The scenario IS the spec.
   - |
-    NO CROSS-USER LEAKS — RLS on every new table. Match algorithm reads
-    FROM the current user's contacts but the MATCH TARGET (the company
-    / counterparty surface) is always anonymized or aggregated. Never
-    expose another user's raw contact record. Proof test must bind this
-    invariant (two users, each with data, one user's query MUST NOT
-    return the other user's row IDs).
+    R9 + R11 CARRYOVER CAVEATS — R12 closes these with real runtime
+    proofs:
+      • R9 Orrery 100+ planets frame timing (>= 30fps, click-to-detail
+        < 250ms, supernova within ±10% of spec)
+      • R11 cross-user RLS runtime: 2 authenticated users, user A's
+        match-candidates response NEVER contains user B's data
+      • R11 rate-limit end-to-end: 21 sequential real requests trip the
+        Postgres RPC and return typed 429
+      • R11 route-level fail-closed: mock DB error returns 500 not 200
   - |
-    RATE LIMIT — 20 match-candidate queries per user per hour. Typed 429
-    with retry_after_seconds. Documented in the consent copy surface
-    (NOT hidden). Enforced server-side with Supabase-backed counter or
-    Vercel Fluid Compute shared state.
+    ISOLATION INVARIANT — scenarios must not mutate shared state. Each
+    scenario runs in a fresh browser context with its own mock surface.
+    No leaked localStorage, no shared cookies, no /tmp pollution
+    between scenarios.
   - |
-    FAIL-CLOSED — every gate (consent, version, rate limit, RLS) fails
-    closed. If any gate lookup throws or is indeterminate, return the
-    403/429 not a 500. No fall-through to "return matches anyway"
-    branches.
+    TEST DB STRATEGY — if a scenario needs MORE than fetch-layer
+    mocking (e.g., testing a real Postgres CHECK constraint), flag as
+    a "needs-real-db" blocker; partner can spin up a Supabase branch
+    via MCP for just those scenarios. Don't try to ship real-DB tests
+    inside autopilot.
+  # ─── R12 scope ───
   - |
-    CONSENT COPY — if the consent surface copy changes to cover R8.x
-    matching, bump CURRENT_CONSENT_VERSION. All already-consented users
-    become `consent-version-stale` until they re-consent. This is
-    intentional — it's the mechanism for "users consented to X; now we
-    do Y, get fresh consent." Partner-brief Red Team pass reviews the
-    copy before ship.
-  # ─── R11 scope ───
+    SCOPE MVP (must-ship) — R12.1 through R12.10 per ledger. 20+ HARSH
+    scenarios across 5 categories (security, abuse, concurrency, scale,
+    failure). R9 + R11 carryover caveats closed with runtime proofs.
   - |
-    SCOPE — R11.1 through R11.12 per ledger. Must-ship is 1-10; 11
-    is partner Red Team pass (post-autopilot); 12 is the accept close.
+    STRETCH (within phase, best-effort after MVP) — R12.11 CI
+    integration workflow file. This can ship in R12 or ship as a
+    partner follow-up commit after accept.
   - |
-    OUT OF SCOPE — (i) cross-user MESSAGING (just matching, not intros
-    yet); (ii) reverse-matching where other users see you as a candidate
-    (reverse needs its own consent opt-in); (iii) ML-based scoring;
-    (iv) any §8 living expansions; (v) UI changes beyond the Settings →
-    Networking audit surface.
-  # ─── R11 anti-patterns (trip-wire against) ───
+    OUT OF SCOPE — (i) mutation testing (Stryker, etc.); (ii) fuzzing
+    (AFL/libFuzzer); (iii) load testing with >1000 concurrent users
+    (Gatling/k6); (iv) ML-adversarial testing; (v) any §8 living
+    expansions; (vi) replacing existing test suites — R12 ADDS the
+    harness, does not migrate existing vitest tests.
+  # ─── R12 anti-patterns (trip-wire against) ───
   - |
-    ANTI-PATTERNS — do not ship: (i) a match algorithm that returns ANY
-    raw contact data from another user's Rolodex; (ii) a 403-removal
-    without also shipping index populator + audit log + rate limit;
-    (iii) a "soft launch" flag that hides matching from UI while still
-    computing+logging against users who haven't re-consented; (iv) a
-    rate limit that's client-side only; (v) an audit log that's opaque
-    ("match event fired" with no human-readable context).
+    ANTI-PATTERNS — do not ship: (i) scenarios that flake and get
+    marked skip/todo; (ii) retry-until-green wrappers that hide race
+    conditions; (iii) a harness that requires prod DB credentials to
+    run; (iv) Playwright tests that don't actually open a browser
+    context (using only request fixtures = vitest-with-extra-steps);
+    (v) a CI workflow that runs on every push instead of gated on
+    src/ changes (cost control); (vi) scenarios named after test IDs
+    (SCENARIO-001) instead of descriptive intent ("user A cannot
+    query user B's match candidates even with a crafted JWT").
