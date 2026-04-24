@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:36 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Friday, April 24, 2026 at 9:42 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `be85108`)
+- **Branch:** `main` (commit `6b1af71`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 115,328 across 666 source files
+- **Total LOC:** 115,642 across 668 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-be85108 [R10/10.14] refactor(api): outreach-approve clamp is now type→seconds map
+6b1af71 [R10/10.14] fix(parlor): strip privateNote from reference-request prompt (P5)
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `be85108`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `6b1af71`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,11 +102,11 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (666 files, 115,328 LOC)
+## Source Tree (668 files, 115,642 LOC)
 
 | Directory | LOC |
 |---|---|
-| `src/lib/db/queries` | 7111 |
+| `src/lib/db/queries` | 7140 |
 | `src/lib/ai/agents` | 4436 |
 | `src/styles` | 3777 |
 | `src/components/world` | 3512 |
@@ -242,6 +242,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/offers` | 199 |
 | `src/app/api/briefing/complete-drill` | 198 |
 | `src/app/api/outreach/undo` | 197 |
+| `src/app/api/contacts/[id]/reference-request/__tests__` | 193 |
 | `src/app/api/cron/cfo-threshold` | 193 |
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
@@ -286,6 +287,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
+| `src/app/api/contacts/[id]/reference-request` | 92 |
 | `src/lib/parlor/__tests__` | 90 |
 | `src/app/api/offers/[id]/simulate` | 84 |
 | `src/app/api/ceo` | 81 |
@@ -399,6 +401,8 @@ src/app/api/comp-bands/lookup/route.ts
 src/app/api/concierge/chat/route.ts
 src/app/api/concierge/extract/route.test.ts
 src/app/api/concierge/extract/route.ts
+src/app/api/contacts/[id]/reference-request/__tests__/route.test.ts
+src/app/api/contacts/[id]/reference-request/route.ts
 src/app/api/coo/route.ts
 src/app/api/cpo/route.ts
 src/app/api/cro/route.ts
@@ -1067,13 +1071,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1116 | 12,525 |
+| `BOOTSTRAP-PROMPT.md` | 1116 | 12,526 |
 | `PROJECT-CONTEXT.md` | 283 | 5,309 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 346 | 6,466 |
-| **Total** | **2112** | **31,472** |
+| **Total** | **2112** | **31,473** |
 
-> ⚠️ Reading all recommended files consumes ~31,472 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,473 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

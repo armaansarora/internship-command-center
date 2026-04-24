@@ -517,3 +517,32 @@ function emptyContactStats(): ContactStats {
     recentActivity: 0,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Query: getContactById (R10.14 — reference-request route uses this)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch a single contact by id under the caller's user_id.
+ * Returns null when the row doesn't exist or RLS filters it out.
+ *
+ * R8/P5 note: the returned ContactForAgent carries `privateNote`. Callers
+ * that pass this into AI prompts MUST strip it before serialization (see
+ * src/lib/ai/structured/reference-request.ts for the pattern).
+ */
+export async function getContactById(
+  userId: string,
+  contactId: string,
+): Promise<ContactForAgent | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*, companies(name)")
+    .eq("user_id", userId)
+    .eq("id", contactId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  const row = data as ContactRow & { companies: { name: string } | null };
+  return rowToAgentFormat(row, row.companies?.name ?? null);
+}
