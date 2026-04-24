@@ -84,6 +84,17 @@ export type StubOverride =
       // created_at. Used by ref-request-flood.spec.ts to bind the
       // (contact_id, offer_id) cooldown invariant on outreach_queue.
       table: string;
+    }
+  | {
+      behavior: "unique_constraint";
+      // Simulate a Postgres unique constraint on the named table. Any
+      // POST/PUT/PATCH whose body (JSON array or object) contains a row
+      // whose tuple of values across `columns` already exists in the
+      // table's fixture rows returns 409 with a PostgreSQL 23505-shape
+      // body. Pairs naturally with writes_become_rows on the same table
+      // so writers append on success and conflict on duplicate.
+      table: string;
+      columns: string[];
     };
 
 export interface StubFixtures {
@@ -119,6 +130,9 @@ export interface StubResponse {
   body: string;
   contentType: string;
   abort?: true;
+  // Optional response headers — required for `count: exact, head: true`
+  // queries which read row counts from `Content-Range`.
+  headers?: Record<string, string>;
 }
 
 // ─── State factory ───────────────────────────────────────────────────────
@@ -340,17 +354,17 @@ function handleRest(
         const got = url.searchParams.get(override.filterParam) ?? "";
         const matches = got === override.filterValue;
         if (process.env.STUB_DEBUG) {
-          // eslint-disable-next-line no-console
           console.error(
             `[stub] table_filter_branch on ${table}: param=${override.filterParam} got="${got}" expected="${override.filterValue}" → ${matches ? "match" : "noMatch"}`,
           );
         }
         const rows = matches ? override.onMatch : override.onNoMatch;
-        return json(200, rows);
+        return jsonWithCount(rows, req);
       }
     }
-    const rows = state.fixtures.tables[table] ?? [];
-    return json(200, rows);
+    const baseRows = state.fixtures.tables[table] ?? [];
+    const filteredRows = applyEqFilters(baseRows, url.searchParams);
+    return jsonWithCount(filteredRows, req);
   }
 
   // Non-GET = write — track and gate on allowWrites.
@@ -363,6 +377,39 @@ function handleRest(
   });
   if (!state.fixtures.allowWrites) {
     return json(500, { error: `unexpected write to ${table}` });
+  }
+
+  // unique_constraint: check incoming row tuples against existing rows
+  // before any append. Returns 409 PG-23505 on first duplicate found.
+  for (const override of state.overrides) {
+    if (override.behavior !== "unique_constraint" || override.table !== table) {
+      continue;
+    }
+    const existing = state.fixtures.tables[table] ?? [];
+    const incomingRows = parseWriteBodyAsRows(req.body);
+    for (const row of incomingRows) {
+      const incomingKey = override.columns
+        .map((c) => String(row[c] ?? ""))
+        .join("::");
+      const dup = existing.some((er) => {
+        const k = override.columns.map((c) => String(er[c] ?? "")).join("::");
+        return k === incomingKey;
+      });
+      if (dup) {
+        return json(409, {
+          code: "23505",
+          message: `duplicate key value violates unique constraint ${table}_${override.columns.join("_")}_unique`,
+          details: `Key (${override.columns.join(", ")})=(${override.columns.map((c) => row[c]).join(", ")}) already exists.`,
+        });
+      }
+    }
+    // No conflict — append all rows so future calls see them.
+    state.fixtures.tables[table] = [...existing, ...incomingRows];
+    return {
+      status: 201,
+      body: JSON.stringify(incomingRows),
+      contentType: "application/json",
+    };
   }
 
   // writes_become_rows: parse body and append into the fixture so reads
@@ -393,6 +440,25 @@ function handleRest(
   }
 
   return json(201, { ok: true });
+}
+
+function parseWriteBodyAsRows(body: string | undefined): Array<Record<string, unknown>> {
+  if (!body) return [];
+  try {
+    const parsed = JSON.parse(body);
+    if (Array.isArray(parsed)) {
+      return parsed.filter(
+        (r): r is Record<string, unknown> =>
+          typeof r === "object" && r !== null,
+      );
+    }
+    if (typeof parsed === "object" && parsed !== null) {
+      return [parsed as Record<string, unknown>];
+    }
+    return [];
+  } catch {
+    return [];
+  }
 }
 
 function parseWriteBody(body: string | undefined): Record<string, unknown> | null {
@@ -432,6 +498,82 @@ function checkIntermittentFailure(state: StubState): StubResponse | null {
     }
   }
   return null;
+}
+
+/**
+ * Apply Supabase REST eq filters to a row set. PostgREST encodes `.eq(col,
+ * val)` as `?col=eq.val`. We honor any query string param whose value
+ * starts with `eq.` and treat the rest as a string match against the row.
+ *
+ * Reserved params (select, order, limit, offset, range, prefer, on_conflict)
+ * are skipped — those don't gate row visibility.
+ *
+ * Routes that count (`?select=*&col=eq.x` with HEAD) rely on this to
+ * return the right number; without it, every row is included regardless
+ * of filter and counts come back wildly inflated. (Tower's Parlor and
+ * Orrery both rely on accurate counts to gate cinematic moments.)
+ */
+const RESERVED_PARAMS = new Set([
+  "select",
+  "order",
+  "limit",
+  "offset",
+  "range",
+  "prefer",
+  "on_conflict",
+]);
+
+function applyEqFilters(
+  rows: Array<Record<string, unknown>>,
+  params: URLSearchParams,
+): Array<Record<string, unknown>> {
+  const filters: Array<{ col: string; val: string }> = [];
+  for (const [key, value] of params.entries()) {
+    if (RESERVED_PARAMS.has(key)) continue;
+    if (value.startsWith("eq.")) {
+      filters.push({ col: key, val: value.substring(3) });
+    }
+    // gt/gte/lt/lte/in/is etc. fall through unfiltered — most scenarios
+    // don't need them; add as-needed.
+  }
+  if (filters.length === 0) return rows;
+  return rows.filter((row) =>
+    filters.every((f) => String(row[f.col] ?? "") === f.val),
+  );
+}
+
+/**
+ * Build a response for a table read. Honors Supabase's `count: exact, head:
+ * true` pattern by always emitting Content-Range; HEAD requests get an
+ * empty body, GET requests get the full row array. Without Content-Range,
+ * `count` from a Supabase select() returns null, and routes that gate on
+ * row counts (e.g., Parlor's `if (count === 0) redirect` guard) take the
+ * wrong branch.
+ */
+function jsonWithCount(
+  rows: Array<Record<string, unknown>>,
+  req: StubRequest,
+): StubResponse {
+  const total = rows.length;
+  const range =
+    total === 0 ? "*/0" : `0-${total - 1}/${total}`;
+  const headers: Record<string, string> = {
+    "content-range": range,
+  };
+  if (req.method === "HEAD") {
+    return {
+      status: 200,
+      body: "",
+      contentType: "application/json",
+      headers,
+    };
+  }
+  return {
+    status: 200,
+    body: JSON.stringify(rows),
+    contentType: "application/json",
+    headers,
+  };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
@@ -477,7 +619,11 @@ export async function startStubServer(opts: StartOptions = {}): Promise<StubServ
         req.socket.destroy();
         return;
       }
-      res.writeHead(r.status, { "content-type": r.contentType });
+      const responseHeaders: Record<string, string> = {
+        "content-type": r.contentType,
+        ...(r.headers ?? {}),
+      };
+      res.writeHead(r.status, responseHeaders);
       res.end(r.body);
     });
     req.on("error", () => {

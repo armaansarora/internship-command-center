@@ -149,7 +149,13 @@ test.describe("Orrery click — planet selection — detail opens in <250ms", ()
     await planetLocator.waitFor({ state: "visible", timeout: 5_000 });
 
     const startNs = Date.now();
-    await planetLocator.click();
+    // R12.10 — `force: true` bypasses Playwright's "stable" check. The
+    // planet sits in a perpetual GSAP orbital animation, so Playwright's
+    // default actionability gate would flake or time out waiting for it
+    // to stop moving. `force` is appropriate here: the click target is
+    // a real button, the bug we're binding is "click → detail < 250ms",
+    // not "is the planet stable for 0ms first."
+    await planetLocator.click({ force: true });
     await page.waitForSelector('[data-testid="orrery-planet-detail"]', {
       timeout: 1_000,
     });

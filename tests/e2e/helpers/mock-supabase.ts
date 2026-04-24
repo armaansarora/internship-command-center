@@ -44,10 +44,11 @@ function stubBaseUrl(): string {
 }
 
 /**
- * Page-shaped subset we actually use — keeps tests injectable with a
- * minimal fake without a real Playwright Page.
+ * Minimal Page shape — install no longer needs Playwright methods, but we
+ * keep the parameter for API compat with the legacy page.route() flow.
+ * Pass the real Page or any object — it's unused.
  */
-export type MockablePage = Pick<Page, "setExtraHTTPHeaders">;
+export type MockablePage = Pick<Page, never>;
 
 /**
  * Install a Supabase fixture for the current Playwright test. Returns the
@@ -58,16 +59,19 @@ export type MockablePage = Pick<Page, "setExtraHTTPHeaders">;
  *  - The stub's active scenarioId is swapped to a fresh value, ensuring no
  *    cross-test bleed.
  *  - Counters and observed writes are reset before this call returns.
- *  - The browser stamps `x-scenario-id` on outbound requests for diagnostic
- *    visibility (the stub's source of truth is its activeScenarioId, not
- *    the header — but the header is helpful when reading server logs).
+ *
+ * Note: a previous version of this helper called page.setExtraHTTPHeaders
+ * to stamp `x-scenario-id` for diagnostic visibility. That broke CORS
+ * preflight on font CDN fetches (browsers reject Access-Control-Allow-
+ * Headers when a custom header is present in the preflight request).
+ * The header was diagnostic-only — the stub's source of truth is its
+ * own activeScenarioId — so we dropped it.
  */
 export async function installSupabaseMock(
-  page: MockablePage,
+  _page: MockablePage,
   options: MockOptions = {},
 ): Promise<string> {
   const scenarioId = randomUUID();
-  await page.setExtraHTTPHeaders({ "x-scenario-id": scenarioId });
 
   const payload = {
     scenarioId,

@@ -1,4 +1,4 @@
-import { test, expect, type Route } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { installSupabaseMock } from "../helpers/mock-supabase";
 import { USERS } from "../helpers/fixtures";
 
@@ -16,30 +16,17 @@ import { USERS } from "../helpers/fixtures";
  * The invariant being bound: if both paths attempt to write the SAME
  * (user_id, counterparty_anon_key) pair in the same instant, the tracker
  * must never show two distinct insertions for that pair landing as
- * successes — either the unique index (a real schema property) returns
- * 23505 on one of them, OR the application-layer "delete-then-insert"
- * pattern (see rebuildMatchIndexForUser) resolves to a single final row.
+ * successes — either the unique index returns 23505 on one of them, OR
+ * the application-layer "delete-then-insert" pattern resolves to a
+ * single final row.
  *
- * Approach:
- *   1. Install the base Supabase mock with a populated candidate list.
- *   2. Layer a write-tracker that simulates a Postgres-level unique
- *      constraint on (user_id, counterparty_anon_key). The FIRST write for
- *      a pair succeeds with 201; subsequent inserts of the same pair
- *      return 409 (23505 shape).
- *   3. Fire two parallel "rebuild" streams via direct Supabase REST POSTs
- *      (which the handler intercepts) that both try to write overlapping
- *      pairs. The race is: the mock layer is the only arbiter, and it
- *      MUST maintain the unique-pair invariant.
- *   4. Also attempt an unauthorized GET to the cron route to prove that
- *      the route itself refuses us — binding the OTHER half of the proof
- *      (the secret gate isn't bypassable). Commented inline.
+ * R12.10 — migrated from page.route() closure to the stub-server's
+ * `unique_constraint` override. The stub holds the rows in memory and
+ * enforces uniqueness on POST, returning a PostgreSQL 23505-shape 409
+ * on the second writer's overlapping pairs. We POST directly at the
+ * stub on :3001 — no page.route involved — so the test exercises the
+ * exact same wire path the dev server would use under the new topology.
  */
-
-interface RecordedPair {
-  userId: string;
-  counterpartyAnonKey: string;
-  responseStatus: number;
-}
 
 test.describe(
   "cron match-index rebuild + delta trigger race — no duplicate (user_id, counterparty_anon_key) pairs in match_candidate_index",
@@ -47,206 +34,80 @@ test.describe(
     test("concurrent writes to match_candidate_index do not produce duplicate pairs; unique constraint holds at DB layer", async ({
       page,
     }) => {
-      const recorded: RecordedPair[] = [];
-
       await installSupabaseMock(page, {
         authedUser: null,
-        tables: {
-          match_candidate_index: [],
-        },
+        tables: { match_candidate_index: [] },
         allowWrites: true,
+        overrides: [
+          {
+            behavior: "unique_constraint",
+            table: "match_candidate_index",
+            columns: ["user_id", "counterparty_anon_key"],
+          },
+        ],
       });
 
-      await page.route(/\.supabase\.co\/rest\/v1\//, async (route: Route) => {
-        const req = route.request();
-        const method = req.method();
-        const url = new URL(req.url());
-        const table = url.pathname.substring("/rest/v1/".length).split("?")[0];
-
-        if (method === "GET" || method === "HEAD") {
-          await route.fulfill({
-            status: 200,
-            body: JSON.stringify([]),
-            contentType: "application/json",
-          });
-          return;
-        }
-
-        // Simulate the real `match_candidate_index` unique constraint on
-        // (user_id, counterparty_anon_key) — every rebuild + delta write
-        // passes through here. The mock is the arbiter.
-        if (
-          table === "match_candidate_index" &&
-          (method === "POST" || method === "PATCH")
-        ) {
-          const body = req.postData() ?? "[]";
-          let rows: Array<Record<string, unknown>> = [];
-          try {
-            const parsed = JSON.parse(body);
-            rows = Array.isArray(parsed) ? parsed : [parsed];
-          } catch {
-            rows = [];
-          }
-
-          let conflict = false;
-          for (const row of rows) {
-            const userId = String(row.user_id ?? "");
-            const anonKey = String(row.counterparty_anon_key ?? "");
-            if (!userId || !anonKey) continue;
-            const dup = recorded.find(
-              (r) =>
-                r.userId === userId &&
-                r.counterpartyAnonKey === anonKey &&
-                r.responseStatus === 201,
-            );
-            if (dup) {
-              conflict = true;
-              recorded.push({
-                userId,
-                counterpartyAnonKey: anonKey,
-                responseStatus: 409,
-              });
-            } else {
-              recorded.push({
-                userId,
-                counterpartyAnonKey: anonKey,
-                responseStatus: 201,
-              });
-            }
-          }
-
-          if (conflict) {
-            await route.fulfill({
-              status: 409,
-              body: JSON.stringify({
-                code: "23505",
-                message:
-                  "duplicate key value violates unique constraint match_candidate_index_user_counterparty_unique",
-              }),
-              contentType: "application/json",
-            });
-            return;
-          }
-
-          await route.fulfill({
-            status: 201,
-            body: JSON.stringify(rows),
-            contentType: "application/json",
-          });
-          return;
-        }
-
-        // DELETE — the rebuild path calls delete().eq("user_id", userId)
-        // before re-inserting. Mock it as a successful no-op and clear any
-        // prior recorded pairs for that user so the next insert round
-        // starts clean (just like the real rebuild).
-        if (table === "match_candidate_index" && method === "DELETE") {
-          const userIdMatch = url.search.match(/user_id=eq\.([^&]+)/);
-          if (userIdMatch) {
-            const userId = decodeURIComponent(userIdMatch[1]);
-            for (let i = recorded.length - 1; i >= 0; i--) {
-              if (
-                recorded[i].userId === userId &&
-                recorded[i].responseStatus === 201
-              ) {
-                recorded.splice(i, 1);
-              }
-            }
-          }
-          await route.fulfill({
-            status: 204,
-            body: "",
-            contentType: "application/json",
-          });
-          return;
-        }
-
-        await route.fulfill({
-          status: 201,
-          body: JSON.stringify({ ok: true }),
-          contentType: "application/json",
-        });
-      });
-
-      // Simulation: rather than invoke the cron route (which requires a
-      // Bearer CRON_SECRET that we don't plumb into E2E), we simulate BOTH
-      // writers — rebuild batch AND delta trigger — firing at the same
-      // instant via the Supabase REST surface the route would use.
-      //
-      // SUPABASE_URL defaults to the project URL; we rely on `page.route`
-      // above to intercept any request matching `*.supabase.co/rest/v1/*`.
-      // Using a direct-to-stub URL keeps the invariant tight.
       const aliceId = USERS.alice.id;
       const rebuildRows = [
-        {
-          user_id: aliceId,
-          counterparty_anon_key: "ANON-1",
-          score: 0.9,
-        },
-        {
-          user_id: aliceId,
-          counterparty_anon_key: "ANON-2",
-          score: 0.8,
-        },
-        {
-          user_id: aliceId,
-          counterparty_anon_key: "ANON-3",
-          score: 0.7,
-        },
+        { user_id: aliceId, counterparty_anon_key: "ANON-1", score: 0.9 },
+        { user_id: aliceId, counterparty_anon_key: "ANON-2", score: 0.8 },
+        { user_id: aliceId, counterparty_anon_key: "ANON-3", score: 0.7 },
       ];
       const deltaRows = [
-        // Same pairs, forcing a collision at the mock layer.
-        {
-          user_id: aliceId,
-          counterparty_anon_key: "ANON-2",
-          score: 0.85,
-        },
-        {
-          user_id: aliceId,
-          counterparty_anon_key: "ANON-3",
-          score: 0.75,
-        },
+        // Same pairs, forcing a collision at the stub layer.
+        { user_id: aliceId, counterparty_anon_key: "ANON-1", score: 0.95 },
+        { user_id: aliceId, counterparty_anon_key: "ANON-2", score: 0.85 },
+        { user_id: aliceId, counterparty_anon_key: "ANON-3", score: 0.75 },
       ];
 
-      const rebuildUrl =
-        "https://jzrsrruugcajohvvmevg.supabase.co/rest/v1/match_candidate_index";
-      const deltaUrl = rebuildUrl;
+      const stubUrl = "http://localhost:3001/rest/v1/match_candidate_index";
 
       const [rebuildRes, deltaRes] = await Promise.all([
-        page.request.post(rebuildUrl, {
+        page.request.post(stubUrl, {
           data: rebuildRows,
           headers: { "content-type": "application/json" },
         }),
-        page.request.post(deltaUrl, {
+        page.request.post(stubUrl, {
           data: deltaRows,
           headers: { "content-type": "application/json" },
         }),
       ]);
 
-      // Invariant: final `recorded` list with responseStatus=201 contains
-      // NO duplicate (user_id, counterparty_anon_key) pairs.
-      const successfulPairs = recorded.filter(
-        (r) => r.responseStatus === 201,
-      );
-      const pairKeys = successfulPairs.map(
-        (r) => `${r.userId}::${r.counterpartyAnonKey}`,
+      const statuses = [rebuildRes.status(), deltaRes.status()];
+
+      // Exactly one of the two writers MUST see 409. JavaScript is
+      // single-threaded so requests serialize at the stub; whichever
+      // ran first appended its 3 rows, the second saw all 3 as
+      // duplicates and 409'd on the first.
+      expect(
+        statuses.includes(409),
+        `expected one writer to see 409 unique-constraint violation; got [${statuses.join(", ")}]`,
+      ).toBe(true);
+      expect(statuses.includes(201)).toBe(true);
+
+      // The 409 body MUST carry PG 23505 — the application layer relies
+      // on the code to distinguish "real conflict" from generic 4xx.
+      const conflictRes = statuses[0] === 409 ? rebuildRes : deltaRes;
+      const conflictBody = await conflictRes.json();
+      expect(conflictBody.code).toBe("23505");
+
+      // Final state of the table: exactly the 3 winning pairs. Read via
+      // the stub's GET to confirm no duplicate slipped through.
+      const tableRes = await page.request.get(stubUrl);
+      const finalRows = (await tableRes.json()) as Array<{
+        user_id: string;
+        counterparty_anon_key: string;
+      }>;
+      const pairKeys = finalRows.map(
+        (r) => `${r.user_id}::${r.counterparty_anon_key}`,
       );
       const uniquePairKeys = new Set(pairKeys);
-
       expect(pairKeys.length).toBe(uniquePairKeys.size);
+      expect(pairKeys).toHaveLength(3);
 
-      // And the second writer (whichever it was) MUST have seen at least
-      // one 409 on the overlapping pairs — a proof that the unique
-      // constraint actually fired and wasn't silently skipped.
-      const conflictCount = recorded.filter(
-        (r) => r.responseStatus === 409,
-      ).length;
-      const oneOf = [rebuildRes.status(), deltaRes.status()];
-      expect(oneOf.includes(409) || conflictCount > 0).toBe(true);
-
-      // Bonus — the cron route itself must 401 without a bearer token, so
-      // even the authentic cron path can't be triggered by an attacker in
-      // parallel with a delta writer. Smoke-verify that invariant too.
+      // Bonus — the cron route itself must 401 without a bearer token,
+      // proving the OTHER half of the proof (the secret gate isn't
+      // bypassable). The dev server runs on :3000.
       const cronUnauth = await page.request.get(
         "http://localhost:3000/api/cron/match-index",
       );

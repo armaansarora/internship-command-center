@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import {
   installSupabaseMock,
   MOCK_SUPABASE_URL_ENV,
@@ -19,16 +19,8 @@ describe("installSupabaseMock — stub-server transport", () => {
     await server.stop();
   });
 
-  let lastHeaders: Record<string, string> | null = null;
-  const fakePage: MockablePage = {
-    setExtraHTTPHeaders: async (headers) => {
-      lastHeaders = headers;
-    },
-  };
-
-  beforeEach(() => {
-    lastHeaders = null;
-  });
+  // The helper no longer touches Page methods; pass a {} placeholder.
+  const fakePage = {} as MockablePage;
 
   it("POSTs an install payload to the stub server with a fresh scenarioId", async () => {
     const scenarioId = await installSupabaseMock(fakePage, {
@@ -44,13 +36,6 @@ describe("installSupabaseMock — stub-server transport", () => {
     });
     expect(server.state.fixtures.tables).toEqual({ applications: [{ id: "a1" }] });
     expect(server.state.fixtures.rpcs).toEqual({ my_rpc: { ok: true } });
-  });
-
-  it("stamps x-scenario-id on outgoing browser headers", async () => {
-    const scenarioId = await installSupabaseMock(fakePage, {
-      authedUser: { id: "u1", email: "u1@example.com" },
-    });
-    expect(lastHeaders).toEqual({ "x-scenario-id": scenarioId });
   });
 
   it("forwards overrides verbatim to the stub", async () => {

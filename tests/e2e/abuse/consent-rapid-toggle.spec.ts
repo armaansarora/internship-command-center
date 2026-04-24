@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import type { Route } from "@playwright/test";
 import { signInAs } from "../helpers/auth";
 import { USERS, TIMES } from "../helpers/fixtures";
 
@@ -15,15 +14,20 @@ import { USERS, TIMES } from "../helpers/fixtures";
  *   3. DELETE from match_candidate_index where counterparty_anon_key IN
  *      (the HMAC-SHA256 anon-keys derived from caller's contact IDs).
  *
- * Step 3 is the R11 Red Team fix — the binding proof-of-life.  This
- * scenario asserts that across 50 revoke cycles, the mock observed:
+ * Step 3 is the R11 Red Team fix — the binding proof-of-life. This
+ * scenario asserts that across 50 revoke cycles, the stub observed:
  *   - 50 user_profiles UPDATEs (one per revoke),
  *   - 50 DELETEs on networking_match_index (one per revoke, Step 2),
  *   - 50 DELETEs on match_candidate_index (one per revoke, Step 3 cascade),
  *   - 50 user_profiles UPDATEs for the opt-in cycles that follow.
  *
  * A silently-skipped cascade (regression) shows up as
- * `match_candidate_index` DELETE count < 50.
+ * match_candidate_index DELETE count < 50.
+ *
+ * R12.10 — migrated from page.route() ops-tracker to the stub's native
+ * /__test__/writes endpoint. The legacy page.route() only saw browser
+ * fetches; the revoke/opt-in routes call Supabase server-side from the
+ * Next dev process, so those writes were invisible to the tracker.
  */
 
 const CYCLE_COUNT = 50;
@@ -31,16 +35,12 @@ const CYCLE_COUNT = 50;
 // a `.in('counterparty_anon_key', [<key>])` DELETE. Seeding at least one
 // contact ensures Step 3 actually makes a DELETE call (the route
 // guards on `contactIds.length > 0`).
-const ALICE_CONTACT_ID = "00000000-0000-0000-0000-aaaa00000001";
+const ALICE_CONTACT_ID = "11111111-1111-4111-8111-aaaa00000001";
 
 test.describe(
   "consent rapid toggle — /api/networking/{revoke,opt-in} — revoke cascade honored across 50 cycles",
   () => {
-    type TrackedOp = { table: string; method: string };
-    let ops: TrackedOp[] = [];
-
     test.beforeEach(async ({ page }) => {
-      ops = [];
       await signInAs(page, USERS.alice, {
         tables: {
           user_profiles: [
@@ -62,19 +62,6 @@ test.describe(
         },
         allowWrites: true,
       });
-
-      await page.route(/\.supabase\.co\/rest\/v1\//, async (route: Route) => {
-        const request = route.request();
-        const method = request.method();
-        if (method !== "GET" && method !== "HEAD") {
-          const url = new URL(request.url());
-          const table = url.pathname
-            .substring("/rest/v1/".length)
-            .split("?")[0];
-          ops.push({ table, method });
-        }
-        await route.fallback();
-      });
     });
 
     test(
@@ -94,9 +81,20 @@ test.describe(
           expect(optIn.status()).toBe(200);
         }
 
-        // Count DELETEs against match_candidate_index. The revoke route
-        // guards Step 3 on `contactIds.length > 0`; since we seeded one
-        // contact, the DELETE fires exactly once per revoke.
+        // The stub tracks every non-GET write at /__test__/writes.
+        // Browser-origin AND Next-server-origin requests both flow
+        // through it under the new R12.10 topology.
+        const writesRes = await page.request.get(
+          "http://localhost:3001/__test__/writes",
+        );
+        const ops = (await writesRes.json()) as Array<{
+          table: string;
+          method: string;
+        }>;
+
+        // Step 3 — match_candidate_index DELETE per revoke. The R11 Red
+        // Team fix; if this is < CYCLE_COUNT, a cascade was silently
+        // skipped — REGRESSION CANDIDATE.
         const cascadeDeletes = ops.filter(
           (o) =>
             o.table === "match_candidate_index" && o.method === "DELETE",

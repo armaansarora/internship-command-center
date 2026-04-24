@@ -91,12 +91,16 @@ test.describe("scale — 100 offers — chart + stack cap + full accounting", ()
       }
     }
 
+    // R12 partner mitigation (2026-04-24, commit 98d3c47) caps the
+    // OakTable at 50 visible folders + overflow banner. The pre-mitigation
+    // assumption was a 3D-stacked Rolodex with only ~5 folders visible at
+    // a time; the shipped UX is a list capped at 50. Both shapes bound
+    // the DOM, which is the security/perf invariant.
     expect(
       visibleCount,
-      `Expected ≤ 5 folders visible in the stack, got ${visibleCount}. ` +
-        `OakTable should cap the visual stack even when 100 offers are in ` +
-        `the data. (DOM may legitimately hold all 100 for a11y.)`,
-    ).toBeLessThanOrEqual(5);
+      `Expected the OakTable's visible folders to be bounded; got ${visibleCount}. ` +
+        `Bound is 50 under the partner mitigation.`,
+    ).toBeLessThanOrEqual(50);
   });
 
   test("100 offers → listitems capped at 50 + overflow banner present (R12 partner mitigation)", async ({
@@ -122,13 +126,14 @@ test.describe("scale — 100 offers — chart + stack cap + full accounting", ()
       `Expected OakTable to cap listitems at 50 with 100 in data; got ${listitems}.`,
     ).toBe(50);
 
-    // Overflow banner with hidden count.
+    // Overflow banner with hidden count. Component uses data-testid
+    // (not className), so query via [data-testid].
     const bannerText = await page
-      .locator(".parlor-oak-table-overflow-banner")
+      .locator('[data-testid="parlor-oak-table-overflow-banner"]')
       .textContent({ timeout: 5_000 });
     expect(
       bannerText,
-      "Expected .parlor-oak-table-overflow-banner with hidden-count copy.",
+      "Expected [data-testid=parlor-oak-table-overflow-banner] with hidden-count copy.",
     ).toBeTruthy();
     expect(bannerText).toContain("more offer");
   });

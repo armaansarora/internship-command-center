@@ -1,7 +1,6 @@
 import { startStubServer, type StubServer } from "./helpers/stub-server";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __TOWER_STUB_SERVER__: StubServer | undefined;
 }
 
@@ -23,6 +22,5 @@ export default async function globalSetup(): Promise<void> {
   const server = await startStubServer({ port: STUB_PORT });
   globalThis.__TOWER_STUB_SERVER__ = server;
   process.env.STUB_SUPABASE_URL = server.url;
-  // eslint-disable-next-line no-console
   console.log(`[stub-server] listening on ${server.url}`);
 }

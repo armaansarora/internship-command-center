@@ -42,6 +42,16 @@ export default defineConfig({
           SUPABASE_SERVICE_ROLE_KEY:
             process.env.SUPABASE_SERVICE_ROLE_KEY ??
             "service_role_stub_for_e2e",
+          // MATCH_ANON_SECRET — consent-revoke + match-index rebuild
+          // routes fail closed without it. Stub value is fine in e2e
+          // because the stub Supabase server doesn't validate tokens.
+          MATCH_ANON_SECRET:
+            process.env.MATCH_ANON_SECRET ?? "stub-match-anon-secret-for-e2e",
+          // CRON_SECRET — without it, verifyCronRequest returns
+          // {ok:true} in non-prod and cron routes accept any caller.
+          // We set it so tests can bind the "no bearer → 401" contract.
+          CRON_SECRET:
+            process.env.CRON_SECRET ?? "stub-cron-secret-for-e2e",
         },
       },
 });
