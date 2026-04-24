@@ -1,73 +1,97 @@
-paused: true
-scope: R10-only
-started: 2026-04-23T21:30:00.000Z
-started_by: sess-r10-autopilot
-ended: 2026-04-24T04:52:00.000Z
-ended_reason: "R10 scope complete — acceptance.met verified_by_commit d988f05. MVP shipped (R10.1–R10.12); R10.13/R10.14 stretch skipped per autopilot budget; R10.15 ledger-close run. Awaits user migration 0020 apply + FIRECRAWL_API_KEY env var for prod."
+paused: false
+scope: R11-only
+started: null
+started_by: null
+ended: null
+ended_reason: null
 max_blockers: 3
-previous_phase: R9
-previous_outcome: "R9 complete — 11/11 tasks, acceptance.met (verified_by_commit: c31c658)."
-current_phase: R10
-next_brief: "docs/NEXT-ROADMAP.md — ### R10 — The Negotiation Parlor (C-Suite annex)"
+previous_phase: R10
+previous_outcome: "R10 complete — 16/16 tasks, acceptance.met (verified_by_commit: d31b652, post-mortem deadline-cron fix landed + ledger pointer correction). All 10 Intent behaviors shipped including both stretch tasks R10.13 (simulator) + R10.14 (ref-request). Post-mortem swarm fired 2026-04-24: 1 BLOCK fixed (acceptance gate post-hoc bypass), 1 MISSING fixed (offer deadline alerts), 3 weak proof tests logged as non-blocking caveats."
+current_phase: R11
+next_brief: ".tower/partner-brief.md §Current-state-of-build R8 row + docs/plans/2026-04-23-r8-rolodex-lounge.md for R8 context"
 verification_before_acceptance:
-  - npm run t accept R10
+  - npm run t accept R11
 partner_constraints:
-  # ─── R10 pre-locked decisions (user, 2026-04-23, at autopilot trigger) ───
+  # ─── R11 pre-locked decisions (user, 2026-04-24) ───
+  # Originally scoped in partner-brief as "R8.x cross-user matching" — promoted
+  # to R11 as its own phase since R8 is already accepted (re-opening would trip
+  # the Husky acceptance gate). Conceptually still "the R8.x work."
   - |
-    (a) COMP BENCHMARKS — Firecrawl scrapes Levels.fyi into a
-    `company_comp_bands` cache table, 30-day TTL. Firecrawl free tier is
-    500 credits/month — cap the target list to the top ~20 companies per
-    sector the user has touched, and cache aggressively. On Levels.fyi
-    empty/miss: graceful-empty fallback (no pin, honest "not enough
-    benchmark data" copy — not a fake band).
+    (a) FULL SCOPE — not the slim version. Ship matching behind the 403
+    hard-stop AND all 3 Red Team gaps (index populator cron, consent
+    version check, audit log UI) AND both concerns (rate limit, delta
+    re-scan on application/contact change). This is a privacy-touching
+    feature; do it right once.
   - |
-    (b) CEO VOICE ships here — the Parlor is the natural home for CEO
-    voice. It reads negotiation drafts aloud (opt-in toggle, SAME
-    three-layer pattern R6 voice uses — Settings toggle → per-surface
-    enable check → graceful fallback when unavailable). Voice is never
-    required.
+    (b) CONSENT GATE REUSE — R8 already shipped `assertConsented`
+    (src/lib/networking/consent-guard.ts). R8.x EXTENDS it with version
+    check; does NOT rebuild it. Add a CURRENT_CONSENT_VERSION constant
+    and a typed 403 reason "consent-version-stale" for users whose
+    stored version is below current. User then re-consents in Settings
+    and the stored version bumps.
   - |
-    (c) SEND-HOLD — reuse R7's `send_after` column on outreach/negotiation
-    emails for the 24h minimum hold on negotiation drafts. Do NOT rebuild
-    scheduling infrastructure.
+    (c) CRON REUSE — match-index populator lives at /api/cron/match-index/
+    and follows the same shape as R7's /api/cron/briefing (per-user
+    iteration, graceful-fail per user, budget cap). Do NOT rebuild cron
+    infrastructure.
   - |
-    (d) PDF — reuse R9's `@react-pdf/renderer` if any PDF artifact is
-    needed (e.g., offer comparison export). Do NOT pick a second PDF lib.
-  # ─── R10 non-negotiables ───
+    (d) DELTA RE-SCAN SURFACE — on contact insert/update/warmth change
+    AND on application insert/status change, enqueue a per-user re-scan.
+    Reuse R8's existing event plumbing if present; otherwise a simple
+    per-user debounce (no re-scan if one fired in the last 5 minutes for
+    that user). No Kafka-style queueing.
   - |
-    PARLOR DOOR MATERIALIZATION — the Parlor door must be ABSENT from the
-    DOM before the first offer parses. Not hidden. Not `display:none`.
-    Not disabled. ABSENT. The CSuiteScene conditionally renders the door
-    only when `offers.length > 0` is true (server-side gate). Before any
-    offer exists, the C-Suite wall reads as a solid wood-panel wall with
-    no door. After the first offer, the door materializes with a single
-    cinematic beat.
+    (e) ALGORITHM — heuristic, not ML. Score = edge strength (warmth) ×
+    company overlap (does the counterparty work at a company the user
+    has a recent application to?) × recency. Deterministic + cache-
+    friendly. Seed fixture for tests.
   - |
-    COMP CHART PINS — red below the 25th percentile, gold above the 75th,
-    ink between. Multiple offers stack as folders on the oak table, and
-    both (or all) pins appear simultaneously on the chart.
+    (f) AUDIT LOG — `match_events` table with anonymized counterparty_
+    anon_key (hash of contact_id + salt, NOT the contact id). Settings →
+    Networking → "How your data is used" surface showing last 20 events
+    as human-readable one-liners ("You were matched with a contact at
+    Acme on Apr 24"). NOT a raw log dump.
+  # ─── R11 non-negotiables ───
   - |
-    OFFERS SCHEMA — migration 0020 with the exact columns named in the
-    brief: base, bonus, equity, sign-on, housing, start_date, location,
-    benefits jsonb, received_at, deadline_at, status enum. Plus: id (uuid
-    PK), user_id (uuid FK → auth.users), application_id (uuid nullable
-    FK → applications), created_at, updated_at. RLS `auth.uid() =
-    user_id` on all four CRUD verbs.
-  # ─── R10 scope ───
+    NO CROSS-USER LEAKS — RLS on every new table. Match algorithm reads
+    FROM the current user's contacts but the MATCH TARGET (the company
+    / counterparty surface) is always anonymized or aggregated. Never
+    expose another user's raw contact record. Proof test must bind this
+    invariant (two users, each with data, one user's query MUST NOT
+    return the other user's row IDs).
   - |
-    SCOPE MVP (must-ship) — door-materialization + offers schema + comp
-    chart + three-chair convening (Offer Evaluator + CFO + CNO) +
-    negotiation-script drafting with send-hold.
+    RATE LIMIT — 20 match-candidate queries per user per hour. Typed 429
+    with retry_after_seconds. Documented in the consent copy surface
+    (NOT hidden). Enforced server-side with Supabase-backed counter or
+    Vercel Fluid Compute shared state.
   - |
-    STRETCH (within phase, best-effort after MVP ships) — negotiation
-    simulator (CPO as recruiter), CNO reference-request drafting.
+    FAIL-CLOSED — every gate (consent, version, rate limit, RLS) fails
+    closed. If any gate lookup throws or is indeterminate, return the
+    403/429 not a 500. No fall-through to "return matches anyway"
+    branches.
   - |
-    OUT OF SCOPE — §8 living expansions (post-offer transition layer,
-    alumni floor, industry-cycle awareness, partner/spouse mode, moat
-    layer). Not even stubbed.
-  # ─── R10 anti-patterns (trip-wire against) ───
+    CONSENT COPY — if the consent surface copy changes to cover R8.x
+    matching, bump CURRENT_CONSENT_VERSION. All already-consented users
+    become `consent-version-stale` until they re-consent. This is
+    intentional — it's the mechanism for "users consented to X; now we
+    do Y, get fresh consent." Partner-brief Red Team pass reviews the
+    copy before ship.
+  # ─── R11 scope ───
   - |
-    ANTI-PATTERNS — do not ship: (i) a generic "Comp benchmarks" page,
-    (ii) a "Negotiation templates" library, (iii) boilerplate email
-    drafts, (iv) a door that exists before it should. Any of these = the
-    build has drifted; back up.
+    SCOPE — R11.1 through R11.12 per ledger. Must-ship is 1-10; 11
+    is partner Red Team pass (post-autopilot); 12 is the accept close.
+  - |
+    OUT OF SCOPE — (i) cross-user MESSAGING (just matching, not intros
+    yet); (ii) reverse-matching where other users see you as a candidate
+    (reverse needs its own consent opt-in); (iii) ML-based scoring;
+    (iv) any §8 living expansions; (v) UI changes beyond the Settings →
+    Networking audit surface.
+  # ─── R11 anti-patterns (trip-wire against) ───
+  - |
+    ANTI-PATTERNS — do not ship: (i) a match algorithm that returns ANY
+    raw contact data from another user's Rolodex; (ii) a 403-removal
+    without also shipping index populator + audit log + rate limit;
+    (iii) a "soft launch" flag that hides matching from UI while still
+    computing+logging against users who haven't re-consented; (iv) a
+    rate limit that's client-side only; (v) an audit log that's opaque
+    ("match event fired" with no human-readable context).

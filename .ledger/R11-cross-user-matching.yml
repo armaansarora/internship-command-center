@@ -1,0 +1,99 @@
+phase: R11
+name: Cross-user warm-intro matching
+status: not_started
+intent: Unblock the /api/networking/match-candidates 403 hard-stop with
+  production-ready cross-user matching. Ships the full Red Team checklist
+  — no half-shipping privacy-touching features. Matching surfaces
+  Rolodex-edge warm-intros (Armaan → Sarah → Acme = surface Acme to Armaan)
+  gated behind R8's consent + consent-version + audit-log + rate-limit +
+  delta-re-scan invariants. Replaces the R8-era 403 holding pattern with
+  the real thing.
+started: null
+completed: null
+lock: null
+acceptance:
+  criteria:
+    - /api/networking/match-candidates returns 200 with real match
+      candidates for consented users whose consent_version matches the
+      current platform version; otherwise returns a well-typed 4xx
+      (401 unauthenticated, 403 consent-required, 403 consent-version-stale,
+      429 rate-limited).
+    - Index populator cron backfills the match index from contacts +
+      applications on a nightly schedule AND on-demand when a delta
+      trigger fires (new contact, new application, updated warmth).
+    - Audit log surface in Settings → Networking lets users see every
+      match event involving their data, with timestamp and anonymized
+      counterparty key. Readable, not a dev-tools dump.
+    - "Rate limit — 20 match-candidate queries per user per hour, enforced server-side with typed 429. Documented in the consent copy."
+    - Proof test binds each invariant (consent gate, version gate, rate
+      limit, audit log insert, RLS cross-user isolation).
+  met: false
+  verified_by_commit: null
+tasks:
+  R11.1:
+    title: Consent-version schema — add consent_version column to user
+      profile + migrate existing consented users to version 1; introduce
+      CURRENT_CONSENT_VERSION constant the guard reads. Migration 0022
+      additive.
+    status: not_started
+  R11.2:
+    title: Match-candidate index schema — new match_candidate_index table
+      (user_id, counterparty_anon_key, edge_strength, inserted_at,
+      invalidates_at) with RLS so users see only their own index rows.
+      Migration 0022 or 0023.
+    status: not_started
+  R11.3:
+    title: Index populator cron — /api/cron/match-index nightly cron that
+      rebuilds each user's match candidates from contacts + applications.
+      Reuses R7 cron surface; budgeted work cap per user.
+    status: not_started
+  R11.4:
+    title: Delta re-scan triggers — on contact insert/update/warmth change
+      AND on application insert/status-change, enqueue a per-user
+      match-index refresh job. Reuses R8's existing event surface where
+      possible. Dedupe by user_id within a short window.
+    status: not_started
+  R11.5:
+    title: Match algorithm — the core scoring. Inputs the user's
+      contacts + applications; outputs ranked candidates. Heuristic,
+      not ML. Must be deterministic and cache-friendly.
+    status: not_started
+  R11.6:
+    title: Consent-version gate — extend assertConsented to also check
+      version match; add typed 403 consent-version-stale response.
+    status: not_started
+  R11.7:
+    title: Rate limit — 20 queries/hour per user, Supabase-backed counter
+      or in-memory if Vercel Fluid Compute shares instance state; typed
+      429 with retry_after_seconds.
+    status: not_started
+  R11.8:
+    title: Unblock /api/networking/match-candidates — replace the
+      gated-red-team-pending 403 with real match results. Route handler
+      reads from match_candidate_index + applies rate limit + logs to
+      audit_events.
+    status: not_started
+  R11.9:
+    title: Audit log surface — match_events table (user_id,
+      counterparty_anon_key, fired_at, match_reason) + Settings →
+      Networking → "How your data is used" view showing last N events.
+      NOT a raw log dump — readable one-liners ("You were matched with a
+      contact at Acme Corp on Apr 24").
+    status: not_started
+  R11.10:
+    title: Proof tests — bind each invariant above. Cross-user RLS
+      isolation, consent gate, version gate, rate limit, audit log
+      insert, delta re-scan debounce, cron idempotency.
+    status: not_started
+  R11.11:
+    title: Red Team pass by partner (post-autopilot) — confirm consent
+      copy survives a lawyer read, no PII leaks cross-user, all gates
+      fail-closed. May open R11.12 blockers.
+    status: not_started
+  R11.12:
+    title: Accept + close — tower verify R11, tower accept R11
+      (gate-enforced), final handoff.
+    status: not_started
+blockers: []
+decisions: []
+history: []
