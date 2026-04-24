@@ -101,3 +101,301 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* ------------------------------------------------------------------
+ * R10.6 — Negotiation Parlor scene.
+ *
+ * Wood-panelled annex past the C-Suite door. Palette matches the R10.5
+ * door: deep wood (#3a2714 → #251504) + gold accents (#C9A84C). Sconces
+ * wash warm amber light across the back wall; the oak floor carries a
+ * subtle grain; the back wall hosts the R10.8 pin-stack chart slot; the
+ * table-area + chairs-area sit on the floor.
+ *
+ * The scene is a fixed-viewport canvas — no scrollbars, no page chrome
+ * beyond the shared world chrome. The draft-area is opt-in (R10.9+).
+ * ------------------------------------------------------------------ */
+
+.parlor-bg {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #e8d9b7;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(201, 168, 76, 0.10) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, #3a2714 0%, #251504 100%);
+  font-family: "Satoshi", system-ui, sans-serif;
+}
+
+.parlor-backwall {
+  position: relative;
+  height: 42vh;
+  padding: 48px 56px 24px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(201, 168, 76, 0.08) 0%,
+      rgba(0, 0, 0, 0.0) 50%,
+      rgba(0, 0, 0, 0.22) 100%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.22) 0 2px,
+      transparent 2px 14px
+    ),
+    linear-gradient(180deg, #47321c 0%, #2f1f0f 100%);
+  box-shadow: inset 0 -8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.parlor-sconces {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38vh;
+  height: 6vh;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 18% 0%,
+      rgba(232, 201, 106, 0.35) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(232, 201, 106, 0.25) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 82% 0%,
+      rgba(232, 201, 106, 0.35) 0%,
+      transparent 40%
+    );
+  opacity: 0.9;
+}
+
+.parlor-floor {
+  position: relative;
+  height: 58vh;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  padding: 32px 56px 56px;
+  background:
+    linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.1) 40%,
+      transparent 80%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.22) 0 3px,
+      transparent 3px 22px
+    ),
+    linear-gradient(180deg, #2a1a0b 0%, #1a0f06 100%);
+  box-shadow: inset 0 16px 32px rgba(0, 0, 0, 0.7);
+}
+
+.parlor-table-area {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 24px;
+}
+
+.parlor-chairs-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 24px;
+}
+
+.parlor-draft-area {
+  position: absolute;
+  right: 0;
+  top: 12vh;
+  width: min(28vw, 380px);
+  max-height: 76vh;
+  overflow-y: auto;
+  padding: 24px;
+  background: linear-gradient(180deg, #2c1d0e 0%, #1e1308 100%);
+  border-left: 1px solid rgba(201, 168, 76, 0.35);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.55);
+  color: #e8d9b7;
+}
+
+/* ------------------------------------------------------------------
+ * Oak table — the flat surface that carries the folder stack.
+ * ------------------------------------------------------------------ */
+
+.parlor-oak-table {
+  position: relative;
+  width: min(780px, 100%);
+  min-height: 360px;
+  padding: 32px 36px 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(201, 168, 76, 0.06) 0%,
+      transparent 40%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.25) 0 3px,
+      transparent 3px 30px
+    ),
+    linear-gradient(180deg, #5a3d1f 0%, #3b2612 100%);
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  border-radius: 6px;
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.55),
+    inset 0 2px 0 rgba(232, 201, 106, 0.18);
+}
+
+/* ------------------------------------------------------------------
+ * Offer folder — manila folder resting on the oak.
+ *
+ * Even/odd tilt is set inline by OfferFolder (-1.5° / +1.5°). Hover lifts
+ * the folder a touch; selected state draws a gold outline and flattens
+ * the tilt to signal focus.
+ * ------------------------------------------------------------------ */
+
+.parlor-offer-folder-item {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+}
+
+.parlor-offer-folder {
+  position: relative;
+  width: 220px;
+  min-height: 168px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  cursor: pointer;
+  color: #2a1a0b;
+  background: linear-gradient(180deg, #e8d9b7 0%, #d3bf94 100%);
+  border: 1px solid rgba(120, 90, 42, 0.6);
+  border-radius: 4px;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transform-origin: center top;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+  font-family: "Satoshi", system-ui, sans-serif;
+}
+
+.parlor-offer-folder:hover {
+  filter: brightness(1.04);
+  box-shadow:
+    0 14px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.parlor-offer-folder:focus-visible {
+  outline: 2px solid rgba(232, 201, 106, 0.9);
+  outline-offset: 3px;
+}
+
+.parlor-offer-folder[data-selected="true"] {
+  transform: rotate(0deg) translateY(-4px) !important;
+  box-shadow:
+    0 18px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 2px rgba(232, 201, 106, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  z-index: 2;
+}
+
+.parlor-offer-folder-tab {
+  padding: 10px 14px 8px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #1a0f06;
+  background: linear-gradient(180deg, #d3bf94 0%, #bfa970 100%);
+  border-bottom: 1px solid rgba(120, 90, 42, 0.5);
+  border-radius: 4px 4px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parlor-offer-folder-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px 14px;
+  font-size: 13px;
+  color: #2a1a0b;
+}
+
+.parlor-offer-folder-role {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.parlor-offer-folder-loc {
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.parlor-offer-folder-total {
+  margin-top: auto;
+  padding-top: 6px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3a2714;
+  border-top: 1px dashed rgba(120, 90, 42, 0.4);
+}
+
+.parlor-offer-folder-status {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.parlor-offer-folder-status[data-status="accepted"] {
+  color: #2b5f2b;
+}
+
+.parlor-offer-folder-status[data-status="declined"],
+.parlor-offer-folder-status[data-status="expired"],
+.parlor-offer-folder-status[data-status="withdrawn"] {
+  color: #6a2a1e;
+}
+
+.parlor-offer-folder-status[data-status="negotiating"] {
+  color: #7a5a12;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parlor-offer-folder,
+  .parlor-offer-folder * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

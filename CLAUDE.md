@@ -192,6 +192,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-7/war-table/StampBar.tsx` (202 LOC) — Floating action bar that appears when the user has selected one or more
 - `src/components/penthouse/PipelineNodes.tsx` (200 LOC) — PipelineNodes renders:
 - `src/components/floor-2/analytics/WeeklyTrend.tsx` (199 LOC) — WeeklyTrend — SVG line chart showing applications per week over 8 weeks.
+- `src/components/parlor/OfferFolder.test.tsx` (197 LOC) — R10.6 — OfferFolder render + interaction tests.
 - `src/components/penthouse/ActivityFeed.tsx` (195 LOC) — Maps each activity type to a CSS colour token.
 - `src/components/ui/SoundToggle.tsx` (194 LOC) — SoundToggle — small fixed speaker button (bottom-right).
 - `src/components/floor-1/CSuiteScene.tsx` (193 LOC) — Graph slot — the live `DispatchGraph` sits here, above the panel slot.
@@ -237,6 +238,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-6/rolodex/RolodexCard.tsx` (128 LOC) — A single physical card on the rolodex cylinder. Warmth-coloured via the
 - `src/components/floor-1/ceo-character/CEOWhiteboard.tsx` (126 LOC) — CEOWhiteboard — Actually a wall display / control panel.
 - `src/components/penthouse/StatCard.tsx` (126 LOC) — StatCard — animated counter inside a GlassPanel.
+- `src/components/parlor/ParlorScene.test.tsx` (124 LOC) — R10.6 — ParlorScene composition tests.
 - `src/components/floor-2/orrery/Orrery.tsx` (118 LOC) — R9.3 + R9.4 — Orrery (consumer wrapper).
 - `src/components/floor-2/orrery/PatternModeToggle.tsx` (118 LOC) — R9.4 — PatternModeToggle.
 - `src/components/floor-3/binder/DebriefBinderShelf.tsx` (117 LOC) — R6.8 — The Debrief Binder Shelf.
@@ -276,6 +278,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-3/drill/DrillTimer.test.tsx` (79 LOC)
 - `src/components/penthouse/quick-actions/QuickActionsRow.tsx` (79 LOC) — QuickActionsRow — the 4 Penthouse quick-actions wired to either a direct
 - `src/components/floor-6/dossier-wall/DossierWall.test.tsx` (77 LOC)
+- `src/components/parlor/OfferFolder.tsx` (77 LOC) — R10.6 — A single manila folder on the Oak Table.
 - `src/components/floor-3/drill/DrillTimer.tsx` (73 LOC) — R6.6 — DrillTimer.
 - `src/components/world/DayNightProvider.tsx` (72 LOC) — DayNightProvider — sets `data-time` on <html> based on the user's local time.
 - `src/components/floor-3/drill/DrillQuestionCard.tsx` (70 LOC) — R6.6 — DrillQuestionCard.
@@ -285,12 +288,15 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/undo-bar/UndoBarProvider.tsx` (64 LOC) — The shape exposed to consumer components.
 - `src/components/penthouse/scenes/SceneRouter.tsx` (62 LOC) — Picks the active Penthouse scene based on the user's current time-of-day
 - `src/components/penthouse/scenes/morning/SkipHint.tsx` (62 LOC) — Small floating hint at the bottom of the Morning Briefing Scene telling the
+- `src/components/parlor/ParlorScene.tsx` (59 LOC) — Optional signature affordance — overlay, portal, or any node the
 - `src/components/agents/dialogue/AgentQuickActions.tsx` (55 LOC)
 - `src/components/floor-6/contact-grid/ContactCard.test.tsx` (55 LOC)
 - `src/components/floor-5/live-compose/PenGlowCursor.tsx` (50 LOC) — R5.4 — PenGlowCursor.
 - `src/components/agents/dialogue/AgentToolCallIndicator.tsx` (49 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.test.tsx` (48 LOC)
+- `src/app/(authenticated)/parlor/parlor-client.tsx` (46 LOC) — R10.6 — ParlorClient.
 - `src/components/floor-6/side-switch/SideSwitch.test.tsx` (44 LOC)
+- `src/components/parlor/OakTable.tsx` (44 LOC) — R10.6 — The Oak Table at the center of the Parlor.
 - `src/components/floor-5/live-compose/LiveComposePanel.test.tsx` (40 LOC) — R5.4 — LiveComposePanel render tests (SSR, matches R8 pattern).
 - `src/components/floor-3/drill/DrillVoiceMic.test.tsx` (30 LOC)
 - `src/components/world/MilestoneToastContainer.tsx` (18 LOC) — Mount-once container for the milestone toast system.

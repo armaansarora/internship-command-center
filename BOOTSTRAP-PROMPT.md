@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 11:10 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Thursday, April 23, 2026 at 11:17 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `3abb5d4`)
+- **Branch:** `main` (commit `f0a537b`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 107,939 across 619 source files
+- **Total LOC:** 108,868 across 627 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-3abb5d4 [R10/10.4] feat(comp): Firecrawl/Levels.fyi scraper + cache + lookup API + seed script
+f0a537b [R10/10.5] feat(parlor): C-Suite door (absent without offers) + materialization animation
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `3abb5d4`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `f0a537b`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -102,18 +102,18 @@ See docs/MASTER-PLAN.md for the next phase.
 - STRIPE_WEBHOOK_SECRET
 - SUPABASE_SERVICE_ROLE_KEY
 
-## Source Tree (619 files, 107,939 LOC)
+## Source Tree (627 files, 108,868 LOC)
 
 | Directory | LOC |
 |---|---|
 | `src/lib/db/queries` | 7070 |
 | `src/lib/ai/agents` | 4255 |
 | `src/components/world` | 3512 |
-| `src/styles` | 2742 |
+| `src/styles` | 3040 |
 | `src/components/floor-1` | 2725 |
 | `src/components/floor-7/war-table` | 1988 |
 | `src/components/floor-2/orrery` | 1915 |
-| `src/app/__tests__` | 1840 |
+| `src/app/__tests__` | 1885 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib` | 1790 |
 | `src/hooks` | 1647 |
@@ -150,6 +150,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cpo` | 842 |
 | `src/components/floor-7/cro-character` | 841 |
 | `src/components/lobby/cinematic` | 832 |
+| `src/components/parlor` | 830 |
 | `src/lib/agents/cio` | 817 |
 | `src/lib/penthouse` | 796 |
 | `src/app/api/cron/draft-follow-ups` | 792 |
@@ -196,7 +197,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/progression` | 349 |
 | `src/components/floor-4/final-countdown` | 341 |
 | `src/app/api/stripe/webhook` | 339 |
-| `src/components/parlor` | 329 |
 | `src/app/api/cron/briefing` | 327 |
 | `src/app/(authenticated)/briefing-room` | 320 |
 | `src/lib/comp-bands/__tests__` | 315 |
@@ -278,6 +278,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
 | `src/app/api/briefing/score-answer` | 98 |
+| `src/app/(authenticated)/parlor` | 85 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
 | `src/lib/resumes/__tests__` | 79 |
@@ -323,6 +324,8 @@ src/app/(authenticated)/error.tsx
 src/app/(authenticated)/layout.tsx
 src/app/(authenticated)/not-found.tsx
 src/app/(authenticated)/observatory/page.tsx
+src/app/(authenticated)/parlor/page.tsx
+src/app/(authenticated)/parlor/parlor-client.tsx
 src/app/(authenticated)/penthouse/page.tsx
 src/app/(authenticated)/penthouse/penthouse-client.tsx
 src/app/(authenticated)/penthouse/penthouse-data.ts
@@ -334,6 +337,7 @@ src/app/(authenticated)/war-room/page.tsx
 src/app/(authenticated)/world-shell.tsx
 src/app/(authenticated)/writing-room/page.tsx
 src/app/__tests__/r10-parlor-door-absence.proof.test.tsx
+src/app/__tests__/r10-parlor-route-gate.proof.test.ts
 src/app/__tests__/r5-writing-room.proof.test.ts
 src/app/__tests__/r6-briefing-room.proof.test.ts
 src/app/__tests__/r7-situation-room.proof.test.ts
@@ -623,8 +627,13 @@ src/components/lobby/concierge/OtisCharacter.tsx
 src/components/lobby/concierge/OtisDialoguePanel.tsx
 src/components/lobby/directory/BuildingDirectory.test.tsx
 src/components/lobby/directory/BuildingDirectory.tsx
+src/components/parlor/OakTable.tsx
+src/components/parlor/OfferFolder.test.tsx
+src/components/parlor/OfferFolder.tsx
 src/components/parlor/ParlorDoor.test.tsx
 src/components/parlor/ParlorDoor.tsx
+src/components/parlor/ParlorScene.test.tsx
+src/components/parlor/ParlorScene.tsx
 src/components/penthouse/ActivityFeed.tsx
 src/components/penthouse/GlassPanel.tsx
 src/components/penthouse/PipelineNodes.tsx
@@ -1007,13 +1016,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1049 | 11,665 |
+| `BOOTSTRAP-PROMPT.md` | 1056 | 11,750 |
 | `PROJECT-CONTEXT.md` | 282 | 5,275 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
-| `CLAUDE.md` | 509 | 11,416 |
-| **Total** | **2207** | **35,528** |
+| `CLAUDE.md` | 515 | 11,591 |
+| **Total** | **2220** | **35,788** |
 
-> ⚠️ Reading all recommended files consumes ~35,528 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~35,788 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)
