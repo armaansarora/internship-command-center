@@ -5,7 +5,7 @@
 
 - `src/app/(authenticated)/settings/settings-client.tsx` (1355 LOC) — R0.7 — `user_profiles.deleted_at` as ISO string (or null). Drives
 - `src/components/floor-3/crud/PrepPacketViewer.tsx` (1135 LOC)
-- `src/app/lobby/lobby-client.tsx` (970 LOC) — Lobby client component — The Tower entrance.
+- `src/app/lobby/lobby-client.tsx` (1003 LOC) — Lobby client component — The Tower entrance.
 - `src/components/floor-7/crud/ApplicationModal.tsx` (777 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (762 LOC) — private sticky-note, visible only to the owning user. NEVER
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
@@ -190,6 +190,7 @@
 - `src/components/settings/NetworkingAudit.tsx` (87 LOC) — R11.9 — Settings → Networking → "How your data is used".
 - `src/components/floor-5/resume-press/ResumePress.test.tsx` (86 LOC)
 - `src/components/floor-5/wall-inscription/WallInscription.tsx` (86 LOC) — R5.9 — Wall inscription (sharpening detail).
+- `src/components/marketing/LegalDocument.tsx` (86 LOC) — Shared renderer for /terms and /privacy. Matches the Tower's serif-display
 - `src/components/floor-3/drill/LiveSTARBoard.tsx` (83 LOC)
 - `src/components/agents/dialogue/AgentMessageBubble.tsx` (82 LOC)
 - `src/components/floor-2/cfo-character/CFODialoguePanel.tsx` (81 LOC)

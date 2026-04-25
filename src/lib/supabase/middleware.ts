@@ -70,10 +70,15 @@ export async function updateSession(request: NextRequest) {
   //                           routes self-authenticate via verifyCronAuth().
   const publicPaths = [
     "/lobby",
+    "/terms",
+    "/privacy",
+    "/pricing",
+    "/waitlist",
     "/api/auth/callback",
     "/api/webhooks",
     "/api/stripe/webhook",
     "/api/cron",
+    "/api/waitlist",
   ];
   const isPublicPath = publicPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path),

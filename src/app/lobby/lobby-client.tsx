@@ -401,11 +401,44 @@ export function LobbyClient({
             />
           </div>
 
+          {/* ── LEGAL LINKS ── */}
+          <nav
+            data-animate
+            aria-label="Legal and pricing"
+            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
+            style={{ opacity: 0.45 }}
+          >
+            {LOBBY_FOOTER_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="transition-opacity hover:opacity-100"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "10px",
+                  letterSpacing: "0.16em",
+                  color: "rgba(255,255,255,0.55)",
+                  textDecoration: "none",
+                  textTransform: "uppercase",
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
         </div>
       </div>
     </div>
   );
 }
+
+const LOBBY_FOOTER_LINKS = [
+  { href: "/pricing", label: "Pricing" },
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/waitlist", label: "Waitlist" },
+] as const;
 
 /**
  * ConstructionTicker — narrow scrolling banner at the very top of the page.

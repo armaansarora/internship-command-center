@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Saturday, April 25, 2026 at 1:52 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Saturday, April 25, 2026 at 2:42 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `c441591`)
+- **Branch:** `main` (commit `92992d7`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 120,848 across 696 source files
+- **Total LOC:** 122,544 across 713 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-c441591 chore(handoff): session sess-a5908e — R0
+92992d7 [R12/post-mortem] chore(ledger+brief): backfill R12 decisions[] + R12 partner-brief row
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `c441591`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `92992d7`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (696 files, 120,848 LOC)
+## Source Tree (713 files, 122,544 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -115,19 +115,19 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-1` | 2725 |
 | `src/app/__tests__` | 2656 |
 | `src/components/floor-7/war-table` | 2166 |
+| `src/lib` | 1916 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
-| `src/lib` | 1790 |
 | `src/lib/ai/structured` | 1650 |
 | `src/hooks` | 1647 |
 | `src/components/floor-3/drill` | 1581 |
 | `src/app/(authenticated)/settings` | 1450 |
 | `src/lib/situation` | 1398 |
-| `src/app/lobby` | 1294 |
+| `src/app` | 1369 |
+| `src/app/lobby` | 1327 |
 | `src/lib/gmail` | 1253 |
 | `src/components/floor-4` | 1251 |
 | `src/db` | 1185 |
-| `src/app` | 1177 |
 | `src/components/floor-3` | 1141 |
 | `src/lib/networking/__tests__` | 1133 |
 | `src/components/floor-6/cio-character` | 1122 |
@@ -162,6 +162,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
 | `src/components/agents/dialogue` | 729 |
+| `src/lib/ai` | 691 |
 | `src/components/parlor/simulator` | 678 |
 | `src/components/floor-3/binder` | 674 |
 | `src/lib/sound` | 641 |
@@ -170,7 +171,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/(authenticated)/penthouse` | 627 |
 | `src/components/floor-7/rejection` | 620 |
 | `src/app/api/reports/state-of-month` | 602 |
-| `src/lib/ai` | 599 |
 | `src/lib/agents/ceo` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
 | `src/app/api/cron/unprompted-ceo` | 573 |
@@ -191,7 +191,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-3/star` | 413 |
 | `src/lib/agents/concierge` | 411 |
 | `src/lib/auth` | 411 |
-| `src/lib/supabase` | 402 |
+| `src/lib/supabase` | 407 |
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/lib/actions` | 396 |
 | `src/app/(authenticated)/parlor` | 390 |
@@ -217,10 +217,12 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/contacts/[id]/reference-request/__tests__` | 298 |
 | `src/components/floor-6/dossier-wall` | 298 |
 | `src/lib/audio` | 297 |
+| `src/app/(marketing)/pricing` | 294 |
 | `src/app/(authenticated)` | 285 |
 | `src/components/lobby/directory` | 285 |
 | `src/lib/utils` | 284 |
 | `src/app/api/offers` | 278 |
+| `src/lib/legal` | 277 |
 | `src/app/api/ceo/dispatches` | 275 |
 | `src/app/api/account/delete` | 271 |
 | `src/lib/agents` | 269 |
@@ -228,6 +230,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/rest` | 268 |
 | `src/app/api/offers/[id]/convene` | 258 |
 | `src/components/floor-4/rings` | 256 |
+| `src/app/(marketing)/waitlist` | 249 |
 | `src/app/api/rejection-reflections` | 232 |
 | `src/app/api/resumes/upload/__tests__` | 227 |
 | `src/components/floor-4/conflicts` | 226 |
@@ -267,6 +270,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/idle` | 153 |
 | `src/app/api/contacts/[id]/reference-request` | 152 |
 | `src/components/icons` | 152 |
+| `src/app/(marketing)` | 151 |
 | `src/lib/voice/__tests__` | 145 |
 | `src/app/(authenticated)/situation-room` | 142 |
 | `src/app/api/cron/cio-reresearch` | 141 |
@@ -283,6 +287,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/settings/__tests__` | 126 |
 | `src/app/api/cron/warmth-decay` | 115 |
 | `src/app/api/briefing/binder/[id]` | 114 |
+| `src/lib/cron` | 112 |
 | `src/app/api/documents/[id]/pdf` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/lib/parlor` | 110 |
@@ -301,6 +306,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/offers/ingest-email` | 98 |
 | `src/lib/parlor/__tests__` | 90 |
 | `src/db/__tests__` | 89 |
+| `src/components/marketing` | 86 |
 | `src/app/api/offers/[id]/simulate` | 84 |
 | `src/app/api/ceo` | 81 |
 | `src/app/api/cron/job-discovery` | 81 |
@@ -319,6 +325,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/networking/opt-in` | 44 |
 | `src/app/api/progression` | 44 |
 | `src/app/api/notifications/[id]/read` | 40 |
+| `src/app/api/admin/sentry-probe` | 37 |
 | `src/lib/agents/offer-evaluator/__tests__` | 36 |
 | `src/app/api/gmail/auth` | 34 |
 | `src/app/api/cro` | 31 |
@@ -327,6 +334,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/stripe/portal` | 27 |
 | `src/app/api/auth/signout` | 25 |
 | `src/lib/speech` | 25 |
+| `src/app/(marketing)/privacy` | 21 |
+| `src/app/(marketing)/terms` | 21 |
 | `src/app/api/gmail/sync` | 19 |
 | `src/app/api/calendar/sync` | 17 |
 | `src` | 17 |
@@ -359,6 +368,13 @@ src/app/(authenticated)/situation-room/page.tsx
 src/app/(authenticated)/war-room/page.tsx
 src/app/(authenticated)/world-shell.tsx
 src/app/(authenticated)/writing-room/page.tsx
+src/app/(marketing)/layout.tsx
+src/app/(marketing)/pricing/page.tsx
+src/app/(marketing)/privacy/page.tsx
+src/app/(marketing)/terms/page.tsx
+src/app/(marketing)/waitlist/WaitlistForm.tsx
+src/app/(marketing)/waitlist/actions.ts
+src/app/(marketing)/waitlist/page.tsx
 src/app/__tests__/r10-ceo-voice-three-layer.proof.test.tsx
 src/app/__tests__/r10-negotiation-send-hold.proof.test.ts
 src/app/__tests__/r10-parlor-door-absence.proof.test.tsx
@@ -383,6 +399,7 @@ src/app/api/account/delete/route.test.ts
 src/app/api/account/delete/route.ts
 src/app/api/account/export/route.test.ts
 src/app/api/account/export/route.ts
+src/app/api/admin/sentry-probe/route.ts
 src/app/api/auth/callback/route.ts
 src/app/api/auth/signout/route.ts
 src/app/api/briefing/audio-upload/route.test.ts
@@ -501,7 +518,10 @@ src/app/lobby/onboarding/one-time-arrival.test.ts
 src/app/lobby/page.tsx
 src/app/lobby/r4.proof.test.ts
 src/app/not-found.tsx
+src/app/opengraph-image.tsx
 src/app/page.tsx
+src/app/robots.ts
+src/app/sitemap.ts
 src/components/agents/dialogue/AgentChatInput.tsx
 src/components/agents/dialogue/AgentDialoguePanel.tsx
 src/components/agents/dialogue/AgentMessageBubble.tsx
@@ -669,6 +689,7 @@ src/components/lobby/concierge/OtisCharacter.tsx
 src/components/lobby/concierge/OtisDialoguePanel.tsx
 src/components/lobby/directory/BuildingDirectory.test.tsx
 src/components/lobby/directory/BuildingDirectory.tsx
+src/components/marketing/LegalDocument.tsx
 src/components/parlor/CEOVoicePlayButton.test.tsx
 src/components/parlor/CEOVoicePlayButton.tsx
 src/components/parlor/CFOQuipOverlay.test.tsx
@@ -827,6 +848,7 @@ src/lib/ai/cost.ts
 src/lib/ai/memory-extractor.ts
 src/lib/ai/model.ts
 src/lib/ai/prompt-cache.ts
+src/lib/ai/quota.ts
 src/lib/ai/structured/__tests__/live-compose.proof.test.ts
 src/lib/ai/structured/__tests__/negotiation-draft.test.ts
 src/lib/ai/structured/__tests__/reference-request.test.ts
@@ -869,6 +891,7 @@ src/lib/comp-bands/lookup.ts
 src/lib/constants/floors.ts
 src/lib/contacts/warmth.test.ts
 src/lib/contacts/warmth.ts
+src/lib/cron/health.ts
 src/lib/crypto/keys.test.ts
 src/lib/crypto/keys.ts
 src/lib/day-night.ts
@@ -929,6 +952,9 @@ src/lib/jobs/sources/lever.ts
 src/lib/jobs/sources/seed.test.ts
 src/lib/jobs/sources/seed.ts
 src/lib/jobs/types.ts
+src/lib/launch-config.ts
+src/lib/legal/privacy.ts
+src/lib/legal/terms.ts
 src/lib/lobby/derive-floors-unlocked.test.ts
 src/lib/lobby/derive-floors-unlocked.ts
 src/lib/logger.test.ts
@@ -1108,13 +1134,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1157 | 13,126 |
-| `PROJECT-CONTEXT.md` | 277 | 5,128 |
+| `BOOTSTRAP-PROMPT.md` | 1157 | 13,111 |
+| `PROJECT-CONTEXT.md` | 278 | 5,161 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2141** | **31,767** |
+| **Total** | **2142** | **31,785** |
 
-> ⚠️ Reading all recommended files consumes ~31,767 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~31,785 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

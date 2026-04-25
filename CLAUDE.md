@@ -99,7 +99,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 
 - `src/app/(authenticated)/settings/settings-client.tsx` (1355 LOC) — R0.7 — `user_profiles.deleted_at` as ISO string (or null). Drives
 - `src/components/floor-3/crud/PrepPacketViewer.tsx` (1135 LOC)
-- `src/app/lobby/lobby-client.tsx` (970 LOC) — Lobby client component — The Tower entrance.
+- `src/app/lobby/lobby-client.tsx` (1003 LOC) — Lobby client component — The Tower entrance.
 - `src/components/floor-7/crud/ApplicationModal.tsx` (777 LOC)
 - `src/components/floor-6/crud/ContactModal.tsx` (762 LOC) — private sticky-note, visible only to the owning user. NEVER
 - `src/components/floor-3/crud/InterviewTimeline.tsx` (676 LOC)
@@ -123,7 +123,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `src/components/floor-4/SituationRoomScene.tsx` (430 LOC) — SituationRoomScene — Floor 4 environment compositor.
 - `src/components/floor-7/WarRoomClient.tsx` (429 LOC)
 
-> 192 smaller components omitted — full list in `docs/KEY-COMPONENTS.md`.
+> 193 smaller components omitted — full list in `docs/KEY-COMPONENTS.md`.
 
 ## Bootstrap Infrastructure
 - `scripts/auto-organize-docs.ts` — **runs on every commit (Husky)**. Auto-archives stale docs, auto-generates Key Components (this section), auto-updates doc map table, auto-appends session logs. Zero manual doc maintenance.

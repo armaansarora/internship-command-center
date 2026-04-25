@@ -215,6 +215,7 @@ All planning docs are in `docs/`. Operational files stay in root.
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |
 | `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge, multi-tenant ready | ~290 |
 | `docs/KEY-COMPONENTS.md` | - `src/app/(authenticated)/settings/settings-client.tsx` (1355 LOC) — R0.7 — `us | ~220 |
+| `docs/LAUNCH-READY.md` | **Generated 2026-04-25 after R12 acceptance.** Single source of truth for everyt | ~380 |
 | `docs/MASTER-PLAN.md` | 7 phases with deliverables, acceptance criteria, testing strategy | ~370 |
 | `docs/NEXT-ROADMAP.md` | **Audience.** Any Claude session working on The Tower. And Armaan, once per phas | ~950 |
 | `docs/SCHEMA-DRAFT.md` | 16-table Postgres schema: RLS, pgvector HNSW indexes, post-push SQL triggers | ~480 |
