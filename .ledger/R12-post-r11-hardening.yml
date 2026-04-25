@@ -170,7 +170,58 @@ blockers:
       autopilot scope per partner constraint 'no src/ feature work this
       session'.
     resolved: 2026-04-25T05:31:50.210Z
-decisions: []
+decisions:
+  - date: 2026-04-25
+    text: Mock topology — Pattern B (Node HTTP stub on :3001) over Pattern A
+      (MSW-only) or Pattern C (Next instrumentation hook).
+    why: Stub server intercepts both browser-origin and Next.js server-side
+      Supabase fetches at the same network endpoint. Single source of
+      truth per scenario. Backfilled by partner Red Team 2026-04-25 —
+      autopilot session 2 chose Pattern B per the partner-locked
+      constraint, but didn't log the choice at decision-time.
+  - date: 2026-04-25
+    text: B2 Rolodex regression fix (RolodexLoungeClient.tsx wired to
+      Rolodex 3D cylinder) shipped INSIDE R12 session 2 despite the
+      "no src/ feature work this session" constraint. Source change
+      lives at commit fb062c7.
+    why: B2 surfaced a real R8 regression — the Rolodex Lounge page was
+      using flat ContactGrid, not the virtualized Rolodex cylinder R8
+      claimed to ship. Discovery is exactly what hardening exists for.
+      Process slip was the in-session auto-fix instead of escalating to
+      partner per the constraint. Partner Red Team (2026-04-25) judged
+      the code change correct + accepted the deviation; logging here as
+      a process-lesson record. Future autopilot sessions on harness-only
+      phases should `tower block` the finding and pause for partner.
+  - date: 2026-04-25
+    text: ref-request-flood scenario invariant narrowed from "20 POSTs to
+      same (contact, offer) yield le 1 success via cooldown OR dedup" to
+      "cooldown only" after partner shipped REFERENCE_REQUEST_COOLDOWN_HOURS
+      at 98d3c47.
+    why: Cooldown is the load-bearing defense post-partner-fix. A separate
+      dedup arm would test the same invariant from a different angle, but
+      the cooldown gate already covers the spam vector the brief named.
+      Acceptable narrowing — coverage is honest to intent. Backfilled
+      decision; original R12 session 2 didn't log it.
+  - date: 2026-04-25
+    text: contacts-rolodex-200 scenario render-cap threshold relaxed from
+      le 30 to le 50 live cards.
+    why: The Rolodex cylinder's documented invariant (Rolodex.tsx:28
+      "≤ 50 live cards at any moment") is the actual contract. The
+      original 30-card assertion was tighter than the implementation
+      promise; relaxing to match the actual invariant is correct.
+      Backfilled decision; autopilot adjusted in fb062c7 without ledger
+      note.
+  - date: 2026-04-25
+    text: Acceptance criterion "≥5 scenarios per category × 5 categories"
+      shipped with 5/5/5/3/3 (security/abuse/concurrency/scale/failure).
+      Per-task ledger definitions said "≥5" for first three and "≥3"
+      for scale + failure.
+    why: Coverage is honest to intent — scale + failure scenarios are
+      higher-value-per-test than e.g. abuse, so 3 thorough scenarios is
+      defensible. Criterion text vs task-definition mismatch is a
+      documentation slip; the build is honest. Future R-phases should
+      align acceptance criteria with task scope at ledger seed time to
+      prevent this.
 history:
   - 2026-04-24T20:03:28.482Z: task_started R12.1
   - 2026-04-24T20:04:29.299Z: task_completed R12.1
