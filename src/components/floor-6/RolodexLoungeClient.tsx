@@ -14,7 +14,7 @@ import { CIODialoguePanel } from "./cio-character/CIODialoguePanel";
 import { CIOWhiteboard } from "./cio-character/CIOWhiteboard";
 import { ContactSearch } from "./crud/ContactSearch";
 import type { ContactSearchParams } from "./crud/ContactSearch";
-import { ContactGrid } from "./contact-grid/ContactGrid";
+import { Rolodex } from "./rolodex/Rolodex";
 
 // 652 LOC modal — code-split.
 const ContactModal = dynamic(
@@ -361,12 +361,11 @@ export function RolodexLoungeClient({
         </button>
       </div>
 
-      {/* Contact grid */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }} className="lounge-scroll">
-        <ContactGrid
+      {/* Rolodex 3D cylinder — Floor 6's centerpiece (R8 Intent: warmth-coloured rotating contact wheel, virtualizes ≤50 live cards at 200+ contacts via ±45° arc). */}
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Rolodex
           contacts={filteredContacts}
-          onEditContact={handleEditContact}
-          groupBy={searchParams.sort === "company" ? "company" : "warmth"}
+          onFlipCard={handleEditContact}
         />
       </div>
     </div>

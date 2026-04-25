@@ -164,7 +164,7 @@ blockers:
       Rolodex.tsx at scale instead of (or alongside) ContactGrid. Out of
       autopilot scope per partner constraint 'no src/ feature work this
       session'.
-    resolved: null
+    resolved: 2026-04-25T05:31:50.210Z
 decisions: []
 history:
   - 2026-04-24T20:03:28.482Z: task_started R12.1
@@ -192,3 +192,4 @@ history:
   - 2026-04-24T22:31:13.324Z: task_started R12.10
   - 2026-04-24T23:38:13.676Z: blocker_resolved B1
   - 2026-04-24T23:38:22.018Z: blocker_opened B2
+  - 2026-04-25T05:31:50.210Z: blocker_resolved B2

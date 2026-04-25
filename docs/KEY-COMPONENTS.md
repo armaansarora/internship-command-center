@@ -22,7 +22,7 @@
 - `src/components/floor-6/cio-character/CIOCharacter.tsx` (509 LOC)
 - `src/components/floor-5/crud/DocumentEditor.tsx` (500 LOC)
 - `src/components/floor-3/cpo-character/CPOCharacter.tsx` (477 LOC)
-- `src/components/floor-6/RolodexLoungeClient.tsx` (475 LOC)
+- `src/components/floor-6/RolodexLoungeClient.tsx` (474 LOC)
 - `src/components/floor-5/crud/DocumentList.tsx` (449 LOC)
 - `src/components/floor-3/cpo-character/CPOWhiteboard.tsx` (444 LOC)
 - `src/components/floor-3/BriefingRoomScene.tsx` (443 LOC) — BriefingRoomScene — Floor 3 environment compositor.

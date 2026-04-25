@@ -13,10 +13,12 @@ import { USERS, loadFixture } from "../helpers/fixtures";
  *      ContactGrid instead. If the cylinder is absent from the DOM, this
  *      scenario SHOULD fail — file blocker R12.6 "rolodex cylinder not
  *      wired into RolodexLoungeClient". Do NOT weaken the selector.
- *   2. Live card count (`[data-rolodex-card="live"]`) stays at ≤ 30 while
- *      scrolling through — the cylinder's ±45° arc virtualizer should cap
- *      it at ≤ 50 (see Rolodex.tsx comment), and 30 is a headroom-safe
- *      upper bound for the arc at this contact density.
+ *   2. Live card count (`[data-rolodex-card="live"]`) stays at ≤ 50 while
+ *      scrolling through — matches Rolodex.tsx documented cap. Math at 200
+ *      contacts: 360° / 200 = 1.8° per card; VISIBLE_ARC_DEG=90 (strict
+ *      |delta|<45°) → ~50 live. Original draft asserted ≤ 30 ("headroom"),
+ *      but at this density the implementation IS the cap, not below it.
+ *      The bound binds the defense ("virtualize — never render all 200").
  */
 test.describe("scale — 200 contacts — 3D cylinder virtualization", () => {
   const CONTACTS_200 = loadFixture<Array<Record<string, unknown>>>(
@@ -60,7 +62,7 @@ test.describe("scale — 200 contacts — 3D cylinder virtualization", () => {
     ).toHaveCount(1, { timeout: 5_000 });
   });
 
-  test("scrolling cycles cards → ≤ 30 live cards rendered at once", async ({
+  test("scrolling cycles cards → ≤ 50 live cards rendered at once", async ({
     page,
   }) => {
     await page.goto("/rolodex-lounge", { waitUntil: "networkidle" });
@@ -92,10 +94,11 @@ test.describe("scale — 200 contacts — 3D cylinder virtualization", () => {
 
     expect(
       liveCardCount,
-      `Expected ≤ 30 live cards after scrolling, got ${liveCardCount}. ` +
-        `Rolodex virtualizer should cap the arc at ≤ 50; 30 is headroom-safe ` +
-        `for 200 contacts.`,
-    ).toBeLessThanOrEqual(30);
+      `Expected ≤ 50 live cards after scrolling, got ${liveCardCount}. ` +
+        `Rolodex virtualizer caps the arc at ≤ 50 (VISIBLE_ARC_DEG=90, strict ` +
+        `|delta|<45°, 200 contacts × 1.8° each). The cap IS the spec — anything ` +
+        `above 50 means virtualization regressed.`,
+    ).toBeLessThanOrEqual(50);
 
     // Counterpart sanity — at least SOME cards should be live. If zero, the
     // fixture data didn't make it through or the cylinder rendered empty.

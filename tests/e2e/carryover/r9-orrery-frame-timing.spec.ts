@@ -148,6 +148,13 @@ test.describe("Orrery click — planet selection — detail opens in <250ms", ()
     const planetLocator = page.locator('[data-orrery-planet="plt-000"]');
     await planetLocator.waitFor({ state: "visible", timeout: 5_000 });
 
+    // Stability gate — let background fetches (font, asset, sw) finish so the
+    // 250ms click-to-detail measurement isn't skewed by mid-suite noise on the
+    // dev server's event loop. Does NOT change the assertion (still <250ms);
+    // only ensures the timer starts from a quiesced state. Mirrors test 1's
+    // settling waitForTimeout(500). (R12 carryover stability fix.)
+    await page.waitForLoadState("networkidle");
+
     const startNs = Date.now();
     // R12.10 — `force: true` bypasses Playwright's "stable" check. The
     // planet sits in a perpetual GSAP orbital animation, so Playwright's
