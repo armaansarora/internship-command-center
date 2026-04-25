@@ -1,6 +1,6 @@
 phase: R12
 name: Post-R11 Hardening (HARSH E2E)
-status: in_progress
+status: complete
 intent: Stand up a real browser-based E2E harness (Playwright) and run HARSH
   scenarios against the full R0-R11 surface. Closes accumulated proof-test debt
   that jsdom couldn't bind (R9 frame timing, R11 cross-user RLS runtime proof,
@@ -11,11 +11,11 @@ intent: Stand up a real browser-based E2E harness (Playwright) and run HARSH
   surfaces. Accept when every scenario passes + all R9/R11 carryover caveats are
   runtime-bound + full suite green.
 started: 2026-04-24T20:03:28.482Z
-completed: null
+completed: 2026-04-25T05:34:25.516Z
 lock:
   holder: sess-a5908e
-  acquired: 2026-04-24T22:31:13.324Z
-  expires: 2026-04-25T00:31:13.318Z
+  acquired: 2026-04-25T05:34:25.176Z
+  expires: 2026-04-25T07:34:25.171Z
 acceptance:
   criteria:
     - Playwright harness installed, configured, and running locally + in CI
@@ -35,8 +35,8 @@ acceptance:
       route trip the Postgres RPC and return typed 429.
     - Any scenario that surfaces a real regression opens a blocker; NOT silently
       weakened.
-  met: false
-  verified_by_commit: null
+  met: true
+  verified_by_commit: fb062c7
 tasks:
   R12.1:
     title: Playwright harness setup — install, config, tsconfig integration, npm
@@ -118,8 +118,10 @@ tasks:
       Any flake/fail that isn't a new bug → triage (retry stability fix vs mark
       known-flaky vs blocker). Any real regression → blocker, NOT a weakened
       assertion.
-    status: in_progress
+    status: complete
     started: 2026-04-24T22:31:13.324Z
+    completed: 2026-04-25T05:32:48.098Z
+    commit: fb062c7
   R12.11:
     title: CI integration — GitHub Actions workflow runs hardening suite on PRs
       touching src/ + a scheduled weekly run. Reports HTML via artifact upload.
@@ -131,7 +133,10 @@ tasks:
   R12.12:
     title: Accept + close — tower verify R12, tower accept R12 (gate-enforced),
       final handoff.
-    status: not_started
+    status: complete
+    started: 2026-04-25T05:34:25.176Z
+    completed: 2026-04-25T05:34:25.516Z
+    commit: fb062c7
 blockers:
   - id: B1
     task: R12.10
@@ -193,3 +198,8 @@ history:
   - 2026-04-24T23:38:13.676Z: blocker_resolved B1
   - 2026-04-24T23:38:22.018Z: blocker_opened B2
   - 2026-04-25T05:31:50.210Z: blocker_resolved B2
+  - 2026-04-25T05:32:48.098Z: task_completed R12.10
+  - 2026-04-25T05:34:25.176Z: task_started R12.12
+  - 2026-04-25T05:34:25.516Z: task_completed R12.12
+  - 2026-04-25T05:34:25.516Z: phase_completed
+  - 2026-04-25T05:35:38.383Z: acceptance_met verified_by fb062c7
