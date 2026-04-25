@@ -58,7 +58,16 @@ const TIER_COPY: Record<SubscriptionTier, Omit<TierCard, "tier">> = {
 
 const TIER_ORDER: SubscriptionTier[] = ["free", "pro", "team"];
 
-export default function PricingPage() {
+interface PricingPageProps {
+  searchParams: Promise<{ billing?: string }>;
+}
+
+export default async function PricingPage({ searchParams }: PricingPageProps) {
+  const params = await searchParams;
+  const annualToggleAvailable = LAUNCH_CONFIG.pricing.annualDiscountPct > 0;
+  const isAnnual =
+    annualToggleAvailable && params.billing === "annual";
+
   if (!LAUNCH_CONFIG.flags.pricingPublic) {
     return (
       <div className="mx-auto max-w-2xl py-24 text-center">
@@ -90,7 +99,7 @@ export default function PricingPage() {
 
   return (
     <div className="mx-auto max-w-6xl py-12 md:py-16">
-      <header className="mb-12 text-center">
+      <header className="mb-10 text-center">
         <h1
           style={{
             fontFamily: "'Playfair Display', serif",
@@ -116,11 +125,21 @@ export default function PricingPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {annualToggleAvailable && <BillingToggle isAnnual={isAnnual} />}
+
+      <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
         {TIER_ORDER.map((tier) => {
           const plan = STRIPE_PLANS[tier];
+          const config = LAUNCH_CONFIG.pricing[tier];
           const copy = TIER_COPY[tier];
           const isHighlighted = copy.highlight;
+          const showAnnualPrice = isAnnual && plan.price > 0;
+          const monthlyEquivalent = showAnnualPrice
+            ? Math.round((config.yearlyPrice / 12) * 100) / 100
+            : null;
+          const annualSavings = showAnnualPrice
+            ? config.price * 12 - config.yearlyPrice
+            : 0;
 
           return (
             <div
@@ -186,27 +205,57 @@ export default function PricingPage() {
                 </p>
               </div>
 
-              <div className="flex items-baseline gap-1">
-                <span
-                  style={{
-                    fontFamily: "'Satoshi', sans-serif",
-                    fontSize: "44px",
-                    fontWeight: 700,
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  {plan.price === 0 ? "Free" : `$${plan.price}`}
-                </span>
-                {plan.price > 0 && (
+              <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-1">
                   <span
                     style={{
                       fontFamily: "'Satoshi', sans-serif",
-                      fontSize: "14px",
-                      color: "rgba(255,255,255,0.5)",
+                      fontSize: "44px",
+                      fontWeight: 700,
+                      color: "var(--text-primary)",
                     }}
                   >
-                    / month
+                    {plan.price === 0
+                      ? "Free"
+                      : showAnnualPrice
+                        ? `$${monthlyEquivalent}`
+                        : `$${plan.price}`}
                   </span>
+                  {plan.price > 0 && (
+                    <span
+                      style={{
+                        fontFamily: "'Satoshi', sans-serif",
+                        fontSize: "14px",
+                        color: "rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      / month
+                    </span>
+                  )}
+                </div>
+                {showAnnualPrice && (
+                  <p
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "11px",
+                      color: "rgba(201, 168, 76, 0.85)",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    ${config.yearlyPrice}/year — save ${annualSavings}
+                  </p>
+                )}
+                {!showAnnualPrice && annualToggleAvailable && plan.price > 0 && (
+                  <p
+                    style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.4)",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    or ${config.yearlyPrice}/year
+                  </p>
                 )}
               </div>
 
@@ -288,6 +337,69 @@ export default function PricingPage() {
           Questions? {LAUNCH_CONFIG.brand.supportEmail}
         </p>
       </div>
+    </div>
+  );
+}
+
+function BillingToggle({ isAnnual }: { isAnnual: boolean }) {
+  return (
+    <div
+      role="tablist"
+      aria-label="Billing period"
+      className="mx-auto flex w-fit items-center gap-1 rounded-full p-1"
+      style={{
+        background: "rgba(10, 12, 25, 0.6)",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
+      <Link
+        role="tab"
+        aria-selected={!isAnnual}
+        href="/pricing"
+        scroll={false}
+        className="rounded-full px-4 py-1.5 transition-all"
+        style={{
+          fontFamily: "'Satoshi', sans-serif",
+          fontSize: "13px",
+          fontWeight: 600,
+          background: !isAnnual ? "rgba(201, 168, 76, 0.18)" : "transparent",
+          color: !isAnnual ? "#C9A84C" : "rgba(255,255,255,0.55)",
+          border: !isAnnual ? "1px solid rgba(201, 168, 76, 0.3)" : "1px solid transparent",
+        }}
+      >
+        Monthly
+      </Link>
+      <Link
+        role="tab"
+        aria-selected={isAnnual}
+        href="/pricing?billing=annual"
+        scroll={false}
+        className="flex items-center gap-2 rounded-full px-4 py-1.5 transition-all"
+        style={{
+          fontFamily: "'Satoshi', sans-serif",
+          fontSize: "13px",
+          fontWeight: 600,
+          background: isAnnual ? "rgba(201, 168, 76, 0.18)" : "transparent",
+          color: isAnnual ? "#C9A84C" : "rgba(255,255,255,0.55)",
+          border: isAnnual ? "1px solid rgba(201, 168, 76, 0.3)" : "1px solid transparent",
+        }}
+      >
+        Annual
+        <span
+          style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "9px",
+            letterSpacing: "0.1em",
+            color: "#C9A84C",
+            background: "rgba(201, 168, 76, 0.15)",
+            border: "1px solid rgba(201, 168, 76, 0.3)",
+            borderRadius: "999px",
+            padding: "1px 6px",
+          }}
+        >
+          −{LAUNCH_CONFIG.pricing.annualDiscountPct}%
+        </span>
+      </Link>
     </div>
   );
 }

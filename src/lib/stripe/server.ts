@@ -20,8 +20,12 @@ export function getStripe(): Stripe {
 // Price ID → tier name mapping
 // ---------------------------------------------------------------------------
 const priceToTier: Record<string, SubscriptionTier> = Object.fromEntries(
-  (Object.entries(STRIPE_PLANS) as [SubscriptionTier, (typeof STRIPE_PLANS)[SubscriptionTier]][]).map(
-    ([tier, plan]) => [plan.priceId, tier],
+  (Object.entries(STRIPE_PLANS) as [SubscriptionTier, (typeof STRIPE_PLANS)[SubscriptionTier]][]).flatMap(
+    ([tier, plan]) => {
+      const entries: [string, SubscriptionTier][] = [[plan.priceId, tier]];
+      if (plan.yearlyPriceId) entries.push([plan.yearlyPriceId, tier]);
+      return entries;
+    },
   ),
 );
 

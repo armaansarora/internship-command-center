@@ -8,6 +8,31 @@ Sized S/M/L/XL. No time estimates.
 
 ---
 
+## §0 — Locked decisions (2026-04-25)
+
+User picked these defaults; everything below this section is updated to reflect them. Tweak any value in `src/lib/launch-config.ts` and the rest of the app picks it up next render.
+
+| # | Decision | Locked value |
+|---|---|---|
+| 1 | Pricing names | Free / Pro / Team |
+| 2 | Pricing prices /mo | $0 / $29 / $79 |
+| 3 | Trial | none — Free tier IS the trial |
+| 4 | Annual billing | on, **15% off** ($0 / $296 / $806 per year) |
+| 5 | Refund policy | no refunds, prorated cancel only |
+| 6 | Beta gate | waitlist (admin invites manually) |
+| 7 | Free tier app cap | 10 applications |
+| 8 | Free tier AI calls/day | 25 |
+| 9 | Domain | **interntower.com** (canonical: `https://www.interntower.com`) |
+| 10 | Min age | 13 (COPPA threshold; flagged for GDPR-K review if EU is a heavy market) |
+| 11 | Governing law | New York (switch to Delaware once incorporated) |
+| 12 | Soft-delete window | 30 days |
+
+Brand name remains "The Tower". All emails are now `@interntower.com` (`hello@interntower.com`, `concierge@interntower.com`).
+
+**Annual billing implications:** Stripe yearly priceIds are placeholders (`yearlyPriceId: null`) in `src/lib/stripe/config.ts`. The /pricing toggle renders informational annual pricing today; checkout for annual won't work until you create the prices Stripe-side and paste the IDs. See §4.2 below.
+
+---
+
 ## §1 — Business decisions only you can make
 
 These cannot be derived from the codebase. They block legal copy + Stripe live-mode swap.
@@ -191,41 +216,58 @@ Plus `0022_r11_cross_user_matching.sql` likely too — verify.
 
 You alone can do these. Listed in order of "what blocks launch hardest."
 
-### 4.1 Domain — buy + DNS
+### 4.1 Domain — buy + DNS + dependent provider updates
 
-`thetower.app` is referenced in `.env.example`. If you don't own it, buy it now. If you own it, point the apex + www at Vercel.
+`interntower.com` is the locked domain (canonical: `https://www.interntower.com`). Buy if not owned, then point + update every provider that references the old domain.
 
 **Steps:**
 1. Confirm ownership at registrar.
-2. In Vercel project → Settings → Domains → add `thetower.app` and `www.thetower.app`.
-3. At registrar, set the records Vercel shows you (typically A 76.76.21.21 + CNAME for www).
-4. Wait for DNS propagation (15 min - 24h).
-5. Confirm HTTPS cert auto-provisions.
+2. In Vercel project → Settings → Domains → add `interntower.com` and `www.interntower.com` (set `www.interntower.com` as primary; apex 301-redirects to it).
+3. At registrar, set the records Vercel shows you (typically A 76.76.21.21 for apex + CNAME `cname.vercel-dns.com` for www).
+4. Wait for DNS propagation (15 min - 24h). Confirm HTTPS cert auto-provisions.
+5. **Vercel env**: set `NEXT_PUBLIC_APP_URL=https://www.interntower.com` in Production, Preview, and Development.
+6. **Supabase Dashboard** → Authentication → URL Configuration → Site URL = `https://www.interntower.com`. Add to "Redirect URLs": `https://www.interntower.com/**` and `http://localhost:3000/**`.
+7. **Google Cloud Console** → APIs & Services → Credentials → OAuth 2.0 Client → Authorized redirect URIs: add `https://www.interntower.com/api/gmail/callback` (and remove the old `thetower.app` entry once propagation is confirmed).
+8. **LinkedIn Developer Console** → Auth tab → Authorized redirect URLs: add `https://www.interntower.com/api/auth/linkedin/callback`.
+9. **Stripe** → live-mode webhook endpoint → see §4.2.
+10. **Resend** → see §4.3.
 
-**Blocking:** without a real domain, Stripe live mode + Google OAuth verification + email-sender domain verification all stay broken.
+**Blocking:** without a real domain, Stripe live mode, Google OAuth verification, LinkedIn OAuth, and email-sender domain verification all stay broken.
 
-### 4.2 Stripe products test→live swap
+### 4.2 Stripe products test→live swap (+ annual prices)
 
-Hardcoded IDs in `src/lib/stripe/config.ts:4-29` — `prod_UBV...` and `price_1TD...` formats. Verify these are LIVE-mode IDs (Stripe dashboard → toggle test/live, see if these products appear under live).
+Hardcoded IDs in `src/lib/stripe/config.ts` — `prod_UBV...` and `price_1TD...` formats. Verify these are LIVE-mode IDs (Stripe dashboard → toggle test/live, see if these products appear under live).
 
 **Steps:**
-1. In Stripe live mode, create three products (Free, Pro $29/mo, Team $79/mo) if they don't exist.
-2. Copy the live priceIds into `src/lib/stripe/config.ts`.
-3. In Vercel → Settings → Environment Variables, confirm `STRIPE_SECRET_KEY` is `sk_live_...` not `sk_test_...`. Same for `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_live_...`).
-4. In Stripe live mode, register the webhook endpoint pointing at `https://thetower.app/api/stripe/webhook`. Copy the signing secret. Update `STRIPE_WEBHOOK_SECRET` in Vercel.
-5. Run a real $0 test purchase end-to-end (ideally on Free tier downgrade path so no real card is charged).
+1. In Stripe live mode, create three products if they don't exist:
+   - **Free** — $0 monthly recurring
+   - **Pro** — $29 monthly recurring
+   - **Team** — $79 monthly recurring
+2. **Add annual prices to Pro and Team** (per locked decision #4 — annual at 15% off):
+   - Pro yearly: **$296/year**
+   - Team yearly: **$806/year**
+   - Stripe Dashboard → product page → "Add another price" → set interval = Yearly
+3. Copy the four live `price_*` IDs into `src/lib/stripe/config.ts`:
+   - `pro.priceId` (monthly), `pro.yearlyPriceId` (annual)
+   - `team.priceId` (monthly), `team.yearlyPriceId` (annual)
+   - `free.priceId` (monthly $0)
+4. In Vercel → Settings → Environment Variables, confirm `STRIPE_SECRET_KEY` is `sk_live_...` not `sk_test_...`. Same for `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_live_...`).
+5. In Stripe live mode, register the webhook endpoint pointing at `https://www.interntower.com/api/stripe/webhook`. Copy the signing secret. Update `STRIPE_WEBHOOK_SECRET` in Vercel.
+6. Run a real $0 test purchase end-to-end (ideally on Free tier downgrade path so no real card is charged).
 
-**Blocking:** test-mode keys silently fail in production for real users. This is the most common launch-day failure for solo SaaS founders.
+**Blocking (monthly):** test-mode keys silently fail in production for real users. This is the most common launch-day failure for solo SaaS founders.
+
+**Non-blocking (annual):** while `yearlyPriceId` is `null` in the config, the public /pricing toggle still renders informational annual pricing but the checkout flow only accepts monthly. Once you paste real annual price IDs, both work end-to-end with no further code changes — the checkout's `VALID_PRICE_IDS` and the webhook's `priceToTier` mapping already include yearly priceIds when present.
 
 ### 4.3 Email sender domain verification — Resend
 
 `RESEND_API_KEY` is set. Resend requires you to verify your sending domain (DKIM + SPF + DMARC records).
 
 **Steps:**
-1. In Resend dashboard → Domains → add `thetower.app`.
+1. In Resend dashboard → Domains → add `interntower.com`.
 2. At your registrar, add the three DNS records Resend gives you.
 3. Wait for verification.
-4. Confirm send-from address is e.g. `concierge@thetower.app` not `onboarding@resend.dev`.
+4. Confirm send-from address is e.g. `concierge@interntower.com` not `onboarding@resend.dev`.
 
 **Blocking:** unverified Resend means transactional emails go to spam, magic-link auth becomes 50% broken.
 
@@ -326,7 +368,7 @@ If Plausible (§3.2) ships, set up a single dashboard with all six.
 ### 6.5 Support channel
 
 You need exactly one place users can reach you. Pick one:
-- **Email** (`hello@thetower.app`) — simplest, slowest.
+- **Email** (`hello@interntower.com`) — simplest, slowest.
 - **Intercom-style widget** — Crisp.chat free tier is fine.
 - **Discord** — community signal, double-edged.
 

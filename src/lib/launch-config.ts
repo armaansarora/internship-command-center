@@ -2,9 +2,9 @@
  * Launch configuration — the single tweak knob.
  *
  * Every business decision the partner-brief flagged as "user must answer" lives
- * here. Defaults are the launch-ready document's recommendations. Change a
- * value here and the rest of the app picks it up: pricing pages, legal copy,
- * rate limits, feature flags, footer copy, and metadata.
+ * here. Defaults reflect the user's locked-in choices from 2026-04-25.
+ * Change a value here and the rest of the app picks it up: pricing pages,
+ * legal copy, rate limits, feature flags, footer copy, and metadata.
  *
  * If you find yourself wanting to hardcode a launch-related string somewhere
  * in src/, look here first. If it's not here, add it here.
@@ -19,17 +19,21 @@ export const LAUNCH_CONFIG = {
   brand: {
     name: "The Tower",
     tagline: "An immersive command center for the internship search.",
-    domain: "thetower.app",
+    domain: "interntower.com",
     /** Used for canonical URLs, OG tags, sitemap. Override per-env via NEXT_PUBLIC_APP_URL. */
-    url: () => process.env.NEXT_PUBLIC_APP_URL ?? "https://thetower.app",
+    url: () => process.env.NEXT_PUBLIC_APP_URL ?? "https://www.interntower.com",
     /** Single channel users can reach you. */
-    supportEmail: "hello@thetower.app",
+    supportEmail: "hello@interntower.com",
     /** Sender for transactional Resend emails. */
-    senderEmail: "concierge@thetower.app",
+    senderEmail: "concierge@interntower.com",
     /** Legal entity name for ToS / Privacy. Update once incorporated. */
     legalEntity: "The Tower (Armaan Arora, sole proprietor)",
-    /** Jurisdiction governing ToS. Update if you incorporate elsewhere. */
-    governingLaw: "the State of California, United States",
+    /**
+     * Jurisdiction governing ToS. Currently New York while sole-proprietor.
+     * NOTE: switch to "the State of Delaware, United States" once
+     * incorporated as a Delaware C-corp.
+     */
+    governingLaw: "the State of New York, United States",
     /** Last revision date for legal docs. Bump whenever copy changes. */
     legalRevisedOn: "2026-04-25",
   },
@@ -48,32 +52,42 @@ export const LAUNCH_CONFIG = {
 
   /* ─── Pricing ────────────────────────────────────────────────────── */
   pricing: {
-    /** USD/month. Source for pricing page copy. Stripe priceIds are in src/lib/stripe/config.ts and must match. */
-    free: { price: 0, name: "Free" },
-    pro: { price: 29, name: "Pro" },
-    team: { price: 79, name: "Team" },
+    /**
+     * USD/month and USD/year. Source for pricing-page copy. Stripe priceIds
+     * are in src/lib/stripe/config.ts and must match. Annual prices are
+     * 15% off the 12-month sum, rounded to the nearest dollar.
+     */
+    free: { price: 0, yearlyPrice: 0, name: "Free" },
+    pro: { price: 29, yearlyPrice: 296, name: "Pro" },     // 29 * 12 * 0.85 = 295.80
+    team: { price: 79, yearlyPrice: 806, name: "Team" },   // 79 * 12 * 0.85 = 805.80
 
     /** Free tier hard-caps. Surfaced on /pricing. */
     freeAppCap: 10,
-    freeAiCallsPerDay: 50,
+    freeAiCallsPerDay: 25,
 
     /** Trial: "none" means free tier IS the trial. */
     trial: "none" as "none" | "14-card" | "7-no-card",
 
-    /** Annual discount (0 disables the annual toggle). */
-    annualDiscountPct: 0,
+    /** Annual discount as a percentage. 0 disables the annual toggle. */
+    annualDiscountPct: 15,
 
-    /** Refund headline + body for /terms. */
+    /** Refund headline + body for /terms and /pricing. */
     refundHeadline: "Cancel anytime through Settings → Billing.",
     refundBody:
-      "Subscriptions are billed monthly and renew automatically until canceled. Canceling stops the next renewal; we do not refund partial months. If Pro hasn't helped you land an interview within 30 days of your first paid month, email " +
-      "hello@thetower.app — we will refund that first month, no friction.",
+      "Subscriptions are billed monthly or annually and renew automatically until canceled. Cancel anytime through Settings → Billing — your access continues through the end of the current paid period, then stops. We do not refund partial periods.",
   },
 
   /* ─── Eligibility ────────────────────────────────────────────────── */
   eligibility: {
-    /** Minimum age. Single-checkbox at signup. */
-    minimumAge: 16,
+    /**
+     * Minimum age. Single-checkbox at signup.
+     * 13 = COPPA threshold (US): below this requires verifiable parental
+     * consent. Above 13 you're allowed to collect data, but you cannot
+     * market specifically to under-13s. Some EU countries set the digital
+     * age of consent at 16 under GDPR-K — flagged in privacy.ts as a
+     * [REVIEW] item if you target the EU heavily.
+     */
+    minimumAge: 13,
     /** Excluded jurisdictions if any (e.g., sanctioned countries). Empty by default. */
     blockedCountries: [] as string[],
   },
@@ -81,7 +95,7 @@ export const LAUNCH_CONFIG = {
   /* ─── Cost caps (defense against runaway AI bills) ──────────────── */
   costCaps: {
     /** Hard cap per Free-tier user per UTC day. Surfaced as a quota. */
-    freeAiCallsPerDay: 50,
+    freeAiCallsPerDay: 25,
     /** Pro/Team are de-facto unlimited; we still cap to defend against abuse. */
     paidAiCallsPerDay: 1000,
     /** When Firecrawl runs out, /api/comp-bands/lookup returns graceful-empty (no crash). */
@@ -123,3 +137,4 @@ export const LAUNCH_CONFIG = {
 export type LaunchConfig = typeof LAUNCH_CONFIG;
 export type BetaMode = LaunchConfig["beta"]["mode"];
 export type TrialMode = LaunchConfig["pricing"]["trial"];
+export type BillingPeriod = "monthly" | "annual";

@@ -7,7 +7,9 @@ import { log } from "@/lib/logger";
 import { z } from "zod";
 
 const VALID_PRICE_IDS: ReadonlySet<string> = new Set(
-  Object.values(STRIPE_PLANS).map((plan) => plan.priceId)
+  Object.values(STRIPE_PLANS).flatMap((plan) =>
+    plan.yearlyPriceId ? [plan.priceId, plan.yearlyPriceId] : [plan.priceId],
+  ),
 );
 
 const CheckoutSchema = z.object({

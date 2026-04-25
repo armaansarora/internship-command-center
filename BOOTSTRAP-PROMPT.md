@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Saturday, April 25, 2026 at 2:42 AM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Saturday, April 25, 2026 at 11:24 AM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,15 +19,15 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `92992d7`)
+- **Branch:** `main` (commit `94b56c8`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 122,544 across 713 source files
+- **Total LOC:** 122,713 across 713 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
-- **`docs/MASTER-PLAN.md`**: Last updated 2026-04-17 (8d ago)
-- **`docs/VISION-SPEC.md`**: Last updated 2026-04-17 (8d ago)
-- **`docs/TECH-BRIEF.md`**: Last updated 2026-04-17 (8d ago)
+- **`docs/MASTER-PLAN.md`**: Last updated 2026-04-17 (9d ago)
+- **`docs/VISION-SPEC.md`**: Last updated 2026-04-17 (9d ago)
+- **`docs/TECH-BRIEF.md`**: Last updated 2026-04-17 (9d ago)
 
 > Update these docs before starting work — stale specs cause wasted effort.
 
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-92992d7 [R12/post-mortem] chore(ledger+brief): backfill R12 decisions[] + R12 partner-brief row
+94b56c8 chore(launch-prep): wire public marketing surface, legal copy, ops scaffolding
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `92992d7`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `94b56c8`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (713 files, 122,544 LOC)
+## Source Tree (713 files, 122,713 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -115,7 +115,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-1` | 2725 |
 | `src/app/__tests__` | 2656 |
 | `src/components/floor-7/war-table` | 2166 |
-| `src/lib` | 1916 |
+| `src/lib` | 1931 |
 | `src/components/floor-2/orrery` | 1915 |
 | `src/components/floor-3/crud` | 1811 |
 | `src/lib/ai/structured` | 1650 |
@@ -172,9 +172,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/floor-7/rejection` | 620 |
 | `src/app/api/reports/state-of-month` | 602 |
 | `src/lib/agents/ceo` | 585 |
+| `src/lib/stripe` | 585 |
 | `src/app/api/cron/packet-regenerate` | 581 |
 | `src/app/api/cron/unprompted-ceo` | 573 |
-| `src/lib/stripe` | 545 |
 | `src/components/floor-2/cfo-character` | 544 |
 | `src/components/floor-1/ceo-character` | 520 |
 | `src/components/floor-6/rolodex` | 511 |
@@ -192,6 +192,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/concierge` | 411 |
 | `src/lib/auth` | 411 |
 | `src/lib/supabase` | 407 |
+| `src/app/(marketing)/pricing` | 406 |
 | `src/components/penthouse/quick-actions` | 398 |
 | `src/lib/actions` | 396 |
 | `src/app/(authenticated)/parlor` | 390 |
@@ -217,7 +218,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/contacts/[id]/reference-request/__tests__` | 298 |
 | `src/components/floor-6/dossier-wall` | 298 |
 | `src/lib/audio` | 297 |
-| `src/app/(marketing)/pricing` | 294 |
 | `src/app/(authenticated)` | 285 |
 | `src/components/lobby/directory` | 285 |
 | `src/lib/utils` | 284 |
@@ -318,8 +318,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/penthouse/scenes` | 62 |
 | `src/app/api/resumes/signed-url/[id]` | 58 |
 | `src/app/api/drive/export` | 53 |
+| `src/app/api/stripe/checkout` | 53 |
 | `src/app/api/cfo` | 52 |
-| `src/app/api/stripe/checkout` | 51 |
 | `src/lib/agents/offer-evaluator` | 50 |
 | `src/lib/crypto` | 50 |
 | `src/app/api/networking/opt-in` | 44 |
@@ -1134,13 +1134,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1157 | 13,111 |
+| `BOOTSTRAP-PROMPT.md` | 1183 | 13,367 |
 | `PROJECT-CONTEXT.md` | 278 | 5,161 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2142** | **31,785** |
+| **Total** | **2168** | **32,041** |
 
-> ⚠️ Reading all recommended files consumes ~31,785 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~32,041 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

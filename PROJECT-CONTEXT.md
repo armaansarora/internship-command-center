@@ -208,14 +208,14 @@ All planning docs are in `docs/`. Operational files stay in root.
 | File | Purpose | Lines |
 |---|---|---|
 | `PROJECT-CONTEXT.md` | Operational context, credentials, stack, audit summary, session log (root) | ~280 |
-| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~1160 |
+| `BOOTSTRAP-PROMPT.md` | Auto-generated session entry point — source tree, build health, acceptance criteria (root) | ~1180 |
 | `CLAUDE.md` | Codebase summary, conventions, agent behavior rules, doc architecture (root) | ~340 |
 | `docs/ARCHITECTURE-MAP.md` | This document is the fastest way to understand how the app is organized today. | ~90 |
 | `docs/BUG-TRACKER.md` | Bug reports, fix log, sprint priorities | ~310 |
 | `docs/CHAIN-OF-COMMAND.md` | AI agent hierarchy: CEO → CRO → 5 subagents, system prompts, tools, RACI | ~1590 |
 | `docs/CHARACTER-PROMPTS.md` | System prompts for all 8 characters + Concierge, multi-tenant ready | ~290 |
 | `docs/KEY-COMPONENTS.md` | - `src/app/(authenticated)/settings/settings-client.tsx` (1355 LOC) — R0.7 — `us | ~220 |
-| `docs/LAUNCH-READY.md` | **Generated 2026-04-25 after R12 acceptance.** Single source of truth for everyt | ~380 |
+| `docs/LAUNCH-READY.md` | **Generated 2026-04-25 after R12 acceptance.** Single source of truth for everyt | ~420 |
 | `docs/MASTER-PLAN.md` | 7 phases with deliverables, acceptance criteria, testing strategy | ~370 |
 | `docs/NEXT-ROADMAP.md` | **Audience.** Any Claude session working on The Tower. And Armaan, once per phas | ~950 |
 | `docs/SCHEMA-DRAFT.md` | 16-table Postgres schema: RLS, pgvector HNSW indexes, post-push SQL triggers | ~480 |

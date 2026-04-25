@@ -9,7 +9,7 @@ import { isOwner } from "@/lib/auth/owner";
  * a known error so we can confirm Sentry is capturing in production.
  *
  * Usage:
- *   curl -i https://thetower.app/api/admin/sentry-probe \
+ *   curl -i https://www.interntower.com/api/admin/sentry-probe \
  *     -H "Cookie: <your auth cookie>"
  *
  * The error message is unique enough to grep for in Sentry. If you don't
