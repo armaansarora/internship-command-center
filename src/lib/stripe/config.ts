@@ -32,8 +32,8 @@ interface StripePlan {
 
 export const STRIPE_PLANS: Record<SubscriptionTier, StripePlan> = {
   free: {
-    productId: "prod_UBV0Ra2wpzYrcW",
-    priceId: "price_1TD80i10OAbyunOKStviLCWm",
+    productId: "prod_UPPzC30x0U1oLk",
+    priceId: "price_1TQb9t0uey7yEjQoJ3cK4GrL",
     yearlyPriceId: null,
     name: "Free",
     price: 0,
@@ -46,9 +46,9 @@ export const STRIPE_PLANS: Record<SubscriptionTier, StripePlan> = {
     },
   },
   pro: {
-    productId: "prod_UBV066SmTMPUfl",
-    priceId: "price_1TD80m10OAbyunOKTDU8aa6e",
-    yearlyPriceId: null,
+    productId: "prod_UPPz7rUvNcosXJ",
+    priceId: "price_1TQb9t0uey7yEjQosCsbrK3t",
+    yearlyPriceId: "price_1TQb9u0uey7yEjQoW7qgKVfT",
     name: "Pro",
     price: 29,
     yearlyPrice: 296,
@@ -60,9 +60,9 @@ export const STRIPE_PLANS: Record<SubscriptionTier, StripePlan> = {
     },
   },
   team: {
-    productId: "prod_UBV0XnNh2HlQrz",
-    priceId: "price_1TD80i10OAbyunOKUqtkiFeY",
-    yearlyPriceId: null,
+    productId: "prod_UPPzsV09jjQ9AT",
+    priceId: "price_1TQb9v0uey7yEjQo9N5ogS4b",
+    yearlyPriceId: "price_1TQb9v0uey7yEjQo527fmL8W",
     name: "Team",
     price: 79,
     yearlyPrice: 806,
