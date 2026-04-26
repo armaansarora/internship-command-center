@@ -62,3 +62,6 @@ migration-*.sql
 # Playwright (R12 hardening harness) — local artifacts only, never commit.
 test-results/
 playwright-report/
+
+# Stripe bootstrap script output — contains webhook secret
+.stripe-ids.json
