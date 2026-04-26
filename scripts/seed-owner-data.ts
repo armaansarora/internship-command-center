@@ -615,7 +615,11 @@ async function seedApplications(
 async function seedDocuments(applications: { id: string; company_name: string | null; role: string }[]) {
   const drafts = [
     {
-      app: applications.find((a) => a.company_name === "Goldman Sachs" && a.role.includes("IB")),
+      app: applications.find(
+        (a) =>
+          a.company_name === "Goldman Sachs" &&
+          (a.role.includes("Investment Banking") || a.role.includes("IB")),
+      ),
       title: "Cover Letter — Goldman IB",
       type: "cover_letter",
       content:
@@ -674,7 +678,11 @@ async function seedInterviews(
 ) {
   const rows = [
     {
-      app: applications.find((a) => a.company_name === "Goldman Sachs" && a.role.includes("IB")),
+      app: applications.find(
+        (a) =>
+          a.company_name === "Goldman Sachs" &&
+          (a.role.includes("Investment Banking") || a.role.includes("IB")),
+      ),
       round: "Superday",
       format: "in-person",
       scheduled_at: daysFromNow(7),
