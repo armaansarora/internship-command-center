@@ -1,5 +1,5 @@
 /**
- * R10.3 — POST/GET /api/offers
+ * POST/GET /api/offers
  *
  * POST creates a new offer row (scoped to the authenticated user via RLS).
  * GET lists all offers owned by the user, newest `received_at` first.

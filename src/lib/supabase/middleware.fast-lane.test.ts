@@ -1,5 +1,5 @@
 /**
- * R4.9 — returning-user fast-lane test.
+ * returning-user fast-lane test.
  *
  * The middleware must redirect an authenticated guest landing on /lobby
  * to their last-visited floor IF they have already watched the cinematic

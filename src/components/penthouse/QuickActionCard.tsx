@@ -44,7 +44,7 @@ interface QuickActionCardProps {
 /**
  * QuickActionCard — live glass button with icon, label, and description.
  *
- * R2: no longer disabled; the banned "Phase 1 / Phase 2" badge has been
+ * no longer disabled; the banned "Phase 1 / Phase 2" badge has been
  * removed per brief. Click dispatches via the parent; `pending` draws a
  * subtle pulsing accent while the pneumatic-tube overlay plays.
  */

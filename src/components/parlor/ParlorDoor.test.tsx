@@ -6,7 +6,7 @@ import { act } from "react";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R10.5 — ParlorDoor render + accessibility tests.
+ * ParlorDoor render + accessibility tests.
  *
  * Uses the project's manual createRoot + react act() pattern (no
  * @testing-library/react in this repo — see Orrery.test.tsx).

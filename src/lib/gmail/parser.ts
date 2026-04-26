@@ -136,7 +136,7 @@ export function classifyEmail(email: {
    */
   userId?: string;
 }): EmailClassificationResult {
-  // R0.8 — Pre-classifier regex runs BEFORE any content-based classification
+  // Pre-classifier regex runs BEFORE any content-based classification
   // so a hostile email is never fed to downstream LLM consumers with a
   // confidence signal attached. Returning "other" + `suspectedInjection=true`
   // short-circuits the full pattern suite so the hostile string can't

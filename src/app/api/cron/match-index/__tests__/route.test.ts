@@ -1,5 +1,5 @@
 /**
- * R11.3 — GET /api/cron/match-index contract tests.
+ * GET /api/cron/match-index contract tests.
  *
  * Scope:
  *   - 401 when verifyCronRequest rejects.

@@ -1,5 +1,5 @@
 /**
- * R6.8 — GET /api/briefing/binder/[id] contract tests.
+ * GET /api/briefing/binder/[id] contract tests.
  *
  * Locks in:
  *  - 404 when readBinder returns null (missing / wrong-owner / wrong-type).

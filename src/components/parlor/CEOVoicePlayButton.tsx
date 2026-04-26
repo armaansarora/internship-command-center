@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { pickCeoVoice, buildCeoUtterance } from "@/lib/voice/ceo-voice";
 
 /**
- * R10.11 — CEOVoicePlayButton.
+ * CEOVoicePlayButton.
  *
  * Opt-in "Read aloud" button for the negotiation draft in the Parlor. The
  * button is gated by a three-layer pattern, identical to R6 voice:
@@ -21,7 +21,7 @@ import { pickCeoVoice, buildCeoUtterance } from "@/lib/voice/ceo-voice";
  *   iframe, etc.), the button renders `null`.
  *
  * All three gates must be GREEN for the button to render. The
- * R10-ceo-voice-three-layer PROOF test keeps future refactors honest.
+ * ceo-voice-three-layer PROOF test keeps future refactors honest.
  *
  * NO cloud TTS — `window.speechSynthesis` ONLY. ElevenLabs / OpenAI /
  * Cartesia / Deepgram are all drift per partner constraints. Browser

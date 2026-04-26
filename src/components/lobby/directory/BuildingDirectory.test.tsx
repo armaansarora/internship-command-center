@@ -5,7 +5,7 @@ import { BuildingDirectory } from "./BuildingDirectory";
 import { FLOORS, type FloorId } from "@/types/ui";
 
 /**
- * R4.8 — BuildingDirectory render tests.
+ * BuildingDirectory render tests.
  *
  * Rules under test:
  *   1. All 9 floors are always rendered — locked floors still show up (ghosted),

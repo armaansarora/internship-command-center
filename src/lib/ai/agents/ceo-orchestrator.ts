@@ -386,7 +386,7 @@ function buildSpecByAgent(): Record<AgentKey, DispatchSpec<unknown>> {
     cro: {
       agent: "cro",
       loadStats: getPipelineStatsRest as DispatchSpec<unknown>["loadStats"],
-      // R3.9 — pass shared_knowledge into the CRO so peer intel surfaces in
+      // pass shared_knowledge into the CRO so peer intel surfaces in
       // the prompt tail. targetProfile stays null in CEO context (the route
       // handler at /api/cro/route.ts is the only caller that loads it).
       buildSystem: ((s, n, m, k) =>
@@ -469,7 +469,7 @@ export function buildCEODispatchTools(userId: string, userName: string) {
 }
 
 // ---------------------------------------------------------------------------
-// R3.3 — dispatchBatch: parallel fan-out across 2+ departments
+// dispatchBatch: parallel fan-out across 2+ departments
 // ---------------------------------------------------------------------------
 
 /**

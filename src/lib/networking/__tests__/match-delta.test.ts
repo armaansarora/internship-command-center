@@ -1,5 +1,5 @@
 /**
- * R11.4 — enqueueMatchRescan debounce contract.
+ * enqueueMatchRescan debounce contract.
  *
  * Fire-and-forget per-user rebuild, debounced 5 minutes via
  * `user_profiles.match_index_last_rescan_at`.  All errors swallowed.

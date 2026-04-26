@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 /**
- * R9.7 — CFO weekly threshold cron + pneumatic-tube delivery.
+ * CFO weekly threshold cron + pneumatic-tube delivery.
  *
  * Partner constraint (verbatim, autopilot.yml):
  *   "CFO threshold triggers reuse the R8 warmth-decay cron pattern --
@@ -32,7 +32,7 @@ function readSource(relPath: string): string {
   return readFileSync(resolve(ROOT, relPath), "utf8");
 }
 
-describe("R9.7 — CFO threshold cron route is wired", () => {
+describe("CFO threshold cron route is wired", () => {
   it("exports a GET handler", async () => {
     const mod = await import("@/app/api/cron/cfo-threshold/route");
     expect(typeof mod.GET).toBe("function");
@@ -67,7 +67,7 @@ describe("R9.7 — CFO threshold cron route is wired", () => {
   });
 });
 
-describe("R9.7 — vercel.json registration", () => {
+describe("vercel.json registration", () => {
   it("registers /api/cron/cfo-threshold in the crons array", () => {
     const cfg = JSON.parse(
       readFileSync(resolve(ROOT, "vercel.json"), "utf8"),

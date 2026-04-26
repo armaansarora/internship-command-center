@@ -87,7 +87,7 @@ export function AgentDialoguePanel({
     return () => window.clearTimeout(timer);
   }, [initialMessage, isOpen, messages.length, setInput]);
 
-  // R3.11 — register the inject handler with the parent. The parent stores the
+  // register the inject handler with the parent. The parent stores the
   // returned function in a ref and calls it when the user submits the floating
   // `/`-inject prompt, pushing the directive into the chat mid-orchestration.
   // Deregister on unmount by handing back a no-op — simpler than actual

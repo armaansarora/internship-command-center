@@ -1,5 +1,5 @@
 /**
- * R10.9 — POST /api/offers/[id]/negotiation-draft contract tests.
+ * POST /api/offers/[id]/negotiation-draft contract tests.
  *
  * Invariants:
  *   - 401 when unauthenticated; no DB touched, no draft generated.

@@ -1,5 +1,5 @@
 /**
- * R5.7 — GET /api/documents/[id]/pdf
+ * GET /api/documents/[id]/pdf
  *
  * Renders a document (cover_letter or resume_tailored) to a
  * publication-quality PDF and returns it with content-type

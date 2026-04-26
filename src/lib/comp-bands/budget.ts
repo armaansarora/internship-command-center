@@ -1,5 +1,5 @@
 /**
- * R10.4 — Firecrawl monthly budget tracking.
+ * Firecrawl monthly budget tracking.
  *
  * Firecrawl's free tier caps us at 500 scrape credits per calendar month.
  * We gate ourselves at 450 (50-credit safety buffer) so a race between the

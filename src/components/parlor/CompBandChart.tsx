@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { colorForPercentile, type PinColor } from "@/lib/parlor/pin-color";
 
 /**
- * R10.8 — Comp-band chart (hand-rolled SVG).
+ * Comp-band chart (hand-rolled SVG).
  *
  * Back-wall chart slot for the Negotiation Parlor. Plots the market
  * percentile rails (p25/p50/p75) and stacks the user's offer(s) as pins

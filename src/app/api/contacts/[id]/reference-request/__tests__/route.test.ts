@@ -1,5 +1,5 @@
 /**
- * R10.14 — POST /api/contacts/[id]/reference-request contract tests.
+ * POST /api/contacts/[id]/reference-request contract tests.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";

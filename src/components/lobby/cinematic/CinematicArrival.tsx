@@ -13,7 +13,7 @@ import {
 } from "./ArrivalStages";
 
 /**
- * R4.7 — CinematicArrival.
+ * CinematicArrival.
  *
  * One-time-per-account aerial-approach cinematic. Composed over the existing
  * world primitives (ProceduralSkyline as the far background, LobbyBackground

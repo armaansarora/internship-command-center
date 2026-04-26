@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 
 /**
- * R11.9 — Settings → Networking → "How your data is used".
+ * Settings → Networking → "How your data is used".
  *
  * Presentational Server Component. Renders the last 20 match_events for
  * the current user as human-readable one-liners. Event rows are surfaced

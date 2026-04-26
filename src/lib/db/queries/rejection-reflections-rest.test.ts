@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R9.6 — Tests for rejection-reflections-rest.ts.
+ * Tests for rejection-reflections-rest.ts.
  *
  * Contract:
  *   - listReflectionsForUser → SELECT * with eq(user_id) + order(created_at desc) + limit

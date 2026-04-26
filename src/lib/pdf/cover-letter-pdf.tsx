@@ -1,5 +1,5 @@
 /**
- * R5.7 — Cover letter PDF component.
+ * Cover letter PDF component.
  *
  * Render a Document using @react-pdf/renderer's primitives. Typography
  * stays in the Tower family: Playfair Display for the signature line,

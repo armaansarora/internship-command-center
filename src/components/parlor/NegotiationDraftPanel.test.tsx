@@ -6,7 +6,7 @@ import { act } from "react";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R10.9 — NegotiationDraftPanel render + reveal tests.
+ * NegotiationDraftPanel render + reveal tests.
  *
  * Uses the project's manual createRoot + react act() pattern (no
  * @testing-library/react — see OfferFolder.test.tsx + ParlorDoor.test.tsx).

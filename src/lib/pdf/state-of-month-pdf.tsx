@@ -1,5 +1,5 @@
 /**
- * R9.8 — State of the Month PDF.
+ * State of the Month PDF.
  *
  * Reuses @react-pdf/renderer (already shipped in R5.7) — partner constraint
  * is explicit: do NOT pick a second PDF library. Layout reads as a CFO's

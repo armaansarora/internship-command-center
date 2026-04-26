@@ -6,7 +6,7 @@ import { act } from "react";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R10.12 — CFOQuipOverlay behavioral tests.
+ * CFOQuipOverlay behavioral tests.
  *
  * Manual createRoot + react act() pattern (no @testing-library/react) —
  * matches the existing parlor suite (OfferFolder.test.tsx,

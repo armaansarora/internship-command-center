@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useCallback, useMemo, useState } from "react";
 
 /**
- * R9.6 — Inline rejection-autopsy strip.
+ * Inline rejection-autopsy strip.
  *
  * Lives inside the application card body when `application.status === "rejected"`
  * and the parent has decided to surface the prompt (Settings → Analytics →

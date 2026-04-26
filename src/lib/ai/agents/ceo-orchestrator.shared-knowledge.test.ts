@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R3.9 — CIO→CRO shared-knowledge bridge, end-to-end through the orchestrator.
+ * CIO→CRO shared-knowledge bridge, end-to-end through the orchestrator.
  *
  * Proof goal: when the CEO dispatches the CRO, the CRO's system prompt
  * contains the CIO-written entry that was previously persisted to

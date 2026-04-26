@@ -1,5 +1,5 @@
 /**
- * R10.1 — CEO voice read-aloud preference.
+ * CEO voice read-aloud preference.
  *
  * Storage shape: lives under the `ceoVoice` key of `user_profiles.preferences`
  * jsonb. The Negotiation Parlor (Floor 1 C-Suite annex) reads negotiation
@@ -22,7 +22,7 @@ export type CeoVoicePref = z.infer<typeof CeoVoicePrefSchema>;
 export const CEO_VOICE_PREF_DEFAULT: CeoVoicePref = { enabled: false };
 
 /**
- * R10.11 — Defensive read of the `ceoVoice` pref off a `user_profiles.preferences`
+ * Defensive read of the `ceoVoice` pref off a `user_profiles.preferences`
  * jsonb blob. Mirrors `readRejectionReflectionsPref`: any invalid or absent
  * shape returns the default OFF value. Voice is opt-in; we never surprise
  * the user with audio by accident, so "missing" always resolves to "off."

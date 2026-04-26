@@ -1,5 +1,5 @@
 /**
- * R6.2 — PUT /api/briefing/voice-preference contract tests.
+ * PUT /api/briefing/voice-preference contract tests.
  *
  * Locks:
  *   - empty body = no-op read-through

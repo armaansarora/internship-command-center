@@ -1,5 +1,5 @@
 /**
- * R5.4 — live-compose streaming helpers for the three-tone cover-letter path.
+ * live-compose streaming helpers for the three-tone cover-letter path.
  *
  * Mirrors the non-streaming helpers in `cover-letter.ts` but uses AI SDK v6
  * `streamText`, so callers can render tokens as they arrive. Both helpers

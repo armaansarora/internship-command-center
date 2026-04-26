@@ -1,5 +1,5 @@
 /**
- * R5.2 — PDF parse unit tests.
+ * PDF parse unit tests.
  *
  * Focuses on the ReDoS guard (pure fn, easy to test) rather than the
  * pdfjs-dist integration (covered by the route test via an injected mock).

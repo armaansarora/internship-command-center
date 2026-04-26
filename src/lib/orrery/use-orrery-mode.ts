@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { PatternMode } from "./types";
 
 /**
- * R9.4 — useOrreryMode.
+ * useOrreryMode.
  *
  * Client-only hook that mirrors the Observatory's selected layout into
  * localStorage so the choice survives reloads. The contract:

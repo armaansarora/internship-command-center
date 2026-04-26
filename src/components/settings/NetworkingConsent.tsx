@@ -11,12 +11,12 @@ interface Props {
 }
 
 /*
- * R8 §7 — Warm Intro Network consent surface.
+ * Warm Intro Network consent surface.
  *
- * IMPORTANT: the copy below is verbatim from docs/r8/consent-copy.md.
- * Do NOT edit without bumping user_profiles.networking_consent_version
- * and updating BOTH the doc and this component in the same commit —
- * past consent is invalidated when the version changes, users re-consent.
+ * IMPORTANT: the consent copy below is load-bearing — it's what users
+ * legally agreed to. Do NOT edit without bumping
+ * user_profiles.networking_consent_version. Past consent is invalidated
+ * when the version changes; users will be required to re-consent.
  *
  * P9 grep invariant checks specific canary sentences appear here.
  */

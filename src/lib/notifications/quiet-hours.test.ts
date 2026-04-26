@@ -1,5 +1,5 @@
 /**
- * R7.4 — computeDeliverAfter table-driven tests.
+ * computeDeliverAfter table-driven tests.
  *
  * Every case constructs `now` as a UTC instant whose projection in the
  * supplied `userTimezone` equals a known wall-clock — that lets each row

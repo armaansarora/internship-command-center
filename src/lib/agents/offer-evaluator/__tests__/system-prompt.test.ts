@@ -1,5 +1,5 @@
 /**
- * R10.7 — Offer Evaluator system prompt tests.
+ * Offer Evaluator system prompt tests.
  *
  * The Offer Evaluator is a new CRO subagent seated in the Negotiation
  * Parlor. Unlike the full-pipeline CRO which weighs the funnel, the

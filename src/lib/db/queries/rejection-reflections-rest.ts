@@ -1,5 +1,5 @@
 /**
- * R9.6 — Rejection reflections REST helpers.
+ * Rejection reflections REST helpers.
  *
  * One row per (user_id, application_id) — the UNIQUE constraint on
  * application_id in `rejection_reflections` enforces it at the DB level.

@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useCallback, useState } from "react";
 
 /**
- * R5.6 — ReadyToSendPanel.
+ * ReadyToSendPanel.
  *
  * Shows three tone-variant cards side-by-side after a tone-group has been
  * generated. The user must:

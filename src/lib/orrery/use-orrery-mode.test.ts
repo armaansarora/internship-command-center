@@ -8,7 +8,7 @@ import type { PatternMode } from "./types";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.4 — useOrreryMode tests.
+ * useOrreryMode tests.
  *
  * The hook reads/writes the user's preferred Orrery layout to localStorage so
  * the choice survives reloads. It must:

@@ -50,7 +50,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
   const admin = getSupabaseAdmin();
 
   // Pull approved rows + contact email for delivery.
-  // R7.2 — `send_after <= now()` is the load-bearing predicate. Rows whose
+  // `send_after <= now()` is the load-bearing predicate. Rows whose
   // undo window is still open (send_after > now) must be invisible to this
   // cron; /api/outreach/undo runs with the opposite predicate. Mutual
   // exclusion is enforced by the database, not the UI.

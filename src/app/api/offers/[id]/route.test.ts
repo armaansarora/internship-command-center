@@ -1,5 +1,5 @@
 /**
- * R10.3 — GET + PATCH /api/offers/[id] contract tests.
+ * GET + PATCH /api/offers/[id] contract tests.
  *
  * Invariants:
  *  - 401 on both verbs when unauthenticated; DB never touched.

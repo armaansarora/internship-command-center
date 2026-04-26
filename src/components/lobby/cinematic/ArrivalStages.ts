@@ -1,5 +1,5 @@
 /**
- * R4.7 — CinematicArrival: pure stage definitions.
+ * CinematicArrival: pure stage definitions.
  *
  * The cinematic is an aerial-approach-into-lobby sequence composed from the
  * existing world primitives (ProceduralSkyline, LobbyBackground). Keeping

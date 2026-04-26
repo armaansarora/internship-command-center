@@ -301,7 +301,7 @@ export function SituationRoomClient({
     [applications]
   );
 
-  // R7.8 — Build Final Countdown cards from applications with a deadline set.
+  // Build Final Countdown cards from applications with a deadline set.
   const countdownCards = useMemo<CountdownCard[]>(
     () =>
       applications

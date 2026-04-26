@@ -288,7 +288,7 @@ async function BriefingRoomData({
     status: row.status as string,
   }));
 
-  // R6.6 — voice opt-in flags + drill prefs for DrillStage. Profile row may
+  // voice opt-in flags + drill prefs for DrillStage. Profile row may
   // be missing for freshly-signed-up users; fall back to safe defaults.
   const profile = profileResult.data ?? null;
   const voiceEnabled = Boolean(profile?.voice_recording_enabled);

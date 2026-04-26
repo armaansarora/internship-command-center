@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
 
 /**
- * R4.8 — Building Directory.
+ * Building Directory.
  *
  * A vertical cross-section of the Tower shown in the Lobby between the
  * Concierge conversation and the elevator ride. Nine floors stacked top-to-bottom

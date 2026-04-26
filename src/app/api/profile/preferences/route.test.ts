@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R9.6 — POST /api/profile/preferences contract tests.
+ * POST /api/profile/preferences contract tests.
  *
  * Generic merge endpoint into user_profiles.preferences jsonb. R9.6 ships
  * with `rejectionReflections` whitelisted; future tasks add more keys.
@@ -250,7 +250,7 @@ describe("POST /api/profile/preferences — merge semantics", () => {
 });
 
 /**
- * R10.1 — Whitelist extensions. Three new keys join the registry: ceoVoice
+ * Whitelist extensions. Three new keys join the registry: ceoVoice
  * (CEO voice read-aloud opt-in), parlorDoorSeen (door-materialization latch),
  * parlorCfoQuipShown (CFO entry-quip latch). The shape and failure modes are
  * identical to the R9.6 key — known key + valid body → 200 with a patched

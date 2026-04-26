@@ -17,7 +17,7 @@ interface SettingsClientProps {
   subscriptionTier: SubscriptionTier;
   appsUsed: number;
   /**
-   * R0.7 — `user_profiles.deleted_at` as ISO string (or null). Drives
+   * `user_profiles.deleted_at` as ISO string (or null). Drives
    * whether the Data section shows "Delete Account" or "Cancel Deletion".
    */
   deletedAt: string | null;
@@ -25,13 +25,13 @@ interface SettingsClientProps {
   networkingConsentAt?: string | null;
   networkingRevokedAt?: string | null;
   /**
-   * R9.6 — Rejection autopsy preference (Settings → Analytics →
+   * Rejection autopsy preference (Settings → Analytics →
    * 'Rejection reflection prompts'). Default ON. Seeded server-side from
    * `user_profiles.preferences.rejectionReflections.enabled`.
    */
   rejectionReflectionsEnabled?: boolean;
   /**
-   * R10.11 — CEO voice read-aloud preference (Settings → Analytics →
+   * CEO voice read-aloud preference (Settings → Analytics →
    * 'CEO voice'). Default OFF. Seeded server-side from
    * `user_profiles.preferences.ceoVoice.enabled`. Consumed by the
    * CEOVoicePlayButton rendered inside the NegotiationDraftPanel —
@@ -39,7 +39,7 @@ interface SettingsClientProps {
    */
   ceoVoiceEnabled?: boolean;
   /**
-   * R11.9 — last 20 `match_events` rows for this user (already transformed
+   * last 20 `match_events` rows for this user (already transformed
    * into the camelCase shape consumed by `NetworkingAudit`). Empty array
    * when the user has never been surfaced a warm-intro candidate. The
    * parent page component performs the REST fetch so this client stays
@@ -124,7 +124,7 @@ export function SettingsClient({
     deletedAt,
   );
 
-  // R9.6 — Rejection autopsy toggle. Optimistic-update state + tiny error
+  // Rejection autopsy toggle. Optimistic-update state + tiny error
   // surface; the backing fetch hits the generic /api/profile/preferences
   // merge endpoint.
   const [reflectionsEnabled, setReflectionsEnabled] = useState<boolean>(
@@ -163,7 +163,7 @@ export function SettingsClient({
     [reflectionsEnabled],
   );
 
-  // R10.11 — CEO voice toggle (default OFF). Shares the reflections
+  // CEO voice toggle (default OFF). Shares the reflections
   // optimistic-update pattern: flip state immediately, POST, roll back on
   // failure. The button this gates lives inside the Negotiation Parlor.
   const [ceoVoiceOn, setCeoVoiceOn] = useState<boolean>(ceoVoiceEnabled);

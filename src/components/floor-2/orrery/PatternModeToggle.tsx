@@ -4,7 +4,7 @@ import type { CSSProperties, JSX, KeyboardEvent } from "react";
 import type { PatternMode } from "@/lib/orrery/types";
 
 /**
- * R9.4 — PatternModeToggle.
+ * PatternModeToggle.
  *
  * Three-button glass pill that flips the Orrery between layout modes:
  *   stage    — radius by tier, color by pipeline status (default)

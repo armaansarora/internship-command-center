@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { DebriefContent } from "@/types/debrief";
 
 /**
- * R6.8 — Flip-open view of a single Debrief binder.
+ * Flip-open view of a single Debrief binder.
  *
  * Lazy-fetches the full `DebriefContent` from `/api/briefing/binder/:id`
  * and renders it as an illustrated two-page spread — NOT as a JSON

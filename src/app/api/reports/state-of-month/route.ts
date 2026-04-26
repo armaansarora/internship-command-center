@@ -1,5 +1,5 @@
 /**
- * R9.8 — GET /api/reports/state-of-month?month=YYYY-MM
+ * GET /api/reports/state-of-month?month=YYYY-MM
  *
  * Generates the monthly State of the Month PDF for the authenticated user.
  * Reuses @react-pdf/renderer (R5.7) for rendering; the data layer composes

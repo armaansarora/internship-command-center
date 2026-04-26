@@ -1,5 +1,5 @@
 /**
- * R7.9 — Situation Map data shaping.
+ * Situation Map data shaping.
  *
  * Transforms outreach rows into a renderable node + arc graph. The Map's
  * cardinal rule from the R7 brief: **flight paths are earned, not

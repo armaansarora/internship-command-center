@@ -1,5 +1,5 @@
 /**
- * R4.3 — Otis system prompt contract tests.
+ * Otis system prompt contract tests.
  *
  * The Concierge's voice is strict: no emoji outside a single ☞, no
  * exclamation-point abuse, no banned startup phrases, explicit greeting

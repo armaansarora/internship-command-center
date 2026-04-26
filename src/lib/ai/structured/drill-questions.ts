@@ -1,5 +1,5 @@
 /**
- * R6.7 — Drill-questions generator.
+ * Drill-questions generator.
  *
  * Asks the CPO (drill-sergeant interview coach) to produce EXACTLY 3 mock
  * questions for a given company / role / round, grounded in the prep packet

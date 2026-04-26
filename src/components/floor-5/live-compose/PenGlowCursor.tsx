@@ -3,7 +3,7 @@
 import type { JSX } from "react";
 
 /**
- * R5.4 — PenGlowCursor.
+ * PenGlowCursor.
  *
  * A gold ink-well indicator shown at the live edge of a composing card.
  * The component is CSS-animation-driven — no React state, no effects —

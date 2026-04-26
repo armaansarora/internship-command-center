@@ -1,5 +1,5 @@
 /**
- * R11.3 — rebuildMatchIndexForUser contract tests.
+ * rebuildMatchIndexForUser contract tests.
  *
  * Table-driven: a minimal Supabase-admin fixture stands in for
  * @/lib/supabase/admin so we can drive the helper's exact

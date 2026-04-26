@@ -3,7 +3,7 @@
 import type { JSX } from "react";
 
 /**
- * R5.9 — Wall inscription (sharpening detail).
+ * Wall inscription (sharpening detail).
  *
  * The roadmap called for "a line of Siken on the wall." Siken is under
  * copyright, so rather than quote without permission, the inscription

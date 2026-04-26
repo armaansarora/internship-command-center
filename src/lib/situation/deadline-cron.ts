@@ -1,5 +1,5 @@
 /**
- * R7 — per-user deadline beat cron. Invoked from /api/cron/briefing.
+ * per-user deadline beat cron. Invoked from /api/cron/briefing.
  *
  * Reads applications AND offers with `deadline_at` in the next ~26h (to
  * cover t_24h eligibility) + deadlines in the last hour (to cover t_0).

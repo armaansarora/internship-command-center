@@ -8,7 +8,7 @@ import { CEOVoicePlayButton } from "@/components/parlor/CEOVoicePlayButton";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
 
 /**
- * R10.9 — NegotiationDraftPanel.
+ * NegotiationDraftPanel.
  *
  * The Negotiation Parlor's final-beat surface: one clean "Draft negotiation"
  * CTA that POSTs to `/api/offers/:id/negotiation-draft`, then reveals the
@@ -56,7 +56,7 @@ interface NegotiationDraftPanelProps {
   /** Override the endpoint (tests). */
   endpoint?: string;
   /**
-   * R10.11 — Layer 2 of the three-layer voice gate. When true, the
+   * Layer 2 of the three-layer voice gate. When true, the
    * CEOVoicePlayButton is rendered after the reveal finishes; when false
    * (default), the button is not rendered. The button performs its own
    * Layer 3 browser-support check internally, so callers don't need to

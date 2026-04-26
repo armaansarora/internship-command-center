@@ -8,7 +8,7 @@ interface ContactCardProps {
   onEdit: (contact: ContactForAgent) => void;
 }
 
-// R8 — cool-blue warmth ramp. Informative, not punitive. Cold cards look
+// cool-blue warmth ramp. Informative, not punitive. Cold cards look
 // like an old photograph; zero red anywhere.
 const WARMTH_CONFIG = {
   warm: {

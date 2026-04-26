@@ -1,5 +1,5 @@
 /**
- * R5.4 — /api/writing-room/compose-stream contract test.
+ * /api/writing-room/compose-stream contract test.
  *
  * Asserts:
  *   - 401 when unauthenticated

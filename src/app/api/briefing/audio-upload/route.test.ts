@@ -1,5 +1,5 @@
 /**
- * R6.2 — POST /api/briefing/audio-upload gate + shape tests.
+ * POST /api/briefing/audio-upload gate + shape tests.
  *
  * Locks the opt-in enforcement contract:
  *   - 403 when voice_recording_enabled=false

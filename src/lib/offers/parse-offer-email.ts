@@ -1,5 +1,5 @@
 /**
- * R10.3 — parseOfferEmail
+ * parseOfferEmail
  *
  * Best-effort structured extraction from an already-classified offer email.
  * Regex-driven for speed + determinism. Failed extractions return null — the

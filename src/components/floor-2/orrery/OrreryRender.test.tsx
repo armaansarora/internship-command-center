@@ -6,7 +6,7 @@ import type { OrreryPlanet } from "@/lib/orrery/types";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.2 — OrreryRender SSR + invariant tests.
+ * OrreryRender SSR + invariant tests.
  *
  * The orrery render primitive consumes OrreryPlanet[] from R9.1 and renders a
  * CSS 3D scene. Tests exercise SSR safety, aria contracts, the empty-state

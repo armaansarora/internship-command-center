@@ -121,7 +121,7 @@ function MetricPill({ label, value, color }: { label: string; value: string; col
 // Main component
 // ---------------------------------------------------------------------------
 export function CFOWhiteboard({ stats }: CFOWhiteboardProps): JSX.Element {
-  // R9.9 — Discreet entry point for the State of the Month PDF (R9.8 route).
+  // Discreet entry point for the State of the Month PDF (R9.8 route).
   // Computed from current local time so the link always points at the active
   // month; format is YYYY-MM per the route's Zod validator.
   const currentMonth = new Date().toISOString().slice(0, 7);

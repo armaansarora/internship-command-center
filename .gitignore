@@ -45,10 +45,6 @@ migration-*.sql
 # husky internal directory
 .husky/_/
 
-# bootstrap system (ephemeral tracking)
-.bootstrap-last-hash
-.vercel-status.json
-
 # audit reports — contain detailed vulnerability findings; keep local-only for public repo
 # Root-anchored so src/lib/audit/ (the runtime security-event helper) is tracked.
 /audit/
@@ -56,12 +52,10 @@ migration-*.sql
 # editor configs
 .vscode/
 
-.tower/.cache
-.tower/lock.yml
-
-# Playwright (R12 hardening harness) — local artifacts only, never commit.
+# Playwright — local artifacts only, never commit.
 test-results/
 playwright-report/
 
 # Stripe bootstrap script output — contains webhook secret
 .stripe-ids.json
+.env*.local

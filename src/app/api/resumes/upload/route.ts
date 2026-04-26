@@ -1,5 +1,5 @@
 /**
- * R5.2 — POST /api/resumes/upload
+ * POST /api/resumes/upload
  *
  * Accepts a multipart PDF upload, parses it, stores the binary in the
  * PRIVATE `resumes` bucket, and writes a base_resumes row with the

@@ -25,7 +25,7 @@ const ContactFormSchema = z.object({
     .or(z.literal("")),
   introducedBy: z.string().max(200, "Too long").optional().or(z.literal("")),
   notes: z.string().max(2000, "Notes too long").optional().or(z.literal("")),
-  // R8 — private sticky-note, visible only to the owning user. NEVER
+  // private sticky-note, visible only to the owning user. NEVER
   // included in AI prompts / exports / cross-user surfaces.  P5 enforces.
   privateNote: z
     .string()

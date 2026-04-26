@@ -1,5 +1,5 @@
 /**
- * R4.12 — strict one-time-per-account cinematic guard.
+ * strict one-time-per-account cinematic guard.
  *
  * The brief's anti-pattern is explicit: "An arrival scene that plays
  * every visit" fails R4. This file pulls the guard together in ONE test

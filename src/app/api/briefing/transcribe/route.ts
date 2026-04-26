@@ -1,5 +1,5 @@
 /**
- * R6.2 — POST /api/briefing/transcribe
+ * POST /api/briefing/transcribe
  *
  * Downloads an opt-in audio blob from interview-audio-private, hands it to
  * Whisper, and returns the transcribed text. The three-layer gate:

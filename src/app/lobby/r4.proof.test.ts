@@ -1,5 +1,5 @@
 /**
- * R4.11 — End-to-end Proof of the Tower's first-run experience.
+ * End-to-end Proof of the Tower's first-run experience.
  *
  * The acceptance criterion: "First-click to first-Morning-Briefing is
  * fast and feels continuous. Returning users never see the arrival twice.

@@ -8,7 +8,7 @@ import {
 } from "./ArrivalStages";
 
 /**
- * R4.7 — pure stage-definition tests for the CinematicArrival.
+ * pure stage-definition tests for the CinematicArrival.
  *
  * The cinematic is composed of a small, fixed sequence of named stages.
  * Keeping them in a pure data module means we can assert timing, ordering,

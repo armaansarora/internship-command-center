@@ -1,5 +1,5 @@
 /**
- * R7 — Deadline beat detection.
+ * Deadline beat detection.
  *
  * Three beats per application deadline: t_24h (24h out), t_4h (4h out),
  * t_0 (deadline itself). Each beat fires exactly once — dedupe via

@@ -19,13 +19,13 @@ export interface ApproveResult {
 /**
  * Approve a pending_approval outreach row for a given user.
  *
- * R7.2 — callers may pass an explicit `sendAfter` Date to stamp the
+ * callers may pass an explicit `sendAfter` Date to stamp the
  * undo window. When omitted, the row is immediately eligible for the
  * cron sender (send_after = now()), which preserves the pre-R7 behavior
  * for legacy callers. The R7 path (/api/outreach/approve) is the
  * canonical entry point and always passes now()+30s.
  *
- * R10.10 — `opts.minimumHoldSeconds` clamps the written `send_after` to
+ * `opts.minimumHoldSeconds` clamps the written `send_after` to
  * at least `now() + minimumHoldSeconds`, even if the caller passed an
  * earlier `sendAfter`. This is the server-side enforcement of the 24h
  * negotiation send-hold: hand-crafted POSTs cannot bypass by passing a

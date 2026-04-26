@@ -44,28 +44,28 @@ const ALLOWLIST = new Set<string>([
   // Red Team test references the canonical Q7 phrasing that mentions
   // 'private_note ever appear' from the checklist markdown.
   "src/app/__tests__/r8-red-team.proof.test.ts",
-  // R10.14 — defensive privateNote destructure before LLM prompt.
+  // defensive privateNote destructure before LLM prompt.
   // draftReferenceRequest strips privateNote off the contact object
   // before JSON.stringify reaches the LLM (P5 invariant preserved).
   "src/lib/ai/structured/reference-request.ts",
-  // R10.14 — regression test for the P5 strip: seeds a contact with
+  // regression test for the P5 strip: seeds a contact with
   // privateNote: "SECRET: ..." and asserts the prompt never contains
   // that string. The word 'privateNote' appears only in fixture/asserts.
   "src/lib/ai/structured/__tests__/reference-request.test.ts",
-  // R10.14 — route comment documents the P5 guarantee for the
+  // route comment documents the P5 guarantee for the
   // reference-request endpoint. No privateNote data crosses the boundary.
   "src/app/api/contacts/[id]/reference-request/route.ts",
-  // R10.14 — ReferenceRequestPanel test fixture includes
+  // ReferenceRequestPanel test fixture includes
   // `privateNote: null` for type-shape completeness of ContactForAgent.
   "src/components/parlor/ReferenceRequestPanel.test.tsx",
-  // R11.10 — structural proof test. Names `contacts.private_note` as a
+  // structural proof test. Names `contacts.private_note` as a
   // FORBIDDEN string in the R11 match flow (asserts it never appears in
   // files touching match_candidate_index). The R11 proof NEEDS to quote
   // the string to search for it; no private_note data is handled.
   "src/app/__tests__/r11-no-contact-leak.proof.test.ts",
 ]);
 
-// R10.14 — AI-prompt composition path exemptions.
+// AI-prompt composition path exemptions.
 // The blanket "src/lib/ai/**" grep rejects ANY reference to privateNote,
 // but reference-request.ts must NAME the field in order to destructure
 // it OUT before serialization (the P5 defensive strip). Its sibling test

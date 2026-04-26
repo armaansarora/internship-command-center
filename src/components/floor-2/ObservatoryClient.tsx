@@ -20,7 +20,7 @@ import { ActivityHeatmap } from "./analytics/ActivityHeatmap";
 interface ObservatoryClientProps {
   stats: PipelineStats;
   /**
-   * R9.9 — raw application data the Orrery transforms into planets. The
+   * raw application data the Orrery transforms into planets. The
    * Orrery is the centerpiece of Floor 2 (per partner brief: "the chart
    * grid is supporting material, not the centerpiece"). Empty array is
    * valid — the Orrery shows its empty-state aria-label.
@@ -109,7 +109,7 @@ export function ObservatoryClient({ stats, apps }: ObservatoryClientProps): JSX.
   );
 
   // ── Dashboard slot ──────────────────────────────────────────────────────
-  // R9.9 — Orrery is the centerpiece. The chart grid is demoted to supporting
+  // Orrery is the centerpiece. The chart grid is demoted to supporting
   // material below it; WeeklyTrend + ActivityHeatmap collapse into "More
   // analytics" so the Orrery owns the first viewport. This composition is
   // structurally guarded by ObservatoryClient.test.tsx (DOM-order assertions).

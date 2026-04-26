@@ -1,5 +1,5 @@
 /**
- * R10.3 — POST + GET /api/offers contract tests.
+ * POST + GET /api/offers contract tests.
  *
  * Invariants:
  *  - 401 when unauthenticated; DB helper never called.

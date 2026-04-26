@@ -14,7 +14,7 @@ interface ApplicationCardProps {
   onDelete?: (id: string) => void;
   onToggleSelection?: (id: string, event: { shiftKey: boolean }) => void;
   /**
-   * R9.6 — When true AND `application.status === "rejected"`, the inline
+   * When true AND `application.status === "rejected"`, the inline
    * rejection-autopsy strip renders below the card body. The PARENT owns
    * the dismissal: after a submit/skip callback fires, flip this back to
    * false for that card. Persistence lives in the

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R9.6 — POST /api/rejection-reflections contract tests.
+ * POST /api/rejection-reflections contract tests.
  *
  * Invariants:
  *   - 401 when unauthenticated (never touches the create query).

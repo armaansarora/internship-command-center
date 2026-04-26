@@ -28,7 +28,7 @@ function make(tier: "warm" | "cooling" | "cold"): ContactForAgent {
 
 const FORBIDDEN_RED = [/#ef4{2,}/i, /239,\s*68,\s*68/, /#f44336/i];
 
-describe("R8 — ContactCard cool-blue palette (non-negotiable)", () => {
+describe("ContactCard cool-blue palette (non-negotiable)", () => {
   it("cold card does NOT contain any red hex or rgba", () => {
     const html = renderToStaticMarkup(<ContactCard contact={make("cold")} onEdit={() => {}} />);
     for (const pattern of FORBIDDEN_RED) expect(html).not.toMatch(pattern);

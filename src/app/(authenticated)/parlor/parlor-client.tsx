@@ -22,7 +22,7 @@ import { ReferenceRequestPanel } from "@/components/parlor/ReferenceRequestPanel
 interface ParlorClientProps {
   offers: OfferRow[];
   /**
-   * R10.11 — Layer 2 of the CEO voice three-layer gate. Seeded from
+   * Layer 2 of the CEO voice three-layer gate. Seeded from
    * `user_profiles.preferences.ceoVoice.enabled` server-side. Threaded
    * down to the NegotiationDraftPanel so the read-aloud button can gate
    * itself. Default OFF preserves the Layer 1 default when callers drop
@@ -30,7 +30,7 @@ interface ParlorClientProps {
    */
   ceoVoiceEnabled?: boolean;
   /**
-   * R10.12 — Seeded from `user_profiles.preferences.parlorCfoQuipShown.shown`
+   * Seeded from `user_profiles.preferences.parlorCfoQuipShown.shown`
    * server-side. When `true` the CFO overlay is never rendered on this
    * mount (latch-is-closed). When `false` we render the overlay for
    * exactly one dismissal cycle and POST the latch-closed write on
@@ -39,7 +39,7 @@ interface ParlorClientProps {
    */
   cfoQuipShown?: boolean;
   /**
-   * R10.12 — Server-computed `{quip}` for the first-entry CFO line. Null
+   * Server-computed `{quip}` for the first-entry CFO line. Null
    * when comp-band lookup failed catastrophically. When null OR when
    * `cfoQuipShown===true` the overlay stays absent from the DOM.
    */
@@ -51,7 +51,7 @@ interface ParlorClientProps {
 }
 
 /**
- * R10.6 — ParlorClient.
+ * ParlorClient.
  *
  * Client scaffold for the Negotiation Parlor. Holds the selected-offer
  * state and threads it into the OakTable + OfferFolder tree.
@@ -70,7 +70,7 @@ interface ParlorClientProps {
  * empty response), the chart graceful-empties and the other offers still
  * pin on the shared rails built from any successful convenings.
  *
- * R10.12 — CFO entry-quip overlay. Rendered at most once per user, ever:
+ * CFO entry-quip overlay. Rendered at most once per user, ever:
  * the `parlorCfoQuipShown` pref (server-read in page.tsx, client-written
  * here on dismissal) enforces the latch. The overlay is a fire-and-forget
  * beat — we flip the local `quipShown` flag optimistically so a second
@@ -104,7 +104,7 @@ export function ParlorClient({
     Record<string, LookupResult>
   >({});
 
-  // R10.12 — Local latch. Seeded from the server pref (which is the source
+  // Local latch. Seeded from the server pref (which is the source
   // of truth across sessions). We flip it true on dismissal — that hides
   // the overlay for the remainder of this mount AND for any subsequent
   // mount in this session (state persists via React, the pref POST
@@ -131,7 +131,7 @@ export function ParlorClient({
   }, [selectedOfferId]);
 
   /**
-   * R10.12 — Flip the CFO-quip latch and fire the persistence POST.
+   * Flip the CFO-quip latch and fire the persistence POST.
    *
    * Optimistic: we set `quipShown=true` synchronously so the overlay
    * unmounts even if the POST takes a while (or fails entirely).
@@ -185,7 +185,7 @@ export function ParlorClient({
     [offers],
   );
 
-  // R10.12 — Render the overlay only when ALL of:
+  // Render the overlay only when ALL of:
   //   - The server pref says the latch is open (quipShown === false).
   //   - The server computed a quip (initialCfoQuip !== null). A null quip
   //     is our signal that bands lookup couldn't produce anything; we'd

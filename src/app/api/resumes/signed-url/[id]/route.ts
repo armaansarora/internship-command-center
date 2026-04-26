@@ -1,5 +1,5 @@
 /**
- * R5.2 — GET /api/resumes/signed-url/[id]
+ * GET /api/resumes/signed-url/[id]
  *
  * Mints a short-lived signed URL (1 hour) for a base resume's stored PDF.
  * The calling user must own the row; RLS + the getBaseResumeById check

@@ -28,7 +28,7 @@ interface Props {
 }
 
 /**
- * R10.12 — CFOQuipOverlay.
+ * CFOQuipOverlay.
  *
  * Understated dialogue bubble that renders the CFO's one-time, comp-aware
  * quip on the user's first Parlor entry after their first offer arrives.

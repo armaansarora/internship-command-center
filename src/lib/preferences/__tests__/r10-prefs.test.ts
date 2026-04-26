@@ -10,7 +10,7 @@ import {
 } from "../parlor-cfo-quip-pref";
 
 /**
- * R10.1 — Preference-key contract tests for the three new R10 keys.
+ * Preference-key contract tests for the three new R10 keys.
  *
  * Each key lives under its namespaced slot in `user_profiles.preferences`
  * jsonb and is validated by a strict Zod schema. The keys are whitelisted

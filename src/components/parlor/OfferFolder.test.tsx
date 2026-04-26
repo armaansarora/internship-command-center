@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R10.6 — OfferFolder render + interaction tests.
+ * OfferFolder render + interaction tests.
  *
  * Uses the project's manual createRoot + react act() pattern (no
  * @testing-library/react — see CLAUDE.md and ParlorDoor.test.tsx).

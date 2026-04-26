@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 /**
- * R10.6 — /parlor route-gate invariant.
+ * /parlor route-gate invariant.
  *
  * NON-NEGOTIABLE: `/parlor` must redirect to `/c-suite` for any user whose
  * `offers` count is zero. The Negotiation Parlor is an offer-gated annex —
@@ -34,7 +34,7 @@ vi.mock("@/lib/db/queries/offers-rest", () => ({
   getOffersForUser: vi.fn(async () => []),
 }));
 
-describe("R10.6 — GET /parlor route gate", () => {
+describe("GET /parlor route gate", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("redirects to /c-suite when offerCount === 0", async () => {

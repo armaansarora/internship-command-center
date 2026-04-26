@@ -62,7 +62,7 @@ function count(html: string, needle: string): number {
   return n;
 }
 
-describe("R12 — PipelineColumn render cap (defense at scale)", () => {
+describe("PipelineColumn render cap (defense at scale)", () => {
   it("renders all cards when count is at or below the cap (50)", () => {
     const html = renderColumn(50);
     expect(html).not.toContain("war-column-overflow-banner");

@@ -7,7 +7,7 @@ import type { PatternMode } from "@/lib/orrery/types";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.4 — PatternModeToggle render + a11y + interaction tests.
+ * PatternModeToggle render + a11y + interaction tests.
  *
  * The toggle is a 3-button pill that lets the user flip the Orrery between
  * stage / tier / velocity layouts. It's pure UI — state lives in the parent

@@ -19,7 +19,7 @@ interface ParlorSceneProps {
 }
 
 /**
- * R10.6 — The Negotiation Parlor scene compositor.
+ * The Negotiation Parlor scene compositor.
  *
  * Environment: wood panels, brass sconces, oak floor. Matches the R10.5
  * door palette (deep wood + gold accents) so the annex reads as a natural

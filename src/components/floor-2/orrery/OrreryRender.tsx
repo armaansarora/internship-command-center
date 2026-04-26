@@ -7,7 +7,7 @@ import type { OrreryPlanet, PatternMode, Tier } from "@/lib/orrery/types";
 import "./orrery.css";
 
 /**
- * R9.2 — OrreryRender.
+ * OrreryRender.
  *
  * The CSS 3D render primitive for the Observatory's orrery. THIS FILE is the
  * single boundary in the codebase that uses `transform-style: preserve-3d`

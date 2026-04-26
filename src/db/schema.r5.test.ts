@@ -1,10 +1,9 @@
 /**
- * R5.1 — base_resumes table + resumes storage bucket.
+ * base_resumes table + resumes storage bucket.
  *
  * Locks in the schema shape for base resumes (uploaded PDF sources that the
  * CMO's tailoring tool reads from). The bucket itself is provisioned via
- * migration 0014 against storage.buckets and cannot be asserted from Drizzle
- * (see docs/plans/2026-04-23-r5-writing-room.md §R5.1 — operator-run SQL).
+ * migration 0014 against storage.buckets and cannot be asserted from Drizzle.
  */
 import { describe, it, expect } from "vitest";
 import { getTableColumns } from "drizzle-orm";

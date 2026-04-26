@@ -4,7 +4,7 @@ import { renderToString } from "react-dom/server";
 import { CSuiteScene, type CSuiteStats } from "@/components/floor-1/CSuiteScene";
 
 /**
- * R10.5 — Parlor door absence invariant.
+ * Parlor door absence invariant.
  *
  * NON-NEGOTIABLE: When `doorSlot` is not provided (user has 0 offers), the
  * rendered HTML must contain ZERO door markers — no `data-parlor-door`
@@ -26,7 +26,7 @@ const stats: CSuiteStats = {
   weeklyActivity: 0,
 };
 
-describe("R10 — Parlor door absence invariant", () => {
+describe("Parlor door absence invariant", () => {
   it("renders NO door markers when doorSlot is not provided", () => {
     const html = renderToString(<CSuiteScene stats={stats} />);
     expect(html).not.toMatch(/data-parlor-door/i);

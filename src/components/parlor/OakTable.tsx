@@ -23,7 +23,7 @@ interface OakTableProps {
 }
 
 /**
- * R10.6 — The Oak Table at the center of the Parlor.
+ * The Oak Table at the center of the Parlor.
  *
  * Holds the collection of OfferFolders as a `role="list"` for
  * assistive-tech users (each OfferFolder is a `role="listitem"`). The

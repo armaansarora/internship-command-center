@@ -3,7 +3,7 @@
 import type { JSX } from "react";
 
 /**
- * R6.6 — DrillTimer.
+ * DrillTimer.
  *
  * Small, visible clock. Cool blue under pressure; amber past 90 seconds;
  * red past 120 seconds. The color band matches `interrupt-rules.ts`:

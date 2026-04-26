@@ -1,5 +1,5 @@
 /**
- * R7 — Calendar conflict detection.
+ * Calendar conflict detection.
  *
  * Pure function: given a list of events (interviews + calendar events)
  * within a rolling 14-day window, return the set of overlapping pairs.

@@ -1,5 +1,5 @@
 /**
- * R10.7 — POST /api/offers/[id]/convene contract tests.
+ * POST /api/offers/[id]/convene contract tests.
  *
  * Invariants:
  *   - 401 when unauthenticated; no DB, no model, no bands lookup.

@@ -22,7 +22,7 @@ import {
 /**
  * POST /api/profile/preferences
  *
- * R9.6 — Generic merge endpoint for `user_profiles.preferences` jsonb. The
+ * Generic merge endpoint for `user_profiles.preferences` jsonb. The
  * route is a controlled key/value setter: only known keys are accepted,
  * and each known key has its own per-key Zod schema for the value.
  *

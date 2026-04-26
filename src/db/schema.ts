@@ -37,7 +37,7 @@ export const userProfiles = pgTable("user_profiles", {
   googleTokens: jsonb("google_tokens"),
   preferences: jsonb("preferences"),
   stripeCustomerId: text("stripe_customer_id"),
-  // R0.6 — full user-data export queue. `idle` is the resting state;
+  // full user-data export queue. `idle` is the resting state;
   // POST /api/account/export flips to `queued`; the cron worker transitions
   // through `running` → `delivered` (or `failed`). `dataExportRequestedAt`
   // is stamped at queue time; `dataExportLastDeliveredAt` is stamped after
@@ -47,7 +47,7 @@ export const userProfiles = pgTable("user_profiles", {
   }).default("idle"),
   dataExportRequestedAt: timestamp("data_export_requested_at", { withTimezone: true }),
   dataExportLastDeliveredAt: timestamp("data_export_last_delivered_at", { withTimezone: true }),
-  // R0.7 — account deletion. `POST /api/account/delete` stamps now(); the
+  // account deletion. `POST /api/account/delete` stamps now(); the
   // cron purge-sweeper hard-deletes rows whose `deleted_at` is older than
   // 30 days. Null means the account is live; non-null means the 30-day
   // grace window is ticking down to a hard delete.
@@ -56,12 +56,12 @@ export const userProfiles = pgTable("user_profiles", {
     enum: ["free", "pro", "team"],
   }).default("free"),
   lastFloorVisited: text("last_floor_visited").default("PH"),
-  // R3.2 — cross-agent shared-knowledge bridge. Keyed two-level:
+  // cross-agent shared-knowledge bridge. Keyed two-level:
   // { [agentKey]: { [entryKey]: { value, writtenAt, writtenBy } } }.
   // Read/write via src/lib/db/queries/shared-knowledge-rest.ts; never
   // mutate this jsonb from route handlers directly.
   sharedKnowledge: jsonb("shared_knowledge").default(sql`'{}'::jsonb`),
-  // R4.1 — Lobby onboarding state. Stamped exactly once per account when
+  // Lobby onboarding state. Stamped exactly once per account when
   // the cinematic arrival plays (claimArrivalPlay uses an atomic
   // WHERE arrival_played_at IS NULL update); a null value means the
   // first-visit arrival still owes the user, a timestamp means we already
@@ -84,7 +84,7 @@ export const userProfiles = pgTable("user_profiles", {
   // (everyone is in the Lobby at creation); extended by syncFloorsUnlocked
   // as applications, contacts, interviews, etc. appear.
   floorsUnlocked: text("floors_unlocked").array().notNull().default(sql`'{L}'::text[]`),
-  // R6 — Mock interview drill voice opt-in.
+  // Mock interview drill voice opt-in.
   // voiceRecordingEnabled: default false. User can flip true in Settings or
   // at drill start. Gated end-to-end by /api/briefing/audio-upload and
   // /api/briefing/transcribe (403 if false).
@@ -98,19 +98,19 @@ export const userProfiles = pgTable("user_profiles", {
   voiceRecordingPermanentlyDisabled: boolean("voice_recording_permanently_disabled")
     .notNull()
     .default(false),
-  // R6 — Per-user drill tuning. interruptFirmness: gentle|firm|hardass gates
+  // Per-user drill tuning. interruptFirmness: gentle|firm|hardass gates
   // how aggressively CPO's interrupt-rules FSM fires. timerSeconds: default
   // 90s amber threshold; 120s hard cap.
   drillPreferences: jsonb("drill_preferences")
     .notNull()
     .default(sql`'{"interruptFirmness":"firm","timerSeconds":90}'::jsonb`),
-  // R7 — Pneumatic-tube quiet-hours preference. Shape:
+  // Pneumatic-tube quiet-hours preference. Shape:
   // {"start":"HH:MM","end":"HH:MM"} or null (always deliver immediately).
   // Wrap-around is allowed (start="22:00", end="07:00" = overnight quiet).
   // Server reads this at notification insert to compute deliver_after; tubes
   // queued during quiet hours land at wake-up, never at 3am.
   quietHours: jsonb("quiet_hours"),
-  // R8 — Cross-user Warm Intro Network consent. `consentAt` stamps opt-in;
+  // Cross-user Warm Intro Network consent. `consentAt` stamps opt-in;
   // `revokedAt` stamps the last revoke (may precede a newer consent).
   // `consentVersion` bumps when the consent copy changes, forcing
   // re-consent.  The assertConsented guard treats consent as active when
@@ -118,7 +118,7 @@ export const userProfiles = pgTable("user_profiles", {
   networkingConsentAt: timestamp("networking_consent_at", { withTimezone: true }),
   networkingRevokedAt: timestamp("networking_revoked_at", { withTimezone: true }),
   networkingConsentVersion: integer("networking_consent_version").default(0),
-  // R11 — Cross-user warm-intro matching. Stamped each time the per-user
+  // Cross-user warm-intro matching. Stamped each time the per-user
   // match-candidate scan (re)builds this user's ranked candidate index in
   // `match_candidate_index`. The scan scheduler compares this timestamp
   // against the TTL window (invalidatesAt on each row) to decide whether
@@ -197,11 +197,11 @@ export const applications = pgTable("applications", {
   // the war-table sort and the CRO whiteboard's "top finds" list. Nullable
   // because rows created pre-R1.3 + manually-entered rows don't have one.
   matchScore: numeric("match_score", { precision: 4, scale: 3 }),
-  // R7 — Optional hard deadline for the application. Feeds the Floor-4 Final
+  // Optional hard deadline for the application. Feeds the Floor-4 Final
   // Countdown section and the 3-beat cron (t_24h, t_4h, t_0). Null means no
   // known deadline; user sets this from the ApplicationModal.
   deadlineAt: timestamp("deadline_at", { withTimezone: true }),
-  // R7 — Per-app dedupe for the 3-beat deadline cron. Shape:
+  // Per-app dedupe for the 3-beat deadline cron. Shape:
   // {"t_24h":"ISO","t_4h":"ISO","t_0":"ISO"} — each key optional, value is
   // the timestamp the beat was fired. Presence of a key = that beat already
   // fired and must not fire again.
@@ -225,7 +225,7 @@ export const applications = pgTable("applications", {
     table.userId,
     table.matchScore.desc().nullsLast(),
   ),
-  // R7 — Final Countdown sort. (Migration 0017.) Partial index: only apps
+  // Final Countdown sort. (Migration 0017.) Partial index: only apps
   // with a deadline set.
   index("idx_apps_user_deadline").on(
     table.userId,
@@ -252,7 +252,7 @@ export const contacts = pgTable("contacts", {
   warmth: integer("warmth").default(50),
   lastContactAt: timestamp("last_contact_at", { withTimezone: true }),
   notes: text("notes"),
-  // R8 — Private note. The sharpening detail. NEVER exposed to AI-prompt
+  // Private note. The sharpening detail. NEVER exposed to AI-prompt
   // composition, export pipelines, or cross-user surfaces.  P5 grep
   // invariant allowlists exactly the files that may reference this column.
   privateNote: text("private_note"),
@@ -389,7 +389,7 @@ export const outreachQueue = pgTable("outreach_queue", {
   type: text("type", {
     enum: [
       "cold_email", "follow_up", "thank_you", "networking", "cover_letter_send",
-      // R10.1 — Negotiation Parlor queue rows. `negotiation` carries the
+      // Negotiation Parlor queue rows. `negotiation` carries the
       // drafted negotiation script with the same 24h send-hold R7 wires in
       // via `sendAfter`; `reference_request` carries CNO-drafted reference
       // asks sent from the Parlor's CNO chair.
@@ -403,7 +403,7 @@ export const outreachQueue = pgTable("outreach_queue", {
   }).notNull().default("pending_approval"),
   generatedBy: text("generated_by"),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
-  // R7 — REAL undo. Earliest moment the cron sender may pick up this row.
+  // REAL undo. Earliest moment the cron sender may pick up this row.
   // Set to now()+30s by /api/outreach/approve. The cron predicate is
   // `send_after <= now()`; the undo predicate is `send_after > now()`.
   // Mutual exclusion is enforced by the database, not the UI — the race
@@ -412,11 +412,11 @@ export const outreachQueue = pgTable("outreach_queue", {
   sendAfter: timestamp("send_after", { withTimezone: true }),
   sentAt: timestamp("sent_at", { withTimezone: true }),
   resendMessageId: text("resend_message_id"),
-  // R7 — Audit trail stamped by /api/outreach/undo on successful revert.
+  // Audit trail stamped by /api/outreach/undo on successful revert.
   // Set means the user cancelled within the undo window; status flipped
   // back to 'pending_approval' at the same time.
   cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
-  // R5.6 — tone-group + selection state for cover_letter_send rows.
+  // tone-group + selection state for cover_letter_send rows.
   // Application-enforced shape; see migration 0015 header for the JSON schema.
   metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
   ...timestamps,
@@ -442,12 +442,12 @@ export const notifications = pgTable("notifications", {
   isRead: boolean("is_read").default(false),
   isDismissed: boolean("is_dismissed").default(false),
   actions: jsonb("actions"),
-  // R7 — Pneumatic-tube quiet-hours queueing. Set at notification insert
+  // Pneumatic-tube quiet-hours queueing. Set at notification insert
   // from user's quiet_hours + timezone. Null (legacy rows) = deliver
   // immediately. Client-side tube subscriber only renders rows where
   // deliver_after <= now().
   deliverAfter: timestamp("deliver_after", { withTimezone: true }),
-  // R7 — Stamped atomically by the first client session that claims the
+  // Stamped atomically by the first client session that claims the
   // row. Ensures no double-tube for the same notification across tabs/
   // devices: concurrent sessions race on `UPDATE ... SET delivered_at=now()
   // WHERE delivered_at IS NULL RETURNING id`; only one wins.
@@ -950,7 +950,7 @@ export type ContactEmbedding = typeof contactEmbeddings.$inferSelect;
 export type NewContactEmbedding = typeof contactEmbeddings.$inferInsert;
 export type NetworkingMatchIndex = typeof networkingMatchIndex.$inferSelect;
 export type NewNetworkingMatchIndex = typeof networkingMatchIndex.$inferInsert;
-// R11 — Cross-user warm-intro matching
+// Cross-user warm-intro matching
 export type MatchCandidateIndex = typeof matchCandidateIndex.$inferSelect;
 export type NewMatchCandidateIndex = typeof matchCandidateIndex.$inferInsert;
 export type MatchEvent = typeof matchEvents.$inferSelect;
@@ -964,7 +964,7 @@ export type BaseResume = typeof baseResumes.$inferSelect;
 export type NewBaseResume = typeof baseResumes.$inferInsert;
 export type RejectionReflection = typeof rejectionReflections.$inferSelect;
 export type NewRejectionReflection = typeof rejectionReflections.$inferInsert;
-// R10 — Negotiation Parlor
+// Negotiation Parlor
 export type Offer = typeof offers.$inferSelect;
 export type NewOffer = typeof offers.$inferInsert;
 export type CompBands = typeof companyCompBands.$inferSelect;

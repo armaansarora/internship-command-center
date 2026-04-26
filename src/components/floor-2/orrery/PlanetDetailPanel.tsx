@@ -4,7 +4,7 @@ import type { CSSProperties, JSX } from "react";
 import type { OrreryPlanet } from "@/lib/orrery/types";
 
 /**
- * R9.3 — PlanetDetailPanel.
+ * PlanetDetailPanel.
  *
  * The slide-up panel revealed when a planet is focused in the Orrery. Anchored
  * to the bottom of its relative parent (the Orrery container), NOT to the

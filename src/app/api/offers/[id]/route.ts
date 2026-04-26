@@ -1,5 +1,5 @@
 /**
- * R10.3 — GET/PATCH /api/offers/[id]
+ * GET/PATCH /api/offers/[id]
  *
  * GET returns a single offer owned by the user (404 otherwise — never reveal
  * row existence across user boundaries). PATCH mutates the status enum only;

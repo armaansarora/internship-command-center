@@ -4,7 +4,7 @@ import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 import type { SharedKnowledgeFlatMap } from "@/lib/db/queries/shared-knowledge-rest";
 
 /**
- * R3.9 — CROSS-AGENT INTEL block in the CRO system prompt.
+ * CROSS-AGENT INTEL block in the CRO system prompt.
  *
  * The block is the visible half of the CIO→CRO shared-knowledge bridge: the
  * CIO writes timestamped intel notes via `writeSharedKnowledge`, the

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 /**
  * Floor PH — The Penthouse.
  *
- * R2: scene-first. The server fetches the user's pre-computed morning
+ * scene-first. The server fetches the user's pre-computed morning
  * briefing + overnight signal + pipeline weather + time-of-day and hands the
  * whole payload to the client, which routes to the right scene for the
  * window.

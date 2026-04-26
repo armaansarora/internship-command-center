@@ -35,7 +35,7 @@ describe("DOSSIER_AGE_STYLE", () => {
   });
 });
 
-describe("R8 — DossierWall SSR", () => {
+describe("DossierWall SSR", () => {
   const dossiers: DossierShape[] = [
     { id: "d-1", companyName: "Blackstone", sector: "Alternatives", lastResearchedAt: new Date("2026-04-20"), hasNotes: true, domain: "blackstone.com" },
     { id: "d-2", companyName: "Tiger Global", sector: "Growth", lastResearchedAt: new Date("2026-01-01"), hasNotes: false, domain: null },

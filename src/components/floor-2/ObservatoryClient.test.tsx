@@ -9,7 +9,7 @@ import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.9 — ObservatoryClient composition tests.
+ * ObservatoryClient composition tests.
  *
  * The Observatory's centerpiece is the Orrery (R9.1–R9.5). Charts are
  * supporting material. This test file is the structural guard against the

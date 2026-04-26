@@ -5,7 +5,7 @@ import type { BinderSummary } from "@/lib/db/queries/debriefs-rest";
 import { binderAging } from "./shelf-aging";
 
 /**
- * R6.8 — A single binder spine on the Debrief shelf.
+ * A single binder spine on the Debrief shelf.
  *
  * Leather-look spine, embossed company name rotated -90deg, round
  * sub-label ("R1" / "R2" / ...), and aging effects (dust, sepia,

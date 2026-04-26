@@ -1,5 +1,5 @@
 /**
- * R7.4 — synthThunk unit tests.
+ * synthThunk unit tests.
  *
  * We don't need real audio here — the invariants are structural:
  *   - the filter is configured correctly (bandpass, 600Hz, Q=3)

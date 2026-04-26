@@ -1,5 +1,5 @@
 /**
- * R10.13 — simulator-turn helper contract tests.
+ * simulator-turn helper contract tests.
  *
  * Stubs `ai.generateObject` so no network call runs. Tests verify:
  *   - the mocked structured object round-trips through

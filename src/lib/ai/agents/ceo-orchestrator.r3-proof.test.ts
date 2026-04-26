@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R3.12 — The R3 Proof-line canary.
+ * The R3 Proof-line canary.
  *
  * One integration-style test that stitches the full R3 proof into a single
  * cohesive statement. If parallel fan-out, dispatch-row writing, or

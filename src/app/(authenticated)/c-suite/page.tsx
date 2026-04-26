@@ -19,7 +19,7 @@ export const metadata: Metadata = { title: "The C-Suite | The Tower" };
  * Skyline paints immediately; CEO orchestration data streams into the
  * Suspense boundary so first paint isn't blocked.
  *
- * R10.5 — The Negotiation Parlor door is gated by `offerCount > 0`.
+ * The Negotiation Parlor door is gated by `offerCount > 0`.
  * When the user has zero offers, `hasParlorDoor` stays false and the
  * door is ABSENT from the DOM (see the absence proof test). When the
  * first offer parses, the next page load computes `hasParlorDoor=true`

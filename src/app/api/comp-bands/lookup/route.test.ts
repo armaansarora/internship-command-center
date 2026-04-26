@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R10.4 — Contract tests for GET /api/comp-bands/lookup.
+ * Contract tests for GET /api/comp-bands/lookup.
  *
  * Happy path:
  *   - 401 when unauthenticated

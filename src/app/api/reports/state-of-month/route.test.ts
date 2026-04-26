@@ -1,5 +1,5 @@
 /**
- * R9.8 — GET /api/reports/state-of-month tests.
+ * GET /api/reports/state-of-month tests.
  *
  * Mocks getUser, the Supabase REST client, and generateStateOfMonthPdf so
  * the test stays deterministic. Asserts:

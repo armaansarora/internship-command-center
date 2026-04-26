@@ -7,7 +7,7 @@ import { BinderSpine } from "./BinderSpine";
 import { BinderOpen } from "./BinderOpen";
 
 /**
- * R6.8 — The Debrief Binder Shelf.
+ * The Debrief Binder Shelf.
  *
  * A physical shelf of leather-look binders, filed by company. The whole
  * premise is that each binder is a REAL thing on the shelf — the user

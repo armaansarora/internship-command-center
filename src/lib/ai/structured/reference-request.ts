@@ -1,5 +1,5 @@
 /**
- * R10.14 — CNO reference-request draft helper.
+ * CNO reference-request draft helper.
  *
  * Single `generateObject` call. Mirrors `draftNegotiationEmail`'s shape
  * but with CNO warmth voice: relationship-first, specific to the target

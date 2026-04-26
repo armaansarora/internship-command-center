@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { ReadyToSendPanel, type ToneVariantCard } from "./ReadyToSendPanel";
 
 /**
- * R5.6 — ReadyToSendPanel render assertions.
+ * ReadyToSendPanel render assertions.
  *
  * Covers the UI half of the approval gate:
  *   - Approve button starts disabled + aria-disabled=true

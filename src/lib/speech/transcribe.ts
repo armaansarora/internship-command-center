@@ -1,5 +1,5 @@
 /**
- * R6.2 — Whisper transcription via Vercel AI SDK v6.
+ * Whisper transcription via Vercel AI SDK v6.
  *
  * Called exclusively from /api/briefing/transcribe. That route is gated
  * end-to-end (403 if voice_recording_enabled=false, 410 if permanently

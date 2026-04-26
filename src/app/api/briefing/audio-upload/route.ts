@@ -1,5 +1,5 @@
 /**
- * R6.2 — POST /api/briefing/audio-upload
+ * POST /api/briefing/audio-upload
  *
  * Accepts a single audio blob per drill-question, writes it into the
  * private `interview-audio-private` bucket keyed by

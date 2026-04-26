@@ -1,5 +1,5 @@
 /**
- * R9.8 — State of the Month PDF — component + helper tests.
+ * State of the Month PDF — component + helper tests.
  *
  * Mocks @react-pdf/renderer so the engine doesn't actually run in JSDOM.
  * Asserts:

@@ -1,5 +1,5 @@
 /**
- * R8.15 — Paper-rustle synthesiser.
+ * Paper-rustle synthesiser.
  *
  * A short (110ms) high-passed noise burst with a soft envelope.  Plays
  * when the rolodex rotates past a card that has a private sticky-note

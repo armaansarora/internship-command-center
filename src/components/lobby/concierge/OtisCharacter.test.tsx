@@ -1,5 +1,5 @@
 /**
- * R4.2 — Otis character primitives.
+ * Otis character primitives.
  *
  * Locks the contract that Otis is a NEW named character distinct from
  * every C-suite agent. The cover-the-name test: looking at Otis without

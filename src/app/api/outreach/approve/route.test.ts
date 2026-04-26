@@ -1,5 +1,5 @@
 /**
- * R7.2 + R10.10 — POST /api/outreach/approve contract tests.
+ * R10.10 — POST /api/outreach/approve contract tests.
  *
  * Locks the undo-window semantics at the route boundary:
  *   - 400 on malformed body
@@ -214,7 +214,7 @@ describe("POST /api/outreach/approve", () => {
     expect(sendAfterMs - before).toBeLessThan(86_400_000 + 10_000);
   });
 
-  it("R10.14 — type=reference_request also gets 24h send-hold clamp", async () => {
+  it("type=reference_request also gets 24h send-hold clamp", async () => {
     const { selectChain: _s, updateChain: _u } = wireChains(
       { data: { type: "reference_request" }, error: null },
       {

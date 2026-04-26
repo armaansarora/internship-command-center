@@ -1,5 +1,5 @@
 /**
- * R10.9 — Negotiation-email draft generator.
+ * Negotiation-email draft generator.
  *
  * The Negotiation Parlor's final beat: once the three chairs have convened
  * and the comp band chart has pinned the offer, the Offer Evaluator drafts

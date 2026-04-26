@@ -1,5 +1,5 @@
 /**
- * R7.6 — Overnight follow-up draft generator.
+ * Overnight follow-up draft generator.
  *
  * COO Dylan Shorts drafts a follow-up for a stale application. Real AI-drafted
  * prose, not a template. Three tones (formal / warm / direct) — the LLM picks

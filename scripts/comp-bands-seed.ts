@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * R10.4 — one-shot comp-bands seeder.
+ * one-shot comp-bands seeder.
  *
  * Pre-populates `company_comp_bands` for a hand-curated roster of top
  * companies in a given sector. Writes are guarded by the same monthly

@@ -1,5 +1,5 @@
 /**
- * R6.8 — GET /api/briefing/binder/[id]
+ * GET /api/briefing/binder/[id]
  *
  * Returns the fully-parsed `DebriefContent` for a single binder owned
  * by the current user. The BinderOpen flip-view lazy-fetches from here

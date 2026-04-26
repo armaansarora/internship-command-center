@@ -1,5 +1,5 @@
 /**
- * R10.7 — The three-chair convening.
+ * The three-chair convening.
  *
  * Fans an offer out to three seats in parallel:
  *
@@ -18,7 +18,7 @@
  * The Parlor needs offer-scoped, brief, assessment-only voices. Keeping
  * the convening prompts local here keeps the existing builders stable
  * for their Floor 2 / Floor 6 callers (R10 ships without touching
- * R9-era code).
+ * era code).
  *
  * MVP-scope notes:
  *   - No `recordAgentRun` telemetry yet. `agent_dispatches` writes land in

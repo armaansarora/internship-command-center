@@ -1,5 +1,5 @@
 /**
- * R10.13 — Negotiation simulator turn helper.
+ * Negotiation simulator turn helper.
  *
  * A single `generateObject` call per turn. The CPO roleplays as a recruiter
  * for the offer's company; we score the user's latest reply on anchor /

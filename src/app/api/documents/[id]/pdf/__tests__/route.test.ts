@@ -1,5 +1,5 @@
 /**
- * R5.7 — GET /api/documents/[id]/pdf route tests.
+ * GET /api/documents/[id]/pdf route tests.
  *
  * Scoped to the route-layer behavior: ownership, type gating, error
  * translation, and the happy-path contract (application/pdf, non-empty

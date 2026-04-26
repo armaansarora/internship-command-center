@@ -146,7 +146,7 @@ function parseQuietHours(raw: unknown): QuietHours | null {
 /**
  * Create a new notification (called by agents).
  *
- * R7.4 — If the notification targets the pneumatic tube channel, we stamp
+ * If the notification targets the pneumatic tube channel, we stamp
  * `deliver_after` at insert time using the user's quiet-hours + timezone
  * preference. The client-side tube hook filters on this column, so the
  * queueing decision happens server-side once, not on every client tick.

@@ -1,5 +1,5 @@
 /**
- * R10.4 — Comp-bands REST helpers.
+ * Comp-bands REST helpers.
  *
  * Typed Supabase REST surface for the `company_comp_bands` global cache
  * (ships in migration 0020, R10.1). This is a GLOBAL cache — every

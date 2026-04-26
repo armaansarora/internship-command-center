@@ -1,5 +1,5 @@
 /**
- * R10.14 — draftReferenceRequest helper contract tests.
+ * draftReferenceRequest helper contract tests.
  */
 import { describe, it, expect, vi } from "vitest";
 

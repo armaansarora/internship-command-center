@@ -126,7 +126,7 @@ interface CEODialoguePanelProps {
     status: ChatStatus;
   }) => void;
   /**
-   * R3.11 — called once on mount so the parent can store an `inject(text)`
+   * called once on mount so the parent can store an `inject(text)`
    * handler. Used by CSuiteClient's `/`-inject floating prompt to push the
    * user's mid-orchestration directive into this chat without changing the
    * panel's internal state machine.

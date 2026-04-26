@@ -6,7 +6,7 @@ import { createRejectionReflection } from "@/lib/db/queries/rejection-reflection
 /**
  * POST /api/rejection-reflections
  *
- * R9.6 — Inserts a rejection autopsy row keyed (user_id, application_id).
+ * Inserts a rejection autopsy row keyed (user_id, application_id).
  * The DB-level UNIQUE on application_id prevents duplicates; callers should
  * gate on `getReflectionForApplication` before attempting an insert if they
  * want to update instead of conflict.

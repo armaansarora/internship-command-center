@@ -1,5 +1,5 @@
 /**
- * R10.3 — parseOfferEmail unit tests.
+ * parseOfferEmail unit tests.
  *
  * Deterministic regex-driven extraction. Three canonical shapes:
  *  - Clean offer body (all fields present) → fully populated row.

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 /**
- * R10.4 — lookupCompBands resolver tests.
+ * lookupCompBands resolver tests.
  *
  * Covers the four flows from design-doc §4.5:
  *   1. Cache hit  → returns {ok:true, fromCache:true} and never scrapes.

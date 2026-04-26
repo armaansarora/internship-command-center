@@ -397,7 +397,7 @@ export function makeUpdateCompanyIntelTool(userId: string) {
 
       const result = await updateCompanyResearch(userId, companyId, updateData);
 
-      // R3.9 — broadcast the confirmed intel delta to the shared-knowledge
+      // broadcast the confirmed intel delta to the shared-knowledge
       // bus so sibling agents (CRO especially) see it on their next dispatch.
       // Only fire on confirmed success: a failed Supabase update would leave
       // peers chasing intel the row never received.

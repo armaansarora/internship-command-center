@@ -7,7 +7,7 @@ import type { ApplicationInput, Status } from "@/lib/orrery/types";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.3 + R9.4 — Orrery consumer wrapper tests.
+ * R9.4 — Orrery consumer wrapper tests.
  *
  * The Orrery component is the click-to-history surface for the Observatory.
  * It owns focus state, owns the active layout mode (R9.4 via useOrreryMode),

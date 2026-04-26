@@ -9,7 +9,7 @@
  * surfacing the revoker's anon-keys for up to 24h (the cron rebuild TTL).
  *
  * This suite binds the fix: on revoke, all three steps fire (stamp,
- * R8-clear, R11-cascade-purge) and the route fails closed if the
+ * clear, R11-cascade-purge) and the route fails closed if the
  * R11 cascade errors.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";

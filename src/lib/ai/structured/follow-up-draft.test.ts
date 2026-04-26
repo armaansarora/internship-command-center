@@ -1,5 +1,5 @@
 /**
- * R7.6 — follow-up draft generator contract tests.
+ * follow-up draft generator contract tests.
  *
  * We stub out the `ai` module's `generateObject` so we never hit the network;
  * the `getAgentModel()` helper stays live but receives a null model (acceptable

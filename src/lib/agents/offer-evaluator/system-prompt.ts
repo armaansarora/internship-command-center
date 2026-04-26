@@ -1,5 +1,5 @@
 /**
- * R10.7 — Offer Evaluator system prompt.
+ * Offer Evaluator system prompt.
  *
  * The Offer Evaluator is a CRO subagent seated in the user's Negotiation
  * Parlor. Unlike the CRO on Floor 7 (which weighs the pipeline as a whole),

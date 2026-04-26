@@ -5,7 +5,7 @@ import { createClient, requireUser } from "@/lib/supabase/server";
 import { approveOutreachForUser } from "@/lib/db/queries/outreach-mutations";
 
 /**
- * R7.2 — server-action entry point for approving a single outreach row.
+ * server-action entry point for approving a single outreach row.
  * Stamps the same 30s undo window the /api/outreach/approve route stamps,
  * so callers that approve via a server action (legacy code path) still
  * get the DB-level send_after guard.

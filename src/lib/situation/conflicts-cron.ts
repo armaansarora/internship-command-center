@@ -1,5 +1,5 @@
 /**
- * R7 — per-user conflict-detection worker. Invoked from the daily briefing
+ * per-user conflict-detection worker. Invoked from the daily briefing
  * cron (/api/cron/briefing) so conflicts surface with the same cadence as
  * the morning snapshot.
  *

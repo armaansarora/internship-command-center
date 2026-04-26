@@ -1,5 +1,5 @@
 /**
- * R6.7 — Debrief (Briefing Room binder) REST queries.
+ * Debrief (Briefing Room binder) REST queries.
  *
  * Debriefs live in the `documents` table with `type = "debrief"`. The
  * Briefing Room uses them as "binders" — historic drill transcripts the

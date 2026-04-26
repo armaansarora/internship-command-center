@@ -1,5 +1,5 @@
 /**
- * R10.4 — Comp-bands cache-first resolver.
+ * Comp-bands cache-first resolver.
  *
  * Single orchestration point for the comp-band lookup flow. The four exit
  * paths (design-doc §4.5):

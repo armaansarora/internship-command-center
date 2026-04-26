@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { InjectPrompt, parseInjectKey } from "./InjectPrompt";
 
 /**
- * R3.11 — unit tests for the floating `/`-inject prompt.
+ * unit tests for the floating `/`-inject prompt.
  *
  * Approach mirrors the rest of the R3 suite: the pure decision helper
  * (`parseInjectKey`) carries all of the branching logic, so we exercise it

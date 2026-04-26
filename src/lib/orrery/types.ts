@@ -1,5 +1,5 @@
 /**
- * R9.1 — Typed contract for the Observatory's Orrery.
+ * Typed contract for the Observatory's Orrery.
  *
  * This is the swap-ready boundary between data and render. R9.2 ships a
  * CSS 3D renderer that consumes `OrreryPlanet[]`; an eventual R3F port

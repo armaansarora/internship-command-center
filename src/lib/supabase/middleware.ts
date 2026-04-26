@@ -90,7 +90,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // R4.9 — Returning-user fast lane. If the guest is authenticated AND has
+  // Returning-user fast lane. If the guest is authenticated AND has
   // already watched the first-visit cinematic (arrival_played_at is stamped),
   // /lobby is not their destination anymore; the building sends them up to
   // the floor they were last on. One extra DB read, but only on the /lobby

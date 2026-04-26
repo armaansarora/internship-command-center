@@ -1,5 +1,5 @@
 /**
- * R4.3 — extraction module tests.
+ * extraction module tests.
  *
  * Covers the skip placeholder path (which does NOT call the LLM) — that's
  * the deterministic branch we can unit-test in isolation. The

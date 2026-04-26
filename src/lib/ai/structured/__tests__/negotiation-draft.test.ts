@@ -1,5 +1,5 @@
 /**
- * R10.9 — negotiation-draft helper contract tests.
+ * negotiation-draft helper contract tests.
  *
  * Stubs `ai.generateObject` so no network call runs; `getAgentModel()` stays
  * live but receives a null model (acceptable because the real `generateObject`

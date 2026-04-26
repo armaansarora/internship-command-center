@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R3.9 — CIO `updateCompanyIntel` writes to shared_knowledge after a
+ * CIO `updateCompanyIntel` writes to shared_knowledge after a
  * successful Supabase update.
  *
  * Contract under test:

@@ -1,5 +1,5 @@
 /**
- * R10.13 — POST /api/offers/[id]/simulate contract tests.
+ * POST /api/offers/[id]/simulate contract tests.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { deriveFloorsUnlocked, type ActivitySignal } from "./derive-floors-unlocked";
 
 /**
- * R4.8 — Building Directory derivation tests.
+ * Building Directory derivation tests.
  *
  * The Lobby paints the Tower's 9-floor cross-section with each row either lit
  * (the user has "reached" that floor through activity) or ghosted. The mapping

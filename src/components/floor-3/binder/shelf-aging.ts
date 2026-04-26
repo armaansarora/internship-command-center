@@ -1,5 +1,5 @@
 /**
- * R6.8 — Shelf-aging computation (pure).
+ * Shelf-aging computation (pure).
  *
  * Every binder on the Debrief shelf has a physical presence that ages as
  * the shelf fills: dust settles on the left-hand (older) spines,

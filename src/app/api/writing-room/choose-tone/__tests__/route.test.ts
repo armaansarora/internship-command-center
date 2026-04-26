@@ -1,5 +1,5 @@
 /**
- * R5.6 — /api/writing-room/choose-tone route tests.
+ * /api/writing-room/choose-tone route tests.
  *
  * Covers ownership + state-machine guards. choose-tone is the FIRST of
  * two mandatory clicks (the second being /approve). Status stays

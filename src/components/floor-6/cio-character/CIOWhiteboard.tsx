@@ -47,7 +47,7 @@ function getFreshnessLevel(lastResearchedAt: Date | null): FreshnessLevel {
 }
 
 function getFreshnessColor(level: FreshnessLevel): string {
-  // R8: dossiers yellow and curl with age, they don't turn red.  Fresh is
+  // dossiers yellow and curl with age, they don't turn red.  Fresh is
   // still a green "active" signal, but staleness walks through aging paper
   // colors rather than a warning ramp.
   switch (level) {

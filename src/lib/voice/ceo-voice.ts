@@ -1,5 +1,5 @@
 /**
- * R10.11 — Pure helpers for the CEO read-aloud feature.
+ * Pure helpers for the CEO read-aloud feature.
  *
  * Voice selection + utterance construction live here so they can be tested
  * without mounting a component, stubbing the DOM, or wiring a preference.

@@ -1,5 +1,5 @@
 /**
- * R7.2 — POST /api/outreach/undo contract tests.
+ * POST /api/outreach/undo contract tests.
  *
  * Locks the load-bearing predicate: send_after > now(). If a future change
  * strips this filter, an undo clicked after the cron already fired would

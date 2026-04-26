@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * R7.4 — Pneumatic-tube delivery subscriber.
+ * Pneumatic-tube delivery subscriber.
  *
  * Responsibility: surface the right notification rows, exactly once, to the
  * world-level arrival overlay. The tube is not polish — the delivery is

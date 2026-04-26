@@ -7,7 +7,7 @@ import { RejectionReflectionStrip } from "./RejectionReflectionStrip";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.6 — RejectionReflectionStrip render + interaction tests.
+ * RejectionReflectionStrip render + interaction tests.
  *
  * Contract:
  *   - Renders three chip buttons with the partner-specified labels.

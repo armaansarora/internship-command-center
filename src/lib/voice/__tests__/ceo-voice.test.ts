@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { pickCeoVoice, buildCeoUtterance } from "../ceo-voice";
 
 /**
- * R10.11 — Pure-helper tests for CEO voice selection + utterance building.
+ * Pure-helper tests for CEO voice selection + utterance building.
  *
  * These are stateless, side-effect-free helpers: the whole point of pulling
  * them out of the component is that they're trivially testable without

@@ -1,5 +1,5 @@
 /**
- * R4.3 — /api/concierge/extract route contract tests.
+ * /api/concierge/extract route contract tests.
  *
  * Locks the skip path + auth + validation behavior. The conversation path
  * (which calls generateObject against a real Anthropic model) is

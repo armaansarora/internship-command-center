@@ -1,5 +1,5 @@
 /**
- * R10.13 — POST /api/offers/[id]/simulate
+ * POST /api/offers/[id]/simulate
  *
  * One turn of the negotiation simulator. Client tracks the conversation
  * locally; each turn round-trips the full history + the user's latest

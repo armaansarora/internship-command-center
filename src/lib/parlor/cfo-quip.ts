@@ -1,5 +1,5 @@
 /**
- * R10.12 — CFO quip position resolver + copy table.
+ * CFO quip position resolver + copy table.
  *
  * Pure helpers that drive the one-time CFO quip delivered on the user's
  * first entry to the Negotiation Parlor after their first offer arrives.

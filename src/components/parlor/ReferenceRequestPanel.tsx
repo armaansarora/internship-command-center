@@ -8,7 +8,7 @@ import { PenGlowCursor } from "@/components/floor-5/live-compose/PenGlowCursor";
 import type { ContactForAgent } from "@/lib/db/queries/contacts-rest";
 
 /**
- * R10.14 — ReferenceRequestPanel.
+ * ReferenceRequestPanel.
  *
  * Three states driven by the server-fetched contact tiers:
  *   1. Warm contacts present → list up to 3 with per-card "Draft reference

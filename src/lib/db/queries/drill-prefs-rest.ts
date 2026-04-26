@@ -1,5 +1,5 @@
 /**
- * R6.2 — Drill preferences REST helpers.
+ * Drill preferences REST helpers.
  *
  * Exposes the three user_profiles columns that gate voice recording end-to-
  * end:

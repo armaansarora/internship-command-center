@@ -1,5 +1,5 @@
 /**
- * R9.1 — Pure transformer: ApplicationInput[] → OrreryPlanet[].
+ * Pure transformer: ApplicationInput[] → OrreryPlanet[].
  *
  * Lives on the data boundary. No DOM, React, GSAP, or fetch. Every
  * visual + behavior signal the render layer needs is materialized here

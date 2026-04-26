@@ -3,7 +3,7 @@
 import type { JSX } from "react";
 
 /**
- * R6.6 — DrillQuestionCard.
+ * DrillQuestionCard.
  *
  * Shows the active question with a small category chip + Q-number badge
  * ("Q2 / 3 — behavioral"). Intentionally minimal: no state, no timing,

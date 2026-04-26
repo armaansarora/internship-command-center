@@ -28,7 +28,7 @@ export default async function ObservatoryPage(): Promise<JSX.Element> {
 }
 
 async function ObservatoryData({ userId }: { userId: string }): Promise<JSX.Element> {
-  // R9.9 — fetch the two server-shaped inputs the client wraps:
+  // fetch the two server-shaped inputs the client wraps:
   //   • PipelineStats — drives the chart grid + CFO whiteboard mini-funnel
   //   • ApplicationInput[] — feeds the Orrery (the centerpiece per partner brief)
   // Both run in parallel; failures degrade gracefully (stats returns empty,

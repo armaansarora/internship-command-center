@@ -1,5 +1,5 @@
 /**
- * R5.7 — Tailored resume PDF component.
+ * Tailored resume PDF component.
  *
  * The documents.content for a resume_tailored row is markdown produced
  * by renderTailoredResume(). We split on `## ` for section boundaries

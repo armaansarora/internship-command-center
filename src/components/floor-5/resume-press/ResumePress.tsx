@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
- * R5.8 — The Resume Press.
+ * The Resume Press.
  *
  * A mechanical object at the corner of the Writing Room desk. Sits
  * dormant until a resume tailoring kicks off — then the lever pulls

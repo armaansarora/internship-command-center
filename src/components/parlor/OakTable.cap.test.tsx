@@ -55,7 +55,7 @@ function count(html: string, needle: string): number {
   return n;
 }
 
-describe("R12 — OakTable render cap (defense at scale)", () => {
+describe("OakTable render cap (defense at scale)", () => {
   it("renders all folders when count is at or below the cap (10)", () => {
     const html = renderTable(10);
     expect(html).not.toContain("parlor-oak-table-overflow-banner");

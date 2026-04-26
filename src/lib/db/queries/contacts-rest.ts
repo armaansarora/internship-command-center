@@ -35,7 +35,7 @@ export interface ContactRow {
   last_contact_at: string | null;
   notes: string | null;
   /**
-   * R8 — private sticky-note, visible only to the owning user.  NEVER
+   * private sticky-note, visible only to the owning user.  NEVER
    * included in AI-prompt composition, exports, or cross-user surfaces.
    * The P5 grep invariant keeps this column off every outbound path.
    */
@@ -332,7 +332,7 @@ export async function createContactRest(
     };
   }
 
-  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  // fire-and-forget match-index rescan (5-min debounced).
   void import("@/lib/networking/match-delta")
     .then((m) => m.enqueueMatchRescan(userId))
     .catch(() => {});
@@ -391,7 +391,7 @@ export async function updateContactActivity(
     };
   }
 
-  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  // fire-and-forget match-index rescan (5-min debounced).
   void import("@/lib/networking/match-delta")
     .then((m) => m.enqueueMatchRescan(userId))
     .catch(() => {});
@@ -432,7 +432,7 @@ export async function linkContactToApplication(
     };
   }
 
-  // R11.4 — fire-and-forget match-index rescan (5-min debounced).
+  // fire-and-forget match-index rescan (5-min debounced).
   void import("@/lib/networking/match-delta")
     .then((m) => m.enqueueMatchRescan(userId))
     .catch(() => {});

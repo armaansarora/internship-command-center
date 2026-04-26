@@ -1,5 +1,5 @@
 /**
- * R6.2 — POST /api/briefing/transcribe gate tests.
+ * POST /api/briefing/transcribe gate tests.
  *
  * Mirrors audio-upload plus the userId-path ownership check. Whisper is
  * stubbed via a mock on @/lib/speech/transcribe so the test never hits

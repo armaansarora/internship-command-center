@@ -1,5 +1,5 @@
 /**
- * R7.4 — Quiet-hours delivery window math.
+ * Quiet-hours delivery window math.
  *
  * Partner non-negotiable: "Tubes queued during quiet hours arrive at wake-up,
  * never at 3am." This module is the single source of truth for when a

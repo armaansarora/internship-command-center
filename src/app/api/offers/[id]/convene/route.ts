@@ -1,5 +1,5 @@
 /**
- * R10.7 — POST /api/offers/[id]/convene
+ * POST /api/offers/[id]/convene
  *
  * The Negotiation Parlor's "Convene" button hits this endpoint. We resolve
  * the offer, look up comp bands (cache-first), then fan out the three

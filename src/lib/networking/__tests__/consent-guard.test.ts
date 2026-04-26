@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 /**
- * R11.1 — consent-guard unit tests.
+ * consent-guard unit tests.
  *
  * Covers both the pure `isConsentedShape` truth table (carried over
  * from R8) and the version-aware `assertConsented` 403 surface that
@@ -38,7 +38,7 @@ beforeEach(async () => {
   vi.clearAllMocks();
 });
 
-describe("R8 — isConsentedShape (truth table)", () => {
+describe("isConsentedShape (truth table)", () => {
   it("never consented → false", () => {
     expect(
       isConsentedShape({
@@ -80,7 +80,7 @@ describe("R8 — isConsentedShape (truth table)", () => {
   });
 });
 
-describe("R11.1 — assertConsented version gate", () => {
+describe("assertConsented version gate", () => {
   it("returns 403 consent-required when profile row is missing", async () => {
     const { createClient } = await import("@/lib/supabase/server");
     (createClient as ReturnType<typeof vi.fn>).mockResolvedValue(

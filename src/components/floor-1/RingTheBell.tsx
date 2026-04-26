@@ -36,7 +36,7 @@ interface RingTheBellProps {
    */
   isStreaming?: boolean;
   /**
-   * R3.10 — surfaces the bell's internal phase transitions to the parent so
+   * surfaces the bell's internal phase transitions to the parent so
    * other scene elements (CSuiteScene) can react visually. Called with the
    * new phase whenever it changes (idle → ringing → orchestrating → complete,
    * or any reset back to idle).
@@ -45,7 +45,7 @@ interface RingTheBellProps {
 }
 
 /**
- * R3.10 — Pure helper that decides what value `--building-dim` should take
+ * Pure helper that decides what value `--building-dim` should take
  * on the document element for a given bell phase. Extracted as its own export
  * so the side-effect logic is unit-testable without spinning up a JSDOM
  * window; the corresponding `useEffect` in RingTheBell just calls
@@ -255,13 +255,13 @@ export function RingTheBell({
     setPhase("complete");
   }, [isStreaming, phase, dispatchEvents]);
 
-  // R3.10 — surface phase changes to the parent scene (CSuiteClient) so it
+  // surface phase changes to the parent scene (CSuiteClient) so it
   // can plumb the phase down onto CSuiteScene's root for CSS-driven polish.
   useEffect(() => {
     onPhaseChange?.(phase);
   }, [phase, onPhaseChange]);
 
-  // R3.10 — set the `--building-dim` CSS variable on <html> based on the
+  // set the `--building-dim` CSS variable on <html> based on the
   // current bell phase. The Atmosphere overlay consumes it via brightness()
   // to visibly dim the boardroom during the 600ms ring, then ease back to
   // 1.0 once orchestrating. Under prefers-reduced-motion we never set the

@@ -1,5 +1,5 @@
 /**
- * R10.1 — CFO entry-quip shown latch for the Parlor.
+ * CFO entry-quip shown latch for the Parlor.
  *
  * Storage shape: lives under the `parlorCfoQuipShown` key of
  * `user_profiles.preferences` jsonb. When the user first enters the
@@ -24,7 +24,7 @@ export type ParlorCfoQuipPref = z.infer<typeof ParlorCfoQuipPrefSchema>;
 export const PARLOR_CFO_QUIP_DEFAULT: ParlorCfoQuipPref = { shown: false };
 
 /**
- * R10.12 — Defensive read of the `parlorCfoQuipShown` latch off a
+ * Defensive read of the `parlorCfoQuipShown` latch off a
  * `user_profiles.preferences` jsonb blob. Mirrors `readCeoVoicePref`:
  * any invalid or absent shape returns the default `{ shown: false }`.
  *

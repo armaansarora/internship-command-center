@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { _resetEnvCacheForTests } from "@/lib/env";
 
 /**
- * R0.4 — Cron auth coverage audit.
+ * Cron auth coverage audit.
  *
  * Proves every route under `src/app/api/cron/` actually calls
  * `verifyCronRequest` as its first gate. Unit coverage of the helper

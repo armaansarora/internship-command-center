@@ -283,7 +283,7 @@ async function processUser(
       throw new Error(`snapshot upsert: ${snapshotError.message}`);
     }
 
-    // R7.7 — Detect + notify calendar conflicts in the next 14 days.
+    // Detect + notify calendar conflicts in the next 14 days.
     // Failures here must not block the daily briefing, so we swallow and log.
     try {
       const conflictRes = await detectConflictsForUser(supabase, userId);
@@ -301,7 +301,7 @@ async function processUser(
       });
     }
 
-    // R7.8 — Fire deadline beats (t_24h, t_4h, t_0). Swallow failures so
+    // Fire deadline beats (t_24h, t_4h, t_0). Swallow failures so
     // they don't block the briefing's primary success path.
     try {
       const beatRes = await fireDeadlineBeatsForUser(supabase, userId);

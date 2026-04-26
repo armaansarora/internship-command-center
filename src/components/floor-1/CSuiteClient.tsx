@@ -24,7 +24,7 @@ import { PARLOR_DOOR_SEEN_PREF_KEY } from "@/lib/preferences/parlor-door-seen-pr
 type BellPhase = "idle" | "ringing" | "orchestrating" | "complete";
 
 /**
- * R3.11 — pure decision helper for the `/`-keystroke listener. Opens the
+ * pure decision helper for the `/`-keystroke listener. Opens the
  * inject prompt ONLY when:
  *   - the dialogue panel is currently mounted (`dialogueOpen`), so there's
  *     somewhere for the inject to land;
@@ -60,14 +60,14 @@ export function shouldOpenInjectOnSlash(
 interface CSuiteClientProps {
   stats: PipelineStats;
   /**
-   * R10.5 — Gate for the Negotiation Parlor door. True only when the
+   * Gate for the Negotiation Parlor door. True only when the
    * server computed `offerCount > 0`. When false we pass NO `doorSlot`
    * prop to CSuiteScene — the door is ABSENT from the DOM, not hidden.
    * Invariant locked in `r10-parlor-door-absence.proof.test.tsx`.
    */
   hasParlorDoor?: boolean;
   /**
-   * R10.5 — True on the very first render after an offer parses.
+   * True on the very first render after an offer parses.
    * Drives the 2.3s cinematic materialization beat. After the beat
    * completes the client POSTs `parlorDoorSeen=true` so subsequent
    * visits arrive with `firstAppearance=false`.
@@ -216,14 +216,14 @@ export function CSuiteClient({
   const [ceoState, setCEOState] = useState<"idle" | "thinking" | "talking">("idle");
   const [dispatchEvents, setDispatchEvents] = useState<Record<string, "running" | "completed">>({});
   const [chatStatus, setChatStatus] = useState<ChatStatus>("ready");
-  // R3.10 — mirror of RingTheBell's internal phase. Surfaced via the new
+  // mirror of RingTheBell's internal phase. Surfaced via the new
   // `onPhaseChange` prop on the bell, then forwarded down to CSuiteScene as
   // `bellPhase` so the scene root can carry `data-bell-phase` for CSS-driven
   // camera-pullback + atmospheric dim.
   const [bellPhase, setBellPhase] = useState<BellPhase>("idle");
-  // R3.11 — `/`-inject floating prompt visibility.
+  // `/`-inject floating prompt visibility.
   const [injectOpen, setInjectOpen] = useState(false);
-  // R3.11 — handler the CEO dialogue panel registers on mount via
+  // handler the CEO dialogue panel registers on mount via
   // `registerInject`. When the user submits the inject prompt we call this
   // to push their directive into the active chat.
   const injectRef = useRef<((text: string) => void) | null>(null);
@@ -241,7 +241,7 @@ export function CSuiteClient({
     setInjectOpen(false);
   }, []);
 
-  // R3.11 — the CEO dialogue panel calls this on mount with a function we
+  // the CEO dialogue panel calls this on mount with a function we
   // can invoke to push a message into the chat. Stable identity so the
   // panel's effect dep array doesn't re-fire on every CSuiteClient render.
   const registerInject = useCallback((fn: (text: string) => void) => {
@@ -255,7 +255,7 @@ export function CSuiteClient({
     setInjectOpen(false);
   }, []);
 
-  // R3.11 — global `/` listener. Only active while the dialogue panel is
+  // global `/` listener. Only active while the dialogue panel is
   // mounted AND the bell has reached orchestrating/complete. The decision
   // logic is factored into `shouldOpenInjectOnSlash` above so it can be
   // unit-tested without a full JSDOM event loop.
@@ -435,7 +435,7 @@ export function CSuiteClient({
   );
 
   // ── Door slot (C-Suite left column, bottom-right) ───────────────────────
-  // R10.5 — The Negotiation Parlor door. MUST be truly undefined when the
+  // The Negotiation Parlor door. MUST be truly undefined when the
   // user has zero offers — the CSuiteScene's absence invariant depends on
   // NOT receiving the prop (see r10-parlor-door-absence.proof.test.tsx).
   // Don't pass `null`, don't pass `false && <ParlorDoor />` — just don't

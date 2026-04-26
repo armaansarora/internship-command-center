@@ -1,5 +1,5 @@
 /**
- * R6.2 — PUT /api/briefing/voice-preference
+ * PUT /api/briefing/voice-preference
  *
  * Lets the user flip voice_recording_enabled and optionally latch the
  * permanent-disable bit. Returns the fresh DrillPrefs so the UI can

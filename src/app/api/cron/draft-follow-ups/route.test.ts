@@ -1,5 +1,5 @@
 /**
- * R7.6 — draft-follow-ups cron contract tests.
+ * draft-follow-ups cron contract tests.
  *
  * Table-driven: each case builds a minimal Supabase admin fixture whose tables
  * (`user_profiles`, `applications`, `outreach_queue`, `contacts`, `notifications`)

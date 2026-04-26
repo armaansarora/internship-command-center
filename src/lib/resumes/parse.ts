@@ -1,5 +1,5 @@
 /**
- * R5.2 — PDF resume parser.
+ * PDF resume parser.
  *
  * Extracts plain text + page count from a PDF buffer using pdfjs-dist.
  * The library is imported dynamically so it never runs during module load

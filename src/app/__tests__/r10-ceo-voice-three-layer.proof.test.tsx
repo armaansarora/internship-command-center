@@ -7,7 +7,7 @@ import { CEOVoicePlayButton } from "@/components/parlor/CEOVoicePlayButton";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R10.11 — CEO voice three-layer gate invariant (PROOF).
+ * CEO voice three-layer gate invariant (PROOF).
  *
  * NON-NEGOTIABLE: The Read-aloud button MUST be gated by three independent
  * layers. If any one layer is red, the button MUST NOT render. If all
@@ -111,7 +111,7 @@ afterEach(() => {
   cleanups = [];
 });
 
-describe("R10 — CEO voice three-layer gate (PROOF)", () => {
+describe("CEO voice three-layer gate (PROOF)", () => {
   it("Layer 1: returns null when enabled=false (pref off), even with full browser support", () => {
     const realSynth = getGlobal(SYNTH_KEY);
     const realUtt = getGlobal(UTT_KEY);

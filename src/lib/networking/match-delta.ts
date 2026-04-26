@@ -5,7 +5,7 @@ import { log } from "@/lib/logger";
 const DEBOUNCE_MS = 5 * 60 * 1000;
 
 /**
- * R11.4 — Fire-and-forget per-user match-index rebuild, debounced 5 min.
+ * Fire-and-forget per-user match-index rebuild, debounced 5 min.
  *
  * Called from contact + application REST mutations (createContactRest,
  * updateContactActivity, linkContactToApplication, createApplicationRest,

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * R11.7 — per-user hourly rate limit for the warm-intro match endpoint.
+ * per-user hourly rate limit for the warm-intro match endpoint.
  *
  * Implementation notes:
  *   - Uses the `bump_match_rate_limit` RPC from migration 0022, which

@@ -17,7 +17,7 @@ import { ParlorClient } from "./parlor-client";
 export const metadata: Metadata = { title: "The Negotiation Parlor | The Tower" };
 
 /**
- * R10.6 — The Negotiation Parlor (C-Suite annex).
+ * The Negotiation Parlor (C-Suite annex).
  *
  * Gated server-side: a user with zero offers cannot enter. The R10.5 door
  * is absent from the C-Suite when `offerCount === 0`, and this route also
@@ -35,7 +35,7 @@ export const metadata: Metadata = { title: "The Negotiation Parlor | The Tower" 
  * chart; R10.11 threads the ceoVoice pref (default OFF) through to the
  * NegotiationDraftPanel so the read-aloud button can gate itself.
  *
- * R10.12 — CFO quip on first parlor entry (once, ever). When
+ * CFO quip on first parlor entry (once, ever). When
  * `parlorCfoQuipShown.shown === false` AND comp bands are available for
  * the newest offer (the Parlor's default selection), we compute the
  * position + quip server-side and pass both down to the client. The
@@ -54,7 +54,7 @@ export default async function ParlorPage(): Promise<JSX.Element> {
   if (count === 0) redirect("/c-suite");
   const offers = await getOffersForUser(supabase, user.id);
 
-  // R10.14 — top-3 warm contacts for the reference-request panel.
+  // top-3 warm contacts for the reference-request panel.
   // Tiered fallback: if no warm contacts, fetch cooling contacts so the
   // panel can coach the user to re-warm before asking for a reference.
   const { contacts: topWarmContacts } = await getContactsForAgent(user.id, {
@@ -84,7 +84,7 @@ export default async function ParlorPage(): Promise<JSX.Element> {
   const ceoVoicePref = readCeoVoicePref(preferences);
   const cfoQuipPref = readParlorCfoQuipPref(preferences);
 
-  // R10.12 — Only compute the entry-quip when we'd actually render it.
+  // Only compute the entry-quip when we'd actually render it.
   // `cfoQuipPref.shown === true` means the user has already seen it; we
   // short-circuit. When unshown, we read comp bands for the user's
   // newest offer (same offer the ParlorClient default-selects) and

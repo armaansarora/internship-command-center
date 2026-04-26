@@ -6,7 +6,7 @@ import { act } from "react";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R10.11 — CEOVoicePlayButton behavioral tests.
+ * CEOVoicePlayButton behavioral tests.
  *
  * Uses the project's manual createRoot + react act() pattern (no
  * @testing-library/react — see ParlorDoor.test.tsx, OfferFolder.test.tsx).

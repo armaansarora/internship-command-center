@@ -14,9 +14,9 @@ export const metadata: Metadata = { title: "Settings" };
  * BUG-012: Account/settings section with dark/light mode.
  * BUG-011: Dark/light mode toggle.
  * BUG-005: Sign out accessible from here too.
- * R0.7: Reads user_profiles.deleted_at so the Data section can swap
+ * Reads user_profiles.deleted_at so the Data section can swap
  *       Delete Account ↔ Cancel Deletion.
- * R9.6: Reads user_profiles.preferences.rejectionReflections so the
+ * Reads user_profiles.preferences.rejectionReflections so the
  *       Analytics section seeds the toggle correctly.
  */
 export default async function SettingsPage() {

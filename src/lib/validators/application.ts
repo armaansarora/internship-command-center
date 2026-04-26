@@ -76,7 +76,7 @@ export const createApplicationSchema = z.object({
   salary: z.string().optional(),
   sector: z.string().optional(),
   tier: z.number().min(1).max(5).optional(),
-  // R7.8 — optional application deadline. Feeds Floor 4's Final Countdown
+  // optional application deadline. Feeds Floor 4's Final Countdown
   // + the 3-beat cron. Accepts an ISO string or the HTML datetime-local
   // "YYYY-MM-DDTHH:mm" shape (which `new Date()` parses in local tz).
   deadlineAt: z

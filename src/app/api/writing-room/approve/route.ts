@@ -1,5 +1,5 @@
 /**
- * R5.6 — POST /api/writing-room/approve
+ * POST /api/writing-room/approve
  *
  * Flips a cover_letter_send outreach_queue row from pending_approval →
  * approved. The outreach-sender cron picks it up from there and sends.

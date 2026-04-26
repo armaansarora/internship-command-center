@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R4.7 — CinematicArrival render tests.
+ * CinematicArrival render tests.
  *
  * The server decides whether the cinematic has already played by calling
  * `claimArrivalPlay(userId)` (R4.3) and passes the boolean down as

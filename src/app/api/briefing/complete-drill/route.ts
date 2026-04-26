@@ -1,5 +1,5 @@
 /**
- * R6.7 — POST /api/briefing/complete-drill
+ * POST /api/briefing/complete-drill
  *
  * Finalises a drill: validates the full `DebriefContent` payload, stores it
  * as a `documents` row of type "debrief" (the Briefing Room binder view

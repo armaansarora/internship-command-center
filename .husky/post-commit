@@ -1,1 +1,0 @@
-npx tsx scripts/tower/index.ts diff > /dev/null 2>&1 &

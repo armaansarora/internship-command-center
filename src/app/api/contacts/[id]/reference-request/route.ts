@@ -1,5 +1,5 @@
 /**
- * R10.14 — POST /api/contacts/[id]/reference-request
+ * POST /api/contacts/[id]/reference-request
  *
  * The CNO drafts a reference-request email for a specific contact,
  * anchored on a specific offer. We insert the draft into `outreach_queue`

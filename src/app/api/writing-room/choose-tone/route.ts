@@ -1,5 +1,5 @@
 /**
- * R5.6 — POST /api/writing-room/choose-tone
+ * POST /api/writing-room/choose-tone
  *
  * User selects one of the three tone variants (formal / conversational /
  * bold) for a cover-letter tone group. Updates the outreach_queue row's

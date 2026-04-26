@@ -1,5 +1,5 @@
 /**
- * R7.4 — Pneumatic-tube thunk synthesiser.
+ * Pneumatic-tube thunk synthesiser.
  *
  * One 80ms burst of bandpass-filtered white noise with an exponential
  * amplitude envelope. Built from primitives so no audio asset needs to be

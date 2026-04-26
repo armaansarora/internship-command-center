@@ -1,5 +1,5 @@
 /**
- * R10.5 — Generic preference reader.
+ * Generic preference reader.
  *
  * Reads a single namespaced value out of the `user_profiles.preferences`
  * jsonb blob. The write side goes through the validated POST handler at

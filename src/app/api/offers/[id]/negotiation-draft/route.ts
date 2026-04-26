@@ -1,5 +1,5 @@
 /**
- * R10.9 — POST /api/offers/[id]/negotiation-draft
+ * POST /api/offers/[id]/negotiation-draft
  *
  * The Negotiation Parlor's final beat: the Offer Evaluator drafts the
  * negotiation email for a specific offer, optionally anchored on the

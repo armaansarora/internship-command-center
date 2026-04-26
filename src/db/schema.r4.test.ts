@@ -1,5 +1,5 @@
 /**
- * R4.1 — user_profiles onboarding columns.
+ * user_profiles onboarding columns.
  *
  * Locks in the 5 columns that R4 adds to userProfiles so that no future
  * refactor silently drops the columns the cinematic arrival, Concierge

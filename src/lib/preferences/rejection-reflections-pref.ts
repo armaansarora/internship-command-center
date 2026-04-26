@@ -1,5 +1,5 @@
 /**
- * R9.6 — Typed preference helper for the rejection-autopsy opt-in.
+ * Typed preference helper for the rejection-autopsy opt-in.
  *
  * Storage shape: lives under the `rejectionReflections` key of the
  * `user_profiles.preferences` jsonb column. Defensive read — any invalid

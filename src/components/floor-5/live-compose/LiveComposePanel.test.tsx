@@ -1,5 +1,5 @@
 /**
- * R5.4 — LiveComposePanel render tests (SSR, matches R8 pattern).
+ * LiveComposePanel render tests (SSR, matches R8 pattern).
  *
  * Three assertions:
  *   1. Renders three tone cards with aria-live="polite".
@@ -11,7 +11,7 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { LiveComposePanel } from "./LiveComposePanel";
 
-describe("R5.4 — LiveComposePanel SSR", () => {
+describe("LiveComposePanel SSR", () => {
   it("renders three tone cards with aria-live", () => {
     const html = renderToStaticMarkup(
       <LiveComposePanel companyName="Acme" role="Analyst" />,

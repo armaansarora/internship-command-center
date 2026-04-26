@@ -19,7 +19,7 @@ import {
 import type { DebriefContent } from "@/types/debrief";
 
 /**
- * R6.6 — DrillStage.
+ * DrillStage.
  *
  * The Intent-level centerpiece of the Briefing Room. Wires the drill
  * machine, live STAR extraction, CPO's mid-answer interrupt engine, and

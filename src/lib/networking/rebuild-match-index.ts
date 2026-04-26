@@ -8,7 +8,7 @@ import { CURRENT_CONSENT_VERSION } from "./consent-version";
 import { log } from "@/lib/logger";
 
 /**
- * R11.3 — shared per-user match-index rebuild helper.
+ * shared per-user match-index rebuild helper.
  *
  * Called by:
  *   - the nightly /api/cron/match-index cron (iteration over all

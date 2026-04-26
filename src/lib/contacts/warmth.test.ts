@@ -29,7 +29,7 @@ describe("R8 P2 — computeWarmth", () => {
   });
 });
 
-describe("R8 — computeWarmthTier (cool-blue palette, no red)", () => {
+describe("computeWarmthTier (cool-blue palette, no red)", () => {
   it("hot tier for 0-2 days since contact (warmth 94-100)", () => {
     expect(computeWarmthTier(100)).toBe("hot");
     expect(computeWarmthTier(96)).toBe("hot");
@@ -53,7 +53,7 @@ describe("R8 — computeWarmthTier (cool-blue palette, no red)", () => {
   });
 });
 
-describe("R8 — WARMTH_PALETTE has zero red hex codes", () => {
+describe("WARMTH_PALETTE has zero red hex codes", () => {
   const FORBIDDEN_PATTERNS: RegExp[] = [
     /#ef4{2,}/i,
     /#f44336/i,

@@ -1,5 +1,5 @@
 /**
- * R4.4 — ConciergeFlow smoke test.
+ * ConciergeFlow smoke test.
  *
  * The full flow (claim → cinematic → Otis → extract → bootstrap → redirect)
  * is exercised end-to-end by the R4.11 Proof test. This smoke-level file

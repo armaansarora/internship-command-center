@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { isConsentedShape } from "./consent-guard";
 
-describe("R8 — isConsentedShape", () => {
+describe("isConsentedShape", () => {
   it("null consent → not consented", () => {
     expect(
       isConsentedShape({

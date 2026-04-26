@@ -116,7 +116,7 @@ function mkHelperClient(result: {
   return { client, patches };
 }
 
-describe("R10.10 — 24h negotiation send-hold (server-clamped)", () => {
+describe("24h negotiation send-hold (server-clamped)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

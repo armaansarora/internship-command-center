@@ -11,7 +11,7 @@ import type {
 import { TurnScoreBadge } from "./TurnScoreBadge";
 
 /**
- * R10.13 — NegotiationSimulator.
+ * NegotiationSimulator.
  *
  * Turn-based practice surface. Three phases: stance (form), round (dialogue),
  * done (aggregate + reset). All state is local React state — simulations

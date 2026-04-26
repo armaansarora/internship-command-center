@@ -6,7 +6,7 @@ import { computeBuildingDim } from "./RingTheBell";
 import { CSuiteScene } from "./CSuiteScene";
 
 /**
- * R3.10 — unit tests for the pure side-effect helper + a spot-check that
+ * unit tests for the pure side-effect helper + a spot-check that
  * CSuiteScene renders the `data-bell-phase` attribute on its root div given
  * the new prop.
  *

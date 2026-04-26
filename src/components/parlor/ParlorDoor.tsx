@@ -44,7 +44,7 @@ function prefersReducedMotion(): boolean {
 }
 
 /**
- * R10.5 — The door on the C-Suite wall that leads to the Negotiation Parlor.
+ * The door on the C-Suite wall that leads to the Negotiation Parlor.
  *
  * ABSENT from the DOM when the user has zero offers. That invariant is
  * enforced upstream by `c-suite/page.tsx` (only renders ParlorDoor when

@@ -1,5 +1,5 @@
 /**
- * R4.5 — bootstrap-discovery route contract test.
+ * bootstrap-discovery route contract test.
  *
  * Locks the route surface: auth gate, response shape, error passthrough
  * from the underlying discovery runner. Full pipeline integration lives

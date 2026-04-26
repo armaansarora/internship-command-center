@@ -34,7 +34,7 @@ interface Props {
    */
   externalOffsetRef?: { current: number };
   /**
-   * R2 — Penthouse pipeline weather. Small saturation offset applied via a
+   * Penthouse pipeline weather. Small saturation offset applied via a
    * CSS `saturate()` filter on the canvas (clamped [-0.05, +0.05]). Positive
    * = gold-hour boost; negative = dim / desaturated. 0 or omitted = no shift.
    * Kept outside the WebGL/2D pipeline so other floors remain untouched.

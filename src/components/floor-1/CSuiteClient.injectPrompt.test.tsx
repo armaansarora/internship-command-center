@@ -4,7 +4,7 @@ import { describe, it, expect } from "vitest";
 import { shouldOpenInjectOnSlash } from "./CSuiteClient";
 
 /**
- * R3.11 — unit tests for the `/`-inject activation gate.
+ * unit tests for the `/`-inject activation gate.
  *
  * The `useEffect` inside CSuiteClient that listens for `keydown` events is
  * intentionally a thin wrapper around `shouldOpenInjectOnSlash`: the effect

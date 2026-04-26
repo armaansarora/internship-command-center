@@ -1,5 +1,5 @@
 /**
- * R10.4 — Firecrawl client for Levels.fyi scraping.
+ * Firecrawl client for Levels.fyi scraping.
  *
  * Direct HTTP against Firecrawl's /v1/scrape endpoint — no npm dep. We parse
  * the returned markdown with a focused regex set (NOT a full HTML parser).

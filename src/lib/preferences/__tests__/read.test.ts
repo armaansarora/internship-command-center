@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getUserPreferenceValue } from "../read";
 
 /**
- * R10.5 — Tests for the generic preferences reader.
+ * Tests for the generic preferences reader.
  *
  * Contract:
  *   - Happy path: returns the typed value under the requested key.

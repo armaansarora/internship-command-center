@@ -8,7 +8,7 @@ import { withCronHealth } from "@/lib/cron/health";
 /**
  * GET /api/cron/match-index
  *
- * R11.3 — nightly match-index populator.  Iterates every consented user
+ * nightly match-index populator.  Iterates every consented user
  * (networking_consent_at IS NOT NULL) and rebuilds their
  * match_candidate_index via `rebuildMatchIndexForUser`.  Stale consent
  * versions are handled inside the helper (it clears the user's cache +

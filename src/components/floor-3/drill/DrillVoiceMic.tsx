@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useRef, useState } from "react";
 
 /**
- * R6.6 — DrillVoiceMic.
+ * DrillVoiceMic.
  *
  * Opt-in mic button. Only ever visible when the user's profile has
  * `voice_recording_enabled=true` AND `voice_recording_permanently_disabled=false`.

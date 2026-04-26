@@ -1,5 +1,5 @@
 /**
- * R6.7 — Score-answer generator.
+ * Score-answer generator.
  *
  * Given a question + rubric + the candidate's answer, asks CPO to grade the
  * STAR components (Situation / Task / Action / Result) on 0-100, compute a

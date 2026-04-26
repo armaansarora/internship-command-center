@@ -1,7 +1,7 @@
 import type { FloorId } from "@/types/ui";
 
 /**
- * R4.8 — Building Directory derivation.
+ * Building Directory derivation.
  *
  * Maps a user's activity snapshot to the set of floors that should appear
  * "lit" in the Lobby's Building Directory cross-section. Pure function,

@@ -1,5 +1,5 @@
 /**
- * R5.5 — generateTailoredResume reads from active base_resume by default.
+ * generateTailoredResume reads from active base_resume by default.
  *
  * Covers three paths:
  *   1. No base resume + no override → success: false, reason: no_base_resume.

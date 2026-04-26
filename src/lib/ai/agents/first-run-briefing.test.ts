@@ -1,5 +1,5 @@
 /**
- * R4.6 — first-run briefing override contract tests.
+ * first-run briefing override contract tests.
  *
  * The generateObject call itself isn't exercised here (that's the R4.11
  * Proof test). These assertions lock the gating logic: we must only

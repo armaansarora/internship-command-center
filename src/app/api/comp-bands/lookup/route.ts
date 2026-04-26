@@ -1,5 +1,5 @@
 /**
- * R10.4 — GET /api/comp-bands/lookup
+ * GET /api/comp-bands/lookup
  *
  * Auth-gated comp-band lookup. Reads from the global `company_comp_bands`
  * cache first (user-scoped client); on miss, scrapes Levels.fyi via Firecrawl

@@ -11,7 +11,7 @@ import { PatternModeToggle } from "./PatternModeToggle";
 import { PlanetDetailPanel } from "./PlanetDetailPanel";
 
 /**
- * R9.3 + R9.4 — Orrery (consumer wrapper).
+ * R9.4 — Orrery (consumer wrapper).
  *
  * Owns the focus state for click-to-history, owns the active layout mode
  * (via useOrreryMode → localStorage), and re-derives the planet array on

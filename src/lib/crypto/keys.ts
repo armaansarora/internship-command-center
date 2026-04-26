@@ -8,8 +8,7 @@ import { hkdfSync } from "crypto";
  * the blob prefix and switch salt in lockstep. `info` is the user's UUID
  * so two users never share the same derived key.
  *
- * Reference: docs/NEXT-ROADMAP.md §4 Climate — per-user key via HKDF on a
- * server master.
+ * Per-user key via HKDF on a server master.
  */
 export function deriveUserKey(userId: string, master: Buffer): Buffer {
   const salt = Buffer.from("tower.gmail.oauth.v1");

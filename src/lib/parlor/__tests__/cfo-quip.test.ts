@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { cfoQuipForPosition, positionFor, type BandPosition } from "../cfo-quip";
 
 /**
- * R10.12 — CFO-quip pure-helper tests.
+ * CFO-quip pure-helper tests.
  *
  * The CFO delivers a comp-aware one-time quip when the user first enters
  * the Parlor after their first offer arrives. These helpers are the

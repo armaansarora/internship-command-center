@@ -6,7 +6,7 @@ import { act } from "react";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R10.8 — CompBandChart render tests.
+ * CompBandChart render tests.
  *
  * Uses the project's manual createRoot + react act() pattern (no
  * @testing-library/react — see CLAUDE.md, ParlorDoor.test.tsx, and

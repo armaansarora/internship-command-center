@@ -10,7 +10,7 @@ import { ApplicationCard } from "./ApplicationCard";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R9.6 — ApplicationCard prop wiring tests for the rejection-reflection
+ * ApplicationCard prop wiring tests for the rejection-reflection
  * strip. Tests the new opt-in surface only — existing card behavior is
  * exercised in the war-table integration suite.
  *

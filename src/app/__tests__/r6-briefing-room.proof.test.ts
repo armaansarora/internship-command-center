@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 /**
- * R6 — The Briefing Room — Proof invariants.
+ * The Briefing Room — Proof invariants.
  *
  * Five hard assertions the floor must satisfy. If any regresses, R6's
  * acceptance.met flips to false and the phase is re-opened.

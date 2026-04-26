@@ -1,5 +1,5 @@
 /**
- * R7.4 — useTubeDeliveries tests.
+ * useTubeDeliveries tests.
  *
  * We test the pure helpers (`isEligibleForSweep`, `sweepDeliveries`) against
  * a hand-rolled Supabase client mock. The hook itself is a thin wrapper that

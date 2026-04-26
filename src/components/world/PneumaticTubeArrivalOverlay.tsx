@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * R7.4 — System-wide pneumatic-tube arrival overlay.
+ * System-wide pneumatic-tube arrival overlay.
  *
  * Mounted once at the world-chrome level (inside PersistentWorld) so every
  * authenticated floor receives tube arrivals. This component REPLACES the

@@ -1,5 +1,5 @@
 /**
- * R10.8 — Pin-colour pure helper.
+ * Pin-colour pure helper.
  *
  * The Parlor's comp-band chart plots the user's offer(s) as pins against
  * the p25/p75 rails. Colour carries the verdict:

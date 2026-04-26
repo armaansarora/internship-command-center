@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 
 /**
- * R10.6 — ParlorScene composition tests.
+ * ParlorScene composition tests.
  *
  * The Scene is a pure environment compositor — wood panels, sconces, oak
  * floor, plus four slots (table, chart, chairs, optional draft + signature).

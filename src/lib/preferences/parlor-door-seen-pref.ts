@@ -1,5 +1,5 @@
 /**
- * R10.1 — Parlor door first-materialization latch.
+ * Parlor door first-materialization latch.
  *
  * Storage shape: lives under the `parlorDoorSeen` key of
  * `user_profiles.preferences` jsonb. The Parlor door must be ABSENT from

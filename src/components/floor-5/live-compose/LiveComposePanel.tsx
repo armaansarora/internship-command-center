@@ -6,7 +6,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { PenGlowCursor } from "./PenGlowCursor";
 
 /**
- * R5.4 — LiveComposePanel.
+ * LiveComposePanel.
  *
  * Three-tone live-compose surface. On mount (or when `start` becomes true)
  * fires three parallel POSTs to /api/writing-room/compose-stream (one per

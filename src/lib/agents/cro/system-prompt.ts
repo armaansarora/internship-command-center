@@ -8,7 +8,7 @@ interface AgentMemoryEntry {
 }
 
 // ---------------------------------------------------------------------------
-// R3.9 — Cross-agent intel renderer
+// Cross-agent intel renderer
 //
 // shared_knowledge is the bus by which sibling agents (CIO, CNO, etc.) leave
 // timestamped notes for the CRO to read on its next dispatch. We render it

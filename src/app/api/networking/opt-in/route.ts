@@ -6,10 +6,10 @@ import { CURRENT_CONSENT_VERSION } from "@/lib/networking/consent-version";
 /**
  * POST /api/networking/opt-in
  *
- * R8 §7.4 / R11.1 — stamps the user's networking_consent_at to now(),
- * clears networking_revoked_at, and bumps consent_version to
- * `CURRENT_CONSENT_VERSION` (R11 = 2 — the copy in
- * `docs/r8/consent-copy.md` plus the match-query / audit-log addendum).
+ * Stamps the user's networking_consent_at to now(), clears
+ * networking_revoked_at, and bumps consent_version to
+ * `CURRENT_CONSENT_VERSION` (current version = 2 — pairs the
+ * Rolodex consent copy with the match-query / audit-log addendum).
  *
  * Authenticated session required. No payload.
  */

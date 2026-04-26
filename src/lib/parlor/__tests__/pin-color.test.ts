@@ -1,5 +1,5 @@
 /**
- * R10.8 — pin-color pure function tests.
+ * pin-color pure function tests.
  *
  * Maps an offer's base comp to a semantic colour channel keyed to the
  * market percentile bands:

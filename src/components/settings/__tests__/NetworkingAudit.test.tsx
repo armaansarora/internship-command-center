@@ -6,7 +6,7 @@ import { act } from "react";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 /**
- * R11.9 — NetworkingAudit render contract.
+ * NetworkingAudit render contract.
  *
  * Manual createRoot + react act() pattern (no @testing-library/react in
  * this repo — see parlor/OfferFolder.test.tsx, floor-2/orrery/Orrery.test.tsx).

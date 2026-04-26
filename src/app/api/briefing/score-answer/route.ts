@@ -1,5 +1,5 @@
 /**
- * R6.7 — POST /api/briefing/score-answer
+ * POST /api/briefing/score-answer
  *
  * Scores a single candidate answer against the drill's question + rubric.
  * The client passes the question & rubric alongside the answer so the scoring

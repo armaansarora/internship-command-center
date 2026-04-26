@@ -14,7 +14,7 @@
  * between a late-clicked cancel and an early cron tick is resolved
  * atomically by Postgres timestamp comparison, not by UI animation.
  *
- * R10.10 + R10.14 — hold-bearing outreach types get a 24-hour minimum
+ * R10.14 — hold-bearing outreach types get a 24-hour minimum
  * send-hold, clamped SERVER-SIDE. This route reads the queued row's
  * `type` column itself (NOT from the request body) and looks up the hold
  * in `HOLD_SECONDS_BY_TYPE`. Today that map carries `negotiation` (R10.10)
@@ -68,7 +68,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   const { id } = parsed.data;
   const supabase = await createClient();
 
-  // R10.10 — server-side read of queued row.type. A hand-crafted POST cannot
+  // server-side read of queued row.type. A hand-crafted POST cannot
   // bypass the 24h clamp because `type` is decided by the INSERT that queued
   // the row (see /api/offers/:id/negotiation-draft), not by this request.
   const { data: row } = await supabase

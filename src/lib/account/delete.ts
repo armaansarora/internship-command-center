@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 
 /**
- * R0.7 — account deletion helpers.
+ * account deletion helpers.
  *
  * The flow is a two-stage soft-then-hard delete:
  *   1. POST /api/account/delete stamps `user_profiles.deleted_at = now()`.

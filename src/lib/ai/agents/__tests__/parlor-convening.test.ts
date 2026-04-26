@@ -1,5 +1,5 @@
 /**
- * R10.7 — Parlor convening fan-out tests.
+ * Parlor convening fan-out tests.
  *
  * Invariants:
  *   - Three parallel `generateObject` calls, one per seat (offer_evaluator,

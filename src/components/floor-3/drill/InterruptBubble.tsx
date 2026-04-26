@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import type { InterruptType } from "../star/interrupt-rules";
 
 /**
- * R6.6 — InterruptBubble.
+ * InterruptBubble.
  *
  * CPO's mid-answer cut-in. The bubble pops above the answer textarea with
  * a terse, role-appropriate line ("That's the setup. What did YOU do?").

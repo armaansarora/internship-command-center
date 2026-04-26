@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 /**
- * R11.7 — 20 queries/hour/user rate limit.
+ * 20 queries/hour/user rate limit.
  *
  * Verifies the typed wrapper over the `bump_match_rate_limit` RPC
  * (migration 0022). Four axes:

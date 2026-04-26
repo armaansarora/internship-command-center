@@ -20,14 +20,14 @@ interface CSuiteSceneProps {
   /** Right panel slot — Ring the Bell + agent network */
   panelSlot?: React.ReactNode;
   /**
-   * R3.10 — current bell phase, forwarded by CSuiteClient from RingTheBell.
+   * current bell phase, forwarded by CSuiteClient from RingTheBell.
    * Surfaces on the root div as `data-bell-phase` so floor-1.css can key the
    * camera-pullback (scale 0.97 + -8px translate) and the atmospheric
    * brightness dim off this attribute + the sibling `--building-dim` var.
    */
   bellPhase?: "idle" | "ringing" | "orchestrating" | "complete";
   /**
-   * R10.5 — The Negotiation Parlor door. MUST be undefined when the user
+   * The Negotiation Parlor door. MUST be undefined when the user
    * has zero offers — the door must be ABSENT from the DOM entirely, not
    * hidden via CSS. The invariant is locked in
    * `src/app/__tests__/r10-parlor-door-absence.proof.test.tsx`.

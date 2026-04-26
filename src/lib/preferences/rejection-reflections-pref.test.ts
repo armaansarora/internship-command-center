@@ -6,7 +6,7 @@ import {
 } from "./rejection-reflections-pref";
 
 /**
- * R9.6 — Tests for the typed preference helper.
+ * Tests for the typed preference helper.
  *
  * Contract:
  *   - Default ON when input is null / undefined / non-object / wrong shape.

@@ -1,5 +1,5 @@
 /**
- * R5.2 — POST /api/resumes/upload route tests.
+ * POST /api/resumes/upload route tests.
  *
  * Covers the hard partner constraints:
  *   - 401 when unauthenticated

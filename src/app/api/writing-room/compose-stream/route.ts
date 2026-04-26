@@ -1,5 +1,5 @@
 /**
- * R5.4 — POST /api/writing-room/compose-stream
+ * POST /api/writing-room/compose-stream
  *
  * Streams one tone variant of a cover letter as text/plain tokens. The
  * client fires three of these in parallel (one per tone) to power the

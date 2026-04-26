@@ -1,5 +1,5 @@
 /**
- * R10.2 — Offers REST helpers.
+ * Offers REST helpers.
  *
  * Typed Supabase REST surface for the `offers` table shipped in migration
  * 0020 (R10.1). The Parlor's door-materialization gate, pin-stack comp chart,

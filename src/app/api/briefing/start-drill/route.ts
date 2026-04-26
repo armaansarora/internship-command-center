@@ -1,5 +1,5 @@
 /**
- * R6.7 — POST /api/briefing/start-drill
+ * POST /api/briefing/start-drill
  *
  * Kicks off a fresh interview-prep drill. Given an `interviewId` the user
  * owns, resolves the backing application (for company / role) and the

@@ -1,5 +1,5 @@
 /**
- * R6.7 — POST /api/briefing/score-answer contract tests.
+ * POST /api/briefing/score-answer contract tests.
  *
  * Locks in:
  *  - 400 on malformed body

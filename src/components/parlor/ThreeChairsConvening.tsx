@@ -18,7 +18,7 @@ function formatUSD(n: number): string {
 }
 
 /**
- * R10.7 — ThreeChairsConvening.
+ * ThreeChairsConvening.
  *
  * Right-half of the Parlor floor. Three glass-panel cards seat the three
  * convening agents — Offer Evaluator (new CRO subagent), CFO (Parlor-scoped),

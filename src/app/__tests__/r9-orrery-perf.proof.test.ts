@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve, join, relative } from "node:path";
 
 /**
- * R9.5 — Orrery perf invariants.
+ * Orrery perf invariants.
  *
  * 60fps@100 partner constraint. JSDOM cannot measure real frame times,
  * so we assert the architectural invariants that make 60fps achievable:
@@ -64,7 +64,7 @@ function walkFiles(dirRel: string): string[] {
   return results;
 }
 
-describe("R9.5 — single GSAP timeline drives all orbits", () => {
+describe("single GSAP timeline drives all orbits", () => {
   it("OrreryRender.tsx contains AT MOST one gsap.timeline() call", () => {
     // Strip comments first — the file documents the invariant in JSDoc and
     // an inline comment, both of which contain the literal `gsap.timeline(`
@@ -84,7 +84,7 @@ describe("R9.5 — single GSAP timeline drives all orbits", () => {
   });
 });
 
-describe("R9.5 — CSS containment on planet", () => {
+describe("CSS containment on planet", () => {
   it(".orrery-planet rule body declares `contain: layout paint`", () => {
     const css = readSource(ORRERY_CSS_PATH);
     // Match the bare .orrery-planet rule (first hit), not the modifier
@@ -96,7 +96,7 @@ describe("R9.5 — CSS containment on planet", () => {
   });
 });
 
-describe("R9.5 — will-change scoped to orbit, NEVER per-planet", () => {
+describe("will-change scoped to orbit, NEVER per-planet", () => {
   it(".orrery-orbit rule body declares will-change", () => {
     const css = readSource(ORRERY_CSS_PATH);
     const match = css.match(/\.orrery-orbit\s*\{([^}]*)\}/);
@@ -114,7 +114,7 @@ describe("R9.5 — will-change scoped to orbit, NEVER per-planet", () => {
   });
 });
 
-describe("R9.5 — preserve-3d lives in orrery.css and ONLY there in floor-2", () => {
+describe("preserve-3d lives in orrery.css and ONLY there in floor-2", () => {
   it("orrery.css declares transform-style: preserve-3d", () => {
     const css = readSource(ORRERY_CSS_PATH);
     expect(css).toMatch(/transform-style\s*:\s*preserve-3d/);
@@ -146,7 +146,7 @@ describe("R9.5 — preserve-3d lives in orrery.css and ONLY there in floor-2", (
   });
 });
 
-describe("R9.5 — OrreryRender uses the centralized gsap import", () => {
+describe("OrreryRender uses the centralized gsap import", () => {
   it("imports gsap from @/lib/gsap-init", () => {
     const src = readSource(ORRERY_RENDER_PATH);
     expect(src).toMatch(

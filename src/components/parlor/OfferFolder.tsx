@@ -19,7 +19,7 @@ function formatUSD(n: number): string {
 }
 
 /**
- * R10.6 — A single manila folder on the Oak Table.
+ * A single manila folder on the Oak Table.
  *
  * Renders a button (not a link) because selecting an offer changes local
  * client state only — the Parlor is a single-route floor, one user
