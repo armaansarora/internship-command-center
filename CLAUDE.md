@@ -90,6 +90,7 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - `scripts/setup-env.sh` — local env init.
 
 ## Documentation
+- `STRUCTURE.md` — **READ FIRST.** Complete file map. Where things live, "where do I look to do X" table, conventions.
 - `docs/VISION-SPEC.md` — spatial UI metaphor (sacred)
 - `docs/CHAIN-OF-COMMAND.md` — AI agent hierarchy
 - `docs/CHARACTER-PROMPTS.md` — 8 agent system prompts
