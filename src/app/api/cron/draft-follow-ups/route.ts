@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { generateFollowUpDraft } from "@/lib/ai/structured/follow-up-draft";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/draft-follow-ups
@@ -89,7 +90,7 @@ function daysSince(iso: string | null, now: Date): number {
   return Math.max(0, Math.floor((now.getTime() - then) / (24 * 60 * 60 * 1000)));
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+async function handle(req: NextRequest): Promise<NextResponse> {
   const guard = verifyCronRequest(req);
   if (!guard.ok) {
     return NextResponse.json(
@@ -294,3 +295,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     durationMs,
   });
 }
+
+export const GET = withCronHealth("draft-follow-ups", handle);

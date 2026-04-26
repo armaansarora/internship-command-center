@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createNotification } from "@/lib/db/queries/notifications-rest";
 import { computeWarmth } from "@/lib/contacts/warmth";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/warmth-decay
@@ -29,7 +30,7 @@ export const maxDuration = 300;
 const COLD_THRESHOLD = 30;
 const PAGE_SIZE = 1000;
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+async function handle(req: NextRequest): Promise<NextResponse> {
   const guard = verifyCronRequest(req);
   if (!guard.ok) {
     return NextResponse.json(
@@ -112,3 +113,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   return NextResponse.json({ ok: true, updated, alerted });
 }
+
+export const GET = withCronHealth("warmth-decay", handle);

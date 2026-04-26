@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createNotification } from "@/lib/db/queries/notifications-rest";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/cfo-threshold
@@ -72,7 +73,7 @@ interface UserBucket {
   total8w: number;
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+async function handle(req: NextRequest): Promise<NextResponse> {
   const guard = verifyCronRequest(req);
   if (!guard.ok) {
     return NextResponse.json(
@@ -190,3 +191,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   return NextResponse.json({ ok: true, scanned, notified });
 }
+
+export const GET = withCronHealth("cfo-threshold", handle);

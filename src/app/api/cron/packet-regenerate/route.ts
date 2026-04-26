@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { generateStructuredPrepPacket } from "@/lib/ai/structured/prep-packet";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/packet-regenerate
@@ -66,7 +67,7 @@ function coerceFormat(raw: string | null): InterviewFormat {
   return "general";
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+async function handle(req: NextRequest): Promise<NextResponse> {
   const guard = verifyCronRequest(req);
   if (!guard.ok) {
     return NextResponse.json(
@@ -286,3 +287,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     durationMs,
   });
 }
+
+export const GET = withCronHealth("packet-regenerate", handle);

@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { rebuildMatchIndexForUser } from "@/lib/networking/rebuild-match-index";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/match-index
@@ -38,7 +39,7 @@ interface UserResult {
   written?: number;
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+async function handle(req: NextRequest): Promise<NextResponse> {
   const auth = verifyCronRequest(req);
   if (!auth.ok) {
     return NextResponse.json(
@@ -99,3 +100,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     results,
   });
 }
+
+export const GET = withCronHealth("match-index", handle);

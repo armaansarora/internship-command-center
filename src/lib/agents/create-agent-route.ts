@@ -6,6 +6,8 @@ import { z } from "zod/v4";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { requireAgentAccess } from "@/lib/stripe/agent-access";
+import { getUserTier } from "@/lib/stripe/entitlements";
+import { consumeAiQuota } from "@/lib/ai/quota";
 import { log } from "@/lib/logger";
 import { requireEnv } from "@/lib/env";
 
@@ -76,6 +78,25 @@ export function createAgentRoute(config: AgentRouteConfig): (req: Request) => Pr
 
     const rate = await withRateLimit(user.id);
     if (rate.response) return rate.response;
+
+    // Per-user-per-UTC-day AI call cap. Defends against runaway provider
+    // bills on Free tier and against abuse on paid tiers. Fail-open on
+    // infrastructure errors so a transient DB hiccup doesn't lock every
+    // user out of every agent.
+    const tier = await getUserTier(user.id);
+    const quota = await consumeAiQuota(user.id, tier);
+    if (!quota.allowed) {
+      log.info("agent.quota_exceeded", { agent: config.id, userId: user.id, used: quota.used, cap: quota.cap });
+      return Response.json(
+        {
+          error: "ai_quota_exceeded",
+          message: `You've used today's AI agent allowance (${quota.cap} runs). Resets at 00:00 UTC.`,
+          used: quota.used,
+          cap: quota.cap,
+        },
+        { status: 429, headers: rate.headers },
+      );
+    }
 
     let body: unknown;
     try {

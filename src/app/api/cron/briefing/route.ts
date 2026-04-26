@@ -11,6 +11,7 @@ import { encodeBriefing } from "@/lib/penthouse/briefing-storage";
 import { synthesizeFallbackBriefing } from "@/lib/penthouse/briefing-fallback";
 import { detectConflictsForUser } from "@/lib/situation/conflicts-cron";
 import { fireDeadlineBeatsForUser } from "@/lib/situation/deadline-cron";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/briefing
@@ -42,7 +43,7 @@ interface UserRow {
   timezone: string | null;
 }
 
-export async function GET(req: Request): Promise<Response> {
+async function handle(req: Request): Promise<Response> {
   const auth = verifyCronRequest(req);
   if (!auth.ok) {
     return NextResponse.json(
@@ -324,3 +325,5 @@ async function processUser(
     return { userId, status: `error: ${message}` };
   }
 }
+
+export const GET = withCronHealth("briefing", handle);

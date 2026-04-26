@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Sunday, April 26, 2026 at 6:31 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Sunday, April 26, 2026 at 6:59 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,9 +19,9 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `cc6190e`)
+- **Branch:** `main` (commit `0dc0886`)
 - **Production:** `internship-command-center-lake.vercel.app`
-- **Total LOC:** 122,713 across 713 source files
+- **Total LOC:** 122,819 across 713 source files
 - **Build:** Clean (zero TS errors)
 
 ### ⚠️ Stale Docs Detected
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-cc6190e chore(launch-prep): add Stripe live-mode bootstrap script
+0dc0886 chore(launch-prep): patch in live-mode Stripe price IDs
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `cc6190e`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `0dc0886`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -103,7 +103,7 @@ See docs/MASTER-PLAN.md for the next phase.
 - SUPABASE_SERVICE_ROLE_KEY
 - FIRECRAWL_API_KEY
 
-## Source Tree (713 files, 122,713 LOC)
+## Source Tree (713 files, 122,819 LOC)
 
 | Directory | LOC |
 |---|---|
@@ -157,7 +157,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cio` | 817 |
 | `src/lib/networking` | 802 |
 | `src/lib/penthouse` | 796 |
-| `src/app/api/cron/draft-follow-ups` | 792 |
+| `src/app/api/cron/draft-follow-ups` | 795 |
 | `src/components/floor-6/cno-character` | 785 |
 | `src/components/floor-2/analytics` | 764 |
 | `src/components/penthouse` | 751 |
@@ -173,8 +173,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/reports/state-of-month` | 602 |
 | `src/lib/agents/ceo` | 585 |
 | `src/lib/stripe` | 585 |
-| `src/app/api/cron/packet-regenerate` | 581 |
-| `src/app/api/cron/unprompted-ceo` | 573 |
+| `src/app/api/cron/packet-regenerate` | 584 |
+| `src/app/api/cron/unprompted-ceo` | 576 |
 | `src/components/floor-2/cfo-character` | 544 |
 | `src/components/floor-1/ceo-character` | 520 |
 | `src/components/floor-6/rolodex` | 511 |
@@ -184,8 +184,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/agents/cno` | 471 |
 | `src/components/floor-6/contact-grid` | 449 |
 | `src/components/penthouse/scenes/morning` | 448 |
+| `src/app/api/cron/purge-sweeper` | 442 |
 | `src/app/api/profile/preferences` | 441 |
-| `src/app/api/cron/purge-sweeper` | 439 |
 | `src/lib/account` | 432 |
 | `src/lib/notifications` | 428 |
 | `src/components/floor-3/star` | 413 |
@@ -207,7 +207,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/progression` | 349 |
 | `src/components/floor-4/final-countdown` | 341 |
 | `src/app/api/stripe/webhook` | 339 |
-| `src/app/api/cron/briefing` | 327 |
+| `src/app/api/cron/briefing` | 330 |
 | `src/app/(authenticated)/briefing-room` | 320 |
 | `src/lib/comp-bands/__tests__` | 315 |
 | `src/app/api/offers/__tests__` | 313 |
@@ -218,6 +218,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/contacts/[id]/reference-request/__tests__` | 298 |
 | `src/components/floor-6/dossier-wall` | 298 |
 | `src/lib/audio` | 297 |
+| `src/lib/agents` | 290 |
 | `src/app/(authenticated)` | 285 |
 | `src/components/lobby/directory` | 285 |
 | `src/lib/utils` | 284 |
@@ -225,7 +226,6 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/legal` | 277 |
 | `src/app/api/ceo/dispatches` | 275 |
 | `src/app/api/account/delete` | 271 |
-| `src/lib/agents` | 269 |
 | `src/components/floor-6/side-switch` | 268 |
 | `src/components/penthouse/rest` | 268 |
 | `src/app/api/offers/[id]/convene` | 258 |
@@ -238,10 +238,10 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/account/export` | 222 |
 | `src/app/api/networking/revoke/__tests__` | 222 |
 | `src/app/api/cron/__integration__` | 221 |
+| `src/app/api/cron/sync` | 216 |
 | `src/app/api/networking/match-candidates/__tests__` | 214 |
-| `src/app/api/cron/sync` | 213 |
+| `src/app/api/cron/outreach-sender` | 212 |
 | `src/lib/agents/cmo/__tests__` | 212 |
-| `src/app/api/cron/outreach-sender` | 209 |
 | `src/app/api/writing-room/choose-tone/__tests__` | 209 |
 | `src/app/api/briefing/audio-upload` | 208 |
 | `src/lib/email` | 206 |
@@ -252,7 +252,7 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/offers` | 199 |
 | `src/app/api/briefing/complete-drill` | 198 |
 | `src/app/api/outreach/undo` | 197 |
-| `src/app/api/cron/cfo-threshold` | 193 |
+| `src/app/api/cron/cfo-threshold` | 196 |
 | `src/app/api/cron/match-index/__tests__` | 191 |
 | `src/lib/audit` | 185 |
 | `src/app/api/writing-room/approve/__tests__` | 181 |
@@ -263,8 +263,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/documents/[id]/pdf/__tests__` | 168 |
 | `src/lib/resumes` | 168 |
 | `src/app/api/writing-room/choose-tone` | 165 |
-| `src/app/api/cron/warm-intro-scan` | 160 |
-| `src/app/api/cron/export-worker` | 157 |
+| `src/app/api/cron/warm-intro-scan` | 163 |
+| `src/app/api/cron/export-worker` | 160 |
 | `src/components/penthouse/scenes/latenight` | 156 |
 | `src/lib/validators` | 155 |
 | `src/components/penthouse/idle` | 153 |
@@ -272,8 +272,8 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/components/icons` | 152 |
 | `src/app/(marketing)` | 151 |
 | `src/lib/voice/__tests__` | 145 |
+| `src/app/api/cron/cio-reresearch` | 144 |
 | `src/app/(authenticated)/situation-room` | 142 |
-| `src/app/api/cron/cio-reresearch` | 141 |
 | `src/app/api/briefing/transcribe` | 139 |
 | `src/app/(authenticated)/rolodex-lounge` | 137 |
 | `src/app/api/onboarding/bootstrap-discovery` | 137 |
@@ -285,20 +285,20 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/app/api/writing-room/approve` | 129 |
 | `src/lib/ai/agents/__tests__` | 129 |
 | `src/components/settings/__tests__` | 126 |
-| `src/app/api/cron/warmth-decay` | 115 |
+| `src/app/api/writing-room/compose-stream` | 121 |
+| `src/app/api/concierge/chat` | 119 |
+| `src/app/api/cron/warmth-decay` | 118 |
+| `src/lib/cron` | 116 |
 | `src/app/api/briefing/binder/[id]` | 114 |
-| `src/lib/cron` | 112 |
 | `src/app/api/documents/[id]/pdf` | 111 |
+| `src/app/api/writing-room/compose-stream/__tests__` | 111 |
 | `src/components/penthouse/scenes/evening` | 110 |
 | `src/lib/parlor` | 110 |
 | `src/app/api/gmail/callback` | 108 |
 | `src/app/(authenticated)/observatory` | 106 |
 | `src/app/api/networking/revoke` | 106 |
-| `src/app/api/writing-room/compose-stream` | 105 |
+| `src/app/api/cron/match-index` | 105 |
 | `src/components/penthouse/scenes/afternoon` | 105 |
-| `src/app/api/writing-room/compose-stream/__tests__` | 104 |
-| `src/app/api/concierge/chat` | 103 |
-| `src/app/api/cron/match-index` | 102 |
 | `src/app/api/networking/match-candidates` | 102 |
 | `src/components/penthouse/ceo-at-window` | 101 |
 | `src/app/api/weather` | 99 |
@@ -307,9 +307,9 @@ See docs/MASTER-PLAN.md for the next phase.
 | `src/lib/parlor/__tests__` | 90 |
 | `src/db/__tests__` | 89 |
 | `src/components/marketing` | 86 |
+| `src/app/api/cron/job-discovery` | 84 |
 | `src/app/api/offers/[id]/simulate` | 84 |
 | `src/app/api/ceo` | 81 |
-| `src/app/api/cron/job-discovery` | 81 |
 | `src/lib/resumes/__tests__` | 79 |
 | `src/lib/onboarding` | 70 |
 | `src/app/(authenticated)/c-suite` | 67 |
@@ -1134,13 +1134,13 @@ zod: ^4.3.6
 
 | File | Lines | ~Tokens |
 |---|---|---|
-| `BOOTSTRAP-PROMPT.md` | 1183 | 13,365 |
+| `BOOTSTRAP-PROMPT.md` | 1183 | 13,358 |
 | `PROJECT-CONTEXT.md` | 278 | 5,161 |
 | `docs/MASTER-PLAN.md` | 367 | 7,172 |
 | `CLAUDE.md` | 340 | 6,341 |
-| **Total** | **2168** | **32,039** |
+| **Total** | **2168** | **32,032** |
 
-> ⚠️ Reading all recommended files consumes ~32,039 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
+> ⚠️ Reading all recommended files consumes ~32,032 tokens. Prioritize: this file → CLAUDE.md (mandatory) → PROJECT-CONTEXT.md → MASTER-PLAN.md.
 
 
 ## Technical Notes (Gotchas)

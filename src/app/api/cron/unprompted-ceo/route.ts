@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 import {
   shouldFireStaleCluster,
   shouldFireRejectionCluster,
@@ -61,7 +62,7 @@ interface NotificationRow {
   created_at: string;
 }
 
-export async function GET(request: NextRequest): Promise<Response> {
+async function handle(request: NextRequest): Promise<Response> {
   const auth = verifyCronRequest(request);
   if (!auth.ok) {
     return NextResponse.json(
@@ -196,3 +197,5 @@ async function sweepUser(userId: string, now: Date): Promise<number> {
 
   return inserted;
 }
+
+export const GET = withCronHealth("unprompted-ceo", handle);

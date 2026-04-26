@@ -1,6 +1,8 @@
 import { streamText, stepCountIs, convertToModelMessages, type UIMessage } from "ai";
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/supabase/server";
+import { getUserTier } from "@/lib/stripe/entitlements";
+import { consumeAiQuota } from "@/lib/ai/quota";
 import { getAgentModel } from "@/lib/ai/model";
 import { buildCachedSystemMessages } from "@/lib/ai/prompt-cache";
 import { buildOtisSystemPrompt } from "@/lib/agents/concierge/system-prompt";
@@ -31,6 +33,20 @@ export async function POST(req: Request): Promise<Response> {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const tier = await getUserTier(user.id);
+  const quota = await consumeAiQuota(user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      {
+        error: "ai_quota_exceeded",
+        message: `You've used today's AI allowance (${quota.cap} runs). Resets at 00:00 UTC.`,
+        used: quota.used,
+        cap: quota.cap,
+      },
+      { status: 429 },
+    );
   }
 
   const body = (await req.json().catch(() => null)) as ConcieregePostBody | null;

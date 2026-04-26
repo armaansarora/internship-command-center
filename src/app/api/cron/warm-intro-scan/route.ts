@@ -9,6 +9,7 @@ import {
   type ActiveApplication,
 } from "@/lib/networking/warm-intro-finder";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/warm-intro-scan
@@ -36,7 +37,7 @@ const ACTIVE_APP_STATUSES = [
   "under_review",
 ];
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+async function handle(req: NextRequest): Promise<NextResponse> {
   const guard = verifyCronRequest(req);
   if (!guard.ok) {
     return NextResponse.json(
@@ -157,3 +158,5 @@ function toVector(raw: unknown): number[] | null {
   }
   return null;
 }
+
+export const GET = withCronHealth("warm-intro-scan", handle);

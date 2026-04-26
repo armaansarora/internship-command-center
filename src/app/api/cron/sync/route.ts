@@ -4,6 +4,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { syncGmailForUser } from "@/lib/gmail/sync";
 import { syncCalendarEvents } from "@/lib/calendar/sync";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/sync
@@ -38,7 +39,7 @@ interface SyncResult {
   errors: string[];
 }
 
-export async function GET(request: Request): Promise<NextResponse> {
+async function handle(request: Request): Promise<NextResponse> {
   const auth = verifyCronRequest(request);
   if (!auth.ok) {
     return NextResponse.json(
@@ -210,3 +211,5 @@ async function processUser(userId: string): Promise<SyncResult> {
     errors,
   };
 }
+
+export const GET = withCronHealth("sync", handle);

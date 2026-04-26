@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { listUserIdsWithTargetProfile } from "@/lib/db/queries/job-discovery-rest";
 import { runJobDiscoveryForUser } from "@/lib/jobs/discovery";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/job-discovery
@@ -18,7 +19,7 @@ import { log } from "@/lib/logger";
  */
 export const maxDuration = 300;
 
-export async function GET(
+async function handle(
   req: NextRequest
 ): Promise<NextResponse> {
   const guard = verifyCronRequest(req);
@@ -78,3 +79,5 @@ export async function GET(
     results,
   });
 }
+
+export const GET = withCronHealth("job-discovery", handle);

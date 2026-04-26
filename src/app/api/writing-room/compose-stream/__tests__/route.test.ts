@@ -28,6 +28,13 @@ vi.mock("@/lib/logger", () => ({
   log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: vi.fn(async () => ({ allowed: true, used: 1, cap: 25 })),
+}));
+
 vi.mock("ai", () => {
   return {
     streamText: vi.fn(() => ({

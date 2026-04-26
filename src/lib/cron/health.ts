@@ -26,7 +26,9 @@ import { log } from "@/lib/logger";
  * leave breadcrumbs (e.g., rows-processed). Pass it via `setCronMeta`
  * inside the handler scope.
  */
-type CronHandler = (req: Request) => Promise<Response> | Response;
+type CronHandler<Req extends Request = Request, Res extends Response = Response> = (
+  req: Req,
+) => Promise<Res> | Res;
 
 const CRON_META_REGISTRY = new WeakMap<Request, Record<string, unknown>>();
 
@@ -35,16 +37,18 @@ export function setCronMeta(req: Request, meta: Record<string, unknown>): void {
   CRON_META_REGISTRY.set(req, { ...existing, ...meta });
 }
 
-export function withCronHealth(jobName: string, handler: CronHandler): CronHandler {
+export function withCronHealth<Req extends Request, Res extends Response>(
+  jobName: string,
+  handler: CronHandler<Req, Res>,
+): CronHandler<Req, Res> {
   return async (req) => {
     const startedAt = new Date();
     const t0 = performance.now();
     let success = false;
     let errorMessage: string | null = null;
-    let response: Response;
 
     try {
-      response = await handler(req);
+      const response = await handler(req);
       success = response.ok || (response.status >= 200 && response.status < 400);
       if (!success) {
         try {

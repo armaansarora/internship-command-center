@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { logSecurityEvent } from "@/lib/audit/log";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 import {
   PURGE_BATCH_LIMIT,
   hashEmailForTombstone,
@@ -46,7 +47,7 @@ interface EligibleProfile {
   email: string;
 }
 
-export async function GET(request: NextRequest): Promise<Response> {
+async function handle(request: NextRequest): Promise<Response> {
   const auth = verifyCronRequest(request);
   if (!auth.ok) {
     return NextResponse.json(
@@ -124,3 +125,5 @@ export async function GET(request: NextRequest): Promise<Response> {
   log.info("purge-sweeper.done", { purged, failed: failures.length });
   return NextResponse.json({ purged, failed: failures });
 }
+
+export const GET = withCronHealth("purge-sweeper", handle);

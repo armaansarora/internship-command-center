@@ -13,6 +13,8 @@ import { z } from "zod/v4";
 import { NextResponse } from "next/server";
 import { streamText } from "ai";
 import { getUser } from "@/lib/supabase/server";
+import { getUserTier } from "@/lib/stripe/entitlements";
+import { consumeAiQuota } from "@/lib/ai/quota";
 import { getAgentModel, getActiveModelId } from "@/lib/ai/model";
 import { getCachedSystem } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
@@ -33,6 +35,20 @@ export async function POST(req: Request): Promise<Response> {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const tier = await getUserTier(user.id);
+  const quota = await consumeAiQuota(user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      {
+        error: "ai_quota_exceeded",
+        message: `You've used today's AI allowance (${quota.cap} runs). Resets at 00:00 UTC.`,
+        used: quota.used,
+        cap: quota.cap,
+      },
+      { status: 429 },
+    );
   }
 
   const raw = await req.json().catch(() => null);

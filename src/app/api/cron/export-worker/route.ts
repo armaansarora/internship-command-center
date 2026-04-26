@@ -5,6 +5,7 @@ import { buildUserExport } from "@/lib/account/export";
 import { sendExportEmail } from "@/lib/email/send-export";
 import { logSecurityEvent } from "@/lib/audit/log";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/export-worker
@@ -40,7 +41,7 @@ interface WorkerResult {
   error?: string;
 }
 
-export async function GET(request: NextRequest): Promise<Response> {
+async function handle(request: NextRequest): Promise<Response> {
   const auth = verifyCronRequest(request);
   if (!auth.ok) {
     return NextResponse.json(
@@ -154,3 +155,5 @@ async function processOne(profile: QueuedProfile): Promise<WorkerResult> {
     return { userId, status: "failed", error: message };
   }
 }
+
+export const GET = withCronHealth("export-worker", handle);

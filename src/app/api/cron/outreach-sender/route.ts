@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { sendOutreachEmail } from "@/lib/email/outreach";
 import { logSecurityEvent } from "@/lib/audit/log";
 import { log } from "@/lib/logger";
+import { withCronHealth } from "@/lib/cron/health";
 
 /**
  * GET /api/cron/outreach-sender
@@ -36,7 +37,7 @@ interface ApprovedRow {
   type: string | null;
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+async function handle(req: NextRequest): Promise<NextResponse> {
   const guard = verifyCronRequest(req);
   if (!guard.ok) {
     return NextResponse.json(
@@ -206,3 +207,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     results: perRow,
   });
 }
+
+export const GET = withCronHealth("outreach-sender", handle);
