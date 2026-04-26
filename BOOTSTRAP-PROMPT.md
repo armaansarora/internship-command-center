@@ -1,6 +1,6 @@
 # BOOTSTRAP PROMPT — The Tower
 
-> **Auto-generated** by `scripts/generate-bootstrap.ts` on Sunday, April 26, 2026 at 6:59 PM EDT
+> **Auto-generated** by `scripts/generate-bootstrap.ts` on Sunday, April 26, 2026 at 7:07 PM EDT
 > Run `npm run bootstrap` to regenerate. Auto-runs on every commit (Husky pre-commit hook).
 > **DO NOT manually edit** — changes will be overwritten.
 
@@ -19,7 +19,7 @@
 ## Status
 
 - **Current state:** Phase 0 IN PROGRESS
-- **Branch:** `main` (commit `0dc0886`)
+- **Branch:** `main` (commit `3dcf89d`)
 - **Production:** `internship-command-center-lake.vercel.app`
 - **Total LOC:** 122,819 across 713 source files
 - **Build:** Clean (zero TS errors)
@@ -35,7 +35,7 @@
 ## Changes Since Last Bootstrap
 
 ```
-0dc0886 chore(launch-prep): patch in live-mode Stripe price IDs
+3dcf89d chore(launch-prep): wire withCronHealth + consumeAiQuota into routes
 ```
 
 ## Acceptance Criteria — Progress
@@ -89,7 +89,7 @@ See docs/MASTER-PLAN.md for the next phase.
 
 | Service | Detail |
 |---|---|
-| Repo | `armaansarora/internship-command-center` on `main` (commit `0dc0886`) |
+| Repo | `armaansarora/internship-command-center` on `main` (commit `3dcf89d`) |
 | Supabase | Project `jzrsrruugcajohvvmevg`, URL `https://jzrsrruugcajohvvmevg.supabase.co` |
 | Vercel | Project `prj_C6B6ZEsG5khpsISEzvgaMQzo9r5g` |
 | Production | `internship-command-center-lake.vercel.app` |
@@ -98,10 +98,31 @@ See docs/MASTER-PLAN.md for the next phase.
 ## Env Vars (names only — values in .env.local)
 
 - AI_GATEWAY_API_KEY
-- OWNER_USER_ID
-- STRIPE_WEBHOOK_SECRET
-- SUPABASE_SERVICE_ROLE_KEY
+- ANTHROPIC_API_KEY
+- CRON_SECRET
+- ENCRYPTION_KEY
 - FIRECRAWL_API_KEY
+- GMAIL_REDIRECT_URI
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- LINKEDIN_CLIENT_ID
+- LINKEDIN_CLIENT_SECRET
+- NEXT_PUBLIC_APP_URL
+- NEXT_PUBLIC_SENTRY_DSN
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+- NEXT_PUBLIC_SUPABASE_URL
+- OAUTH_STATE_SECRET
+- OPENWEATHER_API_KEY
+- OWNER_USER_ID
+- RESEND_API_KEY
+- STRIPE_SECRET_KEY
+- STRIPE_WEBHOOK_SECRET
+- SUPABASE_DB_URL
+- SUPABASE_SERVICE_ROLE_KEY
+- UPSTASH_REDIS_REST_TOKEN
+- UPSTASH_REDIS_REST_URL
+- VERCEL_OIDC_TOKEN
 
 ## Source Tree (713 files, 122,819 LOC)
 
