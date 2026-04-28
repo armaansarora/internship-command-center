@@ -18,6 +18,7 @@
  * down-weight thin-data situations.
  */
 import { NextResponse } from "next/server";
+import { z } from "zod/v4";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
@@ -37,6 +38,9 @@ export async function POST(
   if (!auth.ok) return auth.response;
 
   const { id } = await ctx.params;
+  if (!z.string().uuid().safeParse(id).success) {
+    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  }
   const client = await createClient();
   const offer = await getOfferById(client, auth.user.id, id);
   if (!offer) {

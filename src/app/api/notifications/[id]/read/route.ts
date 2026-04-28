@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod/v4";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -21,6 +22,11 @@ export async function POST(
 
   const supabase = await createClient();
   const { id } = await params;
+  // Validate UUID before touching the DB so a bad path segment can't reach
+  // PostgREST and produce a 500 with a leaked Postgres error message.
+  if (!z.string().uuid().safeParse(id).success) {
+    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  }
 
   const { error } = await supabase
     .from("notifications")

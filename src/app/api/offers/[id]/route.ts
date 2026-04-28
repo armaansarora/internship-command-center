@@ -42,6 +42,9 @@ export async function GET(
   if (!auth.ok) return auth.response;
 
   const { id } = await ctx.params;
+  if (!z.string().uuid().safeParse(id).success) {
+    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  }
   const supabase = await createClient();
   const offer = await getOfferById(supabase, auth.user.id, id);
   if (!offer) {
@@ -58,6 +61,9 @@ export async function PATCH(
   if (!auth.ok) return auth.response;
 
   const { id } = await ctx.params;
+  if (!z.string().uuid().safeParse(id).success) {
+    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  }
   const raw = await req.json().catch(() => null);
   const parsed = UpdateOfferSchema.safeParse(raw);
   if (!parsed.success) {

@@ -60,7 +60,7 @@ function makeReq(body: unknown): NextRequest {
   });
 }
 
-const ctx = { params: Promise.resolve({ id: "o1" }) };
+const ctx = { params: Promise.resolve({ id: "44444444-4444-4444-8444-444444444444" }) };
 
 const validBody = {
   stance: { anchor: 185000, flex: 5000, walkaway: 170000 },
@@ -69,7 +69,7 @@ const validBody = {
 };
 
 const offerRow = {
-  id: "o1",
+  id: "44444444-4444-4444-8444-444444444444",
   user_id: "u1",
   company_name: "Acme",
   role: "Analyst",

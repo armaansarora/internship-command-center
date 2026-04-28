@@ -54,6 +54,9 @@ export async function POST(
   if (!auth.ok) return auth.response;
 
   const { id } = await ctx.params;
+  if (!z.string().uuid().safeParse(id).success) {
+    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+  }
   const client = await createClient();
   const offer = await getOfferById(client, auth.user.id, id);
   if (!offer) {
