@@ -22,6 +22,8 @@ import { requireUserApi } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { simulateTurn } from "@/lib/ai/structured/simulator-turn";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 
 export const maxDuration = 60;
 
@@ -33,13 +35,15 @@ const BodySchema = z.object({
     flex: z.number().int().nonnegative(),
     walkaway: z.number().int().nonnegative(),
   }),
-  history: z.array(
-    z.object({
-      role: z.enum(["user", "recruiter"]),
-      text: z.string(),
-    }),
-  ),
-  userReply: z.string().nullable().optional(),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "recruiter"]),
+        text: z.string().max(5_000),
+      }),
+    )
+    .max(20),
+  userReply: z.string().max(5_000).nullable().optional(),
 });
 
 export async function POST(
@@ -61,6 +65,15 @@ export async function POST(
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
   const { stance, history, userReply } = parsed.data;
+
+  const tier = await getUserTier(auth.user.id);
+  const quota = await consumeAiQuota(auth.user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
+    );
+  }
 
   const result = await simulateTurn({
     userFirstName:

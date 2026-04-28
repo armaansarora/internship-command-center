@@ -48,6 +48,22 @@ vi.mock("@/lib/logger", () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaMock = vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+  async () => ({ allowed: true, used: 1, cap: 25 }),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: (userId: string, tier: string) => consumeAiQuotaMock(userId, tier),
+}));
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 const generatePdfMock = vi.fn();
 
 vi.mock("@/lib/pdf/state-of-month-pdf", async () => {
@@ -90,6 +106,7 @@ describe("GET /api/reports/state-of-month", () => {
     });
     plantedRows = [];
     plantedError = null;
+    consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
     generatePdfMock.mockResolvedValue(Buffer.from("%PDF-1.4 mocked content"));
   });
 
@@ -236,5 +253,26 @@ describe("GET /api/reports/state-of-month", () => {
       expect(planet.angleDeg).toBeLessThan(360);
       expect([1, 2, 3, 4]).toContain(planet.tier);
     }
+  });
+
+  it("returns 429 when AI quota is exhausted, never renders PDF", async () => {
+    consumeAiQuotaMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+    const res = await get("http://localhost/api/reports/state-of-month?month=2026-04");
+    expect(res.status).toBe(429);
+    expect(generatePdfMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when month query param is absurdly long", async () => {
+    const oversized = "x".repeat(100);
+    const res = await get(
+      `http://localhost/api/reports/state-of-month?month=${oversized}`,
+    );
+    expect(res.status).toBe(400);
+    expect(generatePdfMock).not.toHaveBeenCalled();
   });
 });

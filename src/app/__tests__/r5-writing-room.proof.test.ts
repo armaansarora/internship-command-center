@@ -115,6 +115,18 @@ vi.mock("@/lib/logger", () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: vi.fn(async () => ({
+    allowed: true,
+    used: 1,
+    cap: 25,
+  })),
+}));
+
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 vi.mock("@/lib/ai/model", () => ({
   getAgentModel: () => null,
   getActiveModelId: () => "mock-model",

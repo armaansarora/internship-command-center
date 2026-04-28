@@ -53,6 +53,22 @@ vi.mock("@/lib/logger", () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaMock = vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+  async () => ({ allowed: true, used: 1, cap: 25 }),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: (userId: string, tier: string) => consumeAiQuotaMock(userId, tier),
+}));
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 import { POST } from "../route";
 
 async function postChoose(body: unknown): Promise<Response> {
@@ -71,6 +87,7 @@ describe("POST /api/writing-room/choose-tone", () => {
     getUserMock.mockResolvedValue({ id: "u-1" });
     queueFetchResult = async () => ({ data: null, error: null });
     documentFetchResult = async () => ({ data: null, error: null });
+    consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -204,5 +221,30 @@ describe("POST /api/writing-room/choose-tone", () => {
     expect(json.status).toBe("pending_approval"); // still pending after choice
     expect(json.selectedCoverLetterId).toBe("doc-1");
     expect(json.selectedTone).toBe("formal");
+  });
+
+  it("returns 429 when AI quota is exhausted", async () => {
+    consumeAiQuotaMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+    const res = await postChoose({
+      outreachQueueId: "q-1",
+      coverLetterId: "doc-1",
+      tone: "formal",
+    });
+    expect(res.status).toBe(429);
+  });
+
+  it("returns 400 when ids are absurdly long", async () => {
+    const oversized = "x".repeat(201);
+    const res = await postChoose({
+      outreachQueueId: oversized,
+      coverLetterId: "doc-1",
+      tone: "formal",
+    });
+    expect(res.status).toBe(400);
   });
 });

@@ -24,6 +24,8 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { convenePipelineForOffer } from "@/lib/ai/agents/parlor-convening";
 import { lookupCompBands } from "@/lib/comp-bands/lookup";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 
 export const maxDuration = 60;
 
@@ -39,6 +41,15 @@ export async function POST(
   const offer = await getOfferById(client, auth.user.id, id);
   if (!offer) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
+  const tier = await getUserTier(auth.user.id);
+  const quota = await consumeAiQuota(auth.user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
+    );
   }
 
   const admin = getSupabaseAdmin();

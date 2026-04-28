@@ -59,6 +59,26 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
+  // Content-Length precheck. Without this, a 50MB upload would trip
+  // Next.js's body-size guard *before* the per-file check below, surfacing
+  // as a misleading 400 invalid_multipart. Reject early with 413 instead.
+  // Allow ~1MB slop above MAX_FILE_BYTES for multipart boundary + headers.
+  // Missing or malformed Content-Length: fall through; downstream checks
+  // (and Next.js's own guard) still cover us.
+  const contentLength = req.headers.get("content-length");
+  if (contentLength) {
+    const size = Number.parseInt(contentLength, 10);
+    if (Number.isFinite(size) && size > MAX_FILE_BYTES + 1024 * 1024) {
+      return NextResponse.json(
+        {
+          error: "file_too_large",
+          message: `Request body is ${size} bytes; the file alone is limited to ${MAX_FILE_BYTES} bytes (10MB).`,
+        },
+        { status: 413 },
+      );
+    }
+  }
+
   // Parse multipart form
   let form: FormData;
   try {

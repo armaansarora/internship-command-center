@@ -14,6 +14,8 @@
  */
 import { NextResponse } from "next/server";
 import { getUser, createClient } from "@/lib/supabase/server";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
 import {
   generateStateOfMonthPdf,
@@ -293,6 +295,12 @@ export async function GET(req: Request): Promise<Response> {
 
   const url = new URL(req.url);
   const monthParam = url.searchParams.get("month");
+  if (monthParam !== null && monthParam.length > 16) {
+    return NextResponse.json(
+      { error: "invalid_month", message: "month must be YYYY-MM with month in 01..12" },
+      { status: 400 },
+    );
+  }
   const parsed = parseMonth(monthParam);
   if (!parsed.ok) {
     return NextResponse.json(
@@ -301,6 +309,15 @@ export async function GET(req: Request): Promise<Response> {
     );
   }
   const { month, range } = parsed;
+
+  const tier = await getUserTier(user.id);
+  const quota = await consumeAiQuota(user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
+    );
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase

@@ -6,7 +6,11 @@ import {
   persistSkipPlaceholderProfile,
   type ExtractionTurn,
 } from "@/lib/agents/concierge/extract";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
+
+const MAX_TRANSCRIPT_BYTES = 20_000;
 
 /**
  * POST /api/concierge/extract — Concierge hand-off.
@@ -30,7 +34,7 @@ export const maxDuration = 60;
 
 const TurnSchema = z.object({
   role: z.enum(["assistant", "user"]),
-  text: z.string().min(1),
+  text: z.string().min(1).max(2_000),
 });
 
 const BodySchema = z.object({
@@ -53,6 +57,27 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
   const { turns, skip } = parsed.data;
+
+  const transcriptBytes = turns.reduce((sum, turn) => sum + turn.text.length, 0);
+  if (transcriptBytes > MAX_TRANSCRIPT_BYTES) {
+    return NextResponse.json(
+      { error: "transcript_too_large", bytes: transcriptBytes, cap: MAX_TRANSCRIPT_BYTES },
+      { status: 400 },
+    );
+  }
+
+  // Skip path persists a placeholder; only the conversation path consumes a
+  // call (it invokes generateObject against the configured model).
+  if (!skip && turns.length > 0) {
+    const tier = await getUserTier(user.id);
+    const quota = await consumeAiQuota(user.id, tier);
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+        { status: 429 },
+      );
+    }
+  }
 
   const result = skip || turns.length === 0
     ? await persistSkipPlaceholderProfile(user.id)

@@ -21,6 +21,23 @@ vi.mock("@/lib/agents/concierge/extract", () => ({
     skipPlaceholderMock(...args),
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaMock = vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+  async () => ({ allowed: true, used: 1, cap: 25 }),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: (userId: string, tier: string) => consumeAiQuotaMock(userId, tier),
+}));
+
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 vi.mock("@/lib/logger", () => ({
   log: {
     info: vi.fn(),
@@ -43,6 +60,7 @@ function makeRequest(body: unknown): Request {
 describe("POST /api/concierge/extract", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
   });
 
   it("401s when unauthenticated", async () => {
@@ -129,5 +147,72 @@ describe("POST /api/concierge/extract", () => {
     skipPlaceholderMock.mockResolvedValueOnce(null);
     const res = await POST(makeRequest({ turns: [], skip: true }));
     expect(res.status).toBe(500);
+  });
+
+  it("429s when AI quota is exhausted on the conversation path", async () => {
+    getUserMock.mockResolvedValueOnce({ id: "u-q", email: "q@e.com" });
+    consumeAiQuotaMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+    const res = await POST(
+      makeRequest({
+        skip: false,
+        turns: [
+          { role: "assistant", text: "Hi." },
+          { role: "user", text: "Hello." },
+        ],
+      }),
+    );
+    expect(res.status).toBe(429);
+    expect(extractMock).not.toHaveBeenCalled();
+  });
+
+  it("does not consume quota on the skip path", async () => {
+    getUserMock.mockResolvedValueOnce({ id: "u-skip", email: "s@e.com" });
+    skipPlaceholderMock.mockResolvedValueOnce({
+      source: "skip",
+      completedAt: "2026-04-26T10:00:00.000Z",
+      profile: {
+        version: 1,
+        roles: ["Software Engineer"],
+        level: ["intern"],
+        geos: ["Remote"],
+        companies: [],
+        musts: [],
+        nices: [],
+      },
+    });
+    const res = await POST(makeRequest({ turns: [], skip: true }));
+    expect(res.status).toBe(200);
+    expect(consumeAiQuotaMock).not.toHaveBeenCalled();
+  });
+
+  it("400s when an individual turn exceeds the per-turn cap", async () => {
+    getUserMock.mockResolvedValueOnce({ id: "u-big", email: "b@e.com" });
+    const oversized = "x".repeat(2_001);
+    const res = await POST(
+      makeRequest({
+        skip: false,
+        turns: [{ role: "user", text: oversized }],
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("400s when total transcript bytes exceed the ceiling", async () => {
+    getUserMock.mockResolvedValueOnce({ id: "u-big2", email: "b@e.com" });
+    // 11 turns at 1900 chars each = 20_900 > 20_000
+    const turn = "x".repeat(1_900);
+    const turns = Array.from({ length: 11 }, (_, i) => ({
+      role: i % 2 === 0 ? "assistant" : "user",
+      text: turn,
+    }));
+    const res = await POST(makeRequest({ skip: false, turns }));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("transcript_too_large");
   });
 });

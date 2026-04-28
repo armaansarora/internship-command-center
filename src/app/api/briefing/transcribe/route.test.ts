@@ -29,6 +29,24 @@ vi.mock("@/lib/speech/transcribe", () => ({
   transcribeAudio: vi.fn(async () => "transcribed text"),
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaMock = vi.hoisted(() =>
+  vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+    async () => ({ allowed: true, used: 1, cap: 25 }),
+  ),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: consumeAiQuotaMock,
+}));
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 async function callPost(opts: {
   enabled: boolean;
   permDisabled?: boolean;
@@ -51,6 +69,7 @@ async function callPost(opts: {
 describe("POST /api/briefing/transcribe — opt-in gate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
   });
 
   it("403 when voice disabled", async () => {
@@ -77,5 +96,16 @@ describe("POST /api/briefing/transcribe — opt-in gate", () => {
     expect(res.status).toBe(200);
     const j = await res.json();
     expect(j.text).toBe("transcribed text");
+  });
+
+  it("429 when AI quota is exhausted on the otherwise-happy path", async () => {
+    consumeAiQuotaMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+    const res = await callPost({ enabled: true, path: "user-1/d/q1.webm" });
+    expect(res.status).toBe(429);
   });
 });

@@ -66,6 +66,24 @@ vi.mock("@/lib/ai/structured/negotiation-draft", () => ({
   draftNegotiationEmail: draftNegotiationEmailSpy,
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaSpy = vi.hoisted(() =>
+  vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+    async () => ({ allowed: true, used: 1, cap: 25 }),
+  ),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: consumeAiQuotaSpy,
+}));
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 const { POST } = await import("./route");
 
 const OFFER_ID = "33333333-3333-4333-8333-333333333333";
@@ -117,6 +135,8 @@ beforeEach(() => {
   getOfferByIdSpy.mockReset();
   draftNegotiationEmailSpy.mockReset();
   insertRowCaptureSpy.mockReset();
+  consumeAiQuotaSpy.mockReset();
+  consumeAiQuotaSpy.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
   singleResult = { data: null, error: null };
 });
 
@@ -283,5 +303,42 @@ describe("POST /api/offers/[id]/negotiation-draft", () => {
     expect(draftNegotiationEmailSpy).toHaveBeenCalledWith(
       expect.objectContaining({ convening: null }),
     );
+  });
+
+  it("returns 429 when AI quota is exhausted, never drafts", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    getOfferByIdSpy.mockResolvedValue(offerRow());
+    consumeAiQuotaSpy.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+
+    const res = await callPost({});
+    expect(res.status).toBe(429);
+    expect(draftNegotiationEmailSpy).not.toHaveBeenCalled();
+    expect(insertRowCaptureSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when the convening payload exceeds the size cap", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    getOfferByIdSpy.mockResolvedValue(offerRow());
+    // Build a convening object whose serialized form is > 5_000 chars.
+    const huge = "x".repeat(6_000);
+    const convening = {
+      offer_evaluator: { verdict: "MARKET", narrative: huge, risks: [] },
+      cfo: {
+        total_comp_year1: 100,
+        total_comp_4yr: 400,
+        vesting_note: "",
+        narrative: "",
+      },
+      cno: { contacts_at_company: [], narrative: "" },
+    };
+    const res = await callPost({ convening });
+    expect(res.status).toBe(400);
+    expect(draftNegotiationEmailSpy).not.toHaveBeenCalled();
+    expect(insertRowCaptureSpy).not.toHaveBeenCalled();
   });
 });

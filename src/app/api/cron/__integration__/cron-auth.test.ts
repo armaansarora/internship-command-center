@@ -18,7 +18,9 @@ import { _resetEnvCacheForTests } from "@/lib/env";
  * Auth behavior exercised:
  *   - Missing header in production                        → 401
  *   - Authorization: Bearer <CRON_SECRET>                 → not 401
- *   - x-vercel-cron: 1 (Vercel internal signal)           → not 401
+ *   - x-vercel-cron: 1 alone (no bearer)                  → 401
+ *     (the platform header is trivially settable by any
+ *      external caller and cannot be trusted on its own)
  */
 
 const CRON_SECRET_VALUE = "test-secret-thirty-two-characters-min";
@@ -194,7 +196,7 @@ describe("cron auth — every cron route gates on verifyCronRequest", () => {
         expect(res.status).not.toBe(401);
       });
 
-      it(`accepts x-vercel-cron header`, async () => {
+      it(`rejects x-vercel-cron header alone without a bearer (401)`, async () => {
         const loaded = await tryLoad(route.load);
         if (!loaded.ok) {
           console.warn(
@@ -212,8 +214,12 @@ describe("cron auth — every cron route gates on verifyCronRequest", () => {
           }
         );
         const res = await invoke(entry.handler, req);
-        if (res === "threw") return;
-        expect(res.status).not.toBe(401);
+        if (res === "threw") {
+          throw new Error(
+            `header-only case threw instead of returning 401 — guard likely missing`
+          );
+        }
+        expect(res.status).toBe(401);
       });
     });
   }

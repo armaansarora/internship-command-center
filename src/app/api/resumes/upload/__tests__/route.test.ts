@@ -92,6 +92,25 @@ async function postUpload(file: File | null): Promise<Response> {
   return POST(req);
 }
 
+/**
+ * Build a Request with an explicit Content-Length header that lies about the
+ * payload size. Used to verify the size precheck rejects oversized requests
+ * BEFORE Next.js's default body-size limit yields a misleading 400.
+ */
+function postUploadWithContentLength(
+  file: File | null,
+  contentLength: string,
+): Promise<Response> {
+  const form = new FormData();
+  if (file) form.append("file", file);
+  const req = new Request("http://localhost/api/resumes/upload", {
+    method: "POST",
+    body: form,
+    headers: { "content-length": contentLength },
+  });
+  return POST(req);
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -212,6 +231,45 @@ describe("POST /api/resumes/upload", () => {
       "application/pdf",
     );
     expect(insertBaseResumeMock).toHaveBeenCalledOnce();
+  });
+
+  it("returns 413 file_too_large via Content-Length precheck (NOT 400 invalid_multipart)", async () => {
+    // Regression: a 50MB upload used to hit Next.js's body-size guard before
+    // the route's file-size check, surfacing as a misleading 400
+    // invalid_multipart. The Content-Length precheck must intercept it and
+    // return 413 file_too_large so users get an accurate error.
+    getUserMock.mockResolvedValue({ id: "u-1" });
+    const res = await postUploadWithContentLength(
+      makePdfFile(1024),
+      "50000000",
+    );
+    expect(res.status).toBe(413);
+    const body = await res.json();
+    expect(body.error).toBe("file_too_large");
+    // Critical: the precheck fires before formData() parsing, so nothing was
+    // uploaded or persisted.
+    expect(storageUploadMock).not.toHaveBeenCalled();
+    expect(insertBaseResumeMock).not.toHaveBeenCalled();
+  });
+
+  it("falls through when Content-Length is missing (chunked transfer)", async () => {
+    // Some clients omit Content-Length for chunked transfers. The precheck
+    // must not crash; the existing file-size check inside formData() handles
+    // the size guard.
+    getUserMock.mockResolvedValue({ id: "u-1" });
+    const res = await postUpload(makePdfFile(1024));
+    expect(res.status).toBe(200);
+  });
+
+  it("falls through when Content-Length is malformed", async () => {
+    // Defensive: non-numeric Content-Length must not crash the route.
+    getUserMock.mockResolvedValue({ id: "u-1" });
+    const res = await postUploadWithContentLength(
+      makePdfFile(1024),
+      "not-a-number",
+    );
+    // Should fall through to the formData parse + normal flow.
+    expect(res.status).toBe(200);
   });
 
   it("cleans up orphaned blob if row insertion fails", async () => {

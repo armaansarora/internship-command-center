@@ -50,6 +50,24 @@ vi.mock("@/lib/comp-bands/lookup", () => ({
   lookupCompBands: lookupBandsSpy,
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaSpy = vi.hoisted(() =>
+  vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+    async () => ({ allowed: true, used: 1, cap: 25 }),
+  ),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: consumeAiQuotaSpy,
+}));
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 const { POST } = await import("./route");
 
 const OFFER_ID = "22222222-2222-4222-8222-222222222222";
@@ -109,6 +127,8 @@ beforeEach(() => {
   getOfferByIdSpy.mockReset();
   convenePipelineSpy.mockReset();
   lookupBandsSpy.mockReset();
+  consumeAiQuotaSpy.mockReset();
+  consumeAiQuotaSpy.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
 });
 
 describe("POST /api/offers/[id]/convene", () => {
@@ -191,5 +211,21 @@ describe("POST /api/offers/[id]/convene", () => {
     expect(convenePipelineSpy).toHaveBeenCalledWith(
       expect.objectContaining({ bands: null }),
     );
+  });
+
+  it("returns 429 when AI quota is exhausted, never invokes the pipeline", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    getOfferByIdSpy.mockResolvedValue(offerRow());
+    consumeAiQuotaSpy.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+
+    const res = await callPost();
+    expect(res.status).toBe(429);
+    expect(convenePipelineSpy).not.toHaveBeenCalled();
+    expect(lookupBandsSpy).not.toHaveBeenCalled();
   });
 });

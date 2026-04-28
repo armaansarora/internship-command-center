@@ -13,11 +13,15 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/supabase/server";
 import { createClient } from "@/lib/supabase/server";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
 
 interface ApproveBody {
   outreachQueueId?: string;
 }
+
+const MAX_ID_LEN = 200;
 
 export async function POST(req: Request): Promise<Response> {
   const user = await getUser();
@@ -30,6 +34,21 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json(
       { error: "invalid_body", message: "Expected { outreachQueueId }." },
       { status: 400 },
+    );
+  }
+  if (typeof body.outreachQueueId !== "string" || body.outreachQueueId.length > MAX_ID_LEN) {
+    return NextResponse.json(
+      { error: "invalid_body", message: "outreachQueueId must be a short string." },
+      { status: 400 },
+    );
+  }
+
+  const tier = await getUserTier(user.id);
+  const quota = await consumeAiQuota(user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
     );
   }
 

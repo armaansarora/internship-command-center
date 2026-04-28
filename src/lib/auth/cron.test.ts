@@ -54,4 +54,29 @@ describe("verifyCronRequest", () => {
     const req = new Request("https://example.com/api/cron/x");
     expect(verifyCronRequest(req).ok).toBe(false);
   });
+
+  it("rejects x-vercel-cron header alone (cannot substitute for bearer)", () => {
+    // The `x-vercel-cron` header is set by Vercel's platform internally but
+    // is also trivially settable by any external caller. It must NEVER be
+    // sufficient on its own — the bearer token is the only authoritative
+    // proof that a request came from a trusted source.
+    process.env.CRON_SECRET = "correct-horse-staple-battery";
+    _resetEnvCacheForTests();
+    const req = new Request("https://example.com/api/cron/x", {
+      headers: { "x-vercel-cron": "1" },
+    });
+    expect(verifyCronRequest(req).ok).toBe(false);
+  });
+
+  it("rejects x-vercel-cron header combined with a wrong bearer", () => {
+    process.env.CRON_SECRET = "correct-horse-staple-battery";
+    _resetEnvCacheForTests();
+    const req = new Request("https://example.com/api/cron/x", {
+      headers: {
+        "x-vercel-cron": "1",
+        authorization: "Bearer wrong-but-same-length-aaaaaa",
+      },
+    });
+    expect(verifyCronRequest(req).ok).toBe(false);
+  });
 });

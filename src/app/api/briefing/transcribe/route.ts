@@ -14,9 +14,11 @@ import { requireUser } from "@/lib/supabase/server";
 import { readDrillPrefs } from "@/lib/db/queries/drill-prefs-rest";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { transcribeAudio } from "@/lib/speech/transcribe";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 import { z } from "zod/v4";
 
-const Body = z.object({ path: z.string().min(1) });
+const Body = z.object({ path: z.string().min(1).max(500) });
 const BUCKET = "interview-audio-private";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -42,6 +44,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   if (!parsed.data.path.startsWith(`${user.id}/`)) {
     return NextResponse.json({ error: "path not owned" }, { status: 403 });
+  }
+
+  const tier = await getUserTier(user.id);
+  const quota = await consumeAiQuota(user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
+    );
   }
 
   const admin = getSupabaseAdmin();

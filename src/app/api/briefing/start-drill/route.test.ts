@@ -29,6 +29,24 @@ vi.mock("@/lib/ai/structured/drill-questions", () => ({
   generateDrillQuestions: genMock,
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaMock = vi.hoisted(() =>
+  vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+    async () => ({ allowed: true, used: 1, cap: 25 }),
+  ),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: consumeAiQuotaMock,
+}));
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 function mockSelectChain(rows: unknown[]) {
   const chain = {
     select: vi.fn(() => chain),
@@ -51,6 +69,7 @@ async function callPost(body: unknown) {
 describe("POST /api/briefing/start-drill", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
     sbMock.from.mockImplementation((table: string) => {
       if (table === "interviews") {
         return mockSelectChain([
@@ -89,5 +108,19 @@ describe("POST /api/briefing/start-drill", () => {
     expect(j.drillId).toMatch(/^[0-9a-f-]{36}$/);
     expect(j.company).toBe("CBRE");
     expect(genMock).toHaveBeenCalledOnce();
+  });
+
+  it("429 when AI quota is exhausted, never queries DB", async () => {
+    consumeAiQuotaMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+    const res = await callPost({
+      interviewId: "11111111-1111-4111-8111-111111111111",
+    });
+    expect(res.status).toBe(429);
+    expect(genMock).not.toHaveBeenCalled();
   });
 });

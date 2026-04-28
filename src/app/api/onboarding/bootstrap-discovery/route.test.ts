@@ -17,6 +17,23 @@ vi.mock("@/lib/onboarding/bootstrap", () => ({
   runBootstrapDiscovery: (...args: unknown[]) => runBootstrapMock(...args),
 }));
 
+interface QuotaResultLike {
+  allowed: boolean;
+  used: number;
+  cap: number;
+  reason?: "exceeded" | "rpc_error";
+}
+const consumeAiQuotaMock = vi.fn<(userId: string, tier: string) => Promise<QuotaResultLike>>(
+  async () => ({ allowed: true, used: 1, cap: 25 }),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: (userId: string, tier: string) => consumeAiQuotaMock(userId, tier),
+}));
+
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 vi.mock("@/lib/logger", () => ({
   log: {
     info: vi.fn(),
@@ -37,6 +54,7 @@ function makeRequest(): Request {
 describe("POST /api/onboarding/bootstrap-discovery", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
   });
 
   it("401s when unauthenticated", async () => {
@@ -82,5 +100,18 @@ describe("POST /api/onboarding/bootstrap-discovery", () => {
     const body = await res.json();
     expect(body.ok).toBe(false);
     expect(body.error).toBe("Greenhouse 503");
+  });
+
+  it("returns 429 when AI quota is exhausted and never invokes discovery", async () => {
+    getUserMock.mockResolvedValueOnce({ id: "user-q" });
+    consumeAiQuotaMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+      reason: "exceeded",
+    });
+    const res = await POST(makeRequest());
+    expect(res.status).toBe(429);
+    expect(runBootstrapMock).not.toHaveBeenCalled();
   });
 });

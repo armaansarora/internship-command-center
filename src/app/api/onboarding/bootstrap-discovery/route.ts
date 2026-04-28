@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/supabase/server";
 import { runBootstrapDiscovery } from "@/lib/onboarding/bootstrap";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
 
 /**
@@ -23,6 +25,15 @@ export async function POST(_req: Request): Promise<Response> {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const tier = await getUserTier(user.id);
+  const quota = await consumeAiQuota(user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
+    );
   }
 
   log.info("onboarding.bootstrap.started", { userId: user.id });

@@ -28,8 +28,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { draftNegotiationEmail } from "@/lib/ai/structured/negotiation-draft";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 
 export const maxDuration = 60;
+
+const MAX_CONVENING_BYTES = 5_000;
 
 export async function POST(
   req: Request,
@@ -49,6 +53,31 @@ export async function POST(
     convening?: ParlorConveningResult | null;
   };
   const convening = body?.convening ?? null;
+
+  // Defence against token-cost DOS via crafted convening payloads.
+  if (convening !== null) {
+    let serialized: string;
+    try {
+      serialized = JSON.stringify(convening);
+    } catch {
+      return NextResponse.json({ error: "invalid_convening" }, { status: 400 });
+    }
+    if (serialized.length > MAX_CONVENING_BYTES) {
+      return NextResponse.json(
+        { error: "convening_too_large", bytes: serialized.length, cap: MAX_CONVENING_BYTES },
+        { status: 400 },
+      );
+    }
+  }
+
+  const tier = await getUserTier(auth.user.id);
+  const quota = await consumeAiQuota(auth.user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
+    );
+  }
 
   const draft = await draftNegotiationEmail({
     userFirstName:

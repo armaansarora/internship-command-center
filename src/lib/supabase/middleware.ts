@@ -18,6 +18,61 @@ function requireEnv(name: string): string {
   return value;
 }
 
+/**
+ * Public-path table. Each entry intentionally bypasses the Supabase session
+ * check so that unauthenticated callers receive the route's own response
+ * instead of being 307-redirected to /lobby.
+ *
+ * `prefix: true` means the path itself AND any nested path under it are
+ * public (e.g. `/lobby` matches `/lobby/onboarding` but NOT `/lobbyhack`).
+ *
+ * Default (no `prefix` flag) is exact match — required for paths that
+ * have no real sub-routes, so we don't accidentally auth-bypass a future
+ * `/termsfake` style route.
+ *
+ *   /lobby               — prefix: entry point + onboarding sub-routes.
+ *   /terms               — exact: marketing page only.
+ *   /privacy             — exact: marketing page only.
+ *   /pricing             — exact: marketing page only.
+ *   /waitlist            — exact: marketing page only.
+ *   /api/auth/callback   — exact: Supabase OAuth callback runs pre-session.
+ *   /api/webhooks        — prefix: generic webhook namespace (forward compat).
+ *   /api/stripe/webhook  — exact: Stripe POSTs unauthenticated;
+ *                                redirect would break billing (audit M-9 / P2-1).
+ *   /api/cron            — prefix: Vercel Cron POSTs sans session;
+ *                                cron routes self-auth via verifyCronAuth().
+ *   /api/waitlist        — exact: marketing form ingest endpoint.
+ */
+const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
+  { path: "/lobby", prefix: true },
+  { path: "/terms" },
+  { path: "/privacy" },
+  { path: "/pricing" },
+  { path: "/waitlist" },
+  { path: "/api/auth/callback" },
+  { path: "/api/webhooks", prefix: true },
+  { path: "/api/stripe/webhook" },
+  { path: "/api/cron", prefix: true },
+  { path: "/api/waitlist" },
+];
+
+/**
+ * Decide whether `pathname` is reachable without a Supabase session.
+ *
+ * Exact entries match only the literal path. Prefix entries match the path
+ * itself and any nested sub-path under a `/` boundary — so `/lobby` and
+ * `/lobby/onboarding` are public, but `/lobbyhack` is NOT.
+ *
+ * Exported for unit testing.
+ */
+export function isPathPublic(pathname: string): boolean {
+  return PUBLIC_PATHS.some(({ path, prefix }) =>
+    prefix
+      ? pathname === path || pathname.startsWith(path + "/")
+      : pathname === path,
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -55,36 +110,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Public routes that don't require auth.
-  //
-  // Each path here intentionally bypasses the Supabase session check so that
-  // unauthenticated callers receive the route's own response instead of being
-  // 307-redirected to /lobby.
-  //
-  //   /lobby                — entry point; redirect target itself, must be public.
-  //   /api/auth/callback    — Supabase OAuth callback runs before a session exists.
-  //   /api/webhooks         — generic webhook prefix (kept for forward compat).
-  //   /api/stripe/webhook   — Stripe POSTs unauthenticated; redirect would break
-  //                           billing (audit M-9 / P2-1).
-  //   /api/cron             — Vercel Cron POSTs without a session; the cron
-  //                           routes self-authenticate via verifyCronAuth().
-  const publicPaths = [
-    "/lobby",
-    "/terms",
-    "/privacy",
-    "/pricing",
-    "/waitlist",
-    "/api/auth/callback",
-    "/api/webhooks",
-    "/api/stripe/webhook",
-    "/api/cron",
-    "/api/waitlist",
-  ];
-  const isPublicPath = publicPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path),
-  );
-
-  if (!user && !isPublicPath) {
+  if (!user && !isPathPublic(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/lobby";
     return NextResponse.redirect(url);

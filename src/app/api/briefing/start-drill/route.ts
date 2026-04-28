@@ -16,6 +16,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { generateDrillQuestions } from "@/lib/ai/structured/drill-questions";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 import { z } from "zod/v4";
 import { randomUUID } from "crypto";
 
@@ -26,6 +28,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const parsed = Body.safeParse(await req.json());
   if (!parsed.success) {
     return NextResponse.json({ error: "bad body" }, { status: 400 });
+  }
+
+  const tier = await getUserTier(user.id);
+  const quota = await consumeAiQuota(user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429 },
+    );
   }
 
   const sb = await createClient();
