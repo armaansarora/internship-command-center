@@ -59,3 +59,11 @@ playwright-report/
 # Stripe bootstrap script output — contains webhook secret
 .stripe-ids.json
 .env*.local
+
+# Per-developer Claude Code config (skills, local permissions). The skills here
+# are re-installable via `playwright-cli install --skills`; settings.local.json
+# holds developer-specific permission grants and must not be shared.
+.claude/
+
+# playwright-cli session artifacts — page snapshots, console logs, screenshots.
+.playwright-cli/

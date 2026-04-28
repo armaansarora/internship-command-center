@@ -52,9 +52,6 @@ test.describe(
     test("two simultaneous bell-rings produce non-overlapping dispatch request ids", async ({
       page,
     }) => {
-      const writesA: TrackedDispatchWrite[] = [];
-      const writesB: TrackedDispatchWrite[] = [];
-
       await signInAs(page, USERS.alice, {
         tables: {
           agent_dispatches: [],

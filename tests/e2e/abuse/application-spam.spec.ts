@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
 import type { Route } from "@playwright/test";
-import { installSupabaseMock } from "../helpers/mock-supabase";
 import { signInAs } from "../helpers/auth";
 import { USERS, TIMES } from "../helpers/fixtures";
 

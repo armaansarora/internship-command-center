@@ -36,12 +36,10 @@ function requireEnv(name: string): string {
  *   /pricing             — exact: marketing page only.
  *   /waitlist            — exact: marketing page only.
  *   /api/auth/callback   — exact: Supabase OAuth callback runs pre-session.
- *   /api/webhooks        — prefix: generic webhook namespace (forward compat).
  *   /api/stripe/webhook  — exact: Stripe POSTs unauthenticated;
  *                                redirect would break billing (audit M-9 / P2-1).
  *   /api/cron            — prefix: Vercel Cron POSTs sans session;
  *                                cron routes self-auth via verifyCronAuth().
- *   /api/waitlist        — exact: marketing form ingest endpoint.
  */
 const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
   { path: "/lobby", prefix: true },
@@ -50,10 +48,8 @@ const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
   { path: "/pricing" },
   { path: "/waitlist" },
   { path: "/api/auth/callback" },
-  { path: "/api/webhooks", prefix: true },
   { path: "/api/stripe/webhook" },
   { path: "/api/cron", prefix: true },
-  { path: "/api/waitlist" },
 ];
 
 /**

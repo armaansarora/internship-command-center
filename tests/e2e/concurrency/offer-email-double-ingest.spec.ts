@@ -1,5 +1,4 @@
 import { test, expect, type Route } from "@playwright/test";
-import { installSupabaseMock } from "../helpers/mock-supabase";
 import { signInAs } from "../helpers/auth";
 import { USERS } from "../helpers/fixtures";
 

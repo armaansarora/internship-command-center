@@ -75,8 +75,8 @@ describe("isPathPublic — exact paths", () => {
     expect(isPathPublic("/api/stripe/webhookhack")).toBe(false);
   });
 
-  it("matches /api/waitlist exactly", () => {
-    expect(isPathPublic("/api/waitlist")).toBe(true);
+  it("rejects /api/waitlist (no API route exists; marketing page is at /waitlist)", () => {
+    expect(isPathPublic("/api/waitlist")).toBe(false);
   });
 
   it("rejects /api/waitlistdrip", () => {
@@ -125,12 +125,12 @@ describe("isPathPublic — prefix paths", () => {
     expect(isPathPublic("/api/cronfig")).toBe(false);
   });
 
-  it("matches /api/webhooks exactly", () => {
-    expect(isPathPublic("/api/webhooks")).toBe(true);
+  it("rejects /api/webhooks (dead namespace; no real route)", () => {
+    expect(isPathPublic("/api/webhooks")).toBe(false);
   });
 
-  it("matches /api/webhooks/anything", () => {
-    expect(isPathPublic("/api/webhooks/anything")).toBe(true);
+  it("rejects /api/webhooks/anything (no real route)", () => {
+    expect(isPathPublic("/api/webhooks/anything")).toBe(false);
   });
 
   it("rejects /api/webhookshack", () => {
