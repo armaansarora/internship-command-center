@@ -19,6 +19,10 @@ import {
   updateOfferStatus,
 } from "@/lib/db/queries/offers-rest";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 const StatusSchema = z.enum([
   "received",
@@ -69,8 +73,12 @@ export async function PATCH(
   if (!z.string().uuid().safeParse(id).success) {
     return NextResponse.json({ error: "invalid_id" }, { status: 400 });
   }
-  const raw = await req.json().catch(() => null);
-  const parsed = UpdateOfferSchema.safeParse(raw);
+  const raw = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!raw.ok) {
+    return NextResponse.json({ error: raw.error }, { status: raw.status });
+  }
+
+  const parsed = UpdateOfferSchema.safeParse(raw.value);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "invalid_body", details: parsed.error.issues },

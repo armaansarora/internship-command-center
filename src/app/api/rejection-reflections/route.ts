@@ -3,6 +3,10 @@ import { z } from "zod";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { createRejectionReflection } from "@/lib/db/queries/rejection-reflections-rest";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 /**
  * POST /api/rejection-reflections
@@ -28,12 +32,12 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(auth.user.id, "C");
   if (rate.response) return rate.response;
 
-  const raw = await req.json().catch(() => null);
-  if (raw === null) {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+  const raw = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!raw.ok) {
+    return NextResponse.json({ error: raw.error }, { status: raw.status });
   }
 
-  const parsed = BodySchema.safeParse(raw);
+  const parsed = BodySchema.safeParse(raw.value);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "invalid_body", details: parsed.error.issues },

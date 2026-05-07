@@ -10,6 +10,10 @@ import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 const MAX_TRANSCRIPT_BYTES = 20_000;
 
@@ -52,8 +56,12 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(user.id, "B");
   if (rate.response) return rate.response;
 
-  const raw = await req.json().catch(() => null);
-  const parsed = BodySchema.safeParse(raw);
+  const raw = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!raw.ok) {
+    return NextResponse.json({ error: raw.error }, { status: raw.status });
+  }
+
+  const parsed = BodySchema.safeParse(raw.value);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "invalid body", issues: parsed.error.issues },

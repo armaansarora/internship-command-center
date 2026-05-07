@@ -9,7 +9,7 @@ import { getUserTier } from "@/lib/stripe/entitlements";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { log } from "@/lib/logger";
 import { requireEnv } from "@/lib/env";
-import { parseUiMessageBody } from "@/lib/ai/request-guards";
+import { parseUiMessageRequest } from "@/lib/ai/request-guards";
 
 /**
  * Shape of the context each agent loads before the LLM is invoked.
@@ -74,21 +74,11 @@ export function createAgentRoute(config: AgentRouteConfig): (req: Request) => Pr
     const rate = await withRateLimit(user.id);
     if (rate.response) return rate.response;
 
-    let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
-      return Response.json(
-        { error: "Invalid JSON body" },
-        { status: 400, headers: rate.headers }
-      );
-    }
-
-    const parsed = parseUiMessageBody(body);
+    const parsed = await parseUiMessageRequest(req);
     if (!parsed.ok) {
       return Response.json(
         { error: parsed.error },
-        { status: 400, headers: rate.headers }
+        { status: parsed.status ?? 400, headers: rate.headers }
       );
     }
 

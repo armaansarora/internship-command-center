@@ -7,6 +7,7 @@ import { log } from "@/lib/logger";
 import { logSecurityEvent } from "@/lib/audit/log";
 import { buildSubscriptionAuditEvent } from "@/lib/stripe/webhook-audit";
 import { stripeWebhookDuplicateDecision } from "@/lib/stripe/webhook-duplicate";
+import { readRawBodyWithLimit } from "@/lib/http/request-body";
 
 /**
  * Stripe webhook.
@@ -20,10 +21,23 @@ import { stripeWebhookDuplicateDecision } from "@/lib/stripe/webhook-duplicate";
  *  - Failed handler updates never overwrite a "processed" row (concurrent retries).
  */
 export const runtime = "nodejs";
+const STRIPE_WEBHOOK_MAX_BYTES = 512 * 1024;
+
+class WebhookBodyError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
 
 async function getRawBody(request: Request): Promise<Buffer> {
-  const arrayBuffer = await request.arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  const body = await readRawBodyWithLimit(request, STRIPE_WEBHOOK_MAX_BYTES);
+  if (!body.ok) {
+    throw new WebhookBodyError(body.error, body.status);
+  }
+  return Buffer.from(body.bytes);
 }
 
 async function finalizeWebhookSuccess(
@@ -91,6 +105,9 @@ export async function POST(request: Request): Promise<NextResponse> {
       STRIPE_WEBHOOK_SECRET,
     );
   } catch (err) {
+    if (err instanceof WebhookBodyError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
     log.warn("stripe.webhook.signature_verification_failed", {
       error: err instanceof Error ? err.message : String(err),
     });

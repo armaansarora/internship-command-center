@@ -9,7 +9,7 @@ import { buildOtisSystemPrompt } from "@/lib/agents/concierge/system-prompt";
 import { getConciergeState } from "@/lib/db/queries/user-profiles-rest";
 import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
-import { parseUiMessageBody } from "@/lib/ai/request-guards";
+import { parseUiMessageRequest } from "@/lib/ai/request-guards";
 
 /**
  * POST /api/concierge/chat — Otis's streaming dialogue endpoint.
@@ -34,15 +34,14 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(user.id, "B");
   if (rate.response) return rate.response;
 
-  const rawBody = await req.json().catch(() => null);
-  const guardedBody = parseUiMessageBody(rawBody);
+  const guardedBody = await parseUiMessageRequest(req);
   if (!guardedBody.ok) {
-    return NextResponse.json({ error: guardedBody.error }, { status: 400 });
+    return NextResponse.json(
+      { error: guardedBody.error },
+      { status: guardedBody.status ?? 400 },
+    );
   }
-  const bodyRecord =
-    typeof rawBody === "object" && rawBody !== null
-      ? (rawBody as Record<string, unknown>)
-      : {};
+  const bodyRecord = guardedBody.body;
 
   const tier = await getUserTier(user.id);
   const quota = await consumeAiQuota(user.id, tier);

@@ -33,6 +33,10 @@ import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readRawBodyWithLimit,
+} from "@/lib/http/request-body";
 
 export const maxDuration = 60;
 
@@ -57,9 +61,22 @@ export async function POST(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  const body = (await req.json().catch(() => ({}))) as {
-    convening?: ParlorConveningResult | null;
-  };
+  const bodyResult = await readRawBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!bodyResult.ok) {
+    return NextResponse.json(
+      { error: bodyResult.error },
+      { status: bodyResult.status },
+    );
+  }
+  const bodyText = new TextDecoder().decode(bodyResult.bytes).trim();
+  let body: { convening?: ParlorConveningResult | null } = {};
+  if (bodyText.length > 0) {
+    try {
+      body = JSON.parse(bodyText) as { convening?: ParlorConveningResult | null };
+    } catch {
+      return NextResponse.json({ error: "invalid_json_body" }, { status: 400 });
+    }
+  }
   const convening = body?.convening ?? null;
 
   // Defence against token-cost DOS via crafted convening payloads.

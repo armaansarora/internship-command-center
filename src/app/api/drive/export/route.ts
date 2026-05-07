@@ -3,6 +3,10 @@ import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { getDocumentById } from "@/lib/db/queries/documents-rest";
 import { exportDocumentToDrive } from "@/lib/utils/google-drive-export";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 export async function POST(req: Request): Promise<Response> {
   const auth = await requireUserApi();
@@ -11,8 +15,14 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(user.id);
   if (rate.response) return rate.response;
 
-  const body = (await req.json()) as { documentId: string };
-  const { documentId } = body;
+  const body = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!body.ok) {
+    return NextResponse.json(
+      { error: body.error },
+      { status: body.status, headers: rate.headers }
+    );
+  }
+  const { documentId } = body.value as { documentId?: string };
 
   if (!documentId) {
     return NextResponse.json(

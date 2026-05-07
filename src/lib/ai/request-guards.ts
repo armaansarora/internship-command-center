@@ -1,12 +1,13 @@
 import type { UIMessage } from "ai";
+import { readJsonBodyWithLimit } from "@/lib/http/request-body";
 
 const MAX_UI_MESSAGES = 40;
 const MAX_UI_MESSAGE_TEXT_CHARS = 20_000;
-const MAX_UI_MESSAGE_BODY_CHARS = 80_000;
+export const MAX_UI_MESSAGE_BODY_BYTES = 80_000;
 
 type GuardResult =
-  | { ok: true; messages: UIMessage[] }
-  | { ok: false; error: string };
+  | { ok: true; messages: UIMessage[]; body: Record<string, unknown> }
+  | { ok: false; error: string; status?: number };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -35,16 +36,11 @@ function textCharsFromMessage(message: unknown): number {
  */
 export function parseUiMessageBody(raw: unknown): GuardResult {
   if (!isRecord(raw) || !Array.isArray(raw.messages)) {
-    return { ok: false, error: "invalid body" };
-  }
-
-  const serialized = JSON.stringify(raw);
-  if (serialized.length > MAX_UI_MESSAGE_BODY_CHARS) {
-    return { ok: false, error: "body too large" };
+    return { ok: false, error: "invalid body", status: 400 };
   }
 
   if (raw.messages.length > MAX_UI_MESSAGES) {
-    return { ok: false, error: "too many messages" };
+    return { ok: false, error: "too many messages", status: 400 };
   }
 
   const textChars = raw.messages.reduce(
@@ -52,8 +48,25 @@ export function parseUiMessageBody(raw: unknown): GuardResult {
     0,
   );
   if (textChars > MAX_UI_MESSAGE_TEXT_CHARS) {
-    return { ok: false, error: "messages too large" };
+    return { ok: false, error: "messages too large", status: 400 };
   }
 
-  return { ok: true, messages: raw.messages as UIMessage[] };
+  return {
+    ok: true,
+    messages: raw.messages as UIMessage[],
+    body: raw,
+  };
+}
+
+export async function parseUiMessageRequest(req: Request): Promise<GuardResult> {
+  const raw = await readJsonBodyWithLimit(req, MAX_UI_MESSAGE_BODY_BYTES);
+  if (!raw.ok) {
+    return {
+      ok: false,
+      error: raw.error,
+      status: raw.status,
+    };
+  }
+
+  return parseUiMessageBody(raw.value);
 }

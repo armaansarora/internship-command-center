@@ -33,6 +33,10 @@ import { createClient } from "@/lib/supabase/server";
 import { insertOffer } from "@/lib/db/queries/offers-rest";
 import { parseOfferEmail } from "@/lib/offers/parse-offer-email";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 const IngestEmailSchema = z
   .object({
@@ -48,8 +52,12 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(auth.user.id, "C");
   if (rate.response) return rate.response;
 
-  const raw = await req.json().catch(() => null);
-  const parsed = IngestEmailSchema.safeParse(raw);
+  const raw = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!raw.ok) {
+    return NextResponse.json({ error: raw.error }, { status: raw.status });
+  }
+
+  const parsed = IngestEmailSchema.safeParse(raw.value);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "invalid_body", details: parsed.error.issues },

@@ -4,6 +4,10 @@ import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { createCheckoutSession } from "@/lib/stripe/server";
 import { STRIPE_PLANS } from "@/lib/stripe/config";
 import { log } from "@/lib/logger";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 import { z } from "zod";
 
 const VALID_PRICE_IDS: ReadonlySet<string> = new Set(
@@ -26,8 +30,14 @@ export async function POST(request: Request): Promise<Response> {
   const rate = await withRateLimit(user.id);
   if (rate.response) return rate.response;
 
-  const body: unknown = await request.json();
-  const parsed = CheckoutSchema.safeParse(body);
+  const body = await readJsonBodyWithLimit(request, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!body.ok) {
+    return NextResponse.json(
+      { error: body.error },
+      { status: body.status, headers: rate.headers },
+    );
+  }
+  const parsed = CheckoutSchema.safeParse(body.value);
 
   if (!parsed.success) {
     return NextResponse.json(

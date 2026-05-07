@@ -34,6 +34,10 @@ import { createClient, requireUser } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { approveOutreachForUser } from "@/lib/db/queries/outreach-mutations";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 const BodySchema = z.object({ id: z.string().uuid() });
 
@@ -57,14 +61,12 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(user.id, "C");
   if (rate.response) return rate.response;
 
-  let json: unknown;
-  try {
-    json = await req.json();
-  } catch {
-    return NextResponse.json({ error: "bad_request" }, { status: 400 });
+  const json = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!json.ok) {
+    return NextResponse.json({ error: json.error }, { status: json.status });
   }
 
-  const parsed = BodySchema.safeParse(json);
+  const parsed = BodySchema.safeParse(json.value);
   if (!parsed.success) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }

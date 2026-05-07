@@ -17,6 +17,10 @@ import { scoreAnswer } from "@/lib/ai/structured/score-answer";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 import { z } from "zod/v4";
 
 const Body = z.object({
@@ -32,7 +36,12 @@ export async function POST(req: NextRequest): Promise<Response> {
   const rate = await withRateLimit(user.id, "B");
   if (rate.response) return rate.response;
 
-  const parsed = Body.safeParse(await req.json().catch(() => null));
+  const raw = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!raw.ok) {
+    return NextResponse.json({ error: raw.error }, { status: raw.status });
+  }
+
+  const parsed = Body.safeParse(raw.value);
   if (!parsed.success) {
     return NextResponse.json({ error: "bad body" }, { status: 400 });
   }

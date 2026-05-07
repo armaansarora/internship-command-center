@@ -46,7 +46,7 @@ import { buildCachedSystemMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
 import { extractAndStoreMemories } from "@/lib/ai/memory-extractor";
 import { getMemoriesForContext } from "@/lib/db/queries/agent-memory-rest";
-import { parseUiMessageBody } from "@/lib/ai/request-guards";
+import { parseUiMessageRequest } from "@/lib/ai/request-guards";
 
 /**
  * Tools shape — record of `tool(...)` outputs from `ai`. We deliberately keep
@@ -174,20 +174,11 @@ export function createAgentRouteHandler<Context>(
     const check = await withRateLimit(user.id, "B");
     if (check.response) return check.response;
 
-    let rawBody: unknown;
-    try {
-      rawBody = await req.json();
-    } catch {
-      return Response.json(
-        { error: "Invalid JSON body" },
-        { status: 400, headers: check.headers }
-      );
-    }
-    const guardedBody = parseUiMessageBody(rawBody);
+    const guardedBody = await parseUiMessageRequest(req);
     if (!guardedBody.ok) {
       return Response.json(
         { error: guardedBody.error },
-        { status: 400, headers: check.headers }
+        { status: guardedBody.status ?? 400, headers: check.headers }
       );
     }
     const { messages } = guardedBody;

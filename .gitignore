@@ -65,5 +65,8 @@ playwright-report/
 # holds developer-specific permission grants and must not be shared.
 .claude/
 
+# Per-developer Codex/agent config (local skills, runtime permissions).
+.agents/
+
 # playwright-cli session artifacts — page snapshots, console logs, screenshots.
 .playwright-cli/

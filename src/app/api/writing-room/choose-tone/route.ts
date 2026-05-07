@@ -20,6 +20,10 @@ import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 interface ChooseToneBody {
   outreachQueueId?: string;
@@ -38,7 +42,14 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(user.id, "C");
   if (rate.response) return rate.response;
 
-  const body = (await req.json().catch(() => null)) as ChooseToneBody | null;
+  const bodyResult = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!bodyResult.ok) {
+    return NextResponse.json(
+      { error: bodyResult.error },
+      { status: bodyResult.status },
+    );
+  }
+  const body = bodyResult.value as ChooseToneBody | null;
   if (!body || !body.outreachQueueId || !body.coverLetterId || !body.tone) {
     return NextResponse.json(
       {

@@ -4,6 +4,10 @@ import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { logSecurityEvent, requestMetadata } from "@/lib/audit/log";
 import { GRACE_WINDOW_DAYS, scheduledPurgeAt } from "@/lib/account/delete";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 /**
  * POST /api/account/delete
@@ -29,9 +33,14 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(auth.user.id, "C");
   if (rate.response) return rate.response;
 
-  const { confirmEmail } = (await req.json().catch(() => ({}))) as {
-    confirmEmail?: string;
-  };
+  const body = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!body.ok) {
+    return NextResponse.json(
+      { error: body.error },
+      { status: body.status, headers: rate.headers },
+    );
+  }
+  const { confirmEmail } = body.value as { confirmEmail?: string };
   if (!confirmEmail || confirmEmail !== auth.user.email) {
     return NextResponse.json(
       {

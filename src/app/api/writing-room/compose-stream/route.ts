@@ -21,6 +21,10 @@ import { recordAgentRun } from "@/lib/ai/telemetry";
 import { getToneSystemPrompt } from "@/lib/ai/structured/cover-letter";
 import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  DEFAULT_JSON_BODY_MAX_BYTES,
+  readJsonBodyWithLimit,
+} from "@/lib/http/request-body";
 
 export const maxDuration = 120;
 
@@ -41,8 +45,12 @@ export async function POST(req: Request): Promise<Response> {
   const rate = await withRateLimit(user.id, "B");
   if (rate.response) return rate.response;
 
-  const raw = await req.json().catch(() => null);
-  const parsed = BodySchema.safeParse(raw);
+  const raw = await readJsonBodyWithLimit(req, DEFAULT_JSON_BODY_MAX_BYTES);
+  if (!raw.ok) {
+    return NextResponse.json({ error: raw.error }, { status: raw.status });
+  }
+
+  const parsed = BodySchema.safeParse(raw.value);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "invalid_body", issues: parsed.error.issues },

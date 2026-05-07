@@ -2,18 +2,27 @@ import type { NextConfig } from "next";
 
 /* ─── Content Security Policy ─────────────────────────────────────────────
    Relaxations:
-   - 'unsafe-inline' / 'unsafe-eval' for scripts: required by Next.js
-     development bootstrap and GSAP runtime; tightenable via nonces in
-     a follow-up.
+   - 'unsafe-inline' for scripts: required by the current Next.js/GSAP
+     runtime path; tightenable via nonces in a follow-up.
+   - 'unsafe-eval' is development-only for Next.js bootstrap.
    - 'unsafe-inline' for styles: required by Tailwind JIT + inline style
      props sprinkled across the immersive UI.
    - Stripe iframes (js.stripe.com, hooks.stripe.com) for checkout.
    - Supabase REST + WebSocket for data + realtime.
    - OpenAI / Anthropic for in-browser SSE streaming where applicable.
    ───────────────────────────────────────────────────────────────────── */
+const scriptSources = [
+  "'self'",
+  "'unsafe-inline'",
+  ...(process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : []),
+  "https://js.stripe.com",
+  "https://*.vercel.app",
+  "https://plausible.io",
+].join(" ");
+
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.vercel.app https://plausible.io",
+  `script-src ${scriptSources}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
   "font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:",
   "img-src 'self' data: blob: https:",

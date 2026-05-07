@@ -20,6 +20,7 @@ import { requireUser } from "@/lib/supabase/server";
 import { readDrillPrefs } from "@/lib/db/queries/drill-prefs-rest";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { rejectLargeRequestBody } from "@/lib/http/request-body";
 import { z } from "zod/v4";
 
 const ALLOWED_MIME = new Set([
@@ -29,6 +30,7 @@ const ALLOWED_MIME = new Set([
   "audio/x-m4a",
 ]);
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB cap
+const MAX_MULTIPART_BYTES = MAX_BYTES + 1024 * 1024;
 const BUCKET = "interview-audio-private";
 
 const Query = z.object({
@@ -59,6 +61,11 @@ export async function POST(req: NextRequest): Promise<Response> {
   const parsed = Query.safeParse(Object.fromEntries(url.searchParams));
   if (!parsed.success) {
     return NextResponse.json({ error: "bad params" }, { status: 400 });
+  }
+
+  const bodyLimit = rejectLargeRequestBody(req, MAX_MULTIPART_BYTES);
+  if (bodyLimit) {
+    return NextResponse.json({ error: "audio too large" }, { status: bodyLimit.status });
   }
 
   const form = await req.formData();
