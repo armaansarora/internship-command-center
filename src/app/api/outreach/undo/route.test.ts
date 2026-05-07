@@ -18,9 +18,13 @@ const requireUserMock = vi.hoisted(() =>
   vi.fn(async () => ({ id: "11111111-1111-4111-8111-111111111111" })),
 );
 const sbMock = vi.hoisted(() => ({ from: vi.fn() }));
+const adminMock = vi.hoisted(() => ({ from: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({
   requireUser: requireUserMock,
   createClient: vi.fn(async () => sbMock),
+}));
+vi.mock("@/lib/supabase/admin", () => ({
+  getSupabaseAdmin: () => adminMock,
 }));
 
 interface UpdateChain {
@@ -60,7 +64,7 @@ describe("POST /api/outreach/undo", () => {
   });
 
   it("400 when body is missing id", async () => {
-    sbMock.from.mockImplementation(() =>
+    adminMock.from.mockImplementation(() =>
       mkUpdateChain({ data: null, error: null }),
     );
     const res = await callPost({});
@@ -70,7 +74,7 @@ describe("POST /api/outreach/undo", () => {
   });
 
   it("400 when id is not a uuid", async () => {
-    sbMock.from.mockImplementation(() =>
+    adminMock.from.mockImplementation(() =>
       mkUpdateChain({ data: null, error: null }),
     );
     const res = await callPost({ id: "not-a-uuid" });
@@ -85,7 +89,7 @@ describe("POST /api/outreach/undo", () => {
       data: null,
       error: { code: "PGRST116", message: "no rows affected" },
     });
-    sbMock.from.mockImplementation(() => chain);
+    adminMock.from.mockImplementation(() => chain);
 
     const res = await callPost({
       id: "22222222-2222-4222-8222-222222222222",
@@ -101,7 +105,7 @@ describe("POST /api/outreach/undo", () => {
       data: { id: rowId },
       error: null,
     });
-    sbMock.from.mockImplementation(() => chain);
+    adminMock.from.mockImplementation(() => chain);
 
     const res = await callPost({ id: rowId });
     expect(res.status).toBe(200);

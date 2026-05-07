@@ -80,6 +80,15 @@ export async function linkContactToApplicationForUser(
   contactId: string,
   applicationId: string,
 ): Promise<void> {
+  const { data: contact } = await supabase
+    .from("contacts")
+    .select("id")
+    .eq("id", contactId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!contact) return;
+
   await supabase
     .from("applications")
     .update({

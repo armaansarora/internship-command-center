@@ -21,8 +21,22 @@ const download = vi.hoisted(() =>
     error: null,
   })),
 );
+interface StorageMutationResultLike {
+  data: null;
+  error: { message: string } | null;
+}
+const remove = vi.hoisted(() =>
+  vi.fn<(paths: string[]) => Promise<StorageMutationResultLike>>(async () => ({
+    data: null,
+    error: null,
+  })),
+);
 vi.mock("@/lib/supabase/admin", () => ({
-  getSupabaseAdmin: () => ({ storage: { from: () => ({ download }) } }),
+  getSupabaseAdmin: () => ({ storage: { from: () => ({ download, remove }) } }),
+}));
+
+vi.mock("@/lib/logger", () => ({
+  log: { error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() },
 }));
 
 vi.mock("@/lib/speech/transcribe", () => ({
@@ -70,6 +84,7 @@ describe("POST /api/briefing/transcribe — opt-in gate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
+    remove.mockResolvedValue({ data: null, error: null });
   });
 
   it("403 when voice disabled", async () => {
@@ -96,6 +111,18 @@ describe("POST /api/briefing/transcribe — opt-in gate", () => {
     expect(res.status).toBe(200);
     const j = await res.json();
     expect(j.text).toBe("transcribed text");
+    expect(remove).toHaveBeenCalledWith(["user-1/d/q1.webm"]);
+  });
+
+  it("500 when cleanup fails after transcription", async () => {
+    remove.mockResolvedValueOnce({
+      data: null,
+      error: { message: "storage cleanup failed" },
+    });
+    const res = await callPost({ enabled: true, path: "user-1/d/q1.webm" });
+    expect(res.status).toBe(500);
+    const j = await res.json();
+    expect(j.error).toBe("cleanup failed");
   });
 
   it("429 when AI quota is exhausted on the otherwise-happy path", async () => {

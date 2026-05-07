@@ -92,6 +92,17 @@ interface MutFilter {
   val: unknown;
 }
 
+interface AdminUpdateChain
+  extends PromiseLike<{ error: null | { message: string } }> {
+  eq: (c: string, v: unknown) => AdminUpdateChain;
+  gt: (c: string, v: unknown) => AdminUpdateChain;
+  select: () => AdminUpdateChain;
+  single: () => Promise<{
+    data: { id: string; send_after: string | null } | null;
+    error: null | { code: string; message: string };
+  }>;
+}
+
 function userAuthClient() {
   return {
     from(table: string) {
@@ -223,21 +234,36 @@ function adminCronClient() {
         function makeUpdateChain(
           patch: Partial<OutreachRow>,
           fs: MutFilter[],
-        ): {
-          eq: (c: string, v: unknown) => ReturnType<typeof makeUpdateChain> &
-            PromiseLike<{ error: null | { message: string } }>;
-        } & PromiseLike<{ error: null | { message: string } }> {
+        ): AdminUpdateChain {
           const awaitable = makeUpdateAwaitable(patch, fs);
-          return {
+          const chain: AdminUpdateChain = {
             eq(c: string, v: unknown) {
               fs.push({ kind: "eq", col: c, val: v });
-              return makeUpdateChain(patch, fs) as ReturnType<
-                typeof makeUpdateChain
-              > &
-                PromiseLike<{ error: null | { message: string } }>;
+              return chain;
+            },
+            gt(c: string, v: unknown) {
+              fs.push({ kind: "gt", col: c, val: v });
+              return chain;
+            },
+            select() {
+              return chain;
+            },
+            async single() {
+              const value = await Promise.resolve(awaitable);
+              if (value.error) {
+                return {
+                  data: null,
+                  error: { code: "PGRST116", message: value.error.message },
+                };
+              }
+              return {
+                data: { id: row.id, send_after: row.send_after },
+                error: null,
+              };
             },
             then: awaitable.then,
           };
+          return chain;
         }
 
         const chain = {

@@ -26,6 +26,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { draftNegotiationEmail } from "@/lib/ai/structured/negotiation-draft";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
@@ -90,7 +91,8 @@ export async function POST(
     convening,
   });
 
-  const { data: inserted, error } = await client
+  const admin = getSupabaseAdmin();
+  const { data: inserted, error } = await admin
     .from("outreach_queue")
     .insert({
       user_id: auth.user.id,

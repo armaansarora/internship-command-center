@@ -106,13 +106,32 @@ function chainGetSelect(result: {
 }
 
 /** insert({...}).select("id").single() → result */
-function chainInsert(result: {
-  data: { id: string } | null;
-  error: { message: string } | null;
-}): void {
+function chainInsert(
+  result: {
+    data: { id: string } | null;
+    error: { message: string } | null;
+  },
+  applicationResult: {
+    data: { id: string } | null;
+    error: { message: string } | null;
+  } = { data: { id: "app-1" }, error: null },
+): void {
   insertSingleSpy.mockResolvedValue(result);
   insertSelectSpy.mockReturnValue({ single: insertSingleSpy });
   insertSpy.mockReturnValue({ select: insertSelectSpy });
+  const appMaybeSingleSpy = vi.fn(async () => applicationResult);
+  const appEq2Spy = vi.fn(() => ({ maybeSingle: appMaybeSingleSpy }));
+  const appEq1Spy = vi.fn(() => ({ eq: appEq2Spy }));
+  const appSelectSpy = vi.fn(() => ({ eq: appEq1Spy }));
+  fromSpy.mockImplementation((table: string) => {
+    if (table === "applications") {
+      return { select: appSelectSpy };
+    }
+    return {
+      select: selectSpy,
+      insert: insertSpy,
+    };
+  });
 }
 
 // Zod v4's `.uuid()` enforces RFC 4122 variant bits (8/9/a/b in the
@@ -297,6 +316,26 @@ describe("createRejectionReflection", () => {
     expect(logErrorSpy).toHaveBeenCalledTimes(1);
     expect(logErrorSpy.mock.calls[0][0]).toBe(
       "rejection_reflections.create_failed",
+    );
+  });
+
+  it("does not insert when the application is not owned by the user", async () => {
+    chainInsert(
+      { data: { id: "new-id" }, error: null },
+      { data: null, error: null },
+    );
+
+    const result = await createRejectionReflection({
+      userId: "user-1",
+      applicationId: "victim-app",
+      reasons: [],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("application_not_found");
+    expect(insertSpy).not.toHaveBeenCalled();
+    expect(logErrorSpy.mock.calls[0][0]).toBe(
+      "rejection_reflections.application_check_failed",
     );
   });
 });

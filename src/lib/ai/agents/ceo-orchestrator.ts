@@ -29,6 +29,8 @@ import { generateText, stepCountIs, tool } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel, getActiveModelId } from "../model";
 import { recordAgentRun } from "../telemetry";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 import { getMemoriesForContext } from "@/lib/db/queries/agent-memory-rest";
 import {
   insertQueuedDispatch,
@@ -175,6 +177,12 @@ async function runSubagent<TStats>(
     const systemPrompt = spec.buildSystem(stats, userName, memories, sharedKnowledge);
     const tools = spec.buildTools(userId);
     const modelId = getActiveModelId();
+
+    const tier = await getUserTier(userId);
+    const quota = await consumeAiQuota(userId, tier);
+    if (!quota.allowed) {
+      throw new Error(`ai_quota_exceeded:${quota.used}/${quota.cap}`);
+    }
 
     const result = await generateText({
       model: getAgentModel(),

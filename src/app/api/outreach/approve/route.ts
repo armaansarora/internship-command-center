@@ -31,6 +31,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { createClient, requireUser } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { approveOutreachForUser } from "@/lib/db/queries/outreach-mutations";
 
 const BodySchema = z.object({ id: z.string().uuid() });
@@ -87,7 +88,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   const sendAfterBase = new Date(Date.now() + UNDO_WINDOW_SECONDS * 1000);
 
   const result = await approveOutreachForUser(
-    supabase,
+    getSupabaseAdmin(),
     user.id,
     id,
     sendAfterBase,

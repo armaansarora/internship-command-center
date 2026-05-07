@@ -33,9 +33,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getContactById } from "@/lib/db/queries/contacts-rest";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { draftReferenceRequest } from "@/lib/ai/structured/reference-request";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { consumeAiQuota } from "@/lib/ai/quota";
+import { getUserTier } from "@/lib/stripe/entitlements";
 
 export const maxDuration = 60;
 
@@ -73,6 +77,18 @@ export async function POST(
   const offer = await getOfferById(client, auth.user.id, parsed.data.offerId);
   if (!offer) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
+  const rate = await withRateLimit(auth.user.id, "B");
+  if (rate.response) return rate.response;
+
+  const tier = await getUserTier(auth.user.id);
+  const quota = await consumeAiQuota(auth.user.id, tier);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: "ai_quota_exceeded", used: quota.used, cap: quota.cap },
+      { status: 429, headers: rate.headers },
+    );
   }
 
   // Cooldown gate — match prior reference_request rows for this user
@@ -124,7 +140,8 @@ export async function POST(
     offer,
   });
 
-  const { data: inserted, error } = await client
+  const admin = getSupabaseAdmin();
+  const { data: inserted, error } = await admin
     .from("outreach_queue")
     .insert({
       user_id: auth.user.id,

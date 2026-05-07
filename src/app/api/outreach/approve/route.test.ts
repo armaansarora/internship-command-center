@@ -31,6 +31,10 @@ vi.mock("@/lib/supabase/server", () => ({
   requireUser: requireUserMock,
   createClient: vi.fn(async () => sbMock),
 }));
+const adminMock = vi.hoisted(() => ({ from: vi.fn() }));
+vi.mock("@/lib/supabase/admin", () => ({
+  getSupabaseAdmin: () => adminMock,
+}));
 
 interface SelectChain {
   select: ReturnType<typeof vi.fn>;
@@ -79,11 +83,8 @@ function wireChains(
 ): { selectChain: SelectChain; updateChain: UpdateChain } {
   const selectChain = mkSelectChain(selectResult);
   const updateChain = mkUpdateChain(updateResult);
-  let call = 0;
-  sbMock.from.mockImplementation(() => {
-    call += 1;
-    return call === 1 ? selectChain : updateChain;
-  });
+  sbMock.from.mockImplementation(() => selectChain);
+  adminMock.from.mockImplementation(() => updateChain);
   return { selectChain, updateChain };
 }
 
@@ -100,6 +101,7 @@ async function callPost(body: unknown): Promise<Response> {
 describe("POST /api/outreach/approve", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    adminMock.from.mockReset();
   });
 
   it("400 when body is missing id", async () => {

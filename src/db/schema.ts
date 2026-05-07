@@ -421,7 +421,11 @@ export const outreachQueue = pgTable("outreach_queue", {
   metadata: jsonb("metadata").notNull().default(sql`'{}'::jsonb`),
   ...timestamps,
 }, (table) => [
-  userIsolation("outreach_queue"),
+  pgPolicy("outreach_queue_user_select", {
+    for: "select",
+    to: "authenticated",
+    using: sql`auth.uid() = user_id`,
+  }),
   index("idx_outreach_user_status").on(table.userId, table.status),
 ]);
 
@@ -805,12 +809,13 @@ export const matchRateLimits = pgTable("match_rate_limits", {
 export const rejectionReflections = pgTable("rejection_reflections", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
-  applicationId: uuid("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }).unique(),
+  applicationId: uuid("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }),
   reasons: text("reasons").array().notNull().default(sql`'{}'::text[]`),
   freeText: text("free_text"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   userIsolation("rejection_reflections"),
+  unique("rejection_reflections_user_application_unique").on(table.userId, table.applicationId),
   index("idx_rejection_reflections_user_created").on(table.userId, table.createdAt.desc()),
 ]);
 

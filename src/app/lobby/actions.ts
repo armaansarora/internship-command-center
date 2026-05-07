@@ -1,8 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { env } from "@/lib/env";
 
 /**
  * Server Action: initiate Google OAuth sign-in.
@@ -19,11 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function signInWithGoogleAction(): Promise<void> {
   const supabase = await createClient();
 
-  // Derive the absolute origin (works in Vercel preview / prod / local)
-  const headerList = await headers();
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "";
-  const proto = headerList.get("x-forwarded-proto") ?? "https";
-  const origin = host ? `${proto}://${host}` : "";
+  const origin = env().NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

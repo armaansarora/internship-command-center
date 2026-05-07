@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { counterpartyAnonKey } from "@/lib/networking/match-anon";
 import { log } from "@/lib/logger";
 
@@ -82,7 +83,8 @@ export async function POST() {
     const contactIds = (ownContacts ?? []).map((c) => c.id as string);
     if (contactIds.length > 0) {
       const anonKeys = contactIds.map((id) => counterpartyAnonKey(id));
-      const { error: cascadeErr } = await sb
+      const admin = getSupabaseAdmin();
+      const { error: cascadeErr } = await admin
         .from("match_candidate_index")
         .delete()
         .in("counterparty_anon_key", anonKeys);

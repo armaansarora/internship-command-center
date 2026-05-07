@@ -44,7 +44,11 @@ let singleResult: { data: unknown; error: { message: string } | null } = {
 };
 
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({
+  createClient: async () => ({ from: vi.fn() }),
+}));
+
+vi.mock("@/lib/supabase/admin", () => ({
+  getSupabaseAdmin: () => ({
     from: (_table: string) => ({
       insert: (row: unknown) => {
         insertRowCaptureSpy(row);

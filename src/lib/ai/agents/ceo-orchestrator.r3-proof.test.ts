@@ -46,6 +46,8 @@ const {
   completeDispatchSpy,
   failDispatchSpy,
   recordAgentRunSpy,
+  consumeAiQuotaSpy,
+  getUserTierSpy,
   getMemoriesForContextSpy,
   getCachedSystemSpy,
   getAgentModelSpy,
@@ -85,6 +87,8 @@ const {
     completeDispatchSpy: vi.fn(),
     failDispatchSpy: vi.fn(),
     recordAgentRunSpy: vi.fn(),
+    consumeAiQuotaSpy: vi.fn(),
+    getUserTierSpy: vi.fn(),
     getMemoriesForContextSpy: vi.fn(),
     getCachedSystemSpy: vi.fn(),
     getAgentModelSpy: vi.fn(),
@@ -127,6 +131,14 @@ vi.mock("../model", () => ({
 }));
 
 vi.mock("../telemetry", () => ({ recordAgentRun: recordAgentRunSpy }));
+
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: consumeAiQuotaSpy,
+}));
+
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: getUserTierSpy,
+}));
 
 vi.mock("../prompt-cache", () => ({ getCachedSystem: getCachedSystemSpy }));
 
@@ -228,6 +240,8 @@ beforeEach(() => {
   completeDispatchSpy.mockReset();
   failDispatchSpy.mockReset();
   recordAgentRunSpy.mockReset();
+  consumeAiQuotaSpy.mockReset();
+  getUserTierSpy.mockReset();
   getMemoriesForContextSpy.mockReset();
   getCachedSystemSpy.mockReset();
   getAgentModelSpy.mockReset();
@@ -259,6 +273,8 @@ beforeEach(() => {
   getCachedSystemSpy.mockImplementation((s: string) => s);
   getMemoriesForContextSpy.mockResolvedValue([]);
   recordAgentRunSpy.mockResolvedValue(undefined);
+  getUserTierSpy.mockResolvedValue("free");
+  consumeAiQuotaSpy.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
 
   // CRO's real builder expects a PipelineStats-shaped object.
   getPipelineStatsRestSpy.mockResolvedValue({

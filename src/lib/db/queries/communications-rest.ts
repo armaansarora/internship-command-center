@@ -5,6 +5,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -451,7 +452,7 @@ export async function createOutreachDraft(
     body: string;
   }
 ): Promise<{ success: boolean; outreachId: string | null; message: string }> {
-  const supabase = await createClient();
+  const supabase = getSupabaseAdmin();
 
   const { data: inserted, error } = await supabase
     .from("outreach_queue")
@@ -495,13 +496,15 @@ export async function approveAndSendOutreach(
   userId: string,
   outreachId: string
 ): Promise<{ success: boolean; message: string }> {
-  const supabase = await createClient();
+  const supabase = getSupabaseAdmin();
+  const nowIso = new Date().toISOString();
 
   const { error } = await supabase
     .from("outreach_queue")
     .update({
       status: "approved",
-      approved_at: new Date().toISOString(),
+      approved_at: nowIso,
+      send_after: nowIso,
     })
     .eq("id", outreachId)
     .eq("user_id", userId);

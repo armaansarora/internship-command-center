@@ -19,7 +19,8 @@
  */
 import { NextResponse } from "next/server";
 import { z } from "zod/v4";
-import { createClient, requireUser } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 const BodySchema = z.object({ id: z.string().uuid() });
 
@@ -41,8 +42,8 @@ export async function POST(req: Request): Promise<NextResponse> {
   const { id } = parsed.data;
   const nowIso = new Date().toISOString();
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
     .from("outreach_queue")
     .update({
       status: "pending_approval",

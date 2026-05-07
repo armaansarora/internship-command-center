@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod/v4";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import {
   generateStructuredCoverLetter,
   generateThreeToneCoverLetters,
@@ -602,8 +603,9 @@ export function makeGenerateThreeToneCoverLettersTool(userId: string) {
       // until the user picks a tone via /api/writing-room/choose-tone.
       let outreachQueueId: string | null = null;
       if (complete) {
+        const admin = getSupabaseAdmin();
         const subjectLine = `${input.companyName} — ${input.role} application`;
-        const { data: queueRow, error: queueError } = await supabase
+        const { data: queueRow, error: queueError } = await admin
           .from("outreach_queue")
           .insert({
             user_id: userId,

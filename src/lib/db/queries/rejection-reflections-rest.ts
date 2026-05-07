@@ -110,6 +110,23 @@ export async function createRejectionReflection(
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const supabase = await createClient();
 
+  const { data: application, error: applicationError } = await supabase
+    .from("applications")
+    .select("id")
+    .eq("id", input.applicationId)
+    .eq("user_id", input.userId)
+    .maybeSingle();
+
+  if (applicationError || !application) {
+    const message = applicationError?.message ?? "application_not_found";
+    log.error("rejection_reflections.application_check_failed", undefined, {
+      userId: input.userId,
+      applicationId: input.applicationId,
+      error: message,
+    });
+    return { success: false, error: message };
+  }
+
   const { data, error } = await supabase
     .from("rejection_reflections")
     .insert({

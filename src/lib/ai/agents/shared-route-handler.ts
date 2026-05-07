@@ -35,6 +35,8 @@ import type {
 import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { requireAgentAccess } from "@/lib/stripe/agent-access";
+import { getUserTier } from "@/lib/stripe/entitlements";
+import { consumeAiQuota } from "@/lib/ai/quota";
 import { log } from "@/lib/logger";
 import { requireEnv } from "@/lib/env";
 import type { User } from "@supabase/supabase-js";
@@ -170,6 +172,20 @@ export function createAgentRouteHandler<Context>(
     // Agent calls are Tier B: 20 rpm for free users, 60 rpm for pro/team.
     const check = await withRateLimit(user.id, "B");
     if (check.response) return check.response;
+
+    const tier = await getUserTier(user.id);
+    const quota = await consumeAiQuota(user.id, tier);
+    if (!quota.allowed) {
+      return Response.json(
+        {
+          error: "ai_quota_exceeded",
+          message: `You've used today's AI agent allowance (${quota.cap} runs). Resets at 00:00 UTC.`,
+          used: quota.used,
+          cap: quota.cap,
+        },
+        { status: 429, headers: check.headers },
+      );
+    }
 
     let body: { messages: UIMessage[] };
     try {

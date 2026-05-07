@@ -18,6 +18,7 @@
  * Parallelism is deferred to R3 — R1 ships the proof loop serially.
  */
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { generateStructuredCoverLetter } from "@/lib/ai/structured/cover-letter";
 import {
   generateStructuredTailoredResume,
@@ -214,7 +215,8 @@ export async function executeNorthStar(
       (appRow.contact_id as string | null) ?? null;
 
     const subject = `Interest in ${role} at ${companyName}`;
-    const { data: outreachRow, error: outreachErr } = await supabase
+    const admin = getSupabaseAdmin();
+    const { data: outreachRow, error: outreachErr } = await admin
       .from("outreach_queue")
       .insert({
         user_id: userId,

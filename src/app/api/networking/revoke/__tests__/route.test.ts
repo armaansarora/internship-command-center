@@ -93,6 +93,24 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
+vi.mock("@/lib/supabase/admin", () => ({
+  getSupabaseAdmin: () => ({
+    from: (table: string) => {
+      if (table !== "match_candidate_index") {
+        throw new Error(`unexpected admin table: ${table}`);
+      }
+      return {
+        delete: () => ({
+          in: (_col: string, vals: unknown[]) => {
+            callLog.push({ table, op: "admin_delete_in", payload: vals });
+            return mockCandidateIndexDelete();
+          },
+        }),
+      };
+    },
+  }),
+}));
+
 // Mock the logger — otherwise `log.error` in the route triggers env.ts's
 // Supabase-URL validation and crashes the test in environments without
 // a populated .env.local (CI, fresh clones, etc.).
@@ -135,12 +153,14 @@ describe("POST /api/networking/revoke — cascade purge (R11 Red Team fix)", () 
       "user_profiles:update",
       "networking_match_index:delete_eq",
       "contacts:select_eq",
-      "match_candidate_index:delete_in",
+      "match_candidate_index:admin_delete_in",
     ]);
 
     // Cascade anon-keys must be deterministic HMAC-SHA256 hex (64 chars).
     const cascade = callLog.find(
       (c) => c.table === "match_candidate_index" && c.op === "delete_in",
+    ) ?? callLog.find(
+      (c) => c.table === "match_candidate_index" && c.op === "admin_delete_in",
     );
     const keys = cascade?.payload as string[];
     expect(keys).toHaveLength(3);

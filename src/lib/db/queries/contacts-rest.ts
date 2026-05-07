@@ -416,6 +416,20 @@ export async function linkContactToApplication(
 ): Promise<{ success: boolean; message: string }> {
   const supabase = await createClient();
 
+  const { data: contact, error: contactError } = await supabase
+    .from("contacts")
+    .select("id")
+    .eq("id", contactId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (contactError || !contact) {
+    return {
+      success: false,
+      message: "Contact not found for this user.",
+    };
+  }
+
   const { error } = await supabase
     .from("applications")
     .update({

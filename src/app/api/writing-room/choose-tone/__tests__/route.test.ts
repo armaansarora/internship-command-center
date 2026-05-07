@@ -49,6 +49,21 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
+vi.mock("@/lib/supabase/admin", () => ({
+  getSupabaseAdmin: () => ({
+    from: (table: string) => {
+      if (table !== "outreach_queue") return {};
+      return {
+        update: (_patch: unknown) => ({
+          eq: () => ({
+            eq: async () => ({ error: updateError }),
+          }),
+        }),
+      };
+    },
+  }),
+}));
+
 vi.mock("@/lib/logger", () => ({
   log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));

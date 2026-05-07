@@ -23,6 +23,28 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(async () => supabaseStub),
 }));
 
+const supabaseAdminFromMock = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/supabase/admin", () => ({
+  getSupabaseAdmin: () => ({ from: supabaseAdminFromMock }),
+}));
+
+const withRateLimitMock = vi.hoisted(() =>
+  vi.fn(async () => ({ response: null, headers: { "X-RateLimit-Limit": "60" } })),
+);
+vi.mock("@/lib/rate-limit-middleware", () => ({
+  withRateLimit: withRateLimitMock,
+}));
+
+const consumeAiQuotaMock = vi.hoisted(() =>
+  vi.fn(async () => ({ allowed: true, used: 1, cap: 25 })),
+);
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiQuota: consumeAiQuotaMock,
+}));
+vi.mock("@/lib/stripe/entitlements", () => ({
+  getUserTier: vi.fn(async () => "free"),
+}));
+
 const getContactByIdMock = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/db/queries/contacts-rest", () => ({
   getContactById: getContactByIdMock,
@@ -106,15 +128,19 @@ function cooldownSelectChain(rows: Array<{
 function stubHappyPath(insertResult: { data: unknown; error: unknown }) {
   const cooldown = cooldownSelectChain([]);
   const insertC = insertChain(insertResult);
-  supabaseFromMock
-    .mockReturnValueOnce(cooldown)
-    .mockReturnValueOnce(insertC);
+  supabaseFromMock.mockReturnValueOnce(cooldown);
+  supabaseAdminFromMock.mockReturnValueOnce(insertC);
   return { cooldown, insertC };
 }
 
 describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    withRateLimitMock.mockResolvedValue({
+      response: null,
+      headers: { "X-RateLimit-Limit": "60" },
+    });
+    consumeAiQuotaMock.mockResolvedValue({ allowed: true, used: 1, cap: 25 });
     requireUserApiMock.mockImplementation(async () => ({
       ok: true,
       user: { id: "u1", firstName: "Armaan" },
@@ -218,6 +244,22 @@ describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
     expect(res.status).toBe(500);
   });
 
+  it("returns 429 before drafting when AI quota is exhausted", async () => {
+    consumeAiQuotaMock.mockResolvedValueOnce({
+      allowed: false,
+      used: 26,
+      cap: 25,
+    });
+    const res = await POST(
+      makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
+      ctx,
+    );
+    expect(res.status).toBe(429);
+    expect(draftRefMock).not.toHaveBeenCalled();
+    expect(supabaseFromMock).not.toHaveBeenCalledWith("outreach_queue");
+    expect(supabaseAdminFromMock).not.toHaveBeenCalled();
+  });
+
   // R12 Red Team — cooldown gate (prevents ref-request spam).
   describe("cooldown (6h) — prevents same-(contact, offer) re-draft spam", () => {
     it("returns 429 when a prior reference_request for this (contact, offer) is within window", async () => {
@@ -271,9 +313,8 @@ describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
         },
         error: null,
       });
-      supabaseFromMock
-        .mockReturnValueOnce(cooldown)
-        .mockReturnValueOnce(insertC);
+      supabaseFromMock.mockReturnValueOnce(cooldown);
+      supabaseAdminFromMock.mockReturnValueOnce(insertC);
       const res = await POST(
         makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
         ctx,

@@ -37,6 +37,10 @@ export async function GET(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  if (!row.storagePath.startsWith(`u/${user.id}/`)) {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+
   const signedUrl = await mintSignedUrlForBaseResume(row.storagePath, 3600);
   if (!signedUrl) {
     return NextResponse.json(

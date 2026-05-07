@@ -46,9 +46,13 @@ export function withCronHealth<Req extends Request, Res extends Response>(
     const t0 = performance.now();
     let success = false;
     let errorMessage: string | null = null;
+    let shouldRecord = true;
 
     try {
       const response = await handler(req);
+      if (response.status === 401 || response.status === 403) {
+        shouldRecord = false;
+      }
       success = response.ok || (response.status >= 200 && response.status < 400);
       if (!success) {
         try {
@@ -67,17 +71,19 @@ export function withCronHealth<Req extends Request, Res extends Response>(
       errorMessage = err instanceof Error ? err.message.slice(0, 500) : String(err).slice(0, 500);
       throw err;
     } finally {
-      const durationMs = Math.round(performance.now() - t0);
-      const meta = CRON_META_REGISTRY.get(req) ?? null;
-      // Fire-and-forget — never block the cron response on telemetry.
-      void recordCronRun({
-        jobName,
-        startedAt,
-        success,
-        errorMessage,
-        durationMs,
-        metadata: meta,
-      });
+      if (shouldRecord) {
+        const durationMs = Math.round(performance.now() - t0);
+        const meta = CRON_META_REGISTRY.get(req) ?? null;
+        // Fire-and-forget — never block the cron response on telemetry.
+        void recordCronRun({
+          jobName,
+          startedAt,
+          success,
+          errorMessage,
+          durationMs,
+          metadata: meta,
+        });
+      }
     }
   };
 }

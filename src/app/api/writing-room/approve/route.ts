@@ -13,6 +13,7 @@
 import { NextResponse } from "next/server";
 import { getUser } from "@/lib/supabase/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
@@ -117,11 +118,13 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const nowIso = new Date().toISOString();
-  const { error: updateError } = await supabase
+  const admin = getSupabaseAdmin();
+  const { error: updateError } = await admin
     .from("outreach_queue")
     .update({
       status: "approved",
       approved_at: nowIso,
+      send_after: nowIso,
       updated_at: nowIso,
     })
     .eq("id", body.outreachQueueId)

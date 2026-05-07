@@ -24,8 +24,8 @@ import { approveOutreachForUser } from "@/lib/db/queries/outreach-mutations";
 // Mocks for the route-level tests. The route now does TWO supabase calls:
 //   1. .from("outreach_queue").select("type").eq(...).eq(...).eq(...).maybeSingle()
 //   2. The helper's .from("outreach_queue").update({...}).eq(...).eq(...).eq(...).select(...).single()
-// We use a single `sbMock.from` whose implementation returns a different
-// chain depending on which call site (select-only vs update) is invoking it.
+// The first uses the user client for ownership-scoped reads; the second uses
+// the admin client so authenticated users cannot write outreach_queue directly.
 // ---------------------------------------------------------------------------
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
@@ -34,9 +34,13 @@ const requireUserMock = vi.hoisted(() =>
   vi.fn(async () => ({ id: USER_ID })),
 );
 const sbMock = vi.hoisted(() => ({ from: vi.fn() }));
+const adminMock = vi.hoisted(() => ({ from: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({
   requireUser: requireUserMock,
   createClient: vi.fn(async () => sbMock),
+}));
+vi.mock("@/lib/supabase/admin", () => ({
+  getSupabaseAdmin: () => adminMock,
 }));
 
 interface SelectChain {
@@ -209,12 +213,8 @@ describe("24h negotiation send-hold (server-clamped)", () => {
       error: null,
     });
 
-    // First .from() call is the SELECT; second is the UPDATE inside the helper.
-    let call = 0;
-    sbMock.from.mockImplementation(() => {
-      call += 1;
-      return call === 1 ? selectChain : updateChain;
-    });
+    sbMock.from.mockImplementation(() => selectChain);
+    adminMock.from.mockImplementation(() => updateChain);
 
     const before = Date.now();
     const res = await callPost({ id: rowId });
@@ -248,11 +248,8 @@ describe("24h negotiation send-hold (server-clamped)", () => {
       error: null,
     });
 
-    let call = 0;
-    sbMock.from.mockImplementation(() => {
-      call += 1;
-      return call === 1 ? selectChain : updateChain;
-    });
+    sbMock.from.mockImplementation(() => selectChain);
+    adminMock.from.mockImplementation(() => updateChain);
 
     const before = Date.now();
     const res = await callPost({ id: rowId });

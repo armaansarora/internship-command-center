@@ -16,6 +16,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { transcribeAudio } from "@/lib/speech/transcribe";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
+import { log } from "@/lib/logger";
 import { z } from "zod/v4";
 
 const Body = z.object({ path: z.string().min(1).max(500) });
@@ -62,6 +63,33 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (error || !data) {
     return NextResponse.json({ error: "download failed" }, { status: 500 });
   }
-  const text = await transcribeAudio(data);
+  let text: string | null = null;
+  let transcriptionError: unknown = null;
+  try {
+    text = await transcribeAudio(data);
+  } catch (err) {
+    transcriptionError = err;
+  }
+
+  const { error: cleanupError } = await admin.storage
+    .from(BUCKET)
+    .remove([parsed.data.path]);
+
+  if (cleanupError) {
+    log.error("briefing.transcribe.cleanup_failed", cleanupError, {
+      userId: user.id,
+      path: parsed.data.path,
+    });
+    return NextResponse.json({ error: "cleanup failed" }, { status: 500 });
+  }
+
+  if (transcriptionError) {
+    log.error("briefing.transcribe.failed", transcriptionError, {
+      userId: user.id,
+      path: parsed.data.path,
+    });
+    return NextResponse.json({ error: "transcription failed" }, { status: 500 });
+  }
+
   return NextResponse.json({ text });
 }

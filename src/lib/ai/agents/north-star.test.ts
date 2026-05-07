@@ -92,6 +92,14 @@ vi.mock("@/lib/supabase/server", () => {
   };
 });
 
+vi.mock("@/lib/supabase/admin", () => {
+  return {
+    getSupabaseAdmin: () => ({
+      from: (table: string) => supabaseMock.tableBuilder(table),
+    }),
+  };
+});
+
 vi.mock("@/lib/ai/structured/tailored-resume", () => {
   return {
     generateStructuredTailoredResume: vi.fn(async () => ({
