@@ -82,6 +82,14 @@ describe("isPathPublic — exact paths", () => {
   it("rejects /api/waitlistdrip", () => {
     expect(isPathPublic("/api/waitlistdrip")).toBe(false);
   });
+
+  it("matches /opengraph-image exactly", () => {
+    expect(isPathPublic("/opengraph-image")).toBe(true);
+  });
+
+  it("rejects /opengraph-image/extra", () => {
+    expect(isPathPublic("/opengraph-image/extra")).toBe(false);
+  });
 });
 
 describe("isPathPublic — prefix paths", () => {
