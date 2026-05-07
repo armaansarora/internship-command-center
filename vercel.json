@@ -13,6 +13,10 @@
       "schedule": "0 1 * * *"
     },
     {
+      "path": "/api/cron/match-index",
+      "schedule": "30 1 * * *"
+    },
+    {
       "path": "/api/cron/purge-sweeper",
       "schedule": "0 3 * * *"
     },
