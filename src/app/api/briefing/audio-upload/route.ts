@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/supabase/server";
 import { readDrillPrefs } from "@/lib/db/queries/drill-prefs-rest";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { z } from "zod/v4";
 
 const ALLOWED_MIME = new Set([
@@ -32,11 +33,14 @@ const BUCKET = "interview-audio-private";
 
 const Query = z.object({
   drillId: z.string().uuid(),
-  questionId: z.string().min(1).max(128),
+  questionId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/),
 });
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<Response> {
   const user = await requireUser();
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
+
   const prefs = await readDrillPrefs(user.id);
   if (prefs.voiceRecordingPermanentlyDisabled) {
     return NextResponse.json(

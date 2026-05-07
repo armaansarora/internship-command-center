@@ -8,6 +8,8 @@ import { buildCachedSystemMessages } from "@/lib/ai/prompt-cache";
 import { buildOtisSystemPrompt } from "@/lib/agents/concierge/system-prompt";
 import { getConciergeState } from "@/lib/db/queries/user-profiles-rest";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { parseUiMessageBody } from "@/lib/ai/request-guards";
 
 /**
  * POST /api/concierge/chat — Otis's streaming dialogue endpoint.
@@ -23,17 +25,24 @@ import { log } from "@/lib/logger";
  */
 export const maxDuration = 120;
 
-interface ConcieregePostBody {
-  messages: UIMessage[];
-  timezone?: string;
-  localHour?: number;
-}
-
 export async function POST(req: Request): Promise<Response> {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
+
+  const rawBody = await req.json().catch(() => null);
+  const guardedBody = parseUiMessageBody(rawBody);
+  if (!guardedBody.ok) {
+    return NextResponse.json({ error: guardedBody.error }, { status: 400 });
+  }
+  const bodyRecord =
+    typeof rawBody === "object" && rawBody !== null
+      ? (rawBody as Record<string, unknown>)
+      : {};
 
   const tier = await getUserTier(user.id);
   const quota = await consumeAiQuota(user.id, tier);
@@ -49,11 +58,6 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const body = (await req.json().catch(() => null)) as ConcieregePostBody | null;
-  if (!body || !Array.isArray(body.messages)) {
-    return NextResponse.json({ error: "invalid body" }, { status: 400 });
-  }
-
   const [state] = await Promise.all([getConciergeState(user.id)]);
   const guestName =
     (user.user_metadata?.full_name as string | undefined) ??
@@ -61,11 +65,11 @@ export async function POST(req: Request): Promise<Response> {
     "";
 
   const localHour =
-    typeof body.localHour === "number" && Number.isFinite(body.localHour)
-      ? Math.max(0, Math.min(23, Math.floor(body.localHour)))
+    typeof bodyRecord.localHour === "number" && Number.isFinite(bodyRecord.localHour)
+      ? Math.max(0, Math.min(23, Math.floor(bodyRecord.localHour)))
       : new Date().getUTCHours();
 
-  const timezone = typeof body.timezone === "string" ? body.timezone : "UTC";
+  const timezone = typeof bodyRecord.timezone === "string" ? bodyRecord.timezone : "UTC";
   const isFirstVisit = state?.conciergeCompletedAt === null;
   const lastFloorVisitedLabel = friendlyFloorLabel(state?.lastFloorVisited ?? null);
 
@@ -80,7 +84,7 @@ export async function POST(req: Request): Promise<Response> {
   try {
     const cachedSystem = buildCachedSystemMessages(systemPrompt);
     const modelMessages = await convertToModelMessages(
-      body.messages as Array<Omit<UIMessage, "id">>,
+      guardedBody.messages as Array<Omit<UIMessage, "id">>,
     );
 
     const result = streamText({

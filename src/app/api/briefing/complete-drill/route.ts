@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { DebriefContentSchema, stringifyDebriefContent } from "@/types/debrief";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { z } from "zod/v4";
 
 const Body = z.object({
@@ -22,14 +23,29 @@ const Body = z.object({
   debrief: DebriefContentSchema,
 });
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<Response> {
   const user = await requireUser();
-  const parsed = Body.safeParse(await req.json());
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
+
+  const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "bad body" }, { status: 400 });
   }
 
   const sb = await createClient();
+  if (parsed.data.interviewId) {
+    const { data: interview } = await sb
+      .from("interviews")
+      .select("id")
+      .eq("id", parsed.data.interviewId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!interview) {
+      return NextResponse.json({ error: "interview not found" }, { status: 404 });
+    }
+  }
+
   const title = `Debrief — ${parsed.data.debrief.company} (${parsed.data.debrief.round})`;
 
   const { data: doc, error } = await sb
@@ -56,7 +72,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await sb
       .from("interviews")
       .update({ debrief_id: doc.id })
-      .eq("id", parsed.data.interviewId);
+      .eq("id", parsed.data.interviewId)
+      .eq("user_id", user.id);
   }
   return NextResponse.json({ binderId: doc.id });
 }

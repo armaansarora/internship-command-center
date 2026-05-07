@@ -61,6 +61,11 @@ vi.mock("@/lib/stripe/entitlements", () => ({
   getUserTier: vi.fn(async () => "free"),
 }));
 
+const OWNED_AUDIO_PATH =
+  "user-1/00000000-0000-4000-8000-000000000000/q1.webm";
+const OTHER_USER_AUDIO_PATH =
+  "user-2/00000000-0000-4000-8000-000000000000/q1.webm";
+
 async function callPost(opts: {
   enabled: boolean;
   permDisabled?: boolean;
@@ -88,7 +93,7 @@ describe("POST /api/briefing/transcribe — opt-in gate", () => {
   });
 
   it("403 when voice disabled", async () => {
-    const res = await callPost({ enabled: false, path: "user-1/d/q1.webm" });
+    const res = await callPost({ enabled: false, path: OWNED_AUDIO_PATH });
     expect(res.status).toBe(403);
   });
 
@@ -96,22 +101,27 @@ describe("POST /api/briefing/transcribe — opt-in gate", () => {
     const res = await callPost({
       enabled: false,
       permDisabled: true,
-      path: "user-1/d/q1.webm",
+      path: OWNED_AUDIO_PATH,
     });
     expect(res.status).toBe(410);
   });
 
-  it("403 when path does not start with userId/", async () => {
-    const res = await callPost({ enabled: true, path: "user-2/d/q1.webm" });
+  it("403 when path does not belong to the user", async () => {
+    const res = await callPost({ enabled: true, path: OTHER_USER_AUDIO_PATH });
+    expect(res.status).toBe(403);
+  });
+
+  it("403 when path is not an issued audio-upload key", async () => {
+    const res = await callPost({ enabled: true, path: "user-1/d/q1.webm" });
     expect(res.status).toBe(403);
   });
 
   it("200 on happy path", async () => {
-    const res = await callPost({ enabled: true, path: "user-1/d/q1.webm" });
+    const res = await callPost({ enabled: true, path: OWNED_AUDIO_PATH });
     expect(res.status).toBe(200);
     const j = await res.json();
     expect(j.text).toBe("transcribed text");
-    expect(remove).toHaveBeenCalledWith(["user-1/d/q1.webm"]);
+    expect(remove).toHaveBeenCalledWith([OWNED_AUDIO_PATH]);
   });
 
   it("500 when cleanup fails after transcription", async () => {
@@ -119,7 +129,7 @@ describe("POST /api/briefing/transcribe — opt-in gate", () => {
       data: null,
       error: { message: "storage cleanup failed" },
     });
-    const res = await callPost({ enabled: true, path: "user-1/d/q1.webm" });
+    const res = await callPost({ enabled: true, path: OWNED_AUDIO_PATH });
     expect(res.status).toBe(500);
     const j = await res.json();
     expect(j.error).toBe("cleanup failed");
@@ -132,7 +142,7 @@ describe("POST /api/briefing/transcribe — opt-in gate", () => {
       cap: 25,
       reason: "exceeded",
     });
-    const res = await callPost({ enabled: true, path: "user-1/d/q1.webm" });
+    const res = await callPost({ enabled: true, path: OWNED_AUDIO_PATH });
     expect(res.status).toBe(429);
   });
 });

@@ -18,6 +18,7 @@ import {
   getOfferById,
   updateOfferStatus,
 } from "@/lib/db/queries/offers-rest";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const StatusSchema = z.enum([
   "received",
@@ -40,6 +41,8 @@ export async function GET(
 ): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
+  const rate = await withRateLimit(auth.user.id, "A");
+  if (rate.response) return rate.response;
 
   const { id } = await ctx.params;
   if (!z.string().uuid().safeParse(id).success) {
@@ -59,6 +62,8 @@ export async function PATCH(
 ): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
+  const rate = await withRateLimit(auth.user.id, "C");
+  if (rate.response) return rate.response;
 
   const { id } = await ctx.params;
   if (!z.string().uuid().safeParse(id).success) {

@@ -184,10 +184,8 @@ export async function exchangeCodeForTokens(code: string): Promise<TokenResponse
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
     log.error("gmail.oauth.token_exchange_failed", undefined, {
       status: response.status,
-      body: errorText.slice(0, 500),
     });
     throw new Error("Token exchange failed");
   }
@@ -217,10 +215,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<TokenRes
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
     log.error("gmail.oauth.token_refresh_failed", undefined, {
       status: response.status,
-      body: errorText.slice(0, 500),
     });
     throw new Error("Token refresh failed");
   }

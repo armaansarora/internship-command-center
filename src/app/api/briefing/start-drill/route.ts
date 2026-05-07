@@ -18,14 +18,18 @@ import { requireUser, createClient } from "@/lib/supabase/server";
 import { generateDrillQuestions } from "@/lib/ai/structured/drill-questions";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { z } from "zod/v4";
 import { randomUUID } from "crypto";
 
 const Body = z.object({ interviewId: z.string().uuid() });
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<Response> {
   const user = await requireUser();
-  const parsed = Body.safeParse(await req.json());
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
+
+  const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "bad body" }, { status: 400 });
   }
@@ -54,6 +58,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     .from("applications")
     .select("company_name, role")
     .eq("id", interview.application_id)
+    .eq("user_id", user.id)
     .single();
 
   let packetSummary: string | null = null;
@@ -62,6 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       .from("documents")
       .select("content")
       .eq("id", interview.prep_packet_id)
+      .eq("user_id", user.id)
       .single();
     if (pkt?.content) {
       try {

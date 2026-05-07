@@ -9,6 +9,7 @@ import {
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const MAX_TRANSCRIPT_BYTES = 20_000;
 
@@ -47,6 +48,9 @@ export async function POST(req: Request): Promise<Response> {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
 
   const raw = await req.json().catch(() => null);
   const parsed = BodySchema.safeParse(raw);

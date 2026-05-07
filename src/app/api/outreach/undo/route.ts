@@ -21,11 +21,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod/v4";
 import { requireUser } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const BodySchema = z.object({ id: z.string().uuid() });
 
-export async function POST(req: Request): Promise<NextResponse> {
+export async function POST(req: Request): Promise<Response> {
   const user = await requireUser();
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
 
   let json: unknown;
   try {

@@ -18,6 +18,7 @@ import {
   PARLOR_CFO_QUIP_PREF_KEY,
   ParlorCfoQuipPrefSchema,
 } from "@/lib/preferences/parlor-cfo-quip-pref";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 /**
  * POST /api/profile/preferences
@@ -56,6 +57,8 @@ const BodySchema = z.object({
 export async function POST(req: Request): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
+  const rate = await withRateLimit(auth.user.id, "C");
+  if (rate.response) return rate.response;
 
   const raw = await req.json().catch(() => null);
   if (raw === null) {

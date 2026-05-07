@@ -46,6 +46,7 @@ import { buildCachedSystemMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
 import { extractAndStoreMemories } from "@/lib/ai/memory-extractor";
 import { getMemoriesForContext } from "@/lib/db/queries/agent-memory-rest";
+import { parseUiMessageBody } from "@/lib/ai/request-guards";
 
 /**
  * Tools shape — record of `tool(...)` outputs from `ai`. We deliberately keep
@@ -173,6 +174,24 @@ export function createAgentRouteHandler<Context>(
     const check = await withRateLimit(user.id, "B");
     if (check.response) return check.response;
 
+    let rawBody: unknown;
+    try {
+      rawBody = await req.json();
+    } catch {
+      return Response.json(
+        { error: "Invalid JSON body" },
+        { status: 400, headers: check.headers }
+      );
+    }
+    const guardedBody = parseUiMessageBody(rawBody);
+    if (!guardedBody.ok) {
+      return Response.json(
+        { error: guardedBody.error },
+        { status: 400, headers: check.headers }
+      );
+    }
+    const { messages } = guardedBody;
+
     const tier = await getUserTier(user.id);
     const quota = await consumeAiQuota(user.id, tier);
     if (!quota.allowed) {
@@ -186,17 +205,6 @@ export function createAgentRouteHandler<Context>(
         { status: 429, headers: check.headers },
       );
     }
-
-    let body: { messages: UIMessage[] };
-    try {
-      body = (await req.json()) as { messages: UIMessage[] };
-    } catch {
-      return Response.json(
-        { error: "Invalid JSON body" },
-        { status: 400, headers: check.headers }
-      );
-    }
-    const { messages } = body;
 
     // Memory + context loaded in parallel. Memory call is intentionally
     // forgiving: any failure returns [] rather than throwing, so a memory

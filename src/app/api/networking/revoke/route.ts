@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { counterpartyAnonKey } from "@/lib/networking/match-anon";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 /**
  * POST /api/networking/revoke
@@ -37,6 +38,9 @@ export async function POST() {
   if (userErr || !user) {
     return NextResponse.json({ ok: false, reason: "unauthenticated" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
 
   // Step 1 — stamp revoke.
   const stampErr = await sb

@@ -47,8 +47,7 @@ async function fetchRecentMessageRefs(
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gmail list error: ${response.status} ${errorText}`);
+    throw new Error(`Gmail list error: ${response.status}`);
   }
 
   const data = (await response.json()) as GmailMessageListResponse;
@@ -70,10 +69,7 @@ async function fetchMessageDetail(
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Gmail fetch error for ${messageId}: ${response.status} ${errorText}`
-    );
+    throw new Error(`Gmail fetch error for ${messageId}: ${response.status}`);
   }
 
   return response.json() as Promise<GmailMessage>;

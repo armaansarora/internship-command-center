@@ -17,13 +17,29 @@ import { transcribeAudio } from "@/lib/speech/transcribe";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { z } from "zod/v4";
+
+function userAudioPathSchema(userId: string): z.ZodString {
+  const escapedUserId = userId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return z
+    .string()
+    .max(500)
+    .regex(
+      new RegExp(
+        `^${escapedUserId}/[0-9a-fA-F-]{36}/[A-Za-z0-9_-]{1,128}\\.(webm|m4a)$`,
+      ),
+    );
+}
 
 const Body = z.object({ path: z.string().min(1).max(500) });
 const BUCKET = "interview-audio-private";
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<Response> {
   const user = await requireUser();
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
+
   const prefs = await readDrillPrefs(user.id);
   if (prefs.voiceRecordingPermanentlyDisabled) {
     return NextResponse.json(
@@ -38,12 +54,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const parsed = Body.safeParse(await req.json());
+  const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "bad body" }, { status: 400 });
   }
 
-  if (!parsed.data.path.startsWith(`${user.id}/`)) {
+  if (!userAudioPathSchema(user.id).safeParse(parsed.data.path).success) {
     return NextResponse.json({ error: "path not owned" }, { status: 403 });
   }
 

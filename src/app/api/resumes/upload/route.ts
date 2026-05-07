@@ -23,6 +23,7 @@ import {
 } from "@/lib/db/queries/base-resumes-rest";
 import { parseResumePdf, MAX_FILE_BYTES } from "@/lib/resumes/parse";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 export const maxDuration = 60;
 
@@ -39,6 +40,9 @@ export async function POST(req: Request): Promise<Response> {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
 
   // Probe bucket first — surfaces the bucket_unprovisioned error clearly
   // before we bother parsing anything.

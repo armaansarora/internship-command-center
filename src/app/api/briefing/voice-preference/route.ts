@@ -20,6 +20,7 @@ import {
   permanentlyDisableVoice,
   readDrillPrefs,
 } from "@/lib/db/queries/drill-prefs-rest";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { z } from "zod/v4";
 
 const Body = z.object({
@@ -27,9 +28,12 @@ const Body = z.object({
   permanentlyDisable: z.boolean().optional(),
 });
 
-export async function PUT(req: NextRequest): Promise<NextResponse> {
+export async function PUT(req: NextRequest): Promise<Response> {
   const user = await requireUser();
-  const parsed = Body.safeParse(await req.json());
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
+
+  const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "bad body" }, { status: 400 });
   }

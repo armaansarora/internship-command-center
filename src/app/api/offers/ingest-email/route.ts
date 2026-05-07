@@ -32,6 +32,7 @@ import { requireUserApi } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { insertOffer } from "@/lib/db/queries/offers-rest";
 import { parseOfferEmail } from "@/lib/offers/parse-offer-email";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const IngestEmailSchema = z
   .object({
@@ -44,6 +45,8 @@ const IngestEmailSchema = z
 export async function POST(req: Request): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
+  const rate = await withRateLimit(auth.user.id, "C");
+  if (rate.response) return rate.response;
 
   const raw = await req.json().catch(() => null);
   const parsed = IngestEmailSchema.safeParse(raw);

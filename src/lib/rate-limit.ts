@@ -1,6 +1,5 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { env, isProd } from "@/lib/env";
 
 // ── In-memory token-bucket fallback ───────────────────────────────────────────
 //
@@ -88,13 +87,18 @@ type RateLimiters =
 let _ratelimit: RateLimiters | null = null;
 let _redis: Redis | null = null;
 
+function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
 function getRedis(): Redis | null {
   if (_redis) return _redis;
-  const e = env();
-  if (!e.UPSTASH_REDIS_REST_URL || !e.UPSTASH_REDIS_REST_TOKEN) return null;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
   _redis = new Redis({
-    url: e.UPSTASH_REDIS_REST_URL,
-    token: e.UPSTASH_REDIS_REST_TOKEN,
+    url,
+    token,
   });
   return _redis;
 }
@@ -182,7 +186,7 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const limiters = getRateLimiters();
   if (!limiters) {
-    if (isProd()) {
+    if (isProductionRuntime()) {
       return {
         configured: false,
         success: false,
@@ -218,7 +222,7 @@ export async function checkTieredRateLimit(
 ): Promise<RateLimitResult> {
   const limiters = getRateLimiters();
   if (!limiters) {
-    if (isProd()) {
+    if (isProductionRuntime()) {
       return {
         configured: false,
         success: false,
@@ -247,7 +251,7 @@ export async function checkAnonymousRateLimit(
 ): Promise<RateLimitResult> {
   const limiters = getRateLimiters();
   if (!limiters) {
-    if (isProd()) {
+    if (isProductionRuntime()) {
       return {
         configured: false,
         success: false,

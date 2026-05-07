@@ -19,6 +19,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 interface ChooseToneBody {
   outreachQueueId?: string;
@@ -33,6 +34,9 @@ export async function POST(req: Request): Promise<Response> {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
 
   const body = (await req.json().catch(() => null)) as ChooseToneBody | null;
   if (!body || !body.outreachQueueId || !body.coverLetterId || !body.tone) {

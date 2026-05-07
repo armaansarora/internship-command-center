@@ -80,8 +80,7 @@ export async function fetchCalendarEvents(
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Calendar API error: ${response.status} ${errorText}`);
+    throw new Error(`Calendar API error: ${response.status}`);
   }
 
   const data = (await response.json()) as CalendarEventsResponse;
@@ -154,8 +153,7 @@ export async function createCalendarEvent(
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to create calendar event: ${response.status} ${errorText}`);
+    throw new Error(`Failed to create calendar event: ${response.status}`);
   }
 
   return response.json() as Promise<GoogleCalendarEvent>;

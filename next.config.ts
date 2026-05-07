@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
-/* ─── Content Security Policy (Report-Only) ──────────────────────────────
-   Shipped in REPORT-ONLY mode so violations are logged in the browser
-   console but nothing is blocked. Once the CSP has been observed clean
-   in production for a release cycle, swap the header name to
-   `Content-Security-Policy` (drop the `-Report-Only`) to enforce.
-
+/* ─── Content Security Policy ─────────────────────────────────────────────
    Relaxations:
    - 'unsafe-inline' / 'unsafe-eval' for scripts: required by Next.js
      development bootstrap and GSAP runtime; tightenable via nonces in
@@ -16,15 +11,16 @@ import type { NextConfig } from "next";
    - Supabase REST + WebSocket for data + realtime.
    - OpenAI / Anthropic for in-browser SSE streaming where applicable.
    ───────────────────────────────────────────────────────────────────── */
-const cspReportOnly = [
+const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.vercel.app",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.vercel.app https://plausible.io",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
   "font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.anthropic.com https://api.stripe.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.anthropic.com https://api.stripe.com https://plausible.io https://*.ingest.sentry.io",
   "frame-src https://js.stripe.com https://hooks.stripe.com",
   "frame-ancestors 'none'",
+  "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
 ].join("; ");
@@ -52,8 +48,7 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(self), geolocation=()",
   },
-  // Report-only — see comment above. Flip to enforce when stable.
-  { key: "Content-Security-Policy-Report-Only", value: cspReportOnly },
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
 ];
 
 const nextConfig: NextConfig = {

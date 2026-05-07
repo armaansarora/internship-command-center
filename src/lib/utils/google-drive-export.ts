@@ -78,8 +78,7 @@ export async function exportToGoogleDrive(
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Google Drive upload failed: ${response.status} ${errorText}`);
+    throw new Error(`Google Drive upload failed: ${response.status}`);
   }
 
   return response.json() as Promise<DriveFile>;

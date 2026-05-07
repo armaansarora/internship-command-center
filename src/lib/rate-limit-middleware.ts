@@ -4,7 +4,6 @@ import {
   type RateBucket,
 } from "@/lib/rate-limit";
 import { getUserTier } from "@/lib/stripe/entitlements";
-import { isProd } from "@/lib/env";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -35,6 +34,10 @@ const BUCKET_LIMITS: Record<RateBucket, number> = {
 };
 
 const ANON_LIMIT = 20;
+
+function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === "production";
+}
 
 // ── Middleware helper ─────────────────────────────────────────────────────────
 
@@ -95,7 +98,7 @@ export async function withRateLimit(
     "X-RateLimit-Reset": String(reset),
   };
 
-  if (!configured && isProd()) {
+  if (!configured && isProductionRuntime()) {
     const response = Response.json(
       { error: "Rate limiter is not configured for this environment." },
       {
@@ -161,7 +164,7 @@ export async function withAnonymousRateLimit(
     "X-RateLimit-Reset": String(reset),
   };
 
-  if (!configured && isProd()) {
+  if (!configured && isProductionRuntime()) {
     return {
       limited: true,
       headers,
@@ -188,4 +191,3 @@ export async function withAnonymousRateLimit(
 
   return { limited: false, headers, response: null };
 }
-

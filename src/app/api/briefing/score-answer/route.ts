@@ -16,6 +16,7 @@ import { requireUser } from "@/lib/supabase/server";
 import { scoreAnswer } from "@/lib/ai/structured/score-answer";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { z } from "zod/v4";
 
 const Body = z.object({
@@ -26,9 +27,12 @@ const Body = z.object({
   answer: z.string().min(1).max(5_000),
 });
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<Response> {
   const user = await requireUser();
-  const parsed = Body.safeParse(await req.json());
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
+
+  const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "bad body" }, { status: 400 });
   }

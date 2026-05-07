@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import type { JSX } from "react";
-import { revalidatePath } from "next/cache";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { FloorShell } from "@/components/world/FloorShell";
 import { BriefingRoomClient } from "@/components/floor-3/BriefingRoomClient";
@@ -9,6 +8,11 @@ import type { Interview } from "@/components/floor-3/crud/InterviewTimeline";
 import type { PrepPacket, PrepQuestion, QuestionCategory } from "@/components/floor-3/crud/PrepPacketViewer";
 import type { PrepStats } from "@/components/floor-3/cpo-character/CPOWhiteboard";
 import type { Firmness } from "@/components/floor-3/star/interrupt-rules";
+import {
+  createPrepPacketAction,
+  exportPacketAction,
+  printPacketAction,
+} from "@/lib/actions/interviews";
 
 export const metadata: Metadata = { title: "The Briefing Room | The Tower" };
 
@@ -21,82 +25,14 @@ export const metadata: Metadata = { title: "The Briefing Room | The Tower" };
 export default async function BriefingRoomPage(): Promise<JSX.Element> {
   const user = await requireUser();
 
-  // ── Server Actions ─────────────────────────────────────────────────
-
-  async function createPrepPacket(interviewId: string): Promise<void> {
-    "use server";
-    const sessionUser = await requireUser();
-    const sb = await createClient();
-
-    // Get interview + application info
-    const { data: interview } = await sb
-      .from("interviews")
-      .select("application_id, company_id, round")
-      .eq("id", interviewId)
-      .single();
-
-    if (!interview) return;
-
-    const { data: app } = await sb
-      .from("applications")
-      .select("company_name, role")
-      .eq("id", interview.application_id)
-      .single();
-
-    const title = `Prep Packet — ${app?.company_name ?? "Unknown"} (${app?.role ?? "Unknown"})`;
-
-    const { data: newDoc } = await sb
-      .from("documents")
-      .insert({
-        user_id: sessionUser.id,
-        type: "prep_packet",
-        title,
-        content: JSON.stringify({
-          companyOverview: { industry: "Pending", keyBusinessLines: [] },
-          questions: [],
-          talkingPoints: [],
-          completeness: 0,
-        }),
-        application_id: interview.application_id,
-        company_id: interview.company_id,
-        version: 1,
-        is_active: true,
-        generated_by: "cpo",
-      })
-      .select("id")
-      .single();
-
-    // Link prep packet to interview
-    if (newDoc) {
-      await sb
-        .from("interviews")
-        .update({ prep_packet_id: newDoc.id })
-        .eq("id", interviewId);
-    }
-
-    revalidatePath("/briefing-room");
-  }
-
-  async function exportPacket(packetId: string): Promise<void> {
-    "use server";
-    // Placeholder — will be handled client-side via fetch to /api/drive/export
-    void packetId;
-  }
-
-  async function printPacket(packetId: string): Promise<void> {
-    "use server";
-    // Print is handled client-side via window.print()
-    void packetId;
-  }
-
   return (
     <FloorShell floorId="3">
       <Suspense fallback={null}>
         <BriefingRoomData
           userId={user.id}
-          createPrepPacket={createPrepPacket}
-          exportPacket={exportPacket}
-          printPacket={printPacket}
+          createPrepPacket={createPrepPacketAction}
+          exportPacket={exportPacketAction}
+          printPacket={printPacketAction}
         />
       </Suspense>
     </FloorShell>
@@ -316,4 +252,3 @@ async function BriefingRoomData({
     />
   );
 }
-

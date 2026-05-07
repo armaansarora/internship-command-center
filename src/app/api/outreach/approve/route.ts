@@ -33,6 +33,7 @@ import { z } from "zod/v4";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { approveOutreachForUser } from "@/lib/db/queries/outreach-mutations";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const BodySchema = z.object({ id: z.string().uuid() });
 
@@ -51,8 +52,10 @@ const HOLD_SECONDS_BY_TYPE: Record<string, number> = {
   reference_request: REFERENCE_REQUEST_HOLD_SECONDS,
 };
 
-export async function POST(req: Request): Promise<NextResponse> {
+export async function POST(req: Request): Promise<Response> {
   const user = await requireUser();
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
 
   let json: unknown;
   try {

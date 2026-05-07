@@ -18,6 +18,7 @@ import {
   insertOffer,
   getOffersForUser,
 } from "@/lib/db/queries/offers-rest";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const CreateOfferSchema = z
   .object({
@@ -40,6 +41,8 @@ const CreateOfferSchema = z
 export async function POST(req: Request): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
+  const rate = await withRateLimit(auth.user.id, "C");
+  if (rate.response) return rate.response;
 
   const raw = await req.json().catch(() => null);
   const parsed = CreateOfferSchema.safeParse(raw);
@@ -61,6 +64,8 @@ export async function POST(req: Request): Promise<Response> {
 export async function GET(): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
+  const rate = await withRateLimit(auth.user.id, "A");
+  if (rate.response) return rate.response;
 
   const supabase = await createClient();
   const offers = await getOffersForUser(supabase, auth.user.id);

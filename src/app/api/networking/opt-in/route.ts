@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
 import { CURRENT_CONSENT_VERSION } from "@/lib/networking/consent-version";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 /**
  * POST /api/networking/opt-in
@@ -24,6 +25,9 @@ export async function POST() {
   if (userErr || !user) {
     return NextResponse.json({ ok: false, reason: "unauthenticated" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "C");
+  if (rate.response) return rate.response;
 
   const { error } = await sb
     .from("user_profiles")

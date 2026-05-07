@@ -20,6 +20,7 @@ import { getCachedSystem } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
 import { getToneSystemPrompt } from "@/lib/ai/structured/cover-letter";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 export const maxDuration = 120;
 
@@ -37,6 +38,19 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
+
+  const raw = await req.json().catch(() => null);
+  const parsed = BodySchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "invalid_body", issues: parsed.error.issues },
+      { status: 400 },
+    );
+  }
+  const body = parsed.data;
+
   const tier = await getUserTier(user.id);
   const quota = await consumeAiQuota(user.id, tier);
   if (!quota.allowed) {
@@ -50,16 +64,6 @@ export async function POST(req: Request): Promise<Response> {
       { status: 429 },
     );
   }
-
-  const raw = await req.json().catch(() => null);
-  const parsed = BodySchema.safeParse(raw);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "invalid_body", issues: parsed.error.issues },
-      { status: 400 },
-    );
-  }
-  const body = parsed.data;
 
   const model = getAgentModel();
   if (!model) {

@@ -27,6 +27,7 @@ import { convenePipelineForOffer } from "@/lib/ai/agents/parlor-convening";
 import { lookupCompBands } from "@/lib/comp-bands/lookup";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 export const maxDuration = 60;
 
@@ -36,6 +37,8 @@ export async function POST(
 ): Promise<Response> {
   const auth = await requireUserApi();
   if (!auth.ok) return auth.response;
+  const rate = await withRateLimit(auth.user.id, "B");
+  if (rate.response) return rate.response;
 
   const { id } = await ctx.params;
   if (!z.string().uuid().safeParse(id).success) {

@@ -4,6 +4,7 @@ import { runBootstrapDiscovery } from "@/lib/onboarding/bootstrap";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 /**
  * POST /api/onboarding/bootstrap-discovery — Tower's first-run trigger.
@@ -26,6 +27,9 @@ export async function POST(_req: Request): Promise<Response> {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
 
   const tier = await getUserTier(user.id);
   const quota = await consumeAiQuota(user.id, tier);

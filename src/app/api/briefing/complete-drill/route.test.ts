@@ -27,6 +27,7 @@ interface DocsChain {
   update: ReturnType<typeof vi.fn>;
   select: ReturnType<typeof vi.fn>;
   single: ReturnType<typeof vi.fn>;
+  maybeSingle: ReturnType<typeof vi.fn>;
   eq: ReturnType<typeof vi.fn>;
 }
 
@@ -36,6 +37,10 @@ function mkChain(): DocsChain {
     update: vi.fn((_a: UpdateArgs) => chain),
     select: vi.fn(() => chain),
     single: vi.fn(async () => ({ data: { id: "doc-123" }, error: null })),
+    maybeSingle: vi.fn(async () => ({
+      data: { id: "22222222-2222-4222-8222-222222222222" },
+      error: null,
+    })),
     eq: vi.fn(() => chain),
   } as DocsChain;
   return chain;
@@ -113,6 +118,7 @@ describe("POST /api/briefing/complete-drill", () => {
     expect(interviewsChain.update).toHaveBeenCalledOnce();
     const updateArg = interviewsChain.update.mock.calls[0]?.[0] as UpdateArgs;
     expect(updateArg.debrief_id).toBe("doc-123");
+    expect(interviewsChain.eq).toHaveBeenCalledWith("user_id", "user-1");
   });
 
   it("skips interview update when interviewId is null", async () => {

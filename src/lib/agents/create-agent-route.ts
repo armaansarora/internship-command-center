@@ -2,7 +2,6 @@ import { streamText, stepCountIs, convertToModelMessages } from "ai";
 import type { UIMessage, ToolSet } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import type { User } from "@supabase/supabase-js";
-import { z } from "zod/v4";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { requireAgentAccess } from "@/lib/stripe/agent-access";
@@ -10,6 +9,7 @@ import { getUserTier } from "@/lib/stripe/entitlements";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { log } from "@/lib/logger";
 import { requireEnv } from "@/lib/env";
+import { parseUiMessageBody } from "@/lib/ai/request-guards";
 
 /**
  * Shape of the context each agent loads before the LLM is invoked.
@@ -39,11 +39,6 @@ export interface AgentRouteConfig {
   /** Produce the system prompt + tools for this request. */
   loadContext: (args: { user: User; userName: string }) => Promise<AgentContext>;
 }
-
-/** Shape of the body we accept on any agent route. */
-const BodySchema = z.object({
-  messages: z.array(z.any()).min(1, "messages must be a non-empty array"),
-});
 
 /** Default name derivation — keep identical to prior behaviour. */
 function defaultDeriveName(user: User): string {
@@ -79,6 +74,24 @@ export function createAgentRoute(config: AgentRouteConfig): (req: Request) => Pr
     const rate = await withRateLimit(user.id);
     if (rate.response) return rate.response;
 
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return Response.json(
+        { error: "Invalid JSON body" },
+        { status: 400, headers: rate.headers }
+      );
+    }
+
+    const parsed = parseUiMessageBody(body);
+    if (!parsed.ok) {
+      return Response.json(
+        { error: parsed.error },
+        { status: 400, headers: rate.headers }
+      );
+    }
+
     // Per-user-per-UTC-day AI call cap. Defends against runaway provider
     // bills on Free tier and against abuse on paid tiers. Fail-open on
     // infrastructure errors so a transient DB hiccup doesn't lock every
@@ -98,25 +111,7 @@ export function createAgentRoute(config: AgentRouteConfig): (req: Request) => Pr
       );
     }
 
-    let body: unknown;
-    try {
-      body = await req.json();
-    } catch {
-      return Response.json(
-        { error: "Invalid JSON body" },
-        { status: 400, headers: rate.headers }
-      );
-    }
-
-    const parsed = BodySchema.safeParse(body);
-    if (!parsed.success) {
-      return Response.json(
-        { error: "Invalid request body", issues: parsed.error.issues },
-        { status: 400, headers: rate.headers }
-      );
-    }
-
-    const messages = parsed.data.messages as UIMessage[];
+    const messages = parsed.messages as UIMessage[];
     const userName = deriveName(user);
 
     let ctx: AgentContext;

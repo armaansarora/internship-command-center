@@ -17,6 +17,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import {
   generateStateOfMonthPdf,
   type PlanetSnapshot,
@@ -292,6 +293,9 @@ export async function GET(req: Request): Promise<Response> {
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const rate = await withRateLimit(user.id, "B");
+  if (rate.response) return rate.response;
 
   const url = new URL(req.url);
   const monthParam = url.searchParams.get("month");
