@@ -37,6 +37,7 @@ describe("SettingsClient connected services", () => {
     expect(html).toContain("Google workspace is connected");
     expect(html).toContain("Sync Gmail");
     expect(html).toContain("Sync Calendar");
+    expect(html).toContain("Disconnect");
     expect(html).not.toContain("Coming Soon");
   });
 });

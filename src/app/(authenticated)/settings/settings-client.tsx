@@ -126,6 +126,11 @@ export function SettingsClient({
   const [googleConnectState, setGoogleConnectState] = useState<
     "idle" | "loading" | "error"
   >("idle");
+  const [googleDisconnectState, setGoogleDisconnectState] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+  const [effectiveGoogleIntegration, setEffectiveGoogleIntegration] =
+    useState<boolean>(hasGoogleIntegration);
   const [syncState, setSyncState] = useState<
     "idle" | "gmail" | "calendar" | "done" | "error"
   >("idle");
@@ -310,6 +315,7 @@ export function SettingsClient({
 
   const handleConnectGoogle = useCallback(async () => {
     setGoogleConnectState("loading");
+    setGoogleDisconnectState("idle");
     try {
       const response = await fetch("/api/gmail/auth", { method: "GET" });
       if (!response.ok) {
@@ -324,6 +330,25 @@ export function SettingsClient({
       window.location.href = body.authUrl;
     } catch {
       setGoogleConnectState("error");
+    }
+  }, []);
+
+  const handleDisconnectGoogle = useCallback(async () => {
+    setGoogleDisconnectState("loading");
+    try {
+      const response = await fetch("/api/gmail/disconnect", {
+        method: "POST",
+      });
+      if (!response.ok) {
+        setGoogleDisconnectState("error");
+        return;
+      }
+      setEffectiveGoogleIntegration(false);
+      setSyncState("idle");
+      setGoogleDisconnectState("idle");
+      setGoogleConnectState("idle");
+    } catch {
+      setGoogleDisconnectState("error");
     }
   }, []);
 
@@ -1182,11 +1207,13 @@ export function SettingsClient({
                   color: "var(--text-muted)",
                 }}
               >
-                {hasGoogleIntegration
+                {effectiveGoogleIntegration
                   ? "Google workspace is connected. Sync pulls new mail and calendar changes into the Situation Room."
                   : "Connect Gmail and Calendar so COO can surface replies, interview invites, and schedule conflicts."}
               </div>
-              {(googleConnectState === "error" || syncState === "error") && (
+              {(googleConnectState === "error" ||
+                googleDisconnectState === "error" ||
+                syncState === "error") && (
                 <div
                   role="alert"
                   className="mt-1"
@@ -1213,11 +1240,15 @@ export function SettingsClient({
                 </div>
               )}
             </div>
-            {hasGoogleIntegration ? (
+            {effectiveGoogleIntegration ? (
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
-                  disabled={syncState === "gmail" || syncState === "calendar"}
+                  disabled={
+                    syncState === "gmail" ||
+                    syncState === "calendar" ||
+                    googleDisconnectState === "loading"
+                  }
                   onClick={() => void handleSyncGoogle("gmail")}
                   className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
                   style={{
@@ -1237,7 +1268,11 @@ export function SettingsClient({
                 </button>
                 <button
                   type="button"
-                  disabled={syncState === "gmail" || syncState === "calendar"}
+                  disabled={
+                    syncState === "gmail" ||
+                    syncState === "calendar" ||
+                    googleDisconnectState === "loading"
+                  }
                   onClick={() => void handleSyncGoogle("calendar")}
                   className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
                   style={{
@@ -1254,6 +1289,33 @@ export function SettingsClient({
                   aria-label="Sync Google Calendar now"
                 >
                   {syncState === "calendar" ? "Syncing..." : "Sync Calendar"}
+                </button>
+                <button
+                  type="button"
+                  disabled={
+                    googleDisconnectState === "loading" ||
+                    syncState === "gmail" ||
+                    syncState === "calendar"
+                  }
+                  onClick={() => void handleDisconnectGoogle()}
+                  className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    color: "rgba(220, 80, 80, 0.85)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    background: "rgba(220, 60, 60, 0.06)",
+                    border: "1px solid rgba(220, 60, 60, 0.18)",
+                    cursor:
+                      googleDisconnectState === "loading" ? "wait" : "pointer",
+                    opacity: googleDisconnectState === "loading" ? 0.7 : 1,
+                  }}
+                  aria-label="Disconnect Gmail and Google Calendar"
+                >
+                  {googleDisconnectState === "loading"
+                    ? "Disconnecting..."
+                    : "Disconnect"}
                 </button>
               </div>
             ) : (
