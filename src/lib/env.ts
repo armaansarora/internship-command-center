@@ -33,7 +33,13 @@ const EnvSchema = z.object({
   OWNER_USER_ID: z.string().uuid().optional(),
 
   // ── Google OAuth (Gmail + Calendar) ──────────────────────────────────────
-  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_ID: z
+    .string()
+    .regex(
+      /^\d+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/,
+      "must be a Google OAuth web client id like 123-abc.apps.googleusercontent.com",
+    )
+    .optional(),
   GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
   GMAIL_REDIRECT_URI: z.string().url().optional(),
 

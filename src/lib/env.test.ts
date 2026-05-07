@@ -38,4 +38,24 @@ describe("env", () => {
     const vals = requireEnv(["STRIPE_SECRET_KEY"] as const);
     expect(vals.STRIPE_SECRET_KEY).toBe("sk_test_abc");
   });
+
+  it("rejects malformed Google OAuth client ids", () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "key";
+    process.env.GOOGLE_CLIENT_ID =
+      "1646763469098oiok2se6u6d021g2ard9rcu181j866i.apps.googleusercontent.com";
+
+    expect(() => env()).toThrow(/Google OAuth web client id/);
+  });
+
+  it("accepts Google OAuth web client ids with the numeric prefix separator", () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "key";
+    process.env.GOOGLE_CLIENT_ID =
+      "164676346909-8oiok2se6u6d021g2ard9rcu181j866i.apps.googleusercontent.com";
+
+    expect(env().GOOGLE_CLIENT_ID).toBe(
+      "164676346909-8oiok2se6u6d021g2ard9rcu181j866i.apps.googleusercontent.com",
+    );
+  });
 });

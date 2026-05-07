@@ -9,6 +9,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
 import type { TargetProfile } from "@/lib/agents/cro/target-profile";
+import { deriveFloorsUnlocked } from "@/lib/lobby/derive-floors-unlocked";
 
 export interface ConciergeState {
   conciergeCompletedAt: string | null;
@@ -82,6 +83,15 @@ export async function saveConciergeProfile(
     .update({
       concierge_target_profile: profile,
       concierge_completed_at: completedAt,
+      floors_unlocked: deriveFloorsUnlocked({
+        hasApplications: false,
+        hasContacts: false,
+        hasInterviews: false,
+        hasCoverLetters: false,
+        hasFollowUps: false,
+        hasBriefing: false,
+        conciergeCompleted: true,
+      }),
     })
     .eq("id", userId);
 
