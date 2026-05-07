@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
 import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
+import { needsLobbyOnboardingAfterAuth } from "@/lib/auth/post-auth-profile";
 import { log } from "@/lib/logger";
 
 /**
@@ -21,13 +22,17 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const email = data.user?.email ?? data.session?.user.email ?? null;
+      const user = data.user ?? data.session?.user ?? null;
+      const email = user?.email ?? null;
       if (!isEmailAllowedForBeta(email)) {
         await supabase.auth.signOut();
         log.warn("auth.callback.beta_gate_denied", {
           domain: email?.split("@")[1] ?? "unknown",
         });
         return NextResponse.redirect(`${origin}/lobby?error=beta_not_invited`);
+      }
+      if (await needsLobbyOnboardingAfterAuth(supabase, user)) {
+        return NextResponse.redirect(new URL("/lobby", origin).toString());
       }
       return NextResponse.redirect(new URL(next, origin).toString());
     }
