@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireEnv, env } from "@/lib/env";
 import { STRIPE_PLANS, type SubscriptionTier } from "./config";
 
@@ -62,7 +63,8 @@ export async function createOrRetrieveCustomer(
   });
 
   // Persist the customer ID
-  const { error } = await supabase
+  const admin = getSupabaseAdmin();
+  const { error } = await admin
     .from("user_profiles")
     .update({ stripe_customer_id: customer.id })
     .eq("id", userId);
