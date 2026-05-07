@@ -86,6 +86,8 @@ test.describe("new-user activation smoke", () => {
 
     await expectHealthyPage(page, "/pricing");
     await expect(page.getByRole("link", { name: /^request key$/i })).toHaveCount(2);
+    await expect(page.getByText("Every specialist floor unlocked")).toBeVisible();
+    await expect(page.getByText("All seven floors unlocked")).toHaveCount(0);
     await expect(page.getByRole("link", { name: /request team access/i })).toHaveAttribute(
       "href",
       "/waitlist",

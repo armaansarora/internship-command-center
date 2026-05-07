@@ -33,7 +33,7 @@ const TIER_COPY: Record<SubscriptionTier, Omit<TierCard, "tier">> = {
     tagline: "The full tower, every floor.",
     features: [
       "Unlimited applications",
-      "All seven floors unlocked",
+      "Every specialist floor unlocked",
       "All eight AI agents",
       "Daily briefing + outreach drafts",
       "Negotiation Parlor + Observatory",
