@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
+import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
 import { log } from "@/lib/logger";
 
 /**
@@ -18,8 +19,16 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      const email = data.user?.email ?? data.session?.user.email ?? null;
+      if (!isEmailAllowedForBeta(email)) {
+        await supabase.auth.signOut();
+        log.warn("auth.callback.beta_gate_denied", {
+          domain: email?.split("@")[1] ?? "unknown",
+        });
+        return NextResponse.redirect(`${origin}/lobby?error=beta_not_invited`);
+      }
       return NextResponse.redirect(new URL(next, origin).toString());
     }
     log.warn("auth.callback.exchange_failed", { error: error.message });

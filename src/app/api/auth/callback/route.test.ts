@@ -1,0 +1,109 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const {
+  exchangeCodeForSessionSpy,
+  signOutSpy,
+  isEmailAllowedForBetaSpy,
+  logWarnSpy,
+} = vi.hoisted(() => ({
+  exchangeCodeForSessionSpy: vi.fn(),
+  signOutSpy: vi.fn(),
+  isEmailAllowedForBetaSpy: vi.fn(),
+  logWarnSpy: vi.fn(),
+}));
+
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: async () => ({
+    auth: {
+      exchangeCodeForSession: exchangeCodeForSessionSpy,
+      signOut: signOutSpy,
+    },
+  }),
+}));
+
+vi.mock("@/lib/auth/beta-gate", () => ({
+  isEmailAllowedForBeta: isEmailAllowedForBetaSpy,
+}));
+
+vi.mock("@/lib/logger", () => ({
+  log: {
+    warn: logWarnSpy,
+    error: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
+const { GET } = await import("./route");
+
+function request(path: string): Request {
+  return new Request(`https://www.interntower.com${path}`);
+}
+
+describe("GET /api/auth/callback", () => {
+  beforeEach(() => {
+    exchangeCodeForSessionSpy.mockReset();
+    signOutSpy.mockReset();
+    isEmailAllowedForBetaSpy.mockReset();
+    logWarnSpy.mockReset();
+    signOutSpy.mockResolvedValue({ error: null });
+  });
+
+  it("redirects to the safe next path when the beta gate allows the user", async () => {
+    exchangeCodeForSessionSpy.mockResolvedValue({
+      data: {
+        user: { email: "invited@example.com" },
+        session: { user: { email: "invited@example.com" } },
+      },
+      error: null,
+    });
+    isEmailAllowedForBetaSpy.mockReturnValue(true);
+
+    const res = await GET(request("/api/auth/callback?code=abc&next=/settings"));
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "https://www.interntower.com/settings",
+    );
+    expect(isEmailAllowedForBetaSpy).toHaveBeenCalledWith("invited@example.com");
+    expect(signOutSpy).not.toHaveBeenCalled();
+  });
+
+  it("signs out and redirects to the lobby when the email is not invited", async () => {
+    exchangeCodeForSessionSpy.mockResolvedValue({
+      data: {
+        user: { email: "guest@example.com" },
+        session: { user: { email: "guest@example.com" } },
+      },
+      error: null,
+    });
+    isEmailAllowedForBetaSpy.mockReturnValue(false);
+
+    const res = await GET(request("/api/auth/callback?code=abc"));
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "https://www.interntower.com/lobby?error=beta_not_invited",
+    );
+    expect(signOutSpy).toHaveBeenCalledOnce();
+    expect(logWarnSpy).toHaveBeenCalledWith("auth.callback.beta_gate_denied", {
+      domain: "example.com",
+    });
+  });
+
+  it("falls back to auth_failed when the Supabase code exchange fails", async () => {
+    exchangeCodeForSessionSpy.mockResolvedValue({
+      data: { user: null, session: null },
+      error: { message: "bad code" },
+    });
+
+    const res = await GET(request("/api/auth/callback?code=bad"));
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "https://www.interntower.com/lobby?error=auth_failed",
+    );
+    expect(isEmailAllowedForBetaSpy).not.toHaveBeenCalled();
+    expect(signOutSpy).not.toHaveBeenCalled();
+  });
+});

@@ -23,6 +23,7 @@ const EnvSchema = z.object({
 
   // ── App ──────────────────────────────────────────────────────────────────
   NEXT_PUBLIC_APP_URL: z.string().url().default("https://www.interntower.com"),
+  ALLOWED_EMAILS: z.string().optional(),
 
   // ── Owner override ───────────────────────────────────────────────────────
   // Single Supabase user UUID granted unconditional bypass on every

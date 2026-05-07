@@ -12,6 +12,18 @@ interface LobbyPageProps {
   searchParams: Promise<{ error?: string }>;
 }
 
+function getLobbyErrorMessage(error: string | undefined): string | null {
+  if (!error) return null;
+  switch (error) {
+    case "auth_failed":
+      return "The front desk could not verify that sign-in. Try again.";
+    case "beta_not_invited":
+      return "This email does not have a Tower access key yet. Join the waitlist or use an invited account.";
+    default:
+      return decodeURIComponent(error);
+  }
+}
+
 /**
  * The Lobby — ground floor of The Tower.
  *
@@ -25,7 +37,7 @@ interface LobbyPageProps {
 export default async function LobbyPage({ searchParams }: LobbyPageProps) {
   const user = await getUser();
   const params = await searchParams;
-  const initialError = params.error ? decodeURIComponent(params.error) : null;
+  const initialError = getLobbyErrorMessage(params.error);
 
   const conciergeState = user ? await getConciergeState(user.id) : null;
   const needsOnboarding =
