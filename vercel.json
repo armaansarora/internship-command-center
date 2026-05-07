@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/export-worker",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 1 * * *"
     },
     {
       "path": "/api/cron/purge-sweeper",
@@ -18,23 +18,23 @@
     },
     {
       "path": "/api/cron/job-discovery",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/outreach-sender",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 7 * * *"
     },
     {
       "path": "/api/cron/draft-follow-ups",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/unprompted-ceo",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 10 * * *"
     },
     {
       "path": "/api/cron/packet-regenerate",
-      "schedule": "15 * * * *"
+      "schedule": "0 11 * * *"
     },
     {
       "path": "/api/cron/warmth-decay",
