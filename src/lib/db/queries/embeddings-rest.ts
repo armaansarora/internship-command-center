@@ -10,13 +10,12 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { embed, embedMany } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { getEmbeddingModel } from "@/lib/ai/model";
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
-const EMBEDDING_MODEL = openai.embedding("text-embedding-3-small");
 const SIMILARITY_THRESHOLD = 0.7;
 const DEFAULT_MATCH_COUNT = 5;
 
@@ -70,7 +69,7 @@ export interface SimilarJobResult extends SimilarityResult {
  */
 async function generateEmbedding(text: string): Promise<number[]> {
   const { embedding } = await embed({
-    model: EMBEDDING_MODEL,
+    model: getEmbeddingModel(),
     value: text,
   });
   return embedding;
@@ -83,7 +82,7 @@ async function generateEmbeddings(
   texts: string[]
 ): Promise<Array<{ text: string; embedding: number[] }>> {
   const { embeddings } = await embedMany({
-    model: EMBEDDING_MODEL,
+    model: getEmbeddingModel(),
     values: texts,
   });
   return texts.map((text, i) => ({ text, embedding: embeddings[i] }));
@@ -142,7 +141,7 @@ export async function upsertCompanyEmbedding(
     return {
       success: false,
       message:
-        "Failed to generate embedding. Ensure OPENAI_API_KEY is configured.",
+        "Failed to generate embedding. Ensure AI_GATEWAY_API_KEY or OPENAI_API_KEY is configured.",
     };
   }
 
@@ -265,7 +264,7 @@ export async function upsertJobEmbedding(
     return {
       success: false,
       message:
-        "Failed to generate embedding. Ensure OPENAI_API_KEY is configured.",
+        "Failed to generate embedding. Ensure AI_GATEWAY_API_KEY or OPENAI_API_KEY is configured.",
     };
   }
 

@@ -22,6 +22,7 @@
 import { gateway } from "ai";
 import type { LanguageModel } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
+import { createOpenAI, openai } from "@ai-sdk/openai";
 
 // ---------------------------------------------------------------------------
 // Model identifiers
@@ -34,6 +35,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 export const PRIMARY_MODEL_ID = "anthropic/claude-sonnet-4-6" as const;
 /** Fast / cheap model used for memory summarisation. */
 export const FAST_MODEL_ID = "anthropic/claude-haiku-4-5" as const;
+/** Embedding model used for CIO/company/job similarity search. */
+export const EMBEDDING_MODEL_ID = "openai/text-embedding-3-small" as const;
 
 // Mirror identifiers when AI Gateway is unavailable (direct Anthropic SDK
 // expects the bare model name without provider prefix).
@@ -47,7 +50,7 @@ const FAST_MODEL_BARE = "claude-haiku-4-5";
  * Returns true when AI Gateway is configured. We also accept the
  * `VERCEL_AI_GATEWAY_API_KEY` alias used by some deployments.
  */
-function isGatewayEnabled(): boolean {
+export function isGatewayEnabled(): boolean {
   return Boolean(process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_AI_GATEWAY_API_KEY);
 }
 
@@ -77,6 +80,36 @@ export function getFastModel(): LanguageModel {
     return gateway(FAST_MODEL_ID);
   }
   return anthropic(FAST_MODEL_BARE);
+}
+
+/**
+ * Text embedding model for vector search.
+ *
+ * Production is expected to use AI Gateway. The direct OpenAI fallback keeps
+ * local/dev functional for environments that only have OPENAI_API_KEY.
+ */
+export function getEmbeddingModel() {
+  if (isGatewayEnabled()) {
+    return gateway.embeddingModel(EMBEDDING_MODEL_ID);
+  }
+  return openai.embedding("text-embedding-3-small");
+}
+
+/**
+ * Interview audio transcription model.
+ *
+ * AI Gateway exposes an OpenAI-compatible endpoint, so we use the OpenAI
+ * provider against the gateway base URL when the gateway key is present.
+ */
+export function getTranscriptionModel() {
+  if (isGatewayEnabled()) {
+    const apiKey = process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_AI_GATEWAY_API_KEY;
+    return createOpenAI({
+      apiKey,
+      baseURL: "https://ai-gateway.vercel.sh/v1",
+    }).transcription("openai/whisper-1");
+  }
+  return openai.transcription("whisper-1");
 }
 
 /**

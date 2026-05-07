@@ -7,17 +7,16 @@
  * control reaches here, the user has consented and owns the file.
  *
  * `ai@6.0.116` exports `experimental_transcribe` (see node_modules/ai/dist/
- * index.d.ts). We stay on that export rather than the direct OpenAI fetch
- * fallback — the SDK gives us provider-agnostic swap-out later, and the
- * fetch path would bypass AI_GATEWAY_API_KEY routing if we add it.
+ * index.d.ts). The model comes from the central AI factory so production can
+ * route through AI Gateway while local/dev can still use a direct OpenAI key.
  */
-import { openai } from "@ai-sdk/openai";
 import { experimental_transcribe as transcribe } from "ai";
+import { getTranscriptionModel } from "@/lib/ai/model";
 
 export async function transcribeAudio(blob: Blob): Promise<string> {
   const buf = new Uint8Array(await blob.arrayBuffer());
   const result = await transcribe({
-    model: openai.transcription("whisper-1"),
+    model: getTranscriptionModel(),
     audio: buf,
   });
   return result.text ?? "";

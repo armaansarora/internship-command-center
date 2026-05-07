@@ -475,7 +475,7 @@ export function makeSemanticCompanySearchTool(userId: string) {
 export function makeEmbedCompanyResearchTool(userId: string) {
   return tool({
     description:
-      "Generate or refresh the vector embedding for a company's research profile. Run this after updating a company's intel to enable semantic search. Requires OPENAI_API_KEY.",
+      "Generate or refresh the vector embedding for a company's research profile. Run this after updating a company's intel to enable semantic search. Requires AI_GATEWAY_API_KEY or OPENAI_API_KEY.",
     inputSchema: z.object({
       companyId: z.string().describe("UUID of the company to embed"),
     }),

@@ -44,6 +44,8 @@ const EnvSchema = z.object({
 
   // ── AI ───────────────────────────────────────────────────────────────────
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  AI_GATEWAY_API_KEY: z.string().min(1).optional(),
+  VERCEL_AI_GATEWAY_API_KEY: z.string().min(1).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
 
   // ── Cron ─────────────────────────────────────────────────────────────────
@@ -63,11 +65,17 @@ const EnvSchema = z.object({
 
   // ── Third-party ──────────────────────────────────────────────────────────
   OPENWEATHER_API_KEY: z.string().min(1).optional(),
+  FIRECRAWL_API_KEY: z.string().min(1).optional(),
 
   // ── Sentry ───────────────────────────────────────────────────────────────
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
+  SENTRY_AUTH_TOKEN: z.string().min(1).optional(),
+
+  // ── Analytics ────────────────────────────────────────────────────────────
+  NEXT_PUBLIC_PLAUSIBLE_DOMAIN: z.string().min(1).optional(),
+  NEXT_PUBLIC_PLAUSIBLE_SRC: z.string().url().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
