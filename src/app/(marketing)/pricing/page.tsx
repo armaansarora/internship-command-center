@@ -132,6 +132,13 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
           const plan = STRIPE_PLANS[tier];
           const config = LAUNCH_CONFIG.pricing[tier];
           const copy = TIER_COPY[tier];
+          const betaGated = LAUNCH_CONFIG.beta.mode !== "open";
+          const ctaHref = betaGated ? "/waitlist" : "/lobby";
+          const ctaLabel = betaGated
+            ? tier === "team"
+              ? "Request team access"
+              : "Request key"
+            : copy.cta;
           const isHighlighted = copy.highlight;
           const showAnnualPrice = isAnnual && plan.price > 0;
           const monthlyEquivalent = showAnnualPrice
@@ -293,7 +300,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
               </ul>
 
               <Link
-                href="/lobby"
+                href={ctaHref}
                 className="block rounded-lg px-4 py-3 text-center transition-all"
                 style={{
                   fontFamily: "'Satoshi', sans-serif",
@@ -308,7 +315,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
                   color: isHighlighted ? "#C9A84C" : "rgba(255,255,255,0.85)",
                 }}
               >
-                {copy.cta}
+                {ctaLabel}
               </Link>
             </div>
           );

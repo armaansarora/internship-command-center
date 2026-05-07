@@ -46,9 +46,8 @@ export function ElevatorButton({
   size = "md",
   onClick,
 }: ElevatorButtonProps): JSX.Element {
-  const { id: floorId, name, label, phase } = floor;
+  const { id: floorId, name, label } = floor;
   const isLobby = floorId === "L";
-  const isLocked = phase > 0;
 
   // Mobile (sm): 44x44px minimum touch target per WCAG guidelines
   const btnSizeClass = size === "md" ? "w-9 h-9" : "w-11 h-11";
@@ -64,20 +63,17 @@ export function ElevatorButton({
         border: "1px solid rgba(201, 168, 76, 0.25)",
       };
     }
-    if (isLocked) {
-      return { color: "var(--text-muted)", opacity: 0.55 };
-    }
     return { color: "var(--text-secondary)" };
-  }, [isActive, isLobby, isLocked]);
+  }, [isActive, isLobby]);
 
   /** Restore base inline style on mouse-leave. */
   function handleMouseLeave(e: React.MouseEvent<HTMLButtonElement>): void {
     if (isActive || isTransitioning) return;
     const el = e.currentTarget;
     el.style.border = isLobby ? "1px solid rgba(201, 168, 76, 0.25)" : "";
-    el.style.color = isLocked ? "var(--text-muted)" : "var(--text-secondary)";
+    el.style.color = "var(--text-secondary)";
     el.style.background = "";
-    el.style.opacity = isLocked ? "0.55" : "";
+    el.style.opacity = "";
     el.style.transform = "";
     el.style.boxShadow = "";
   }
@@ -94,7 +90,7 @@ export function ElevatorButton({
     el.style.boxShadow = "0 0 12px rgba(201, 168, 76, 0.15)";
   }
 
-  const ariaLabel = `${name} — ${label}${isLocked ? " (Under Construction)" : ""}`;
+  const ariaLabel = `${name} — ${label}`;
 
   const buttonContent: JSX.Element = isLobby ? (
     <ExitIcon size={size === "md" ? 14 : 12} />
@@ -165,15 +161,13 @@ export function ElevatorButton({
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "9px",
-                color: isLocked
-                  ? "rgba(201, 168, 76, 0.4)"
-                  : "rgba(201, 168, 76, 0.65)",
+                color: "rgba(201, 168, 76, 0.65)",
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
                 marginTop: "1px",
               }}
             >
-              {isLocked ? `Phase ${phase} • Coming Soon` : label}
+              {label}
             </div>
           </div>
         </div>

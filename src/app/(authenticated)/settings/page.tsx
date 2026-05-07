@@ -37,7 +37,7 @@ export default async function SettingsPage() {
       const { data } = await supabase
         .from("user_profiles")
         .select(
-          "deleted_at, networking_consent_at, networking_revoked_at, preferences",
+          "deleted_at, networking_consent_at, networking_revoked_at, preferences, google_tokens",
         )
         .eq("id", user.id)
         .single();
@@ -48,6 +48,9 @@ export default async function SettingsPage() {
         networkingRevokedAt:
           (data?.networking_revoked_at as string | null | undefined) ?? null,
         preferences: (data?.preferences as unknown) ?? null,
+        hasGoogleIntegration: Boolean(
+          (data?.google_tokens as string | null | undefined) ?? null,
+        ),
       };
     })(),
     (async () => {
@@ -85,6 +88,7 @@ export default async function SettingsPage() {
         deletedAt={profileData.deletedAt}
         networkingConsentAt={profileData.networkingConsentAt}
         networkingRevokedAt={profileData.networkingRevokedAt}
+        hasGoogleIntegration={profileData.hasGoogleIntegration}
         rejectionReflectionsEnabled={rejectionReflectionsPref.enabled}
         ceoVoiceEnabled={ceoVoicePref.enabled}
         matchEvents={matchEventsData}

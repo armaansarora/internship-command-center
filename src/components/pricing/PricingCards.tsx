@@ -17,7 +17,7 @@ const PLAN_FEATURES: Record<SubscriptionTier, string[]> = {
   ],
   pro: [
     "Unlimited applications",
-    "All 7 floors unlocked",
+    "Every specialist floor unlocked",
     "All 8 AI agents",
     "Daily briefing",
     "Full analytics",

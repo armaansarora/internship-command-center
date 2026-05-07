@@ -137,7 +137,7 @@ export function LobbyClient({
       {/* ── ELEVATOR (authenticated users only) ── */}
       {isAuthenticated && <Elevator />}
 
-      {/* ── UNDER CONSTRUCTION TICKER BANNER ── */}
+      {/* ── PRIVATE BETA ACCESS TICKER ── */}
       <ConstructionTicker />
 
       {/* ── LOBBY BACKGROUND — BUG-010: luxury reception, not skyline ── */}
@@ -367,7 +367,7 @@ export function LobbyClient({
                     floorId={floor.id}
                     name={floor.name}
                     label={floor.label}
-                    available={floor.phase === 0}
+                    available
                     index={i}
                   />
                 ))}
@@ -393,7 +393,7 @@ export function LobbyClient({
                 color: "var(--gold)",
               }}
             >
-              UNDER CONSTRUCTION — PHASE 0
+              PRIVATE BETA — ACCESS BY KEY
             </span>
             <div
               className="h-px w-12"
@@ -446,7 +446,7 @@ const LOBBY_FOOTER_LINKS = [
  */
 function ConstructionTicker(): JSX.Element {
   const TEXT =
-    "PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — PHASE 0 — UNDER CONSTRUCTION — THE TOWER IS RISING — ";
+    "PRIVATE BETA — ACCESS BY KEY — THE TOWER IS OPENING FLOOR BY FLOOR — PRIVATE BETA — ACCESS BY KEY — THE TOWER IS OPENING FLOOR BY FLOOR — ";
 
   return (
     <div
@@ -457,7 +457,7 @@ function ConstructionTicker(): JSX.Element {
         background: "rgba(4, 5, 12, 0.96)",
         borderBottom: "1px solid rgba(201, 168, 76, 0.15)",
       }}
-      aria-label="Under construction notice"
+      aria-label="Private beta access notice"
       role="region"
       aria-live="off"
     >
@@ -691,7 +691,7 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
               color: "var(--text-secondary)",
             }}
           >
-            {isAuthenticated ? "Take the elevator to any floor" : isReturningUser ? "Resume your session" : "Authenticate to proceed"}
+            {isAuthenticated ? "Take the elevator to any floor" : isReturningUser ? "Resume your session" : "Invited guests continue with Google"}
           </p>
         </div>
 
@@ -775,6 +775,24 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
           </button>
         )}
 
+        {!isAuthenticated && (
+          <a
+            href="/waitlist"
+            className="text-center transition-opacity hover:opacity-100"
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "10px",
+              letterSpacing: "0.12em",
+              color: "rgba(255,255,255,0.5)",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              opacity: 0.78,
+            }}
+          >
+            Need a key? Join the waitlist
+          </a>
+        )}
+
         {error && (
           <p
             className="text-sm text-center"
@@ -811,9 +829,7 @@ function DirectoryRow({ floorId, name, label, available, index }: {
 
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg relative overflow-hidden ${
-        available ? "cursor-pointer" : ""
-      }`}
+      className="flex items-center gap-3 px-4 py-2.5 rounded-lg relative overflow-hidden"
       style={{
         opacity: visible ? (available ? 1 : 0.35) : 0,
         transform: visible

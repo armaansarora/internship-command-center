@@ -101,7 +101,7 @@ export const TERMS_OF_SERVICE = {
       body: [
         "To the maximum extent allowed by law, our total liability to you for any claim arising out of or related to the product is capped at the greater of (a) the amount you paid us in the twelve months preceding the claim, or (b) one hundred US dollars.",
         "We are not liable for indirect, incidental, consequential, special, exemplary, or punitive damages, or for lost profits, lost opportunities, or lost data, even if we knew or should have known of the possibility.",
-        "[REVIEW] Some jurisdictions don't allow certain liability exclusions. Where they don't, our liability is limited to the maximum extent allowed.",
+        "Some jurisdictions do not allow certain liability exclusions. Where they do not, our liability is limited to the maximum extent allowed by applicable law.",
       ],
     },
     {
@@ -115,7 +115,7 @@ export const TERMS_OF_SERVICE = {
       body: [
         `These Terms are governed by the laws of ${LAUNCH_CONFIG.brand.governingLaw}, without regard to conflict-of-laws principles.`,
         `Disputes arising out of these Terms or the product shall be brought exclusively in the state or federal courts located in ${LAUNCH_CONFIG.brand.governingLaw}, and you consent to personal jurisdiction there.`,
-        "[REVIEW] Some startups prefer mandatory arbitration with a class-action waiver. That requires more careful drafting and is the kind of clause an attorney should tailor.",
+        "These Terms do not require arbitration. Disputes proceed in the courts described above unless we agree otherwise in writing.",
       ],
     },
     {

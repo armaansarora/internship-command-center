@@ -44,7 +44,9 @@ export default function WaitlistPage() {
           lineHeight: 1.55,
         }}
       >
-        {LAUNCH_CONFIG.brand.tagline} We&apos;re letting people in slowly so the building stays well-staffed. Join the list and we&apos;ll send you a key.
+        {LAUNCH_CONFIG.brand.tagline}{" "}
+        We&apos;re letting people in slowly so the building stays well-staffed.
+        Join the list and we&apos;ll send you a key.
       </p>
 
       <div className="mt-10 w-full max-w-md">

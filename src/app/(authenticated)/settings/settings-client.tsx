@@ -24,6 +24,8 @@ interface SettingsClientProps {
   /** R8 — Warm Intro Network opt-in state. */
   networkingConsentAt?: string | null;
   networkingRevokedAt?: string | null;
+  /** Whether Gmail + Calendar OAuth has been connected. */
+  hasGoogleIntegration?: boolean;
   /**
    * Rejection autopsy preference (Settings → Analytics →
    * 'Rejection reflection prompts'). Default ON. Seeded server-side from
@@ -105,6 +107,7 @@ export function SettingsClient({
   deletedAt,
   networkingConsentAt = null,
   networkingRevokedAt = null,
+  hasGoogleIntegration = false,
   rejectionReflectionsEnabled = true,
   ceoVoiceEnabled = false,
   matchEvents = [],
@@ -120,6 +123,12 @@ export function SettingsClient({
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [cancelUi, setCancelUi] = useState<CancelUiState>("idle");
+  const [googleConnectState, setGoogleConnectState] = useState<
+    "idle" | "loading" | "error"
+  >("idle");
+  const [syncState, setSyncState] = useState<
+    "idle" | "gmail" | "calendar" | "done" | "error"
+  >("idle");
   const [effectiveDeletedAt, setEffectiveDeletedAt] = useState<string | null>(
     deletedAt,
   );
@@ -298,6 +307,41 @@ export function SettingsClient({
     document.body.appendChild(form);
     form.submit();
   }, []);
+
+  const handleConnectGoogle = useCallback(async () => {
+    setGoogleConnectState("loading");
+    try {
+      const response = await fetch("/api/gmail/auth", { method: "GET" });
+      if (!response.ok) {
+        setGoogleConnectState("error");
+        return;
+      }
+      const body = (await response.json()) as { authUrl?: string };
+      if (!body.authUrl) {
+        setGoogleConnectState("error");
+        return;
+      }
+      window.location.href = body.authUrl;
+    } catch {
+      setGoogleConnectState("error");
+    }
+  }, []);
+
+  const handleSyncGoogle = useCallback(
+    async (kind: "gmail" | "calendar") => {
+      setSyncState(kind);
+      try {
+        const response = await fetch(
+          kind === "gmail" ? "/api/gmail/sync" : "/api/calendar/sync",
+          { method: "POST" },
+        );
+        setSyncState(response.ok ? "done" : "error");
+      } catch {
+        setSyncState("error");
+      }
+    },
+    [],
+  );
 
   const handleBillingPortal = useCallback(async () => {
     setBillingLoading(true);
@@ -1097,7 +1141,7 @@ export function SettingsClient({
                   color: "var(--text-muted)",
                 }}
               >
-                Configure email and in-app notification preferences
+                Critical Tower updates are delivered by email and in-app alerts.
               </div>
             </div>
             <span
@@ -1109,16 +1153,16 @@ export function SettingsClient({
                 textTransform: "uppercase",
               }}
             >
-              Coming Soon
+              Managed
             </span>
           </div>
 
-          {/* Connected services placeholder */}
+          {/* Connected services */}
           <div
             className="flex items-center justify-between px-5 py-4"
             style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.04)" }}
           >
-            <div>
+            <div className="min-w-0 pr-4">
               <div
                 style={{
                   fontFamily: "'Satoshi', sans-serif",
@@ -1128,7 +1172,7 @@ export function SettingsClient({
                   lineHeight: 1.3,
                 }}
               >
-                Connected Services
+                Gmail & Calendar
               </div>
               <div
                 className="mt-0.5"
@@ -1138,20 +1182,102 @@ export function SettingsClient({
                   color: "var(--text-muted)",
                 }}
               >
-                Gmail, Google Calendar, and other integrations
+                {hasGoogleIntegration
+                  ? "Google workspace is connected. Sync pulls new mail and calendar changes into the Situation Room."
+                  : "Connect Gmail and Calendar so COO can surface replies, interview invites, and schedule conflicts."}
               </div>
+              {(googleConnectState === "error" || syncState === "error") && (
+                <div
+                  role="alert"
+                  className="mt-1"
+                  style={{
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: "12px",
+                    color: "rgba(220, 80, 80, 0.85)",
+                  }}
+                >
+                  The connection desk did not answer. Try again in a moment.
+                </div>
+              )}
+              {syncState === "done" && (
+                <div
+                  role="status"
+                  className="mt-1"
+                  style={{
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: "12px",
+                    color: "#C9A84C",
+                  }}
+                >
+                  Sync requested. The Situation Room will update shortly.
+                </div>
+              )}
             </div>
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "10px",
-                color: "var(--text-muted)",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-              }}
-            >
-              Coming Soon
-            </span>
+            {hasGoogleIntegration ? (
+              <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  disabled={syncState === "gmail" || syncState === "calendar"}
+                  onClick={() => void handleSyncGoogle("gmail")}
+                  className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    color: "#C9A84C",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    background: "rgba(201, 168, 76, 0.08)",
+                    border: "1px solid rgba(201, 168, 76, 0.2)",
+                    cursor: syncState === "gmail" ? "wait" : "pointer",
+                    opacity: syncState === "gmail" ? 0.7 : 1,
+                  }}
+                  aria-label="Sync Gmail now"
+                >
+                  {syncState === "gmail" ? "Syncing..." : "Sync Gmail"}
+                </button>
+                <button
+                  type="button"
+                  disabled={syncState === "gmail" || syncState === "calendar"}
+                  onClick={() => void handleSyncGoogle("calendar")}
+                  className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    color: "#C9A84C",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    background: "rgba(201, 168, 76, 0.08)",
+                    border: "1px solid rgba(201, 168, 76, 0.2)",
+                    cursor: syncState === "calendar" ? "wait" : "pointer",
+                    opacity: syncState === "calendar" ? 0.7 : 1,
+                  }}
+                  aria-label="Sync Google Calendar now"
+                >
+                  {syncState === "calendar" ? "Syncing..." : "Sync Calendar"}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={googleConnectState === "loading"}
+                onClick={() => void handleConnectGoogle()}
+                className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "10px",
+                  color: "#C9A84C",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  background: "rgba(201, 168, 76, 0.08)",
+                  border: "1px solid rgba(201, 168, 76, 0.2)",
+                  cursor: googleConnectState === "loading" ? "wait" : "pointer",
+                  opacity: googleConnectState === "loading" ? 0.7 : 1,
+                }}
+                aria-label="Connect Gmail and Google Calendar"
+              >
+                {googleConnectState === "loading" ? "Opening..." : "Connect"}
+              </button>
+            )}
           </div>
 
           {/* Sign out */}

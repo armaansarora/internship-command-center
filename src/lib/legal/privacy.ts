@@ -68,7 +68,7 @@ export const PRIVACY_POLICY = {
         ...LAUNCH_CONFIG.subProcessors.map(
           (sp) => `${sp.name} — ${sp.purpose}. Privacy policy: ${sp.privacyUrl}`,
         ),
-        "[REVIEW] Update this list whenever a new provider is added.",
+        "We update this list when a new provider is added for production use.",
       ],
     },
     {
@@ -103,7 +103,7 @@ export const PRIVACY_POLICY = {
         "All traffic is HTTPS. We enforce HTTP Strict Transport Security with a two-year max-age and the preload directive.",
         "We enforce row-level security at the database layer: every row in every user-owned table is gated by the authenticated user's identifier. A query without a session cannot return another user's row, by construction.",
         "We have shipped a hardening pass (R12) that includes 36+ adversarial end-to-end scenarios across security, abuse, concurrency, scale, and failure modes. We continue to add to it.",
-        "[REVIEW] Add an incident-disclosure timeline once you have a recommended one (typically 'we will notify you within 72 hours of confirming a material breach affecting your data').",
+        "If we confirm a material breach affecting your data, we will notify you without undue delay and as required by applicable law.",
       ],
     },
     {
@@ -116,7 +116,7 @@ export const PRIVACY_POLICY = {
       heading: "International transfers",
       body: [
         "Our infrastructure is hosted primarily in the United States (Supabase, Vercel default regions). If you access the product from outside the United States, your data will be transferred to and processed in the United States.",
-        "[REVIEW] If you target EU users heavily, you'll want a Standard Contractual Clauses (SCC) addendum here. Skippable until you do.",
+        "For international transfers that require additional safeguards, we use legally recognized transfer mechanisms as applicable.",
       ],
     },
     {

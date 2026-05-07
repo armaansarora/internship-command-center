@@ -103,7 +103,10 @@ function CPOSilhouette({
   // Pointer arm: animated when briefing
   const pointerArmStyle: React.CSSProperties =
     !reducedMotion && state === "briefing"
-      ? { animation: "cpo-pointer-point 1.8s ease-in-out infinite" }
+      ? {
+          animation: "cpo-pointer-point 1.8s ease-in-out infinite",
+          transformOrigin: "75px 158px",
+        }
       : {};
 
   return (
@@ -258,7 +261,7 @@ function CPOSilhouette({
         />
 
         {/* Left arm — pointing at whiteboard (pointer arm) */}
-        <g style={pointerArmStyle} transform-origin="75 158">
+        <g style={pointerArmStyle}>
           <rect
             x="28"
             y="152"

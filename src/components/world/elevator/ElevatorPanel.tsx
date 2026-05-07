@@ -355,16 +355,18 @@ export function ElevatorMobileBar({
         />
       )}
 
-      {/* ── Bottom Sheet (expanded floor list) ── */}
+      {/* ── Bottom Sheet (expanded floor list) ──
+          Render only while expanded so closed navigation is not exposed as
+          a hidden dialog with tabbable offscreen buttons. */}
+      {expanded && (
       <div
         ref={sheetRef}
         className="fixed bottom-0 left-0 right-0 z-[29] md:hidden"
         role="dialog"
         aria-label="Floor navigation"
         aria-modal="true"
-        aria-hidden={!expanded}
         style={{
-          transform: expanded ? "translateY(0)" : "translateY(100%)",
+          transform: "translateY(0)",
           transition: "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
           background: "rgba(10, 12, 25, 0.97)",
           backdropFilter: "blur(24px) saturate(1.5)",
@@ -466,6 +468,7 @@ export function ElevatorMobileBar({
           {sheetFloorItems}
         </div>
       </div>
+      )}
 
       {/* ── Fixed Bottom Bar (always visible on mobile) ── */}
       <div
