@@ -75,6 +75,14 @@ describe("isPathPublic — exact paths", () => {
     expect(isPathPublic("/api/auth/google/start/extra")).toBe(false);
   });
 
+  it("matches /api/auth/signout exactly", () => {
+    expect(isPathPublic("/api/auth/signout")).toBe(true);
+  });
+
+  it("rejects /api/auth/signout/extra", () => {
+    expect(isPathPublic("/api/auth/signout/extra")).toBe(false);
+  });
+
   it("matches /api/gmail/callback exactly", () => {
     expect(isPathPublic("/api/gmail/callback")).toBe(true);
   });
