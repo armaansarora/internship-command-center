@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { requireEnv } from "@/lib/env";
 import { log } from "@/lib/logger";
 
@@ -25,10 +26,14 @@ export function getGoogleLoginAuthUrl(args: {
     scope: "openid email profile",
     prompt: "select_account",
     state: args.state,
-    nonce: args.nonce,
+    nonce: hashGoogleLoginNonce(args.nonce),
   });
 
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+export function hashGoogleLoginNonce(nonce: string): string {
+  return createHash("sha256").update(nonce).digest("hex");
 }
 
 export async function exchangeGoogleLoginCodeForIdToken(

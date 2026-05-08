@@ -17,6 +17,13 @@ import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
 import { needsLobbyOnboardingAfterAuth } from "@/lib/auth/post-auth-profile";
 import { log } from "@/lib/logger";
 
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+type GoogleIdTokenSignInResult = Awaited<
+  ReturnType<SupabaseServerClient["auth"]["signInWithIdToken"]>
+>;
+
+const SUPABASE_GOOGLE_LOGIN_RETRY_DELAYS_MS = [250, 750] as const;
+
 /**
  * Gmail / Calendar OAuth callback.
  *
@@ -168,9 +175,9 @@ async function handleLoginCallback(args: {
   try {
     const idToken = await exchangeGoogleLoginCodeForIdToken(args.code);
     const supabase = await createClient();
-    const { data, error } = await supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: idToken,
+    const { data, error } = await signInWithGoogleIdToken({
+      supabase,
+      idToken,
       nonce: verification.payload.nonce,
     });
 
@@ -204,4 +211,54 @@ async function handleLoginCallback(args: {
     log.error("auth.google_login.failed", err);
     return lobbyError("auth_failed");
   }
+}
+
+async function signInWithGoogleIdToken(args: {
+  supabase: SupabaseServerClient;
+  idToken: string;
+  nonce: string;
+}): Promise<GoogleIdTokenSignInResult> {
+  for (
+    let attempt = 0;
+    attempt <= SUPABASE_GOOGLE_LOGIN_RETRY_DELAYS_MS.length;
+    attempt += 1
+  ) {
+    const result = await args.supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: args.idToken,
+      nonce: args.nonce,
+    });
+
+    if (
+      !result.error ||
+      !isTransientSupabaseAuthError(result.error.message) ||
+      attempt === SUPABASE_GOOGLE_LOGIN_RETRY_DELAYS_MS.length
+    ) {
+      return result;
+    }
+
+    log.warn("auth.google_login.supabase_exchange_retry", {
+      attempt: attempt + 1,
+      error: result.error.message,
+    });
+    await delay(SUPABASE_GOOGLE_LOGIN_RETRY_DELAYS_MS[attempt]);
+  }
+
+  throw new Error("Unreachable Supabase Google login retry state");
+}
+
+function isTransientSupabaseAuthError(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("unexpected token '<'") ||
+    lower.includes("connection timed out") ||
+    lower.includes("522") ||
+    lower.includes("fetch failed")
+  );
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

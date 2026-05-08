@@ -344,6 +344,49 @@ describe("GET /api/gmail/callback", () => {
     expectClearedLoginCookie(res);
   });
 
+  it("retries transient Supabase edge failures during first-party Google login", async () => {
+    const user = {
+      id: "new-user",
+      email: "invited@example.com",
+      user_metadata: {},
+    };
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: true,
+      payload: {
+        v: 1,
+        state: "login-state",
+        nonce: "login-nonce",
+        next: "/settings",
+        issuedAt: Date.now(),
+      },
+    });
+    exchangeGoogleLoginCodeForIdTokenSpy.mockResolvedValue("id-token");
+    signInWithIdTokenSpy
+      .mockResolvedValueOnce({
+        data: { user: null, session: null },
+        error: {
+          message: "Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+        },
+      })
+      .mockResolvedValueOnce({
+        data: { user, session: { user } },
+        error: null,
+      });
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(signInWithIdTokenSpy).toHaveBeenCalledTimes(2);
+    expect(logWarnSpy).toHaveBeenCalledWith(
+      "auth.google_login.supabase_exchange_retry",
+      {
+        attempt: 1,
+        error: "Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      },
+    );
+    expect(res.headers.get("location")).toBe("http://localhost/settings");
+    expectClearedLoginCookie(res);
+  });
+
   it("rejects login callbacks outside the beta gate", async () => {
     verifyGoogleLoginStateSpy.mockReturnValue({
       ok: true,
