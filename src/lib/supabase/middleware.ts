@@ -90,11 +90,7 @@ export async function updateSession(request: NextRequest) {
       path: request.nextUrl.pathname,
     });
     const response = !isPathPublic(request.nextUrl.pathname)
-      ? (() => {
-          const url = request.nextUrl.clone();
-          url.pathname = "/lobby";
-          return NextResponse.redirect(url);
-        })()
+      ? unauthenticatedResponse(request)
       : NextResponse.next({ request });
     clearAuthCookies(response, authCookieBaseName);
     return response;
@@ -130,9 +126,7 @@ export async function updateSession(request: NextRequest) {
   const user = await readMiddlewareUser(supabase, request.nextUrl.pathname);
 
   if (!user && !isPathPublic(request.nextUrl.pathname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/lobby";
-    return NextResponse.redirect(url);
+    return unauthenticatedResponse(request);
   }
 
   // Returning-user fast lane. If the guest is authenticated AND has
@@ -157,6 +151,23 @@ function getSupabaseAuthCookieBaseName(): string {
   const url = new URL(requireEnv("NEXT_PUBLIC_SUPABASE_URL"));
   const projectRef = url.hostname.split(".")[0] ?? "localhost";
   return `sb-${projectRef}-auth-token`;
+}
+
+function unauthenticatedResponse(request: NextRequest): NextResponse {
+  if (isApiPath(request.nextUrl.pathname)) {
+    return NextResponse.json(
+      { error: "Authentication required", code: "UNAUTHENTICATED" },
+      { status: 401 },
+    );
+  }
+
+  const url = request.nextUrl.clone();
+  url.pathname = "/lobby";
+  return NextResponse.redirect(url);
+}
+
+function isApiPath(pathname: string): boolean {
+  return pathname === "/api" || pathname.startsWith("/api/");
 }
 
 function hasMalformedAuthCookie(

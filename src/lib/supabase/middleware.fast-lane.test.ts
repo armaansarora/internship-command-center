@@ -135,6 +135,17 @@ describe("R4.9 returning-user fast lane", () => {
     expect(res.headers.get("location")).toContain("/lobby");
   });
 
+  it("returns JSON 401 for protected API routes when Supabase Auth cannot verify the session", async () => {
+    nextMockClient = mkClient(null, null, false, true);
+    const res = await updateSession(request("http://localhost/api/stripe/checkout"));
+    expect(res.status).toBe(401);
+    expect(res.headers.get("location")).toBeNull();
+    await expect(res.json()).resolves.toEqual({
+      error: "Authentication required",
+      code: "UNAUTHENTICATED",
+    });
+  });
+
   it("clears malformed auth cookies on public routes before Supabase SSR can recover them", async () => {
     nextMockClient = mkClient({ id: "should-not-read" }, null, false, true);
     const res = await updateSession(
@@ -157,6 +168,23 @@ describe("R4.9 returning-user fast lane", () => {
     );
     expect(res.headers.get("location")).toContain("/lobby");
     expect(res.cookies.get("sb-supabase-auth-token")?.value).toBe("");
+  });
+
+  it("returns JSON 401 for protected API routes with malformed auth cookies and clears them", async () => {
+    nextMockClient = mkClient({ id: "should-not-read" }, null, false, true);
+    const res = await updateSession(
+      request(
+        "http://localhost/api/stripe/portal",
+        "sb-supabase-auth-token=base64-bm90LWpzb24",
+      ),
+    );
+    expect(res.status).toBe(401);
+    expect(res.headers.get("location")).toBeNull();
+    expect(res.cookies.get("sb-supabase-auth-token")?.value).toBe("");
+    await expect(res.json()).resolves.toEqual({
+      error: "Authentication required",
+      code: "UNAUTHENTICATED",
+    });
   });
 
   it("does not fast-lane when path is not the lobby root (e.g. /penthouse)", async () => {
