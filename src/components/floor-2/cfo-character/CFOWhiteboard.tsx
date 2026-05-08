@@ -199,7 +199,15 @@ export function CFOWhiteboard({ stats }: CFOWhiteboardProps): JSX.Element {
         <a
           href={`/api/reports/state-of-month?month=${currentMonth}`}
           aria-label={`Download State of the Month PDF for ${currentMonth}`}
-          style={{ color: "inherit", textDecoration: "underline", textUnderlineOffset: "3px" }}
+          style={{
+            color: "inherit",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "44px",
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",
+          }}
         >
           DOWNLOAD STATE OF THE MONTH ↓
         </a>
@@ -223,5 +231,4 @@ export function CFOWhiteboard({ stats }: CFOWhiteboardProps): JSX.Element {
     </div>
   );
 }
-
 

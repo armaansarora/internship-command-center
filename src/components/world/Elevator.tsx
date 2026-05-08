@@ -368,7 +368,7 @@ export function Elevator(): JSX.Element {
           DESKTOP PANEL (md and above, fixed left column)
          ══════════════════════════════════════════════════════ */}
       <div
-        className="fixed left-0 top-0 bottom-0 z-[30] hidden md:flex flex-col items-center w-16"
+        className="fixed left-0 top-0 bottom-0 z-[30] hidden lg:flex flex-col items-center w-16"
         aria-hidden="false"
       >
         {/* Cable above panel */}

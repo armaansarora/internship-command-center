@@ -58,7 +58,7 @@ test.describe(
           agent_memory: [],
           agent_logs: [],
           user_profiles: [
-            { id: USERS.alice.id, full_name: "Alice" },
+            { id: USERS.alice.id, full_name: "Alice", subscription_tier: "team" },
           ],
           applications: [],
         },
@@ -182,13 +182,15 @@ test.describe(
         }
       }
 
-      // Both responses either completed or errored — we don't require 200
-      // because the AI key stub makes 500 likely. The scenario binds
-      // request_id integrity at the DB layer.
-      expect(res1 === null || [200, 400, 401, 500].includes(res1.status())).toBe(
+      // Both responses either completed, failed at auth/entitlement, errored,
+      // hit the agent-call rate limit, or returned typed unavailable when no
+      // provider key is present. The scenario binds request_id integrity at
+      // the DB layer when the route reaches dispatch writes.
+      const responseStatuses = [res1?.status() ?? null, res2?.status() ?? null];
+      expect(res1 === null || [200, 400, 401, 403, 429, 500, 503].includes(res1.status()), `unexpected /api/ceo response statuses ${JSON.stringify(responseStatuses)}`).toBe(
         true,
       );
-      expect(res2 === null || [200, 400, 401, 500].includes(res2.status())).toBe(
+      expect(res2 === null || [200, 400, 401, 403, 429, 500, 503].includes(res2.status()), `unexpected /api/ceo response statuses ${JSON.stringify(responseStatuses)}`).toBe(
         true,
       );
     });

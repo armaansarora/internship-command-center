@@ -99,9 +99,10 @@ function DocumentRow({
           (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(42,28,18,0.8)";
         }
       }}
-      onFocus={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.outline = "2px solid rgba(201,168,76,0.35)";
-      }}
+        onFocus={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.outline = "2px solid rgba(201,168,76,0.35)";
+          (e.currentTarget as HTMLButtonElement).style.outlineOffset = "2px";
+        }}
       onBlur={(e) => {
         (e.currentTarget as HTMLButtonElement).style.outline = "none";
       }}
@@ -247,12 +248,16 @@ function DocumentSearch({
           outline: "none",
           caretColor: "#C9A84C",
           boxSizing: "border-box",
+          minHeight: "44px",
         }}
         onFocus={(e) => {
           (e.currentTarget as HTMLInputElement).style.borderColor = "rgba(201,168,76,0.4)";
+          (e.currentTarget as HTMLInputElement).style.outline = "2px solid rgba(201,168,76,0.35)";
+          (e.currentTarget as HTMLInputElement).style.outlineOffset = "2px";
         }}
         onBlur={(e) => {
           (e.currentTarget as HTMLInputElement).style.borderColor = "#2A1C12";
+          (e.currentTarget as HTMLInputElement).style.outline = "none";
         }}
       />
       {/* Search icon */}
@@ -376,6 +381,7 @@ export function DocumentList({
               cursor: "pointer",
               transition: "background 0.15s ease",
               outline: "none",
+              minHeight: "44px",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,168,76,0.16)";
@@ -385,6 +391,7 @@ export function DocumentList({
             }}
             onFocus={(e) => {
               (e.currentTarget as HTMLButtonElement).style.outline = "2px solid rgba(201,168,76,0.4)";
+              (e.currentTarget as HTMLButtonElement).style.outlineOffset = "2px";
             }}
             onBlur={(e) => {
               (e.currentTarget as HTMLButtonElement).style.outline = "none";

@@ -59,7 +59,7 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
         <Elevator />
 
         {/* User menu — top-right, above everything */}
-        <div className="fixed top-3 right-3 z-[40] md:top-4 md:right-16">
+        <div className="fixed top-3 right-3 z-[40] md:top-4 lg:right-16">
           <UserMenu
             displayName={displayName}
             email={userEmail}
@@ -73,7 +73,7 @@ export function WorldShell({ children, userName, userEmail, avatarUrl }: WorldSh
             the viewport and causing body-level horizontal scroll. Internal
             scroll containers (war table, rolodex grid, etc.) still work
             because they own their own `overflow-x: auto`. */}
-        <main className="flex-1 min-w-0 overflow-x-hidden md:ml-16 pb-20 md:pb-0">
+        <main className="flex-1 min-w-0 overflow-x-hidden pb-20 lg:ml-16 lg:pb-0">
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>
 

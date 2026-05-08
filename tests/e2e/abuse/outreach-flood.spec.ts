@@ -102,12 +102,13 @@ test.describe(
 
         // Every response is non-200. Acceptable shapes: 400 (Zod rejects
         // extra keys if strict), 401 (auth stripped in parallel race —
-        // unlikely but acceptable), 404 (row not found), 500 (RPC error).
+        // unlikely but acceptable), 404 (row not found), 429 (side-effect
+        // rate-limit clamp), 500 (RPC error).
         // A 200 here is regression — it means the approve path honored
         // the attacker's send_at despite the server-side clamp.
         for (const status of statuses) {
           expect(status).not.toBe(200);
-          expect([400, 401, 404, 500]).toContain(status);
+          expect([400, 401, 404, 429, 500]).toContain(status);
         }
 
         // Count of writes that would land the row in "sent" status with a

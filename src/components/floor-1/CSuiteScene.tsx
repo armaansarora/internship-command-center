@@ -126,6 +126,7 @@ export function CSuiteScene({
       >
         {/* Split layout */}
         <div
+          className="csuite-layout"
           style={{
             flex: 1,
             display: "grid",
@@ -135,6 +136,7 @@ export function CSuiteScene({
         >
           {/* Left — CEO character + briefing */}
           <div
+            className="csuite-ceo-pane"
             style={{
               position: "relative",
               borderRight: "1px solid rgba(201, 168, 76, 0.1)",
@@ -157,6 +159,7 @@ export function CSuiteScene({
 
           {/* Right — live DispatchGraph + Ring the Bell */}
           <div
+            className="csuite-orchestration-pane"
             data-testid="csuite-right-column"
             style={{
               display: "flex",
@@ -187,6 +190,32 @@ export function CSuiteScene({
       <div style={{ position: "relative", zIndex: 20, flexShrink: 0 }}>
         <CSuiteTicker stats={stats} />
       </div>
+
+      <style>{`
+        @media (max-width: 767px) {
+          .csuite-layout {
+            grid-template-columns: minmax(0, 1fr) !important;
+            grid-auto-rows: minmax(0, auto);
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+          }
+
+          .csuite-ceo-pane {
+            min-width: 0;
+            border-right: 0 !important;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+            padding: 22px 16px 18px !important;
+          }
+
+          .csuite-orchestration-pane {
+            min-width: 0;
+            width: 100%;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+            padding: 18px 14px 24px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

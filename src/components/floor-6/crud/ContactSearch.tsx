@@ -1,6 +1,6 @@
 "use client";
 
-import type { JSX } from "react";
+import type { FocusEvent, JSX } from "react";
 import { useState, useCallback } from "react";
 
 export type WarmthFilter = "warm" | "cooling" | "cold" | "all";
@@ -37,6 +37,7 @@ const inputBase: React.CSSProperties = {
   fontFamily: "IBM Plex Mono, monospace",
   fontSize: "12px",
   outline: "none",
+  minHeight: "44px",
   transition: "border-color 0.15s ease",
 };
 
@@ -113,6 +114,15 @@ export function ContactSearch({
   );
 
   const hasFilter = query.trim() || warmth !== "all" || relationship !== "all";
+  const handleFilterFocus = useCallback((e: FocusEvent<HTMLSelectElement>) => {
+    e.currentTarget.style.borderColor = "rgba(201, 168, 76, 0.5)";
+    e.currentTarget.style.outline = "2px solid rgba(201, 168, 76, 0.45)";
+    e.currentTarget.style.outlineOffset = "2px";
+  }, []);
+  const handleFilterBlur = useCallback((e: FocusEvent<HTMLSelectElement>) => {
+    e.currentTarget.style.borderColor = "rgba(92, 58, 30, 0.7)";
+    e.currentTarget.style.outline = "none";
+  }, []);
 
   return (
     <div
@@ -137,10 +147,14 @@ export function ContactSearch({
             onFocus={(e) => {
               (e.currentTarget as HTMLInputElement).style.borderColor =
                 "rgba(201, 168, 76, 0.5)";
+              (e.currentTarget as HTMLInputElement).style.outline =
+                "2px solid rgba(201, 168, 76, 0.45)";
+              (e.currentTarget as HTMLInputElement).style.outlineOffset = "2px";
             }}
             onBlur={(e) => {
               (e.currentTarget as HTMLInputElement).style.borderColor =
                 "rgba(92, 58, 30, 0.7)";
+              (e.currentTarget as HTMLInputElement).style.outline = "none";
             }}
           />
         </div>
@@ -183,6 +197,8 @@ export function ContactSearch({
             onChange={handleWarmthChange}
             aria-label="Filter by warmth level"
             style={{ ...inputBase, width: "100%", padding: "6px 8px", cursor: "pointer" }}
+            onFocus={handleFilterFocus}
+            onBlur={handleFilterBlur}
           >
             <option value="all">All levels</option>
             <option value="warm">Warm</option>
@@ -202,6 +218,8 @@ export function ContactSearch({
             onChange={handleRelationshipChange}
             aria-label="Filter by relationship type"
             style={{ ...inputBase, width: "100%", padding: "6px 8px", cursor: "pointer" }}
+            onFocus={handleFilterFocus}
+            onBlur={handleFilterBlur}
           >
             <option value="all">All types</option>
             <option value="alumni">Alumni</option>
@@ -223,6 +241,8 @@ export function ContactSearch({
             onChange={handleSortChange}
             aria-label="Sort contacts"
             style={{ ...inputBase, width: "100%", padding: "6px 8px", cursor: "pointer" }}
+            onFocus={handleFilterFocus}
+            onBlur={handleFilterBlur}
           >
             <option value="warmth">Warmth</option>
             <option value="name">Name</option>

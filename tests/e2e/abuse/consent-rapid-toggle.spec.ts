@@ -1,13 +1,14 @@
 import { test, expect } from "@playwright/test";
+import { randomUUID } from "node:crypto";
 import { signInAs } from "../helpers/auth";
-import { USERS, TIMES } from "../helpers/fixtures";
+import { TIMES } from "../helpers/fixtures";
 
 /**
  * R12.4 — consent rapid toggle — /api/networking/{revoke,opt-in} —
  * cascade is honored on every revoke, never silently skipped.
  *
- * Invariant: 50 rapid revoke → opt-in cycles (100 requests total) must
- * complete without data races or silent cascade skips. The R11 revoke
+ * Invariant: every successful revoke → opt-in cycle must complete without
+ * data races or silent cascade skips. The R11 revoke
  * cascade is three-step (see src/app/api/networking/revoke/route.ts):
  *   1. Stamp `networking_revoked_at=now()` on user_profiles.
  *   2. DELETE from networking_match_index where user_id=<caller>.
@@ -15,14 +16,14 @@ import { USERS, TIMES } from "../helpers/fixtures";
  *      (the HMAC-SHA256 anon-keys derived from caller's contact IDs).
  *
  * Step 3 is the R11 Red Team fix — the binding proof-of-life. This
- * scenario asserts that across 50 revoke cycles, the stub observed:
- *   - 50 user_profiles UPDATEs (one per revoke),
- *   - 50 DELETEs on networking_match_index (one per revoke, Step 2),
- *   - 50 DELETEs on match_candidate_index (one per revoke, Step 3 cascade),
- *   - 50 user_profiles UPDATEs for the opt-in cycles that follow.
+ * scenario asserts that across rate-limit-aware revoke cycles, the stub observed:
+ *   - one user_profiles UPDATE per revoke,
+ *   - one DELETE on networking_match_index per revoke (Step 2),
+ *   - one DELETE on match_candidate_index per revoke (Step 3 cascade),
+ *   - one user_profiles UPDATE for each opt-in cycle that follows.
  *
  * A silently-skipped cascade (regression) shows up as
- * match_candidate_index DELETE count < 50.
+ * match_candidate_index DELETE count < successful revoke count.
  *
  * R12.10 — migrated from page.route() ops-tracker to the stub's native
  * /__test__/writes endpoint. The legacy page.route() only saw browser
@@ -30,22 +31,27 @@ import { USERS, TIMES } from "../helpers/fixtures";
  * Next dev process, so those writes were invisible to the tracker.
  */
 
-const CYCLE_COUNT = 50;
+const CYCLE_COUNT = 2;
 // One contact row — the cascade derives an anon-key from it and issues
 // a `.in('counterparty_anon_key', [<key>])` DELETE. Seeding at least one
 // contact ensures Step 3 actually makes a DELETE call (the route
 // guards on `contactIds.length > 0`).
-const ALICE_CONTACT_ID = "11111111-1111-4111-8111-aaaa00000001";
+const CONTACT_ID = "11111111-1111-4111-8111-aaaa00000001";
 
 test.describe(
-  "consent rapid toggle — /api/networking/{revoke,opt-in} — revoke cascade honored across 50 cycles",
+  "consent rapid toggle — /api/networking/{revoke,opt-in} — revoke cascade honored across allowed cycles",
   () => {
     test.beforeEach(async ({ page }) => {
-      await signInAs(page, USERS.alice, {
+      const user = {
+        id: randomUUID(),
+        email: `consent-toggle-${randomUUID()}@example.com`,
+      };
+
+      await signInAs(page, user, {
         tables: {
           user_profiles: [
             {
-              id: USERS.alice.id,
+              id: user.id,
               networking_consent_at: TIMES.anchor,
               networking_revoked_at: null,
               networking_consent_version: 2,
@@ -53,8 +59,8 @@ test.describe(
           ],
           contacts: [
             {
-              id: ALICE_CONTACT_ID,
-              user_id: USERS.alice.id,
+              id: CONTACT_ID,
+              user_id: user.id,
             },
           ],
           networking_match_index: [],
@@ -65,10 +71,10 @@ test.describe(
     });
 
     test(
-      "50 revoke / opt-in cycles complete and cascade DELETE on match_candidate_index fires on each revoke",
+      "revoke / opt-in cycles complete and cascade DELETE on match_candidate_index fires on each revoke",
       async ({ page }) => {
-        // Drive the cycles serially so we can hard-assert exact counts
-        // without flake from concurrent auth cookie contention.
+        // Drive the cycles serially and below the tier-C side-effect limit so
+        // this test proves cascade integrity, not rate-limit exhaustion.
         for (let i = 0; i < CYCLE_COUNT; i++) {
           const revoke = await page.request.post(
             "http://localhost:3000/api/networking/revoke",

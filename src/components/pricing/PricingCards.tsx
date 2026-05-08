@@ -285,7 +285,7 @@ export function PricingCards({
               type="button"
               disabled={buttonDisabled}
               onClick={() => void handleUpgrade(tier)}
-              className="w-full rounded-lg py-2.5 px-4 transition-all duration-150 mt-auto"
+              className="w-full rounded-lg py-2.5 px-4 min-h-11 transition-all duration-150 mt-auto"
               style={{
                 fontFamily: "'Satoshi', sans-serif",
                 fontSize: "13px",

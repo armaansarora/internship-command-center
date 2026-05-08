@@ -1091,7 +1091,7 @@ export function SettingsClient({
               aria-disabled="true"
               tabIndex={-1}
               aria-label="Two-factor authentication — not yet available"
-              className="rounded-lg px-3.5 py-1.5 shrink-0"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg px-3.5 py-1.5"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "10px",
@@ -1166,7 +1166,7 @@ export function SettingsClient({
           }}
         >
           <label
-            className="flex items-start gap-3 cursor-pointer select-none"
+            className="flex min-h-11 cursor-pointer select-none items-start gap-3"
             style={{ alignItems: "flex-start" }}
           >
             <input
@@ -1233,7 +1233,7 @@ export function SettingsClient({
               OFF. The button this unlocks lives in the Negotiation Parlor
               under each revealed draft. */}
           <label
-            className="flex items-start gap-3 cursor-pointer select-none"
+            className="flex min-h-11 cursor-pointer select-none items-start gap-3"
             style={{ alignItems: "flex-start", marginTop: "16px" }}
           >
             <input
@@ -1363,7 +1363,7 @@ export function SettingsClient({
               type="button"
               disabled={exportUi === "queueing" || exportUi === "queued"}
               onClick={() => void handleExport()}
-              className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "10px",
@@ -1449,7 +1449,7 @@ export function SettingsClient({
                 type="button"
                 disabled={cancelUi === "cancelling"}
                 onClick={() => void handleCancelDeletion()}
-                className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: "10px",
@@ -1469,7 +1469,7 @@ export function SettingsClient({
               <button
                 type="button"
                 onClick={openDeleteModal}
-                className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: "10px",
@@ -1560,7 +1560,7 @@ export function SettingsClient({
             <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
               <a
                 href="/lobby/onboarding"
-                className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: "10px",
@@ -1578,7 +1578,7 @@ export function SettingsClient({
               </a>
               <a
                 href="/lobby/onboarding"
-                className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: "10px",
@@ -1665,7 +1665,7 @@ export function SettingsClient({
                     googleDisconnectState === "loading"
                   }
                   onClick={() => void handleSyncGoogle("gmail")}
-                  className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: "10px",
@@ -1689,7 +1689,7 @@ export function SettingsClient({
                     googleDisconnectState === "loading"
                   }
                   onClick={() => void handleSyncGoogle("calendar")}
-                  className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: "10px",
@@ -1713,7 +1713,7 @@ export function SettingsClient({
                     syncState === "calendar"
                   }
                   onClick={() => void handleDisconnectGoogle()}
-                  className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                  className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: "10px",
@@ -1738,7 +1738,7 @@ export function SettingsClient({
                 type="button"
                 disabled={googleConnectState === "loading"}
                 onClick={() => void handleConnectGoogle()}
-                className="rounded-lg px-3.5 py-1.5 shrink-0 transition-all duration-150"
+                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg px-3.5 py-1.5 transition-all duration-150"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: "10px",

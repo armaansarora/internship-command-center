@@ -74,8 +74,8 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
         aria-haspopup="menu"
         className="flex items-center justify-center rounded-full transition-all duration-200 focus-visible:outline-2 focus-visible:outline-[var(--gold)] focus-visible:outline-offset-2"
         style={{
-          width: "36px",
-          height: "36px",
+          width: "44px",
+          height: "44px",
           background: avatarUrl ? "transparent" : "rgba(201, 168, 76, 0.12)",
           border: open
             ? "1.5px solid rgba(201, 168, 76, 0.5)"

@@ -90,6 +90,7 @@ export function WaitlistForm(): JSX.Element {
             background: "rgba(10, 12, 25, 0.7)",
             border: "1px solid rgba(255,255,255,0.12)",
             color: "var(--text-primary)",
+            minHeight: "44px",
           }}
         />
         <button
@@ -104,6 +105,7 @@ export function WaitlistForm(): JSX.Element {
             border: "1px solid rgba(201, 168, 76, 0.4)",
             color: "#C9A84C",
             cursor: status.kind === "submitting" || isPending ? "wait" : "pointer",
+            minHeight: "44px",
           }}
         >
           {status.kind === "submitting" || isPending ? "Adding…" : "Request key"}

@@ -986,6 +986,7 @@ const inputStyle = {
   borderRadius: "6px",
   background: "rgba(255,255,255,0.045)",
   color: "#F5EEE1",
+  minHeight: "44px",
   padding: "8px 10px",
   fontFamily: "'Satoshi', system-ui, sans-serif",
   fontSize: "13px",
@@ -993,10 +994,14 @@ const inputStyle = {
 } satisfies CSSProperties;
 
 const ghostButtonStyle = {
+  alignItems: "center",
   border: "1px solid rgba(255,255,255,0.12)",
   borderRadius: "6px",
   background: "transparent",
   color: "rgba(245,238,225,0.7)",
+  display: "inline-flex",
+  justifyContent: "center",
+  minHeight: "44px",
   padding: "9px 12px",
   fontFamily: "'JetBrains Mono', monospace",
   fontSize: "10px",
@@ -1006,12 +1011,16 @@ const ghostButtonStyle = {
 
 function primaryButtonStyle(disabled: boolean): CSSProperties {
   return {
+    alignItems: "center",
     border: "1px solid rgba(201,168,76,0.65)",
     borderRadius: "6px",
     background: disabled
       ? "rgba(255,255,255,0.06)"
       : "linear-gradient(135deg, #C9A84C, #E8C45A)",
     color: disabled ? "rgba(245,238,225,0.45)" : "#0A0A14",
+    display: "inline-flex",
+    justifyContent: "center",
+    minHeight: "44px",
     padding: "10px 16px",
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: "11px",
@@ -1024,10 +1033,14 @@ function primaryButtonStyle(disabled: boolean): CSSProperties {
 
 function secondaryButtonStyle(disabled: boolean): CSSProperties {
   return {
+    alignItems: "center",
     border: "1px solid rgba(201,168,76,0.24)",
     borderRadius: "6px",
     background: "rgba(201,168,76,0.08)",
     color: "#E8C45A",
+    display: "inline-flex",
+    justifyContent: "center",
+    minHeight: "44px",
     padding: "9px 12px",
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: "10px",

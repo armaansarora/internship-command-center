@@ -76,7 +76,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps): JSX.Element {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `32px repeat(${WEEKS}, 1fr)`,
+          gridTemplateColumns: `32px repeat(${WEEKS}, minmax(44px, 1fr))`,
           gap: "3px",
           marginBottom: "4px",
         }}
@@ -104,9 +104,9 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps): JSX.Element {
           key={dayIdx}
           style={{
             display: "grid",
-            gridTemplateColumns: `32px repeat(${WEEKS}, 1fr)`,
+            gridTemplateColumns: `32px repeat(${WEEKS}, minmax(44px, 1fr))`,
             gap: "3px",
-            marginBottom: "3px",
+            marginBottom: "4px",
           }}
         >
           {/* Day label */}
@@ -116,7 +116,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps): JSX.Element {
               fontSize: "8px",
               fontFamily: "JetBrains Mono, IBM Plex Mono, monospace",
               color: "rgba(74, 122, 155, 0.6)",
-              lineHeight: "18px",
+              lineHeight: "44px",
               textAlign: "right",
               paddingRight: "4px",
             }}
@@ -141,17 +141,16 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps): JSX.Element {
                 onFocus={() => setTooltip({ date: cell.date, count: cell.count })}
                 onBlur={() => setTooltip(null)}
                 style={{
-                  height: "18px",
+                  minHeight: "44px",
                   borderRadius: "2px",
                   background: color,
                   border: isHovered
                     ? "1px solid rgba(100, 180, 255, 0.6)"
                     : "1px solid rgba(60, 140, 220, 0.1)",
-                  cursor: "default",
+                  cursor: "pointer",
                   transition: "transform 0.1s ease, border-color 0.1s ease",
                   transform: isHovered ? "scale(1.15)" : "scale(1)",
                   padding: 0,
-                  outline: "none",
                 }}
                 className="obs-heatmap-cell"
               />

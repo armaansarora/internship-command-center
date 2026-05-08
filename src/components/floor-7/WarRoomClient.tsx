@@ -272,7 +272,7 @@ export function WarRoomClient({
             outline: "none",
             flexShrink: 0,
             whiteSpace: "nowrap",
-            height: "36px",
+            minHeight: "44px",
             alignSelf: "flex-start",
           }}
           onMouseEnter={(e) => {
@@ -288,6 +288,7 @@ export function WarRoomClient({
           onFocus={(e) => {
             (e.currentTarget as HTMLButtonElement).style.outline =
               "2px solid rgba(30, 144, 255, 0.5)";
+            (e.currentTarget as HTMLButtonElement).style.outlineOffset = "2px";
           }}
           onBlur={(e) => {
             (e.currentTarget as HTMLButtonElement).style.outline = "none";

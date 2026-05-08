@@ -205,7 +205,7 @@ function FreshnessLegend(): JSX.Element {
 
   return (
     <div
-      className="flex items-center gap-3"
+      className="flex flex-wrap items-center gap-2"
       role="group"
       aria-label="Research freshness legend"
     >
@@ -250,7 +250,7 @@ function StatBadge({
 }): JSX.Element {
   return (
     <div
-      className="flex items-center justify-between gap-2"
+      className="flex min-w-0 items-center justify-between gap-2"
       role="group"
       aria-label={`${label}: ${value}`}
     >
@@ -261,6 +261,10 @@ function StatBadge({
           color: "#1E3A5F",
           textTransform: "uppercase",
           letterSpacing: "0.08em",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          minWidth: 0,
         }}
       >
         {label}
@@ -378,6 +382,8 @@ export function CIOWhiteboard({
       aria-label="CIO research intelligence whiteboard"
       className="relative rounded-md p-4 w-full"
       style={{
+        minWidth: 0,
+        overflow: "hidden",
         backgroundColor: "#0D1B2A",
         border: "1px solid #1E3A5F",
         boxShadow: "inset 0 0 24px rgba(59, 130, 246, 0.04)",

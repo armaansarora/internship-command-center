@@ -364,7 +364,7 @@ function BillingToggle({ isAnnual }: { isAnnual: boolean }) {
         aria-selected={!isAnnual}
         href="/pricing"
         scroll={false}
-        className="rounded-full px-4 py-1.5 transition-all"
+        className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-1.5 transition-all"
         style={{
           fontFamily: "'Satoshi', sans-serif",
           fontSize: "13px",
@@ -381,7 +381,7 @@ function BillingToggle({ isAnnual }: { isAnnual: boolean }) {
         aria-selected={isAnnual}
         href="/pricing?billing=annual"
         scroll={false}
-        className="flex items-center gap-2 rounded-full px-4 py-1.5 transition-all"
+        className="flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-1.5 transition-all"
         style={{
           fontFamily: "'Satoshi', sans-serif",
           fontSize: "13px",

@@ -352,7 +352,7 @@ export function LobbyClient({
                 <a
                   key={link.href}
                   href={link.href}
-                  className="transition-opacity hover:opacity-100"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center transition-opacity hover:opacity-100"
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: "10px",
@@ -748,7 +748,7 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
         {!isAuthenticated && (
           <a
             href="/waitlist"
-            className="text-center transition-opacity hover:opacity-100"
+            className="inline-flex min-h-11 items-center justify-center text-center transition-opacity hover:opacity-100"
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "10px",

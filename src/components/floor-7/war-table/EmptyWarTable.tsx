@@ -131,6 +131,7 @@ export function EmptyWarTable({
         style={{
           appearance: "none",
           padding: "10px 22px",
+          minHeight: "44px",
           borderRadius: "2px",
           border: "1px solid #C9A84C",
           background:

@@ -41,7 +41,7 @@ export function PipelineVelocity({ stages = DEFAULT_STAGES }: PipelineVelocityPr
     <div
       role="img"
       aria-label="Pipeline velocity chart showing average days per stage"
-      style={{ width: "100%" }}
+      style={{ minWidth: 0, overflow: "hidden", width: "100%" }}
     >
       <div
         style={{
@@ -64,7 +64,9 @@ export function PipelineVelocity({ stages = DEFAULT_STAGES }: PipelineVelocityPr
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  gap: "8px",
                   marginBottom: "4px",
+                  minWidth: 0,
                 }}
               >
                 <span
@@ -73,11 +75,15 @@ export function PipelineVelocity({ stages = DEFAULT_STAGES }: PipelineVelocityPr
                     fontFamily: "JetBrains Mono, IBM Plex Mono, monospace",
                     color: "rgba(168, 216, 255, 0.8)",
                     letterSpacing: "0.04em",
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {stage.label}
                 </span>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div style={{ display: "flex", alignItems: "center", flexShrink: 0, gap: "6px" }}>
                   <span
                     style={{
                       fontSize: "8px",
@@ -148,6 +154,7 @@ export function PipelineVelocity({ stages = DEFAULT_STAGES }: PipelineVelocityPr
       <div
         style={{
           display: "flex",
+          flexWrap: "wrap",
           gap: "12px",
           marginTop: "12px",
           borderTop: "1px solid rgba(60, 140, 220, 0.12)",

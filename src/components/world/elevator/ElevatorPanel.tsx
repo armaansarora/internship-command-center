@@ -348,7 +348,7 @@ export function ElevatorMobileBar({
       {/* ── Backdrop (when expanded) ── */}
       {expanded && (
         <div
-          className="fixed inset-0 z-[28] md:hidden"
+          className="fixed inset-0 z-[28] lg:hidden"
           style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(2px)" }}
           onClick={dismiss}
           aria-hidden="true"
@@ -361,7 +361,7 @@ export function ElevatorMobileBar({
       {expanded && (
       <div
         ref={sheetRef}
-        className="fixed bottom-0 left-0 right-0 z-[29] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[29] lg:hidden"
         role="dialog"
         aria-label="Floor navigation"
         aria-modal="true"
@@ -472,7 +472,7 @@ export function ElevatorMobileBar({
 
       {/* ── Fixed Bottom Bar (always visible on mobile) ── */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[30] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[30] lg:hidden"
         role="navigation"
         aria-label="Floor navigation"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}

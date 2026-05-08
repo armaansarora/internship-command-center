@@ -174,8 +174,8 @@ function MorningReport({
             onClick={onClose}
             aria-label="Dismiss morning report"
             style={{
-              width: "30px",
-              height: "30px",
+              width: "44px",
+              height: "44px",
               borderRadius: "50%",
               border: "1px solid rgba(255,255,255,0.12)",
               background: "rgba(255,255,255,0.04)",
@@ -668,6 +668,9 @@ const smallLinkStyle = {
   border: "1px solid rgba(201,168,76,0.22)",
   borderRadius: "6px",
   padding: "8px 10px",
+  minHeight: "44px",
+  display: "inline-flex",
+  alignItems: "center",
   fontFamily: "'JetBrains Mono', monospace",
   fontSize: "10px",
   letterSpacing: "0.12em",
@@ -685,6 +688,7 @@ const actionButtonStyle = {
   borderRadius: "7px",
   background: "rgba(201,168,76,0.08)",
   padding: "12px 13px",
+  minHeight: "44px",
   color: "#E8C45A",
   fontFamily: "'JetBrains Mono', monospace",
   fontSize: "10px",

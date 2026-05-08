@@ -93,6 +93,8 @@ export default async function MilestonesPage() {
             aria-label="All milestones"
             style={{
               ...panelStyle,
+              display: "grid",
+              alignItems: "stretch",
               padding: "10px",
               gap: "0",
             }}
@@ -160,6 +162,7 @@ const panelStyle = {
   boxShadow: "0 24px 70px rgba(0,0,0,0.34)",
   padding: "22px",
   display: "flex",
+  minWidth: 0,
   justifyContent: "space-between",
   gap: "18px",
   alignItems: "center",
@@ -193,6 +196,10 @@ const linkButtonStyle = {
   border: "1px solid rgba(201,168,76,0.24)",
   borderRadius: "7px",
   padding: "10px 12px",
+  minHeight: "44px",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
   color: "#E8C45A",
   background: "rgba(201,168,76,0.08)",
   textDecoration: "none",
@@ -205,7 +212,7 @@ const linkButtonStyle = {
 
 const milestoneRowStyle = {
   display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr) minmax(220px, 280px)",
+  gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
   gap: "18px",
   alignItems: "center",
   padding: "16px 14px",

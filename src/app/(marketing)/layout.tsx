@@ -36,7 +36,7 @@ export default function MarketingLayout({
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <Link
             href="/"
-            className="flex items-baseline gap-2 transition-opacity hover:opacity-80"
+            className="flex min-h-11 items-center gap-2 transition-opacity hover:opacity-80"
           >
             <span
               style={{
@@ -65,7 +65,7 @@ export default function MarketingLayout({
             {LAUNCH_CONFIG.flags.pricingPublic && (
               <Link
                 href="/pricing"
-                className="text-sm text-white/70 transition-colors hover:text-white"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm text-white/70 transition-colors hover:text-white"
                 style={{ fontFamily: "'Satoshi', sans-serif" }}
               >
                 Pricing
@@ -73,7 +73,7 @@ export default function MarketingLayout({
             )}
             <Link
               href="/lobby"
-              className="rounded-lg px-4 py-2 text-sm transition-all"
+              className="inline-flex min-h-11 items-center rounded-lg px-4 py-2 text-sm transition-all"
               style={{
                 fontFamily: "'Satoshi', sans-serif",
                 fontWeight: 600,
@@ -121,7 +121,7 @@ export default function MarketingLayout({
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xs text-white/50 transition-colors hover:text-white/90"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center text-xs text-white/50 transition-colors hover:text-white/90"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   letterSpacing: "0.08em",

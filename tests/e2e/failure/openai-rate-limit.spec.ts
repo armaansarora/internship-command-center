@@ -76,11 +76,12 @@ test.describe("LLM 429 — /api/writing-room/compose-stream — user-visible fal
 
     // Invariant: acceptable statuses are 200 (stream begins, may degrade
     // mid-stream — still a user-visible response), 401 (auth failed,
-    // vacuously not a crash), 503 (ai_provider_missing — typed degrade),
-    // or 500 (typed stream_failed — NOT a raw stack).
+    // vacuously not a crash), 429 (agent-call rate limit), 503
+    // (ai_provider_missing — typed degrade), or 500 (typed stream_failed —
+    // NOT a raw stack).
     const status = res.status();
     expect(
-      [200, 401, 500, 503],
+      [200, 401, 429, 500, 503],
       `unexpected status ${status} — regression if 502/504 or uncaught crash`,
     ).toContain(status);
 

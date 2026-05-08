@@ -164,8 +164,8 @@ export function SoundToggle(): JSX.Element {
         onPointerLeave={handlePointerUp}
         onContextMenu={handleContextMenu}
         style={{
-          width: "36px",
-          height: "36px",
+          width: "44px",
+          height: "44px",
           borderRadius: "50%",
           background: "rgba(10, 12, 25, 0.78)",
           backdropFilter: "blur(12px)",

@@ -234,7 +234,7 @@ export function RolodexLoungeClient({
   // CNO + warmth board on the left; CIO + intel board on the right.
   const characterSlot = (
     <div
-      className="flex items-end justify-center gap-6 w-full h-full px-6 pb-4"
+      className="flex flex-wrap items-end justify-center gap-3 sm:gap-6 w-full h-full overflow-hidden px-3 pb-3 sm:px-6 sm:pb-4"
       style={{ maxWidth: "1280px", margin: "0 auto" }}
     >
       {/* CNO character — left */}
@@ -322,7 +322,7 @@ export function RolodexLoungeClient({
             outline: "none",
             flexShrink: 0,
             whiteSpace: "nowrap",
-            height: "36px",
+            minHeight: "44px",
             alignSelf: "flex-end",
           }}
           onMouseEnter={(e) => {
@@ -338,6 +338,7 @@ export function RolodexLoungeClient({
           onFocus={(e) => {
             (e.currentTarget as HTMLButtonElement).style.outline =
               "2px solid rgba(201, 168, 76, 0.5)";
+            (e.currentTarget as HTMLButtonElement).style.outlineOffset = "2px";
           }}
           onBlur={(e) => {
             (e.currentTarget as HTMLButtonElement).style.outline = "none";

@@ -175,6 +175,7 @@ export function ObservatoryScene({ stats, characterSlot, dashboardSlot }: Observ
       >
         {/* Split layout: character left, dashboard right */}
         <div
+          className="observatory-layout"
           style={{
             flex: 1,
             display: "grid",
@@ -186,6 +187,7 @@ export function ObservatoryScene({ stats, characterSlot, dashboardSlot }: Observ
         >
           {/* Character slot */}
           <div
+            className="observatory-character-pane"
             style={{
               borderRight: "1px solid rgba(60, 140, 220, 0.12)",
               display: "flex",
@@ -202,6 +204,7 @@ export function ObservatoryScene({ stats, characterSlot, dashboardSlot }: Observ
 
           {/* Dashboard slot */}
           <div
+            className="observatory-dashboard-pane"
             style={{
               overflow: "auto",
               padding: "16px 20px",
@@ -217,6 +220,32 @@ export function ObservatoryScene({ stats, characterSlot, dashboardSlot }: Observ
       <div style={{ position: "relative", zIndex: 20, flexShrink: 0 }}>
         <ObservatoryTicker stats={stats} />
       </div>
+
+      <style>{`
+        @media (max-width: 767px) {
+          .observatory-layout {
+            grid-template-columns: minmax(0, 1fr) !important;
+            grid-auto-rows: minmax(0, auto);
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+          }
+
+          .observatory-character-pane {
+            order: 2;
+            min-height: 560px;
+            border-right: 0 !important;
+            border-top: 1px solid rgba(60, 140, 220, 0.12);
+          }
+
+          .observatory-dashboard-pane {
+            order: 1;
+            min-width: 0;
+            overflow-x: hidden !important;
+            overflow-y: visible !important;
+            padding: 12px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

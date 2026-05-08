@@ -129,6 +129,7 @@ export function ObservatoryClient({ stats, apps }: ObservatoryClientProps): JSX.
 
       {/* SUPPORTING — context strips, not centerpieces */}
       <div
+        className="observatory-supporting-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -154,12 +155,16 @@ export function ObservatoryClient({ stats, apps }: ObservatoryClientProps): JSX.
             color: "rgba(74, 122, 155, 0.8)",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
+            minHeight: "44px",
+            display: "flex",
+            alignItems: "center",
             padding: "8px 0",
           }}
         >
           More analytics
         </summary>
         <div
+          className="observatory-supporting-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
@@ -175,6 +180,18 @@ export function ObservatoryClient({ stats, apps }: ObservatoryClientProps): JSX.
           </AnalyticsPanel>
         </div>
       </details>
+      <style>{`
+        @media (max-width: 767px) {
+          .observatory-supporting-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+
+          .instrument-panel {
+            min-width: 0;
+            overflow: hidden;
+          }
+        }
+      `}</style>
     </div>
   );
 

@@ -261,6 +261,7 @@ export function WritingRoomScene({
 
       {/* ── Main content area ── */}
       <div
+        className="writing-room-main"
         style={{
           position: "relative",
           zIndex: 10,
@@ -272,6 +273,7 @@ export function WritingRoomScene({
       >
         {/* Left section — 60% — Document editor area */}
         <div
+          className="writing-room-editor"
           style={{
             flex: "0 0 60%",
             minWidth: 0,
@@ -286,6 +288,7 @@ export function WritingRoomScene({
 
         {/* Warm divider glow */}
         <div
+          className="writing-room-divider"
           aria-hidden="true"
           style={{
             width: "1px",
@@ -299,6 +302,7 @@ export function WritingRoomScene({
 
         {/* Right section — 40% — CMO character area */}
         <div
+          className="writing-room-character"
           style={{
             flex: "0 0 40%",
             minWidth: 0,
@@ -335,6 +339,31 @@ export function WritingRoomScene({
           )}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 767px) {
+          .writing-room-main {
+            flex-direction: column !important;
+          }
+
+          .writing-room-editor {
+            flex: 1 1 auto !important;
+            min-height: 58dvh !important;
+            border-right: 0 !important;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+          }
+
+          .writing-room-divider {
+            display: none !important;
+          }
+
+          .writing-room-character {
+            flex: 0 0 auto !important;
+            min-height: 270px;
+            overflow: hidden;
+          }
+        }
+      `}</style>
 
       {/* ── Bottom ticker strip ── */}
       <div

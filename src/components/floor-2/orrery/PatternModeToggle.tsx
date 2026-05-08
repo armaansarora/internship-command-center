@@ -63,6 +63,7 @@ function buttonStyle(active: boolean): CSSProperties {
     background: active ? ACTIVE_BG : "transparent",
     color: active ? TEXT_ACTIVE : TEXT_DIM,
     padding: "5px 14px",
+    minHeight: "44px",
     fontSize: "11px",
     letterSpacing: "0.08em",
     textTransform: "uppercase",

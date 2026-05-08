@@ -199,6 +199,7 @@ export function NetworkingConsent({
               alignItems: "center",
               gap: 8,
               fontSize: 13,
+              minHeight: 44,
               marginTop: 10,
             }}
           >
@@ -227,6 +228,7 @@ export function NetworkingConsent({
               alignItems: "center",
               gap: 8,
               fontSize: 13,
+              minHeight: 44,
             }}
           >
             <input
@@ -259,7 +261,11 @@ function buttonStyle({
   disabled: boolean;
 }): React.CSSProperties {
   const base: React.CSSProperties = {
+    alignItems: "center",
+    display: "inline-flex",
+    justifyContent: "center",
     marginTop: 12,
+    minHeight: 44,
     padding: "8px 18px",
     fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 11,

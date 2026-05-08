@@ -45,7 +45,15 @@ test.describe("anonymous request — /api/networking/match-candidates — middle
       expect(location).toContain("/lobby");
     } else {
       const body = await res.json();
-      expect(body).toMatchObject({ ok: false, reason: "unauthenticated" });
+      const legacyUnauthenticated =
+        body?.ok === false && body?.reason === "unauthenticated";
+      const currentUnauthenticated =
+        body?.code === "UNAUTHENTICATED" &&
+        body?.error === "Authentication required";
+      expect(
+        legacyUnauthenticated || currentUnauthenticated,
+        `unexpected unauthenticated body: ${JSON.stringify(body)}`,
+      ).toBe(true);
     }
   });
 });

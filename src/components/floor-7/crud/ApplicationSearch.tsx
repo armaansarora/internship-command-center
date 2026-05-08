@@ -143,15 +143,20 @@ export function ApplicationSearch({
               color: "#E8F4FD",
               outline: "none",
               boxSizing: "border-box",
+              minHeight: "44px",
               transition: "border-color 0.15s ease",
             }}
             onFocus={(e) => {
               (e.currentTarget as HTMLInputElement).style.borderColor =
                 "rgba(30, 144, 255, 0.6)";
+              (e.currentTarget as HTMLInputElement).style.outline =
+                "2px solid rgba(30, 144, 255, 0.5)";
+              (e.currentTarget as HTMLInputElement).style.outlineOffset = "2px";
             }}
             onBlur={(e) => {
               (e.currentTarget as HTMLInputElement).style.borderColor =
                 "rgba(30, 58, 95, 0.8)";
+              (e.currentTarget as HTMLInputElement).style.outline = "none";
             }}
           />
         </div>
@@ -268,7 +273,7 @@ export function ApplicationSearch({
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                height: "22px",
+                minHeight: "44px",
                 padding: "0 8px",
                 background: isActive ? `${filter.color}22` : "rgba(10, 22, 40, 0.6)",
                 border: `1px solid ${isActive ? `${filter.color}77` : "rgba(30, 58, 95, 0.6)"}`,
