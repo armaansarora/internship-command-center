@@ -240,6 +240,24 @@ async function auditSubscriptionEvent(
   await logSecurityEvent(auditEvent);
 }
 
+async function updateUserSubscriptionTier(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  userId: string,
+  tier: string,
+  context: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("user_profiles")
+    .update({ subscription_tier: tier })
+    .eq("id", userId)
+    .select("id")
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to persist ${context}: ${error.message}`);
+  }
+}
+
 /**
  * Dispatch table for Stripe event types. Only the events we care about are
  * listed — everything else gets acknowledged and ignored.
@@ -264,13 +282,7 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       if (!priceId) return;
 
       const tier = tierFromPriceId(priceId);
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({ subscription_tier: tier })
-        .eq("id", userId);
-      if (error) {
-        throw new Error(`Failed to persist checkout tier: ${error.message}`);
-      }
+      await updateUserSubscriptionTier(supabase, userId, tier, "checkout tier");
       return;
     }
 
@@ -289,15 +301,12 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
         const tier = tierFromPriceId(priceId);
         const isActive =
           subscription.status === "active" || subscription.status === "trialing";
-        const { error } = await supabase
-          .from("user_profiles")
-          .update({ subscription_tier: isActive ? tier : "free" })
-          .eq("id", userId);
-        if (error) {
-          throw new Error(
-            `Failed to persist subscription creation: ${error.message}`,
-          );
-        }
+        await updateUserSubscriptionTier(
+          supabase,
+          userId,
+          isActive ? tier : "free",
+          "subscription creation",
+        );
       }
 
       await auditSubscriptionEvent(event, userId);
@@ -317,13 +326,12 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
 
       const isActive =
         subscription.status === "active" || subscription.status === "trialing";
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({ subscription_tier: isActive ? tier : "free" })
-        .eq("id", userId);
-      if (error) {
-        throw new Error(`Failed to persist subscription update: ${error.message}`);
-      }
+      await updateUserSubscriptionTier(
+        supabase,
+        userId,
+        isActive ? tier : "free",
+        "subscription update",
+      );
 
       await auditSubscriptionEvent(event, userId);
       return;
@@ -335,15 +343,12 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       const userId = await findUserIdByStripeCustomer(supabase, subscription.customer);
       if (!userId) return;
 
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({ subscription_tier: "free" })
-        .eq("id", userId);
-      if (error) {
-        throw new Error(
-          `Failed to persist subscription deletion: ${error.message}`,
-        );
-      }
+      await updateUserSubscriptionTier(
+        supabase,
+        userId,
+        "free",
+        "subscription deletion",
+      );
 
       await auditSubscriptionEvent(event, userId);
       return;
