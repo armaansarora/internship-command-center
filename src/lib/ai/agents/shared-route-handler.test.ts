@@ -245,4 +245,41 @@ describe("createAgentRouteHandler", () => {
     expect(getAgentModelSpy).toHaveBeenCalledOnce();
     expect(streamTextSpy).toHaveBeenCalledOnce();
   });
+
+  it("records and alerts failed stream finishes", async () => {
+    const res = await makeHandler()(makeRequest());
+    expect(res.status).toBe(200);
+
+    const options = streamTextSpy.mock.calls[0]?.[0] as {
+      onFinish: (args: {
+        text: string;
+        usage: undefined;
+        toolCalls: Array<{ toolName: string }>;
+        toolResults: Array<{ toolName: string }>;
+        finishReason: "error";
+      }) => Promise<void>;
+    };
+
+    await options.onFinish({
+      text: "",
+      usage: undefined,
+      toolCalls: [],
+      toolResults: [],
+      finishReason: "error",
+    });
+
+    expect(logErrorSpy).toHaveBeenCalledWith(
+      "agent.finish_failed",
+      expect.any(Error),
+      { agent: "cro", userId: "user-agent", toolNames: "" },
+    );
+    expect(recordAgentRunSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent: "cro",
+        userId: "user-agent",
+        status: "failed",
+        error: "stream_finish_error",
+      }),
+    );
+  });
 });
