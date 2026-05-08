@@ -51,7 +51,24 @@ const FAST_MODEL_BARE = "claude-haiku-4-5";
  * `VERCEL_AI_GATEWAY_API_KEY` alias used by some deployments.
  */
 export function isGatewayEnabled(): boolean {
-  return Boolean(process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_AI_GATEWAY_API_KEY);
+  return Boolean(
+    process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_AI_GATEWAY_API_KEY,
+  );
+}
+
+/**
+ * Returns true when at least one provider path for the agent model can work.
+ *
+ * Agent routes can use AI Gateway or the direct Anthropic provider. Keeping
+ * this check next to model selection prevents a Gateway-configured deployment
+ * from being blocked by a missing direct Anthropic key.
+ */
+export function isAgentModelConfigured(): boolean {
+  return Boolean(
+    process.env.AI_GATEWAY_API_KEY ||
+      process.env.VERCEL_AI_GATEWAY_API_KEY ||
+      process.env.ANTHROPIC_API_KEY,
+  );
 }
 
 // ---------------------------------------------------------------------------

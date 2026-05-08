@@ -44,10 +44,13 @@ describe("getClientIp", () => {
 //   - checkTieredRateLimit (Upstash-backed limiter)
 // and assert that withRateLimit dispatches to the correct bucket per tier.
 
-const { checkTieredSpy, getUserTierSpy } = vi.hoisted(() => ({
-  checkTieredSpy: vi.fn(),
-  getUserTierSpy: vi.fn(),
-}));
+const { checkTieredSpy, checkAnonymousSpy, getUserTierSpy, logErrorSpy } =
+  vi.hoisted(() => ({
+    checkTieredSpy: vi.fn(),
+    checkAnonymousSpy: vi.fn(),
+    getUserTierSpy: vi.fn(),
+    logErrorSpy: vi.fn(),
+  }));
 
 vi.mock("@/lib/rate-limit", async () => {
   const actual = await vi.importActual<typeof import("@/lib/rate-limit")>(
@@ -56,12 +59,7 @@ vi.mock("@/lib/rate-limit", async () => {
   return {
     ...actual,
     checkTieredRateLimit: checkTieredSpy,
-    checkAnonymousRateLimit: vi.fn().mockResolvedValue({
-      configured: true,
-      success: true,
-      remaining: 999,
-      reset: 0,
-    }),
+    checkAnonymousRateLimit: checkAnonymousSpy,
   };
 });
 
@@ -78,13 +76,23 @@ vi.mock("@/lib/env", () => ({
   requireEnv: () => ({}),
 }));
 
+vi.mock("@/lib/logger", () => ({
+  log: {
+    error: logErrorSpy,
+  },
+}));
+
 // Re-import after mocks so the module picks up the mocked dependencies.
-const { withRateLimit } = await import("./rate-limit-middleware");
+const { withRateLimit, withAnonymousRateLimit } = await import(
+  "./rate-limit-middleware"
+);
 
 describe("withRateLimit tier selection", () => {
   beforeEach(() => {
     checkTieredSpy.mockReset();
+    checkAnonymousSpy.mockReset();
     getUserTierSpy.mockReset();
+    logErrorSpy.mockReset();
     // Default: limiter succeeds.
     checkTieredSpy.mockResolvedValue({
       configured: true,
@@ -92,6 +100,16 @@ describe("withRateLimit tier selection", () => {
       remaining: 10,
       reset: Date.now() + 60_000,
     });
+    checkAnonymousSpy.mockResolvedValue({
+      configured: true,
+      success: true,
+      remaining: 999,
+      reset: 0,
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("tier A dispatches to the 60-rpm bucket and skips getUserTier", async () => {
@@ -158,5 +176,46 @@ describe("withRateLimit tier selection", () => {
     // Retry-After is ceil((reset - now) / 1000) — we allow a small window for test timing jitter.
     expect(Number(retryAfter)).toBeGreaterThan(0);
     expect(Number(retryAfter)).toBeLessThanOrEqual(60);
+  });
+
+  it("returns a clean 503 when the tiered limiter throws in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    checkTieredSpy.mockRejectedValueOnce(new Error("upstash unavailable"));
+
+    const result = await withRateLimit("user-outage", "A");
+
+    expect(result.limited).toBe(true);
+    expect(result.response?.status).toBe(503);
+    expect(result.headers["X-RateLimit-Limit"]).toBe("60");
+    expect(result.headers["X-RateLimit-Remaining"]).toBe("0");
+    expect(logErrorSpy).toHaveBeenCalledWith(
+      "rate_limit.check_failed",
+      expect.any(Error),
+      { tier: "A", bucket: "tierA" },
+    );
+    await expect(result.response?.json()).resolves.toEqual({
+      error: "Rate limiter is temporarily unavailable.",
+    });
+  });
+
+  it("returns a clean 503 when the anonymous limiter throws in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    checkAnonymousSpy.mockRejectedValueOnce(new Error("upstash unavailable"));
+
+    const result = await withAnonymousRateLimit(
+      new Request("https://example.com/api/weather"),
+    );
+
+    expect(result.limited).toBe(true);
+    expect(result.response?.status).toBe(503);
+    expect(result.headers["X-RateLimit-Limit"]).toBe("20");
+    expect(result.headers["X-RateLimit-Remaining"]).toBe("0");
+    expect(logErrorSpy).toHaveBeenCalledWith(
+      "rate_limit.anonymous_check_failed",
+      expect.any(Error),
+    );
+    await expect(result.response?.json()).resolves.toEqual({
+      error: "Rate limiter is temporarily unavailable.",
+    });
   });
 });

@@ -38,10 +38,13 @@ import { requireAgentAccess } from "@/lib/stripe/agent-access";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { log } from "@/lib/logger";
-import { requireEnv } from "@/lib/env";
 import type { User } from "@supabase/supabase-js";
 
-import { getAgentModel, getActiveModelId } from "@/lib/ai/model";
+import {
+  getAgentModel,
+  getActiveModelId,
+  isAgentModelConfigured,
+} from "@/lib/ai/model";
 import { buildCachedSystemMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
 import { extractAndStoreMemories } from "@/lib/ai/memory-extractor";
@@ -160,9 +163,6 @@ export function createAgentRouteHandler<Context>(
   return async function POST(req: Request): Promise<Response> {
     const startedAt = Date.now();
 
-    // Fail fast at the boundary if Anthropic isn't configured.
-    requireEnv(["ANTHROPIC_API_KEY"] as const);
-
     const auth = await requireUserApi();
     if (!auth.ok) return auth.response;
     const { user } = auth;
@@ -182,6 +182,25 @@ export function createAgentRouteHandler<Context>(
       );
     }
     const { messages } = guardedBody;
+
+    if (!model && !isAgentModelConfigured()) {
+      log.error(
+        "agent.model_unavailable",
+        new Error("Missing AI provider credentials"),
+        {
+          agent: agentKey,
+          userId: user.id,
+        },
+      );
+      return Response.json(
+        {
+          error: "ai_unavailable",
+          message:
+            "The Tower agent desk is temporarily unavailable. Try again in a minute.",
+        },
+        { status: 503, headers: check.headers },
+      );
+    }
 
     const tier = await getUserTier(user.id);
     const quota = await consumeAiQuota(user.id, tier);

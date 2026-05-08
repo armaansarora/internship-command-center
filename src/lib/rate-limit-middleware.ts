@@ -4,6 +4,7 @@ import {
   type RateBucket,
 } from "@/lib/rate-limit";
 import { getUserTier } from "@/lib/stripe/entitlements";
+import { log } from "@/lib/logger";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -37,6 +38,27 @@ const ANON_LIMIT = 20;
 
 function isProductionRuntime(): boolean {
   return process.env.NODE_ENV === "production";
+}
+
+function unavailableRateLimitResult(limit: number): RateLimitCheck {
+  const headers: RateLimitHeaders = {
+    "X-RateLimit-Limit": String(limit),
+    "X-RateLimit-Remaining": "0",
+    "X-RateLimit-Reset": String(Date.now() + 60_000),
+  };
+
+  if (!isProductionRuntime()) {
+    return { limited: false, headers, response: null };
+  }
+
+  return {
+    limited: true,
+    headers,
+    response: Response.json(
+      { error: "Rate limiter is temporarily unavailable." },
+      { status: 503, headers },
+    ),
+  };
 }
 
 // ── Middleware helper ─────────────────────────────────────────────────────────
@@ -87,10 +109,19 @@ export async function withRateLimit(
   tier: RateTier = "B",
 ): Promise<RateLimitCheck> {
   const { bucket, limit } = await resolveTier(tier, userId);
-  const { configured, success, remaining, reset } = await checkTieredRateLimit(
-    userId,
-    bucket,
-  );
+  let configured: boolean;
+  let success: boolean;
+  let remaining: number;
+  let reset: number;
+  try {
+    ({ configured, success, remaining, reset } = await checkTieredRateLimit(
+      userId,
+      bucket,
+    ));
+  } catch (err) {
+    log.error("rate_limit.check_failed", err, { tier, bucket });
+    return unavailableRateLimitResult(limit);
+  }
 
   const headers: RateLimitHeaders = {
     "X-RateLimit-Limit": String(limit),
@@ -156,7 +187,16 @@ export async function withAnonymousRateLimit(
   request: Request
 ): Promise<RateLimitCheck> {
   const ip = getClientIp(request);
-  const { configured, success, remaining, reset } = await checkAnonymousRateLimit(ip);
+  let configured: boolean;
+  let success: boolean;
+  let remaining: number;
+  let reset: number;
+  try {
+    ({ configured, success, remaining, reset } = await checkAnonymousRateLimit(ip));
+  } catch (err) {
+    log.error("rate_limit.anonymous_check_failed", err);
+    return unavailableRateLimitResult(ANON_LIMIT);
+  }
 
   const headers: RateLimitHeaders = {
     "X-RateLimit-Limit": String(ANON_LIMIT),
