@@ -137,4 +137,39 @@ describe("GET /api/auth/callback", () => {
     expect(needsLobbyOnboardingAfterAuthSpy).not.toHaveBeenCalled();
     expect(signOutSpy).not.toHaveBeenCalled();
   });
+
+  it("uses auth_unavailable when the Supabase exchange hits an edge outage", async () => {
+    exchangeCodeForSessionSpy.mockResolvedValue({
+      data: { user: null, session: null },
+      error: {
+        message: "Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      },
+    });
+
+    const res = await GET(request("/api/auth/callback?code=bad"));
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "https://www.interntower.com/lobby?error=auth_unavailable",
+    );
+    expect(isEmailAllowedForBetaSpy).not.toHaveBeenCalled();
+    expect(needsLobbyOnboardingAfterAuthSpy).not.toHaveBeenCalled();
+    expect(signOutSpy).not.toHaveBeenCalled();
+  });
+
+  it("uses auth_unavailable when the Supabase exchange throws an edge outage", async () => {
+    exchangeCodeForSessionSpy.mockRejectedValue(
+      new Error("Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"),
+    );
+
+    const res = await GET(request("/api/auth/callback?code=bad"));
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "https://www.interntower.com/lobby?error=auth_unavailable",
+    );
+    expect(isEmailAllowedForBetaSpy).not.toHaveBeenCalled();
+    expect(needsLobbyOnboardingAfterAuthSpy).not.toHaveBeenCalled();
+    expect(signOutSpy).not.toHaveBeenCalled();
+  });
 });

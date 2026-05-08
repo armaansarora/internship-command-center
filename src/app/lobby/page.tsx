@@ -15,6 +15,8 @@ interface LobbyPageProps {
 function getLobbyErrorMessage(error: string | undefined): string | null {
   if (!error) return null;
   switch (error) {
+    case "auth_unavailable":
+      return "The Tower sign-in desk is temporarily unavailable. Try again in a minute.";
     case "auth_failed":
       return "The front desk could not verify that sign-in. Try again.";
     case "beta_not_invited":

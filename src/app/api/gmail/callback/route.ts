@@ -13,6 +13,7 @@ import {
 } from "@/lib/auth/google-login-state";
 import { exchangeGoogleLoginCodeForIdToken } from "@/lib/auth/google-login-oauth";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
+import { isTransientSupabaseAuthError } from "@/lib/auth/supabase-auth-errors";
 import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
 import { needsLobbyOnboardingAfterAuth } from "@/lib/auth/post-auth-profile";
 import { log } from "@/lib/logger";
@@ -185,7 +186,11 @@ async function handleLoginCallback(args: {
       log.warn("auth.google_login.supabase_exchange_failed", {
         error: error.message,
       });
-      return lobbyError("auth_failed");
+      return lobbyError(
+        isTransientSupabaseAuthError(error.message)
+          ? "auth_unavailable"
+          : "auth_failed",
+      );
     }
 
     const user = data.user ?? data.session?.user ?? null;
@@ -209,7 +214,12 @@ async function handleLoginCallback(args: {
     );
   } catch (err) {
     log.error("auth.google_login.failed", err);
-    return lobbyError("auth_failed");
+    const message = err instanceof Error ? err.message : String(err);
+    return lobbyError(
+      isTransientSupabaseAuthError(message)
+        ? "auth_unavailable"
+        : "auth_failed",
+    );
   }
 }
 
@@ -223,11 +233,7 @@ async function signInWithGoogleIdToken(args: {
     attempt <= SUPABASE_GOOGLE_LOGIN_RETRY_DELAYS_MS.length;
     attempt += 1
   ) {
-    const result = await args.supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: args.idToken,
-      nonce: args.nonce,
-    });
+    const result = await trySignInWithGoogleIdToken(args);
 
     if (
       !result.error ||
@@ -247,14 +253,24 @@ async function signInWithGoogleIdToken(args: {
   throw new Error("Unreachable Supabase Google login retry state");
 }
 
-function isTransientSupabaseAuthError(message: string): boolean {
-  const lower = message.toLowerCase();
-  return (
-    lower.includes("unexpected token '<'") ||
-    lower.includes("connection timed out") ||
-    lower.includes("522") ||
-    lower.includes("fetch failed")
-  );
+async function trySignInWithGoogleIdToken(args: {
+  supabase: SupabaseServerClient;
+  idToken: string;
+  nonce: string;
+}): Promise<GoogleIdTokenSignInResult> {
+  try {
+    return await args.supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: args.idToken,
+      nonce: args.nonce,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      data: { user: null, session: null },
+      error: { message },
+    } as GoogleIdTokenSignInResult;
+  }
 }
 
 function delay(ms: number): Promise<void> {

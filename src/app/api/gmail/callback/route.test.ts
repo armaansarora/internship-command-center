@@ -387,6 +387,59 @@ describe("GET /api/gmail/callback", () => {
     expectClearedLoginCookie(res);
   });
 
+  it("routes persistent Supabase edge failures to auth_unavailable", async () => {
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: true,
+      payload: {
+        v: 1,
+        state: "login-state",
+        nonce: "login-nonce",
+        next: "/settings",
+        issuedAt: Date.now(),
+      },
+    });
+    exchangeGoogleLoginCodeForIdTokenSpy.mockResolvedValue("id-token");
+    signInWithIdTokenSpy.mockResolvedValue({
+      data: { user: null, session: null },
+      error: {
+        message: "Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+      },
+    });
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(signInWithIdTokenSpy).toHaveBeenCalledTimes(3);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/lobby?error=auth_unavailable",
+    );
+    expectClearedLoginCookie(res);
+  });
+
+  it("routes thrown Supabase edge failures to auth_unavailable", async () => {
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: true,
+      payload: {
+        v: 1,
+        state: "login-state",
+        nonce: "login-nonce",
+        next: "/settings",
+        issuedAt: Date.now(),
+      },
+    });
+    exchangeGoogleLoginCodeForIdTokenSpy.mockResolvedValue("id-token");
+    signInWithIdTokenSpy.mockRejectedValue(
+      new Error("Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"),
+    );
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(signInWithIdTokenSpy).toHaveBeenCalledTimes(3);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/lobby?error=auth_unavailable",
+    );
+    expectClearedLoginCookie(res);
+  });
+
   it("rejects login callbacks outside the beta gate", async () => {
     verifyGoogleLoginStateSpy.mockReturnValue({
       ok: true,

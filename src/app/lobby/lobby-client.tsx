@@ -11,6 +11,8 @@ function authErrorMessage(code: string | undefined): string {
   switch (code) {
     case "beta_not_invited":
       return "This email does not have a Tower access key yet. Join the waitlist or use an invited account.";
+    case "auth_unavailable":
+      return "The Tower sign-in desk is temporarily unavailable. Try again in a minute.";
     case "auth_failed":
       return "The front desk could not verify that sign-in. Try again.";
     default:
