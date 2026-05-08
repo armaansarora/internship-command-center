@@ -1,70 +1,87 @@
 "use client";
 
-import type { JSX } from "react";
-import type { UIMessage } from "ai";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, CSSProperties, JSX } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OtisCharacter, type OtisMood } from "@/components/lobby/concierge/OtisCharacter";
-import { OtisDialoguePanel, type OtisMessage, type OtisStatus } from "@/components/lobby/concierge/OtisDialoguePanel";
 import { CinematicArrival } from "@/components/lobby/cinematic/CinematicArrival";
 import { BuildingDirectory } from "@/components/lobby/directory/BuildingDirectory";
-import { useConciergeChat } from "@/hooks/useConciergeChat";
+import type { TargetProfile } from "@/lib/agents/cro/target-profile";
 import { claimArrivalPlayAction } from "./actions";
-
-/**
- * ConciergeFlow — the R4 onboarding orchestrator.
- *
- * Runs only for authenticated users whose onboarding is incomplete
- * (server decides based on concierge_completed_at / arrival_played_at).
- * Owns the sequence:
- *
- *   1. Atomic claim on arrival_played_at → decides cinematic plays.
- *   2. CinematicArrival (if won) → onComplete → phase "concierge".
- *   3. Otis conversation via useConciergeChat → user confirms or skips.
- *   4. POST /api/concierge/extract with the transcript.
- *   5. POST /api/onboarding/bootstrap-discovery (race with cinematic).
- *   6. Router.push("/penthouse").
- *
- * The Building Directory renders as a quiet side panel from step 2
- * onward — the floor the user will unlock first is the Penthouse once
- * the first briefing lands.
- */
 
 interface ConciergeFlowProps {
   arrivalAlreadyPlayed: boolean;
   floorsUnlocked: string[];
   guestName: string;
+  mode?: "first-run" | "update";
 }
 
 type Phase = "claiming" | "cinematic" | "concierge" | "finishing" | "redirecting";
+
+type IntakeLevel =
+  | "intern"
+  | "new_grad"
+  | "early_career"
+  | "mid_level"
+  | "senior"
+  | "staff";
+
+type IntakeState = {
+  roles: string;
+  level: IntakeLevel;
+  locations: string;
+  timeline: string;
+  graduation: string;
+  companies: string;
+  musts: string;
+  preferences: string;
+  workAuthorization: "authorized" | "sponsorship" | "unsure";
+  resumeStatus: "ready" | "needs_update" | "none";
+  searchStage: "starting" | "applying" | "interviewing" | "offer";
+  networkingComfort: "comfortable" | "light" | "not_now";
+  notes: string;
+};
+
+const DRAFT_KEY = "tower-concierge-intake-draft";
+
+const DEFAULT_INTAKE: IntakeState = {
+  roles: "",
+  level: "intern",
+  locations: "",
+  timeline: "",
+  graduation: "",
+  companies: "",
+  musts: "",
+  preferences: "",
+  workAuthorization: "unsure",
+  resumeStatus: "needs_update",
+  searchStage: "starting",
+  networkingComfort: "light",
+  notes: "",
+};
+
+const LEVEL_LABELS: Record<IntakeLevel, string> = {
+  intern: "Internship",
+  new_grad: "New grad",
+  early_career: "Early career",
+  mid_level: "Mid level",
+  senior: "Senior",
+  staff: "Staff",
+};
 
 export function ConciergeFlow({
   arrivalAlreadyPlayed,
   floorsUnlocked,
   guestName,
+  mode = "first-run",
 }: ConciergeFlowProps): JSX.Element {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>(arrivalAlreadyPlayed ? "concierge" : "claiming");
   const [cinematicShouldPlay, setCinematicShouldPlay] = useState(false);
-  const bootstrapFiredRef = useRef(false);
+  const [intake, setIntake] = useState<IntakeState>(readDraft);
+  const [saveState, setSaveState] = useState<"idle" | "saved" | "error">("idle");
+  const [googleState, setGoogleState] = useState<"idle" | "loading" | "error">("idle");
 
-  // Local time context passed to /api/concierge/chat so Otis's greeting
-  // register is correct regardless of the server's UTC clock.
-  const localContext = useMemo(() => {
-    if (typeof window === "undefined") {
-      return { timezone: "UTC", localHour: 9 };
-    }
-    const tz =
-      Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-    return { timezone: tz, localHour: new Date().getHours() };
-  }, []);
-
-  const { messages, input, setInput, submit, status, sendRaw } =
-    useConciergeChat({
-      body: localContext,
-    });
-
-  // Phase 1 — atomic claim for the cinematic.
   useEffect(() => {
     if (phase !== "claiming") return;
     let cancelled = false;
@@ -82,68 +99,75 @@ export function ConciergeFlow({
     };
   }, [phase]);
 
-  // Otis seeds the conversation with a greeting once the user reaches the
-  // concierge phase — the first beat is his, not the user's.
-  useEffect(() => {
-    if (phase !== "concierge") return;
-    if (messages.length > 0) return;
-    sendRaw("__SYSTEM_KICKOFF__"); // Otis sees this and opens normally.
-  }, [phase, messages.length, sendRaw]);
+  const canSubmit =
+    intake.roles.trim().length > 0 &&
+    intake.locations.trim().length > 0 &&
+    phase === "concierge";
 
-  const otisMessages: OtisMessage[] = useMemo(
-    () =>
-      messages
-        .filter((m) => !isSystemKickoff(m))
-        .map((m) => ({
-          id: m.id,
-          role: m.role === "assistant" ? "assistant" : "user",
-          text: extractText(m),
-        })),
-    [messages],
-  );
-
-  const otisStatus: OtisStatus =
-    status === "streaming"
-      ? "streaming"
-      : status === "submitted"
-        ? "thinking"
-        : "idle";
+  const completion = useMemo(() => {
+    const fields = [
+      intake.roles,
+      intake.locations,
+      intake.timeline,
+      intake.graduation,
+      intake.companies,
+      intake.musts,
+      intake.preferences,
+      intake.notes,
+    ];
+    const filled = fields.filter((field) => field.trim().length > 0).length + 4;
+    return Math.min(100, Math.round((filled / 12) * 100));
+  }, [intake]);
 
   const otisMood: OtisMood =
-    phase === "cinematic" || phase === "claiming"
-      ? "idle"
-      : status === "streaming"
-        ? "talking"
-        : status === "submitted"
-          ? "thinking"
-          : otisMessages.length === 0
-            ? "greeting"
-            : "listening";
+    phase === "finishing" || phase === "redirecting"
+      ? "thinking"
+      : phase === "cinematic" || phase === "claiming"
+        ? "idle"
+        : "greeting";
 
-  // Once the conversation settles (user sent 2+ messages + Otis replied),
-  // show a Confirm button. For simplicity we let the user confirm explicitly.
-  const conversationReady = otisMessages.filter((m) => m.role === "user").length >= 2;
+  const updateField = useCallback(
+    <K extends keyof IntakeState>(key: K, value: IntakeState[K]) => {
+      setIntake((current) => ({ ...current, [key]: value }));
+      setSaveState("idle");
+    },
+    [],
+  );
 
-  const handleConfirm = useCallback(async () => {
-    if (phase === "finishing" || phase === "redirecting") return;
+  const saveDraft = useCallback(() => {
+    try {
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(intake));
+      setSaveState("saved");
+    } catch {
+      setSaveState("error");
+    }
+  }, [intake]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!canSubmit) return;
     setPhase("finishing");
-    const turns = otisMessages.map((m) => ({ role: m.role, text: m.text }));
     try {
       await fetch("/api/concierge/extract", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ turns, skip: false }),
+        body: JSON.stringify({
+          source: "structured",
+          turns: [],
+          skip: false,
+          profile: buildTargetProfile(intake),
+        }),
       });
+      window.localStorage.removeItem(DRAFT_KEY);
     } catch {
-      // Still proceed — the skip-placeholder path will catch missing profiles.
+      saveDraft();
     }
-    await fireBootstrapOnce(bootstrapFiredRef);
+
+    await fireBootstrap();
     setPhase("redirecting");
     router.push("/penthouse");
-  }, [otisMessages, phase, router]);
+  }, [canSubmit, intake, router, saveDraft]);
 
   const handleSkip = useCallback(async () => {
-    if (phase === "finishing" || phase === "redirecting") return;
     setPhase("finishing");
     try {
       await fetch("/api/concierge/extract", {
@@ -152,12 +176,28 @@ export function ConciergeFlow({
         body: JSON.stringify({ turns: [], skip: true }),
       });
     } catch {
-      // Still proceed.
+      // The Penthouse has safe empty states if this network call misses.
     }
-    await fireBootstrapOnce(bootstrapFiredRef);
+    await fireBootstrap();
     setPhase("redirecting");
     router.push("/penthouse");
-  }, [phase, router]);
+  }, [router]);
+
+  const handleConnectGoogle = useCallback(async () => {
+    setGoogleState("loading");
+    try {
+      const response = await fetch("/api/gmail/auth", { method: "GET" });
+      const body = (await response.json().catch(() => ({}))) as { authUrl?: string };
+      if (!response.ok || !body.authUrl) {
+        setGoogleState("error");
+        return;
+      }
+      saveDraft();
+      window.location.href = body.authUrl;
+    } catch {
+      setGoogleState("error");
+    }
+  }, [saveDraft]);
 
   return (
     <div
@@ -168,11 +208,11 @@ export function ConciergeFlow({
         inset: 0,
         zIndex: 40,
         display: "grid",
-        gridTemplateColumns: "1fr 360px",
-        backgroundColor: "rgba(12, 6, 7, 0.78)",
+        gridTemplateColumns: "minmax(0, 1fr) minmax(280px, 360px)",
+        background:
+          "linear-gradient(115deg, rgba(17, 8, 9, 0.92), rgba(10, 12, 24, 0.9) 52%, rgba(33, 21, 10, 0.82))",
       }}
     >
-      {/* Cinematic arrival — owns the stage when phase === "cinematic" */}
       {phase === "cinematic" && (
         <CinematicArrival
           arrivalAlreadyPlayed={!cinematicShouldPlay}
@@ -181,65 +221,83 @@ export function ConciergeFlow({
         />
       )}
 
-      {/* Otis + Building Directory side-by-side when the Concierge is on-stage */}
-      {(phase === "concierge" || phase === "finishing") && (
+      {(phase === "concierge" || phase === "finishing" || phase === "redirecting") && (
         <>
-          <div
+          <main
             style={{
-              display: "flex",
-              flexDirection: "column",
+              display: "grid",
+              gridTemplateColumns: "minmax(180px, 280px) minmax(0, 780px)",
               alignItems: "center",
               justifyContent: "center",
-              gap: "32px",
-              padding: "40px",
+              gap: "34px",
+              padding: "42px clamp(20px, 5vw, 72px)",
+              overflowY: "auto",
             }}
           >
-            <OtisCharacter mood={otisMood} />
-            <div style={{ width: "min(560px, 90%)", height: "min(420px, 60vh)" }}>
-              <OtisDialoguePanel
-                messages={otisMessages}
-                status={otisStatus}
-                input={input}
-                onInputChange={setInput}
-                onSubmit={submit}
-                onSkip={handleSkip}
-                canSkip
-                opener={
-                  otisMessages.length === 0
-                    ? guestName
-                      ? `Good to see you, ${guestName}.`
-                      : "Good to see you."
-                    : undefined
-                }
-              />
-            </div>
-            {conversationReady && phase === "concierge" && (
-              <button
-                type="button"
-                onClick={handleConfirm}
-                aria-label="Confirm with Otis and head upstairs"
+            <section aria-label="Otis reception desk" className="flex flex-col items-center gap-5">
+              <OtisCharacter mood={otisMood} />
+              <div
                 style={{
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  backgroundColor: "#6B2A2E",
-                  color: "#F5EEE1",
-                  border: "1px solid #6B2A2E",
-                  cursor: "pointer",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "12px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
+                  width: "100%",
+                  maxWidth: "260px",
+                  border: "1px solid rgba(201, 168, 76, 0.2)",
+                  background: "rgba(12, 6, 7, 0.72)",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  textAlign: "center",
+                  boxShadow: "0 18px 48px rgba(0,0,0,0.32)",
                 }}
               >
-                Send me up ☞
-              </button>
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontSize: "18px",
+                    color: "#F5EEE1",
+                  }}
+                >
+                  Otis has the desk.
+                </p>
+                <p
+                  style={{
+                    margin: "8px 0 0",
+                    color: "rgba(245, 238, 225, 0.68)",
+                    fontSize: "13px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {mode === "update"
+                    ? "Update the building record, then ride back up."
+                    : "Set the building record once, then the floors can work with context."}
+                </p>
+              </div>
+            </section>
+
+            {phase === "concierge" ? (
+              <StructuredIntakeDesk
+                guestName={guestName}
+                mode={mode}
+                intake={intake}
+                completion={completion}
+                canSubmit={canSubmit}
+                saveState={saveState}
+                googleState={googleState}
+                onFieldChange={updateField}
+                onSave={saveDraft}
+                onSkip={handleSkip}
+                onSubmit={handleSubmit}
+                onConnectGoogle={handleConnectGoogle}
+              />
+            ) : (
+              <ElevatorProgress mode={mode} />
             )}
-          </div>
+          </main>
+
           <aside
             style={{
               padding: "32px 24px",
               borderLeft: "1px solid rgba(201, 168, 76, 0.16)",
-              backgroundColor: "rgba(12, 6, 7, 0.6)",
+              background: "rgba(7, 8, 18, 0.72)",
               overflowY: "auto",
             }}
           >
@@ -248,51 +306,647 @@ export function ConciergeFlow({
         </>
       )}
 
-      {phase === "redirecting" && (
-        <div
-          style={{
-            gridColumn: "1 / -1",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#F5EEE1",
-            fontFamily: "'Playfair Display', serif",
-            fontSize: "18px",
-          }}
-        >
-          Taking you up…
-        </div>
-      )}
+      <style>{`
+        @media (max-width: 980px) {
+          div[aria-label="Lobby onboarding"] {
+            grid-template-columns: 1fr !important;
+          }
+          div[aria-label="Lobby onboarding"] > aside {
+            display: none;
+          }
+          div[aria-label="Lobby onboarding"] main {
+            grid-template-columns: 1fr !important;
+            align-content: start;
+          }
+        }
+      `}</style>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function extractText(m: UIMessage): string {
-  const parts = Array.isArray(m.parts) ? m.parts : [];
-  return parts
-    .filter(
-      (p: unknown): p is { type: "text"; text: string } =>
-        (p as { type?: string } | null)?.type === "text",
-    )
-    .map((p: { text: string }) => p.text)
-    .join("");
+interface StructuredIntakeDeskProps {
+  guestName: string;
+  mode: "first-run" | "update";
+  intake: IntakeState;
+  completion: number;
+  canSubmit: boolean;
+  saveState: "idle" | "saved" | "error";
+  googleState: "idle" | "loading" | "error";
+  onFieldChange: <K extends keyof IntakeState>(key: K, value: IntakeState[K]) => void;
+  onSave: () => void;
+  onSkip: () => void;
+  onSubmit: () => void;
+  onConnectGoogle: () => void;
 }
 
-function isSystemKickoff(m: UIMessage): boolean {
-  if (m.role !== "user") return false;
-  return extractText(m).trim() === "__SYSTEM_KICKOFF__";
+function StructuredIntakeDesk({
+  guestName,
+  mode,
+  intake,
+  completion,
+  canSubmit,
+  saveState,
+  googleState,
+  onFieldChange,
+  onSave,
+  onSkip,
+  onSubmit,
+  onConnectGoogle,
+}: StructuredIntakeDeskProps): JSX.Element {
+  return (
+    <section
+      aria-label="Otis structured intake desk"
+      style={{
+        border: "1px solid rgba(201, 168, 76, 0.22)",
+        background: "rgba(8, 10, 20, 0.88)",
+        borderRadius: "8px",
+        boxShadow: "0 30px 80px rgba(0,0,0,0.42)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          gap: "16px",
+          padding: "24px 26px 18px",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+        }}
+      >
+        <div>
+          <p
+            style={{
+              margin: "0 0 8px",
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "10px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--gold)",
+            }}
+          >
+            Lobby reception
+          </p>
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontSize: "clamp(26px, 3vw, 36px)",
+              lineHeight: 1.05,
+              color: "#F5EEE1",
+            }}
+          >
+            {mode === "update" ? "Update your intake" : `Settle in${guestName ? `, ${guestName}` : ""}.`}
+          </h1>
+          <p
+            style={{
+              margin: "10px 0 0",
+              color: "rgba(245, 238, 225, 0.68)",
+              fontSize: "14px",
+              lineHeight: 1.55,
+              maxWidth: "64ch",
+            }}
+          >
+            Otis only needs the facts the building uses: targets, timing, constraints,
+            and whether the communications floors may connect to Google.
+          </p>
+        </div>
+        <div
+          aria-label={`Intake ${completion}% complete`}
+          style={{
+            width: "76px",
+            alignSelf: "center",
+            textAlign: "right",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "12px",
+            color: "rgba(245, 238, 225, 0.72)",
+          }}
+        >
+          {completion}%
+          <div
+            aria-hidden="true"
+            style={{
+              height: "3px",
+              marginTop: "8px",
+              borderRadius: "999px",
+              background: "rgba(255,255,255,0.1)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${completion}%`,
+                height: "100%",
+                background: "var(--gold)",
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: "16px",
+          padding: "22px 26px 10px",
+        }}
+      >
+        <TextField
+          label="Target roles"
+          value={intake.roles}
+          placeholder="Investment Banking Summer Analyst, SWE intern"
+          required
+          onChange={(value) => onFieldChange("roles", value)}
+        />
+        <SelectField
+          label="Level"
+          value={intake.level}
+          options={LEVEL_LABELS}
+          onChange={(value) => onFieldChange("level", value)}
+        />
+        <TextField
+          label="Target locations"
+          value={intake.locations}
+          placeholder="New York, Chicago, Remote"
+          required
+          onChange={(value) => onFieldChange("locations", value)}
+        />
+        <TextField
+          label="Timeline"
+          value={intake.timeline}
+          placeholder="Summer 2027, January start, immediately"
+          onChange={(value) => onFieldChange("timeline", value)}
+        />
+        <TextField
+          label="Graduation"
+          value={intake.graduation}
+          placeholder="May 2027, junior, senior"
+          onChange={(value) => onFieldChange("graduation", value)}
+        />
+        <TextField
+          label="Target companies"
+          value={intake.companies}
+          placeholder="Goldman Sachs, Vercel, Stripe"
+          onChange={(value) => onFieldChange("companies", value)}
+        />
+        <SelectField
+          label="Work authorization"
+          value={intake.workAuthorization}
+          options={{
+            authorized: "Authorized",
+            sponsorship: "Needs sponsorship",
+            unsure: "Not sure",
+          }}
+          onChange={(value) => onFieldChange("workAuthorization", value)}
+        />
+        <SelectField
+          label="Resume status"
+          value={intake.resumeStatus}
+          options={{
+            ready: "Ready",
+            needs_update: "Needs update",
+            none: "No resume yet",
+          }}
+          onChange={(value) => onFieldChange("resumeStatus", value)}
+        />
+        <SelectField
+          label="Search stage"
+          value={intake.searchStage}
+          options={{
+            starting: "Just starting",
+            applying: "Actively applying",
+            interviewing: "Interviewing",
+            offer: "Offer stage",
+          }}
+          onChange={(value) => onFieldChange("searchStage", value)}
+        />
+        <SelectField
+          label="Networking comfort"
+          value={intake.networkingComfort}
+          options={{
+            comfortable: "Comfortable with warm intros",
+            light: "Light nudges only",
+            not_now: "Not now",
+          }}
+          onChange={(value) => onFieldChange("networkingComfort", value)}
+        />
+        <TextAreaField
+          label="Constraints"
+          value={intake.musts}
+          placeholder="Visa constraints, commute limits, industry exclusions, school schedule"
+          onChange={(value) => onFieldChange("musts", value)}
+        />
+        <TextAreaField
+          label="Preferences"
+          value={intake.preferences}
+          placeholder="Hybrid preference, company size, team style, compensation needs"
+          onChange={(value) => onFieldChange("preferences", value)}
+        />
+        <div style={{ gridColumn: "1 / -1" }}>
+          <TextAreaField
+            label="Anything Otis should remember"
+            value={intake.notes}
+            placeholder="Context that would help the C-Suite judge opportunities correctly"
+            onChange={(value) => onFieldChange("notes", value)}
+          />
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          gap: "16px",
+          alignItems: "center",
+          margin: "10px 26px 22px",
+          padding: "16px",
+          border: "1px solid rgba(76, 143, 212, 0.22)",
+          background: "rgba(76, 143, 212, 0.08)",
+          borderRadius: "8px",
+        }}
+      >
+        <div>
+          <p style={{ margin: 0, color: "#F5EEE1", fontSize: "14px", fontWeight: 600 }}>
+            Gmail &amp; Calendar
+          </p>
+          <p style={{ margin: "4px 0 0", color: "rgba(245,238,225,0.65)", fontSize: "13px" }}>
+            Connect now or later from Settings. The Situation Room uses this to find replies,
+            interview invites, and calendar conflicts.
+          </p>
+          {googleState === "error" && (
+            <p role="alert" style={{ margin: "6px 0 0", color: "#F87171", fontSize: "12px" }}>
+              The connection desk did not answer. Save progress and try again.
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onConnectGoogle}
+          disabled={googleState === "loading"}
+          style={secondaryButtonStyle(googleState === "loading")}
+          aria-label="Connect Gmail and Google Calendar"
+        >
+          {googleState === "loading" ? "Opening" : "Connect"}
+        </button>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          gap: "12px",
+          padding: "18px 26px 24px",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+        }}
+      >
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={onSave} style={secondaryButtonStyle(false)}>
+            Save progress
+          </button>
+          <button type="button" onClick={onSkip} style={ghostButtonStyle}>
+            Skip for now
+          </button>
+          <span
+            role={saveState === "error" ? "alert" : "status"}
+            style={{
+              alignSelf: "center",
+              minWidth: "110px",
+              fontSize: "12px",
+              color: saveState === "error" ? "#F87171" : "rgba(245,238,225,0.54)",
+            }}
+          >
+            {saveState === "saved" ? "Progress saved." : saveState === "error" ? "Could not save." : ""}
+          </span>
+        </div>
+        <button
+          type="button"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+          style={primaryButtonStyle(!canSubmit)}
+          aria-label="Send me up to the Penthouse"
+        >
+          Send me up
+        </button>
+      </div>
+
+      <style>{`
+        @media (max-width: 760px) {
+          section[aria-label="Otis structured intake desk"] > div:nth-child(2) {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
 }
 
-async function fireBootstrapOnce(ref: { current: boolean }): Promise<void> {
-  if (ref.current) return;
-  ref.current = true;
+function TextField({
+  label,
+  value,
+  placeholder,
+  required = false,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  required?: boolean;
+  onChange: (value: string) => void;
+}): JSX.Element {
+  return (
+    <label style={fieldWrapStyle}>
+      <span style={fieldLabelStyle}>
+        {label}
+        {required ? <span style={{ color: "var(--gold)" }}> *</span> : null}
+      </span>
+      <input
+        value={value}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
+        placeholder={placeholder}
+        style={inputStyle}
+      />
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}): JSX.Element {
+  return (
+    <label style={fieldWrapStyle}>
+      <span style={fieldLabelStyle}>{label}</span>
+      <textarea
+        value={value}
+        onChange={(event: ChangeEvent<HTMLTextAreaElement>) => onChange(event.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        style={{ ...inputStyle, resize: "vertical", minHeight: "78px" }}
+      />
+    </label>
+  );
+}
+
+function SelectField<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: Record<T, string>;
+  onChange: (value: T) => void;
+}): JSX.Element {
+  return (
+    <label style={fieldWrapStyle}>
+      <span style={fieldLabelStyle}>{label}</span>
+      <select
+        value={value}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => onChange(event.target.value as T)}
+        style={inputStyle}
+      >
+        {Object.entries(options).map(([key, label]) => (
+          <option key={key} value={key}>
+            {label as string}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function ElevatorProgress({ mode }: { mode: "first-run" | "update" }): JSX.Element {
+  const title = mode === "update" ? "Updating the building record" : "Calling the Penthouse elevator";
+  const steps = [
+    "Filing intake with Otis",
+    "Starting first discovery pass",
+    "Preparing the Penthouse briefing",
+  ];
+  return (
+    <section
+      aria-label="Onboarding transition progress"
+      style={{
+        border: "1px solid rgba(201, 168, 76, 0.24)",
+        background: "rgba(8, 10, 20, 0.9)",
+        borderRadius: "8px",
+        padding: "34px",
+        color: "#F5EEE1",
+        boxShadow: "0 30px 80px rgba(0,0,0,0.42)",
+      }}
+    >
+      <p
+        style={{
+          margin: "0 0 10px",
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: "10px",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "var(--gold)",
+        }}
+      >
+        Elevator dispatch
+      </p>
+      <h2
+        style={{
+          margin: 0,
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: "32px",
+          lineHeight: 1.05,
+        }}
+      >
+        {title}
+      </h2>
+      <div style={{ display: "grid", gap: "12px", marginTop: "24px" }}>
+        {steps.map((step, index) => (
+          <div
+            key={step}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "12px",
+              color: index === 2 ? "rgba(245,238,225,0.72)" : "#F5EEE1",
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                width: "9px",
+                height: "9px",
+                borderRadius: "50%",
+                background: index === 2 ? "rgba(201,168,76,0.28)" : "var(--gold)",
+                boxShadow: index === 2 ? "none" : "0 0 14px rgba(201,168,76,0.5)",
+              }}
+            />
+            {step}
+          </div>
+        ))}
+      </div>
+      <p style={{ margin: "22px 0 0", color: "rgba(245,238,225,0.58)", fontSize: "13px" }}>
+        You will see the dashboard as soon as the elevator doors open.
+      </p>
+    </section>
+  );
+}
+
+function readDraft(): IntakeState {
+  if (typeof window === "undefined") return DEFAULT_INTAKE;
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return DEFAULT_INTAKE;
+    const parsed = JSON.parse(raw) as Partial<IntakeState>;
+    return { ...DEFAULT_INTAKE, ...parsed };
+  } catch {
+    return DEFAULT_INTAKE;
+  }
+}
+
+function buildTargetProfile(intake: IntakeState): TargetProfile {
+  const roles = splitList(intake.roles).slice(0, 8);
+  const geos = splitList(intake.locations).slice(0, 8);
+  const companies = splitList(intake.companies).slice(0, 25);
+  const musts = [
+    ...splitList(intake.musts),
+    authPhrase(intake.workAuthorization),
+  ].filter((item) => item.length > 0).slice(0, 10);
+  const nices = [
+    ...splitList(intake.preferences),
+    resumePhrase(intake.resumeStatus),
+    networkingPhrase(intake.networkingComfort),
+  ].filter((item) => item.length > 0).slice(0, 10);
+
+  const notes = [
+    `Timeline: ${intake.timeline || "not specified"}`,
+    `Graduation: ${intake.graduation || "not specified"}`,
+    `Search stage: ${intake.searchStage.replace(/_/g, " ")}`,
+    intake.notes.trim(),
+  ]
+    .filter(Boolean)
+    .join(" | ")
+    .slice(0, 800);
+
+  return {
+    version: 1,
+    roles: roles.length > 0 ? roles : ["Software Engineer"],
+    level: [intake.level],
+    companies,
+    geos: geos.length > 0 ? geos : ["Remote"],
+    musts,
+    nices,
+    notes,
+  };
+}
+
+function splitList(value: string): string[] {
+  return value
+    .split(/[,;\n]/)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
+function authPhrase(value: IntakeState["workAuthorization"]): string {
+  if (value === "authorized") return "Authorized to work without sponsorship";
+  if (value === "sponsorship") return "Needs sponsorship-friendly employers";
+  return "";
+}
+
+function resumePhrase(value: IntakeState["resumeStatus"]): string {
+  if (value === "ready") return "Resume is ready";
+  if (value === "needs_update") return "Resume needs update";
+  return "Needs first resume";
+}
+
+function networkingPhrase(value: IntakeState["networkingComfort"]): string {
+  if (value === "comfortable") return "Comfortable with warm introductions";
+  if (value === "light") return "Light networking nudges only";
+  return "Networking paused for now";
+}
+
+async function fireBootstrap(): Promise<void> {
   try {
     await fetch("/api/onboarding/bootstrap-discovery", { method: "POST" });
   } catch {
-    // Swallow — the cron will pick it up within 4h if the bootstrap missed.
+    // Scheduled discovery can recover later.
   }
+}
+
+const fieldWrapStyle = {
+  display: "grid",
+  gap: "7px",
+} satisfies CSSProperties;
+
+const fieldLabelStyle = {
+  fontFamily: "'JetBrains Mono', monospace",
+  fontSize: "10px",
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "rgba(245,238,225,0.62)",
+} satisfies CSSProperties;
+
+const inputStyle = {
+  width: "100%",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: "6px",
+  background: "rgba(255,255,255,0.045)",
+  color: "#F5EEE1",
+  padding: "10px 11px",
+  fontFamily: "'Satoshi', system-ui, sans-serif",
+  fontSize: "14px",
+  lineHeight: 1.4,
+} satisfies CSSProperties;
+
+const ghostButtonStyle = {
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: "6px",
+  background: "transparent",
+  color: "rgba(245,238,225,0.7)",
+  padding: "10px 14px",
+  fontFamily: "'JetBrains Mono', monospace",
+  fontSize: "10px",
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+} satisfies CSSProperties;
+
+function primaryButtonStyle(disabled: boolean): CSSProperties {
+  return {
+    border: "1px solid rgba(201,168,76,0.65)",
+    borderRadius: "6px",
+    background: disabled
+      ? "rgba(255,255,255,0.06)"
+      : "linear-gradient(135deg, #C9A84C, #E8C45A)",
+    color: disabled ? "rgba(245,238,225,0.45)" : "#0A0A14",
+    padding: "11px 18px",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "11px",
+    letterSpacing: "0.14em",
+    textTransform: "uppercase",
+    cursor: disabled ? "not-allowed" : "pointer",
+    boxShadow: disabled ? "none" : "0 12px 28px rgba(201,168,76,0.22)",
+  };
+}
+
+function secondaryButtonStyle(disabled: boolean): CSSProperties {
+  return {
+    border: "1px solid rgba(201,168,76,0.24)",
+    borderRadius: "6px",
+    background: "rgba(201,168,76,0.08)",
+    color: "#E8C45A",
+    padding: "10px 14px",
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: "10px",
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    cursor: disabled ? "wait" : "pointer",
+    opacity: disabled ? 0.7 : 1,
+  };
 }

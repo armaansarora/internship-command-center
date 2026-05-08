@@ -248,59 +248,66 @@ export function LobbyClient({
           animation: "lobby-entrance 0.8s ease-out forwards",
         }}
       >
-        <div
-          className="flex flex-col items-center justify-center px-6 w-full max-w-lg mx-auto gap-6 py-8"
-        >
+        <div className="grid w-full max-w-6xl grid-cols-1 items-center gap-8 px-6 py-12 lg:grid-cols-[minmax(0,1fr)_420px]">
+          <section data-animate className="flex flex-col items-start gap-7 text-left">
+            <div
+              className="flex items-center gap-2"
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "12px",
+                letterSpacing: "0.26em",
+                color: "var(--gold)",
+                opacity: 0.72,
+              }}
+            >
+              <RadarPulse />
+              FLOOR L · RECEPTION
+            </div>
 
-          {/* ── FLOOR LABEL ── */}
-          <div
-            data-animate
-            className="flex items-center gap-2"
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "12px",
-              letterSpacing: "0.3em",
-              color: "var(--gold)",
-              opacity: 0.55,
-            }}
-          >
-            <RadarPulse />
-            FLOOR L — THE LOBBY
-          </div>
-
-          {/* ── HERO: LOGO + TITLE + TAGLINE ── */}
-          <div data-animate className="flex flex-col items-center gap-4 text-center">
-            {/* Logo with dramatic aura glow */}
-            <div className="relative flex items-center justify-center">
-              {/* Outer soft aura */}
-              <div
-                className="absolute"
-                style={{
-                  width: "220px",
-                  height: "220px",
-                  background: "radial-gradient(circle, rgba(201, 168, 76, 0.12) 0%, rgba(201, 168, 76, 0.04) 45%, transparent 72%)",
-                  filter: "blur(28px)",
-                  animation: "logo-breathe 5s ease-in-out infinite",
-                }}
-                aria-hidden="true"
-              />
-              {/* Inner tight glow */}
-              <div
-                className="absolute"
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  background: "radial-gradient(circle, rgba(201, 168, 76, 0.22) 0%, rgba(201, 168, 76, 0.08) 50%, transparent 75%)",
-                  filter: "blur(12px)",
-                  animation: "logo-breathe 5s ease-in-out infinite 0.5s",
-                }}
-                aria-hidden="true"
-              />
-              <TowerLogo />
+            <div className="flex items-center gap-5">
+              <div className="relative flex items-center justify-center">
+                <div
+                  className="absolute"
+                  style={{
+                    width: "170px",
+                    height: "170px",
+                    background: "radial-gradient(circle, rgba(201, 168, 76, 0.13) 0%, rgba(201, 168, 76, 0.035) 50%, transparent 72%)",
+                    filter: "blur(22px)",
+                    animation: "logo-breathe 6s ease-in-out infinite",
+                  }}
+                  aria-hidden="true"
+                />
+                <TowerLogo />
+              </div>
+              <div>
+                <h1
+                  className="text-5xl md:text-7xl leading-none"
+                  style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    color: "var(--text-primary)",
+                    textShadow: "0 4px 34px rgba(0,0,0,0.78), 0 0 80px rgba(201, 168, 76, 0.14)",
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  The Tower
+                </h1>
+                <p
+                  className="mt-3 max-w-xl text-sm md:text-base"
+                  style={{
+                    color: "rgba(245, 238, 225, 0.74)",
+                    lineHeight: 1.65,
+                    textShadow: "0 1px 12px rgba(0,0,0,0.72)",
+                  }}
+                >
+                  {isReturningUser
+                    ? "Your offices are open. Return upstairs or stop at the desk to revise your intake."
+                    : "Reception for your internship search. Sign in, settle your intake with Otis, then ride up to the Penthouse command center."}
+                </p>
+              </div>
               <style>{`
                 @keyframes logo-breathe {
-                  0%, 100% { opacity: 0.6; transform: scale(1); }
-                  50% { opacity: 1; transform: scale(1.18); }
+                  0%, 100% { opacity: 0.65; transform: scale(1); }
+                  50% { opacity: 1; transform: scale(1.14); }
                 }
                 @media (prefers-reduced-motion: reduce) {
                   @keyframes logo-breathe { 0%, 100% { opacity: 0.85; transform: scale(1); } }
@@ -308,149 +315,117 @@ export function LobbyClient({
               `}</style>
             </div>
 
-            {/* The Tower — more commanding, larger headline */}
-            <h1
-              className="text-6xl md:text-8xl tracking-tight leading-none"
-              style={{
-                fontFamily: "'Playfair Display', Georgia, serif",
-                color: "var(--text-primary)",
-                textShadow:
-                  "0 4px 40px rgba(0,0,0,0.9), 0 0 80px rgba(201, 168, 76, 0.2), 0 0 160px rgba(201, 168, 76, 0.08)",
-                letterSpacing: "-0.03em",
-              }}
+            <div
+              className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3"
+              aria-label="Reception floor highlights"
             >
-              The Tower
-            </h1>
-
-            {/* Tagline */}
-            <p
-              className="text-sm md:text-base leading-relaxed max-w-sm"
-              style={{
-                color: "var(--text-secondary)",
-                textShadow: "0 1px 10px rgba(0,0,0,0.9)",
-                animation: "tagline-fade 1.2s ease-out forwards",
-                opacity: 0,
-                animationDelay: "0.6s",
-              }}
-            >
-              {isReturningUser
-                ? "Welcome back. Your offices are as you left them."
-                : "AI-powered internship pipeline management, research, and preparation."}
-              <style>{`
-                @keyframes tagline-fade {
-                  from { opacity: 0; transform: translateY(6px); }
-                  to { opacity: 1; transform: translateY(0); }
-                }
-              `}</style>
-            </p>
-          </div>
-
-          {/* ── SIGN-IN CARD ── */}
-          <SignInCard
-            isLoading={isAuthenticating}
-            error={error}
-            isReturningUser={isReturningUser}
-            isAuthenticated={isAuthenticated}
-            onSignIn={handleSignIn}
-          />
-
-          {/* ── BUILDING DIRECTORY ── */}
-          <div data-animate className="w-full max-w-lg space-y-3">
-            {/* Directory header */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(201,168,76,0.2))" }} />
-              <span
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "11px",
-                  letterSpacing: "0.28em",
-                  color: "var(--gold)",
-                  opacity: 0.7,
-                }}
-              >
-                BUILDING DIRECTORY
-              </span>
-              <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, rgba(201,168,76,0.2))" }} />
+              {[
+                ["Front desk", "Google sign-in and beta access."],
+                ["Otis intake", "Structured targets, timing, constraints."],
+                ["Elevator", "Direct handoff to the Penthouse."],
+              ].map(([label, detail]) => (
+                <div
+                  key={label}
+                  style={{
+                    border: "1px solid rgba(201,168,76,0.15)",
+                    background: "rgba(7, 9, 18, 0.58)",
+                    borderRadius: "8px",
+                    padding: "14px",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "10px",
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "var(--gold)",
+                    }}
+                  >
+                    {label}
+                  </p>
+                  <p style={{ margin: "7px 0 0", color: "rgba(245,238,225,0.62)", fontSize: "13px", lineHeight: 1.45 }}>
+                    {detail}
+                  </p>
+                </div>
+              ))}
             </div>
 
-            {/* Directory panel */}
-            <div
-              className="rounded-xl"
-              style={{
-                background: "rgba(6, 8, 18, 0.88)",
-                backdropFilter: "blur(24px)",
-                WebkitBackdropFilter: "blur(24px)",
-                border: "1px solid rgba(255, 255, 255, 0.06)",
-                boxShadow: "0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(201,168,76,0.08)",
-              }}
+            <nav
+              aria-label="Legal and pricing"
+              className="flex flex-wrap items-center gap-x-5 gap-y-2"
+              style={{ opacity: 0.72 }}
             >
-              <div className="p-3 space-y-px">
-                {FLOORS.filter((f) => f.id !== "L").map((floor, i) => (
-                  <DirectoryRow
-                    key={floor.id}
-                    floorId={floor.id}
-                    name={floor.name}
-                    label={floor.label}
-                    available
-                    index={i}
-                  />
-                ))}
+              {LOBBY_FOOTER_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="transition-opacity hover:opacity-100"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    letterSpacing: "0.14em",
+                    color: "rgba(255,255,255,0.58)",
+                    textDecoration: "none",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+          </section>
+
+          <section data-animate className="flex w-full flex-col items-center gap-5" aria-label="Reception desk">
+            <SignInCard
+              isLoading={isAuthenticating}
+              error={error}
+              isReturningUser={isReturningUser}
+              isAuthenticated={isAuthenticated}
+              onSignIn={handleSignIn}
+            />
+
+            <div className="w-full max-w-md space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(201,168,76,0.22))" }} />
+                <span
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    letterSpacing: "0.22em",
+                    color: "var(--gold)",
+                    opacity: 0.82,
+                  }}
+                >
+                  BUILDING DIRECTORY
+                </span>
+                <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, rgba(201,168,76,0.22))" }} />
+              </div>
+
+              <div
+                className="rounded-lg"
+                style={{
+                  background: "rgba(7, 9, 18, 0.8)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  boxShadow: "0 18px 52px rgba(0, 0, 0, 0.44)",
+                }}
+              >
+                <div className="p-3 space-y-px">
+                  {FLOORS.filter((f) => f.id !== "L").map((floor, i) => (
+                    <DirectoryRow
+                      key={floor.id}
+                      floorId={floor.id}
+                      name={floor.name}
+                      label={floor.label}
+                      available
+                      index={i}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* ── FOOTER ── */}
-          <div
-            data-animate
-            className="flex items-center gap-4"
-            style={{ opacity: 0.3 }}
-          >
-            <div
-              className="h-px w-12"
-              style={{ background: "var(--gold)" }}
-            />
-            <span
-              style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "10px",
-                letterSpacing: "0.2em",
-                color: "var(--gold)",
-              }}
-            >
-              PRIVATE BETA — ACCESS BY KEY
-            </span>
-            <div
-              className="h-px w-12"
-              style={{ background: "var(--gold)" }}
-            />
-          </div>
-
-          {/* ── LEGAL LINKS ── */}
-          <nav
-            data-animate
-            aria-label="Legal and pricing"
-            className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2"
-            style={{ opacity: 0.45 }}
-          >
-            {LOBBY_FOOTER_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="transition-opacity hover:opacity-100"
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "10px",
-                  letterSpacing: "0.16em",
-                  color: "rgba(255,255,255,0.55)",
-                  textDecoration: "none",
-                  textTransform: "uppercase",
-                }}
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
+          </section>
         </div>
       </div>
     </div>

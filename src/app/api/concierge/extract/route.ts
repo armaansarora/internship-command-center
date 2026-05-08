@@ -3,9 +3,12 @@ import { z } from "zod/v4";
 import { getUser } from "@/lib/supabase/server";
 import {
   extractTargetProfileFromConversation,
+  persistStructuredTargetProfile,
   persistSkipPlaceholderProfile,
+  type ExtractResult,
   type ExtractionTurn,
 } from "@/lib/agents/concierge/extract";
+import { TargetProfileSchema } from "@/lib/agents/cro/target-profile";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
@@ -43,8 +46,10 @@ const TurnSchema = z.object({
 });
 
 const BodySchema = z.object({
-  turns: z.array(TurnSchema).max(40),
+  turns: z.array(TurnSchema).max(40).default([]),
   skip: z.boolean().optional().default(false),
+  source: z.enum(["structured"]).optional(),
+  profile: TargetProfileSchema.optional(),
 });
 
 export async function POST(req: Request): Promise<Response> {
@@ -68,7 +73,7 @@ export async function POST(req: Request): Promise<Response> {
       { status: 400 },
     );
   }
-  const { turns, skip } = parsed.data;
+  const { turns, skip, profile } = parsed.data;
 
   const transcriptBytes = turns.reduce((sum, turn) => sum + turn.text.length, 0);
   if (transcriptBytes > MAX_TRANSCRIPT_BYTES) {
@@ -78,9 +83,9 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  // Skip path persists a placeholder; only the conversation path consumes a
-  // call (it invokes generateObject against the configured model).
-  if (!skip && turns.length > 0) {
+  // Skip and structured paths do not call an LLM. Only the freeform
+  // conversation extractor consumes AI quota.
+  if (!skip && !profile && turns.length > 0) {
     const tier = await getUserTier(user.id);
     const quota = await consumeAiQuota(user.id, tier);
     if (!quota.allowed) {
@@ -91,12 +96,17 @@ export async function POST(req: Request): Promise<Response> {
     }
   }
 
-  const result = skip || turns.length === 0
-    ? await persistSkipPlaceholderProfile(user.id)
-    : await extractTargetProfileFromConversation(
-        user.id,
-        turns as ExtractionTurn[],
-      );
+  let result: ExtractResult | null = null;
+  if (skip || (turns.length === 0 && !profile)) {
+    result = await persistSkipPlaceholderProfile(user.id);
+  } else if (profile) {
+    result = await persistStructuredTargetProfile(user.id, profile);
+  } else {
+    result = await extractTargetProfileFromConversation(
+      user.id,
+      turns as ExtractionTurn[],
+    );
+  }
 
   if (!result) {
     log.error("concierge.extract.persist_failed", undefined, {

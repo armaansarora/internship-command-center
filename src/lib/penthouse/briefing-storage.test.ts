@@ -73,6 +73,17 @@ describe("briefing-storage encode/decode", () => {
     expect(decoded!.beats.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("never exposes internal v2 markers or raw JSON when a stored briefing is malformed", () => {
+    const bogus = `${BRIEFING_PREFIX}{"version":"v2","generated_at":"2026-04-22T13:00:00.000Z","beats":"not-an-array"}`;
+    const decoded = decodeBriefing(bogus);
+    expect(decoded).not.toBeNull();
+    const visibleScript = decoded!.beats.map((beat) => beat.text).join(" ");
+    expect(visibleScript).not.toContain(BRIEFING_PREFIX);
+    expect(visibleScript).not.toContain('"version"');
+    expect(visibleScript).not.toContain("{");
+    expect(visibleScript).not.toContain("}");
+  });
+
   it("pads a very short legacy body with reflective fillers to reach 3 beats", () => {
     const decoded = decodeBriefing("Morning.");
     expect(decoded).not.toBeNull();

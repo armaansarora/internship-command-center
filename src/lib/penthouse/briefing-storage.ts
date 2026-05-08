@@ -50,12 +50,38 @@ export function decodeBriefing(body: string | null | undefined): MorningBriefing
       const validated = MorningBriefingSchema.parse(parsed);
       return validated;
     } catch {
-      // Malformed v2 body — drop to legacy wrap so the scene still paints.
-      return wrapLegacy(trimmed.slice(BRIEFING_PREFIX.length));
+      // Malformed v2 body: never wrap raw JSON, or the UI can expose
+      // storage markers. Use a clean operational fallback instead.
+      return wrapCorruptStructuredBriefing();
     }
   }
 
   return wrapLegacy(trimmed);
+}
+
+function wrapCorruptStructuredBriefing(): MorningBriefing {
+  const beats: MorningBriefing["beats"] = [
+    {
+      tone: "warning",
+      text: "The overnight packet arrived incomplete.",
+    },
+    {
+      tone: "steady",
+      text: "Your live pipeline below is current.",
+    },
+    {
+      tone: "reflective",
+      text: "Start with the next action list and keep moving.",
+    },
+  ];
+  return {
+    version: "v2",
+    generated_at: new Date(0).toISOString(),
+    script: renderBriefingScript({ beats }),
+    beats,
+    mood: "cautious",
+    weather_hint: "cool",
+  };
 }
 
 /**

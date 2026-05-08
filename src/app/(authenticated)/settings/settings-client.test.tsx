@@ -140,6 +140,17 @@ describe("SettingsClient connected services", () => {
     expect(html).not.toContain("Coming Soon");
   });
 
+  it("lets users revisit their concierge intake from settings", () => {
+    const html = renderToStaticMarkup(
+      <SettingsClient {...BASE_PROPS} hasGoogleIntegration={false} />,
+    );
+
+    expect(html).toContain("Career intake");
+    expect(html).toContain("Update your target roles, locations, timeline, resume status, and constraints.");
+    expect(html).toContain("Redo intake");
+    expect(html).toContain("Resume intake");
+  });
+
   it("opens the Google OAuth desk when the auth route returns a URL", async () => {
     const authUrl =
       "https://accounts.google.com/o/oauth2/v2/auth?client_id=tower";

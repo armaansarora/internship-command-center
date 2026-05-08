@@ -31,7 +31,7 @@ export interface ExtractionTurn {
 export interface ExtractResult {
   profile: TargetProfile;
   completedAt: string | null;
-  source: "conversation" | "skip";
+  source: "conversation" | "structured" | "skip";
 }
 
 /**
@@ -86,6 +86,35 @@ Return a structured TargetProfile.`;
     log.error("concierge.extract_failed", err, { userId });
     return null;
   }
+}
+
+/**
+ * The structured intake desk already collected the canonical profile. Persist
+ * it directly, bypassing the Concierge LLM extraction call.
+ */
+export async function persistStructuredTargetProfile(
+  userId: string,
+  profile: TargetProfile,
+): Promise<ExtractResult | null> {
+  const parsed = TargetProfileSchema.parse(profile);
+
+  const stored = await upsertTargetProfile(userId, parsed);
+  if (!stored) {
+    log.warn("concierge.structured_upsert_failed", { userId });
+    return null;
+  }
+
+  const mirrored = await saveConciergeProfile(userId, parsed);
+  if (!mirrored.ok) {
+    log.warn("concierge.structured_mirror_failed", { userId });
+    return null;
+  }
+
+  return {
+    profile: parsed,
+    completedAt: mirrored.completedAt,
+    source: "structured",
+  };
 }
 
 /**

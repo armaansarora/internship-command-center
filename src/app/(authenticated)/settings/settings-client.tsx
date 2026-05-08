@@ -1207,6 +1207,75 @@ export function SettingsClient({
             </span>
           </div>
 
+          {/* Concierge intake is replayable so users can revise their search
+              profile after skipping or rushing through the first visit. */}
+          <div
+            className="flex items-center justify-between px-5 py-4 gap-4"
+            style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.04)" }}
+          >
+            <div className="min-w-0 pr-4">
+              <div
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                  lineHeight: 1.3,
+                }}
+              >
+                Career intake
+              </div>
+              <div
+                className="mt-0.5"
+                style={{
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontSize: "13px",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Update your target roles, locations, timeline, resume status, and constraints.
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              <a
+                href="/lobby/onboarding"
+                className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "10px",
+                  color: "#C9A84C",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  background: "rgba(201, 168, 76, 0.08)",
+                  border: "1px solid rgba(201, 168, 76, 0.2)",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+                aria-label="Redo intake with Otis"
+              >
+                Redo intake
+              </a>
+              <a
+                href="/lobby/onboarding"
+                className="rounded-lg px-3.5 py-1.5 transition-all duration-150"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "10px",
+                  color: "rgba(245, 238, 225, 0.68)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+                aria-label="Resume saved intake with Otis"
+              >
+                Resume intake
+              </a>
+            </div>
+          </div>
+
           {/* Connected services */}
           <div
             className="flex items-center justify-between px-5 py-4"

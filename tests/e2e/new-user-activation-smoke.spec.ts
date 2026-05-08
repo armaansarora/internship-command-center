@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { signInAs } from "./helpers/auth";
 import { TIMES, USERS } from "./helpers/fixtures";
 
-const DRAFT_MARKERS = /\[(?:REVIEW|TODO|FIXME)\]|lorem ipsum|UNDER CONSTRUCTION|Coming Soon|search\.We're/i;
+const DRAFT_MARKERS = /\[(?:REVIEW|TODO|FIXME|briefing_v2)\]|"version"\s*:\s*"v2"|lorem ipsum|UNDER CONSTRUCTION|Coming Soon|search\.We're/i;
 const ERROR_COPY = /out of service|something went wrong|application error|unhandled runtime error/i;
 
 function emptyFreshUserTables(): Record<string, Array<Record<string, unknown>>> {
@@ -117,6 +117,22 @@ test.describe("new-user activation smoke", () => {
         label: /Penthouse/i,
         check: async () => {
           await expect(page.getByLabel("Penthouse — Floor PH")).toBeVisible();
+          await expect(page.getByLabel("Command center dashboard")).toBeVisible();
+          await expect(page.getByLabel("Morning Briefing")).toBeVisible();
+          await expect(page.getByLabel("Pipeline status")).toBeVisible();
+          await expect(page.getByLabel("Next actions")).toBeVisible();
+        },
+      },
+      {
+        path: "/lobby/onboarding",
+        label: /Lobby|intake/i,
+        check: async () => {
+          await expect(page.getByLabel("Lobby onboarding")).toBeVisible();
+          await expect(page.getByLabel("Otis structured intake desk")).toBeVisible();
+          await expect(page.getByText("Target roles")).toBeVisible();
+          await expect(page.getByText("Work authorization")).toBeVisible();
+          await expect(page.getByText("Gmail & Calendar")).toBeVisible();
+          await expect(page.getByRole("button", { name: /send me up/i })).toBeVisible();
         },
       },
       {

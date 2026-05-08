@@ -17,6 +17,8 @@ const skipPlaceholderMock = vi.fn();
 vi.mock("@/lib/agents/concierge/extract", () => ({
   extractTargetProfileFromConversation: (...args: unknown[]) =>
     extractMock(...args),
+  persistStructuredTargetProfile: (...args: unknown[]) =>
+    extractMock(...args),
   persistSkipPlaceholderProfile: (...args: unknown[]) =>
     skipPlaceholderMock(...args),
 }));
@@ -188,6 +190,58 @@ describe("POST /api/concierge/extract", () => {
     const res = await POST(makeRequest({ turns: [], skip: true }));
     expect(res.status).toBe(200);
     expect(consumeAiQuotaMock).not.toHaveBeenCalled();
+  });
+
+  it("accepts a structured intake profile without consuming AI quota", async () => {
+    getUserMock.mockResolvedValueOnce({ id: "u-structured", email: "s@e.com" });
+    extractMock.mockResolvedValueOnce({
+      source: "structured",
+      completedAt: "2026-05-08T10:00:00.000Z",
+      profile: {
+        version: 1,
+        roles: ["Investment Banking Summer Analyst"],
+        level: ["intern"],
+        geos: ["New York"],
+        companies: ["Goldman Sachs"],
+        musts: ["Requires sponsorship-friendly employers"],
+        nices: ["Prefers hybrid roles"],
+        notes: "Resume ready. Searching actively.",
+      },
+    });
+
+    const res = await POST(
+      makeRequest({
+        skip: false,
+        turns: [],
+        source: "structured",
+        profile: {
+          version: 1,
+          roles: ["Investment Banking Summer Analyst"],
+          level: ["intern"],
+          geos: ["New York"],
+          companies: ["Goldman Sachs"],
+          musts: ["Requires sponsorship-friendly employers"],
+          nices: ["Prefers hybrid roles"],
+          notes: "Resume ready. Searching actively.",
+        },
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.source).toBe("structured");
+    expect(extractMock).toHaveBeenCalledWith("u-structured", {
+      version: 1,
+      roles: ["Investment Banking Summer Analyst"],
+      level: ["intern"],
+      geos: ["New York"],
+      companies: ["Goldman Sachs"],
+      musts: ["Requires sponsorship-friendly employers"],
+      nices: ["Prefers hybrid roles"],
+      notes: "Resume ready. Searching actively.",
+    });
+    expect(consumeAiQuotaMock).not.toHaveBeenCalled();
+    expect(skipPlaceholderMock).not.toHaveBeenCalled();
   });
 
   it("400s when an individual turn exceeds the per-turn cap", async () => {

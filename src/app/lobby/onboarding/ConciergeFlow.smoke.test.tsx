@@ -60,4 +60,21 @@ describe("R4.4 ConciergeFlow", () => {
     );
     expect(html).toMatch(/Building Directory/i);
   });
+
+  it("renders a structured intake desk instead of a chat-only onboarding surface", () => {
+    const html = renderToStaticMarkup(
+      <ConciergeFlow
+        arrivalAlreadyPlayed
+        floorsUnlocked={["L"]}
+        guestName="Armaan"
+      />,
+    );
+
+    expect(html).toContain("Target roles");
+    expect(html).toContain("Work authorization");
+    expect(html).toContain("Resume status");
+    expect(html).toContain("Gmail &amp; Calendar");
+    expect(html).toContain("Save progress");
+    expect(html).toContain("Skip for now");
+  });
 });
