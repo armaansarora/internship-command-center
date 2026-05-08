@@ -337,7 +337,10 @@ describe("GET /api/gmail/callback", () => {
       token: "id-token",
       nonce: "login-nonce",
     });
-    expect(isEmailAllowedForBetaSpy).toHaveBeenCalledWith("invited@example.com");
+    expect(isEmailAllowedForBetaSpy).toHaveBeenCalledWith(
+      "invited@example.com",
+      { userId: "new-user" },
+    );
     expect(needsLobbyOnboardingAfterAuthSpy).toHaveBeenCalledWith(
       expect.any(Object),
       user,

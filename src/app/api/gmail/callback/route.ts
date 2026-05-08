@@ -246,7 +246,7 @@ async function handleLoginCallback(args: {
 
     const user = data.user ?? data.session?.user ?? null;
     const email = user?.email ?? null;
-    if (!isEmailAllowedForBeta(email)) {
+    if (!(await isEmailAllowedForBeta(email, { userId: user?.id }))) {
       await supabase.auth.signOut();
       log.warn("auth.google_login.beta_gate_denied", {
         domain: email?.split("@")[1] ?? "unknown",

@@ -60,8 +60,8 @@ describe("GET /api/auth/callback", () => {
   it("redirects to the safe next path when the beta gate allows the user", async () => {
     exchangeCodeForSessionSpy.mockResolvedValue({
       data: {
-        user: { email: "invited@example.com" },
-        session: { user: { email: "invited@example.com" } },
+        user: { id: "user-invited", email: "invited@example.com" },
+        session: { user: { id: "user-invited", email: "invited@example.com" } },
       },
       error: null,
     });
@@ -73,10 +73,13 @@ describe("GET /api/auth/callback", () => {
     expect(res.headers.get("location")).toBe(
       "https://www.interntower.com/settings",
     );
-    expect(isEmailAllowedForBetaSpy).toHaveBeenCalledWith("invited@example.com");
+    expect(isEmailAllowedForBetaSpy).toHaveBeenCalledWith(
+      "invited@example.com",
+      { userId: "user-invited" },
+    );
     expect(needsLobbyOnboardingAfterAuthSpy).toHaveBeenCalledWith(
       expect.any(Object),
-      { email: "invited@example.com" },
+      { id: "user-invited", email: "invited@example.com" },
     );
     expect(signOutSpy).not.toHaveBeenCalled();
   });
@@ -84,8 +87,8 @@ describe("GET /api/auth/callback", () => {
   it("redirects first-run users to the lobby for onboarding", async () => {
     exchangeCodeForSessionSpy.mockResolvedValue({
       data: {
-        user: { email: "invited@example.com" },
-        session: { user: { email: "invited@example.com" } },
+        user: { id: "user-invited", email: "invited@example.com" },
+        session: { user: { id: "user-invited", email: "invited@example.com" } },
       },
       error: null,
     });
@@ -101,8 +104,8 @@ describe("GET /api/auth/callback", () => {
   it("signs out and redirects to the lobby when the email is not invited", async () => {
     exchangeCodeForSessionSpy.mockResolvedValue({
       data: {
-        user: { email: "guest@example.com" },
-        session: { user: { email: "guest@example.com" } },
+        user: { id: "user-guest", email: "guest@example.com" },
+        session: { user: { id: "user-guest", email: "guest@example.com" } },
       },
       error: null,
     });
