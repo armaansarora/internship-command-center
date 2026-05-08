@@ -11,13 +11,14 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
  *   - 500 on DB error (still returns rate-limit headers)
  */
 
-const { requireUserSpy, rateLimitSpy, updateSpy, eqSpy, auditSpy } = vi.hoisted(
+const { requireUserSpy, rateLimitSpy, updateSpy, eqSpy, auditSpy, logErrorSpy } = vi.hoisted(
   () => ({
     requireUserSpy: vi.fn(),
     rateLimitSpy: vi.fn(),
     updateSpy: vi.fn(),
     eqSpy: vi.fn(),
     auditSpy: vi.fn(),
+    logErrorSpy: vi.fn(),
   }),
 );
 
@@ -45,6 +46,15 @@ vi.mock("@/lib/audit/log", () => ({
   }),
 }));
 
+vi.mock("@/lib/logger", () => ({
+  log: {
+    error: logErrorSpy,
+    warn: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
 // Re-import after mocks.
 const { POST } = await import("./route");
 
@@ -60,8 +70,15 @@ const OK_RATE = {
 };
 
 function chainUpdate(result: { error: { message: string } | null }): void {
-  // update(...).eq(...) → result
-  eqSpy.mockResolvedValue(result);
+  // update(...).eq(...).select("id").single() → result
+  eqSpy.mockReturnValue({
+    select: () => ({
+      single: async () => ({
+        data: result.error ? null : { id: "user-xyz" },
+        error: result.error,
+      }),
+    }),
+  });
   updateSpy.mockReturnValue({ eq: eqSpy });
 }
 
@@ -79,6 +96,7 @@ describe("POST /api/account/export", () => {
     updateSpy.mockReset();
     eqSpy.mockReset();
     auditSpy.mockReset();
+    logErrorSpy.mockReset();
   });
 
   it("returns 401 when unauthenticated and never touches the DB", async () => {
@@ -158,8 +176,13 @@ describe("POST /api/account/export", () => {
     const res = await POST(makeRequest());
     expect(res.status).toBe(500);
     const body = (await res.json()) as { error: string };
-    expect(body.error).toContain("postgres down");
+    expect(body.error).toBe("Failed to queue account export.");
     expect(res.headers.get("X-RateLimit-Limit")).toBe("5");
+    expect(logErrorSpy).toHaveBeenCalledWith(
+      "account.export.queue_failed",
+      undefined,
+      { userId: "user-xyz", error: "postgres down" },
+    );
     // Audit not fired on DB failure — stage=queued is only truthful if the
     // row actually flipped.
     expect(auditSpy).not.toHaveBeenCalled();

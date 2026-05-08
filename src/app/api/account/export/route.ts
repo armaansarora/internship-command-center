@@ -3,6 +3,7 @@ import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { logSecurityEvent, requestMetadata } from "@/lib/audit/log";
+import { log } from "@/lib/logger";
 
 /**
  * POST /api/account/export
@@ -33,11 +34,17 @@ export async function POST(req: Request): Promise<Response> {
       data_export_status: "queued",
       data_export_requested_at: new Date().toISOString(),
     })
-    .eq("id", auth.user.id);
+    .eq("id", auth.user.id)
+    .select("id")
+    .single();
 
   if (error) {
+    log.error("account.export.queue_failed", undefined, {
+      userId: auth.user.id,
+      error: error.message,
+    });
     return NextResponse.json(
-      { error: error.message },
+      { error: "Failed to queue account export." },
       { status: 500, headers: rate.headers },
     );
   }

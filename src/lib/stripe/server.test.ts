@@ -62,7 +62,11 @@ function mockProfileRead(stripeCustomerId: string | null): void {
 function mockAdminUpdate(error: { message: string } | null = null): void {
   adminFromSpy.mockReturnValue({ update: adminUpdateSpy });
   adminUpdateSpy.mockReturnValue({ eq: adminEqSpy });
-  adminEqSpy.mockResolvedValue({ error });
+  adminEqSpy.mockReturnValue({
+    select: () => ({
+      single: async () => ({ data: error ? null : { id: "user-1" }, error }),
+    }),
+  });
 }
 
 describe("createOrRetrieveCustomer", () => {
@@ -83,6 +87,23 @@ describe("createOrRetrieveCustomer", () => {
     const result = await createOrRetrieveCustomer("user-1", "user@example.com");
 
     expect(result).toBe("cus_existing");
+    expect(stripeCustomersCreateSpy).not.toHaveBeenCalled();
+    expect(adminFromSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not create a Stripe customer when the profile read fails", async () => {
+    sessionFromSpy.mockReturnValue({ select: sessionSelectSpy });
+    sessionSelectSpy.mockReturnValue({ eq: sessionEqSpy });
+    sessionEqSpy.mockReturnValue({ single: sessionSingleSpy });
+    sessionSingleSpy.mockResolvedValue({
+      data: null,
+      error: { message: "Supabase unavailable" },
+    });
+
+    await expect(
+      createOrRetrieveCustomer("user-1", "user@example.com"),
+    ).rejects.toThrow("Failed to retrieve Stripe customer id");
+
     expect(stripeCustomersCreateSpy).not.toHaveBeenCalled();
     expect(adminFromSpy).not.toHaveBeenCalled();
   });

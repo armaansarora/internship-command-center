@@ -44,11 +44,15 @@ export async function createOrRetrieveCustomer(
   const supabase = await createClient();
 
   // Check if we already have a customer ID stored
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
     .select("stripe_customer_id")
     .eq("id", userId)
     .single();
+
+  if (profileError) {
+    throw new Error(`Failed to retrieve Stripe customer id: ${profileError.message}`);
+  }
 
   const existingCustomerId = profile?.stripe_customer_id as string | null | undefined;
 
@@ -67,7 +71,9 @@ export async function createOrRetrieveCustomer(
   const { error } = await admin
     .from("user_profiles")
     .update({ stripe_customer_id: customer.id })
-    .eq("id", userId);
+    .eq("id", userId)
+    .select("id")
+    .single();
 
   if (error) {
     throw new Error(`Failed to persist Stripe customer id: ${error.message}`);
