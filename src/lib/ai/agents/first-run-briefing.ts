@@ -13,16 +13,17 @@
  * Flow:
  *   1. Read ConciergeState → check first_briefing_shown, concierge_completed_at.
  *   2. Exit early if outside the window.
- *   3. Atomically claim the flag via claimFirstBriefing (race-safe).
- *   4. Pull the top newly-discovered applications (status='discovered',
+ *   3. Pull the top newly-discovered applications (status='discovered',
  *      created since concierge_completed_at).
- *   5. Call generateObject with a dedicated first-run system prompt that
+ *   4. Call generateObject with a dedicated first-run system prompt that
  *      tells the LLM to name the specific roles/companies it found.
+ *   5. Atomically claim the flag via claimFirstBriefing (race-safe).
  *   6. Persist to `notifications` with [briefing_v2] prefix.
  *   7. Return the briefing for the page to render inline.
  *
- * On any error: release nothing (the claim sticks) and return null. The
- * Penthouse falls back to the usual cron/fallback path.
+ * On any error before the claim: return null without burning the one-shot
+ * flag. The Penthouse falls back visually, and a later mount can still show
+ * the real first-run briefing if bootstrap catches up.
  */
 import { generateObject } from "ai";
 import { getAgentModel } from "@/lib/ai/model";
@@ -59,12 +60,6 @@ export async function maybeGenerateFirstRunBriefing(
   if (Number.isNaN(completedAt)) return null;
   if (Date.now() - completedAt > FIRST_RUN_WINDOW_MS) return null;
 
-  // Race-safe flip. If we don't win the claim, another request (or a
-  // refresh-in-flight) has already taken responsibility for the first
-  // briefing — step out.
-  const won = await claimFirstBriefing(input.userId);
-  if (!won) return null;
-
   const supabase = await createClient();
 
   // Pull the freshest discovered applications (since the Concierge
@@ -83,6 +78,7 @@ export async function maybeGenerateFirstRunBriefing(
       userId: input.userId,
       error: appsErr.message,
     });
+    return null;
   }
 
   const topDiscovered = (apps ?? []).map((row) => ({
@@ -96,8 +92,21 @@ export async function maybeGenerateFirstRunBriefing(
           : null,
   }));
 
+  if (topDiscovered.length === 0) {
+    log.info("first_run_briefing.awaiting_discoveries", {
+      userId: input.userId,
+    });
+    return null;
+  }
+
   const briefing = await generateBriefing(input, topDiscovered);
   if (!briefing) return null;
+
+  // Race-safe flip after the expensive prerequisites succeed. If we don't
+  // win the claim, another request has already persisted or returned the
+  // first briefing.
+  const won = await claimFirstBriefing(input.userId);
+  if (!won) return null;
 
   // Persist the briefing so subsequent mounts (refresh, slow nav) see
   // the same first-briefing and the cron's 13:00 run doesn't clobber it

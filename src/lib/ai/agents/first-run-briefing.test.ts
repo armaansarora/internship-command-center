@@ -20,6 +20,8 @@ vi.mock("@/lib/logger", () => ({
 
 const getConciergeStateMock = vi.fn();
 const claimFirstBriefingMock = vi.fn();
+const appsReadResultMock = vi.fn();
+const notificationsInsertMock = vi.fn();
 vi.mock("@/lib/db/queries/user-profiles-rest", () => ({
   getConciergeState: (...a: unknown[]) => getConciergeStateMock(...a),
   claimFirstBriefing: (...a: unknown[]) => claimFirstBriefingMock(...a),
@@ -34,13 +36,13 @@ vi.mock("@/lib/supabase/server", () => ({
           eq: () => ({
             gte: () => ({
               order: () => ({
-                limit: async () => ({ data: [], error: null }),
+                limit: (...a: unknown[]) => appsReadResultMock(...a),
               }),
             }),
           }),
         }),
       }),
-      insert: async () => ({ data: null, error: null }),
+      insert: (...a: unknown[]) => notificationsInsertMock(...a),
     }),
   }),
 }));
@@ -73,6 +75,19 @@ const TEN_MINUTES_MS = 10 * 60 * 1000;
 describe("R4.6 maybeGenerateFirstRunBriefing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    appsReadResultMock.mockResolvedValue({
+      data: [
+        {
+          id: "app-1",
+          role: "Product Design Intern",
+          company_name: "Linear",
+          match_score: 0.87,
+          created_at: new Date().toISOString(),
+        },
+      ],
+      error: null,
+    });
+    notificationsInsertMock.mockResolvedValue({ data: null, error: null });
   });
 
   it("returns null when concierge state is unavailable", async () => {
@@ -152,6 +167,53 @@ describe("R4.6 maybeGenerateFirstRunBriefing", () => {
       displayName: "Test",
     });
     expect(out).toBeNull();
+    expect(claimFirstBriefingMock).toHaveBeenCalledWith("u-1");
+    expect(notificationsInsertMock).not.toHaveBeenCalled();
+  });
+
+  it("does not burn the one-shot flag when discovered applications cannot be read", async () => {
+    getConciergeStateMock.mockResolvedValueOnce({
+      firstBriefingShown: false,
+      conciergeCompletedAt: new Date().toISOString(),
+      arrivalPlayedAt: new Date().toISOString(),
+      lastFloorVisited: null,
+      conciergeTargetProfile: null,
+      floorsUnlocked: ["L"],
+    });
+    appsReadResultMock.mockResolvedValueOnce({
+      data: null,
+      error: { message: "applications unavailable" },
+    });
+
+    const out = await maybeGenerateFirstRunBriefing({
+      userId: "u-1",
+      displayName: "Test",
+    });
+
+    expect(out).toBeNull();
+    expect(claimFirstBriefingMock).not.toHaveBeenCalled();
+    expect(notificationsInsertMock).not.toHaveBeenCalled();
+  });
+
+  it("does not burn the one-shot flag while bootstrap discoveries have not landed yet", async () => {
+    getConciergeStateMock.mockResolvedValueOnce({
+      firstBriefingShown: false,
+      conciergeCompletedAt: new Date().toISOString(),
+      arrivalPlayedAt: new Date().toISOString(),
+      lastFloorVisited: null,
+      conciergeTargetProfile: null,
+      floorsUnlocked: ["L"],
+    });
+    appsReadResultMock.mockResolvedValueOnce({ data: [], error: null });
+
+    const out = await maybeGenerateFirstRunBriefing({
+      userId: "u-1",
+      displayName: "Test",
+    });
+
+    expect(out).toBeNull();
+    expect(claimFirstBriefingMock).not.toHaveBeenCalled();
+    expect(notificationsInsertMock).not.toHaveBeenCalled();
   });
 
   it("generates and returns a briefing when the window is open and the claim is won", async () => {
@@ -173,5 +235,7 @@ describe("R4.6 maybeGenerateFirstRunBriefing", () => {
     expect(out).not.toBeNull();
     expect(out!.beats.length).toBeGreaterThanOrEqual(3);
     expect(out!.mood).toBe("warm");
+    expect(claimFirstBriefingMock).toHaveBeenCalledWith("u-1");
+    expect(notificationsInsertMock).toHaveBeenCalled();
   });
 });
