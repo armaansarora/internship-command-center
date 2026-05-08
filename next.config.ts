@@ -16,6 +16,7 @@ const scriptSources = [
   "'unsafe-inline'",
   ...(process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : []),
   "https://js.stripe.com",
+  "https://accounts.google.com/gsi/client",
   "https://*.vercel.app",
   "https://plausible.io",
 ].join(" ");
@@ -23,11 +24,11 @@ const scriptSources = [
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src ${scriptSources}`,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com https://accounts.google.com/gsi/style",
   "font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.anthropic.com https://api.stripe.com https://plausible.io https://*.ingest.sentry.io",
-  "frame-src https://js.stripe.com https://hooks.stripe.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com/gsi/ https://api.openai.com https://api.anthropic.com https://api.stripe.com https://plausible.io https://*.ingest.sentry.io",
+  "frame-src https://js.stripe.com https://hooks.stripe.com https://accounts.google.com/gsi/",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -51,6 +52,7 @@ const securityHeaders = [
   // Don't leak the full URL (with query params / user IDs) to
   // third-party origins via the Referer header.
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
   // Disable powerful sensors. Microphone left as `self` for future
   // voice mode (CEO chat by voice).
   {
