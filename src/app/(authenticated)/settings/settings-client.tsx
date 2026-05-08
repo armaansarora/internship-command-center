@@ -74,6 +74,8 @@ type DeleteUiState = "idle" | "confirming" | "deleting" | "scheduled" | "error";
 type CancelUiState = "idle" | "cancelling" | "cancelled" | "error";
 
 const GRACE_WINDOW_DAYS = 30;
+const BILLING_PORTAL_ERROR =
+  "The billing desk did not answer. Try again in a moment.";
 
 function formatDeletionDate(deletedAtIso: string): string {
   const scheduled = new Date(
@@ -116,6 +118,7 @@ export function SettingsClient({
   const initial = displayName[0]?.toUpperCase() ?? "?";
 
   const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
   const [exportUi, setExportUi] = useState<ExportUiState>("idle");
   const [deleteUi, setDeleteUi] = useState<DeleteUiState>(
     deletedAt ? "scheduled" : "idle",
@@ -370,9 +373,11 @@ export function SettingsClient({
 
   const handleBillingPortal = useCallback(async () => {
     setBillingLoading(true);
+    setBillingError(null);
     try {
       const response = await fetch("/api/stripe/portal", { method: "POST" });
       if (!response.ok) {
+        setBillingError(BILLING_PORTAL_ERROR);
         setBillingLoading(false);
         return;
       }
@@ -380,9 +385,11 @@ export function SettingsClient({
       if (data.url) {
         window.location.href = data.url;
       } else {
+        setBillingError(BILLING_PORTAL_ERROR);
         setBillingLoading(false);
       }
     } catch {
+      setBillingError(BILLING_PORTAL_ERROR);
       setBillingLoading(false);
     }
   }, []);
@@ -680,6 +687,22 @@ export function SettingsClient({
             )}
           </div>
         </div>
+
+        {billingError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg px-4 py-3"
+            style={{
+              background: "rgba(220, 60, 60, 0.06)",
+              border: "1px solid rgba(220, 60, 60, 0.18)",
+              fontFamily: "'Satoshi', sans-serif",
+              fontSize: "12px",
+              color: "rgba(220, 80, 80, 0.85)",
+            }}
+          >
+            {billingError}
+          </div>
+        )}
 
         {/* Pricing cards */}
         <PricingCards
