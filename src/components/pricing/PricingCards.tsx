@@ -6,6 +6,8 @@ import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
 interface PricingCardsProps {
   currentTier: SubscriptionTier;
   appsUsed: number;
+  billingLoading?: boolean;
+  onManageBilling?: () => void;
 }
 
 const PLAN_FEATURES: Record<SubscriptionTier, string[]> = {
@@ -31,12 +33,23 @@ const PLAN_FEATURES: Record<SubscriptionTier, string[]> = {
   ],
 };
 
-export function PricingCards({ currentTier, appsUsed }: PricingCardsProps): JSX.Element {
+export function PricingCards({
+  currentTier,
+  appsUsed,
+  billingLoading = false,
+  onManageBilling,
+}: PricingCardsProps): JSX.Element {
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
 
   const handleUpgrade = useCallback(
     async (tier: SubscriptionTier) => {
       if (tier === currentTier) return;
+
+      if (currentTier !== "free") {
+        onManageBilling?.();
+        return;
+      }
+
       setLoading(tier);
 
       try {
@@ -61,7 +74,7 @@ export function PricingCards({ currentTier, appsUsed }: PricingCardsProps): JSX.
         setLoading(null);
       }
     },
-    [currentTier],
+    [currentTier, onManageBilling],
   );
 
   const tierOrder: SubscriptionTier[] = ["free", "pro", "team"];
@@ -76,9 +89,15 @@ export function PricingCards({ currentTier, appsUsed }: PricingCardsProps): JSX.
 
         const getButtonLabel = () => {
           if (isCurrentPlan) return "Current Plan";
-          if (tier === "free") return "Downgrade";
+          if (currentTier !== "free") {
+            return billingLoading ? "Loading..." : "Manage Billing";
+          }
           return `Upgrade to ${plan.name}`;
         };
+
+        const shouldUseBillingPortal = currentTier !== "free" && !isCurrentPlan;
+        const buttonDisabled =
+          isCurrentPlan || isLoadingThis || (shouldUseBillingPortal && billingLoading);
 
         return (
           <div
@@ -240,7 +259,7 @@ export function PricingCards({ currentTier, appsUsed }: PricingCardsProps): JSX.
             {/* CTA button */}
             <button
               type="button"
-              disabled={isCurrentPlan || isLoadingThis}
+              disabled={buttonDisabled}
               onClick={() => void handleUpgrade(tier)}
               className="w-full rounded-lg py-2.5 px-4 transition-all duration-150 mt-auto"
               style={{
@@ -248,7 +267,11 @@ export function PricingCards({ currentTier, appsUsed }: PricingCardsProps): JSX.
                 fontSize: "13px",
                 fontWeight: 600,
                 letterSpacing: "0.02em",
-                cursor: isCurrentPlan ? "default" : "pointer",
+                cursor: buttonDisabled
+                  ? shouldUseBillingPortal && billingLoading
+                    ? "wait"
+                    : "default"
+                  : "pointer",
                 background: isCurrentPlan
                   ? "rgba(201, 168, 76, 0.08)"
                   : tier === "free"
@@ -269,6 +292,8 @@ export function PricingCards({ currentTier, appsUsed }: PricingCardsProps): JSX.
               aria-label={
                 isCurrentPlan
                   ? `${plan.name} is your current plan`
+                  : shouldUseBillingPortal
+                  ? `Manage ${plan.name} plan in billing portal`
                   : `Switch to ${plan.name} plan`
               }
             >

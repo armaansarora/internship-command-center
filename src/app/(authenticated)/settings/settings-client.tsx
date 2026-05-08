@@ -685,6 +685,8 @@ export function SettingsClient({
         <PricingCards
           currentTier={subscriptionTier}
           appsUsed={appsUsed}
+          billingLoading={billingLoading}
+          onManageBilling={handleBillingPortal}
         />
       </section>
 
