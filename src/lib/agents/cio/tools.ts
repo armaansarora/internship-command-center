@@ -327,7 +327,7 @@ export function makeFindSimilarCompaniesTool(userId: string) {
         note:
           similar.length === 0
             ? "No peer companies found in the research database yet. Consider researching companies in the same sector to build a comparison set."
-            : `Found ${similar.length} peer ${similar.length === 1 ? "company" : "companies"} based on sector/industry/tier matching. (Full pgvector similarity search coming soon.)`,
+            : `Found ${similar.length} peer ${similar.length === 1 ? "company" : "companies"} based on sector/industry/tier matching. Semantic similarity is not active for this comparison set, so this result uses the current researched fields.`,
       };
     },
   });

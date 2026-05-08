@@ -1073,7 +1073,7 @@ export function SettingsClient({
                   lineHeight: 1.3,
                 }}
               >
-                Two-factor authentication
+                Google account security
               </div>
               <div
                 className="mt-0.5"
@@ -1083,30 +1083,24 @@ export function SettingsClient({
                   color: "var(--text-muted)",
                 }}
               >
-                Arriving with the Security Office in a future wave.
+                Sign-in is handled by Google. Use your Google Account to manage MFA,
+                passkeys, and recovery settings.
               </div>
             </div>
-            <button
-              type="button"
-              aria-disabled="true"
-              tabIndex={-1}
-              aria-label="Two-factor authentication — not yet available"
+            <span
               className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg px-3.5 py-1.5"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "10px",
-                color: "var(--text-muted)",
+                color: "#C9A84C",
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
-                background: "rgba(255, 255, 255, 0.02)",
-                border: "1px solid rgba(255, 255, 255, 0.06)",
-                cursor: "not-allowed",
-                opacity: 0.55,
-                pointerEvents: "none",
+                background: "rgba(201, 168, 76, 0.08)",
+                border: "1px solid rgba(201, 168, 76, 0.2)",
               }}
             >
-              Unavailable
-            </button>
+              Protected
+            </span>
           </div>
         </div>
       </section>

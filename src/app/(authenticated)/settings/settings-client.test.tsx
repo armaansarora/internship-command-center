@@ -201,6 +201,16 @@ describe("SettingsClient connected services", () => {
     expect(html).toContain("Resume intake");
   });
 
+  it("describes current Google sign-in security without disabled roadmap copy", () => {
+    const html = renderToStaticMarkup(
+      <SettingsClient {...BASE_PROPS} hasGoogleIntegration={false} />,
+    );
+
+    expect(html).toContain("Google account security");
+    expect(html).toContain("Protected");
+    expect(html).not.toMatch(/future wave|not yet available|Unavailable/i);
+  });
+
   it("opens the Google OAuth desk when the auth route returns a URL", async () => {
     const authUrl =
       "https://accounts.google.com/o/oauth2/v2/auth?client_id=tower";

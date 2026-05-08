@@ -3,7 +3,7 @@ import { signInAs } from "./helpers/auth";
 import { TIMES, USERS } from "./helpers/fixtures";
 
 const DRAFT_MARKERS =
-  /\[(?:REVIEW|TODO|FIXME|briefing_v2)\]|"version"\s*:\s*"v2"|lorem ipsum|UNDER CONSTRUCTION|Coming Soon|search\.We're/i;
+  /\[(?:REVIEW|TODO|FIXME|briefing_v2)\]|"version"\s*:\s*"v2"|lorem ipsum|UNDER CONSTRUCTION|Coming Soon|\bTBD\b|future wave|not yet available|search\.We're/i;
 const ERROR_COPY =
   /out of service|something went wrong|application error|unhandled runtime error/i;
 

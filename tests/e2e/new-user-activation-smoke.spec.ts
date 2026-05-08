@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { signInAs } from "./helpers/auth";
 import { TIMES, USERS } from "./helpers/fixtures";
 
-const DRAFT_MARKERS = /\[(?:REVIEW|TODO|FIXME|briefing_v2)\]|"version"\s*:\s*"v2"|lorem ipsum|UNDER CONSTRUCTION|Coming Soon|search\.We're/i;
+const DRAFT_MARKERS = /\[(?:REVIEW|TODO|FIXME|briefing_v2)\]|"version"\s*:\s*"v2"|lorem ipsum|UNDER CONSTRUCTION|Coming Soon|\bTBD\b|future wave|not yet available|search\.We're/i;
 const ERROR_COPY = /out of service|something went wrong|application error|unhandled runtime error/i;
 
 function emptyFreshUserTables(): Record<string, Array<Record<string, unknown>>> {
@@ -71,20 +71,30 @@ async function expectHealthyPage(page: Page, path: string): Promise<string> {
   return body;
 }
 
+async function expectPublicPageIndexable(page: Page, path: string): Promise<void> {
+  const robots = await page.locator('meta[name="robots"]').getAttribute("content");
+  expect(robots ?? "", `${path} should not ship a noindex/nofollow marker`).not.toMatch(
+    /noindex|nofollow/i,
+  );
+}
+
 test.describe("new-user activation smoke", () => {
   test("public launch surfaces are coherent and beta-gated", async ({ page }) => {
     const consoleErrors = watchConsole(page);
 
     await expectHealthyPage(page, "/lobby");
+    await expectPublicPageIndexable(page, "/lobby");
     await expect(page.getByRole("button", { name: /continue with google/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /join the waitlist/i })).toBeVisible();
 
     await expectHealthyPage(page, "/waitlist");
+    await expectPublicPageIndexable(page, "/waitlist");
     await expect(
       page.getByText("search. We're letting people in slowly", { exact: false }),
     ).toBeVisible();
 
     await expectHealthyPage(page, "/pricing");
+    await expectPublicPageIndexable(page, "/pricing");
     await expect(page.getByRole("link", { name: /^request key$/i })).toHaveCount(2);
     await expect(page.getByText("Every specialist floor unlocked")).toBeVisible();
     await expect(page.getByText("All seven floors unlocked")).toHaveCount(0);
@@ -94,7 +104,9 @@ test.describe("new-user activation smoke", () => {
     );
 
     await expectHealthyPage(page, "/privacy");
+    await expectPublicPageIndexable(page, "/privacy");
     await expectHealthyPage(page, "/terms");
+    await expectPublicPageIndexable(page, "/terms");
     expect(consoleErrors).toEqual([]);
   });
 

@@ -636,16 +636,6 @@ a, button, [role="button"], label[for], summary,
   animation: floor-card-enter 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* COMING SOON glow pulse */
-@keyframes coming-soon-glow {
-  0%, 100% { opacity: 0.75; text-shadow: 0 0 8px currentColor; }
-  50%       { opacity: 1;    text-shadow: 0 0 18px currentColor, 0 0 32px currentColor; }
-}
-
-.coming-soon-glow {
-  animation: coming-soon-glow 2.8s ease-in-out infinite;
-}
-
 /* War Room — crosshair slow rotation */
 @keyframes crosshair-rotate {
   from { transform: rotate(0deg); }
