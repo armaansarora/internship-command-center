@@ -122,7 +122,7 @@ export async function syncCalendarEvents(
   const { error } = await supabase
     .from("calendar_events")
     .upsert(rows, {
-      onConflict: "google_event_id",
+      onConflict: "user_id,google_event_id",
       ignoreDuplicates: false,
     });
 

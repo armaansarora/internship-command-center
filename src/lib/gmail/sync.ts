@@ -127,7 +127,10 @@ export async function syncGmailForUser(
 
       const { error } = await supabase
         .from("emails")
-        .upsert(row, { onConflict: "gmail_id", ignoreDuplicates: false });
+        .upsert(row, {
+          onConflict: "user_id,gmail_id",
+          ignoreDuplicates: false,
+        });
 
       if (error) {
         failedCount++;

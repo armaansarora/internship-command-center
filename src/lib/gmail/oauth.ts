@@ -241,7 +241,9 @@ export async function storeGoogleTokens(
   const { error } = await supabase
     .from("user_profiles")
     .update({ google_tokens: encryptedTokens })
-    .eq("id", userId);
+    .eq("id", userId)
+    .select("id")
+    .single();
 
   if (error) {
     throw new Error(`Failed to store Google tokens: ${error.message}`);
@@ -326,7 +328,9 @@ export async function revokeGoogleTokens(
   const { error } = await supabase
     .from("user_profiles")
     .update({ google_tokens: null })
-    .eq("id", userId);
+    .eq("id", userId)
+    .select("id")
+    .single();
 
   if (error) throw new Error(`Failed to clear Google tokens: ${error.message}`);
 }
