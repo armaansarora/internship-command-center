@@ -27,6 +27,14 @@ export function isSupabaseAuthTimeoutError(
   );
 }
 
+export function isRestartableSupabaseAuthError(
+  message: string | null | undefined,
+): boolean {
+  if (!message) return false;
+  const lower = message.toLowerCase();
+  return lower.includes("pkce code verifier not found");
+}
+
 export async function withSupabaseAuthTimeout<T>(
   operation: Promise<T>,
   timeoutMs = SUPABASE_AUTH_OPERATION_TIMEOUT_MS,

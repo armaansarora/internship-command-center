@@ -138,6 +138,26 @@ describe("GET /api/auth/callback", () => {
     expect(signOutSpy).not.toHaveBeenCalled();
   });
 
+  it("asks the user to restart when the Supabase PKCE verifier is missing", async () => {
+    exchangeCodeForSessionSpy.mockResolvedValue({
+      data: { user: null, session: null },
+      error: {
+        message:
+          "PKCE code verifier not found in storage. This can happen if the auth flow was initiated in a different browser or device.",
+      },
+    });
+
+    const res = await GET(request("/api/auth/callback?code=bad"));
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "https://www.interntower.com/lobby?error=auth_restart_required",
+    );
+    expect(isEmailAllowedForBetaSpy).not.toHaveBeenCalled();
+    expect(needsLobbyOnboardingAfterAuthSpy).not.toHaveBeenCalled();
+    expect(signOutSpy).not.toHaveBeenCalled();
+  });
+
   it("uses auth_unavailable when the Supabase exchange hits an edge outage", async () => {
     exchangeCodeForSessionSpy.mockResolvedValue({
       data: { user: null, session: null },

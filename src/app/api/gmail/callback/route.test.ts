@@ -14,6 +14,7 @@ const {
   requireUserSpy,
   exchangeCodeSpy,
   exchangeGoogleLoginCodeForIdTokenSpy,
+  getGoogleLoginTokenExchangeLobbyErrorSpy,
   isEmailAllowedForBetaSpy,
   needsLobbyOnboardingAfterAuthSpy,
   signInWithIdTokenSpy,
@@ -29,6 +30,7 @@ const {
   requireUserSpy: vi.fn(),
   exchangeCodeSpy: vi.fn(),
   exchangeGoogleLoginCodeForIdTokenSpy: vi.fn(),
+  getGoogleLoginTokenExchangeLobbyErrorSpy: vi.fn(),
   isEmailAllowedForBetaSpy: vi.fn(),
   needsLobbyOnboardingAfterAuthSpy: vi.fn(),
   signInWithIdTokenSpy: vi.fn(),
@@ -65,6 +67,8 @@ vi.mock("@/lib/auth/google-login-state", () => ({
 
 vi.mock("@/lib/auth/google-login-oauth", () => ({
   exchangeGoogleLoginCodeForIdToken: exchangeGoogleLoginCodeForIdTokenSpy,
+  getGoogleLoginTokenExchangeLobbyError:
+    getGoogleLoginTokenExchangeLobbyErrorSpy,
 }));
 
 vi.mock("@/lib/auth/beta-gate", () => ({
@@ -118,6 +122,7 @@ describe("GET /api/gmail/callback", () => {
     requireUserSpy.mockReset();
     exchangeCodeSpy.mockReset();
     exchangeGoogleLoginCodeForIdTokenSpy.mockReset();
+    getGoogleLoginTokenExchangeLobbyErrorSpy.mockReset();
     isEmailAllowedForBetaSpy.mockReset();
     needsLobbyOnboardingAfterAuthSpy.mockReset();
     signInWithIdTokenSpy.mockReset();
@@ -142,6 +147,7 @@ describe("GET /api/gmail/callback", () => {
     signOutSpy.mockResolvedValue({ error: null });
     isEmailAllowedForBetaSpy.mockReturnValue(true);
     needsLobbyOnboardingAfterAuthSpy.mockResolvedValue(false);
+    getGoogleLoginTokenExchangeLobbyErrorSpy.mockReturnValue(null);
   });
 
   it("redirects OAuth denials back to Situation Room and clears the nonce cookie", async () => {
@@ -516,6 +522,35 @@ describe("GET /api/gmail/callback", () => {
     expect(signInWithIdTokenSpy).not.toHaveBeenCalled();
     expect(res.headers.get("location")).toBe(
       "http://localhost/lobby?error=auth_failed",
+    );
+    expectClearedLoginCookie(res);
+  });
+
+  it("asks the user to restart when Google rejects a replayed login code", async () => {
+    const tokenError = new Error("Google login token exchange failed");
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: true,
+      payload: {
+        v: 1,
+        state: "login-state",
+        nonce: "login-nonce",
+        next: "/settings",
+        issuedAt: Date.now(),
+      },
+    });
+    exchangeGoogleLoginCodeForIdTokenSpy.mockRejectedValue(tokenError);
+    getGoogleLoginTokenExchangeLobbyErrorSpy.mockReturnValue(
+      "auth_restart_required",
+    );
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(getGoogleLoginTokenExchangeLobbyErrorSpy).toHaveBeenCalledWith(
+      tokenError,
+    );
+    expect(signInWithIdTokenSpy).not.toHaveBeenCalled();
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/lobby?error=auth_restart_required",
     );
     expectClearedLoginCookie(res);
   });

@@ -11,7 +11,10 @@ import {
   isGoogleLoginStateValue,
   verifyGoogleLoginState,
 } from "@/lib/auth/google-login-state";
-import { exchangeGoogleLoginCodeForIdToken } from "@/lib/auth/google-login-oauth";
+import {
+  exchangeGoogleLoginCodeForIdToken,
+  getGoogleLoginTokenExchangeLobbyError,
+} from "@/lib/auth/google-login-oauth";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
 import {
   isSupabaseAuthTimeoutError,
@@ -218,6 +221,10 @@ async function handleLoginCallback(args: {
     );
   } catch (err) {
     log.error("auth.google_login.failed", err);
+    const googleTokenError = getGoogleLoginTokenExchangeLobbyError(err);
+    if (googleTokenError) {
+      return lobbyError(googleTokenError);
+    }
     const message = err instanceof Error ? err.message : String(err);
     return lobbyError(
       isTransientSupabaseAuthError(message)

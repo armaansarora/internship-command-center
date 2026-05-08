@@ -10,6 +10,38 @@ interface GoogleLoginTokenResponse {
   token_type?: string;
 }
 
+interface GoogleLoginTokenErrorResponse {
+  error?: unknown;
+  error_description?: unknown;
+}
+
+export type GoogleLoginLobbyErrorCode =
+  | "auth_failed"
+  | "auth_restart_required"
+  | "auth_unavailable";
+
+export class GoogleLoginTokenExchangeError extends Error {
+  readonly status: number;
+  readonly googleError: string | null;
+  readonly googleErrorDescription: string | null;
+
+  constructor(args: {
+    status: number;
+    googleError: string | null;
+    googleErrorDescription: string | null;
+  }) {
+    super(
+      args.googleError
+        ? `Google login token exchange failed: ${args.googleError}`
+        : "Google login token exchange failed",
+    );
+    this.name = "GoogleLoginTokenExchangeError";
+    this.status = args.status;
+    this.googleError = args.googleError;
+    this.googleErrorDescription = args.googleErrorDescription;
+  }
+}
+
 export function getGoogleLoginAuthUrl(args: {
   nonce: string;
   state: string;
@@ -58,10 +90,17 @@ export async function exchangeGoogleLoginCodeForIdToken(
   });
 
   if (!response.ok) {
+    const errorFields = await readGoogleLoginTokenError(response);
     log.warn("auth.google_login.token_exchange_failed", {
       status: response.status,
+      googleError: errorFields.googleError ?? "unknown",
+      googleErrorDescription:
+        errorFields.googleErrorDescription ?? "unavailable",
     });
-    throw new Error("Google login token exchange failed");
+    throw new GoogleLoginTokenExchangeError({
+      status: response.status,
+      ...errorFields,
+    });
   }
 
   const payload = (await response.json()) as GoogleLoginTokenResponse;
@@ -73,4 +112,56 @@ export async function exchangeGoogleLoginCodeForIdToken(
   }
 
   return payload.id_token;
+}
+
+export function getGoogleLoginTokenExchangeLobbyError(
+  err: unknown,
+): GoogleLoginLobbyErrorCode | null {
+  if (!(err instanceof GoogleLoginTokenExchangeError)) return null;
+  if (
+    err.status === 429 ||
+    err.status >= 500 ||
+    err.googleError === "temporarily_unavailable"
+  ) {
+    return "auth_unavailable";
+  }
+  if (err.googleError === "invalid_grant") {
+    return "auth_restart_required";
+  }
+  return "auth_failed";
+}
+
+async function readGoogleLoginTokenError(response: Response): Promise<{
+  googleError: string | null;
+  googleErrorDescription: string | null;
+}> {
+  try {
+    const contentType = response.headers.get("Content-Type") ?? "";
+    if (contentType.toLowerCase().includes("application/json")) {
+      const payload = (await response.json()) as GoogleLoginTokenErrorResponse;
+      return {
+        googleError: normaliseGoogleErrorField(payload.error),
+        googleErrorDescription: normaliseGoogleErrorField(
+          payload.error_description,
+        ),
+      };
+    }
+
+    return {
+      googleError: null,
+      googleErrorDescription: normaliseGoogleErrorField(await response.text()),
+    };
+  } catch {
+    return {
+      googleError: null,
+      googleErrorDescription: null,
+    };
+  }
+}
+
+function normaliseGoogleErrorField(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed.length > 240 ? `${trimmed.slice(0, 240)}...` : trimmed;
 }

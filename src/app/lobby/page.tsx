@@ -17,6 +17,8 @@ function getLobbyErrorMessage(error: string | undefined): string | null {
   switch (error) {
     case "auth_unavailable":
       return "The Tower sign-in desk is temporarily unavailable. Try again in a minute.";
+    case "auth_restart_required":
+      return "That sign-in session expired. Start again from the Lobby.";
     case "auth_failed":
       return "The front desk could not verify that sign-in. Try again.";
     case "beta_not_invited":

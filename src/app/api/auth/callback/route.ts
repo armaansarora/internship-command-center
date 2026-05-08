@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
 import {
+  isRestartableSupabaseAuthError,
   isTransientSupabaseAuthError,
   withSupabaseAuthTimeout,
 } from "@/lib/auth/supabase-auth-errors";
@@ -41,7 +42,9 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL(next, origin).toString());
     }
     log.warn("auth.callback.exchange_failed", { error: error.message });
-    const errorCode = isTransientSupabaseAuthError(error.message)
+    const errorCode = isRestartableSupabaseAuthError(error.message)
+      ? "auth_restart_required"
+      : isTransientSupabaseAuthError(error.message)
       ? "auth_unavailable"
       : "auth_failed";
     return NextResponse.redirect(`${origin}/lobby?error=${errorCode}`);
