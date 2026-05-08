@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type JSX } from "react";
+import { useCallback, useState, type CSSProperties, type JSX } from "react";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
 import { NetworkingConsent } from "@/components/settings/NetworkingConsent";
@@ -320,7 +320,9 @@ export function SettingsClient({
     setGoogleConnectState("loading");
     setGoogleDisconnectState("idle");
     try {
-      const response = await fetch("/api/gmail/auth", { method: "GET" });
+      const response = await fetch("/api/gmail/auth?next=/settings", {
+        method: "GET",
+      });
       if (!response.ok) {
         setGoogleConnectState("error");
         return;
@@ -395,7 +397,15 @@ export function SettingsClient({
   }, []);
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-start gap-8 p-8 md:p-12 max-w-2xl mx-auto">
+    <div
+      className="relative flex min-h-dvh flex-col items-start gap-8 p-8 md:p-12 max-w-3xl mx-auto"
+      style={{
+        "--text-primary": "#F8F1E4",
+        "--text-secondary": "rgba(248, 241, 228, 0.82)",
+        "--text-muted": "rgba(248, 241, 228, 0.68)",
+        color: "#F8F1E4",
+      } as CSSProperties}
+    >
       {/* Page header */}
       <div className="w-full">
         <div className="flex items-center gap-2 mb-2">
@@ -422,6 +432,54 @@ export function SettingsClient({
           Settings
         </h1>
       </div>
+
+      <a
+        href="/milestones"
+        className="w-full rounded-lg px-5 py-4 transition-colors duration-150"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "16px",
+          background: "rgba(10, 12, 25, 0.78)",
+          border: "1px solid rgba(201, 168, 76, 0.2)",
+          textDecoration: "none",
+        }}
+      >
+        <span>
+          <span
+            style={{
+              display: "block",
+              fontFamily: "'Playfair Display', serif",
+              fontSize: "19px",
+              color: "var(--text-primary)",
+            }}
+          >
+            Milestones
+          </span>
+          <span
+            style={{
+              display: "block",
+              marginTop: "4px",
+              color: "var(--text-muted)",
+              fontSize: "13px",
+              lineHeight: 1.45,
+            }}
+          >
+            View every unlock threshold and current account progress.
+          </span>
+        </span>
+        <span
+          aria-hidden="true"
+          style={{
+            color: "#C9A84C",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "18px",
+          }}
+        >
+          -&gt;
+        </span>
+      </a>
 
       {/* ── Section 1: Profile ── */}
       <section className="w-full" aria-labelledby="section-profile">

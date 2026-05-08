@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties, JSX } from "react";
+import { useState } from "react";
 import { EntranceSequence } from "@/components/transitions/EntranceSequence";
 import { PipelineNodes, PipelineBar } from "@/components/penthouse/PipelineNodes";
 import { ActivityFeed } from "@/components/penthouse/ActivityFeed";
@@ -50,11 +51,20 @@ export function PenthouseClient({ scene }: Props): JSX.Element {
     recentRejection: scene.recentRejection,
   });
   const nextActions = deriveNextActions(scene);
+  const [reportOpen, setReportOpen] = useState(true);
 
   return (
     <EntranceSequence>
       <style>{KEYFRAMES}</style>
       <FloorChyron />
+      <MorningReport
+        briefing={scene.briefing}
+        displayName={scene.user.displayName}
+        generated={scene.briefingGenerated}
+        overnight={scene.overnightDelta}
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+      />
 
       {scene.timeOfDay !== "late-night" && (
         <div
@@ -78,18 +88,12 @@ export function PenthouseClient({ scene }: Props): JSX.Element {
           minHeight: "calc(100dvh - 28px)",
           padding: "82px clamp(18px, 4vw, 56px) 34px",
           display: "grid",
-          gridTemplateColumns: "minmax(300px, 0.9fr) minmax(420px, 1.35fr)",
+          gridTemplateColumns: "minmax(0, 1180px)",
+          justifyContent: "center",
           gap: "24px",
           alignItems: "stretch",
         }}
       >
-        <MorningReport
-          briefing={scene.briefing}
-          displayName={scene.user.displayName}
-          generated={scene.briefingGenerated}
-          overnight={scene.overnightDelta}
-        />
-
         <DashboardDesk
           stats={scene.stats}
           pipeline={scene.pipeline}
@@ -115,12 +119,18 @@ function MorningReport({
   displayName,
   generated,
   overnight,
+  open,
+  onClose,
 }: {
   briefing: MorningBriefing | null;
   displayName: string;
   generated: boolean;
   overnight: PenthouseScene["overnightDelta"];
+  open: boolean;
+  onClose: () => void;
 }): JSX.Element {
+  if (!open) return <></>;
+
   const beats = briefing?.beats ?? [];
   const summary =
     beats.length > 0
@@ -128,7 +138,8 @@ function MorningReport({
           .slice(0, 2)
           .map((beat) => beat.text)
           .join(" ")
-      : `${displayName}, the desk is quiet. Build the first signal from the War Room.`;
+      : `${displayName}, there is no new signal since your last visit.`;
+  const reportActions = deriveReportActions(overnight);
   const date = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -136,18 +147,52 @@ function MorningReport({
   });
 
   return (
-    <section aria-label="Morning Briefing" style={panelStyle}>
-      <div style={panelHeaderStyle}>
+    <section
+      aria-label="Since you were gone report"
+      style={{
+        ...panelStyle,
+        position: "fixed",
+        top: "76px",
+        right: "clamp(16px, 4vw, 52px)",
+        zIndex: 10,
+        width: "min(440px, calc(100vw - 32px))",
+        padding: "18px",
+        gap: "14px",
+        background: "rgba(8, 10, 20, 0.96)",
+        boxShadow: "0 30px 90px rgba(0,0,0,0.52), 0 0 0 1px rgba(201,168,76,0.12)",
+      }}
+    >
+      <div style={{ ...panelHeaderStyle, alignItems: "center" }}>
         <div>
-          <p style={eyebrowStyle}>Morning Briefing</p>
-          <h1 style={displayHeadingStyle}>Executive report</h1>
+          <p style={eyebrowStyle}>Morning report</p>
+          <h1 style={{ ...displayHeadingStyle, fontSize: "28px" }}>Since you were gone</h1>
         </div>
-        <span style={statusPillStyle}>{generated ? "Filed" : "Live fallback"}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={statusPillStyle}>{generated ? "Filed" : "Live"}</span>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Dismiss morning report"
+            style={{
+              width: "30px",
+              height: "30px",
+              borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.04)",
+              color: "rgba(245,238,225,0.82)",
+              cursor: "pointer",
+              fontSize: "18px",
+              lineHeight: 1,
+            }}
+          >
+            x
+          </button>
+        </div>
       </div>
 
       <div
         style={{
-          padding: "18px",
+          padding: "14px",
           border: "1px solid rgba(201,168,76,0.18)",
           background: "rgba(201,168,76,0.07)",
           borderRadius: "8px",
@@ -169,7 +214,7 @@ function MorningReport({
           style={{
             margin: 0,
             color: "#F5EEE1",
-            fontSize: "17px",
+            fontSize: "15px",
             lineHeight: 1.55,
             fontFamily: "'Satoshi', system-ui, sans-serif",
           }}
@@ -212,6 +257,22 @@ function MorningReport({
           </article>
         ))}
       </div>
+
+      <div aria-label="Report actions" style={{ display: "grid", gap: "8px" }}>
+        {reportActions.map((action) => (
+          <a key={action.href + action.label} href={action.href} style={actionRowStyle}>
+            <span>
+              <strong style={{ color: "#F5EEE1", fontWeight: 600 }}>{action.label}</strong>
+              <span style={{ display: "block", marginTop: "3px", color: "rgba(245,238,225,0.58)" }}>
+                {action.detail}
+              </span>
+            </span>
+            <span aria-hidden="true" style={{ color: "var(--gold)" }}>
+              →
+            </span>
+          </a>
+        ))}
+      </div>
     </section>
   );
 }
@@ -227,6 +288,7 @@ function DashboardDesk({
   activity: ActivityItemData[];
   nextActions: NextAction[];
 }): JSX.Element {
+  const [tasksOpen, setTasksOpen] = useState(false);
   const totalPipeline = pipeline.reduce((sum, stage) => sum + stage.count, 0);
 
   return (
@@ -277,23 +339,37 @@ function DashboardDesk({
         )}
       </section>
 
-      <section aria-label="Next actions" style={innerPanelStyle}>
-        <h3 style={sectionTitleStyle}>Next actions</h3>
-        <div style={{ display: "grid", gap: "8px" }}>
-          {nextActions.map((action) => (
-            <a key={action.href + action.label} href={action.href} style={actionRowStyle}>
-              <span>
-                <strong style={{ color: "#F5EEE1", fontWeight: 600 }}>{action.label}</strong>
-                <span style={{ display: "block", marginTop: "3px", color: "rgba(245,238,225,0.58)" }}>
-                  {action.detail}
+      <section aria-label="Task drawer" style={innerPanelStyle}>
+        <button
+          type="button"
+          onClick={() => setTasksOpen((current) => !current)}
+          aria-expanded={tasksOpen}
+          style={{
+            ...actionButtonStyle,
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <span>{tasksOpen ? "Hide tasks" : "Open tasks"}</span>
+          <span style={monoMutedStyle}>{nextActions.length} queued</span>
+        </button>
+        {tasksOpen && (
+          <div style={{ display: "grid", gap: "8px" }}>
+            {nextActions.map((action) => (
+              <a key={action.href + action.label} href={action.href} style={actionRowStyle}>
+                <span>
+                  <strong style={{ color: "#F5EEE1", fontWeight: 600 }}>{action.label}</strong>
+                  <span style={{ display: "block", marginTop: "3px", color: "rgba(245,238,225,0.58)" }}>
+                    {action.detail}
+                  </span>
                 </span>
-              </span>
-              <span aria-hidden="true" style={{ color: "var(--gold)" }}>
-                →
-              </span>
-            </a>
-          ))}
-        </div>
+                <span aria-hidden="true" style={{ color: "var(--gold)" }}>
+                  →
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
       </section>
 
       <section aria-label="Recent movement" style={innerPanelStyle}>
@@ -314,39 +390,74 @@ type NextAction = {
   href: string;
 };
 
+function deriveReportActions(
+  overnight: PenthouseScene["overnightDelta"],
+): NextAction[] {
+  const actions: NextAction[] = [];
+  if (overnight.importantEmailCount > 0 || overnight.responses > 0) {
+    actions.push({
+      label: "Review inbox signal",
+      detail: `${overnight.importantEmailCount + overnight.responses} message signal${overnight.importantEmailCount + overnight.responses === 1 ? "" : "s"}`,
+      href: "/situation-room",
+    });
+  }
+  if (overnight.newApps > 0) {
+    actions.push({
+      label: "Check new roles",
+      detail: `${overnight.newApps} new application ${overnight.newApps === 1 ? "record" : "records"}`,
+      href: "/war-room",
+    });
+  }
+  if (overnight.rejections > 0) {
+    actions.push({
+      label: "Handle rejections",
+      detail: `${overnight.rejections} status ${overnight.rejections === 1 ? "change" : "changes"} to review`,
+      href: "/war-room",
+    });
+  }
+  if (actions.length === 0) {
+    actions.push({
+      label: "Open the War Room",
+      detail: "Add or discover the next target role",
+      href: "/war-room",
+    });
+  }
+  return actions.slice(0, 3);
+}
+
 function deriveNextActions(scene: PenthouseScene): NextAction[] {
   const actions: NextAction[] = [];
   if (scene.stats.totalApplications === 0) {
     actions.push({
-      label: "Build the first slate",
-      detail: "Open Floor 7 and add or discover the roles you want tracked.",
+      label: "Build first slate",
+      detail: "Add tracked roles.",
       href: "/war-room",
     });
   }
   if (scene.overnightDelta.importantEmailCount > 0) {
     actions.push({
       label: "Review urgent mail",
-      detail: `${scene.overnightDelta.importantEmailCount} important message${scene.overnightDelta.importantEmailCount === 1 ? "" : "s"} need a decision.`,
+      detail: `${scene.overnightDelta.importantEmailCount} message${scene.overnightDelta.importantEmailCount === 1 ? "" : "s"}.`,
       href: "/situation-room",
     });
   }
   if (scene.stats.interviews > 0) {
     actions.push({
-      label: "Prep interview packets",
-      detail: "Turn upcoming interviews into structured practice before the clock gets tight.",
+      label: "Prep interviews",
+      detail: `${scene.stats.interviews} active interview${scene.stats.interviews === 1 ? "" : "s"}.`,
       href: "/briefing-room",
     });
   }
   if (scene.stats.inPipeline > 0) {
     actions.push({
-      label: "Clear stuck applications",
-      detail: "Scan the active pipeline and decide what needs a follow-up.",
+      label: "Clear stuck items",
+      detail: `${scene.stats.inPipeline} active application${scene.stats.inPipeline === 1 ? "" : "s"}.`,
       href: "/war-room",
     });
   }
   actions.push({
-    label: "Tune your intake",
-    detail: "Update target roles, constraints, and Google connections when your search changes.",
+    label: "Update intake",
+    detail: "Targets, constraints, Gmail, Calendar.",
     href: "/settings",
   });
   return actions.slice(0, 4);
@@ -356,15 +467,15 @@ function emptyBriefingBeats(): MorningBriefing["beats"] {
   return [
     {
       tone: "steady",
-      text: "The building has no overnight signal yet.",
-    },
-    {
-      tone: "reflective",
-      text: "Add target roles and applications to give the executive desk something real to brief.",
+      text: "No new emails, application moves, or urgent items are waiting.",
     },
     {
       tone: "warm",
-      text: "Your first useful report starts with one clear pipeline move.",
+      text: "Add target roles and connect services when you want the report to watch live signal.",
+    },
+    {
+      tone: "steady",
+      text: "Open the War Room to build the first tracked slate.",
     },
   ];
 }
@@ -564,6 +675,22 @@ const smallLinkStyle = {
   color: "#E8C45A",
   textDecoration: "none",
   background: "rgba(201,168,76,0.08)",
+} satisfies CSSProperties;
+
+const actionButtonStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  border: "1px solid rgba(201,168,76,0.22)",
+  borderRadius: "7px",
+  background: "rgba(201,168,76,0.08)",
+  padding: "12px 13px",
+  color: "#E8C45A",
+  fontFamily: "'JetBrains Mono', monospace",
+  fontSize: "10px",
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+  cursor: "pointer",
 } satisfies CSSProperties;
 
 const emptyStateStyle = {

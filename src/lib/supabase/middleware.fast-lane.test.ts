@@ -1,10 +1,9 @@
 /**
- * returning-user fast-lane test.
+ * Lobby routing tests.
  *
- * The middleware must redirect an authenticated guest landing on /lobby
- * to their last-visited floor IF they have already watched the cinematic
- * (arrival_played_at is stamped). First-time authenticated guests, who
- * still need the arrival, must continue into /lobby.
+ * The middleware must allow authenticated guests to visit /lobby intentionally.
+ * The Lobby is a real floor, and redirecting it to last_floor_visited created
+ * a self-redirect when that value was "L".
  *
  * DB errors must fail-open — better to let the guest see the lobby than
  * break sign-in when Supabase hiccups.
@@ -68,7 +67,7 @@ function request(url: string, cookie?: string): NextRequest {
   });
 }
 
-describe("R4.9 returning-user fast lane", () => {
+describe("R4.9 lobby routing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -89,7 +88,7 @@ describe("R4.9 returning-user fast lane", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("redirects a returning guest at /lobby to /penthouse when last_floor is PH", async () => {
+  it("lets a returning guest intentionally visit /lobby as a real floor", async () => {
     nextMockClient = mkClient(
       { id: "user-pro" },
       {
@@ -98,19 +97,19 @@ describe("R4.9 returning-user fast lane", () => {
       },
     );
     const res = await updateSession(request("http://localhost/lobby"));
-    expect(res.headers.get("location")).toContain("/penthouse");
+    expect(res.headers.get("location")).toBeNull();
   });
 
-  it("redirects to /war-room when last_floor was 7", async () => {
+  it("does not self-redirect when the last visited floor is the Lobby", async () => {
     nextMockClient = mkClient(
       { id: "user-cro" },
       {
         arrival_played_at: "2026-04-20T09:00:00.000Z",
-        last_floor_visited: "7",
+        last_floor_visited: "L",
       },
     );
     const res = await updateSession(request("http://localhost/lobby"));
-    expect(res.headers.get("location")).toContain("/war-room");
+    expect(res.headers.get("location")).toBeNull();
   });
 
   it("fails open when the user_profiles read errors (guest still sees lobby)", async () => {

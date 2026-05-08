@@ -11,15 +11,6 @@ interface Props {
   focused: boolean;
 }
 
-/** Deterministic ±2.5° tilt for sticky notes, seeded by contact id. */
-function seededNoteTilt(id: string): number {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) | 0;
-  }
-  return ((hash % 11) - 5) * 0.5;
-}
-
 /**
  * A single physical card on the rolodex cylinder. Warmth-coloured via the
  * cool-blue palette — zero red anywhere. The card is a <button> so flick-to-
@@ -28,6 +19,10 @@ function seededNoteTilt(id: string): number {
 export function RolodexCard({ contact, onFlip, focused }: Props): JSX.Element {
   const tier = computeWarmthTier(contact.warmthScore ?? 0);
   const palette = WARMTH_PALETTE[tier];
+  const lastContact =
+    contact.lastContactAt === null
+      ? "No touch logged"
+      : `${contact.daysSinceContact}d since contact`;
 
   return (
     <button
@@ -43,85 +38,157 @@ export function RolodexCard({ contact, onFlip, focused }: Props): JSX.Element {
       style={{
         width: "100%",
         height: "100%",
-        background: palette.bg,
+        background: `linear-gradient(180deg, rgba(255,255,255,0.08), transparent 32%), ${palette.bg}`,
         border: `1.5px solid ${palette.edge}`,
         color: palette.text,
-        padding: "14px 12px",
+        padding: "16px",
         fontFamily: "'Satoshi', sans-serif",
-        fontSize: 12,
+        fontSize: 13,
         textAlign: "left",
         cursor: "pointer",
-        borderRadius: 4,
+        borderRadius: 6,
         boxShadow: focused
-          ? "0 6px 20px rgba(0,0,0,0.45), 0 0 0 1px rgba(201, 168, 76, 0.35)"
-          : "0 2px 6px rgba(0,0,0,0.25)",
+          ? "0 18px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(201, 168, 76, 0.42)"
+          : "0 6px 18px rgba(0,0,0,0.28)",
         display: "flex",
         flexDirection: "column",
-        gap: 4,
+        gap: 10,
         opacity: focused ? 1 : 0.88,
-        transition: "box-shadow 0.25s ease, opacity 0.25s ease",
+        transition: "box-shadow 0.25s ease, opacity 0.25s ease, transform 0.25s ease",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <div style={{ fontWeight: 600, fontSize: 14, letterSpacing: "0.01em" }}>
-        {contact.name}
-      </div>
-      {contact.title && (
-        <div style={{ fontSize: 11, opacity: 0.85 }}>{contact.title}</div>
-      )}
-      {contact.companyName && (
-        <div
-          style={{
-            fontSize: 11,
-            fontFamily: "'IBM Plex Mono', monospace",
-            opacity: 0.72,
-          }}
-        >
-          {contact.companyName}
-        </div>
-      )}
       <div
         aria-hidden="true"
         style={{
-          marginTop: "auto",
+          position: "absolute",
+          inset: "10px",
+          border: `1px solid ${palette.edge}`,
+          opacity: 0.32,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+          fontFamily: "'IBM Plex Mono', monospace",
           fontSize: 9,
-          letterSpacing: "0.1em",
+          letterSpacing: "0.16em",
           textTransform: "uppercase",
-          opacity: 0.55,
+          opacity: 0.66,
         }}
       >
-        {palette.label}
+        <span>Contact file</span>
+        <span>{palette.label}</span>
       </div>
 
-      {/* R8 sharpening detail — private sticky-note visible ONLY to the
-          owning user.  Rendered as a hand-stuck cream square tilted a few
-          degrees.  Never included in any outbound surface (allowlist
-          enforced by P5 grep). */}
+      <div
+        style={{
+          borderBottom: `1px solid ${palette.edge}`,
+          paddingBottom: 12,
+        }}
+      >
+        <div style={{ fontWeight: 700, fontSize: 19, lineHeight: 1.05 }}>
+          {contact.name}
+        </div>
+        {contact.title && (
+          <div style={{ marginTop: 7, fontSize: 12, opacity: 0.86 }}>
+            {contact.title}
+          </div>
+        )}
+        {contact.companyName && (
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 11,
+              fontFamily: "'IBM Plex Mono', monospace",
+              opacity: 0.74,
+            }}
+          >
+            {contact.companyName}
+          </div>
+        )}
+      </div>
+
+      <div style={{ display: "grid", gap: 8, marginTop: 2 }}>
+        <DossierLine label="Relationship" value={contact.relationship ?? "Unsorted"} />
+        <DossierLine label="Last touch" value={lastContact} />
+        <DossierLine label="Source" value={contact.source ?? "Manual"} />
+      </div>
+
       {contact.privateNote && (
         <aside
           aria-label="Private note, visible only to you"
           style={{
-            position: "absolute",
-            top: -10,
-            right: -8,
-            width: 78,
-            minHeight: 46,
-            padding: "6px 8px",
-            transform: `rotate(${seededNoteTilt(contact.id)}deg)`,
-            background: "#FFF8D4",
-            color: "#3A2817",
-            fontFamily: "'Caveat', 'Bradley Hand', cursive",
+            marginTop: "auto",
+            padding: "9px 10px",
+            border: `1px solid ${palette.edge}`,
+            borderRadius: 4,
+            background: "rgba(255,255,255,0.12)",
+            color: palette.text,
+            fontFamily: "'Satoshi', sans-serif",
             fontSize: 12,
-            lineHeight: 1.2,
+            lineHeight: 1.3,
             boxShadow:
-              "0 2px 6px rgba(0,0,0,0.3), inset 0 -4px 6px rgba(0,0,0,0.04)",
+              "inset 0 1px 0 rgba(255,255,255,0.08)",
             pointerEvents: "none",
             overflow: "hidden",
-            whiteSpace: "pre-wrap",
           }}
         >
+          <span
+            style={{
+              display: "block",
+              marginBottom: 4,
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 8,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              opacity: 0.66,
+            }}
+          >
+            Private note
+          </span>
           {contact.privateNote.slice(0, 60)}
         </aside>
       )}
     </button>
+  );
+}
+
+function DossierLine({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}): JSX.Element {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "78px 1fr",
+        gap: 8,
+        alignItems: "baseline",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 9,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          opacity: 0.58,
+        }}
+      >
+        {label}
+      </span>
+      <span style={{ fontSize: 12, lineHeight: 1.25, opacity: 0.88 }}>
+        {value}
+      </span>
+    </div>
   );
 }

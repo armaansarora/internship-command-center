@@ -261,6 +261,26 @@ describe("GET /api/gmail/callback", () => {
     });
   });
 
+  it("returns Google connection callbacks to the signed next path", async () => {
+    verifyOAuthStateSpy.mockReturnValue({
+      ok: true,
+      payload: { userId: "session-user", next: "/lobby/onboarding" },
+    });
+    exchangeCodeSpy.mockResolvedValue({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      expires_in: 3600,
+      token_type: "Bearer",
+    });
+
+    const res = await GET(makeRequest("?code=oauth-code&state=signed"));
+
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/lobby/onboarding?gmail=connected",
+    );
+    expectClearedStateCookie(res);
+  });
+
   it("redirects to token_exchange_failed when exchange or storage throws", async () => {
     verifyOAuthStateSpy.mockReturnValue({
       ok: true,

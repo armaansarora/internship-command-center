@@ -3,9 +3,7 @@
 import type { ChangeEvent, CSSProperties, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { OtisCharacter, type OtisMood } from "@/components/lobby/concierge/OtisCharacter";
 import { CinematicArrival } from "@/components/lobby/cinematic/CinematicArrival";
-import { BuildingDirectory } from "@/components/lobby/directory/BuildingDirectory";
 import type { TargetProfile } from "@/lib/agents/cro/target-profile";
 import { claimArrivalPlayAction } from "./actions";
 
@@ -75,6 +73,7 @@ export function ConciergeFlow({
   guestName,
   mode = "first-run",
 }: ConciergeFlowProps): JSX.Element {
+  void floorsUnlocked;
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>(arrivalAlreadyPlayed ? "concierge" : "claiming");
   const [cinematicShouldPlay, setCinematicShouldPlay] = useState(false);
@@ -118,13 +117,6 @@ export function ConciergeFlow({
     const filled = fields.filter((field) => field.trim().length > 0).length + 4;
     return Math.min(100, Math.round((filled / 12) * 100));
   }, [intake]);
-
-  const otisMood: OtisMood =
-    phase === "finishing" || phase === "redirecting"
-      ? "thinking"
-      : phase === "cinematic" || phase === "claiming"
-        ? "idle"
-        : "greeting";
 
   const updateField = useCallback(
     <K extends keyof IntakeState>(key: K, value: IntakeState[K]) => {
@@ -186,7 +178,9 @@ export function ConciergeFlow({
   const handleConnectGoogle = useCallback(async () => {
     setGoogleState("loading");
     try {
-      const response = await fetch("/api/gmail/auth", { method: "GET" });
+      const response = await fetch("/api/gmail/auth?next=/lobby/onboarding", {
+        method: "GET",
+      });
       const body = (await response.json().catch(() => ({}))) as { authUrl?: string };
       if (!response.ok || !body.authUrl) {
         setGoogleState("error");
@@ -208,7 +202,7 @@ export function ConciergeFlow({
         inset: 0,
         zIndex: 40,
         display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr) minmax(280px, 360px)",
+        gridTemplateColumns: "1fr",
         background:
           "linear-gradient(115deg, rgba(17, 8, 9, 0.92), rgba(10, 12, 24, 0.9) 52%, rgba(33, 21, 10, 0.82))",
       }}
@@ -222,88 +216,37 @@ export function ConciergeFlow({
       )}
 
       {(phase === "concierge" || phase === "finishing" || phase === "redirecting") && (
-        <>
-          <main
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(180px, 280px) minmax(0, 780px)",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "34px",
-              padding: "42px clamp(20px, 5vw, 72px)",
-              overflowY: "auto",
-            }}
-          >
-            <section aria-label="Otis reception desk" className="flex flex-col items-center gap-5">
-              <OtisCharacter mood={otisMood} />
-              <div
-                style={{
-                  width: "100%",
-                  maxWidth: "260px",
-                  border: "1px solid rgba(201, 168, 76, 0.2)",
-                  background: "rgba(12, 6, 7, 0.72)",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  textAlign: "center",
-                  boxShadow: "0 18px 48px rgba(0,0,0,0.32)",
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontFamily: "'Playfair Display', Georgia, serif",
-                    fontSize: "18px",
-                    color: "#F5EEE1",
-                  }}
-                >
-                  Otis has the desk.
-                </p>
-                <p
-                  style={{
-                    margin: "8px 0 0",
-                    color: "rgba(245, 238, 225, 0.68)",
-                    fontSize: "13px",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {mode === "update"
-                    ? "Update the building record, then ride back up."
-                    : "Set the building record once, then the floors can work with context."}
-                </p>
-              </div>
-            </section>
-
-            {phase === "concierge" ? (
-              <StructuredIntakeDesk
-                guestName={guestName}
-                mode={mode}
-                intake={intake}
-                completion={completion}
-                canSubmit={canSubmit}
-                saveState={saveState}
-                googleState={googleState}
-                onFieldChange={updateField}
-                onSave={saveDraft}
-                onSkip={handleSkip}
-                onSubmit={handleSubmit}
-                onConnectGoogle={handleConnectGoogle}
-              />
-            ) : (
-              <ElevatorProgress mode={mode} />
-            )}
-          </main>
-
-          <aside
-            style={{
-              padding: "32px 24px",
-              borderLeft: "1px solid rgba(201, 168, 76, 0.16)",
-              background: "rgba(7, 8, 18, 0.72)",
-              overflowY: "auto",
-            }}
-          >
-            <BuildingDirectory floorsUnlocked={floorsUnlocked} />
-          </aside>
-        </>
+        <main
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1080px)",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "18px",
+            padding: "clamp(14px, 2vw, 24px)",
+            overflow: "hidden",
+            minHeight: "100dvh",
+          }}
+        >
+          {phase === "concierge" ? (
+            <StructuredIntakeDesk
+              guestName={guestName}
+              mode={mode}
+              intake={intake}
+              completion={completion}
+              canSubmit={canSubmit}
+              saveState={saveState}
+              googleState={googleState}
+              onFieldChange={updateField}
+              onSave={saveDraft}
+              onSkip={handleSkip}
+              onSubmit={handleSubmit}
+              onConnectGoogle={handleConnectGoogle}
+            />
+          ) : (
+            <ElevatorProgress mode={mode} />
+          )}
+        </main>
       )}
 
       <style>{`
@@ -311,12 +254,10 @@ export function ConciergeFlow({
           div[aria-label="Lobby onboarding"] {
             grid-template-columns: 1fr !important;
           }
-          div[aria-label="Lobby onboarding"] > aside {
-            display: none;
-          }
           div[aria-label="Lobby onboarding"] main {
             grid-template-columns: 1fr !important;
             align-content: start;
+            overflow-y: auto !important;
           }
         }
       `}</style>
@@ -362,14 +303,17 @@ function StructuredIntakeDesk({
         borderRadius: "8px",
         boxShadow: "0 30px 80px rgba(0,0,0,0.42)",
         overflow: "hidden",
+        maxHeight: "calc(100dvh - 32px)",
+        display: "grid",
+        gridTemplateRows: "auto auto minmax(0, 1fr) auto auto",
       }}
     >
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "1fr auto",
-          gap: "16px",
-          padding: "24px 26px 18px",
+          gap: "14px",
+          padding: "16px 20px 12px",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
         }}
       >
@@ -384,30 +328,30 @@ function StructuredIntakeDesk({
               color: "var(--gold)",
             }}
           >
-            Lobby reception
+            Otis intake
           </p>
           <h1
             style={{
               margin: 0,
               fontFamily: "'Playfair Display', Georgia, serif",
-              fontSize: "clamp(26px, 3vw, 36px)",
+              fontSize: "clamp(24px, 2.4vw, 31px)",
               lineHeight: 1.05,
               color: "#F5EEE1",
             }}
           >
-            {mode === "update" ? "Update your intake" : `Settle in${guestName ? `, ${guestName}` : ""}.`}
+            {mode === "update" ? "Update your search record" : "Set your search record"}
           </h1>
           <p
             style={{
-              margin: "10px 0 0",
+              margin: "7px 0 0",
               color: "rgba(245, 238, 225, 0.68)",
-              fontSize: "14px",
-              lineHeight: 1.55,
+              fontSize: "13px",
+              lineHeight: 1.45,
               maxWidth: "64ch",
             }}
           >
-            Otis only needs the facts the building uses: targets, timing, constraints,
-            and whether the communications floors may connect to Google.
+            {guestName ? `${guestName}, this` : "This"} gives the floors the targets,
+            constraints, and connections they need to work cleanly.
           </p>
         </div>
         <div
@@ -444,11 +388,59 @@ function StructuredIntakeDesk({
       </div>
 
       <div
+        aria-label="What this powers"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-          gap: "16px",
-          padding: "22px 26px 10px",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: "8px",
+          padding: "10px 20px",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          background: "rgba(201,168,76,0.045)",
+        }}
+      >
+        {[
+          ["War Room", "Role matching"],
+          ["CRO brief", "Priorities"],
+          ["Situation Room", "Replies"],
+          ["Calendar", "Conflicts"],
+        ].map(([label, detail]) => (
+          <div
+            key={label}
+            style={{
+              border: "1px solid rgba(201,168,76,0.14)",
+              borderRadius: "7px",
+              padding: "8px 9px",
+              minHeight: "46px",
+              background: "rgba(7,9,18,0.42)",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "10px",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "#E8C45A",
+              }}
+            >
+              {label}
+            </p>
+            <p style={{ margin: "3px 0 0", color: "rgba(245,238,225,0.62)", fontSize: "12px" }}>
+              {detail}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: "10px",
+          padding: "14px 20px 8px",
+          overflow: "auto",
+          minHeight: 0,
         }}
       >
         <TextField
@@ -530,23 +522,27 @@ function StructuredIntakeDesk({
           }}
           onChange={(value) => onFieldChange("networkingComfort", value)}
         />
-        <TextAreaField
-          label="Constraints"
-          value={intake.musts}
-          placeholder="Visa constraints, commute limits, industry exclusions, school schedule"
-          onChange={(value) => onFieldChange("musts", value)}
-        />
-        <TextAreaField
-          label="Preferences"
-          value={intake.preferences}
-          placeholder="Hybrid preference, company size, team style, compensation needs"
-          onChange={(value) => onFieldChange("preferences", value)}
-        />
+        <div style={{ gridColumn: "span 2" }}>
+          <TextAreaField
+            label="Constraints"
+            value={intake.musts}
+            placeholder="Visa, commute, industry exclusions, school schedule"
+            onChange={(value) => onFieldChange("musts", value)}
+          />
+        </div>
+        <div style={{ gridColumn: "span 2" }}>
+          <TextAreaField
+            label="Preferences"
+            value={intake.preferences}
+            placeholder="Hybrid, company size, team style, compensation"
+            onChange={(value) => onFieldChange("preferences", value)}
+          />
+        </div>
         <div style={{ gridColumn: "1 / -1" }}>
           <TextAreaField
             label="Anything Otis should remember"
             value={intake.notes}
-            placeholder="Context that would help the C-Suite judge opportunities correctly"
+            placeholder="Extra context that should shape recommendations"
             onChange={(value) => onFieldChange("notes", value)}
           />
         </div>
@@ -558,8 +554,8 @@ function StructuredIntakeDesk({
           gridTemplateColumns: "1fr auto",
           gap: "16px",
           alignItems: "center",
-          margin: "10px 26px 22px",
-          padding: "16px",
+          margin: "8px 20px 12px",
+          padding: "12px",
           border: "1px solid rgba(76, 143, 212, 0.22)",
           background: "rgba(76, 143, 212, 0.08)",
           borderRadius: "8px",
@@ -569,9 +565,9 @@ function StructuredIntakeDesk({
           <p style={{ margin: 0, color: "#F5EEE1", fontSize: "14px", fontWeight: 600 }}>
             Gmail &amp; Calendar
           </p>
-          <p style={{ margin: "4px 0 0", color: "rgba(245,238,225,0.65)", fontSize: "13px" }}>
-            Connect now or later from Settings. The Situation Room uses this to find replies,
-            interview invites, and calendar conflicts.
+          <p style={{ margin: "4px 0 0", color: "rgba(245,238,225,0.65)", fontSize: "12px" }}>
+            Optional now, always available in Settings. Used for replies, interview invites,
+            follow-ups, and calendar conflicts.
           </p>
           {googleState === "error" && (
             <p role="alert" style={{ margin: "6px 0 0", color: "#F87171", fontSize: "12px" }}>
@@ -596,7 +592,7 @@ function StructuredIntakeDesk({
           flexWrap: "wrap",
           justifyContent: "space-between",
           gap: "12px",
-          padding: "18px 26px 24px",
+          padding: "12px 20px 16px",
           borderTop: "1px solid rgba(255,255,255,0.07)",
         }}
       >
@@ -631,9 +627,24 @@ function StructuredIntakeDesk({
       </div>
 
       <style>{`
+        @media (max-height: 820px) {
+          section[aria-label="Otis structured intake desk"] {
+            max-height: calc(100dvh - 20px) !important;
+          }
+        }
         @media (max-width: 760px) {
-          section[aria-label="Otis structured intake desk"] > div:nth-child(2) {
+          section[aria-label="Otis structured intake desk"] {
+            max-height: none !important;
+          }
+          section[aria-label="Otis structured intake desk"] > div[aria-label="What this powers"] {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+          section[aria-label="Otis structured intake desk"] > div:nth-child(3) {
             grid-template-columns: 1fr !important;
+            overflow: visible !important;
+          }
+          section[aria-label="Otis structured intake desk"] > div:nth-child(3) > div {
+            grid-column: auto !important;
           }
         }
       `}</style>
@@ -688,8 +699,8 @@ function TextAreaField({
         value={value}
         onChange={(event: ChangeEvent<HTMLTextAreaElement>) => onChange(event.target.value)}
         placeholder={placeholder}
-        rows={3}
-        style={{ ...inputStyle, resize: "vertical", minHeight: "78px" }}
+        rows={2}
+        style={{ ...inputStyle, resize: "vertical", minHeight: "58px" }}
       />
     </label>
   );
@@ -882,7 +893,7 @@ async function fireBootstrap(): Promise<void> {
 
 const fieldWrapStyle = {
   display: "grid",
-  gap: "7px",
+  gap: "5px",
 } satisfies CSSProperties;
 
 const fieldLabelStyle = {
@@ -899,9 +910,9 @@ const inputStyle = {
   borderRadius: "6px",
   background: "rgba(255,255,255,0.045)",
   color: "#F5EEE1",
-  padding: "10px 11px",
+  padding: "8px 10px",
   fontFamily: "'Satoshi', system-ui, sans-serif",
-  fontSize: "14px",
+  fontSize: "13px",
   lineHeight: 1.4,
 } satisfies CSSProperties;
 
@@ -910,7 +921,7 @@ const ghostButtonStyle = {
   borderRadius: "6px",
   background: "transparent",
   color: "rgba(245,238,225,0.7)",
-  padding: "10px 14px",
+  padding: "9px 12px",
   fontFamily: "'JetBrains Mono', monospace",
   fontSize: "10px",
   letterSpacing: "0.12em",
@@ -925,7 +936,7 @@ function primaryButtonStyle(disabled: boolean): CSSProperties {
       ? "rgba(255,255,255,0.06)"
       : "linear-gradient(135deg, #C9A84C, #E8C45A)",
     color: disabled ? "rgba(245,238,225,0.45)" : "#0A0A14",
-    padding: "11px 18px",
+    padding: "10px 16px",
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: "11px",
     letterSpacing: "0.14em",
@@ -941,7 +952,7 @@ function secondaryButtonStyle(disabled: boolean): CSSProperties {
     borderRadius: "6px",
     background: "rgba(201,168,76,0.08)",
     color: "#E8C45A",
-    padding: "10px 14px",
+    padding: "9px 12px",
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: "10px",
     letterSpacing: "0.12em",

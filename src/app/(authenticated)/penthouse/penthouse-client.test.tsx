@@ -67,9 +67,9 @@ describe("PenthouseClient", () => {
     const html = renderToStaticMarkup(<PenthouseClient scene={scene} />);
 
     expect(html).toContain("Command center dashboard");
-    expect(html).toContain("Morning Briefing");
+    expect(html).toContain("Since you were gone");
     expect(html).toContain("Pipeline status");
-    expect(html).toContain("Next actions");
+    expect(html).toContain("Open tasks");
     expect(html).toContain("Applications");
     expect(html).not.toContain("Full dashboard");
     expect(html).not.toContain("[briefing_v2]");

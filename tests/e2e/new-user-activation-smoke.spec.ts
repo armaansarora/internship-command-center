@@ -76,7 +76,7 @@ test.describe("new-user activation smoke", () => {
     const consoleErrors = watchConsole(page);
 
     await expectHealthyPage(page, "/lobby");
-    await expect(page.getByLabel("Private beta access notice")).toContainText("PRIVATE BETA");
+    await expect(page.getByRole("button", { name: /continue with google/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /join the waitlist/i })).toBeVisible();
 
     await expectHealthyPage(page, "/waitlist");
@@ -118,9 +118,10 @@ test.describe("new-user activation smoke", () => {
         check: async () => {
           await expect(page.getByLabel("Penthouse — Floor PH")).toBeVisible();
           await expect(page.getByLabel("Command center dashboard")).toBeVisible();
-          await expect(page.getByLabel("Morning Briefing")).toBeVisible();
+          await expect(page.getByLabel("Since you were gone report")).toBeVisible();
           await expect(page.getByLabel("Pipeline status")).toBeVisible();
-          await expect(page.getByLabel("Next actions")).toBeVisible();
+          await expect(page.getByLabel("Task drawer")).toBeVisible();
+          await expect(page.getByRole("button", { name: /open tasks/i })).toBeVisible();
         },
       },
       {

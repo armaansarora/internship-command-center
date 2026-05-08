@@ -50,7 +50,7 @@ describe("R4.4 ConciergeFlow", () => {
     expect(html).toMatch(/data-phase="/);
   });
 
-  it("mounts the Building Directory in the side panel when the concierge is on-stage", () => {
+  it("does not mount the Building Directory inside the intake page", () => {
     const html = renderToStaticMarkup(
       <ConciergeFlow
         arrivalAlreadyPlayed
@@ -58,7 +58,7 @@ describe("R4.4 ConciergeFlow", () => {
         guestName="Armaan"
       />,
     );
-    expect(html).toMatch(/Building Directory/i);
+    expect(html).not.toMatch(/Building Directory/i);
   });
 
   it("renders a structured intake desk instead of a chat-only onboarding surface", () => {
@@ -76,5 +76,6 @@ describe("R4.4 ConciergeFlow", () => {
     expect(html).toContain("Gmail &amp; Calendar");
     expect(html).toContain("Save progress");
     expect(html).toContain("Skip for now");
+    expect(html).toContain("What this powers");
   });
 });

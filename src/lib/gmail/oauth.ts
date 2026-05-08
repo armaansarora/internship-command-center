@@ -127,7 +127,7 @@ export function decryptForUser(userId: string, blob: string): string {
  * callback verifies both, giving real CSRF protection instead of the
  * plaintext userId the previous implementation used.
  */
-export function getGmailAuthUrl(userId: string): {
+export function getGmailAuthUrl(userId: string, next?: string): {
   url: string;
   nonce: string;
 } {
@@ -142,7 +142,7 @@ export function getGmailAuthUrl(userId: string): {
     "https://www.googleapis.com/auth/calendar.events",
   ];
 
-  const { state, nonce } = createOAuthState({ userId });
+  const { state, nonce } = createOAuthState({ userId, next });
 
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,

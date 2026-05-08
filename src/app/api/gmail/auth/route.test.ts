@@ -106,7 +106,7 @@ describe("GET /api/gmail/auth", () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get("X-RateLimit-Limit")).toBe("10");
-    expect(gmailAuthUrlSpy).toHaveBeenCalledWith("user-oauth");
+    expect(gmailAuthUrlSpy).toHaveBeenCalledWith("user-oauth", undefined);
     await expect(res.json()).resolves.toEqual({
       authUrl: "https://accounts.google.com/o/oauth2/v2/auth?scope=gmail",
     });
@@ -134,5 +134,24 @@ describe("GET /api/gmail/auth", () => {
 
     expect(cookie).toContain("oauth_state_nonce=dev-nonce");
     expect(cookie).not.toContain("Secure");
+  });
+
+  it("passes a safe return path into the signed OAuth state", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    gmailAuthUrlSpy.mockReturnValue({
+      url: "https://accounts.google.com/o/oauth2/v2/auth?scope=gmail",
+      nonce: "nonce-from-state",
+    });
+
+    const res = await GET(
+      new Request("http://localhost/api/gmail/auth?next=/lobby/onboarding"),
+    );
+
+    expect(res.status).toBe(200);
+    expect(gmailAuthUrlSpy).toHaveBeenCalledWith(
+      "user-oauth",
+      "/lobby/onboarding",
+    );
   });
 });

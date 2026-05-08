@@ -162,7 +162,7 @@ describe("SettingsClient connected services", () => {
 
     await click(findButton(mounted.host, /^Connect$/i));
 
-    expect(fetchMock).toHaveBeenCalledWith("/api/gmail/auth", {
+    expect(fetchMock).toHaveBeenCalledWith("/api/gmail/auth?next=/settings", {
       method: "GET",
     });
     expect(window.location.href).toBe(authUrl);

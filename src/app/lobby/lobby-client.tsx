@@ -161,9 +161,6 @@ export function LobbyClient({
       {/* ── ELEVATOR (authenticated users only) ── */}
       {isAuthenticated && <Elevator />}
 
-      {/* ── PRIVATE BETA ACCESS TICKER ── */}
-      <ConstructionTicker />
-
       {/* ── LOBBY BACKGROUND — BUG-010: luxury reception, not skyline ── */}
       <LobbyBackground />
 
@@ -300,8 +297,8 @@ export function LobbyClient({
                   }}
                 >
                   {isReturningUser
-                    ? "Your offices are open. Return upstairs or stop at the desk to revise your intake."
-                    : "Reception for your internship search. Sign in, settle your intake with Otis, then ride up to the Penthouse command center."}
+                    ? "Your offices are open. The reception floor is ready whenever you need it."
+                    : "A private reception floor for stepping into your internship tower."}
                 </p>
               </div>
               <style>{`
@@ -315,42 +312,7 @@ export function LobbyClient({
               `}</style>
             </div>
 
-            <div
-              className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3"
-              aria-label="Reception floor highlights"
-            >
-              {[
-                ["Front desk", "Google sign-in and beta access."],
-                ["Otis intake", "Structured targets, timing, constraints."],
-                ["Elevator", "Direct handoff to the Penthouse."],
-              ].map(([label, detail]) => (
-                <div
-                  key={label}
-                  style={{
-                    border: "1px solid rgba(201,168,76,0.15)",
-                    background: "rgba(7, 9, 18, 0.58)",
-                    borderRadius: "8px",
-                    padding: "14px",
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: "10px",
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "var(--gold)",
-                    }}
-                  >
-                    {label}
-                  </p>
-                  <p style={{ margin: "7px 0 0", color: "rgba(245,238,225,0.62)", fontSize: "13px", lineHeight: 1.45 }}>
-                    {detail}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <ReceptionGlint />
 
             <nav
               aria-label="Legal and pricing"
@@ -439,63 +401,43 @@ const LOBBY_FOOTER_LINKS = [
   { href: "/waitlist", label: "Waitlist" },
 ] as const;
 
-/**
- * ConstructionTicker — narrow scrolling banner at the very top of the page.
- * JetBrains Mono, 10px, gold text on near-black, infinite horizontal scroll.
- */
-function ConstructionTicker(): JSX.Element {
-  const TEXT =
-    "PRIVATE BETA — ACCESS BY KEY — THE TOWER IS OPENING FLOOR BY FLOOR — PRIVATE BETA — ACCESS BY KEY — THE TOWER IS OPENING FLOOR BY FLOOR — ";
-
+function ReceptionGlint(): JSX.Element {
   return (
     <div
-      className="fixed top-0 inset-x-0 overflow-hidden"
+      aria-hidden="true"
+      className="relative h-16 w-full max-w-xl overflow-hidden"
       style={{
-        zIndex: 50,
-        height: "26px",
-        background: "rgba(4, 5, 12, 0.96)",
-        borderBottom: "1px solid rgba(201, 168, 76, 0.15)",
+        borderTop: "1px solid rgba(201,168,76,0.22)",
+        borderBottom: "1px solid rgba(201,168,76,0.1)",
+        opacity: 0.78,
       }}
-      aria-label="Private beta access notice"
-      role="region"
-      aria-live="off"
     >
-      {/* Gold accent line at very top */}
       <div
-        className="absolute inset-x-0 top-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.5) 25%, rgba(232,196,90,0.7) 50%, rgba(201,168,76,0.5) 75%, transparent)" }}
-      />
-
-      <div
-        className="flex items-center h-full whitespace-nowrap"
+        className="absolute inset-0"
         style={{
-          display: "inline-flex",
-          animation: "ticker-scroll 28s linear infinite",
-          willChange: "transform",
+          background:
+            "linear-gradient(90deg, transparent, rgba(201,168,76,0.18), transparent)",
         }}
-      >
-        {/* Duplicate text for seamless loop */}
-        <span
-          style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "10px",
-            letterSpacing: "0.18em",
-            color: "var(--gold)",
-            opacity: 0.75,
-            paddingRight: "0",
-          }}
-        >
-          {TEXT}
-          {TEXT}
-        </span>
-      </div>
-
-      <style>{`
-        @keyframes ticker-scroll {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-      `}</style>
+      />
+      <div
+        className="absolute left-8 top-1/2 h-px w-28"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(245,238,225,0.5))",
+        }}
+      />
+      <div
+        className="absolute right-10 top-1/2 h-px w-36"
+        style={{
+          background: "linear-gradient(90deg, rgba(245,238,225,0.42), transparent)",
+        }}
+      />
+      <div
+        className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          background: "rgba(232,196,90,0.8)",
+          boxShadow: "0 0 28px rgba(201,168,76,0.75)",
+        }}
+      />
     </div>
   );
 }

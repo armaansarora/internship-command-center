@@ -8,9 +8,9 @@ import { useRolodexRotation, normalizeDelta } from "./useRolodexRotation";
 import { useSoundEngine } from "@/components/world/SoundProvider";
 import { synthPaperRustle } from "@/lib/audio/synth-paper-rustle";
 
-const CYLINDER_RADIUS = 240;
-const CARD_WIDTH = 160;
-const CARD_HEIGHT = 220;
+const CYLINDER_RADIUS = 320;
+const CARD_WIDTH = 220;
+const CARD_HEIGHT = 278;
 /** Cards strictly within ±45° of the camera center are rendered (live); the
  *  rest are virtual.  At 200 cards this caps the live DOM child count to
  *  ≤ 50.  (Strict-less-than because at 200 cards each card is 1.8° apart

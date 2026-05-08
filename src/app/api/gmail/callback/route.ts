@@ -32,6 +32,18 @@ type GoogleIdTokenSignInResult = Awaited<
 
 const SUPABASE_GOOGLE_LOGIN_RETRY_DELAYS_MS = [250, 750] as const;
 
+function connectionReturnUrl(
+  origin: string,
+  path: string | null | undefined,
+  params: Record<string, string>,
+): URL {
+  const url = new URL(getSafePostAuthPath(path ?? "/situation-room"), origin);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
+  return url;
+}
+
 /**
  * Gmail / Calendar OAuth callback.
  *
@@ -117,6 +129,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  const returnPath = verification.payload.next ?? "/situation-room";
+
   try {
     const tokenResponse = await exchangeCodeForTokens(code);
 
@@ -135,14 +149,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
     return clearCookie(
       NextResponse.redirect(
-        new URL("/situation-room?error=token_exchange_failed", origin)
+        connectionReturnUrl(origin, returnPath, {
+          error: "token_exchange_failed",
+        })
       )
     );
   }
 
   log.info("gmail.oauth.connected", { userId: sessionUser.id });
   return clearCookie(
-    NextResponse.redirect(new URL("/situation-room?gmail=connected", origin))
+    NextResponse.redirect(
+      connectionReturnUrl(origin, returnPath, { gmail: "connected" }),
+    )
   );
 }
 
