@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
-import { isTransientSupabaseAuthError } from "@/lib/auth/supabase-auth-errors";
+import {
+  isTransientSupabaseAuthError,
+  withSupabaseAuthTimeout,
+} from "@/lib/auth/supabase-auth-errors";
 import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
 import { needsLobbyOnboardingAfterAuth } from "@/lib/auth/post-auth-profile";
 import { log } from "@/lib/logger";
@@ -57,7 +60,9 @@ async function exchangeCodeForSession(
   code: string,
 ): Promise<CodeExchangeResult> {
   try {
-    return await supabase.auth.exchangeCodeForSession(code);
+    return await withSupabaseAuthTimeout(
+      supabase.auth.exchangeCodeForSession(code),
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return {

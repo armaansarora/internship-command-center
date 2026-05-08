@@ -440,6 +440,40 @@ describe("GET /api/gmail/callback", () => {
     expectClearedLoginCookie(res);
   });
 
+  it("routes hung Supabase exchanges to auth_unavailable without retrying", async () => {
+    vi.useFakeTimers();
+    try {
+      verifyGoogleLoginStateSpy.mockReturnValue({
+        ok: true,
+        payload: {
+          v: 1,
+          state: "login-state",
+          nonce: "login-nonce",
+          next: "/settings",
+          issuedAt: Date.now(),
+        },
+      });
+      exchangeGoogleLoginCodeForIdTokenSpy.mockResolvedValue("id-token");
+      signInWithIdTokenSpy.mockReturnValue(new Promise(() => {}));
+
+      const pending = GET(makeLoginRequest("?code=login-code&state=login-state"));
+      await vi.advanceTimersByTimeAsync(5_000);
+      const res = await pending;
+
+      expect(signInWithIdTokenSpy).toHaveBeenCalledTimes(1);
+      expect(logWarnSpy).not.toHaveBeenCalledWith(
+        "auth.google_login.supabase_exchange_retry",
+        expect.any(Object),
+      );
+      expect(res.headers.get("location")).toBe(
+        "http://localhost/lobby?error=auth_unavailable",
+      );
+      expectClearedLoginCookie(res);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("rejects login callbacks outside the beta gate", async () => {
     verifyGoogleLoginStateSpy.mockReturnValue({
       ok: true,

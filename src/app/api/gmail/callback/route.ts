@@ -13,7 +13,11 @@ import {
 } from "@/lib/auth/google-login-state";
 import { exchangeGoogleLoginCodeForIdToken } from "@/lib/auth/google-login-oauth";
 import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
-import { isTransientSupabaseAuthError } from "@/lib/auth/supabase-auth-errors";
+import {
+  isSupabaseAuthTimeoutError,
+  isTransientSupabaseAuthError,
+  withSupabaseAuthTimeout,
+} from "@/lib/auth/supabase-auth-errors";
 import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
 import { needsLobbyOnboardingAfterAuth } from "@/lib/auth/post-auth-profile";
 import { log } from "@/lib/logger";
@@ -237,7 +241,7 @@ async function signInWithGoogleIdToken(args: {
 
     if (
       !result.error ||
-      !isTransientSupabaseAuthError(result.error.message) ||
+      !isRetryableSupabaseGoogleLoginError(result.error.message) ||
       attempt === SUPABASE_GOOGLE_LOGIN_RETRY_DELAYS_MS.length
     ) {
       return result;
@@ -253,17 +257,28 @@ async function signInWithGoogleIdToken(args: {
   throw new Error("Unreachable Supabase Google login retry state");
 }
 
+function isRetryableSupabaseGoogleLoginError(
+  message: string | null | undefined,
+): boolean {
+  return (
+    isTransientSupabaseAuthError(message) &&
+    !isSupabaseAuthTimeoutError(message)
+  );
+}
+
 async function trySignInWithGoogleIdToken(args: {
   supabase: SupabaseServerClient;
   idToken: string;
   nonce: string;
 }): Promise<GoogleIdTokenSignInResult> {
   try {
-    return await args.supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: args.idToken,
-      nonce: args.nonce,
-    });
+    return await withSupabaseAuthTimeout(
+      args.supabase.auth.signInWithIdToken({
+        provider: "google",
+        token: args.idToken,
+        nonce: args.nonce,
+      }),
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return {

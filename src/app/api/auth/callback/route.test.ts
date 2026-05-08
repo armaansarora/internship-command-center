@@ -172,4 +172,25 @@ describe("GET /api/auth/callback", () => {
     expect(needsLobbyOnboardingAfterAuthSpy).not.toHaveBeenCalled();
     expect(signOutSpy).not.toHaveBeenCalled();
   });
+
+  it("uses auth_unavailable when the Supabase exchange hangs", async () => {
+    vi.useFakeTimers();
+    try {
+      exchangeCodeForSessionSpy.mockReturnValue(new Promise(() => {}));
+
+      const pending = GET(request("/api/auth/callback?code=slow"));
+      await vi.advanceTimersByTimeAsync(5_000);
+      const res = await pending;
+
+      expect(res.status).toBe(307);
+      expect(res.headers.get("location")).toBe(
+        "https://www.interntower.com/lobby?error=auth_unavailable",
+      );
+      expect(isEmailAllowedForBetaSpy).not.toHaveBeenCalled();
+      expect(needsLobbyOnboardingAfterAuthSpy).not.toHaveBeenCalled();
+      expect(signOutSpy).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
