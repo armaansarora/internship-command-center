@@ -96,6 +96,11 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
+  const publicPath = isPathPublic(request.nextUrl.pathname);
+  if (publicPath && !isLobbyRoot(request.nextUrl.pathname)) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(
     requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
     requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
@@ -125,7 +130,7 @@ export async function updateSession(request: NextRequest) {
   // back to the Lobby instead of hanging on the loading shell.
   const user = await readMiddlewareUser(supabase, request.nextUrl.pathname);
 
-  if (!user && !isPathPublic(request.nextUrl.pathname)) {
+  if (!user && !publicPath) {
     return unauthenticatedResponse(request);
   }
 

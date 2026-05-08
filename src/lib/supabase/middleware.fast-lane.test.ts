@@ -129,6 +129,21 @@ describe("R4.9 returning-user fast lane", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 
+  it("does not ask Supabase for a user on public OAuth callback routes", async () => {
+    const getUser = vi.fn(async () => ({ data: { user: null } }));
+    nextMockClient = {
+      auth: { getUser },
+      from: vi.fn(),
+    };
+
+    const res = await updateSession(
+      request("http://localhost/api/gmail/callback?code=abc&state=login_123"),
+    );
+
+    expect(res.headers.get("location")).toBeNull();
+    expect(getUser).not.toHaveBeenCalled();
+  });
+
   it("redirects protected routes to the lobby when Supabase Auth cannot verify the session", async () => {
     nextMockClient = mkClient(null, null, false, true);
     const res = await updateSession(request("http://localhost/settings"));
