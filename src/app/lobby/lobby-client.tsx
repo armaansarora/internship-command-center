@@ -354,6 +354,8 @@ export function LobbyClient({
                   href={link.href}
                   className="inline-flex min-h-11 min-w-11 items-center justify-center transition-opacity hover:opacity-100"
                   style={{
+                    minHeight: "44px",
+                    minWidth: "44px",
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: "10px",
                     letterSpacing: "0.14em",
@@ -750,6 +752,8 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
             href="/waitlist"
             className="inline-flex min-h-11 items-center justify-center text-center transition-opacity hover:opacity-100"
             style={{
+              minHeight: "44px",
+              minWidth: "44px",
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "10px",
               letterSpacing: "0.12em",

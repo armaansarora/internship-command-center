@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getGoogleTokens } from "@/lib/gmail/oauth";
+import { readGoogleApiError } from "@/lib/google/api-error";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -80,7 +81,7 @@ export async function fetchCalendarEvents(
   );
 
   if (!response.ok) {
-    throw new Error(`Calendar API error: ${response.status}`);
+    throw await readGoogleApiError("calendar", response);
   }
 
   const data = (await response.json()) as CalendarEventsResponse;
@@ -153,7 +154,7 @@ export async function createCalendarEvent(
   );
 
   if (!response.ok) {
-    throw new Error(`Failed to create calendar event: ${response.status}`);
+    throw await readGoogleApiError("calendar", response);
   }
 
   return response.json() as Promise<GoogleCalendarEvent>;

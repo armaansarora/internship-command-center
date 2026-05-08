@@ -20,6 +20,8 @@ const {
   signInWithIdTokenSpy,
   signOutSpy,
   storeGoogleTokensSpy,
+  syncCalendarEventsSpy,
+  syncGmailForUserSpy,
   verifyGoogleLoginStateSpy,
   verifyOAuthStateSpy,
   logWarnSpy,
@@ -36,6 +38,8 @@ const {
   signInWithIdTokenSpy: vi.fn(),
   signOutSpy: vi.fn(),
   storeGoogleTokensSpy: vi.fn(),
+  syncCalendarEventsSpy: vi.fn(),
+  syncGmailForUserSpy: vi.fn(),
   verifyGoogleLoginStateSpy: vi.fn(),
   verifyOAuthStateSpy: vi.fn(),
   logWarnSpy: vi.fn(),
@@ -51,6 +55,14 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/gmail/oauth", () => ({
   exchangeCodeForTokens: exchangeCodeSpy,
   storeGoogleTokens: storeGoogleTokensSpy,
+}));
+
+vi.mock("@/lib/gmail/sync", () => ({
+  syncGmailForUser: syncGmailForUserSpy,
+}));
+
+vi.mock("@/lib/calendar/sync", () => ({
+  syncCalendarEvents: syncCalendarEventsSpy,
 }));
 
 vi.mock("@/lib/auth/oauth-state", () => ({
@@ -128,6 +140,8 @@ describe("GET /api/gmail/callback", () => {
     signInWithIdTokenSpy.mockReset();
     signOutSpy.mockReset();
     storeGoogleTokensSpy.mockReset();
+    syncCalendarEventsSpy.mockReset();
+    syncGmailForUserSpy.mockReset();
     verifyGoogleLoginStateSpy.mockReset();
     verifyOAuthStateSpy.mockReset();
     logWarnSpy.mockReset();
@@ -145,6 +159,8 @@ describe("GET /api/gmail/callback", () => {
       },
     });
     signOutSpy.mockResolvedValue({ error: null });
+    syncCalendarEventsSpy.mockResolvedValue(0);
+    syncGmailForUserSpy.mockResolvedValue({ synced: 0, classified: 0, failed: 0 });
     isEmailAllowedForBetaSpy.mockReturnValue(true);
     needsLobbyOnboardingAfterAuthSpy.mockResolvedValue(false);
     getGoogleLoginTokenExchangeLobbyErrorSpy.mockReturnValue(null);
@@ -253,6 +269,12 @@ describe("GET /api/gmail/callback", () => {
     expect(tokens.refresh_token).toBe("refresh-token");
     expect(tokens.expiry_date).toBeGreaterThanOrEqual(before + 3_600_000 - 100);
     expect(options).toEqual({ useAdmin: true });
+    expect(syncGmailForUserSpy).toHaveBeenCalledWith("session-user", {
+      useAdmin: true,
+    });
+    expect(syncCalendarEventsSpy).toHaveBeenCalledWith("session-user", {
+      useAdmin: true,
+    });
     expect(res.headers.get("location")).toBe(
       "http://localhost/situation-room?gmail=connected",
     );
@@ -280,6 +302,34 @@ describe("GET /api/gmail/callback", () => {
       "http://localhost/lobby/onboarding?gmail=connected",
     );
     expectClearedStateCookie(res);
+  });
+
+  it("keeps the connection successful when the first sync fails", async () => {
+    verifyOAuthStateSpy.mockReturnValue({
+      ok: true,
+      payload: { userId: "session-user", next: "/settings" },
+    });
+    exchangeCodeSpy.mockResolvedValue({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      expires_in: 3600,
+      token_type: "Bearer",
+    });
+    syncGmailForUserSpy.mockRejectedValue(new Error("Gmail API error: 403"));
+
+    const res = await GET(makeRequest("?code=oauth-code&state=signed"));
+
+    expect(storeGoogleTokensSpy).toHaveBeenCalledTimes(1);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/settings?gmail=connected",
+    );
+    expectClearedStateCookie(res);
+    expect(logWarnSpy).toHaveBeenCalledWith("gmail.oauth.initial_sync_failed", {
+      alert: true,
+      userId: "session-user",
+      gmail: "Gmail API error: 403",
+      calendar: "ok",
+    });
   });
 
   it("redirects to token_exchange_failed when exchange or storage throws", async () => {

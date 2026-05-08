@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { syncGmailForUser } from "@/lib/gmail/sync";
+import { isGoogleApiDisabledError } from "@/lib/google/api-error";
 import { log } from "@/lib/logger";
 
 // ---------------------------------------------------------------------------
@@ -20,7 +21,7 @@ export async function POST(): Promise<Response> {
   if (rate.response) return rate.response;
 
   try {
-    const result = await syncGmailForUser(user.id);
+    const result = await syncGmailForUser(user.id, { useAdmin: true });
     return NextResponse.json(result, { headers: rate.headers });
   } catch (err) {
     if (isGoogleNotConnectedError(err)) {
@@ -30,6 +31,17 @@ export async function POST(): Promise<Response> {
           code: "GOOGLE_NOT_CONNECTED",
         },
         { status: 409, headers: rate.headers },
+      );
+    }
+    if (isGoogleApiDisabledError(err)) {
+      log.error("gmail.sync.provider_disabled", err, { userId: user.id });
+      return NextResponse.json(
+        {
+          error:
+            "Google API access is not enabled for this Tower OAuth project.",
+          code: "GOOGLE_API_DISABLED",
+        },
+        { status: 503, headers: rate.headers },
       );
     }
 

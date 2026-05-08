@@ -148,7 +148,7 @@ Best regards,
 export function makeCheckEmailsTool(userId: string) {
   return tool({
     description:
-      "Get recent parsed emails with their classifications, urgency levels, and suggested actions. Call this to review what's in the inbox and identify items needing response.",
+      "Get recent parsed emails from the user's synced Gmail ledger with their classifications, urgency levels, and suggested actions. Always call this when the user asks about email, Gmail, recruiters, unread messages, or new inbox activity. If it returns zero emails, tell the user no synced inbox items are indexed yet and recommend Sync Gmail in Settings.",
     inputSchema: z.object({
       limit: z
         .number()

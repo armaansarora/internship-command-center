@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { syncCalendarEvents } from "@/lib/calendar/sync";
+import { isGoogleApiDisabledError } from "@/lib/google/api-error";
 import { log } from "@/lib/logger";
 
 function isGoogleNotConnectedError(err: unknown): boolean {
@@ -16,7 +17,7 @@ export async function POST(): Promise<Response> {
   if (rate.response) return rate.response;
 
   try {
-    const count = await syncCalendarEvents(user.id);
+    const count = await syncCalendarEvents(user.id, { useAdmin: true });
 
     return NextResponse.json({ synced: count }, { headers: rate.headers });
   } catch (err) {
@@ -27,6 +28,17 @@ export async function POST(): Promise<Response> {
           code: "GOOGLE_NOT_CONNECTED",
         },
         { status: 409, headers: rate.headers },
+      );
+    }
+    if (isGoogleApiDisabledError(err)) {
+      log.error("calendar.sync.provider_disabled", err, { userId: user.id });
+      return NextResponse.json(
+        {
+          error:
+            "Google API access is not enabled for this Tower OAuth project.",
+          code: "GOOGLE_API_DISABLED",
+        },
+        { status: 503, headers: rate.headers },
       );
     }
 

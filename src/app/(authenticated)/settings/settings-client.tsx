@@ -152,6 +152,7 @@ export function SettingsClient({
   const [syncState, setSyncState] = useState<
     "idle" | "gmail" | "calendar" | "done" | "error"
   >("idle");
+  const [syncDetail, setSyncDetail] = useState<string | null>(null);
   const [effectiveDeletedAt, setEffectiveDeletedAt] = useState<string | null>(
     deletedAt,
   );
@@ -403,6 +404,7 @@ export function SettingsClient({
       }
       setEffectiveGoogleIntegration(false);
       setSyncState("idle");
+      setSyncDetail(null);
       setGoogleDisconnectState("idle");
       setGoogleConnectState("idle");
     } catch {
@@ -418,6 +420,7 @@ export function SettingsClient({
   const handleSyncGoogle = useCallback(
     async (kind: "gmail" | "calendar") => {
       setSyncState(kind);
+      setSyncDetail(null);
       trackPlausibleEvent("tower_google_workspace_sync_requested", {
         surface: "settings",
         provider: "google",
@@ -428,6 +431,13 @@ export function SettingsClient({
           kind === "gmail" ? "/api/gmail/sync" : "/api/calendar/sync",
           { method: "POST" },
         );
+        const body = (await response.json().catch(() => ({}))) as {
+          synced?: number;
+          classified?: number;
+          failed?: number;
+          error?: string;
+          code?: string;
+        };
         if (!response.ok) {
           trackPlausibleEvent("tower_google_workspace_sync_failed", {
             surface: "settings",
@@ -436,9 +446,24 @@ export function SettingsClient({
             status: "error",
             reason: String(response.status),
           });
+          setSyncDetail(
+            body.code === "GOOGLE_NOT_CONNECTED"
+              ? "Google workspace is not connected. Reconnect Gmail and Calendar."
+              : body.code === "GOOGLE_API_DISABLED"
+                ? "Tower's Google API access is not fully enabled yet. The owner needs to enable Gmail and Calendar APIs in Google Cloud."
+              : body.error ?? "The connection desk did not answer. Try again in a moment.",
+          );
           setSyncState("error");
           return;
         }
+        const synced = body.synced ?? 0;
+        const suffix =
+          kind === "gmail"
+            ? `, ${body.classified ?? 0} job-search signal${(body.classified ?? 0) === 1 ? "" : "s"} classified${body.failed ? `, ${body.failed} failed` : ""}`
+            : "";
+        setSyncDetail(
+          `${kind === "gmail" ? "Gmail" : "Calendar"} sync complete: ${synced} item${synced === 1 ? "" : "s"} updated${suffix}.`,
+        );
         setSyncState("done");
       } catch {
         trackPlausibleEvent("tower_google_workspace_sync_failed", {
@@ -447,6 +472,7 @@ export function SettingsClient({
           kind,
           status: "network_error",
         });
+        setSyncDetail("Network error. Try again in a moment.");
         setSyncState("error");
       }
     },
@@ -1632,7 +1658,9 @@ export function SettingsClient({
                     color: "rgba(220, 80, 80, 0.85)",
                   }}
                 >
-                  The connection desk did not answer. Try again in a moment.
+                  {syncState === "error" && syncDetail
+                    ? syncDetail
+                    : "The connection desk did not answer. Try again in a moment."}
                 </div>
               )}
               {syncState === "done" && (
@@ -1645,7 +1673,7 @@ export function SettingsClient({
                     color: "#C9A84C",
                   }}
                 >
-                  Sync requested. The Situation Room will update shortly.
+                  {syncDetail ?? "Sync complete. The Situation Room is up to date."}
                 </div>
               )}
             </div>

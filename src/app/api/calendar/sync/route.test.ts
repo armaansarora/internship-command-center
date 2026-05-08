@@ -34,6 +34,7 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 const { POST } = await import("./route");
+const { GoogleApiError } = await import("@/lib/google/api-error");
 
 const OK_AUTH = {
   ok: true as const,
@@ -95,7 +96,9 @@ describe("POST /api/calendar/sync", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("X-RateLimit-Limit")).toBe("10");
     await expect(res.json()).resolves.toEqual({ synced: 3 });
-    expect(syncCalendarSpy).toHaveBeenCalledWith("user-google");
+    expect(syncCalendarSpy).toHaveBeenCalledWith("user-google", {
+      useAdmin: true,
+    });
   });
 
   it("returns a clear 409 when Google is not connected", async () => {
@@ -128,6 +131,31 @@ describe("POST /api/calendar/sync", () => {
     });
     expect(logErrorSpy).toHaveBeenCalledWith(
       "calendar.sync.manual_failed",
+      err,
+      { userId: "user-google" },
+    );
+  });
+
+  it("returns provider-configuration guidance when the Calendar API is disabled", async () => {
+    const err = new GoogleApiError(
+      "calendar",
+      403,
+      "PERMISSION_DENIED",
+      "Google Calendar API has not been used in project 123 before or it is disabled.",
+    );
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    syncCalendarSpy.mockRejectedValue(err);
+
+    const res = await POST();
+
+    expect(res.status).toBe(503);
+    await expect(res.json()).resolves.toEqual({
+      error: "Google API access is not enabled for this Tower OAuth project.",
+      code: "GOOGLE_API_DISABLED",
+    });
+    expect(logErrorSpy).toHaveBeenCalledWith(
+      "calendar.sync.provider_disabled",
       err,
       { userId: "user-google" },
     );

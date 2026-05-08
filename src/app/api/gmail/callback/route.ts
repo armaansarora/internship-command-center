@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForTokens, storeGoogleTokens } from "@/lib/gmail/oauth";
+import { syncCalendarEvents } from "@/lib/calendar/sync";
+import { syncGmailForUser } from "@/lib/gmail/sync";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import type { GoogleTokens } from "@/lib/gmail/oauth";
 import {
@@ -158,6 +160,29 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // The `handle_user_profile_sensitive_fields` trigger blocks updates to
     // `google_tokens` from the `authenticated` role; use the admin client.
     await storeGoogleTokens(sessionUser.id, tokens, { useAdmin: true });
+
+    const [gmailSync, calendarSync] = await Promise.allSettled([
+      syncGmailForUser(sessionUser.id, { useAdmin: true }),
+      syncCalendarEvents(sessionUser.id, { useAdmin: true }),
+    ]);
+    if (gmailSync.status === "rejected" || calendarSync.status === "rejected") {
+      log.warn("gmail.oauth.initial_sync_failed", {
+        alert: true,
+        userId: sessionUser.id,
+        gmail:
+          gmailSync.status === "rejected"
+            ? gmailSync.reason instanceof Error
+              ? gmailSync.reason.message
+              : String(gmailSync.reason)
+            : "ok",
+        calendar:
+          calendarSync.status === "rejected"
+            ? calendarSync.reason instanceof Error
+              ? calendarSync.reason.message
+              : String(calendarSync.reason)
+            : "ok",
+      });
+    }
   } catch (err) {
     log.error("gmail.oauth.token_exchange_failed", err, {
       userId: sessionUser.id,

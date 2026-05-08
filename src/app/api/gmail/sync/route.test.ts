@@ -34,6 +34,7 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 const { POST } = await import("./route");
+const { GoogleApiError } = await import("@/lib/google/api-error");
 
 const OK_AUTH = {
   ok: true as const,
@@ -99,7 +100,9 @@ describe("POST /api/gmail/sync", () => {
       classified: 1,
       failed: 0,
     });
-    expect(syncGmailSpy).toHaveBeenCalledWith("user-google");
+    expect(syncGmailSpy).toHaveBeenCalledWith("user-google", {
+      useAdmin: true,
+    });
   });
 
   it("returns a clear 409 when Google is not connected", async () => {
@@ -132,6 +135,31 @@ describe("POST /api/gmail/sync", () => {
     });
     expect(logErrorSpy).toHaveBeenCalledWith(
       "gmail.sync.manual_failed",
+      err,
+      { userId: "user-google" },
+    );
+  });
+
+  it("returns provider-configuration guidance when the Gmail API is disabled", async () => {
+    const err = new GoogleApiError(
+      "gmail",
+      403,
+      "PERMISSION_DENIED",
+      "Gmail API has not been used in project 123 before or it is disabled.",
+    );
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    syncGmailSpy.mockRejectedValue(err);
+
+    const res = await POST();
+
+    expect(res.status).toBe(503);
+    await expect(res.json()).resolves.toEqual({
+      error: "Google API access is not enabled for this Tower OAuth project.",
+      code: "GOOGLE_API_DISABLED",
+    });
+    expect(logErrorSpy).toHaveBeenCalledWith(
+      "gmail.sync.provider_disabled",
       err,
       { userId: "user-google" },
     );

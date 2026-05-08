@@ -243,7 +243,11 @@ describe("SettingsClient connected services", () => {
   });
 
   it("requests Gmail and Calendar manual syncs from connected settings", async () => {
-    const fetchMock = installFetch(async () => jsonResponse({ queued: true }));
+    const fetchMock = installFetch(async (input) =>
+      String(input).includes("/api/gmail/sync")
+        ? jsonResponse({ synced: 2, classified: 1, failed: 0 })
+        : jsonResponse({ synced: 1 }),
+    );
     const mounted = mount(
       <SettingsClient {...BASE_PROPS} hasGoogleIntegration />,
     );
@@ -254,13 +258,58 @@ describe("SettingsClient connected services", () => {
       method: "POST",
     });
     expect(mounted.host.textContent ?? "").toContain(
-      "Sync requested. The Situation Room will update shortly.",
+      "Gmail sync complete: 2 items updated, 1 job-search signal classified.",
     );
 
     await click(findButton(mounted.host, /Sync Calendar/i));
     expect(fetchMock).toHaveBeenLastCalledWith("/api/calendar/sync", {
       method: "POST",
     });
+  });
+
+  it("surfaces a specific Google reconnect message when manual sync has no token", async () => {
+    installFetch(async () =>
+      jsonResponse(
+        {
+          error: "Google workspace is not connected.",
+          code: "GOOGLE_NOT_CONNECTED",
+        },
+        409,
+      ),
+    );
+    const mounted = mount(
+      <SettingsClient {...BASE_PROPS} hasGoogleIntegration />,
+    );
+    cleanups.push(mounted.unmount);
+
+    await click(findButton(mounted.host, /Sync Gmail/i));
+
+    expect(mounted.host.textContent ?? "").toContain(
+      "Google workspace is not connected. Reconnect Gmail and Calendar.",
+    );
+  });
+
+  it("surfaces Google provider setup failures from manual sync", async () => {
+    installFetch(async () =>
+      jsonResponse(
+        {
+          error:
+            "Google API access is not enabled for this Tower OAuth project.",
+          code: "GOOGLE_API_DISABLED",
+        },
+        503,
+      ),
+    );
+    const mounted = mount(
+      <SettingsClient {...BASE_PROPS} hasGoogleIntegration />,
+    );
+    cleanups.push(mounted.unmount);
+
+    await click(findButton(mounted.host, /Sync Calendar/i));
+
+    expect(mounted.host.textContent ?? "").toContain(
+      "Tower's Google API access is not fully enabled yet.",
+    );
   });
 
   it("disconnects Google and returns the settings row to the connect state", async () => {

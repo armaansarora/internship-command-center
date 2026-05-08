@@ -31,6 +31,10 @@ const EnvSchema = z.object({
   // never bundled to the client. Leave unset in dev/preview unless you want
   // god-tier locally too. Set in production only on your own account.
   OWNER_USER_ID: z.string().uuid().optional(),
+  // Optional comma/space/semicolon-separated owner UUID list. Useful when
+  // Google OAuth creates a second auth identity for the same real owner during
+  // launch migration; keep this server-only.
+  OWNER_USER_IDS: z.string().optional(),
 
   // ── Google OAuth (Gmail + Calendar) ──────────────────────────────────────
   GOOGLE_CLIENT_ID: z

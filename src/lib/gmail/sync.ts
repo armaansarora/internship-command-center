@@ -6,6 +6,7 @@ import {
   classifyEmail,
   matchEmailToApplication,
 } from "@/lib/gmail/parser";
+import { readGoogleApiError } from "@/lib/google/api-error";
 import { log } from "@/lib/logger";
 import type { GmailMessage } from "@/lib/gmail/parser";
 
@@ -47,7 +48,7 @@ async function fetchRecentMessageRefs(
   );
 
   if (!response.ok) {
-    throw new Error(`Gmail list error: ${response.status}`);
+    throw await readGoogleApiError("gmail", response);
   }
 
   const data = (await response.json()) as GmailMessageListResponse;
@@ -69,7 +70,7 @@ async function fetchMessageDetail(
   );
 
   if (!response.ok) {
-    throw new Error(`Gmail fetch error for ${messageId}: ${response.status}`);
+    throw await readGoogleApiError("gmail", response);
   }
 
   return response.json() as Promise<GmailMessage>;
