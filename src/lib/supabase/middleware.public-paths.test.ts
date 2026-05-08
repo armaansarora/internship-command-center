@@ -67,6 +67,22 @@ describe("isPathPublic — exact paths", () => {
     expect(isPathPublic("/api/auth/callback/extra")).toBe(false);
   });
 
+  it("matches /api/auth/google/start exactly", () => {
+    expect(isPathPublic("/api/auth/google/start")).toBe(true);
+  });
+
+  it("rejects /api/auth/google/start/extra", () => {
+    expect(isPathPublic("/api/auth/google/start/extra")).toBe(false);
+  });
+
+  it("matches /api/gmail/callback exactly", () => {
+    expect(isPathPublic("/api/gmail/callback")).toBe(true);
+  });
+
+  it("rejects /api/gmail/callback/extra", () => {
+    expect(isPathPublic("/api/gmail/callback/extra")).toBe(false);
+  });
+
   it("matches /api/stripe/webhook exactly", () => {
     expect(isPathPublic("/api/stripe/webhook")).toBe(true);
   });
