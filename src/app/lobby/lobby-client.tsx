@@ -6,6 +6,7 @@ import { LobbyBackground } from "@/components/world/LobbyBackground";
 import { Elevator } from "@/components/world/Elevator";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { gsap } from "@/lib/gsap-init";
+import { trackPlausibleEvent } from "@/lib/analytics/plausible";
 
 function authErrorMessage(code: string | undefined): string {
   switch (code) {
@@ -56,6 +57,15 @@ export function LobbyClient({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional SSR hydration handoff
     setIsReturningUser(hasPriorVisit);
   }, []);
+
+  useEffect(() => {
+    if (!initialError) return;
+    trackPlausibleEvent("tower_auth_sign_in_failed", {
+      surface: "lobby",
+      provider: "google",
+      reason: initialError,
+    });
+  }, [initialError]);
 
   // Mouse tracking for spotlight — rAF-throttled with translate3d for GPU layer (M1).
   // Disabled under reduced motion.
@@ -130,6 +140,10 @@ export function LobbyClient({
   const handleSignIn = useCallback(async () => {
     setError(null);
     setIsAuthenticating(true);
+    trackPlausibleEvent("tower_auth_sign_in_started", {
+      surface: "lobby",
+      provider: "google",
+    });
     try {
       const next = new URLSearchParams(window.location.search).get("next");
       const authPath = next
@@ -143,13 +157,28 @@ export function LobbyClient({
       };
 
       if (!result.ok || !payload.authUrl) {
+        trackPlausibleEvent("tower_auth_sign_in_failed", {
+          surface: "lobby",
+          provider: "google",
+          status: "error",
+          reason: payload.error ?? String(result.status),
+        });
         setError(authErrorMessage(payload.error));
         setIsAuthenticating(false);
         return;
       }
 
+      trackPlausibleEvent("tower_auth_sign_in_redirect", {
+        surface: "lobby",
+        provider: "google",
+      });
       window.location.assign(payload.authUrl);
     } catch {
+      trackPlausibleEvent("tower_auth_sign_in_failed", {
+        surface: "lobby",
+        provider: "google",
+        status: "network_error",
+      });
       setError("Google sign-in could not start. Try again.");
       setIsAuthenticating(false);
     }

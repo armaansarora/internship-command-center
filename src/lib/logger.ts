@@ -1,4 +1,5 @@
 import { isProd } from "./env";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * Structured logger. Thin wrapper over console so Vercel/Sentry pick up
@@ -45,6 +46,87 @@ function redact(value: unknown, depth = 0): unknown {
     }
   }
   return out;
+}
+
+function sanitizeSentryValue(value: unknown, key = "", depth = 0): unknown {
+  if (depth > 4) return "[depth-limit]";
+  const lower = key.toLowerCase();
+  if (
+    lower.includes("password") ||
+    lower.includes("secret") ||
+    lower.includes("token") ||
+    lower.includes("cookie") ||
+    lower.includes("authorization")
+  ) {
+    return "[redacted]";
+  }
+  if (
+    lower.includes("email") ||
+    lower.includes("body") ||
+    lower.includes("content") ||
+    lower.includes("prompt") ||
+    lower.includes("transcript") ||
+    lower.includes("notes") ||
+    lower.includes("profile") ||
+    lower.includes("resume") ||
+    lower.includes("text") ||
+    lower.includes("html") ||
+    lower.includes("payload")
+  ) {
+    return "[omitted]";
+  }
+  if (value == null) return value;
+  if (typeof value === "string") {
+    if (/^sk-|^whsec_|^rk_|^Bearer\s+/i.test(value)) return "[redacted]";
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) return "[omitted]";
+    return value.length > 300 ? `${value.slice(0, 300)}…` : value;
+  }
+  if (typeof value !== "object") return value;
+  if (Array.isArray(value)) {
+    return value.slice(0, 20).map((item) => sanitizeSentryValue(item, key, depth + 1));
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const [childKey, childValue] of Object.entries(value as Record<string, unknown>)) {
+    if (childKey === "alert" || childKey === "sentry") continue;
+    out[childKey] = sanitizeSentryValue(childValue, childKey, depth + 1);
+  }
+  return out;
+}
+
+function sentryExtra(fields: LogFields): LogFields {
+  return sanitizeSentryValue(fields) as LogFields;
+}
+
+function captureSentry(
+  level: "warning" | "error",
+  msg: string,
+  err: unknown,
+  fields: LogFields,
+): void {
+  if (!isProd()) return;
+  try {
+    const context = {
+      level,
+      tags: { event: msg },
+      extra: sentryExtra(fields),
+    };
+    if (level === "error") {
+      if (err instanceof Error) {
+        Sentry.captureException(err, context);
+      } else {
+        Sentry.captureMessage(msg, context);
+      }
+      return;
+    }
+    Sentry.captureMessage(msg, context);
+  } catch {
+    // Logging must never become the source of a production failure.
+  }
+}
+
+function shouldAlert(fields: LogFields): boolean {
+  return fields.alert === true || fields.sentry === true;
 }
 
 function emit(payload: LogPayload): void {
@@ -104,14 +186,17 @@ export const log = {
     emit({ level: "info", msg, ts: new Date().toISOString(), fields });
   },
   warn(msg: string, fields: LogFields = {}): void {
+    if (shouldAlert(fields)) captureSentry("warning", msg, undefined, fields);
     emit({ level: "warn", msg, ts: new Date().toISOString(), fields });
   },
   error(msg: string, err?: unknown, fields: LogFields = {}): void {
+    const allFields = { ...fields, ...(err === undefined ? {} : serialiseError(err)) };
+    captureSentry("error", msg, err, err instanceof Error ? fields : allFields);
     emit({
       level: "error",
       msg,
       ts: new Date().toISOString(),
-      fields: { ...fields, ...(err === undefined ? {} : serialiseError(err)) },
+      fields: allFields,
     });
   },
 };

@@ -180,6 +180,7 @@ describe("GET /api/gmail/callback", () => {
     );
     expectClearedStateCookie(res);
     expect(logWarnSpy).toHaveBeenCalledWith("gmail.oauth.missing_state_cookie", {
+      alert: true,
       userId: "session-user",
     });
     expect(exchangeCodeSpy).not.toHaveBeenCalled();

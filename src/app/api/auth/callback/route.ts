@@ -41,15 +41,20 @@ export async function GET(request: Request) {
       }
       return NextResponse.redirect(new URL(next, origin).toString());
     }
-    log.warn("auth.callback.exchange_failed", { error: error.message });
     const errorCode = isRestartableSupabaseAuthError(error.message)
       ? "auth_restart_required"
       : isTransientSupabaseAuthError(error.message)
       ? "auth_unavailable"
       : "auth_failed";
+    log.warn("auth.callback.exchange_failed", {
+      alert: true,
+      errorCode,
+      reason: error.message,
+    });
     return NextResponse.redirect(`${origin}/lobby?error=${errorCode}`);
   }
 
+  log.warn("auth.callback.missing_code", { alert: true });
   return NextResponse.redirect(`${origin}/lobby?error=auth_failed`);
 }
 

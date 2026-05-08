@@ -8,6 +8,8 @@ import {
   NetworkingAudit,
   type MatchEvent,
 } from "@/components/settings/NetworkingAudit";
+import { trackPlausibleEvent } from "@/lib/analytics/plausible";
+import type { ProductionHealthSummary } from "@/lib/observability/production-health";
 
 interface SettingsClientProps {
   userName: string | null;
@@ -48,6 +50,8 @@ interface SettingsClientProps {
    * presentational.
    */
   matchEvents?: MatchEvent[];
+  /** Owner-only production launch health summary. Null for normal users. */
+  productionHealth?: ProductionHealthSummary | null;
 }
 
 /**
@@ -88,6 +92,16 @@ function formatDeletionDate(deletedAtIso: string): string {
   });
 }
 
+function formatHealthTime(value: string | null): string {
+  if (!value) return "Never";
+  return new Date(value).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 /**
  * SettingsClient — account management and preferences.
  *
@@ -113,6 +127,7 @@ export function SettingsClient({
   rejectionReflectionsEnabled = true,
   ceoVoiceEnabled = false,
   matchEvents = [],
+  productionHealth = null,
 }: SettingsClientProps): JSX.Element {
   const displayName = userName ?? userEmail.split("@")[0];
   const initial = displayName[0]?.toUpperCase() ?? "?";
@@ -309,6 +324,10 @@ export function SettingsClient({
   }, []);
 
   const handleSignOut = useCallback(() => {
+    trackPlausibleEvent("tower_sign_out_started", {
+      surface: "settings",
+      action: "sign_out",
+    });
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "/api/auth/signout";
@@ -319,32 +338,66 @@ export function SettingsClient({
   const handleConnectGoogle = useCallback(async () => {
     setGoogleConnectState("loading");
     setGoogleDisconnectState("idle");
+    trackPlausibleEvent("tower_google_workspace_connect_started", {
+      surface: "settings",
+      provider: "google",
+    });
     try {
       const response = await fetch("/api/gmail/auth?next=/settings", {
         method: "GET",
       });
       if (!response.ok) {
+        trackPlausibleEvent("tower_google_workspace_connect_failed", {
+          surface: "settings",
+          provider: "google",
+          status: "error",
+          reason: String(response.status),
+        });
         setGoogleConnectState("error");
         return;
       }
       const body = (await response.json()) as { authUrl?: string };
       if (!body.authUrl) {
+        trackPlausibleEvent("tower_google_workspace_connect_failed", {
+          surface: "settings",
+          provider: "google",
+          status: "missing_url",
+        });
         setGoogleConnectState("error");
         return;
       }
+      trackPlausibleEvent("tower_google_workspace_connect_redirect", {
+        surface: "settings",
+        provider: "google",
+      });
       window.location.href = body.authUrl;
     } catch {
+      trackPlausibleEvent("tower_google_workspace_connect_failed", {
+        surface: "settings",
+        provider: "google",
+        status: "network_error",
+      });
       setGoogleConnectState("error");
     }
   }, []);
 
   const handleDisconnectGoogle = useCallback(async () => {
     setGoogleDisconnectState("loading");
+    trackPlausibleEvent("tower_google_workspace_disconnect_requested", {
+      surface: "settings",
+      provider: "google",
+    });
     try {
       const response = await fetch("/api/gmail/disconnect", {
         method: "POST",
       });
       if (!response.ok) {
+        trackPlausibleEvent("tower_google_workspace_disconnect_failed", {
+          surface: "settings",
+          provider: "google",
+          status: "error",
+          reason: String(response.status),
+        });
         setGoogleDisconnectState("error");
         return;
       }
@@ -353,6 +406,11 @@ export function SettingsClient({
       setGoogleDisconnectState("idle");
       setGoogleConnectState("idle");
     } catch {
+      trackPlausibleEvent("tower_google_workspace_disconnect_failed", {
+        surface: "settings",
+        provider: "google",
+        status: "network_error",
+      });
       setGoogleDisconnectState("error");
     }
   }, []);
@@ -360,13 +418,35 @@ export function SettingsClient({
   const handleSyncGoogle = useCallback(
     async (kind: "gmail" | "calendar") => {
       setSyncState(kind);
+      trackPlausibleEvent("tower_google_workspace_sync_requested", {
+        surface: "settings",
+        provider: "google",
+        kind,
+      });
       try {
         const response = await fetch(
           kind === "gmail" ? "/api/gmail/sync" : "/api/calendar/sync",
           { method: "POST" },
         );
-        setSyncState(response.ok ? "done" : "error");
+        if (!response.ok) {
+          trackPlausibleEvent("tower_google_workspace_sync_failed", {
+            surface: "settings",
+            provider: "google",
+            kind,
+            status: "error",
+            reason: String(response.status),
+          });
+          setSyncState("error");
+          return;
+        }
+        setSyncState("done");
       } catch {
+        trackPlausibleEvent("tower_google_workspace_sync_failed", {
+          surface: "settings",
+          provider: "google",
+          kind,
+          status: "network_error",
+        });
         setSyncState("error");
       }
     },
@@ -376,25 +456,49 @@ export function SettingsClient({
   const handleBillingPortal = useCallback(async () => {
     setBillingLoading(true);
     setBillingError(null);
+    trackPlausibleEvent("tower_billing_portal_started", {
+      surface: "settings",
+      tier: subscriptionTier,
+    });
     try {
       const response = await fetch("/api/stripe/portal", { method: "POST" });
       if (!response.ok) {
+        trackPlausibleEvent("tower_billing_portal_failed", {
+          surface: "settings",
+          tier: subscriptionTier,
+          status: "error",
+          reason: String(response.status),
+        });
         setBillingError(BILLING_PORTAL_ERROR);
         setBillingLoading(false);
         return;
       }
       const data = (await response.json()) as { url?: string };
       if (data.url) {
+        trackPlausibleEvent("tower_billing_portal_redirect", {
+          surface: "settings",
+          tier: subscriptionTier,
+        });
         window.location.href = data.url;
       } else {
+        trackPlausibleEvent("tower_billing_portal_failed", {
+          surface: "settings",
+          tier: subscriptionTier,
+          status: "missing_url",
+        });
         setBillingError(BILLING_PORTAL_ERROR);
         setBillingLoading(false);
       }
     } catch {
+      trackPlausibleEvent("tower_billing_portal_failed", {
+        surface: "settings",
+        tier: subscriptionTier,
+        status: "network_error",
+      });
       setBillingError(BILLING_PORTAL_ERROR);
       setBillingLoading(false);
     }
-  }, []);
+  }, [subscriptionTier]);
 
   return (
     <div
@@ -480,6 +584,165 @@ export function SettingsClient({
           -&gt;
         </span>
       </a>
+
+      {productionHealth && (
+        <section className="w-full" aria-labelledby="section-production-health">
+          <h2
+            id="section-production-health"
+            className="mb-4"
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "10px",
+              color: "var(--gold)",
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+            }}
+          >
+            Production health
+          </h2>
+          <div
+            className="rounded-xl p-5"
+            style={{
+              background: "rgba(10, 12, 25, 0.65)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border:
+                productionHealth.status === "attention"
+                  ? "1px solid rgba(220, 80, 80, 0.35)"
+                  : "1px solid rgba(201, 168, 76, 0.1)",
+              boxShadow:
+                "0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div
+                  style={{
+                    fontFamily: "'Playfair Display', serif",
+                    fontSize: "18px",
+                    fontWeight: 700,
+                    color:
+                      productionHealth.status === "attention"
+                        ? "rgba(248, 113, 113, 0.95)"
+                        : "var(--text-primary)",
+                  }}
+                >
+                  {productionHealth.status === "attention"
+                    ? "Needs attention"
+                    : "All clear"}
+                </div>
+                <div
+                  className="mt-1"
+                  style={{
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontSize: "13px",
+                    color: "var(--text-muted)",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {productionHealth.cron.configuredJobs} scheduled jobs tracked.
+                  {productionHealth.stripe.failedRecent.length > 0
+                    ? ` ${productionHealth.stripe.failedRecent.length} Stripe webhook failure${productionHealth.stripe.failedRecent.length === 1 ? "" : "s"} need review.`
+                    : " No failed Stripe webhooks in the recent window."}
+                </div>
+              </div>
+            </div>
+
+            {(productionHealth.cron.failingJobs.length > 0 ||
+              productionHealth.cron.staleJobs.length > 0) && (
+              <div className="mt-4 grid gap-2">
+                {[
+                  ...productionHealth.cron.failingJobs,
+                  ...productionHealth.cron.staleJobs,
+                ]
+                  .slice(0, 6)
+                  .map((job) => (
+                    <div
+                      key={`${job.jobName}-${job.startedAt ?? "missing"}`}
+                      className="flex items-start justify-between gap-4 rounded-lg px-3 py-2"
+                      style={{
+                        background: "rgba(220, 80, 80, 0.08)",
+                        border: "1px solid rgba(220, 80, 80, 0.14)",
+                      }}
+                    >
+                      <div className="min-w-0">
+                        <div
+                          style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: "11px",
+                            color: "var(--text-primary)",
+                          }}
+                        >
+                          {job.jobName}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "'Satoshi', sans-serif",
+                            fontSize: "12px",
+                            color: "var(--text-muted)",
+                            lineHeight: 1.45,
+                          }}
+                        >
+                          {job.errorMessage ??
+                            (job.stale
+                              ? "No recent successful run recorded."
+                              : "Cron failed.")}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: "10px",
+                          color: "var(--text-muted)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {formatHealthTime(job.startedAt)}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {productionHealth.stripe.failedRecent.length > 0 && (
+              <div className="mt-4 grid gap-2">
+                {productionHealth.stripe.failedRecent.slice(0, 4).map((event) => (
+                  <div
+                    key={event.eventId}
+                    className="rounded-lg px-3 py-2"
+                    style={{
+                      background: "rgba(201, 168, 76, 0.07)",
+                      border: "1px solid rgba(201, 168, 76, 0.14)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: "11px",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      Stripe webhook failure · {event.type}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "'Satoshi', sans-serif",
+                        fontSize: "12px",
+                        color: "var(--text-muted)",
+                        lineHeight: 1.45,
+                        marginTop: "2px",
+                      }}
+                    >
+                      {event.error ?? "No handler error recorded."} ·{" "}
+                      {formatHealthTime(event.receivedAt)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── Section 1: Profile ── */}
       <section className="w-full" aria-labelledby="section-profile">

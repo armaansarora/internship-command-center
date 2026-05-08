@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CinematicArrival } from "@/components/lobby/cinematic/CinematicArrival";
 import type { TargetProfile } from "@/lib/agents/cro/target-profile";
+import { trackPlausibleEvent } from "@/lib/analytics/plausible";
 import { claimArrivalPlayAction } from "./actions";
 
 interface ConciergeFlowProps {
@@ -98,6 +99,15 @@ export function ConciergeFlow({
     };
   }, [phase]);
 
+  useEffect(() => {
+    if (phase !== "concierge") return;
+    trackPlausibleEvent("tower_onboarding_started", {
+      surface: "lobby",
+      mode,
+      phase,
+    });
+  }, [mode, phase]);
+
   const canSubmit =
     intake.roles.trim().length > 0 &&
     intake.locations.trim().length > 0 &&
@@ -139,7 +149,7 @@ export function ConciergeFlow({
     if (!canSubmit) return;
     setPhase("finishing");
     try {
-      await fetch("/api/concierge/extract", {
+      const response = await fetch("/api/concierge/extract", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -149,49 +159,98 @@ export function ConciergeFlow({
           profile: buildTargetProfile(intake),
         }),
       });
-      window.localStorage.removeItem(DRAFT_KEY);
+      if (!response.ok) {
+        trackPlausibleEvent("tower_onboarding_submitted", {
+          surface: "lobby",
+          mode,
+          status: "error",
+          reason: String(response.status),
+        });
+        saveDraft();
+      } else {
+        trackPlausibleEvent("tower_onboarding_submitted", {
+          surface: "lobby",
+          mode,
+          status: "ok",
+        });
+        window.localStorage.removeItem(DRAFT_KEY);
+      }
     } catch {
+      trackPlausibleEvent("tower_onboarding_submitted", {
+        surface: "lobby",
+        mode,
+        status: "network_error",
+      });
       saveDraft();
     }
 
     await fireBootstrap();
     setPhase("redirecting");
     router.push("/penthouse");
-  }, [canSubmit, intake, router, saveDraft]);
+  }, [canSubmit, intake, mode, router, saveDraft]);
 
   const handleSkip = useCallback(async () => {
     setPhase("finishing");
     try {
-      await fetch("/api/concierge/extract", {
+      const response = await fetch("/api/concierge/extract", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ turns: [], skip: true }),
       });
+      trackPlausibleEvent("tower_onboarding_skipped", {
+        surface: "lobby",
+        mode,
+        status: response.ok ? "ok" : "error",
+        reason: response.ok ? undefined : String(response.status),
+      });
     } catch {
+      trackPlausibleEvent("tower_onboarding_skipped", {
+        surface: "lobby",
+        mode,
+        status: "network_error",
+      });
       // The Penthouse has safe empty states if this network call misses.
     }
     await fireBootstrap();
     setPhase("redirecting");
     router.push("/penthouse");
-  }, [router]);
+  }, [mode, router]);
 
   const handleConnectGoogle = useCallback(async () => {
     setGoogleState("loading");
+    trackPlausibleEvent("tower_onboarding_google_connect_started", {
+      surface: "lobby",
+      mode,
+      provider: "google",
+    });
     try {
       const response = await fetch("/api/gmail/auth?next=/lobby/onboarding", {
         method: "GET",
       });
       const body = (await response.json().catch(() => ({}))) as { authUrl?: string };
       if (!response.ok || !body.authUrl) {
+        trackPlausibleEvent("tower_onboarding_google_connect_failed", {
+          surface: "lobby",
+          mode,
+          provider: "google",
+          status: !response.ok ? "error" : "missing_url",
+          reason: !response.ok ? String(response.status) : undefined,
+        });
         setGoogleState("error");
         return;
       }
       saveDraft();
       window.location.href = body.authUrl;
     } catch {
+      trackPlausibleEvent("tower_onboarding_google_connect_failed", {
+        surface: "lobby",
+        mode,
+        provider: "google",
+        status: "network_error",
+      });
       setGoogleState("error");
     }
-  }, [saveDraft]);
+  }, [mode, saveDraft]);
 
   return (
     <div
@@ -884,9 +943,26 @@ function networkingPhrase(value: IntakeState["networkingComfort"]): string {
 }
 
 async function fireBootstrap(): Promise<void> {
+  trackPlausibleEvent("tower_onboarding_bootstrap_requested", {
+    surface: "lobby",
+    action: "bootstrap",
+  });
   try {
-    await fetch("/api/onboarding/bootstrap-discovery", { method: "POST" });
+    const response = await fetch("/api/onboarding/bootstrap-discovery", { method: "POST" });
+    if (!response.ok) {
+      trackPlausibleEvent("tower_onboarding_bootstrap_failed", {
+        surface: "lobby",
+        action: "bootstrap",
+        status: "error",
+        reason: String(response.status),
+      });
+    }
   } catch {
+    trackPlausibleEvent("tower_onboarding_bootstrap_failed", {
+      surface: "lobby",
+      action: "bootstrap",
+      status: "network_error",
+    });
     // Scheduled discovery can recover later.
   }
 }

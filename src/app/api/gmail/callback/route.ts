@@ -89,12 +89,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   };
 
   if (errorParam) {
+    log.warn("gmail.oauth.provider_denied", {
+      alert: true,
+      userId: sessionUser.id,
+      reason: errorParam,
+    });
     return clearCookie(
       NextResponse.redirect(new URL("/situation-room?error=oauth_denied", origin))
     );
   }
 
   if (!code || !state) {
+    log.warn("gmail.oauth.missing_params", {
+      alert: true,
+      userId: sessionUser.id,
+      missingCode: !code,
+      missingState: !state,
+    });
     return clearCookie(
       NextResponse.redirect(new URL("/situation-room?error=missing_params", origin))
     );
@@ -102,7 +113,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const nonceCookie = gmailStateCookie;
   if (!nonceCookie) {
-    log.warn("gmail.oauth.missing_state_cookie", { userId: sessionUser.id });
+    log.warn("gmail.oauth.missing_state_cookie", {
+      alert: true,
+      userId: sessionUser.id,
+    });
     return clearCookie(
       NextResponse.redirect(new URL("/situation-room?error=missing_state", origin))
     );
@@ -111,6 +125,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const verification = verifyOAuthState(state, nonceCookie);
   if (!verification.ok) {
     log.warn("gmail.oauth.invalid_state", {
+      alert: true,
       userId: sessionUser.id,
       reason: verification.reason,
     });
@@ -183,16 +198,26 @@ async function handleLoginCallback(args: {
     clearCookie(NextResponse.redirect(new URL(`/lobby?error=${error}`, args.origin)));
 
   if (args.errorParam) {
+    log.warn("auth.google_login.provider_denied", {
+      alert: true,
+      reason: args.errorParam,
+    });
     return lobbyError("auth_failed");
   }
 
   if (!args.code || !args.state) {
+    log.warn("auth.google_login.missing_params", {
+      alert: true,
+      missingCode: !args.code,
+      missingState: !args.state,
+    });
     return lobbyError("auth_failed");
   }
 
   const verification = verifyGoogleLoginState(args.state, args.stateCookie);
   if (!verification.ok) {
     log.warn("auth.google_login.invalid_state", {
+      alert: true,
       reason: verification.reason,
     });
     return lobbyError("auth_failed");
@@ -209,6 +234,7 @@ async function handleLoginCallback(args: {
 
     if (error) {
       log.warn("auth.google_login.supabase_exchange_failed", {
+        alert: true,
         error: error.message,
       });
       return lobbyError(

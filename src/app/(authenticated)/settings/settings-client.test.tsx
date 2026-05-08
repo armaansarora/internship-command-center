@@ -24,6 +24,56 @@ const BASE_PROPS = {
   matchEvents: [],
 };
 
+const ATTENTION_HEALTH = {
+  status: "attention" as const,
+  cron: {
+    configuredJobs: 14,
+    lastRuns: [
+      {
+        jobName: "sync",
+        startedAt: "2026-05-08T12:00:00.000Z",
+        finishedAt: "2026-05-08T12:00:01.000Z",
+        success: true,
+        durationMs: 1000,
+        errorMessage: null,
+        stale: false,
+      },
+      {
+        jobName: "briefing",
+        startedAt: "2026-05-08T13:00:00.000Z",
+        finishedAt: "2026-05-08T13:00:03.000Z",
+        success: false,
+        durationMs: 3000,
+        errorMessage: "Provider 503",
+        stale: false,
+      },
+    ],
+    staleJobs: [],
+    failingJobs: [
+      {
+        jobName: "briefing",
+        startedAt: "2026-05-08T13:00:00.000Z",
+        finishedAt: "2026-05-08T13:00:03.000Z",
+        success: false,
+        durationMs: 3000,
+        errorMessage: "Provider 503",
+        stale: false,
+      },
+    ],
+  },
+  stripe: {
+    failedRecent: [
+      {
+        eventId: "evt_failed",
+        type: "checkout.session.completed",
+        receivedAt: "2026-05-08T14:00:00.000Z",
+        status: "failed",
+        error: "Failed to persist checkout tier",
+      },
+    ],
+  },
+};
+
 interface Mounted {
   host: HTMLDivElement;
   root: Root;
@@ -219,6 +269,33 @@ describe("SettingsClient connected services", () => {
       "Connect Gmail and Calendar",
     );
     expect(mounted.host.textContent ?? "").not.toContain("Sync Gmail");
+  });
+});
+
+describe("SettingsClient production health", () => {
+  it("renders owner-only production alerts when health needs attention", () => {
+    const html = renderToStaticMarkup(
+      <SettingsClient
+        {...BASE_PROPS}
+        hasGoogleIntegration={false}
+        productionHealth={ATTENTION_HEALTH}
+      />,
+    );
+
+    expect(html).toContain("Production health");
+    expect(html).toContain("Needs attention");
+    expect(html).toContain("briefing");
+    expect(html).toContain("Provider 503");
+    expect(html).toContain("checkout.session.completed");
+    expect(html).not.toContain("customer_email");
+  });
+
+  it("hides production health from normal users", () => {
+    const html = renderToStaticMarkup(
+      <SettingsClient {...BASE_PROPS} hasGoogleIntegration={false} />,
+    );
+
+    expect(html).not.toContain("Production health");
   });
 });
 

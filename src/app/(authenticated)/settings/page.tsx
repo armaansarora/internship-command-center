@@ -6,6 +6,7 @@ import { getSubscriptionTier } from "@/lib/stripe/server";
 import { createClient } from "@/lib/supabase/server";
 import { readRejectionReflectionsPref } from "@/lib/preferences/rejection-reflections-pref";
 import { readCeoVoicePref } from "@/lib/preferences/ceo-voice-pref";
+import { readProductionHealthSummary } from "@/lib/observability/production-health";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -22,7 +23,13 @@ export const metadata: Metadata = { title: "Settings" };
 export default async function SettingsPage() {
   const user = await requireUser();
 
-  const [subscriptionTier, appsCountResult, profileData, matchEventsData] = await Promise.all([
+  const [
+    subscriptionTier,
+    appsCountResult,
+    profileData,
+    matchEventsData,
+    productionHealth,
+  ] = await Promise.all([
     getSubscriptionTier(user.id),
     (async () => {
       const supabase = await createClient();
@@ -69,6 +76,7 @@ export default async function SettingsPage() {
         matchReason: r.match_reason as string,
       }));
     })(),
+    readProductionHealthSummary(user.id),
   ]);
 
   const rejectionReflectionsPref = readRejectionReflectionsPref(
@@ -92,6 +100,7 @@ export default async function SettingsPage() {
         rejectionReflectionsEnabled={rejectionReflectionsPref.enabled}
         ceoVoiceEnabled={ceoVoicePref.enabled}
         matchEvents={matchEventsData}
+        productionHealth={productionHealth}
       />
     </FloorShell>
   );

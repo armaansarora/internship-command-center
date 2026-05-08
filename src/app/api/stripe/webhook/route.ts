@@ -90,6 +90,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const signature = request.headers.get("stripe-signature");
   if (!signature) {
+    log.warn("stripe.webhook.signature_missing", { alert: true });
     return NextResponse.json(
       { error: "Missing stripe-signature header" },
       { status: 400 },
@@ -106,9 +107,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
   } catch (err) {
     if (err instanceof WebhookBodyError) {
+      log.warn("stripe.webhook.body_invalid", {
+        alert: true,
+        status: err.status,
+        reason: err.message,
+      });
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     log.warn("stripe.webhook.signature_verification_failed", {
+      alert: true,
       error: err instanceof Error ? err.message : String(err),
     });
     return NextResponse.json(

@@ -271,6 +271,14 @@ export function createAgentRouteHandler<Context>(
         .join(",");
 
       // Persist token + cost row for the CFO floor. Fire-and-forget.
+      if (finishReason === "error") {
+        log.error("agent.finish_failed", new Error("Agent stream finished with error"), {
+          agent: agentKey,
+          userId: user.id,
+          toolNames,
+        });
+      }
+
       void recordAgentRun({
         userId: user.id,
         agent: agentKey,
@@ -280,6 +288,7 @@ export function createAgentRouteHandler<Context>(
         durationMs,
         inputSummary: userMessageText.slice(0, 500),
         outputSummary: text.slice(0, 500),
+        error: finishReason === "error" ? "stream_finish_error" : null,
         status: finishReason === "error" ? "failed" : "completed",
       });
 
