@@ -84,6 +84,22 @@ export async function updateSession(request: NextRequest) {
   // Path only — never log the full request (privacy + log volume).
   log.debug("middleware.updateSession", { path: request.nextUrl.pathname });
 
+  const authCookieBaseName = getSupabaseAuthCookieBaseName();
+  if (hasMalformedAuthCookie(request.cookies.getAll(), authCookieBaseName)) {
+    log.warn("middleware.malformed_auth_cookie", {
+      path: request.nextUrl.pathname,
+    });
+    const response = !isPathPublic(request.nextUrl.pathname)
+      ? (() => {
+          const url = request.nextUrl.clone();
+          url.pathname = "/lobby";
+          return NextResponse.redirect(url);
+        })()
+      : NextResponse.next({ request });
+    clearAuthCookies(response, authCookieBaseName);
+    return response;
+  }
+
   const supabase = createServerClient(
     requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
     requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
@@ -107,10 +123,11 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Refresh session — this is critical for token refresh to work
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Refresh session — this is critical for token refresh to work. Supabase
+  // Auth can occasionally return a non-JSON edge error; treat that as no
+  // reliable session so public routes still render and private routes fall
+  // back to the Lobby instead of hanging on the loading shell.
+  const user = await readMiddlewareUser(supabase, request.nextUrl.pathname);
 
   if (!user && !isPathPublic(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
@@ -134,6 +151,80 @@ export async function updateSession(request: NextRequest) {
   }
 
   return supabaseResponse;
+}
+
+function getSupabaseAuthCookieBaseName(): string {
+  const url = new URL(requireEnv("NEXT_PUBLIC_SUPABASE_URL"));
+  const projectRef = url.hostname.split(".")[0] ?? "localhost";
+  return `sb-${projectRef}-auth-token`;
+}
+
+function hasMalformedAuthCookie(
+  cookies: Array<{ name: string; value: string }>,
+  baseName: string,
+): boolean {
+  const value = readAuthCookieValue(cookies, baseName);
+  if (!value) return false;
+  try {
+    const decoded = value.startsWith("base64-")
+      ? decodeBase64Url(value.slice("base64-".length))
+      : value;
+    const parsed = JSON.parse(decoded) as unknown;
+    return !parsed || typeof parsed !== "object" || Array.isArray(parsed);
+  } catch {
+    return true;
+  }
+}
+
+function readAuthCookieValue(
+  cookies: Array<{ name: string; value: string }>,
+  baseName: string,
+): string | null {
+  const exact = cookies.find((cookie) => cookie.name === baseName);
+  if (exact) return exact.value;
+
+  const chunks: string[] = [];
+  for (let i = 0; i < 5; i += 1) {
+    const chunk = cookies.find((cookie) => cookie.name === `${baseName}.${i}`);
+    if (!chunk) break;
+    chunks.push(chunk.value);
+  }
+  return chunks.length > 0 ? chunks.join("") : null;
+}
+
+function decodeBase64Url(value: string): string {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(
+    normalized.length + ((4 - (normalized.length % 4)) % 4),
+    "=",
+  );
+  return atob(padded);
+}
+
+function clearAuthCookies(response: NextResponse, baseName: string): void {
+  const options = { path: "/", maxAge: 0 };
+  response.cookies.set(baseName, "", options);
+  for (let i = 0; i < 5; i += 1) {
+    response.cookies.set(`${baseName}.${i}`, "", options);
+  }
+}
+
+async function readMiddlewareUser(
+  supabase: ReturnType<typeof createServerClient>,
+  pathname: string,
+) {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  } catch (err) {
+    log.warn("middleware.auth_get_user_failed", {
+      path: pathname,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
 }
 
 /** Match `/lobby` and `/lobby/` — not nested sub-paths. */

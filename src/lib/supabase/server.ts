@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { log } from "@/lib/logger";
 
 /**
  * Read a required env var with a readable error if it's missing. Replaces the
@@ -53,8 +54,15 @@ export async function createClient() {
  */
 export const getUser = cache(async () => {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  } catch (err) {
+    log.warn("supabase.auth_get_user_failed", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
 });
 
 /**

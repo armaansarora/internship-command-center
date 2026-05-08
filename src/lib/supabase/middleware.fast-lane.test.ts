@@ -26,10 +26,18 @@ type ProfileRow = {
   last_floor_visited: string | null;
 };
 
-function mkClient(user: { id: string } | null, profile: ProfileRow | null, profileErr = false) {
+function mkClient(
+  user: { id: string } | null,
+  profile: ProfileRow | null,
+  profileErr = false,
+  authErr = false,
+) {
   return {
     auth: {
-      getUser: async () => ({ data: { user } }),
+      getUser: async () => {
+        if (authErr) throw new Error("Supabase Auth returned HTML");
+        return { data: { user } };
+      },
     },
     from: () => ({
       select: () => ({
@@ -54,8 +62,10 @@ process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "test-key";
 
 import { updateSession } from "./middleware";
 
-function request(url: string): NextRequest {
-  return new NextRequest(new URL(url));
+function request(url: string, cookie?: string): NextRequest {
+  return new NextRequest(new URL(url), {
+    headers: cookie ? { cookie } : undefined,
+  });
 }
 
 describe("R4.9 returning-user fast lane", () => {
@@ -111,6 +121,42 @@ describe("R4.9 returning-user fast lane", () => {
     );
     const res = await updateSession(request("http://localhost/lobby"));
     expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("fails open on public routes when Supabase Auth returns a non-JSON edge error", async () => {
+    nextMockClient = mkClient(null, null, false, true);
+    const res = await updateSession(request("http://localhost/lobby"));
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("redirects protected routes to the lobby when Supabase Auth cannot verify the session", async () => {
+    nextMockClient = mkClient(null, null, false, true);
+    const res = await updateSession(request("http://localhost/settings"));
+    expect(res.headers.get("location")).toContain("/lobby");
+  });
+
+  it("clears malformed auth cookies on public routes before Supabase SSR can recover them", async () => {
+    nextMockClient = mkClient({ id: "should-not-read" }, null, false, true);
+    const res = await updateSession(
+      request(
+        "http://localhost/lobby",
+        "sb-supabase-auth-token=base64-bm90LWpzb24",
+      ),
+    );
+    expect(res.headers.get("location")).toBeNull();
+    expect(res.cookies.get("sb-supabase-auth-token")?.value).toBe("");
+  });
+
+  it("redirects protected routes with malformed auth cookies and clears the stale session", async () => {
+    nextMockClient = mkClient({ id: "should-not-read" }, null, false, true);
+    const res = await updateSession(
+      request(
+        "http://localhost/settings",
+        "sb-supabase-auth-token=base64-bm90LWpzb24",
+      ),
+    );
+    expect(res.headers.get("location")).toContain("/lobby");
+    expect(res.cookies.get("sb-supabase-auth-token")?.value).toBe("");
   });
 
   it("does not fast-lane when path is not the lobby root (e.g. /penthouse)", async () => {
