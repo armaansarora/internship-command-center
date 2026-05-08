@@ -8,6 +8,18 @@
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
+const { generateObjectMock } = vi.hoisted(() => ({
+  generateObjectMock: vi.fn(),
+}));
+
+vi.mock("ai", () => ({
+  generateObject: generateObjectMock,
+}));
+
+vi.mock("@/lib/ai/model", () => ({
+  getAgentModel: () => ({ provider: "mock-model" }),
+}));
+
 // Mock the persistence layer — we only want to verify the shape of the
 // placeholder profile here. The actual Supabase writes are covered by the
 // Proof test.
@@ -42,14 +54,41 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-import { persistSkipPlaceholderProfile } from "./extract";
-import { TargetProfileSchema } from "@/lib/agents/cro/target-profile";
+import {
+  extractTargetProfileFromConversation,
+  persistSkipPlaceholderProfile,
+} from "./extract";
+import {
+  TargetProfileSchema,
+  type TargetProfile,
+} from "@/lib/agents/cro/target-profile";
 import { upsertTargetProfile } from "@/lib/agents/cro/target-profile";
 import { saveConciergeProfile } from "@/lib/db/queries/user-profiles-rest";
+
+const profile: TargetProfile = {
+  version: 1,
+  roles: ["Software Engineer"],
+  level: ["intern"],
+  geos: ["Remote"],
+  companies: [],
+  musts: [],
+  nices: [],
+};
 
 describe("R4.3 persistSkipPlaceholderProfile", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    generateObjectMock.mockResolvedValue({ object: profile });
+    vi.mocked(upsertTargetProfile).mockResolvedValue({
+      profile,
+      embedding: null,
+      updatedAt: new Date().toISOString(),
+      rowId: "test-row-id",
+    });
+    vi.mocked(saveConciergeProfile).mockResolvedValue({
+      ok: true,
+      completedAt: "2026-04-23T10:00:00.000Z",
+    });
   });
 
   it("writes a TargetProfileSchema-valid placeholder on skip", async () => {
@@ -82,6 +121,68 @@ describe("R4.3 persistSkipPlaceholderProfile", () => {
   it("returns null if the canonical upsert fails", async () => {
     vi.mocked(upsertTargetProfile).mockResolvedValueOnce(null);
     const result = await persistSkipPlaceholderProfile("user-xyz");
+    expect(result).toBeNull();
+  });
+
+  it("returns null if the user_profiles mirror fails", async () => {
+    vi.mocked(saveConciergeProfile).mockResolvedValueOnce({
+      ok: false,
+      completedAt: null,
+    });
+
+    const result = await persistSkipPlaceholderProfile("user-mirror-fail");
+
+    expect(result).toBeNull();
+  });
+});
+
+describe("R4.3 extractTargetProfileFromConversation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    generateObjectMock.mockResolvedValue({ object: profile });
+    vi.mocked(upsertTargetProfile).mockResolvedValue({
+      profile,
+      embedding: null,
+      updatedAt: new Date().toISOString(),
+      rowId: "test-row-id",
+    });
+    vi.mocked(saveConciergeProfile).mockResolvedValue({
+      ok: true,
+      completedAt: "2026-04-23T10:00:00.000Z",
+    });
+  });
+
+  it("persists conversation extraction to the canonical profile and mirror", async () => {
+    const result = await extractTargetProfileFromConversation("user-convo", [
+      { role: "user", text: "I want software engineering internships remote." },
+    ]);
+
+    expect(result).not.toBeNull();
+    expect(result?.source).toBe("conversation");
+    expect(upsertTargetProfile).toHaveBeenCalledWith("user-convo", profile);
+    expect(saveConciergeProfile).toHaveBeenCalledWith("user-convo", profile);
+  });
+
+  it("returns null if the canonical conversation upsert fails", async () => {
+    vi.mocked(upsertTargetProfile).mockResolvedValueOnce(null);
+
+    const result = await extractTargetProfileFromConversation("user-convo", [
+      { role: "user", text: "I want software engineering internships remote." },
+    ]);
+
+    expect(result).toBeNull();
+  });
+
+  it("returns null if the conversation mirror update fails", async () => {
+    vi.mocked(saveConciergeProfile).mockResolvedValueOnce({
+      ok: false,
+      completedAt: null,
+    });
+
+    const result = await extractTargetProfileFromConversation("user-convo", [
+      { role: "user", text: "I want software engineering internships remote." },
+    ]);
+
     expect(result).toBeNull();
   });
 });

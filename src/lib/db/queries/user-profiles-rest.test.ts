@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TargetProfile } from "@/lib/agents/cro/target-profile";
 
-const { fromSpy, updateSpy, eqSpy, logErrorSpy } = vi.hoisted(() => ({
+const { fromSpy, updateSpy, eqSpy, selectSpy, singleSpy, logErrorSpy } =
+vi.hoisted(() => ({
   fromSpy: vi.fn(),
   updateSpy: vi.fn(),
   eqSpy: vi.fn(),
+  selectSpy: vi.fn(),
+  singleSpy: vi.fn(),
   logErrorSpy: vi.fn(),
 }));
 
@@ -41,9 +44,13 @@ describe("saveConciergeProfile", () => {
     fromSpy.mockReset();
     updateSpy.mockReset();
     eqSpy.mockReset();
+    selectSpy.mockReset();
+    singleSpy.mockReset();
     logErrorSpy.mockReset();
 
-    eqSpy.mockResolvedValue({ error: null });
+    singleSpy.mockResolvedValue({ data: { id: "user-1" }, error: null });
+    selectSpy.mockReturnValue({ single: singleSpy });
+    eqSpy.mockReturnValue({ select: selectSpy });
     updateSpy.mockReturnValue({ eq: eqSpy });
     fromSpy.mockReturnValue({ update: updateSpy });
   });
@@ -61,10 +68,12 @@ describe("saveConciergeProfile", () => {
       }),
     );
     expect(eqSpy).toHaveBeenCalledWith("id", "user-1");
+    expect(selectSpy).toHaveBeenCalledWith("id");
+    expect(singleSpy).toHaveBeenCalledOnce();
   });
 
   it("returns false when the profile update fails", async () => {
-    eqSpy.mockResolvedValueOnce({ error: { message: "nope" } });
+    singleSpy.mockResolvedValueOnce({ data: null, error: { message: "nope" } });
 
     const result = await saveConciergeProfile("user-1", profile);
 
@@ -73,6 +82,25 @@ describe("saveConciergeProfile", () => {
       "concierge.save_profile_failed",
       undefined,
       expect.objectContaining({ userId: "user-1", error: "nope" }),
+    );
+  });
+
+  it("returns false when no profile row was updated", async () => {
+    singleSpy.mockResolvedValueOnce({
+      data: null,
+      error: { message: "No rows found" },
+    });
+
+    const result = await saveConciergeProfile("missing-user", profile);
+
+    expect(result).toEqual({ ok: false, completedAt: null });
+    expect(logErrorSpy).toHaveBeenCalledWith(
+      "concierge.save_profile_failed",
+      undefined,
+      expect.objectContaining({
+        userId: "missing-user",
+        error: "No rows found",
+      }),
     );
   });
 });

@@ -66,10 +66,15 @@ Return a structured TargetProfile.`;
 
     const parsed = TargetProfileSchema.parse(result.object);
     const stored = await upsertTargetProfile(userId, parsed);
-    const mirrored = await saveConciergeProfile(userId, parsed);
-
     if (!stored) {
       log.warn("concierge.upsert_profile_failed", { userId });
+      return null;
+    }
+
+    const mirrored = await saveConciergeProfile(userId, parsed);
+    if (!mirrored.ok) {
+      log.warn("concierge.mirror_profile_failed", { userId });
+      return null;
     }
 
     return {
@@ -103,10 +108,14 @@ export async function persistSkipPlaceholderProfile(
   });
 
   const stored = await upsertTargetProfile(userId, placeholder);
-  const mirrored = await saveConciergeProfile(userId, placeholder);
-
   if (!stored) {
     log.warn("concierge.skip_upsert_failed", { userId });
+    return null;
+  }
+
+  const mirrored = await saveConciergeProfile(userId, placeholder);
+  if (!mirrored.ok) {
+    log.warn("concierge.skip_mirror_failed", { userId });
     return null;
   }
 

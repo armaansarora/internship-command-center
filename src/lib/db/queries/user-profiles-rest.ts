@@ -93,7 +93,9 @@ export async function saveConciergeProfile(
         conciergeCompleted: true,
       }),
     })
-    .eq("id", userId);
+    .eq("id", userId)
+    .select("id")
+    .single();
 
   if (error) {
     log.error("concierge.save_profile_failed", undefined, {
