@@ -10,17 +10,31 @@ import { NextRequest } from "next/server";
  */
 
 const {
+  createClientSpy,
   requireUserSpy,
   exchangeCodeSpy,
+  exchangeGoogleLoginCodeForIdTokenSpy,
+  isEmailAllowedForBetaSpy,
+  needsLobbyOnboardingAfterAuthSpy,
+  signInWithIdTokenSpy,
+  signOutSpy,
   storeGoogleTokensSpy,
+  verifyGoogleLoginStateSpy,
   verifyOAuthStateSpy,
   logWarnSpy,
   logErrorSpy,
   logInfoSpy,
 } = vi.hoisted(() => ({
+  createClientSpy: vi.fn(),
   requireUserSpy: vi.fn(),
   exchangeCodeSpy: vi.fn(),
+  exchangeGoogleLoginCodeForIdTokenSpy: vi.fn(),
+  isEmailAllowedForBetaSpy: vi.fn(),
+  needsLobbyOnboardingAfterAuthSpy: vi.fn(),
+  signInWithIdTokenSpy: vi.fn(),
+  signOutSpy: vi.fn(),
   storeGoogleTokensSpy: vi.fn(),
+  verifyGoogleLoginStateSpy: vi.fn(),
   verifyOAuthStateSpy: vi.fn(),
   logWarnSpy: vi.fn(),
   logErrorSpy: vi.fn(),
@@ -28,6 +42,7 @@ const {
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
+  createClient: createClientSpy,
   requireUser: requireUserSpy,
 }));
 
@@ -39,6 +54,25 @@ vi.mock("@/lib/gmail/oauth", () => ({
 vi.mock("@/lib/auth/oauth-state", () => ({
   OAUTH_STATE_COOKIE: "oauth_state_nonce",
   verifyOAuthState: verifyOAuthStateSpy,
+}));
+
+vi.mock("@/lib/auth/google-login-state", () => ({
+  GOOGLE_LOGIN_STATE_COOKIE: "google_login_state",
+  isGoogleLoginStateValue: (state: string | null | undefined) =>
+    typeof state === "string" && state.startsWith("login_"),
+  verifyGoogleLoginState: verifyGoogleLoginStateSpy,
+}));
+
+vi.mock("@/lib/auth/google-login-oauth", () => ({
+  exchangeGoogleLoginCodeForIdToken: exchangeGoogleLoginCodeForIdTokenSpy,
+}));
+
+vi.mock("@/lib/auth/beta-gate", () => ({
+  isEmailAllowedForBeta: isEmailAllowedForBetaSpy,
+}));
+
+vi.mock("@/lib/auth/post-auth-profile", () => ({
+  needsLobbyOnboardingAfterAuth: needsLobbyOnboardingAfterAuthSpy,
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -58,6 +92,12 @@ function makeRequest(search: string, nonce = "nonce-cookie"): NextRequest {
   });
 }
 
+function makeLoginRequest(search: string, cookie = "login-cookie"): NextRequest {
+  return new NextRequest(`http://localhost/api/gmail/callback${search}`, {
+    headers: cookie ? { cookie: `google_login_state=${cookie}` } : {},
+  });
+}
+
 function expectClearedStateCookie(res: Response): void {
   const cookie = res.headers.get("set-cookie") ?? "";
   expect(cookie).toContain("oauth_state_nonce=");
@@ -65,11 +105,25 @@ function expectClearedStateCookie(res: Response): void {
   expect(cookie).toContain("Max-Age=0");
 }
 
+function expectClearedLoginCookie(res: Response): void {
+  const cookie = res.headers.get("set-cookie") ?? "";
+  expect(cookie).toContain("google_login_state=");
+  expect(cookie).toContain("Path=/api/gmail");
+  expect(cookie).toContain("Max-Age=0");
+}
+
 describe("GET /api/gmail/callback", () => {
   beforeEach(() => {
+    createClientSpy.mockReset();
     requireUserSpy.mockReset();
     exchangeCodeSpy.mockReset();
+    exchangeGoogleLoginCodeForIdTokenSpy.mockReset();
+    isEmailAllowedForBetaSpy.mockReset();
+    needsLobbyOnboardingAfterAuthSpy.mockReset();
+    signInWithIdTokenSpy.mockReset();
+    signOutSpy.mockReset();
     storeGoogleTokensSpy.mockReset();
+    verifyGoogleLoginStateSpy.mockReset();
     verifyOAuthStateSpy.mockReset();
     logWarnSpy.mockReset();
     logErrorSpy.mockReset();
@@ -79,6 +133,15 @@ describe("GET /api/gmail/callback", () => {
       id: "session-user",
       email: "fresh@example.com",
     });
+    createClientSpy.mockResolvedValue({
+      auth: {
+        signInWithIdToken: signInWithIdTokenSpy,
+        signOut: signOutSpy,
+      },
+    });
+    signOutSpy.mockResolvedValue({ error: null });
+    isEmailAllowedForBetaSpy.mockReturnValue(true);
+    needsLobbyOnboardingAfterAuthSpy.mockResolvedValue(false);
   });
 
   it("redirects OAuth denials back to Situation Room and clears the nonce cookie", async () => {
@@ -210,5 +273,120 @@ describe("GET /api/gmail/callback", () => {
       expect.any(Error),
       { userId: "session-user" },
     );
+  });
+
+  it("handles first-party Google login callbacks before requiring an existing session", async () => {
+    const user = {
+      id: "new-user",
+      email: "invited@example.com",
+      user_metadata: { full_name: "Invited User" },
+    };
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: true,
+      payload: {
+        v: 1,
+        state: "login-state",
+        nonce: "login-nonce",
+        next: "/settings",
+        issuedAt: Date.now(),
+      },
+    });
+    exchangeGoogleLoginCodeForIdTokenSpy.mockResolvedValue("id-token");
+    signInWithIdTokenSpy.mockResolvedValue({
+      data: { user, session: { user } },
+      error: null,
+    });
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(requireUserSpy).not.toHaveBeenCalled();
+    expect(verifyGoogleLoginStateSpy).toHaveBeenCalledWith(
+      "login-state",
+      "login-cookie",
+    );
+    expect(exchangeGoogleLoginCodeForIdTokenSpy).toHaveBeenCalledWith("login-code");
+    expect(signInWithIdTokenSpy).toHaveBeenCalledWith({
+      provider: "google",
+      token: "id-token",
+      nonce: "login-nonce",
+    });
+    expect(isEmailAllowedForBetaSpy).toHaveBeenCalledWith("invited@example.com");
+    expect(needsLobbyOnboardingAfterAuthSpy).toHaveBeenCalledWith(
+      expect.any(Object),
+      user,
+    );
+    expect(res.headers.get("location")).toBe("http://localhost/settings");
+    expectClearedLoginCookie(res);
+  });
+
+  it("routes first-run Google login users back to the lobby", async () => {
+    const user = { id: "new-user", email: "invited@example.com", user_metadata: {} };
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: true,
+      payload: {
+        v: 1,
+        state: "login-state",
+        nonce: "login-nonce",
+        next: "/penthouse",
+        issuedAt: Date.now(),
+      },
+    });
+    exchangeGoogleLoginCodeForIdTokenSpy.mockResolvedValue("id-token");
+    signInWithIdTokenSpy.mockResolvedValue({
+      data: { user, session: { user } },
+      error: null,
+    });
+    needsLobbyOnboardingAfterAuthSpy.mockResolvedValue(true);
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(res.headers.get("location")).toBe("http://localhost/lobby");
+    expectClearedLoginCookie(res);
+  });
+
+  it("rejects login callbacks outside the beta gate", async () => {
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: true,
+      payload: {
+        v: 1,
+        state: "login-state",
+        nonce: "login-nonce",
+        next: "/penthouse",
+        issuedAt: Date.now(),
+      },
+    });
+    exchangeGoogleLoginCodeForIdTokenSpy.mockResolvedValue("id-token");
+    signInWithIdTokenSpy.mockResolvedValue({
+      data: {
+        user: { id: "new-user", email: "guest@example.com", user_metadata: {} },
+        session: null,
+      },
+      error: null,
+    });
+    isEmailAllowedForBetaSpy.mockReturnValue(false);
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(signOutSpy).toHaveBeenCalledOnce();
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/lobby?error=beta_not_invited",
+    );
+    expectClearedLoginCookie(res);
+  });
+
+  it("rejects login callbacks with invalid state", async () => {
+    verifyGoogleLoginStateSpy.mockReturnValue({
+      ok: false,
+      reason: "bad_signature",
+    });
+
+    const res = await GET(makeLoginRequest("?code=login-code&state=login-state"));
+
+    expect(exchangeGoogleLoginCodeForIdTokenSpy).not.toHaveBeenCalled();
+    expect(signInWithIdTokenSpy).not.toHaveBeenCalled();
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/lobby?error=auth_failed",
+    );
+    expectClearedLoginCookie(res);
   });
 });

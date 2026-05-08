@@ -1,11 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForTokens, storeGoogleTokens } from "@/lib/gmail/oauth";
-import { requireUser } from "@/lib/supabase/server";
+import { createClient, requireUser } from "@/lib/supabase/server";
 import type { GoogleTokens } from "@/lib/gmail/oauth";
 import {
   OAUTH_STATE_COOKIE,
   verifyOAuthState,
 } from "@/lib/auth/oauth-state";
+import {
+  GOOGLE_LOGIN_STATE_COOKIE,
+  isGoogleLoginStateValue,
+  verifyGoogleLoginState,
+} from "@/lib/auth/google-login-state";
+import { exchangeGoogleLoginCodeForIdToken } from "@/lib/auth/google-login-oauth";
+import { getSafePostAuthPath } from "@/lib/auth/safe-next-path";
+import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
+import { needsLobbyOnboardingAfterAuth } from "@/lib/auth/post-auth-profile";
 import { log } from "@/lib/logger";
 
 /**
@@ -20,12 +29,28 @@ import { log } from "@/lib/logger";
  *   5. Cookie is cleared regardless of outcome.
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const sessionUser = await requireUser();
   const { searchParams, origin } = request.nextUrl;
 
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const errorParam = searchParams.get("error");
+
+  const loginStateCookie = request.cookies.get(GOOGLE_LOGIN_STATE_COOKIE)?.value;
+  const gmailStateCookie = request.cookies.get(OAUTH_STATE_COOKIE)?.value;
+  if (
+    isGoogleLoginStateValue(state) ||
+    (loginStateCookie && !gmailStateCookie)
+  ) {
+    return handleLoginCallback({
+      code,
+      errorParam,
+      origin,
+      state,
+      stateCookie: loginStateCookie,
+    });
+  }
+
+  const sessionUser = await requireUser();
 
   // Always clear the single-use state cookie on the response we return.
   const clearCookie = (response: NextResponse): NextResponse => {
@@ -48,7 +73,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const nonceCookie = request.cookies.get(OAUTH_STATE_COOKIE)?.value;
+  const nonceCookie = gmailStateCookie;
   if (!nonceCookie) {
     log.warn("gmail.oauth.missing_state_cookie", { userId: sessionUser.id });
     return clearCookie(
@@ -104,4 +129,79 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   return clearCookie(
     NextResponse.redirect(new URL("/situation-room?gmail=connected", origin))
   );
+}
+
+async function handleLoginCallback(args: {
+  code: string | null;
+  errorParam: string | null;
+  origin: string;
+  state: string | null;
+  stateCookie: string | undefined;
+}): Promise<NextResponse> {
+  const clearCookie = (response: NextResponse): NextResponse => {
+    response.cookies.set(GOOGLE_LOGIN_STATE_COOKIE, "", {
+      path: "/api/gmail",
+      maxAge: 0,
+    });
+    return response;
+  };
+
+  const lobbyError = (error: string): NextResponse =>
+    clearCookie(NextResponse.redirect(new URL(`/lobby?error=${error}`, args.origin)));
+
+  if (args.errorParam) {
+    return lobbyError("auth_failed");
+  }
+
+  if (!args.code || !args.state) {
+    return lobbyError("auth_failed");
+  }
+
+  const verification = verifyGoogleLoginState(args.state, args.stateCookie);
+  if (!verification.ok) {
+    log.warn("auth.google_login.invalid_state", {
+      reason: verification.reason,
+    });
+    return lobbyError("auth_failed");
+  }
+
+  try {
+    const idToken = await exchangeGoogleLoginCodeForIdToken(args.code);
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: idToken,
+      nonce: verification.payload.nonce,
+    });
+
+    if (error) {
+      log.warn("auth.google_login.supabase_exchange_failed", {
+        error: error.message,
+      });
+      return lobbyError("auth_failed");
+    }
+
+    const user = data.user ?? data.session?.user ?? null;
+    const email = user?.email ?? null;
+    if (!isEmailAllowedForBeta(email)) {
+      await supabase.auth.signOut();
+      log.warn("auth.google_login.beta_gate_denied", {
+        domain: email?.split("@")[1] ?? "unknown",
+      });
+      return lobbyError("beta_not_invited");
+    }
+
+    if (await needsLobbyOnboardingAfterAuth(supabase, user)) {
+      return clearCookie(NextResponse.redirect(new URL("/lobby", args.origin)));
+    }
+
+    return clearCookie(
+      NextResponse.redirect(
+        new URL(getSafePostAuthPath(verification.payload.next), args.origin),
+      ),
+    );
+  } catch (err) {
+    log.error("auth.google_login.failed", err);
+    return lobbyError("auth_failed");
+  }
 }

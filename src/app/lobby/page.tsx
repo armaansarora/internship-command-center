@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getUser } from "@/lib/supabase/server";
-import { env } from "@/lib/env";
 import { LobbyClient } from "./lobby-client";
 import { ConciergeFlow } from "./onboarding/ConciergeFlow";
 import { getConciergeState } from "@/lib/db/queries/user-profiles-rest";
@@ -54,11 +53,7 @@ export default async function LobbyPage({ searchParams }: LobbyPageProps) {
 
   return (
     <>
-      <LobbyClient
-        isAuthenticated={!!user}
-        initialError={initialError}
-        googleClientId={env().GOOGLE_CLIENT_ID ?? null}
-      />
+      <LobbyClient isAuthenticated={!!user} initialError={initialError} />
       {needsOnboarding && conciergeState && (
         <ConciergeFlow
           arrivalAlreadyPlayed={conciergeState.arrivalPlayedAt !== null}

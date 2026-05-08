@@ -7,87 +7,6 @@ import { Elevator } from "@/components/world/Elevator";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { gsap } from "@/lib/gsap-init";
 
-interface GoogleCredentialResponse {
-  credential?: string;
-}
-
-interface GoogleAccountsId {
-  initialize(options: {
-    client_id: string;
-    callback: (response: GoogleCredentialResponse) => void;
-    ux_mode?: "popup" | "redirect";
-    nonce?: string;
-  }): void;
-  renderButton(
-    parent: HTMLElement,
-    options: {
-      type?: "standard" | "icon";
-      theme?: "outline" | "filled_blue" | "filled_black";
-      size?: "large" | "medium" | "small";
-      text?: "signin_with" | "signup_with" | "continue_with" | "signin";
-      shape?: "rectangular" | "pill" | "circle" | "square";
-      logo_alignment?: "left" | "center";
-      width?: number;
-    },
-  ): void;
-}
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: GoogleAccountsId;
-      };
-    };
-  }
-}
-
-let googleIdentityScriptPromise: Promise<void> | null = null;
-
-function loadGoogleIdentityScript(): Promise<void> {
-  if (typeof window === "undefined") return Promise.resolve();
-  if (window.google?.accounts?.id) return Promise.resolve();
-  if (googleIdentityScriptPromise) return googleIdentityScriptPromise;
-
-  googleIdentityScriptPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[src="https://accounts.google.com/gsi/client"]',
-    );
-    if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener("error", () => reject(new Error("Google sign-in failed to load")), {
-        once: true,
-      });
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Google sign-in failed to load"));
-    document.head.appendChild(script);
-  });
-
-  return googleIdentityScriptPromise;
-}
-
-async function generateGoogleNonce(): Promise<{ raw: string; hashed: string } | null> {
-  if (!window.crypto?.getRandomValues || !window.crypto.subtle) return null;
-
-  const bytes = new Uint8Array(32);
-  window.crypto.getRandomValues(bytes);
-  const raw = btoa(String.fromCharCode(...bytes));
-  const encoded = new TextEncoder().encode(raw);
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", encoded);
-  const hashed = Array.from(new Uint8Array(hashBuffer))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-
-  return { raw, hashed };
-}
-
 function authErrorMessage(code: string | undefined): string {
   switch (code) {
     case "beta_not_invited":
@@ -112,19 +31,15 @@ function authErrorMessage(code: string | undefined): string {
 export function LobbyClient({
   isAuthenticated = false,
   initialError = null,
-  googleClientId = null,
 }: {
   isAuthenticated?: boolean;
   initialError?: string | null;
-  googleClientId?: string | null;
 }) {
   const [error, setError] = useState<string | null>(initialError);
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-  const googleNonceRef = useRef<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   // Detect returning user from cookie (no SSR mismatch — empty initial render).
@@ -208,89 +123,33 @@ export function LobbyClient({
     };
   }, [prefersReducedMotion]);
 
-  const handleGoogleCredential = useCallback(async (response: GoogleCredentialResponse) => {
-    if (!response.credential) {
-      setError("Google did not return a sign-in credential. Try again.");
-      return;
-    }
-
+  const handleSignIn = useCallback(async () => {
     setError(null);
     setIsAuthenticating(true);
     try {
-      const result = await fetch("/api/auth/google-id-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          credential: response.credential,
-          next: new URLSearchParams(window.location.search).get("next"),
-          nonce: googleNonceRef.current,
-        }),
-      });
+      const next = new URLSearchParams(window.location.search).get("next");
+      const authPath = next
+        ? `/api/auth/google/start?next=${encodeURIComponent(next)}`
+        : "/api/auth/google/start";
+      const result = await fetch(authPath, { method: "GET" });
 
       const payload = (await result.json().catch(() => ({}))) as {
         error?: string;
-        next?: string;
+        authUrl?: string;
       };
 
-      if (!result.ok) {
+      if (!result.ok || !payload.authUrl) {
         setError(authErrorMessage(payload.error));
         setIsAuthenticating(false);
         return;
       }
 
-      window.location.assign(payload.next ?? "/penthouse");
+      window.location.assign(payload.authUrl);
     } catch {
-      setError("The front desk could not verify that sign-in. Try again.");
+      setError("Google sign-in could not start. Try again.");
       setIsAuthenticating(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (isAuthenticated) return;
-    if (!googleClientId) return;
-
-    let cancelled = false;
-    loadGoogleIdentityScript()
-      .then(async () => {
-        const nonce = await generateGoogleNonce();
-        if (cancelled) return;
-        const google = window.google?.accounts?.id;
-        const buttonEl = googleButtonRef.current;
-        if (!google || !buttonEl) {
-          setError("Google sign-in is not available. Try again.");
-          return;
-        }
-
-        googleNonceRef.current = nonce?.raw ?? null;
-        google.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredential,
-          ux_mode: "popup",
-          ...(nonce ? { nonce: nonce.hashed } : {}),
-        });
-        buttonEl.replaceChildren();
-        google.renderButton(buttonEl, {
-          type: "standard",
-          theme: "filled_black",
-          size: "large",
-          text: "continue_with",
-          shape: "rectangular",
-          logo_alignment: "left",
-          width: Math.min(328, buttonEl.clientWidth || 328),
-        });
-      })
-      .catch(() => {
-        if (!cancelled) setError("Google sign-in failed to load. Try again.");
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [googleClientId, handleGoogleCredential, isAuthenticated]);
-
-  const visibleError =
-    error ??
-    (!isAuthenticated && !googleClientId ? "Google sign-in is not configured." : null);
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden">
@@ -485,10 +344,10 @@ export function LobbyClient({
           {/* ── SIGN-IN CARD ── */}
           <SignInCard
             isLoading={isAuthenticating}
-            error={visibleError}
+            error={error}
             isReturningUser={isReturningUser}
             isAuthenticated={isAuthenticated}
-            googleButtonRef={googleButtonRef}
+            onSignIn={handleSignIn}
           />
 
           {/* ── BUILDING DIRECTORY ── */}
@@ -762,12 +621,12 @@ function ParticleField(): JSX.Element {
  * SignInCard — premium glass card with frosted noise texture, 3D tilt (max 3deg),
  * gold top border, and cursor-following hover glow.
  */
-function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, googleButtonRef }: {
+function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSignIn }: {
   isLoading: boolean;
   error: string | null;
   isReturningUser: boolean;
   isAuthenticated: boolean;
-  googleButtonRef: React.RefObject<HTMLDivElement | null>;
+  onSignIn: () => void;
 }): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const [hoverGlow, setHoverGlow] = useState({ x: 50, y: 50 });
@@ -894,32 +753,46 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, google
             <span>Return to Penthouse</span>
           </button>
         ) : (
-          /* Unauthenticated: Google Identity Services owns the button branding. */
-          <div
-            className="relative flex min-h-[44px] w-full items-center justify-center"
-            aria-busy={isLoading}
+          /* Unauthenticated: first-party Google OAuth redirect. */
+          <button
+            onClick={onSignIn}
+            disabled={isLoading}
+            aria-label={isLoading ? "Authenticating..." : "Continue with Google"}
+            className="flex w-full items-center justify-center gap-3 rounded-lg px-6 py-3.5 font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: "linear-gradient(135deg, #C9A84C 0%, #E8C45A 50%, #C9A84C 100%)",
+              backgroundSize: "200% auto",
+              color: "#0A0A14",
+              fontSize: "15px",
+              fontFamily: "'Satoshi', sans-serif",
+              fontWeight: 600,
+              boxShadow: "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)",
+              letterSpacing: "0.01em",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.boxShadow = "0 8px 36px rgba(201, 168, 76, 0.55), inset 0 1px 0 rgba(255,255,255,0.25)";
+              el.style.transform = "translateY(-2px)";
+              el.style.backgroundPosition = "right center";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.boxShadow = "0 6px 28px rgba(201, 168, 76, 0.4), inset 0 1px 0 rgba(255,255,255,0.25)";
+              el.style.transform = "translateY(0)";
+              el.style.backgroundPosition = "left center";
+            }}
           >
-            <div
-              ref={googleButtonRef}
-              className={isLoading ? "pointer-events-none opacity-0" : ""}
-              aria-hidden={isLoading}
-            />
             {isLoading ? (
-              <span
-                className="absolute inset-0 flex items-center justify-center rounded-lg"
-                style={{
-                  background: "rgba(19, 19, 20, 0.96)",
-                  color: "#E3E3E3",
-                  border: "1px solid rgba(142, 145, 143, 0.75)",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "12px",
-                  letterSpacing: "0.15em",
-                }}
-              >
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", letterSpacing: "0.15em" }}>
                 AUTHENTICATING...
               </span>
-            ) : null}
-          </div>
+            ) : (
+              <>
+                <GoogleIcon />
+                <span>Continue with Google</span>
+              </>
+            )}
+          </button>
         )}
 
         {!isAuthenticated && (
@@ -1146,6 +1019,20 @@ function TowerLogo(): JSX.Element {
       {/* Edge highlights */}
       <rect x="16" y="22" width="0.75" height="66" fill="var(--gold)" opacity="0.28" />
       <rect x="47.25" y="22" width="0.75" height="66" fill="var(--gold)" opacity="0.14" />
+    </svg>
+  );
+}
+
+/**
+ * GoogleIcon — standard Google G logo.
+ */
+function GoogleIcon(): JSX.Element {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4" />
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853" />
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05" />
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335" />
     </svg>
   );
 }
