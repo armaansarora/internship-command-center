@@ -33,6 +33,9 @@ const PLAN_FEATURES: Record<SubscriptionTier, string[]> = {
   ],
 };
 
+const BILLING_ACTION_ERROR =
+  "The billing desk did not answer. Try again in a moment.";
+
 export function PricingCards({
   currentTier,
   appsUsed,
@@ -40,10 +43,13 @@ export function PricingCards({
   onManageBilling,
 }: PricingCardsProps): JSX.Element {
   const [loading, setLoading] = useState<SubscriptionTier | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const handleUpgrade = useCallback(
     async (tier: SubscriptionTier) => {
       if (tier === currentTier) return;
+
+      setCheckoutError(null);
 
       if (currentTier !== "free") {
         onManageBilling?.();
@@ -60,6 +66,7 @@ export function PricingCards({
         });
 
         if (!response.ok) {
+          setCheckoutError(BILLING_ACTION_ERROR);
           setLoading(null);
           return;
         }
@@ -68,9 +75,11 @@ export function PricingCards({
         if (data.url) {
           window.location.href = data.url;
         } else {
+          setCheckoutError(BILLING_ACTION_ERROR);
           setLoading(null);
         }
       } catch {
+        setCheckoutError(BILLING_ACTION_ERROR);
         setLoading(null);
       }
     },
@@ -81,6 +90,21 @@ export function PricingCards({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+      {checkoutError && (
+        <div
+          role="alert"
+          className="rounded-lg px-4 py-3 md:col-span-3"
+          style={{
+            background: "rgba(220, 60, 60, 0.06)",
+            border: "1px solid rgba(220, 60, 60, 0.18)",
+            fontFamily: "'Satoshi', sans-serif",
+            fontSize: "12px",
+            color: "rgba(220, 80, 80, 0.85)",
+          }}
+        >
+          {checkoutError}
+        </div>
+      )}
       {tierOrder.map((tier) => {
         const plan = STRIPE_PLANS[tier];
         const isCurrentPlan = tier === currentTier;
