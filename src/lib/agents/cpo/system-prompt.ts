@@ -2,6 +2,8 @@
 // CPO (Chief Preparation Officer) — Floor 3: The Briefing Room
 // ---------------------------------------------------------------------------
 
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
+
 export interface AgentMemoryEntry {
   content: string;
   category: string;
@@ -117,5 +119,5 @@ export function buildCPOSystemPrompt(
 ): string {
   const dynamicContext = buildDynamicContext(prepStats, userName, memories);
 
-  return [CPO_IDENTITY, "", CPO_RULES, "", dynamicContext].join("\n");
+  return [BASE_SCAFFOLD, BASE_CACHE_MARKER, CPO_IDENTITY, "", CPO_RULES, "", dynamicContext].join("\n");
 }

@@ -1,4 +1,5 @@
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
 
 interface AgentMemoryEntry {
   content: string;
@@ -135,5 +136,5 @@ export function buildCFOSystemPrompt(
 ): string {
   const dynamicContext = buildDynamicContext(stats, snapshots, userName, memories);
 
-  return [CFO_IDENTITY, "", CFO_RULES, "", dynamicContext].join("\n");
+  return [BASE_SCAFFOLD, BASE_CACHE_MARKER, CFO_IDENTITY, "", CFO_RULES, "", dynamicContext].join("\n");
 }

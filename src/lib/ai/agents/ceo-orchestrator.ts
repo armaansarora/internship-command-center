@@ -42,7 +42,7 @@ import {
   readSharedKnowledge,
   type SharedKnowledgeFlatMap,
 } from "@/lib/db/queries/shared-knowledge-rest";
-import { getCachedSystem } from "../prompt-cache";
+import { buildCachedSystemMessages } from "../prompt-cache";
 import { appendAgentGovernance } from "@/lib/agents/governance-contract";
 
 import { buildCROSystemPrompt } from "@/lib/agents/cro/system-prompt";
@@ -188,13 +188,22 @@ async function runSubagent<TStats>(
       throw new Error(`ai_quota_exceeded:${quota.used}/${quota.cap}`);
     }
 
+    // Build the cache-aware system messages once per dispatch. This is the
+    // hottest fan-out path in the system (parallel `dispatchBatch` to up to
+    // 6 agents) and the bug it replaces silently dropped cache markers by
+    // passing a plain string into `system:` — every nested call paid full
+    // input rate. Spreading the array into `messages` puts providerOptions
+    // back on the wire so Anthropic actually sees the cacheControl markers.
+    const sysMsgs = buildCachedSystemMessages(systemPrompt);
     const result = await generateText({
       model: getAgentModel(),
-      // Prompt-cache the entire system message for this subagent. Subsequent
-      // dispatches within the same chat session reuse the cached prefix and
-      // pay only for the dynamic context tail + the new user task.
-      system: getCachedSystem(systemPrompt),
-      prompt: `${DISPATCH_INSTRUCTION}\n\nTASK FROM CEO:\n${task}`,
+      messages: [
+        ...sysMsgs,
+        {
+          role: "user",
+          content: `${DISPATCH_INSTRUCTION}\n\nTASK FROM CEO:\n${task}`,
+        },
+      ],
       // The cast is benign — each subagent's tools satisfy ToolSet structurally;
       // this orchestrator only widens at the boundary.
       tools: tools as Parameters<typeof generateText>[0]["tools"],

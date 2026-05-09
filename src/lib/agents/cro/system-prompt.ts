@@ -1,5 +1,6 @@
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
 import type { SharedKnowledgeFlatMap } from "@/lib/db/queries/shared-knowledge-rest";
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
 import type { TargetProfile } from "./target-profile";
 
 interface AgentMemoryEntry {
@@ -163,7 +164,15 @@ export function buildCROSystemPrompt(
     ? renderSharedKnowledgeBlock(sharedKnowledge)
     : "";
 
-  const sections = [CRO_IDENTITY, "", CRO_RULES, "", dynamicContext];
+  const sections: string[] = [
+    BASE_SCAFFOLD,
+    BASE_CACHE_MARKER,
+    CRO_IDENTITY,
+    "",
+    CRO_RULES,
+    "",
+    dynamicContext,
+  ];
   if (sharedBlock.length > 0) {
     sections.push("", sharedBlock);
   }

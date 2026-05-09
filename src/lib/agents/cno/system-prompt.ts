@@ -1,4 +1,5 @@
 import type { ContactStats } from "@/lib/db/queries/contacts-rest";
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
 
 interface AgentMemoryEntry {
   content: string;
@@ -97,5 +98,5 @@ export function buildCNOSystemPrompt(
 ): string {
   const dynamicContext = buildDynamicContext(stats, userName, memories);
 
-  return [CNO_IDENTITY, "", CNO_RULES, "", dynamicContext].join("\n");
+  return [BASE_SCAFFOLD, BASE_CACHE_MARKER, CNO_IDENTITY, "", CNO_RULES, "", dynamicContext].join("\n");
 }

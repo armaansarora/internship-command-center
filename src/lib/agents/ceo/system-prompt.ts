@@ -1,4 +1,5 @@
 import type { PipelineStats } from "@/lib/db/queries/applications-rest";
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
 
 interface AgentMemoryEntry {
   content: string;
@@ -134,5 +135,5 @@ export function buildCEOSystemPrompt(
     agentSummaries
   );
 
-  return [CEO_IDENTITY, "", CEO_RULES, "", dynamicContext].join("\n");
+  return [BASE_SCAFFOLD, BASE_CACHE_MARKER, CEO_IDENTITY, "", CEO_RULES, "", dynamicContext].join("\n");
 }

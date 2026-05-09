@@ -140,7 +140,13 @@ vi.mock("@/lib/stripe/entitlements", () => ({
   getUserTier: getUserTierSpy,
 }));
 
-vi.mock("../prompt-cache", () => ({ getCachedSystem: getCachedSystemSpy }));
+vi.mock("../prompt-cache", () => ({
+  getCachedSystem: getCachedSystemSpy,
+  // Fix #4: orchestrator now uses buildCachedSystemMessages. Pass-through
+  // mock returns a single system message so test assertions on `args.messages`
+  // see the original prompt content.
+  buildCachedSystemMessages: (s: string) => [{ role: "system", content: s }],
+}));
 
 vi.mock("@/lib/db/queries/agent-memory-rest", () => ({
   getMemoriesForContext: getMemoriesForContextSpy,
@@ -365,12 +371,25 @@ describe("R3 Proof — bell-ring end-to-end", () => {
     //      sequential would be 1500ms+, parallel should land well under. ──
     const capturedSystems: Record<string, string> = {};
     generateTextMock.mockImplementation(
-      async ({ system }: { system: string }) => {
+      async (args: {
+        messages?: Array<{ role: string; content: string }>;
+        system?: string;
+      }) => {
+        // Fix #4: orchestrator now passes `messages` (with cache markers)
+        // instead of `system:`+`prompt:`. Extract joined system content from
+        // either shape so this test works pre- and post-migration.
+        const system = args.messages
+          ? args.messages
+              .filter((m) => m.role === "system")
+              .map((m) => m.content)
+              .join("\n")
+          : (args.system ?? "");
         // Non-CRO stubs tag their prompt with "<agent>-system-prompt".
-        // The real CRO prompt starts with the CRO_IDENTITY block.
-        const agent = system.startsWith("coo-")
+        // The real CRO prompt now starts with BASE_SCAFFOLD; CRO_IDENTITY
+        // appears after the marker — use `includes` not `startsWith`.
+        const agent = system.includes("coo-system-prompt")
           ? "coo"
-          : system.startsWith("cio-")
+          : system.includes("cio-system-prompt")
             ? "cio"
             : "cro";
         capturedSystems[agent] = system;

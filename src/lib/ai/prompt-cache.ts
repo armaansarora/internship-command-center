@@ -1,56 +1,115 @@
 /**
- * Anthropic prompt-caching wiring.
+ * Anthropic prompt-caching wiring — the four-case ladder.
  *
- * Each agent's system prompt is composed of three layers:
+ * Each agent's system prompt is composed of layers we want cached at
+ * different lifetimes:
  *
- *   LAYER 1 — Identity (immutable)
- *   LAYER 2 — Behavioral rules (immutable)
- *   LAYER 3 — Dynamic context (per-request: pipeline stats, memories, user name)
+ *   LAYER 0 — BASE_SCAFFOLD (immutable, shared by all 8 C-suite characters)
+ *   LAYER 1 — Character identity (immutable, per-character)
+ *   LAYER 2 — Behavioral rules (immutable, per-character)
+ *   LAYER 3 — Dynamic context (per-request: pipeline stats, memories, name)
  *
- * Layers 1+2 are identical across every request for a given agent — perfect
- * cache candidates. Layer 3 changes every call so we never want it cached.
+ * Anthropic supports up to 4 cache breakpoints. We use TWO:
  *
- * AI SDK v6 caveat: `SystemModelMessage.content` is typed as `string` only —
- * it does NOT accept content-part arrays, so per-block cache markers aren't
- * representable on a single system message. To still mark the stable prefix
- * cacheable we emit TWO system messages back-to-back:
+ *   Breakpoint 1 — at the end of LAYER 0 (BASE_SCAFFOLD).
+ *     Hits across every C-suite agent in the same session: switching from
+ *     CRO to CEO inside the 5-min TTL pays only ~10% of the input rate
+ *     on the scaffold.
  *
- *   1. LAYER 1 + 2 (stable)  — providerOptions.anthropic.cacheControl:ephemeral
- *   2. LAYER 3 (dynamic)     — no cache marker
+ *   Breakpoint 2 — at the end of LAYER 2 (just before LAYER 3).
+ *     Hits across every turn within the same agent: re-asking the same
+ *     character pays only the read rate on identity+rules.
  *
- * Anthropic concatenates multiple system messages for the provider call, and
- * the cacheControl on the first one applies to the prefix of the joined
- * system prompt up through that point. When the input is too short to split
- * cleanly (no LAYER 3 marker), we fall back to caching the whole string as a
- * single system message — still a win for repeat calls within the same
- * session.
+ * AI SDK v6 caveat: `SystemModelMessage.content` is typed as `string` only,
+ * so per-block cache markers aren't representable on a single system
+ * message. Instead we emit MULTIPLE system messages back-to-back, each
+ * carrying its own `providerOptions.anthropic.cacheControl`. Anthropic
+ * concatenates the system messages and treats the cumulative content up
+ * to each marked message as that breakpoint's cache key.
  *
- * Cost impact: cache reads are billed at ~10% of input rate, and cache writes
- * at ~125% of input. After the first chat turn for a given agent, every
- * subsequent turn pays only the read rate on L1+L2 (typically 70-90% of the
- * total system prompt) — net 60-90% reduction in input spend.
+ * The four cases:
+ *
+ *   Case A — both BASE and dynamic boundaries present:
+ *     [base | identity+rules | dynamic]   3 messages, 2 breakpoints.
+ *     This is the path for the 8 C-suite characters.
+ *
+ *   Case B — BASE boundary present, no dynamic boundary:
+ *     [base | rest]                       2 messages, 2 breakpoints.
+ *     Rare. A C-suite prompt with no LAYER 3.
+ *
+ *   Case C — only dynamic boundary present (LEGACY):
+ *     [identity+rules | dynamic]          2 messages, 1 breakpoint.
+ *     Concierge falls here once `CURRENT CONTEXT\n` is in the regex.
+ *
+ *   Case D — neither boundary:
+ *     [whole prompt]                      1 message, 1 breakpoint.
+ *     Offer Evaluator and any short prompt.
+ *
+ * MARKER STRIPPING: when a base split fires, the `BASE_CACHE_MARKER`
+ * itself is consumed by the slice — outgoing message content NEVER
+ * contains the sentinel. Tested in `prompt-cache.test.ts`.
+ *
+ * FEATURE FLAG: `process.env.TOWER_PROMPT_CACHE_LAYOUT === "legacy"`
+ * forces `baseSplit = null`, reproducing the pre-Fix-#4 single-breakpoint
+ * behavior. Set this Vercel env to roll back without code revert.
+ *
+ * Cost reference: cache reads are billed at ~10% of input rate, cache
+ * writes at ~125%. Anthropic Sonnet 4.6 requires cumulative content >=
+ * 1024 tokens at a breakpoint to actually cache; BASE_SCAFFOLD is sized
+ * accordingly.
  *
  * Reference: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
  */
 
 import type { ModelMessage } from "ai";
+import { BASE_CACHE_MARKER } from "@/lib/agents/base-scaffold";
 
 /**
- * The marker every `buildXxxSystemPrompt` writer in `src/lib/agents/*` uses
- * between LAYER 2 (rules) and LAYER 3 (live context). Splitting on this
- * keyword lets us isolate the cacheable prefix without changing the prompt
- * builders.
+ * Anchor that marks the start of LAYER 3 (dynamic context) in every
+ * `buildXxxSystemPrompt` writer in `src/lib/agents/*`.
+ *
+ * Patterns we recognize:
+ *   - `LIVE PIPELINE SNAPSHOT:` (CRO)
+ *   - `LIVE FINANCIAL DASHBOARD:` (CFO)
+ *   - `LIVE C-SUITE DASHBOARD` (CEO — no trailing colon)
+ *   - `LIVE …` for every other C-suite floor.
+ *   - `CURRENT CONTEXT\n` (Otis / Concierge — added in Fix #4 so Otis
+ *     benefits from a 2-message split with no content change).
  */
-const DYNAMIC_LAYER_MARKER = /\n\n(LIVE [A-Z][^\n]*:|LIVE C-SUITE)/;
+const DYNAMIC_LAYER_MARKER = /\n\n(LIVE [A-Z][^\n]*:|LIVE C-SUITE|CURRENT CONTEXT\n)/;
 
 /**
- * Split a multi-layer system prompt into cached + fresh parts.
- * Returns the indices in the original string.
+ * Result of finding the BASE_SCAFFOLD/character boundary.
+ *
+ * `base` is the substring BEFORE the marker — preserved byte-for-byte so
+ * it stays identical across every C-suite character. `rest` is everything
+ * AFTER the marker — the per-character prompt body.
+ *
+ * Returns `null` when:
+ *   - The marker is not in the prompt (Concierge, Offer Evaluator).
+ *   - The base is implausibly short (<200 chars) — splitting tiny
+ *     prefixes wastes a cache breakpoint.
  */
-function splitAtDynamicLayer(systemPrompt: string): {
-  cached: string;
-  fresh: string;
-} | null {
+function splitAtBaseBoundary(
+  s: string,
+): { base: string; rest: string } | null {
+  const idx = s.indexOf(BASE_CACHE_MARKER);
+  if (idx < 0) return null;
+
+  const base = s.slice(0, idx);
+  const rest = s.slice(idx + BASE_CACHE_MARKER.length);
+
+  if (base.length < 200) return null;
+  return { base, rest };
+}
+
+/**
+ * Find the LAYER 2 → LAYER 3 boundary. Returns `null` when either half
+ * would be too small to justify a cache breakpoint.
+ */
+function splitAtDynamicLayer(
+  systemPrompt: string,
+): { cached: string; fresh: string } | null {
   const match = systemPrompt.match(DYNAMIC_LAYER_MARKER);
   if (!match || typeof match.index !== "number") return null;
 
@@ -58,15 +117,13 @@ function splitAtDynamicLayer(systemPrompt: string): {
   const cached = systemPrompt.slice(0, splitIdx).trimEnd();
   const fresh = systemPrompt.slice(splitIdx).trimStart();
 
-  // Only split if both halves are substantial — otherwise the cache write
-  // overhead would exceed the read savings.
   if (cached.length < 200 || fresh.length < 50) return null;
   return { cached, fresh };
 }
 
 /**
- * Convert a system prompt string into a pair of `system`-role messages with
- * Anthropic prompt-caching enabled on the stable LAYER 1+2 prefix.
+ * Convert a system-prompt string into 1, 2, or 3 `system`-role messages
+ * with Anthropic prompt-cache markers placed at the correct boundaries.
  *
  * Usage:
  *   const messages = [
@@ -78,15 +135,56 @@ function splitAtDynamicLayer(systemPrompt: string): {
 export function buildCachedSystemMessages(
   systemPrompt: string,
 ): ModelMessage[] {
-  const split = splitAtDynamicLayer(systemPrompt);
+  // Feature flag: set TOWER_PROMPT_CACHE_LAYOUT=legacy on Vercel to fall
+  // back to the pre-Fix-#4 single-breakpoint behavior. This pretends the
+  // BASE marker isn't there and reproduces the old code behavior.
+  const layoutEnabled =
+    process.env.TOWER_PROMPT_CACHE_LAYOUT !== "legacy";
 
-  if (!split) {
-    // Single-block cache. Still useful for short prompts that lack a clean
-    // L2/L3 boundary.
+  const baseSplit = layoutEnabled ? splitAtBaseBoundary(systemPrompt) : null;
+  // After the BASE split (if it fired), look for the dynamic boundary in
+  // the REST half — never the original prompt — so the dyn marker can't
+  // fire inside the BASE prefix.
+  const sourceForDyn = baseSplit ? baseSplit.rest : systemPrompt;
+  const dynSplit = splitAtDynamicLayer(sourceForDyn);
+
+  // Case A: both boundaries — [base | identity+rules | dynamic]
+  if (baseSplit && dynSplit) {
     return [
       {
         role: "system",
-        content: systemPrompt,
+        content: baseSplit.base.trimEnd(),
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" } },
+        },
+      },
+      {
+        role: "system",
+        content: dynSplit.cached,
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" } },
+        },
+      },
+      {
+        role: "system",
+        content: dynSplit.fresh,
+      },
+    ];
+  }
+
+  // Case B: only BASE — [base | rest]
+  if (baseSplit && !dynSplit) {
+    return [
+      {
+        role: "system",
+        content: baseSplit.base.trimEnd(),
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" } },
+        },
+      },
+      {
+        role: "system",
+        content: baseSplit.rest.trimStart(),
         providerOptions: {
           anthropic: { cacheControl: { type: "ephemeral" } },
         },
@@ -94,35 +192,45 @@ export function buildCachedSystemMessages(
     ];
   }
 
+  // Case C: only dynamic — [cached | fresh]
+  // Concierge (Otis) falls here once `CURRENT CONTEXT\n` is in the regex.
+  if (!baseSplit && dynSplit) {
+    return [
+      {
+        role: "system",
+        content: dynSplit.cached,
+        providerOptions: {
+          anthropic: { cacheControl: { type: "ephemeral" } },
+        },
+      },
+      {
+        role: "system",
+        content: dynSplit.fresh,
+      },
+    ];
+  }
+
+  // Case D: neither — single block, fully cached.
   return [
-    // LAYER 1 + 2: identity + rules. Stable across every request for this
-    // agent → cached at this breakpoint. Anthropic treats the cumulative
-    // system content up to this point as the cache key.
     {
       role: "system",
-      content: split.cached,
+      content: systemPrompt,
       providerOptions: {
         anthropic: { cacheControl: { type: "ephemeral" } },
       },
-    },
-    // LAYER 3: dynamic context. Fresh every request → no cache marker.
-    {
-      role: "system",
-      content: split.fresh,
     },
   ];
 }
 
 /**
- * Helper that returns the same payload shape but typed for `generateText` /
- * sub-agent calls that take a `system` string OR a structured prompt. We
- * just expose the array so a caller can spread it into `messages`.
+ * @deprecated Returns a plain string — provider options never reach the
+ * model. Use `buildCachedSystemMessages(...)` and spread the result into
+ * a `messages` array instead.
+ *
+ * Kept temporarily so any remaining callers don't break during the
+ * rollout window. The orchestrator's `runSubagent` was migrated to the
+ * message form in Fix #4; remaining callers should follow.
  */
 export function getCachedSystem(systemPrompt: string): string {
-  // For sub-agent `generateText` calls we currently fall back to a plain
-  // system string — the v6 API for nested calls accepts a string most
-  // ergonomically. Caching still applies via the providerOptions on the
-  // outer streamText. If we later need per-subagent cache hits we can
-  // promote this to the message-array form.
   return systemPrompt;
 }

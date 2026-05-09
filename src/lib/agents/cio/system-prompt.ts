@@ -1,4 +1,5 @@
 import type { ResearchStats } from "@/lib/db/queries/companies-rest";
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
 
 interface AgentMemoryEntry {
   content: string;
@@ -100,5 +101,5 @@ export function buildCIOSystemPrompt(
 ): string {
   const dynamicContext = buildDynamicContext(stats, userName, memories);
 
-  return [CIO_IDENTITY, "", CIO_RULES, "", dynamicContext].join("\n");
+  return [BASE_SCAFFOLD, BASE_CACHE_MARKER, CIO_IDENTITY, "", CIO_RULES, "", dynamicContext].join("\n");
 }

@@ -137,6 +137,10 @@ vi.mock("@/lib/stripe/entitlements", () => ({
 
 vi.mock("../prompt-cache", () => ({
   getCachedSystem: getCachedSystemSpy,
+  // Fix #4: orchestrator now uses buildCachedSystemMessages. Pass-through
+  // mock returns a single system message so test assertions on `args.messages`
+  // see the original prompt content.
+  buildCachedSystemMessages: (s: string) => [{ role: "system", content: s }],
 }));
 
 // ---------------------------------------------------------------------------
@@ -273,16 +277,29 @@ function makeTimedGenerateText(
   perAgentSleepMs: Record<string, number>,
   shouldFailAgent?: string,
 ): void {
-  generateTextMock.mockImplementation(async ({ system }: { system: string }) => {
-    // Each system string is tagged "<AGENT>-system-prompt" by our stubs.
-    const agent = Object.keys(perAgentSleepMs).find((k) =>
-      system.startsWith(`${k}-system-prompt`),
-    );
-    if (!agent) {
-      throw new Error(
-        `generateText called with unknown system: ${system.slice(0, 40)}`,
+  generateTextMock.mockImplementation(
+    async (args: {
+      messages?: Array<{ role: string; content: string }>;
+      system?: string;
+    }) => {
+      // Fix #4: orchestrator now passes `messages` (with cache markers) instead
+      // of `system:`+`prompt:`. Extract the joined system content from either
+      // shape so this helper works pre- and post-migration.
+      const system = args.messages
+        ? args.messages
+            .filter((m) => m.role === "system")
+            .map((m) => m.content)
+            .join("\n")
+        : (args.system ?? "");
+      // Each system string is tagged "<AGENT>-system-prompt" by our stubs.
+      const agent = Object.keys(perAgentSleepMs).find((k) =>
+        system.includes(`${k}-system-prompt`),
       );
-    }
+      if (!agent) {
+        throw new Error(
+          `generateText called with unknown system: ${system.slice(0, 40)}`,
+        );
+      }
     await new Promise((r) => setTimeout(r, perAgentSleepMs[agent]));
     if (shouldFailAgent && agent === shouldFailAgent) {
       throw new Error(`${agent.toUpperCase()} simulated failure`);

@@ -1,4 +1,5 @@
 import type { DocumentStats } from "@/lib/db/queries/documents-rest";
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
 
 interface AgentMemoryEntry {
   content: string;
@@ -105,5 +106,5 @@ export function buildCMOSystemPrompt(
 ): string {
   const dynamicContext = buildDynamicContext(documentStats, userName, memories);
 
-  return [CMO_IDENTITY, "", CMO_RULES, "", dynamicContext].join("\n");
+  return [BASE_SCAFFOLD, BASE_CACHE_MARKER, CMO_IDENTITY, "", CMO_RULES, "", dynamicContext].join("\n");
 }

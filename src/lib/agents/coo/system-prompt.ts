@@ -1,4 +1,5 @@
 import type { BriefingData } from "@/lib/db/queries/communications-rest";
+import { BASE_CACHE_MARKER, BASE_SCAFFOLD } from "../base-scaffold";
 
 interface AgentMemoryEntry {
   content: string;
@@ -106,5 +107,5 @@ export function buildCOOSystemPrompt(
 ): string {
   const dynamicContext = buildDynamicContext(briefingData, userName, memories);
 
-  return [COO_IDENTITY, "", COO_RULES, "", dynamicContext].join("\n");
+  return [BASE_SCAFFOLD, BASE_CACHE_MARKER, COO_IDENTITY, "", COO_RULES, "", dynamicContext].join("\n");
 }

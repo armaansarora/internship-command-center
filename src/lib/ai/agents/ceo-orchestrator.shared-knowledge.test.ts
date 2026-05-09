@@ -97,7 +97,13 @@ vi.mock("@/lib/stripe/entitlements", () => ({
   getUserTier: getUserTierSpy,
 }));
 
-vi.mock("../prompt-cache", () => ({ getCachedSystem: getCachedSystemSpy }));
+vi.mock("../prompt-cache", () => ({
+  getCachedSystem: getCachedSystemSpy,
+  // Fix #4: orchestrator now uses buildCachedSystemMessages. Pass-through
+  // mock returns a single system message so test assertions on `args.messages`
+  // see the original prompt content.
+  buildCachedSystemMessages: (s: string) => [{ role: "system", content: s }],
+}));
 
 vi.mock("@/lib/db/queries/agent-memory-rest", () => ({
   getMemoriesForContext: getMemoriesForContextSpy,
@@ -273,8 +279,16 @@ describe("CEO orchestrator — CIO→CRO shared-knowledge round trip (R3.9)", ()
     // Capture the `system` string generateText was called with — that's what
     // the subagent actually saw.
     let capturedSystem: string | null = null;
-    generateTextMock.mockImplementation(async (args: { system: string }) => {
-      capturedSystem = args.system;
+    generateTextMock.mockImplementation(async (args: {
+      messages?: Array<{ role: string; content: string }>;
+      system?: string;
+    }) => {
+      capturedSystem = args.messages
+        ? args.messages
+            .filter((m) => m.role === "system")
+            .map((m) => m.content)
+            .join("\n")
+        : (args.system ?? "");
       return {
         text: "CRO compressed report citing Acme intel.",
         usage: { inputTokens: 100, outputTokens: 50 },
@@ -315,8 +329,16 @@ describe("CEO orchestrator — CIO→CRO shared-knowledge round trip (R3.9)", ()
     readSharedKnowledgeSpy.mockResolvedValue({});
 
     let capturedSystem: string | null = null;
-    generateTextMock.mockImplementation(async (args: { system: string }) => {
-      capturedSystem = args.system;
+    generateTextMock.mockImplementation(async (args: {
+      messages?: Array<{ role: string; content: string }>;
+      system?: string;
+    }) => {
+      capturedSystem = args.messages
+        ? args.messages
+            .filter((m) => m.role === "system")
+            .map((m) => m.content)
+            .join("\n")
+        : (args.system ?? "");
       return {
         text: "CRO compressed report (no peer intel).",
         usage: { inputTokens: 80, outputTokens: 40 },
