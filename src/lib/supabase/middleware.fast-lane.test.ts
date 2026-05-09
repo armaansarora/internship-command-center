@@ -8,7 +8,7 @@
  * DB errors must fail-open — better to let the guest see the lobby than
  * break sign-in when Supabase hiccups.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { afterEach, describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 vi.mock("@/lib/logger", () => ({
@@ -70,6 +70,16 @@ function request(url: string, cookie?: string): NextRequest {
 describe("R4.9 lobby routing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://supabase.test";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "test-key";
+    delete process.env.TOWER_DEV_PREVIEW_AUTH;
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://supabase.test";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "test-key";
+    delete process.env.TOWER_DEV_PREVIEW_AUTH;
   });
 
   it("lets an unauthenticated guest continue into /lobby (lobby is public)", async () => {
@@ -171,6 +181,38 @@ describe("R4.9 lobby routing", () => {
       error: "Authentication required",
       code: "UNAUTHENTICATED",
     });
+  });
+
+  it("routes local protected pages into dev preview login when preview auth is enabled", async () => {
+    vi.stubEnv("TOWER_DEV_PREVIEW_AUTH", "1");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://localhost:3001");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "test-key");
+    const getUser = vi.fn(async () => ({ data: { user: null } }));
+    nextMockClient = {
+      auth: { getUser },
+      from: vi.fn(),
+    };
+
+    const res = await updateSession(
+      request("http://localhost/penthouse?panel=briefing"),
+    );
+
+    const location = new URL(res.headers.get("location") ?? "");
+    expect(location.pathname).toBe("/api/dev/preview-login");
+    expect(location.searchParams.get("next")).toBe("/penthouse?panel=briefing");
+    expect(getUser).not.toHaveBeenCalled();
+  });
+
+  it("keeps protected APIs as 401s in local preview mode", async () => {
+    vi.stubEnv("TOWER_DEV_PREVIEW_AUTH", "1");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://localhost:3001");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "test-key");
+    nextMockClient = mkClient(null, null, false, true);
+
+    const res = await updateSession(request("http://localhost/api/stripe/checkout"));
+
+    expect(res.status).toBe(401);
+    expect(res.headers.get("location")).toBeNull();
   });
 
   it("clears malformed auth cookies on public routes before Supabase SSR can recover them", async () => {

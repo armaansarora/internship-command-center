@@ -1,5 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  getSupabaseAuthCookieBaseName as getAuthCookieBaseNameForUrl,
+  isDevPreviewAuthEnabled,
+  isLocalAppHost,
+} from "@/lib/dev-preview-auth";
 import { log } from "@/lib/logger";
 
 /**
@@ -38,6 +43,7 @@ function requireEnv(name: string): string {
  *   /api/auth/callback   — exact: Supabase OAuth callback runs pre-session.
  *   /api/auth/google/start — exact: first-party Google login kickoff.
  *   /api/auth/signout    — exact: must be able to clear stale/expired sessions.
+ *   /api/dev/preview-login — exact: local-only stub login for product review.
  *   /api/gmail/callback  — exact: Gmail connect callback and Google login return.
  *   /api/stripe/webhook  — exact: Stripe POSTs unauthenticated;
  *                                redirect would break billing (audit M-9 / P2-1).
@@ -54,6 +60,7 @@ const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
   { path: "/api/auth/callback" },
   { path: "/api/auth/google/start" },
   { path: "/api/auth/signout" },
+  { path: "/api/dev/preview-login" },
   { path: "/api/gmail/callback" },
   { path: "/api/stripe/webhook" },
   { path: "/api/cron", prefix: true },
@@ -98,6 +105,14 @@ export async function updateSession(request: NextRequest) {
   }
 
   const publicPath = isPathPublic(request.nextUrl.pathname);
+  if (
+    !publicPath &&
+    shouldUseDevPreviewLogin(request) &&
+    !readAuthCookieValue(request.cookies.getAll(), authCookieBaseName)
+  ) {
+    return devPreviewLoginResponse(request);
+  }
+
   if (publicPath && !isLobbyRoot(request.nextUrl.pathname)) {
     return supabaseResponse;
   }
@@ -132,6 +147,9 @@ export async function updateSession(request: NextRequest) {
   const user = await readMiddlewareUser(supabase, request.nextUrl.pathname);
 
   if (!user && !publicPath) {
+    if (shouldUseDevPreviewLogin(request)) {
+      return devPreviewLoginResponse(request);
+    }
     return unauthenticatedResponse(request);
   }
 
@@ -139,9 +157,9 @@ export async function updateSession(request: NextRequest) {
 }
 
 function getSupabaseAuthCookieBaseName(): string {
-  const url = new URL(requireEnv("NEXT_PUBLIC_SUPABASE_URL"));
-  const projectRef = url.hostname.split(".")[0] ?? "localhost";
-  return `sb-${projectRef}-auth-token`;
+  return getAuthCookieBaseNameForUrl(
+    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+  );
 }
 
 function unauthenticatedResponse(request: NextRequest): NextResponse {
@@ -159,6 +177,25 @@ function unauthenticatedResponse(request: NextRequest): NextResponse {
 
 function isApiPath(pathname: string): boolean {
   return pathname === "/api" || pathname.startsWith("/api/");
+}
+
+function shouldUseDevPreviewLogin(request: NextRequest): boolean {
+  return (
+    isDevPreviewAuthEnabled() &&
+    isLocalAppHost(request.nextUrl.hostname) &&
+    !isApiPath(request.nextUrl.pathname)
+  );
+}
+
+function devPreviewLoginResponse(request: NextRequest): NextResponse {
+  const url = request.nextUrl.clone();
+  url.pathname = "/api/dev/preview-login";
+  url.search = "";
+  url.searchParams.set(
+    "next",
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+  );
+  return NextResponse.redirect(url);
 }
 
 function hasMalformedAuthCookie(

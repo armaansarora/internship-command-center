@@ -43,6 +43,7 @@ import {
   type SharedKnowledgeFlatMap,
 } from "@/lib/db/queries/shared-knowledge-rest";
 import { getCachedSystem } from "../prompt-cache";
+import { appendAgentGovernance } from "@/lib/agents/governance-contract";
 
 import { buildCROSystemPrompt } from "@/lib/agents/cro/system-prompt";
 import { buildCROTools } from "@/lib/agents/cro/tools";
@@ -174,7 +175,10 @@ async function runSubagent<TStats>(
       readSharedKnowledge(userId, spec.agent),
     ]);
 
-    const systemPrompt = spec.buildSystem(stats, userName, memories, sharedKnowledge);
+    const systemPrompt = appendAgentGovernance(
+      spec.buildSystem(stats, userName, memories, sharedKnowledge),
+      spec.agent,
+    );
     const tools = spec.buildTools(userId);
     const modelId = getActiveModelId();
 

@@ -50,6 +50,7 @@ import { recordAgentRun } from "@/lib/ai/telemetry";
 import { extractAndStoreMemories } from "@/lib/ai/memory-extractor";
 import { getMemoriesForContext } from "@/lib/db/queries/agent-memory-rest";
 import { parseUiMessageRequest } from "@/lib/ai/request-guards";
+import { appendAgentGovernance } from "@/lib/agents/governance-contract";
 
 /**
  * Tools shape — record of `tool(...)` outputs from `ai`. We deliberately keep
@@ -219,6 +220,7 @@ export function createAgentRouteHandler<Context>(
     // Memory + context loaded in parallel. Memory call is intentionally
     // forgiving: any failure returns [] rather than throwing, so a memory
     // outage never blocks chat.
+    const userName = deriveUserName(user, defaultUserName);
     let ctx: Context;
     let memories: Array<{ content: string; category: string }> = [];
     try {
@@ -233,9 +235,10 @@ export function createAgentRouteHandler<Context>(
         { status: 500, headers: check.headers }
       );
     }
-    const userName = deriveUserName(user, defaultUserName);
-
-    const systemPrompt = buildSystemPrompt(ctx, userName, memories);
+    const systemPrompt = appendAgentGovernance(
+      buildSystemPrompt(ctx, userName, memories),
+      agentKey,
+    );
     const tools = {
       ...buildTools(user.id),
       ...(buildExtraTools ? buildExtraTools(user.id, userName) : {}),

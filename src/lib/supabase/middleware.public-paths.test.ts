@@ -83,6 +83,14 @@ describe("isPathPublic — exact paths", () => {
     expect(isPathPublic("/api/auth/signout/extra")).toBe(false);
   });
 
+  it("matches /api/dev/preview-login exactly", () => {
+    expect(isPathPublic("/api/dev/preview-login")).toBe(true);
+  });
+
+  it("rejects nested /api/dev/preview-login paths", () => {
+    expect(isPathPublic("/api/dev/preview-login/extra")).toBe(false);
+  });
+
   it("matches /api/gmail/callback exactly", () => {
     expect(isPathPublic("/api/gmail/callback")).toBe(true);
   });

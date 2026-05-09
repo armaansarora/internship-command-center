@@ -20,13 +20,18 @@ const scriptSources = [
   "https://plausible.io",
 ].join(" ");
 
+const devConnectSources =
+  process.env.NODE_ENV === "development"
+    ? " http://localhost:3001 http://127.0.0.1:3001 ws://localhost:3001 ws://127.0.0.1:3001"
+    : "";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src ${scriptSources}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
   "font-src 'self' https://fonts.gstatic.com https://cdn.fontshare.com data:",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.anthropic.com https://api.stripe.com https://plausible.io https://*.ingest.sentry.io",
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co${devConnectSources} https://api.openai.com https://api.anthropic.com https://api.stripe.com https://plausible.io https://*.ingest.sentry.io`,
   "frame-src https://js.stripe.com https://hooks.stripe.com",
   "frame-ancestors 'none'",
   "object-src 'none'",

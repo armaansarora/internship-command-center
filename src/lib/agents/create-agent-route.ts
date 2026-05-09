@@ -10,6 +10,7 @@ import { consumeAiQuota } from "@/lib/ai/quota";
 import { log } from "@/lib/logger";
 import { requireEnv } from "@/lib/env";
 import { parseUiMessageRequest } from "@/lib/ai/request-guards";
+import { appendAgentGovernance } from "@/lib/agents/governance-contract";
 
 /**
  * Shape of the context each agent loads before the LLM is invoked.
@@ -122,7 +123,7 @@ export function createAgentRoute(config: AgentRouteConfig): (req: Request) => Pr
     try {
       const result = streamText({
         model: anthropic(modelId),
-        system: ctx.systemPrompt,
+        system: appendAgentGovernance(ctx.systemPrompt, config.id),
         messages: modelMessages,
         tools: ctx.tools,
         stopWhen: stepCountIs(maxSteps),
