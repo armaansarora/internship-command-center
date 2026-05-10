@@ -292,6 +292,7 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 | Add a new cron job | `src/app/api/cron/<name>/route.ts` (wrap with `withCronHealth`) + add schedule to `vercel.json` |
 | Database table changes | `src/db/schema.ts` → `npx drizzle-kit generate` → apply via Supabase MCP or dashboard |
 | Database queries at runtime | `src/lib/db/queries/<table>-rest.ts` (Supabase REST — never the Drizzle `db` object) |
+| Snake_case row types for Supabase REST | `import { Row } from "@/db/database.types"` then `Row<"applications">` etc. (Fix #5 derives them from Drizzle so they cannot drift) |
 | Onboarding flow edits | `src/app/lobby/onboarding/ConciergeFlow.tsx` + `src/app/lobby/lobby-client.tsx` |
 | Lobby UI / sign-in | `src/app/lobby/lobby-client.tsx` |
 | Settings UI | `src/app/(authenticated)/settings/settings-client.tsx` (1355 LOC, big file) |

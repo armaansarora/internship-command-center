@@ -12,6 +12,8 @@ on:
       - 'src/app/(marketing)/terms/**'
       - 'src/app/(marketing)/privacy/**'
       - 'src/app/(marketing)/pricing/**'
+      - 'src/db/database.types.ts'
+      - 'src/db/schema.ts'
   workflow_dispatch:
 
 jobs:
@@ -37,6 +39,9 @@ jobs:
 
       - name: Run config tests
         run: npm test -- src/lib/config
+
+      - name: Run Row type guard (Fix #5)
+        run: npm test -- src/db
 
       - name: Typecheck whole project
         run: npx tsc --noEmit

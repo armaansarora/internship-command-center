@@ -10,6 +10,7 @@ import { getApplicationLimit } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
 import { buildPipelineStatsFromAggregates } from "./pipeline-stats-from-aggregates";
 import type { Application } from "@/db/schema";
+import type { Row } from "@/db/database.types";
 import type {
   CreateApplicationInput,
   UpdateApplicationInput,
@@ -44,30 +45,13 @@ interface PipelineStatsOptions {
   useAdmin?: boolean;
 }
 
-export interface ApplicationRow {
-  id: string;
-  user_id: string;
-  company_id: string | null;
-  role: string;
-  url: string | null;
-  status: string;
-  tier: number | null;
-  applied_at: string | null;
-  source: string | null;
-  notes: string | null;
-  sector: string | null;
-  contact_id: string | null;
-  salary: string | null;
-  location: string | null;
-  position: string | null;
-  company_name: string | null;
-  last_activity_at: string | null;
-  match_score: string | null;
-  deadline_at: string | null;
-  deadline_alerts_sent: Record<string, string> | null;
-  created_at: string;
-  updated_at: string;
-}
+/**
+ * The full snake_case shape Supabase REST returns for an `applications` row.
+ * Derived from the Drizzle schema via `database.types.ts` so any column added
+ * to `applications` shows up here without a manual edit, and any drift between
+ * the Drizzle definition and a previous hand-rolled interface goes away.
+ */
+export type ApplicationRow = Row<"applications">;
 
 export interface ApplicationForAgent {
   id: string;

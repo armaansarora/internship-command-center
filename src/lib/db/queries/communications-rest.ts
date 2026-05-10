@@ -91,15 +91,16 @@ export interface OutreachQueueItem {
 // Raw DB row types
 // ---------------------------------------------------------------------------
 
-interface ApplicationRow {
-  id: string;
-  company_name: string | null;
-  role: string;
-  status: string;
-  last_activity_at: string | null;
-  created_at: string;
-  notes: string | null;
-}
+type ApplicationRow = Pick<
+  import("@/db/database.types").Row<"applications">,
+  | "id"
+  | "company_name"
+  | "role"
+  | "status"
+  | "last_activity_at"
+  | "created_at"
+  | "notes"
+>;
 
 interface InterviewRow {
   id: string;

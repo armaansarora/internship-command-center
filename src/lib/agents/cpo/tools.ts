@@ -24,11 +24,10 @@ interface InterviewRow {
   created_at: string;
 }
 
-interface ApplicationRow {
-  id: string;
-  company_name: string | null;
-  role: string;
-}
+type ApplicationRow = Pick<
+  import("@/db/database.types").Row<"applications">,
+  "id" | "company_name" | "role"
+>;
 
 interface CompanyRow {
   id: string;

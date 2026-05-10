@@ -40,6 +40,10 @@ const TABLES = [
 const ALLOWLIST = new Set<string>([
   // Drizzle schema — column + RLS policy definitions. Rule doesn't apply.
   "src/db/schema.ts",
+  // Row-type derivation (Fix #5) — `Tables` interface keys every table for
+  // Row<…> lookup. No queries here, only type aliases over the Drizzle
+  // shape. The privacy contract is enforced at the call sites in *-rest.ts.
+  "src/db/database.types.ts",
   // Rebuild helper — every query is explicitly `.eq("user_id", userId)` or
   // builds insertRows with `user_id: userId`.  The file mentions the table
   // in three JSDoc blocks + the final `.insert(insertRows)` call whose

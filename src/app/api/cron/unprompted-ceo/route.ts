@@ -45,15 +45,16 @@ interface ActiveUser {
   id: string;
 }
 
-interface ApplicationRow {
-  id: string;
-  status: string;
-  last_activity_at: string | null;
-  updated_at: string;
-  created_at: string;
-  company_name: string | null;
-  role: string;
-}
+type ApplicationRow = Pick<
+  import("@/db/database.types").Row<"applications">,
+  | "id"
+  | "status"
+  | "last_activity_at"
+  | "updated_at"
+  | "created_at"
+  | "company_name"
+  | "role"
+>;
 
 interface NotificationRow {
   source_agent: string | null;
