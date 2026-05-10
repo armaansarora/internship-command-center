@@ -28,6 +28,7 @@ import {
   beforeEach,
   afterEach,
 } from "vitest";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Mock the @/lib/supabase/admin module with a hoisted fixture. Each test
@@ -40,18 +41,18 @@ interface Profile {
   networking_consent_version: number | null;
 }
 
+// Synthesised view shape — not a direct table column. Keep hand-rolled.
 interface TargetRow {
   user_id: string;
   target_company_name: string;
   created_at: string;
 }
 
-interface ContactRow {
-  id: string;
-  company_name: string | null;
-  last_contact_at: string | null;
-  user_id: string;
-}
+// Joined projection: contacts + a companies(name) join shape.
+type ContactRow = Pick<
+  Row<"contacts">,
+  "id" | "last_contact_at" | "user_id"
+> & { company_name: string | null };
 
 interface Fixture {
   profiles: Profile[];

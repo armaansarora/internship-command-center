@@ -5,6 +5,7 @@ import { sendOutreachEmail } from "@/lib/email/outreach";
 import { logSecurityEvent } from "@/lib/audit/log";
 import { log } from "@/lib/logger";
 import { withCronHealth } from "@/lib/cron/health";
+import type { Row } from "@/db/database.types";
 
 /**
  * GET /api/cron/outreach-sender
@@ -27,15 +28,16 @@ export const maxDuration = 120;
 
 const OUTREACH_BATCH_LIMIT = 30;
 
-interface ApprovedRow {
-  id: string;
-  user_id: string;
-  application_id: string | null;
-  contact_id: string | null;
-  subject: string | null;
-  body: string | null;
-  type: string | null;
-}
+type ApprovedRow = Pick<
+  Row<"outreach_queue">,
+  | "id"
+  | "user_id"
+  | "application_id"
+  | "contact_id"
+  | "subject"
+  | "body"
+  | "type"
+>;
 
 async function handle(req: NextRequest): Promise<NextResponse> {
   const guard = verifyCronRequest(req);

@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { verifyCronRequest } from "@/lib/auth/cron";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 import {
   generateMorningBriefing,
   type MorningBriefingInput,
@@ -36,12 +37,10 @@ export const maxDuration = 300;
 const PAGE_SIZE = 500;
 const WORKERS = 6;
 
-interface UserRow {
-  id: string;
-  display_name: string | null;
-  email: string | null;
-  timezone: string | null;
-}
+type UserRow = Pick<
+  Row<"user_profiles">,
+  "id" | "display_name" | "email" | "timezone"
+>;
 
 async function handle(req: Request): Promise<Response> {
   const auth = verifyCronRequest(req);

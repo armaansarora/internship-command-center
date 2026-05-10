@@ -17,6 +17,7 @@ import { getUser, createClient } from "@/lib/supabase/server";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import {
   generateStateOfMonthPdf,
@@ -30,14 +31,10 @@ export const maxDuration = 60;
 
 const MONTH_RE = /^(\d{4})-(\d{2})$/;
 
-interface ApplicationMonthRow {
-  id: string;
-  status: string | null;
-  tier: number | null;
-  applied_at: string | null;
-  last_activity_at: string | null;
-  created_at: string;
-}
+type ApplicationMonthRow = Pick<
+  Row<"applications">,
+  "id" | "status" | "tier" | "applied_at" | "last_activity_at" | "created_at"
+>;
 
 // ---------------------------------------------------------------------------
 // Helpers — pure, testable

@@ -18,27 +18,18 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export interface AgentDispatchRow {
-  id: string;
-  user_id: string;
-  request_id: string;
-  parent_dispatch_id: string | null;
-  agent: string;
-  depends_on: string[];
-  task: string;
-  status: "queued" | "running" | "completed" | "failed";
-  summary: string | null;
-  tokens_used: number | null;
-  started_at: string | null;
-  completed_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
+/**
+ * Snake_case `agent_dispatches` row. Derived from the Drizzle schema via
+ * `database.types.ts` so the status enum and depends_on array stay in
+ * sync with the live column definitions. (Fix #5.)
+ */
+export type AgentDispatchRow = Row<"agent_dispatches">;
 
 // ---------------------------------------------------------------------------
 // Mutations

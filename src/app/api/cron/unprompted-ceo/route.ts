@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { log } from "@/lib/logger";
 import { withCronHealth } from "@/lib/cron/health";
+import type { Row } from "@/db/database.types";
 import {
   shouldFireStaleCluster,
   shouldFireRejectionCluster,
@@ -46,7 +47,7 @@ interface ActiveUser {
 }
 
 type ApplicationRow = Pick<
-  import("@/db/database.types").Row<"applications">,
+  Row<"applications">,
   | "id"
   | "status"
   | "last_activity_at"
@@ -56,12 +57,10 @@ type ApplicationRow = Pick<
   | "role"
 >;
 
-interface NotificationRow {
-  source_agent: string | null;
-  source_entity_id: string | null;
-  source_entity_type: string | null;
-  created_at: string;
-}
+type NotificationRow = Pick<
+  Row<"notifications">,
+  "source_agent" | "source_entity_id" | "source_entity_type" | "created_at"
+>;
 
 async function handle(request: NextRequest): Promise<Response> {
   const auth = verifyCronRequest(request);

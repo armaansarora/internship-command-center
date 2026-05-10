@@ -6,6 +6,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -92,7 +93,7 @@ export interface OutreachQueueItem {
 // ---------------------------------------------------------------------------
 
 type ApplicationRow = Pick<
-  import("@/db/database.types").Row<"applications">,
+  Row<"applications">,
   | "id"
   | "company_name"
   | "role"
@@ -102,65 +103,77 @@ type ApplicationRow = Pick<
   | "notes"
 >;
 
-interface InterviewRow {
-  id: string;
-  application_id: string;
-  company_id: string | null;
-  round: string | null;
-  format: string | null;
-  scheduled_at: string;
-  duration_minutes: number | null;
-  location: string | null;
-  interviewer_name: string | null;
-  status: string;
-  calendar_event_id: string | null;
+/**
+ * Communications join rows (Fix #5). Each row picks the fields that the
+ * `getPendingFollowupsRest` query actually selects, derived from Drizzle
+ * so column drift surfaces at compile time. `InterviewRow` adds the
+ * PostgREST join shape (`applications: [{...}]`) on top of the picked
+ * `interviews` columns.
+ */
+type InterviewRow = Pick<
+  Row<"interviews">,
+  | "id"
+  | "application_id"
+  | "company_id"
+  | "round"
+  | "format"
+  | "scheduled_at"
+  | "duration_minutes"
+  | "location"
+  | "interviewer_name"
+  | "status"
+  | "calendar_event_id"
+> & {
   // Supabase join returns array when using !inner
   applications: { company_name: string | null; role: string }[] | null;
-}
+};
 
-interface EmailRow {
-  id: string;
-  application_id: string | null;
-  contact_id: string | null;
-  from_address: string;
-  to_address: string | null;
-  subject: string | null;
-  snippet: string | null;
-  classification: string | null;
-  urgency: string | null;
-  suggested_action: string | null;
-  is_read: boolean;
-  is_processed: boolean;
-  received_at: string;
-}
+type EmailRow = Pick<
+  Row<"emails">,
+  | "id"
+  | "application_id"
+  | "contact_id"
+  | "from_address"
+  | "to_address"
+  | "subject"
+  | "snippet"
+  | "classification"
+  | "urgency"
+  | "suggested_action"
+  | "is_read"
+  | "is_processed"
+  | "received_at"
+>;
 
-interface CalendarEventRow {
-  id: string;
-  google_event_id: string | null;
-  title: string;
-  description: string | null;
-  start_at: string;
-  end_at: string;
-  location: string | null;
-  interview_id: string | null;
-  source: string | null;
-}
+type CalendarEventRow = Pick<
+  Row<"calendar_events">,
+  | "id"
+  | "google_event_id"
+  | "title"
+  | "description"
+  | "start_at"
+  | "end_at"
+  | "location"
+  | "interview_id"
+  | "source"
+>;
 
-interface OutreachRow {
-  id: string;
-  application_id: string | null;
-  contact_id: string | null;
-  company_id: string | null;
-  type: string;
-  subject: string;
-  body: string;
-  status: string;
-  generated_by: string | null;
-  approved_at: string | null;
-  sent_at: string | null;
-  resend_message_id: string | null;
-  created_at: string;
-}
+type OutreachRow = Pick<
+  Row<"outreach_queue">,
+  | "id"
+  | "application_id"
+  | "contact_id"
+  | "company_id"
+  | "type"
+  | "subject"
+  | "body"
+  | "status"
+  | "generated_by"
+  | "approved_at"
+  | "sent_at"
+  | "resend_message_id"
+  | "created_at"
+>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -257,11 +270,14 @@ export async function getUpcomingInterviews(
     companyId: row.company_id,
     round: row.round,
     format: row.format,
-    scheduledAt: row.scheduled_at,
+    // scheduled_at is filterable-not-null at the query level (gte/lte
+    // bounds above), so coalesce defends the DTO contract against the
+    // Drizzle schema saying nullable.
+    scheduledAt: row.scheduled_at ?? "",
     durationMinutes: row.duration_minutes,
     location: row.location,
     interviewerName: row.interviewer_name,
-    status: row.status,
+    status: row.status ?? "scheduled",
     calendarEventId: row.calendar_event_id,
     companyName: row.applications?.[0]?.company_name ?? null,
     role: row.applications?.[0]?.role ?? "Unknown Role",
@@ -298,16 +314,16 @@ export async function getRecentEmails(
     id: row.id,
     applicationId: row.application_id,
     contactId: row.contact_id,
-    fromAddress: row.from_address,
+    fromAddress: row.from_address ?? "",
     toAddress: row.to_address,
     subject: row.subject,
     snippet: row.snippet,
     classification: row.classification,
     urgency: row.urgency,
     suggestedAction: row.suggested_action,
-    isRead: row.is_read,
-    isProcessed: row.is_processed,
-    receivedAt: row.received_at,
+    isRead: row.is_read ?? false,
+    isProcessed: row.is_processed ?? false,
+    receivedAt: row.received_at ?? "",
   }));
 }
 
@@ -342,10 +358,12 @@ export async function getCalendarEvents(
   return (data as CalendarEventRow[]).map((row) => ({
     id: row.id,
     googleEventId: row.google_event_id,
-    title: row.title,
+    title: row.title ?? "",
     description: row.description,
-    startAt: row.start_at,
-    endAt: row.end_at,
+    // start_at/end_at are filterable-not-null in the query above
+    // (gte/lte bounds); coalesce defends the DTO contract.
+    startAt: row.start_at ?? "",
+    endAt: row.end_at ?? "",
     location: row.location,
     interviewId: row.interview_id,
     source: row.source,
@@ -416,11 +434,11 @@ export async function getDailyBriefingData(userId: string): Promise<BriefingData
       companyId: row.company_id,
       round: row.round,
       format: row.format,
-      scheduledAt: row.scheduled_at,
+      scheduledAt: row.scheduled_at ?? "",
       durationMinutes: row.duration_minutes,
       location: row.location,
       interviewerName: row.interviewer_name,
-      status: row.status,
+      status: row.status ?? "scheduled",
       calendarEventId: row.calendar_event_id,
       companyName: row.applications?.[0]?.company_name ?? null,
       role: row.applications?.[0]?.role ?? "Unknown Role",
@@ -559,9 +577,9 @@ export async function getOutreachQueue(
     applicationId: row.application_id,
     contactId: row.contact_id,
     companyId: row.company_id,
-    type: row.type,
-    subject: row.subject,
-    body: row.body,
+    type: row.type ?? "cold_email",
+    subject: row.subject ?? "",
+    body: row.body ?? "",
     status: row.status,
     generatedBy: row.generated_by,
     approvedAt: row.approved_at,

@@ -15,27 +15,10 @@
  * SupabaseClient as their first arg and throw on error.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Row } from "@/db/database.types";
 
-export interface CompBandsRow {
-  id: string;
-  company_name_normalized: string;
-  role: string;
-  location: string;
-  level: string;
-  base_p25: number | null;
-  base_p50: number | null;
-  base_p75: number | null;
-  bonus_p25: number | null;
-  bonus_p50: number | null;
-  bonus_p75: number | null;
-  equity_p25: number | null;
-  equity_p50: number | null;
-  equity_p75: number | null;
-  sample_size: number;
-  source: string;
-  scraped_at: string;
-  expires_at: string;
-}
+/** Raw snake_case `company_comp_bands` row (Fix #5). */
+export type CompBandsRow = Row<"company_comp_bands">;
 
 /**
  * Read a non-expired cache row for the given (company, role, location, level)

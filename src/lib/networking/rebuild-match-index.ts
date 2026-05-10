@@ -6,6 +6,7 @@ import {
 } from "./match-algorithm";
 import { CURRENT_CONSENT_VERSION } from "./consent-version";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 /**
  * shared per-user match-index rebuild helper.
@@ -41,27 +42,31 @@ const TTL_HOURS = 24;
 const COUNTERPARTY_BUDGET = 500;
 const TOP_N = 25;
 
-interface ProfileConsentRow {
-  networking_consent_at: string | null;
-  networking_revoked_at: string | null;
-  networking_consent_version: number | null;
-}
+type ProfileConsentRow = Pick<
+  Row<"user_profiles">,
+  | "networking_consent_at"
+  | "networking_revoked_at"
+  | "networking_consent_version"
+>;
 
 interface OtherProfileRow extends ProfileConsentRow {
   id: string;
 }
 
+// `target_company_name` is shaped by a SQL view, not a direct table column;
+// keep it hand-rolled (closest column is the networking-matching cache).
 interface TargetRow {
   target_company_name: string;
   created_at: string | null;
 }
 
-interface ContactRow {
-  id: string;
-  company_name: string | null;
-  last_contact_at: string | null;
-  user_id: string;
-}
+// Joined projection: the SQL query joins `companies(name)` onto `contacts`,
+// so the row has the contact's own columns plus a `company_name` synthesised
+// by PostgREST.
+type ContactRow = Pick<
+  Row<"contacts">,
+  "id" | "user_id" | "last_contact_at"
+> & { company_name: string | null };
 
 /**
  * Pure consent evaluator. Mirrors `isConsentedShape` in consent-guard but

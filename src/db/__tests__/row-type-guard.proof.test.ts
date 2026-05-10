@@ -26,8 +26,41 @@ const REPO_ROOT = join(__dirname, "..", "..", "..");
  * Snake_case row-shape types that already live in `database.types.ts`.
  * Adding a name here means: "all hand-rolled `interface <Name> {` is now
  * forbidden in src/; use the Row<…> helper instead."
+ *
+ * Excluded from this list (kept hand-rolled by intent):
+ *   - CronRunRow, WaitlistInviteRow — tables not in Drizzle schema yet.
+ *   - DeadlineRow — synthesized union over applications+offers, not a
+ *     pure DB row.
+ *   - TargetRow, TopDiscoveredRow — view-shaped projections.
+ *   - MockRow, PlantedRow — test fixtures by name.
  */
-const MIGRATED_TYPES = ["ApplicationRow"] as const;
+const MIGRATED_TYPES = [
+  "ApplicationRow",
+  "AgentDispatchRow",
+  "BaseResumeRow",
+  "ContactRow",
+  "CompanyRow",
+  "DocumentRow",
+  "NotificationRow",
+  "CompanyEmbeddingRow",
+  "JobEmbeddingRow",
+  "CompBandsRow",
+  "InterviewRow",
+  "EmailRow",
+  "CalendarEventRow",
+  "CalendarRow",
+  "OutreachRow",
+  "InterviewPrepRow",
+  "ApplicationPrepRow",
+  "ProfileConsentRow",
+  "ProfileStateRow",
+  "StripeWebhookRow",
+  "NotificationQueueRow",
+  "UserRow",
+  "ApprovedRow",
+  "AppRow",
+  "ApplicationMonthRow",
+] as const;
 
 /** Files allowed to reference the migrated type names. */
 const ALLOWED_FILES = new Set<string>([

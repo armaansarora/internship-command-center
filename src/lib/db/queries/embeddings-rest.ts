@@ -11,6 +11,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { embed, embedMany } from "ai";
 import { getEmbeddingModel } from "@/lib/ai/model";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -23,25 +24,11 @@ const DEFAULT_MATCH_COUNT = 5;
 // Types
 // ---------------------------------------------------------------------------
 
-export interface CompanyEmbeddingRow {
-  id: string;
-  user_id: string;
-  company_id: string;
-  content: string | null;
-  embedding: number[] | null;
-  created_at: string;
-  updated_at: string;
-}
+/** Raw snake_case `company_embeddings` row (Fix #5). */
+export type CompanyEmbeddingRow = Row<"company_embeddings">;
 
-export interface JobEmbeddingRow {
-  id: string;
-  user_id: string;
-  application_id: string;
-  content: string | null;
-  embedding: number[] | null;
-  created_at: string;
-  updated_at: string;
-}
+/** Raw snake_case `job_embeddings` row (Fix #5). */
+export type JobEmbeddingRow = Row<"job_embeddings">;
 
 export interface SimilarityResult {
   id: string;

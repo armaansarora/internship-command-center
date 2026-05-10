@@ -39,6 +39,7 @@ import {
 } from "vitest";
 import { NextRequest } from "next/server";
 import { _resetEnvCacheForTests } from "@/lib/env";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // In-memory row that the three route handlers share via mocked supabase
@@ -49,21 +50,22 @@ import { _resetEnvCacheForTests } from "@/lib/env";
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 const ROW_ID = "22222222-2222-4222-8222-222222222222";
 
-interface OutreachRow {
-  id: string;
-  user_id: string;
-  application_id: string | null;
-  contact_id: string | null;
-  subject: string | null;
-  body: string | null;
-  type: string | null;
-  status: "pending_approval" | "approved" | "sent" | "rejected" | "expired";
-  approved_at: string | null;
-  send_after: string | null;
-  sent_at: string | null;
-  resend_message_id: string | null;
-  cancelled_at: string | null;
-}
+type OutreachRow = Pick<
+  Row<"outreach_queue">,
+  | "id"
+  | "user_id"
+  | "application_id"
+  | "contact_id"
+  | "subject"
+  | "body"
+  | "type"
+  | "status"
+  | "approved_at"
+  | "send_after"
+  | "sent_at"
+  | "resend_message_id"
+  | "cancelled_at"
+>;
 
 const row: OutreachRow = {
   id: ROW_ID,

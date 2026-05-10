@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { rebuildMatchIndexForUser } from "@/lib/networking/rebuild-match-index";
 import { log } from "@/lib/logger";
 import { withCronHealth } from "@/lib/cron/health";
+import type { Row } from "@/db/database.types";
 
 /**
  * GET /api/cron/match-index
@@ -29,9 +30,7 @@ export const maxDuration = 300;
 const PAGE_SIZE = 500;
 const WORKERS = 6;
 
-interface UserRow {
-  id: string;
-}
+type UserRow = Pick<Row<"user_profiles">, "id">;
 
 interface UserResult {
   userId: string;

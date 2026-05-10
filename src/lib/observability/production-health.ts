@@ -2,6 +2,7 @@ import vercelConfig from "../../../vercel.json";
 import { isOwner } from "@/lib/auth/owner";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 export interface CronHealthRun {
   jobName: string;
@@ -34,6 +35,8 @@ export interface ProductionHealthSummary {
   };
 }
 
+// cron_runs is not in the Drizzle schema (raw-SQL table). Keep this shape
+// hand-rolled until the table joins schema.ts.
 interface CronRunRow {
   job_name: string;
   started_at: string | null;
@@ -43,13 +46,10 @@ interface CronRunRow {
   duration_ms: number | null;
 }
 
-interface StripeWebhookRow {
-  id: string;
-  type: string;
-  received_at: string;
-  status: string;
-  error: string | null;
-}
+type StripeWebhookRow = Pick<
+  Row<"stripe_webhook_events">,
+  "id" | "type" | "received_at" | "status" | "error"
+>;
 
 const DAILY_STALE_MS = 36 * 60 * 60 * 1000;
 const WEEKLY_STALE_MS = 8 * 24 * 60 * 60 * 1000;

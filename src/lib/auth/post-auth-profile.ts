@@ -1,12 +1,13 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 type AuthUser = Pick<User, "id" | "email" | "user_metadata">;
 
-interface ProfileStateRow {
-  arrival_played_at: string | null;
-  concierge_completed_at: string | null;
-}
+type ProfileStateRow = Pick<
+  Row<"user_profiles">,
+  "arrival_played_at" | "concierge_completed_at"
+>;
 
 function metadataString(
   metadata: AuthUser["user_metadata"],

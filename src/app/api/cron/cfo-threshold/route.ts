@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { createNotification } from "@/lib/db/queries/notifications-rest";
 import { log } from "@/lib/logger";
 import { withCronHealth } from "@/lib/cron/health";
+import type { Row } from "@/db/database.types";
 
 /**
  * GET /api/cron/cfo-threshold
@@ -61,11 +62,7 @@ const DENOMINATOR_STATUSES = new Set([
   "rejected",
 ]);
 
-interface AppRow {
-  user_id: string;
-  status: string;
-  created_at: string;
-}
+type AppRow = Pick<Row<"applications">, "user_id" | "status" | "created_at">;
 
 interface UserBucket {
   thisWeek: { advanced: number; total: number };

@@ -6,27 +6,14 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-/** Raw snake_case row from the documents table */
-export interface DocumentRow {
-  id: string;
-  user_id: string;
-  application_id: string | null;
-  company_id: string | null;
-  type: string | null;
-  title: string | null;
-  content: string | null;
-  version: number | null;
-  is_active: boolean | null;
-  parent_id: string | null;
-  generated_by: string | null;
-  created_at: string;
-  updated_at: string;
-}
+/** Raw snake_case `documents` row (Fix #5). */
+export type DocumentRow = Row<"documents">;
 
 /** camelCase version used in agent tools and UI components */
 export interface DocumentForAgent {

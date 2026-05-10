@@ -9,24 +9,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-/** Raw snake_case row from the base_resumes table. */
-export interface BaseResumeRow {
-  id: string;
-  user_id: string;
-  storage_path: string;
-  original_filename: string;
-  file_size_bytes: number;
-  parsed_text: string;
-  page_count: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+/** Raw snake_case row from the base_resumes table (derived in Fix #5). */
+export type BaseResumeRow = Row<"base_resumes">;
 
 /** camelCase shape consumed by CMO tooling + UI. */
 export interface BaseResumeForAgent {

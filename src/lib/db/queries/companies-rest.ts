@@ -6,35 +6,24 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-/** Raw snake_case row from the companies table */
-export interface CompanyRow {
-  id: string;
-  user_id: string;
-  name: string;
-  sector: string | null;
-  industry: string | null;
-  // Note: `employee_count`, `website`, `notes` are type-only placeholders.
-  // The columns don't exist on the `companies` table; these fields always
-  // emit `null` so consumers see a stable shape rather than `undefined`.
+/**
+ * Raw snake_case `companies` row (Fix #5). Derived from Drizzle for every
+ * real column, intersected with three legacy placeholders that consumers
+ * still read: `employee_count`, `website`, `notes` do not exist on the
+ * table and are always written as `null` by `companies-rest.ts` so the UI
+ * sees a stable shape rather than `undefined`.
+ */
+export type CompanyRow = Row<"companies"> & {
   employee_count: string | null;
-  headquarters: string | null;
   website: string | null;
-  description: string | null;
-  culture_summary: string | null;
-  recent_news: string | null;
-  financials_summary: string | null;
-  internship_intel: string | null;
-  research_freshness: string | null;
-  tier: number | null;
   notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
+};
 
 /** camelCase version used in agent tools and UI components */
 export interface CompanyForAgent {

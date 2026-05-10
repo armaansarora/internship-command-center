@@ -1,15 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Row } from "@/db/database.types";
 
-interface InterviewPrepRow {
-  application_id: string;
-  company_id: string | null;
-  round: string | null;
-}
+type InterviewPrepRow = Pick<
+  Row<"interviews">,
+  "application_id" | "company_id" | "round"
+>;
 
-interface ApplicationPrepRow {
-  company_name: string | null;
-  role: string | null;
-}
+type ApplicationPrepRow = Pick<Row<"applications">, "company_name" | "role">;
 
 export async function createPrepPacketForInterview(
   supabase: SupabaseClient,

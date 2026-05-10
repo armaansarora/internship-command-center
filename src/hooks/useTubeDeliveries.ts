@@ -29,6 +29,7 @@
 import { useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { RealtimeChannel, SupabaseClient } from "@supabase/supabase-js";
+import type { Row } from "@/db/database.types";
 
 export interface TubeArrival {
   id: string;
@@ -49,15 +50,16 @@ const SWEEP_INTERVAL_MS = 60_000;
  * Row shape we need from `notifications`. Keep lean to minimise payload —
  * we don't need is_read / is_dismissed / timestamps here.
  */
-interface NotificationQueueRow {
-  id: string;
-  title: string | null;
-  body: string | null;
-  source_agent: string | null;
-  actions: unknown;
-  deliver_after: string | null;
-  delivered_at: string | null;
-}
+type NotificationQueueRow = Pick<
+  Row<"notifications">,
+  | "id"
+  | "title"
+  | "body"
+  | "source_agent"
+  | "actions"
+  | "deliver_after"
+  | "delivered_at"
+>;
 
 /**
  * Coerce a `jsonb` actions column into our narrow Array shape, or null.

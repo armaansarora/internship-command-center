@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { generateFollowUpDraft } from "@/lib/ai/structured/follow-up-draft";
 import { log } from "@/lib/logger";
 import { withCronHealth } from "@/lib/cron/health";
+import type { Row } from "@/db/database.types";
 
 /**
  * GET /api/cron/draft-follow-ups
@@ -39,10 +40,7 @@ const ACTIVE_STATUSES = [
   "under_review",
 ] as const;
 
-interface UserRow {
-  id: string;
-  timezone: string | null;
-}
+type UserRow = Pick<Row<"user_profiles">, "id" | "timezone">;
 
 interface StaleApp {
   id: string;
@@ -53,11 +51,7 @@ interface StaleApp {
   last_activity_at: string | null;
 }
 
-interface ContactRow {
-  id: string;
-  name: string | null;
-  warmth: number | null;
-}
+type ContactRow = Pick<Row<"contacts">, "id" | "name" | "warmth">;
 
 /**
  * Extract the user's local hour (0–23) from a UTC instant using Intl.

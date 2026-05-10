@@ -2,55 +2,56 @@ import { tool } from "ai";
 import { z } from "zod/v4";
 import { createClient } from "@/lib/supabase/server";
 import { generateStructuredPrepPacket } from "@/lib/ai/structured/prep-packet";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
-// Local Types
+// Local Types — projections of the snake_case Row<…> shape (Fix #5).
 // ---------------------------------------------------------------------------
 
-interface InterviewRow {
-  id: string;
-  application_id: string;
-  company_id: string | null;
-  round: string | null;
-  format: string | null;
-  scheduled_at: string | null;
-  duration_minutes: number | null;
-  location: string | null;
-  interviewer_name: string | null;
-  interviewer_title: string | null;
-  status: string | null;
-  prep_packet_id: string | null;
-  notes: string | null;
-  created_at: string;
-}
-
-type ApplicationRow = Pick<
-  import("@/db/database.types").Row<"applications">,
-  "id" | "company_name" | "role"
+type InterviewRow = Pick<
+  Row<"interviews">,
+  | "id"
+  | "application_id"
+  | "company_id"
+  | "round"
+  | "format"
+  | "scheduled_at"
+  | "duration_minutes"
+  | "location"
+  | "interviewer_name"
+  | "interviewer_title"
+  | "status"
+  | "prep_packet_id"
+  | "notes"
+  | "created_at"
 >;
 
-interface CompanyRow {
-  id: string;
-  name: string;
-  description: string | null;
-  culture_summary: string | null;
-  recent_news: string | null;
-  financials_summary: string | null;
-  internship_intel: string | null;
-  industry: string | null;
-  headquarters: string | null;
-}
+type ApplicationRow = Pick<Row<"applications">, "id" | "company_name" | "role">;
 
-interface DocumentRow {
-  id: string;
-  application_id: string | null;
-  company_id: string | null;
-  type: string | null;
-  title: string | null;
-  content: string | null;
-  created_at: string;
-  updated_at: string;
-}
+type CompanyRow = Pick<
+  Row<"companies">,
+  | "id"
+  | "name"
+  | "description"
+  | "culture_summary"
+  | "recent_news"
+  | "financials_summary"
+  | "internship_intel"
+  | "industry"
+  | "headquarters"
+>;
+
+type DocumentRow = Pick<
+  Row<"documents">,
+  | "id"
+  | "application_id"
+  | "company_id"
+  | "type"
+  | "title"
+  | "content"
+  | "created_at"
+  | "updated_at"
+>;
 
 interface InterviewForAgent {
   id: string;

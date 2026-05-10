@@ -5,6 +5,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 import {
   computeDeliverAfter,
   type QuietHours,
@@ -14,23 +15,8 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
-export interface NotificationRow {
-  id: string;
-  user_id: string;
-  type: string | null;
-  priority: "critical" | "high" | "medium" | "low" | null;
-  title: string | null;
-  body: string | null;
-  source_agent: string | null;
-  source_entity_id: string | null;
-  source_entity_type: string | null;
-  channels: unknown;
-  is_read: boolean | null;
-  is_dismissed: boolean | null;
-  actions: unknown;
-  created_at: string;
-  updated_at: string;
-}
+/** Raw snake_case `notifications` row (Fix #5). */
+export type NotificationRow = Row<"notifications">;
 
 export interface CreateNotificationInput {
   userId: string;

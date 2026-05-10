@@ -6,6 +6,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -20,30 +21,15 @@ export interface ContactStats {
   recentActivity: number; // contacts touched this week
 }
 
-export interface ContactRow {
-  id: string;
-  user_id: string;
-  company_id: string | null;
-  name: string;
-  email: string | null;
-  title: string | null;
-  linkedin_url: string | null;
-  relationship: string | null;
-  phone: string | null;
-  introduced_by: string | null;
-  warmth: number | null;
-  last_contact_at: string | null;
-  notes: string | null;
-  /**
-   * private sticky-note, visible only to the owning user.  NEVER
-   * included in AI-prompt composition, exports, or cross-user surfaces.
-   * The P5 grep invariant keeps this column off every outbound path.
-   */
-  private_note: string | null;
-  source: string | null;
-  created_at: string;
-  updated_at: string;
-}
+/**
+ * Raw snake_case `contacts` row (Fix #5). Derived from Drizzle so the
+ * `relationship` and `source` enums stay in sync with the live schema.
+ *
+ * NOTE: `private_note` is the sticky-note column — never include it in
+ * AI-prompt composition, exports, or cross-user surfaces. The P5 grep
+ * invariant allowlists exactly the files that may reference this column.
+ */
+export type ContactRow = Row<"contacts">;
 
 export interface ContactForAgent {
   id: string;

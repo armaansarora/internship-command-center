@@ -11,22 +11,22 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { detectConflicts, type ConflictEvent } from "./detect-conflicts";
 import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 const WINDOW_DAYS = 14;
 
-interface InterviewRow {
-  id: string;
+// Joined projection: the `interviews` row gets a `companies(name)` join so
+// we surface a company name alongside the interview fields.
+type InterviewRow = Pick<
+  Row<"interviews">,
+  "id" | "round" | "scheduled_at" | "duration_minutes"
+> & {
   company_name: string | null;
-  round: string | null;
-  scheduled_at: string | null;
-  duration_minutes: number | null;
-}
-interface CalendarRow {
-  id: string;
-  title: string | null;
-  start_at: string | null;
-  end_at: string | null;
-}
+};
+type CalendarRow = Pick<
+  Row<"calendar_events">,
+  "id" | "title" | "start_at" | "end_at"
+>;
 
 function interviewToEvent(r: InterviewRow): ConflictEvent | null {
   if (!r.scheduled_at) return null;

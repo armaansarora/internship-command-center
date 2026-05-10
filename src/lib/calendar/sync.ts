@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getGoogleTokens } from "@/lib/gmail/oauth";
 import { readGoogleApiError } from "@/lib/google/api-error";
+import type { Row } from "@/db/database.types";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -164,17 +165,18 @@ export async function createCalendarEvent(
 // Get upcoming events from DB
 // ---------------------------------------------------------------------------
 
-interface CalendarEventRow {
-  id: string;
-  google_event_id: string;
-  title: string;
-  description: string | null;
-  start_at: string;
-  end_at: string;
-  location: string | null;
-  interview_id: string | null;
-  source: string;
-}
+type CalendarEventRow = Pick<
+  Row<"calendar_events">,
+  | "id"
+  | "google_event_id"
+  | "title"
+  | "description"
+  | "start_at"
+  | "end_at"
+  | "location"
+  | "interview_id"
+  | "source"
+>;
 
 export async function getUpcomingEvents(
   userId: string,
