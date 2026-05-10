@@ -83,6 +83,7 @@ export const PRIVACY_POLICY = {
       heading: "Cookies and storage",
       body: [
         "We use first-party cookies issued by Supabase Auth to maintain your session. These cookies are essential for the product to function and are not used for advertising or cross-site tracking.",
+        "We also store first-party UI-preference cookies (for example, `tower_focus_mode`, which remembers whether you have toggled Focus Mode on for the current account). Each holds a single boolean or a small enum value, is scoped to our domain, and is never used for tracking.",
         "We use sessionStorage to remember whether you have already watched the lobby entrance animation in the current tab. This is a single boolean and is cleared when the tab closes.",
         "We do not use third-party tracking cookies. Our analytics provider, Plausible, is cookie-less.",
       ],
