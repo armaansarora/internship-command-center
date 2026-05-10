@@ -39,7 +39,7 @@ export const PRIVACY_POLICY = {
         "Resumes and cover letters: PDF and DOCX files you upload, plus any content the writing tools generate from them.",
         "Derived embeddings: we generate vector embeddings (numeric fingerprints) of resumes, job descriptions, and company profiles to power similarity search. Embeddings are derived data, not raw text, but they can carry information about the source.",
         "Voice recordings (only if you opt in): when you enable voice mode in the Briefing Room, we accept audio uploads and send them to a transcription provider. Audio is stored only long enough to transcribe.",
-        "Operational metadata: timestamps, error events, request paths. We do not retain full request bodies and we do not log personally identifying information beyond what the route needs.",
+        "Operational metadata: timestamps, error events, request paths. We do not retain full request bodies and we do not log personally identifying information beyond what the route needs. We also record first-party server-side engagement events (path, route kind, signed-in user id when applicable) for product analytics. We never store query strings, request bodies, IP addresses, user agents, or third-party cookies for this.",
       ],
     },
     {

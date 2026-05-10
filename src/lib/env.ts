@@ -59,6 +59,12 @@ const EnvSchema = z.object({
   VERCEL_AI_GATEWAY_API_KEY: z.string().min(1).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
 
+  // Server-side engagement events (Fix #3) kill-switch. Set to "1" to enable
+  // middleware-emitted writes to the engagement_events table. Anything else
+  // (or unset) keeps the writer dormant — the service-role admin module is
+  // never even dynamically imported.
+  TOWER_SERVER_ANALYTICS_ENABLED: z.string().optional(),
+
   // ── Cron ─────────────────────────────────────────────────────────────────
   CRON_SECRET: z.string().min(16).optional(),
 

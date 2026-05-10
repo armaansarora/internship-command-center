@@ -6,6 +6,10 @@ import {
   isLocalAppHost,
 } from "@/lib/dev-preview-auth";
 import { log } from "@/lib/logger";
+import {
+  classifyMiddlewareRequest,
+  recordServerEngagementEvent,
+} from "@/lib/analytics/server-engagement";
 
 /**
  * Read a required env var with a readable error if it's missing. Replaces the
@@ -114,6 +118,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (publicPath && !isLobbyRoot(request.nextUrl.pathname)) {
+    fireEngagement(request, { isAuthenticated: false, userId: null });
     return supabaseResponse;
   }
 
@@ -147,13 +152,53 @@ export async function updateSession(request: NextRequest) {
   const user = await readMiddlewareUser(supabase, request.nextUrl.pathname);
 
   if (!user && !publicPath) {
+    fireEngagement(request, { isAuthenticated: false, userId: null });
     if (shouldUseDevPreviewLogin(request)) {
       return devPreviewLoginResponse(request);
     }
     return unauthenticatedResponse(request);
   }
 
+  fireEngagement(request, {
+    isAuthenticated: user != null,
+    userId: user?.id ?? null,
+  });
+
   return supabaseResponse;
+}
+
+/**
+ * Fire-and-forget engagement event emission. Classifies the request, and
+ * if a classification is returned, writes via the service-role helper.
+ * Never throws, never awaits — safe to call before any return statement.
+ *
+ * The helper is a no-op when `TOWER_SERVER_ANALYTICS_ENABLED !== "1"`, so
+ * the dynamic admin-client import never runs in environments where the
+ * kill-switch is off (dev, tests, preview deployments without the flag).
+ */
+function fireEngagement(
+  request: NextRequest,
+  authState: { isAuthenticated: boolean; userId: string | null },
+): void {
+  const classification = classifyMiddlewareRequest({
+    pathname: request.nextUrl.pathname,
+    method: request.method,
+    userAgent: request.headers.get("user-agent"),
+    prefetch: request.headers.get("next-router-prefetch"),
+    rsc: request.headers.get("rsc"),
+    secFetchDest: request.headers.get("sec-fetch-dest"),
+    isAuthenticated: authState.isAuthenticated,
+  });
+
+  if (!classification) return;
+
+  void recordServerEngagementEvent({
+    eventType: classification.eventType,
+    pathname: classification.pathname,
+    userId: authState.userId,
+    floor: classification.floor,
+    metadata: { is_authenticated: authState.isAuthenticated },
+  }).catch(() => {});
 }
 
 function getSupabaseAuthCookieBaseName(): string {
