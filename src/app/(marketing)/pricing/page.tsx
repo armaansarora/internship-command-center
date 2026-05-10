@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
+import { LEGAL_CONFIG } from "@/lib/config/legal-config";
+import { PRICING_CONFIG } from "@/lib/config/pricing-config";
 import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: `${LAUNCH_CONFIG.brand.name} subscription tiers.`,
-  alternates: { canonical: `${LAUNCH_CONFIG.brand.url()}/pricing` },
+  description: `${GATE_CONFIG.brand.name} subscription tiers.`,
+  alternates: { canonical: `${GATE_CONFIG.brand.url()}/pricing` },
 };
 
 interface TierCard {
@@ -21,8 +23,8 @@ const TIER_COPY: Record<SubscriptionTier, Omit<TierCard, "tier">> = {
   free: {
     tagline: "See if the building's for you.",
     features: [
-      `Up to ${LAUNCH_CONFIG.pricing.freeAppCap} active applications`,
-      `${LAUNCH_CONFIG.pricing.freeAiCallsPerDay} AI agent runs per day`,
+      `Up to ${PRICING_CONFIG.freeAppCap} active applications`,
+      `${PRICING_CONFIG.freeAiCallsPerDay} AI agent runs per day`,
       "War Room + Penthouse access",
       "Basic analytics",
     ],
@@ -64,11 +66,11 @@ interface PricingPageProps {
 
 export default async function PricingPage({ searchParams }: PricingPageProps) {
   const params = await searchParams;
-  const annualToggleAvailable = LAUNCH_CONFIG.pricing.annualDiscountPct > 0;
+  const annualToggleAvailable = PRICING_CONFIG.annualDiscountPct > 0;
   const isAnnual =
     annualToggleAvailable && params.billing === "annual";
 
-  if (!LAUNCH_CONFIG.flags.pricingPublic) {
+  if (!PRICING_CONFIG.flags.pricingPublic) {
     return (
       <div className="mx-auto max-w-2xl py-24 text-center">
         <p
@@ -121,7 +123,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
             lineHeight: 1.5,
           }}
         >
-          Free is real, not a five-day trial. {LAUNCH_CONFIG.pricing.refundHeadline}
+          Free is real, not a five-day trial. {LEGAL_CONFIG.refund.headline}
         </p>
       </header>
 
@@ -130,9 +132,9 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
       <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
         {TIER_ORDER.map((tier) => {
           const plan = STRIPE_PLANS[tier];
-          const config = LAUNCH_CONFIG.pricing[tier];
+          const config = PRICING_CONFIG.tiers[tier];
           const copy = TIER_COPY[tier];
-          const betaGated = LAUNCH_CONFIG.beta.mode !== "open";
+          const betaGated = GATE_CONFIG.beta.mode !== "open";
           const ctaHref = betaGated ? "/waitlist" : "/lobby";
           const ctaLabel = betaGated
             ? tier === "team"
@@ -330,7 +332,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
             color: "rgba(255,255,255,0.5)",
           }}
         >
-          {LAUNCH_CONFIG.pricing.refundBody}
+          {LEGAL_CONFIG.refund.body}
         </p>
         <p
           className="mt-4"
@@ -341,7 +343,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
             letterSpacing: "0.1em",
           }}
         >
-          Questions? {LAUNCH_CONFIG.brand.supportEmail}
+          Questions? {LEGAL_CONFIG.entity.supportEmail}
         </p>
       </div>
     </div>
@@ -404,7 +406,7 @@ function BillingToggle({ isAnnual }: { isAnnual: boolean }) {
             padding: "1px 6px",
           }}
         >
-          −{LAUNCH_CONFIG.pricing.annualDiscountPct}%
+          −{PRICING_CONFIG.annualDiscountPct}%
         </span>
       </Link>
     </div>

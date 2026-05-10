@@ -3,12 +3,12 @@ import { getUser } from "@/lib/supabase/server";
 import { LobbyClient } from "./lobby-client";
 import { ConciergeFlow } from "./onboarding/ConciergeFlow";
 import { getConciergeState } from "@/lib/db/queries/user-profiles-rest";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 
 export const metadata: Metadata = {
   title: "The Lobby",
   description: "Reception, sign-in, and first-run intake for The Tower.",
-  alternates: { canonical: `${LAUNCH_CONFIG.brand.url()}/lobby` },
+  alternates: { canonical: `${GATE_CONFIG.brand.url()}/lobby` },
   robots: { index: true, follow: true },
 };
 

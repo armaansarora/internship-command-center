@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 
 export const runtime = "edge";
-export const alt = `${LAUNCH_CONFIG.brand.name} — ${LAUNCH_CONFIG.brand.tagline}`;
+export const alt = `${GATE_CONFIG.brand.name} — ${GATE_CONFIG.brand.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -46,7 +46,7 @@ export default async function OpengraphImage() {
               letterSpacing: "0.02em",
             }}
           >
-            {LAUNCH_CONFIG.brand.name}
+            {GATE_CONFIG.brand.name}
           </div>
           <div
             style={{
@@ -57,7 +57,7 @@ export default async function OpengraphImage() {
               textTransform: "uppercase",
             }}
           >
-            {LAUNCH_CONFIG.brand.domain}
+            {GATE_CONFIG.brand.domain}
           </div>
         </div>
 

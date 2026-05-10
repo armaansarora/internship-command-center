@@ -13,7 +13,7 @@ interface StripePlan {
    * To enable annual billing end-to-end:
    *   1. Stripe Dashboard → Products → Pro (or Team) → Add another price
    *   2. Set the recurring interval to "Yearly" and the amount to
-   *      LAUNCH_CONFIG.pricing.{tier}.yearlyPrice (in dollars)
+   *      PRICING_CONFIG.tiers.{tier}.yearlyPrice (in dollars)
    *   3. Copy the new price_* ID and replace the null below.
    *   4. Redeploy. Checkout, webhook tier-mapping, and the Settings
    *      PricingCards all pick it up automatically.

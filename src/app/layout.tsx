@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Playfair_Display, JetBrains_Mono } from "next/font/google";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 import "./globals.css";
 
 /* ─── Fonts ──────────────────────────────────────────────────────────
@@ -25,25 +25,25 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(LAUNCH_CONFIG.brand.url()),
+  metadataBase: new URL(GATE_CONFIG.brand.url()),
   title: {
-    default: `${LAUNCH_CONFIG.brand.name} — Command Center`,
-    template: `%s | ${LAUNCH_CONFIG.brand.name}`,
+    default: `${GATE_CONFIG.brand.name} — Command Center`,
+    template: `%s | ${GATE_CONFIG.brand.name}`,
   },
-  description: LAUNCH_CONFIG.brand.tagline,
+  description: GATE_CONFIG.brand.tagline,
   // Default: don't index. Marketing routes opt back in via their own layout.
   robots: { index: false, follow: false },
   openGraph: {
-    title: `${LAUNCH_CONFIG.brand.name} — ${LAUNCH_CONFIG.brand.tagline}`,
-    description: LAUNCH_CONFIG.brand.tagline,
-    siteName: LAUNCH_CONFIG.brand.name,
+    title: `${GATE_CONFIG.brand.name} — ${GATE_CONFIG.brand.tagline}`,
+    description: GATE_CONFIG.brand.tagline,
+    siteName: GATE_CONFIG.brand.name,
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: LAUNCH_CONFIG.brand.name,
-    description: LAUNCH_CONFIG.brand.tagline,
+    title: GATE_CONFIG.brand.name,
+    description: GATE_CONFIG.brand.tagline,
   },
 };
 

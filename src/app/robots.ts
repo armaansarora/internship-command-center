@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 
 /**
  * Public crawlable surface = the marketing pages. Everything inside the
@@ -8,7 +8,7 @@ import { LAUNCH_CONFIG } from "@/lib/launch-config";
  * hit our endpoints.
  */
 export default function robots(): MetadataRoute.Robots {
-  const base = LAUNCH_CONFIG.brand.url();
+  const base = GATE_CONFIG.brand.url();
   return {
     rules: [
       {

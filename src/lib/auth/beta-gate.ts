@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { log } from "@/lib/logger";
 
@@ -26,7 +26,7 @@ export function parseAllowedEmails(raw: string | null | undefined): Set<string> 
  * Closed/private beta admission check for post-OAuth callbacks.
  *
  * Production private beta is fail-closed:
- * - LAUNCH_CONFIG.beta.mode === "open" admits any Google email.
+ * - GATE_CONFIG.beta.mode === "open" admits any Google email.
  * - ALLOWED_EMAILS is the emergency/admin key list.
  * - waitlist_signups rows are admitted only after invited_at is set.
  *
@@ -40,7 +40,7 @@ export async function isEmailAllowedForBeta(
   const normalizedEmail = normalizeEmail(email);
   if (!normalizedEmail) return false;
 
-  if (LAUNCH_CONFIG.beta.mode === "open") return true;
+  if (GATE_CONFIG.beta.mode === "open") return true;
 
   const environment = env();
   const isProduction = environment.NODE_ENV === "production";
@@ -51,7 +51,7 @@ export async function isEmailAllowedForBeta(
   if (allowed.has("*")) {
     if (!isProduction) return true;
     log.warn("auth.beta_gate.production_wildcard_ignored", {
-      mode: LAUNCH_CONFIG.beta.mode,
+      mode: GATE_CONFIG.beta.mode,
     });
   }
 

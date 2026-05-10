@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { JSX, ReactNode } from "react";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
+import { LEGAL_CONFIG } from "@/lib/config/legal-config";
+import { PRICING_CONFIG } from "@/lib/config/pricing-config";
 
 export const metadata: Metadata = {
   robots: { index: true, follow: true },
@@ -47,7 +49,7 @@ export default function MarketingLayout({
                 letterSpacing: "0.02em",
               }}
             >
-              {LAUNCH_CONFIG.brand.name}
+              {GATE_CONFIG.brand.name}
             </span>
             <span
               style={{
@@ -62,7 +64,7 @@ export default function MarketingLayout({
             </span>
           </Link>
           <nav className="flex items-center gap-6">
-            {LAUNCH_CONFIG.flags.pricingPublic && (
+            {PRICING_CONFIG.flags.pricingPublic && (
               <Link
                 href="/pricing"
                 className="inline-flex min-h-11 min-w-11 items-center justify-center text-sm text-white/70 transition-colors hover:text-white"
@@ -104,7 +106,7 @@ export default function MarketingLayout({
                 color: "#C9A84C",
               }}
             >
-              {LAUNCH_CONFIG.brand.name}
+              {GATE_CONFIG.brand.name}
             </span>
             <span
               style={{
@@ -113,7 +115,7 @@ export default function MarketingLayout({
                 color: "rgba(255,255,255,0.4)",
               }}
             >
-              {LAUNCH_CONFIG.brand.tagline}
+              {GATE_CONFIG.brand.tagline}
             </span>
           </div>
           <nav className="flex flex-wrap gap-6">
@@ -141,8 +143,8 @@ export default function MarketingLayout({
             letterSpacing: "0.1em",
           }}
         >
-          © {new Date().getUTCFullYear()} {LAUNCH_CONFIG.brand.legalEntity}. Last
-          revised {LAUNCH_CONFIG.brand.legalRevisedOn}.
+          © {new Date().getUTCFullYear()} {LEGAL_CONFIG.entity.legalEntity}. Last
+          revised {LEGAL_CONFIG.entity.legalRevisedOn}.
         </div>
       </footer>
     </div>

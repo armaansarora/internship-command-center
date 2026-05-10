@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 import { WaitlistForm } from "./WaitlistForm";
 
 export const metadata: Metadata = {
   title: "Join the Waitlist",
-  description: `Be among the first to enter ${LAUNCH_CONFIG.brand.name}.`,
-  alternates: { canonical: `${LAUNCH_CONFIG.brand.url()}/waitlist` },
+  description: `Be among the first to enter ${GATE_CONFIG.brand.name}.`,
+  alternates: { canonical: `${GATE_CONFIG.brand.url()}/waitlist` },
 };
 
 export default function WaitlistPage() {
@@ -44,7 +44,7 @@ export default function WaitlistPage() {
           lineHeight: 1.55,
         }}
       >
-        {LAUNCH_CONFIG.brand.tagline}{" "}
+        {GATE_CONFIG.brand.tagline}{" "}
         We&apos;re letting people in slowly so the building stays well-staffed.
         Join the list and we&apos;ll send you a key.
       </p>

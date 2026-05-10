@@ -28,13 +28,13 @@ src/app/lobby/                          login + onboarding entry
 
 src/app/(marketing)/                    public marketing
   layout.tsx                            shared chrome (header/footer)
-  pricing/page.tsx                      reads STRIPE_PLANS + LAUNCH_CONFIG
+  pricing/page.tsx                      reads STRIPE_PLANS + PRICING/LEGAL/GATE
   privacy/page.tsx                      renders src/lib/legal/privacy.ts
   terms/page.tsx                        renders src/lib/legal/terms.ts
   waitlist/page.tsx + WaitlistForm.tsx + actions.ts
 
-src/app/robots.ts                       built from launch-config
-src/app/sitemap.ts                      built from launch-config
+src/app/robots.ts                       built from gate-config
+src/app/sitemap.ts                      built from gate + legal + pricing configs
 src/app/opengraph-image.tsx             1200×630 OG card (Edge runtime)
 src/app/layout.tsx                      root metadata, fonts, Plausible tag
 ```
@@ -206,10 +206,20 @@ src/lib/email/                                     Resend transactional
 
 ### Infra root files
 ```
-src/lib/launch-config.ts          ★ SINGLE TWEAK KNOB — pricing, beta gate,
-                                    retention, refund, eligibility, sub-procs.
-                                    Edit values here; pages, sitemap, legal
-                                    copy, quotas pick them up automatically.
+src/lib/config/                   ★ THREE CADENCE KNOBS — split by review
+                                    cadence so the right human edits the right
+                                    file. Pages, sitemap, legal copy, and
+                                    quotas read directly from these.
+  legal-config.ts                   yearly, counsel-gated — entity, governing
+                                    law, refund, retention, sub-processors,
+                                    eligibility, support email, revised-on
+  pricing-config.ts                 monthly, revenue — Free/Pro/Team tiers
+                                    and prices, caps, costCaps, annual %,
+                                    flags.pricingPublic
+  gate-config.ts                    weekly, founder — brand name/tagline/
+                                    domain/url(), sender email, beta mode,
+                                    blocked countries, waitlist + plausible
+                                    flags
 src/lib/env.ts                    Zod-validated env (use env() not process.env)
 src/lib/logger.ts                 Structured logger (use log.info etc.)
 src/lib/rate-limit.ts             Per-user-per-tier rate limit (Upstash)
@@ -270,14 +280,15 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 
 | Task | File |
 |---|---|
-| Change pricing tier names / amounts | `src/lib/launch-config.ts` (display) + `src/lib/stripe/config.ts` (Stripe IDs) |
-| Change refund / retention / age policy | `src/lib/launch-config.ts` |
+| Change pricing tier names / amounts | `src/lib/config/pricing-config.ts` (display) + `src/lib/stripe/config.ts` (Stripe IDs) |
+| Change refund / retention / age policy | `src/lib/config/legal-config.ts` |
+| Change brand name / canonical URL / beta mode | `src/lib/config/gate-config.ts` |
 | Edit privacy / terms copy | `src/lib/legal/{privacy,terms}.ts` (rendered into routes automatically) |
 | Add a new public marketing page | `src/app/(marketing)/<route>/page.tsx` + add to `src/proxy.ts` `publicPaths` + add to `src/app/sitemap.ts` |
 | Add a new floor / authenticated route | `src/app/(authenticated)/<floor>/page.tsx` + `src/components/floor-N/<Floor>Client.tsx` + add to `FLOORS` in `src/types/ui.ts` |
 | Change an AI agent's voice | `src/lib/agents/<agent>/system-prompt.ts` |
 | Change an AI agent's tools | `src/lib/agents/<agent>/tools.ts` |
-| Change AI quota cap | `src/lib/launch-config.ts` (`costCaps.{free,paid}AiCallsPerDay`) |
+| Change AI quota cap | `src/lib/config/pricing-config.ts` (`costCaps.{free,paid}AiCallsPerDay`) |
 | Add a new cron job | `src/app/api/cron/<name>/route.ts` (wrap with `withCronHealth`) + add schedule to `vercel.json` |
 | Database table changes | `src/db/schema.ts` → `npx drizzle-kit generate` → apply via Supabase MCP or dashboard |
 | Database queries at runtime | `src/lib/db/queries/<table>-rest.ts` (Supabase REST — never the Drizzle `db` object) |
@@ -307,4 +318,4 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 - Aria attributes on all interactive elements; `prefers-reduced-motion` respected.
 - No `console.log` in shipped code; use `log.info/warn/error` from `@/lib/logger`.
 - No TODO/FIXME comments in shipped code.
-- `launch-config.ts` is the single source of truth for business decisions.
+- Business decisions are split across three cadence knobs: `src/lib/config/{legal,pricing,gate}-config.ts`. Each is gated by the right human + CI guard.

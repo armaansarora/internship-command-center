@@ -1,0 +1,49 @@
+name: Config Guard
+
+# Triggers on any PR that touches a cadence config or its consumers.
+# Runs the dedicated config tests and a full typecheck so a broken
+# rename in any of the consumers is caught before merge.
+on:
+  pull_request:
+    paths:
+      - 'src/lib/config/**'
+      - 'src/lib/stripe/config.ts'
+      - 'src/lib/legal/**'
+      - 'src/app/(marketing)/terms/**'
+      - 'src/app/(marketing)/privacy/**'
+      - 'src/app/(marketing)/pricing/**'
+  workflow_dispatch:
+
+jobs:
+  config-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://stub.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: stub_publishable_key_for_ci
+      NEXT_PUBLIC_APP_URL: https://www.interntower.com
+      SUPABASE_SERVICE_ROLE_KEY: stub_service_role_key_for_ci
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run config tests
+        run: npm test -- src/lib/config
+
+      - name: Typecheck whole project
+        run: npx tsc --noEmit
+
+      - name: Forbid LAUNCH_CONFIG re-emergence
+        run: |
+          if grep -rE "LAUNCH_CONFIG|from \"@/lib/launch-config\"" src/ --include="*.ts" --include="*.tsx"; then
+            echo "::error::LAUNCH_CONFIG references must not return. Use legal-config, pricing-config, or gate-config."
+            exit 1
+          fi

@@ -78,7 +78,13 @@ Immersive spatial UI — building metaphor, not a dashboard. Each page is a "flo
 - No motion-sickness-inducing animations — slow, organic, barely perceptible movement
 
 ## Single Tweak Knob
-`src/lib/launch-config.ts` is the source of truth for every business decision (pricing, beta gate, retention, refund policy, sub-processors, eligibility, cost caps, support email, governing law). Edit values there; pages, sitemap, and legal copy pick them up automatically. Stripe price IDs live alongside in `src/lib/stripe/config.ts`.
+Business decisions live in three config files split by review cadence — edit values there and pages, sitemap, and legal copy pick them up automatically.
+
+- `src/lib/config/legal-config.ts` (yearly, counsel-gated) — entity, governing law, support email, refund policy, retention SLA, sub-processors, eligibility/minimum age, last-revised date.
+- `src/lib/config/pricing-config.ts` (monthly, revenue) — Free/Pro/Team tiers, monthly + yearly prices, free-tier caps, cost caps, annual discount %, `flags.pricingPublic`.
+- `src/lib/config/gate-config.ts` (weekly, founder) — brand name/tagline/domain/canonical URL, sender email, beta mode, blocked countries, `flags.waitlistPublic` / `flags.plausibleEnabled`.
+
+Stripe price IDs live alongside in `src/lib/stripe/config.ts`. CODEOWNERS gates legal-config; CI (`config-guard.yml`) runs vitest + tsc on every PR that touches these files and rejects any re-introduction of `LAUNCH_CONFIG`.
 
 ## Useful Scripts
 - `scripts/seed-owner-data.ts` — re-seed the owner account with believable internship-search data (12 companies, 14 applications, 12 contacts, 6 interviews, 1 active offer, 31 days of snapshots). Run via:

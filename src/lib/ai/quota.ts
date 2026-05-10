@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { PRICING_CONFIG } from "@/lib/config/pricing-config";
 import { log } from "@/lib/logger";
 
 /**
@@ -32,8 +32,8 @@ export interface QuotaResult {
 }
 
 function capForTier(tier: AiTier): number {
-  if (tier === "free") return LAUNCH_CONFIG.costCaps.freeAiCallsPerDay;
-  return LAUNCH_CONFIG.costCaps.paidAiCallsPerDay;
+  if (tier === "free") return PRICING_CONFIG.costCaps.freeAiCallsPerDay;
+  return PRICING_CONFIG.costCaps.paidAiCallsPerDay;
 }
 
 export async function consumeAiQuota(

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { LegalDocument } from "@/components/marketing/LegalDocument";
 import { PRIVACY_POLICY } from "@/lib/legal/privacy";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: `How ${LAUNCH_CONFIG.brand.name} handles your data.`,
-  alternates: { canonical: `${LAUNCH_CONFIG.brand.url()}/privacy` },
+  description: `How ${GATE_CONFIG.brand.name} handles your data.`,
+  alternates: { canonical: `${GATE_CONFIG.brand.url()}/privacy` },
 };
 
 export default function PrivacyPage() {

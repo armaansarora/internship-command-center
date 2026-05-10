@@ -1,4 +1,6 @@
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { LEGAL_CONFIG } from "@/lib/config/legal-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
+import { PRICING_CONFIG } from "@/lib/config/pricing-config";
 
 /**
  * Terms of Service — source of truth. Renders into /terms.
@@ -6,21 +8,34 @@ import { LAUNCH_CONFIG } from "@/lib/launch-config";
  * Sections marked [REVIEW] should be reviewed by an attorney before launch
  * if you're collecting payment. The rest is a Termly-style skeleton hardened
  * for AI / OAuth-heavy SaaS at this price tier.
+ *
+ * --
+ *
+ * This file pulls from THREE cadence configs because legal copy spans all
+ * three review surfaces:
+ *   • LEGAL_CONFIG   — entity name, governing law, revision date,
+ *                       refund language, eligibility, sub-processors
+ *                       (yearly, counsel-gated)
+ *   • GATE_CONFIG    — brand name and canonical URL
+ *                       (weekly, founder)
+ *   • PRICING_CONFIG — Free-tier caps and Pro/Team monthly prices that
+ *                       are quoted inside the "Subscriptions and billing"
+ *                       section (revenue, monthly)
  */
 export const TERMS_OF_SERVICE = {
-  revisedOn: LAUNCH_CONFIG.brand.legalRevisedOn,
+  revisedOn: LEGAL_CONFIG.entity.legalRevisedOn,
   sections: [
     {
       heading: "Acceptance",
       body: [
-        `Welcome to ${LAUNCH_CONFIG.brand.name}. By creating an account, accessing, or using the product, you agree to these Terms. If you don't agree, don't use the product.`,
-        `${LAUNCH_CONFIG.brand.legalEntity} ("we," "us") operates ${LAUNCH_CONFIG.brand.url()} and is the party you contract with.`,
+        `Welcome to ${GATE_CONFIG.brand.name}. By creating an account, accessing, or using the product, you agree to these Terms. If you don't agree, don't use the product.`,
+        `${LEGAL_CONFIG.entity.legalEntity} ("we," "us") operates ${GATE_CONFIG.brand.url()} and is the party you contract with.`,
       ],
     },
     {
       heading: "Eligibility",
       body: [
-        `You must be at least ${LAUNCH_CONFIG.eligibility.minimumAge} years old to use ${LAUNCH_CONFIG.brand.name}. By signing up you represent that you are.`,
+        `You must be at least ${LEGAL_CONFIG.eligibility.minimumAge} years old to use ${GATE_CONFIG.brand.name}. By signing up you represent that you are.`,
         "You must provide a valid email address that you control. We will use it to authenticate you and to send transactional notices.",
         "You must not use the product if you are barred from doing so under the laws of your jurisdiction or ours.",
       ],
@@ -65,11 +80,11 @@ export const TERMS_OF_SERVICE = {
     {
       heading: "Subscriptions and billing",
       body: [
-        `${LAUNCH_CONFIG.brand.name} offers a Free tier (${LAUNCH_CONFIG.pricing.freeAppCap} applications, ${LAUNCH_CONFIG.pricing.freeAiCallsPerDay} AI calls per day) and paid Pro and Team tiers at $${LAUNCH_CONFIG.pricing.pro.price} and $${LAUNCH_CONFIG.pricing.team.price} per month.`,
+        `${GATE_CONFIG.brand.name} offers a Free tier (${PRICING_CONFIG.freeAppCap} applications, ${PRICING_CONFIG.freeAiCallsPerDay} AI calls per day) and paid Pro and Team tiers at $${PRICING_CONFIG.tiers.pro.price} and $${PRICING_CONFIG.tiers.team.price} per month.`,
         "Paid subscriptions are processed by Stripe. By subscribing, you authorize Stripe to charge your payment method on a recurring basis until you cancel.",
         "Subscriptions renew automatically at the end of each billing cycle. The renewal price will be the price posted at that time; we will notify you in advance of any increase.",
-        LAUNCH_CONFIG.pricing.refundHeadline,
-        LAUNCH_CONFIG.pricing.refundBody,
+        LEGAL_CONFIG.refund.headline,
+        LEGAL_CONFIG.refund.body,
         "We may change pricing for new subscribers at any time. Existing subscribers receive at least 30 days' notice before any price increase takes effect for them.",
       ],
     },
@@ -91,7 +106,7 @@ export const TERMS_OF_SERVICE = {
     {
       heading: "Disclaimers",
       body: [
-        `${LAUNCH_CONFIG.brand.name} is provided "as is" and "as available." We make no warranties, express or implied, regarding the product, including warranties of merchantability, fitness for a particular purpose, or non-infringement.`,
+        `${GATE_CONFIG.brand.name} is provided "as is" and "as available." We make no warranties, express or implied, regarding the product, including warranties of merchantability, fitness for a particular purpose, or non-infringement.`,
         "We do not provide career advice, legal advice, or financial advice. AI agent outputs are not advice.",
         "We do not guarantee that you will land an interview, an offer, or a job by using the product. Outcomes depend on you, the market, and the employer.",
       ],
@@ -113,8 +128,8 @@ export const TERMS_OF_SERVICE = {
     {
       heading: "Governing law and disputes",
       body: [
-        `These Terms are governed by the laws of ${LAUNCH_CONFIG.brand.governingLaw}, without regard to conflict-of-laws principles.`,
-        `Disputes arising out of these Terms or the product shall be brought exclusively in the state or federal courts located in ${LAUNCH_CONFIG.brand.governingLaw}, and you consent to personal jurisdiction there.`,
+        `These Terms are governed by the laws of ${LEGAL_CONFIG.entity.governingLaw}, without regard to conflict-of-laws principles.`,
+        `Disputes arising out of these Terms or the product shall be brought exclusively in the state or federal courts located in ${LEGAL_CONFIG.entity.governingLaw}, and you consent to personal jurisdiction there.`,
         "These Terms do not require arbitration. Disputes proceed in the courts described above unless we agree otherwise in writing.",
       ],
     },
@@ -127,8 +142,8 @@ export const TERMS_OF_SERVICE = {
     {
       heading: "Contact",
       body: [
-        `Questions about these Terms: ${LAUNCH_CONFIG.brand.supportEmail}.`,
-        `Last revised: ${LAUNCH_CONFIG.brand.legalRevisedOn}.`,
+        `Questions about these Terms: ${LEGAL_CONFIG.entity.supportEmail}.`,
+        `Last revised: ${LEGAL_CONFIG.entity.legalRevisedOn}.`,
       ],
     },
   ],

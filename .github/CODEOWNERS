@@ -1,0 +1,19 @@
+# CODEOWNERS — file-granular governance for cadence-sensitive paths.
+# GitHub enforces required review when these paths change in a PR.
+
+# Legal cadence — yearly counsel review. Touch only with intentional review.
+/src/lib/config/legal-config.ts            @armaansarora
+/src/lib/legal/                            @armaansarora
+/src/app/(marketing)/terms/                @armaansarora
+/src/app/(marketing)/privacy/              @armaansarora
+
+# Revenue cadence — pricing changes cascade into Stripe.
+/src/lib/config/pricing-config.ts          @armaansarora
+/src/lib/stripe/                           @armaansarora
+
+# Operational cadence — beta gate and brand strings.
+/src/lib/config/gate-config.ts             @armaansarora
+
+# CI guard.
+/.github/workflows/config-guard.yml        @armaansarora
+/.github/CODEOWNERS                        @armaansarora

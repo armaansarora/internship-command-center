@@ -1,4 +1,5 @@
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { LEGAL_CONFIG } from "@/lib/config/legal-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 
 /**
  * Privacy Policy — source of truth. Renders into /privacy.
@@ -8,18 +9,25 @@ import { LAUNCH_CONFIG } from "@/lib/launch-config";
  * actual data flows (R8 Rolodex, R11 cross-user matching, encrypted OAuth
  * tokens, pgvector embeddings).
  *
- * Update LAUNCH_CONFIG values rather than hand-editing strings here when the
+ * --
+ *
+ * Pulls from TWO cadence configs:
+ *   • LEGAL_CONFIG — entity, retention SLA, sub-processors, eligibility
+ *                     (yearly, counsel-gated)
+ *   • GATE_CONFIG  — brand name and canonical URL (weekly, founder)
+ *
+ * Update config values rather than hand-editing strings here when the
  * change is a parameter (entity name, retention days, sub-processor list).
  * Hand-edit only when the legal substance itself changes.
  */
 export const PRIVACY_POLICY = {
-  revisedOn: LAUNCH_CONFIG.brand.legalRevisedOn,
+  revisedOn: LEGAL_CONFIG.entity.legalRevisedOn,
   sections: [
     {
       heading: "Who we are",
       body: [
-        `${LAUNCH_CONFIG.brand.legalEntity} ("we," "us," "${LAUNCH_CONFIG.brand.name}") operates ${LAUNCH_CONFIG.brand.url()} and the application accessible there. This policy explains what we collect, why, who we share it with, and the rights you have over it.`,
-        `Questions: ${LAUNCH_CONFIG.brand.supportEmail}.`,
+        `${LEGAL_CONFIG.entity.legalEntity} ("we," "us," "${GATE_CONFIG.brand.name}") operates ${GATE_CONFIG.brand.url()} and the application accessible there. This policy explains what we collect, why, who we share it with, and the rights you have over it.`,
+        `Questions: ${LEGAL_CONFIG.entity.supportEmail}.`,
       ],
     },
     {
@@ -65,7 +73,7 @@ export const PRIVACY_POLICY = {
       heading: "Sharing with sub-processors",
       body: [
         "We use the following sub-processors to operate the product. Each is contractually bound to handle your data only for the purpose listed.",
-        ...LAUNCH_CONFIG.subProcessors.map(
+        ...LEGAL_CONFIG.subProcessors.map(
           (sp) => `${sp.name} — ${sp.purpose}. Privacy policy: ${sp.privacyUrl}`,
         ),
         "We update this list when a new provider is added for production use.",
@@ -82,7 +90,7 @@ export const PRIVACY_POLICY = {
     {
       heading: "Data retention",
       body: [
-        `When you delete your account, we soft-delete your data immediately (you stop being able to read or write to it). We hard-purge soft-deleted data after ${LAUNCH_CONFIG.retention.softDeleteDays} days.`,
+        `When you delete your account, we soft-delete your data immediately (you stop being able to read or write to it). We hard-purge soft-deleted data after ${LEGAL_CONFIG.retention.softDeleteDays} days.`,
         "Some operational logs (Sentry error events, Vercel platform logs) are retained on our providers' default schedules — typically 30-90 days — outside our direct control.",
         "Encrypted OAuth tokens are deleted from our database within minutes of disconnecting an integration in Settings.",
       ],
@@ -90,9 +98,9 @@ export const PRIVACY_POLICY = {
     {
       heading: "Your rights",
       body: [
-        `You can export your data at any time from Settings → Account → Export. The export is a zip of your account in machine-readable format and is delivered immediately for small accounts; larger accounts arrive via email within ${LAUNCH_CONFIG.retention.rightsRequestSlaDays} days.`,
-        `You can delete your account from Settings → Account → Delete. We honor this within ${LAUNCH_CONFIG.retention.rightsRequestSlaDays} days; in practice the soft-delete is immediate.`,
-        `California residents (CCPA), EU/UK residents (GDPR), and other jurisdictions with equivalent rights have the additional rights to access, correct, and restrict processing of your data. To exercise these, email ${LAUNCH_CONFIG.brand.supportEmail}.`,
+        `You can export your data at any time from Settings → Account → Export. The export is a zip of your account in machine-readable format and is delivered immediately for small accounts; larger accounts arrive via email within ${LEGAL_CONFIG.retention.rightsRequestSlaDays} days.`,
+        `You can delete your account from Settings → Account → Delete. We honor this within ${LEGAL_CONFIG.retention.rightsRequestSlaDays} days; in practice the soft-delete is immediate.`,
+        `California residents (CCPA), EU/UK residents (GDPR), and other jurisdictions with equivalent rights have the additional rights to access, correct, and restrict processing of your data. To exercise these, email ${LEGAL_CONFIG.entity.supportEmail}.`,
         "We do not respond differently to Do-Not-Track signals because we do not engage in tracking that the signal is intended to address.",
       ],
     },
@@ -109,7 +117,7 @@ export const PRIVACY_POLICY = {
     {
       heading: "Children",
       body: [
-        `${LAUNCH_CONFIG.brand.name} is not directed at children under ${LAUNCH_CONFIG.eligibility.minimumAge}. If you are under ${LAUNCH_CONFIG.eligibility.minimumAge}, do not create an account. If we learn we have collected personal information from a person under ${LAUNCH_CONFIG.eligibility.minimumAge}, we will delete it.`,
+        `${GATE_CONFIG.brand.name} is not directed at children under ${LEGAL_CONFIG.eligibility.minimumAge}. If you are under ${LEGAL_CONFIG.eligibility.minimumAge}, do not create an account. If we learn we have collected personal information from a person under ${LEGAL_CONFIG.eligibility.minimumAge}, we will delete it.`,
       ],
     },
     {
@@ -128,8 +136,8 @@ export const PRIVACY_POLICY = {
     {
       heading: "Contact",
       body: [
-        `Questions about this policy or your data: ${LAUNCH_CONFIG.brand.supportEmail}.`,
-        `Last revised: ${LAUNCH_CONFIG.brand.legalRevisedOn}.`,
+        `Questions about this policy or your data: ${LEGAL_CONFIG.entity.supportEmail}.`,
+        `Last revised: ${LEGAL_CONFIG.entity.legalRevisedOn}.`,
       ],
     },
   ],

@@ -10,7 +10,7 @@ Sized S/M/L/XL. No time estimates.
 
 ## §0 — Locked decisions (2026-04-25)
 
-User picked these defaults; everything below this section is updated to reflect them. Tweak any value in `src/lib/launch-config.ts` and the rest of the app picks it up next render.
+User picked these defaults; everything below this section is updated to reflect them. Tweak values in the three cadence-split configs (`src/lib/config/legal-config.ts` for entity/refund/retention/sub-processors, `src/lib/config/pricing-config.ts` for tiers/caps, `src/lib/config/gate-config.ts` for brand/beta) and the rest of the app picks them up next render.
 
 | # | Decision | Locked value |
 |---|---|---|

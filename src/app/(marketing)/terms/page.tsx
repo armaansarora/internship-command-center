@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { LegalDocument } from "@/components/marketing/LegalDocument";
 import { TERMS_OF_SERVICE } from "@/lib/legal/terms";
-import { LAUNCH_CONFIG } from "@/lib/launch-config";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: `Terms of service for ${LAUNCH_CONFIG.brand.name}.`,
-  alternates: { canonical: `${LAUNCH_CONFIG.brand.url()}/terms` },
+  description: `Terms of service for ${GATE_CONFIG.brand.name}.`,
+  alternates: { canonical: `${GATE_CONFIG.brand.url()}/terms` },
 };
 
 export default function TermsPage() {
