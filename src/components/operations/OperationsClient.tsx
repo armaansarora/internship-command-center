@@ -11,32 +11,42 @@ import type {
   ActivationCost,
   RecentActivationDispatch,
 } from "@/lib/db/queries/operations-rest";
+import type {
+  DailyAiSpendReading,
+  IncidentAlertView,
+} from "@/lib/db/queries/operations-ops-rest";
+import type { ProductionHealthSummary } from "@/lib/observability/production-health";
 import { MetricLadderCard } from "./MetricLadderCard";
 import { FunnelChart } from "./FunnelChart";
 import { CostMeter } from "./CostMeter";
 import { RecentActivationsTable } from "./RecentActivationsTable";
+import { CronHealthPanel } from "./CronHealthPanel";
+import { IncidentAlertsPanel } from "./IncidentAlertsPanel";
+import { AiSpendPanel } from "./AiSpendPanel";
 
 /**
- * `/operations` — Activation Funnel Dashboard client shell.
+ * `/operations` — Operations Dashboard client shell (GTM OpsDashboard).
  *
- * Receives raw aggregate counts + dispatch rows from the server page
- * and stitches them into the four cards (metric ladder, funnel, cost
- * meter, recent activations). The activation funnel math
+ * Renders four panels for the founder, sourced entirely from
+ * service-role-only tables the route shell pre-fetches:
+ *
+ *   1. Activation funnel — metric ladder + cost meter + funnel chart +
+ *      recent activations table (existing PR 2 surface; window-toggled).
+ *   2. Cron health — last run per cron, sourced from `cron_runs`.
+ *   3. Lighthouse incidents — recent rows from `incident_alerts`.
+ *   4. AI spend — today's `v_daily_ai_spend_cents` value vs the
+ *      `KILL_AI_SPEND_USD` cap, with a progress bar.
+ *
+ * The activation funnel keeps its 7-day / 24-hour toggle — the math
  * (`computeFunnelMetrics` + `computeObservedCostPerActivation`) is run
- * here in `useMemo` so the founder can toggle between the 7-day and
- * 24-hour windows without a round-trip — the server page pre-fetches
- * both windows.
+ * in `useMemo` so the founder can flip the window without a round-trip.
+ * The other three panels are global (today, currently-open, last 25),
+ * so the window toggle does not apply.
  *
  * No PII surfaces beyond what already lives on the dispatch row. The
  * skyline / building chrome is intentionally absent — this is the
  * Penthouse window onto Operations, not a floor in its own right; the
- * parent `(authenticated)/layout.tsx` already provides the world-shell
- * so the dashboard inherits the building feel without adding decoration
- * that would bury the data.
- *
- * The prop contract is fixed by the route shell (PR2-Architect). New
- * optional props are fine; renaming or dropping any of these seven
- * breaks the route.
+ * parent `(authenticated)/layout.tsx` provides the world-shell.
  */
 export interface OperationsClientProps {
   /** Activation funnel counts over the last 7 days. */
@@ -49,6 +59,23 @@ export interface OperationsClientProps {
   cost7d: ActivationCost;
   /** Token + USD cost over the last 24 hours. */
   cost24h: ActivationCost;
+  /**
+   * Cron summary from `readProductionHealthSummary`. `null` when the
+   * production-health read failed entirely — the panel renders an
+   * informational empty state in that case.
+   */
+  cron: ProductionHealthSummary["cron"] | null;
+  /**
+   * Recent incidents from `incident_alerts`, open first then resolved.
+   * Empty array is the steady-state and renders the "system quiet" view.
+   */
+  incidents: readonly IncidentAlertView[];
+  /**
+   * Today's AI spend reading. Always present; the container returns a
+   * zeroed-out reading on read failure so this panel renders the
+   * empty-state value rather than a broken card.
+   */
+  spend: DailyAiSpendReading;
   /** ISO timestamp the route generated this snapshot (server-render time). */
   generatedAt: string;
   /** ISO bounds the route used so the client can label its windows. */
@@ -120,6 +147,9 @@ export function OperationsClient({
   cost7d,
   cost24h,
   recentDispatches,
+  cron,
+  incidents,
+  spend,
   generatedAt,
 }: OperationsClientProps): JSX.Element {
   const [activeWindow, setActiveWindow] = useState<Window>("7d");
@@ -205,6 +235,17 @@ export function OperationsClient({
         </div>
         <div className="sm:col-span-12 lg:col-span-5">
           <RecentActivationsTable dispatches={recentDispatches} />
+        </div>
+
+        {/* Day-1 production-health panels: cron / incidents / spend. */}
+        <div className="sm:col-span-12 lg:col-span-7">
+          <CronHealthPanel cron={cron} />
+        </div>
+        <div className="sm:col-span-12 lg:col-span-5">
+          <AiSpendPanel spend={spend} />
+        </div>
+        <div className="sm:col-span-12">
+          <IncidentAlertsPanel incidents={incidents} />
         </div>
       </div>
     </main>
