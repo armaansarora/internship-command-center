@@ -1,4 +1,3 @@
-import type { ActorRef, Snapshot } from "xstate";
 import {
   createCharacterMachine,
   type BaseCharacterEvent,
@@ -19,19 +18,3 @@ export const characterMachine = createCharacterMachine<CharacterContext, Charact
     unreadAlerts: 0,
   },
 });
-
-type CharacterActorRef = ActorRef<
-  Snapshot<CharacterContext>,
-  CharacterEvent
->;
-
-type CharacterSnapshot = Snapshot<CharacterContext> & {
-  value:
-    | "idle"
-    | "alert"
-    | "greeting"
-    | "ready"
-    | "thinking"
-    | "talking"
-    | "returning";
-};
