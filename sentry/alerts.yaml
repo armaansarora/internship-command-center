@@ -1,0 +1,42 @@
+# Sentry alert rules — versioned source of truth.
+#
+# This file codifies the on-call contract for The Tower. Each entry describes
+# one Sentry "Issue Alert" rule that an operator (today: the founder) MUST
+# create in the Sentry dashboard. We deliberately keep these in YAML rather
+# than apply via the Sentry API so a code review trail is permanent and so
+# accidentally-deleted dashboard rules can be restored from this file.
+#
+# Schema (validated by scripts/validate-sentry-alerts.ts):
+#   version           must equal 1
+#   alerts[].id       lowercase snake_case unique key — anchors runbook entry
+#   alerts[].name     human title displayed in Sentry
+#   alerts[].query    Sentry search query that matches firing events
+#   alerts[].window_minutes  evaluation window (positive integer)
+#   alerts[].threshold       count threshold (positive integer)
+#   alerts[].comparator      "gt" | "gte"
+#   alerts[].runbook         relative path + anchor into docs/RUNBOOK.md
+#
+# Upload procedure: see docs/RUNBOOK.md#applying-alerts-to-sentry.
+version: 1
+alerts:
+  - id: agent_stream_failures
+    name: "Agent stream failures > 5/min"
+    query: "tags.event:agent.stream_failed"
+    window_minutes: 1
+    threshold: 5
+    comparator: "gt"
+    runbook: "docs/RUNBOOK.md#agent_stream_failures"
+  - id: outreach_sender_send_failures
+    name: "Outreach sender send_failed > 10/hr"
+    query: "tags.event:outreach_sender.send_failed"
+    window_minutes: 60
+    threshold: 10
+    comparator: "gt"
+    runbook: "docs/RUNBOOK.md#outreach_sender_send_failures"
+  - id: ai_quota_rpc_errors
+    name: "AI quota RPC errors > 20/hr"
+    query: "tags.event:ai_quota.rpc_error"
+    window_minutes: 60
+    threshold: 20
+    comparator: "gt"
+    runbook: "docs/RUNBOOK.md#ai_quota_rpc_errors"
