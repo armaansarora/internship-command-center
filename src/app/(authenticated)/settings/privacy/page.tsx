@@ -5,9 +5,12 @@ import { createClient, getUser } from "@/lib/supabase/server";
 import { isOwner } from "@/lib/auth/owner";
 import { GATE_CONFIG } from "@/lib/config/gate-config";
 import {
+  getRevokePreview,
   getUserAuditTimeline,
   getUserConsentState,
+  REVOKE_PREVIEW_EMPTY,
   type AuditLogRow,
+  type RevokePreview,
   type UserConsentState,
 } from "@/lib/db/queries/trust-console-rest";
 import { PrivacyClient } from "./privacy-client";
@@ -52,10 +55,19 @@ export default async function PrivacyPage(): Promise<JSX.Element> {
 
   // `audit_logs` rows are read under RLS — pass the request-scoped client
   // (NOT the admin client) so the user only sees their own proof rows.
-  const [consentState, auditTimeline, integrationsRow]: [
+  // The revoke preview also runs under RLS — both `networking_match_index`
+  // and `contacts` are policy-scoped to `auth.uid() = user_id`, so the
+  // HEAD counts cannot leak another user's footprint.
+  const [
+    consentState,
+    auditTimeline,
+    integrationsRow,
+    revokePreview,
+  ]: [
     UserConsentState,
     AuditLogRow[],
     { google: boolean; googleSinceIso: string | null; revokedSinceIso: string | null },
+    RevokePreview,
   ] = await Promise.all([
     getUserConsentState(supabase, user.id),
     getUserAuditTimeline(supabase, user.id, { limit: 100 }),
@@ -81,6 +93,7 @@ export default async function PrivacyPage(): Promise<JSX.Element> {
             ?.networking_revoked_at ?? null,
       };
     })(),
+    consentState_isOptedInOrNotYet(supabase, user.id),
   ]);
 
   return (
@@ -97,6 +110,25 @@ export default async function PrivacyPage(): Promise<JSX.Element> {
         sinceIso: integrationsRow.googleSinceIso,
       }}
       flagPreview={!flagOn && owner}
+      flagOn={flagOn}
+      revokePreview={revokePreview}
     />
   );
+}
+
+/**
+ * Resolve a revoke preview without throwing. Wraps `getRevokePreview` so
+ * the page-level `Promise.all` never rejects on a count read failure —
+ * Trust Console degrades to the "0 items" copy instead of erroring out
+ * the entire page.
+ */
+async function consentState_isOptedInOrNotYet(
+  client: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<RevokePreview> {
+  try {
+    return await getRevokePreview(client, userId);
+  } catch {
+    return REVOKE_PREVIEW_EMPTY;
+  }
 }

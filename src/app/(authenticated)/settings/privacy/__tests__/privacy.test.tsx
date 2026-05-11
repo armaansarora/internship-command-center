@@ -33,6 +33,7 @@ const {
   redirectMock,
   getUserAuditTimelineMock,
   getUserConsentStateMock,
+  getRevokePreviewMock,
   fromMock,
   adminFromMock,
   logSecurityEventMock,
@@ -47,6 +48,7 @@ const {
   }),
   getUserAuditTimelineMock: vi.fn(),
   getUserConsentStateMock: vi.fn(),
+  getRevokePreviewMock: vi.fn(),
   fromMock: vi.fn(),
   adminFromMock: vi.fn(),
   logSecurityEventMock: vi.fn(async (_event: AuditEvent) => undefined),
@@ -92,6 +94,11 @@ vi.mock("@/lib/config/gate-config", () => ({
 vi.mock("@/lib/db/queries/trust-console-rest", () => ({
   getUserAuditTimeline: getUserAuditTimelineMock,
   getUserConsentState: getUserConsentStateMock,
+  getRevokePreview: getRevokePreviewMock,
+  REVOKE_PREVIEW_EMPTY: {
+    itemsToErase: 0,
+    tablesTouched: ["user_profiles"],
+  },
 }));
 
 vi.mock("@/lib/audit/log", () => ({
@@ -166,6 +173,10 @@ beforeEach(() => {
     },
   });
   getUserAuditTimelineMock.mockResolvedValue([]);
+  getRevokePreviewMock.mockResolvedValue({
+    itemsToErase: 0,
+    tablesTouched: ["user_profiles"],
+  });
   fromMock.mockImplementation(() => makeQuery({ data: null, error: null }));
   adminFromMock.mockImplementation(() =>
     makeQuery({ data: { id: "u1" }, error: null, count: 0 }),

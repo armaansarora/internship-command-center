@@ -95,7 +95,10 @@ src/app/api/
                                                    the public unauth probe hit
                                                    by GitHub Actions every 15m.
   auth/callback, auth/signout
-  account/delete, account/export                   GDPR
+  account/delete, account/export                   GDPR (export queues +
+                                                   the export/status route
+                                                   that the Trust Console
+                                                   polls for delivery)
   admin/sentry-probe                               owner-only debug
   briefing/, calendar/, gmail/, drive/             integration data
   contacts/, documents/, networking/, offers/      floor data
@@ -127,6 +130,9 @@ src/components/
   marketing/   LegalDocument renderer
   pricing/     PricingCards (used in settings billing)
   settings/    settings tab clients (NetworkingConsent, etc.)
+  trust-console/  Trust Console primitives (TrustHeader,
+                  ConsentTimeline, AuditFeed, RevokeButton)
+                  — composed by /settings/privacy
   transitions/ shared route/elevator transitions
   ui/          generic UI primitives
   icons/       SVG icon components
