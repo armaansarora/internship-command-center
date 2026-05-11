@@ -1,6 +1,7 @@
 "use client";
 
 import { type JSX } from "react";
+import { FLOORS, FLOOR_ORDER, type FloorId } from "@/lib/constants/floors";
 
 export interface ElevatorDoorsRefs {
   overlayRef: React.RefObject<HTMLDivElement | null>;
@@ -8,11 +9,45 @@ export interface ElevatorDoorsRefs {
   rightDoorRef: React.RefObject<HTMLDivElement | null>;
   interiorRef: React.RefObject<HTMLDivElement | null>;
   counterRef: React.RefObject<HTMLSpanElement | null>;
+  /**
+   * Optional ref to the floor-name caption beneath the counter. Updated in
+   * lock-step with `counterRef` so the spoken floor name (e.g. "Penthouse",
+   * "The War Room") rides the tick animation alongside the floor id and
+   * stays in physical sync with the directional arrow.
+   */
+  floorNameRef?: React.RefObject<HTMLSpanElement | null>;
+  /**
+   * Optional ref to the direction arrow (▲ up / ▼ down / · idle). Updated
+   * once at transition start so the user sees the physical sense of travel
+   * for the entire moving phase.
+   */
+  directionRef?: React.RefObject<HTMLSpanElement | null>;
   darkWashRef: React.RefObject<HTMLDivElement | null>;
 }
 
 interface ElevatorDoorsProps extends ElevatorDoorsRefs {
   activeFloor: string;
+}
+
+/** Pure helper — exported so Elevator's `direction = up | down | idle`
+ *  arrow is testable without rendering. FLOOR_ORDER goes top → bottom,
+ *  so a smaller index means a higher floor (upward travel). */
+export function deriveTravelDirection(
+  from: FloorId,
+  to: FloorId,
+): "up" | "down" | "idle" {
+  if (from === to) return "idle";
+  const fromIdx = FLOOR_ORDER.indexOf(from);
+  const toIdx = FLOOR_ORDER.indexOf(to);
+  if (fromIdx === -1 || toIdx === -1) return "idle";
+  return toIdx < fromIdx ? "up" : "down";
+}
+
+/** Resolve a floor id to its display name. PH stays "Penthouse". */
+export function floorDisplayName(id: string): string {
+  const f = FLOORS.find((x) => x.id === id);
+  if (!f) return id;
+  return f.name.startsWith("The ") ? f.name.slice(4) : f.name;
 }
 
 /** Brushed-metal vertical texture used on both door leaves. */
@@ -46,6 +81,8 @@ export function ElevatorDoors({
   rightDoorRef,
   interiorRef,
   counterRef,
+  floorNameRef,
+  directionRef,
   darkWashRef,
   activeFloor,
 }: ElevatorDoorsProps): JSX.Element {
@@ -202,13 +239,28 @@ export function ElevatorDoors({
             aria-hidden="true"
           />
 
-          {/* Floor counter */}
-          <div className="relative z-10 flex flex-col items-center gap-4">
+          {/* Floor counter — floor id (large) + direction arrow + spoken floor name */}
+          <div className="relative z-10 flex flex-col items-center gap-3">
             <div
-              className="text-data text-xs tracking-[0.3em] uppercase"
+              className="text-data text-xs tracking-[0.3em] uppercase flex items-center gap-2"
               style={{ color: "var(--text-muted)" }}
             >
-              Floor
+              <span>Floor</span>
+              <span
+                ref={directionRef}
+                aria-hidden="true"
+                data-elevator-direction="idle"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "12px",
+                  color: "rgba(201, 168, 76, 0.85)",
+                  width: "14px",
+                  textAlign: "center",
+                  lineHeight: 1,
+                }}
+              >
+                ·
+              </span>
             </div>
             <span
               ref={counterRef}
@@ -219,6 +271,20 @@ export function ElevatorDoors({
               }}
             >
               {activeFloor === "PH" ? "PH" : activeFloor}
+            </span>
+            <span
+              ref={floorNameRef}
+              data-elevator-floor-name
+              style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: "16px",
+                color: "rgba(245, 220, 160, 0.85)",
+                letterSpacing: "0.04em",
+                marginTop: "-4px",
+                opacity: 0.92,
+              }}
+            >
+              {floorDisplayName(activeFloor)}
             </span>
             <div
               className="h-px w-14 opacity-50"

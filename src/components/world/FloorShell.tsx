@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import type { FloorId } from "@/types/ui";
 import { FLOORS } from "@/types/ui";
 import { useSoundEngine } from "./SoundProvider";
+import { FLOOR_IDENTITY } from "@/lib/constants/floor-identity";
 
 interface FloorShellProps {
   floorId: FloorId;
@@ -29,6 +30,7 @@ interface FloorShellProps {
  */
 export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element {
   const floor = FLOORS.find((f) => f.id === floorId);
+  const identity = FLOOR_IDENTITY[floorId];
   const { playAmbient } = useSoundEngine();
 
   useEffect(() => {
@@ -92,6 +94,60 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
         </div>
       )}
 
+      {/* Presence ribbon — fixed bottom-left text-only signal that the
+          floor's character is "at their station." Reads from the single
+          FLOOR_IDENTITY registry so the wording on every floor stays
+          consistent and the building feels inhabited even before the user
+          interacts with the character. Lobby, Penthouse, C-Suite all
+          inherit their own line. Skipped on floors without a character. */}
+      {identity?.characterId && (
+        <div
+          aria-live="polite"
+          aria-label={identity.idleAction}
+          data-presence-ribbon={identity.characterId}
+          className="pointer-events-none hidden md:flex fixed bottom-6 left-24 items-center gap-2"
+          style={{
+            zIndex: 20,
+            paddingLeft: "10px",
+            paddingRight: "12px",
+            paddingTop: "6px",
+            paddingBottom: "6px",
+            borderLeft: "1px solid rgba(201, 168, 76, 0.45)",
+            background:
+              "linear-gradient(90deg, rgba(8,7,14,0.7) 0%, rgba(8,7,14,0.0) 100%)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            opacity: 0.84,
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-block",
+              width: "5px",
+              height: "5px",
+              borderRadius: "50%",
+              background: "rgba(232, 196, 90, 0.95)",
+              boxShadow: "0 0 6px rgba(201, 168, 76, 0.55)",
+              flexShrink: 0,
+              animation: "presence-pulse 4s ease-in-out infinite",
+            }}
+          />
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "10px",
+              letterSpacing: "0.16em",
+              color: "rgba(245, 220, 160, 0.78)",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {identity.idleAction}
+          </span>
+        </div>
+      )}
+
       <style>{`
         @keyframes floor-badge-breathe {
           0%, 100% {
@@ -106,6 +162,18 @@ export function FloorShell({ floorId, children }: FloorShellProps): JSX.Element 
               0 4px 24px rgba(0, 0, 0, 0.38),
               0 0 18px rgba(201, 168, 76, 0.08),
               inset 0 1px 0 rgba(255,255,255,0.04);
+          }
+        }
+        @keyframes presence-pulse {
+          0%, 100% { opacity: 0.7; }
+          50% { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes floor-badge-breathe {
+            0%, 100% { opacity: 0.98; }
+          }
+          @keyframes presence-pulse {
+            0%, 100% { opacity: 0.85; }
           }
         }
       `}</style>

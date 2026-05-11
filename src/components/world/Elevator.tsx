@@ -8,7 +8,11 @@ import { FLOORS, FLOOR_ORDER, ROUTE_TO_FLOOR, type FloorId } from "@/lib/constan
 import type { ElevatorState } from "@/types/ui";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { ElevatorPanel, ElevatorMobileBar } from "./elevator/ElevatorPanel";
-import { ElevatorDoors } from "./elevator/ElevatorDoors";
+import {
+  ElevatorDoors,
+  deriveTravelDirection,
+  floorDisplayName,
+} from "./elevator/ElevatorDoors";
 
 // ─── SessionStorage key ──────────────────────────────────────────────────────
 /**
@@ -143,6 +147,8 @@ export function Elevator({
   const rightDoorRef = useRef<HTMLDivElement>(null);
   const interiorRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const floorNameRef = useRef<HTMLSpanElement>(null);
+  const directionRef = useRef<HTMLSpanElement>(null);
   const darkWashRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const tickTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -306,6 +312,16 @@ export function Elevator({
 
     timelineRef.current = tl;
 
+    // Direction arrow — set once at transition start. FLOOR_ORDER goes top→bottom,
+    // so moving to a SMALLER index means a higher floor (up arrow).
+    const direction = deriveTravelDirection(fromFloor, targetFloor);
+    const directionEl = directionRef.current;
+    if (directionEl) {
+      directionEl.dataset.elevatorDirection = direction;
+      directionEl.textContent =
+        direction === "up" ? "▲" : direction === "down" ? "▼" : "·";
+    }
+
     // Phase 1: Dark wash + doors close
     // Timings deliberately cover the typical page-data-fetch latency
     // (~200-800ms Supabase round-trip) — shortening them exposes the load time.
@@ -318,15 +334,17 @@ export function Elevator({
       .to(rightDoor, { xPercent: 0, duration: 0.5, ease: "power3.inOut" }, "<")
       .call(() => setState("moving"))
 
-      // Phase 2: Interior + counter tick
+      // Phase 2: Interior + counter tick (floor id + spoken name ride together)
       .to(interior, { opacity: 1, duration: 0.2, ease: "power1.in" })
       .call(() => {
         tickTimersRef.current.forEach(clearTimeout);
         tickTimersRef.current = [];
         const tickInterval = 400 / Math.max(sequence.length - 1, 1);
+        const nameEl = floorNameRef.current;
         sequence.forEach((fId, i) => {
           const timer = setTimeout(() => {
             if (counter) counter.textContent = fId === "PH" ? "PH" : fId;
+            if (nameEl) nameEl.textContent = floorDisplayName(fId);
           }, i * tickInterval);
           tickTimersRef.current.push(timer);
         });
@@ -454,6 +472,8 @@ export function Elevator({
         rightDoorRef={rightDoorRef}
         interiorRef={interiorRef}
         counterRef={counterRef}
+        floorNameRef={floorNameRef}
+        directionRef={directionRef}
         darkWashRef={darkWashRef}
         activeFloor={activeFloor}
       />

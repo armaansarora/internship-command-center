@@ -73,6 +73,7 @@ function CinematicArrivalInner({ onComplete, onSkip }: InnerProps): JSX.Element 
   const skylineLayerRef = useRef<HTMLDivElement>(null);
   const lobbyLayerRef = useRef<HTMLDivElement>(null);
   const deskLightRef = useRef<HTMLDivElement>(null);
+  const conciergeBadgeRef = useRef<HTMLDivElement>(null);
   const hasCompleted = useRef(false);
 
   const stages: readonly ArrivalStage[] = reducedMotion
@@ -106,12 +107,14 @@ function CinematicArrivalInner({ onComplete, onSkip }: InnerProps): JSX.Element 
     const skylineEl = skylineLayerRef.current;
     const lobbyEl = lobbyLayerRef.current;
     const deskEl = deskLightRef.current;
+    const badgeEl = conciergeBadgeRef.current;
     if (!skylineEl || !lobbyEl || !deskEl) return;
 
     // Initial positions — far aerial approach, lobby dim, desk dark.
     gsap.set(skylineEl, { scale: 1.35, opacity: 0.45, filter: "blur(2px)" });
     gsap.set(lobbyEl, { opacity: 0, scale: 1.04 });
     gsap.set(deskEl, { opacity: 0 });
+    if (badgeEl) gsap.set(badgeEl, { opacity: 0, y: 6 });
 
     const tl = gsap.timeline({
       onComplete: () => {
@@ -170,7 +173,9 @@ function CinematicArrivalInner({ onComplete, onSkip }: InnerProps): JSX.Element 
       );
     }
 
-    // Stage 4: concierge-land — warm light lands on the desk area.
+    // Stage 4: concierge-land — warm light lands on the desk + the
+    // "OTIS · CONCIERGE" nameplate text fades up the last 600ms so the
+    // sequence resolves on a named human, not an abstract glow.
     const conciergeLand = STAGES.find((s) => s.id === "concierge-land");
     if (conciergeLand) {
       tl.add(() => setActiveStageId("concierge-land"));
@@ -179,6 +184,18 @@ function CinematicArrivalInner({ onComplete, onSkip }: InnerProps): JSX.Element 
         duration: conciergeLand.durationMs / 1000,
         ease: conciergeLand.easing,
       });
+      if (badgeEl) {
+        tl.to(
+          badgeEl,
+          {
+            opacity: 0.92,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          `-=${Math.min(conciergeLand.durationMs / 1000, 0.6)}`,
+        );
+      }
     }
 
     return () => {
@@ -246,6 +263,36 @@ function CinematicArrivalInner({ onComplete, onSkip }: InnerProps): JSX.Element 
         }}
         aria-hidden="true"
       />
+
+      {/* Concierge nameplate — fades up during the final beat so the
+          cinematic resolves on a named human, not an abstract glow. */}
+      <div
+        ref={conciergeBadgeRef}
+        data-cinematic-element="concierge-nameplate"
+        aria-hidden="true"
+        className="absolute left-1/2 -translate-x-1/2"
+        style={{
+          bottom: "11%",
+          zIndex: 4,
+          willChange: "opacity, transform",
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: "10px",
+          letterSpacing: "0.32em",
+          color: "rgba(232, 196, 90, 0.78)",
+          textShadow: "0 2px 16px rgba(0, 0, 0, 0.65)",
+          textTransform: "uppercase",
+          padding: "6px 14px",
+          borderTop: "1px solid rgba(201, 168, 76, 0.28)",
+          borderBottom: "1px solid rgba(201, 168, 76, 0.14)",
+          background:
+            "linear-gradient(180deg, rgba(8,7,14,0.55) 0%, rgba(8,7,14,0.25) 100%)",
+          backdropFilter: "blur(4px)",
+          WebkitBackdropFilter: "blur(4px)",
+          pointerEvents: "none",
+        }}
+      >
+        Otis · Concierge
+      </div>
 
       {/* Invisible duration announcement for screen readers. */}
       <span className="sr-only" aria-hidden="false">
