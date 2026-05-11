@@ -482,4 +482,76 @@ describe("recordServerEngagementEvent", () => {
       }),
     );
   });
+
+  // ------------------------------------------------------------------------
+  // user_return (D1/D7/D30 retention instrumentation)
+  // ------------------------------------------------------------------------
+
+  it("user_return writes with route_kind 'retention'", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "user_return",
+      pathname: "/penthouse",
+      userId: "00000000-0000-0000-0000-000000000001",
+      floor: "penthouse",
+      metadata: { return_source: "tube", floor_first: "penthouse" },
+    });
+
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event_type: "user_return",
+        route_kind: "retention",
+        pathname: "/penthouse",
+        floor: "penthouse",
+      }),
+    );
+  });
+
+  it("user_return preserves return_source and floor_first metadata", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "user_return",
+      pathname: "/c-suite",
+      userId: "00000000-0000-0000-0000-000000000001",
+      floor: "c-suite",
+      metadata: {
+        return_source: "briefing_email",
+        floor_first: "c-suite",
+      },
+    });
+
+    const call = insertMock.mock.calls[0][0] as {
+      metadata: Record<string, unknown>;
+    };
+    expect(call.metadata).toEqual({
+      return_source: "briefing_email",
+      floor_first: "c-suite",
+    });
+  });
+
+  it("user_return still strips non-allowlisted keys (no leakage via retention event)", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "user_return",
+      pathname: "/penthouse",
+      userId: "00000000-0000-0000-0000-000000000001",
+      metadata: {
+        return_source: "tube",
+        // not in allowlist — must be dropped
+        email: "user@example.com",
+        ip: "192.0.2.1",
+      },
+    });
+
+    const call = insertMock.mock.calls[0][0] as {
+      metadata: Record<string, unknown>;
+    };
+    expect(call.metadata).toEqual({ return_source: "tube" });
+  });
 });

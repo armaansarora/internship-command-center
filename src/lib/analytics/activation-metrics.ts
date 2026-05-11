@@ -126,6 +126,17 @@ export const ACTIVATION_METRIC_TARGETS: readonly ActivationMetric[] = [
     unit: "ratio",
   },
   {
+    // D30 retention is the long-tail durability check — it answers "did the
+    // user keep coming back a month later?" The target is intentionally
+    // ambitious; the kill threshold matches what a single-app pipeline can
+    // sustain through a real recruiting season.
+    key: "d30_return",
+    description: "D30 return",
+    target: 0.18,
+    killThreshold: 0.08,
+    unit: "ratio",
+  },
+  {
     key: "cost_per_activation_usd",
     description: "Cost per activation",
     target: 0.05,

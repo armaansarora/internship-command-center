@@ -116,8 +116,14 @@ function friendlyError(code: string): string {
       return "Gmail isn't connected yet — let's connect it.";
     case "gmail_sync_failed":
       return "Gmail sync didn't complete. Try manual entry for now.";
+    case "gmail_sync_timeout":
+      return "Gmail is taking too long. Add one application by hand instead — it's faster.";
     case "no_applications_found":
-      return "We couldn't spot a recent application in your inbox. Add one manually.";
+      // This is THE most common cs-junior bounce: their applications live in
+      // Lever / Greenhouse / Workday confirmation emails that our parser
+      // can't always identify. We surface a copy that explicitly invites the
+      // manual pivot rather than reading like a hard failure.
+      return "Couldn't spot a recent application in your inbox — most of yours probably live behind a Lever or Greenhouse link. Add one by hand below; it takes 30 seconds.";
     case "application_read_failed":
     case "profile_read_failed":
       return "Couldn't reach your records. Try once more.";
@@ -285,6 +291,7 @@ function SourcePhase({
   onGmailConnect,
   pending,
   globalError,
+  initialMode = "choice",
 }: {
   manual: ManualFormState;
   setManual: (next: ManualFormState) => void;
@@ -292,8 +299,12 @@ function SourcePhase({
   onGmailConnect: () => void;
   pending: boolean;
   globalError: string | null;
+  /** When the Gmail flow surfaced an unrecoverable error, parent passes
+   *  "manual" so the phase opens directly into the manual form instead of
+   *  forcing the user back to the choice screen they just left. */
+  initialMode?: "choice" | "manual";
 }): JSX.Element {
-  const [mode, setMode] = useState<"choice" | "manual">("choice");
+  const [mode, setMode] = useState<"choice" | "manual">(initialMode);
 
   return (
     <section
@@ -597,6 +608,14 @@ export function ActivateClient({
   const [sourceGlobalError, setSourceGlobalError] = useState<string | null>(
     null,
   );
+  // When the Gmail path fails in a recoverable way (no apps found, timeout,
+  // sync failed) we auto-open the manual form. This saves a click for the
+  // most common bounce — Maya bounces here at ~30% in baseline activation
+  // testing because her offers live behind Lever / Greenhouse rather than
+  // in plain-text Gmail receipts.
+  const [sourceInitialMode, setSourceInitialMode] = useState<"choice" | "manual">(
+    "choice",
+  );
   const [working, setWorking] = useState<WorkingState | null>(null);
   const [delivered, setDelivered] = useState<DeliveredState | null>(null);
 
@@ -708,6 +727,19 @@ export function ActivateClient({
       const res = await importFirstApplicationAction({ source: "gmail" });
       if (!res.ok) {
         setSourceGlobalError(friendlyError(res.error));
+        // The four recoverable Gmail-path failures land us in manual mode
+        // automatically so the user doesn't have to re-click "Add it by
+        // hand" after reading the error. `no_gmail_oauth` is excluded —
+        // that one means tokens never landed; the user needs the choice
+        // screen so they can retry the OAuth flow.
+        if (
+          res.error === "no_applications_found" ||
+          res.error === "gmail_sync_failed" ||
+          res.error === "gmail_sync_timeout" ||
+          res.error === "application_read_failed"
+        ) {
+          setSourceInitialMode("manual");
+        }
         return;
       }
       await advanceToWorking(res.appId);
@@ -881,6 +913,7 @@ export function ActivateClient({
             onGmailConnect={connectGmail}
             pending={pending}
             globalError={sourceGlobalError}
+            initialMode={sourceInitialMode}
           />
         ) : null}
         {phase === "working" && working ? (

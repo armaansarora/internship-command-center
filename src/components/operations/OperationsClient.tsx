@@ -64,12 +64,13 @@ type Window = "7d" | "24h";
  * Stitch funnel counts + cost reading into the metric ladder rows. The
  * cost row is emitted by `computeFunnelMetrics` with `observed: null`
  * by design — we merge in the cost-observer reading here so the ladder
- * has all six rows live in a single pass.
+ * has all seven rows live in a single pass.
  *
- * D1 / D7 retention are not derivable from beat counts alone (they
- * require a per-user join we don't fetch in PR2). Until that retention
- * query lands the two rows pass through with `observed: null`, which
- * renders as an em dash — the dashboard never shows a fake zero.
+ * D1 / D7 / D30 retention are not derivable from beat counts alone — they
+ * require a per-user join against the new `user_return` engagement_events
+ * rows. Until that retention query lands, the three return rows pass
+ * through with `observed: null`, which renders as an em dash — the
+ * dashboard never shows a fake zero.
  */
 function buildLadderRows(
   funnel: ActivationFunnelCounts,

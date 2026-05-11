@@ -6,7 +6,10 @@
  * each of the five derivable metrics on the ladder. The sixth row
  * (cost_per_activation_usd) is exercised via cost-observer; here we only
  * assert that funnel-rollup emits a null observed + below_target placeholder
- * so the dashboard always renders six rows.
+ * so the dashboard always renders seven rows. The D30 row mirrors D1 / D7
+ * but is only populated when the caller supplies `activatedUsersD30` — when
+ * the field is undefined, the row surfaces a null observed + below_target
+ * placeholder, just like the cost row.
  */
 
 import { describe, expect, it } from "vitest";
@@ -84,6 +87,7 @@ describe("computeFunnelMetrics — shape", () => {
       "first_app_to_first_action",
       "d1_return_activated",
       "d7_return",
+      "d30_return",
       "cost_per_activation_usd",
     ]);
   });
@@ -400,6 +404,51 @@ describe("computeFunnelMetrics — d7_return thresholds", () => {
       buildInput({ activatedUsersD7: 5, totalActivations: 100 }),
     );
     expect(readingFor(result, "d7_return").health).toBe("kill");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D30 retention — null when missing, derived when supplied
+// ---------------------------------------------------------------------------
+
+describe("computeFunnelMetrics — d30_return", () => {
+  it("emits null observed + below_target when activatedUsersD30 is undefined", () => {
+    const result = computeFunnelMetrics(
+      buildInput({ totalActivations: 100 }),
+    );
+    const row = readingFor(result, "d30_return");
+    expect(row.observed).toBeNull();
+    expect(row.health).toBe("below_target");
+  });
+
+  it("derives the ratio when activatedUsersD30 is supplied", () => {
+    const result = computeFunnelMetrics(
+      buildInput({ activatedUsersD30: 22, totalActivations: 100 }),
+    );
+    const row = readingFor(result, "d30_return");
+    expect(row.observed).toBe(0.22);
+    expect(row.health).toBe("above_target"); // target = 0.18
+  });
+
+  it("classifies below_target between kill (0.08) and target (0.18)", () => {
+    const result = computeFunnelMetrics(
+      buildInput({ activatedUsersD30: 12, totalActivations: 100 }),
+    );
+    expect(readingFor(result, "d30_return").health).toBe("below_target");
+  });
+
+  it("classifies kill when below the floor (0.08)", () => {
+    const result = computeFunnelMetrics(
+      buildInput({ activatedUsersD30: 5, totalActivations: 100 }),
+    );
+    expect(readingFor(result, "d30_return").health).toBe("kill");
+  });
+
+  it("returns null observed when totalActivations is 0 even with a D30 reading", () => {
+    const result = computeFunnelMetrics(
+      buildInput({ activatedUsersD30: 10, totalActivations: 0 }),
+    );
+    expect(readingFor(result, "d30_return").observed).toBeNull();
   });
 });
 

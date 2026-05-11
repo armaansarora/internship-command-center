@@ -10,6 +10,7 @@ import {
   classifyMiddlewareRequest,
   recordServerEngagementEvent,
 } from "@/lib/analytics/server-engagement";
+import { recordUserReturn } from "@/lib/analytics/retention";
 
 /**
  * Read a required env var with a readable error if it's missing. Replaces the
@@ -205,6 +206,42 @@ function fireEngagement(
     floor: classification.floor,
     metadata: { is_authenticated: authState.isAuthenticated },
   }).catch(() => {});
+
+  // Retention beacon: emit `user_return` alongside every authenticated
+  // floor_view. The rollup query enforces per-day uniqueness at read time
+  // (count distinct user_id + date_trunc('day', created_at)), so this is
+  // append-only and dirt cheap. The channel attribution (`return_source`)
+  // is parsed from the `?ref=` query param when present; the public
+  // `/api/auth/google/start` strips unknown query params, so an attacker
+  // can't forge an arbitrary source on an unauth signin. Unknown sources
+  // fall back to "direct" — fail-closed.
+  if (
+    classification.eventType === "floor_view" &&
+    authState.isAuthenticated &&
+    authState.userId !== null
+  ) {
+    void recordUserReturn({
+      userId: authState.userId,
+      source: parseReturnSource(request.nextUrl.searchParams.get("ref")),
+      floorFirst: classification.floor,
+      pathname: classification.pathname,
+    }).catch(() => {});
+  }
+}
+
+/** Validate a `?ref=` query param against the closed `RETURN_SOURCES` set. */
+function parseReturnSource(
+  raw: string | null,
+): "tube" | "briefing_email" | "deadline_alert" | "referral" | "direct" {
+  switch (raw) {
+    case "tube":
+    case "briefing_email":
+    case "deadline_alert":
+    case "referral":
+      return raw;
+    default:
+      return "direct";
+  }
 }
 
 function getSupabaseAuthCookieBaseName(): string {

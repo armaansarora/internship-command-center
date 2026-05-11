@@ -37,8 +37,8 @@ function lastCall(): RecordInput {
 }
 
 describe("ACTIVATION_METRIC_TARGETS", () => {
-  it("has exactly 6 entries", () => {
-    expect(ACTIVATION_METRIC_TARGETS).toHaveLength(6);
+  it("has exactly 7 entries (six conversion/retention ratios + cost)", () => {
+    expect(ACTIVATION_METRIC_TARGETS).toHaveLength(7);
   });
 
   it("each metric has a unique key", () => {
@@ -67,7 +67,7 @@ describe("ACTIVATION_METRIC_TARGETS", () => {
     }
   });
 
-  it("includes the six canonical metric keys", () => {
+  it("includes the seven canonical metric keys", () => {
     const keys = ACTIVATION_METRIC_TARGETS.map((m) => m.key);
     expect(keys).toEqual([
       "landing_to_signin",
@@ -75,6 +75,7 @@ describe("ACTIVATION_METRIC_TARGETS", () => {
       "first_app_to_first_action",
       "d1_return_activated",
       "d7_return",
+      "d30_return",
       "cost_per_activation_usd",
     ]);
   });
