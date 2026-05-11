@@ -107,7 +107,17 @@ export function parseEvidence(value: unknown): DossierEvidenceItem[] {
 
 /**
  * Narrow an `unknown` disagreement value into a `DossierDisagreement | null`.
- * Accepts either `{ note: "..." }` or a bare string for forward compat.
+ *
+ * Accepts three on-disk shapes:
+ *   1. `{ withAgent, reason }` — the canonical shape `dossier-extractor`
+ *      emits (matches the Zod schema field names).
+ *   2. `{ with?, note }` — legacy shape from earlier prototypes.
+ *   3. bare string — older free-form note.
+ *
+ * The card always renders `with` + `note` internally, so the parse step
+ * normalizes whichever shape the jsonb cell holds into the read model.
+ * Returning a single canonical reader shape keeps the JSX site simple and
+ * insulates it from future schema migrations.
  */
 export function parseDisagreement(value: unknown): DossierDisagreement | null {
   if (typeof value === "string" && value.trim().length > 0) {
@@ -115,12 +125,16 @@ export function parseDisagreement(value: unknown): DossierDisagreement | null {
   }
   if (value !== null && typeof value === "object" && !Array.isArray(value)) {
     const r = value as Record<string, unknown>;
-    const note = typeof r.note === "string" ? r.note : undefined;
+    const note =
+      (typeof r.note === "string" && r.note) ||
+      (typeof r.reason === "string" && r.reason) ||
+      undefined;
     if (!note || note.trim().length === 0) return null;
-    return {
-      note,
-      with: typeof r.with === "string" ? r.with : undefined,
-    };
+    const withAgent =
+      (typeof r.with === "string" && r.with) ||
+      (typeof r.withAgent === "string" && r.withAgent) ||
+      undefined;
+    return { note, with: withAgent };
   }
   return null;
 }

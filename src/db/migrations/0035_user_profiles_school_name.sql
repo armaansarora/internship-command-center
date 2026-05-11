@@ -1,4 +1,4 @@
--- 0031_user_profiles_school_name.sql
+-- 0035_user_profiles_school_name.sql
 -- Add `school_name` to user_profiles to power the school-cohort density
 -- signal surfaced by R13 (Differentiate council).
 --

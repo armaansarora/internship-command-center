@@ -1,4 +1,4 @@
--- 0031_stripe_dunning_refund_audit.sql
+-- 0034_stripe_dunning_refund_audit.sql
 -- Monetize council / dunning + refund hardening — extend the audit_logs
 -- allow-list so the Stripe webhook can emit `payment_failed` and
 -- `refund_issued` rows.

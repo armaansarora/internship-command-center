@@ -317,16 +317,15 @@ describe("POST /api/networking/revoke — audit_logs proof rows (PR4)", () => {
     expect(auditInserts).toHaveLength(1);
     const payload = auditInserts[0] as {
       event_type: string;
-      metadata: { error: string };
+      metadata: { error_code: string };
     };
     expect(payload.event_type).toBe("networking_revoke_cascade_failed");
-    // Route stringifies the thrown error via the same `err instanceof Error
-    // ? err.message : String(err)` pattern it uses for its own log line.
-    // The supabase error shape is a plain object, so String(...) yields
-    // "[object Object]" — we assert SOME error string is present rather
-    // than coupling this PR4 test to the existing logging-precision bug.
-    expect(typeof payload.metadata.error).toBe("string");
-    expect(payload.metadata.error.length).toBeGreaterThan(0);
+    // RiskCompliance council moved raw error strings out of the durable
+    // audit row to avoid leaking Postgres column/constraint names. The
+    // route now writes a `sanitizeErrorCode` value — operators still get
+    // the verbose error via the matching `log.error` line.
+    expect(typeof payload.metadata.error_code).toBe("string");
+    expect(payload.metadata.error_code.length).toBeGreaterThan(0);
   });
 
   it("emits a networking_revoke_cascade_failed audit row when stamp fails", async () => {
@@ -340,10 +339,12 @@ describe("POST /api/networking/revoke — audit_logs proof rows (PR4)", () => {
     expect(auditInserts).toHaveLength(1);
     const payload = auditInserts[0] as {
       event_type: string;
-      metadata: { error: string; tables_touched: string[] };
+      metadata: { error_code: string; tables_touched: string[] };
     };
     expect(payload.event_type).toBe("networking_revoke_cascade_failed");
-    expect(payload.metadata.error).toBe("stamp broken");
+    // "stamp broken" matches none of the keyword regexes in
+    // sanitizeErrorCode, so it falls through to the generic bucket.
+    expect(payload.metadata.error_code).toBe("cascade_failed");
     // Stamp failed BEFORE user_profiles was recorded as touched.
     expect(payload.metadata.tables_touched).toEqual([]);
   });

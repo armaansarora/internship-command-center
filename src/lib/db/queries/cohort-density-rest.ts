@@ -35,7 +35,7 @@
  * warm-intro network — not every user who ever signed up with a school.
  *
  * Schema source: src/db/schema.ts → userProfiles.schoolName.
- * Migration: src/db/migrations/0031_user_profiles_school_name.sql.
+ * Migration: src/db/migrations/0035_user_profiles_school_name.sql.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";

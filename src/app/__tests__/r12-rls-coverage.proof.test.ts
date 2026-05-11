@@ -43,15 +43,15 @@ interface ServiceRoleOnly {
 }
 
 const SERVICE_ROLE_ONLY: Record<string, ServiceRoleOnly> = {
-  // Stripe webhook idempotency.  Hardened by 0031 (this PR) to add
-  // explicit REVOKE so the posture isn't relying on default-deny alone.
+  // Stripe webhook idempotency.  Hardened by 0033 (RiskCompliance) to
+  // add explicit REVOKE so the posture isn't relying on default-deny.
   stripe_webhook_events: {
-    migration: "src/db/migrations/0031_service_role_only_revokes.sql",
+    migration: "src/db/migrations/0033_service_role_only_revokes.sql",
     reason: "webhook idempotency cache; client reads/writes denied",
   },
-  // Firecrawl monthly budget counter.  Hardened by 0031.
+  // Firecrawl monthly budget counter.  Hardened by 0033.
   comp_bands_budget: {
-    migration: "src/db/migrations/0031_service_role_only_revokes.sql",
+    migration: "src/db/migrations/0033_service_role_only_revokes.sql",
     reason: "monthly scrape-credit budget; never client-readable",
   },
 };

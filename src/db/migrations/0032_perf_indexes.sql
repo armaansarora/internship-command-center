@@ -1,4 +1,4 @@
--- 0031_perf_indexes.sql
+-- 0032_perf_indexes.sql
 -- Architect performance pass — composite indexes for two high-frequency
 -- query shapes the existing index set does not cover.
 --

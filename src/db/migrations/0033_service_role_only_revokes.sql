@@ -1,4 +1,4 @@
--- 0031_service_role_only_revokes.sql
+-- 0033_service_role_only_revokes.sql
 -- RiskCompliance — General #1 (RLS coverage).
 --
 -- Two tables in the schema rely on RLS-default-deny (RLS enabled with no
