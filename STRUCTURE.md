@@ -8,10 +8,10 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 
 ```
 src/         the app
-scripts/     maintenance + seed + dev scripts
-docs/        design specs (4 files)
-tests/       Playwright E2E suite
-public/      static assets (logos, OG, etc.)
+scripts/     maintenance + seed + dev scripts (6 files)
+docs/        design specs + testing patterns (5 files)
+tests/       Playwright E2E suite + JSON fixtures
+public/      static assets (4 lobby bgs + favicon)
 ```
 
 ---
@@ -181,7 +181,7 @@ src/lib/db/
 src/db/schema.ts                                   Drizzle schema (49KB,
                                                    schema-only — NEVER use
                                                    `db` object at runtime)
-src/db/migrations/                                 0000–0023.sql
+src/db/migrations/                                 0000–0035.sql
 src/db/manual/                                     hand-written SQL
 src/db/manual/auth-email-templates/                4 HTML templates already
                                                    pasted into Supabase dashboard
@@ -276,6 +276,8 @@ docs/CHAIN-OF-COMMAND.md     AI agent hierarchy spec (66KB — long, skim)
 docs/CHARACTER-PROMPTS.md    8 agent system prompts (voice/personality)
 docs/LAUNCH-READY.md         locked business decisions + remaining ops
                              checklist (§0 has the table of decisions)
+docs/TESTING.md              vitest + Playwright patterns (read before
+                             adding a new test suite)
 ```
 
 ---
