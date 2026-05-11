@@ -7,11 +7,19 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 ## Top-level
 
 ```
-src/         the app
-scripts/     maintenance + seed + dev scripts (6 files)
-docs/        design specs + testing patterns (5 files)
-tests/       Playwright E2E suite + JSON fixtures
-public/      static assets (4 lobby bgs + favicon)
+src/                    the app
+scripts/                maintenance + seed + dev scripts (6 files)
+docs/                   design specs + testing patterns (6 files)
+tests/                  Playwright E2E + off-platform canary
+  tests/e2e/            local stub-server Playwright suite
+  tests/canary/         off-platform synthetic canary against real prod
+public/                 static assets (4 lobby bgs + favicon)
+.github/workflows/      CI + scheduled jobs
+  config-guard.yml      vitest + tsc on cadence-config PRs
+  hardening-e2e.yml     Playwright HARSH suite on src/ PRs + weekly
+  canary.yml            off-platform synthetic canary (every 15 min)
+playwright.config.ts            default config — local e2e (stub server)
+playwright.canary.config.ts     canary-only — hits real prod, no stub
 ```
 
 ---
@@ -72,8 +80,12 @@ src/app/api/
                                                    (all use
                                                     createAgentRouteHandler)
   stripe/checkout, stripe/portal, stripe/webhook
-  cron/                                            14 scheduled jobs
-                                                   (all wrapped withCronHealth)
+  cron/                                            14 scheduled jobs +
+                                                   1 public liveness probe
+                                                   (canary-heartbeat — hit
+                                                    by GitHub Actions,
+                                                    unauthenticated; all
+                                                    wrapped withCronHealth)
   auth/callback, auth/signout
   account/delete, account/export                   GDPR
   admin/sentry-probe                               owner-only debug
@@ -278,6 +290,8 @@ docs/LAUNCH-READY.md         locked business decisions + remaining ops
                              checklist (§0 has the table of decisions)
 docs/TESTING.md              vitest + Playwright patterns (read before
                              adding a new test suite)
+docs/RUNBOOK.md              operations playbook (synthetic canary,
+                             triage steps, alert paths)
 ```
 
 ---
@@ -322,6 +336,7 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 | Get current tier | `import { getUserTier } from "@/lib/stripe/entitlements"` |
 | Re-seed owner test data | `bash scripts/seed-owner-data.ts` (after `vercel env pull --yes .env.local`) |
 | Cron health table | `cron_runs` (owner-only RLS) |
+| Synthetic canary (off-platform) | `.github/workflows/canary.yml` + `tests/canary/production.spec.ts` (heartbeat at `/api/cron/canary-heartbeat`; runbook: `docs/RUNBOOK.md`) |
 | Quota table | `ai_call_quotas` (atomic `consume_ai_call_quota` RPC) |
 | Waitlist signups | `waitlist_signups` (RLS deny-all, admin-only) |
 

@@ -1,0 +1,79 @@
+name: Production Canary
+
+# Off-platform synthetic canary. Hits real production every 15 minutes
+# and proves the login → penthouse → CEO chat surface is alive. The
+# whole point is that the scheduler survives a Vercel-region outage —
+# do NOT migrate this to Vercel Cron. Use a different cloud's cron
+# (this one: GitHub Actions) so a Vercel outage is visible from the
+# outside, not silenced from within.
+#
+# Heartbeat probe lives at /api/cron/canary-heartbeat in the app and
+# is deliberately unauthenticated. See
+# src/app/api/cron/canary-heartbeat/route.ts and
+# tests/canary/production.spec.ts for the full contract.
+#
+# Alerts: GitHub's built-in "failure email to repo admins" — no
+# external paging configured on purpose. Add one if/when this fires
+# enough that email isn't the right channel.
+
+on:
+  schedule:
+    # Every 15 minutes. GitHub may skew this by a few minutes under
+    # load; that's fine — this is a liveness probe, not an SLA clock.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  # Also run on PRs that touch the canary itself so changes are
+  # validated before they hit main.
+  pull_request:
+    paths:
+      - '.github/workflows/canary.yml'
+      - 'tests/canary/**'
+      - 'playwright.canary.config.ts'
+      - 'src/app/api/cron/canary-heartbeat/**'
+
+# Cancel any in-flight run of this workflow when a new one starts —
+# we never want two 15-min canaries piling up if a run goes slow.
+concurrency:
+  group: production-canary
+  cancel-in-progress: true
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      CI: 'true'
+      # Hardcoded prod URL — the canary's whole job is to prove THIS
+      # URL is alive. If a developer needs to point it at a preview
+      # they can dispatch with `workflow_dispatch` and set
+      # CANARY_BASE_URL in a branch override.
+      CANARY_BASE_URL: 'https://www.interntower.com'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        # `npm ci` keeps the lockfile honest. The canary needs the
+        # full dev-dep set (Playwright lives there) — there's no
+        # cheaper install path.
+        run: npm ci
+
+      - name: Install Playwright (chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run canary spec against production
+        run: npx playwright test --config=playwright.canary.config.ts
+
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canary-traces
+          path: test-results/
+          retention-days: 7
