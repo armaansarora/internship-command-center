@@ -54,6 +54,14 @@ const SERVICE_ROLE_ONLY: Record<string, ServiceRoleOnly> = {
     migration: "src/db/migrations/0033_service_role_only_revokes.sql",
     reason: "monthly scrape-credit budget; never client-readable",
   },
+  // Lighthouse Watchdog incident state machine.  Migration 0036 mirrors
+  // the stripe_webhook_events / comp_bands_budget posture — RLS enabled
+  // without a policy, plus explicit REVOKE FROM anon, authenticated so a
+  // future grant cannot quietly expose owner-only operational data.
+  incident_alerts: {
+    migration: "src/db/migrations/0036_incident_alerts.sql",
+    reason: "watchdog incident state; owner-only diagnostics, service-role",
+  },
 };
 
 describe("R12 — RLS coverage", () => {

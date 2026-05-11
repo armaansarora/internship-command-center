@@ -80,6 +80,11 @@ const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
       import("@/app/api/cron/outreach-sender/route") as Promise<RouteModule>,
   },
   {
+    name: "owner-watchdog",
+    load: () =>
+      import("@/app/api/cron/owner-watchdog/route") as Promise<RouteModule>,
+  },
+  {
     name: "packet-regenerate",
     load: () =>
       import("@/app/api/cron/packet-regenerate/route") as Promise<RouteModule>,

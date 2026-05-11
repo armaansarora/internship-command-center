@@ -54,13 +54,23 @@ type StripeWebhookRow = Pick<
 const DAILY_STALE_MS = 36 * 60 * 60 * 1000;
 const WEEKLY_STALE_MS = 8 * 24 * 60 * 60 * 1000;
 
-function configuredCronJobNames(): string[] {
+/**
+ * Names of every cron job currently wired in vercel.json. Exported so the
+ * Lighthouse Watchdog (and any other observability consumer) can iterate
+ * the same canonical list without duplicating the path-stripping logic.
+ */
+export function configuredCronJobNames(): string[] {
   return vercelConfig.crons.map((cron) =>
     cron.path.replace(/^\/api\/cron\/?/, ""),
   );
 }
 
-function staleThreshold(jobName: string): number {
+/**
+ * Milliseconds after which a cron is considered stale. Exported so the
+ * watchdog can apply the same per-job threshold this dashboard uses,
+ * rather than re-deriving the schedule heuristic independently.
+ */
+export function staleThreshold(jobName: string): number {
   return jobName === "cfo-threshold" ? WEEKLY_STALE_MS : DAILY_STALE_MS;
 }
 

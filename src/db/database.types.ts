@@ -43,6 +43,7 @@ import type {
   documents,
   emails,
   handoffDossiers,
+  incidentAlerts,
   interviews,
   jobEmbeddings,
   matchCandidateIndex,
@@ -122,6 +123,7 @@ export interface Tables {
   documents: RowOf<typeof documents.$inferSelect>;
   emails: RowOf<typeof emails.$inferSelect>;
   handoff_dossiers: RowOf<typeof handoffDossiers.$inferSelect>;
+  incident_alerts: RowOf<typeof incidentAlerts.$inferSelect>;
   interviews: RowOf<typeof interviews.$inferSelect>;
   job_embeddings: RowOf<typeof jobEmbeddings.$inferSelect>;
   match_candidate_index: RowOf<typeof matchCandidateIndex.$inferSelect>;
