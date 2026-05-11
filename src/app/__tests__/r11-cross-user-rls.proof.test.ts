@@ -87,16 +87,33 @@ const ALLOWLIST = new Set<string>([
   // every OTHER user's cache.  The set of keys passed to IN(...) is
   // user-scoped upstream; that is the privacy guarantee.
   "src/app/api/networking/revoke/route.ts",
-  // Trust Console server action (PR4) — mirrors the revoke cascade
-  // above. The cascade DELETE intentionally omits `user_id` from the
-  // WHERE clause because its purpose is to remove the revoking user's
-  // anon-keys from every OTHER user's cache. Anon-keys are derived
-  // upstream via `.from("contacts").select("id").eq("user_id", user.id)`,
-  // which is the user-scoping guarantee. Manually verified.
+  // Trust Console privacy actions — mirror of the revoke route's R11
+  // cascade. `revokeNetworkingConsentAction` performs the SAME three-step
+  // cascade (stamp → clear own index → purge other users' caches by
+  // anon-key) and the SAME `match_candidate_index` DELETE without an
+  // explicit `user_id` filter for the identical reason: the cascade
+  // purges the revoker's anon-keys from EVERY other user's cache. The
+  // anon-keys passed to `IN(...)` are derived from contacts.id rows
+  // scoped by `.eq("user_id", user.id)` upstream — the privacy guarantee
+  // is the user-scoping of the input set, not the DELETE's WHERE.
+  // Inspected: every other reference to match_* tables in this file is
+  // either a docstring or the same cascade pattern.
   "src/app/(authenticated)/settings/privacy/actions.ts",
   // env.ts — comment block on `MATCH_ANON_SECRET` documents the table
   // dependency for the warm-intro audit trail. Reference-only.
   "src/lib/env.ts",
+  // R13 user-data export — iterates EXPORT_TABLES with a generic
+  // `.eq(column, userId)` where `column` is `user_id` for every table
+  // except `user_profiles` (which uses `id`). The match_* table names
+  // appear in the `EXPORT_TABLES` literal — that array is iterated
+  // 30+ lines below the table list, so the grep heuristic can't see
+  // the `.eq(column, userId)` binding from the literal. Manually
+  // verified: every read in `buildUserExport` projects ONLY the
+  // calling user's rows. The match_* tables in the archive are the
+  // user's own data (their own match_events audit history, their own
+  // match_rate_limits counter, their own match_candidate_index cache)
+  // — never cross-user reads.
+  "src/lib/account/export.ts",
 ]);
 
 describe("R11 P1 — cross-user RLS scoping", () => {

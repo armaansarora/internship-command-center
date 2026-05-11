@@ -59,6 +59,9 @@ vi.mock("@/lib/supabase/admin", () => ({
 // Re-import after the mock is registered so the module picks it up.
 const { buildUserExport } = await import("./export");
 
+// R13 expansion (Differentiate council, 2026-05-11) — pre-R13 list was 13
+// tables; full user-scoped surface is 27 tables. The proof test
+// `r13-export-completeness.proof.test.ts` asserts schema-vs-export parity.
 const EXPECTED_TABLES = [
   "user_profiles",
   "companies",
@@ -68,11 +71,25 @@ const EXPECTED_TABLES = [
   "documents",
   "interviews",
   "calendar_events",
-  "notifications",
   "outreach_queue",
-  "daily_snapshots",
+  "notifications",
   "agent_logs",
+  "agent_dispatches",
+  "handoff_dossiers",
   "audit_logs",
+  "agent_memory",
+  "daily_snapshots",
+  "company_embeddings",
+  "job_embeddings",
+  "progression_milestones",
+  "base_resumes",
+  "contact_embeddings",
+  "networking_match_index",
+  "match_candidate_index",
+  "match_events",
+  "match_rate_limits",
+  "rejection_reflections",
+  "offers",
 ] as const;
 
 describe("buildUserExport", () => {

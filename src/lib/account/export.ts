@@ -9,12 +9,25 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 const EXPORT_SCHEMA_VERSION = 1;
 
 /**
- * Tables included in a full user-data export (R0.6). Every table here is RLS-
- * isolated by `user_id`, except `user_profiles` which is scoped by its primary
- * key `id`. Add a new table here when introducing one — missing tables mean
- * the archive is silently incomplete.
+ * Tables included in a full user-data export (R0.6 + R13 expansion).
+ * Every table here is RLS-isolated by `user_id`, except `user_profiles`
+ * which is scoped by its primary key `id`. Add a new table here when
+ * introducing one — missing tables mean the archive is silently
+ * incomplete.
  *
- * Order mirrors the schema file for human-friendly diffing.
+ * R13 audit (Differentiate council, 2026-05-11)
+ * ---------------------------------------------
+ * The pre-R13 list shipped 13 tables — missing ~10 user-scoped tables
+ * the schema gained between R6 and R11. Users who exported their data
+ * received an incomplete archive (missing dispatches, dossiers, memory,
+ * embeddings, networking metadata, base resumes, milestones, reflections,
+ * offers). This expansion brings the export back in sync with the live
+ * schema's `user_id`-keyed surface.
+ *
+ * Order mirrors the schema file for human-friendly diffing. The
+ * `r13-export-completeness.proof.test.ts` proof test asserts every
+ * `user_id`-FK table in src/db/schema.ts appears in this list OR is
+ * explicitly documented as exempt.
  */
 const EXPORT_TABLES = [
   "user_profiles",
@@ -25,11 +38,25 @@ const EXPORT_TABLES = [
   "documents",
   "interviews",
   "calendar_events",
-  "notifications",
   "outreach_queue",
-  "daily_snapshots",
+  "notifications",
   "agent_logs",
+  "agent_dispatches",
+  "handoff_dossiers",
   "audit_logs",
+  "agent_memory",
+  "daily_snapshots",
+  "company_embeddings",
+  "job_embeddings",
+  "progression_milestones",
+  "base_resumes",
+  "contact_embeddings",
+  "networking_match_index",
+  "match_candidate_index",
+  "match_events",
+  "match_rate_limits",
+  "rejection_reflections",
+  "offers",
 ] as const;
 
 type ExportTable = (typeof EXPORT_TABLES)[number];
