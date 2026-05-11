@@ -67,6 +67,21 @@ const EnvSchema = z.object({
   VERCEL_AI_GATEWAY_API_KEY: z.string().min(1).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
 
+  // ── Global AI spend brake (Lighthouse SpendBrake) ────────────────────────
+  // Hard ceiling on the day's Anthropic+OpenAI bill in USD. When the rollup
+  // in `v_daily_ai_spend_cents` crosses this cap, `consumeAiQuota` flips to
+  // fail-CLOSED for every non-owner caller until UTC midnight resets the
+  // rollup. Default 50 — a sane single-day kill-switch for the free tier.
+  // Read as a coerced number (z.coerce.number()) so the operator can paste
+  // a plain integer in Vercel env without quoting it as a string.
+  KILL_AI_SPEND_USD: z.coerce.number().positive().default(50),
+  // Comma-separated UUID list (whitespace tolerant). Each id bypasses the
+  // global spend brake — the founder can keep working while the brake is
+  // engaged. Per-user quota still applies. Server-only; never bundled to
+  // the client. Distinct from OWNER_USER_ID(S) so the spend-brake bypass
+  // can be granted to ops/oncall without inheriting the rest of god-mode.
+  OWNER_SPEND_OVERRIDE_USER_IDS: z.string().optional(),
+
   // Server-side engagement events (Fix #3) kill-switch. Set to "1" to enable
   // middleware-emitted writes to the engagement_events table. Anything else
   // (or unset) keeps the writer dormant — the service-role admin module is
