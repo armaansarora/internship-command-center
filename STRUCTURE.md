@@ -8,7 +8,7 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 
 ```
 src/         the app
-scripts/     maintenance + seed + dev scripts (7 files + ledger/, all useful)
+scripts/     maintenance + seed + dev scripts
 docs/        design specs (4 files)
 tests/       Playwright E2E suite
 public/      static assets (logos, OG, etc.)
@@ -265,8 +265,6 @@ scripts/setup-env.sh              env init shell helper
 scripts/create-skyline-layers.py  procedural skyline asset generator
 scripts/dev-preview.ts            `npm run dev:preview` — dev preview
                                   harness (auth-stub, ports)
-scripts/ledger/verify.ts          ledger schema/contract verifier
-                                  (run from .husky/pre-commit if enabled)
 ```
 
 ---
