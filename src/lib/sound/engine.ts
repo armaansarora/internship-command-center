@@ -341,21 +341,12 @@ class SoundEngine {
 
     this.stopAmbient();
 
-    // Map floor id to ambient type
-    const map: Record<string, () => ActiveAmbient> = {
-      PH:  () => this.ambientPenthouse(ctx),
-      "7": () => this.ambientWarRoom(ctx),
-      "6": () => this.ambientSituationRoom(ctx),
-      "5": () => this.ambientWritingRoom(ctx),
-      "4": () => this.ambientBriefingRoom(ctx),
-      "3": () => this.ambientRolodex(ctx),
-      "2": () => this.ambientObservatory(ctx),
-      "1": () => this.ambientCSuite(ctx),
-    };
+    const bedName = AMBIENT_BED_BY_FLOOR[floor];
+    if (!bedName) return;
 
-    const factory = map[floor];
+    const factory = AMBIENT_FACTORIES[bedName];
     if (factory) {
-      this.activeAmbient = factory();
+      this.activeAmbient = factory(this, ctx);
     }
   }
 
@@ -638,3 +629,64 @@ class SoundEngine {
 }
 
 export const soundEngine = new SoundEngine();
+
+/* ─────────────────────────────────────────────────────────────────────
+   AMBIENT FLOOR MAPPING (Cross-floor coherence)
+   ─────────────────────────────────────────────────────────────────────
+   Source of truth: src/types/ui.ts FLOORS.
+   Each floor id maps to exactly one named ambient bed. The mapping
+   used to be inlined inside playAmbient with hand-typed factory calls,
+   and a regression swapped three rooms (4↔Briefing, 3↔Rolodex,
+   6↔Situation), making every authenticated floor play the wrong bed.
+   It now lives here as a pure const so vitest can pin the mapping
+   without instantiating AudioContext (which is unavailable in node).
+   ───────────────────────────────────────────────────────────────────── */
+
+/** Named ambient beds — one per floor. */
+export type AmbientBedName =
+  | "penthouse"
+  | "war-room"
+  | "rolodex"
+  | "writing-room"
+  | "situation-room"
+  | "briefing-room"
+  | "observatory"
+  | "c-suite";
+
+/**
+ * Canonical floor → ambient bed mapping. Tests pin this exact shape so a
+ * future re-ordering of `playAmbient` cannot silently re-swap rooms.
+ * The Lobby (`L`) intentionally has no ambient bed — reception is silent.
+ */
+export const AMBIENT_BED_BY_FLOOR: Record<string, AmbientBedName> = {
+  PH:  "penthouse",
+  "7": "war-room",
+  "6": "rolodex",
+  "5": "writing-room",
+  "4": "situation-room",
+  "3": "briefing-room",
+  "2": "observatory",
+  "1": "c-suite",
+};
+
+/** Type-only access into SoundEngine's private ambient-* methods. */
+type AmbientFactory = (engine: SoundEngine, ctx: AudioContext) => ActiveAmbient;
+
+/**
+ * Named factory table that bridges the public bed name to the engine's
+ * private ambient methods. Defined here (not inside playAmbient) so the
+ * tests can iterate over keys to assert every floor maps to a callable
+ * bed. The `unknown as` cast is required because we are reaching into
+ * the engine's private methods at the boundary between the declarative
+ * mapping and the imperative AudioContext graph.
+ */
+const AMBIENT_FACTORIES: Record<AmbientBedName, AmbientFactory> = {
+  "penthouse":      (e, ctx) => (e as unknown as { ambientPenthouse:      (c: AudioContext) => ActiveAmbient }).ambientPenthouse(ctx),
+  "war-room":       (e, ctx) => (e as unknown as { ambientWarRoom:        (c: AudioContext) => ActiveAmbient }).ambientWarRoom(ctx),
+  "rolodex":        (e, ctx) => (e as unknown as { ambientRolodex:        (c: AudioContext) => ActiveAmbient }).ambientRolodex(ctx),
+  "writing-room":   (e, ctx) => (e as unknown as { ambientWritingRoom:    (c: AudioContext) => ActiveAmbient }).ambientWritingRoom(ctx),
+  "situation-room": (e, ctx) => (e as unknown as { ambientSituationRoom:  (c: AudioContext) => ActiveAmbient }).ambientSituationRoom(ctx),
+  "briefing-room":  (e, ctx) => (e as unknown as { ambientBriefingRoom:   (c: AudioContext) => ActiveAmbient }).ambientBriefingRoom(ctx),
+  "observatory":    (e, ctx) => (e as unknown as { ambientObservatory:    (c: AudioContext) => ActiveAmbient }).ambientObservatory(ctx),
+  "c-suite":        (e, ctx) => (e as unknown as { ambientCSuite:         (c: AudioContext) => ActiveAmbient }).ambientCSuite(ctx),
+};
