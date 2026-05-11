@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { PRICING_CONFIG } from "@/lib/config/pricing-config";
 import { log } from "@/lib/logger";
+import { checkGlobalSpendBrake } from "@/lib/ai/spend-brake";
 
 /**
  * Per-user-per-day AI call cap.
@@ -18,9 +19,19 @@ import { log } from "@/lib/logger";
  * }
  * ```
  *
- * On infrastructure failure we fail-OPEN so a transient DB hiccup doesn't
- * lock every user out of every AI surface. The cron-health table will surface
- * sustained failures to the owner.
+ * Two checks run in sequence:
+ *
+ *  1. **Global spend brake** (`checkGlobalSpendBrake`) — fails CLOSED on RPC
+ *     error and fires when the day's aggregate Anthropic bill crosses
+ *     `KILL_AI_SPEND_USD`. Owner-override users skip this check. Telemetry
+ *     records every brake-fired denial so the Watchdog can alert.
+ *  2. **Per-user cap** (the RPC below) — fails OPEN on RPC error so a
+ *     transient DB hiccup doesn't lock every user out of every AI surface.
+ *     The cron-health table surfaces sustained failures to the owner.
+ *
+ * The brake runs first deliberately: if the brake has fired, we MUST NOT
+ * consume any quota (incrementing the per-user counter on a denied call
+ * would punish the user for an outage they didn't cause).
  */
 /**
  * Tier dimension for AI cost caps.
@@ -36,7 +47,11 @@ export interface QuotaResult {
   allowed: boolean;
   used: number;
   cap: number;
-  reason?: "exceeded" | "rpc_error";
+  reason?:
+    | "exceeded"
+    | "rpc_error"
+    | "global_spend_cap"
+    | "spend_brake_unavailable";
 }
 
 function capForTier(tier: AiTier): number {
@@ -49,6 +64,23 @@ export async function consumeAiQuota(
   tier: AiTier,
 ): Promise<QuotaResult> {
   const cap = capForTier(tier);
+
+  // ── Step 1: Global spend brake (fails CLOSED) ──────────────────────────
+  // The brake is checked BEFORE the per-user RPC so a fired brake does not
+  // wastefully consume a quota slot. The owner override inside
+  // `checkGlobalSpendBrake` lets the founder keep working while the brake is
+  // engaged.
+  const brake = await checkGlobalSpendBrake(userId);
+  if (!brake.allowed) {
+    return {
+      allowed: false,
+      used: 0,
+      cap,
+      reason: brake.reason ?? "spend_brake_unavailable",
+    };
+  }
+
+  // ── Step 2: Per-user atomic cap RPC (fails OPEN) ───────────────────────
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase.rpc("consume_ai_call_quota", {

@@ -181,7 +181,7 @@ src/lib/db/
 src/db/schema.ts                                   Drizzle schema (49KB,
                                                    schema-only — NEVER use
                                                    `db` object at runtime)
-src/db/migrations/                                 0000–0035.sql
+src/db/migrations/                                 0000–0037.sql
 src/db/manual/                                     hand-written SQL
 src/db/manual/auth-email-templates/                4 HTML templates already
                                                    pasted into Supabase dashboard
@@ -191,6 +191,8 @@ src/db/manual/auth-email-templates/                4 HTML templates already
 ```
 src/lib/cron/health.ts                             withCronHealth wrapper
                                                    (used in all 14 cron routes)
+src/lib/ai/spend-brake.ts                          global daily Anthropic-bill
+                                                   kill-switch (fails CLOSED)
 src/lib/legal/{privacy,terms}.ts                   legal copy source
 src/lib/notifications/                             pneumatic-tube notifications
 src/lib/preferences/                               user preferences
