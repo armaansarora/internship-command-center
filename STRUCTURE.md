@@ -81,7 +81,7 @@ src/app/api/
                                                    (all use
                                                     createAgentRouteHandler)
   stripe/checkout, stripe/portal, stripe/webhook
-  cron/                                            14 Vercel-scheduled jobs +
+  cron/                                            15 Vercel-scheduled jobs +
                                                    2 off-platform handlers.
                                                    All wrapped withCronHealth.
                                                    owner-watchdog runs every 30m
@@ -91,9 +91,12 @@ src/app/api/
                                                    enforces a 3-layer blast
                                                    brake (pending freeze, per-
                                                    tick ceiling, per-user daily
-                                                   cap). canary-heartbeat is
-                                                   the public unauth probe hit
-                                                   by GitHub Actions every 15m.
+                                                   cap). rolling-invites drains
+                                                   the waitlist daily under
+                                                   gateConfig.beta.rolling*.
+                                                   canary-heartbeat is the
+                                                   public unauth probe hit by
+                                                   GitHub Actions every 15m.
   auth/callback, auth/signout
   account/delete, account/export                   GDPR
   admin/sentry-probe                               owner-only debug
