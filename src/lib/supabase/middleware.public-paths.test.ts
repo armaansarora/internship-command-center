@@ -55,6 +55,22 @@ describe("isPathPublic — exact paths", () => {
     expect(isPathPublic("/waitlistleak")).toBe(false);
   });
 
+  it("matches /season-pass exactly (PR 5 marketing surface)", () => {
+    expect(isPathPublic("/season-pass")).toBe(true);
+  });
+
+  it("rejects /season-passing (no prefix-leak)", () => {
+    expect(isPathPublic("/season-passing")).toBe(false);
+  });
+
+  it("matches /campus exactly (PR 5 marketing surface)", () => {
+    expect(isPathPublic("/campus")).toBe(true);
+  });
+
+  it("rejects /campusleak", () => {
+    expect(isPathPublic("/campusleak")).toBe(false);
+  });
+
   it("matches /api/auth/callback exactly", () => {
     expect(isPathPublic("/api/auth/callback")).toBe(true);
   });

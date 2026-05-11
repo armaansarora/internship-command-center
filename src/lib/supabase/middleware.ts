@@ -60,6 +60,12 @@ const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
   { path: "/privacy" },
   { path: "/pricing" },
   { path: "/waitlist" },
+  // PR 5 marketing surfaces — public landing pages with their own
+  // CTAs. /season-pass + /campus must be reachable without a session
+  // so an unauthenticated visitor can read the pitch and decide.
+  { path: "/season-pass" },
+  { path: "/campus" },
+  { path: "/campus/actions", prefix: true },
   { path: "/opengraph-image" },
   { path: "/api/auth/callback" },
   { path: "/api/auth/google/start" },
