@@ -21,7 +21,9 @@
 
   --wm-text-primary:      #E8F4FD;
   --wm-text-secondary:    #7FB3D3;
-  --wm-text-muted:        #4A7A9B;
+  /* Muted text bumped from #4A7A9B → #7197B5 to clear WCAG AA (4.5:1)
+     against the dark blueprint panel backgrounds. The original was ~4.17:1. */
+  --wm-text-muted:        #7197B5;
   --wm-text-data:         #00D4FF;
 
   /* ── Animation timing tokens ── */

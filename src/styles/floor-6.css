@@ -25,7 +25,9 @@
 
   --rl-text-primary:      #FDF3E8;
   --rl-text-secondary:    #C4925A;
-  --rl-text-muted:        #7A5B35;
+  /* Muted text bumped from #7A5B35 → #A07B47 to clear WCAG AA (4.5:1)
+     against the dark wood-grain panel backgrounds. The original was ~3.4:1. */
+  --rl-text-muted:        #A07B47;
   --rl-text-data:         #C9A84C;
 
   /* ── Animation timing tokens ── */

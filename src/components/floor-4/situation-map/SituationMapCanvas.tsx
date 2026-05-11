@@ -92,7 +92,7 @@ export function SituationMapCanvas({ shape, companyNameById }: Props): JSX.Eleme
         ctx.arc(CENTER, CENTER, USER_R, 0, Math.PI * 2);
         ctx.stroke();
         ctx.font = "11px 'JetBrains Mono', monospace";
-        ctx.fillStyle = "#7A5B35";
+        ctx.fillStyle = "#A07B47";
         ctx.textAlign = "center";
         ctx.fillText("The Situation Room is quiet.", CENTER, CENTER + OUTER_R + 24);
         return;
@@ -169,7 +169,7 @@ export function SituationMapCanvas({ shape, companyNameById }: Props): JSX.Eleme
         ctx.arc(pos.x, pos.y, NODE_R, 0, Math.PI * 2);
         ctx.fill();
         ctx.font = "10px 'JetBrains Mono', monospace";
-        ctx.fillStyle = "#7A5B35";
+        ctx.fillStyle = "#A07B47";
         ctx.textAlign = "center";
         ctx.fillText(shape.cluster.label, pos.x, pos.y + 16);
       }

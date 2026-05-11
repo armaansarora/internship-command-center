@@ -85,7 +85,7 @@ function TargetBrief({
         <span
           style={{
             fontSize: "9px",
-            color: "#4A7A9B",
+            color: "#7197B5",
             fontFamily: "IBM Plex Mono, monospace",
             letterSpacing: "0.02em",
           }}
@@ -178,7 +178,7 @@ function LatestNote({
       <span
         style={{
           fontSize: "8px",
-          color: "#4A7A9B",
+          color: "#7197B5",
           fontFamily: "IBM Plex Mono, monospace",
           letterSpacing: "0.12em",
           transform: "rotate(-0.3deg)",
@@ -255,7 +255,7 @@ function PipelineFunnelBar({ stats }: { stats: PipelineStats }): JSX.Element {
           <div key={stage.key} className="flex-1 text-center">
             <span
               style={{
-                color: "#4A7A9B",
+                color: "#7197B5",
                 fontSize: "7px",
                 fontFamily: "IBM Plex Mono, monospace",
                 letterSpacing: "0.05em",
@@ -324,7 +324,7 @@ export function CROWhiteboard({
           aria-hidden="true"
           style={{
             fontSize: "8px",
-            color: "#4A7A9B",
+            color: "#7197B5",
             letterSpacing: "0.14em",
             marginBottom: "3px",
           }}
@@ -344,7 +344,7 @@ export function CROWhiteboard({
             aria-hidden="true"
             style={{
               fontSize: "8px",
-              color: "#4A7A9B",
+              color: "#7197B5",
               letterSpacing: "0.14em",
               marginBottom: "5px",
             }}

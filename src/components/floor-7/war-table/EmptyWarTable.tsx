@@ -166,7 +166,7 @@ export function EmptyWarTable({
         aria-hidden="true"
         style={{
           fontSize: "9px",
-          color: "#4A7A9B",
+          color: "#7197B5",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
         }}

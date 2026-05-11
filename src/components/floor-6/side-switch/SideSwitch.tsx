@@ -79,9 +79,9 @@ export function SideSwitch({ cnoSlot, cioSlot, initial = "cno" }: Props): JSX.El
           textTransform: "uppercase",
         }}
       >
-        <span style={{ color: side === "cno" ? "#C9A84C" : "#7A5B35" }}>[ CNO</span>
+        <span style={{ color: side === "cno" ? "#C9A84C" : "#A07B47" }}>[ CNO</span>
         <span style={{ opacity: 0.4 }}>&nbsp;/&nbsp;</span>
-        <span style={{ color: side === "cio" ? "#C9A84C" : "#7A5B35" }}>CIO ]</span>
+        <span style={{ color: side === "cio" ? "#C9A84C" : "#A07B47" }}>CIO ]</span>
       </div>
 
       {/* Mobile tab fallback (<1024px) — actual display:none/flex via CSS */}
@@ -126,7 +126,7 @@ function sideButton(active: boolean): React.CSSProperties {
     textTransform: "uppercase",
     padding: "6px 10px",
     background: active ? "rgba(201, 168, 76, 0.18)" : "transparent",
-    color: active ? "#C9A84C" : "#7A5B35",
+    color: active ? "#C9A84C" : "#A07B47",
     border: "1px solid rgba(201, 168, 76, 0.3)",
     cursor: "pointer",
     borderRadius: 2,

@@ -479,7 +479,7 @@ export function ApplicationModal({
                 fontFamily: "'IBM Plex Mono', monospace",
                 fontSize: "9px",
                 letterSpacing: "0.15em",
-                color: "#4A7A9B",
+                color: "#7197B5",
                 textTransform: "uppercase",
                 marginBottom: "4px",
               }}

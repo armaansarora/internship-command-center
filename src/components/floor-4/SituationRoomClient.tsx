@@ -204,7 +204,7 @@ function DeadlineCard({ card }: { card: DeadlineCard }): JSX.Element {
       <div
         style={{
           fontSize: "9px",
-          color: "#7A5B35",
+          color: "#A07B47",
           textTransform: "uppercase",
           letterSpacing: "0.06em",
           marginTop: "2px",
@@ -234,7 +234,7 @@ function SectionHeader({
         style={{
           fontSize: "10px",
           fontFamily: "IBM Plex Mono, monospace",
-          color: "#7A5B35",
+          color: "#A07B47",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}
@@ -407,7 +407,7 @@ export function SituationRoomClient({
             style={{
               fontFamily: "IBM Plex Mono, monospace",
               fontSize: "11px",
-              color: "#7A5B35",
+              color: "#A07B47",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
             }}
@@ -555,7 +555,7 @@ export function SituationRoomClient({
                   <span
                     style={{
                       fontSize: "9px",
-                      color: "#7A5B35",
+                      color: "#A07B47",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",

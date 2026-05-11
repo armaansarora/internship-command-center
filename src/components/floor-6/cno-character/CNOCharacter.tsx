@@ -358,7 +358,7 @@ export function CNOCharacter({
         <span
           aria-hidden="true"
           className="mt-2 text-xs font-mono tracking-wide uppercase"
-          style={{ color: currentState === "idle" ? "#7A5B35" : "#C9A84C" }}
+          style={{ color: currentState === "idle" ? "#A07B47" : "#C9A84C" }}
         >
           {currentState === "idle" ? "CNO" : "● CNO"}
         </span>

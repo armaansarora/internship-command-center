@@ -111,7 +111,7 @@ export function BinderOpen({ binderId, onClose }: Props): JSX.Element {
               alignItems: "center",
               justifyContent: "center",
               fontStyle: "italic",
-              color: "#7a5a3c",
+              color: "#A07B47",
             }}
           >
             Unable to open this binder.

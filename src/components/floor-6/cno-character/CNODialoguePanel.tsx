@@ -40,11 +40,11 @@ const CNO_THEME: AgentDialogueTheme = {
   accentColor: "#C9A84C",
   assistantColor: "#FDF3E8",
   userColor: "#C9A84C",
-  mutedColor: "#7A5B35",
+  mutedColor: "#A07B47",
   quickActionColor: "#C4925A",
   inputColor: "#FDF3E8",
   inputBackground: "rgba(35, 21, 8, 0.8)",
-  closeColor: "#7A5B35",
+  closeColor: "#A07B47",
   toolIndicatorBg: "rgba(201, 168, 76, 0.08)",
   toolIndicatorBorder: "rgba(201, 168, 76, 0.2)",
   toolIndicatorText: "#E8C87A",
@@ -78,7 +78,7 @@ export function CNODialoguePanel({
       opener={{
         ariaLabel: "Conversation opener",
         label: "CNO",
-        labelColor: "#7A5B35",
+        labelColor: "#A07B47",
         lines: [
           { text: "Glad you dropped by. Pull up a chair.", color: "#FDF3E8", marginTop: 0 },
           {

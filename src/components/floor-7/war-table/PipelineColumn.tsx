@@ -193,7 +193,7 @@ export function PipelineColumn({
                   style={{
                     fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: "9px",
-                    color: "#4A7A9B",
+                    color: "#7197B5",
                     letterSpacing: "0.08em",
                     textAlign: "center",
                   }}
@@ -247,7 +247,7 @@ export function PipelineColumn({
                       style={{
                         fontFamily: "'IBM Plex Mono', monospace",
                         fontSize: "9px",
-                        color: "#4A7A9B",
+                        color: "#7197B5",
                         letterSpacing: "0.04em",
                         textAlign: "center",
                         lineHeight: 1.4,

@@ -39,14 +39,55 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  // Close on Escape
+  // Close on Escape + arrow-key navigation between menu items.
+  // ArrowDown/ArrowUp cycle through the [role="menuitem"] children;
+  // Home/End jump to first/last. Improves keyboard a11y over the
+  // previous "Escape only" behaviour.
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      const root = menuRef.current;
+      if (!root) return;
+      const items = Array.from(
+        root.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+      );
+      if (items.length === 0) return;
+      const current = document.activeElement as HTMLElement | null;
+      const idx = current ? items.indexOf(current) : -1;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const next = items[idx >= 0 ? (idx + 1) % items.length : 0];
+        next?.focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const next = items[idx > 0 ? idx - 1 : items.length - 1];
+        next?.focus();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        items[0]?.focus();
+      } else if (e.key === "End") {
+        e.preventDefault();
+        items[items.length - 1]?.focus();
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
+  }, [open]);
+
+  // When the menu opens, drop focus on the first menuitem so a keyboard-only
+  // user can immediately arrow-navigate or Enter to activate.
+  useEffect(() => {
+    if (!open) return;
+    const root = menuRef.current;
+    if (!root) return;
+    const firstItem = root.querySelector<HTMLElement>('[role="menuitem"]');
+    // Delay so the menu has rendered before focusing.
+    const id = window.setTimeout(() => firstItem?.focus(), 30);
+    return () => window.clearTimeout(id);
   }, [open]);
 
   const handleSignOut = useCallback(async () => {
@@ -72,6 +113,8 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
         aria-label="Account menu"
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-controls="user-menu-dropdown"
+        type="button"
         className="flex items-center justify-center rounded-full transition-all duration-200 focus-visible:outline-2 focus-visible:outline-[var(--gold)] focus-visible:outline-offset-2"
         style={{
           width: "44px",
@@ -126,8 +169,10 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
       {/* Dropdown menu */}
       {open && (
         <div
+          id="user-menu-dropdown"
           role="menu"
           aria-label="Account options"
+          aria-orientation="vertical"
           className="absolute right-0 mt-2 w-64 rounded-xl overflow-hidden"
           style={{
             background: "rgba(10, 12, 25, 0.92)",
@@ -275,7 +320,8 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
         </div>
       )}
 
-      {/* Dropdown entrance animation */}
+      {/* Dropdown entrance animation — gracefully no-ops under
+          prefers-reduced-motion via the global override in globals.css. */}
       <style>{`
         @keyframes user-menu-enter {
           from {
@@ -285,6 +331,11 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
           to {
             opacity: 1;
             transform: translateY(0) scale(1);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [id="user-menu-dropdown"] {
+            animation: none !important;
           }
         }
       `}</style>

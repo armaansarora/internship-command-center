@@ -31,10 +31,13 @@
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-blur: 16px;
 
-  /* ── Text ── */
+  /* ── Text ──
+     --text-muted bumped from #6B6865 → #8A8783 to clear WCAG AA (4.5:1)
+     against tower-dark backgrounds. Used widely across penthouse + glass
+     panels for secondary labels. */
   --text-primary: #F0EDE6;
   --text-secondary: #A8A4A0;
-  --text-muted: #6B6865;
+  --text-muted: #8A8783;
   --text-gold: #C9A84C;
 
   /* ── Semantic ── */

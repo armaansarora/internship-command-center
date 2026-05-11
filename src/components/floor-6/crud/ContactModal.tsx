@@ -170,7 +170,7 @@ function ContactSubmitButton({ isEditing }: { isEditing: boolean }): JSX.Element
       style={{
         fontFamily: "IBM Plex Mono, monospace",
         fontSize: "10px",
-        color: pending ? "#7A5B35" : "#C9A84C",
+        color: pending ? "#A07B47" : "#C9A84C",
         backgroundColor: "rgba(201, 168, 76, 0.1)",
         border: "1px solid rgba(201, 168, 76, 0.35)",
         borderRadius: "2px",
@@ -283,7 +283,7 @@ function DeleteConfirm({
         <span style={{ color: "#C9A84C", fontWeight: 600 }}>{contactName}</span>{" "}
         from your network?
         <br />
-        <span style={{ color: "#7A5B35", fontSize: "11px" }}>
+        <span style={{ color: "#A07B47", fontSize: "11px" }}>
           This action cannot be undone.
         </span>
       </span>
@@ -493,7 +493,7 @@ export function ContactModal({
             style={{
               background: "transparent",
               border: "none",
-              color: "#7A5B35",
+              color: "#A07B47",
               fontSize: "18px",
               cursor: "pointer",
               lineHeight: 1,
@@ -714,7 +714,7 @@ export function ContactModal({
                   id="private-note-help"
                   style={{
                     fontSize: "10px",
-                    color: "#7A5B35",
+                    color: "#A07B47",
                     fontFamily: "'IBM Plex Mono', monospace",
                     marginTop: "4px",
                     display: "block",
