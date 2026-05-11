@@ -133,7 +133,25 @@ vi.mock("@/lib/ai/model", () => ({
 }));
 vi.mock("@/lib/ai/prompt-cache", () => ({
   getCachedSystem: (s: string) => s,
+  buildCachedSystemAndUserMessages: (system: string, user: string) => [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ],
 }));
+
+interface MockMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+function pickSystem(args: {
+  system?: string;
+  messages?: MockMessage[];
+}): string {
+  if (typeof args.system === "string") return args.system;
+  const sys = args.messages?.find((m) => m.role === "system");
+  return sys?.content ?? "";
+}
 vi.mock("@/lib/ai/telemetry", () => ({
   recordAgentRun: vi.fn(),
 }));
@@ -145,8 +163,9 @@ vi.mock("ai", () => ({
   Output: {
     object: <T,>(config: { schema: T }) => config,
   },
-  generateText: vi.fn(async ({ system }: { system: string }) => {
-    if (typeof system !== "string") return { output: null };
+  generateText: vi.fn(async (args: { system?: string; messages?: MockMessage[] }) => {
+    const system = pickSystem(args);
+    if (typeof system !== "string" || system.length === 0) return { output: null };
     if (system.includes("FORMAL mode")) {
       return {
         output: {

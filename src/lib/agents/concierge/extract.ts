@@ -14,7 +14,8 @@
  * profile so Job Discovery still runs; the user is never stranded.
  */
 import { generateObject } from "ai";
-import { getAgentModel } from "@/lib/ai/model";
+import { getFastModel } from "@/lib/ai/model";
+import { CONCIERGE_EXTRACTION_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import {
   TargetProfileSchema,
   type TargetProfile,
@@ -58,10 +59,11 @@ Return a structured TargetProfile.`;
 
   try {
     const result = await generateObject({
-      model: getAgentModel(),
+      model: getFastModel(),
       schema: TargetProfileSchema,
       system,
       prompt,
+      maxOutputTokens: CONCIERGE_EXTRACTION_MAX_OUTPUT_TOKENS,
     });
 
     const parsed = TargetProfileSchema.parse(result.object);

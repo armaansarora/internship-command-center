@@ -11,8 +11,9 @@
 import { generateText, Output } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel, getActiveModelId } from "@/lib/ai/model";
-import { getCachedSystem } from "@/lib/ai/prompt-cache";
+import { buildCachedSystemAndUserMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
+import { MORNING_BRIEFING_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -228,9 +229,9 @@ Return the structured morning briefing. Set 'generated_at' to "${new Date().toIS
   try {
     const result = await generateText({
       model: getAgentModel(),
-      system: getCachedSystem(SYSTEM_PROMPT),
-      prompt,
+      messages: buildCachedSystemAndUserMessages(SYSTEM_PROMPT, prompt),
       output: Output.object({ schema: MorningBriefingSchema }),
+      maxOutputTokens: MORNING_BRIEFING_MAX_OUTPUT_TOKENS,
     });
 
     if (!result.output) return null;

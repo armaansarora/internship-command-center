@@ -22,7 +22,12 @@ vi.mock("ai", () => ({
 }));
 
 vi.mock("../model", () => ({
+  // The extractor migrated to Haiku 4.5 — dossier emission is structural
+  // distillation from an already-written summary, not high-stakes reasoning.
+  // Mock both `getAgentModel` and `getFastModel` so the test stays robust to
+  // that flip.
   getAgentModel: () => ({ provider: "mock-model" }),
+  getFastModel: () => ({ provider: "mock-fast-model" }),
 }));
 
 // Logger pokes env.ts on warn paths — mock to a no-op so the fallback branch

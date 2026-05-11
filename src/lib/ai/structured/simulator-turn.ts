@@ -23,6 +23,7 @@
 import { generateObject } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel } from "../model";
+import { SIMULATOR_TURN_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 
 const ScoringSchema = z.object({
@@ -91,6 +92,7 @@ Rules:
       `HISTORY:\n${historyJson}\n\n` +
       `USER REPLY THIS TURN:\n${input.userReply ?? "(none — you open)"}\n\n` +
       `Produce the recruiter's next reply and score the user's latest reply (null scoring if no user reply this turn).`,
+    maxOutputTokens: SIMULATOR_TURN_MAX_OUTPUT_TOKENS,
   });
 
   return object;

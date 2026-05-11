@@ -6,14 +6,20 @@
  * weighted overall score, and attach a 1-2 sentence narrative plus an
  * imperative "nudge" the candidate can act on next time.
  *
- * Uses the project's centralised `getAgentModel()` so it inherits AI Gateway
- * routing. All shape-validation happens via the Zod schema — the callsite
- * receives a fully-typed object.
+ * Uses `getFastModel()` so it inherits AI Gateway routing on the cheap
+ * Haiku 4.5 tier. Scoring against a rubric with a fixed weighting (S=15,
+ * T=15, A=40, R=30) is a templated structural task — Sonnet's full reasoning
+ * is wasted here, and Haiku produces the same shape at ~12% of the input
+ * cost and ~25% of the output cost.
+ *
+ * All shape-validation happens via the Zod schema — the callsite receives a
+ * fully-typed object.
  */
 
 import { generateObject } from "ai";
 import { z } from "zod/v4";
-import { getAgentModel } from "@/lib/ai/model";
+import { getFastModel } from "@/lib/ai/model";
+import { SCORE_ANSWER_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -46,7 +52,7 @@ export interface ScoreAnswerInput {
  */
 export async function scoreAnswer(input: ScoreAnswerInput): Promise<ScoredAnswer> {
   const { object } = await generateObject({
-    model: getAgentModel(),
+    model: getFastModel(),
     schema: Schema,
     prompt: [
       "You are CPO — a drill-sergeant interview coach.",
@@ -57,6 +63,7 @@ export async function scoreAnswer(input: ScoreAnswerInput): Promise<ScoredAnswer
       "Narrative: 1-2 sentences of specific feedback (what worked, what to tighten).",
       "Nudge: one short imperative sentence for the candidate to improve the answer next time.",
     ].join("\n"),
+    maxOutputTokens: SCORE_ANSWER_MAX_OUTPUT_TOKENS,
   });
   return object;
 }

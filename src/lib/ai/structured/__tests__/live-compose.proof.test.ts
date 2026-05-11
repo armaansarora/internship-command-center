@@ -18,9 +18,32 @@ vi.mock("@/lib/ai/model", () => ({
   getAgentModel: () => null,
   getActiveModelId: () => "mock-model",
 }));
+// The live-compose helpers migrated to the messages-array form so
+// Anthropic's `cacheControl` provider option actually reaches the wire.
+// We still want the mock to be a byte-for-byte passthrough — the proof
+// itself only inspects the system text the helper sent, not the cache
+// configuration around it.
 vi.mock("@/lib/ai/prompt-cache", () => ({
   getCachedSystem: (s: string) => s,
+  buildCachedSystemAndUserMessages: (system: string, user: string) => [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ],
 }));
+
+interface MockSystemMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+function pickSystem(args: {
+  system?: string;
+  messages?: MockSystemMessage[];
+}): string {
+  if (typeof args.system === "string") return args.system;
+  const sys = args.messages?.find((m) => m.role === "system");
+  return sys?.content ?? "";
+}
 vi.mock("@/lib/ai/telemetry", () => ({
   recordAgentRun: vi.fn(),
 }));
@@ -50,8 +73,9 @@ const callTimes: number[] = [];
 // --- `ai` module mock -------------------------------------------------------
 vi.mock("ai", () => {
   return {
-    streamText: vi.fn(({ system }: { system: string }) => {
+    streamText: vi.fn((args: { system?: string; messages?: MockSystemMessage[] }) => {
       callTimes.push(Date.now());
+      const system = pickSystem(args);
       const tone = system.includes("FORMAL mode")
         ? "formal"
         : system.includes("CONVERSATIONAL mode")
@@ -70,7 +94,8 @@ vi.mock("ai", () => {
         usage: Promise.resolve({ inputTokens: 10, outputTokens: 20, totalTokens: 30 }),
       };
     }),
-    generateText: vi.fn(async ({ system }: { system: string }) => {
+    generateText: vi.fn(async (args: { system?: string; messages?: MockSystemMessage[] }) => {
+      const system = pickSystem(args);
       const tone = system.includes("FORMAL mode")
         ? "formal"
         : system.includes("CONVERSATIONAL mode")

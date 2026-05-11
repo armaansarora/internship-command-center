@@ -30,6 +30,11 @@
 import { generateObject } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel } from "../model";
+import {
+  PARLOR_OFFER_EVAL_MAX_OUTPUT_TOKENS,
+  PARLOR_CFO_MAX_OUTPUT_TOKENS,
+  PARLOR_CNO_MAX_OUTPUT_TOKENS,
+} from "@/lib/ai/output-budgets";
 import { buildOfferEvaluatorSystemPrompt } from "@/lib/agents/offer-evaluator/system-prompt";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 import type { LookupResult } from "@/lib/comp-bands/lookup";
@@ -151,6 +156,7 @@ export async function convenePipelineForOffer(input: {
         userFirstName: input.userFirstName,
       }),
       prompt: promptShared,
+      maxOutputTokens: PARLOR_OFFER_EVAL_MAX_OUTPUT_TOKENS,
     }),
     generateObject({
       model,
@@ -160,6 +166,7 @@ export async function convenePipelineForOffer(input: {
       prompt:
         promptShared +
         `\nCompute total_comp_year1 and total_comp_4yr assuming standard 4-year vesting with 1yr cliff. Return integers in USD.`,
+      maxOutputTokens: PARLOR_CFO_MAX_OUTPUT_TOKENS,
     }),
     generateObject({
       model,
@@ -169,6 +176,7 @@ export async function convenePipelineForOffer(input: {
       prompt:
         promptShared +
         `\nReturn contacts the user already has at "${input.offer.company_name}". If you don't know, return [].`,
+      maxOutputTokens: PARLOR_CNO_MAX_OUTPUT_TOKENS,
     }),
   ]);
 

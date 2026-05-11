@@ -15,6 +15,7 @@
 import { generateObject } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel } from "../model";
+import { REFERENCE_REQUEST_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import type { ContactForAgent } from "@/lib/db/queries/contacts-rest";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 
@@ -55,6 +56,7 @@ Rules:
     prompt:
       `CONTACT:\n${contactJson}\n\nOFFER:\n${offerJson}\n\n` +
       `Draft the reference-request email. Weave any prior-interaction detail from the notes field into the body so this reads as personal, not a template.`,
+    maxOutputTokens: REFERENCE_REQUEST_MAX_OUTPUT_TOKENS,
   });
 
   return object;

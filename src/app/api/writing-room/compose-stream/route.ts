@@ -16,9 +16,10 @@ import { getUser } from "@/lib/supabase/server";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getAgentModel, getActiveModelId } from "@/lib/ai/model";
-import { getCachedSystem } from "@/lib/ai/prompt-cache";
+import { buildCachedSystemAndUserMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
 import { getToneSystemPrompt } from "@/lib/ai/structured/cover-letter";
+import { COVER_LETTER_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import {
@@ -93,8 +94,11 @@ Lead with a HOOK that proves you've done the work. Make the value proposition co
   try {
     const result = streamText({
       model,
-      system: getCachedSystem(getToneSystemPrompt(body.tone)),
-      prompt: userPrompt,
+      messages: buildCachedSystemAndUserMessages(
+        getToneSystemPrompt(body.tone),
+        userPrompt,
+      ),
+      maxOutputTokens: COVER_LETTER_MAX_OUTPUT_TOKENS,
     });
 
     // Telemetry after finish (not awaited here — the stream starts immediately).

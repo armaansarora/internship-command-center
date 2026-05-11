@@ -27,6 +27,7 @@
  */
 import { generateObject } from "ai";
 import { getAgentModel } from "@/lib/ai/model";
+import { FIRST_RUN_BRIEFING_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import { createClient } from "@/lib/supabase/server";
 import {
   MorningBriefingSchema,
@@ -193,6 +194,7 @@ Return the structured MorningBriefing. Set 'generated_at' to "${new Date().toISO
       schema: MorningBriefingSchema,
       system: FIRST_RUN_SYSTEM,
       prompt,
+      maxOutputTokens: FIRST_RUN_BRIEFING_MAX_OUTPUT_TOKENS,
     });
 
     const parsed = MorningBriefingSchema.parse(result.object);

@@ -28,6 +28,7 @@
 import { generateText, stepCountIs, tool } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel, getActiveModelId } from "../model";
+import { SUBAGENT_DISPATCH_MAX_OUTPUT_TOKENS } from "../output-budgets";
 import { recordAgentRun } from "../telemetry";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
@@ -213,6 +214,7 @@ async function runSubagent<TStats>(
       // this orchestrator only widens at the boundary.
       tools: tools as Parameters<typeof generateText>[0]["tools"],
       stopWhen: stepCountIs(spec.maxSteps ?? 5),
+      maxOutputTokens: SUBAGENT_DISPATCH_MAX_OUTPUT_TOKENS,
     });
 
     const summary = result.text.trim();

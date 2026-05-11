@@ -20,6 +20,10 @@ vi.mock("@/lib/ai/model", () => ({
 }));
 vi.mock("@/lib/ai/prompt-cache", () => ({
   getCachedSystem: (s: string) => s,
+  buildCachedSystemAndUserMessages: (system: string, user: string) => [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ],
 }));
 vi.mock("@/lib/ai/telemetry", () => ({
   recordAgentRun: vi.fn(),

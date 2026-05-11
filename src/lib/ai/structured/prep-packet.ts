@@ -12,8 +12,9 @@
 import { generateText, Output } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel, getActiveModelId } from "@/lib/ai/model";
-import { getCachedSystem } from "@/lib/ai/prompt-cache";
+import { buildCachedSystemAndUserMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
+import { PREP_PACKET_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -217,9 +218,9 @@ The user has the interview soon. Make every question and every framework specifi
   try {
     const result = await generateText({
       model: getAgentModel(),
-      system: getCachedSystem(SYSTEM_PROMPT),
-      prompt,
+      messages: buildCachedSystemAndUserMessages(SYSTEM_PROMPT, prompt),
       output: Output.object({ schema: PrepPacketSchema }),
+      maxOutputTokens: PREP_PACKET_MAX_OUTPUT_TOKENS,
     });
 
     if (!result.output) return null;

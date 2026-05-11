@@ -23,6 +23,7 @@
 import { generateObject } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel } from "../model";
+import { NEGOTIATION_DRAFT_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
 
@@ -59,6 +60,7 @@ Rules:
       `OFFER:\n${offerJson}\n\nCONVENING:\n${conveningJson}\n\n` +
       `Draft the negotiation email. If comp bands are thin, negotiate on terms ` +
       `(start date, signing, equity refresh) instead of base.`,
+    maxOutputTokens: NEGOTIATION_DRAFT_MAX_OUTPUT_TOKENS,
   });
   return object;
 }

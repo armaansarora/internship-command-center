@@ -25,6 +25,7 @@
 
 import { generateText } from "ai";
 import { getAgentModel } from "@/lib/ai/model";
+import { ACTIVATION_CRO_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { upsertTargetProfile } from "@/lib/agents/cro/target-profile";
 import { createApplicationRest } from "@/lib/db/queries/applications-rest";
@@ -338,7 +339,6 @@ export type DispatchActivationCROResult =
   | { ok: false; error: string };
 
 const ACTIVATION_CRO_TASK = "activation_first_action";
-const ACTIVATION_CRO_MAX_OUTPUT_TOKENS = 600;
 
 /**
  * Build the minimal CRO prompt used by the activation gauntlet.
