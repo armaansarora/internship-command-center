@@ -57,12 +57,12 @@ export const characterMachine = createCharacterMachine<
   },
 });
 
-export type CharacterActorRef = ActorRef<
+type CharacterActorRef = ActorRef<
   Snapshot<CharacterContext>,
   CharacterEvent
 >;
 
-export type CharacterSnapshot = Snapshot<CharacterContext> & {
+type CharacterSnapshot = Snapshot<CharacterContext> & {
   value:
     | "idle"
     | "alert"

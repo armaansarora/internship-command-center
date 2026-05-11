@@ -19,7 +19,6 @@ vi.mock("./actions", () => ({
     ok: true,
     shouldPlayCinematic: false,
   }),
-  exitLobbyToPenthouse: vi.fn(),
 }));
 
 import { ConciergeFlow } from "./ConciergeFlow";

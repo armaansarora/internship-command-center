@@ -111,7 +111,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
     if (!page || page.length === 0) break;
 
     for (const raw of page) {
-      const row = raw as unknown as AppRow;
+      const row = raw as AppRow;
       const status = row.status;
       const userId = row.user_id;
       if (!userId || !status) continue;

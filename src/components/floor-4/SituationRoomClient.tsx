@@ -310,7 +310,10 @@ export function SituationRoomClient({
           id: a.id,
           companyName: a.companyName ?? "Unknown company",
           role: a.role,
-          deadlineAtMs: new Date(a.deadlineAt as unknown as string | Date).getTime(),
+          // filter above guarantees `deadlineAt !== null`; Drizzle infers
+          // `Date | null`, so non-null assertion is safe and `new Date(Date)`
+          // round-trips without semantic change.
+          deadlineAtMs: new Date(a.deadlineAt!).getTime(),
         })),
     [applications]
   );

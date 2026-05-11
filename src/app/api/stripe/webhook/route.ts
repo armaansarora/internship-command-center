@@ -133,7 +133,12 @@ export async function POST(request: Request): Promise<NextResponse> {
       type: event.type,
       livemode: event.livemode,
       status: "received",
-      payload: event as unknown as Record<string, unknown>,
+      // `Stripe.Event` is a discriminated union with non-string keys in
+       // some variants (e.g. `object: "event"`), so TS rejects a direct
+       // assignment to `Record<string, unknown>`. The jsonb column accepts
+       // the full Stripe payload by design — we serialise as-is via a
+       // single cast through the parser-friendly object shape.
+      payload: { ...event } as Record<string, unknown>,
     })
     .select("id, status")
     .maybeSingle();

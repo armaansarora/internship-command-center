@@ -42,12 +42,12 @@ export const cnoCharacterMachine = createCharacterMachine<
   },
 });
 
-export type CNOCharacterActorRef = ActorRef<
+type CNOCharacterActorRef = ActorRef<
   Snapshot<CNOCharacterContext>,
   CNOCharacterEvent
 >;
 
-export type CNOCharacterSnapshot = Snapshot<CNOCharacterContext> & {
+type CNOCharacterSnapshot = Snapshot<CNOCharacterContext> & {
   value:
     | "idle"
     | "alert"

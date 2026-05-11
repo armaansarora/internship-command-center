@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { claimArrivalPlay } from "@/lib/db/queries/user-profiles-rest";
 
@@ -17,13 +16,4 @@ export async function claimArrivalPlayAction(): Promise<{
   if (!user) return { ok: false, shouldPlayCinematic: false };
   const shouldPlayCinematic = await claimArrivalPlay(user.id);
   return { ok: true, shouldPlayCinematic };
-}
-
-/**
- * Server action: send the returning (now-onboarded) guest upstairs. Used
- * as the final step of the Concierge flow once Otis's extract + the
- * bootstrap discovery have completed.
- */
-export async function exitLobbyToPenthouse(): Promise<never> {
-  redirect("/penthouse");
 }

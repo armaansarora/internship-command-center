@@ -22,8 +22,8 @@ export function SituationMapList({ shape, companyNameById }: Props): JSX.Element
   const rings = useRingPulse();
 
   const handleRowClick = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      rings.pulse(e.clientX, e.clientY);
+    (pos: { clientX: number; clientY: number }) => {
+      rings.pulse(pos.clientX, pos.clientY);
     },
     [rings],
   );
@@ -151,7 +151,7 @@ function Row({
 }: {
   label: string;
   kind: "active" | "draft" | "completed";
-  onClick: (e: React.MouseEvent<HTMLElement>) => void;
+  onClick: (pos: { clientX: number; clientY: number }) => void;
 }): JSX.Element {
   const accent = kind === "active" ? "#F0A050" : kind === "completed" ? "#6FB26F" : "#7A5B35";
   const dotGlow = kind === "active" ? "glow" : "";
@@ -159,14 +159,14 @@ function Row({
     <li
       role="button"
       tabIndex={0}
-      onClick={onClick}
+      onClick={(e) => onClick({ clientX: e.clientX, clientY: e.clientY })}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           onClick({
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
-          } as unknown as React.MouseEvent<HTMLElement>);
+          });
         }
       }}
       data-arc-kind={kind}

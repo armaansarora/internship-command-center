@@ -45,10 +45,40 @@ export type DossierStatus = DossierRow["status"];
 export type DossierPermission = DossierRow["permission_needed"];
 
 /**
- * Input shape for `insertDossier`. Mirrors the column set with one carve-out:
- * `evidence` and `disagreement` are `unknown` because they are jsonb columns
- * whose shape evolves outside the migration boundary — caller-side schemas
- * narrow these (see PR3-Architect's `evidence` payload conventions).
+ * Evidence entry shape — one citation pointing back to the row, message, or
+ * artifact that backs a dossier recommendation. `kind` describes the source
+ * type ("application", "contact", "calendar_event", "dispatch_summary", …);
+ * `id` is the row id when applicable, null otherwise. The jsonb column itself
+ * is intentionally permissive at read time (see `parseEvidence`), but writers
+ * are required to land structured entries so the brand promise "every
+ * recommendation carries evidence" stays enforceable.
+ */
+export interface DossierEvidenceEntry {
+  kind: string;
+  id: string | null;
+  summary: string;
+}
+
+/**
+ * Disagreement payload. Two shapes are accepted today:
+ *
+ *   1. `{ withAgent, reason }` — emitted by the dossier-extractor (Zod schema).
+ *   2. `{ with?, note }` — legacy shape consumed by `parseDisagreement` on
+ *      read. Older callers still write this verbatim into the jsonb column.
+ *
+ * Reader-side narrowing (`parseDisagreement`) resolves both into a single
+ * `DossierDisagreement` for display. New writers should prefer shape (1).
+ */
+export type DossierDisagreementInput =
+  | { withAgent: string; reason: string }
+  | { with?: string; note: string };
+
+/**
+ * Input shape for `insertDossier`. Mirrors the column set; `evidence` /
+ * `disagreement` map onto jsonb cells whose runtime shape evolves outside the
+ * migration boundary, but writers commit to the structured entries above —
+ * read-side narrowing (`parseEvidence`, `parseDisagreement`) keeps consumers
+ * defensive against legacy rows.
  */
 export interface InsertDossierInput {
   userId: string;
@@ -57,10 +87,10 @@ export interface InsertDossierInput {
   owner: string;
   requestingAgent?: string;
   task: string;
-  evidence?: unknown;
+  evidence?: DossierEvidenceEntry[];
   openQuestions?: string[];
   confidence?: number | null;
-  disagreement?: unknown;
+  disagreement?: DossierDisagreementInput | null;
   proposedAction: string;
   permissionNeeded?: DossierPermission;
   deadline?: string | null;

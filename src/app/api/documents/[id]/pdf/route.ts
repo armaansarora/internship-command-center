@@ -84,8 +84,7 @@ export async function GET(
 
   let buffer: Buffer;
   try {
-    const nodeBuffer = await pdfLib.renderToBuffer(pdfComponent);
-    buffer = nodeBuffer as unknown as Buffer;
+    buffer = await pdfLib.renderToBuffer(pdfComponent);
   } catch (err) {
     log.error("[documents/pdf] renderToBuffer failed", err, {
       userId: user.id,

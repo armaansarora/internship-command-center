@@ -122,11 +122,22 @@ async function BriefingRoomData({
       (i) => i.prep_packet_id === row.id
     );
 
-    // Try to parse structured content, fall back to empty structure
-    let parsed: Partial<PrepPacket> = {};
+    // Try to parse structured content, fall back to empty structure.
+    //
+    // `parsed.questions` is `PrepQuestion[]` on the current schema. We also
+    // accept a legacy category-keyed object — written by older versions of
+    // the packet generator — so existing rows continue to render. The
+    // intermediate `parsedUnknown` view widens the question field to
+    // express both shapes without a fictional `as unknown as` cast.
+    type LegacyQuestionEntry = { text?: string; sampleAnswer?: string; difficulty?: string };
+    type LegacyQuestions = Record<string, LegacyQuestionEntry[]>;
+    type ParsedPacket = Omit<Partial<PrepPacket>, "questions"> & {
+      questions?: PrepQuestion[] | LegacyQuestions;
+    };
+    let parsed: ParsedPacket = {};
     try {
       if (row.content) {
-        parsed = JSON.parse(row.content) as Partial<PrepPacket>;
+        parsed = JSON.parse(row.content) as ParsedPacket;
       }
     } catch {
       // Content is plain text, wrap in basic structure
@@ -138,7 +149,7 @@ async function BriefingRoomData({
       questions = parsed.questions;
     } else if (parsed.questions && typeof parsed.questions === "object") {
       // Legacy format: { behavioral: [], technical: [], ... }
-      const legacyQ = parsed.questions as unknown as Record<string, Array<{ text?: string; sampleAnswer?: string; difficulty?: string }>>;
+      const legacyQ: LegacyQuestions = parsed.questions;
       const categoryMap: Record<string, QuestionCategory> = {
         behavioral: "behavioral",
         technical: "technical",

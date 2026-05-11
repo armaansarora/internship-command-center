@@ -47,7 +47,7 @@ function ConfettiParticle({
  * Auto-dismisses after 5 seconds.
  * CSS-only confetti animation.
  */
-export function MilestoneToast({
+function MilestoneToast({
   milestone,
   onDismiss,
 }: MilestoneToastProps): JSX.Element {
