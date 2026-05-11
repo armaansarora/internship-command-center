@@ -272,3 +272,40 @@ Set `CANARY_BASE_URL` to the preview URL when dispatching manually, or
 override it in a branch fork of the workflow. The default is hardcoded
 to `https://www.interntower.com` so a misconfigured environment can't
 accidentally silence the production probe.
+
+---
+
+## Owner Watchdog (off-platform driver)
+
+The `/api/cron/owner-watchdog` route is driven from a GitHub Actions
+workflow rather than Vercel cron because the Hobby plan caps `vercel.json`
+schedules at once-per-day, and the watchdog's value is sub-hour detection
+of stale crons, failed Stripe webhooks, and AI cost spikes.
+
+- **Schedule:** GitHub Actions, every 30 minutes.
+- **Workflow:** `.github/workflows/owner-watchdog.yml`.
+- **Endpoint:** `POST https://www.interntower.com/api/cron/owner-watchdog`
+- **Auth:** `Authorization: Bearer ${{ secrets.CRON_SECRET }}` — same
+  shared secret every other cron route checks via `verifyCronRequest`.
+
+### Required repo secret
+
+`CRON_SECRET` must be set in GitHub repository secrets
+(Settings → Secrets and variables → Actions). The workflow exits with a
+warning rather than failing if the secret is missing, so a fresh fork of
+the repo never spams the Actions failure email.
+
+### When this alerts
+
+GitHub emails repo admins when the workflow itself fails (curl returns
+non-200, or the workflow timeouts). The watchdog handler returns 200 in
+all healthy and unhealthy in-app paths — incident emails come from
+Resend (configured via `RESEND_API_KEY` + `OWNER_ALERT_EMAIL`), not from
+this workflow.
+
+### Pause without losing history
+
+Disable the workflow from the Actions tab; the route remains callable
+on demand via `workflow_dispatch`. The `incident_alerts` table keeps
+the historical state machine — re-enabling the schedule does not
+re-page closed incidents.

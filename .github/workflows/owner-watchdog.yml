@@ -1,0 +1,55 @@
+name: Owner Watchdog
+
+# Off-platform driver for the /api/cron/owner-watchdog route. Vercel
+# Hobby caps `vercel.json` crons at once-per-day, but the watchdog's
+# whole point is sub-hour detection of stale crons, failed Stripe
+# webhooks, and AI cost spikes. Running this on GitHub Actions gives
+# the same off-platform survivability the production canary has, with
+# the bonus that a Vercel-region outage that takes down `/operations`
+# does NOT take down the alerting that would have paged us about it.
+#
+# This workflow does NOT replicate any logic — it only triggers the
+# in-app handler with the project's CRON_SECRET. The state machine
+# (incident_alerts table, Resend digest, 6-hour reminder cadence)
+# all lives in the route. Required repository secret: CRON_SECRET.
+
+on:
+  schedule:
+    # Every 30 minutes. The route is idempotent under double-fires
+    # (incident_alerts dedupes via job_name + resolved_at IS NULL).
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: owner-watchdog
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    env:
+      WATCHDOG_URL: 'https://www.interntower.com/api/cron/owner-watchdog'
+    steps:
+      - name: Ping watchdog
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::warning::CRON_SECRET secret is unset; watchdog will not run"
+            exit 0
+          fi
+          response=$(curl -sS -o /tmp/body.json -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$WATCHDOG_URL")
+          echo "HTTP $response"
+          cat /tmp/body.json
+          # 401 = auth misconfigured (secret stale). 5xx = route or DB
+          # broken. Either way the workflow should fail loud so GitHub
+          # emails the repo admins.
+          if [ "$response" != "200" ]; then
+            echo "::error::Watchdog returned $response"
+            exit 1
+          fi

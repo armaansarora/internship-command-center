@@ -55,10 +55,6 @@
     {
       "path": "/api/cron/cfo-threshold",
       "schedule": "0 9 * * 1"
-    },
-    {
-      "path": "/api/cron/owner-watchdog",
-      "schedule": "*/30 * * * *"
     }
   ]
 }
