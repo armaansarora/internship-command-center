@@ -8,7 +8,7 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 
 ```
 src/         the app
-scripts/     maintenance + seed scripts (6 files, all useful)
+scripts/     maintenance + seed + dev scripts (7 files + ledger/, all useful)
 docs/        design specs (4 files)
 tests/       Playwright E2E suite
 public/      static assets (logos, OG, etc.)
@@ -32,6 +32,8 @@ src/app/(marketing)/                    public marketing
   privacy/page.tsx                      renders src/lib/legal/privacy.ts
   terms/page.tsx                        renders src/lib/legal/terms.ts
   waitlist/page.tsx + WaitlistForm.tsx + actions.ts
+  campus/page.tsx                       campus / .edu landing variant
+  season-pass/page.tsx                  Season Pass landing
 
 src/app/robots.ts                       built from gate-config
 src/app/sitemap.ts                      built from gate + legal + pricing configs
@@ -52,6 +54,10 @@ src/app/(authenticated)/
   c-suite/           Floor 1  — CEO orchestrator
   parlor/            Negotiation Parlor (annex of Floor 1)
   settings/          user settings
+  activate/          5-minute activation gauntlet (onboarding cross-floor)
+  operations/        owner-only ops dashboard
+  milestones/        progression milestones view
+  actions/           shared server actions (cross-floor)
 ```
 
 Each floor follows the same shape:
@@ -63,7 +69,8 @@ Each floor follows the same shape:
 ```
 src/app/api/
   ceo/, cro/, cfo/, cio/, cmo/, cno/, coo/, cpo/   8 AI agents
-                                                   (all use createAgentRoute)
+                                                   (all use
+                                                    createAgentRouteHandler)
   stripe/checkout, stripe/portal, stripe/webhook
   cron/                                            14 scheduled jobs
                                                    (all wrapped withCronHealth)
@@ -115,10 +122,16 @@ src/components/
 src/lib/agents/
   ceo/, cro/, cfo/, cio/, cmo/, cno/, coo/, cpo/   per-agent prompts + tools
   concierge/                                       Otis (lobby concierge)
-  create-agent-route.ts                            shared route factory
-                                                   (auth + rate limit + quota +
-                                                    streaming)
+  offer-evaluator/                                 system prompt for the
+                                                   Parlor offer-eval agent
   shared/                                          cross-agent helpers
+
+src/lib/ai/agents/
+  shared-route-handler.ts                          createAgentRouteHandler —
+                                                   shared API route factory
+                                                   (auth + rate limit + quota +
+                                                    streaming). Used by every
+                                                   src/app/api/<agent>/route.ts
 
 src/lib/ai/
   model.ts                                         provider selection
@@ -126,7 +139,8 @@ src/lib/ai/
   telemetry.ts                                     recordAgentRun
   structured/                                      structured-output schemas
   quota.ts                                         consumeAiQuota gate
-                                                   (used in createAgentRoute
+                                                   (used in
+                                                    createAgentRouteHandler
                                                     + bespoke AI routes)
 ```
 
@@ -246,6 +260,10 @@ scripts/comp-bands-seed.ts        seed Levels.fyi comp data
 scripts/init-env.ts               local env init helper (`npm run env:init`)
 scripts/setup-env.sh              env init shell helper
 scripts/create-skyline-layers.py  procedural skyline asset generator
+scripts/dev-preview.ts            `npm run dev:preview` — dev preview
+                                  harness (auth-stub, ports)
+scripts/ledger/verify.ts          ledger schema/contract verifier
+                                  (run from .husky/pre-commit if enabled)
 ```
 
 ---
@@ -268,7 +286,8 @@ docs/LAUNCH-READY.md         locked business decisions + remaining ops
 tests/e2e/                   Playwright E2E (security/abuse/concurrency/
                              scale/failure scenarios)
 tests/                       (root) shared test helpers
-src/**/*.test.ts             unit + integration (vitest, ~1575 tests)
+src/**/*.test.ts             unit + integration (vitest, ~2285 tests across
+                             297 spec files)
 src/app/__tests__/*.proof.test.ts   proof tests for invariants
 ```
 
@@ -295,7 +314,7 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 | Snake_case row types for Supabase REST | `import { Row } from "@/db/database.types"` then `Row<"applications">` etc. (Fix #5 derives them from Drizzle so they cannot drift) |
 | Onboarding flow edits | `src/app/lobby/onboarding/ConciergeFlow.tsx` + `src/app/lobby/lobby-client.tsx` |
 | Lobby UI / sign-in | `src/app/lobby/lobby-client.tsx` |
-| Settings UI | `src/app/(authenticated)/settings/settings-client.tsx` (1355 LOC, big file) |
+| Settings UI | `src/app/(authenticated)/settings/settings-client.tsx` (1985 LOC, big file) |
 | Owner-only feature gates | `import { isOwner } from "@/lib/auth/owner"` |
 | Get current user (server) | `import { getUser } from "@/lib/supabase/server"` |
 | Get current tier | `import { getUserTier } from "@/lib/stripe/entitlements"` |
@@ -314,7 +333,7 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 - Database at runtime → Supabase REST (`createClient()` from `@/lib/supabase/server`). NEVER the Drizzle `db` object.
 - Database for migrations → Drizzle Kit only.
 - All cron route handlers are wrapped with `withCronHealth("name", handler)`.
-- All AI agent routes go through `createAgentRoute` (which calls `consumeAiQuota`).
+- All AI agent routes go through `createAgentRouteHandler` (which calls `consumeAiQuota`).
 - All GSAP imports go through `@/lib/gsap-init` (tree-shake contract).
 - Aria attributes on all interactive elements; `prefers-reduced-motion` respected.
 - No `console.log` in shipped code; use `log.info/warn/error` from `@/lib/logger`.
