@@ -101,6 +101,11 @@ const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
       import("@/app/api/cron/purge-sweeper/route") as Promise<RouteModule>,
   },
   {
+    name: "rolling-invites",
+    load: () =>
+      import("@/app/api/cron/rolling-invites/route") as Promise<RouteModule>,
+  },
+  {
     name: "sync",
     load: () => import("@/app/api/cron/sync/route") as Promise<RouteModule>,
   },
