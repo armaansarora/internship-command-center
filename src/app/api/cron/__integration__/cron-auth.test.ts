@@ -35,6 +35,9 @@ type LoadResult =
   | { ok: false; reason: string };
 
 // Known cron routes. Keep in sync with `src/app/api/cron/*/route.ts`.
+// This audit MUST list every directory under src/app/api/cron/ that ships a
+// route.ts handler. Adding a new cron route without listing it here means
+// the cron-auth gate is unverified.
 const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
   {
     name: "briefing",
@@ -42,8 +45,19 @@ const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
       import("@/app/api/cron/briefing/route") as Promise<RouteModule>,
   },
   {
-    name: "sync",
-    load: () => import("@/app/api/cron/sync/route") as Promise<RouteModule>,
+    name: "cfo-threshold",
+    load: () =>
+      import("@/app/api/cron/cfo-threshold/route") as Promise<RouteModule>,
+  },
+  {
+    name: "cio-reresearch",
+    load: () =>
+      import("@/app/api/cron/cio-reresearch/route") as Promise<RouteModule>,
+  },
+  {
+    name: "draft-follow-ups",
+    load: () =>
+      import("@/app/api/cron/draft-follow-ups/route") as Promise<RouteModule>,
   },
   {
     name: "export-worker",
@@ -51,9 +65,48 @@ const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
       import("@/app/api/cron/export-worker/route") as Promise<RouteModule>,
   },
   {
+    name: "job-discovery",
+    load: () =>
+      import("@/app/api/cron/job-discovery/route") as Promise<RouteModule>,
+  },
+  {
+    name: "match-index",
+    load: () =>
+      import("@/app/api/cron/match-index/route") as Promise<RouteModule>,
+  },
+  {
+    name: "outreach-sender",
+    load: () =>
+      import("@/app/api/cron/outreach-sender/route") as Promise<RouteModule>,
+  },
+  {
+    name: "packet-regenerate",
+    load: () =>
+      import("@/app/api/cron/packet-regenerate/route") as Promise<RouteModule>,
+  },
+  {
     name: "purge-sweeper",
     load: () =>
       import("@/app/api/cron/purge-sweeper/route") as Promise<RouteModule>,
+  },
+  {
+    name: "sync",
+    load: () => import("@/app/api/cron/sync/route") as Promise<RouteModule>,
+  },
+  {
+    name: "unprompted-ceo",
+    load: () =>
+      import("@/app/api/cron/unprompted-ceo/route") as Promise<RouteModule>,
+  },
+  {
+    name: "warm-intro-scan",
+    load: () =>
+      import("@/app/api/cron/warm-intro-scan/route") as Promise<RouteModule>,
+  },
+  {
+    name: "warmth-decay",
+    load: () =>
+      import("@/app/api/cron/warmth-decay/route") as Promise<RouteModule>,
   },
 ];
 
