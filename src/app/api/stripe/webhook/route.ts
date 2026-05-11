@@ -12,6 +12,7 @@ import {
 } from "@/lib/stripe/webhook-audit";
 import { stripeWebhookDuplicateDecision } from "@/lib/stripe/webhook-duplicate";
 import { readRawBodyWithLimit } from "@/lib/http/request-body";
+import { recordServerEngagementEvent } from "@/lib/analytics/server-engagement";
 
 /**
  * Stripe webhook.
@@ -286,7 +287,29 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.supabase_user_id;
       if (!userId) return;
-      if (!session.subscription) return;
+
+      // One-time payment branch: Season Pass uses mode="payment" so
+      // session.subscription is null. We don't flip the tier here (the
+      // subscription_tier column is reconciled by a separate purchase-tier
+      // updater outside this PR's scope) but we DO write a durable
+      // engagement_events row mirroring the season_pass_purchased Plausible
+      // goal so the founder's conversion dashboard survives content blockers
+      // even if the client-side trackGoal call never fires.
+      if (!session.subscription) {
+        if (session.metadata?.tier === "seasonPass") {
+          await recordServerEngagementEvent({
+            eventType: "purchase",
+            pathname: "/season-pass/purchased",
+            userId,
+            metadata: {
+              goal: "season_pass_purchased",
+              sku: "seasonPass",
+              currency: (session.currency ?? "usd").toLowerCase(),
+            },
+          });
+        }
+        return;
+      }
 
       const subscriptionId =
         typeof session.subscription === "string"

@@ -36,4 +36,26 @@ test.describe("campus pilot inquiry — public submission shape", () => {
       expect(Number.parseInt(tabIndex, 10)).toBeGreaterThanOrEqual(0);
     }
   });
+
+  /**
+   * Plausible script — must render on the marketing root when
+   * NEXT_PUBLIC_PLAUSIBLE_DOMAIN is set in the test environment. Skipped
+   * otherwise so CI without an analytics domain configured stays green.
+   *
+   * The script tag must reference plausible.io and carry a `data-domain`
+   * attribute matching the env value — the tagged-events variant unlocks
+   * the four named conversion goals shipped in the GTM Plausible PR.
+   */
+  test("Plausible tagged-events script appears on / when domain env is set", async ({
+    page,
+  }) => {
+    const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+    test.skip(!domain, "NEXT_PUBLIC_PLAUSIBLE_DOMAIN unset — analytics off");
+
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const script = page.locator(`script[data-domain="${domain}"]`);
+    await expect(script).toHaveCount(1);
+    const src = await script.first().getAttribute("src");
+    expect(src).toContain("plausible");
+  });
 });

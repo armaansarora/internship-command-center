@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useState, type CSSProperties, type JSX } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type JSX,
+} from "react";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
 import { NetworkingConsent } from "@/components/settings/NetworkingConsent";
@@ -8,7 +15,7 @@ import {
   NetworkingAudit,
   type MatchEvent,
 } from "@/components/settings/NetworkingAudit";
-import { trackPlausibleEvent } from "@/lib/analytics/plausible";
+import { trackGoal, trackPlausibleEvent } from "@/lib/analytics/plausible";
 import type { ProductionHealthSummary } from "@/lib/observability/production-health";
 
 interface SettingsClientProps {
@@ -156,6 +163,25 @@ export function SettingsClient({
   const [effectiveDeletedAt, setEffectiveDeletedAt] = useState<string | null>(
     deletedAt,
   );
+
+  // Post-purchase landing — fire the season_pass_purchased Plausible goal
+  // exactly once when the user arrives at /settings?upgrade=success&plan=
+  // seasonPass (the Stripe success_url). The webhook also mirrors this
+  // into engagement_events server-side, so we have BOTH paths covered:
+  //  - Client trackGoal lights up Plausible's conversion dashboard
+  //  - Server engagement_events write survives content blockers
+  // Stripe redirects with these params exactly once per checkout session;
+  // a guard ref prevents duplicate fires if the component remounts.
+  const seasonPassGoalFiredRef = useRef(false);
+  useEffect(() => {
+    if (seasonPassGoalFiredRef.current) return;
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgrade") !== "success") return;
+    if (params.get("plan") !== "seasonPass") return;
+    seasonPassGoalFiredRef.current = true;
+    trackGoal("season_pass_purchased", { surface: "settings" });
+  }, []);
 
   // Rejection autopsy toggle. Optimistic-update state + tiny error
   // surface; the backing fetch hits the generic /api/profile/preferences
