@@ -4,6 +4,7 @@ const {
   requireEnvSpy,
   constructEventSpy,
   retrieveSubscriptionSpy,
+  listLineItemsSpy,
   tierFromPriceIdSpy,
   getSupabaseAdminSpy,
   webhookInsertSpy,
@@ -21,6 +22,7 @@ const {
   requireEnvSpy: vi.fn(),
   constructEventSpy: vi.fn(),
   retrieveSubscriptionSpy: vi.fn(),
+  listLineItemsSpy: vi.fn(),
   tierFromPriceIdSpy: vi.fn(),
   getSupabaseAdminSpy: vi.fn(),
   webhookInsertSpy: vi.fn(),
@@ -47,6 +49,11 @@ vi.mock("@/lib/stripe/server", () => ({
     },
     subscriptions: {
       retrieve: retrieveSubscriptionSpy,
+    },
+    checkout: {
+      sessions: {
+        listLineItems: listLineItemsSpy,
+      },
     },
   }),
   tierFromPriceId: tierFromPriceIdSpy,
@@ -77,8 +84,29 @@ function makeCheckoutEvent() {
     livemode: false,
     data: {
       object: {
+        id: "cs_test_subscription",
+        mode: "subscription",
         metadata: { supabase_user_id: "user-billing" },
         subscription: "sub_123",
+      },
+    },
+  };
+}
+
+function makeSeasonPassCheckoutEvent() {
+  return {
+    id: "evt_season_pass_checkout",
+    type: "checkout.session.completed",
+    livemode: false,
+    data: {
+      object: {
+        id: "cs_test_season_pass",
+        mode: "payment",
+        metadata: {
+          supabase_user_id: "user-billing",
+          tier: "seasonPass",
+        },
+        subscription: null,
       },
     },
   };
@@ -116,6 +144,7 @@ describe("POST /api/stripe/webhook", () => {
     requireEnvSpy.mockReset();
     constructEventSpy.mockReset();
     retrieveSubscriptionSpy.mockReset();
+    listLineItemsSpy.mockReset();
     tierFromPriceIdSpy.mockReset();
     getSupabaseAdminSpy.mockReset();
     webhookInsertSpy.mockReset();
@@ -172,6 +201,47 @@ describe("POST /api/stripe/webhook", () => {
     expect(profileEqSpy).toHaveBeenCalledWith("id", "user-billing");
     expect(profileSelectSpy).toHaveBeenCalledWith("id");
     expect(profileSingleSpy).toHaveBeenCalledOnce();
+  });
+
+  // ── Season Pass durability ──────────────────────────────────────────────
+  //
+  // A Season Pass purchase delivers `checkout.session.completed` with
+  // `mode: "payment"` and `subscription: null`. The webhook MUST resolve
+  // the price id via `checkout.sessions.listLineItems` and persist the
+  // tier — without this branch, a $149 purchase never grants entitlement.
+  it("persists subscription_tier=seasonPass for one-time Season Pass checkout", async () => {
+    constructEventSpy.mockReturnValue(makeSeasonPassCheckoutEvent());
+    listLineItemsSpy.mockResolvedValue({
+      data: [{ price: { id: "price_season_pass_live" } }],
+    });
+    tierFromPriceIdSpy.mockReturnValueOnce("seasonPass");
+
+    const res = await POST(makeRequest());
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ received: true });
+    // The one-time SKU does NOT have a subscription, so the subscription
+    // retrieve must NOT be called — that path is reserved for recurring
+    // checkouts. listLineItems is the contract for one-time SKUs.
+    expect(retrieveSubscriptionSpy).not.toHaveBeenCalled();
+    expect(listLineItemsSpy).toHaveBeenCalledWith("cs_test_season_pass", {
+      limit: 1,
+    });
+    expect(tierFromPriceIdSpy).toHaveBeenCalledWith("price_season_pass_live");
+    expect(profileUpdateSpy).toHaveBeenCalledWith({
+      subscription_tier: "seasonPass",
+    });
+    expect(profileEqSpy).toHaveBeenCalledWith("id", "user-billing");
+  });
+
+  it("acks the Season Pass webhook without writing a profile when line items are empty", async () => {
+    constructEventSpy.mockReturnValue(makeSeasonPassCheckoutEvent());
+    listLineItemsSpy.mockResolvedValue({ data: [] });
+
+    const res = await POST(makeRequest());
+
+    expect(res.status).toBe(200);
+    expect(profileUpdateSpy).not.toHaveBeenCalled();
   });
 
   it("fails the webhook when checkout tier persistence touches no profile row", async () => {

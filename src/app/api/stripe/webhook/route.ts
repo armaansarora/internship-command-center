@@ -286,6 +286,37 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.metadata?.supabase_user_id;
       if (!userId) return;
+
+      // Branch on Stripe checkout `mode` so the one-time Season Pass SKU
+      // (`mode: "payment"`) durably stamps the entitlement.
+      //
+      // Subscription checkouts (`mode: "subscription"`) resolve their price
+      // via the subscription retrieve call below — that path is unchanged.
+      //
+      // For `mode: "payment"`, the session itself does not surface line
+      // items; we call `checkout.sessions.listLineItems` to pull the
+      // purchased price id, map it to a tier, and persist exactly like
+      // the subscription path. Without this branch a Season Pass purchase
+      // never lands on `user_profiles.subscription_tier`, so the user
+      // pays $149 and never receives entitlements.
+      if (session.mode === "payment") {
+        const lineItems = await getStripe().checkout.sessions.listLineItems(
+          session.id,
+          { limit: 1 },
+        );
+        const priceId = lineItems.data[0]?.price?.id;
+        if (!priceId) return;
+
+        const tier = tierFromPriceId(priceId);
+        await updateUserSubscriptionTier(
+          supabase,
+          userId,
+          tier,
+          "season pass tier",
+        );
+        return;
+      }
+
       if (!session.subscription) return;
 
       const subscriptionId =
