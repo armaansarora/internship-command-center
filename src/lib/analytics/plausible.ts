@@ -24,7 +24,14 @@ export type TowerPlausibleEvent =
   | "tower_google_workspace_sync_failed"
   | "tower_google_workspace_disconnect_requested"
   | "tower_google_workspace_disconnect_failed"
-  | "tower_sign_out_started";
+  | "tower_sign_out_started"
+  // Funnel — top-of-funnel CTA + waitlist conversion events (GTM PR).
+  // Fired before sign-up to give the dashboard a real `landing_to_signin`
+  // denominator that survives ad-blockers (Plausible) AND a server-side
+  // mirror (engagement_events `marketing_view`).
+  | "tower_waitlist_submit_started"
+  | "tower_waitlist_submit_succeeded"
+  | "tower_waitlist_submit_failed";
 
 const ALLOWED_PROP_KEYS = new Set([
   "action",

@@ -1,7 +1,15 @@
 "use client";
 
-import { useState, useTransition, type FormEvent, type JSX } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type FormEvent,
+  type JSX,
+} from "react";
 import { joinWaitlist } from "./actions";
+import { trackPlausibleEvent } from "@/lib/analytics/plausible";
 
 type Status =
   | { kind: "idle" }
@@ -9,9 +17,54 @@ type Status =
   | { kind: "success" }
   | { kind: "error"; message: string };
 
+// Recognized referral channels. The same tokens are accepted by the
+// retention beacon (`?ref=…` in middleware) so attribution stays consistent
+// across the funnel. Unknown values are sanitized to "direct" by the server
+// action's Zod parser (utm field caps at 256 chars; anything longer is
+// rejected before persistence).
+const KNOWN_REF_SOURCES = new Set([
+  "reddit",
+  "campus",
+  "twitter",
+  "linkedin",
+  "hn",
+  "referral",
+  "direct",
+]);
+
+/**
+ * Read `?ref=…` from the current URL on mount. The component never re-reads
+ * across rerenders (a SPA navigation back to /waitlist doesn't change the
+ * source). Unknown values fall through to "direct" — fail-closed so a hostile
+ * caller can't smuggle arbitrary text into the warehouse.
+ */
+function readReferralSource(): string {
+  if (typeof window === "undefined") return "direct";
+  const raw = new URLSearchParams(window.location.search).get("ref");
+  if (!raw) return "direct";
+  const trimmed = raw.trim().toLowerCase();
+  return KNOWN_REF_SOURCES.has(trimmed) ? trimmed : "direct";
+}
+
 export function WaitlistForm(): JSX.Element {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [isPending, startTransition] = useTransition();
+  const [refSource, setRefSource] = useState<string>("direct");
+
+  // SSR hydration handoff: read `?ref=` exactly once on mount. The empty
+  // server-rendered string is replaced with the real source on the client.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional SSR hydration handoff
+    setRefSource(readReferralSource());
+  }, []);
+
+  // Pre-compute the document.referrer once — accessing it on every render
+  // would tear hydration if the value changed mid-flight (it can't, but the
+  // memo also avoids re-reading the DOM on every keystroke).
+  const referrer = useMemo<string>(() => {
+    if (typeof document === "undefined") return "";
+    return document.referrer;
+  }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -19,13 +72,23 @@ export function WaitlistForm(): JSX.Element {
     const form = event.currentTarget;
     const data = new FormData(form);
     setStatus({ kind: "submitting" });
+    trackPlausibleEvent("tower_waitlist_submit_started", {
+      source: refSource,
+    });
     startTransition(async () => {
       const result = await joinWaitlist(data);
       if (result.ok) {
         setStatus({ kind: "success" });
+        trackPlausibleEvent("tower_waitlist_submit_succeeded", {
+          source: refSource,
+        });
         form.reset();
       } else {
         setStatus({ kind: "error", message: result.error });
+        trackPlausibleEvent("tower_waitlist_submit_failed", {
+          source: refSource,
+          reason: result.error,
+        });
       }
     });
   };
@@ -68,7 +131,13 @@ export function WaitlistForm(): JSX.Element {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
-      <input type="hidden" name="referrer" value={typeof document !== "undefined" ? document.referrer : ""} />
+      <input type="hidden" name="referrer" value={referrer} />
+      {/* The `utm` column carries the resolved referral source — the same
+          enum the retention beacon reads from `?ref=` in middleware. The
+          server-side Zod schema caps this at 256 chars and the client-side
+          allowlist constrains the values, so this hidden field can't be
+          weaponized to insert arbitrary text. */}
+      <input type="hidden" name="utm" value={refSource} />
       <label htmlFor="email" className="sr-only">
         Email address
       </label>

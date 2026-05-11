@@ -88,10 +88,13 @@ describe("middleware engagement emission", () => {
     );
   });
 
-  it("F2: /penthouse GET authed → floor_view with floor=penthouse", async () => {
+  it("F2: /penthouse GET authed → floor_view with floor=penthouse + user_return beacon", async () => {
     nextMockClient = mkClient({ id: "user-1" });
     await updateSession(req("http://localhost/penthouse"));
-    expect(recordSpy).toHaveBeenCalledTimes(1);
+    // The middleware now emits TWO events per authed floor view: the
+    // existing `floor_view` (funnel telemetry) and the new `user_return`
+    // (retention dashboard). Both run via the same fire-and-forget writer.
+    expect(recordSpy).toHaveBeenCalledTimes(2);
     expect(recordSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: "floor_view",
@@ -100,6 +103,50 @@ describe("middleware engagement emission", () => {
         floor: "penthouse",
       }),
     );
+    expect(recordSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: "user_return",
+        pathname: "/penthouse",
+        userId: "user-1",
+        floor: "penthouse",
+      }),
+    );
+  });
+
+  it("F2b: unauthed floor request → only auth_gate_blocked, no user_return", async () => {
+    nextMockClient = mkClient(null);
+    await updateSession(req("http://localhost/penthouse"));
+    // Retention beacon is gated on authentication — anonymous requests
+    // never produce a `user_return` row.
+    const callArgs = recordSpy.mock.calls.map(
+      (call) => (call[0] as { eventType: string }).eventType,
+    );
+    expect(callArgs).not.toContain("user_return");
+  });
+
+  it("F2c: authed floor visit with ?ref=tube → user_return source=tube", async () => {
+    nextMockClient = mkClient({ id: "user-1" });
+    await updateSession(req("http://localhost/penthouse?ref=tube"));
+    const returnCall = recordSpy.mock.calls.find(
+      (call) => (call[0] as { eventType: string }).eventType === "user_return",
+    );
+    expect(returnCall).toBeDefined();
+    expect(returnCall?.[0]).toMatchObject({
+      eventType: "user_return",
+      metadata: expect.objectContaining({ return_source: "tube" }),
+    });
+  });
+
+  it("F2d: unknown ?ref= value falls back to source=direct", async () => {
+    nextMockClient = mkClient({ id: "user-1" });
+    await updateSession(req("http://localhost/penthouse?ref=evilforger"));
+    const returnCall = recordSpy.mock.calls.find(
+      (call) => (call[0] as { eventType: string }).eventType === "user_return",
+    );
+    expect(returnCall?.[0]).toMatchObject({
+      eventType: "user_return",
+      metadata: expect.objectContaining({ return_source: "direct" }),
+    });
   });
 
   it("F3: /penthouse GET unauthed → auth_gate_blocked then redirect to /lobby", async () => {

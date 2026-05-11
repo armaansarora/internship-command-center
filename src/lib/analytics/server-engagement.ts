@@ -33,13 +33,15 @@ export type EngagementEventType =
   | "marketing_view"
   | "floor_view"
   | "auth_gate_blocked"
-  | "activation_step";
+  | "activation_step"
+  | "user_return";
 
 export type EngagementRouteKind =
   | "marketing"
   | "floor"
   | "gate"
-  | "activation";
+  | "activation"
+  | "retention";
 
 export type EngagementMetadataValue = string | number | boolean;
 export type EngagementMetadata = Record<string, EngagementMetadataValue>;
@@ -93,6 +95,13 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "dwell_ms",
   "source",
   "beat",
+  // user_return keys (PR — D1/D7/D30 retention instrumentation)
+  // `return_source` is a free-text channel hint (e.g. "tube", "briefing_email",
+  // "direct") and is capped at 64 chars by `sanitizeMetadata`. `floor_first`
+  // is the first authenticated floor segment seen on this return — lets the
+  // dashboard split "which floor pulled them back" without a separate query.
+  "return_source",
+  "floor_first",
 ]);
 
 const MAX_PATHNAME_LENGTH = 256;
@@ -135,6 +144,7 @@ function routeKindFor(eventType: EngagementEventType): EngagementRouteKind {
   if (eventType === "floor_view") return "floor";
   if (eventType === "auth_gate_blocked") return "gate";
   if (eventType === "activation_step") return "activation";
+  if (eventType === "user_return") return "retention";
   return "marketing";
 }
 

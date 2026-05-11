@@ -53,9 +53,16 @@ export interface FunnelMetricsInput {
   /** Users who returned on D7. */
   readonly activatedUsersD7: number;
   /**
-   * Activations to date in the window — the denominator for D1 / D7. The
-   * Architect computes this from the same beat events; we accept it as input
-   * so this module stays purely functional.
+   * Users who returned on D30. Optional so the dashboard can render the row
+   * with "no data" until the retention table has been populated for at least
+   * 30 days. Callers that have a real reading pass a finite non-negative
+   * integer; missing readings remain `undefined` and surface as null observed.
+   */
+  readonly activatedUsersD30?: number;
+  /**
+   * Activations to date in the window — the denominator for D1 / D7 / D30.
+   * The Architect computes this from the same beat events; we accept it as
+   * input so this module stays purely functional.
    */
   readonly totalActivations: number;
 }
@@ -147,6 +154,8 @@ function metricByKey(key: string) {
  *                                     google_connect.success)
  *   - `d1_return_activated`       = activatedUsersD1 / totalActivations
  *   - `d7_return`                 = activatedUsersD7 / totalActivations
+ *   - `d30_return`                = activatedUsersD30 / totalActivations
+ *     (only when the caller supplies activatedUsersD30; otherwise null)
  *   - `cost_per_activation_usd`   = NOT computed here — see cost-observer.ts.
  *     The cost row is emitted with `observed: null` and `health: below_target`
  *     until the caller merges in the cost reading.
@@ -182,7 +191,17 @@ export function computeFunnelMetrics(
   const d7Metric = metricByKey("d7_return");
   const d7Observed = safeRatio(input.activatedUsersD7, input.totalActivations);
 
-  // 6. cost_per_activation_usd — not derivable from funnel input alone.
+  // 6. d30_return — only emitted when the caller passes a finite reading.
+  // Missing input falls through to a null observed + below_target placeholder
+  // so the dashboard renders the row consistently before there are 30 days
+  // of retention data.
+  const d30Metric = metricByKey("d30_return");
+  const d30Observed =
+    typeof input.activatedUsersD30 === "number"
+      ? safeRatio(input.activatedUsersD30, input.totalActivations)
+      : null;
+
+  // 7. cost_per_activation_usd — not derivable from funnel input alone.
   const costMetric = metricByKey("cost_per_activation_usd");
 
   return [
@@ -249,6 +268,19 @@ export function computeFunnelMetrics(
         d7Observed,
         d7Metric.target,
         d7Metric.killThreshold,
+      ),
+    },
+    {
+      key: d30Metric.key,
+      description: d30Metric.description,
+      target: d30Metric.target,
+      killThreshold: d30Metric.killThreshold,
+      unit: d30Metric.unit,
+      observed: d30Observed,
+      health: classifyRatio(
+        d30Observed,
+        d30Metric.target,
+        d30Metric.killThreshold,
       ),
     },
     {
