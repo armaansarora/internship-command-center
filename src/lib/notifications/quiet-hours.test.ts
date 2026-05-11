@@ -20,7 +20,11 @@
  * a far-east non-DST zone by Asia/Tokyo; UTC as a null-check baseline.
  */
 import { describe, it, expect } from "vitest";
-import { computeDeliverAfter, type QuietHours } from "./quiet-hours";
+import {
+  computeDeliverAfter,
+  exceedsPerUserDailyCap,
+  type QuietHours,
+} from "./quiet-hours";
 
 /**
  * Build a UTC instant whose wall-clock in `tz` is `(y, mo, d, h, mi)`.
@@ -240,5 +244,50 @@ describe("computeDeliverAfter", () => {
       quietHours: { start: "07:00", end: "07:00" },
     });
     expect(out).toBe(now.toISOString());
+  });
+});
+
+/**
+ * `exceedsPerUserDailyCap` is the per-user blast-brake half of the
+ * cadence module — quiet-hours gates *when* a send may go out, this
+ * helper gates *how many* may go out in a rolling 24h window.
+ *
+ * The fixtures cover every branch:
+ *   - well-below the cap → false
+ *   - exactly at the cap → true (inclusive boundary, "25th send blocks")
+ *   - over the cap → true
+ *   - cap = 0 → defensive false (don't freeze every user on misconfig)
+ *   - cap = NaN → defensive false (env-coercion fallback)
+ */
+describe("exceedsPerUserDailyCap", () => {
+  it("returns false when well below the cap", () => {
+    expect(exceedsPerUserDailyCap({ sentInLast24h: 10, capPerDay: 25 })).toBe(false);
+  });
+
+  it("returns false at cap-1", () => {
+    expect(exceedsPerUserDailyCap({ sentInLast24h: 24, capPerDay: 25 })).toBe(false);
+  });
+
+  it("returns true exactly at the cap (inclusive boundary)", () => {
+    expect(exceedsPerUserDailyCap({ sentInLast24h: 25, capPerDay: 25 })).toBe(true);
+  });
+
+  it("returns true above the cap", () => {
+    expect(exceedsPerUserDailyCap({ sentInLast24h: 100, capPerDay: 25 })).toBe(true);
+  });
+
+  it("returns false defensively when capPerDay is zero", () => {
+    // Treating zero as "no cap" prevents a misconfigured env from
+    // accidentally freezing every user; the per-tick and circuit
+    // breaker still apply.
+    expect(exceedsPerUserDailyCap({ sentInLast24h: 100, capPerDay: 0 })).toBe(false);
+  });
+
+  it("returns false defensively when capPerDay is NaN", () => {
+    expect(exceedsPerUserDailyCap({ sentInLast24h: 5, capPerDay: Number.NaN })).toBe(false);
+  });
+
+  it("returns false defensively when capPerDay is negative", () => {
+    expect(exceedsPerUserDailyCap({ sentInLast24h: 5, capPerDay: -3 })).toBe(false);
   });
 });

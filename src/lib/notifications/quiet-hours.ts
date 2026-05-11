@@ -180,3 +180,35 @@ export function computeDeliverAfter(args: ComputeArgs): string {
   const utc = zonedWallToUtc(targetY, targetMo, targetD, endH, endM, userTimezone);
   return utc.toISOString();
 }
+
+/**
+ * Per-user daily send-rate check used by the outreach blast-brake.
+ *
+ * This lives next to `computeDeliverAfter` because both are "is this user
+ * allowed to be touched right now?" predicates — quiet-hours gates *when* a
+ * message may go out, the daily cap gates *how many* may go out in a
+ * rolling 24-hour window. The shared home keeps the two cadence checks
+ * discoverable and tested side-by-side.
+ *
+ * Pure with respect to the supplied count: the cron route does the actual
+ * `SELECT count(*) FROM outreach_queue WHERE user_id = $1 AND sent_at >
+ * now() - interval '24 hours'` and feeds the result in. Pure-helper shape
+ * keeps it trivially testable without a Supabase mock and lets the route
+ * batch all per-user counts into a single fetch.
+ *
+ * Returns `true` when the user has already hit or exceeded the cap and the
+ * current message MUST be skipped this tick. Returns `false` when the user
+ * is still under the cap and the cron may proceed.
+ */
+export function exceedsPerUserDailyCap(args: {
+  sentInLast24h: number;
+  capPerDay: number;
+}): boolean {
+  if (!Number.isFinite(args.capPerDay) || args.capPerDay <= 0) {
+    // Defensive: a zero-or-negative cap would freeze every user forever, so
+    // treat misconfiguration as "no cap" (the per-tick global ceiling and the
+    // pending-queue circuit breaker are still in effect).
+    return false;
+  }
+  return args.sentInLast24h >= args.capPerDay;
+}

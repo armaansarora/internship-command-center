@@ -74,9 +74,13 @@ src/app/api/
                                                     createAgentRouteHandler)
   stripe/checkout, stripe/portal, stripe/webhook
   cron/                                            15 scheduled jobs
-                                                   (all wrapped withCronHealth;
+                                                   (all wrapped withCronHealth);
                                                    owner-watchdog runs every 30m
-                                                   for incident_alerts digest)
+                                                   for incident_alerts digest;
+                                                   outreach-sender enforces
+                                                   3-layer blast brake: pending
+                                                   freeze, per-tick ceiling,
+                                                   per-user daily cap
   auth/callback, auth/signout
   account/delete, account/export                   GDPR
   admin/sentry-probe                               owner-only debug
