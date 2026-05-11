@@ -4,6 +4,8 @@ A multi-tenant SaaS that automates the internship and job search process. Users 
 
 **Not a dashboard.** The Tower is an immersive spatial experience — users navigate a virtual building via elevator, interact with AI characters who manage different departments, and watch the NYC skyline change with their local time of day.
 
+Live at [interntower.com](https://www.interntower.com).
+
 ## Stack
 
 | Layer | Technology |
@@ -27,7 +29,7 @@ A multi-tenant SaaS that automates the internship and job search process. Users 
 |---|---|
 | CEO | Orchestration, morning briefings |
 | CRO | Pipeline tracking, conversion analytics |
-| COO (Dylan Shorts) | Calendar, follow-ups, deadlines |
+| COO | Calendar, follow-ups, deadlines |
 | CIO | Company research, competitive intelligence |
 | CMO | Cover letters, outreach messaging |
 | CPO | Interview preparation, mock interviews |
@@ -41,19 +43,17 @@ npm install
 npm run dev
 ```
 
-See `docs/MASTER-PLAN.md` for the full 7-phase build plan.
-
 ## Docs
 
-All planning documents are in `/docs/`:
-- **MASTER-PLAN.md** — Phases, deliverables, acceptance criteria, testing strategy
-- **VISION-SPEC.md** — Spatial UI specification (locked)
-- **TECH-BRIEF.md** — Research findings, code patterns, dependency list
-- **ARCHITECTURE-MAP.md** — Current folder boundaries, shared primitives, and mutation flow
-- **SCHEMA-DRAFT.md** — 16-table Postgres schema with RLS
-- **CHARACTER-PROMPTS.md** — System prompts for all AI agents
-
-Operational context in `PROJECT-CONTEXT.md` (root).
+| File | What it covers |
+|---|---|
+| [`CLAUDE.md`](./CLAUDE.md) | Architecture, conventions, gotchas — the canonical project brief for engineers and AI agents |
+| [`STRUCTURE.md`](./STRUCTURE.md) | Where every file lives — read this when you don't know where something should go |
+| [`docs/VISION-SPEC.md`](./docs/VISION-SPEC.md) | Spatial UI specification — the building metaphor (sacred) |
+| [`docs/CHAIN-OF-COMMAND.md`](./docs/CHAIN-OF-COMMAND.md) | AI agent hierarchy and dispatch model |
+| [`docs/CHARACTER-PROMPTS.md`](./docs/CHARACTER-PROMPTS.md) | System prompts for all 8 agents |
+| [`docs/LAUNCH-READY.md`](./docs/LAUNCH-READY.md) | Locked business decisions + remaining ops checklist |
+| [`docs/TESTING.md`](./docs/TESTING.md) | Test layout (vitest + Playwright) |
 
 ## License
 

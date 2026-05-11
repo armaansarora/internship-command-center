@@ -262,7 +262,6 @@ scripts/stripe-bootstrap.sh       create Stripe products + prices + webhook
 scripts/comp-bands-seed.ts        seed Levels.fyi comp data
 scripts/init-env.ts               local env init helper (`npm run env:init`)
 scripts/setup-env.sh              env init shell helper
-scripts/create-skyline-layers.py  procedural skyline asset generator
 scripts/dev-preview.ts            `npm run dev:preview` — dev preview
                                   harness (auth-stub, ports)
 ```
