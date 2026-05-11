@@ -231,6 +231,12 @@ export const applications = pgTable("applications", {
     table.userId,
     table.deadlineAt,
   ),
+  // Gauntlet first-applied-at lookup + admin ops "first application
+  // by user" lookup. (Migration 0031.)
+  index("idx_apps_user_applied_at").on(
+    table.userId,
+    table.appliedAt.asc().nullsLast(),
+  ),
 ]);
 
 // ===========================================================================

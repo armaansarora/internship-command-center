@@ -115,10 +115,14 @@ src/components/
 src/lib/agents/
   ceo/, cro/, cfo/, cio/, cmo/, cno/, coo/, cpo/   per-agent prompts + tools
   concierge/                                       Otis (lobby concierge)
-  create-agent-route.ts                            shared route factory
-                                                   (auth + rate limit + quota +
-                                                    streaming)
   shared/                                          cross-agent helpers
+
+src/lib/ai/agents/
+  shared-route-handler.ts                          shared agent route factory
+                                                   (auth + rate limit + quota +
+                                                    cached system prompt +
+                                                    streaming + memory write)
+  ceo-orchestrator.ts                              CEO dispatch graph
 
 src/lib/ai/
   model.ts                                         provider selection

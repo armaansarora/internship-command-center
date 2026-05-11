@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireEnv, env } from "@/lib/env";
@@ -178,24 +179,37 @@ export async function createBillingPortalSession(
 // ---------------------------------------------------------------------------
 // getSubscriptionTier
 // ---------------------------------------------------------------------------
-export async function getSubscriptionTier(userId: string): Promise<SubscriptionTier> {
-  const supabase = await createClient();
+/**
+ * Returns the subscription tier for a given user.
+ *
+ * Wrapped in React's `cache()` so multiple callers within a single request
+ * (e.g. `requireAgentAccess → canUseAgents → getSubscriptionTier` AND
+ * `getUserTier → getSubscriptionTier` in the same agent route) are deduped
+ * to a single Supabase round-trip. Saves 1-2 user_profiles SELECTs and the
+ * matching IPv6→IPv4 fan-out per agent invocation. Cache key is `userId`,
+ * which is per-user — no RLS cross-bleed risk because each request creates
+ * a fresh cookie-scoped Supabase client.
+ */
+export const getSubscriptionTier = cache(
+  async (userId: string): Promise<SubscriptionTier> => {
+    const supabase = await createClient();
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("subscription_tier")
-    .eq("id", userId)
-    .single();
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("subscription_tier")
+      .eq("id", userId)
+      .single();
 
-  const tier = profile?.subscription_tier as string | null | undefined;
+    const tier = profile?.subscription_tier as string | null | undefined;
 
-  if (
-    tier === "pro" ||
-    tier === "team" ||
-    tier === "seasonPass" ||
-    tier === "free"
-  ) {
-    return tier;
-  }
-  return "free";
-}
+    if (
+      tier === "pro" ||
+      tier === "team" ||
+      tier === "seasonPass" ||
+      tier === "free"
+    ) {
+      return tier;
+    }
+    return "free";
+  },
+);
