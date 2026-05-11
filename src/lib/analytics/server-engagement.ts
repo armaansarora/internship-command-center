@@ -34,14 +34,16 @@ export type EngagementEventType =
   | "floor_view"
   | "auth_gate_blocked"
   | "activation_step"
-  | "user_return";
+  | "user_return"
+  | "purchase";
 
 export type EngagementRouteKind =
   | "marketing"
   | "floor"
   | "gate"
   | "activation"
-  | "retention";
+  | "retention"
+  | "commerce";
 
 export type EngagementMetadataValue = string | number | boolean;
 export type EngagementMetadata = Record<string, EngagementMetadataValue>;
@@ -102,6 +104,15 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   // dashboard split "which floor pulled them back" without a separate query.
   "return_source",
   "floor_first",
+  // purchase keys (GTM Plausible PR — durable mirror of season_pass_purchased
+  // Plausible goal so conversion math survives content blockers).
+  // `goal` is the conversion-goal name (e.g. "season_pass_purchased").
+  // `sku` is the product identifier ("seasonPass" / "pro" / etc.) — NEVER
+  // the Stripe price id, which is treated as semi-secret. `currency` mirrors
+  // the Stripe currency code (USD).
+  "goal",
+  "sku",
+  "currency",
 ]);
 
 const MAX_PATHNAME_LENGTH = 256;
@@ -145,6 +156,7 @@ function routeKindFor(eventType: EngagementEventType): EngagementRouteKind {
   if (eventType === "auth_gate_blocked") return "gate";
   if (eventType === "activation_step") return "activation";
   if (eventType === "user_return") return "retention";
+  if (eventType === "purchase") return "commerce";
   return "marketing";
 }
 

@@ -12,6 +12,7 @@ import {
 } from "@/lib/stripe/webhook-audit";
 import { stripeWebhookDuplicateDecision } from "@/lib/stripe/webhook-duplicate";
 import { readRawBodyWithLimit } from "@/lib/http/request-body";
+import { recordServerEngagementEvent } from "@/lib/analytics/server-engagement";
 
 /**
  * Stripe webhook.
@@ -288,17 +289,21 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       if (!userId) return;
 
       // Branch on Stripe checkout `mode` so the one-time Season Pass SKU
-      // (`mode: "payment"`) durably stamps the entitlement.
+      // (`mode: "payment"`) durably stamps the entitlement AND mirrors the
+      // analytics goal server-side.
       //
       // Subscription checkouts (`mode: "subscription"`) resolve their price
       // via the subscription retrieve call below — that path is unchanged.
       //
       // For `mode: "payment"`, the session itself does not surface line
       // items; we call `checkout.sessions.listLineItems` to pull the
-      // purchased price id, map it to a tier, and persist exactly like
-      // the subscription path. Without this branch a Season Pass purchase
-      // never lands on `user_profiles.subscription_tier`, so the user
-      // pays $149 and never receives entitlements.
+      // purchased price id, map it to a tier, persist on `user_profiles`,
+      // AND write a durable engagement_events row mirroring the
+      // `season_pass_purchased` Plausible goal so the founder's conversion
+      // dashboard survives content blockers even when the client-side
+      // trackGoal call never fires. Without this branch a Season Pass
+      // purchase never lands on `subscription_tier` (the user pays $149
+      // and never receives entitlements).
       if (session.mode === "payment") {
         const lineItems = await getStripe().checkout.sessions.listLineItems(
           session.id,
@@ -314,6 +319,22 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
           tier,
           "season pass tier",
         );
+
+        // Server-side analytics mirror. Only fire when the session metadata
+        // confirms this was the Season Pass SKU — keeps the engagement
+        // events table free of noise from any future one-time payments.
+        if (session.metadata?.tier === "seasonPass") {
+          await recordServerEngagementEvent({
+            eventType: "purchase",
+            pathname: "/season-pass/purchased",
+            userId,
+            metadata: {
+              goal: "season_pass_purchased",
+              sku: "seasonPass",
+              currency: (session.currency ?? "usd").toLowerCase(),
+            },
+          });
+        }
         return;
       }
 

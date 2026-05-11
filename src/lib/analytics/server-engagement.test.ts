@@ -554,4 +554,83 @@ describe("recordServerEngagementEvent", () => {
     };
     expect(call.metadata).toEqual({ return_source: "tube" });
   });
+
+  // ------------------------------------------------------------------------
+  // purchase (GTM Plausible PR — season_pass_purchased server mirror)
+  // ------------------------------------------------------------------------
+
+  it("purchase writes with route_kind 'commerce'", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "purchase",
+      pathname: "/season-pass/purchased",
+      userId: "00000000-0000-0000-0000-000000000001",
+      metadata: {
+        goal: "season_pass_purchased",
+        sku: "seasonPass",
+        currency: "usd",
+      },
+    });
+
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event_type: "purchase",
+        route_kind: "commerce",
+        pathname: "/season-pass/purchased",
+      }),
+    );
+  });
+
+  it("purchase preserves goal/sku/currency metadata", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "purchase",
+      pathname: "/season-pass/purchased",
+      userId: "00000000-0000-0000-0000-000000000001",
+      metadata: {
+        goal: "season_pass_purchased",
+        sku: "seasonPass",
+        currency: "usd",
+      },
+    });
+
+    const call = insertMock.mock.calls[0][0] as {
+      metadata: Record<string, unknown>;
+    };
+    expect(call.metadata).toEqual({
+      goal: "season_pass_purchased",
+      sku: "seasonPass",
+      currency: "usd",
+    });
+  });
+
+  it("purchase still strips non-allowlisted keys (no PII leakage via commerce event)", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "purchase",
+      pathname: "/season-pass/purchased",
+      userId: "00000000-0000-0000-0000-000000000001",
+      metadata: {
+        goal: "season_pass_purchased",
+        sku: "seasonPass",
+        // not in allowlist — must be dropped
+        email: "user@example.com",
+        stripe_price_id: "price_1ABCxyz",
+      },
+    });
+
+    const call = insertMock.mock.calls[0][0] as {
+      metadata: Record<string, unknown>;
+    };
+    expect(call.metadata).toEqual({
+      goal: "season_pass_purchased",
+      sku: "seasonPass",
+    });
+  });
 });

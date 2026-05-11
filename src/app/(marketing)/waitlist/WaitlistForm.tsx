@@ -9,7 +9,7 @@ import {
   type JSX,
 } from "react";
 import { joinWaitlist } from "./actions";
-import { trackPlausibleEvent } from "@/lib/analytics/plausible";
+import { trackGoal, trackPlausibleEvent } from "@/lib/analytics/plausible";
 
 type Status =
   | { kind: "idle" }
@@ -82,6 +82,11 @@ export function WaitlistForm(): JSX.Element {
         trackPlausibleEvent("tower_waitlist_submit_succeeded", {
           source: refSource,
         });
+        // GTM funnel goal — separate from the granular tower_* event so the
+        // founder's conversion dashboard reads waitlist_submit as ONE entry
+        // rather than parsing a multi-state event. Fires after the server
+        // action acks, so a 4xx/5xx never registers as a conversion.
+        trackGoal("waitlist_submit", { source: refSource });
         form.reset();
       } else {
         setStatus({ kind: "error", message: result.error });

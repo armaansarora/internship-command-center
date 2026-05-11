@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Playfair_Display, JetBrains_Mono } from "next/font/google";
 import { GATE_CONFIG } from "@/lib/config/gate-config";
+import { PlausibleScript } from "@/lib/analytics/plausible.client";
 import "./globals.css";
 
 /* ─── Fonts ──────────────────────────────────────────────────────────
@@ -70,21 +70,11 @@ export default function RootLayout({
           href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap"
           rel="stylesheet"
         />
-        {/* Plausible — cookie-less, privacy-first analytics. Loads only when
-            NEXT_PUBLIC_PLAUSIBLE_DOMAIN is set. No-op at build time when
-            absent so dev/preview don't ping an analytics endpoint that
-            doesn't exist. */}
-        {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
-          <Script
-            defer
-            data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
-            src={
-              process.env.NEXT_PUBLIC_PLAUSIBLE_SRC ??
-              "https://plausible.io/js/script.js"
-            }
-            strategy="afterInteractive"
-          />
-        )}
+        {/* Plausible — cookie-less, privacy-first analytics. The component
+            renders <Script> only when `gateConfig.flags.plausibleEnabled()`
+            AND `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` are both truthy. Returns null
+            otherwise so SSR output contains no Plausible reference at all. */}
+        <PlausibleScript />
       </head>
       <body className="min-h-dvh font-body text-[var(--text-primary)] bg-[var(--tower-darkest)]">
         {children}

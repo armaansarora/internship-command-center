@@ -11,6 +11,7 @@ import {
   recordActivationStepAction,
   type IntakeLevel,
 } from "./actions";
+import { trackGoal } from "@/lib/analytics/plausible";
 
 interface ActivateClientProps {
   /**
@@ -847,6 +848,10 @@ export function ActivateClient({
       beat: "closing",
       outcome: "success",
     });
+    // GTM funnel goal — fires exactly when the user clears the closing beat
+    // (clicks "Enter the Tower" on the delivered phase). Server-side mirror
+    // already lands in engagement_events via recordActivationStepAction.
+    trackGoal("activate_complete", { surface: "activate" });
     router.push("/penthouse");
   }, [router]);
 

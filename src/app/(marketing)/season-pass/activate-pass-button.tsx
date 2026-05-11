@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type JSX } from "react";
+import { trackGoal } from "@/lib/analytics/plausible";
 
 /**
  * Activate-Pass button.
@@ -48,6 +49,11 @@ export function ActivatePassButton({
 
   const handleClick = () => {
     setError(null);
+    // GTM funnel goal — fires at the click, BEFORE the network round-trip.
+    // We deliberately track intent rather than success: a checkout that
+    // never lands on Stripe is still a strong revenue signal worth
+    // measuring against the eventual season_pass_purchased goal.
+    trackGoal("season_pass_checkout_start", { surface: "season-pass" });
     startTransition(async () => {
       try {
         const res = await fetch("/api/stripe/checkout", {
