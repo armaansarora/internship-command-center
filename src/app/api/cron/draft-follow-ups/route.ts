@@ -32,13 +32,13 @@ const OVERFETCH_MULTIPLIER = 2;
 const STALE_DAYS = 7;
 const TIME_BUDGET_MS = 250_000;
 
-const ACTIVE_STATUSES = [
+const ACTIVE_STATUSES: readonly string[] = [
   "applied",
   "screening",
   "interview_scheduled",
   "interviewing",
   "under_review",
-] as const;
+];
 
 type UserRow = Pick<Row<"user_profiles">, "id" | "timezone">;
 
@@ -141,7 +141,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
         .from("applications")
         .select("id, user_id, company_name, role, contact_id, last_activity_at")
         .eq("user_id", user.id)
-        .in("status", ACTIVE_STATUSES as unknown as string[])
+        .in("status", ACTIVE_STATUSES)
         .lt("last_activity_at", staleCutoff)
         .order("last_activity_at", { ascending: true })
         .limit(DRAFT_CAP_PER_NIGHT * OVERFETCH_MULTIPLIER);

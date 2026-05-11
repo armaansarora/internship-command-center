@@ -200,19 +200,21 @@ export function useTubeDeliveries(opts: UseTubeDeliveriesOpts): void {
       userId = uid;
 
       // Realtime channel — INSERT events on our notifications rows.
+      //
+      // The @supabase/realtime-js `on()` overload set is template-literal
+      // typed; supplying `"postgres_changes"` directly would force TS to
+      // resolve against the wrong overload. Cast once at the call site,
+      // not twice through `unknown`, to keep the surface honest.
       channel = sb
         .channel(`tube-deliveries:${uid}`)
         .on(
-          // The @supabase/realtime-js type for this event is loose
-          // (`'postgres_changes' | ...`), so we cast to keep TS honest
-          // while still allowing the literal string filter shape.
-          "postgres_changes" as unknown as never,
+          "postgres_changes" as never,
           {
             event: "INSERT",
             schema: "public",
             table: "notifications",
             filter: `user_id=eq.${uid}`,
-          } as unknown as never,
+          } as never,
           () => {
             // We don't trust the INSERT payload's deliver_after directly —
             // always go through the sweep so the eligibility check and the

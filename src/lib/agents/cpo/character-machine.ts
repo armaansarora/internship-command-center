@@ -1,5 +1,4 @@
 import { assign } from "xstate";
-import type { ActorRef, Snapshot } from "xstate";
 import {
   createCharacterMachine,
   type BaseCharacterContext,
@@ -56,20 +55,3 @@ export const characterMachine = createCharacterMachine<
     isBriefing: false,
   },
 });
-
-export type CharacterActorRef = ActorRef<
-  Snapshot<CharacterContext>,
-  CharacterEvent
->;
-
-export type CharacterSnapshot = Snapshot<CharacterContext> & {
-  value:
-    | "idle"
-    | "alert"
-    | "greeting"
-    | "ready"
-    | "thinking"
-    | "talking"
-    | "briefing"
-    | "returning";
-};

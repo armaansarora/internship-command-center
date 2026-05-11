@@ -12,7 +12,7 @@ import {
 // ---------------------------------------------------------------------------
 // Tool 1: checkSchedule
 // ---------------------------------------------------------------------------
-export function makeCheckScheduleTool(userId: string) {
+function makeCheckScheduleTool(userId: string) {
   return tool({
     description:
       "Get today's and upcoming calendar events and scheduled interviews. Always call this when the user asks about their schedule or what's on the calendar.",
@@ -48,7 +48,7 @@ export function makeCheckScheduleTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 2: checkFollowUps
 // ---------------------------------------------------------------------------
-export function makeCheckFollowUpsTool(userId: string) {
+function makeCheckFollowUpsTool(userId: string) {
   return tool({
     description:
       "Get all overdue follow-ups sorted by urgency (most overdue first). Active applications with no activity for 7+ days. Call this to identify who needs a follow-up email.",
@@ -83,7 +83,7 @@ export function makeCheckFollowUpsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: draftFollowUp
 // ---------------------------------------------------------------------------
-export function makeDraftFollowUpTool(userId: string) {
+function makeDraftFollowUpTool(userId: string) {
   return tool({
     description:
       "Generate a professional follow-up email draft for a specific application and insert it into the outreach queue for approval. Returns the draft content and queue ID.",
@@ -145,7 +145,7 @@ Best regards,
 // ---------------------------------------------------------------------------
 // Tool 4: checkEmails
 // ---------------------------------------------------------------------------
-export function makeCheckEmailsTool(userId: string) {
+function makeCheckEmailsTool(userId: string) {
   return tool({
     description:
       "Get recent parsed emails from the user's synced Gmail ledger with their classifications, urgency levels, and suggested actions. Always call this when the user asks about email, Gmail, recruiters, unread messages, or new inbox activity. If it returns zero emails, tell the user no synced inbox items are indexed yet and recommend Sync Gmail in Settings.",
@@ -182,7 +182,7 @@ export function makeCheckEmailsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 5: getOverview
 // ---------------------------------------------------------------------------
-export function makeGetOverviewTool(userId: string) {
+function makeGetOverviewTool(userId: string) {
   return tool({
     description:
       "Get the full daily briefing — overdue follow-up count, today's interviews, unread emails count, and pending outreach count. Call this first for a morning briefing or general status check.",

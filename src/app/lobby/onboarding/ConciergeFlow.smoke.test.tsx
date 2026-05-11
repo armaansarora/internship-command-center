@@ -19,20 +19,6 @@ vi.mock("./actions", () => ({
     ok: true,
     shouldPlayCinematic: false,
   }),
-  exitLobbyToPenthouse: vi.fn(),
-}));
-
-vi.mock("@/hooks/useConciergeChat", () => ({
-  useConciergeChat: () => ({
-    messages: [],
-    input: "",
-    setInput: vi.fn(),
-    submit: vi.fn(),
-    status: "ready",
-    isWorking: false,
-    clear: vi.fn(),
-    sendRaw: vi.fn(),
-  }),
 }));
 
 import { ConciergeFlow } from "./ConciergeFlow";

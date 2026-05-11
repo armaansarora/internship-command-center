@@ -484,9 +484,5 @@ export async function generateStateOfMonthPdf(
   data: StateOfMonthData,
 ): Promise<Buffer> {
   const tree = StateOfMonthPdf({ data });
-  const result = await renderToBuffer(tree);
-  // @react-pdf/renderer types renderToBuffer as Promise<NodeJS.ReadableStream>
-  // in some setups but in practice returns a Buffer at runtime. Cast through
-  // unknown to keep the surface honest.
-  return result as unknown as Buffer;
+  return renderToBuffer(tree);
 }

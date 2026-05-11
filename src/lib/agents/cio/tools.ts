@@ -49,7 +49,7 @@ function buildIntelSummary(fields: {
 // ---------------------------------------------------------------------------
 // Tool 1: researchCompany
 // ---------------------------------------------------------------------------
-export function makeResearchCompanyTool(userId: string) {
+function makeResearchCompanyTool(userId: string) {
   return tool({
     description:
       "Look up a company by name from the user's research database. Returns stored intel including financials, culture, recent news, and internship data. If no data exists, returns a message suggesting the user request fresh research.",
@@ -95,7 +95,7 @@ export function makeResearchCompanyTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 2: getCompanyList
 // ---------------------------------------------------------------------------
-export function makeGetCompanyListTool(userId: string) {
+function makeGetCompanyListTool(userId: string) {
   return tool({
     description:
       "List all companies the user has researched, with freshness indicators showing how current the intel is. Use this to give the user an overview of their research database.",
@@ -179,7 +179,7 @@ export function makeGetCompanyListTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: compareCompanies
 // ---------------------------------------------------------------------------
-export function makeCompareCompaniesTool(userId: string) {
+function makeCompareCompaniesTool(userId: string) {
   return tool({
     description:
       "Compare 2 or 3 companies side-by-side on key dimensions: size, industry, culture, recent news, and internship intel. Use this when the user wants to evaluate options or prepare for multiple interviews at once.",
@@ -260,7 +260,7 @@ export function makeCompareCompaniesTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 4: findSimilarCompanies
 // ---------------------------------------------------------------------------
-export function makeFindSimilarCompaniesTool(userId: string) {
+function makeFindSimilarCompaniesTool(userId: string) {
   return tool({
     description:
       "Given a company name, find similar companies in the user's research database. Matches on sector, industry, and size tier. Useful for identifying peer companies and expanding the target list.",
@@ -421,7 +421,7 @@ export function makeUpdateCompanyIntelTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 6: semanticCompanySearch
 // ---------------------------------------------------------------------------
-export function makeSemanticCompanySearchTool(userId: string) {
+function makeSemanticCompanySearchTool(userId: string) {
   return tool({
     description:
       "Search the company research database using semantic similarity (pgvector). Finds companies related to a natural language query — e.g. 'fintech companies focused on payments' or 'fast-growing startups in healthcare'. More powerful than text search for conceptual matching.",
@@ -472,7 +472,7 @@ export function makeSemanticCompanySearchTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 7: embedCompanyResearch
 // ---------------------------------------------------------------------------
-export function makeEmbedCompanyResearchTool(userId: string) {
+function makeEmbedCompanyResearchTool(userId: string) {
   return tool({
     description:
       "Generate or refresh the vector embedding for a company's research profile. Run this after updating a company's intel to enable semantic search. Requires AI_GATEWAY_API_KEY or OPENAI_API_KEY.",

@@ -51,11 +51,7 @@ interface Props {
  */
 function getSupportSnapshot(): boolean {
   if (typeof window === "undefined") return false;
-  const win = window as unknown as {
-    speechSynthesis?: SpeechSynthesis;
-    SpeechSynthesisUtterance?: typeof SpeechSynthesisUtterance;
-  };
-  return Boolean(win.speechSynthesis && win.SpeechSynthesisUtterance);
+  return Boolean(window.speechSynthesis && window.SpeechSynthesisUtterance);
 }
 
 function subscribeSupport(_cb: () => void): () => void {
@@ -84,19 +80,16 @@ export function CEOVoicePlayButton({ enabled, text }: Props): JSX.Element | null
   useEffect(() => {
     if (!enabled) return;
     if (typeof window === "undefined") return;
-    const win = window as unknown as {
-      speechSynthesis?: SpeechSynthesis;
-      SpeechSynthesisUtterance?: typeof SpeechSynthesisUtterance;
-    };
-    if (!win.speechSynthesis || !win.SpeechSynthesisUtterance) return;
+    if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
 
+    const synth = window.speechSynthesis;
     const updateVoice = (): void => {
-      voiceRef.current = pickCeoVoice(win.speechSynthesis!.getVoices());
+      voiceRef.current = pickCeoVoice(synth.getVoices());
     };
     updateVoice();
-    win.speechSynthesis.addEventListener?.("voiceschanged", updateVoice);
+    synth.addEventListener?.("voiceschanged", updateVoice);
     return () => {
-      win.speechSynthesis?.removeEventListener?.("voiceschanged", updateVoice);
+      synth.removeEventListener?.("voiceschanged", updateVoice);
     };
   }, [enabled]);
 
@@ -104,15 +97,13 @@ export function CEOVoicePlayButton({ enabled, text }: Props): JSX.Element | null
   useEffect(() => {
     return () => {
       if (typeof window === "undefined") return;
-      const win = window as unknown as { speechSynthesis?: SpeechSynthesis };
-      win.speechSynthesis?.cancel?.();
+      window.speechSynthesis?.cancel?.();
     };
   }, []);
 
   const toggle = useCallback((): void => {
     if (typeof window === "undefined") return;
-    const win = window as unknown as { speechSynthesis?: SpeechSynthesis };
-    const synth = win.speechSynthesis;
+    const synth = window.speechSynthesis;
     if (!synth) return;
 
     if (playing) {

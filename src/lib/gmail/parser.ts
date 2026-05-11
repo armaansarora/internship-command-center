@@ -274,8 +274,10 @@ interface ApplicationRecord {
   company_name: string | null;
   // `applications` does not have a `company_domain` column. The domain lives
   // on the related `companies` row, surfaced here through the PostgREST
-  // nested-select alias (`companies(domain)`).
-  companies?: { domain: string | null } | null;
+  // nested-select alias (`companies(domain)`). Supabase's generated types
+  // model the embed as an array even though the FK is many-to-one — at
+  // runtime there is at most one row, but the type system insists on `[]`.
+  companies?: Array<{ domain: string | null }> | null;
 }
 
 export async function matchEmailToApplication(
@@ -299,11 +301,16 @@ export async function matchEmailToApplication(
   const fromDomain = extractDomainFromEmail(email.from);
   if (!fromDomain) return undefined;
 
-  const records = applications as unknown as ApplicationRecord[];
+  // The `companies(domain)` nested-select returns the joined row as an
+  // object — supabase's generated types model embeds as `T[] | T | null`
+  // depending on the FK direction, so we narrow to the local projection.
+  const records = applications as ApplicationRecord[];
 
-  // Try matching by linked company domain first
+  // Try matching by linked company domain first. The `companies(domain)`
+  // embed lands as an array of at most one row (many-to-one FK), so we
+  // pick the head before reading the domain.
   for (const app of records) {
-    const appDomain = app.companies?.domain;
+    const appDomain = app.companies?.[0]?.domain;
     if (appDomain) {
       const normalized = appDomain.toLowerCase().replace(/^www\./, "");
       if (fromDomain.includes(normalized) || normalized.includes(fromDomain)) {

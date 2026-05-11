@@ -84,5 +84,3 @@ export async function CouncilTableSection({
     </section>
   );
 }
-
-export default CouncilTableSection;

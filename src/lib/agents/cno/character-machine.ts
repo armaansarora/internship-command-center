@@ -1,5 +1,4 @@
 import { assign } from "xstate";
-import type { ActorRef, Snapshot } from "xstate";
 import {
   createCharacterMachine,
   type BaseCharacterContext,
@@ -41,19 +40,3 @@ export const cnoCharacterMachine = createCharacterMachine<
     },
   },
 });
-
-export type CNOCharacterActorRef = ActorRef<
-  Snapshot<CNOCharacterContext>,
-  CNOCharacterEvent
->;
-
-export type CNOCharacterSnapshot = Snapshot<CNOCharacterContext> & {
-  value:
-    | "idle"
-    | "alert"
-    | "greeting"
-    | "ready"
-    | "thinking"
-    | "talking"
-    | "returning";
-};

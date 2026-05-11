@@ -63,8 +63,9 @@ const PIPELINE_COLORS: Record<string, string> = {
  *
  * Uses the server-side Supabase client (RLS-protected by auth.uid()).
  * Returns safe defaults if any query fails — the dashboard should always render.
+ * Internal helper for `fetchPenthouseScene` — not exported.
  */
-export async function fetchPenthouseData(userId: string): Promise<{
+async function fetchPenthouseData(userId: string): Promise<{
   stats: PenthouseStats;
   pipeline: PipelineStageData[];
   activity: ActivityItemData[];

@@ -49,13 +49,19 @@ const GLOW = "rgba(201, 168, 76, 0.28)";
  */
 let ctx: AudioContext | null = null;
 
+// `webkitAudioContext` is the legacy Safari/iOS vendor prefix — not in
+// lib.dom.d.ts. Declare the augmentation locally rather than carrying the
+// cast at every read site.
+interface WindowWithWebkitAudio {
+  webkitAudioContext?: typeof AudioContext;
+}
+
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   if (ctx) return ctx;
   const Ctor =
     window.AudioContext ??
-    (window as unknown as { webkitAudioContext?: typeof AudioContext })
-      .webkitAudioContext;
+    (window as Window & WindowWithWebkitAudio).webkitAudioContext;
   if (!Ctor) return null;
   try {
     ctx = new Ctor();

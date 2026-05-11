@@ -78,8 +78,12 @@ export async function detectConflictsForUser(
       .lte("start_at", windowEndIso),
   ]);
 
-  const interviews = (ivRes.data ?? []) as unknown as InterviewRow[];
-  const events = (ceRes.data ?? []) as unknown as CalendarRow[];
+  // The `companies(name)` join surfaces `company_name`, which the supabase
+  // type generator can't infer through joined selects — cast to the local
+  // projection type. `data` is already typed `Row<"interviews">[] | null`,
+  // so a direct cast avoids the `as unknown` widening step.
+  const interviews = (ivRes.data ?? []) as InterviewRow[];
+  const events = (ceRes.data ?? []) as CalendarRow[];
   const mapped: ConflictEvent[] = [
     ...interviews.map(interviewToEvent).filter((e): e is ConflictEvent => e !== null),
     ...events.map(calendarToEvent).filter((e): e is ConflictEvent => e !== null),
