@@ -7,12 +7,20 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 ## Top-level
 
 ```
-src/         the app
-scripts/     maintenance + seed + dev scripts (7 files)
-docs/        design specs + testing patterns + runbook (6 files)
-sentry/      versioned Sentry alert rules (alerts.yaml)
-tests/       Playwright E2E suite + JSON fixtures
-public/      static assets (4 lobby bgs + favicon)
+src/                            the app
+scripts/                        maintenance + seed + dev scripts (7 files)
+docs/                           design specs + testing + runbook (6 files)
+sentry/                         versioned Sentry alert rules (alerts.yaml)
+tests/                          Playwright E2E + off-platform canary
+  tests/e2e/                    local stub-server Playwright suite
+  tests/canary/                 off-platform synthetic canary against real prod
+public/                         static assets (4 lobby bgs + favicon)
+.github/workflows/              CI + scheduled jobs
+  config-guard.yml              vitest + tsc on cadence-config PRs
+  hardening-e2e.yml             Playwright HARSH suite on src/ PRs + weekly
+  canary.yml                    off-platform synthetic canary (every 15 min)
+playwright.config.ts            default config — local e2e (stub server)
+playwright.canary.config.ts     canary-only — hits real prod, no stub
 ```
 
 ---
@@ -73,14 +81,18 @@ src/app/api/
                                                    (all use
                                                     createAgentRouteHandler)
   stripe/checkout, stripe/portal, stripe/webhook
-  cron/                                            15 scheduled jobs
-                                                   (all wrapped withCronHealth);
+  cron/                                            15 scheduled jobs +
+                                                   1 public liveness probe.
+                                                   All wrapped withCronHealth.
                                                    owner-watchdog runs every 30m
-                                                   for incident_alerts digest;
-                                                   outreach-sender enforces
-                                                   3-layer blast brake: pending
+                                                   for incident_alerts digest.
+                                                   outreach-sender enforces a
+                                                   3-layer blast brake (pending
                                                    freeze, per-tick ceiling,
-                                                   per-user daily cap
+                                                   per-user daily cap).
+                                                   canary-heartbeat is the
+                                                   public unauth probe hit by
+                                                   GitHub Actions every 15m.
   auth/callback, auth/signout
   account/delete, account/export                   GDPR
   admin/sentry-probe                               owner-only debug
@@ -292,6 +304,8 @@ docs/RUNBOOK.md              on-call runbook — one paragraph per Sentry
                              alert (mirrors sentry/alerts.yaml ids)
 docs/TESTING.md              vitest + Playwright patterns (read before
                              adding a new test suite)
+docs/RUNBOOK.md              operations playbook (synthetic canary,
+                             triage steps, alert paths)
 ```
 
 ---
@@ -350,6 +364,7 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 | Get current tier | `import { getUserTier } from "@/lib/stripe/entitlements"` |
 | Re-seed owner test data | `bash scripts/seed-owner-data.ts` (after `vercel env pull --yes .env.local`) |
 | Cron health table | `cron_runs` (owner-only RLS) |
+| Synthetic canary (off-platform) | `.github/workflows/canary.yml` + `tests/canary/production.spec.ts` (heartbeat at `/api/cron/canary-heartbeat`; runbook: `docs/RUNBOOK.md`) |
 | Quota table | `ai_call_quotas` (atomic `consume_ai_call_quota` RPC) |
 | Waitlist signups | `waitlist_signups` (RLS deny-all, admin-only) |
 

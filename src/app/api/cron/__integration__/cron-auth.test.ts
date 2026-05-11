@@ -38,6 +38,12 @@ type LoadResult =
 // This audit MUST list every directory under src/app/api/cron/ that ships a
 // route.ts handler. Adding a new cron route without listing it here means
 // the cron-auth gate is unverified.
+//
+// EXEMPTIONS (deliberately unauthenticated — confirmed by the dedicated
+// public-probe test at the bottom of this file):
+//   • canary-heartbeat — off-platform synthetic canary's liveness probe.
+//     Public by design; returns `{ ok: true, t, build }`. No auth gate.
+//     See src/app/api/cron/canary-heartbeat/route.ts.
 const ROUTES: Array<{ name: string; load: () => Promise<RouteModule> }> = [
   {
     name: "briefing",
@@ -281,4 +287,38 @@ describe("cron auth — every cron route gates on verifyCronRequest", () => {
       });
     });
   }
+
+  // ── Public-probe exemption binding ─────────────────────────────────
+  // The canary-heartbeat route is intentionally unauthenticated. This
+  // test makes that contract explicit: if someone "fixes" the exemption
+  // by adding verifyCronRequest to the route, this assertion goes red
+  // before the canary in production starts failing every 15 minutes.
+  describe("public-probe exemption: canary-heartbeat", () => {
+    it("returns 200 without any cron header (deliberately unauthenticated)", async () => {
+      const loaded = await tryLoad(
+        () =>
+          import("@/app/api/cron/canary-heartbeat/route") as Promise<RouteModule>,
+      );
+      if (!loaded.ok) {
+        throw new Error(
+          `canary-heartbeat failed to load: ${loaded.reason}`,
+        );
+      }
+      const entry = getHandler(loaded.mod);
+      if (!entry) {
+        throw new Error("canary-heartbeat exports neither GET nor POST");
+      }
+      const req = new NextRequest(
+        "http://localhost/api/cron/canary-heartbeat",
+        { method: entry.method },
+      );
+      const res = await invoke(entry.handler, req);
+      if (res === "threw") {
+        throw new Error(
+          "canary-heartbeat threw on a bare GET — probe is no longer reachable",
+        );
+      }
+      expect(res.status).toBe(200);
+    });
+  });
 });
