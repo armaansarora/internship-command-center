@@ -13,12 +13,12 @@ test.describe("campus pilot inquiry — public submission shape", () => {
     const res = await page.goto("/campus", { waitUntil: "domcontentloaded" });
     expect(res?.status() ?? 0).toBeLessThan(400);
     await expect(page.locator('[data-testid="campus-inquiry-form"]')).toBeVisible();
-    await expect(page.getByLabel(/school name/i)).toBeVisible();
-    await expect(page.getByLabel(/your name/i)).toBeVisible();
-    await expect(page.getByLabel(/role/i)).toBeVisible();
-    await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByLabel(/student count|size/i)).toBeVisible();
-    await expect(page.getByLabel(/intake season/i)).toBeVisible();
+    await expect(page.getByLabel("School / institution")).toBeVisible();
+    await expect(page.getByLabel("Your name")).toBeVisible();
+    await expect(page.getByLabel("Role at school")).toBeVisible();
+    await expect(page.getByLabel("Work email")).toBeVisible();
+    await expect(page.getByLabel("Approximate cohort size")).toBeVisible();
+    await expect(page.getByLabel("Target intake season")).toBeVisible();
   });
 
   test("/campus is indexable (no robots noindex/nofollow)", async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe("campus pilot inquiry — public submission shape", () => {
 
   test("submit button is keyboard-reachable on /campus", async ({ page }) => {
     await page.goto("/campus", { waitUntil: "domcontentloaded" });
-    const submit = page.getByRole("button", { name: /submit|send|inquiry/i });
+    const submit = page.getByRole("button", { name: /request a pilot proposal/i });
     await expect(submit).toBeVisible();
     const tabIndex = await submit.getAttribute("tabindex");
     if (tabIndex !== null) {
