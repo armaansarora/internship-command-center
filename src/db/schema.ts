@@ -124,6 +124,13 @@ export const userProfiles = pgTable("user_profiles", {
   // against the TTL window (invalidatesAt on each row) to decide whether
   // a rescan is due. Null means no scan has ever run for this account.
   matchIndexLastRescanAt: timestamp("match_index_last_rescan_at", { withTimezone: true }),
+  // Optional school/cohort identifier for the warm-intro network density
+  // signal (R13 — Differentiate council). NULL means the user has not
+  // provided a school (default — opt-in). Read by `getCohortDensity` to
+  // surface "N active members in your school cohort" counts. NEVER
+  // surfaced as identifying data — the query returns only aggregate
+  // counts excluding the calling user.
+  schoolName: text("school_name"),
   ...timestamps,
 }, () => [
   pgPolicy("user_profiles_self_access", {
