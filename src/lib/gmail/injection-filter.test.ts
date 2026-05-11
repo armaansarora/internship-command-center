@@ -112,9 +112,13 @@ describe("recordInjectionAttempt", () => {
     insertSpy.mockReset();
   });
 
-  it("writes a prompt_injection_detected audit row with truncated snippet", async () => {
+  it("writes a prompt_injection_detected audit row with redacted PII", async () => {
     insertSpy.mockResolvedValue({ error: null });
-    const longBody = "A".repeat(500);
+    // Body containing an embedded email + URL + digit run — every PII
+    // class the redactor knows about — plus padding to validate truncation.
+    const longBody =
+      "Reach victim@example.org via https://phish.example/secret?id=1234567890 " +
+      "then ".repeat(80);
     await recordInjectionAttempt({
       userId: "user-abc",
       pattern: "override_instructions",
@@ -131,12 +135,24 @@ describe("recordInjectionAttempt", () => {
       }),
     );
     const call = insertSpy.mock.calls[0][0] as {
-      metadata: { pattern: string; from: string; subject: string; snippet: string };
+      metadata: {
+        pattern: string;
+        from_hash: string;
+        subject: string;
+        snippet: string;
+      };
     };
     expect(call.metadata.pattern).toBe("override_instructions");
-    expect(call.metadata.from).toBe("attacker@evil.example");
+    // PII discipline — the raw sender email NEVER lands in metadata.
+    expect(call.metadata).not.toHaveProperty("from");
+    expect(call.metadata.from_hash).toMatch(/^[0-9a-f]{16}$/);
     expect(call.metadata.subject).toBe("subj");
-    expect(call.metadata.snippet).toHaveLength(200);
+    expect(call.metadata.snippet.length).toBeLessThanOrEqual(200);
+    expect(call.metadata.snippet).not.toContain("victim@example.org");
+    expect(call.metadata.snippet).not.toContain("phish.example");
+    expect(call.metadata.snippet).not.toContain("1234567890");
+    expect(call.metadata.snippet).toContain("[email]");
+    expect(call.metadata.snippet).toContain("[url]");
   });
 
   it("never throws when the audit insert itself errors", async () => {

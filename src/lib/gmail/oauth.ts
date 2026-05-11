@@ -136,9 +136,21 @@ export function getGmailAuthUrl(userId: string, next?: string): {
     "GMAIL_REDIRECT_URI",
   ] as const);
 
+  // Minimum-scope OAuth grants. Each scope is justified by an existing
+  // call site; do NOT add a broader scope (e.g. gmail.modify, full
+  // `calendar`) without a matching call site AND updating the
+  // r12-oauth-scope-minimum proof test allowlist.
+  //
+  // - gmail.readonly    → src/lib/gmail/sync.ts only reads
+  //                       users.messages.list / messages.get.
+  // - calendar.events   → src/lib/calendar/sync.ts reads + inserts
+  //                       events on the primary calendar. `events`
+  //                       already covers the read paths we need, so
+  //                       we do NOT also request `calendar.readonly`
+  //                       (which would grant access to ALL calendar
+  //                       metadata rather than just events).
   const scopes = [
     "https://www.googleapis.com/auth/gmail.readonly",
-    "https://www.googleapis.com/auth/calendar.readonly",
     "https://www.googleapis.com/auth/calendar.events",
   ];
 
