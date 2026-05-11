@@ -25,6 +25,7 @@ import {
 } from "@/lib/auth/supabase-auth-errors";
 import { isEmailAllowedForBeta } from "@/lib/auth/beta-gate";
 import { needsLobbyOnboardingAfterAuth } from "@/lib/auth/post-auth-profile";
+import { logSecurityEvent, requestMetadata } from "@/lib/audit/log";
 import { log } from "@/lib/logger";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -197,6 +198,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   log.info("gmail.oauth.connected", { userId: sessionUser.id });
+  // Consent-lifecycle audit (R12): emit the `oauth_connected` proof row
+  // the Trust Console renders so the user can see every Gmail/Calendar
+  // grant on their account. Fire-and-forget — `logSecurityEvent` never
+  // throws and never blocks the redirect.
+  void logSecurityEvent({
+    userId: sessionUser.id,
+    eventType: "oauth_connected",
+    resourceType: "google_oauth",
+    metadata: {
+      scopes: ["gmail", "calendar"],
+      source: "gmail_callback",
+    },
+    ...requestMetadata(request),
+  });
   return clearCookie(
     NextResponse.redirect(
       connectionReturnUrl(origin, returnPath, { gmail: "connected" }),

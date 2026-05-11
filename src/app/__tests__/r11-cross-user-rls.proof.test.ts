@@ -87,6 +87,16 @@ const ALLOWLIST = new Set<string>([
   // every OTHER user's cache.  The set of keys passed to IN(...) is
   // user-scoped upstream; that is the privacy guarantee.
   "src/app/api/networking/revoke/route.ts",
+  // Trust Console server action (PR4) — mirrors the revoke cascade
+  // above. The cascade DELETE intentionally omits `user_id` from the
+  // WHERE clause because its purpose is to remove the revoking user's
+  // anon-keys from every OTHER user's cache. Anon-keys are derived
+  // upstream via `.from("contacts").select("id").eq("user_id", user.id)`,
+  // which is the user-scoping guarantee. Manually verified.
+  "src/app/(authenticated)/settings/privacy/actions.ts",
+  // env.ts — comment block on `MATCH_ANON_SECRET` documents the table
+  // dependency for the warm-intro audit trail. Reference-only.
+  "src/lib/env.ts",
 ]);
 
 describe("R11 P1 — cross-user RLS scoping", () => {

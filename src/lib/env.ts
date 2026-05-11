@@ -53,6 +53,14 @@ const EnvSchema = z.object({
   // Signs CSRF state for OAuth flows. 32+ bytes base64 or hex.
   OAUTH_STATE_SECRET: z.string().min(32).optional(),
 
+  // HMAC secret for the warm-intro `counterparty_anon_key` in
+  // match_candidate_index / match_events. NEVER share with a third
+  // party — leaking it lets an attacker correlate cross-user anon keys
+  // back to the contacts that produced them. Fail-closed: the helper
+  // in src/lib/networking/match-anon.ts throws when this is unset so
+  // raw contact IDs cannot leak via the match cache.
+  MATCH_ANON_SECRET: z.string().min(32).optional(),
+
   // ── AI ───────────────────────────────────────────────────────────────────
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   AI_GATEWAY_API_KEY: z.string().min(1).optional(),

@@ -3,6 +3,7 @@ import { verifyCronRequest } from "@/lib/auth/cron";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { sendOutreachEmail } from "@/lib/email/outreach";
 import { logSecurityEvent } from "@/lib/audit/log";
+import { hashForAudit } from "@/lib/audit/pii-redact";
 import { log } from "@/lib/logger";
 import { withCronHealth } from "@/lib/cron/health";
 import type { Row } from "@/db/database.types";
@@ -165,13 +166,17 @@ async function handle(req: NextRequest): Promise<NextResponse> {
         });
       }
 
+      // PII discipline (R12): never persist the raw recipient address into
+      // `audit_logs.metadata`. The Resend `messageId` is the actionable
+      // forensic key; a stable hash of the recipient lets support correlate
+      // multiple sends to the same target without retaining the raw email.
       void logSecurityEvent({
         userId: row.user_id,
         eventType: "agent_side_effect_email_sent",
         resourceType: "outreach_queue",
         resourceId: row.id,
         metadata: {
-          to,
+          to_hash: hashForAudit(to),
           outreachType: row.type,
           applicationId: row.application_id,
           messageId,
