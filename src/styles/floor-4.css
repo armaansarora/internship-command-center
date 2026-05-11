@@ -23,7 +23,9 @@
 
   --sr-text-primary:      #FDF3E8;
   --sr-text-secondary:    #C4925A;
-  --sr-text-muted:        #7A5B35;
+  /* Muted text bumped from #7A5B35 → #A07B47 to clear WCAG AA (4.5:1)
+     against the dark amber panel backgrounds. The original was ~3.4:1. */
+  --sr-text-muted:        #A07B47;
   --sr-text-data:         #F0A050;
 
   /* ── Animation timing tokens ── */

@@ -69,7 +69,7 @@ export function DebriefBinderShelf({ binders }: Props): JSX.Element {
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: 10,
-              color: "#7a5a3c",
+              color: "#A07B47",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
             }}

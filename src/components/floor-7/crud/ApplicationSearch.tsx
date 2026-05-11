@@ -10,7 +10,7 @@ interface ApplicationSearchProps {
 }
 
 const STATUS_FILTERS = [
-  { value: "discovered", label: "RECON", color: "#4A7A9B" },
+  { value: "discovered", label: "RECON", color: "#7197B5" },
   { value: "applied", label: "OPS SUBMITTED", color: "#1E90FF" },
   { value: "screening", label: "FIRST CONTACT", color: "#00D4FF" },
   { value: "interview_scheduled", label: "INTERVIEW", color: "#F59E0B" },
@@ -19,7 +19,7 @@ const STATUS_FILTERS = [
   { value: "offer", label: "MISSION SUCCESS", color: "#00FF87" },
   { value: "accepted", label: "ACCEPTED", color: "#00FF87" },
   { value: "rejected", label: "REJECTED", color: "#DC3C3C" },
-  { value: "withdrawn", label: "WITHDRAWN", color: "#4A7A9B" },
+  { value: "withdrawn", label: "WITHDRAWN", color: "#7197B5" },
 ] as const;
 
 export function ApplicationSearch({
@@ -108,7 +108,7 @@ export function ApplicationSearch({
               left: "10px",
               top: "50%",
               transform: "translateY(-50%)",
-              color: "#4A7A9B",
+              color: "#7197B5",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -179,7 +179,7 @@ export function ApplicationSearch({
             style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: "9px",
-              color: "#4A7A9B",
+              color: "#7197B5",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
             }}
@@ -200,7 +200,7 @@ export function ApplicationSearch({
             style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: "9px",
-              color: "#4A7A9B",
+              color: "#7197B5",
               letterSpacing: "0.04em",
             }}
           >
@@ -282,7 +282,7 @@ export function ApplicationSearch({
                 fontSize: "9px",
                 fontWeight: isActive ? 700 : 400,
                 letterSpacing: "0.08em",
-                color: isActive ? filter.color : "#4A7A9B",
+                color: isActive ? filter.color : "#7197B5",
                 cursor: "pointer",
                 textTransform: "uppercase",
                 transition:
@@ -300,7 +300,7 @@ export function ApplicationSearch({
                 if (!isActive) {
                   const el = e.currentTarget as HTMLButtonElement;
                   el.style.borderColor = "rgba(30, 58, 95, 0.6)";
-                  el.style.color = "#4A7A9B";
+                  el.style.color = "#7197B5";
                 }
               }}
               onFocus={(e) => {

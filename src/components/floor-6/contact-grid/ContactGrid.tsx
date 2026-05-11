@@ -28,7 +28,7 @@ function SectionHeader({
         style={{
           fontSize: "10px",
           fontFamily: "IBM Plex Mono, monospace",
-          color: "#7A5B35",
+          color: "#A07B47",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}
@@ -81,7 +81,7 @@ function EmptyState(): JSX.Element {
         style={{
           fontFamily: "IBM Plex Mono, monospace",
           fontSize: "11px",
-          color: "#7A5B35",
+          color: "#A07B47",
           letterSpacing: "0.1em",
           textTransform: "uppercase",
         }}

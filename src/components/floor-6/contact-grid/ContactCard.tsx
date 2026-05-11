@@ -128,7 +128,7 @@ export function ContactCard({ contact, onEdit }: ContactCardProps): JSX.Element 
           style={{
             fontSize: "11px",
             fontFamily: "IBM Plex Mono, monospace",
-            color: "#7A5B35",
+            color: "#A07B47",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -168,7 +168,7 @@ export function ContactCard({ contact, onEdit }: ContactCardProps): JSX.Element 
           style={{
             fontSize: "10px",
             fontFamily: "IBM Plex Mono, monospace",
-            color: "#7A5B35",
+            color: "#A07B47",
             backgroundColor: "transparent",
             border: "none",
             cursor: "pointer",
@@ -180,7 +180,7 @@ export function ContactCard({ contact, onEdit }: ContactCardProps): JSX.Element 
             (e.currentTarget as HTMLButtonElement).style.color = "#C9A84C";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = "#7A5B35";
+            (e.currentTarget as HTMLButtonElement).style.color = "#A07B47";
           }}
         >
           EDIT

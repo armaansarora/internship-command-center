@@ -513,7 +513,7 @@ export function COOCharacter({
           aria-hidden="true"
           className="mt-1 text-xs font-mono tracking-wide uppercase"
           style={{
-            color: currentState === "idle" ? "#7A5B35" : "#DC7C28",
+            color: currentState === "idle" ? "#A07B47" : "#DC7C28",
             fontFamily: "IBM Plex Mono, monospace",
           }}
         >

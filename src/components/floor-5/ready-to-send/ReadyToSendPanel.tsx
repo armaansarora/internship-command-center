@@ -294,9 +294,9 @@ export function ReadyToSendPanel({
           <span
             style={{
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "10px",
+              fontSize: "11px",
               letterSpacing: "0.1em",
-              color: "#5A3E20",
+              color: "#A07B47",
             }}
           >
             {selectedTone
@@ -318,9 +318,9 @@ export function ReadyToSendPanel({
             fontSize: "11px",
             fontWeight: 700,
             letterSpacing: "0.14em",
-            color: selectedId ? "#0A0A12" : "#5A3E20",
+            color: selectedId ? "#0A0A12" : "#A07B47",
             backgroundColor: selectedId ? "#C9A84C" : "transparent",
-            border: `1px solid ${selectedId ? "#C9A84C" : "#3A2510"}`,
+            border: `1px solid ${selectedId ? "#C9A84C" : "#4A2F1E"}`,
             borderRadius: "2px",
             cursor: selectedId && !approving && !approved ? "pointer" : "not-allowed",
             opacity: approving ? 0.6 : 1,
@@ -356,9 +356,9 @@ export function ReadyToSendPanel({
         style={{
           marginTop: "14px",
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: "9px",
+          fontSize: "10px",
           letterSpacing: "0.1em",
-          color: "#3A2510",
+          color: "#A07B47",
           textAlign: "right",
         }}
       >

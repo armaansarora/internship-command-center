@@ -15,7 +15,7 @@ const DEFAULT_OPTIONS: StampOption[] = [
   { status: "interview_scheduled", label: "INTERVIEW", color: "#F59E0B" },
   { status: "offer", label: "OFFER", color: "#00FF87" },
   { status: "rejected", label: "REJECTED", color: "#DC3C3C" },
-  { status: "withdrawn", label: "ARCHIVED", color: "#4A7A9B" },
+  { status: "withdrawn", label: "ARCHIVED", color: "#7197B5" },
 ];
 
 interface StampBarProps {

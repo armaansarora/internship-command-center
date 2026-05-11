@@ -333,7 +333,7 @@ export function CROCharacter({
         <span
           aria-hidden="true"
           className="mt-2 text-xs font-mono tracking-wide uppercase"
-          style={{ color: currentState === "idle" ? "#4A7A9B" : "#1E90FF" }}
+          style={{ color: currentState === "idle" ? "#7197B5" : "#1E90FF" }}
         >
           {currentState === "idle" ? "CRO" : "● CRO"}
         </span>

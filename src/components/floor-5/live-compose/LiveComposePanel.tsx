@@ -254,9 +254,9 @@ export function LiveComposePanel({
         style={{
           marginTop: "14px",
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: "9px",
+          fontSize: "10px",
           letterSpacing: "0.1em",
-          color: "#3A2510",
+          color: "#A07B47",
           textAlign: "right",
         }}
       >

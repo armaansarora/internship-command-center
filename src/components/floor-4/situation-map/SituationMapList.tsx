@@ -42,7 +42,7 @@ export function SituationMapList({ shape, companyNameById }: Props): JSX.Element
           fontSize: 12,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "#7A5B35",
+          color: "#A07B47",
         }}
       >
         The Situation Room is quiet.
@@ -133,7 +133,7 @@ function Column({
               padding: "8px 12px",
               fontFamily: "IBM Plex Mono, monospace",
               fontSize: 11,
-              color: "#7A5B35",
+              color: "#A07B47",
             }}
           >
             —
@@ -153,7 +153,7 @@ function Row({
   kind: "active" | "draft" | "completed";
   onClick: (e: React.MouseEvent<HTMLElement>) => void;
 }): JSX.Element {
-  const accent = kind === "active" ? "#F0A050" : kind === "completed" ? "#6FB26F" : "#7A5B35";
+  const accent = kind === "active" ? "#F0A050" : kind === "completed" ? "#6FB26F" : "#A07B47";
   const dotGlow = kind === "active" ? "glow" : "";
   return (
     <li

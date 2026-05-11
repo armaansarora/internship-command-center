@@ -50,17 +50,17 @@ function getClassificationStamp(app: Application): ClassificationStamp {
 function getStampColor(stamp: ClassificationStamp): string {
   switch (stamp) {
     case "MISSION SUCCESS": return "#00FF87";
-    case "ARCHIVED": return "#4A7A9B";
+    case "ARCHIVED": return "#7197B5";
     case "ACTIVE OPERATION": return "#F59E0B";
     case "FOLLOW-UP REQUIRED": return "#F59E0B";
     case "PRIORITY TARGET": return "#9B59B6";
-    default: return "#4A7A9B";
+    default: return "#7197B5";
   }
 }
 
 function getStatusColor(status: string): string {
   switch (status) {
-    case "discovered": return "#4A7A9B";
+    case "discovered": return "#7197B5";
     case "applied": return "#1E90FF";
     case "screening": return "#00D4FF";
     case "interview_scheduled":
@@ -69,8 +69,8 @@ function getStatusColor(status: string): string {
     case "offer": return "#00FF87";
     case "accepted": return "#00FF87";
     case "rejected": return "#DC3C3C";
-    case "withdrawn": return "#4A7A9B";
-    default: return "#4A7A9B";
+    case "withdrawn": return "#7197B5";
+    default: return "#7197B5";
   }
 }
 
@@ -428,7 +428,7 @@ export function ApplicationCard({
             style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: "9px",
-              color: "#4A7A9B",
+              color: "#7197B5",
               letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}
@@ -457,7 +457,7 @@ export function ApplicationCard({
                 style={{
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontSize: "9px",
-                  color: "#4A7A9B",
+                  color: "#7197B5",
                   letterSpacing: "0.06em",
                   textTransform: "uppercase",
                 }}

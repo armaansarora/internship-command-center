@@ -86,7 +86,7 @@ function OverdueCounter({ count }: { count: number }): JSX.Element {
             fontSize: "32px",
             fontFamily: "IBM Plex Mono, monospace",
             fontWeight: 700,
-            color: hasOverdue ? "#E84040" : "#7A5B35",
+            color: hasOverdue ? "#E84040" : "#A07B47",
             transform: "rotate(-0.5deg)",
             display: "inline-block",
             lineHeight: 1,
@@ -100,7 +100,7 @@ function OverdueCounter({ count }: { count: number }): JSX.Element {
           style={{
             fontSize: "9px",
             fontFamily: "IBM Plex Mono, monospace",
-            color: hasOverdue ? "#E84040" : "#7A5B35",
+            color: hasOverdue ? "#E84040" : "#A07B47",
             textTransform: "uppercase",
             letterSpacing: "0.06em",
           }}
@@ -129,7 +129,7 @@ function TodayTimeline({ events }: { events: ScheduleEvent[] }): JSX.Element {
         style={{
           fontSize: "11px",
           fontFamily: "IBM Plex Mono, monospace",
-          color: "#7A5B35",
+          color: "#A07B47",
           fontStyle: "italic",
         }}
       >
@@ -162,7 +162,7 @@ function TodayTimeline({ events }: { events: ScheduleEvent[] }): JSX.Element {
               backgroundColor: evt.isNow
                 ? "#FF6B35"
                 : evt.isPast
-                ? "#7A5B35"
+                ? "#A07B47"
                 : "#DC7C28",
               boxShadow: evt.isNow
                 ? "0 0 6px rgba(255, 107, 53, 0.8)"
@@ -174,7 +174,7 @@ function TodayTimeline({ events }: { events: ScheduleEvent[] }): JSX.Element {
             style={{
               fontFamily: "IBM Plex Mono, monospace",
               fontSize: "9px",
-              color: evt.isNow ? "#FF6B35" : "#7A5B35",
+              color: evt.isNow ? "#FF6B35" : "#A07B47",
               width: "32px",
               flexShrink: 0,
             }}
@@ -222,7 +222,7 @@ function StatBadge({
         style={{
           fontSize: "9px",
           fontFamily: "IBM Plex Mono, monospace",
-          color: "#7A5B35",
+          color: "#A07B47",
           textTransform: "uppercase",
           letterSpacing: "0.08em",
         }}
@@ -331,7 +331,7 @@ export function COOWhiteboard({ briefingData }: COOWhiteboardProps): JSX.Element
         <StatBadge
           label="OUTREACH"
           value={briefingData.pendingOutreachCount}
-          valueColor={briefingData.pendingOutreachCount > 0 ? "#F59E0B" : "#7A5B35"}
+          valueColor={briefingData.pendingOutreachCount > 0 ? "#F59E0B" : "#A07B47"}
         />
       </div>
 
@@ -344,7 +344,7 @@ export function COOWhiteboard({ briefingData }: COOWhiteboardProps): JSX.Element
           <span
             style={{
               fontSize: "9px",
-              color: "#7A5B35",
+              color: "#A07B47",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               display: "block",

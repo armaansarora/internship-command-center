@@ -36,7 +36,7 @@ function WarmthBar({
         style={{
           fontSize: "9px",
           fontFamily: "IBM Plex Mono, monospace",
-          color: "#7A5B35",
+          color: "#A07B47",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           width: "52px",
@@ -169,7 +169,7 @@ function CompanyNetworkGrid({ stats }: { stats: ContactStats }): JSX.Element {
           style={{
             fontSize: "9px",
             fontFamily: "IBM Plex Mono, monospace",
-            color: "#7A5B35",
+            color: "#A07B47",
             textTransform: "uppercase",
             letterSpacing: "0.06em",
           }}

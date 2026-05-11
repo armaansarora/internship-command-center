@@ -115,7 +115,7 @@ function VersionSelector({ versions, activeVersion, onSelect }: VersionSelectorP
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "10px",
               fontWeight: isActive ? 700 : 400,
-              color: isActive ? "#C9A84C" : "#5A3E20",
+              color: isActive ? "#C9A84C" : "#A07B47",
               backgroundColor: isActive ? "rgba(201,168,76,0.12)" : "transparent",
               border: `1px solid ${isActive ? "rgba(201,168,76,0.4)" : "#2A1C12"}`,
               borderRadius: "2px",
@@ -220,7 +220,7 @@ function EmptyState(): JSX.Element {
         style={{
           fontSize: "13px",
           fontFamily: "'JetBrains Mono', monospace",
-          color: "#5A3E20",
+          color: "#C8A878",
           letterSpacing: "0.06em",
           textAlign: "center",
         }}
@@ -232,7 +232,7 @@ function EmptyState(): JSX.Element {
         style={{
           fontSize: "12px",
           fontFamily: "'Satoshi', system-ui, sans-serif",
-          color: "#3A2510",
+          color: "#A07B47",
           textAlign: "center",
         }}
       >
@@ -401,9 +401,9 @@ export function DocumentEditor({
           <span
             aria-label={`Word count: ${wordCount}`}
             style={{
-              fontSize: "10px",
+              fontSize: "11px",
               fontFamily: "'JetBrains Mono', monospace",
-              color: "#5A3E20",
+              color: "#A07B47",
             }}
           >
             {wordCount} WORDS
@@ -470,9 +470,9 @@ export function DocumentEditor({
           <div
             style={{
               position: "relative",
-              color: "#3A2510",
+              color: "#C8A878",
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "12px",
+              fontSize: "13px",
               paddingLeft: "5%",
               paddingTop: "8px",
             }}

@@ -142,14 +142,15 @@ export function RestPanel({ isOpen, onClose, stats, pipeline, activity, quickAct
               onClick={onClose}
               aria-label="Dismiss dashboard"
               style={{
-                padding: "6px 10px",
+                minHeight: "44px",
+                padding: "8px 12px",
                 fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "10px",
+                fontSize: "11px",
                 letterSpacing: "0.16em",
                 textTransform: "uppercase",
-                color: "rgba(255, 255, 255, 0.55)",
+                color: "rgba(255, 255, 255, 0.72)",
                 background: "transparent",
-                border: "1px solid rgba(255, 255, 255, 0.12)",
+                border: "1px solid rgba(255, 255, 255, 0.18)",
                 borderRadius: "3px",
                 cursor: "pointer",
               }}
@@ -239,10 +240,10 @@ export function RestPanel({ isOpen, onClose, stats, pipeline, activity, quickAct
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: "9px",
+                    fontSize: "10px",
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "rgba(255, 255, 255, 0.45)",
+                    color: "rgba(255, 255, 255, 0.62)",
                   }}
                 >
                   {chip.label}

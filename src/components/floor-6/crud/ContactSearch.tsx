@@ -48,7 +48,7 @@ const labelStyle: React.CSSProperties = {
   fontWeight: 600,
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: "#7A5B35",
+  color: "#A07B47",
   marginBottom: "4px",
 };
 
@@ -166,7 +166,7 @@ export function ContactSearch({
           style={{
             fontFamily: "IBM Plex Mono, monospace",
             fontSize: "10px",
-            color: "#7A5B35",
+            color: "#A07B47",
             whiteSpace: "nowrap",
             alignSelf: "flex-end",
             paddingBottom: "8px",
