@@ -93,6 +93,37 @@ const EnvSchema = z.object({
   // ── Email delivery (outreach) ────────────────────────────────────────────
   RESEND_API_KEY: z.string().min(1).optional(),
 
+  // ── Outreach blast-brake ─────────────────────────────────────────────────
+  // Two-layer ceiling + circuit breaker on /api/cron/outreach-sender. A
+  // corrupted approval batch must not be able to blast 10,000 emails before
+  // anyone notices. All four values are read at request time so a Vercel env
+  // tweak takes effect on the next cron tick — no redeploy required, except
+  // for OUTREACH_FREEZE_OVERRIDE which intentionally requires a redeploy as
+  // the human-in-the-loop unfreeze gesture.
+  //
+  // Coerced through `z.coerce.number()` so the value can be set via the
+  // Vercel UI (always a string) and parsed once at boot. `.int().positive()`
+  // hard-fails a typo like "fifty" rather than silently defaulting.
+  OUTREACH_MAX_PER_TICK_GLOBAL: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(100),
+  OUTREACH_MAX_PER_USER_DAILY: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(25),
+  OUTREACH_PENDING_FREEZE_AT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(500),
+  // Deliberate human gate: when the circuit breaker freezes the queue, the
+  // owner must set this to "1" (re-deploy required) to thaw it. Any other
+  // value, including unset, leaves the freeze armed.
+  OUTREACH_FREEZE_OVERRIDE: z.string().optional(),
+
   // ── Stripe ───────────────────────────────────────────────────────────────
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),

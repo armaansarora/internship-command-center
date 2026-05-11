@@ -74,6 +74,10 @@ src/app/api/
   stripe/checkout, stripe/portal, stripe/webhook
   cron/                                            14 scheduled jobs
                                                    (all wrapped withCronHealth)
+                                                   outreach-sender enforces
+                                                   3-layer blast brake: pending
+                                                   freeze, per-tick ceiling,
+                                                   per-user daily cap
   auth/callback, auth/signout
   account/delete, account/export                   GDPR
   admin/sentry-probe                               owner-only debug

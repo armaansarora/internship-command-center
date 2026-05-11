@@ -268,9 +268,91 @@ function adminCronClient() {
           return chain;
         }
 
+        // Lighthouse OutreachBrake added two new query shapes:
+        //   • Circuit-breaker count probe — select(_, {count, head}).eq.is.lte
+        //     resolves to {count, error} after the third filter.
+        //   • Per-user 24h send count — select('user_id').in.eq.gte
+        //     resolves to {data, error}; reused by the daily-cap check.
+        // We dispatch on the `select(...)` call shape and keep the original
+        // drain/update chain untouched.
+        function makeCountChain(): {
+          eq: (c: string, v: unknown) => unknown;
+          is: (c: string, v: unknown) => unknown;
+          lte: (
+            c: string,
+            v: unknown,
+          ) => Promise<{ count: number; error: null }>;
+        } {
+          const fs: MutFilter[] = [];
+          const c = {
+            eq(col: string, val: unknown) {
+              fs.push({ kind: "eq", col, val });
+              return c;
+            },
+            is(col: string, val: unknown) {
+              fs.push({ kind: "is", col, val });
+              return c;
+            },
+            async lte(col: string, val: unknown) {
+              fs.push({ kind: "lte", col, val });
+              const count = matches(row, fs) ? 1 : 0;
+              return { count, error: null as null };
+            },
+          };
+          return c;
+        }
+
+        function makeRecentSendsChain(): {
+          in: (c: string, v: unknown) => unknown;
+          eq: (c: string, v: unknown) => unknown;
+          gte: (
+            c: string,
+            v: unknown,
+          ) => Promise<{ data: Array<{ user_id: string }>; error: null }>;
+        } {
+          const fs: MutFilter[] = [];
+          const c = {
+            in(col: string, val: unknown) {
+              // For `.in` we keep a simple "membership" predicate.
+              fs.push({ kind: "eq", col, val: Array.isArray(val) && val.length === 1 ? val[0] : val });
+              return c;
+            },
+            eq(col: string, val: unknown) {
+              fs.push({ kind: "eq", col, val });
+              return c;
+            },
+            async gte() {
+              // Only report sends within the rolling window; the R7 undo
+              // suite never pre-stamps `sent_at`, so the count is always 0.
+              return { data: [] as Array<{ user_id: string }>, error: null as null };
+            },
+          };
+          return c;
+        }
+
         const chain = {
-          select() {
-            return chain;
+          select(_cols?: string, opts?: { count?: string; head?: boolean }) {
+            if (opts?.count === "exact" && opts?.head === true) {
+              return makeCountChain();
+            }
+            // The recent-sends select uses `.in()` first; the drain select
+            // uses `.eq()` first. Return a router that resolves to either
+            // chain on the first method call.
+            const router = {
+              eq(col: string, val: unknown) {
+                selectFilters.push({ kind: "eq", col, val });
+                return chain;
+              },
+              is(col: string, val: unknown) {
+                selectFilters.push({ kind: "is", col, val });
+                return chain;
+              },
+              in(col: string, val: unknown) {
+                const rc = makeRecentSendsChain();
+                return rc.in(col, val);
+              },
+            };
+            return router;
           },
           eq(col: string, val: unknown) {
             selectFilters.push({ kind: "eq", col, val });
