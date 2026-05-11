@@ -75,7 +75,7 @@ interface InterviewForAgent {
 // ---------------------------------------------------------------------------
 // Tool 1: generatePrepPacket
 // ---------------------------------------------------------------------------
-export function makeGeneratePrepPacketTool(userId: string) {
+function makeGeneratePrepPacketTool(userId: string) {
   return tool({
     description:
       "Generate a comprehensive interview prep packet for a specific application. Includes company overview, likely questions by category (behavioral, technical, culture-fit), talking points, culture notes, and questions the candidate should ask. Stores the packet in the documents table and returns the content plus document ID.",
@@ -186,7 +186,7 @@ Could not auto-generate this packet. Try regenerating.`;
 // ---------------------------------------------------------------------------
 // Tool 2: getUpcomingInterviews
 // ---------------------------------------------------------------------------
-export function makeGetUpcomingInterviewsTool(userId: string) {
+function makeGetUpcomingInterviewsTool(userId: string) {
   return tool({
     description:
       "Fetch all upcoming interviews from the interviews table, sorted by scheduled date ascending (soonest first). Shows which interviews have prep packets and which are unprepped. Call this to assess prep status across the pipeline.",
@@ -294,7 +294,7 @@ export function makeGetUpcomingInterviewsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: getCompanyResearch
 // ---------------------------------------------------------------------------
-export function makeGetCompanyResearchTool(userId: string) {
+function makeGetCompanyResearchTool(userId: string) {
   return tool({
     description:
       "Read company research data from the companies table for a specific company. Returns all research fields including description, culture summary, recent news, financials, and internship intel. Use this to feed company context into prep packet generation.",
@@ -349,7 +349,7 @@ export function makeGetCompanyResearchTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 4: getExistingPrepPackets
 // ---------------------------------------------------------------------------
-export function makeGetExistingPrepPacketsTool(userId: string) {
+function makeGetExistingPrepPacketsTool(userId: string) {
   return tool({
     description:
       "List all existing prep_packet documents for the user, including which application and company each is linked to. Use this to check what's already been prepped before generating a new packet.",
@@ -433,7 +433,7 @@ export function makeGetExistingPrepPacketsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 5: generateQuestions
 // ---------------------------------------------------------------------------
-export function makeGenerateQuestionsTool(userId: string) {
+function makeGenerateQuestionsTool(userId: string) {
   return tool({
     description:
       "Generate targeted interview questions for a specific company, role, and interview type. Returns questions with suggested answer frameworks (STAR method, case structure, direct answer). Use this for focused question practice or to build out the questions section of a prep packet.",

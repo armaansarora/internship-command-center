@@ -15,7 +15,7 @@ import { executeNorthStar } from "@/lib/ai/agents/north-star";
 // ---------------------------------------------------------------------------
 // Tool 1: queryApplications
 // ---------------------------------------------------------------------------
-export function makeQueryApplicationsTool(userId: string) {
+function makeQueryApplicationsTool(userId: string) {
   return tool({
     description:
       "Query the user's applications with optional filters. Always call this before making pipeline claims.",
@@ -71,7 +71,7 @@ export function makeQueryApplicationsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 2: manageApplication
 // ---------------------------------------------------------------------------
-export function makeManageApplicationTool(userId: string) {
+function makeManageApplicationTool(userId: string) {
   return tool({
     description:
       "Update an application's status, add a note, mark a follow-up as sent, or archive it.",
@@ -146,7 +146,7 @@ export function makeManageApplicationTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: suggestFollowUp
 // ---------------------------------------------------------------------------
-export function makeSuggestFollowUpTool(userId: string) {
+function makeSuggestFollowUpTool(userId: string) {
   return tool({
     description:
       "Generate a ready-to-send follow-up email draft for a specific application.",
@@ -196,7 +196,7 @@ Best,
 // ---------------------------------------------------------------------------
 // Tool 4: analyzeConversionRates
 // ---------------------------------------------------------------------------
-export function makeAnalyzeConversionRatesTool(userId: string) {
+function makeAnalyzeConversionRatesTool(userId: string) {
   return tool({
     description:
       "Calculate stage-to-stage conversion rates across the user's full pipeline. Compares against industry benchmarks.",
@@ -221,7 +221,7 @@ export function makeAnalyzeConversionRatesTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 5: captureTargetProfile
 // ---------------------------------------------------------------------------
-export function makeCaptureTargetProfileTool(userId: string) {
+function makeCaptureTargetProfileTool(userId: string) {
   return tool({
     description:
       "Record the user's target profile after they have stated what they want. Call this only when you have extracted concrete roles, geographies, and at least one must-have or company from the conversation. This unlocks Job Discovery — no jobs arrive until a profile is stored.",
@@ -253,7 +253,7 @@ export function makeCaptureTargetProfileTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 6: runJobDiscovery
 // ---------------------------------------------------------------------------
-export function makeRunJobDiscoveryTool(userId: string) {
+function makeRunJobDiscoveryTool(userId: string) {
   return tool({
     description:
       "Run a single Job Discovery pass for the user — pulls fresh postings from Greenhouse + Lever plus the seed library, scores them against the user's target profile, and adds the strongest matches to the war table as `discovered` applications. Call this when the user asks you to find jobs, refresh the pipeline, or kick off discovery. Do not call if the user has no target profile yet — capture that first with captureTargetProfile.",
@@ -316,7 +316,7 @@ export function makeRunJobDiscoveryTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 7: runNorthStarForApplication
 // ---------------------------------------------------------------------------
-export function makeRunNorthStarTool(userId: string) {
+function makeRunNorthStarTool(userId: string) {
   return tool({
     description:
       "Run the full North Star loop for a single application — tailor the master resume, draft a cover letter, and queue a cold_email in the outreach queue pending user approval. Use this when the user says 'run the loop on X', 'work up Stripe', or when you're confident the user wants to pursue a specific discovered opportunity. Requires masterResume; ask the user to paste it if you haven't seen it this session.",

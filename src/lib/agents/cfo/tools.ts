@@ -14,7 +14,7 @@ const BENCHMARKS = {
 // ---------------------------------------------------------------------------
 // Tool 1: getConversionFunnel
 // ---------------------------------------------------------------------------
-export function makeGetConversionFunnelTool(userId: string) {
+function makeGetConversionFunnelTool(userId: string) {
   return tool({
     description:
       "Get the full pipeline conversion funnel with stage-to-stage rates and industry benchmark comparisons. Always call this before making conversion rate claims.",
@@ -150,7 +150,7 @@ export function makeGetConversionFunnelTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 2: getPipelineVelocity
 // ---------------------------------------------------------------------------
-export function makeGetPipelineVelocityTool(userId: string) {
+function makeGetPipelineVelocityTool(userId: string) {
   return tool({
     description:
       "Calculate average days per pipeline stage — how long applications spend at each stage. Lower is better. Compare against top-performer benchmarks.",
@@ -253,7 +253,7 @@ export function makeGetPipelineVelocityTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: getWeeklyTrend
 // ---------------------------------------------------------------------------
-export function makeGetWeeklyTrendTool(userId: string) {
+function makeGetWeeklyTrendTool(userId: string) {
   return tool({
     description:
       "Compute week-over-week application activity trend. Shows new applications, stage progressions, and WoW direction for each metric.",
@@ -342,7 +342,7 @@ export function makeGetWeeklyTrendTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 4: getAgentCosts
 // ---------------------------------------------------------------------------
-export function makeGetAgentCostsTool(userId: string) {
+function makeGetAgentCostsTool(userId: string) {
   return tool({
     description:
       "Retrieve agent cost tracking data — API usage, time investment per task, and ROI analysis by department. Helps track the efficiency of each agent.",
@@ -447,7 +447,7 @@ export function makeGetAgentCostsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 5: getDailySnapshot
 // ---------------------------------------------------------------------------
-export function makeGetDailySnapshotTool(userId: string) {
+function makeGetDailySnapshotTool(userId: string) {
   return tool({
     description:
       "Read daily_snapshots for historical pipeline comparison. Shows how the pipeline has evolved over time — total applications, conversion rates, and stale counts by date.",
@@ -533,7 +533,7 @@ export function makeGetDailySnapshotTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 6: benchmarkPerformance
 // ---------------------------------------------------------------------------
-export function makeBenchmarkPerformanceTool(userId: string) {
+function makeBenchmarkPerformanceTool(userId: string) {
   return tool({
     description:
       "Compare the user's pipeline metrics against industry averages and top-quartile performers. Returns a scorecard with percentile estimates.",

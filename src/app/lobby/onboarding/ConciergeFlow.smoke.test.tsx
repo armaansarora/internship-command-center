@@ -22,19 +22,6 @@ vi.mock("./actions", () => ({
   exitLobbyToPenthouse: vi.fn(),
 }));
 
-vi.mock("@/hooks/useConciergeChat", () => ({
-  useConciergeChat: () => ({
-    messages: [],
-    input: "",
-    setInput: vi.fn(),
-    submit: vi.fn(),
-    status: "ready",
-    isWorking: false,
-    clear: vi.fn(),
-    sendRaw: vi.fn(),
-  }),
-}));
-
 import { ConciergeFlow } from "./ConciergeFlow";
 
 describe("R4.4 ConciergeFlow", () => {

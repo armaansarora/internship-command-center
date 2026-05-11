@@ -13,7 +13,7 @@ import { getActiveBaseResume } from "@/lib/db/queries/base-resumes-rest";
 // ---------------------------------------------------------------------------
 // Tool 1: generateCoverLetter
 // ---------------------------------------------------------------------------
-export function makeGenerateCoverLetterTool(userId: string) {
+function makeGenerateCoverLetterTool(userId: string) {
   return tool({
     description:
       "Generate a new cover letter for a specific application. Pulls company research, applies tone calibration, stores the draft in the documents table, and returns the full draft content plus document ID.",
@@ -146,7 +146,7 @@ export function makeGenerateCoverLetterTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 2: getExistingDrafts
 // ---------------------------------------------------------------------------
-export function makeGetExistingDraftsTool(userId: string) {
+function makeGetExistingDraftsTool(userId: string) {
   return tool({
     description:
       "List all cover letters for this user. Shows version info, which application each draft is tied to, and creation dates. Always call this before generating a new cover letter.",
@@ -210,7 +210,7 @@ export function makeGetExistingDraftsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: refineDraft
 // ---------------------------------------------------------------------------
-export function makeRefineDraftTool(userId: string) {
+function makeRefineDraftTool(userId: string) {
   return tool({
     description:
       "Refine an existing cover letter draft based on specific feedback. Creates a new version (increments version, links via parentId) and stores it. Returns the updated content and new document ID.",
@@ -313,7 +313,7 @@ export function makeRefineDraftTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 4: getCompanyResearch
 // ---------------------------------------------------------------------------
-export function makeGetCompanyResearchTool(userId: string) {
+function makeGetCompanyResearchTool(userId: string) {
   return tool({
     description:
       "Pull company research from the CIO's research database to inform cover letter personalization. Returns culture summary, recent news, financials overview, and internship intel.",
@@ -392,7 +392,7 @@ export function makeGetCompanyResearchTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 5: getApplicationContext
 // ---------------------------------------------------------------------------
-export function makeGetApplicationContextTool(userId: string) {
+function makeGetApplicationContextTool(userId: string) {
   return tool({
     description:
       "Fetch a specific application's details — company, role, status, notes — to inform cover letter writing and personalization.",
@@ -461,7 +461,7 @@ export function buildCMOTools(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 7: generateThreeToneCoverLetters (R5.3)
 // ---------------------------------------------------------------------------
-export function makeGenerateThreeToneCoverLettersTool(userId: string) {
+function makeGenerateThreeToneCoverLettersTool(userId: string) {
   return tool({
     description:
       "Generate three cover letters (formal, conversational, bold) for the same application in parallel, so the user can compare voices side-by-side and pick one. Writes a group-parent document first, then three child documents linked via parent_id. Each tone is generated from its own distinct system prompt — the three outputs are demonstrably different on the same JD, not three temperature re-rolls of the same draft. The tones are not stored under `is_active=true` — the user's Ready-to-Send panel (R5.6) activates whichever they approve. Call this instead of generateCoverLetter when the user asks for options, wants to compare voices, or is on an application that matters.",
@@ -651,7 +651,7 @@ function capitalize(s: string): string {
 // ---------------------------------------------------------------------------
 // Tool 6: generateTailoredResume
 // ---------------------------------------------------------------------------
-export function makeGenerateTailoredResumeTool(userId: string) {
+function makeGenerateTailoredResumeTool(userId: string) {
   return tool({
     description:
       "Tailor the user's master resume for a specific application. Re-frames bullets, re-orders experience and skills to match the target role, and persists the result as a versioned `resume_tailored` document. Reads the canonical master resume from the user's uploaded base resume (R5.2) by default; the `masterResume` argument is an optional override for cases where the caller already holds the text (e.g., the CRO pipeline or a test harness). If neither a base resume is uploaded nor a masterResume argument is provided, the tool returns `success: false` with reason `no_base_resume` so the UI can prompt for an upload. Never fabricate roles, companies, metrics, or skills that aren't in the master.",

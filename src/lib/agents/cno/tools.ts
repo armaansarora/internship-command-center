@@ -12,7 +12,7 @@ import {
 // ---------------------------------------------------------------------------
 // Tool 1: queryContacts
 // ---------------------------------------------------------------------------
-export function makeQueryContactsTool(userId: string) {
+function makeQueryContactsTool(userId: string) {
   return tool({
     description:
       "Filter contacts by warmth level, company, or relationship type. Always call this before making claims about the user's network.",
@@ -61,7 +61,7 @@ export function makeQueryContactsTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 2: addContact
 // ---------------------------------------------------------------------------
-export function makeAddContactTool(userId: string) {
+function makeAddContactTool(userId: string) {
   return tool({
     description:
       "Create a new contact in the user's network, optionally linked to a company or application.",
@@ -129,7 +129,7 @@ export function makeAddContactTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: updateContactWarmth
 // ---------------------------------------------------------------------------
-export function makeUpdateContactWarmthTool(userId: string) {
+function makeUpdateContactWarmthTool(userId: string) {
   return tool({
     description:
       "Log an interaction with a contact — meeting, email, call, LinkedIn message, or any touchpoint. Updates lastContactAt to now and appends an interaction note. Warmth is recalculated automatically from the new lastContactAt.",
@@ -166,7 +166,7 @@ export function makeUpdateContactWarmthTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 4: getNetworkOverview
 // ---------------------------------------------------------------------------
-export function makeGetNetworkOverviewTool(userId: string) {
+function makeGetNetworkOverviewTool(userId: string) {
   return tool({
     description:
       "Get a full overview of the user's network: warmth distribution, contacts by company, cooling alerts, and cold contacts sorted by days since last contact.",
@@ -200,7 +200,7 @@ export function makeGetNetworkOverviewTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 5: suggestOutreach
 // ---------------------------------------------------------------------------
-export function makeSuggestOutreachTool(userId: string) {
+function makeSuggestOutreachTool(userId: string) {
   return tool({
     description:
       "Generate a personalized re-engagement message for a cold or cooling contact. Based on their role, company, and last interaction note. Returns a ready-to-send draft.",

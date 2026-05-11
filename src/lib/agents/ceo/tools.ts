@@ -22,7 +22,7 @@ import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 // ---------------------------------------------------------------------------
 // Tool 2: compileBriefing
 // ---------------------------------------------------------------------------
-export function makeCompileBriefingTool(userId: string) {
+function makeCompileBriefingTool(userId: string) {
   return tool({
     description:
       "Aggregate results from multiple department agents into a unified executive summary. Calls the full pipeline, recent activity, and department logs to build the complete picture.",
@@ -93,7 +93,7 @@ export function makeCompileBriefingTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 3: queryAllPipeline
 // ---------------------------------------------------------------------------
-export function makeQueryAllPipelineTool(userId: string) {
+function makeQueryAllPipelineTool(userId: string) {
   return tool({
     description:
       "Read the full pipeline statistics across all departments and stages. Returns counts by status, conversion rates, velocity, and health indicators. Always call this before making pipeline claims.",
@@ -165,7 +165,7 @@ export function makeQueryAllPipelineTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 4: getRecentActivity
 // ---------------------------------------------------------------------------
-export function makeGetRecentActivityTool(userId: string) {
+function makeGetRecentActivityTool(userId: string) {
   return tool({
     description:
       "Read recent agent logs and notifications to surface overnight or recent activity. Use this to understand what happened while the user was away.",
@@ -248,7 +248,7 @@ export function makeGetRecentActivityTool(userId: string) {
 // ---------------------------------------------------------------------------
 // Tool 5: getDailyBriefingData
 // ---------------------------------------------------------------------------
-export function makeGetDailyBriefingDataTool(userId: string) {
+function makeGetDailyBriefingDataTool(userId: string) {
   return tool({
     description:
       "Compile the full overnight activity report for the morning briefing. Combines pipeline changes, agent actions, notifications, and calendar events since last session.",
