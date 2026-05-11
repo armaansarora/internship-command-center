@@ -309,3 +309,86 @@ Disable the workflow from the Actions tab; the route remains callable
 on demand via `workflow_dispatch`. The `incident_alerts` table keeps
 the historical state machine — re-enabling the schedule does not
 re-page closed incidents.
+
+---
+
+## Enable Operations Dashboard
+
+The `/operations` route is the founder's read-only window onto the same
+signals the Lighthouse Watchdog uses to decide when to page: cron
+freshness, open incidents, AI spend vs the kill-switch cap, plus the
+activation funnel from PR 2. Code ships dark — the route is gated by
+`TOWER_OPERATIONS_DASHBOARD=1`, owner-only by user id, and `notFound()`s
+(404) when either check fails.
+
+### What this dashboard is, and is NOT
+
+This dashboard is **read-only diagnostics**. It is NOT a source of
+paging — the watchdog already emails the owner when it sees a stale
+cron / failed webhook / hourly AI-cost spike. The dashboard is where you
+go AFTER the alert lands to confirm what tripped before reaching for
+mitigation. If the dashboard disagrees with the watchdog email, the
+**watchdog wins** — it reads the same tables and is the authoritative
+source.
+
+### Required Vercel env vars
+
+All of these must already be set for the rest of the app to run; this
+section is the launch checklist of "what must be live before flipping
+the flag." Verify via `vercel env ls production`.
+
+| Variable | Why it matters |
+| --- | --- |
+| `TOWER_OPERATIONS_DASHBOARD` | Set to `1` to render. Any other value (including unset) renders 404. |
+| `OWNER_USER_ID` or `OWNER_USER_IDS` | The route uses `isOwner(user.id)`; without this, even your account 404s. |
+| `SUPABASE_SERVICE_ROLE_KEY` | All four panels read service-role-only tables (`engagement_events`, `cron_runs`, `incident_alerts`, `v_daily_ai_spend_cents`). |
+| `KILL_AI_SPEND_USD` | The AI spend panel renders the bar against this cap. Defaults to `50`; override only if Stripe metering is wired. |
+
+### Flip the flag
+
+1. `vercel env add TOWER_OPERATIONS_DASHBOARD` → enter `1` → select
+   **Production** (and Preview if you want to QA on a preview URL).
+2. Trigger a redeploy: `git commit --allow-empty -m "chore: enable
+   operations dashboard"` and push, OR re-deploy the latest production
+   build from the Vercel dashboard. The env var is a build-time read for
+   client bundles but `GATE_CONFIG.flags.operationsDashboardEnabled()`
+   re-evaluates `process.env` per server render — a fresh deploy is
+   simplest but technically unnecessary for the gate itself.
+3. Sign in as the owner and visit `https://www.interntower.com/operations`.
+4. Verify all four panel headers render: "Activation funnel", "Cron
+   health", "Lighthouse incidents", "AI spend today". Empty states are
+   fine on day 1 — the dashboard is supposed to look quiet when the
+   watchdog has nothing to flag.
+
+### Flip the flag back off
+
+1. `vercel env rm TOWER_OPERATIONS_DASHBOARD production`.
+2. Re-deploy (or wait for the next deploy). The route then 404s for
+   everyone, including the owner. No data is lost; the underlying
+   tables continue to feed the watchdog.
+
+### Verify owner-only enforcement (manual)
+
+Before public launch, confirm the gate from an incognito browser:
+
+1. Sign in as a non-owner test account (any free-tier user other than
+   the configured owner UUID).
+2. Visit `/operations`. Expected: 404. No founder content in the body.
+3. Sign out. Visit `/operations`. Expected: 302/307 redirect to `/lobby`.
+
+The same three checks run in CI via `page.test.tsx` (server-side gate
+proof) and `tests/e2e/operations-founder-view.spec.ts` (browser-level
+proof). If those tests fail, the gate is broken — do not ship.
+
+### Where the panels source their data
+
+| Panel | Source | Reader |
+| --- | --- | --- |
+| Activation funnel | `engagement_events` + `agent_dispatches` + `applications` | `lib/db/queries/operations-rest.ts` |
+| Cron health | `cron_runs` | `lib/observability/production-health.ts` |
+| Lighthouse incidents | `incident_alerts` | `lib/db/queries/operations-ops-rest.ts` |
+| AI spend | `v_daily_ai_spend_cents` (view) | `lib/db/queries/operations-ops-rest.ts` |
+
+The cron-health and incident-alerts panels share their source tables
+with the Lighthouse Watchdog cron, by design — the dashboard is the
+read-only window; the watchdog is the writer.
