@@ -7,10 +7,15 @@
  * matches the in-world aesthetic — the user is still "inside" the building.
  *
  * Per Next.js App Router contract, accepts `{ error, reset }` props.
+ *
+ * Reliability contract: every fall-through into this boundary is reported
+ * to Sentry (NEXT_PUBLIC_SENTRY_DSN-gated) with the digest tagged so a
+ * floor-level fault doesn't go unrecorded.
  */
 
 import { useEffect } from "react";
 import type { JSX } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 type ErrorPageProps = {
   error: Error & { digest?: string };
@@ -22,8 +27,20 @@ export default function AuthenticatedError({
   reset,
 }: ErrorPageProps): JSX.Element {
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      try {
+        Sentry.captureException(error, {
+          tags: {
+            boundary: "app.authenticated",
+            digest: error.digest ?? "none",
+          },
+        });
+      } catch {
+        // intentional swallow — telemetry cannot crash the panel
+      }
+    }
     if (process.env.NODE_ENV !== "production") {
-       
+
       console.error("[(authenticated)/error.tsx] caught error:", error);
     }
   }, [error]);

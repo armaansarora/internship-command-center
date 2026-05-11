@@ -44,8 +44,10 @@ async function ObservatoryData({ userId }: { userId: string }): Promise<JSX.Elem
  * Fetch the user's applications and project them to the orrery's input shape.
  *
  * `hasOfferEverFired` is per-USER, not per-application — it's the supernova-once
- * gate from R9.1. We compute it ONCE for the user and stamp every row with the
- * same flag. "Accepted" is the proxy for a real offer experience (one-way door).
+ * gate from R9.1. Because the same query already returns every row's status,
+ * we derive the flag in-memory rather than firing a second `head:count` REST
+ * round-trip. Saves one Supabase hop on every Observatory floor render.
+ * "Accepted" is the proxy for a real offer experience (one-way door).
  */
 async function getApplicationsForOrrery(userId: string): Promise<ApplicationInput[]> {
   const supabase = await createClient();
@@ -63,9 +65,12 @@ async function getApplicationsForOrrery(userId: string): Promise<ApplicationInpu
     return [];
   }
 
-  const hasOfferEverFired = await checkUserHasEverHadOffer(userId, supabase);
+  const applications = rows ?? [];
+  const hasOfferEverFired = applications.some(
+    (row) => row.status === "accepted",
+  );
 
-  return (rows ?? []).map((row): ApplicationInput => ({
+  return applications.map((row): ApplicationInput => ({
     id: String(row.id),
     companyName: row.company_name ?? "Unknown",
     role: row.role ?? "",
@@ -76,30 +81,5 @@ async function getApplicationsForOrrery(userId: string): Promise<ApplicationInpu
     lastActivityAt: row.last_activity_at ?? null,
     hasOfferEverFired,
   }));
-}
-
-/**
- * Tiny `head: true` count query — has the user ever had any application reach
- * `accepted`? Returns false on any error so the supernova still fires (failing
- * open here is the right call: better one extra celebration than zero).
- */
-async function checkUserHasEverHadOffer(
-  userId: string,
-  supabase: Awaited<ReturnType<typeof createClient>>,
-): Promise<boolean> {
-  const { count, error } = await supabase
-    .from("applications")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("status", "accepted");
-
-  if (error) {
-    log.error("observatory.has_ever_had_offer_failed", undefined, {
-      userId,
-      error: error.message,
-    });
-    return false;
-  }
-  return (count ?? 0) > 0;
 }
 

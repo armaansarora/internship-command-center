@@ -8,10 +8,17 @@
  * building, not a generic web error.
  *
  * Per Next.js App Router contract, accepts `{ error, reset }` props.
+ *
+ * Reliability contract: every fall-through into this boundary is reported
+ * to Sentry (NEXT_PUBLIC_SENTRY_DSN-gated) with the digest as a tag so the
+ * client-side stack and the server-side digest correlate. Without this
+ * capture, a transient build/runtime failure would surface to the user
+ * with no breadcrumb on our side.
  */
 
 import { useEffect } from "react";
 import type { JSX } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 type ErrorPageProps = {
   error: Error & { digest?: string };
@@ -20,10 +27,20 @@ type ErrorPageProps = {
 
 export default function GlobalError({ error, reset }: ErrorPageProps): JSX.Element {
   useEffect(() => {
-    // Defer to Sentry boundary in production; in dev surface via console
-    // (intentional dev-only — no console.* in shipped runtime paths).
+    // NEXT_PUBLIC_* is inlined at build time; this tree-shakes when unset.
+    // Telemetry must never become the source of a production failure, so
+    // any Sentry init/runtime error is swallowed.
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      try {
+        Sentry.captureException(error, {
+          tags: { boundary: "app.global", digest: error.digest ?? "none" },
+        });
+      } catch {
+        // intentional swallow — telemetry cannot crash the panel
+      }
+    }
     if (process.env.NODE_ENV !== "production") {
-       
+
       console.error("[error.tsx] caught error:", error);
     }
   }, [error]);

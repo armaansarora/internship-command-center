@@ -130,8 +130,11 @@ src/lib/ai/agents/
   shared-route-handler.ts                          createAgentRouteHandler —
                                                    shared API route factory
                                                    (auth + rate limit + quota +
-                                                    streaming). Used by every
+                                                    cached system prompt +
+                                                    streaming + memory write).
+                                                   Used by every
                                                    src/app/api/<agent>/route.ts
+  ceo-orchestrator.ts                              CEO dispatch graph
 
 src/lib/ai/
   model.ts                                         provider selection

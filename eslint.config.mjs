@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Council worktrees — each contains its own `.next/` build output and a
+    // full copy of `src/` that's redundant with the main tree. ESLint must
+    // never traverse them. Without this, husky pre-commit drowns in 60k+
+    // errors from compiled output inside the worktrees.
+    ".claude/worktrees/**",
   ]),
   {
     rules: {
