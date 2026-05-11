@@ -985,6 +985,40 @@ export const compBandsBudget = pgTable("comp_bands_budget", {
 });
 
 // ===========================================================================
+// 24. INCIDENT ALERTS (Lighthouse Watchdog — owner-only diagnostic state)
+// ===========================================================================
+// The /api/cron/owner-watchdog handler (every 30 minutes) reads three
+// production signals — cron staleness, recent Stripe webhook failures,
+// hourly AI cost rollup — and emails the owner when something is wrong.
+// Each open incident is persisted as one row keyed by `jobName`. The
+// state machine:
+//   * detection sees a NEW problem (no row with job_name=X AND
+//     resolvedAt IS NULL) → INSERT row + send digest.
+//   * detection sees an EXISTING problem and `lastEmailAt` older than 6h
+//     → UPDATE lastEmailAt + send reminder digest.
+//   * detection sees the signal back below threshold for an open incident
+//     → UPDATE resolvedAt + send recovery digest.
+//
+// RLS posture mirrors `stripeWebhookEvents` / `compBandsBudget`: enabled
+// with no policy (default-deny), and migration 0036 also REVOKEs the
+// implicit table grants so authenticated/anon cannot read this owner-only
+// operational data even if a future migration accidentally GRANTs SELECT.
+export const incidentAlerts = pgTable("incident_alerts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  jobName: text("job_name").notNull(),
+  severity: text("severity", { enum: ["warn", "crit"] }).notNull(),
+  // Free-form snapshot of the value that tripped the threshold so the
+  // recovery email can quote the worst-case the owner needed to react to.
+  lastSeenValue: text("last_seen_value"),
+  openedAt: timestamp("opened_at", { withTimezone: true }).defaultNow().notNull(),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  lastEmailAt: timestamp("last_email_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("idx_incident_alerts_job_open").on(table.jobName, table.resolvedAt),
+]);
+
+// ===========================================================================
 // TYPE EXPORTS
 // ===========================================================================
 export type UserProfile = typeof userProfiles.$inferSelect;
@@ -1047,3 +1081,6 @@ export type NewCompBandsBudget = typeof compBandsBudget.$inferInsert;
 // Handoff Dossiers (PR 3)
 export type HandoffDossier = typeof handoffDossiers.$inferSelect;
 export type NewHandoffDossier = typeof handoffDossiers.$inferInsert;
+// Lighthouse Watchdog (Section 24) — owner-only incident state machine.
+export type IncidentAlert = typeof incidentAlerts.$inferSelect;
+export type NewIncidentAlert = typeof incidentAlerts.$inferInsert;

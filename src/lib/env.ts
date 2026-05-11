@@ -93,6 +93,17 @@ const EnvSchema = z.object({
   // ── Email delivery (outreach) ────────────────────────────────────────────
   RESEND_API_KEY: z.string().min(1).optional(),
 
+  // ── Lighthouse Watchdog ──────────────────────────────────────────────────
+  // Owner-only operational watchdog (every 30 minutes). Hourly AI cost
+  // ceiling, in integer cents. When the rolling 1h `agent_logs.cost_cents`
+  // sum exceeds this value the watchdog opens an `ai-cost-hourly`
+  // incident. Default ($5/hr) is enforced in the route when unset.
+  WATCHDOG_HOURLY_COST_CAP_CENTS: z.coerce.number().int().positive().optional(),
+  // Optional override for the digest recipient. When unset the watchdog
+  // falls back to `gateConfig.brand.senderEmail` so the platform never
+  // has to dial in a second contact just to land alerts.
+  OWNER_ALERT_EMAIL: z.string().email().optional(),
+
   // ── Stripe ───────────────────────────────────────────────────────────────
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
