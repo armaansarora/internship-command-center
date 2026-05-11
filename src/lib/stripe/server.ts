@@ -20,10 +20,13 @@ export function getStripe(): Stripe {
 // ---------------------------------------------------------------------------
 // Price ID → tier name mapping
 // ---------------------------------------------------------------------------
-const priceToTier: Record<string, SubscriptionTier> = Object.fromEntries(
-  (Object.entries(STRIPE_PLANS) as [SubscriptionTier, (typeof STRIPE_PLANS)[SubscriptionTier]][]).flatMap(
+type CheckoutTier = Exclude<SubscriptionTier, "team">;
+
+const priceToTier: Record<string, CheckoutTier> = Object.fromEntries(
+  (Object.entries(STRIPE_PLANS) as [CheckoutTier, (typeof STRIPE_PLANS)[CheckoutTier]][]).flatMap(
     ([tier, plan]) => {
-      const entries: [string, SubscriptionTier][] = [[plan.priceId, tier]];
+      const entries: [string, CheckoutTier][] = [];
+      if (plan.priceId) entries.push([plan.priceId, tier]);
       if (plan.yearlyPriceId) entries.push([plan.yearlyPriceId, tier]);
       return entries;
     },
@@ -31,6 +34,14 @@ const priceToTier: Record<string, SubscriptionTier> = Object.fromEntries(
 );
 
 export function tierFromPriceId(priceId: string): SubscriptionTier {
+  // The Season Pass price id is sourced from env (`STRIPE_SEASON_PASS_PRICE_ID`)
+  // because the static STRIPE_PLANS.seasonPass.priceId is empty by design.
+  // Check the env-driven id first so webhook deliveries for the one-time SKU
+  // map to "seasonPass".
+  const seasonPassPriceId = env().STRIPE_SEASON_PASS_PRICE_ID;
+  if (seasonPassPriceId && priceId === seasonPassPriceId) {
+    return "seasonPass";
+  }
   return priceToTier[priceId] ?? "free";
 }
 
@@ -111,6 +122,44 @@ export async function createCheckoutSession(
 }
 
 // ---------------------------------------------------------------------------
+// createSeasonPassCheckoutSession (one-time payment)
+// ---------------------------------------------------------------------------
+/**
+ * Create a Stripe Checkout Session for the Internship Season Pass ($149,
+ * one-time). Quantity is hard-capped at 1 — a Season Pass is per-user, not
+ * a seat. The caller is responsible for passing the env-driven price id;
+ * the route layer enforces "STRIPE_SEASON_PASS_PRICE_ID unset" as a clear
+ * operator error.
+ */
+export async function createSeasonPassCheckoutSession(
+  userId: string,
+  email: string,
+  seasonPassPriceId: string,
+): Promise<string> {
+  const customerId = await createOrRetrieveCustomer(userId, email);
+  const domain = env().NEXT_PUBLIC_APP_URL;
+
+  const session = await getStripe().checkout.sessions.create({
+    customer: customerId,
+    mode: "payment",
+    payment_method_types: ["card"],
+    line_items: [{ price: seasonPassPriceId, quantity: 1 }],
+    success_url: `${domain}/settings?upgrade=success&plan=seasonPass`,
+    cancel_url: `${domain}/settings?upgrade=cancelled`,
+    metadata: {
+      supabase_user_id: userId,
+      tier: "seasonPass",
+    },
+  });
+
+  if (!session.url) {
+    throw new Error("Stripe did not return a checkout URL");
+  }
+
+  return session.url;
+}
+
+// ---------------------------------------------------------------------------
 // createBillingPortalSession
 // ---------------------------------------------------------------------------
 export async function createBillingPortalSession(
@@ -140,7 +189,12 @@ export async function getSubscriptionTier(userId: string): Promise<SubscriptionT
 
   const tier = profile?.subscription_tier as string | null | undefined;
 
-  if (tier === "pro" || tier === "team" || tier === "free") {
+  if (
+    tier === "pro" ||
+    tier === "team" ||
+    tier === "seasonPass" ||
+    tier === "free"
+  ) {
     return tier;
   }
   return "free";

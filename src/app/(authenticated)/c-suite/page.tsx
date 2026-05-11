@@ -11,6 +11,7 @@ import {
   PARLOR_DOOR_SEEN_PREF_KEY,
   type ParlorDoorSeenPref,
 } from "@/lib/preferences/parlor-door-seen-pref";
+import { CouncilTableSection } from "./council-table-section";
 
 export const metadata: Metadata = { title: "The C-Suite | The Tower" };
 
@@ -34,6 +35,11 @@ export default async function CSuitePage(): Promise<JSX.Element> {
     <FloorShell floorId="1">
       <Suspense fallback={null}>
         <CSuiteData userId={user.id} />
+      </Suspense>
+      {/* PR3 — Council Table renders below the dispatch surface. Server
+          component; gated to null when TOWER_COUNCIL_TABLE !== "1". */}
+      <Suspense fallback={null}>
+        <CouncilTableSection userId={user.id} />
       </Suspense>
     </FloorShell>
   );

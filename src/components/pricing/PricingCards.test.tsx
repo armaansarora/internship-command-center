@@ -93,14 +93,16 @@ afterEach(() => {
 });
 
 describe("PricingCards billing actions", () => {
-  it("sends free users to Checkout for paid upgrades", () => {
+  it("sends free users to Checkout for paid upgrades (Pro + Season Pass)", () => {
     const html = renderToStaticMarkup(
       <PricingCards currentTier="free" appsUsed={3} />,
     );
 
     expect(html).toContain("Current Plan");
     expect(html).toContain("Upgrade to Pro");
-    expect(html).toContain("Upgrade to Team");
+    expect(html).toContain("Buy Season Pass");
+    // Team was killed in the Season Pass council fork.
+    expect(html).not.toContain("Upgrade to Team");
   });
 
   it("sends paid users to the billing portal for every plan change", () => {
@@ -114,7 +116,7 @@ describe("PricingCards billing actions", () => {
     expect(html).not.toContain("Upgrade to Team");
   });
 
-  it("posts free-user upgrades to Stripe Checkout and redirects to the session", async () => {
+  it("posts free-user Pro upgrades to Stripe Checkout and redirects to the session", async () => {
     const checkoutUrl = "https://checkout.stripe.com/c/session_123";
     const fetchMock = installFetch(async () => jsonResponse({ url: checkoutUrl }));
     const mounted = mount(<PricingCards currentTier="free" appsUsed={3} />);
@@ -126,6 +128,22 @@ describe("PricingCards billing actions", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ priceId: STRIPE_PLANS.pro.priceId }),
+    });
+    expect(window.location.href).toBe(checkoutUrl);
+  });
+
+  it("posts free-user Season Pass purchases as { tier: 'seasonPass' }", async () => {
+    const checkoutUrl = "https://checkout.stripe.com/c/season_pass_123";
+    const fetchMock = installFetch(async () => jsonResponse({ url: checkoutUrl }));
+    const mounted = mount(<PricingCards currentTier="free" appsUsed={3} />);
+    cleanups.push(mounted.unmount);
+
+    await click(findButton(mounted.host, /Buy Season Pass/i));
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tier: "seasonPass" }),
     });
     expect(window.location.href).toBe(checkoutUrl);
   });
@@ -153,7 +171,7 @@ describe("PricingCards billing actions", () => {
     );
     cleanups.push(mounted.unmount);
 
-    await click(findButton(mounted.host, /Manage Team plan in billing portal/i));
+    await click(findButton(mounted.host, /Manage Season Pass plan in billing portal/i));
 
     expect(onManageBilling).toHaveBeenCalledTimes(1);
   });

@@ -71,6 +71,14 @@ const EnvSchema = z.object({
   // .activationV1() so the value is re-evaluated on every server render.
   TOWER_ACTIVATION_V1: z.string().optional(),
 
+  // PR 2-5 feature flags. Set each to "1" to enable the corresponding
+  // surface. All consumed via GATE_CONFIG.flags thunks (see gate-config.ts)
+  // so server-render picks up env changes without a redeploy.
+  TOWER_OPERATIONS_DASHBOARD: z.string().optional(),
+  TOWER_COUNCIL_TABLE: z.string().optional(),
+  TOWER_TRUST_CONSOLE: z.string().optional(),
+  TOWER_SEASON_PASS: z.string().optional(),
+
   // ── Cron ─────────────────────────────────────────────────────────────────
   CRON_SECRET: z.string().min(16).optional(),
 
@@ -81,6 +89,14 @@ const EnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+  /**
+   * Internship Season Pass — one-time $149 SKU. Populated by
+   * `scripts/stripe-bootstrap.sh` (re-run when rotating Stripe products) and
+   * pasted into Vercel env. The checkout route fails closed with a clear
+   * "Invalid env" message when this branch fires without the id set, so a
+   * misconfigured deploy never silently lands a $0 charge on the wrong SKU.
+   */
+  STRIPE_SEASON_PASS_PRICE_ID: z.string().min(1).optional(),
 
   // ── Upstash Redis (rate limiting) ────────────────────────────────────────
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),

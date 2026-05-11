@@ -18,9 +18,11 @@ import { PRICING_CONFIG } from "@/lib/config/pricing-config";
  *                       (yearly, counsel-gated)
  *   • GATE_CONFIG    — brand name and canonical URL
  *                       (weekly, founder)
- *   • PRICING_CONFIG — Free-tier caps and Pro/Team monthly prices that
- *                       are quoted inside the "Subscriptions and billing"
- *                       section (revenue, monthly)
+ *   • PRICING_CONFIG — Free-tier caps, Pro monthly price, and Internship
+ *                       Season Pass one-time price quoted inside the
+ *                       "Subscriptions and billing" section (revenue,
+ *                       monthly). The Campus tier is contact-sales and
+ *                       is referenced without a price.
  */
 export const TERMS_OF_SERVICE = {
   revisedOn: LEGAL_CONFIG.entity.legalRevisedOn,
@@ -80,7 +82,7 @@ export const TERMS_OF_SERVICE = {
     {
       heading: "Subscriptions and billing",
       body: [
-        `${GATE_CONFIG.brand.name} offers a Free tier (${PRICING_CONFIG.freeAppCap} applications, ${PRICING_CONFIG.freeAiCallsPerDay} AI calls per day) and paid Pro and Team tiers at $${PRICING_CONFIG.tiers.pro.price} and $${PRICING_CONFIG.tiers.team.price} per month.`,
+        `${GATE_CONFIG.brand.name} offers a Free tier (${PRICING_CONFIG.freeAppCap} applications, ${PRICING_CONFIG.freeAiCallsPerDay} AI calls per day), a paid Pro tier at $${PRICING_CONFIG.tiers.pro.price} per month, an Internship Season Pass at $${PRICING_CONFIG.tiers.seasonPass.price} as a one-time payment covering the ${PRICING_CONFIG.seasonPass.label} season, and a contact-sales Campus / Career Center tier whose pricing is set in the sales conversation.`,
         "Paid subscriptions are processed by Stripe. By subscribing, you authorize Stripe to charge your payment method on a recurring basis until you cancel.",
         "Subscriptions renew automatically at the end of each billing cycle. The renewal price will be the price posted at that time; we will notify you in advance of any increase.",
         LEGAL_CONFIG.refund.headline,

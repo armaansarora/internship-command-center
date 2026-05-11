@@ -939,7 +939,13 @@ export function SettingsClient({
                     color: "var(--text-primary)",
                   }}
                 >
-                  {STRIPE_PLANS[subscriptionTier].name} Plan
+                  {/* Legacy "team" tier rows still exist in DB even though the
+                      Team SKU was killed in the Season Pass council fork.
+                      Render the legacy name verbatim — entitlements still
+                      flow via LEGACY_TEAM_LIMITS in entitlements.ts. */}
+                  {subscriptionTier === "team"
+                    ? "Team"
+                    : STRIPE_PLANS[subscriptionTier].name} Plan
                 </span>
                 <span
                   className="rounded-full px-2 py-0.5"

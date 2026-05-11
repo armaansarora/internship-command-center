@@ -42,8 +42,13 @@ import {
   readSharedKnowledge,
   type SharedKnowledgeFlatMap,
 } from "@/lib/db/queries/shared-knowledge-rest";
+import { insertDossier } from "@/lib/db/queries/handoff-dossiers-rest";
 import { buildCachedSystemMessages } from "../prompt-cache";
 import { appendAgentGovernance } from "@/lib/agents/governance-contract";
+import { extractDossierFromDispatch } from "./dossier-extractor";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
+import { log } from "@/lib/logger";
+import type { Row } from "@/db/database.types";
 
 import { buildCROSystemPrompt } from "@/lib/agents/cro/system-prompt";
 import { buildCROTools } from "@/lib/agents/cro/tools";
@@ -626,6 +631,70 @@ export function buildDispatchBatchTool(userId: string, userName: string) {
           ok: false,
         };
       });
+
+      // ---------------------------------------------------------------
+      // PR 3 — Handoff Dossiers
+      //
+      // For every dispatch that produced a real summary, extract a
+      // structured Council Table dossier and insert it. The whole block is
+      // gated behind `GATE_CONFIG.flags.councilTableEnabled()` so it is a
+      // true no-op (no LLM calls, no inserts) until the flag is flipped.
+      //
+      // Failures here MUST NOT break the orchestrator's existing return —
+      // wrap each pair (extract + insert) in its own try/catch and run them
+      // in parallel via Promise.allSettled. The CEO still sees the
+      // `{ requestId, agents }` shape it has always seen.
+      // ---------------------------------------------------------------
+      if (GATE_CONFIG.flags.councilTableEnabled()) {
+        await Promise.allSettled(
+          agents.map(async (a, i) => {
+            if (!a.ok) return;
+            const dispatchId = ids[i];
+            if (!dispatchId) return;
+
+            try {
+              // Reconstruct the minimal AgentDispatchRow shape the extractor
+              // needs. We have everything in-process — no DB roundtrip.
+              // The extractor only consumes id / agent / task / summary; the
+              // timestamp + status fields are filled in for type compliance.
+              const stamp = new Date().toISOString();
+              const dispatchRow: Row<"agent_dispatches"> = {
+                id: dispatchId,
+                user_id: userId,
+                request_id: requestId,
+                parent_dispatch_id: null,
+                agent: a.agent,
+                depends_on: [],
+                task: present[i][1],
+                status: "completed",
+                summary: a.summary,
+                tokens_used: a.tokensUsed,
+                started_at: stamp,
+                completed_at: stamp,
+                created_at: stamp,
+                updated_at: stamp,
+              };
+
+              const dossier = await extractDossierFromDispatch({
+                userId,
+                requestId,
+                dispatch: dispatchRow,
+              });
+              if (!dossier) return;
+              await insertDossier(dossier);
+            } catch (err) {
+              // Dossier emission is best-effort — log + swallow so the
+              // CEO's reply is never blocked on Council Table writes.
+              log.warn("ceo_orchestrator.dossier_emission_failed", {
+                userId,
+                requestId,
+                agent: a.agent,
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
+          }),
+        );
+      }
 
       return { requestId, agents };
     },

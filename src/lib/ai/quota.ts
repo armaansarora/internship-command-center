@@ -22,7 +22,15 @@ import { log } from "@/lib/logger";
  * lock every user out of every AI surface. The cron-health table will surface
  * sustained failures to the owner.
  */
-type AiTier = "free" | "pro" | "team";
+/**
+ * Tier dimension for AI cost caps.
+ *
+ * `team` is kept for back-compat with legacy `user_profiles.subscription_tier`
+ * rows; `seasonPass` is the post-fork one-time SKU. All non-free tiers share
+ * the same daily cap (`paidAiCallsPerDay`), so the distinction is purely
+ * narrative.
+ */
+type AiTier = "free" | "pro" | "seasonPass" | "team";
 
 export interface QuotaResult {
   allowed: boolean;

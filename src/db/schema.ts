@@ -517,6 +517,61 @@ export const agentDispatches = pgTable("agent_dispatches", {
 ]);
 
 // ===========================================================================
+// 10a. HANDOFF DOSSIERS (PR 3) — typed packets produced when the CEO
+// orchestrator fans a request out to one or more sibling agents. Each
+// completed dispatch can produce ZERO or ONE dossier row; the CEO's final
+// briefing aggregates a request's dossiers into a single Council Table
+// surface for user review/approval.
+//
+// The dossier IS the durable product object — `agent_dispatches.summary`
+// records the raw model output; the dossier records the *structured*
+// recommendation the user actually decides on (proposed action, evidence
+// cited, confidence, permission needed, optional disagreement note).
+// ===========================================================================
+export const handoffDossiers = pgTable("handoff_dossiers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => userProfiles.id, { onDelete: "cascade" }),
+  // Joins to agent_dispatches.requestId so a Council Table can fetch every
+  // dossier emitted in a single bell-ring turn.
+  requestId: text("request_id").notNull(),
+  // Optional join to the specific dispatch row that produced this dossier.
+  // Null when the dossier was synthesised post-hoc by the CEO from peer
+  // intel rather than a single named dispatch.
+  dispatchId: uuid("dispatch_id"),
+  // Who owns this dossier (the agent making the recommendation).
+  owner: text("owner").notNull(),
+  // Who asked for the work (usually "ceo"; can be another agent in a
+  // peer-to-peer handoff).
+  requestingAgent: text("requesting_agent").notNull().default("ceo"),
+  task: text("task").notNull(),
+  // Evidence the dossier cites — array of { kind, id, summary } objects.
+  // Kept as jsonb so the shape can evolve without a migration.
+  evidence: jsonb("evidence").notNull().default(sql`'[]'::jsonb`),
+  openQuestions: text("open_questions").array().notNull().default(sql`'{}'::text[]`),
+  // 0-100; nullable when the agent declines to estimate.
+  confidence: integer("confidence"),
+  // Optional disagreement note when the owner disagrees with a peer's
+  // implicit recommendation in the same request.
+  disagreement: jsonb("disagreement"),
+  proposedAction: text("proposed_action").notNull(),
+  // What's needed for the user to grant the action.
+  permissionNeeded: text("permission_needed", { enum: ["none", "draft", "send"] }).notNull().default("none"),
+  deadline: timestamp("deadline", { withTimezone: true }),
+  // Single user-facing sentence in the owner agent's voice.
+  recommendation: text("recommendation").notNull(),
+  status: text("status", { enum: ["draft", "ready", "approved", "rejected", "executed", "expired"] }).notNull().default("ready"),
+  // Set when the user makes a decision; service-role writers stamp these.
+  decidedAt: timestamp("decided_at", { withTimezone: true }),
+  executedAt: timestamp("executed_at", { withTimezone: true }),
+  ...timestamps,
+}, (table) => [
+  userIsolation("handoff_dossiers"),
+  index("idx_dossiers_user_request").on(table.userId, table.requestId),
+  index("idx_dossiers_user_status_created").on(table.userId, table.status, table.createdAt),
+  index("idx_dossiers_owner").on(table.owner, table.userId),
+]);
+
+// ===========================================================================
 // 10b. AUDIT LOGS — security-sensitive events (distinct from agent_logs
 // cost telemetry). Reads gated to the owning user; writes are service-role
 // only (no INSERT/UPDATE/DELETE policy). The `event_type` CHECK constraint
@@ -976,3 +1031,6 @@ export type CompBands = typeof companyCompBands.$inferSelect;
 export type NewCompBands = typeof companyCompBands.$inferInsert;
 export type CompBandsBudget = typeof compBandsBudget.$inferSelect;
 export type NewCompBandsBudget = typeof compBandsBudget.$inferInsert;
+// Handoff Dossiers (PR 3)
+export type HandoffDossier = typeof handoffDossiers.$inferSelect;
+export type NewHandoffDossier = typeof handoffDossiers.$inferInsert;

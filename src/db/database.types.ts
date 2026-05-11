@@ -42,6 +42,7 @@ import type {
   dailySnapshots,
   documents,
   emails,
+  handoffDossiers,
   interviews,
   jobEmbeddings,
   matchCandidateIndex,
@@ -120,6 +121,7 @@ export interface Tables {
   daily_snapshots: RowOf<typeof dailySnapshots.$inferSelect>;
   documents: RowOf<typeof documents.$inferSelect>;
   emails: RowOf<typeof emails.$inferSelect>;
+  handoff_dossiers: RowOf<typeof handoffDossiers.$inferSelect>;
   interviews: RowOf<typeof interviews.$inferSelect>;
   job_embeddings: RowOf<typeof jobEmbeddings.$inferSelect>;
   match_candidate_index: RowOf<typeof matchCandidateIndex.$inferSelect>;

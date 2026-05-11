@@ -10,7 +10,15 @@ interface PricingCardsProps {
   onManageBilling?: () => void;
 }
 
-const PLAN_FEATURES: Record<SubscriptionTier, string[]> = {
+/**
+ * The tiers actually rendered as cards in the Settings sidebar. `team` is
+ * deliberately absent — it was killed in the Season Pass council fork. The
+ * `currentTier` prop may still arrive as "team" for legacy subscribers,
+ * which is handled by the "Manage Billing" fallback below.
+ */
+type RenderableTier = Exclude<SubscriptionTier, "team">;
+
+const PLAN_FEATURES: Record<RenderableTier, string[]> = {
   free: [
     "Up to 10 applications",
     "War Room + Penthouse floors",
@@ -25,11 +33,12 @@ const PLAN_FEATURES: Record<SubscriptionTier, string[]> = {
     "Full analytics",
     "100 req/min rate limit",
   ],
-  team: [
-    "Everything in Pro",
-    "Team analytics dashboard",
-    "Priority support",
-    "200 req/min rate limit",
+  seasonPass: [
+    "One-time $149 — covers Aug → Apr",
+    "Every Pro feature, no recurring bill",
+    "All 8 AI agents",
+    "Daily briefing",
+    "100 req/min rate limit",
   ],
 };
 
@@ -42,11 +51,11 @@ export function PricingCards({
   billingLoading = false,
   onManageBilling,
 }: PricingCardsProps): JSX.Element {
-  const [loading, setLoading] = useState<SubscriptionTier | null>(null);
+  const [loading, setLoading] = useState<RenderableTier | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const handleUpgrade = useCallback(
-    async (tier: SubscriptionTier) => {
+    async (tier: RenderableTier) => {
       if (tier === currentTier) return;
 
       setCheckoutError(null);
@@ -59,10 +68,17 @@ export function PricingCards({
       setLoading(tier);
 
       try {
+        // Season Pass is a one-time SKU — the server reads the price id from
+        // env and branches on `tier`. Pro/free still pass the static price id.
+        const checkoutBody =
+          tier === "seasonPass"
+            ? { tier: "seasonPass" as const }
+            : { priceId: STRIPE_PLANS[tier].priceId };
+
         const response = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ priceId: STRIPE_PLANS[tier].priceId }),
+          body: JSON.stringify(checkoutBody),
         });
 
         if (!response.ok) {
@@ -86,7 +102,7 @@ export function PricingCards({
     [currentTier, onManageBilling],
   );
 
-  const tierOrder: SubscriptionTier[] = ["free", "pro", "team"];
+  const tierOrder: RenderableTier[] = ["free", "pro", "seasonPass"];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
@@ -110,12 +126,14 @@ export function PricingCards({
         const isCurrentPlan = tier === currentTier;
         const features = PLAN_FEATURES[tier];
         const isLoadingThis = loading === tier;
+        const isOneTime = tier === "seasonPass";
 
         const getButtonLabel = () => {
           if (isCurrentPlan) return "Current Plan";
           if (currentTier !== "free") {
             return billingLoading ? "Loading..." : "Manage Billing";
           }
+          if (isOneTime) return "Buy Season Pass";
           return `Upgrade to ${plan.name}`;
         };
 
@@ -196,7 +214,7 @@ export function PricingCards({
                       color: "var(--text-muted)",
                     }}
                   >
-                    / month
+                    {isOneTime ? " one-time" : " / month"}
                   </span>
                 )}
               </div>

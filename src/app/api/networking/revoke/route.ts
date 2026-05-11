@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { counterpartyAnonKey } from "@/lib/networking/match-anon";
 import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { recordRevokeCascade } from "@/lib/audit/consent-events";
 
 /**
  * POST /api/networking/revoke
@@ -42,6 +43,15 @@ export async function POST() {
   const rate = await withRateLimit(user.id, "C");
   if (rate.response) return rate.response;
 
+  // PR4 audit instrumentation — accumulate proof-of-cascade metadata as we
+  // walk the three steps so the success/failure audit row records exactly
+  // which tables were touched and how many items were erased. Trust Console
+  // surfaces this back to the user as evidence the 60-second promise was
+  // kept (or as a triage trail when it was not).
+  const startedAt = Date.now();
+  const tablesTouched: string[] = [];
+  let itemsErased = 0;
+
   // Step 1 — stamp revoke.
   const stampErr = await sb
     .from("user_profiles")
@@ -53,8 +63,18 @@ export async function POST() {
       userId: user.id,
       error: stampErr.error.message,
     });
+    // Stamp failure means the revoke never landed — emit a cascade-failed
+    // audit row so the user has a record of the attempt and the error.
+    await recordRevokeCascade({
+      userId: user.id,
+      itemsErased,
+      tablesTouched,
+      durationMs: Date.now() - startedAt,
+      error: stampErr.error.message,
+    });
     return NextResponse.json({ ok: false, error: stampErr.error.message }, { status: 500 });
   }
+  tablesTouched.push("user_profiles");
 
   // Step 2 — clear R8 networking_match_index rows for this user.
   const clearErr = await sb
@@ -69,6 +89,8 @@ export async function POST() {
     });
     // Non-fatal: the consent stamp is the binding guard for this user's
     // own endpoint access.  Other users' caches are cleared in Step 3.
+  } else {
+    tablesTouched.push("networking_match_index");
   }
 
   // Step 3 — cascade purge: remove this user's anon-keys from every
@@ -93,6 +115,8 @@ export async function POST() {
         .delete()
         .in("counterparty_anon_key", anonKeys);
       if (cascadeErr) throw cascadeErr;
+      tablesTouched.push("match_candidate_index");
+      itemsErased += anonKeys.length;
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -101,11 +125,29 @@ export async function POST() {
       err instanceof Error ? err : new Error(msg),
       { userId: user.id },
     );
+    // Emit cascade-failed audit row before responding — the Trust Console
+    // surfaces these so support can correlate user complaints with the
+    // exact failure mode.
+    await recordRevokeCascade({
+      userId: user.id,
+      itemsErased,
+      tablesTouched,
+      durationMs: Date.now() - startedAt,
+      error: msg,
+    });
     return NextResponse.json(
       { ok: false, reason: "revoke-cascade-failed" },
       { status: 500 },
     );
   }
+
+  // Success — record the proof row the Trust Console will render.
+  await recordRevokeCascade({
+    userId: user.id,
+    itemsErased,
+    tablesTouched,
+    durationMs: Date.now() - startedAt,
+  });
 
   return NextResponse.json({ ok: true });
 }

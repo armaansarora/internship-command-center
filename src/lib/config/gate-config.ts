@@ -40,6 +40,10 @@ export const GateConfigSchema = z.object({
     plausibleEnabled: z.function(),
     activationV1: z.function(),
     focusModeEnabled: z.boolean(),
+    operationsDashboardEnabled: z.function(),
+    councilTableEnabled: z.function(),
+    trustConsoleEnabled: z.function(),
+    seasonPassEnabled: z.function(),
   }).strict(),
 }).strict();
 
@@ -75,6 +79,19 @@ export const GATE_CONFIG = {
     activationV1: () => process.env.TOWER_ACTIVATION_V1 === "1",
     /** Focus Mode UI affordances. Defer until D14+. */
     focusModeEnabled: false,
+    /** PR 2 — Activation Funnel Dashboard at /operations. Owner-only path
+     *  even when on; the flag controls the visible UI affordance only. */
+    operationsDashboardEnabled: () =>
+      process.env.TOWER_OPERATIONS_DASHBOARD === "1",
+    /** PR 3 — Council Table on the C-Suite floor. Renders handoff dossier
+     *  packets emitted by the CEO orchestrator. */
+    councilTableEnabled: () => process.env.TOWER_COUNCIL_TABLE === "1",
+    /** PR 4 — Trust Console at /settings/privacy. Public-facing consent +
+     *  audit surface. Gated until copy is reviewed. */
+    trustConsoleEnabled: () => process.env.TOWER_TRUST_CONSOLE === "1",
+    /** PR 5 — Internship Season Pass tier visible on /pricing. Set after
+     *  Stripe price IDs are bootstrapped in production. */
+    seasonPassEnabled: () => process.env.TOWER_SEASON_PASS === "1",
   },
 } as const;
 

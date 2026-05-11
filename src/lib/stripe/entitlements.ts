@@ -1,8 +1,28 @@
-import { STRIPE_PLANS, type SubscriptionTier } from "./config";
+import {
+  STRIPE_PLANS,
+  LEGACY_TEAM_LIMITS,
+  type SubscriptionTier,
+} from "./config";
 import { getSubscriptionTier } from "./server";
 import { isOwner } from "@/lib/auth/owner";
 
 export type EntitlementFeature = "agents" | "dailyBriefing";
+
+type StripePlanLimits = (typeof STRIPE_PLANS)["pro"]["limits"];
+
+/**
+ * Resolve the entitlement limits row for a given tier.
+ *
+ * `team` is no longer surfaced on /pricing (replaced by the contact-sales
+ * Campus tier in the Season Pass council fork), but the durable
+ * `subscription_tier` column may still hold legacy "team" rows. Fall back
+ * to LEGACY_TEAM_LIMITS so those seats keep their entitlements until they
+ * migrate.
+ */
+function limitsForTier(tier: SubscriptionTier): StripePlanLimits {
+  if (tier === "team") return LEGACY_TEAM_LIMITS;
+  return STRIPE_PLANS[tier].limits;
+}
 
 /**
  * Check if a user's subscription tier allows a specific feature.
@@ -15,7 +35,7 @@ export async function checkEntitlement(
 ): Promise<boolean> {
   if (isOwner(userId)) return true;
   const tier = await getSubscriptionTier(userId);
-  return STRIPE_PLANS[tier].limits[feature];
+  return limitsForTier(tier)[feature];
 }
 
 /**
@@ -25,7 +45,7 @@ export async function checkEntitlement(
 export async function getApplicationLimit(userId: string): Promise<number> {
   if (isOwner(userId)) return Infinity;
   const tier = await getSubscriptionTier(userId);
-  return STRIPE_PLANS[tier].limits.applications;
+  return limitsForTier(tier).applications;
 }
 
 /**
@@ -35,7 +55,7 @@ export async function getApplicationLimit(userId: string): Promise<number> {
 export async function canUseAgents(userId: string): Promise<boolean> {
   if (isOwner(userId)) return true;
   const tier = await getSubscriptionTier(userId);
-  return STRIPE_PLANS[tier].limits.agents;
+  return limitsForTier(tier).agents;
 }
 
 /**
@@ -45,15 +65,16 @@ export async function canUseAgents(userId: string): Promise<boolean> {
 export async function getRateLimit(userId: string): Promise<number> {
   if (isOwner(userId)) return Infinity;
   const tier = await getSubscriptionTier(userId);
-  return STRIPE_PLANS[tier].limits.rateLimit;
+  return limitsForTier(tier).rateLimit;
 }
 
 /**
  * Returns the subscription tier for a given user. Owner is reported as
- * `team` (the highest declared tier) so any tier-comparison code that
- * doesn't know about the owner override still grants maximum permissions.
+ * `pro` (the highest declared tier surfaced on /pricing) so any
+ * tier-comparison code that doesn't know about the owner override still
+ * grants maximum permissions.
  */
 export async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  if (isOwner(userId)) return "team";
+  if (isOwner(userId)) return "pro";
   return getSubscriptionTier(userId);
 }

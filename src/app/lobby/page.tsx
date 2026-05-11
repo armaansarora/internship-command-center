@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getUser } from "@/lib/supabase/server";
 import { LobbyClient } from "./lobby-client";
 import { ConciergeFlow } from "./onboarding/ConciergeFlow";
@@ -13,8 +15,16 @@ export const metadata: Metadata = {
 };
 
 interface LobbyPageProps {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; intent?: string }>;
 }
+
+// httpOnly cookie that stashes a post-auth intent so the user resumes the
+// flow they came from (e.g. Season Pass checkout) after Google sign-in.
+// Short max-age so a stale intent can't hijack a later session.
+const POST_AUTH_INTENT_COOKIE = "tower_post_auth_intent";
+const POST_AUTH_INTENT_MAX_AGE = 600; // 10 minutes
+
+const VALID_POST_AUTH_INTENTS = new Set<string>(["season-pass"]);
 
 function getLobbyErrorMessage(error: string | undefined): string | null {
   if (!error) return null;
@@ -46,6 +56,46 @@ export default async function LobbyPage({ searchParams }: LobbyPageProps) {
   const user = await getUser();
   const params = await searchParams;
   const initialError = getLobbyErrorMessage(params.error);
+
+  // Post-auth intent: when /season-pass (and similar marketing CTAs) hit
+  // an unauthenticated user we redirect them here with `?intent=…`. Stash
+  // the intent in a short-lived httpOnly cookie BEFORE Google OAuth begins
+  // so the post-auth handoff knows where to send the user. After OAuth
+  // returns, this same page renders with `user` non-null and the cookie
+  // still set; we replay the intent and clear the cookie. Unknown intents
+  // are dropped silently — fail-closed.
+  const cookieStore = await cookies();
+  const queryIntent =
+    params.intent && VALID_POST_AUTH_INTENTS.has(params.intent)
+      ? params.intent
+      : null;
+  const stashedIntent = cookieStore.get(POST_AUTH_INTENT_COOKIE)?.value ?? null;
+  const validStashedIntent =
+    stashedIntent && VALID_POST_AUTH_INTENTS.has(stashedIntent)
+      ? stashedIntent
+      : null;
+
+  if (user && (queryIntent || validStashedIntent)) {
+    const intent = queryIntent ?? validStashedIntent;
+    cookieStore.delete(POST_AUTH_INTENT_COOKIE);
+    if (intent === "season-pass") {
+      // Authenticated — bounce to the Season Pass surface which has its
+      // own POST-to-checkout button. We don't auto-POST here because that
+      // would consume a Stripe session even if the user wandered in via
+      // back-button + refresh.
+      redirect("/season-pass?resume=1");
+    }
+  }
+
+  if (!user && queryIntent) {
+    cookieStore.set(POST_AUTH_INTENT_COOKIE, queryIntent, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: POST_AUTH_INTENT_MAX_AGE,
+    });
+  }
 
   const conciergeState = user ? await getConciergeState(user.id) : null;
   const needsOnboarding =
