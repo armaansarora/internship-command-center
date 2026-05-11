@@ -203,4 +203,117 @@ describe("POST /api/stripe/checkout", () => {
     expect(createCheckoutSessionSpy).not.toHaveBeenCalled();
     expect(createSeasonPassCheckoutSessionSpy).not.toHaveBeenCalled();
   });
+
+  // ── Failure-mode coverage (Stripe SDK error fan-out) ──────────────────────
+
+  it("returns generic copy for a card-declined Stripe error (never the raw Stripe message)", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    createCheckoutSessionSpy.mockRejectedValue(
+      Object.assign(new Error("Your card was declined."), {
+        type: "StripeCardError",
+        code: "card_declined",
+      }),
+    );
+
+    const res = await POST(makeRequest({ priceId: "price_1TQb9t0uey7yEjQosCsbrK3t" }));
+
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body).toEqual({ error: "Failed to create checkout session" });
+    // Defensive: raw Stripe message must not leak through.
+    expect(JSON.stringify(body)).not.toMatch(/card was declined/i);
+  });
+
+  it("returns generic copy for a 3DS authentication_required error", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    createCheckoutSessionSpy.mockRejectedValue(
+      Object.assign(new Error("Authentication required."), {
+        type: "StripeCardError",
+        code: "authentication_required",
+      }),
+    );
+
+    const res = await POST(makeRequest({ priceId: "price_1TQb9t0uey7yEjQosCsbrK3t" }));
+
+    expect(res.status).toBe(500);
+    await expect(res.json()).resolves.toEqual({
+      error: "Failed to create checkout session",
+    });
+  });
+
+  it("returns generic copy when Stripe reports a currency mismatch (invalid_request_error)", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    createCheckoutSessionSpy.mockRejectedValue(
+      Object.assign(
+        new Error(
+          "The currency provided (eur) does not match the Customer's default currency (usd).",
+        ),
+        { type: "StripeInvalidRequestError", code: "currency_mismatch" },
+      ),
+    );
+
+    const res = await POST(makeRequest({ priceId: "price_1TQb9t0uey7yEjQosCsbrK3t" }));
+
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body).toEqual({ error: "Failed to create checkout session" });
+    expect(JSON.stringify(body)).not.toMatch(/currency/i);
+  });
+
+  it("returns generic copy when Stripe reports a prior active subscription exists", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    createCheckoutSessionSpy.mockRejectedValue(
+      Object.assign(
+        new Error("Customer has an active subscription on this product."),
+        { type: "StripeInvalidRequestError", code: "resource_already_exists" },
+      ),
+    );
+
+    const res = await POST(makeRequest({ priceId: "price_1TQb9t0uey7yEjQosCsbrK3t" }));
+
+    expect(res.status).toBe(500);
+    await expect(res.json()).resolves.toEqual({
+      error: "Failed to create checkout session",
+    });
+  });
+
+  it("returns generic copy when Stripe reports an expired checkout session (race on retry)", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    createCheckoutSessionSpy.mockRejectedValue(
+      Object.assign(new Error("This Checkout Session has expired."), {
+        type: "StripeInvalidRequestError",
+        code: "resource_expired",
+      }),
+    );
+
+    const res = await POST(makeRequest({ priceId: "price_1TQb9t0uey7yEjQosCsbrK3t" }));
+
+    expect(res.status).toBe(500);
+    await expect(res.json()).resolves.toEqual({
+      error: "Failed to create checkout session",
+    });
+  });
+
+  it("returns generic copy for Season Pass when Stripe SDK throws (no raw Stripe error leaks)", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue(OK_RATE);
+    createSeasonPassCheckoutSessionSpy.mockRejectedValue(
+      Object.assign(new Error("Your card was declined."), {
+        type: "StripeCardError",
+        code: "card_declined",
+      }),
+    );
+
+    const res = await POST(makeRequest({ tier: "seasonPass" }));
+
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body).toEqual({ error: "Failed to create checkout session" });
+    expect(JSON.stringify(body)).not.toMatch(/card was declined/i);
+  });
 });

@@ -1,8 +1,37 @@
+import { createHash } from "node:crypto";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireEnv, env } from "@/lib/env";
 import { STRIPE_PLANS, type SubscriptionTier } from "./config";
+
+/**
+ * Derive a stable idempotency key for a checkout session create call.
+ *
+ * Stripe deduplicates `checkout.sessions.create` requests by the
+ * `Idempotency-Key` header — re-sending the same key with the same body
+ * within 24h returns the original session URL instead of creating a
+ * second one. We hash `(userId, priceId, mode)` so:
+ *   1. A double-click on the Pricing page returns one session URL, not two.
+ *   2. Two different users hitting the same price still get distinct keys.
+ *   3. Re-using the SAME user across SKU branches (Pro → Season Pass)
+ *      still gets distinct keys because `mode` is part of the digest.
+ *
+ * The key is intentionally derived from inputs the caller already has —
+ * no clock, no nonce — so retries within the dedup window converge.
+ * Length is capped at 255 chars (Stripe's hard limit) by SHA-256's
+ * fixed 64-hex-char output plus the short prefix.
+ */
+function checkoutIdempotencyKey(
+  userId: string,
+  priceId: string,
+  mode: "subscription" | "payment",
+): string {
+  const digest = createHash("sha256")
+    .update(`${userId}:${priceId}:${mode}`)
+    .digest("hex");
+  return `checkout:${mode}:${digest}`;
+}
 
 // ---------------------------------------------------------------------------
 // Lazy-init Stripe SDK
@@ -104,15 +133,18 @@ export async function createCheckoutSession(
   const customerId = await createOrRetrieveCustomer(userId, email);
   const domain = env().NEXT_PUBLIC_APP_URL;
 
-  const session = await getStripe().checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    payment_method_types: ["card"],
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${domain}/settings?upgrade=success`,
-    cancel_url: `${domain}/settings?upgrade=cancelled`,
-    metadata: { supabase_user_id: userId },
-  });
+  const session = await getStripe().checkout.sessions.create(
+    {
+      customer: customerId,
+      mode: "subscription",
+      payment_method_types: ["card"],
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${domain}/settings?upgrade=success`,
+      cancel_url: `${domain}/settings?upgrade=cancelled`,
+      metadata: { supabase_user_id: userId },
+    },
+    { idempotencyKey: checkoutIdempotencyKey(userId, priceId, "subscription") },
+  );
 
   if (!session.url) {
     throw new Error("Stripe did not return a checkout URL");
@@ -139,18 +171,27 @@ export async function createSeasonPassCheckoutSession(
   const customerId = await createOrRetrieveCustomer(userId, email);
   const domain = env().NEXT_PUBLIC_APP_URL;
 
-  const session = await getStripe().checkout.sessions.create({
-    customer: customerId,
-    mode: "payment",
-    payment_method_types: ["card"],
-    line_items: [{ price: seasonPassPriceId, quantity: 1 }],
-    success_url: `${domain}/settings?upgrade=success&plan=seasonPass`,
-    cancel_url: `${domain}/settings?upgrade=cancelled`,
-    metadata: {
-      supabase_user_id: userId,
-      tier: "seasonPass",
+  const session = await getStripe().checkout.sessions.create(
+    {
+      customer: customerId,
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: [{ price: seasonPassPriceId, quantity: 1 }],
+      success_url: `${domain}/settings?upgrade=success&plan=seasonPass`,
+      cancel_url: `${domain}/settings?upgrade=cancelled`,
+      metadata: {
+        supabase_user_id: userId,
+        tier: "seasonPass",
+      },
     },
-  });
+    {
+      idempotencyKey: checkoutIdempotencyKey(
+        userId,
+        seasonPassPriceId,
+        "payment",
+      ),
+    },
+  );
 
   if (!session.url) {
     throw new Error("Stripe did not return a checkout URL");

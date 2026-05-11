@@ -13,7 +13,9 @@ export type AuditEventType =
   | "agent_side_effect_email_sent" | "agent_side_effect_status_updated"
   | "prompt_injection_detected"
   | "subscription_created" | "subscription_canceled" | "subscription_updated"
-  | "login_succeeded" | "login_failed";
+  | "login_succeeded" | "login_failed"
+  // Stripe dunning + refund events — admitted by migration 0031.
+  | "payment_failed" | "refund_issued";
 
 export interface AuditEvent {
   userId: string;

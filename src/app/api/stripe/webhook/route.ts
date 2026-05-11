@@ -5,7 +5,11 @@ import { getStripe, tierFromPriceId } from "@/lib/stripe/server";
 import { requireEnv } from "@/lib/env";
 import { log } from "@/lib/logger";
 import { logSecurityEvent } from "@/lib/audit/log";
-import { buildSubscriptionAuditEvent } from "@/lib/stripe/webhook-audit";
+import {
+  buildSubscriptionAuditEvent,
+  buildPaymentFailureAuditEvent,
+  buildRefundAuditEvent,
+} from "@/lib/stripe/webhook-audit";
 import { stripeWebhookDuplicateDecision } from "@/lib/stripe/webhook-duplicate";
 import { readRawBodyWithLimit } from "@/lib/http/request-body";
 
@@ -358,6 +362,44 @@ async function handleStripeEvent(event: Stripe.Event): Promise<void> {
       );
 
       await auditSubscriptionEvent(event, userId);
+      return;
+    }
+
+    case "invoice.payment_failed": {
+      // Dunning event — emit a `payment_failed` audit row so the user's
+      // Trust Console timeline and the founder's ops dashboard both record
+      // the failure. Do NOT downgrade the subscription tier here: Stripe's
+      // dunning logic continues to retry (controlled by the Stripe Dashboard
+      // dunning settings), and the canonical tier transition arrives via a
+      // subsequent `customer.subscription.updated` if the customer never
+      // recovers the card.
+      const invoice = event.data.object as Stripe.Invoice;
+      const customer = invoice.customer;
+      if (!customer) return;
+
+      const userId = await findUserIdByStripeCustomer(supabase, customer);
+      if (!userId) return;
+
+      const auditEvent = buildPaymentFailureAuditEvent(event, userId);
+      if (auditEvent) await logSecurityEvent(auditEvent);
+      return;
+    }
+
+    case "charge.refunded": {
+      // Refund event — emit a `refund_issued` audit row. Like the dunning
+      // branch, we do not touch the subscription tier; refunds for the
+      // Season Pass do not automatically revoke access, and refunds for
+      // recurring SKUs are paired with their own `subscription.updated`
+      // delivery when the merchant cancels alongside.
+      const charge = event.data.object as Stripe.Charge;
+      const customer = charge.customer;
+      if (!customer) return;
+
+      const userId = await findUserIdByStripeCustomer(supabase, customer);
+      if (!userId) return;
+
+      const auditEvent = buildRefundAuditEvent(event, userId);
+      if (auditEvent) await logSecurityEvent(auditEvent);
       return;
     }
 
