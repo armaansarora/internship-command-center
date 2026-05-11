@@ -309,3 +309,89 @@ Disable the workflow from the Actions tab; the route remains callable
 on demand via `workflow_dispatch`. The `incident_alerts` table keeps
 the historical state machine — re-enabling the schedule does not
 re-page closed incidents.
+
+---
+
+## enable-season-pass-in-production
+
+The Internship Season Pass is shipped dark behind `TOWER_SEASON_PASS=1` in
+`src/lib/config/gate-config.ts`. The SKU itself (price, copy, refund text)
+is defined in `pricing-config.ts` and `legal-config.ts`. To go live in
+production:
+
+1. **Verify the Stripe price is bootstrapped.** Run
+   `./scripts/stripe-bootstrap.sh` (idempotent — re-runs return the
+   existing ids). Confirm the `price_*` for the one-time Season Pass SKU
+   appears in the script output. Re-run only when rotating Stripe
+   products.
+
+2. **Paste `STRIPE_SEASON_PASS_PRICE_ID` into Vercel env.** From the
+   Vercel dashboard → Settings → Environment Variables, scope to
+   **Production** only. The checkout route fails closed with `500
+   "Failed to create checkout session"` and logs
+   `stripe.checkout.create_session_failed` if this env var is missing,
+   so the misconfiguration is loud — but you still want it set first.
+
+3. **Set `TOWER_SEASON_PASS=1` in Vercel env (Production scope).** This
+   is the visibility gate. With it unset, /pricing renders Free + Pro
+   only, and /season-pass renders a "Coming soon" capture surface that
+   re-uses the waitlist email form. With it set to `"1"`, /pricing adds
+   the Season Pass card (centered, "Most popular" pin) and /season-pass
+   renders the full marketing surface.
+
+4. **Trigger a Vercel redeploy.** Both env vars are read at request time
+   (the flag is a thunk over `process.env.TOWER_SEASON_PASS`), so a
+   redeploy of the same commit is sufficient — no rebuild artifacts to
+   invalidate.
+
+5. **Smoke-test the live page.**
+   - `curl -sI https://www.interntower.com/pricing | head -1` → `200`
+     (the request itself; tier visibility is HTML-side).
+   - `curl -sI https://www.interntower.com/season-pass | head -1` → `200`.
+   - Sign in as the owner, visit `/pricing`, click the Season Pass
+     "Activate the pass" CTA, complete a $0.50 test Stripe checkout in
+     a test-mode card. Verify the `user_profiles.subscription_tier`
+     column flips to `seasonPass` in Supabase.
+   - Verify `stripe_webhook_events` has a `processed` row whose payload
+     contains `mode: "payment"` — that's the durable evidence the
+     one-time checkout completed and the webhook persisted the tier.
+
+6. **Dispatch the synthetic canary.** From the Actions tab → Synthetic
+   Canary → workflow_dispatch → run on `main`. The canary asserts /
+   renders and /lobby renders — it does NOT touch /pricing or /season-pass
+   by default. If you want the canary to cover the new surfaces, add
+   them to `tests/canary/production.spec.ts` and commit the change.
+
+### Rollback
+
+Set `TOWER_SEASON_PASS=0` (or unset it) in Vercel env and redeploy. The
+pricing page reverts to 2 tiers; the season-pass landing reverts to the
+"Coming soon" capture form. Any in-flight checkout sessions that have
+NOT yet completed will still complete (Stripe handles them server-side),
+and the webhook will still persist the entitlement — the flag gates the
+marketing surface, not the billing pipeline. Refund flow is unchanged
+and lives in the same audit log path as Pro refunds.
+
+### Common failures
+
+- **`STRIPE_SEASON_PASS_PRICE_ID` missing.** Symptom: clicking Activate
+  returns a 500 with `"Failed to create checkout session"`. Logs:
+  `stripe.checkout.create_session_failed`. Fix: paste the id into Vercel
+  env (Production scope) and redeploy.
+
+- **Webhook delivered but tier never persists.** Symptom: user completes
+  Stripe checkout but `user_profiles.subscription_tier` stays `free`.
+  Verify the webhook handler is reading the `checkout.session.completed`
+  event with `mode: "payment"` (one-time) — earlier revisions of the
+  webhook silently dropped these. Source:
+  `src/app/api/stripe/webhook/route.ts`, the `payment` branch under
+  `case "checkout.session.completed"`.
+
+- **Pricing page renders 2 tiers despite the flag being on.** Verify
+  the env var is set on the **Production** environment (not Preview)
+  and that a redeploy followed the env change. Vercel preview deploys
+  inherit Production env unless overridden — but the gate is a
+  process.env read, so missing-on-Production manifests as missing-on-
+  every-request after a redeploy.
+
+
