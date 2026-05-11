@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 import { LobbyClient } from "../lobby-client";
 import { ConciergeFlow } from "./ConciergeFlow";
 import { getConciergeState } from "@/lib/db/queries/user-profiles-rest";
@@ -13,6 +15,13 @@ export default async function LobbyOnboardingPage() {
 
   if (!user) {
     return <LobbyClient isAuthenticated={false} initialError={null} />;
+  }
+
+  // Activation V1 kill-switch: when the flag is flipped on, every
+  // authenticated arrival is rerouted into the new gauntlet so the legacy
+  // concierge flow doesn't fight it for first-run real estate.
+  if (GATE_CONFIG.flags.activationV1()) {
+    redirect("/activate");
   }
 
   const state = await getConciergeState(user.id);

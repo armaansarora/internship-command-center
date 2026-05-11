@@ -36,6 +36,15 @@ interface WorldShellProps {
   avatarUrl?: string | null;
   /** Focus Mode (Fix #4): hides world chrome when true. */
   focusMode: boolean;
+  /**
+   * Gauntlet stats — fed through to the Elevator so it can hide floors a
+   * beta-stage user has no reason to enter yet. Both default to "nothing
+   * extra is unlocked" so a missing fetch never surfaces a broken floor.
+   */
+  offerCount: number;
+  appCount: number;
+  /** ISO timestamp of the user's first application, if any. */
+  firstAppliedAt: string | null;
 }
 
 /**
@@ -59,6 +68,9 @@ export function WorldShell({
   userEmail,
   avatarUrl,
   focusMode,
+  offerCount,
+  appCount,
+  firstAppliedAt,
 }: WorldShellProps) {
   const displayName = userName ?? userEmail.split("@")[0];
 
@@ -82,7 +94,11 @@ export function WorldShell({
             <PersistentWorld />
 
             {/* Elevator panel — left side */}
-            <Elevator />
+            <Elevator
+              offerCount={offerCount}
+              appCount={appCount}
+              firstAppliedAt={firstAppliedAt}
+            />
           </>
         )}
 

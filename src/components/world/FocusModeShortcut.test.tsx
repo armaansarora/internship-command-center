@@ -16,6 +16,18 @@ vi.mock("@/hooks/useReducedMotion", () => ({
   useReducedMotion: () => false,
 }));
 
+// The Focus Mode UI is gated on GATE_CONFIG.flags.focusModeEnabled.
+// During the activation gauntlet beta this flag defaults to false and
+// the listener does not register, so we stub the gate to true here to
+// keep the existing shortcut behavior covered.
+vi.mock("@/lib/config/gate-config", () => ({
+  GATE_CONFIG: {
+    flags: {
+      focusModeEnabled: true,
+    },
+  },
+}));
+
 import { FocusModeShortcut } from "./FocusModeShortcut";
 
 let container: HTMLDivElement;

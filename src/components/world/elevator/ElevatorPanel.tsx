@@ -1,13 +1,50 @@
 "use client";
 
 import { useMemo, useState, useRef, useCallback, useEffect, type JSX } from "react";
+import { useRouter } from "next/navigation";
 import { FLOORS, FLOOR_ORDER, type FloorId } from "@/lib/constants/floors";
 import { ElevatorButton } from "./ElevatorButton";
+
+/** Minimum applications + days of history before the Observatory unlocks. */
+const OBSERVATORY_MIN_APPS = 5;
+const OBSERVATORY_MIN_DAYS = 7;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Pure helpers for the gauntlet gates — exported so tests can pin the
+ * gate logic without rendering React. Kept tiny and explicit; the goal
+ * is "show nothing until the user has earned the unlock," so unknown
+ * inputs (negative counts, null timestamps, future-dated rows) collapse
+ * to the safe `false` path rather than throwing.
+ */
+export function isObservatoryUnlocked(
+  appCount: number,
+  firstAppliedAt: string | null,
+  now: Date = new Date(),
+): boolean {
+  if (appCount < OBSERVATORY_MIN_APPS) return false;
+  if (!firstAppliedAt) return false;
+  const parsed = new Date(firstAppliedAt);
+  if (Number.isNaN(parsed.getTime())) return false;
+  // Elapsed hours, NOT calendar days: a user who applies at 23:55 local and
+  // reloads at 00:05 seven days later sees ageDays ≈ 6.0 (locked), which is
+  // intentional. Tests pin the "exactly 7×24h" boundary — do not "fix" this
+  // into a date-only diff.
+  const ageDays = (now.getTime() - parsed.getTime()) / MS_PER_DAY;
+  return ageDays >= OBSERVATORY_MIN_DAYS;
+}
+
+export function isParlorUnlocked(offerCount: number): boolean {
+  return offerCount > 0;
+}
 
 interface ElevatorPanelProps {
   activeFloor: FloorId;
   isTransitioning: boolean;
   onNavigate: (floorId: FloorId) => void;
+  offerCount: number;
+  appCount: number;
+  firstAppliedAt: string | null;
 }
 
 /** Tower silhouette SVG in the panel header. */
@@ -57,15 +94,31 @@ export function ElevatorPanel({
   activeFloor,
   isTransitioning,
   onNavigate,
+  offerCount,
+  appCount,
+  firstAppliedAt,
 }: ElevatorPanelProps): JSX.Element {
+  const router = useRouter();
   const activeFloorData = useMemo(
     () => FLOORS.find((f) => f.id === activeFloor),
     [activeFloor],
   );
 
+  const observatoryUnlocked = isObservatoryUnlocked(appCount, firstAppliedAt);
+  const parlorUnlocked = isParlorUnlocked(offerCount);
+
+  const visibleFloorOrder = useMemo(
+    () =>
+      FLOOR_ORDER.filter((floorId) => {
+        if (floorId === "2" && !observatoryUnlocked) return false;
+        return true;
+      }),
+    [observatoryUnlocked],
+  );
+
   const floorButtons = useMemo(
     () =>
-      FLOOR_ORDER.map((floorId) => {
+      visibleFloorOrder.map((floorId) => {
         const floor = FLOORS.find((f) => f.id === floorId);
         if (!floor) return null;
         return (
@@ -79,8 +132,13 @@ export function ElevatorPanel({
           />
         );
       }),
-    [activeFloor, isTransitioning, onNavigate],
+    [visibleFloorOrder, activeFloor, isTransitioning, onNavigate],
   );
+
+  const handleParlorClick = useCallback(() => {
+    if (isTransitioning) return;
+    router.push("/parlor");
+  }, [router, isTransitioning]);
 
   return (
     <nav
@@ -118,6 +176,88 @@ export function ElevatorPanel({
 
         {/* ── Floor Buttons ── */}
         {floorButtons}
+
+        {/* ── Parlor Annex Button ──
+            Rendered ONLY when the user has at least one offer. The Parlor
+            is an off-elevator annex on the C-Suite floor, so the route is
+            pushed directly through next/router rather than the elevator's
+            floor-transition state machine. The /parlor route also
+            redirects to /c-suite when offerCount===0 (see
+            r10-parlor-route-gate.proof.test.ts) — the button is the
+            first line of defence, the redirect is the safety net. */}
+        {parlorUnlocked && (
+          <div className="elevator-btn-wrap">
+            <button
+              type="button"
+              onClick={handleParlorClick}
+              disabled={isTransitioning}
+              aria-label="The Negotiation Parlor — Offers"
+              data-elevator-button="parlor"
+              className={[
+                "w-9 h-9 rounded-full flex items-center justify-center",
+                "text-data text-xs font-medium transition-all duration-200",
+                "focus-visible:outline-2 focus-visible:outline-[var(--gold)] focus-visible:outline-offset-2",
+                isTransitioning
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer",
+              ].join(" ")}
+              style={{
+                color: "var(--text-secondary)",
+                border: "1px solid rgba(201, 168, 76, 0.45)",
+                marginTop: "2px",
+              }}
+            >
+              <span
+                style={{ ...monoStyle, fontSize: "10px", lineHeight: 1 }}
+              >
+                NP
+              </span>
+            </button>
+            <div
+              className="elevator-tooltip"
+              role="tooltip"
+              aria-hidden="true"
+            >
+              <div
+                style={{
+                  background: "rgba(10, 12, 25, 0.92)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border: "1px solid rgba(201, 168, 76, 0.15)",
+                  borderLeft: "2px solid rgba(201, 168, 76, 0.7)",
+                  borderRadius: "6px",
+                  padding: "5px 10px",
+                  boxShadow:
+                    "0 4px 16px rgba(0,0,0,0.5), 0 0 8px rgba(201,168,76,0.06)",
+                }}
+              >
+                <div
+                  style={{
+                    ...monoStyle,
+                    fontSize: "11px",
+                    color: "var(--text-primary)",
+                    lineHeight: 1.3,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  The Negotiation Parlor
+                </div>
+                <div
+                  style={{
+                    ...monoStyle,
+                    fontSize: "9px",
+                    color: "rgba(201, 168, 76, 0.65)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    marginTop: "1px",
+                  }}
+                >
+                  Offers
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Status Indicator: FLOOR [X] ── */}
         <div
@@ -222,12 +362,28 @@ export function ElevatorMobileBar({
   activeFloor,
   isTransitioning,
   onNavigate,
+  offerCount,
+  appCount,
+  firstAppliedAt,
 }: ElevatorPanelProps): JSX.Element {
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const activeFloorData = useMemo(
     () => FLOORS.find((f) => f.id === activeFloor),
     [activeFloor],
+  );
+
+  const observatoryUnlocked = isObservatoryUnlocked(appCount, firstAppliedAt);
+  const parlorUnlocked = isParlorUnlocked(offerCount);
+
+  const visibleFloorOrder = useMemo(
+    () =>
+      FLOOR_ORDER.filter((floorId) => {
+        if (floorId === "2" && !observatoryUnlocked) return false;
+        return true;
+      }),
+    [observatoryUnlocked],
   );
 
   const dismiss = useCallback(() => setExpanded(false), []);
@@ -242,10 +398,16 @@ export function ElevatorMobileBar({
     [onNavigate],
   );
 
+  const handleParlorNavigate = useCallback(() => {
+    setExpanded(false);
+    if (isTransitioning) return;
+    router.push("/parlor");
+  }, [router, isTransitioning]);
+
   // All floor buttons for the sheet (with names visible)
   const sheetFloorItems = useMemo(
     () =>
-      FLOOR_ORDER.map((floorId) => {
+      visibleFloorOrder.map((floorId) => {
         const floor = FLOORS.find((f) => f.id === floorId);
         if (!floor) return null;
         const isActive = floorId === activeFloor;
@@ -340,8 +502,88 @@ export function ElevatorMobileBar({
           </button>
         );
       }),
-    [activeFloor, isTransitioning, handleNavigate],
+    [visibleFloorOrder, activeFloor, isTransitioning, handleNavigate],
   );
+
+  /**
+   * Optional Parlor entry appended at the bottom of the floor sheet. Only
+   * surfaces when the user has at least one offer. Visually mirrors the
+   * regular floor row so it slots in without re-architecting the sheet.
+   */
+  const parlorSheetItem = parlorUnlocked ? (
+    <button
+      key="parlor"
+      onClick={handleParlorNavigate}
+      disabled={isTransitioning}
+      aria-label="The Negotiation Parlor — Offers"
+      data-elevator-button="parlor"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        width: "100%",
+        padding: "10px 16px",
+        background: "transparent",
+        border: "none",
+        borderRadius: "8px",
+        cursor: isTransitioning ? "default" : "pointer",
+        opacity: isTransitioning ? 0.5 : 1,
+        minHeight: "44px",
+      }}
+    >
+      <span
+        style={{
+          ...monoStyle,
+          width: "32px",
+          height: "32px",
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "13px",
+          fontWeight: 700,
+          background: "rgba(255,255,255,0.06)",
+          color: "var(--text-secondary)",
+          flexShrink: 0,
+          border: "1px solid rgba(201, 168, 76, 0.45)",
+        }}
+      >
+        NP
+      </span>
+      <span
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: "2px",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'Satoshi', system-ui, sans-serif",
+            fontSize: "14px",
+            color: "var(--text-primary)",
+            fontWeight: 400,
+            lineHeight: 1.2,
+          }}
+        >
+          The Negotiation Parlor
+        </span>
+        <span
+          style={{
+            ...monoStyle,
+            fontSize: "10px",
+            color: "var(--text-muted)",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            lineHeight: 1,
+          }}
+        >
+          Offers
+        </span>
+      </span>
+    </button>
+  ) : null;
 
   return (
     <>
@@ -466,6 +708,7 @@ export function ElevatorMobileBar({
           }}
         >
           {sheetFloorItems}
+          {parlorSheetItem}
         </div>
       </div>
       )}

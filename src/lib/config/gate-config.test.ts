@@ -12,10 +12,12 @@ import { GATE_CONFIG, GateConfigSchema } from "./gate-config";
 describe("GATE_CONFIG", () => {
   let prevAppUrl: string | undefined;
   let prevPlausible: string | undefined;
+  let prevActivation: string | undefined;
 
   beforeEach(() => {
     prevAppUrl = process.env.NEXT_PUBLIC_APP_URL;
     prevPlausible = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+    prevActivation = process.env.TOWER_ACTIVATION_V1;
   });
 
   afterEach(() => {
@@ -24,6 +26,9 @@ describe("GATE_CONFIG", () => {
 
     if (prevPlausible === undefined) delete process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
     else process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN = prevPlausible;
+
+    if (prevActivation === undefined) delete process.env.TOWER_ACTIVATION_V1;
+    else process.env.TOWER_ACTIVATION_V1 = prevActivation;
   });
 
   it("parses cleanly through GateConfigSchema", () => {
@@ -77,6 +82,19 @@ describe("GATE_CONFIG", () => {
     expect(GATE_CONFIG.flags.plausibleEnabled()).toBe(false);
     process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN = "example.com";
     expect(GATE_CONFIG.flags.plausibleEnabled()).toBe(true);
+  });
+
+  it("activationV1 is a thunk over TOWER_ACTIVATION_V1; focusModeEnabled defaults off", () => {
+    delete process.env.TOWER_ACTIVATION_V1;
+    expect(GATE_CONFIG.flags.activationV1()).toBe(false);
+    process.env.TOWER_ACTIVATION_V1 = "1";
+    expect(GATE_CONFIG.flags.activationV1()).toBe(true);
+    process.env.TOWER_ACTIVATION_V1 = "0";
+    expect(GATE_CONFIG.flags.activationV1()).toBe(false);
+    process.env.TOWER_ACTIVATION_V1 = "yes";
+    expect(GATE_CONFIG.flags.activationV1()).toBe(false);
+
+    expect(GATE_CONFIG.flags.focusModeEnabled).toBe(false);
   });
 
   it("rejects an unknown top-level key under .strict()", () => {

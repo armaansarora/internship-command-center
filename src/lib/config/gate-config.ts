@@ -38,6 +38,8 @@ export const GateConfigSchema = z.object({
   flags: z.object({
     waitlistPublic: z.boolean(),
     plausibleEnabled: z.function(),
+    activationV1: z.function(),
+    focusModeEnabled: z.boolean(),
   }).strict(),
 }).strict();
 
@@ -69,6 +71,10 @@ export const GATE_CONFIG = {
     waitlistPublic: true,
     /** Plausible analytics. Off if NEXT_PUBLIC_PLAUSIBLE_DOMAIN unset. */
     plausibleEnabled: () => !!process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN,
+    /** New /activate route. Old /lobby/onboarding redirects here when on. */
+    activationV1: () => process.env.TOWER_ACTIVATION_V1 === "1",
+    /** Focus Mode UI affordances. Defer until D14+. */
+    focusModeEnabled: false,
   },
 } as const;
 

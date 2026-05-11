@@ -48,18 +48,11 @@ export const QUICK_ACTION_DISPATCHES: QuickActionDispatch[] = [
     kind: "nav",
     route: "/war-room?new=1",
   },
-  {
-    key: "research_company",
-    label: "Research Company",
-    desc: "Get intelligence on a target company",
-    accentColor: "#4C8FD4",
-    glowColor: "rgba(76,143,212,0.14)",
-    borderColor: "rgba(76,143,212,0.25)",
-    kind: "agent",
-    route: "/rolodex-lounge",
-    ackText: "CIO is warming up on Floor 6. Research briefs land on the whiteboard.",
-    ownerAgent: "CIO",
-  },
+  // "Research Company" temporarily withdrawn from the Penthouse rail:
+  // the CIO character is hidden from Floor 6 until the agent gets folded
+  // into CRO/CNO (per the AgentArch council recommendation). Restoring
+  // this entry means re-wiring the route + acknowledgment to a visible
+  // owner first.
   {
     key: "prep_interview",
     label: "Prep Interview",

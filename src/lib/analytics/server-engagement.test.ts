@@ -365,4 +365,121 @@ describe("recordServerEngagementEvent", () => {
       expect.objectContaining({ error: "network down" }),
     );
   });
+
+  // ------------------------------------------------------------------------
+  // activation_step (PR1 — 5-minute activation gauntlet)
+  // ------------------------------------------------------------------------
+
+  it("activation_step writes with route_kind 'activation'", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "activation_step",
+      pathname: "/activate",
+      userId: "00000000-0000-0000-0000-000000000001",
+    });
+
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event_type: "activation_step",
+        route_kind: "activation",
+        pathname: "/activate",
+      }),
+    );
+  });
+
+  it("activation_step preserves step_id, outcome, dwell_ms, source, and beat metadata", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "activation_step",
+      pathname: "/activate",
+      userId: "00000000-0000-0000-0000-000000000001",
+      floor: null,
+      metadata: {
+        step_id: "intake_complete",
+        outcome: "success",
+        dwell_ms: 4321,
+        source: "gmail",
+        beat: "google_connect",
+      },
+    });
+
+    const call = insertMock.mock.calls[0][0] as {
+      metadata: Record<string, unknown>;
+    };
+    expect(call.metadata).toEqual({
+      step_id: "intake_complete",
+      outcome: "success",
+      dwell_ms: 4321,
+      source: "gmail",
+      beat: "google_connect",
+    });
+  });
+
+  it("activation_step still strips non-allowlisted keys (no leakage via new event type)", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "activation_step",
+      pathname: "/activate",
+      userId: "00000000-0000-0000-0000-000000000001",
+      metadata: {
+        beat: "intake",
+        outcome: "success",
+        // not in allowlist — must be dropped
+        email: "user@example.com",
+        secret: "should never appear",
+      },
+    });
+
+    const call = insertMock.mock.calls[0][0] as {
+      metadata: Record<string, unknown>;
+    };
+    expect(call.metadata).toEqual({
+      beat: "intake",
+      outcome: "success",
+    });
+  });
+
+  it("regression: floor_view still writes with route_kind 'floor' after activation additions", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "floor_view",
+      pathname: "/penthouse",
+      userId: "00000000-0000-0000-0000-000000000001",
+      floor: "penthouse",
+    });
+
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event_type: "floor_view",
+        route_kind: "floor",
+        floor: "penthouse",
+      }),
+    );
+  });
+
+  it("regression: auth_gate_blocked still writes with route_kind 'gate' after activation additions", async () => {
+    process.env.TOWER_SERVER_ANALYTICS_ENABLED = "1";
+    insertMock.mockResolvedValueOnce({ error: null });
+
+    await recordServerEngagementEvent({
+      eventType: "auth_gate_blocked",
+      pathname: "/penthouse",
+      userId: null,
+    });
+
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event_type: "auth_gate_blocked",
+        route_kind: "gate",
+      }),
+    );
+  });
 });

@@ -10,6 +10,10 @@ vi.mock("@/components/world/elevator/ElevatorButton", () => ({
   }) => <button type="button">{floor.id}</button>,
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: () => undefined }),
+}));
+
 describe("ElevatorMobileBar", () => {
   it("does not expose the closed floor sheet as a hidden dialog", () => {
     const html = renderToStaticMarkup(
@@ -17,6 +21,9 @@ describe("ElevatorMobileBar", () => {
         activeFloor="PH"
         isTransitioning={false}
         onNavigate={() => undefined}
+        offerCount={0}
+        appCount={0}
+        firstAppliedAt={null}
       />,
     );
 

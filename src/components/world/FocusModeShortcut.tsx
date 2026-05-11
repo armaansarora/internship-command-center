@@ -9,6 +9,7 @@ import {
 } from "react";
 import { toggleFocusMode } from "@/app/(authenticated)/actions/focus-mode";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { GATE_CONFIG } from "@/lib/config/gate-config";
 
 interface FocusModeShortcutProps {
   /** Current focusMode value, threaded from the server layout. */
@@ -29,10 +30,17 @@ const TOAST_DURATION_MS = 1400;
  * The transient toast is not the source of truth — `props.focusMode` is.
  * The toast renders only what the keypress just changed to, then
  * auto-clears so future toggles re-announce.
+ *
+ * Gated on `GATE_CONFIG.flags.focusModeEnabled`. While false (default
+ * during the activation-gauntlet beta) the listener is not registered
+ * and the toast slot stays unmounted; the `tower_focus_mode` cookie
+ * and the `toggleFocusMode` server action remain intact and become
+ * visible again the moment the flag flips.
  */
 export function FocusModeShortcut({
   focusMode,
-}: FocusModeShortcutProps): JSX.Element {
+}: FocusModeShortcutProps): JSX.Element | null {
+  const focusModeEnabled = GATE_CONFIG.flags.focusModeEnabled;
   const reducedMotion = useReducedMotion();
   const [isPending, startTransition] = useTransition();
   const [toastText, setToastText] = useState<string>("");
@@ -44,6 +52,7 @@ export function FocusModeShortcut({
   }, [isPending]);
 
   useEffect(() => {
+    if (!focusModeEnabled) return;
     function onKey(e: KeyboardEvent) {
       const isMatch =
         (e.metaKey || e.ctrlKey) &&
@@ -90,13 +99,15 @@ export function FocusModeShortcut({
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [focusMode, startTransition]);
+  }, [focusMode, focusModeEnabled, startTransition]);
 
   useEffect(() => {
     return () => {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
   }, []);
+
+  if (!focusModeEnabled) return null;
 
   return (
     <div

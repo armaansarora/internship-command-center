@@ -14,10 +14,14 @@ import {
 
 export const metadata: Metadata = { title: "The Rolodex Lounge | The Tower" };
 
-/** Floor 6 — Contacts Network + CNO Agent + CIO Agent.
+/** Floor 6 — Contacts Network + CNO Agent.
  *
- * Skyline + chrome paint immediately; the contact grid + CIO research stats
- * stream into the Suspense boundary so the floor's atmosphere appears first.
+ * The CIO surface (character, whiteboard, dialogue) was folded out of
+ * the visible cast in the activation gauntlet pass; the lounge now
+ * surfaces a single character so a first-time visitor has one clear
+ * affordance instead of two competing ones. Skyline + chrome paint
+ * immediately; the contact grid streams into the Suspense boundary so
+ * the floor's atmosphere appears first.
  */
 export default async function RolodexLoungePage(): Promise<JSX.Element> {
   const user = await requireUser();
@@ -38,28 +42,20 @@ async function RolodexLoungeData({
 }): Promise<JSX.Element> {
   const supabase = await createClient();
 
-  // Fetch contacts (with warmth computed) and companies in parallel.
-  // We pull the full company shape because the CIO whiteboard derives
-  // research-freshness stats from it.
+  // Fetch contacts (with warmth computed) and the company list — the
+  // contact modal needs the company list to link a contact to a company
+  // record, but no longer needs the CIO research-freshness derivation.
   const [contacts, contactStats, companiesResult] = await Promise.all([
     getContactsByUser(userId),
     getContactStats(userId),
     supabase
       .from("companies")
-      .select("id, name, sector, research_freshness, internship_intel, website, updated_at")
+      .select("id, name")
       .eq("user_id", userId)
       .order("name", { ascending: true }),
   ]);
 
-  type CompanyRow = {
-    id: string;
-    name: string;
-    sector: string | null;
-    research_freshness: string | null;
-    internship_intel: string | null;
-    website: string | null;
-    updated_at: string | null;
-  };
+  type CompanyRow = { id: string; name: string };
 
   const companyRows = (companiesResult.data ?? []) as CompanyRow[];
 
@@ -68,64 +64,11 @@ async function RolodexLoungeData({
     name: row.name,
   }));
 
-  // ── CIO research stats — shape consumed by CIOWhiteboard ────────────────
-  const FRESH_DAYS = 7;
-  const STALE_DAYS = 30;
-  // Server component: per-request Date.now() is the correct pattern for
-  // freshness-tier bucketing. React's purity rule targets client components
-  // whose re-renders should be idempotent; server components render once per
-  // request and non-determinism is the norm.
-  // eslint-disable-next-line react-hooks/purity -- per-request timestamp in server component
-  const now = Date.now();
-
-  const researchedCompanies = companyRows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    sector: row.sector,
-    lastResearchedAt: row.research_freshness ? new Date(row.research_freshness) : null,
-    hasNotes: Boolean(row.internship_intel),
-    domain: row.website,
-  }));
-
-  let freshCount = 0;
-  let staleCount = 0;
-  let researchedCount = 0;
-  for (const c of researchedCompanies) {
-    if (!c.lastResearchedAt) continue;
-    researchedCount++;
-    const ageDays = (now - c.lastResearchedAt.getTime()) / (1000 * 60 * 60 * 24);
-    if (ageDays < FRESH_DAYS) freshCount++;
-    else if (ageDays > STALE_DAYS) staleCount++;
-  }
-
-  const recentActivity = researchedCompanies
-    .filter((c) => c.lastResearchedAt !== null)
-    .sort(
-      (a, b) =>
-        (b.lastResearchedAt?.getTime() ?? 0) - (a.lastResearchedAt?.getTime() ?? 0),
-    )
-    .slice(0, 4)
-    .map((c) => ({
-      companyName: c.name,
-      action: "researched",
-      at: c.lastResearchedAt as Date,
-    }));
-
-  const researchStats = {
-    totalCompanies: researchedCompanies.length,
-    researchedCount,
-    staleCount,
-    freshCount,
-    recentActivity,
-    companies: researchedCompanies,
-  };
-
   return (
     <RolodexLoungeClient
       contacts={contacts}
       contactStats={contactStats}
       companies={companies}
-      researchStats={researchStats}
       onCreateContact={createContactAction}
       onUpdateContact={updateContactAction}
       onDeleteContact={deleteContactAction}

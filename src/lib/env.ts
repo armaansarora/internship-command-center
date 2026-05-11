@@ -65,6 +65,12 @@ const EnvSchema = z.object({
   // never even dynamically imported.
   TOWER_SERVER_ANALYTICS_ENABLED: z.string().optional(),
 
+  // Activation V1 route kill-switch. Set to "1" to route new users through
+  // /activate (5-minute activation gauntlet). When unset/empty, the legacy
+  // /lobby/onboarding concierge flow is used. Read via GATE_CONFIG.flags
+  // .activationV1() so the value is re-evaluated on every server render.
+  TOWER_ACTIVATION_V1: z.string().optional(),
+
   // ── Cron ─────────────────────────────────────────────────────────────────
   CRON_SECRET: z.string().min(16).optional(),
 

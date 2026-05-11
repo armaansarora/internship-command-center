@@ -721,7 +721,7 @@ export function ContactModal({
                     letterSpacing: "0.04em",
                   }}
                 >
-                  Visible only to you. Never seen by the CEO, CNO, CIO, or any AI.
+                  Visible only to you. Never seen by the CEO, CNO, or any AI.
                 </span>
               </Field>
             </div>

@@ -93,6 +93,24 @@ const ELEVATOR_STYLES = `
 }
 `;
 
+interface ElevatorProps {
+  /**
+   * Number of offers the user has. When 0 the Parlor annex button is
+   * hidden — the /parlor route also redirects, so the elevator never
+   * surfaces a button that walks straight into a bounce. Optional so
+   * the lobby (which mounts the Elevator pre-layout) can omit it; an
+   * omitted value defaults to "no offers" which is the safe gate.
+   */
+  offerCount?: number;
+  /** Total application count, for the Observatory unlock gate. */
+  appCount?: number;
+  /**
+   * ISO timestamp of the user's first application, or null. Combined with
+   * `appCount` to gate the Observatory: ≥5 apps AND ≥7 days of history.
+   */
+  firstAppliedAt?: string | null;
+}
+
 /**
  * Elevator — persistent left-side navigation with GSAP door transitions.
  *
@@ -102,8 +120,18 @@ const ELEVATOR_STYLES = `
  * - SessionStorage arriving-flag coordination (cross-route transitions)
  * - Custom `elevator:navigate` event listener
  * - Composition of ElevatorPanel, ElevatorMobileBar, ElevatorDoors
+ *
+ * Floor visibility is gated on the gauntlet stats threaded down from the
+ * authenticated layout. Hiding a button does NOT remove the floor from
+ * FLOOR_ORDER — the elevator's tick animation still walks through every
+ * floor index between source and target so floor-counter sequence stays
+ * physically continuous.
  */
-export function Elevator(): JSX.Element {
+export function Elevator({
+  offerCount = 0,
+  appCount = 0,
+  firstAppliedAt = null,
+}: ElevatorProps): JSX.Element {
   const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState<ElevatorState>("idle");
@@ -387,6 +415,9 @@ export function Elevator(): JSX.Element {
           activeFloor={activeFloor}
           isTransitioning={isTransitioning}
           onNavigate={navigateToFloor}
+          offerCount={offerCount}
+          appCount={appCount}
+          firstAppliedAt={firstAppliedAt}
         />
 
         {/* Cable below panel */}
@@ -409,6 +440,9 @@ export function Elevator(): JSX.Element {
         activeFloor={activeFloor}
         isTransitioning={isTransitioning}
         onNavigate={navigateToFloor}
+        offerCount={offerCount}
+        appCount={appCount}
+        firstAppliedAt={firstAppliedAt}
       />
 
       {/* ══════════════════════════════════════════════════════

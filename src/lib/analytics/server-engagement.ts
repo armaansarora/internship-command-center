@@ -7,7 +7,10 @@ import { log } from "@/lib/logger";
  * Fire-and-forget. Never throws. Kill-switched by env var.
  *
  * What this module owns end-to-end:
- *   - Event-type union and route-kind mapping (LOCKED to 3 values each).
+ *   - Event-type union and route-kind mapping. Middleware emits three kinds
+ *     (marketing_view, floor_view, auth_gate_blocked); server actions emit
+ *     activation_step. The classifier here never produces activation_step —
+ *     those are written directly from the /activate server actions.
  *   - Middleware request classifier — decides whether the request even
  *     produces an event, before any DB call.
  *   - Pathname / metadata sanitization. Query strings, hashes, and any
@@ -29,9 +32,14 @@ import { log } from "@/lib/logger";
 export type EngagementEventType =
   | "marketing_view"
   | "floor_view"
-  | "auth_gate_blocked";
+  | "auth_gate_blocked"
+  | "activation_step";
 
-export type EngagementRouteKind = "marketing" | "floor" | "gate";
+export type EngagementRouteKind =
+  | "marketing"
+  | "floor"
+  | "gate"
+  | "activation";
 
 export type EngagementMetadataValue = string | number | boolean;
 export type EngagementMetadata = Record<string, EngagementMetadataValue>;
@@ -79,6 +87,12 @@ const ALLOWED_METADATA_KEYS = new Set<string>([
   "is_authenticated",
   "tier",
   "is_first_floor_visit",
+  // activation_step keys (PR1 — 5-minute activation gauntlet)
+  "step_id",
+  "outcome",
+  "dwell_ms",
+  "source",
+  "beat",
 ]);
 
 const MAX_PATHNAME_LENGTH = 256;
@@ -120,6 +134,7 @@ const IGNORE_EXACT = new Set<string>(["/api", "/sentry-tunnel"]);
 function routeKindFor(eventType: EngagementEventType): EngagementRouteKind {
   if (eventType === "floor_view") return "floor";
   if (eventType === "auth_gate_blocked") return "gate";
+  if (eventType === "activation_step") return "activation";
   return "marketing";
 }
 

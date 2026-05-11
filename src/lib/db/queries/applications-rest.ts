@@ -4,6 +4,7 @@
  * All War Room server components and CRO tools use these.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getApplicationLimit } from "@/lib/stripe/entitlements";
@@ -104,6 +105,68 @@ function rowToAgentFormat(row: ApplicationRow): ApplicationForAgent {
 // ---------------------------------------------------------------------------
 // Queries (Supabase REST)
 // ---------------------------------------------------------------------------
+
+/**
+ * Lightweight gauntlet helpers — count of applications and the timestamp of
+ * the user's first applied row. Both used by the authenticated layout to
+ * decide whether to surface the Observatory floor (analytics needs ≥5 apps
+ * and ≥7 days of pipeline history before its charts read as anything other
+ * than noise). Two separate REST calls because Supabase REST can't return a
+ * count + ordered-first row in a single request and the layout already
+ * parallelises its fetches.
+ */
+export interface ApplicationGauntletStats {
+  count: number;
+  firstAppliedAt: string | null;
+}
+
+export async function getApplicationGauntletStats(
+  client: SupabaseClient,
+  userId: string,
+): Promise<ApplicationGauntletStats> {
+  const supabase = client;
+
+  const [countResult, firstAppliedResult] = await Promise.all([
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId),
+    supabase
+      .from("applications")
+      .select("applied_at, created_at")
+      .eq("user_id", userId)
+      .order("applied_at", { ascending: true, nullsFirst: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  if (countResult.error) {
+    log.error("applications.count_failed", undefined, {
+      userId,
+      error: countResult.error.message,
+    });
+  }
+
+  if (firstAppliedResult.error) {
+    log.error("applications.first_applied_at_failed", undefined, {
+      userId,
+      error: firstAppliedResult.error.message,
+    });
+  }
+
+  // Fall back to created_at when an application has no applied_at — the row
+  // existed at that moment so the pipeline has started accumulating signal.
+  const firstRow = firstAppliedResult.data as
+    | { applied_at: string | null; created_at: string | null }
+    | null;
+  const firstAppliedAt =
+    firstRow?.applied_at ?? firstRow?.created_at ?? null;
+
+  return {
+    count: countResult.count ?? 0,
+    firstAppliedAt,
+  };
+}
 
 /**
  * Fetch all applications for a user, ordered by position then created_at.
