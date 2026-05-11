@@ -676,17 +676,30 @@ type AmbientFactory = (engine: SoundEngine, ctx: AudioContext) => ActiveAmbient;
  * Named factory table that bridges the public bed name to the engine's
  * private ambient methods. Defined here (not inside playAmbient) so the
  * tests can iterate over keys to assert every floor maps to a callable
- * bed. The `unknown as` cast is required because we are reaching into
- * the engine's private methods at the boundary between the declarative
- * mapping and the imperative AudioContext graph.
+ * bed. The cast through `AmbientMethods` is required because we are
+ * reaching into the engine's private methods at the boundary between
+ * the declarative mapping and the imperative AudioContext graph.
  */
+type AmbientFactoryFn = (c: AudioContext) => ActiveAmbient;
+interface AmbientMethods {
+  ambientPenthouse: AmbientFactoryFn;
+  ambientWarRoom: AmbientFactoryFn;
+  ambientRolodex: AmbientFactoryFn;
+  ambientWritingRoom: AmbientFactoryFn;
+  ambientSituationRoom: AmbientFactoryFn;
+  ambientBriefingRoom: AmbientFactoryFn;
+  ambientObservatory: AmbientFactoryFn;
+  ambientCSuite: AmbientFactoryFn;
+}
+const ambient = (e: SoundEngine): AmbientMethods => e as unknown as AmbientMethods;
+
 const AMBIENT_FACTORIES: Record<AmbientBedName, AmbientFactory> = {
-  "penthouse":      (e, ctx) => (e as unknown as { ambientPenthouse:      (c: AudioContext) => ActiveAmbient }).ambientPenthouse(ctx),
-  "war-room":       (e, ctx) => (e as unknown as { ambientWarRoom:        (c: AudioContext) => ActiveAmbient }).ambientWarRoom(ctx),
-  "rolodex":        (e, ctx) => (e as unknown as { ambientRolodex:        (c: AudioContext) => ActiveAmbient }).ambientRolodex(ctx),
-  "writing-room":   (e, ctx) => (e as unknown as { ambientWritingRoom:    (c: AudioContext) => ActiveAmbient }).ambientWritingRoom(ctx),
-  "situation-room": (e, ctx) => (e as unknown as { ambientSituationRoom:  (c: AudioContext) => ActiveAmbient }).ambientSituationRoom(ctx),
-  "briefing-room":  (e, ctx) => (e as unknown as { ambientBriefingRoom:   (c: AudioContext) => ActiveAmbient }).ambientBriefingRoom(ctx),
-  "observatory":    (e, ctx) => (e as unknown as { ambientObservatory:    (c: AudioContext) => ActiveAmbient }).ambientObservatory(ctx),
-  "c-suite":        (e, ctx) => (e as unknown as { ambientCSuite:         (c: AudioContext) => ActiveAmbient }).ambientCSuite(ctx),
+  "penthouse":      (e, ctx) => ambient(e).ambientPenthouse(ctx),
+  "war-room":       (e, ctx) => ambient(e).ambientWarRoom(ctx),
+  "rolodex":        (e, ctx) => ambient(e).ambientRolodex(ctx),
+  "writing-room":   (e, ctx) => ambient(e).ambientWritingRoom(ctx),
+  "situation-room": (e, ctx) => ambient(e).ambientSituationRoom(ctx),
+  "briefing-room":  (e, ctx) => ambient(e).ambientBriefingRoom(ctx),
+  "observatory":    (e, ctx) => ambient(e).ambientObservatory(ctx),
+  "c-suite":        (e, ctx) => ambient(e).ambientCSuite(ctx),
 };

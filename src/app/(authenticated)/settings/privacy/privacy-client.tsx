@@ -510,13 +510,6 @@ function DataRightsPanel({
   );
 }
 
-// Inlined AuditFeed + AuditFeedRow + EVENT_HEADLINES + describeEvent
-// removed: replaced by the canonical `<AuditFeed />` from
-// `@/components/trust-console/AuditFeed` via `rowToFeedEvent` mapping
-// (declared near the top of this file). The canonical component owns
-// the event-type title map AND the expand-metadata / load-more
-// affordances — keeping a single implementation prevents copy drift.
-
 interface RevokeConfirmModalProps {
   open: boolean;
   pending: boolean;

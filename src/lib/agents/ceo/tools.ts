@@ -4,23 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getPipelineStatsRest } from "@/lib/db/queries/applications-rest";
 
 // ---------------------------------------------------------------------------
-// Tool 1: dispatchAgent — DEPRECATED
-// ---------------------------------------------------------------------------
+// compileBriefing — aggregates department results into an executive summary.
 //
-// The old `dispatchAgent` tool returned a hardcoded acknowledgment string
-// without actually invoking any subagent. Real dispatch is now wired in
-// `src/lib/ai/agents/ceo-orchestrator.ts` as seven typed tools
-// (`dispatchToCRO`, `dispatchToCOO`, etc.) that the CEO route handler
-// injects via `createAgentRouteHandler`'s `buildExtraTools` hook. Each
-// dispatch tool runs a nested `generateText` against the target agent's
-// persona + tools and returns a compressed structured payload.
-//
-// We deliberately do NOT export a dispatchAgent tool here anymore — keeping
-// the placeholder would let the CEO model call it instead of the real
-// orchestrator tools and break the chain of command. Removed.
-
-// ---------------------------------------------------------------------------
-// Tool 2: compileBriefing
+// Dispatch is owned by `src/lib/ai/agents/ceo-orchestrator.ts` (seven typed
+// `dispatchTo<Role>` tools injected by `createAgentRouteHandler`); the CEO
+// model calls those, not anything in this file.
 // ---------------------------------------------------------------------------
 function makeCompileBriefingTool(userId: string) {
   return tool({
