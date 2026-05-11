@@ -8,8 +8,9 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 
 ```
 src/         the app
-scripts/     maintenance + seed + dev scripts (6 files)
-docs/        design specs + testing patterns (5 files)
+scripts/     maintenance + seed + dev scripts (7 files)
+docs/        design specs + testing patterns + runbook (6 files)
+sentry/      versioned Sentry alert rules (alerts.yaml)
 tests/       Playwright E2E suite + JSON fixtures
 public/      static assets (4 lobby bgs + favicon)
 ```
@@ -264,6 +265,9 @@ scripts/init-env.ts               local env init helper (`npm run env:init`)
 scripts/setup-env.sh              env init shell helper
 scripts/dev-preview.ts            `npm run dev:preview` — dev preview
                                   harness (auth-stub, ports)
+scripts/validate-sentry-alerts.ts CLI validator for sentry/alerts.yaml
+                                  (same logic as the vitest regression in
+                                  src/lib/observability/sentry-alerts.test.ts)
 ```
 
 ---
@@ -276,8 +280,24 @@ docs/CHAIN-OF-COMMAND.md     AI agent hierarchy spec (66KB — long, skim)
 docs/CHARACTER-PROMPTS.md    8 agent system prompts (voice/personality)
 docs/LAUNCH-READY.md         locked business decisions + remaining ops
                              checklist (§0 has the table of decisions)
+docs/RUNBOOK.md              on-call runbook — one paragraph per Sentry
+                             alert (mirrors sentry/alerts.yaml ids)
 docs/TESTING.md              vitest + Playwright patterns (read before
                              adding a new test suite)
+```
+
+---
+
+## sentry/
+
+```
+sentry/alerts.yaml           versioned Sentry alert rules (3 today —
+                             agent_stream_failures, outreach_sender_
+                             send_failures, ai_quota_rpc_errors). Validated
+                             by src/lib/observability/sentry-alerts.test.ts
+                             and scripts/validate-sentry-alerts.ts. Upload
+                             procedure: docs/RUNBOOK.md#applying-alerts-to-
+                             sentry.
 ```
 
 ---
