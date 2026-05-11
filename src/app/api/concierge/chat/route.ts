@@ -6,6 +6,10 @@ import { consumeAiQuota } from "@/lib/ai/quota";
 import { getAgentModel } from "@/lib/ai/model";
 import { buildCachedSystemMessages } from "@/lib/ai/prompt-cache";
 import { buildOtisSystemPrompt } from "@/lib/agents/concierge/system-prompt";
+// Otis greets in 1–2 sentences max — anything longer is a sign he's
+// drifted out of voice. 600 tokens is roomy headroom for an unusually
+// chatty reply but cuts off the unbounded edge case.
+const CONCIERGE_MAX_OUTPUT_TOKENS = 600;
 import { getConciergeState } from "@/lib/db/queries/user-profiles-rest";
 import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -90,6 +94,7 @@ export async function POST(req: Request): Promise<Response> {
       model: getAgentModel(),
       messages: [...cachedSystem, ...modelMessages],
       stopWhen: stepCountIs(1),
+      maxOutputTokens: CONCIERGE_MAX_OUTPUT_TOKENS,
     });
 
     log.info("concierge.stream.started", { userId: user.id });

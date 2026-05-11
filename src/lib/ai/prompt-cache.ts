@@ -234,3 +234,40 @@ export function buildCachedSystemMessages(
 export function getCachedSystem(systemPrompt: string): string {
   return systemPrompt;
 }
+
+/**
+ * Convenience wrapper that returns a `messages` array suitable for the
+ * AI SDK's `generateText` / `generateObject` / `streamText` when the
+ * caller currently passes `system + prompt` separately.
+ *
+ * Splits the system text on the BASE_SCAFFOLD / dynamic boundaries (same
+ * logic as `buildCachedSystemMessages`) and emits a single trailing
+ * `user` message containing the original prompt. Spread the result into
+ * the call's `messages` field instead of supplying `system` and
+ * `prompt` directly:
+ *
+ * ```ts
+ * const result = await generateText({
+ *   model,
+ *   messages: buildCachedSystemAndUserMessages(SYSTEM_PROMPT, userPrompt),
+ *   maxOutputTokens: 600,
+ * });
+ * ```
+ *
+ * Providers that don't understand `cacheControl` (currently only Anthropic
+ * does, but the AI SDK is intentionally tolerant) silently ignore the
+ * `providerOptions` block — so the migration is safe everywhere.
+ *
+ * @param systemPrompt the canonical system instructions (LAYER 0/1/2/3)
+ * @param userPrompt the per-call user message (what currently lands in
+ *   the `prompt:` field at the call site)
+ */
+export function buildCachedSystemAndUserMessages(
+  systemPrompt: string,
+  userPrompt: string,
+): ModelMessage[] {
+  return [
+    ...buildCachedSystemMessages(systemPrompt),
+    { role: "user", content: userPrompt },
+  ];
+}

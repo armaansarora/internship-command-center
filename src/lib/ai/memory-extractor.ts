@@ -20,6 +20,7 @@
 import { generateText, Output } from "ai";
 import { z } from "zod/v4";
 import { getFastModel, FAST_MODEL_ID } from "./model";
+import { MEMORY_EXTRACTION_MAX_OUTPUT_TOKENS } from "./output-budgets";
 import { storeAgentMemory } from "@/lib/db/queries/agent-memory-rest";
 import { recordAgentRun } from "./telemetry";
 import { log } from "@/lib/logger";
@@ -116,6 +117,7 @@ export async function extractAndStoreMemories(
       system: EXTRACTION_SYSTEM,
       prompt: transcript,
       output: Output.object({ schema: ExtractionSchema }),
+      maxOutputTokens: MEMORY_EXTRACTION_MAX_OUTPUT_TOKENS,
       // Memory extraction never needs tools or multi-step.
     });
 

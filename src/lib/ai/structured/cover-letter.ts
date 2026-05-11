@@ -14,8 +14,9 @@
 import { generateText, Output } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel, getActiveModelId } from "@/lib/ai/model";
-import { getCachedSystem } from "@/lib/ai/prompt-cache";
+import { buildCachedSystemAndUserMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
+import { COVER_LETTER_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 
 // ---------------------------------------------------------------------------
 // Schema (export so other tools / UI can consume the typed shape later)
@@ -150,8 +151,9 @@ ${STRUCTURE_SECTION}`;
 
 /**
  * Return the tone-specific system prompt. Exported so the three-tone
- * generator can cache them individually via getCachedSystem and so tests
- * can verify the tone-specific discriminators.
+ * generator can cache each tone individually via
+ * `buildCachedSystemAndUserMessages` and so tests can verify the
+ * tone-specific discriminators.
  */
 export function getToneSystemPrompt(tone: "formal" | "conversational" | "bold"): string {
   switch (tone) {
@@ -205,9 +207,12 @@ Lead with a HOOK that proves you've done the work. Make the value proposition co
   try {
     const result = await generateText({
       model: getAgentModel(),
-      system: getCachedSystem(getToneSystemPrompt(input.tone)),
-      prompt,
+      messages: buildCachedSystemAndUserMessages(
+        getToneSystemPrompt(input.tone),
+        prompt,
+      ),
       output: Output.object({ schema: CoverLetterSchema }),
+      maxOutputTokens: COVER_LETTER_MAX_OUTPUT_TOKENS,
     });
 
     if (!result.output) return null;

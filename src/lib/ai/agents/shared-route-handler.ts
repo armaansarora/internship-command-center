@@ -46,6 +46,7 @@ import {
   isAgentModelConfigured,
 } from "@/lib/ai/model";
 import { buildCachedSystemMessages } from "@/lib/ai/prompt-cache";
+import { CEO_BRIEFING_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import { recordAgentRun } from "@/lib/ai/telemetry";
 import { extractAndStoreMemories } from "@/lib/ai/memory-extractor";
 import { getMemoriesForContext } from "@/lib/db/queries/agent-memory-rest";
@@ -102,6 +103,13 @@ export interface AgentRouteConfig<Context> {
    * each step may invoke a nested subagent costing its own multi-step loop.
    */
   maxSteps?: number;
+  /**
+   * Optional output-token ceiling. Defaults to the CEO briefing budget which
+   * is the most permissive value any C-suite agent could need (2000 tokens —
+   * enough for cross-department synthesis). Per-floor routes can override
+   * with a tighter cap when their reply shape is genuinely smaller.
+   */
+  maxOutputTokens?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -159,6 +167,7 @@ export function createAgentRouteHandler<Context>(
     defaultUserName = "Analyst",
     model,
     maxSteps = 5,
+    maxOutputTokens = CEO_BRIEFING_MAX_OUTPUT_TOKENS,
   } = config;
 
   return async function POST(req: Request): Promise<Response> {
@@ -317,6 +326,7 @@ export function createAgentRouteHandler<Context>(
         // we widen here so the factory doesn't force every agent to annotate.
         tools: tools as Parameters<typeof streamText>[0]["tools"],
         stopWhen: stepCountIs(maxSteps),
+        maxOutputTokens,
         onFinish,
       });
 

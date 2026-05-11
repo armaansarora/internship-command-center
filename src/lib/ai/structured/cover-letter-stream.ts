@@ -13,9 +13,10 @@
 
 import { streamText, generateText } from "ai";
 import { getAgentModel, getActiveModelId } from "@/lib/ai/model";
-import { getCachedSystem } from "@/lib/ai/prompt-cache";
+import { buildCachedSystemAndUserMessages } from "@/lib/ai/prompt-cache";
 import { recordAgentRun } from "@/lib/ai/telemetry";
 import { getToneSystemPrompt } from "./cover-letter";
+import { COVER_LETTER_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 
 export interface ComposeInput {
   userId: string;
@@ -53,13 +54,15 @@ export interface StreamedCoverLetter {
 export function streamCoverLetterProse(input: ComposeInput): StreamedCoverLetter {
   const start = Date.now();
   const modelId = getActiveModelId();
-  const system = getCachedSystem(getToneSystemPrompt(input.tone));
   const prompt = buildUserPrompt(input);
 
   const result = streamText({
     model: getAgentModel(),
-    system,
-    prompt,
+    messages: buildCachedSystemAndUserMessages(
+      getToneSystemPrompt(input.tone),
+      prompt,
+    ),
+    maxOutputTokens: COVER_LETTER_MAX_OUTPUT_TOKENS,
   });
 
   // Telemetry after completion — fire-and-forget so the stream isn't held up.
@@ -98,12 +101,14 @@ export function streamCoverLetterProse(input: ComposeInput): StreamedCoverLetter
  * the DB-writing path.
  */
 export async function generateCoverLetterProse(input: ComposeInput): Promise<string> {
-  const system = getCachedSystem(getToneSystemPrompt(input.tone));
   const prompt = buildUserPrompt(input);
   const result = await generateText({
     model: getAgentModel(),
-    system,
-    prompt,
+    messages: buildCachedSystemAndUserMessages(
+      getToneSystemPrompt(input.tone),
+      prompt,
+    ),
+    maxOutputTokens: COVER_LETTER_MAX_OUTPUT_TOKENS,
   });
   return await Promise.resolve(result.text);
 }

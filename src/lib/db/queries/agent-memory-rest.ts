@@ -133,16 +133,89 @@ export async function getMemoriesForContext(
     }));
 }
 
+/** Window for treating an incoming write as a duplicate of a recent row. */
+const DEDUP_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 /**
- * Store a new memory entry for an agent. Caps total memories per
- * (user, agent) pair at MAX_MEMORIES_PER_AGENT — when exceeded, deletes the
- * lowest-importance / least-recently-accessed rows first.
+ * Normalise a memory body for fuzzy duplicate detection. We collapse
+ * whitespace and lowercase, but keep punctuation so "Sarah Chen at JLL" and
+ * "Sarah Chen at jll" are still recognised as the same memory.
+ *
+ * Pure helper — exported for the unit test that asserts collision behaviour.
+ */
+export function normaliseMemoryContent(content: string): string {
+  return content.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/**
+ * Store a new memory entry for an agent.
+ *
+ * Two guards on the write path so the table stays useful instead of bloated:
+ *
+ *   1. DEDUP — within DEDUP_WINDOW_MS for the same (user, agent, category),
+ *      reject an incoming row whose normalised content matches a recent
+ *      memory. The extractor is fire-and-forget and can be invoked twice on
+ *      the same exchange under race conditions; the cap (50/agent) should
+ *      not be burned on noise. The skipped row is treated as an idempotent
+ *      success — we return the existing row so the caller's "stored ?" check
+ *      stays semantically correct.
+ *   2. CAP — when total memories per (user, agent) pair exceeds
+ *      MAX_MEMORIES_PER_AGENT, delete the lowest-importance / least-recently
+ *      -accessed rows first. Runs in the background after the insert.
  */
 export async function storeAgentMemory(
   input: CreateMemoryInput,
 ): Promise<AgentMemoryEntry | null> {
   const supabase = await createClient();
 
+  // ---- 1. DEDUP --------------------------------------------------------
+  const normalisedIncoming = normaliseMemoryContent(input.content);
+  if (normalisedIncoming.length === 0) {
+    // Empty / whitespace-only memory — nothing to store.
+    return null;
+  }
+
+  try {
+    const since = new Date(Date.now() - DEDUP_WINDOW_MS).toISOString();
+    const { data: recent } = await supabase
+      .from("agent_memory")
+      .select("*")
+      .eq("user_id", input.userId)
+      .eq("agent", input.agent)
+      .eq("category", input.category)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (recent && recent.length > 0) {
+      const hit = recent.find((row) => {
+        const existing = (row.content as string | null) ?? "";
+        return normaliseMemoryContent(existing) === normalisedIncoming;
+      });
+      if (hit) {
+        // Treat a duplicate as an idempotent success — bump the existing
+        // row's recency signal so retrieval still prefers the live memory.
+        void supabase
+          .from("agent_memory")
+          .update({
+            last_accessed_at: new Date().toISOString(),
+            access_count: ((hit.access_count as number | null) ?? 0) + 1,
+          })
+          .eq("id", hit.id as string);
+        return rowToMemory(hit as Record<string, unknown>);
+      }
+    }
+  } catch (err) {
+    // A failing dedup query never blocks the write — the cap still bounds
+    // growth and the duplicate is just one extra row in the table.
+    log.warn("agent_memory.dedup_check_failed", {
+      userId: input.userId,
+      agent: input.agent,
+      err: err instanceof Error ? err.message : String(err),
+    });
+  }
+
+  // ---- 2. INSERT -------------------------------------------------------
   const { data, error } = await supabase
     .from("agent_memory")
     .insert({
@@ -167,9 +240,7 @@ export async function storeAgentMemory(
     return null;
   }
 
-  // Enforce the rolling cap. Run in the background — never block the write
-  // path. Two-step: count, then prune oldest-by-recency / weakest-by-
-  // importance if over.
+  // ---- 3. CAP enforcement ---------------------------------------------
   void enforceMemoryCap(input.userId, input.agent);
 
   return data ? rowToMemory(data as Record<string, unknown>) : null;

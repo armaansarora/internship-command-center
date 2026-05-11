@@ -30,13 +30,36 @@ vi.mock("@/lib/ai/model", () => ({
   getActiveModelId: () => "mock-model",
 }));
 
+// Provide both helpers: the legacy `getCachedSystem` (still imported by
+// some callers) and the new `buildCachedSystemAndUserMessages` used by the
+// structured cover-letter generator after the prompt-cache migration. The
+// test re-derives the system text out of the messages array in `pickSystem`
+// below.
 vi.mock("@/lib/ai/prompt-cache", () => ({
   getCachedSystem: (s: string) => s,
+  buildCachedSystemAndUserMessages: (system: string, user: string) => [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ],
 }));
 
 vi.mock("@/lib/ai/telemetry", () => ({
   recordAgentRun: vi.fn(),
 }));
+
+interface MockMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+function pickSystem(args: {
+  system?: string;
+  messages?: MockMessage[];
+}): string {
+  if (typeof args.system === "string") return args.system;
+  const sys = args.messages?.find((m) => m.role === "system");
+  return sys?.content ?? "";
+}
 
 // The generateText mock produces tone-specific output based on the system
 // prompt handed in. If the three-tone generator passes the SAME system
@@ -46,8 +69,9 @@ vi.mock("ai", () => ({
   Output: {
     object: <T,>(config: { schema: T }) => config,
   },
-  generateText: vi.fn(async ({ system }: { system: string }) => {
-    if (typeof system !== "string") {
+  generateText: vi.fn(async (args: { system?: string; messages?: MockMessage[] }) => {
+    const system = pickSystem(args);
+    if (typeof system !== "string" || system.length === 0) {
       return { output: null };
     }
     if (system.includes("FORMAL mode")) {

@@ -7,6 +7,7 @@ import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { requireAgentAccess } from "@/lib/stripe/agent-access";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { consumeAiQuota } from "@/lib/ai/quota";
+import { CEO_BRIEFING_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import { log } from "@/lib/logger";
 import { requireEnv } from "@/lib/env";
 import { parseUiMessageRequest } from "@/lib/ai/request-guards";
@@ -127,6 +128,7 @@ export function createAgentRoute(config: AgentRouteConfig): (req: Request) => Pr
         messages: modelMessages,
         tools: ctx.tools,
         stopWhen: stepCountIs(maxSteps),
+        maxOutputTokens: CEO_BRIEFING_MAX_OUTPUT_TOKENS,
       });
 
       log.info("agent.stream.started", { agent: config.id, userId: user.id });

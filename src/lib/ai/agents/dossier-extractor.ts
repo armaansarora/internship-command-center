@@ -20,19 +20,20 @@
  *      surface should NEVER be empty when a dispatch produced any text.
  *
  * Budget: 1 LLM call per completed dispatch, maxOutputTokens=500. At
- * Sonnet 4.6 pricing this is ~$0.005 per extraction. With the typical
+ * Haiku 4.5 pricing this is ~$0.0008 per extraction. With the typical
  * dispatchBatch fanning to 3 agents, the council-emission overhead is
- * ~$0.015/request — the council-decided cost of the new primitive.
+ * ~$0.0024/request — an order of magnitude cheaper than running the
+ * extractor on Sonnet. Dossier extraction is pure structural distillation
+ * of an already-written summary; Sonnet's reasoning is not the load-bearing
+ * faculty here.
  */
 import { generateObject } from "ai";
 import { z } from "zod/v4";
-import { getAgentModel } from "../model";
+import { getFastModel } from "../model";
+import { DOSSIER_EXTRACTION_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import { log } from "@/lib/logger";
 import type { Row } from "@/db/database.types";
 import type { InsertDossierInput } from "@/lib/db/queries/handoff-dossiers-rest";
-
-/** Max output tokens for one dossier extraction call. */
-const DOSSIER_MAX_OUTPUT_TOKENS = 500;
 
 /** Truncation cap when falling back to the raw summary as a recommendation. */
 const FALLBACK_RECOMMENDATION_CHARS = 240;
@@ -228,11 +229,11 @@ Return a structured dossier.`;
 
   try {
     const result = await generateObject({
-      model: getAgentModel(),
+      model: getFastModel(),
       schema: DossierExtractionSchema,
       system,
       prompt,
-      maxOutputTokens: DOSSIER_MAX_OUTPUT_TOKENS,
+      maxOutputTokens: DOSSIER_EXTRACTION_MAX_OUTPUT_TOKENS,
     });
 
     const parsed = DossierExtractionSchema.parse(result.object);

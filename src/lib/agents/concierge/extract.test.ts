@@ -17,7 +17,11 @@ vi.mock("ai", () => ({
 }));
 
 vi.mock("@/lib/ai/model", () => ({
+  // Concierge extraction was migrated to Haiku 4.5 — a templated structural
+  // distillation that doesn't justify Sonnet pricing. Mock both names so the
+  // test stays robust to that flip.
   getAgentModel: () => ({ provider: "mock-model" }),
+  getFastModel: () => ({ provider: "mock-fast-model" }),
 }));
 
 // Mock the persistence layer — we only want to verify the shape of the

@@ -18,6 +18,7 @@
 import { generateObject } from "ai";
 import { z } from "zod/v4";
 import { getAgentModel } from "@/lib/ai/model";
+import { FOLLOW_UP_DRAFT_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -103,6 +104,7 @@ export async function generateFollowUpDraft(
     schema: FollowUpDraftSchema,
     system: SYSTEM_PROMPT,
     prompt,
+    maxOutputTokens: FOLLOW_UP_DRAFT_MAX_OUTPUT_TOKENS,
   });
 
   return object;

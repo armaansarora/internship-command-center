@@ -7,13 +7,17 @@
  * schema so the callsite always receives a stable, typed shape.
  *
  * The generator wraps `generateObject` and uses the project's centralised
- * `getAgentModel()` helper so it inherits AI Gateway routing + cost tracking
- * for free.
+ * `getFastModel()` helper — drill question generation is a templated
+ * structured task (pick 3 from a closed set of categories, attach a rubric),
+ * not the high-stakes reasoning that justifies Sonnet pricing. Haiku 4.5
+ * produces the same shape at ~12% of the input cost and ~25% of the output
+ * cost.
  */
 
 import { generateObject } from "ai";
 import { z } from "zod/v4";
-import { getAgentModel } from "@/lib/ai/model";
+import { getFastModel } from "@/lib/ai/model";
+import { DRILL_QUESTIONS_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -51,7 +55,7 @@ export async function generateDrillQuestions(
   input: DrillQuestionsInput,
 ): Promise<DrillQuestion[]> {
   const { object } = await generateObject({
-    model: getAgentModel(),
+    model: getFastModel(),
     schema: Schema,
     prompt: [
       "You are CPO in The Tower — a drill-sergeant interview coach.",
@@ -63,6 +67,7 @@ export async function generateDrillQuestions(
     ]
       .filter(Boolean)
       .join("\n"),
+    maxOutputTokens: DRILL_QUESTIONS_MAX_OUTPUT_TOKENS,
   });
   return object.questions;
 }
