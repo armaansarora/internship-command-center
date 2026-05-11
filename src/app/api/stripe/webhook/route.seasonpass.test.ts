@@ -20,6 +20,7 @@ const {
   requireEnvSpy,
   constructEventSpy,
   retrieveSubscriptionSpy,
+  listLineItemsSpy,
   tierFromPriceIdSpy,
   getSupabaseAdminSpy,
   webhookInsertSpy,
@@ -37,6 +38,7 @@ const {
   requireEnvSpy: vi.fn(),
   constructEventSpy: vi.fn(),
   retrieveSubscriptionSpy: vi.fn(),
+  listLineItemsSpy: vi.fn(),
   tierFromPriceIdSpy: vi.fn(),
   getSupabaseAdminSpy: vi.fn(),
   webhookInsertSpy: vi.fn(),
@@ -60,6 +62,9 @@ vi.mock("@/lib/stripe/server", () => ({
   getStripe: () => ({
     webhooks: { constructEvent: constructEventSpy },
     subscriptions: { retrieve: retrieveSubscriptionSpy },
+    checkout: {
+      sessions: { listLineItems: listLineItemsSpy },
+    },
   }),
   tierFromPriceId: tierFromPriceIdSpy,
 }));
@@ -96,6 +101,8 @@ function makeSeasonPassEvent() {
     livemode: false,
     data: {
       object: {
+        id: "cs_season_pass",
+        mode: "payment",
         metadata: {
           supabase_user_id: "user-purchaser",
           tier: "seasonPass",
@@ -137,6 +144,7 @@ describe("POST /api/stripe/webhook — Season Pass purchase mirror", () => {
     requireEnvSpy.mockReset();
     constructEventSpy.mockReset();
     retrieveSubscriptionSpy.mockReset();
+    listLineItemsSpy.mockReset();
     tierFromPriceIdSpy.mockReset();
     getSupabaseAdminSpy.mockReset();
     webhookInsertSpy.mockReset();
@@ -179,6 +187,13 @@ describe("POST /api/stripe/webhook — Season Pass purchase mirror", () => {
     profileUpdateSpy.mockReturnValue({ eq: profileEqSpy });
 
     recordServerEngagementEventSpy.mockResolvedValue(undefined);
+
+    // Season Pass mode=payment branch resolves the purchased price via
+    // listLineItems before stamping the tier + analytics mirror.
+    listLineItemsSpy.mockResolvedValue({
+      data: [{ price: { id: "price_season_pass" } }],
+    });
+    tierFromPriceIdSpy.mockReturnValue("seasonPass");
   });
 
   it("fires recordServerEngagementEvent('purchase', …) when metadata.tier === 'seasonPass'", async () => {
@@ -255,6 +270,8 @@ describe("POST /api/stripe/webhook — Season Pass purchase mirror", () => {
       livemode: false,
       data: {
         object: {
+          id: "cs_currency_caps",
+          mode: "payment",
           metadata: {
             supabase_user_id: "user-currency",
             tier: "seasonPass",
