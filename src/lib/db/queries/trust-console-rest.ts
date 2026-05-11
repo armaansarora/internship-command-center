@@ -66,6 +66,31 @@ export interface UserConsentState {
   };
 }
 
+/**
+ * Preview the size of the impending revoke cascade BEFORE the user
+ * confirms — the Trust Console modal renders these counts so the
+ * destructive copy ("This will erase N items across M tables") shows
+ * real numbers instead of a hand-wave. Read-only by contract.
+ *
+ *   - `itemsToErase` is a best-effort sum of (a) the user's own rows
+ *     in `networking_match_index` and (b) the number of distinct
+ *     `counterparty_anon_key` rows in `match_candidate_index` that
+ *     derive from the caller's contacts. We use HEAD counts so no row
+ *     data leaves Postgres.
+ *   - `tablesTouched` lists the tables the cascade will mutate. It
+ *     always includes `user_profiles` (the consent stamp); the other
+ *     entries are conditional on whether any rows would be deleted.
+ */
+export interface RevokePreview {
+  itemsToErase: number;
+  tablesTouched: readonly string[];
+}
+
+export const REVOKE_PREVIEW_EMPTY: RevokePreview = Object.freeze({
+  itemsToErase: 0,
+  tablesTouched: Object.freeze(["user_profiles"]),
+});
+
 // ---------------------------------------------------------------------------
 // getUserAuditTimeline
 // ---------------------------------------------------------------------------
@@ -211,4 +236,66 @@ export async function getUserConsentState(
       consentVersion,
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// getRevokePreview
+// ---------------------------------------------------------------------------
+
+/**
+ * Count the rows the revoke cascade WOULD erase if the caller confirmed.
+ *
+ * The numbers come from two HEAD counts (no row payload over the wire):
+ *
+ *   1. `networking_match_index` rows where user_id = caller.
+ *   2. The number of the caller's contacts — each contact's
+ *      `counterpartyAnonKey` maps 1:1 to a row in `match_candidate_index`
+ *      keyed off other users' caches. This is the ceiling on how many
+ *      rows step 3 of the cascade purges.
+ *
+ * Pass the request-scoped Supabase client. Returns `REVOKE_PREVIEW_EMPTY`
+ * on read error — the Trust Console renders "0 items" gracefully rather
+ * than blocking the modal on a count-query hiccup. `user_profiles` is
+ * always included in `tablesTouched` because step 1 of the cascade is
+ * the consent stamp; the other tables only appear when rows would
+ * actually be deleted.
+ */
+export async function getRevokePreview(
+  client: SupabaseClient,
+  userId: string,
+): Promise<RevokePreview> {
+  const tables: string[] = ["user_profiles"];
+  let total = 0;
+
+  try {
+    const matchIndex = await client
+      .from("networking_match_index")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+    if (matchIndex.error) throw new Error(matchIndex.error.message);
+    const matchCount = matchIndex.count ?? 0;
+    if (matchCount > 0) {
+      tables.push("networking_match_index");
+      total += matchCount;
+    }
+
+    const contactRows = await client
+      .from("contacts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+    if (contactRows.error) throw new Error(contactRows.error.message);
+    const contactCount = contactRows.count ?? 0;
+    if (contactCount > 0) {
+      tables.push("match_candidate_index");
+      total += contactCount;
+    }
+  } catch (err) {
+    log.warn("trust_console.revoke_preview_failed", {
+      userId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return REVOKE_PREVIEW_EMPTY;
+  }
+
+  return { itemsToErase: total, tablesTouched: tables };
 }

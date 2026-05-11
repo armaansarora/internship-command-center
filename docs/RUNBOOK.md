@@ -392,3 +392,69 @@ proof). If those tests fail, the gate is broken — do not ship.
 The cron-health and incident-alerts panels share their source tables
 with the Lighthouse Watchdog cron, by design — the dashboard is the
 read-only window; the watchdog is the writer.
+
+---
+
+## Enable Trust Console
+
+The Trust Console at `/settings/privacy` is shipped DARK behind
+`TOWER_TRUST_CONSOLE`. Code is in production, but the user-facing
+surface only renders when the env var is `"1"`. Owners (per
+`OWNER_USER_ID` / `OWNER_USER_IDS`) always see a preview badge.
+
+### Pre-flip checklist
+
+Run through these BEFORE flipping the flag. The Trust Console is a
+brand-defining surface — every gap is visible and the modal language
+is uncompromising. The cost of shipping it half-broken is a trust hit
+we cannot retract.
+
+- `npx tsc --noEmit` is green on `main`.
+- `npm test` is green for the privacy bundle:
+  `vitest run src/app/\(authenticated\)/settings/privacy/__tests__/ src/lib/db/queries/__tests__/trust-console-rest.test.ts src/components/trust-console/`.
+- `npm run build` succeeds. The Trust Console page is in the App
+  Router and the build fails closed if any of the server-action wirings
+  drift.
+- The cron stack is healthy: `vercel logs --since 30m | grep export-worker`
+  shows the worker ticking. The Trust Console "Download archive" path
+  depends on the cron worker landing the artifact in
+  `exports/<userId>/<ts>.zip` AND stamping
+  `data_export_status = 'delivered'`.
+- The owner watchdog (GitHub Actions) is enabled — if the Trust Console
+  reveals a backlog of `data_export_status = 'failed'` rows, the
+  watchdog is the channel that surfaces it.
+
+### Flip
+
+1. Vercel → Settings → Environment Variables → Production.
+2. Set `TOWER_TRUST_CONSOLE = 1`. Mark "Production" only —
+   preview deploys stay dark so PR reviewers cannot accidentally hit a
+   live trust surface.
+3. Promote the next deploy (or trigger a redeploy from the dashboard
+   so the new env var is picked up). The flag is read at request time
+   via `GATE_CONFIG.flags.trustConsoleEnabled()`, so even existing
+   warm Lambdas pick it up after a deploy.
+
+### Verification
+
+- `curl -i https://www.interntower.com/settings/privacy` while signed in
+  as the owner returns 200 with the retention banner present
+  (`grep "retention SLA"` against the HTML body). When the flag is on,
+  the owner-preview badge disappears.
+- Sign in as a non-owner account and hit the same URL — it should NOT
+  redirect to `/settings`.
+- In the browser, click "Request export". The polling banner
+  ("Status: queued · checking again every 4 s") should appear and
+  flip to "Download archive" within the cron tick budget
+  (~5 min). The link is a signed URL that resolves to the user's
+  archive.
+- The audit feed at the bottom of the page renders REAL `audit_logs`
+  rows under RLS — never mocks.
+
+### Rollback
+
+Set `TOWER_TRUST_CONSOLE` to anything other than `"1"` (or unset it)
+and redeploy. The route flips back to the redirect-non-owners shape
+within seconds. Audit rows already written by users who exercised the
+revoke or export flow remain in `audit_logs` — the rollback is a
+visibility flip only, never a data delete.

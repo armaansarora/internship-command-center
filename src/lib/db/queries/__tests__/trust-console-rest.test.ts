@@ -25,9 +25,12 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-const { getUserAuditTimeline, getUserConsentState } = await import(
-  "../trust-console-rest"
-);
+const {
+  getUserAuditTimeline,
+  getUserConsentState,
+  getRevokePreview,
+  REVOKE_PREVIEW_EMPTY,
+} = await import("../trust-console-rest");
 
 // ---------------------------------------------------------------------------
 // Helpers — build a chained PostgREST mock that records every step the
@@ -259,5 +262,106 @@ describe("getUserConsentState", () => {
     const { client } = buildConsentClient(null);
     const state = await getUserConsentState(client, "u-1");
     expect(state.networking.state).toBe("never_opted_in");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getRevokePreview — count fan-out
+// ---------------------------------------------------------------------------
+
+interface PreviewBuilderRecord {
+  matchIndexCount: number | null;
+  contactsCount: number | null;
+  matchIndexShouldError?: { message: string };
+  contactsShouldError?: { message: string };
+}
+
+function buildPreviewClient(setup: PreviewBuilderRecord): SupabaseClient {
+  const calls: Array<{ table: string }> = [];
+  return {
+    from(table: string) {
+      calls.push({ table });
+      return {
+        select(_arg: string, _opts?: { count?: string; head?: boolean }) {
+          return {
+            eq(_col: string, _val: unknown) {
+              if (table === "networking_match_index") {
+                return Promise.resolve({
+                  count: setup.matchIndexCount,
+                  error: setup.matchIndexShouldError ?? null,
+                });
+              }
+              if (table === "contacts") {
+                return Promise.resolve({
+                  count: setup.contactsCount,
+                  error: setup.contactsShouldError ?? null,
+                });
+              }
+              return Promise.resolve({ count: 0, error: null });
+            },
+          };
+        },
+      };
+    },
+  } as unknown as SupabaseClient;
+}
+
+describe("getRevokePreview", () => {
+  beforeEach(() => {
+    warnSpy.mockReset();
+  });
+
+  it("returns the empty preview shape when nothing would be erased", async () => {
+    const client = buildPreviewClient({
+      matchIndexCount: 0,
+      contactsCount: 0,
+    });
+    const out = await getRevokePreview(client, "u-1");
+    expect(out.itemsToErase).toBe(0);
+    expect(out.tablesTouched).toEqual(["user_profiles"]);
+  });
+
+  it("sums match-index rows + contact count into itemsToErase", async () => {
+    const client = buildPreviewClient({
+      matchIndexCount: 3,
+      contactsCount: 7,
+    });
+    const out = await getRevokePreview(client, "u-1");
+    expect(out.itemsToErase).toBe(10);
+    expect(out.tablesTouched).toEqual([
+      "user_profiles",
+      "networking_match_index",
+      "match_candidate_index",
+    ]);
+  });
+
+  it("only includes the match-index entry when contacts is empty", async () => {
+    const client = buildPreviewClient({
+      matchIndexCount: 4,
+      contactsCount: 0,
+    });
+    const out = await getRevokePreview(client, "u-1");
+    expect(out.itemsToErase).toBe(4);
+    expect(out.tablesTouched).toEqual([
+      "user_profiles",
+      "networking_match_index",
+    ]);
+  });
+
+  it("falls back to the empty preview on read error", async () => {
+    const client = buildPreviewClient({
+      matchIndexCount: null,
+      contactsCount: null,
+      matchIndexShouldError: { message: "rls denied" },
+    });
+    const out = await getRevokePreview(client, "u-1");
+    expect(out.itemsToErase).toBe(0);
+    expect(out.tablesTouched).toEqual(["user_profiles"]);
+  });
+
+  it("exposes REVOKE_PREVIEW_EMPTY as a frozen sentinel", () => {
+    expect(Object.isFrozen(REVOKE_PREVIEW_EMPTY)).toBe(true);
+    expect(REVOKE_PREVIEW_EMPTY.itemsToErase).toBe(0);
+    expect(REVOKE_PREVIEW_EMPTY.tablesTouched).toEqual(["user_profiles"]);
   });
 });

@@ -114,6 +114,15 @@ const ALLOWLIST = new Set<string>([
   // match_rate_limits counter, their own match_candidate_index cache)
   // — never cross-user reads.
   "src/lib/account/export.ts",
+  // Trust Console preview — `getRevokePreview` HEAD-counts the user's
+  // own `networking_match_index` rows (scoped by `.eq("user_id",
+  // userId)`) and their contact count, then names `match_candidate_index`
+  // ONLY as a string token pushed into `tablesTouched` so the modal
+  // can render "X tables touched". The string reference is a label,
+  // not a query — `match_candidate_index` is never read or written
+  // in this file. The actual cascade (revoke action / API route)
+  // remains the privacy guarantee.
+  "src/lib/db/queries/trust-console-rest.ts",
 ]);
 
 describe("R11 P1 — cross-user RLS scoping", () => {
