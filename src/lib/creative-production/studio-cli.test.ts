@@ -165,6 +165,59 @@ describe("art:studio CLI", () => {
     expect(readFileSync(join(runRoot, "next-action.md"), "utf8")).toContain("Generate production sources");
   });
 
+  it("creates a parallel wave plan with isolated lane briefs and lane mode setup", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-parallel-"));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Redo Otis with the same approved design and generate lots of varied source options.",
+      "--run-id",
+      "otis-parallel-wave-v1",
+      "--parallel-agents",
+      "5",
+      "--waves",
+      "3",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Created Creative Production Engine parallel wave plan: 15 lanes");
+
+    const runRoot = join(root, "characters", "otis-parallel-wave-v1");
+    const planPath = join(runRoot, "parallel", "parallel-plan.json");
+    const dispatcherPromptPath = join(runRoot, "parallel", "dispatcher-prompt.md");
+    const firstLaneRoot = join(runRoot, "parallel", "lanes", "wave-01-agent-01");
+    const firstLaneBriefPath = join(firstLaneRoot, "lane-brief.json");
+    const firstLanePromptPath = join(firstLaneRoot, "agent-prompt.md");
+    const plan = JSON.parse(readFileSync(planPath, "utf8")) as {
+      totalLanes: number;
+      lanes: Array<{ outputRoot: string; laneId: string }>;
+    };
+
+    expect(plan.totalLanes).toBe(15);
+    expect(new Set(plan.lanes.map((lane) => lane.outputRoot)).size).toBe(15);
+    expect(readFileSync(dispatcherPromptPath, "utf8")).toContain("5 agents x 3 waves = 15 lanes");
+    expect(readFileSync(firstLanePromptPath, "utf8")).toContain("You may write only inside");
+
+    const stateBeforeLane = readFileSync(join(root, "state.json"), "utf8");
+    const laneOutput = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--mode",
+      "lane",
+      "--lane-brief",
+      firstLaneBriefPath,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(laneOutput).toContain("Prepared isolated CPE lane: wave-01-agent-01");
+    expect(readFileSync(join(root, "state.json"), "utf8")).toBe(stateBeforeLane);
+    expect(existsSync(join(firstLaneRoot, "lane-status.json"))).toBe(true);
+    expect(existsSync(join(firstLaneRoot, "result-template.md"))).toBe(true);
+    expect(existsSync(join(firstLaneRoot, "outputs"))).toBe(true);
+  }, 20000);
+
   it("creates packets for every registered asset type without character-only assumptions", () => {
     for (const assetType of CREATIVE_ASSET_TYPES) {
       const root = mkdtempSync(join(tmpdir(), `tower-${assetType}-packet-`));

@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { CreativeAssetType } from "./types";
 
@@ -160,5 +160,8 @@ export async function saveCreativeStudioState(
   state: CreativeStudioState,
 ): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, `${JSON.stringify(state, null, 2)}\n`);
+  const temporaryPath = `${path}.${process.pid}.${Date.now()}.tmp`;
+
+  await writeFile(temporaryPath, `${JSON.stringify(state, null, 2)}\n`);
+  await rename(temporaryPath, path);
 }

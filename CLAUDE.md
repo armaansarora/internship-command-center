@@ -62,7 +62,7 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 ## Character Image Pipeline
 The locked character style is `tower-flat-plus-depth-v1`: premium web-game sprites, strong silhouettes, clean raster shapes, subtle depth, adult professional energy, no ultra-realism, no fake-perfect AI people. The locked story tone is `Professional Scars`.
 
-When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
+When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate. When he asks for lots of options, parallel work, wacky exploration, or multiple subagents, use `npm run art:studio -- --request "<request>" --parallel-agents 5 --waves 3`; each lane stays isolated and only the coordinator may merge, promote, clean, or integrate.
 
 For any character image work, run `npm run art:operate` first and read `docs/CHARACTER-IMAGE-OPERATIONS.md`. The operator command writes the next legal action packet under `.artlab/operators/`. Use `npm run art:status` for read-only inspection of promoted characters, run warnings, and the next recommended character.
 

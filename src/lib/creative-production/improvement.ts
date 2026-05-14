@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { CreativePhaseId } from "./types";
 
@@ -40,49 +40,10 @@ export function shouldTriggerEngineUpgrade(entries: ImprovementEntry[]): boolean
   return repeatedManualSteps || highSeverity;
 }
 
-function stableLedgerKey(entry: unknown): string {
-  if (!entry || typeof entry !== "object") return JSON.stringify(entry);
-
-  const { recordedAt: _recordedAt, ...stableEntry } = entry as Record<string, unknown>;
-
-  return JSON.stringify(stableEntry);
-}
-
 export async function writeJsonlEntry(path: string, entry: unknown): Promise<void> {
   const absolutePath = resolve(path);
   const nextLine = JSON.stringify(entry);
-  const nextKey = stableLedgerKey(entry);
 
   await mkdir(dirname(absolutePath), { recursive: true });
-
-  const existingLines = (await readFile(absolutePath, "utf8").catch(() => ""))
-    .split("\n")
-    .filter(Boolean);
-  const seenKeys = new Set<string>();
-  const compactedLines: string[] = [];
-
-  for (const line of existingLines) {
-    let key = line;
-
-    try {
-      key = stableLedgerKey(JSON.parse(line));
-    } catch {
-      // Keep invalid historical lines addressable instead of silently deleting them.
-    }
-
-    if (seenKeys.has(key)) continue;
-
-    seenKeys.add(key);
-    compactedLines.push(line);
-  }
-
-  if (!seenKeys.has(nextKey)) {
-    compactedLines.push(nextLine);
-  }
-
-  const retainedLines = compactedLines.slice(-500);
-
-  if (retainedLines.length !== existingLines.length || !seenKeys.has(nextKey)) {
-    await writeFile(absolutePath, `${retainedLines.join("\n")}\n`);
-  }
+  await appendFile(absolutePath, `${nextLine}\n`);
 }

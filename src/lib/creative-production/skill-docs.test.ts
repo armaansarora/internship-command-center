@@ -27,6 +27,9 @@ describe("creative production natural-language trigger", () => {
     expect(skill).toContain("brainstorm first");
     expect(skill).toContain("approved for app");
     expect(skill).toContain("npm run art:studio -- --request");
+    expect(skill).toContain("--parallel-agents 5 --waves 3");
+    expect(skill).toContain("--mode lane --lane-brief");
     expect(spec).toContain("adaptive request router");
+    expect(spec).toContain("Parallel Wave Mode");
   });
 });

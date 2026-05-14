@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import {
@@ -7,11 +7,17 @@ import {
   buildCreativeStudioOrientation,
   createCreativeProductionPacket,
   createDefaultCreativeStudioState,
+  createCreativeParallelLaneBrief,
+  createCreativeParallelWavePlan,
   createHousekeepingEntry,
   createImprovementEntry,
+  assertCreativeParallelCount,
+  assertCreativeParallelLaneBrief,
   loadCreativeStudioStateWithRecovery,
   getCreativeAssetTypeDefinition,
   inferCreativeProductionRequest,
+  renderCreativeParallelDispatcherPrompt,
+  renderCreativeParallelLanePrompt,
   renderCreativeProductionNextAction,
   renderCreativeProductionPrompt,
   saveCreativeStudioState,
@@ -20,9 +26,23 @@ import {
   type CreativeAssetType,
   type CreativeLiveArtStatusInput,
   type CreativePhaseId,
+  type CreativeParallelLaneBrief,
+  type CreativeParallelWavePlan,
 } from "../src/lib/creative-production";
 
-const KNOWN_FLAGS = new Set(["--state-root", "--asset-type", "--name", "--brief", "--run-id", "--request"]);
+const KNOWN_FLAGS = new Set([
+  "--state-root",
+  "--asset-type",
+  "--name",
+  "--brief",
+  "--run-id",
+  "--request",
+  "--mode",
+  "--parallel-agents",
+  "--agents",
+  "--waves",
+  "--lane-brief",
+]);
 const FLAG_VALUES = new Set(KNOWN_FLAGS);
 
 function validateKnownFlags(argv: string[]): void {
@@ -72,6 +92,31 @@ function assertAssetType(value: string): CreativeAssetType {
   } catch {
     throw new Error(`Unknown creative asset type: ${value}`);
   }
+}
+
+function assertMode(value: string | undefined): "coordinator" | "lane" {
+  const mode = value ?? "coordinator";
+
+  if (mode !== "coordinator" && mode !== "lane") {
+    throw new Error("--mode must be coordinator or lane.");
+  }
+
+  return mode;
+}
+
+function assertIntegerFlag(
+  argv: string[],
+  flag: "--parallel-agents" | "--agents" | "--waves",
+): number | undefined {
+  const value = flagValue(argv, flag);
+
+  if (value === undefined) return undefined;
+
+  if (!/^\d+$/.test(value)) {
+    throw new Error(`${flag} must be an integer.`);
+  }
+
+  return Number(value);
 }
 
 function loadLiveArtStatus(): CreativeLiveArtStatusInput | undefined {
@@ -161,6 +206,149 @@ async function recordAndValidatePhaseGates(input: {
   await writeJsonlEntry(join(ledgerRoot, "improvements.jsonl"), improvement);
 }
 
+async function writeParallelWavePlanFiles(input: {
+  stateRoot: string;
+  packetRoot: string;
+  plan: CreativeParallelWavePlan;
+}): Promise<{
+  planPath: string;
+  dispatcherPromptPath: string;
+  laneBriefPaths: string[];
+  lanePromptPaths: string[];
+}> {
+  const planRoot = assertSafeWorkspacePath(input.plan.parallelRoot, [input.packetRoot]);
+  const planPath = join(planRoot, "parallel-plan.json");
+  const laneBriefPaths: string[] = [];
+  const lanePromptPaths: string[] = [];
+
+  await mkdir(planRoot, { recursive: true });
+  await writeFile(planPath, `${JSON.stringify(input.plan, null, 2)}\n`);
+  await writeFile(input.plan.dispatcherPromptPath, renderCreativeParallelDispatcherPrompt(input.plan));
+
+  for (const lane of input.plan.lanes) {
+    const laneRoot = assertSafeWorkspacePath(lane.outputRoot, [planRoot]);
+    const laneBrief = createCreativeParallelLaneBrief(input.plan, lane);
+
+    await mkdir(lane.outputsRoot, { recursive: true });
+    await mkdir(laneRoot, { recursive: true });
+    await writeFile(lane.laneBriefPath, `${JSON.stringify(laneBrief, null, 2)}\n`);
+    await writeFile(lane.agentPromptPath, renderCreativeParallelLanePrompt(input.plan, lane));
+    laneBriefPaths.push(lane.laneBriefPath);
+    lanePromptPaths.push(lane.agentPromptPath);
+  }
+
+  await recordAndValidatePhaseGates({
+    stateRoot: input.stateRoot,
+    ledgerRoot: join(planRoot, "ledgers"),
+    runId: input.plan.parentRunId,
+    phase: "generation",
+    created: [planPath, input.plan.dispatcherPromptPath, ...laneBriefPaths, ...lanePromptPaths],
+    kept: [planPath, input.plan.dispatcherPromptPath, ...laneBriefPaths, ...lanePromptPaths],
+    housekeepingNotes: "Parallel wave packet created isolated lane roots only; production and shared manifest writes remain parent-owned.",
+    improvementFinding: "Parallel generation needs explicit lane boundaries so subagents can produce more options without colliding.",
+    improvementAction: "Use the dispatcher prompt and one lane prompt per subagent; merge only in the parent coordinator.",
+  });
+
+  return {
+    planPath,
+    dispatcherPromptPath: input.plan.dispatcherPromptPath,
+    laneBriefPaths,
+    lanePromptPaths,
+  };
+}
+
+async function runLaneMode(input: {
+  stateRoot: string;
+  laneBriefPath: string;
+}): Promise<void> {
+  const safeBriefPath = assertSafeWorkspacePath(input.laneBriefPath, [input.stateRoot]);
+  const parsed = JSON.parse(await readFile(safeBriefPath, "utf8")) as unknown;
+  const laneBrief = assertCreativeParallelLaneBrief(parsed);
+  const laneRoot = assertSafeWorkspacePath(laneBrief.lane.outputRoot, [input.stateRoot]);
+  const outputsRoot = assertSafeWorkspacePath(laneBrief.lane.outputsRoot, [laneRoot]);
+  const laneStatusPath = join(laneRoot, "lane-status.json");
+  const resultTemplatePath = join(laneRoot, "result-template.md");
+  const laneRunId = `${laneBrief.parentRunId}-${laneBrief.lane.laneId}`;
+
+  await mkdir(outputsRoot, { recursive: true });
+  await writeFile(laneStatusPath, `${JSON.stringify(createLaneStatus(laneBrief), null, 2)}\n`);
+  await writeFile(resultTemplatePath, renderLaneResultTemplate(laneBrief));
+  await recordAndValidatePhaseGates({
+    stateRoot: input.stateRoot,
+    ledgerRoot: join(laneRoot, "ledgers"),
+    runId: laneRunId,
+    phase: "generation",
+    created: [laneStatusPath, resultTemplatePath, outputsRoot],
+    kept: [laneStatusPath, resultTemplatePath, outputsRoot],
+    housekeepingNotes: "Lane mode prepared only its own isolated output root and did not mutate shared studio state.",
+    improvementFinding: "Lane runs need their own status and result template so parallel agents return mergeable work.",
+    improvementAction: "Keep lane agents inside the lane root and let the coordinator merge after all results land.",
+  });
+
+  console.log(`Prepared isolated CPE lane: ${laneBrief.lane.laneId}`);
+  console.log(`Parent run: ${laneBrief.parentRunId}`);
+  console.log(`Strategy: ${laneBrief.lane.strategy.label}`);
+  console.log(`Lane root: ${laneRoot}`);
+  console.log(`Result template: ${resultTemplatePath}`);
+  console.log("Coordinator-only actions: merge, final review, approval, promotion, and app integration.");
+}
+
+function createLaneStatus(laneBrief: CreativeParallelLaneBrief): Record<string, unknown> {
+  return {
+    schemaVersion: "tower-creative-parallel-lane-status-v1",
+    status: "ready-for-agent-work",
+    parentRunId: laneBrief.parentRunId,
+    laneId: laneBrief.lane.laneId,
+    assetType: laneBrief.assetType,
+    name: laneBrief.name,
+    strategy: laneBrief.lane.strategy,
+    waveMandate: laneBrief.lane.waveMandate,
+    outputRoot: laneBrief.lane.outputRoot,
+    promotionLockedToCoordinator: true,
+    forbiddenActions: laneBrief.lane.forbiddenActions,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function renderLaneResultTemplate(laneBrief: CreativeParallelLaneBrief): string {
+  return `# ${laneBrief.lane.laneId} Result
+
+Parent run: ${laneBrief.parentRunId}
+Asset: ${laneBrief.name} (${laneBrief.assetType})
+Strategy: ${laneBrief.lane.strategy.label}
+
+## Strongest Idea Or Output
+
+TBD
+
+## What Is Meaningfully Different
+
+TBD
+
+## Files Or Prompts Created
+
+- TBD
+
+## Quality Risks
+
+- TBD
+
+## Housekeeping Notes
+
+- Kept:
+- Deleted or archived:
+- Loose files:
+
+## Continuous-Improvement Notes
+
+- Slow step:
+- Error or confusion:
+- Engine improvement recommended:
+
+Coordinator reminder: this lane cannot approve, promote, edit public/art, edit manifests, delete live assets, or integrate the app.
+`;
+}
+
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   validateKnownFlags(argv);
@@ -168,11 +356,28 @@ async function main(): Promise<void> {
   const stateRootInput = flagValue(argv, "--state-root") ?? ".artlab/studio";
   const allowedStateRoots = process.env.NODE_ENV === "test" ? [".artlab/studio", tmpdir()] : [".artlab/studio"];
   const stateRoot = assertSafeWorkspacePath(stateRootInput, allowedStateRoots);
+  const mode = assertMode(flagValue(argv, "--mode"));
+  const laneBriefPath = flagValue(argv, "--lane-brief");
+
+  if (mode === "lane") {
+    if (!laneBriefPath) throw new Error("--mode lane requires --lane-brief.");
+
+    await runLaneMode({ stateRoot, laneBriefPath });
+    return;
+  }
+
+  if (laneBriefPath) {
+    throw new Error("--lane-brief can only be used with --mode lane.");
+  }
+
   const assetTypeValue = flagValue(argv, "--asset-type");
   const assetName = flagValue(argv, "--name");
   const brief = flagValue(argv, "--brief");
   const explicitRunId = flagValue(argv, "--run-id");
   const request = flagValue(argv, "--request");
+  const parallelAgentsValue = assertIntegerFlag(argv, "--parallel-agents") ?? assertIntegerFlag(argv, "--agents");
+  const wavesValue = assertIntegerFlag(argv, "--waves");
+  const wantsParallelWave = parallelAgentsValue !== undefined || wavesValue !== undefined;
   const statePath = join(stateRoot, "state.json");
   const loadedState = await loadCreativeStudioStateWithRecovery(statePath);
   const state = createDefaultCreativeStudioState(new Date().toISOString(), loadLiveArtStatus());
@@ -197,7 +402,7 @@ async function main(): Promise<void> {
     improvementAction: "Continue gathering creative intent before creating production packets.",
   });
 
-  if (assetTypeValue || assetName || brief || explicitRunId || request) {
+  if (assetTypeValue || assetName || brief || explicitRunId || request || wantsParallelWave) {
     const inferred = request ? inferCreativeProductionRequest(request) : undefined;
 
     if (!inferred && (!assetTypeValue || !assetName || !brief)) {
@@ -261,6 +466,32 @@ async function main(): Promise<void> {
         : "Use the packet prompt for concept generation, then record the next gate before promotion.",
     });
 
+    let parallelOutputs:
+      | {
+        planPath: string;
+        dispatcherPromptPath: string;
+        laneBriefPaths: string[];
+        lanePromptPaths: string[];
+      }
+      | undefined;
+
+    if (wantsParallelWave) {
+      const agentsPerWave = assertCreativeParallelCount("--parallel-agents", parallelAgentsValue ?? 5);
+      const waves = assertCreativeParallelCount("--waves", wavesValue ?? 3);
+      const plan = createCreativeParallelWavePlan({
+        packet,
+        agentsPerWave,
+        waves,
+        parallelRoot: join(packet.outputRoot, "parallel"),
+      });
+
+      parallelOutputs = await writeParallelWavePlanFiles({
+        stateRoot,
+        packetRoot,
+        plan,
+      });
+    }
+
     if (inferred) {
       console.log(`Routed request to ${assetType}: ${inferred.routingReason}`);
     }
@@ -269,6 +500,12 @@ async function main(): Promise<void> {
     console.log(`Packet: ${packetPath}`);
     console.log(`Prompt: ${promptPath}`);
     console.log(`Next action: ${nextActionPath}`);
+    if (parallelOutputs) {
+      console.log(`Created Creative Production Engine parallel wave plan: ${parallelOutputs.laneBriefPaths.length} lanes`);
+      console.log(`Parallel plan: ${parallelOutputs.planPath}`);
+      console.log(`Dispatcher prompt: ${parallelOutputs.dispatcherPromptPath}`);
+      console.log(`First lane prompt: ${parallelOutputs.lanePromptPaths[0] ?? "none"}`);
+    }
     return;
   }
 

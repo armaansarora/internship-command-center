@@ -3,6 +3,7 @@ export * from "./housekeeping";
 export * from "./improvement";
 export * from "./intake";
 export * from "./operator";
+export * from "./parallel";
 export * from "./path-safety";
 export * from "./prompts";
 export * from "./registry";

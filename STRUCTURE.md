@@ -358,6 +358,9 @@ For broader visual work, use the Creative Production Engine. When Armaan says
 "Creative Production Engine" or asks to add/generate Tower visuals, run
 `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`.
 Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
+For broad option generation, use `npm run art:studio -- --request "<request>"
+--parallel-agents 5 --waves 3`; each subagent gets one isolated lane prompt,
+and only the coordinator may merge, promote, clean, or integrate.
 
 ---
 

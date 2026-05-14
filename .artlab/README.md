@@ -20,6 +20,14 @@ npm run art:studio -- --asset-type environment --name "War Room Background" --br
 
 The packet command writes only under `.artlab/studio/...`, rejects unsafe paths and run ids, and preserves corrupt state backups instead of silently overwriting them.
 
+For big option sets, run the engine in parallel wave mode:
+
+```bash
+npm run art:studio -- --request "Redo Otis with the same approved design and generate lots of varied source options." --run-id otis-parallel-wave-v1 --parallel-agents 5 --waves 3
+```
+
+This creates lane prompts under `.artlab/studio/<asset-type>/<run-id>/parallel/lanes/...`. Give each subagent one lane prompt. Lane agents may run `npm run art:studio -- --mode lane --lane-brief <lane-brief.json>` and may write only inside their lane root. The coordinator owns merge, final review, promotion, cleanup, and app integration.
+
 Use `npm run art:operate` only when the active asset is a Season 1 character and the engine has reached the character-art operator stage.
 
 Run this from the repo root to continue the pipeline and create the next strict action packet:
