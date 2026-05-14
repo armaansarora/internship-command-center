@@ -1,6 +1,6 @@
 # Otis Art Lab Status
 
-Otis is now organized around the live pilot run `2026-05-14-otis-pilot` and the active native-quality replacement run `2026-05-14-otis-native-v2`. Loose prototype folders and volatile pilot binaries were removed so future work cannot accidentally use stale files.
+Otis is now organized around the live pilot run `2026-05-14-otis-pilot` and the active production redo run `2026-05-14-otis-production-redo-v1`. Loose prototype folders and volatile pilot binaries were removed so future work cannot accidentally use stale files.
 
 Use `ARTIFACTS.md` for the current labeled inventory. Otis has been promoted through the pipeline after Armaan's exact final approval phrase: `approved for app`.
 

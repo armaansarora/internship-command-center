@@ -141,6 +141,30 @@ describe("art:studio CLI", () => {
     expect(packet.acceptanceChecks).toContain("text, icon, and hit-area sizing remain controlled by app CSS, not baked into decorative art");
   });
 
+  it("skips concept-board action when a request says the design is already approved", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-request-approved-"));
+
+    execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Redo Otis with the same approved design and generate the production source sprites.",
+      "--run-id",
+      "approved-otis-redo",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    const runRoot = join(root, "characters", "approved-otis-redo");
+    const packet = JSON.parse(readFileSync(join(runRoot, "creative-brief.json"), "utf8")) as {
+      nextAction: string;
+      intake: { initialApprovalStatus: string };
+    };
+
+    expect(packet.nextAction).toBe("generate-production-sources");
+    expect(packet.intake.initialApprovalStatus).toBe("already-approved");
+    expect(readFileSync(join(runRoot, "next-action.md"), "utf8")).toContain("Generate production sources");
+  });
+
   it("creates packets for every registered asset type without character-only assumptions", () => {
     for (const assetType of CREATIVE_ASSET_TYPES) {
       const root = mkdtempSync(join(tmpdir(), `tower-${assetType}-packet-`));

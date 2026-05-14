@@ -1,7 +1,10 @@
 import { join } from "node:path";
 import { getCreativeAssetTypeDefinition } from "./registry";
 import type { CreativeAssetType } from "./types";
-import type { CreativeProductionRequestConfidence } from "./intake";
+import type {
+  CreativeProductionInitialApprovalStatus,
+  CreativeProductionRequestConfidence,
+} from "./intake";
 
 export interface CreativeProductionPacketIntake {
   rawRequest: string;
@@ -9,7 +12,12 @@ export interface CreativeProductionPacketIntake {
   routingReason: string;
   confidence: CreativeProductionRequestConfidence;
   matchedSignals: string[];
+  initialApprovalStatus: CreativeProductionInitialApprovalStatus;
 }
+
+export type CreativeProductionNextAction =
+  | "generate-concept-options"
+  | "generate-production-sources";
 
 export interface CreativeProductionPacket {
   schemaVersion: "tower-creative-production-packet-v1";
@@ -35,7 +43,7 @@ export interface CreativeProductionPacket {
   promotionPhrase: "approved for app";
   outputRoot: string;
   productionRoot: string;
-  nextAction: "generate-concept-options";
+  nextAction: CreativeProductionNextAction;
 }
 
 export function createCreativeProductionPacket(input: {
@@ -59,7 +67,7 @@ export function createCreativeProductionPacket(input: {
       description: definition.description,
       manifestStrategy: definition.manifestStrategy,
     },
-    requiredOutputs: REQUIRED_OUTPUTS[input.assetType],
+    requiredOutputs: getRequiredOutputs(input.assetType, input.intake),
     acceptanceChecks: ACCEPTANCE_CHECKS[input.assetType],
     organizationPolicy: ORGANIZATION_POLICY,
     qualityBar: QUALITY_BAR[input.assetType],
@@ -70,7 +78,9 @@ export function createCreativeProductionPacket(input: {
     promotionPhrase: "approved for app",
     outputRoot: join(input.stateRoot, `${definition.outputRoot.split("/").at(-1) ?? input.assetType}`, input.runId),
     productionRoot: definition.productionRoot,
-    nextAction: "generate-concept-options",
+    nextAction: input.intake?.initialApprovalStatus === "already-approved"
+      ? "generate-production-sources"
+      : "generate-concept-options",
   };
 
   if (!input.intake) return packet;
@@ -120,16 +130,21 @@ Hard requirements:
 }
 
 export function renderCreativeProductionNextAction(packet: CreativeProductionPacket): string {
+  const actionSummary = packet.nextAction === "generate-production-sources"
+    ? `Generate production sources for ${packet.name}.`
+    : `Generate concept options for ${packet.name}.`;
+
   return `# Creative Production Engine Packet
 
 ## Next Legal Action
 
-Generate concept options for ${packet.name}.
+${actionSummary}
 
 - Asset type: ${packet.assetType}
 - Run id: ${packet.runId}
 - Status: ${packet.status}
 - Promotion phrase: ${packet.promotionPhrase}
+- Next action id: ${packet.nextAction}
 ${packet.intake ? `- Routed from request: ${packet.intake.routingReason}\n` : ""}
 
 ## Gates
@@ -158,7 +173,8 @@ const REQUIRED_OUTPUTS: Record<CreativeAssetType, string[]> = {
     "turnaround sheet: front, 3/4 front, side, 3/4 back, and back",
     "expression sheet matched to the character bible",
     "outfit variants preserved as edits of the approved design",
-    "pose sheets for idle, greeting, listening, thinking, talking, alert, and working",
+    "native high-resolution individual sprite sources for idle, greeting, listening, thinking, talking, alert, and working",
+    "pose/contact sheets only as optional review aids unless every split cell passes source preflight",
     "staged transparent sprites with normal, @2x, and @3x derivatives",
   ],
   environment: [
@@ -205,6 +221,25 @@ const REQUIRED_OUTPUTS: Record<CreativeAssetType, string[]> = {
     "performance-ready raster derivatives and alt-text notes",
   ],
 };
+
+function getRequiredOutputs(
+  assetType: CreativeAssetType,
+  intake?: CreativeProductionPacketIntake,
+): string[] {
+  const outputs = REQUIRED_OUTPUTS[assetType];
+
+  if (assetType !== "character" || intake?.initialApprovalStatus !== "already-approved") {
+    return outputs;
+  }
+
+  return outputs
+    .filter((output) => !output.startsWith("12 initial concept options"))
+    .map((output) =>
+      output === "approved identity reference with visual DNA notes"
+        ? "approved identity reference already recorded with visual DNA notes"
+        : output,
+    );
+}
 
 const ACCEPTANCE_CHECKS: Record<CreativeAssetType, string[]> = {
   character: [

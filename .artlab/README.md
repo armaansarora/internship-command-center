@@ -86,5 +86,6 @@ npm --silent run art:status -- --json
 - Otis Vale: `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`
 - Status: promoted to app.
 - Caveat: sources were prototype-sized and upscaled, so Otis is a functional pilot with visible source-quality warnings.
-- Active replacement run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
+- Active replacement run: `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`.
+- Superseded planning run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
 - Next new character after Otis v2: Mara Voss (`ceo`).

@@ -2,8 +2,8 @@
 
 Last organized: 2026-05-14
 Live run: 2026-05-14-otis-pilot
-Active replacement run: 2026-05-14-otis-native-v2
-Status: live pilot promoted; native-quality v2 planned
+Active replacement run: 2026-05-14-otis-production-redo-v1
+Status: live pilot promoted; production redo planned with native individual-sprite source contract
 
 ## Keepers
 
@@ -11,9 +11,10 @@ Status: live pilot promoted; native-quality v2 planned
 - Expression reference: `.artlab/characters/otis/references/expressions/otis_expression-sheet_v001_reference.png`
 - Pose-sheet references: `.artlab/characters/otis/references/pose-sheets/<outfitVariant>/otis_pose-sheet_<outfitVariant>_v001_reference.png`
 - Run ledger: `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`
-- Replacement run ledger: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`
+- Replacement run ledger: `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`
+- Superseded replacement planning ledger: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`
 - Prompt packet: `.artlab/runs/otis/2026-05-14-otis-pilot/prompts/batch-prompt-packet.md`
-- Replacement prompt packet: `.artlab/runs/otis/2026-05-14-otis-native-v2/prompts/batch-prompt-packet.md`
+- Replacement prompt packet: `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/prompts/batch-prompt-packet.md`
 - Promoted app derivatives: `public/art/lobby/otis/<outfitVariant>/<pose>.webp`, `@2x.webp`, `@3x.webp`
 - Approved manifest entries: `src/lib/visual-assets/approved-character-assets.generated.json`
 - Final review board: `.artlab/runs/otis/2026-05-14-otis-pilot/review/final-upload-ready-board.html`
@@ -38,4 +39,4 @@ Status: live pilot promoted; native-quality v2 planned
 - Every source sprite in this pilot is still marked as prototype-sized and upscaled in the run ledger: `source-long-edge-below-4096` and `source-upscaled-to-master`. This means the board is reviewable, but the quality warning stays visible until truly high-resolution generated sources replace it.
 - The pilot has been promoted into `public/art` after Armaan's exact `approved for app` phrase.
 - Browser QA passed for `/lobby` and `/lobby/onboarding` on desktop and mobile after the `/art` public-path middleware fix.
-- Otis v2 uses the same approved design and will replace the live app files only after final QA and the exact `approved for app` phrase.
+- Otis v2 uses the same approved design and will replace the live app files only after source preflight, final QA, and the exact `approved for app` phrase.

@@ -20,6 +20,7 @@ import {
 } from "../src/lib/visual-assets";
 import {
   inspectCharacterSourceImage,
+  preflightCharacterSourceImage,
   prepareCharacterSpriteAsset,
   splitCharacterPoseSheet,
 } from "../src/lib/visual-assets/art-processing";
@@ -37,6 +38,7 @@ type ArtPipelineCommand =
   | "status"
   | "operate"
   | "clean"
+  | "preflight"
   | "ingest"
   | "split"
   | "master"
@@ -57,6 +59,7 @@ function printUsage(): never {
   npm run art:status [-- --json]
   npm run art:operate [-- --character <characterId>] [-- --run-id <run-id>] [-- --identity-ref <path>] [-- --asset-version <version>] [-- --run <run.json>] [-- --out-root <path>] [-- --dry-run] [-- --json]
   npm run art:clean -- <characterId> --run-id <run-id> [--include-legacy-shared-masters] [--dry-run]
+  npm run art:preflight -- <source> [--minimum-long-edge 4096] [--chroma-key 00ff00] [--json]
   npm run art:ingest -- <run.json> --source <path> --kind <kind> [--id <id>] [--outfit <variant>] [--pose <pose>] [--columns 7] [--rows 1]
   npm run art:split -- <run.json> --source-asset <id>
   npm run art:master -- <run.json> [--master-long-edge 4096]
@@ -73,6 +76,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     "status",
     "operate",
     "clean",
+    "preflight",
     "ingest",
     "split",
     "master",
@@ -188,6 +192,24 @@ function assertSourceKind(value: string): CharacterArtRun["sourceAssets"][number
   return value as CharacterArtRun["sourceAssets"][number]["kind"];
 }
 
+function optionalChromaKeyFlag(args: ParsedArgs): { r: number; g: number; b: number } | undefined {
+  const value = optionalStringFlag(args, "chroma-key");
+
+  if (!value) return undefined;
+
+  const normalized = value.replace(/^#/, "").toLowerCase();
+
+  if (!/^[0-9a-f]{6}$/.test(normalized)) {
+    throw new Error("--chroma-key must be a six-digit hex color such as 00ff00.");
+  }
+
+  return {
+    r: Number.parseInt(normalized.slice(0, 2), 16),
+    g: Number.parseInt(normalized.slice(2, 4), 16),
+    b: Number.parseInt(normalized.slice(4, 6), 16),
+  };
+}
+
 async function ensureParentDirectory(path: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
 }
@@ -231,6 +253,31 @@ async function commandPlan(args: ParsedArgs): Promise<void> {
 
   console.log(`Created character art run: ${runJsonPath}`);
   console.log(`Created prompt packet: ${promptPath}`);
+}
+
+async function commandPreflight(args: ParsedArgs): Promise<void> {
+  const sourcePath = args.positional[0];
+
+  if (!existsSync(sourcePath)) {
+    throw new Error(`Source file does not exist: ${sourcePath}`);
+  }
+
+  const result = await preflightCharacterSourceImage(sourcePath, {
+    minimumLongEdge: optionalNumberFlag(args, "minimum-long-edge") ?? 4096,
+    chromaKey: optionalChromaKeyFlag(args),
+  });
+
+  if (args.flags.get("json")) {
+    console.log(JSON.stringify(result, null, 2));
+  } else if (result.passed) {
+    console.log(`Source preflight passed: ${sourcePath}`);
+  } else {
+    console.error(`Source preflight failed: ${result.issues.join(", ")}`);
+  }
+
+  if (!result.passed) {
+    process.exitCode = 1;
+  }
 }
 
 async function commandIngest(args: ParsedArgs): Promise<void> {
@@ -379,7 +426,11 @@ async function processRunSprites(
       masterLongEdge,
     });
     const blockingIssues = result.issues.filter(
-      (issue) => issue === "source-missing-alpha" || issue === "master-long-edge-below-contract",
+      (issue) =>
+        issue === "source-missing-alpha" ||
+        issue === "master-long-edge-below-contract" ||
+        issue === "source-upscaled-to-master" ||
+        issue.startsWith("source-long-edge-below-"),
     );
 
     processed.push({
@@ -828,6 +879,8 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
       "npm --silent run art:status -- --json",
       "npm run art:clean -- <characterId> --run-id <run-id>",
       "npm run art:plan -- <characterId> --run-id <yyyy-mm-dd-character-purpose> --identity-ref <approved-reference-path>",
+      "npm run art:preflight -- <generated-file> --minimum-long-edge 4096 --chroma-key 00ff00",
+      "npm run art:ingest -- <run.json> --source <generated-file> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle",
       "npm run art:ingest -- <run.json> --source <generated-file> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1",
       "npm run art:split -- <run.json> --source-asset <pose-sheet-id>",
       "npm run art:master -- <run.json>",
@@ -1075,6 +1128,7 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       "npm run art:status",
       "npm run art:clean",
       "npm run art:plan",
+      "npm run art:preflight",
       "npm run art:ingest",
       "npm run art:split",
       "npm run art:master",
@@ -1197,6 +1251,7 @@ async function main(): Promise<void> {
   if (args.command === "status") await commandStatus(args);
   if (args.command === "operate") await commandOperate(args);
   if (args.command === "clean") await commandClean(args);
+  if (args.command === "preflight") await commandPreflight(args);
   if (args.command === "ingest") await commandIngest(args);
   if (args.command === "split") await commandSplit(args);
   if (args.command === "master" || args.command === "derive") await commandMasterOrDerive(args);

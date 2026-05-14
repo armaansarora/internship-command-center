@@ -18,7 +18,8 @@ Use `npm run art:operate` only when the active asset is a Season 1 character and
 - Production gate: no character art enters `public/art` or the approved manifest until Armaan says exactly `approved for app`.
 - Otis Vale is the first promoted pilot: run `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
 - Otis is usable in the app now, but the run ledger must keep its source warning visible: the pilot sources were prototype-sized and upscaled into 4K masters (`source-long-edge-below-4096`, `source-upscaled-to-master`).
-- Active priority: redo Otis from scratch through `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`, using the same approved design but native high-resolution sources.
+- Active priority: redo Otis from scratch through `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`, using the same approved design but native high-resolution individual sprite sources.
+- Superseded planning run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
 - Next new character after Otis v2: Mara Voss (`ceo`).
 
 ## First Commands
@@ -69,7 +70,7 @@ Then read only the files needed for the question:
 For Otis v2, the initial identity is already approved and the replacement run is already planned:
 
 ```bash
-npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-native-v2/run.json
+npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json
 ```
 
 For a new character, use:
@@ -80,7 +81,16 @@ npm run art:operate -- --character ceo --run-id 2026-05-14-mara-voss-pilot --ide
 
 6. Use the generated prompt packet under `.artlab/runs/<characterId>/<runId>/prompts/batch-prompt-packet.md`.
 7. Ingest generated sheets and sources into the run. Never put generation output directly in `public/art`.
-8. Run split, master, QA, and review:
+8. For production-quality replacement work, prefer native individual sprite sources:
+
+```bash
+npm run art:preflight -- <generated-file.png> --minimum-long-edge 4096 --chroma-key 00ff00
+npm run art:ingest -- <run.json> --source <generated-file.png> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle
+```
+
+Preflight must pass before ingest. Pose sheets are allowed as review aids or only when every split cell independently meets the native source contract. Do not use one low-resolution seven-pose sheet as production source.
+
+9. Run split only for acceptable pose sheets, then master, QA, and review:
 
 ```bash
 npm run art:split -- <run.json> --source-asset <pose-sheet-id>
@@ -89,14 +99,14 @@ npm run art:qa -- <run.json>
 npm run art:review -- <run.json>
 ```
 
-9. Show Armaan the final upload-ready board only after QA passes.
-10. Promote only after the exact phrase:
+10. Show Armaan the final upload-ready board only after QA passes.
+11. Promote only after the exact phrase:
 
 ```bash
 npm run art:promote -- <run.json> --approval-phrase "approved for app"
 ```
 
-11. Run browser QA for `/lobby` and `/lobby/onboarding` when the promoted character affects those pages.
+12. Run browser QA for `/lobby` and `/lobby/onboarding` when the promoted character affects those pages.
 
 ## If Armaan Asks What Has Been Done
 
@@ -104,7 +114,8 @@ Answer from these sources, in this order:
 
 - `npm run art:status`
 - `npm run art:operate`
-- `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`
+- `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`
+- `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json` as superseded planning context
 - `.artlab/runs/<characterId>/<runId>/run.json`
 - `src/lib/visual-assets/approved-character-assets.generated.json`
 - `.artlab/characters/<characterId>/ARTIFACTS.md`
@@ -138,6 +149,7 @@ Every character run should leave the pipeline stronger than it found it.
 - If a QA warning is accepted temporarily, keep it visible in the run ledger and status output.
 - If a browser issue is found, fix the runtime route/component and add the smallest regression test that protects it.
 - If a new asset class appears, extend the typed manifest before assets enter production.
+- If generated sheets are too low-resolution for native sprite source, switch the run to individual-sprite source ingestion before continuing.
 
 ## Current Non-Negotiables
 

@@ -1,0 +1,61 @@
+{
+  "operatorVersion": "tower-character-operator-v1",
+  "generatedAt": "2026-05-14T15:11:32.023Z",
+  "strictMode": true,
+  "characterId": "otis",
+  "displayName": "Otis Vale",
+  "runId": "2026-05-14-otis-production-redo-v1",
+  "nextAction": {
+    "type": "ingest-generated-sources",
+    "status": "blocked-on-generated-sources",
+    "summary": "Continue from the existing run ledger and ingest the next required generated sources."
+  },
+  "blockedUntil": "Generated source sheets exist and are ingested into the run ledger.",
+  "files": {
+    "nextActionJson": ".artlab/operators/otis/2026-05-14-otis-production-redo-v1/next-action.json",
+    "nextActionMarkdown": ".artlab/operators/otis/2026-05-14-otis-production-redo-v1/next-action.md",
+    "runJson": ".artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json"
+  },
+  "stateContract": {
+    "approvalGates": [
+      "initial-character-design",
+      "final-upload-ready-board"
+    ],
+    "productionPromotionPhrase": "approved for app",
+    "expectedOutfitVariants": [
+      "regular",
+      "summer-light",
+      "winter-layered"
+    ],
+    "expectedPoses": [
+      "idle",
+      "greeting",
+      "listening",
+      "thinking",
+      "talking",
+      "alert",
+      "working"
+    ],
+    "expectedSpritesPerCharacter": 21
+  },
+  "allowedCommands": [
+    "npm run art:operate",
+    "npm run art:status",
+    "npm run art:clean",
+    "npm run art:plan",
+    "npm run art:preflight",
+    "npm run art:ingest",
+    "npm run art:split",
+    "npm run art:master",
+    "npm run art:qa",
+    "npm run art:review",
+    "npm run art:promote"
+  ],
+  "forbiddenActions": [
+    "Do not copy generated files directly into public/art.",
+    "Do not update the approved manifest without a promoted QA-passed run.",
+    "Do not proceed past the initial design gate without Armaan choosing one concept.",
+    "Do not promote without the exact phrase approved for app.",
+    "Do not hide source-quality warnings."
+  ]
+}

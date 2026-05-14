@@ -350,6 +350,8 @@ Run `npm run art:operate` before continuing image work; use `npm run art:status`
 for read-only inspection. Current live Otis run:
 `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
 Active Otis replacement run:
+`.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`.
+Superseded Otis planning run:
 `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
 
 For broader visual work, use the Creative Production Engine. When Armaan says

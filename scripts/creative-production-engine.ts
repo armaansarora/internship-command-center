@@ -218,7 +218,7 @@ async function main(): Promise<void> {
       name: resolvedAssetName,
       runId,
       brief: resolvedBrief,
-      stateRoot,
+      stateRoot: toPortableLedgerPath(stateRoot),
     };
     const packet = createCreativeProductionPacket(inferred
       ? {
@@ -229,6 +229,7 @@ async function main(): Promise<void> {
             routingReason: inferred.routingReason,
             confidence: inferred.confidence,
             matchedSignals: inferred.matchedSignals,
+            initialApprovalStatus: inferred.initialApprovalStatus,
           },
         }
       : packetInput);

@@ -18,6 +18,7 @@ Everything between those gates is internal factory work. Agents and scripts gene
 - Format target: transparent PNG or WebP, full body, stable frame, safe padding, no text.
 - Master target: one 4K transparent master per approved pose and outfit variant, target long edge 4096px.
 - Production target: optimized default, `@2x`, and `@3x` WebP derivatives generated from the 4K master.
+- Production source target: native high-resolution individual sprite sources. Pose sheets can be used for review or consistency, but not as production source when splitting would make each pose too small.
 - Production posture: straight-on or 3/4 front unless a pose definition requires otherwise.
 - Background policy: transparent for production sprites; neutral sheet backgrounds are allowed only for approval boards.
 - Tone: Professional Scars. Characters are funny because they are competent in incompatible ways, not because they are caricatures.
@@ -232,7 +233,8 @@ Completed:
 Active caveat:
 
 - The pilot source sprites were prototype-sized and upscaled into 4K masters. Keep `source-long-edge-below-4096` and `source-upscaled-to-master` visible until Otis is regenerated from native high-resolution source art.
-- Otis now has a native-quality replacement run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`. This run must finish before Mara Voss.
+- Otis now has an active production redo run: `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`. This run must finish before Mara Voss.
+- Superseded Otis planning run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
 - Future masters are run-owned under `.artlab/characters/<characterId>/masters/<runId>/` so replacement runs cannot overwrite historical master paths.
 
 Next:

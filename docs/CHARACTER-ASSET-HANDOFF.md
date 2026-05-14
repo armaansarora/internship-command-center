@@ -135,7 +135,7 @@ Armaan has only two human approval gates per character:
 | Initial character design | Armaan picks one winner reference from the concept board |
 | Final upload-ready board | Armaan reviews every staged sprite and says `approved for app` |
 
-Everything between those two rows is internal factory work. Turnaround sheets, outfit sheets, expression sheets, pose sheets, split sources, 4K masters, derivatives, and QA boards are generated, repaired, or rejected by agents and scripts without repeatedly asking for approval unless the character identity breaks.
+Everything between those two rows is internal factory work. Turnaround sheets, outfit sheets, expression sheets, pose/contact sheets, individual sprite sources, 4K masters, derivatives, and QA boards are generated, repaired, or rejected by agents and scripts without repeatedly asking for approval unless the character identity breaks.
 
 ## Factory Commands
 
@@ -143,13 +143,17 @@ Everything between those two rows is internal factory work. Turnaround sheets, o
 npm run art:operate
 npm run art:status
 npm run art:plan -- otis --run-id 2026-05-14-otis-batch --identity-ref .artlab/characters/otis/model/otis_winner-ref_v001.png
-npm run art:ingest -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source <generated-file.png> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1
+npm run art:preflight -- <generated-file.png> --minimum-long-edge 4096 --chroma-key 00ff00
+npm run art:ingest -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source <generated-file.png> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle
+npm run art:ingest -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source <generated-sheet.png> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1
 npm run art:split -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source-asset pose-sheet-regular
 npm run art:master -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
 npm run art:qa -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
 npm run art:review -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
 npm run art:promote -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --approval-phrase "approved for app"
 ```
+
+Use individual-sprite source ingestion for production-quality replacement work. Preflight must pass before ingest. Pose sheets are useful for contact sheets and broad consistency checks, but they are not production source unless every split cell independently satisfies the native source-resolution contract.
 
 ## Image QA Before Manifest
 
@@ -184,6 +188,6 @@ After approved files are added:
 
 Otis Vale is promoted through `.artlab/runs/otis/2026-05-14-otis-pilot/run.json` and has 21 approved manifest entries. The remaining 231 Season 1 sprite slots are still missing by design.
 
-The Otis pilot is usable in the app, but its source warnings remain active: `source-long-edge-below-4096` and `source-upscaled-to-master`. Do not hide those warnings. The active replacement run is `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`; finish that native high-resolution pass before Mara.
+The Otis pilot is usable in the app, but its source warnings remain active: `source-long-edge-below-4096` and `source-upscaled-to-master`. Do not hide those warnings. The active replacement run is `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`; finish that native high-resolution individual-sprite pass before Mara. The older `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json` remains superseded planning context.
 
-Run `npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-native-v2/run.json` before continuing Otis image work; use `npm run art:status` for read-only inspection. The next new character after Otis v2 is Mara Voss (`ceo`).
+Run `npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json` before continuing Otis image work; use `npm run art:status` for read-only inspection. The next new character after Otis v2 is Mara Voss (`ceo`).

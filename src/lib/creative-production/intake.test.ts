@@ -15,6 +15,7 @@ describe("creative production adaptive intake", () => {
     expect(draft.runId).toBe("2026-05-14-otis");
     expect(draft.routingReason).toContain("character");
     expect(draft.confidence).toBe("high");
+    expect(draft.initialApprovalStatus).toBe("already-approved");
   });
 
   it("routes background and screen requests to environments", () => {

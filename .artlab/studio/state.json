@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tower-creative-studio-state-v1",
   "engineVersion": "creative-production-engine-v1",
-  "updatedAt": "2026-05-14T14:30:12.229Z",
+  "updatedAt": "2026-05-14T15:24:23.564Z",
   "done": [
     "Four Lobby backgrounds preserved",
     "Otis Vale character pilot promoted",
@@ -31,6 +31,6 @@
   "recommendedNext": {
     "assetType": "character",
     "name": "Otis Vale",
-    "reason": "Otis Vale has an active replacement run (2026-05-14-otis-native-v2) and should be completed before new characters."
+    "reason": "Otis Vale has an active replacement run (2026-05-14-otis-production-redo-v1) and should be completed before new characters."
   }
 }

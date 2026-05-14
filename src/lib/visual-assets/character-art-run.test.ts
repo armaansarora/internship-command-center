@@ -56,12 +56,19 @@ describe("character art run contract", () => {
     expect(run.expectedSprites).toHaveLength(
       CHARACTER_OUTFIT_VARIANTS.length * CHARACTER_POSES.length,
     );
-    expect(run.sourceBatches.map((batch) => batch.id)).toEqual([
+    expect(run.sourceBatches).toHaveLength(1 + CHARACTER_OUTFIT_VARIANTS.length * CHARACTER_POSES.length);
+    expect(run.sourceBatches.map((batch) => batch.id).slice(0, 4)).toEqual([
       "production-packet",
-      "pose-sheet-regular",
-      "pose-sheet-summer-light",
-      "pose-sheet-winter-layered",
+      "sprite-regular-idle",
+      "sprite-regular-greeting",
+      "sprite-regular-listening",
     ]);
+    expect(run.sourceBatches.find((batch) => batch.id === "sprite-winter-layered-working")).toMatchObject({
+      kind: "individual-sprite",
+      outfitVariant: "winter-layered",
+      pose: "working",
+      expectedArtifacts: ["winter-layered/working"],
+    });
     expect(run.directories.stagedPublicRoot).toBe(
       ".artlab/characters/otis/staged-public/2026-05-14-otis-batch",
     );
@@ -127,7 +134,7 @@ describe("character art run contract", () => {
       (sprite, index) => ({
         slotId: sprite.id,
         sourcePath: `.artlab/characters/otis/incoming/source-${index}.png`,
-        sourceResolution: { width: 1024, height: 1536 },
+        sourceResolution: { width: 2400, height: 4096 },
         masterPath: sprite.masterPath,
         masterResolution: sprite.sourceFrame,
         checksum: `sha256-${index.toString().padStart(2, "0")}`,
@@ -164,10 +171,36 @@ describe("character art run contract", () => {
       sourceRunId: "2026-05-14-otis-batch",
       assetVersion: "otis-v1",
       checksum: "sha256-00",
-      sourceResolution: { width: 1024, height: 1536 },
+      sourceResolution: { width: 2400, height: 4096 },
       masterResolution: { width: 2400, height: 4096 },
       qaStatus: "passed",
       promotionDate: "2026-05-14T16:10:00.000Z",
     });
+  });
+
+  it("blocks replacement QA when source art was upscaled instead of generated at native quality", () => {
+    const run = createCharacterArtRunPlan({
+      characterId: "otis",
+      runId: "2026-05-14-otis-native-v2",
+      assetVersion: "otis-v2",
+      approvedIdentityRef: ".artlab/characters/otis/references/identity/otis_identity-outfit-variants_v001_reference.png",
+    });
+    const processedSprites: CharacterArtProcessedSprite[] = run.expectedSprites.map(
+      (sprite, index) => ({
+        slotId: sprite.id,
+        sourcePath: `.artlab/runs/otis/2026-05-14-otis-native-v2/split/source-${index}.png`,
+        sourceResolution: { width: 253, height: 887 },
+        masterPath: sprite.masterPath,
+        masterResolution: sprite.sourceFrame,
+        checksum: `sha256-${index.toString().padStart(2, "0")}`,
+        qaStatus: "passed",
+        issues: ["source-long-edge-below-4096", "source-upscaled-to-master"],
+      }),
+    );
+    const processedRun = markCharacterArtRunProcessed(run, processedSprites);
+
+    expect(() => markCharacterArtRunQaPassed(processedRun)).toThrow(
+      /source art is below the native 4K source contract/,
+    );
   });
 });

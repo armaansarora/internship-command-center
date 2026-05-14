@@ -16,6 +16,7 @@
     "art:studio": "tsx scripts/creative-production-engine.ts",
     "art:clean": "tsx scripts/art-pipeline.ts clean",
     "art:ingest": "tsx scripts/art-pipeline.ts ingest",
+    "art:preflight": "tsx scripts/art-pipeline.ts preflight",
     "art:split": "tsx scripts/art-pipeline.ts split",
     "art:master": "tsx scripts/art-pipeline.ts master",
     "art:derive": "tsx scripts/art-pipeline.ts derive",

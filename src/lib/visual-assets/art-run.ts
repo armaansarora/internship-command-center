@@ -31,7 +31,8 @@ export type CharacterArtRunStatus =
 
 export type CharacterArtSourceBatchKind =
   | "production-packet"
-  | "pose-sheet";
+  | "pose-sheet"
+  | "individual-sprite";
 
 export type CharacterArtHumanApprovalGateId =
   | "initial-character-design"
@@ -83,6 +84,7 @@ export interface CharacterArtSourceBatch {
   required: boolean;
   promptRef: string;
   outfitVariant?: CharacterOutfitVariant;
+  pose?: CharacterPose;
   expectedArtifacts: string[];
 }
 
@@ -320,15 +322,31 @@ function getCharacterArtSourceBatches(characterId: CharacterId): CharacterArtSou
       promptRef: character.posePackPromptRef,
       expectedArtifacts: ["turnaround", "expression-sheet", "outfit-variant-sheet"],
     },
-    ...CHARACTER_OUTFIT_VARIANTS.map((outfitVariant) => ({
-      id: `pose-sheet-${outfitVariant}`,
-      kind: "pose-sheet" as const,
-      required: true,
-      promptRef: character.posePackPromptRef,
-      outfitVariant,
-      expectedArtifacts: CHARACTER_POSES.map((pose) => `${outfitVariant}/${pose}`),
-    })),
+    ...CHARACTER_OUTFIT_VARIANTS.flatMap((outfitVariant) =>
+      CHARACTER_POSES.map((pose) => ({
+        id: `sprite-${outfitVariant}-${pose}`,
+        kind: "individual-sprite" as const,
+        required: true,
+        promptRef: character.posePackPromptRef,
+        outfitVariant,
+        pose,
+        expectedArtifacts: [`${outfitVariant}/${pose}`],
+      })),
+    ),
   ];
+}
+
+export function getOptionalCharacterPoseSheetBatches(characterId: CharacterId): CharacterArtSourceBatch[] {
+  const character = getCharacterVisualMetadata(characterId);
+
+  return CHARACTER_OUTFIT_VARIANTS.map((outfitVariant) => ({
+    id: `pose-sheet-${outfitVariant}`,
+    kind: "pose-sheet" as const,
+    required: false,
+    promptRef: character.posePackPromptRef,
+    outfitVariant,
+    expectedArtifacts: CHARACTER_POSES.map((pose) => `${outfitVariant}/${pose}`),
+  }));
 }
 
 export function createCharacterArtRunPlan({
@@ -515,6 +533,12 @@ export function getCharacterArtRunQaIssues(run: CharacterArtRun): string[] {
     if (Math.max(sprite.masterResolution.width, sprite.masterResolution.height) < CHARACTER_ART_MASTER_LONG_EDGE) {
       issues.push(`Sprite ${sprite.slotId} master is below the 4K long-edge contract.`);
     }
+    if (Math.max(sprite.sourceResolution.width, sprite.sourceResolution.height) < CHARACTER_ART_MASTER_LONG_EDGE) {
+      issues.push(`Sprite ${sprite.slotId} source art is below the native 4K source contract.`);
+    }
+    if (sprite.issues.includes("source-upscaled-to-master")) {
+      issues.push(`Sprite ${sprite.slotId} was upscaled into the master instead of generated at native quality.`);
+    }
     if (!sprite.checksum) {
       issues.push(`Sprite ${sprite.slotId} is missing a checksum.`);
     }
@@ -595,7 +619,6 @@ export function getCharacterArtPublicTargetPath(sprite: CharacterArtExpectedSpri
 
 export function renderCharacterArtRunPromptPacket(run: CharacterArtRun): string {
   const character = getCharacterVisualMetadata(run.characterId);
-  const outfitList = CHARACTER_OUTFIT_VARIANTS.join(", ");
   const poseList = CHARACTER_POSES.join(", ");
 
   return `# ${character.displayName} Batch Art Run
@@ -616,7 +639,8 @@ approvedIdentityRef: ${run.approvedIdentityRef}
 ## Required Batch Outputs
 
 - Production packet: turnaround, expression sheet, outfit variant sheet.
-- Pose sheets: one sheet each for ${outfitList}.
+- Production-quality source sprites: one native high-resolution source per outfit/pose slot.
+- Optional pose/contact sheets may be generated for visual review, but final ingest should use individual source sprites unless every split cell independently meets the native source contract.
 - Required poses on every outfit sheet: ${poseList}.
 - Every pose must preserve the approved identity reference, natural human imperfections, and tower-flat-plus-depth-v1.
 

@@ -23,6 +23,7 @@ describe("character image operations continuity", () => {
     expect(packageJson.scripts["art:status"]).toBe("tsx scripts/art-pipeline.ts status");
     expect(packageJson.scripts["art:operate"]).toBe("tsx scripts/art-pipeline.ts operate");
     expect(packageJson.scripts["art:clean"]).toBe("tsx scripts/art-pipeline.ts clean");
+    expect(packageJson.scripts["art:preflight"]).toBe("tsx scripts/art-pipeline.ts preflight");
 
     for (const document of [operations, prompt, artLab, claude, structure]) {
       expect(document).toContain("npm run art:status");
@@ -39,10 +40,11 @@ describe("character image operations continuity", () => {
     expect(operations).toContain("Self-Improvement Loop");
     expect(operations).toContain("Mara Voss");
     expect(operations).toContain("ceo");
-    expect(prompt).toContain("Finish Otis v2 before Mara");
+    expect(prompt).toContain("Finish Otis production redo before Mara");
     expect(structure).toContain(".artlab/runs/otis/2026-05-14-otis-pilot/run.json");
+    expect(structure).toContain(".artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json");
     expect(structure).toContain(".artlab/runs/otis/2026-05-14-otis-native-v2/run.json");
-    expect(otisArtifacts).toContain("native-quality v2 planned");
+    expect(otisArtifacts).toContain("production redo planned");
   });
 
   it("keeps committed art-operation artifacts portable across machines", () => {
@@ -54,6 +56,9 @@ describe("character image operations continuity", () => {
     );
     const housekeepingLedger = readProjectFile(".artlab/studio/ledgers/housekeeping.jsonl");
     const sessionPrompt = readProjectFile("docs/CHARACTER-IMAGE-SESSION-PROMPT.md");
+    const otisStudioPacket = readProjectFile(
+      ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/creative-brief.json",
+    );
 
     expect(pipeline).not.toContain("pathToFileURL");
     expect(reviewBoard).not.toContain(fileUrlPrefix);
@@ -62,6 +67,8 @@ describe("character image operations continuity", () => {
     expect(housekeepingLedger).not.toContain(localUserRoot);
     expect(housekeepingLedger).toContain(".artlab/studio/state.json");
     expect(sessionPrompt).not.toContain(localUserRoot);
+    expect(otisStudioPacket).not.toContain(localUserRoot);
+    expect(otisStudioPacket).toContain(".artlab/studio/characters/2026-05-14-otis-production-redo-v1");
   });
 
   it("prints a machine-readable status report for fresh Codex sessions", () => {
@@ -97,6 +104,7 @@ describe("character image operations continuity", () => {
     });
     expect(status.nextRecommendedCharacter.reason).toContain("active replacement run");
     expect(status.commands).toContain("npm run art:status");
+    expect(status.commands).toContain("npm run art:preflight -- <generated-file> --minimum-long-edge 4096 --chroma-key 00ff00");
     expect(status.commands).toContain("npm run art:clean -- <characterId> --run-id <run-id>");
     expect(status.commands.join("\n")).toContain("approved for app");
     expect(status.continuationDocs).toContain("docs/CHARACTER-IMAGE-OPERATIONS.md");

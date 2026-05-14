@@ -1,6 +1,7 @@
 import type { CreativeAssetType } from "./types";
 
 export type CreativeProductionRequestConfidence = "high" | "medium" | "low";
+export type CreativeProductionInitialApprovalStatus = "required" | "already-approved";
 
 export interface CreativeProductionRequestDraft {
   rawRequest: string;
@@ -11,6 +12,7 @@ export interface CreativeProductionRequestDraft {
   confidence: CreativeProductionRequestConfidence;
   routingReason: string;
   matchedSignals: string[];
+  initialApprovalStatus: CreativeProductionInitialApprovalStatus;
 }
 
 interface RouteSignal {
@@ -179,7 +181,20 @@ export function inferCreativeProductionRequest(
     confidence: route.confidence,
     routingReason: `Routed to ${route.assetType} because the request matched ${route.reason}.`,
     matchedSignals: route.matchedSignals,
+    initialApprovalStatus: inferInitialApprovalStatus(rawRequest),
   };
+}
+
+function inferInitialApprovalStatus(request: string): CreativeProductionInitialApprovalStatus {
+  if (
+    /\b(same|existing|current|already|previously)\s+approved\b/i.test(request) ||
+    /\bapproved\s+(design|direction|identity|reference|look)\b/i.test(request) ||
+    /\bdesign\s+is\s+already\s+approved\b/i.test(request)
+  ) {
+    return "already-approved";
+  }
+
+  return "required";
 }
 
 function routeRequest(request: string): {
