@@ -27,6 +27,7 @@ Use this skill when the user says any close variant of:
 3. brainstorm first. Ask what Armaan wants to add today and gather the creative brief.
 4. Present 2-3 approaches with a recommendation.
 5. Create concept options or a concept prompt packet.
+   - Prefer `npm run art:studio -- --request "<Armaan's natural-language request>"`. The engine routes characters, backgrounds, screens, buttons, animations, props, scenes, icon systems, and marketing visuals into strict organized packets.
    - Once the brief is known, use `npm run art:studio -- --asset-type <type> --name "<asset name>" --brief "<brief>" --run-id <safe-run-id>` to create the strict packet.
 6. Wait for the initial direction approval.
 7. Build the strict production packet.
@@ -53,4 +54,5 @@ Every phase must record slow steps, manual steps, errors, quality failures, conf
 - Keep live `public/art` assets until a replacement passes QA, receives `approved for app`, and promotes through the manifest.
 - Do not hide quality warnings.
 - Treat unknown flags, unsafe paths, corrupt state, and missing ledgers as engine failures to fix before continuing.
+- If Armaan asks for a different kind of visual asset, do not force it into the character pipeline. Use adaptive request routing first, then improve the router if the result feels wrong.
 - Use Superpowers brainstorming before new creative directions and Superpowers implementation skills when executing the approved plan.

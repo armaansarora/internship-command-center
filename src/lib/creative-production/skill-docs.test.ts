@@ -26,5 +26,7 @@ describe("creative production natural-language trigger", () => {
     expect(skill).toContain("use the creative production engine");
     expect(skill).toContain("brainstorm first");
     expect(skill).toContain("approved for app");
+    expect(skill).toContain("npm run art:studio -- --request");
+    expect(spec).toContain("adaptive request router");
   });
 });

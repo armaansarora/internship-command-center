@@ -1,6 +1,7 @@
 export * from "./adapters/character-art";
 export * from "./housekeeping";
 export * from "./improvement";
+export * from "./intake";
 export * from "./operator";
 export * from "./path-safety";
 export * from "./prompts";

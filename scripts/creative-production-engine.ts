@@ -11,6 +11,7 @@ import {
   createImprovementEntry,
   loadCreativeStudioStateWithRecovery,
   getCreativeAssetTypeDefinition,
+  inferCreativeProductionRequest,
   renderCreativeProductionNextAction,
   renderCreativeProductionPrompt,
   saveCreativeStudioState,
@@ -21,7 +22,7 @@ import {
   type CreativePhaseId,
 } from "../src/lib/creative-production";
 
-const KNOWN_FLAGS = new Set(["--state-root", "--asset-type", "--name", "--brief", "--run-id"]);
+const KNOWN_FLAGS = new Set(["--state-root", "--asset-type", "--name", "--brief", "--run-id", "--request"]);
 const FLAG_VALUES = new Set(KNOWN_FLAGS);
 
 function validateKnownFlags(argv: string[]): void {
@@ -171,6 +172,7 @@ async function main(): Promise<void> {
   const assetName = flagValue(argv, "--name");
   const brief = flagValue(argv, "--brief");
   const explicitRunId = flagValue(argv, "--run-id");
+  const request = flagValue(argv, "--request");
   const statePath = join(stateRoot, "state.json");
   const loadedState = await loadCreativeStudioStateWithRecovery(statePath);
   const state = createDefaultCreativeStudioState(new Date().toISOString(), loadLiveArtStatus());
@@ -195,20 +197,41 @@ async function main(): Promise<void> {
     improvementAction: "Continue gathering creative intent before creating production packets.",
   });
 
-  if (assetTypeValue || assetName || brief) {
-    if (!assetTypeValue || !assetName || !brief) {
-      throw new Error("--asset-type, --name, and --brief are required together.");
+  if (assetTypeValue || assetName || brief || explicitRunId || request) {
+    const inferred = request ? inferCreativeProductionRequest(request) : undefined;
+
+    if (!inferred && (!assetTypeValue || !assetName || !brief)) {
+      throw new Error("--asset-type, --name, and --brief are required together unless --request is provided.");
     }
 
-    const assetType = assertAssetType(assetTypeValue);
-    const runId = assertSafeRunId(explicitRunId ?? slugifyRunId(assetName));
-    const packet = createCreativeProductionPacket({
+    const assetType = assertAssetType(assetTypeValue ?? inferred?.assetType ?? "");
+    const resolvedAssetName = assetName ?? inferred?.name;
+    const resolvedBrief = brief ?? inferred?.brief;
+
+    if (!resolvedAssetName || !resolvedBrief) {
+      throw new Error("Could not resolve a creative production name and brief from the provided input.");
+    }
+
+    const runId = assertSafeRunId(explicitRunId ?? inferred?.runId ?? slugifyRunId(resolvedAssetName));
+    const packetInput = {
       assetType,
-      name: assetName,
+      name: resolvedAssetName,
       runId,
-      brief,
+      brief: resolvedBrief,
       stateRoot,
-    });
+    };
+    const packet = createCreativeProductionPacket(inferred
+      ? {
+          ...packetInput,
+          intake: {
+            rawRequest: inferred.rawRequest,
+            inferredAssetType: inferred.assetType,
+            routingReason: inferred.routingReason,
+            confidence: inferred.confidence,
+            matchedSignals: inferred.matchedSignals,
+          },
+        }
+      : packetInput);
     const packetRoot = assertSafeWorkspacePath(
       join(stateRoot, `${getCreativeAssetTypeDefinition(assetType).outputRoot.split("/").at(-1)}`, runId),
       [stateRoot],
@@ -229,11 +252,19 @@ async function main(): Promise<void> {
       created: [packetPath, promptPath, nextActionPath],
       kept: [packetPath, promptPath, nextActionPath],
       housekeepingNotes: "Production packet files are grouped under the run folder; nothing was written to public/art.",
-      improvementFinding: "Packet mode is now command-backed for any registered creative asset type.",
-      improvementAction: "Use the packet prompt for concept generation, then record the next gate before promotion.",
+      improvementFinding: inferred
+        ? "Adaptive request mode routed natural language into a strict production packet."
+        : "Packet mode is command-backed for any registered creative asset type.",
+      improvementAction: inferred
+        ? "Review request-routing accuracy after the concept phase and add intake signals when the route felt slow or surprising."
+        : "Use the packet prompt for concept generation, then record the next gate before promotion.",
     });
 
-    console.log(`Created Creative Production Engine packet: ${assetName}`);
+    if (inferred) {
+      console.log(`Routed request to ${assetType}: ${inferred.routingReason}`);
+    }
+
+    console.log(`Created Creative Production Engine packet: ${resolvedAssetName}`);
     console.log(`Packet: ${packetPath}`);
     console.log(`Prompt: ${promptPath}`);
     console.log(`Next action: ${nextActionPath}`);

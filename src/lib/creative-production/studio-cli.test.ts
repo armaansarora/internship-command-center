@@ -82,6 +82,65 @@ describe("art:studio CLI", () => {
     expect(readFileSync(actionPath, "utf8")).toContain("Next Legal Action");
   });
 
+  it("turns a natural-language background request into an organized environment run", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-request-bg-"));
+    const today = new Date().toISOString().slice(0, 10);
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Create a new immersive background screen for the application war room.",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Routed request to environment");
+    expect(output).toContain("Application War Room Background Screen");
+
+    const runRoot = join(root, "environments", `${today}-application-war-room-background-screen`);
+    const packet = JSON.parse(readFileSync(join(runRoot, "creative-brief.json"), "utf8")) as {
+      assetType: string;
+      name: string;
+      intake: { rawRequest: string; routingReason: string };
+      requiredOutputs: string[];
+      acceptanceChecks: string[];
+    };
+
+    expect(packet.assetType).toBe("environment");
+    expect(packet.name).toBe("Application War Room Background Screen");
+    expect(packet.intake.rawRequest).toBe("Create a new immersive background screen for the application war room.");
+    expect(packet.intake.routingReason).toContain("environment");
+    expect(packet.requiredOutputs).toContain("desktop, tablet, and mobile crops");
+    expect(packet.acceptanceChecks).toContain("approved lobby backgrounds are untouched unless the request explicitly targets a new replacement run");
+    expect(readFileSync(join(runRoot, "prompt.md"), "utf8")).toContain("desktop, tablet, and mobile crops");
+  });
+
+  it("turns a natural-language UI request into a ui-texture run with state outputs", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-request-ui-"));
+    const today = new Date().toISOString().slice(0, 10);
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Make a small premium UI button texture for the lobby controls.",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Routed request to ui-texture");
+
+    const packetPath = join(root, "ui-textures", `${today}-lobby-controls-button-texture`, "creative-brief.json");
+    const packet = JSON.parse(readFileSync(packetPath, "utf8")) as {
+      assetType: string;
+      requiredOutputs: string[];
+      acceptanceChecks: string[];
+    };
+
+    expect(packet.assetType).toBe("ui-texture");
+    expect(packet.requiredOutputs).toContain("normal, hover, active, focus, disabled, and reduced-motion states");
+    expect(packet.acceptanceChecks).toContain("text, icon, and hit-area sizing remain controlled by app CSS, not baked into decorative art");
+  });
+
   it("creates packets for every registered asset type without character-only assumptions", () => {
     for (const assetType of CREATIVE_ASSET_TYPES) {
       const root = mkdtempSync(join(tmpdir(), `tower-${assetType}-packet-`));
