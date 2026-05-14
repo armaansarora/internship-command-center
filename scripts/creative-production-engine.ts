@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import {
   assertSafeWorkspacePath,
   buildCreativeStudioOrientation,
@@ -98,6 +98,23 @@ function loadLiveArtStatus(): CreativeLiveArtStatusInput | undefined {
   return undefined;
 }
 
+function isInsidePath(root: string, candidate: string): boolean {
+  const relativePath = relative(root, candidate);
+
+  return relativePath === "" || (!relativePath.startsWith("..") && !relativePath.startsWith("/"));
+}
+
+function toPortableLedgerPath(path: string): string {
+  const workspaceRoot = resolve(process.cwd());
+  const absolutePath = resolve(path);
+
+  if (isInsidePath(workspaceRoot, absolutePath)) {
+    return relative(workspaceRoot, absolutePath) || ".";
+  }
+
+  return path;
+}
+
 async function recordAndValidatePhaseGates(input: {
   stateRoot: string;
   runId: string;
@@ -109,11 +126,13 @@ async function recordAndValidatePhaseGates(input: {
   improvementAction: string;
   ledgerRoot?: string;
 }): Promise<void> {
+  const created = input.created.map(toPortableLedgerPath);
+  const kept = input.kept.map(toPortableLedgerPath);
   const housekeeping = createHousekeepingEntry({
     runId: input.runId,
     phase: input.phase,
-    created: input.created,
-    kept: input.kept,
+    created,
+    kept,
     archived: [],
     deleted: [],
     notes: input.housekeepingNotes,

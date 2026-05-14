@@ -3,7 +3,7 @@
 Use this prompt when opening a fresh Codex session for Tower character art work.
 
 ```text
-We are in /Users/armaanarora/Documents/The Tower.
+Work from the The Tower repository root.
 
 Continue Tower visual work through the Creative Production Engine. First read CLAUDE.md, STRUCTURE.md, docs/CREATIVE-PRODUCTION-ENGINE.md, docs/CHARACTER-IMAGE-OPERATIONS.md, docs/CHARACTER-ART-PIPELINE.md, docs/ART-BIBLE.md, docs/CHARACTER-BIBLE.md, and .artlab/README.md. Then run npm run art:studio and treat its guided opening as the source of truth. Use npm run art:operate only when the active asset is a Season 1 character and the engine reaches the character-art operator stage. Use npm run art:status only for read-only inspection.
 

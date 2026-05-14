@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { copyFile, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { dirname, join, relative } from "node:path";
 import {
   CHARACTER_OUTFIT_VARIANTS,
   CHARACTER_POSES,
@@ -427,16 +426,25 @@ async function commandQa(args: ParsedArgs): Promise<void> {
   console.log("Art QA passed.");
 }
 
+function getReviewBoardPreviewSrc(reviewRoot: string, publicSrc: string): string {
+  const publicPath = join("public", publicSrc.replace(/^\/+/, ""));
+
+  return relative(reviewRoot, publicPath).replaceAll("\\", "/");
+}
+
 function renderReviewHtml(run: CharacterArtRun): string {
   const cards = run.expectedSprites
     .map((sprite) => {
-      const absoluteSrc = pathToFileURL(resolve(sprite.stagedRenditions.retina3x.src)).toString();
+      const previewSrc = getReviewBoardPreviewSrc(
+        run.directories.reviewRoot,
+        sprite.publicRenditions.retina3x.src,
+      );
       const processed = run.processedSprites.find((entry) => entry.slotId === sprite.id);
       const warnings = processed?.issues.length ? processed.issues.join(", ") : "none";
 
       return `<article class="card">
-  <div class="preview dark"><img src="${absoluteSrc}" alt="${sprite.id} on dark background"></div>
-  <div class="preview light"><img src="${absoluteSrc}" alt="${sprite.id} on light background"></div>
+  <div class="preview dark"><img src="${previewSrc}" alt="${sprite.id} on dark background"></div>
+  <div class="preview light"><img src="${previewSrc}" alt="${sprite.id} on light background"></div>
   <h2>${sprite.outfitVariant} / ${sprite.pose}</h2>
   <p>${sprite.publicRenditions.default.src}</p>
   <p class="warnings">QA notes: ${warnings}</p>

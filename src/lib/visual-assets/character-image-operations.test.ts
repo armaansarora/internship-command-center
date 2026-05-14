@@ -42,6 +42,25 @@ describe("character image operations continuity", () => {
     expect(otisArtifacts).toContain("Status: promoted");
   });
 
+  it("keeps committed art-operation artifacts portable across machines", () => {
+    const fileUrlPrefix = ["file", "://"].join("");
+    const localUserRoot = ["/", "Users", "/"].join("");
+    const pipeline = readProjectFile("scripts/art-pipeline.ts");
+    const reviewBoard = readProjectFile(
+      ".artlab/runs/otis/2026-05-14-otis-pilot/review/final-upload-ready-board.html",
+    );
+    const housekeepingLedger = readProjectFile(".artlab/studio/ledgers/housekeeping.jsonl");
+    const sessionPrompt = readProjectFile("docs/CHARACTER-IMAGE-SESSION-PROMPT.md");
+
+    expect(pipeline).not.toContain("pathToFileURL");
+    expect(reviewBoard).not.toContain(fileUrlPrefix);
+    expect(reviewBoard).not.toContain(localUserRoot);
+    expect(reviewBoard).toContain("public/art/lobby/otis/regular/idle@3x.webp");
+    expect(housekeepingLedger).not.toContain(localUserRoot);
+    expect(housekeepingLedger).toContain(".artlab/studio/state.json");
+    expect(sessionPrompt).not.toContain(localUserRoot);
+  });
+
   it("prints a machine-readable status report for fresh Codex sessions", () => {
     const tsx = join(process.cwd(), "node_modules/.bin/tsx");
     const rawStatus = execFileSync(tsx, ["scripts/art-pipeline.ts", "status", "--json"], {
