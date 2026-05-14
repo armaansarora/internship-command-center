@@ -253,7 +253,7 @@ export function getCharacterArtRunDirectories(
     prompts: `.artlab/runs/${characterId}/${runId}/prompts`,
     model: `${characterRoot}/model`,
     split: `.artlab/runs/${characterId}/${runId}/split`,
-    mastersRoot: `${characterRoot}/masters`,
+    mastersRoot: `${characterRoot}/masters/${runId}`,
     qaRoot: `${characterRoot}/qa/${runId}`,
     stagedPublicRoot: `${characterRoot}/staged-public/${runId}`,
     reviewRoot: `.artlab/runs/${characterId}/${runId}/review`,
@@ -418,7 +418,7 @@ export function validateCharacterArtRun(run: CharacterArtRun): string[] {
     if (!expectedSlotIds.has(sprite.id)) {
       issues.push(`Unexpected sprite slot in run: ${sprite.id}`);
     }
-    if (!sprite.masterPath.startsWith(`.artlab/characters/${run.characterId}/masters/`)) {
+    if (!sprite.masterPath.startsWith(`.artlab/characters/${run.characterId}/masters/${run.runId}/`)) {
       issues.push(`Master path must stay inside .artlab: ${sprite.masterPath}`);
     }
     if (!sprite.stagedRenditions.default.src.startsWith(`.artlab/characters/${run.characterId}/staged-public/`)) {

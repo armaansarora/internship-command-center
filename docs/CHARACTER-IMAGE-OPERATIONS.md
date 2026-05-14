@@ -18,7 +18,8 @@ Use `npm run art:operate` only when the active asset is a Season 1 character and
 - Production gate: no character art enters `public/art` or the approved manifest until Armaan says exactly `approved for app`.
 - Otis Vale is the first promoted pilot: run `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
 - Otis is usable in the app now, but the run ledger must keep its source warning visible: the pilot sources were prototype-sized and upscaled into 4K masters (`source-long-edge-below-4096`, `source-upscaled-to-master`).
-- Next recommended character: Mara Voss (`ceo`), because Armaan chose Mara after Otis.
+- Active priority: redo Otis from scratch through `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`, using the same approved design but native high-resolution sources.
+- Next new character after Otis v2: Mara Voss (`ceo`).
 
 ## First Commands
 
@@ -40,6 +41,12 @@ For machine-readable handoff:
 npm --silent run art:status -- --json
 ```
 
+To wipe volatile old run binaries while keeping provenance and live app assets, run:
+
+```bash
+npm run art:clean -- <characterId> --run-id <run-id>
+```
+
 Then read only the files needed for the question:
 
 - `CLAUDE.md` for Tower-wide doctrine and commands.
@@ -57,7 +64,15 @@ Then read only the files needed for the question:
 2. Open the generated `next-action.json`, `next-action.md`, and any prompt packet under `.artlab/operators/<characterId>/<runId>/`.
 3. Follow only the action named in the operator packet.
 4. If the packet says `generate-concept-board`, generate exactly 12 options from the generated concept prompt and wait for the initial design choice.
-5. After the initial design is chosen, let the operator create the run from the approved identity:
+5. After the initial design is chosen, let the operator create the run from the approved identity.
+
+For Otis v2, the initial identity is already approved and the replacement run is already planned:
+
+```bash
+npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-native-v2/run.json
+```
+
+For a new character, use:
 
 ```bash
 npm run art:operate -- --character ceo --run-id 2026-05-14-mara-voss-pilot --identity-ref .artlab/characters/ceo/references/identity/<approved-file>.png
@@ -89,6 +104,7 @@ Answer from these sources, in this order:
 
 - `npm run art:status`
 - `npm run art:operate`
+- `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`
 - `.artlab/runs/<characterId>/<runId>/run.json`
 - `src/lib/visual-assets/approved-character-assets.generated.json`
 - `.artlab/characters/<characterId>/ARTIFACTS.md`
@@ -129,5 +145,6 @@ Every character run should leave the pipeline stronger than it found it.
 - Use approved raster character art, not hand-authored local SVG character art.
 - Keep `CharacterStage` as the runtime layer for pose, outfit, state, and motion.
 - Keep generated drafts in `.artlab`; keep approved app derivatives in `public/art`.
+- For replacement work, clean volatile old run images with `npm run art:clean`; do not delete current live `public/art` files until the replacement run is approved and promoted.
 - Keep all production assets manifest-gated.
 - Do not add runtime image generation or paid API generation unless Armaan explicitly approves that separate product decision.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tower-creative-studio-state-v1",
   "engineVersion": "creative-production-engine-v1",
-  "updatedAt": "2026-05-14T05:54:15.760Z",
+  "updatedAt": "2026-05-14T14:30:12.229Z",
   "done": [
     "Four Lobby backgrounds preserved",
     "Otis Vale character pilot promoted",
@@ -11,8 +11,8 @@
     "Promoted characters: Otis Vale (otis)"
   ],
   "active": [
-    "Mara Voss recommended next by live art status",
-    "Mara Voss concept-board operator packet staged"
+    "Otis Vale recommended next by live art status",
+    "Otis Vale production packet is the next strict engine action"
   ],
   "remaining": [
     "11 Season 1 character identities",
@@ -30,7 +30,7 @@
   ],
   "recommendedNext": {
     "assetType": "character",
-    "name": "Mara Voss",
-    "reason": "Mara Voss was already chosen as the next pilot after Otis."
+    "name": "Otis Vale",
+    "reason": "Otis Vale has an active replacement run (2026-05-14-otis-native-v2) and should be completed before new characters."
   }
 }

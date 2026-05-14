@@ -10,6 +10,7 @@ The Creative Production Engine is the Tower-wide system for producing characters
 - `npm run art:studio -- --asset-type <type> --name "<asset name>" --brief "<brief>" --run-id <safe-run-id>`: converts an approved guided brief into a strict production packet under `.artlab/studio/<asset-type>/<run-id>/` with `creative-brief.json`, `prompt.md`, `next-action.md`, and phase ledgers.
 - `npm run art:operate`: strict character-art operator packet for Season 1 character work.
 - `npm run art:status`: read-only character art status.
+- `npm run art:clean`: removes volatile run-owned art binaries while keeping ledgers, references, live `public/art`, and manifest data protected.
 
 `art:studio` rejects unknown flags, unsafe run ids, path traversal, symlink escapes, and production writes outside `.artlab/studio`. If the studio state is corrupt, it preserves a `.corrupt-*` backup before creating a valid state snapshot.
 

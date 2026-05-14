@@ -33,6 +33,7 @@ Use this skill when the user says any close variant of:
 8. Execute generation, ingest, QA, review board, promotion, and app integration through scripts.
 9. Promote only after the exact phrase `approved for app`.
 10. Run the Housekeeping Gate.
+    - Use `npm run art:clean` for volatile old character-run binaries when replacing approved art.
 11. Run the Continuous Improvement Gate.
 12. Recommend the next best action.
 
@@ -49,6 +50,7 @@ Every phase must record slow steps, manual steps, errors, quality failures, conf
 - Preserve approved Lobby backgrounds.
 - Keep drafts in `.artlab`.
 - Keep production manifest gated.
+- Keep live `public/art` assets until a replacement passes QA, receives `approved for app`, and promotes through the manifest.
 - Do not hide quality warnings.
 - Treat unknown flags, unsafe paths, corrupt state, and missing ledgers as engine failures to fix before continuing.
 - Use Superpowers brainstorming before new creative directions and Superpowers implementation skills when executing the approved plan.

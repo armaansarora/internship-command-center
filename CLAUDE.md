@@ -40,7 +40,7 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 - `npm run env:init` — local env init helper
 - `npm run art:status` — current character image pipeline status and next step
 - `npm run art:operate` — strict character image pipeline operator; writes the next legal action packet
-- `npm run art:plan|ingest|split|master|qa|review|promote` — batch character asset factory
+- `npm run art:plan|clean|ingest|split|master|qa|review|promote` — batch character asset factory
 
 ## Conventions
 - Server Components by default; "use client" only when needed
@@ -69,8 +69,9 @@ For any character image work, run `npm run art:operate` first and read `docs/CHA
 Current anchor state:
 - Otis Vale is promoted through `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
 - Otis works in the app, but the run intentionally keeps source warnings visible because prototype-sized sources were upscaled into 4K masters: `source-long-edge-below-4096` and `source-upscaled-to-master`.
-- The next recommended character is Mara Voss (`ceo`).
+- The active replacement run is `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`; finish native-quality Otis v2 before starting Mara Voss (`ceo`).
 - Drafts and generated outputs stay in `.artlab`; only `npm run art:promote` can copy approved derivatives into `public/art`.
+- `npm run art:clean` may remove volatile old run binaries, but live `public/art` files stay until a replacement run is approved and promoted.
 - Promotion requires Armaan's exact phrase: `approved for app`.
 - If the image process exposes a repeated manual workaround, strengthen the script, docs, and tests before continuing.
 

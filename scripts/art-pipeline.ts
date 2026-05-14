@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
 import {
   CHARACTER_OUTFIT_VARIANTS,
@@ -36,6 +36,7 @@ type ArtPipelineCommand =
   | "plan"
   | "status"
   | "operate"
+  | "clean"
   | "ingest"
   | "split"
   | "master"
@@ -54,7 +55,8 @@ function printUsage(): never {
   throw new Error(`Usage:
   npm run art:plan -- <characterId> --run-id <run-id> --identity-ref <path> [--asset-version <version>]
   npm run art:status [-- --json]
-  npm run art:operate [-- --character <characterId>] [-- --run-id <run-id>] [-- --identity-ref <path>] [-- --run <run.json>] [-- --out-root <path>] [-- --dry-run] [-- --json]
+  npm run art:operate [-- --character <characterId>] [-- --run-id <run-id>] [-- --identity-ref <path>] [-- --asset-version <version>] [-- --run <run.json>] [-- --out-root <path>] [-- --dry-run] [-- --json]
+  npm run art:clean -- <characterId> --run-id <run-id> [--include-legacy-shared-masters] [--dry-run]
   npm run art:ingest -- <run.json> --source <path> --kind <kind> [--id <id>] [--outfit <variant>] [--pose <pose>] [--columns 7] [--rows 1]
   npm run art:split -- <run.json> --source-asset <id>
   npm run art:master -- <run.json> [--master-long-edge 4096]
@@ -70,6 +72,7 @@ function parseArgs(argv: string[]): ParsedArgs {
     "plan",
     "status",
     "operate",
+    "clean",
     "ingest",
     "split",
     "master",
@@ -494,6 +497,73 @@ async function commandReview(args: ParsedArgs): Promise<void> {
   console.log(`Created final review board: ${reviewPath}`);
 }
 
+async function listImageFiles(root: string): Promise<string[]> {
+  if (!existsSync(root)) return [];
+
+  const entries = await readdir(root, { withFileTypes: true });
+
+  return entries
+    .filter((entry) => entry.isFile() && /\.(png|webp|jpe?g)$/i.test(entry.name))
+    .map((entry) => join(root, entry.name));
+}
+
+async function commandClean(args: ParsedArgs): Promise<void> {
+  const characterId = assertCharacterId(args.positional[0] ?? "");
+  const runId = requireFlag(args, "run-id");
+  const dryRun = args.flags.get("dry-run") === true;
+  const includeLegacySharedMasters = args.flags.get("include-legacy-shared-masters") === true;
+  const volatileDirectories = [
+    `.artlab/characters/${characterId}/masters/${runId}`,
+    `.artlab/characters/${characterId}/qa/${runId}`,
+    `.artlab/characters/${characterId}/staged-public/${runId}`,
+    `.artlab/runs/${characterId}/${runId}/incoming`,
+    `.artlab/runs/${characterId}/${runId}/split`,
+  ];
+  const legacyMasterDirectories = includeLegacySharedMasters
+    ? CHARACTER_OUTFIT_VARIANTS.map((variant) => `.artlab/characters/${characterId}/masters/${variant}`)
+    : [];
+  const imageFiles = [
+    ...(await listImageFiles(`.artlab/runs/${characterId}/${runId}/review`)),
+    ...(await listImageFiles(`.artlab/runs/${characterId}/${runId}/browser-qa`)),
+  ];
+  const deleteTargets = [...volatileDirectories, ...legacyMasterDirectories, ...imageFiles].filter((path) =>
+    existsSync(path),
+  );
+  const kept = [
+    `.artlab/runs/${characterId}/${runId}/run.json`,
+    `.artlab/runs/${characterId}/${runId}/prompts/`,
+    `.artlab/runs/${characterId}/${runId}/review/final-upload-ready-board.html`,
+    `.artlab/runs/${characterId}/${runId}/browser-qa/browser-qa.json`,
+    `.artlab/characters/${characterId}/references/`,
+    `public/art/lobby/${characterId}/`,
+    GENERATED_MANIFEST_PATH,
+  ];
+
+  if (!dryRun) {
+    for (const target of deleteTargets) {
+      await rm(target, { recursive: true, force: true });
+    }
+  }
+
+  console.log(
+    JSON.stringify(
+      {
+        characterId,
+        runId,
+        dryRun,
+        deleted: deleteTargets,
+        kept,
+        protected: [
+          "production public/art files stay live until a replacement run is approved and promoted",
+          "run ledgers, prompt packets, review HTML, browser QA JSON, and identity references stay as provenance",
+        ],
+      },
+      null,
+      2,
+    ),
+  );
+}
+
 async function readApprovedCharacterAssets(): Promise<VisualAsset[]> {
   if (!existsSync(GENERATED_MANIFEST_PATH)) return [];
 
@@ -672,8 +742,23 @@ function getLatestRunForCharacter(
   runLedgers: ArtRunLedgerSummary[],
   characterId: CharacterId,
 ): ArtRunLedgerSummary | undefined {
-  return runLedgers
+  const runs = runLedgers
     .filter((run) => run.characterId === characterId)
+    .sort((left, right) => right.runId.localeCompare(left.runId));
+
+  return runs.find((run) => run.promotionStatus !== "promoted") ?? runs[0];
+}
+
+function getActiveReplacementRun(
+  runLedgers: ArtRunLedgerSummary[],
+  approvedCounts: Map<CharacterId, number>,
+): ArtRunLedgerSummary | undefined {
+  return runLedgers
+    .filter(
+      (run) =>
+        (approvedCounts.get(run.characterId) ?? 0) >= expectedSpritesPerCharacter &&
+        run.promotionStatus !== "promoted",
+    )
     .sort((left, right) => right.runId.localeCompare(left.runId))[0];
 }
 
@@ -708,10 +793,17 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
       latestRun: getLatestRunForCharacter(runLedgers, characterId),
     };
   });
+  const activeReplacementRun = getActiveReplacementRun(runLedgers, approvedCounts);
   const nextCharacter =
+    characters.find((character) => character.characterId === activeReplacementRun?.characterId) ??
     characters.find((character) => character.characterId === "ceo" && character.productionState !== "fully-promoted") ??
     characters.find((character) => character.productionState !== "fully-promoted") ??
     characters[0];
+  const nextReason = activeReplacementRun
+    ? `${nextCharacter.displayName} has an active replacement run (${activeReplacementRun.runId}) and should be completed before new characters.`
+    : nextCharacter.characterId === "ceo"
+      ? "Mara Voss was already chosen as the next pilot after Otis."
+      : "This is the next unpromoted Season 1 character in the locked generation order.";
 
   return {
     styleId: "tower-flat-plus-depth-v1",
@@ -726,10 +818,7 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
     nextRecommendedCharacter: {
       characterId: nextCharacter.characterId,
       displayName: nextCharacter.displayName,
-      reason:
-        nextCharacter.characterId === "ceo"
-          ? "Mara Voss was already chosen as the next pilot after Otis."
-          : "This is the next unpromoted Season 1 character in the locked generation order.",
+      reason: nextReason,
     },
     characters,
     runLedgers,
@@ -737,6 +826,7 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
       "npm run art:operate",
       "npm run art:status",
       "npm --silent run art:status -- --json",
+      "npm run art:clean -- <characterId> --run-id <run-id>",
       "npm run art:plan -- <characterId> --run-id <yyyy-mm-dd-character-purpose> --identity-ref <approved-reference-path>",
       "npm run art:ingest -- <run.json> --source <generated-file> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1",
       "npm run art:split -- <run.json> --source-asset <pose-sheet-id>",
@@ -903,6 +993,7 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
   const operatorRoot = join(outRoot, characterId, runId);
   const runPath = optionalStringFlag(args, "run");
   const identityRef = optionalStringFlag(args, "identity-ref");
+  const assetVersion = optionalStringFlag(args, "asset-version");
   const characterStatus = report.characters.find((entry) => entry.characterId === characterId);
   const files: CharacterOperatorPacket["files"] = {
     nextActionJson: join(operatorRoot, "next-action.json"),
@@ -915,14 +1006,7 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
     throw new Error(`Unknown Season 1 character id: ${characterId}`);
   }
 
-  if (characterStatus?.productionState === "fully-promoted") {
-    nextAction = {
-      type: "complete",
-      status: "complete",
-      summary: `${character.displayName} already has all ${expectedSpritesPerCharacter} approved production sprites.`,
-    };
-    blockedUntil = "No block; this character is already promoted.";
-  } else if (runPath) {
+  if (runPath) {
     files.runJson = runPath;
     nextAction = {
       type: "ingest-generated-sources",
@@ -935,6 +1019,7 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       characterId,
       runId,
       approvedIdentityRef: identityRef,
+      assetVersion,
     });
 
     files.runJson = getRunJsonPath(run);
@@ -943,9 +1028,19 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       type: "create-run-from-approved-identity",
       status: "ready-to-execute",
       humanGate: "initial-character-design",
-      summary: "Create the strict batch run ledger and prompt packet from the approved identity reference.",
+      summary:
+        characterStatus?.productionState === "fully-promoted"
+          ? "Create a strict replacement run from the already approved identity reference."
+          : "Create the strict batch run ledger and prompt packet from the approved identity reference.",
     };
     blockedUntil = "Run ledger and prompt packet are created, then generated sources are ingested.";
+  } else if (characterStatus?.productionState === "fully-promoted") {
+    nextAction = {
+      type: "complete",
+      status: "complete",
+      summary: `${character.displayName} already has all ${expectedSpritesPerCharacter} approved production sprites.`,
+    };
+    blockedUntil = "No block; this character is already promoted.";
   } else {
     files.conceptPrompt = join(operatorRoot, "concept-board-prompt.md");
     nextAction = {
@@ -978,6 +1073,7 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
     allowedCommands: [
       "npm run art:operate",
       "npm run art:status",
+      "npm run art:clean",
       "npm run art:plan",
       "npm run art:ingest",
       "npm run art:split",
@@ -1100,6 +1196,7 @@ async function main(): Promise<void> {
   if (args.command === "plan") await commandPlan(args);
   if (args.command === "status") await commandStatus(args);
   if (args.command === "operate") await commandOperate(args);
+  if (args.command === "clean") await commandClean(args);
   if (args.command === "ingest") await commandIngest(args);
   if (args.command === "split") await commandSplit(args);
   if (args.command === "master" || args.command === "derive") await commandMasterOrDerive(args);

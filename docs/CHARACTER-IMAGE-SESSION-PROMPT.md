@@ -13,11 +13,11 @@ Do not put generated files directly in public/art. Use .artlab for drafts, runs,
 
 Continue from the current gate. If the next character has no initial design approval, generate the 12-option concept board first. If the initial design is already approved, run the batch factory: plan, ingest, split, master, QA, review board, final approval, promote, manifest update, browser QA. If any pipeline weakness appears, improve the script, docs, and tests before moving on.
 
-Otis Vale is already promoted through run .artlab/runs/otis/2026-05-14-otis-pilot/run.json, but his run carries source warnings because prototype-sized sources were upscaled: source-long-edge-below-4096 and source-upscaled-to-master. Keep those warnings visible. The next recommended character after Otis is Mara Voss (ceo).
+Otis Vale is live through run .artlab/runs/otis/2026-05-14-otis-pilot/run.json, but that pilot carries source warnings because prototype-sized sources were upscaled: source-long-edge-below-4096 and source-upscaled-to-master. Keep those warnings visible. The active priority is the native-quality Otis replacement run at .artlab/runs/otis/2026-05-14-otis-native-v2/run.json. Finish Otis v2 before starting Mara Voss (ceo).
 ```
 
 Short version:
 
 ```text
-Continue Tower visuals. Run npm run art:studio first, read docs/CREATIVE-PRODUCTION-ENGINE.md and docs/CHARACTER-IMAGE-OPERATIONS.md, and proceed through the Creative Production Engine. Use npm run art:operate only for Season 1 character operator packets. Use npm run art:status for read-only inspection. Keep all drafts in .artlab, promote only after approved for app, and strengthen scripts/docs/tests whenever the pipeline exposes a weakness.
+Continue Tower visuals. Run npm run art:studio first, read docs/CREATIVE-PRODUCTION-ENGINE.md and docs/CHARACTER-IMAGE-OPERATIONS.md, and proceed through the Creative Production Engine. Use npm run art:operate only for Season 1 character operator packets. Use npm run art:status for read-only inspection. Finish Otis v2 before Mara. Keep all drafts in .artlab, promote only after approved for app, and strengthen scripts/docs/tests whenever the pipeline exposes a weakness.
 ```

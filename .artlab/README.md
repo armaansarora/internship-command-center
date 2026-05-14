@@ -78,6 +78,7 @@ npm --silent run art:status -- --json
 - Promotion requires Armaan's exact phrase: `approved for app`.
 - Do not delete promoted run ledgers. They are provenance.
 - Do not hide warnings such as `source-upscaled-to-master`.
+- Use `npm run art:clean` to remove volatile old run binaries; never use it to delete live `public/art` assets before a replacement is approved.
 - If the pipeline needs a repeated manual step, turn it into a script, doc, and test.
 
 ## Current Anchor Run
@@ -85,4 +86,5 @@ npm --silent run art:status -- --json
 - Otis Vale: `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`
 - Status: promoted to app.
 - Caveat: sources were prototype-sized and upscaled, so Otis is a functional pilot with visible source-quality warnings.
-- Next recommended character: Mara Voss (`ceo`).
+- Active replacement run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
+- Next new character after Otis v2: Mara Voss (`ceo`).

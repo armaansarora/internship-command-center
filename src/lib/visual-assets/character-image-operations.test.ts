@@ -22,6 +22,7 @@ describe("character image operations continuity", () => {
 
     expect(packageJson.scripts["art:status"]).toBe("tsx scripts/art-pipeline.ts status");
     expect(packageJson.scripts["art:operate"]).toBe("tsx scripts/art-pipeline.ts operate");
+    expect(packageJson.scripts["art:clean"]).toBe("tsx scripts/art-pipeline.ts clean");
 
     for (const document of [operations, prompt, artLab, claude, structure]) {
       expect(document).toContain("npm run art:status");
@@ -31,15 +32,17 @@ describe("character image operations continuity", () => {
     for (const document of [operations, prompt, artLab, claude, otisArtifacts]) {
       expect(document).toContain("approved for app");
       expect(document).toContain("2026-05-14-otis-pilot");
+      expect(document).toContain("2026-05-14-otis-native-v2");
       expect(document).toContain("source-upscaled-to-master");
     }
 
     expect(operations).toContain("Self-Improvement Loop");
     expect(operations).toContain("Mara Voss");
     expect(operations).toContain("ceo");
-    expect(prompt).toContain("The next recommended character after Otis is Mara Voss (ceo)");
+    expect(prompt).toContain("Finish Otis v2 before Mara");
     expect(structure).toContain(".artlab/runs/otis/2026-05-14-otis-pilot/run.json");
-    expect(otisArtifacts).toContain("Status: promoted");
+    expect(structure).toContain(".artlab/runs/otis/2026-05-14-otis-native-v2/run.json");
+    expect(otisArtifacts).toContain("native-quality v2 planned");
   });
 
   it("keeps committed art-operation artifacts portable across machines", () => {
@@ -72,7 +75,7 @@ describe("character image operations continuity", () => {
       approvedProductionSprites: number;
       expectedProductionSprites: number;
       fullyPromotedCharacters: string[];
-      nextRecommendedCharacter: { characterId: string; displayName: string };
+      nextRecommendedCharacter: { characterId: string; displayName: string; reason: string };
       commands: string[];
       continuationDocs: string[];
       runLedgers: Array<{
@@ -89,10 +92,12 @@ describe("character image operations continuity", () => {
     expect(status.expectedProductionSprites).toBe(252);
     expect(status.fullyPromotedCharacters.join(" ")).toContain("Otis Vale (otis)");
     expect(status.nextRecommendedCharacter).toMatchObject({
-      characterId: "ceo",
-      displayName: "Mara Voss",
+      characterId: "otis",
+      displayName: "Otis Vale",
     });
+    expect(status.nextRecommendedCharacter.reason).toContain("active replacement run");
     expect(status.commands).toContain("npm run art:status");
+    expect(status.commands).toContain("npm run art:clean -- <characterId> --run-id <run-id>");
     expect(status.commands.join("\n")).toContain("approved for app");
     expect(status.continuationDocs).toContain("docs/CHARACTER-IMAGE-OPERATIONS.md");
 
@@ -104,6 +109,13 @@ describe("character image operations continuity", () => {
     expect(otisRun?.promotionStatus).toBe("promoted");
     expect(otisRun?.warningCounts["source-upscaled-to-master"]).toBe(21);
     expect(otisRun?.warningCounts["source-long-edge-below-4096"]).toBe(21);
+
+    const otisReplacementRun = status.runLedgers.find(
+      (run) => run.characterId === "otis" && run.runId === "2026-05-14-otis-native-v2",
+    );
+
+    expect(otisReplacementRun?.status).toBe("planned");
+    expect(otisReplacementRun?.promotionStatus).toBe("not-promoted");
   });
 
   it("materializes a strict operator packet for the next character gate", () => {
@@ -182,5 +194,40 @@ describe("character image operations continuity", () => {
     expect(promptPacket).toContain("No celebrity likeness");
     expect(markdownPacket).toContain("Next Legal Action");
     expect(markdownPacket).toContain("blocked-on-human-choice");
+  });
+
+  it("dry-runs volatile Otis cleanup while protecting live app assets", () => {
+    const tsx = join(process.cwd(), "node_modules/.bin/tsx");
+    const rawCleanup = execFileSync(
+      tsx,
+      [
+        "scripts/art-pipeline.ts",
+        "clean",
+        "otis",
+        "--run-id",
+        "2026-05-14-otis-pilot",
+        "--dry-run",
+      ],
+      {
+        cwd: process.cwd(),
+        encoding: "utf8",
+      },
+    );
+    const cleanup = JSON.parse(rawCleanup) as {
+      characterId: string;
+      runId: string;
+      dryRun: boolean;
+      kept: string[];
+      protected: string[];
+    };
+
+    expect(cleanup).toMatchObject({
+      characterId: "otis",
+      runId: "2026-05-14-otis-pilot",
+      dryRun: true,
+    });
+    expect(cleanup.kept).toContain("public/art/lobby/otis/");
+    expect(cleanup.kept).toContain("src/lib/visual-assets/approved-character-assets.generated.json");
+    expect(cleanup.protected.join(" ")).toContain("production public/art files stay live");
   });
 });

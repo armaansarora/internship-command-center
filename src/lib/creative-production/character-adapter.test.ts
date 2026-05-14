@@ -7,7 +7,7 @@ describe("character creative adapter", () => {
 
     expect(summary.assetType).toBe("character");
     expect(summary.completed).toContain("Otis Vale");
-    expect(summary.recommendedNext).toContain("Mara Voss");
+    expect(summary.recommendedNext).toContain("Otis Vale native-quality v2");
     expect(summary.commandHints).toContain("npm run art:operate");
     expect(summary.warningCodes).toContain("source-upscaled-to-master");
   });

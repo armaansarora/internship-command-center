@@ -10,7 +10,7 @@ export function buildCharacterCreativeAdapterSummary(): CharacterCreativeAdapter
   return {
     assetType: "character",
     completed: ["Otis Vale"],
-    recommendedNext: "Mara Voss",
+    recommendedNext: "Otis Vale native-quality v2, then Mara Voss",
     commandHints: ["npm run art:operate", "npm run art:status"],
     warningCodes: ["source-long-edge-below-4096", "source-upscaled-to-master"],
   };

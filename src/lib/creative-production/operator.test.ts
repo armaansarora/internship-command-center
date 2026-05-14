@@ -10,7 +10,7 @@ describe("creative studio operator", () => {
 
     expect(orientation.openingQuestion).toBe("What are we adding to The Tower today?");
     expect(orientation.soFar).toContain("Otis Vale character pilot promoted");
-    expect(orientation.recommendation).toContain("Mara Voss");
+    expect(orientation.recommendation).toContain("Otis Vale");
     expect(orientation.remaining).toContain("11 Season 1 character identities");
     expect(orientation.availableAssetTypes).toContain("environment");
     expect(orientation.availableAssetTypes).toContain("animation");
@@ -41,6 +41,7 @@ describe("creative studio operator", () => {
     expect(state.done).toContain("Otis Vale character pilot promoted");
     expect(state.done).toContain("21/252 approved production sprites");
     expect(state.active).toContain("Mara Voss recommended next by live art status");
+    expect(state.active).toContain("Mara Voss production packet is the next strict engine action");
     expect(state.knownWarnings).toContain("source-upscaled-to-master x21");
   });
 });

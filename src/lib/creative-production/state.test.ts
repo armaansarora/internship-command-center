@@ -9,14 +9,15 @@ import {
 } from "./index";
 
 describe("creative studio state", () => {
-  it("initializes durable studio state with Otis and Mara continuity", () => {
+  it("initializes durable studio state with Otis v2 before Mara continuity", () => {
     const state = createDefaultCreativeStudioState();
 
     expect(state.schemaVersion).toBe("tower-creative-studio-state-v1");
     expect(state.engineVersion).toBe("creative-production-engine-v1");
     expect(state.done).toContain("Otis Vale character pilot promoted");
     expect(state.recommendedNext.assetType).toBe("character");
-    expect(state.recommendedNext.name).toBe("Mara Voss");
+    expect(state.recommendedNext.name).toBe("Otis Vale");
+    expect(state.recommendedNext.reason).toContain("Otis native-quality v2");
     expect(state.remaining.some((item) => item.includes("environments"))).toBe(true);
     expect(state.remaining.some((item) => item.includes("animations"))).toBe(true);
   });
@@ -31,7 +32,7 @@ describe("creative studio state", () => {
     const saved = JSON.parse(readFileSync(statePath, "utf8")) as typeof state;
     expect(saved.schemaVersion).toBe(state.schemaVersion);
     expect(saved.updatedAt).toBe("2026-05-14T00:00:00.000Z");
-    expect(saved.recommendedNext.name).toBe("Mara Voss");
+    expect(saved.recommendedNext.name).toBe("Otis Vale");
   });
 
   it("falls back to default state when no saved state exists", async () => {

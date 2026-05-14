@@ -23,7 +23,7 @@ describe("art:studio CLI", () => {
 
     expect(output).toContain("What are we adding to The Tower today?");
     expect(output).toContain("So far we have done");
-    expect(output).toContain("I suggest we do Mara Voss");
+    expect(output).toContain("I suggest we do Otis Vale");
     expect(output).toContain("Still remaining");
     expect(output).toContain("Known warnings");
     expect(output).toContain("character, environment, prop, ui-texture, animation, scene, icon-system, marketing-hero");

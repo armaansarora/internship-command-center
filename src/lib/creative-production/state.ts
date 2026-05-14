@@ -75,10 +75,10 @@ export function createDefaultCreativeStudioState(
     ? `${liveStatus.approvedProductionSprites}/${liveStatus.expectedProductionSprites} approved production sprites`
     : "21/252 approved production sprites";
   const promotedCharacters = liveStatus?.fullyPromotedCharacters ?? ["Otis Vale (otis)"];
-  const nextName = liveStatus?.nextRecommendedCharacter.displayName ?? "Mara Voss";
+  const nextName = liveStatus?.nextRecommendedCharacter.displayName ?? "Otis Vale";
   const nextReason =
     liveStatus?.nextRecommendedCharacter.reason ??
-    "Mara defines the executive visual language and should set the cast authority benchmark after Otis.";
+    "Otis native-quality v2 must replace the prototype-upscaled pilot before new character work starts.";
 
   return {
     schemaVersion: "tower-creative-studio-state-v1",
@@ -94,7 +94,7 @@ export function createDefaultCreativeStudioState(
     ],
     active: [
       `${nextName} recommended next by live art status`,
-      "Mara Voss concept-board operator packet staged",
+      `${nextName} production packet is the next strict engine action`,
     ],
     remaining: [
       "11 Season 1 character identities",

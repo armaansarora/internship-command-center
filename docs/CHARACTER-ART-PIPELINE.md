@@ -232,9 +232,11 @@ Completed:
 Active caveat:
 
 - The pilot source sprites were prototype-sized and upscaled into 4K masters. Keep `source-long-edge-below-4096` and `source-upscaled-to-master` visible until Otis is regenerated from native high-resolution source art.
+- Otis now has a native-quality replacement run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`. This run must finish before Mara Voss.
+- Future masters are run-owned under `.artlab/characters/<characterId>/masters/<runId>/` so replacement runs cannot overwrite historical master paths.
 
 Next:
 
 - Run `npm run art:operate`.
 - Use `npm run art:status` for read-only inspection.
-- Continue with Mara Voss (`ceo`) unless Armaan explicitly changes the character order.
+- Continue Otis v2 first, then Mara Voss (`ceo`).

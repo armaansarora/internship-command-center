@@ -303,7 +303,7 @@ scripts/dev-preview.ts            `npm run dev:preview` — dev preview
                                   harness (auth-stub, ports)
 scripts/art-pipeline.ts           `npm run art:operate`, `npm run art:status`,
                                   plus character asset factory commands:
-                                  plan, ingest, split, master, derive, qa,
+                                  plan, clean, ingest, split, master, derive, qa,
                                   review, promote
 scripts/validate-sentry-alerts.ts CLI validator for sentry/alerts.yaml
                                   (same logic as the vitest regression in
@@ -347,8 +347,10 @@ docs/RUNBOOK.md              operations playbook (synthetic canary,
 ```
 
 Run `npm run art:operate` before continuing image work; use `npm run art:status`
-for read-only inspection. Current anchor run:
+for read-only inspection. Current live Otis run:
 `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
+Active Otis replacement run:
+`.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
 
 For broader visual work, use the Creative Production Engine. When Armaan says
 "Creative Production Engine" or asks to add/generate Tower visuals, run

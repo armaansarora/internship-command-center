@@ -58,6 +58,6 @@ describe("creative production hardening", () => {
     const fallback = createDefaultCreativeStudioState();
 
     expect(state.schemaVersion).toBe(fallback.schemaVersion);
-    expect(state.recommendedNext.name).toBe("Mara Voss");
+    expect(state.recommendedNext.name).toBe("Otis Vale");
   });
 });

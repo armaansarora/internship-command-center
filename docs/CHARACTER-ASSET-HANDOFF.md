@@ -184,6 +184,6 @@ After approved files are added:
 
 Otis Vale is promoted through `.artlab/runs/otis/2026-05-14-otis-pilot/run.json` and has 21 approved manifest entries. The remaining 231 Season 1 sprite slots are still missing by design.
 
-The Otis pilot is usable in the app, but its source warnings remain active: `source-long-edge-below-4096` and `source-upscaled-to-master`. Do not hide those warnings; replace them later with native high-resolution source art.
+The Otis pilot is usable in the app, but its source warnings remain active: `source-long-edge-below-4096` and `source-upscaled-to-master`. Do not hide those warnings. The active replacement run is `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`; finish that native high-resolution pass before Mara.
 
-Run `npm run art:operate` before continuing image work; use `npm run art:status` for read-only inspection. The next recommended character is Mara Voss (`ceo`).
+Run `npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-native-v2/run.json` before continuing Otis image work; use `npm run art:status` for read-only inspection. The next new character after Otis v2 is Mara Voss (`ceo`).

@@ -65,10 +65,13 @@ describe("character art run contract", () => {
     expect(run.directories.stagedPublicRoot).toBe(
       ".artlab/characters/otis/staged-public/2026-05-14-otis-batch",
     );
+    expect(run.directories.mastersRoot).toBe(
+      ".artlab/characters/otis/masters/2026-05-14-otis-batch",
+    );
 
     for (const sprite of run.expectedSprites) {
       expect(sprite.masterPath).toMatch(
-        /^\.artlab\/characters\/otis\/masters\/(regular|summer-light|winter-layered)\/[a-z-]+\.png$/,
+        /^\.artlab\/characters\/otis\/masters\/2026-05-14-otis-batch\/(regular|summer-light|winter-layered)\/[a-z-]+\.png$/,
       );
       expect(sprite.stagedRenditions.default.src).toMatch(
         /^\.artlab\/characters\/otis\/staged-public\/2026-05-14-otis-batch\/art\/lobby\/otis\/(regular|summer-light|winter-layered)\/[a-z-]+\.webp$/,
