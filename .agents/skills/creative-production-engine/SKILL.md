@@ -69,8 +69,23 @@ Use this for every normal Creative Production Engine packet. The default is alwa
 7. Lane agents must not write `public/art`, update manifests, promote assets, run cleanup, delete approved assets, or edit the parent packet.
 8. Before coordinator merge, validate each completed lane with:
    `npm run art:studio -- --mode validate-lane --lane-brief <lane-brief.json>`
-9. The parent coordinator reads all validated lane `result.md` files, merges the best ideas, runs QA, asks for final approval, and promotes only after `approved for app`.
-10. Volume cannot lower standards: every lane must keep the same source-quality, QA, naming, organization, and approval bar as a single-lane production packet.
+9. The parent coordinator reads all validated lane outputs with:
+   `npm run art:studio -- --mode coordinate --parallel-plan <parallel-plan.json>`
+10. Coordinator mode writes `coordinator-review.json`, `coordinator-report.md`, `review-board.html`, and `promotion-gate.json`.
+11. Ask for `approved for app` only when `promotion-gate.json` is `ready-for-final-approval`.
+12. The parent coordinator merges the best ideas, runs QA, asks for final approval, and promotes only after `approved for app`.
+13. Volume cannot lower standards: every lane must keep the same source-quality, QA, naming, organization, and approval bar as a single-lane production packet.
+
+## Creative Capability Scope
+
+The engine is not only for static images. It can route and produce:
+
+- character sprites and transparent production assets
+- environments and responsive background crops
+- UI surfaces and real app UI components
+- shader effects, WebGL/WebGPU/Three.js scene work, and immersive layers
+- CSS/GSAP/canvas/sprite motion systems with reduced-motion fallbacks
+- props, icon systems, marketing hero art, and composed story scenes
 
 ## Non-negotiables
 

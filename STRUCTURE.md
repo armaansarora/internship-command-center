@@ -360,8 +360,9 @@ For broader visual work, use the Creative Production Engine. When Armaan says
 Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
 Normal creative packets default to 15x parallel output: 5 agents x 3 waves.
 Each subagent gets one isolated lane prompt, should use GPT-5.5 fast mode with
-extra-high reasoning when available, and only the coordinator may merge,
-promote, clean, or integrate.
+extra-high reasoning when available, and `--mode coordinate` must score,
+dedupe, rank, and write the review board before promotion. Only the coordinator
+may merge, promote, clean, or integrate.
 
 ---
 

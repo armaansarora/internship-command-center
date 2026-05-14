@@ -127,6 +127,7 @@ describe("creative production parallel waves", () => {
         "## Housekeeping Notes",
         "## Continuous-Improvement Notes",
         "resolved non-placeholder content",
+        "result.json",
         "preflight.json for image outputs",
       ],
     });
@@ -147,6 +148,7 @@ describe("creative production parallel waves", () => {
         "## Continuous-Improvement Notes",
         "- Add faster crop inspection.",
       ].join("\n\n"),
+      hasResultJson: true,
       imageOutputCount: 1,
       hasPreflight: true,
     })).toEqual({

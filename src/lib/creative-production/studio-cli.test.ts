@@ -273,6 +273,16 @@ describe("art:studio CLI", () => {
     mkdirSync(join(firstLaneRoot, "outputs"), { recursive: true });
     writeFileSync(join(firstLaneRoot, "outputs", "source.png"), "fake image");
     writeFileSync(join(firstLaneRoot, "preflight.json"), "{\"ok\":true}\n");
+    writeFileSync(join(firstLaneRoot, "result.json"), JSON.stringify({
+      laneId: "wave-01-agent-01",
+      strongestIdea: "Soft Otis source candidate.",
+      uniquenessClaim: "Friendlier face and softer posture.",
+      outputFiles: ["outputs/source.png"],
+      qualityRisks: ["Needs real image QA after generation."],
+      fallbackModel: "gpt-5.5",
+      fallbackReason: "",
+      promotionBlockers: [],
+    }, null, 2));
     writeFileSync(join(firstLaneRoot, "result.md"), [
       "# wave-01-agent-01 Result",
       "## Strongest Idea Or Output",
@@ -300,6 +310,92 @@ describe("art:studio CLI", () => {
     ], { cwd: process.cwd(), encoding: "utf8" });
 
     expect(output).toContain("Validated isolated CPE lane result: wave-01-agent-01");
+  }, 20000);
+
+  it("coordinates a complete 15-lane run into review artifacts", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-coordinate-"));
+
+    execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Redo Otis with the same approved design and generate source options.",
+      "--run-id",
+      "otis-coordinate-v1",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    const planPath = join(root, "characters", "otis-coordinate-v1", "parallel", "parallel-plan.json");
+    const plan = JSON.parse(readFileSync(planPath, "utf8")) as {
+      lanes: Array<{
+        laneId: string;
+        outputRoot: string;
+        outputsRoot: string;
+        resultPath: string;
+        resultJsonPath: string;
+        preflightPath: string;
+      }>;
+    };
+
+    plan.lanes.forEach((lane, index) => {
+      mkdirSync(lane.outputsRoot, { recursive: true });
+      writeFileSync(join(lane.outputsRoot, `source-${index}.png`), "fake image");
+      writeFileSync(lane.preflightPath, JSON.stringify({
+        ok: true,
+        checks: ["resolution", "alpha", "app-preview"],
+        warnings: [],
+        blockers: [],
+        files: [`outputs/source-${index}.png`],
+      }, null, 2));
+      writeFileSync(lane.resultJsonPath, JSON.stringify({
+        laneId: lane.laneId,
+        strongestIdea: `Tower approved Otis source option ${index}`,
+        uniquenessClaim: `Distinct posture, warmth, and app preview route ${index}.`,
+        outputFiles: [`outputs/source-${index}.png`],
+        qualityRisks: ["Needs final visual inspection."],
+        fallbackModel: "gpt-5.5",
+        fallbackReason: "",
+        promotionBlockers: [],
+      }, null, 2));
+      writeFileSync(lane.resultPath, [
+        `# ${lane.laneId} Result`,
+        "## Strongest Idea Or Output",
+        `Tower approved Otis source option ${index}`,
+        "## What Is Meaningfully Different",
+        `Distinct posture, warmth, and app preview route ${index}.`,
+        "## Files Or Prompts Created",
+        `- outputs/source-${index}.png`,
+        "## Quality Risks",
+        "- Needs final visual inspection.",
+        "## Housekeeping Notes",
+        "- Kept labeled outputs only.",
+        "## Continuous-Improvement Notes",
+        "- Coordinator should compare candidates automatically.",
+      ].join("\n\n"));
+    });
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--mode",
+      "coordinate",
+      "--parallel-plan",
+      planPath,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    const parallelRoot = join(root, "characters", "otis-coordinate-v1", "parallel");
+
+    expect(output).toContain("Created coordinator review");
+    expect(existsSync(join(parallelRoot, "coordinator-review.json"))).toBe(true);
+    expect(existsSync(join(parallelRoot, "coordinator-report.md"))).toBe(true);
+    expect(existsSync(join(parallelRoot, "review-board.html"))).toBe(true);
+    expect(existsSync(join(parallelRoot, "promotion-gate.json"))).toBe(true);
+
+    const gate = JSON.parse(readFileSync(join(parallelRoot, "promotion-gate.json"), "utf8")) as { status: string };
+
+    expect(gate.status).toBe("ready-for-final-approval");
+    expect(readFileSync(join(parallelRoot, "review-board.html"), "utf8")).toContain("Review Board");
   }, 20000);
 
   it("allows an explicit single-thread diagnostic escape hatch", () => {

@@ -51,4 +51,26 @@ describe("creative production adaptive intake", () => {
     expect(draft.brief).toBe(request);
     expect(draft.routingReason).toContain("animation");
   });
+
+  it("routes real website UI component requests to ui-texture", () => {
+    const draft = inferCreativeProductionRequest(
+      "Build an immersive app UI panel component with shader-like hover effects for the lobby.",
+      NOW,
+    );
+
+    expect(draft.assetType).toBe("ui-texture");
+    expect(draft.routingReason).toContain("ui-texture");
+    expect(draft.matchedSignals.join(" ")).toContain("component");
+  });
+
+  it("routes Three.js, WebGPU, and shader scene requests to scene", () => {
+    const draft = inferCreativeProductionRequest(
+      "Create a Three.js WebGPU shader scene for the elevator arrival moment.",
+      NOW,
+    );
+
+    expect(draft.assetType).toBe("scene");
+    expect(draft.routingReason).toContain("scene");
+    expect(draft.matchedSignals.join(" ")).toContain("three");
+  });
 });

@@ -139,6 +139,7 @@ export interface CreativeParallelLane {
   agentPromptPath: string;
   outputsRoot: string;
   resultPath: string;
+  resultJsonPath: string;
   preflightPath: string;
   status: "ready-for-agent";
   recommendedAgentProfile: CreativeParallelAgentProfile;
@@ -261,7 +262,8 @@ export function assertCreativeParallelLaneBrief(value: unknown): CreativeParalle
     typeof brief.lane !== "object" ||
     typeof brief.lane.laneId !== "string" ||
     typeof brief.lane.outputRoot !== "string" ||
-    typeof brief.lane.resultPath !== "string"
+    typeof brief.lane.resultPath !== "string" ||
+    typeof brief.lane.resultJsonPath !== "string"
   ) {
     throw new Error("Lane brief is missing required fields.");
   }
@@ -324,6 +326,7 @@ export function createCreativeParallelWavePlan(input: {
         agentPromptPath: join(outputRoot, "agent-prompt.md"),
         outputsRoot: join(outputRoot, "outputs"),
         resultPath: join(outputRoot, "result.md"),
+        resultJsonPath: join(outputRoot, "result.json"),
         preflightPath: join(outputRoot, "preflight.json"),
         status: "ready-for-agent",
         recommendedAgentProfile: CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE,
@@ -392,6 +395,7 @@ export function createCreativeParallelWavePlan(input: {
 
 export function validateCreativeParallelLaneResult(input: {
   resultMarkdown: string;
+  hasResultJson?: boolean;
   imageOutputCount: number;
   hasPreflight: boolean;
 }): CreativeParallelLaneResultValidationResult {
@@ -412,6 +416,7 @@ export function validateCreativeParallelLaneResult(input: {
   }
 
   if (/\bTBD\b/i.test(text)) missing.push("resolved non-placeholder content");
+  if (!input.hasResultJson) missing.push("result.json");
   if (input.imageOutputCount > 0 && !input.hasPreflight) missing.push("preflight.json for image outputs");
 
   return {
@@ -480,6 +485,7 @@ You may write only inside:
 
 Expected files:
 - \`${lane.resultPath}\`
+- \`${lane.resultJsonPath}\`
 - \`${lane.preflightPath}\` if you create or inspect images
 - generated or staged exploratory outputs under \`${lane.outputsRoot}\`
 
@@ -500,6 +506,16 @@ Write \`result.md\` with:
 - quality risks
 - housekeeping notes
 - continuous-improvement notes
+
+Also write \`result.json\` with:
+- laneId
+- strongestIdea
+- uniquenessClaim
+- outputFiles
+- qualityRisks
+- fallbackModel
+- fallbackReason
+- promotionBlockers
 
 Keep the work bold but usable. The parent session owns merge, final review, approval, promotion, and app integration.
 Do not trade quality for volume: this lane must meet the same source quality, labeling, QA, and organization standards as a single-run production packet.

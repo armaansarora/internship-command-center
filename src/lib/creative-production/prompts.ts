@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { getCreativeCapabilityInstructions } from "./capabilities";
 import { getCreativeAssetTypeDefinition } from "./registry";
 import type { CreativeAssetType } from "./types";
 import type {
@@ -34,6 +35,7 @@ export interface CreativeProductionPacket {
   };
   requiredOutputs: string[];
   acceptanceChecks: string[];
+  capabilityInstructions: string[];
   organizationPolicy: string[];
   qualityBar: string[];
   forbiddenActions: string[];
@@ -69,6 +71,7 @@ export function createCreativeProductionPacket(input: {
     },
     requiredOutputs: getRequiredOutputs(input.assetType, input.intake),
     acceptanceChecks: ACCEPTANCE_CHECKS[input.assetType],
+    capabilityInstructions: getCreativeCapabilityInstructions(input.assetType),
     organizationPolicy: ORGANIZATION_POLICY,
     qualityBar: QUALITY_BAR[input.assetType],
     forbiddenActions: FORBIDDEN_ACTIONS,
@@ -113,6 +116,9 @@ ${renderList(packet.requiredOutputs)}
 
 Acceptance checks:
 ${renderList(packet.acceptanceChecks)}
+
+Creative capabilities:
+${renderList(packet.capabilityInstructions)}
 
 Organization policy:
 ${renderList(packet.organizationPolicy)}
@@ -159,6 +165,10 @@ ${renderList(packet.requiredOutputs)}
 ## Acceptance Checks
 
 ${renderList(packet.acceptanceChecks)}
+
+## Creative Capabilities
+
+${renderList(packet.capabilityInstructions)}
 
 ## Brief
 

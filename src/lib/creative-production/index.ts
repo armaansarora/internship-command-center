@@ -1,4 +1,6 @@
 export * from "./adapters/character-art";
+export * from "./capabilities";
+export * from "./coordinator";
 export * from "./housekeeping";
 export * from "./improvement";
 export * from "./intake";

@@ -1,10 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import {
   assertSafeWorkspacePath,
   buildCreativeStudioOrientation,
+  createCreativeCoordinatorReview,
   createCreativeProductionPacket,
   createDefaultCreativeStudioState,
   CREATIVE_PARALLEL_DEFAULT_AGENTS,
@@ -19,6 +20,8 @@ import {
   loadCreativeStudioStateWithRecovery,
   getCreativeAssetTypeDefinition,
   inferCreativeProductionRequest,
+  renderCoordinatorReportMarkdown,
+  renderCoordinatorReviewBoardHtml,
   renderCreativeParallelDispatcherPrompt,
   renderCreativeParallelLanePrompt,
   renderCreativeProductionNextAction,
@@ -31,6 +34,9 @@ import {
   type CreativePhaseId,
   type CreativeParallelLaneBrief,
   type CreativeParallelWavePlan,
+  type CreativeCoordinatorLaneInput,
+  type CreativeLanePreflight,
+  type CreativeLaneResultJson,
 } from "../src/lib/creative-production";
 
 const KNOWN_FLAGS = new Set([
@@ -45,6 +51,7 @@ const KNOWN_FLAGS = new Set([
   "--agents",
   "--waves",
   "--lane-brief",
+  "--parallel-plan",
   "--no-parallel",
 ]);
 const FLAG_VALUES = new Set([
@@ -59,6 +66,7 @@ const FLAG_VALUES = new Set([
   "--agents",
   "--waves",
   "--lane-brief",
+  "--parallel-plan",
 ]);
 
 function validateKnownFlags(argv: string[]): void {
@@ -110,11 +118,11 @@ function assertAssetType(value: string): CreativeAssetType {
   }
 }
 
-function assertMode(value: string | undefined): "coordinator" | "lane" | "validate-lane" {
+function assertMode(value: string | undefined): "coordinator" | "lane" | "validate-lane" | "coordinate" {
   const mode = value ?? "coordinator";
 
-  if (mode !== "coordinator" && mode !== "lane" && mode !== "validate-lane") {
-    throw new Error("--mode must be coordinator, lane, or validate-lane.");
+  if (mode !== "coordinator" && mode !== "lane" && mode !== "validate-lane" && mode !== "coordinate") {
+    throw new Error("--mode must be coordinator, lane, validate-lane, or coordinate.");
   }
 
   return mode;
@@ -321,10 +329,13 @@ async function runValidateLaneMode(input: {
   const preflightPath = assertSafeWorkspacePath(laneBrief.lane.preflightPath, [laneRoot]);
   const outputsRoot = assertSafeWorkspacePath(laneBrief.lane.outputsRoot, [laneRoot]);
   const resultMarkdown = await readFile(resultPath, "utf8").catch(() => "");
+  const resultJsonPath = assertSafeWorkspacePath(laneBrief.lane.resultJsonPath, [laneRoot]);
+  const hasResultJson = await pathExists(resultJsonPath);
   const imageOutputCount = await countImmediateFiles(outputsRoot);
   const hasPreflight = await pathExists(preflightPath);
   const validation = validateCreativeParallelLaneResult({
     resultMarkdown,
+    hasResultJson,
     imageOutputCount,
     hasPreflight,
   });
@@ -339,7 +350,7 @@ async function runValidateLaneMode(input: {
     runId: `${laneBrief.parentRunId}-${laneBrief.lane.laneId}`,
     phase: "qa",
     created: [],
-    kept: [resultPath, ...(hasPreflight ? [preflightPath] : [])],
+    kept: [resultPath, ...(hasResultJson ? [resultJsonPath] : []), ...(hasPreflight ? [preflightPath] : [])],
     housekeepingNotes: "Lane result validation confirmed the lane has merge-ready notes and required QA evidence.",
     improvementFinding: "Lane validation prevents 15x output from overwhelming the coordinator with incomplete placeholders.",
     improvementAction: "Keep validating lane result bundles before coordinator review.",
@@ -350,10 +361,107 @@ async function runValidateLaneMode(input: {
   console.log(`Image outputs checked: ${imageOutputCount}`);
 }
 
+async function runCoordinateMode(input: {
+  stateRoot: string;
+  parallelPlanPath: string;
+}): Promise<void> {
+  const safePlanPath = assertSafeWorkspacePath(input.parallelPlanPath, [input.stateRoot]);
+  const planRoot = dirname(safePlanPath);
+  const parsed = JSON.parse(await readFile(safePlanPath, "utf8")) as CreativeParallelWavePlan;
+
+  if (parsed.schemaVersion !== "tower-creative-parallel-wave-plan-v1") {
+    throw new Error("--parallel-plan must point at a Creative Production Engine parallel plan.");
+  }
+
+  const laneInputs = await Promise.all(parsed.lanes.map((lane) =>
+    readCoordinatorLaneInput({
+      planRoot,
+      lane,
+    }),
+  ));
+  const review = createCreativeCoordinatorReview({
+    plan: parsed,
+    lanes: laneInputs,
+  });
+  const reviewPath = join(planRoot, "coordinator-review.json");
+  const reportPath = join(planRoot, "coordinator-report.md");
+  const boardPath = join(planRoot, "review-board.html");
+  const gatePath = join(planRoot, "promotion-gate.json");
+
+  await writeFile(reviewPath, `${JSON.stringify(review, null, 2)}\n`);
+  await writeFile(reportPath, renderCoordinatorReportMarkdown(review));
+  await writeFile(boardPath, renderCoordinatorReviewBoardHtml(review));
+  await writeFile(gatePath, `${JSON.stringify(review.promotionGate, null, 2)}\n`);
+  await recordAndValidatePhaseGates({
+    stateRoot: input.stateRoot,
+    ledgerRoot: join(planRoot, "ledgers"),
+    runId: parsed.parentRunId,
+    phase: "final-review",
+    created: [reviewPath, reportPath, boardPath, gatePath],
+    kept: [reviewPath, reportPath, boardPath, gatePath],
+    housekeepingNotes: "Coordinator gathered lane outputs into review artifacts without touching public/art.",
+    improvementFinding: "Coordinator mode prevents 15x output from becoming unranked folder noise.",
+    improvementAction: "Use coordinator artifacts as the merge gate before asking for final approval.",
+  });
+
+  console.log(`Created coordinator review: ${reviewPath}`);
+  console.log(`Created coordinator report: ${reportPath}`);
+  console.log(`Created review board: ${boardPath}`);
+  console.log(`Created promotion gate: ${gatePath}`);
+
+  if (review.promotionGate.status === "blocked") {
+    throw new Error(`Coordinator promotion gate blocked: ${review.promotionGate.blockers.join("; ")}`);
+  }
+}
+
+async function readCoordinatorLaneInput(input: {
+  planRoot: string;
+  lane: CreativeParallelWavePlan["lanes"][number];
+}): Promise<CreativeCoordinatorLaneInput> {
+  const laneRoot = assertSafeWorkspacePath(input.lane.outputRoot, [input.planRoot]);
+  const resultPath = assertSafeWorkspacePath(input.lane.resultPath, [laneRoot]);
+  const resultJsonPath = assertSafeWorkspacePath(input.lane.resultJsonPath, [laneRoot]);
+  const preflightPath = assertSafeWorkspacePath(input.lane.preflightPath, [laneRoot]);
+  const outputsRoot = assertSafeWorkspacePath(input.lane.outputsRoot, [laneRoot]);
+  const resultMarkdown = await readFile(resultPath, "utf8").catch(() => "");
+  const resultJson = await readOptionalJson<CreativeLaneResultJson>(resultJsonPath);
+  const preflight = await readOptionalJson<CreativeLanePreflight>(preflightPath);
+  const outputFiles = await listImmediateFileNames(outputsRoot);
+
+  return {
+    laneId: input.lane.laneId,
+    strategyLabel: input.lane.strategy.label,
+    waveMandateLabel: input.lane.waveMandate.label,
+    resultMarkdown,
+    ...(resultJson ? { resultJson } : {}),
+    outputFiles,
+    ...(preflight ? { preflight } : {}),
+    hasResultJson: !!resultJson,
+    hasPreflight: !!preflight,
+  };
+}
+
 async function countImmediateFiles(path: string): Promise<number> {
   const entries = await readdir(path, { withFileTypes: true }).catch(() => []);
 
   return entries.filter((entry) => entry.isFile()).length;
+}
+
+async function listImmediateFileNames(path: string): Promise<string[]> {
+  const entries = await readdir(path, { withFileTypes: true }).catch(() => []);
+
+  return entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => `outputs/${entry.name}`)
+    .sort();
+}
+
+async function readOptionalJson<T>(path: string): Promise<T | undefined> {
+  const raw = await readFile(path, "utf8").catch(() => undefined);
+
+  if (!raw) return undefined;
+
+  return JSON.parse(raw) as T;
 }
 
 async function pathExists(path: string): Promise<boolean> {
@@ -372,6 +480,9 @@ function createLaneStatus(laneBrief: CreativeParallelLaneBrief): Record<string, 
     waveMandate: laneBrief.lane.waveMandate,
     recommendedAgentProfile: laneBrief.recommendedAgentProfile,
     outputRoot: laneBrief.lane.outputRoot,
+    resultPath: laneBrief.lane.resultPath,
+    resultJsonPath: laneBrief.lane.resultJsonPath,
+    preflightPath: laneBrief.lane.preflightPath,
     promotionLockedToCoordinator: true,
     forbiddenActions: laneBrief.lane.forbiddenActions,
     updatedAt: new Date().toISOString(),
@@ -396,6 +507,23 @@ TBD
 ## Files Or Prompts Created
 
 - TBD
+
+## Structured Result
+
+Write this JSON to \`${laneBrief.lane.resultJsonPath}\`:
+
+\`\`\`json
+{
+  "laneId": "${laneBrief.lane.laneId}",
+  "strongestIdea": "Replace this with the strongest idea.",
+  "uniquenessClaim": "Replace this with why it is meaningfully different.",
+  "outputFiles": [],
+  "qualityRisks": ["Replace this with real quality risks."],
+  "fallbackModel": "${laneBrief.recommendedAgentProfile.model}",
+  "fallbackReason": "",
+  "promotionBlockers": []
+}
+\`\`\`
 
 ## Quality Risks
 
@@ -426,6 +554,7 @@ async function main(): Promise<void> {
   const stateRoot = assertSafeWorkspacePath(stateRootInput, allowedStateRoots);
   const mode = assertMode(flagValue(argv, "--mode"));
   const laneBriefPath = flagValue(argv, "--lane-brief");
+  const parallelPlanPath = flagValue(argv, "--parallel-plan");
 
   if (mode === "lane") {
     if (!laneBriefPath) throw new Error("--mode lane requires --lane-brief.");
@@ -441,8 +570,19 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (mode === "coordinate") {
+    if (!parallelPlanPath) throw new Error("--mode coordinate requires --parallel-plan.");
+
+    await runCoordinateMode({ stateRoot, parallelPlanPath });
+    return;
+  }
+
   if (laneBriefPath) {
     throw new Error("--lane-brief can only be used with --mode lane or --mode validate-lane.");
+  }
+
+  if (parallelPlanPath) {
+    throw new Error("--parallel-plan can only be used with --mode coordinate.");
   }
 
   const assetTypeValue = flagValue(argv, "--asset-type");

@@ -13,6 +13,7 @@ The Creative Production Engine is the Tower-wide system for producing characters
 - `npm run art:studio -- --request "<natural language request>" --no-parallel`: single-thread diagnostic escape hatch. Do not use for normal creative production.
 - `npm run art:studio -- --mode lane --lane-brief <path-to-lane-brief.json>`: prepares one isolated lane for a subagent without mutating shared studio state.
 - `npm run art:studio -- --mode validate-lane --lane-brief <path-to-lane-brief.json>`: rejects incomplete lane results before coordinator merge.
+- `npm run art:studio -- --mode coordinate --parallel-plan <path-to-parallel-plan.json>`: gathers validated lanes, scores and dedupes candidates, writes review artifacts, and blocks promotion when quality evidence is missing.
 - `npm run art:operate`: strict character-art operator packet for Season 1 character work.
 - `npm run art:status`: read-only character art status.
 - `npm run art:clean`: removes volatile run-owned art binaries while keeping ledgers, references, live `public/art`, and manifest data protected.
@@ -44,6 +45,21 @@ npm run art:studio -- --mode lane --lane-brief .artlab/studio/<asset-type>/<run-
 If the generated plan status is `awaiting-initial-approval`, the coordinator must not launch lane subagents until Armaan approves the initial direction. If the packet was already approved, the plan status is `ready-for-dispatch`.
 
 Lane agents may write only inside their own lane root. They cannot write `public/art`, update manifests, run promotion, run cleanup, delete approved assets, or edit the parent packet. The coordinator owns merge, final review, human approval, promotion, and app integration. Completed lanes must pass `validate-lane` before coordinator merge so 15x output does not become 15x half-finished noise.
+
+After lane validation, run:
+
+```bash
+npm run art:studio -- --mode coordinate --parallel-plan .artlab/studio/<asset-type>/<run-id>/parallel/parallel-plan.json
+```
+
+Coordinator mode writes:
+
+- `coordinator-review.json`: machine-readable scores, ranked candidates, duplicate groups, and blockers.
+- `coordinator-report.md`: concise review summary.
+- `review-board.html`: human review board for choosing final direction.
+- `promotion-gate.json`: `blocked` or `ready-for-final-approval`.
+
+Do not ask for `approved for app` until `promotion-gate.json` is `ready-for-final-approval`.
 
 Default lane subagent profile:
 
@@ -105,3 +121,14 @@ The command layer records both mandatory gates for orientation and production-pa
 - `scene`: composed Tower moments for onboarding and floor beats.
 - `icon-system`: custom symbols only where library icons are insufficient.
 - `marketing-hero`: public-facing Tower imagery.
+
+## Creative Capabilities
+
+The engine is broader than static image generation. Every asset type maps to capability instructions for one or more of:
+
+- raster concept art and transparent production assets
+- responsive environments and marketing compositions
+- UI surfaces and real app UI components
+- shader effects and WebGL/WebGPU/Three.js scenes
+- CSS, GSAP, canvas, sprite, and motion systems with reduced-motion fallbacks
+- iconography systems and human review boards
