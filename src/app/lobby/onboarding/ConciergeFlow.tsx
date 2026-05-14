@@ -4,6 +4,7 @@ import type { ChangeEvent, CSSProperties, JSX } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CinematicArrival } from "@/components/lobby/cinematic/CinematicArrival";
+import { OtisCharacter } from "@/components/lobby/concierge/OtisCharacter";
 import type { TargetProfile } from "@/lib/agents/cro/target-profile";
 import { trackPlausibleEvent } from "@/lib/analytics/plausible";
 import { claimArrivalPlayAction } from "./actions";
@@ -414,34 +415,47 @@ function StructuredIntakeDesk({
           </p>
         </div>
         <div
-          aria-label={`Intake ${completion}% complete`}
           style={{
-            width: "76px",
-            alignSelf: "center",
-            textAlign: "right",
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "12px",
-            color: "rgba(245, 238, 225, 0.72)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: "12px",
           }}
         >
-          {completion}%
+          <OtisCharacter
+            mood="listening"
+            avatarStyle={{ width: "58px", height: "92px", maxWidth: "58px" }}
+            showNameplate={false}
+          />
           <div
-            aria-hidden="true"
+            aria-label={`Intake ${completion}% complete`}
             style={{
-              height: "3px",
-              marginTop: "8px",
-              borderRadius: "999px",
-              background: "rgba(255,255,255,0.1)",
-              overflow: "hidden",
+              width: "76px",
+              textAlign: "right",
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "12px",
+              color: "rgba(245, 238, 225, 0.72)",
             }}
           >
+            {completion}%
             <div
+              aria-hidden="true"
               style={{
-                width: `${completion}%`,
-                height: "100%",
-                background: "var(--gold)",
+                height: "3px",
+                marginTop: "8px",
+                borderRadius: "999px",
+                background: "rgba(255,255,255,0.1)",
+                overflow: "hidden",
               }}
-            />
+            >
+              <div
+                style={{
+                  width: `${completion}%`,
+                  height: "100%",
+                  background: "var(--gold)",
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

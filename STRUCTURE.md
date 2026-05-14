@@ -8,13 +8,14 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 
 ```
 src/                            the app
-scripts/                        maintenance + seed + dev scripts (7 files)
-docs/                           design specs + testing + runbook (6 files)
+scripts/                        maintenance, seed, dev, and art pipeline scripts
+docs/                           design specs, testing, runbooks, character art canon
+.artlab/                        non-production character art lab, run ledgers, QA boards
 sentry/                         versioned Sentry alert rules (alerts.yaml)
 tests/                          Playwright E2E + off-platform canary
   tests/e2e/                    local stub-server Playwright suite
   tests/canary/                 off-platform synthetic canary against real prod
-public/                         static assets (4 lobby bgs + favicon)
+public/                         static assets (4 lobby bgs, approved art, favicon)
 .github/workflows/              CI + scheduled jobs
   config-guard.yml              vitest + tsc on cadence-config PRs
   hardening-e2e.yml             Playwright HARSH suite on src/ PRs + weekly
@@ -140,6 +141,7 @@ src/components/
   ui/          generic UI primitives
   icons/       SVG icon components
   lobby/       lobby-specific (Otis, building directory)
+  visual-assets/ reusable approved-art renderers
 ```
 
 ---
@@ -242,6 +244,10 @@ src/lib/situation/                                 deadlines, follow-ups
 src/lib/contacts/                                  warmth helpers
 src/lib/resumes/                                   resume helpers
 src/lib/voice/, audio/, speech/                    Briefing Room voice pipeline
+src/lib/visual-assets/                             typed manifest, character
+                                                   metadata, CharacterArtRun
+                                                   contract, production asset
+                                                   validation, sprite processing
 ```
 
 ### External integrations
@@ -295,6 +301,10 @@ scripts/init-env.ts               local env init helper (`npm run env:init`)
 scripts/setup-env.sh              env init shell helper
 scripts/dev-preview.ts            `npm run dev:preview` — dev preview
                                   harness (auth-stub, ports)
+scripts/art-pipeline.ts           `npm run art:operate`, `npm run art:status`,
+                                  plus character asset factory commands:
+                                  plan, ingest, split, master, derive, qa,
+                                  review, promote
 scripts/validate-sentry-alerts.ts CLI validator for sentry/alerts.yaml
                                   (same logic as the vitest regression in
                                   src/lib/observability/sentry-alerts.test.ts)
@@ -308,6 +318,13 @@ scripts/validate-sentry-alerts.ts CLI validator for sentry/alerts.yaml
 docs/VISION-SPEC.md          spatial UI metaphor (sacred — read first)
 docs/CHAIN-OF-COMMAND.md     AI agent hierarchy spec (66KB — long, skim)
 docs/CHARACTER-PROMPTS.md    8 agent system prompts (voice/personality)
+docs/CHARACTER-BIBLE.md      Season 1 cast canon and visual DNA
+docs/ART-BIBLE.md            Tower art style, prompt rules, quality ladder
+docs/CHARACTER-ART-PIPELINE.md   approval gates and batch character factory
+docs/CHARACTER-IMAGE-OPERATIONS.md  start-here runbook for future image work
+docs/CHARACTER-IMAGE-SESSION-PROMPT.md  copy-paste prompt for fresh sessions
+docs/CREATIVE-PRODUCTION-ENGINE.md  Creative Production Engine architecture,
+                             Housekeeping Gate, Continuous Improvement Gate
 docs/LAUNCH-READY.md         locked business decisions + remaining ops
                              checklist (§0 has the table of decisions)
 docs/RUNBOOK.md              on-call runbook — one paragraph per Sentry
@@ -317,6 +334,26 @@ docs/TESTING.md              vitest + Playwright patterns (read before
 docs/RUNBOOK.md              operations playbook (synthetic canary,
                              triage steps, alert paths)
 ```
+
+---
+
+## .artlab/  — Character image workshop
+
+```
+.artlab/characters/<characterId>/     references, masters, QA, staged-public,
+                                      ARTIFACTS.md inventory
+.artlab/runs/<characterId>/<runId>/   run.json, prompts, incoming sources,
+                                      split sprites, review boards, browser QA
+```
+
+Run `npm run art:operate` before continuing image work; use `npm run art:status`
+for read-only inspection. Current anchor run:
+`.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
+
+For broader visual work, use the Creative Production Engine. When Armaan says
+"Creative Production Engine" or asks to add/generate Tower visuals, run
+`npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`.
+Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
 
 ---
 

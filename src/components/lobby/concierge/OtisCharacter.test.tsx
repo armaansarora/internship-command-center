@@ -32,6 +32,24 @@ describe("R4.2 Otis primitives", () => {
     expect(html).toContain('data-character="otis"');
   });
 
+  it("preserves mood-specific accessible labels", () => {
+    const html = renderToStaticMarkup(<OtisCharacter mood="thinking" />);
+    expect(html).toContain("Otis is composing his reply.");
+    expect(html).toContain('data-character-mood="thinking"');
+  });
+
+  it("maps Otis moods into approved character stage poses", () => {
+    expect(renderToStaticMarkup(<OtisCharacter mood="talking" />)).toContain(
+      'data-character-pose="talking"',
+    );
+    expect(renderToStaticMarkup(<OtisCharacter mood="listening" />)).toContain(
+      'data-character-pose="listening"',
+    );
+    expect(renderToStaticMarkup(<OtisCharacter mood="thinking" />)).toContain(
+      'data-character-state="thinking"',
+    );
+  });
+
   it("does not reuse the gold C-suite accent palette", () => {
     // None of Otis's source files may reference the gold hex #C9A84C
     // (the C-suite brand color) or its rgba variant. If a designer
@@ -54,6 +72,20 @@ describe("R4.2 Otis primitives", () => {
       for (const pattern of banned) {
         expect(src).not.toMatch(pattern);
       }
+    }
+  });
+
+  it("does not render or source local SVG markup", () => {
+    const svgTag = "<" + "svg";
+    const svgDataUrl = "data:image/" + "svg";
+    const html = renderToStaticMarkup(<OtisCharacter />);
+    expect(html).not.toContain(svgTag);
+    expect(html).not.toContain(svgDataUrl);
+
+    for (const rel of otisFiles) {
+      const src = readFileSync(resolve(process.cwd(), rel), "utf8");
+      expect(src).not.toContain(svgTag);
+      expect(src).not.toContain(svgDataUrl);
     }
   });
 

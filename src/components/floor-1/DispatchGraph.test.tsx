@@ -87,20 +87,18 @@ describe("DispatchGraph — structural rendering", () => {
   it("renders 7 satellite nodes + 1 CEO center when given no dispatches", () => {
     const doc = render(<DispatchGraph dispatches={{}} />);
 
-    // 7 satellite <g data-agent="…"> groups, one per canonical agent.
-    const satellites = doc.querySelectorAll("g[data-agent]");
+    // 7 satellite nodes, one per canonical agent.
+    const satellites = doc.querySelectorAll("[data-agent]");
     expect(satellites.length).toBe(7);
     const agentKeys = Array.from(satellites).map((g) => g.getAttribute("data-agent"));
     expect(agentKeys.sort()).toEqual([...DISPATCH_GRAPH_AGENTS].sort());
 
     // CEO label rendered.
-    const textElements = doc.querySelectorAll("text");
-    const texts = Array.from(textElements).map((t) => t.textContent);
-    expect(texts).toContain("CEO");
+    expect(doc.body.textContent).toContain("CEO");
 
     // All 7 uppercase agent labels rendered.
     for (const key of DISPATCH_GRAPH_AGENTS) {
-      expect(texts).toContain(key.toUpperCase());
+      expect(doc.body.textContent).toContain(key.toUpperCase());
     }
 
     // Every satellite is idle and the wrapper aria-label says so.
@@ -129,7 +127,7 @@ describe("DispatchGraph — structural rendering", () => {
     );
 
     // data-state attributes reflect the status.
-    const running = doc.querySelectorAll('g[data-state="running"]');
+    const running = doc.querySelectorAll('[data-agent][data-state="running"]');
     expect(running.length).toBe(3);
   });
 
@@ -162,7 +160,7 @@ describe("DispatchGraph — structural rendering", () => {
       "Agent network — no departments dispatched",
     );
     // All 7 satellites remain idle; no rogue 'ceo' satellite group.
-    const satellites = doc.querySelectorAll("g[data-agent]");
+    const satellites = doc.querySelectorAll("[data-agent]");
     expect(satellites.length).toBe(7);
     for (const g of Array.from(satellites)) {
       expect(g.getAttribute("data-state")).toBe("idle");
@@ -170,7 +168,7 @@ describe("DispatchGraph — structural rendering", () => {
     }
   });
 
-  it("renders an outbound streak with <animateMotion> for each running agent", () => {
+  it("renders an outbound CSS streak for each running agent", () => {
     const doc = render(
       <DispatchGraph
         dispatches={{
@@ -179,26 +177,20 @@ describe("DispatchGraph — structural rendering", () => {
         }}
       />,
     );
-    // SMIL <animateMotion> elements only exist when at least one streak is
-    // active. Two running dispatches → two outbound streaks.
-    const motions = doc.querySelectorAll("animatemotion");
-    expect(motions.length).toBe(2);
-    for (const m of Array.from(motions)) {
-      expect(m.getAttribute("repeatCount") ?? m.getAttribute("repeatcount")).toBe(
-        "indefinite",
-      );
-    }
+    const streaks = doc.querySelectorAll('[data-dispatch-streak="outbound"]');
+    expect(streaks.length).toBe(2);
+    expect(
+      Array.from(streaks).map((s) => s.getAttribute("data-dispatch-agent")).sort(),
+    ).toEqual(["coo", "cro"]);
   });
 
   it("renders a single-shot return streak for a completed agent (showReturnStreak default)", () => {
     const doc = render(
       <DispatchGraph dispatches={{ cro: { status: "completed" } }} />,
     );
-    const motions = doc.querySelectorAll("animatemotion");
-    expect(motions.length).toBe(1);
-    const m = motions[0];
-    expect(m.getAttribute("repeatCount") ?? m.getAttribute("repeatcount")).toBe("1");
-    expect(m.getAttribute("fill")).toBe("freeze");
+    const streaks = doc.querySelectorAll('[data-dispatch-streak="return"]');
+    expect(streaks.length).toBe(1);
+    expect(streaks[0]?.getAttribute("data-dispatch-agent")).toBe("cro");
   });
 
   it("suppresses return streak when showReturnStreak=false", () => {
@@ -208,8 +200,8 @@ describe("DispatchGraph — structural rendering", () => {
         showReturnStreak={false}
       />,
     );
-    const motions = doc.querySelectorAll("animatemotion");
-    expect(motions.length).toBe(0);
+    const streaks = doc.querySelectorAll("[data-dispatch-streak]");
+    expect(streaks.length).toBe(0);
   });
 });
 
@@ -238,24 +230,22 @@ describe("DispatchGraph — prefers-reduced-motion", () => {
       "text/html",
     );
 
-    // Zero SMIL elements regardless of dispatch state.
-    expect(doc.querySelectorAll("animatemotion").length).toBe(0);
+    // Zero streak elements regardless of dispatch state.
+    expect(doc.querySelectorAll("[data-dispatch-streak]").length).toBe(0);
 
     // Nodes still carry the right data-state so colours communicate status.
-    expect(doc.querySelector('g[data-agent="cro"]')?.getAttribute("data-state")).toBe(
+    expect(doc.querySelector('[data-agent="cro"]')?.getAttribute("data-state")).toBe(
       "running",
     );
-    expect(doc.querySelector('g[data-agent="cio"]')?.getAttribute("data-state")).toBe(
+    expect(doc.querySelector('[data-agent="cio"]')?.getAttribute("data-state")).toBe(
       "completed",
     );
-    expect(doc.querySelector('g[data-agent="cfo"]')?.getAttribute("data-state")).toBe(
+    expect(doc.querySelector('[data-agent="cfo"]')?.getAttribute("data-state")).toBe(
       "failed",
     );
 
-    // The CSS pulse class is also suppressed on running nodes.
-    const runningNode = doc
-      .querySelector('g[data-agent="cro"]')
-      ?.querySelector("circle");
-    expect(runningNode?.getAttribute("class") ?? "").not.toContain("dg-node-running");
+    // The CSS pulse is also suppressed on running nodes.
+    const runningNode = doc.querySelector('[data-agent="cro"]');
+    expect(runningNode?.getAttribute("style") ?? "").not.toContain("animation");
   });
 });

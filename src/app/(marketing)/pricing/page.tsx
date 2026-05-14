@@ -9,6 +9,7 @@ import {
   seasonPassScopeLine,
   seasonPassRange,
 } from "@/lib/pricing/season-pass";
+import { Check } from "lucide-react";
 
 const BRAND_URL = GATE_CONFIG.brand.url();
 
@@ -648,22 +649,13 @@ function FeatureBullet({
 }) {
   return (
     <li className="flex items-start gap-2">
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 14 14"
-        fill="none"
+      <Check
+        size={14}
+        strokeWidth={1.5}
         aria-hidden="true"
         className="mt-1 shrink-0"
-      >
-        <path
-          d="M2.5 7L5.5 10L11.5 4"
-          stroke={highlight ? "#C9A84C" : "rgba(255,255,255,0.5)"}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+        style={{ color: highlight ? "#C9A84C" : "rgba(255,255,255,0.5)" }}
+      />
       <span
         style={{
           fontFamily: "'Satoshi', sans-serif",

@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
+import { Feather } from "lucide-react";
 import { AgentDialoguePanel } from "@/components/agents/dialogue/AgentDialoguePanel";
 import type {
   AgentDialogueTheme,
@@ -61,27 +62,7 @@ const CMO_THEME: AgentDialogueTheme = {
 };
 
 const QUILL_ACCESSORY = (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill="none"
-    aria-hidden="true"
-    style={{ opacity: 0.7 }}
-  >
-    <path
-      d="M12 1C12 1 9 2 6 6C4 9 4 12 4 12L5 11C5 11 5.5 9.5 7 7.5"
-      stroke="#C9A84C"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M4 12C4 12 3 10 4 9C5 8 5 10 5 10"
-      stroke="#C9A84C"
-      strokeWidth="1"
-      strokeLinecap="round"
-    />
-  </svg>
+  <Feather size={14} strokeWidth={1.4} color="#C9A84C" aria-hidden="true" style={{ opacity: 0.7 }} />
 );
 
 export function CMODialoguePanel({

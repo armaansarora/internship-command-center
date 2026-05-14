@@ -1,25 +1,6 @@
 import type { JSX } from "react";
 import { colorForPercentile, type PinColor } from "@/lib/parlor/pin-color";
 
-/**
- * Comp-band chart (hand-rolled SVG).
- *
- * Back-wall chart slot for the Negotiation Parlor. Plots the market
- * percentile rails (p25/p50/p75) and stacks the user's offer(s) as pins
- * coloured by the rail relationship — red below p25, gold above p75, ink
- * inside. No chart library. Native SVG only — R10's anti-pattern list
- * explicitly rules out Recharts/Victory/D3/Chart.js/Nivo/Plotly because a
- * "generic Comp benchmarks page" is exactly what drifts out of a chart
- * library in this surface.
- *
- * Label-collision behaviour: if a later pin's x falls within 2*r of an
- * earlier pin, its label is bumped up by 14px per collision so stacked
- * labels read top-to-bottom rather than overprinting.
- *
- * The `bands` prop is purposefully a local shape (not LookupResult) so
- * the chart is decoupled from the cache layer — the call site adapts.
- */
-
 export interface CompBands {
   p25: number;
   p50: number;
@@ -40,9 +21,9 @@ interface Props {
   height?: number;
 }
 
-const INK = "#C9A84C"; // brand ink-gold (inside-band)
-const HIGH = "#E8C96A"; // above-p75 signal
-const LOW = "#DC3C3C"; // below-p25 warning
+const INK = "#C9A84C";
+const HIGH = "#E8C96A";
+const LOW = "#DC3C3C";
 
 function fillForColor(color: PinColor): string {
   if (color === "red") return LOW;
@@ -56,6 +37,7 @@ export function CompBandChart({
   width = 480,
   height = 140,
 }: Props): JSX.Element {
+  void width;
   if (!bands) {
     return (
       <div
@@ -72,52 +54,74 @@ export function CompBandChart({
     );
   }
 
-  const margin = 48;
-  const chartW = width - margin * 2;
-  const pinRadius = 8;
   const low = Math.min(bands.p25, ...pins.map((p) => p.base)) * 0.92;
   const high = Math.max(bands.p75, ...pins.map((p) => p.base)) * 1.08;
   const span = high - low || 1;
-  const xFor = (v: number): number => margin + ((v - low) / span) * chartW;
+  const pctFor = (v: number): number =>
+    Math.max(0, Math.min(100, ((v - low) / span) * 100));
 
-  // Simple left-to-right collision dodge for label placement. If a pin's
-  // x is within 2*r of any earlier pin, stack its label 14px further up.
-  const placedX: number[] = [];
-
-  const rails: Array<{ id: "p25" | "p50" | "p75"; h: number; y: number; fill: string }> = [
-    { id: "p25", h: 16, y: margin + 32, fill: "#c9a84c" },
-    { id: "p50", h: 24, y: margin + 28, fill: "#e8c96a" },
-    { id: "p75", h: 16, y: margin + 32, fill: "#c9a84c" },
+  const rails: Array<{ id: "p25" | "p50" | "p75"; fill: string }> = [
+    { id: "p25", fill: INK },
+    { id: "p50", fill: HIGH },
+    { id: "p75", fill: INK },
   ];
+  const placed: number[] = [];
+
   return (
-    <svg role="img" aria-label="Compensation benchmark" viewBox={`0 0 ${width} ${height}`} className="parlor-chart">
-      <line x1={margin} y1={margin + 40} x2={width - margin} y2={margin + 40} stroke="rgba(201,168,76,0.25)" strokeWidth={1} />
-      {rails.map((r) => (
-        <g key={r.id}>
-          <rect data-testid={`band-${r.id}`} x={xFor(bands[r.id])} y={r.y} width={4} height={r.h} fill={r.fill} />
-          <text x={xFor(bands[r.id])} y={margin + 68} fontSize={10} textAnchor="middle" fill={r.fill}>
-            {r.id} ${(bands[r.id] / 1000).toFixed(0)}k
-          </text>
-        </g>
+    <div
+      role="img"
+      aria-label="Compensation benchmark"
+      className="parlor-chart"
+      style={{ position: "relative", height, minHeight: 140, width: "100%" }}
+    >
+      <div aria-hidden="true" style={{ position: "absolute", left: 24, right: 24, top: 88, height: 1, background: "rgba(201,168,76,0.25)" }} />
+      {rails.map((rail) => (
+        <div
+          key={rail.id}
+          data-testid={`band-${rail.id}`}
+          style={{
+            position: "absolute",
+            left: `${pctFor(bands[rail.id])}%`,
+            top: rail.id === "p50" ? 76 : 80,
+            width: 4,
+            height: rail.id === "p50" ? 24 : 16,
+            transform: "translateX(-50%)",
+            background: rail.fill,
+          }}
+        >
+          <span style={{ position: "absolute", top: 32, left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap", fontSize: 10, color: rail.fill }}>
+            {rail.id} ${(bands[rail.id] / 1000).toFixed(0)}k
+          </span>
+        </div>
       ))}
-      {pins.map((p) => {
-        const color: PinColor = colorForPercentile(p.base, bands.p25, bands.p75);
-        const x = xFor(p.base);
-        const collisions = placedX.filter((px) => Math.abs(px - x) < pinRadius * 2).length;
-        const labelY = margin - 12 - collisions * 14;
-        placedX.push(x);
+      {pins.map((pin) => {
+        const color = colorForPercentile(pin.base, bands.p25, bands.p75);
+        const leftPercent = pctFor(pin.base);
+        const collisions = placed.filter((x) => Math.abs(x - leftPercent) < 5).length;
+        placed.push(leftPercent);
         return (
-          <g key={p.label} data-testid={`pin-${p.label}`} data-color={color}>
-            <circle cx={x} cy={margin} r={pinRadius} fill={fillForColor(color)} stroke="#1a1a2e" strokeWidth={1.5} />
-            <text x={x} y={labelY} textAnchor="middle" fontSize={11} fill="#c9a84c" fontFamily="JetBrains Mono, monospace">
-              {p.label}
-            </text>
-          </g>
+          <div
+            key={pin.label}
+            data-testid={`pin-${pin.label}`}
+            data-color={color}
+            style={{
+              position: "absolute",
+              left: `${leftPercent}%`,
+              top: 48 - collisions * 14,
+              transform: "translateX(-50%)",
+              display: "grid",
+              placeItems: "center",
+              gap: 4,
+            }}
+          >
+            <span style={{ fontSize: 11, color: INK, fontFamily: "JetBrains Mono, monospace" }}>{pin.label}</span>
+            <span aria-hidden="true" style={{ width: 16, height: 16, borderRadius: "50%", background: fillForColor(color), border: "1.5px solid #1a1a2e" }} />
+          </div>
         );
       })}
-      <text x={width - margin} y={height - 8} textAnchor="end" fontSize={9} fill="rgba(201,168,76,0.55)">
-        {bands.source} — n={bands.sampleSize}
-      </text>
-    </svg>
+      <span style={{ position: "absolute", right: 24, bottom: 8, fontSize: 9, color: "rgba(201,168,76,0.55)" }}>
+        {bands.source} · n={bands.sampleSize}
+      </span>
+    </div>
   );
 }

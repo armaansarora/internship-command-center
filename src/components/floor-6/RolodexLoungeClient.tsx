@@ -3,6 +3,7 @@
 import type { JSX } from "react";
 import { useState, useCallback, useMemo, useTransition } from "react";
 import dynamic from "next/dynamic";
+import { Plus } from "lucide-react";
 import type { ContactForAgent, ContactStats } from "@/lib/db/queries/contacts-rest";
 import { RolodexLoungeScene } from "./RolodexLoungeScene";
 import type { RolodexLoungeStats } from "./RolodexLoungeScene";
@@ -312,20 +313,7 @@ export function RolodexLoungeClient({
             (e.currentTarget as HTMLButtonElement).style.outline = "none";
           }}
         >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M5 1V9M1 5H9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <Plus size={10} strokeWidth={1.5} aria-hidden="true" />
           ADD CONTACT
         </button>
       </div>

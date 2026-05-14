@@ -2,6 +2,7 @@
 
 import type { JSX } from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Search } from "lucide-react";
 
 interface ApplicationSearchProps {
   onSearch: (query: string) => void;
@@ -114,15 +115,7 @@ export function ApplicationSearch({
               pointerEvents: "none",
             }}
           >
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" strokeWidth="1.3" />
-              <path
-                d="M8.5 8.5L11 11"
-                stroke="currentColor"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-              />
-            </svg>
+            <Search size={13} strokeWidth={1.3} aria-hidden="true" />
           </span>
 
           <input

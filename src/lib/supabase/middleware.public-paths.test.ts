@@ -165,6 +165,14 @@ describe("isPathPublic — prefix paths", () => {
     expect(isPathPublic("/api/cron")).toBe(true);
   });
 
+  it("matches /art static character assets", () => {
+    expect(isPathPublic("/art/lobby/otis/regular/idle@3x.webp")).toBe(true);
+  });
+
+  it("rejects /artifact so the art prefix does not leak", () => {
+    expect(isPathPublic("/artifact/lobby/otis")).toBe(false);
+  });
+
   it("matches /api/cron/sync (real cron job)", () => {
     expect(isPathPublic("/api/cron/sync")).toBe(true);
   });

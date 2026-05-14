@@ -39,11 +39,10 @@ describe("ResumePress", () => {
     expect(wrapper?.getAttribute("aria-label")).toMatch(/press/i);
   });
 
-  it("renders the SVG base plate + press head unchanged across phases", () => {
+  it("renders the CSS base plate + press head unchanged across phases", () => {
     const doc = render(false);
-    const svg = doc.querySelector("svg");
-    expect(svg).not.toBeNull();
     // press head + paper + lever are all rendered.
+    expect(doc.querySelector(".rp-base")).not.toBeNull();
     expect(doc.querySelector(".rp-head")).not.toBeNull();
     expect(doc.querySelector(".rp-paper")).not.toBeNull();
     expect(doc.querySelector(".rp-lever")).not.toBeNull();

@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
+import { ChevronDown } from "lucide-react";
 
 interface ColumnHeaderProps {
   tacticalName: string;
@@ -126,25 +127,15 @@ export function ColumnHeader({
           (e.currentTarget as HTMLButtonElement).style.outline = "none";
         }}
       >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
+        <ChevronDown
+          size={12}
+          strokeWidth={1.5}
           aria-hidden="true"
           style={{
             transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
             transition: "transform 0.2s ease",
           }}
-        >
-          <path
-            d="M2 4L6 8L10 4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        />
       </button>
     </div>
   );

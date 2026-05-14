@@ -44,10 +44,6 @@ export function UndoBar({ controller, windowSeconds = 30 }: UndoBarProps): JSX.E
   const copy = computeCopy(state.phase, state.recipient);
   const accent = phaseAccent(state.phase);
 
-  // Countdown ring math — a single SVG circle whose stroke-dashoffset drains.
-  const RADIUS = 16;
-  const CIRC = 2 * Math.PI * RADIUS;
-
   return (
     <div
       role={state.phase === "too_late" ? "alert" : "status"}
@@ -90,45 +86,34 @@ export function UndoBar({ controller, windowSeconds = 30 }: UndoBarProps): JSX.E
       {/* Countdown ring — only rendered during in_flight */}
       {state.phase === "in_flight" && (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <svg
-            width={40}
-            height={40}
-            viewBox="0 0 40 40"
+          <span
             aria-hidden="true"
-            style={{ flexShrink: 0 }}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              flexShrink: 0,
+              display: "grid",
+              placeItems: "center",
+              background: `conic-gradient(${accent} ${progress * 360}deg, rgba(220, 124, 40, 0.18) 0deg)`,
+            }}
           >
-            <circle
-              cx="20"
-              cy="20"
-              r={RADIUS}
-              fill="none"
-              stroke="rgba(220, 124, 40, 0.18)"
-              strokeWidth="2"
-            />
-            <circle
-              cx="20"
-              cy="20"
-              r={RADIUS}
-              fill="none"
-              stroke={accent}
-              strokeWidth="2"
-              strokeLinecap="round"
-              transform="rotate(-90 20 20)"
-              strokeDasharray={CIRC}
-              strokeDashoffset={CIRC * (1 - progress)}
-              style={{ transition: "stroke-dashoffset 240ms linear" }}
-            />
-            <text
-              x="20"
-              y="24"
-              textAnchor="middle"
-              fontSize="11"
-              fontFamily="'JetBrains Mono', monospace"
-              fill={accent}
+            <span
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                display: "grid",
+                placeItems: "center",
+                background: "rgba(7, 9, 18, 0.94)",
+                color: accent,
+                fontSize: 11,
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
             >
               {remainingSec}
-            </text>
-          </svg>
+            </span>
+          </span>
           <button
             type="button"
             onClick={() => {

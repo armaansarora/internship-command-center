@@ -2,6 +2,7 @@
 
 import type { JSX } from "react";
 import { useState, useCallback } from "react";
+import { Feather } from "lucide-react";
 import type { Document } from "@/db/schema";
 
 // ---------------------------------------------------------------------------
@@ -367,21 +368,7 @@ export function DocumentEditor({
               (e.currentTarget as HTMLButtonElement).style.outline = "none";
             }}
           >
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-              {/* Quill icon */}
-              <path
-                d="M9 1C9 1 6.5 2 4 5.5C2.5 7.5 2.5 9 2.5 9L3.2 8.3"
-                stroke="currentColor"
-                strokeWidth="1.1"
-                strokeLinecap="round"
-              />
-              <path
-                d="M2.5 9C2.5 9 2 7.5 2.5 7C3 6.5 3 8 3 8"
-                stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-              />
-            </svg>
+            <Feather size={10} strokeWidth={1.2} aria-hidden="true" />
             REFINE WITH CMO
           </button>
         </div>

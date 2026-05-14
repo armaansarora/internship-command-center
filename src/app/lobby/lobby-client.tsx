@@ -4,9 +4,11 @@ import { useState, useEffect, useRef, useCallback, type JSX } from "react";
 import { FLOORS, type FloorId } from "@/types/ui";
 import { LobbyBackground } from "@/components/world/LobbyBackground";
 import { Elevator } from "@/components/world/Elevator";
+import { OtisCharacter } from "@/components/lobby/concierge/OtisCharacter";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { gsap } from "@/lib/gsap-init";
 import { trackPlausibleEvent } from "@/lib/analytics/plausible";
+import { ArrowUp } from "lucide-react";
 
 function authErrorMessage(code: string | undefined): string {
   switch (code) {
@@ -36,9 +38,13 @@ function authErrorMessage(code: string | undefined): string {
 export function LobbyClient({
   isAuthenticated = false,
   initialError = null,
+  showReceptionOtis = true,
+  showForeground = true,
 }: {
   isAuthenticated?: boolean;
   initialError?: string | null;
+  showReceptionOtis?: boolean;
+  showForeground?: boolean;
 }) {
   const [error, setError] = useState<string | null>(initialError);
   const [isReturningUser, setIsReturningUser] = useState(false);
@@ -188,7 +194,7 @@ export function LobbyClient({
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden">
 
       {/* ── ELEVATOR (authenticated users only) ── */}
-      {isAuthenticated && <Elevator />}
+      {showForeground && isAuthenticated && <Elevator />}
 
       {/* ── LOBBY BACKGROUND — BUG-010: luxury reception, not skyline ── */}
       <LobbyBackground />
@@ -265,15 +271,16 @@ export function LobbyClient({
       {/* ── MAIN CONTENT with parallax ──
           opacity starts at 1 with CSS animation fallback;
           GSAP takes over immediately and provides the dramatic entrance */}
-      <div
-        ref={containerRef}
-        className="relative flex flex-col items-center justify-center flex-1 w-full"
-        style={{
-          zIndex: 10,
-          opacity: 1,
-          animation: "lobby-entrance 0.8s ease-out forwards",
-        }}
-      >
+      {showForeground && (
+        <div
+          ref={containerRef}
+          className="relative flex flex-col items-center justify-center flex-1 w-full"
+          style={{
+            zIndex: 10,
+            opacity: 1,
+            animation: "lobby-entrance 0.8s ease-out forwards",
+          }}
+        >
         <div className="grid w-full max-w-6xl grid-cols-1 items-center gap-8 px-6 py-12 lg:grid-cols-[minmax(0,1fr)_420px]">
           <section data-animate className="flex flex-col items-start gap-7 text-left">
             <div
@@ -371,6 +378,10 @@ export function LobbyClient({
           </section>
 
           <section data-animate className="flex w-full flex-col items-center gap-5" aria-label="Reception desk">
+            {showReceptionOtis && (
+              <OtisReceptionCard isAuthenticated={isAuthenticated} />
+            )}
+
             <SignInCard
               isLoading={isAuthenticating}
               error={error}
@@ -420,6 +431,59 @@ export function LobbyClient({
             </div>
           </section>
         </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OtisReceptionCard({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}): JSX.Element {
+  return (
+    <div
+      className="grid w-full max-w-sm grid-cols-[auto_minmax(0,1fr)] items-center gap-4 rounded-lg px-4 py-3"
+      style={{
+        border: "1px solid rgba(201, 168, 76, 0.18)",
+        background:
+          "linear-gradient(135deg, rgba(7, 9, 18, 0.78), rgba(44, 22, 18, 0.58))",
+        boxShadow: "0 18px 52px rgba(0, 0, 0, 0.36)",
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+      }}
+    >
+      <OtisCharacter
+        mood={isAuthenticated ? "listening" : "idle"}
+        avatarStyle={{ width: "74px", height: "118px", maxWidth: "74px" }}
+        showNameplate={false}
+      />
+      <div>
+        <p
+          style={{
+            margin: 0,
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: "var(--gold)",
+          }}
+        >
+          Otis · Concierge
+        </p>
+        <p
+          style={{
+            margin: "6px 0 0",
+            color: "rgba(245, 238, 225, 0.72)",
+            fontSize: "13px",
+            lineHeight: 1.45,
+          }}
+        >
+          {isAuthenticated
+            ? "He is holding the desk while the elevators stay open."
+            : "He will collect the essentials before the building starts moving."}
+        </p>
       </div>
     </div>
   );
@@ -621,8 +685,9 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
       <div
         className="absolute inset-0 pointer-events-none rounded-xl"
         style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "120px 120px",
+          backgroundImage:
+            "repeating-radial-gradient(circle at 22% 34%, rgba(255,255,255,0.42) 0 1px, transparent 1px 7px), repeating-linear-gradient(115deg, transparent 0 12px, rgba(255,255,255,0.2) 12px 13px)",
+          backgroundSize: "120px 120px, 190px 190px",
           opacity: 0.035,
           mixBlendMode: "overlay",
         }}
@@ -699,9 +764,7 @@ function SignInCard({ isLoading, error, isReturningUser, isAuthenticated, onSign
               el.style.backgroundPosition = "left center";
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M9 14V4M9 4L5 8M9 4L13 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <ArrowUp size={18} strokeWidth={2} aria-hidden="true" />
             <span>Return to Penthouse</span>
           </button>
         ) : (
@@ -933,47 +996,27 @@ function RadarPulse(): JSX.Element {
   );
 }
 
-/**
- * TowerLogo — 2× larger SVG tower mark (80x110 render, 64x88 viewBox).
- * Dramatic drop-shadow filter for depth.
- */
 function TowerLogo(): JSX.Element {
   return (
-    <svg
-      width="80"
-      height="110"
-      viewBox="0 0 64 88"
-      fill="none"
+    <div
+      role="img"
       aria-label="The Tower logo"
       className="relative"
-      style={{ filter: "drop-shadow(0 6px 20px rgba(201, 168, 76, 0.5)) drop-shadow(0 0 40px rgba(201, 168, 76, 0.2))" }}
+      style={{
+        width: "80px",
+        height: "110px",
+        filter: "drop-shadow(0 6px 20px rgba(201, 168, 76, 0.5)) drop-shadow(0 0 40px rgba(201, 168, 76, 0.2))",
+      }}
     >
-      {/* Base wide block */}
-      <rect x="16" y="22" width="32" height="66" fill="var(--gold)" opacity="0.10" />
-      {/* Mid shaft */}
-      <rect x="22" y="14" width="20" height="74" fill="var(--gold)" opacity="0.18" />
-      {/* Core shaft */}
-      <rect x="27" y="6" width="10" height="82" fill="var(--gold)" opacity="0.32" />
-      {/* Spire */}
-      <rect x="30.5" y="0" width="3" height="8" fill="var(--gold)" opacity="0.65" />
-      {/* Antenna tip */}
-      <circle cx="32" cy="0" r="2" fill="var(--gold)" opacity="0.85" />
-      {/* Window pairs — all floors */}
-      {[16, 26, 36, 46, 56, 68, 78].map((y) => (
-        <g key={y}>
-          <rect x="28.5" y={y} width="3" height="4" fill="var(--gold)" opacity="0.42" rx="0.4" />
-          <rect x="32.5" y={y} width="3" height="4" fill="var(--gold)" opacity="0.42" rx="0.4" />
-        </g>
+      <span aria-hidden="true" className="absolute bottom-0 left-[20px] h-[82px] w-[40px] bg-[var(--gold)] opacity-10" />
+      <span aria-hidden="true" className="absolute bottom-0 left-[28px] h-[94px] w-[24px] bg-[var(--gold)] opacity-20" />
+      <span aria-hidden="true" className="absolute bottom-0 left-[35px] h-[104px] w-[10px] bg-[var(--gold)] opacity-40" />
+      <span aria-hidden="true" className="absolute left-[38px] top-0 h-[10px] w-[4px] bg-[var(--gold)] opacity-70" />
+      {[22, 34, 46, 58, 70, 84, 96].map((top) => (
+        <span key={top} aria-hidden="true" className="absolute left-[36px] h-[5px] w-[8px] rounded-[1px] bg-[var(--gold)] opacity-45" style={{ top }} />
       ))}
-      {/* Lobby base */}
-      <rect x="28" y="76" width="8" height="12" fill="var(--gold)" opacity="0.65" rx="0.7" />
-      {/* Side wings */}
-      <rect x="12" y="38" width="6" height="50" fill="var(--gold)" opacity="0.07" />
-      <rect x="46" y="38" width="6" height="50" fill="var(--gold)" opacity="0.07" />
-      {/* Edge highlights */}
-      <rect x="16" y="22" width="0.75" height="66" fill="var(--gold)" opacity="0.28" />
-      <rect x="47.25" y="22" width="0.75" height="66" fill="var(--gold)" opacity="0.14" />
-    </svg>
+      <span aria-hidden="true" className="absolute bottom-0 left-[34px] h-[16px] w-[12px] rounded-t-sm bg-[var(--gold)] opacity-70" />
+    </div>
   );
 }
 
@@ -982,11 +1025,23 @@ function TowerLogo(): JSX.Element {
  */
 function GoogleIcon(): JSX.Element {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4" />
-      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853" />
-      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05" />
-      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335" />
-    </svg>
+    <span
+      aria-hidden="true"
+      style={{
+        width: "18px",
+        height: "18px",
+        display: "inline-grid",
+        placeItems: "center",
+        borderRadius: "50%",
+        background: "conic-gradient(from -45deg, #4285F4 0 25%, #34A853 0 50%, #FBBC05 0 75%, #EA4335 0)",
+        color: "#F5EEE1",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "12px",
+        fontWeight: 700,
+        lineHeight: 1,
+      }}
+    >
+      G
+    </span>
   );
 }

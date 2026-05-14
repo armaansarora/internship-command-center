@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, type JSX } from "react";
 import { useRouter } from "next/navigation";
+import { LogOut, Settings } from "lucide-react";
 
 interface UserMenuProps {
   displayName: string;
@@ -232,31 +233,7 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
                 (e.currentTarget as HTMLButtonElement).style.background = "transparent";
               }}
             >
-              {/* Gear icon */}
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden="true"
-                style={{ flexShrink: 0 }}
-              >
-                <path
-                  d="M6.5 1.5L6.87 3.13C7.05 3.21 7.22 3.31 7.38 3.42L9 2.94L10.5 5.56L9.17 6.63C9.18 6.75 9.18 6.88 9.17 7L10.5 8.06L9 10.69L7.38 10.21C7.22 10.32 7.05 10.42 6.87 10.5L6.5 12.13H3.5L3.13 10.5C2.95 10.42 2.78 10.32 2.62 10.21L1 10.69L-.5 8.06L.83 7C.82 6.88 .82 6.75 .83 6.63L-.5 5.56L1 2.94L2.62 3.42C2.78 3.31 2.95 3.21 3.13 3.13L3.5 1.5H6.5Z"
-                  transform="translate(3 1.19)"
-                  stroke="var(--text-secondary)"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle
-                  cx="8"
-                  cy="8"
-                  r="2"
-                  stroke="var(--text-secondary)"
-                  strokeWidth="1.2"
-                />
-              </svg>
+              <Settings size={16} strokeWidth={1.4} aria-hidden="true" style={{ flexShrink: 0, color: "var(--text-secondary)" }} />
               <span
                 style={{
                   fontFamily: "'Satoshi', sans-serif",
@@ -289,23 +266,7 @@ export function UserMenu({ displayName, email, avatarUrl }: UserMenuProps): JSX.
                 (e.currentTarget as HTMLButtonElement).style.background = "transparent";
               }}
             >
-              {/* Sign out icon */}
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                aria-hidden="true"
-                style={{ flexShrink: 0 }}
-              >
-                <path
-                  d="M6 14H3.33C2.6 14 2 13.4 2 12.67V3.33C2 2.6 2.6 2 3.33 2H6M10.67 11.33L14 8L10.67 4.67M14 8H6"
-                  stroke="rgba(220, 80, 80, 0.8)"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <LogOut size={16} strokeWidth={1.4} aria-hidden="true" style={{ flexShrink: 0, color: "rgba(220, 80, 80, 0.8)" }} />
               <span
                 style={{
                   fontFamily: "'Satoshi', sans-serif",

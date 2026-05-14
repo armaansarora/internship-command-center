@@ -2,6 +2,7 @@
 
 import type { JSX } from "react";
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { Bell } from "lucide-react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSoundEngine } from "@/components/world/SoundProvider";
 
@@ -84,29 +85,13 @@ const BRIEFING_PROMPT =
 
 function BellIcon({ ringing }: { ringing: boolean }): JSX.Element {
   return (
-    <svg
-      width="36"
-      height="36"
-      viewBox="0 0 36 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <Bell
+      size={36}
+      strokeWidth={1.5}
       aria-hidden="true"
       className={ringing ? "bell-ringing" : ""}
-      style={{ display: "block" }}
-    >
-      <path
-        d="M18 4C18 4 10 8 10 18V26H26V18C26 8 18 4 18 4Z"
-        fill="rgba(201, 168, 76, 0.25)"
-        stroke="rgba(201, 168, 76, 0.9)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <rect x="14" y="26" width="8" height="3" rx="1.5" fill="rgba(201, 168, 76, 0.6)" />
-      <circle cx="18" cy="32" r="2" fill="rgba(201, 168, 76, 0.8)" />
-      <path d="M10 18 C 8 18 7 19 7 20" stroke="rgba(201, 168, 76, 0.4)" strokeWidth="1" strokeLinecap="round" />
-      <path d="M26 18 C 28 18 29 19 29 20" stroke="rgba(201, 168, 76, 0.4)" strokeWidth="1" strokeLinecap="round" />
-    </svg>
+      style={{ display: "block", color: "rgba(201, 168, 76, 0.9)" }}
+    />
   );
 }
 

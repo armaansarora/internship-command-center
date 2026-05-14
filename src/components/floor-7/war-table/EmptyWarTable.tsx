@@ -1,6 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
+import { FileText } from "lucide-react";
 
 interface EmptyWarTableProps {
   onSummonCRO: () => void;
@@ -49,49 +50,24 @@ export function EmptyWarTable({
         fontFamily: "IBM Plex Mono, monospace",
       }}
     >
-      {/* Dossier glyph — SVG so it scales cleanly and stays accessible */}
-      <svg
+      <div
         aria-hidden="true"
-        width="72"
-        height="92"
-        viewBox="0 0 72 92"
-        fill="none"
+        style={{
+          width: 72,
+          height: 92,
+          position: "relative",
+          borderRadius: 2,
+          border: "1px solid rgba(201,168,76,0.34)",
+          background: "linear-gradient(180deg, #3a2714, #1a0f08)",
+          display: "grid",
+          placeItems: "center",
+          boxShadow: "0 18px 38px rgba(0,0,0,0.34)",
+        }}
       >
-        <defs>
-          <linearGradient id="dossier-grad" x1="0" y1="0" x2="0" y2="92">
-            <stop offset="0%" stopColor="#3a2714" />
-            <stop offset="100%" stopColor="#1a0f08" />
-          </linearGradient>
-          <linearGradient id="dossier-edge" x1="0" y1="0" x2="0" y2="92">
-            <stop offset="0%" stopColor="#c9a84c" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#8b6f3a" stopOpacity="0.25" />
-          </linearGradient>
-        </defs>
-        <rect
-          x="4"
-          y="8"
-          width="60"
-          height="78"
-          rx="2"
-          fill="url(#dossier-grad)"
-          stroke="url(#dossier-edge)"
-          strokeWidth="1"
-        />
-        {/* Wax seal */}
-        <circle cx="34" cy="47" r="9" fill="#8b1a1a" opacity="0.75" />
-        <circle cx="34" cy="47" r="9" fill="url(#dossier-edge)" opacity="0.3" />
-        {/* Tab */}
-        <rect
-          x="26"
-          y="3"
-          width="20"
-          height="8"
-          rx="1"
-          fill="#2a1a10"
-          stroke="#8b6f3a"
-          strokeWidth="0.5"
-        />
-      </svg>
+        <span style={{ position: "absolute", top: -6, width: 20, height: 8, borderRadius: 1, border: "1px solid rgba(139,111,58,0.7)", background: "#2a1a10" }} />
+        <FileText size={28} strokeWidth={1.2} color="rgba(201,168,76,0.58)" />
+        <span style={{ position: "absolute", top: 38, width: 18, height: 18, borderRadius: "50%", background: "radial-gradient(circle, rgba(201,168,76,0.34), rgba(139,26,26,0.75))" }} />
+      </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <h2

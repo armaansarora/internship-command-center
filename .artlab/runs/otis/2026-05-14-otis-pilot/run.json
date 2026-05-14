@@ -1,0 +1,1880 @@
+{
+  "schemaVersion": "tower-character-art-run-v1",
+  "runId": "2026-05-14-otis-pilot",
+  "characterId": "otis",
+  "assetVersion": "otis-prototype-reference-v1",
+  "styleId": "tower-flat-plus-depth-v1",
+  "status": "promoted",
+  "approvedIdentityRef": ".artlab/characters/otis/references/identity/otis_identity-outfit-variants_v001_reference.png",
+  "directories": {
+    "runRoot": ".artlab/runs/otis/2026-05-14-otis-pilot",
+    "characterRoot": ".artlab/characters/otis",
+    "incoming": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming",
+    "prompts": ".artlab/runs/otis/2026-05-14-otis-pilot/prompts",
+    "model": ".artlab/characters/otis/model",
+    "split": ".artlab/runs/otis/2026-05-14-otis-pilot/split",
+    "mastersRoot": ".artlab/characters/otis/masters",
+    "qaRoot": ".artlab/characters/otis/qa/2026-05-14-otis-pilot",
+    "stagedPublicRoot": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot",
+    "reviewRoot": ".artlab/runs/otis/2026-05-14-otis-pilot/review"
+  },
+  "humanApprovalGates": [
+    {
+      "id": "initial-character-design",
+      "status": "approved",
+      "approvedRef": ".artlab/characters/otis/references/identity/otis_identity-outfit-variants_v001_reference.png"
+    },
+    {
+      "id": "final-upload-ready-board",
+      "status": "approved",
+      "requiredPhrase": "approved for app",
+      "approvedBy": "Armaan",
+      "approvedAt": "2026-05-14T04:36:08.507Z"
+    }
+  ],
+  "internalStages": [
+    {
+      "id": "production-packet",
+      "label": "Generate turnaround, expressions, and outfit variant sheets",
+      "owner": "agent",
+      "blocksPromotion": true
+    },
+    {
+      "id": "pose-sheet-generation",
+      "label": "Generate one pose sheet per outfit variant",
+      "owner": "agent",
+      "blocksPromotion": true
+    },
+    {
+      "id": "source-ingest",
+      "label": "Copy generated source files into the run ledger",
+      "owner": "script",
+      "blocksPromotion": true
+    },
+    {
+      "id": "sheet-splitting",
+      "label": "Split pose sheets into deterministic slot sources",
+      "owner": "script",
+      "blocksPromotion": true
+    },
+    {
+      "id": "master-normalization",
+      "label": "Normalize transparent masters to the 4K quality ladder",
+      "owner": "script",
+      "blocksPromotion": true
+    },
+    {
+      "id": "derivative-export",
+      "label": "Export normal, @2x, and @3x WebP derivatives",
+      "owner": "script",
+      "blocksPromotion": true
+    },
+    {
+      "id": "automated-qa",
+      "label": "Verify dimensions, alpha, files, prompt refs, and sprite completeness",
+      "owner": "script",
+      "blocksPromotion": true
+    },
+    {
+      "id": "final-review-board",
+      "label": "Build the single final upload-ready board for Armaan",
+      "owner": "script",
+      "blocksPromotion": true
+    },
+    {
+      "id": "promotion",
+      "label": "Promote staged assets into public/art and generated manifest data",
+      "owner": "script",
+      "blocksPromotion": true
+    }
+  ],
+  "sourceBatches": [
+    {
+      "id": "production-packet",
+      "kind": "production-packet",
+      "required": true,
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "expectedArtifacts": [
+        "turnaround",
+        "expression-sheet",
+        "outfit-variant-sheet"
+      ]
+    },
+    {
+      "id": "pose-sheet-regular",
+      "kind": "pose-sheet",
+      "required": true,
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "outfitVariant": "regular",
+      "expectedArtifacts": [
+        "regular/idle",
+        "regular/greeting",
+        "regular/listening",
+        "regular/thinking",
+        "regular/talking",
+        "regular/alert",
+        "regular/working"
+      ]
+    },
+    {
+      "id": "pose-sheet-summer-light",
+      "kind": "pose-sheet",
+      "required": true,
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "outfitVariant": "summer-light",
+      "expectedArtifacts": [
+        "summer-light/idle",
+        "summer-light/greeting",
+        "summer-light/listening",
+        "summer-light/thinking",
+        "summer-light/talking",
+        "summer-light/alert",
+        "summer-light/working"
+      ]
+    },
+    {
+      "id": "pose-sheet-winter-layered",
+      "kind": "pose-sheet",
+      "required": true,
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "outfitVariant": "winter-layered",
+      "expectedArtifacts": [
+        "winter-layered/idle",
+        "winter-layered/greeting",
+        "winter-layered/listening",
+        "winter-layered/thinking",
+        "winter-layered/talking",
+        "winter-layered/alert",
+        "winter-layered/working"
+      ]
+    }
+  ],
+  "sourceAssets": [
+    {
+      "id": "approved-identity-reference",
+      "kind": "identity-reference",
+      "path": ".artlab/characters/otis/references/identity/otis_identity-outfit-variants_v001_reference.png"
+    },
+    {
+      "id": "split-regular-idle",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/idle.png",
+      "checksum": "sha256:ec655a09072ef5812c0abfc0d88d890b6d9fd89ee1499d6f2744b8ff7243013b",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "regular",
+      "pose": "idle"
+    },
+    {
+      "id": "split-regular-greeting",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/greeting.png",
+      "checksum": "sha256:4ebdf42fdde3a2b9e4d260ddb756378d0de1e6144e0fc0e5282375f72dc52719",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "regular",
+      "pose": "greeting"
+    },
+    {
+      "id": "split-regular-listening",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/listening.png",
+      "checksum": "sha256:6c67818160f288842de4a8be15cb10e7c4768a3ad80c65172d38812ce54f9efc",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "regular",
+      "pose": "listening"
+    },
+    {
+      "id": "split-regular-thinking",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/thinking.png",
+      "checksum": "sha256:86a07da8c13c24a5f801229d7eba54b654faf6132061aa1be48d743f762ba6d3",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "regular",
+      "pose": "thinking"
+    },
+    {
+      "id": "split-regular-talking",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/talking.png",
+      "checksum": "sha256:65302e03c575d088b04bae98cee4daff8adbf16d01eff9bd613664d32c8f1f81",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "regular",
+      "pose": "talking"
+    },
+    {
+      "id": "split-regular-alert",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/alert.png",
+      "checksum": "sha256:dbbd60e9535595e30069a6cd2ff4a61cf1e7e9e8fff552ae3531a4953b14631d",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "regular",
+      "pose": "alert"
+    },
+    {
+      "id": "split-regular-working",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/working.png",
+      "checksum": "sha256:560dbaae32a05c1a4c2859679757038db629367d0295e966d68249e8f442ff66",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "regular",
+      "pose": "working"
+    },
+    {
+      "id": "split-summer-light-idle",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/idle.png",
+      "checksum": "sha256:254506c790e17205f44a5ab9aaa64fc66b7c0b304a7e29542f9707e6001b143c",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "summer-light",
+      "pose": "idle"
+    },
+    {
+      "id": "split-summer-light-greeting",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/greeting.png",
+      "checksum": "sha256:99e8659435fed73d1eae28a56bcde16c6e3543341c24aacaf271d15adeb3f96b",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "summer-light",
+      "pose": "greeting"
+    },
+    {
+      "id": "split-summer-light-listening",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/listening.png",
+      "checksum": "sha256:0767dc2bc5eab66f240340a5b429e31292a1e539dbb9442111327ebd77a23b6a",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "summer-light",
+      "pose": "listening"
+    },
+    {
+      "id": "split-summer-light-thinking",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/thinking.png",
+      "checksum": "sha256:0741f26dfee7a261f682ff17a73048b420fefe39d918b874d471192c1b7d2a0e",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "summer-light",
+      "pose": "thinking"
+    },
+    {
+      "id": "split-summer-light-talking",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/talking.png",
+      "checksum": "sha256:e2fe8957630287786f4c0cbc13c2cd68eef700c6648fa19960ac0b3e1a629515",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "summer-light",
+      "pose": "talking"
+    },
+    {
+      "id": "split-summer-light-alert",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/alert.png",
+      "checksum": "sha256:0084529f9e9dffc9496ce8e15a74ca975e7cfa1c07d45b75680baf11e53e765c",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "summer-light",
+      "pose": "alert"
+    },
+    {
+      "id": "split-summer-light-working",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/working.png",
+      "checksum": "sha256:daa0a5abdab775f9f04f687488a6800e790d62dabdd228d87211b13d597ec0f9",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "summer-light",
+      "pose": "working"
+    },
+    {
+      "id": "split-winter-layered-idle",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/idle.png",
+      "checksum": "sha256:aeebc2dd1586e7d95ce5c6b4b77a60e8d269be3507b15d3e271e1883b3acdd7c",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "winter-layered",
+      "pose": "idle"
+    },
+    {
+      "id": "split-winter-layered-greeting",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/greeting.png",
+      "checksum": "sha256:66b9c46681a1dff12393c19705e0f07f78f39a2c61b798bb8a3c329ae10a1764",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "winter-layered",
+      "pose": "greeting"
+    },
+    {
+      "id": "split-winter-layered-listening",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/listening.png",
+      "checksum": "sha256:0ce6148af87dee60edaed4db716424cf5b79fcaf50ed508401d29804aa76351d",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "winter-layered",
+      "pose": "listening"
+    },
+    {
+      "id": "split-winter-layered-thinking",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/thinking.png",
+      "checksum": "sha256:6b10b92dd2df5c96839f85688721f081ec80be58d0a7d931b670c4b16971c795",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "winter-layered",
+      "pose": "thinking"
+    },
+    {
+      "id": "split-winter-layered-talking",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/talking.png",
+      "checksum": "sha256:ed77f6f14ab3ed16b25915f6a8c12453ed94b718939dd0c1e7cb8cabb60d8a3d",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "winter-layered",
+      "pose": "talking"
+    },
+    {
+      "id": "split-winter-layered-alert",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/alert.png",
+      "checksum": "sha256:b4831c512ed2f90fc028793d2165a0fcb20882977c2ea3bf62d08947cd9350ee",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "winter-layered",
+      "pose": "alert"
+    },
+    {
+      "id": "split-winter-layered-working",
+      "kind": "individual-sprite",
+      "path": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/working.png",
+      "checksum": "sha256:5614392d72359db71db987985a35a0738ed19f97a0d184903942852892a6c03c",
+      "width": 340,
+      "height": 580,
+      "outfitVariant": "winter-layered",
+      "pose": "working"
+    }
+  ],
+  "expectedSprites": [
+    {
+      "id": "otis-regular-idle",
+      "characterId": "otis",
+      "outfitVariant": "regular",
+      "pose": "idle",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/idle.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/idle-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/idle-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/idle.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/idle@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/idle@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/regular/idle.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/regular/idle@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/regular/idle@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-regular-greeting",
+      "characterId": "otis",
+      "outfitVariant": "regular",
+      "pose": "greeting",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/greeting.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/greeting-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/greeting-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/greeting.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/greeting@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/greeting@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/regular/greeting.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/regular/greeting@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/regular/greeting@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-regular-listening",
+      "characterId": "otis",
+      "outfitVariant": "regular",
+      "pose": "listening",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/listening.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/listening-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/listening-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/listening.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/listening@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/listening@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/regular/listening.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/regular/listening@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/regular/listening@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-regular-thinking",
+      "characterId": "otis",
+      "outfitVariant": "regular",
+      "pose": "thinking",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/thinking.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/thinking-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/thinking-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/thinking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/thinking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/thinking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/regular/thinking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/regular/thinking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/regular/thinking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-regular-talking",
+      "characterId": "otis",
+      "outfitVariant": "regular",
+      "pose": "talking",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/talking.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/talking-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/talking-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/talking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/talking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/talking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/regular/talking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/regular/talking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/regular/talking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-regular-alert",
+      "characterId": "otis",
+      "outfitVariant": "regular",
+      "pose": "alert",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/alert.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/alert-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/alert-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/alert.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/alert@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/alert@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/regular/alert.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/regular/alert@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/regular/alert@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-regular-working",
+      "characterId": "otis",
+      "outfitVariant": "regular",
+      "pose": "working",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/working.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/working-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/regular/working-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/working.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/working@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/regular/working@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/regular/working.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/regular/working@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/regular/working@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-summer-light-idle",
+      "characterId": "otis",
+      "outfitVariant": "summer-light",
+      "pose": "idle",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/idle.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/idle-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/idle-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/idle.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/idle@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/idle@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/summer-light/idle.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/summer-light/idle@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/summer-light/idle@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-summer-light-greeting",
+      "characterId": "otis",
+      "outfitVariant": "summer-light",
+      "pose": "greeting",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/greeting.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/greeting-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/greeting-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/greeting.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/greeting@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/greeting@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/summer-light/greeting.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/summer-light/greeting@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/summer-light/greeting@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-summer-light-listening",
+      "characterId": "otis",
+      "outfitVariant": "summer-light",
+      "pose": "listening",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/listening.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/listening-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/listening-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/listening.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/listening@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/listening@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/summer-light/listening.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/summer-light/listening@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/summer-light/listening@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-summer-light-thinking",
+      "characterId": "otis",
+      "outfitVariant": "summer-light",
+      "pose": "thinking",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/thinking.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/thinking-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/thinking-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/thinking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/thinking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/thinking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/summer-light/thinking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/summer-light/thinking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/summer-light/thinking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-summer-light-talking",
+      "characterId": "otis",
+      "outfitVariant": "summer-light",
+      "pose": "talking",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/talking.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/talking-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/talking-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/talking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/talking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/talking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/summer-light/talking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/summer-light/talking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/summer-light/talking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-summer-light-alert",
+      "characterId": "otis",
+      "outfitVariant": "summer-light",
+      "pose": "alert",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/alert.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/alert-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/alert-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/alert.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/alert@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/alert@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/summer-light/alert.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/summer-light/alert@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/summer-light/alert@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-summer-light-working",
+      "characterId": "otis",
+      "outfitVariant": "summer-light",
+      "pose": "working",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/working.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/working-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/summer-light/working-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/working.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/working@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/summer-light/working@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/summer-light/working.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/summer-light/working@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/summer-light/working@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-winter-layered-idle",
+      "characterId": "otis",
+      "outfitVariant": "winter-layered",
+      "pose": "idle",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/idle.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/idle-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/idle-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/idle.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/idle@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/idle@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/winter-layered/idle.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/winter-layered/idle@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/winter-layered/idle@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-winter-layered-greeting",
+      "characterId": "otis",
+      "outfitVariant": "winter-layered",
+      "pose": "greeting",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/greeting.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/greeting-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/greeting-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/greeting.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/greeting@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/greeting@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/winter-layered/greeting.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/winter-layered/greeting@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/winter-layered/greeting@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-winter-layered-listening",
+      "characterId": "otis",
+      "outfitVariant": "winter-layered",
+      "pose": "listening",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/listening.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/listening-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/listening-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/listening.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/listening@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/listening@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/winter-layered/listening.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/winter-layered/listening@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/winter-layered/listening@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-winter-layered-thinking",
+      "characterId": "otis",
+      "outfitVariant": "winter-layered",
+      "pose": "thinking",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/thinking.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/thinking-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/thinking-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/thinking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/thinking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/thinking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/winter-layered/thinking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/winter-layered/thinking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/winter-layered/thinking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-winter-layered-talking",
+      "characterId": "otis",
+      "outfitVariant": "winter-layered",
+      "pose": "talking",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/talking.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/talking-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/talking-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/talking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/talking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/talking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/winter-layered/talking.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/winter-layered/talking@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/winter-layered/talking@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-winter-layered-alert",
+      "characterId": "otis",
+      "outfitVariant": "winter-layered",
+      "pose": "alert",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/alert.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/alert-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/alert-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/alert.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/alert@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/alert@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/winter-layered/alert.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/winter-layered/alert@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/winter-layered/alert@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    },
+    {
+      "id": "otis-winter-layered-working",
+      "characterId": "otis",
+      "outfitVariant": "winter-layered",
+      "pose": "working",
+      "promptRef": "art-bible:otis-pose-pack-v1",
+      "sourceFrame": {
+        "width": 2400,
+        "height": 4096
+      },
+      "displayFrame": {
+        "width": 170,
+        "height": 290
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/working.png",
+      "qaDarkPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/working-dark.png",
+      "qaLightPath": ".artlab/characters/otis/qa/2026-05-14-otis-pilot/winter-layered/working-light.png",
+      "stagedRenditions": {
+        "default": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/working.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/working@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": ".artlab/characters/otis/staged-public/2026-05-14-otis-pilot/art/lobby/otis/winter-layered/working@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      },
+      "publicRenditions": {
+        "default": {
+          "src": "/art/lobby/otis/winter-layered/working.webp",
+          "width": 170,
+          "height": 290
+        },
+        "retina2x": {
+          "src": "/art/lobby/otis/winter-layered/working@2x.webp",
+          "width": 340,
+          "height": 580
+        },
+        "retina3x": {
+          "src": "/art/lobby/otis/winter-layered/working@3x.webp",
+          "width": 510,
+          "height": 870
+        }
+      }
+    }
+  ],
+  "processedSprites": [
+    {
+      "slotId": "otis-regular-idle",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/idle.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/idle.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:c5d4d833cacb30375ab9f2d569afe7bbf1a57f9e97dedcf96dcd2af66979d86a",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-regular-greeting",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/greeting.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/greeting.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:075694847d354d609ab3a1138f1cfb8a2e8dceca3893e31ecc429181365c8fdd",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-regular-listening",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/listening.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/listening.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:2c2a42c9c493c18ba45f6a3c3796b77b3790d4d906a2e1fbbff1a7e2926c86d9",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-regular-thinking",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/thinking.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/thinking.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:5873ca39ece8d50e40777f5c290acb799076ecac96080694981f3ad5aa546633",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-regular-talking",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/talking.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/talking.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:2507ae0c72a18fd2b7eef4109c74a3d31b7d8edd5a04904f3b269270f8bf5778",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-regular-alert",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/alert.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/alert.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:85da31b5081b044fbc839162213bb807ce9b93cd2ea085e05a84998ed4f8e3ba",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-regular-working",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/regular/working.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/regular/working.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:d17d8fc35f46c12a494ac2a9bab84d64083efcab4ec47af2f6eda555a5c8a5e1",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-summer-light-idle",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/idle.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/idle.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:ad0f37e7d44f75caf575430dae1e05e04d0b222d586121b70ee65fa6c150ce43",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-summer-light-greeting",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/greeting.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/greeting.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:cacf2fca4503dfc49af9cdcd8af48d42103ea7a98926262f266ac84f49c9d209",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-summer-light-listening",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/listening.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/listening.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:12cf9b1bc48dad3ae40894eb2b379cc8aaabcd5a6b1b4c9763fd3de77af4975a",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-summer-light-thinking",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/thinking.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/thinking.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:422b1db0e1d754f658883acfe7839c5d48fbc0e33026caf30ecea3069b6db252",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-summer-light-talking",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/talking.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/talking.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:953d5a2f603204e6d6b841bbe1d53b81b686c33f93ea036ab0eaa7fde27980ec",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-summer-light-alert",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/alert.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/alert.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:6b70a512b0b5bcb056cd8b34745c05a24095d29330a8b1eb285789cbf84f73b3",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-summer-light-working",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/summer-light/working.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/summer-light/working.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:4238846ee1afdf0193354cd4b1fcc1d45094f747db088f4a7baf356b8ad5d5c4",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-winter-layered-idle",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/idle.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/idle.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:b79512d8b45a1543f55da213d77fc8c4e4f4545be19b61f67727256fd22dfa19",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-winter-layered-greeting",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/greeting.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/greeting.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:684e3e0df259278078c2a06514ff7c6c3f138f1067270a4bfd2b558b23ea18d3",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-winter-layered-listening",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/listening.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/listening.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:630b7629b10435bcfac0437bf0dd183791b5c81003592b38602e5c20c622344b",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-winter-layered-thinking",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/thinking.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/thinking.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:3e09d8dc07f59192a79e1744073067f0320536630233e47d3e62cfdff581eecc",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-winter-layered-talking",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/talking.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/talking.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:efdf674967b49dda3e88a71e966a9bed48815759b3ab799a6e0aa51f4341d40d",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-winter-layered-alert",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/alert.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/alert.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:ab9bf75f0998215a8f578dd3e6e55de0b587ccb01fd92c06bf010cf5e4708ceb",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    },
+    {
+      "slotId": "otis-winter-layered-working",
+      "sourcePath": ".artlab/runs/otis/2026-05-14-otis-pilot/incoming/prototype-transparent-sources/winter-layered/working.png",
+      "sourceResolution": {
+        "width": 340,
+        "height": 580
+      },
+      "masterPath": ".artlab/characters/otis/masters/winter-layered/working.png",
+      "masterResolution": {
+        "width": 2401,
+        "height": 4096
+      },
+      "checksum": "sha256:ea8891886af6be0f36bbd0afea6c9f4a1a921dc5b8e41f1da7876a9965520f79",
+      "qaStatus": "passed",
+      "issues": [
+        "source-long-edge-below-4096",
+        "source-upscaled-to-master"
+      ]
+    }
+  ],
+  "qa": {
+    "status": "passed",
+    "checkedAt": "2026-05-14T04:32:42.049Z",
+    "issues": []
+  },
+  "finalApproval": {
+    "id": "final-upload-ready-board",
+    "status": "approved",
+    "requiredPhrase": "approved for app",
+    "approvedBy": "Armaan",
+    "approvedAt": "2026-05-14T04:36:08.507Z"
+  },
+  "promotion": {
+    "status": "promoted",
+    "promotedAt": "2026-05-14T04:36:08.508Z"
+  }
+}

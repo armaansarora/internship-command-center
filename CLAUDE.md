@@ -23,7 +23,7 @@ Target aesthetic: luxury game UI meets Bloomberg Terminal meets Apple spatial de
 | 3 | The Briefing Room (Interview Prep) | CPO |
 | 2 | The Observatory (Analytics) | CFO |
 | 1 | The C-Suite (CEO's Office) | CEO |
-| L | The Lobby (Login/Onboarding) | — |
+| L | The Lobby (Login/Onboarding) | Otis |
 
 Full agent hierarchy spec: `docs/CHAIN-OF-COMMAND.md`
 Character voice prompts: `docs/CHARACTER-PROMPTS.md`
@@ -38,6 +38,9 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 - `npx tsc --noEmit` — type check
 - `npx drizzle-kit generate` — generate migration SQL
 - `npm run env:init` — local env init helper
+- `npm run art:status` — current character image pipeline status and next step
+- `npm run art:operate` — strict character image pipeline operator; writes the next legal action packet
+- `npm run art:plan|ingest|split|master|qa|review|promote` — batch character asset factory
 
 ## Conventions
 - Server Components by default; "use client" only when needed
@@ -55,6 +58,21 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 - Aria attributes on all interactive elements, prefers-reduced-motion respected
 - No console.logs in shipped code
 - No TODO/FIXME comments in shipped code
+
+## Character Image Pipeline
+The locked character style is `tower-flat-plus-depth-v1`: premium web-game sprites, strong silhouettes, clean raster shapes, subtle depth, adult professional energy, no ultra-realism, no fake-perfect AI people. The locked story tone is `Professional Scars`.
+
+When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
+
+For any character image work, run `npm run art:operate` first and read `docs/CHARACTER-IMAGE-OPERATIONS.md`. The operator command writes the next legal action packet under `.artlab/operators/`. Use `npm run art:status` for read-only inspection of promoted characters, run warnings, and the next recommended character.
+
+Current anchor state:
+- Otis Vale is promoted through `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
+- Otis works in the app, but the run intentionally keeps source warnings visible because prototype-sized sources were upscaled into 4K masters: `source-long-edge-below-4096` and `source-upscaled-to-master`.
+- The next recommended character is Mara Voss (`ceo`).
+- Drafts and generated outputs stay in `.artlab`; only `npm run art:promote` can copy approved derivatives into `public/art`.
+- Promotion requires Armaan's exact phrase: `approved for app`.
+- If the image process exposes a repeated manual workaround, strengthen the script, docs, and tests before continuing.
 
 ## Critical Technical Gotchas
 1. **DB Access from Vercel Serverless:** NEVER use Drizzle ORM's `db` object in server components or API routes deployed to Vercel. The Supabase DB is IPv6-only at `db.jzrsrruugcajohvvmevg.supabase.co:5432` and the pooler returns "Tenant not found." ALL server-side data access MUST use the Supabase REST client: `supabase.from('table').select('*')`. Drizzle is only used for schema definition and migrations (`drizzle-kit push`).

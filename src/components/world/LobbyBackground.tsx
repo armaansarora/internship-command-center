@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, useCallback, startTransition, type JSX } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { getVisualAsset, LOBBY_BACKGROUND_ASSET_IDS } from "@/lib/visual-assets";
 
 /**
  * LobbyBackground — Apple TV Saver-style Ken Burns backgrounds.
@@ -16,20 +17,22 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  *
  * Perf (audit C2): images are now served via next/image, so the optimizer
  * pipes them as WebP/AVIF at viewport resolution from /_next/image. The
- * first image is `priority` (LCP); the rest lazy-load. The previous
- * `new Image()` preload loop has been removed — next/image handles this
- * via `<link rel="preload" as="image">` injection automatically.
+ * visible crossfade layers load eagerly because any active lobby background
+ * can become the above-the-fold LCP image during rotation. The previous
+ * `new Image()` preload loop has been removed — next/image handles the
+ * initial preload link for the current image.
  *
  * Atmospheric overlays (vignette, grain, spotlights) layer on top.
  * prefers-reduced-motion: disables Ken Burns, static display only.
  */
 
-const LOBBY_IMAGES = [
-  "/lobby/bg-1.jpg",
-  "/lobby/bg-2.jpg",
-  "/lobby/bg-3.jpg",
-  "/lobby/bg-4.jpg",
-] as const;
+const LOBBY_IMAGES = LOBBY_BACKGROUND_ASSET_IDS.map((id) => {
+  const asset = getVisualAsset(id);
+  if (!asset) {
+    throw new Error(`Missing approved lobby visual asset: ${id}`);
+  }
+  return asset.src;
+});
 
 /** Each image gets a unique pan/zoom keyframe for variety. */
 const KEN_BURNS_KEYFRAMES: string[] = [
@@ -145,7 +148,9 @@ export function LobbyBackground(): JSX.Element {
           src={LOBBY_IMAGES[currentImageIdx]}
           alt=""
           fill
-          priority
+          preload
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           quality={75}
           style={{ objectFit: "cover", objectPosition: "center center" }}
@@ -170,6 +175,7 @@ export function LobbyBackground(): JSX.Element {
             src={LOBBY_IMAGES[nextImageIdx]}
             alt=""
             fill
+            loading="eager"
             sizes="100vw"
             quality={75}
             style={{ objectFit: "cover", objectPosition: "center center" }}
@@ -205,8 +211,9 @@ export function LobbyBackground(): JSX.Element {
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
-          backgroundSize: "150px 150px",
+          backgroundImage:
+            "repeating-radial-gradient(circle at 20% 30%, rgba(245,238,225,0.035) 0 1px, transparent 1px 7px), repeating-linear-gradient(115deg, transparent 0 13px, rgba(255,255,255,0.018) 13px 14px)",
+          backgroundSize: "160px 160px, 220px 220px",
           opacity: 0.35,
           mixBlendMode: "overlay" as const,
         }}

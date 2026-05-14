@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type JSX } from "react";
+import { LogOut } from "lucide-react";
 import type { FloorId, Floor } from "@/lib/constants/floors";
 
 interface ElevatorButtonProps {
@@ -12,25 +13,8 @@ interface ElevatorButtonProps {
   onClick: (floorId: FloorId) => void;
 }
 
-/** Exit-door SVG icon for the Lobby button. */
 function ExitIcon({ size }: { size: number }): JSX.Element {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M5.25 12.25H2.92C2.39 12.25 1.75 11.69 1.75 11.08V2.92C1.75 2.31 2.39 1.75 2.92 1.75H5.25M9.33 9.92L12.25 7L9.33 4.08M12.25 7H5.25"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  return <LogOut size={size} strokeWidth={1.2} aria-hidden="true" />;
 }
 
 /**

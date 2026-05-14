@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, useCallback, useEffect, type JSX } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronUp, X } from "lucide-react";
 import { FLOORS, FLOOR_ORDER, type FloorId } from "@/lib/constants/floors";
 import { ElevatorButton } from "./ElevatorButton";
 
@@ -47,37 +48,21 @@ interface ElevatorPanelProps {
   firstAppliedAt: string | null;
 }
 
-/** Tower silhouette SVG in the panel header. */
 function TowerIcon(): JSX.Element {
   return (
-    <svg
-      width="16"
-      height="20"
-      viewBox="0 0 16 20"
-      fill="none"
+    <span
       aria-hidden="true"
-      style={{ flexShrink: 0 }}
+      style={{ position: "relative", display: "inline-block", width: "16px", height: "20px", flexShrink: 0 }}
     >
-      <rect x="6.5" y="0" width="3" height="3" fill="rgba(201,168,76,0.9)" />
-      <rect x="5" y="3" width="6" height="2" fill="rgba(201,168,76,0.85)" />
-      <rect
-        x="3.5"
-        y="5"
-        width="9"
-        height="10"
-        fill="rgba(201,168,76,0.25)"
-        stroke="rgba(201,168,76,0.6)"
-        strokeWidth="0.75"
-      />
-      {/* Windows */}
-      <rect x="5.5" y="7" width="2" height="2" fill="rgba(201,168,76,0.5)" />
-      <rect x="8.5" y="7" width="2" height="2" fill="rgba(201,168,76,0.5)" />
-      <rect x="5.5" y="10.5" width="2" height="2" fill="rgba(201,168,76,0.5)" />
-      <rect x="8.5" y="10.5" width="2" height="2" fill="rgba(201,168,76,0.5)" />
-      {/* Base */}
-      <rect x="2" y="15" width="12" height="2" fill="rgba(201,168,76,0.5)" />
-      <rect x="0" y="17" width="16" height="2" fill="rgba(201,168,76,0.4)" />
-    </svg>
+      <span style={{ position: "absolute", left: 6.5, top: 0, width: 3, height: 3, background: "rgba(201,168,76,0.9)" }} />
+      <span style={{ position: "absolute", left: 5, top: 3, width: 6, height: 2, background: "rgba(201,168,76,0.85)" }} />
+      <span style={{ position: "absolute", left: 3.5, top: 5, width: 9, height: 10, border: "1px solid rgba(201,168,76,0.6)", background: "rgba(201,168,76,0.25)" }} />
+      {[7, 10.5].map((top) => (
+        <span key={top} style={{ position: "absolute", left: 5.5, top, width: 5, height: 2, background: "linear-gradient(90deg, rgba(201,168,76,0.5) 0 40%, transparent 40% 60%, rgba(201,168,76,0.5) 60%)" }} />
+      ))}
+      <span style={{ position: "absolute", left: 2, top: 15, width: 12, height: 2, background: "rgba(201,168,76,0.5)" }} />
+      <span style={{ position: "absolute", left: 0, top: 17, width: 16, height: 2, background: "rgba(201,168,76,0.4)" }} />
+    </span>
   );
 }
 
@@ -693,9 +678,7 @@ export function ElevatorMobileBar({
               minHeight: "44px",
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            <X size={16} strokeWidth={1.5} aria-hidden="true" />
           </button>
         </div>
 
@@ -784,27 +767,17 @@ export function ElevatorMobileBar({
               >
                 {activeFloor}
               </span>
-              {/* Chevron */}
-              <svg
-                width="10"
-                height="6"
-                viewBox="0 0 10 6"
-                fill="none"
+              <ChevronUp
+                size={12}
+                strokeWidth={1.5}
                 aria-hidden="true"
                 style={{
                   transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
                   transition: "transform 0.25s ease",
                   marginTop: "2px",
+                  color: "rgba(201,168,76,0.6)",
                 }}
-              >
-                <path
-                  d="M1 5L5 1L9 5"
-                  stroke="rgba(201,168,76,0.6)"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              />
             </button>
 
             {/* Vertical divider */}

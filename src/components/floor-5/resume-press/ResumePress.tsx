@@ -4,29 +4,10 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-/**
- * The Resume Press.
- *
- * A mechanical object at the corner of the Writing Room desk. Sits
- * dormant until a resume tailoring kicks off — then the lever pulls
- * down, the press shakes, an embossed version chip slides in, and
- * paper slips out the front slot. prefers-reduced-motion collapses
- * the whole sequence to an opacity crossfade.
- *
- * Visually signals "this is a physical thing, not a `Generate` button".
- * Per the roadmap's provocations: lever arm, *ka-chunk*, embossed
- * version number.
- *
- * Pure CSS + SVG — no GSAP dependency at this scale keeps the bundle
- * light. Animations driven by data-phase attribute (dormant | stamping
- * | settled) so the parent component has full control.
- */
-
 export type PressPhase = "dormant" | "stamping" | "settled";
 
 export interface ResumePressProps {
-  /** Drives the animation. When this flips dormant → stamping the
-   *  timeline runs; settled remains until flipped back. */
+  /** Drives the animation. When this flips dormant → stamping the timeline runs; settled remains until flipped back. */
   active: boolean;
   /** Version number to emboss on the stamped chip. */
   versionLabel?: string;
@@ -34,7 +15,7 @@ export interface ResumePressProps {
   className?: string;
 }
 
-const STAMP_DURATION_MS = 1400; // cold stamp → settled
+const STAMP_DURATION_MS = 1400;
 
 export function ResumePress({
   active,
@@ -42,15 +23,9 @@ export function ResumePress({
   className,
 }: ResumePressProps): JSX.Element {
   const reducedMotion = useReducedMotion();
-  // Derive the initial phase from props so the first render is correct
-  // without a synchronous setState inside useEffect (which the React
-  // lint rule flags as a cascading-render anti-pattern).
   const [stampSettled, setStampSettled] = useState<boolean>(false);
 
   useEffect(() => {
-    // Animation-state reset is a legitimate synchronous effect pattern
-    // (React docs example) — the new `react-hooks/set-state-in-effect`
-    // rule is overly strict here, so we disable it for just this block.
     /* eslint-disable react-hooks/set-state-in-effect */
     if (!active) {
       setStampSettled(false);
@@ -86,177 +61,155 @@ export function ResumePress({
         fontFamily: "'JetBrains Mono', monospace",
       }}
     >
-      <svg
-        viewBox="0 0 180 200"
-        width="100%"
-        height="100%"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        {/* Base plate */}
-        <rect
-          x="10"
-          y="150"
-          width="160"
-          height="30"
-          rx="3"
-          fill="#2A1C12"
-          stroke="#3A2510"
-          strokeWidth="1"
-        />
-        {/* Back post */}
-        <rect
-          x="25"
-          y="30"
-          width="8"
-          height="130"
-          fill="#3A2510"
-        />
-        {/* Cross beam */}
-        <rect
-          x="25"
-          y="30"
-          width="130"
-          height="10"
-          fill="#3A2510"
-        />
-        {/* Lever arm — animated */}
-        <g className="rp-lever">
-          <rect
-            x="100"
-            y="18"
-            width="80"
-            height="6"
-            rx="2"
-            fill="#C9A84C"
-          />
-          <circle cx="178" cy="21" r="6" fill="#C9A84C" stroke="#8F6F2A" />
-        </g>
-        {/* Press head — animated */}
-        <g className="rp-head">
-          <rect
-            x="50"
-            y="45"
-            width="80"
-            height="40"
-            rx="4"
-            fill="#6B4E24"
-            stroke="#3A2510"
-            strokeWidth="1.5"
-          />
-          <rect
-            x="55"
-            y="55"
-            width="70"
-            height="4"
-            fill="#8F6F2A"
-          />
-          <rect
-            x="55"
-            y="65"
-            width="70"
-            height="4"
-            fill="#8F6F2A"
-          />
-        </g>
-        {/* Paper emerging — animated */}
-        <g className="rp-paper">
-          <rect
-            x="40"
-            y="148"
-            width="100"
-            height="28"
-            fill="#F5E6C8"
-            stroke="#B39B75"
-            strokeWidth="0.5"
-          />
-          <rect
-            x="46"
-            y="152"
-            width="60"
-            height="1.2"
-            fill="#3A2510"
-            opacity="0.5"
-          />
-          <rect
-            x="46"
-            y="158"
-            width="80"
-            height="1.2"
-            fill="#3A2510"
-            opacity="0.4"
-          />
-          <rect
-            x="46"
-            y="164"
-            width="50"
-            height="1.2"
-            fill="#3A2510"
-            opacity="0.3"
-          />
-        </g>
-        {/* Version chip — only renders on settled */}
-        {phase === "settled" && versionLabel ? (
-          <g className="rp-chip">
-            <rect
-              x="130"
-              y="150"
-              width="40"
-              height="16"
-              rx="2"
-              fill="#C9A84C"
-              stroke="#8F6F2A"
-              strokeWidth="0.8"
-            />
-            <text
-              x="150"
-              y="161"
-              fontSize="10"
-              fontWeight="700"
-              textAnchor="middle"
-              fill="#1A1008"
-              fontFamily="'JetBrains Mono', monospace"
-            >
-              {versionLabel}
-            </text>
-          </g>
-        ) : null}
-      </svg>
+      <span className="rp-base" aria-hidden="true" />
+      <span className="rp-post" aria-hidden="true" />
+      <span className="rp-crossbeam" aria-hidden="true" />
+      <span className="rp-lever" aria-hidden="true">
+        <span className="rp-lever-arm" />
+        <span className="rp-lever-knob" />
+      </span>
+      <span className="rp-head" aria-hidden="true">
+        <span className="rp-head-line" />
+        <span className="rp-head-line" />
+      </span>
+      <span className="rp-paper" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </span>
+      {phase === "settled" && versionLabel ? (
+        <span className="rp-chip" aria-hidden="true">{versionLabel}</span>
+      ) : null}
 
       <style>{`
+        .rp-base {
+          position: absolute;
+          left: 10px;
+          top: 150px;
+          width: 160px;
+          height: 30px;
+          border-radius: 3px;
+          border: 1px solid #3A2510;
+          background: #2A1C12;
+        }
+        .rp-post {
+          position: absolute;
+          left: 25px;
+          top: 30px;
+          width: 8px;
+          height: 130px;
+          background: #3A2510;
+        }
+        .rp-crossbeam {
+          position: absolute;
+          left: 25px;
+          top: 30px;
+          width: 130px;
+          height: 10px;
+          background: #3A2510;
+        }
+        .rp-lever {
+          position: absolute;
+          left: 100px;
+          top: 18px;
+          width: 86px;
+          height: 12px;
+          transform-origin: 0 3px;
+        }
+        .rp-lever-arm {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 80px;
+          height: 6px;
+          border-radius: 2px;
+          background: #C9A84C;
+        }
+        .rp-lever-knob {
+          position: absolute;
+          left: 72px;
+          top: -3px;
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          border: 1px solid #8F6F2A;
+          background: #C9A84C;
+        }
+        .rp-head {
+          position: absolute;
+          left: 50px;
+          top: 45px;
+          width: 80px;
+          height: 40px;
+          border-radius: 4px;
+          border: 1.5px solid #3A2510;
+          background: #6B4E24;
+          display: grid;
+          align-content: center;
+          gap: 6px;
+          padding: 0 5px;
+          box-sizing: border-box;
+        }
+        .rp-head-line {
+          height: 4px;
+          background: #8F6F2A;
+        }
+        .rp-paper {
+          position: absolute;
+          left: 40px;
+          top: 148px;
+          width: 100px;
+          height: 28px;
+          border: 1px solid #B39B75;
+          background: #F5E6C8;
+          display: grid;
+          gap: 5px;
+          padding: 5px 6px;
+          box-sizing: border-box;
+        }
+        .rp-paper span {
+          height: 1px;
+          background: rgba(58, 37, 16, 0.45);
+        }
+        .rp-paper span:nth-child(2) { width: 80%; }
+        .rp-paper span:nth-child(3) { width: 50%; }
+        .rp-chip {
+          position: absolute;
+          left: 130px;
+          top: 150px;
+          width: 40px;
+          height: 16px;
+          display: grid;
+          place-items: center;
+          border-radius: 2px;
+          border: 1px solid #8F6F2A;
+          background: #C9A84C;
+          color: #1A1008;
+          font-size: 10px;
+          font-weight: 700;
+        }
         @keyframes rp-lever-pull {
-          0%   { transform: rotate(0deg); transform-origin: 100px 21px; }
-          40%  { transform: rotate(-22deg); transform-origin: 100px 21px; }
-          55%  { transform: rotate(-22deg); transform-origin: 100px 21px; }
-          100% { transform: rotate(0deg); transform-origin: 100px 21px; }
+          0% { transform: rotate(0deg); }
+          40%, 55% { transform: rotate(-22deg); }
+          100% { transform: rotate(0deg); }
         }
         @keyframes rp-head-stamp {
-          0%   { transform: translateY(0); }
-          40%  { transform: translateY(30px); }
-          55%  { transform: translateY(30px); }
+          0% { transform: translateY(0); }
+          40%, 55% { transform: translateY(30px); }
           100% { transform: translateY(0); }
         }
         @keyframes rp-paper-slide {
-          0%   { transform: translateY(30px); opacity: 0; }
-          50%  { transform: translateY(30px); opacity: 0; }
-          75%  { transform: translateY(0); opacity: 0.8; }
+          0%, 50% { transform: translateY(30px); opacity: 0; }
+          75% { transform: translateY(0); opacity: 0.8; }
           100% { transform: translateY(0); opacity: 1; }
         }
         @keyframes rp-chip-in {
-          0%   { transform: translateX(30px); opacity: 0; }
+          0% { transform: translateX(30px); opacity: 0; }
           100% { transform: translateX(0); opacity: 1; }
-        }
-
-        [data-phase="dormant"] .rp-lever,
-        [data-phase="dormant"] .rp-head,
-        [data-phase="dormant"] .rp-paper,
-        [data-phase="dormant"] .rp-chip {
-          transform: none;
         }
         [data-phase="dormant"] .rp-paper {
           opacity: 0;
         }
-
         [data-phase="stamping"][data-reduced-motion="false"] .rp-lever {
           animation: rp-lever-pull ${STAMP_DURATION_MS}ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
         }
@@ -266,15 +219,12 @@ export function ResumePress({
         [data-phase="stamping"][data-reduced-motion="false"] .rp-paper {
           animation: rp-paper-slide ${STAMP_DURATION_MS}ms ease-out forwards;
         }
-
         [data-phase="settled"] .rp-paper {
           opacity: 1;
         }
         [data-phase="settled"][data-reduced-motion="false"] .rp-chip {
           animation: rp-chip-in 260ms ease-out forwards;
         }
-
-        /* Reduced motion: hard-swap to final state without motion */
         [data-reduced-motion="true"] .rp-paper {
           opacity: 1;
           transition: opacity 140ms linear;

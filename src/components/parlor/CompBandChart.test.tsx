@@ -14,13 +14,13 @@ import { act } from "react";
  *
  * Contracts under test:
  *   - Empty state (bands=null) renders a parlor-chart-empty block with a
- *     human-readable "not enough benchmark data" message and no SVG.
+ *     human-readable "not enough benchmark data" message and no vector chart.
  *   - Present state renders the three percentile rails (p25/p50/p75) with
  *     data-testid hooks the integration tests can target.
  *   - Pin colour is driven by colorForPercentile — red when base < p25,
  *     gold when base > p75, ink otherwise. Each pin surfaces its label
  *     via `data-testid="pin-<label>"` and its colour via `data-color`.
- *   - Multiple pins render in the same svg (stack-of-offers affordance).
+ *   - Multiple pins render in the same chart (stack-of-offers affordance).
  */
 
 import { CompBandChart, type CompBands, type CompPin } from "./CompBandChart";
@@ -80,7 +80,7 @@ describe("R10.8 CompBandChart — empty state", () => {
   it("does NOT render an svg when bands are null", () => {
     const m = mount(<CompBandChart bands={null} pins={[]} />);
     cleanups.push(m.unmount);
-    expect(m.host.querySelector("svg")).toBeNull();
+    expect(m.host.querySelector(".parlor-chart")).toBeNull();
   });
 });
 
@@ -93,13 +93,13 @@ describe("R10.8 CompBandChart — band rails", () => {
     expect(m.host.querySelector('[data-testid="band-p75"]')).not.toBeNull();
   });
 
-  it("renders an svg with role=img and an accessible label", () => {
+  it("renders an HTML chart with role=img and an accessible label", () => {
     const m = mount(<CompBandChart bands={makeBands()} pins={[]} />);
     cleanups.push(m.unmount);
-    const svg = m.host.querySelector("svg");
-    expect(svg).not.toBeNull();
-    expect(svg?.getAttribute("role")).toBe("img");
-    expect(svg?.getAttribute("aria-label")).toMatch(/compensation/i);
+    const chart = m.host.querySelector(".parlor-chart");
+    expect(chart).not.toBeNull();
+    expect(chart?.getAttribute("role")).toBe("img");
+    expect(chart?.getAttribute("aria-label")).toMatch(/compensation/i);
   });
 });
 

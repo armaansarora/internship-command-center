@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, type JSX } from "react";
+import { Check, LoaderCircle } from "lucide-react";
 import { STRIPE_PLANS, type SubscriptionTier } from "@/lib/stripe/config";
 
 interface PricingCardsProps {
@@ -224,22 +225,13 @@ export function PricingCards({
             <ul className="flex flex-col gap-2 flex-1">
               {features.map((feature) => (
                 <li key={feature} className="flex items-start gap-2">
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 14 14"
-                    fill="none"
+                  <Check
+                    size={14}
+                    strokeWidth={1.5}
                     aria-hidden="true"
                     className="mt-0.5 shrink-0"
-                  >
-                    <path
-                      d="M2.5 7L5.5 10L11.5 4"
-                      stroke={isCurrentPlan ? "#C9A84C" : "rgba(255,255,255,0.4)"}
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                    style={{ color: isCurrentPlan ? "#C9A84C" : "rgba(255,255,255,0.4)" }}
+                  />
                   <span
                     style={{
                       fontFamily: "'Satoshi', sans-serif",
@@ -341,23 +333,12 @@ export function PricingCards({
             >
               {isLoadingThis ? (
                 <span className="inline-flex items-center gap-2">
-                  <svg
+                  <LoaderCircle
                     className="animate-spin"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
+                    size={12}
+                    strokeWidth={1.5}
                     aria-hidden="true"
-                  >
-                    <circle
-                      cx="6"
-                      cy="6"
-                      r="4.5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeDasharray="14 14"
-                    />
-                  </svg>
+                  />
                   Loading...
                 </span>
               ) : (

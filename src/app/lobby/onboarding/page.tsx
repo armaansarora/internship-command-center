@@ -32,7 +32,12 @@ export default async function LobbyOnboardingPage() {
 
   return (
     <>
-      <LobbyClient isAuthenticated initialError={null} />
+      <LobbyClient
+        isAuthenticated
+        initialError={null}
+        showReceptionOtis={false}
+        showForeground={false}
+      />
       <ConciergeFlow
         arrivalAlreadyPlayed
         floorsUnlocked={state?.floorsUnlocked ?? ["L", "PH"]}

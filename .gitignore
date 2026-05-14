@@ -65,8 +65,23 @@ playwright-report/
 # holds developer-specific permission grants and must not be shared.
 .claude/
 
-# Per-developer Codex/agent config (local skills, runtime permissions).
-.agents/
+# Per-developer Codex/agent config (local runtime permissions).
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/creative-production-engine/
+!.agents/skills/creative-production-engine/**
 
 # playwright-cli session artifacts — page snapshots, console logs, screenshots.
 .playwright-cli/
+
+# Tower Creative Production Engine keeps heavy generated workshop binaries local.
+# Production-ready optimized assets are committed from public/art instead.
+.artlab/characters/**/masters/
+.artlab/characters/**/qa/
+.artlab/characters/**/references/
+.artlab/characters/**/staged-public/
+.artlab/runs/**/incoming/
+.artlab/runs/**/split/
+.artlab/runs/**/browser-qa/*.png
+.artlab/runs/**/review/*.png

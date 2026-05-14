@@ -3,6 +3,7 @@
 import type { JSX } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Pencil, Trash2 } from "lucide-react";
 import type { Application } from "@/db/schema";
 import { RejectionReflectionStrip } from "@/components/floor-7/rejection/RejectionReflectionStrip";
 
@@ -559,14 +560,7 @@ export function ApplicationCard({
                   (e.currentTarget as HTMLButtonElement).style.outline = "none";
                 }}
               >
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                  <path
-                    d="M7.5 1.5L9.5 3.5L3.5 9.5H1.5V7.5L7.5 1.5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Pencil size={11} strokeWidth={1.2} aria-hidden="true" />
               </button>
             )}
             {onDelete && (
@@ -599,16 +593,7 @@ export function ApplicationCard({
                   (e.currentTarget as HTMLButtonElement).style.outline = "none";
                 }}
               >
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                  <path d="M2 3H9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                  <path
-                    d="M4 3V2H7V3M3.5 3L4 9H7L7.5 3"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Trash2 size={11} strokeWidth={1.2} aria-hidden="true" />
               </button>
             )}
           </div>

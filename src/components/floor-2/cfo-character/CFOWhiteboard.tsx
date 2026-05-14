@@ -64,32 +64,25 @@ function MiniFunnelBar({ stats }: { stats: PipelineStats }): JSX.Element {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Mini trend sparkline (SVG)
-// ---------------------------------------------------------------------------
 function MiniTrend({ convRate }: { convRate: number }): JSX.Element {
-  // Simulated 6-week trend based on current conversion rate
   const base = Math.max(convRate - 5, 0);
   const trendData = [base * 0.6, base * 0.75, base * 0.8, base * 0.9, convRate * 0.95, convRate];
   const max = Math.max(...trendData, 1);
 
-  const w = 100;
-  const h = 28;
-  const pad = 4;
-  const points = trendData.map((v, i) => ({
-    x: pad + (i / (trendData.length - 1)) * (w - pad * 2),
-    y: h - pad - ((v / max) * (h - pad * 2)),
-  }));
-
-  const pathD = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
-
   return (
-    <svg width="100%" viewBox={`0 0 ${w} ${h}`} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d={pathD} fill="none" stroke="rgba(60, 140, 220, 0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      {points.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="2" fill="rgba(60, 140, 220, 0.9)" />
+    <div aria-hidden="true" style={{ height: "28px", display: "flex", alignItems: "end", gap: "3px" }}>
+      {trendData.map((value, i) => (
+        <span
+          key={i}
+          style={{
+            flex: 1,
+            height: `${Math.max((value / max) * 24, 2)}px`,
+            borderRadius: "999px 999px 2px 2px",
+            background: i === trendData.length - 1 ? "rgba(100, 180, 255, 0.95)" : "rgba(60, 140, 220, 0.62)",
+          }}
+        />
       ))}
-    </svg>
+    </div>
   );
 }
 
@@ -231,4 +224,3 @@ export function CFOWhiteboard({ stats }: CFOWhiteboardProps): JSX.Element {
     </div>
   );
 }
-

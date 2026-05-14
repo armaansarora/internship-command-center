@@ -87,7 +87,7 @@ export function describeDispatches(
 
 /**
  * Returns the per-status visual tokens used for node stroke/fill and label
- * color. Centralising these keeps the SVG markup declarative.
+ * color. Centralising these keeps the HTML/CSS rendering declarative.
  */
 function tokensForStatus(status: DispatchNodeStatus): {
   stroke: string;
@@ -131,16 +131,15 @@ function tokensForStatus(status: DispatchNodeStatus): {
 /**
  * DispatchGraph — live radial visualization of CEO → 7 department dispatches.
  *
- * Animation technique: SVG + SMIL (`<animateMotion>`) + CSS keyframes. No
+ * Animation technique: positioned HTML + CSS keyframes. No
  * Canvas, no requestAnimationFrame, no per-frame JS. Streaks travel along
  * pre-computed straight-line paths from the center to each satellite; the
- * browser's native SMIL engine handles all interpolation on the compositor
- * thread. Seven concurrent streaks cost essentially nothing.
+ * browser handles interpolation on the compositor thread. Seven concurrent
+ * streaks cost essentially nothing.
  *
- * `prefers-reduced-motion`: SMIL elements are omitted entirely and the CSS
- * pulse keyframe is suppressed via a media query. Nodes still render in the
- * correct state colours so the user sees accurate status — just without
- * motion.
+ * `prefers-reduced-motion`: streak elements are omitted entirely and the
+ * pulse keyframe is suppressed. Nodes still render in the correct state
+ * colours so the user sees accurate status, just without motion.
  *
  * Wiring into CSuiteScene happens in R3.7.
  */
@@ -176,117 +175,163 @@ export function DispatchGraph({
       role="img"
       aria-label={ariaLabel}
       className={className}
-      style={{ display: "inline-block", lineHeight: 0 }}
+      style={{ position: "relative", display: "inline-block", width: size, height: size }}
     >
-      <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        {/* Edges — dashed gold lines from CEO to each satellite. Rendered
-            first so nodes/streaks sit above them. */}
-        {nodes.map((node) => (
-          <line
+      {nodes.map((node) => {
+        const dx = node.cx - cx;
+        const dy = node.cy - cy;
+        const length = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+        return (
+          <span
             key={`edge-${node.key}`}
-            x1={cx}
-            y1={cy}
-            x2={node.cx}
-            y2={node.cy}
-            stroke="rgba(201, 168, 76, 0.18)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: cx,
+              top: cy,
+              width: length,
+              height: 1,
+              transform: `rotate(${angle}deg)`,
+              transformOrigin: "0 0",
+              background: "repeating-linear-gradient(90deg, rgba(201,168,76,0.18) 0 4px, transparent 4px 8px)",
+            }}
           />
-        ))}
+        );
+      })}
 
-        {/* Satellite nodes + their labels + streaks */}
-        {nodes.map((node) => {
-          const entry = dispatches[node.key];
-          const status: DispatchNodeStatus = entry?.status ?? "idle";
-          const tokens = tokensForStatus(status);
-          const isRunning = status === "running";
-          const isCompleted = status === "completed";
-          const motionPath = `M ${cx} ${cy} L ${node.cx} ${node.cy}`;
-          const reversePath = `M ${node.cx} ${node.cy} L ${cx} ${cy}`;
+      {nodes.map((node) => {
+        const entry = dispatches[node.key];
+        const status: DispatchNodeStatus = entry?.status ?? "idle";
+        const isRunning = status === "running";
+        const isReturning = status === "completed" && showReturnStreak;
+        if (reducedMotion || (!isRunning && !isReturning)) return null;
 
-          return (
-            <g key={`node-${node.key}`} data-agent={node.key} data-state={status}>
-              <circle
-                cx={node.cx}
-                cy={node.cy}
-                r={nodeRadius}
-                fill={tokens.fill}
-                stroke={tokens.stroke}
-                strokeWidth={isRunning || isCompleted || status === "failed" ? 1.5 : 1}
-                className={isRunning && !reducedMotion ? "dg-node-running" : undefined}
+        const dx = node.cx - cx;
+        const dy = node.cy - cy;
+        const length = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+        const tokens = tokensForStatus(status);
+        const streakKind = isRunning ? "outbound" : "return";
+
+        return (
+          <span
+            key={`streak-${node.key}-${streakKind}`}
+            data-dispatch-streak={streakKind}
+            data-dispatch-agent={node.key}
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: cx,
+              top: cy,
+              width: length,
+              height: 8,
+              transform: `rotate(${angle}deg) translateY(-4px)`,
+              transformOrigin: "0 50%",
+              overflow: "hidden",
+              pointerEvents: "none",
+            }}
+          >
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 2,
+                width: 10,
+                height: 4,
+                borderRadius: 999,
+                background: tokens.streak,
+                boxShadow: `0 0 12px ${tokens.streak}`,
+                animation:
+                  streakKind === "outbound"
+                    ? "dg-css-streak 1.4s linear infinite"
+                    : "dg-css-streak 900ms ease-out 1 reverse forwards",
+              }}
+            />
+          </span>
+        );
+      })}
+
+      {nodes.map((node) => {
+        const entry = dispatches[node.key];
+        const status: DispatchNodeStatus = entry?.status ?? "idle";
+        const tokens = tokensForStatus(status);
+        const isRunning = status === "running";
+        const isCompleted = status === "completed";
+
+        return (
+          <span
+            key={`node-${node.key}`}
+            data-agent={node.key}
+            data-state={status}
+            style={{
+              position: "absolute",
+              left: node.cx - nodeRadius,
+              top: node.cy - nodeRadius,
+              width: nodeRadius * 2,
+              height: nodeRadius * 2,
+              borderRadius: "50%",
+              border: `${isRunning || isCompleted || status === "failed" ? 1.5 : 1}px solid ${tokens.stroke}`,
+              background: tokens.fill,
+              display: "grid",
+              placeItems: "center",
+              color: tokens.label,
+              fontSize: 8,
+              fontFamily: "JetBrains Mono, IBM Plex Mono, monospace",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              boxShadow: isRunning && !reducedMotion ? `0 0 18px ${tokens.streak}` : undefined,
+              animation: isRunning && !reducedMotion ? "dg-node-pulse 1.2s ease-in-out infinite" : undefined,
+            }}
+          >
+            {node.key.toUpperCase()}
+            {isCompleted && showReturnStreak && !reducedMotion && (
+              <span
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  width: 5,
+                  height: 5,
+                  borderRadius: "50%",
+                  background: tokens.streak,
+                  boxShadow: `0 0 10px ${tokens.streak}`,
+                }}
               />
-              <text
-                x={node.cx}
-                y={node.cy + 3}
-                textAnchor="middle"
-                fontSize="8"
-                fontFamily="JetBrains Mono, IBM Plex Mono, monospace"
-                fontWeight={700}
-                letterSpacing="0.06em"
-                fill={tokens.label}
-              >
-                {node.key.toUpperCase()}
-              </text>
+            )}
+          </span>
+        );
+      })}
 
-              {/* Outbound streak — CEO → node, infinite loop while running.
-                  Skipped entirely under prefers-reduced-motion. */}
-              {isRunning && !reducedMotion && (
-                <circle r={3} fill={tokens.streak}>
-                  <animateMotion
-                    dur="0.6s"
-                    repeatCount="indefinite"
-                    path={motionPath}
-                  />
-                </circle>
-              )}
-
-              {/* Return streak — node → CEO, single shot on completion. Uses
-                  repeatCount="1" + fill="freeze" so it runs once and stops
-                  without needing JS to tear it down. */}
-              {isCompleted && showReturnStreak && !reducedMotion && (
-                <circle r={3} fill={tokens.streak}>
-                  <animateMotion
-                    dur="0.6s"
-                    repeatCount="1"
-                    fill="freeze"
-                    path={reversePath}
-                  />
-                </circle>
-              )}
-            </g>
-          );
-        })}
-
-        {/* CEO centre node — larger, gold, always glowing (unless reduced
-            motion). */}
-        <circle
-          cx={cx}
-          cy={cy}
-          r={ceoRadius}
-          fill="rgba(26, 22, 10, 0.95)"
-          stroke="rgba(201, 168, 76, 0.6)"
-          strokeWidth="1.5"
-          className={reducedMotion ? undefined : "cs-gold-glow"}
-        />
-        <text
-          x={cx}
-          y={cy + 4}
-          textAnchor="middle"
-          fontSize="10"
-          fontFamily="JetBrains Mono, IBM Plex Mono, monospace"
-          fontWeight={700}
-          letterSpacing="0.08em"
-          fill="rgba(232, 201, 106, 0.95)"
-        >
-          CEO
-        </text>
-      </svg>
+      <span
+        aria-hidden="true"
+        className={reducedMotion ? undefined : "cs-gold-glow"}
+        style={{
+          position: "absolute",
+          left: cx - ceoRadius,
+          top: cy - ceoRadius,
+          width: ceoRadius * 2,
+          height: ceoRadius * 2,
+          borderRadius: "50%",
+          border: "1.5px solid rgba(201, 168, 76, 0.6)",
+          background: "rgba(26, 22, 10, 0.95)",
+          color: "rgba(232, 201, 106, 0.95)",
+          display: "grid",
+          placeItems: "center",
+          fontSize: 10,
+          fontFamily: "JetBrains Mono, IBM Plex Mono, monospace",
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+        }}
+      >
+        CEO
+      </span>
+      <style>{`
+        @keyframes dg-css-streak {
+          0% { transform: translateX(0); opacity: 0; }
+          15% { opacity: 1; }
+          100% { transform: translateX(calc(100% - 10px)); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }

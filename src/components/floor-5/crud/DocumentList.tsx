@@ -2,6 +2,7 @@
 
 import type { JSX } from "react";
 import { useState, useCallback, useMemo } from "react";
+import { Plus, Search } from "lucide-react";
 import type { Document } from "@/db/schema";
 
 // ---------------------------------------------------------------------------
@@ -260,24 +261,19 @@ function DocumentSearch({
           (e.currentTarget as HTMLInputElement).style.outline = "none";
         }}
       />
-      {/* Search icon */}
-      <svg
+      <Search
         aria-hidden="true"
-        width="13"
-        height="13"
-        viewBox="0 0 13 13"
-        fill="none"
+        size={13}
+        strokeWidth={1.25}
         style={{
           position: "absolute",
           left: "10px",
           top: "50%",
           transform: "translateY(-50%)",
           pointerEvents: "none",
+          color: "#5A3E20",
         }}
-      >
-        <circle cx="5.5" cy="5.5" r="4" stroke="#5A3E20" strokeWidth="1.25" />
-        <path d="M8.5 8.5L11 11" stroke="#5A3E20" strokeWidth="1.25" strokeLinecap="round" />
-      </svg>
+      />
     </div>
   );
 }
@@ -397,9 +393,7 @@ export function DocumentList({
               (e.currentTarget as HTMLButtonElement).style.outline = "none";
             }}
           >
-            <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
-              <path d="M4.5 1V8M1 4.5H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            <Plus size={9} strokeWidth={1.5} aria-hidden="true" />
             NEW
           </button>
         </div>

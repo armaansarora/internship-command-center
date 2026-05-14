@@ -1,11 +1,7 @@
 import { useState, type JSX, type ReactNode } from "react";
 
-/* ──────────────────────────────────────────────────────────────
-   NOISE TEXTURE — SVG data URI used as CSS background overlay.
-   Duplicated here so this component is self-contained; the
-   string is tiny and tree-shaken at build time.
-   ────────────────────────────────────────────────────────────── */
-const NOISE_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E")`;
+const NOISE_TEXTURE =
+  "repeating-radial-gradient(circle at 25% 30%, rgba(255,255,255,0.18) 0 1px, transparent 1px 8px), repeating-linear-gradient(115deg, transparent 0 13px, rgba(255,255,255,0.09) 13px 14px)";
 
 /* ──────────────────────────────────────────────────────────────
    TYPES
@@ -70,7 +66,7 @@ export function QuickActionCard({ action, index, onClick, pending = false }: Qui
         boxShadow: active
           ? `0 8px 32px rgba(0,0,0,0.4), inset 0 0 24px ${action.glowColor}`
           : "0 4px 20px rgba(0,0,0,0.3)",
-        backgroundImage: NOISE_SVG,
+        backgroundImage: NOISE_TEXTURE,
         backgroundBlendMode: "overlay",
         opacity: pending ? 0.95 : active ? 1 : 0.9,
         transform: active ? "translateY(-3px) scale(1.01)" : "translateY(0) scale(1)",

@@ -1,0 +1,138 @@
+[
+  {
+    "name": "lobby-desktop",
+    "url": "http://localhost:3000/lobby",
+    "width": 1440,
+    "height": 1100,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "metrics": {
+      "title": "The Lobby | The Tower",
+      "url": "http://localhost:3000/lobby",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "hasHorizontalOverflow": false,
+      "imageCount": 2,
+      "otisImages": [
+        {
+          "src": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75",
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "naturalWidth": 220,
+          "naturalHeight": 375,
+          "complete": true,
+          "rect": {
+            "x": 887,
+            "y": 158.25,
+            "width": 74,
+            "height": 126.21875
+          }
+        }
+      ],
+      "brokenImages": [],
+      "hasOtisCharacter": true,
+      "otisMood": "idle"
+    }
+  },
+  {
+    "name": "lobby-mobile",
+    "url": "http://localhost:3000/lobby",
+    "width": 390,
+    "height": 844,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "metrics": {
+      "title": "The Lobby | The Tower",
+      "url": "http://localhost:3000/lobby",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "hasHorizontalOverflow": false,
+      "imageCount": 2,
+      "otisImages": [
+        {
+          "src": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75",
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "naturalWidth": 163,
+          "naturalHeight": 279,
+          "complete": true,
+          "rect": {
+            "x": 41,
+            "y": 413,
+            "width": 74,
+            "height": 126.21875
+          }
+        }
+      ],
+      "brokenImages": [],
+      "hasOtisCharacter": true,
+      "otisMood": "idle"
+    }
+  },
+  {
+    "name": "onboarding-desktop",
+    "url": "http://localhost:3000/lobby/onboarding",
+    "width": 1440,
+    "height": 1100,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "metrics": {
+      "title": "Lobby Intake | The Tower",
+      "url": "http://localhost:3000/lobby/onboarding",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "hasHorizontalOverflow": false,
+      "imageCount": 2,
+      "otisImages": [
+        {
+          "src": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75",
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "naturalWidth": 220,
+          "naturalHeight": 375,
+          "complete": true,
+          "rect": {
+            "x": 887,
+            "y": 158.25,
+            "width": 74,
+            "height": 126.21875
+          }
+        }
+      ],
+      "brokenImages": [],
+      "hasOtisCharacter": true,
+      "otisMood": "idle"
+    }
+  },
+  {
+    "name": "onboarding-mobile",
+    "url": "http://localhost:3000/lobby/onboarding",
+    "width": 390,
+    "height": 844,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "metrics": {
+      "title": "Lobby Intake | The Tower",
+      "url": "http://localhost:3000/lobby/onboarding",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "hasHorizontalOverflow": false,
+      "imageCount": 2,
+      "otisImages": [
+        {
+          "src": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75",
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "naturalWidth": 163,
+          "naturalHeight": 279,
+          "complete": true,
+          "rect": {
+            "x": 41,
+            "y": 413,
+            "width": 74,
+            "height": 126.21875
+          }
+        }
+      ],
+      "brokenImages": [],
+      "hasOtisCharacter": true,
+      "otisMood": "idle"
+    }
+  }
+]

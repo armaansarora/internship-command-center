@@ -340,7 +340,7 @@ a, button, [role="button"], label[for], summary,
   }
 
   /* ── Noise texture overlay ──
-     Subtle film-grain / frosted noise via inline SVG data URI filter */
+     Subtle film-grain / frosted noise without inline SVG data URIs. */
   .noise-texture {
     position: relative;
   }
@@ -351,8 +351,10 @@ a, button, [role="button"], label[for], summary,
     border-radius: inherit;
     pointer-events: none;
     opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-size: 128px 128px;
+    background-image:
+      repeating-radial-gradient(circle at 24% 31%, rgba(255,255,255,0.38) 0 1px, transparent 1px 6px),
+      repeating-linear-gradient(117deg, transparent 0 11px, rgba(255,255,255,0.22) 11px 12px);
+    background-size: 132px 132px, 180px 180px;
     background-repeat: repeat;
   }
 
@@ -375,8 +377,10 @@ a, button, [role="button"], label[for], summary,
     border-radius: inherit;
     pointer-events: none;
     opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-size: 128px 128px;
+    background-image:
+      repeating-radial-gradient(circle at 32% 26%, rgba(255,255,255,0.36) 0 1px, transparent 1px 6px),
+      repeating-linear-gradient(117deg, transparent 0 11px, rgba(255,255,255,0.2) 11px 12px);
+    background-size: 132px 132px, 180px 180px;
     background-repeat: repeat;
   }
 

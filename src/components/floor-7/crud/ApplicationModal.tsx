@@ -3,6 +3,7 @@
 import type { JSX } from "react";
 import { forwardRef, useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { X } from "lucide-react";
 import type { Application } from "@/db/schema";
 
 interface ApplicationModalProps {
@@ -173,9 +174,11 @@ function FocusableSelect({
         ...inputStyle,
         appearance: "none",
         WebkitAppearance: "none",
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237FB3D3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+        backgroundImage:
+          "linear-gradient(45deg, transparent 50%, #7FB3D3 50%), linear-gradient(135deg, #7FB3D3 50%, transparent 50%)",
         backgroundRepeat: "no-repeat",
-        backgroundPosition: "right 10px center",
+        backgroundPosition: "calc(100% - 16px) center, calc(100% - 10px) center",
+        backgroundSize: "6px 6px, 6px 6px",
         paddingRight: "28px",
         cursor: "pointer",
         ...(focused ? inputFocusStyle : {}),
@@ -536,14 +539,7 @@ export function ApplicationModal({
               (e.currentTarget as HTMLButtonElement).style.outline = "none";
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path
-                d="M2 2L10 10M10 2L2 10"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <X size={12} strokeWidth={1.5} aria-hidden="true" />
           </button>
         </div>
 

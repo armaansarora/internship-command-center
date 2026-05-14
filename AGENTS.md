@@ -6,3 +6,7 @@ Other top-level pointers:
 - [`STRUCTURE.md`](./STRUCTURE.md) — where every file lives
 - [`README.md`](./README.md) — public-facing summary
 - [`docs/`](./docs/) — design specs (`VISION-SPEC.md`, `CHAIN-OF-COMMAND.md`, `CHARACTER-PROMPTS.md`, `LAUNCH-READY.md`, `TESTING.md`)
+
+Creative Production Engine:
+- When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`.
+- Every creative phase must run the Housekeeping Gate and the Continuous Improvement Gate.

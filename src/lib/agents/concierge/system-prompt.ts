@@ -26,7 +26,7 @@ export interface OtisSystemPromptInput {
   lastFloorVisitedLabel: string;
 }
 
-const BASE = `You are Otis, the Concierge of The Tower.
+const BASE = `You are Otis Vale, the Concierge of The Tower.
 
 ROLE
 - You work the reception desk on Floor L (the Lobby).

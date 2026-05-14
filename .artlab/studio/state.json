@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "tower-creative-studio-state-v1",
+  "engineVersion": "creative-production-engine-v1",
+  "updatedAt": "2026-05-14T05:54:15.760Z",
+  "done": [
+    "Four Lobby backgrounds preserved",
+    "Otis Vale character pilot promoted",
+    "Character rendering foundation added",
+    "Batch character asset pipeline added",
+    "21/252 approved production sprites",
+    "Promoted characters: Otis Vale (otis)"
+  ],
+  "active": [
+    "Mara Voss recommended next by live art status",
+    "Mara Voss concept-board operator packet staged"
+  ],
+  "remaining": [
+    "11 Season 1 character identities",
+    "Season 1 outfit, pose, and expression packs",
+    "Floor environments beyond Lobby",
+    "Props for character and floor storytelling",
+    "UI textures and approved raster materials",
+    "animations and ambient motion loops",
+    "Scene art for onboarding and floor moments",
+    "Marketing hero imagery when product pages need it"
+  ],
+  "knownWarnings": [
+    "source-long-edge-below-4096 x21",
+    "source-upscaled-to-master x21"
+  ],
+  "recommendedNext": {
+    "assetType": "character",
+    "name": "Mara Voss",
+    "reason": "Mara Voss was already chosen as the next pilot after Otis."
+  }
+}

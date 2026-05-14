@@ -111,7 +111,12 @@ export default async function LobbyPage({ searchParams }: LobbyPageProps) {
 
   return (
     <>
-      <LobbyClient isAuthenticated={!!user} initialError={initialError} />
+      <LobbyClient
+        isAuthenticated={!!user}
+        initialError={initialError}
+        showReceptionOtis={!needsOnboarding}
+        showForeground={!needsOnboarding}
+      />
       {needsOnboarding && conciergeState && (
         <ConciergeFlow
           arrivalAlreadyPlayed={conciergeState.arrivalPlayedAt !== null}
