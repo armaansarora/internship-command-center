@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import {
@@ -7,12 +7,15 @@ import {
   buildCreativeStudioOrientation,
   createCreativeProductionPacket,
   createDefaultCreativeStudioState,
+  CREATIVE_PARALLEL_DEFAULT_AGENTS,
+  CREATIVE_PARALLEL_DEFAULT_WAVES,
   createCreativeParallelLaneBrief,
   createCreativeParallelWavePlan,
   createHousekeepingEntry,
   createImprovementEntry,
   assertCreativeParallelCount,
   assertCreativeParallelLaneBrief,
+  validateCreativeParallelLaneResult,
   loadCreativeStudioStateWithRecovery,
   getCreativeAssetTypeDefinition,
   inferCreativeProductionRequest,
@@ -42,8 +45,21 @@ const KNOWN_FLAGS = new Set([
   "--agents",
   "--waves",
   "--lane-brief",
+  "--no-parallel",
 ]);
-const FLAG_VALUES = new Set(KNOWN_FLAGS);
+const FLAG_VALUES = new Set([
+  "--state-root",
+  "--asset-type",
+  "--name",
+  "--brief",
+  "--run-id",
+  "--request",
+  "--mode",
+  "--parallel-agents",
+  "--agents",
+  "--waves",
+  "--lane-brief",
+]);
 
 function validateKnownFlags(argv: string[]): void {
   for (let index = 0; index < argv.length; index += 1) {
@@ -94,11 +110,11 @@ function assertAssetType(value: string): CreativeAssetType {
   }
 }
 
-function assertMode(value: string | undefined): "coordinator" | "lane" {
+function assertMode(value: string | undefined): "coordinator" | "lane" | "validate-lane" {
   const mode = value ?? "coordinator";
 
-  if (mode !== "coordinator" && mode !== "lane") {
-    throw new Error("--mode must be coordinator or lane.");
+  if (mode !== "coordinator" && mode !== "lane" && mode !== "validate-lane") {
+    throw new Error("--mode must be coordinator, lane, or validate-lane.");
   }
 
   return mode;
@@ -241,7 +257,7 @@ async function writeParallelWavePlanFiles(input: {
     stateRoot: input.stateRoot,
     ledgerRoot: join(planRoot, "ledgers"),
     runId: input.plan.parentRunId,
-    phase: "generation",
+    phase: "plan",
     created: [planPath, input.plan.dispatcherPromptPath, ...laneBriefPaths, ...lanePromptPaths],
     kept: [planPath, input.plan.dispatcherPromptPath, ...laneBriefPaths, ...lanePromptPaths],
     housekeepingNotes: "Parallel wave packet created isolated lane roots only; production and shared manifest writes remain parent-owned.",
@@ -293,6 +309,57 @@ async function runLaneMode(input: {
   console.log("Coordinator-only actions: merge, final review, approval, promotion, and app integration.");
 }
 
+async function runValidateLaneMode(input: {
+  stateRoot: string;
+  laneBriefPath: string;
+}): Promise<void> {
+  const safeBriefPath = assertSafeWorkspacePath(input.laneBriefPath, [input.stateRoot]);
+  const parsed = JSON.parse(await readFile(safeBriefPath, "utf8")) as unknown;
+  const laneBrief = assertCreativeParallelLaneBrief(parsed);
+  const laneRoot = assertSafeWorkspacePath(laneBrief.lane.outputRoot, [input.stateRoot]);
+  const resultPath = assertSafeWorkspacePath(laneBrief.lane.resultPath, [laneRoot]);
+  const preflightPath = assertSafeWorkspacePath(laneBrief.lane.preflightPath, [laneRoot]);
+  const outputsRoot = assertSafeWorkspacePath(laneBrief.lane.outputsRoot, [laneRoot]);
+  const resultMarkdown = await readFile(resultPath, "utf8").catch(() => "");
+  const imageOutputCount = await countImmediateFiles(outputsRoot);
+  const hasPreflight = await pathExists(preflightPath);
+  const validation = validateCreativeParallelLaneResult({
+    resultMarkdown,
+    imageOutputCount,
+    hasPreflight,
+  });
+
+  if (!validation.ok) {
+    throw new Error(`Lane result is incomplete: ${validation.missing.join(", ")}`);
+  }
+
+  await recordAndValidatePhaseGates({
+    stateRoot: input.stateRoot,
+    ledgerRoot: join(laneRoot, "ledgers"),
+    runId: `${laneBrief.parentRunId}-${laneBrief.lane.laneId}`,
+    phase: "qa",
+    created: [],
+    kept: [resultPath, ...(hasPreflight ? [preflightPath] : [])],
+    housekeepingNotes: "Lane result validation confirmed the lane has merge-ready notes and required QA evidence.",
+    improvementFinding: "Lane validation prevents 15x output from overwhelming the coordinator with incomplete placeholders.",
+    improvementAction: "Keep validating lane result bundles before coordinator review.",
+  });
+
+  console.log(`Validated isolated CPE lane result: ${laneBrief.lane.laneId}`);
+  console.log(`Result: ${resultPath}`);
+  console.log(`Image outputs checked: ${imageOutputCount}`);
+}
+
+async function countImmediateFiles(path: string): Promise<number> {
+  const entries = await readdir(path, { withFileTypes: true }).catch(() => []);
+
+  return entries.filter((entry) => entry.isFile()).length;
+}
+
+async function pathExists(path: string): Promise<boolean> {
+  return access(path).then(() => true, () => false);
+}
+
 function createLaneStatus(laneBrief: CreativeParallelLaneBrief): Record<string, unknown> {
   return {
     schemaVersion: "tower-creative-parallel-lane-status-v1",
@@ -303,6 +370,7 @@ function createLaneStatus(laneBrief: CreativeParallelLaneBrief): Record<string, 
     name: laneBrief.name,
     strategy: laneBrief.lane.strategy,
     waveMandate: laneBrief.lane.waveMandate,
+    recommendedAgentProfile: laneBrief.recommendedAgentProfile,
     outputRoot: laneBrief.lane.outputRoot,
     promotionLockedToCoordinator: true,
     forbiddenActions: laneBrief.lane.forbiddenActions,
@@ -366,8 +434,15 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (mode === "validate-lane") {
+    if (!laneBriefPath) throw new Error("--mode validate-lane requires --lane-brief.");
+
+    await runValidateLaneMode({ stateRoot, laneBriefPath });
+    return;
+  }
+
   if (laneBriefPath) {
-    throw new Error("--lane-brief can only be used with --mode lane.");
+    throw new Error("--lane-brief can only be used with --mode lane or --mode validate-lane.");
   }
 
   const assetTypeValue = flagValue(argv, "--asset-type");
@@ -377,7 +452,14 @@ async function main(): Promise<void> {
   const request = flagValue(argv, "--request");
   const parallelAgentsValue = assertIntegerFlag(argv, "--parallel-agents") ?? assertIntegerFlag(argv, "--agents");
   const wavesValue = assertIntegerFlag(argv, "--waves");
-  const wantsParallelWave = parallelAgentsValue !== undefined || wavesValue !== undefined;
+  const noParallel = argv.includes("--no-parallel");
+  const packetRequested = Boolean(assetTypeValue || assetName || brief || explicitRunId || request);
+  const wantsParallelWave = !noParallel && packetRequested;
+
+  if (noParallel && (parallelAgentsValue !== undefined || wavesValue !== undefined)) {
+    throw new Error("--no-parallel cannot be combined with --parallel-agents, --agents, or --waves.");
+  }
+
   const statePath = join(stateRoot, "state.json");
   const loadedState = await loadCreativeStudioStateWithRecovery(statePath);
   const state = createDefaultCreativeStudioState(new Date().toISOString(), loadLiveArtStatus());
@@ -402,7 +484,7 @@ async function main(): Promise<void> {
     improvementAction: "Continue gathering creative intent before creating production packets.",
   });
 
-  if (assetTypeValue || assetName || brief || explicitRunId || request || wantsParallelWave) {
+  if (packetRequested || parallelAgentsValue !== undefined || wavesValue !== undefined) {
     const inferred = request ? inferCreativeProductionRequest(request) : undefined;
 
     if (!inferred && (!assetTypeValue || !assetName || !brief)) {
@@ -476,8 +558,11 @@ async function main(): Promise<void> {
       | undefined;
 
     if (wantsParallelWave) {
-      const agentsPerWave = assertCreativeParallelCount("--parallel-agents", parallelAgentsValue ?? 5);
-      const waves = assertCreativeParallelCount("--waves", wavesValue ?? 3);
+      const agentsPerWave = assertCreativeParallelCount(
+        "--parallel-agents",
+        parallelAgentsValue ?? CREATIVE_PARALLEL_DEFAULT_AGENTS,
+      );
+      const waves = assertCreativeParallelCount("--waves", wavesValue ?? CREATIVE_PARALLEL_DEFAULT_WAVES);
       const plan = createCreativeParallelWavePlan({
         packet,
         agentsPerWave,

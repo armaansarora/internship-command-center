@@ -20,13 +20,13 @@ npm run art:studio -- --asset-type environment --name "War Room Background" --br
 
 The packet command writes only under `.artlab/studio/...`, rejects unsafe paths and run ids, and preserves corrupt state backups instead of silently overwriting them.
 
-For big option sets, run the engine in parallel wave mode:
+Normal creative packets now run in 15x parallel wave mode by default:
 
 ```bash
-npm run art:studio -- --request "Redo Otis with the same approved design and generate lots of varied source options." --run-id otis-parallel-wave-v1 --parallel-agents 5 --waves 3
+npm run art:studio -- --request "Redo Otis with the same approved design and generate lots of varied source options." --run-id otis-parallel-wave-v1
 ```
 
-This creates lane prompts under `.artlab/studio/<asset-type>/<run-id>/parallel/lanes/...`. Give each subagent one lane prompt. Lane agents may run `npm run art:studio -- --mode lane --lane-brief <lane-brief.json>` and may write only inside their lane root. The coordinator owns merge, final review, promotion, cleanup, and app integration.
+This creates 15 lane prompts under `.artlab/studio/<asset-type>/<run-id>/parallel/lanes/...`: 5 agents x 3 waves. If the plan says `awaiting-initial-approval`, get Armaan's initial direction approval before launching lanes. Give each subagent one lane prompt and prefer GPT-5.5 fast mode with extra-high reasoning when the current client exposes it. Lane agents may run `npm run art:studio -- --mode lane --lane-brief <lane-brief.json>` and may write only inside their lane root. Validate completed lanes with `npm run art:studio -- --mode validate-lane --lane-brief <lane-brief.json>` before coordinator merge. The coordinator owns merge, final review, promotion, cleanup, and app integration. Use `--no-parallel` only for explicit single-thread diagnostics.
 
 Use `npm run art:operate` only when the active asset is a Season 1 character and the engine has reached the character-art operator stage.
 
@@ -76,6 +76,14 @@ npm --silent run art:status -- --json
       creative-brief.json
       prompt.md
       next-action.md
+      parallel/
+        parallel-plan.json
+        dispatcher-prompt.md
+        lanes/<wave-id-agent-id>/
+          lane-brief.json
+          agent-prompt.md
+          result.md
+          preflight.json
       ledgers/
 ```
 

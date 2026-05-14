@@ -27,9 +27,22 @@ describe("creative production natural-language trigger", () => {
     expect(skill).toContain("brainstorm first");
     expect(skill).toContain("approved for app");
     expect(skill).toContain("npm run art:studio -- --request");
-    expect(skill).toContain("--parallel-agents 5 --waves 3");
+    expect(skill).toContain("Parallel wave mode is the default");
+    expect(skill).toContain("GPT-5.5 fast mode");
+    expect(skill).toContain("--no-parallel");
     expect(skill).toContain("--mode lane --lane-brief");
+    expect(skill).toContain("--mode validate-lane");
     expect(spec).toContain("adaptive request router");
     expect(spec).toContain("Parallel Wave Mode");
+    expect(spec).toContain("default 15x parallel wave packet");
+    expect(spec).toContain("awaiting-initial-approval");
+
+    for (const text of [claude, agents, structure, artlab]) {
+      expect(text).toContain("15x parallel");
+      expect(text).toContain("GPT-5.5");
+    }
+
+    expect(artlab).toContain("--no-parallel");
+    expect(artlab).toContain("--mode validate-lane");
   });
 });

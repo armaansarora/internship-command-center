@@ -6,7 +6,7 @@
 
 **Architecture:** Add a universal `creative-production` domain layer above the existing character-art pipeline. The new layer owns asset types, studio state, guided phases, housekeeping gates, continuous-improvement gates, recommendations, and operator packets; existing character commands become one adapter inside the larger engine. A project-local skill makes Codex or Claude understand “use the Creative Production Engine” as a strict guided brainstorm-to-execution workflow.
 
-**Parallel wave revision:** The engine now treats broad exploration as a coordinator-led fan-out. `npm run art:studio -- --request "<request>" --parallel-agents 5 --waves 3` creates one parent packet and 15 isolated lane prompts. Subagents work only inside their own lane roots; the coordinator owns merge, review, cleanup, promotion, and app integration.
+**Parallel wave revision:** The engine now treats every normal creative packet as a coordinator-led fan-out. `npm run art:studio -- --request "<request>"` creates one parent packet and 15 isolated lane prompts by default: 5 agents x 3 waves. Subagents work only inside their own lane roots and should use GPT-5.5 fast mode with extra-high reasoning when available; the coordinator owns merge, review, cleanup, promotion, and app integration.
 
 **Tech Stack:** TypeScript, Vitest, Node `tsx` scripts, existing Sharp-based image QA, existing `.artlab` structure, project-local Superpowers skill docs, Next.js visual asset manifest patterns.
 

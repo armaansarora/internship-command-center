@@ -9,5 +9,5 @@ Other top-level pointers:
 
 Creative Production Engine:
 - When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`.
-- For broad option generation, use `npm run art:studio -- --request "<request>" --parallel-agents 5 --waves 3`; dispatch subagents only to isolated lane prompts and keep promotion coordinator-owned.
+- Normal creative packets default to 15x parallel output: 5 agents x 3 waves. Dispatch subagents only to isolated lane prompts, prefer GPT-5.5 fast mode with extra-high reasoning when available, and keep promotion coordinator-owned.
 - Every creative phase must run the Housekeeping Gate and the Continuous Improvement Gate.

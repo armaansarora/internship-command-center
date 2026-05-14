@@ -1,6 +1,19 @@
 import { join } from "node:path";
 import type { CreativeProductionPacket } from "./prompts";
 
+export const CREATIVE_PARALLEL_DEFAULT_AGENTS = 5;
+export const CREATIVE_PARALLEL_DEFAULT_WAVES = 3;
+export const CREATIVE_PARALLEL_DEFAULT_TOTAL_LANES =
+  CREATIVE_PARALLEL_DEFAULT_AGENTS * CREATIVE_PARALLEL_DEFAULT_WAVES;
+export const CREATIVE_PARALLEL_MAX_TOTAL_LANES = CREATIVE_PARALLEL_DEFAULT_TOTAL_LANES;
+
+export const CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE = {
+  model: "gpt-5.5",
+  executionMode: "fast",
+  reasoningEffort: "xhigh",
+  label: "GPT-5.5 fast mode, extra-high reasoning",
+} as const;
+
 export const CREATIVE_PARALLEL_STRATEGIES = [
   {
     id: "canonical-safe",
@@ -100,6 +113,13 @@ export const CREATIVE_PARALLEL_WAVE_MANDATES = [
 export type CreativeParallelStrategyId = (typeof CREATIVE_PARALLEL_STRATEGIES)[number]["id"];
 export type CreativeParallelWaveMandateId = (typeof CREATIVE_PARALLEL_WAVE_MANDATES)[number]["id"];
 
+export interface CreativeParallelAgentProfile {
+  model: typeof CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE.model;
+  executionMode: typeof CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE.executionMode;
+  reasoningEffort: typeof CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE.reasoningEffort;
+  label: typeof CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE.label;
+}
+
 export interface CreativeParallelLane {
   laneId: string;
   waveNumber: number;
@@ -121,6 +141,7 @@ export interface CreativeParallelLane {
   resultPath: string;
   preflightPath: string;
   status: "ready-for-agent";
+  recommendedAgentProfile: CreativeParallelAgentProfile;
   allowedActions: string[];
   forbiddenActions: string[];
 }
@@ -138,7 +159,9 @@ export interface CreativeParallelWavePlan {
   totalLanes: number;
   parallelRoot: string;
   dispatcherPromptPath: string;
-  status: "ready-for-dispatch";
+  status: "awaiting-initial-approval" | "ready-for-dispatch";
+  statusReason: string;
+  defaultAgentProfile: CreativeParallelAgentProfile;
   laneContract: {
     ownsWriteAccessOnlyInsideLane: true;
     parentOwnsMergeReviewPromotion: true;
@@ -151,6 +174,11 @@ export interface CreativeParallelWavePlan {
   lanes: CreativeParallelLane[];
 }
 
+export interface CreativeParallelLaneResultValidationResult {
+  ok: boolean;
+  missing: string[];
+}
+
 export interface CreativeParallelLaneBrief {
   schemaVersion: "tower-creative-parallel-lane-brief-v1";
   parentRunId: string;
@@ -160,6 +188,7 @@ export interface CreativeParallelLaneBrief {
   promotionPhrase: CreativeProductionPacket["promotionPhrase"];
   lane: CreativeParallelLane;
   parentOwnsMergeReviewPromotion: true;
+  recommendedAgentProfile: CreativeParallelAgentProfile;
 }
 
 export function assertCreativeParallelCount(
@@ -175,6 +204,25 @@ export function assertCreativeParallelCount(
   return value;
 }
 
+export function assertCreativeParallelShape(
+  agentsPerWave: number,
+  waves: number,
+): { agentsPerWave: number; waves: number; totalLanes: number } {
+  const checkedAgents = assertCreativeParallelCount("--parallel-agents", agentsPerWave);
+  const checkedWaves = assertCreativeParallelCount("--waves", waves);
+  const totalLanes = checkedAgents * checkedWaves;
+
+  if (totalLanes > CREATIVE_PARALLEL_MAX_TOTAL_LANES) {
+    throw new Error(`Parallel wave plans are capped at ${CREATIVE_PARALLEL_MAX_TOTAL_LANES} lanes by default.`);
+  }
+
+  return {
+    agentsPerWave: checkedAgents,
+    waves: checkedWaves,
+    totalLanes,
+  };
+}
+
 export function createCreativeParallelLaneBrief(
   plan: CreativeParallelWavePlan,
   lane: CreativeParallelLane,
@@ -187,6 +235,7 @@ export function createCreativeParallelLaneBrief(
     brief: plan.brief,
     promotionPhrase: "approved for app",
     lane,
+    recommendedAgentProfile: plan.defaultAgentProfile,
     parentOwnsMergeReviewPromotion: true,
   };
 }
@@ -217,7 +266,20 @@ export function assertCreativeParallelLaneBrief(value: unknown): CreativeParalle
     throw new Error("Lane brief is missing required fields.");
   }
 
-  return brief as CreativeParallelLaneBrief;
+  const recommendedAgentProfile =
+    brief.recommendedAgentProfile ?? CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE;
+
+  if (
+    recommendedAgentProfile.model !== CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE.model ||
+    recommendedAgentProfile.reasoningEffort !== CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE.reasoningEffort
+  ) {
+    throw new Error("Lane brief does not use the required default subagent profile.");
+  }
+
+  return {
+    ...brief,
+    recommendedAgentProfile,
+  } as CreativeParallelLaneBrief;
 }
 
 export function createCreativeParallelWavePlan(input: {
@@ -226,10 +288,14 @@ export function createCreativeParallelWavePlan(input: {
   waves: number;
   parallelRoot?: string;
 }): CreativeParallelWavePlan {
-  const agentsPerWave = assertCreativeParallelCount("--parallel-agents", input.agentsPerWave);
-  const waves = assertCreativeParallelCount("--waves", input.waves);
+  const shape = assertCreativeParallelShape(input.agentsPerWave, input.waves);
+  const agentsPerWave = shape.agentsPerWave;
+  const waves = shape.waves;
   const parallelRoot = input.parallelRoot ?? join(input.packet.outputRoot, "parallel");
   const lanes: CreativeParallelLane[] = [];
+  const status = input.packet.nextAction === "generate-production-sources"
+    ? "ready-for-dispatch"
+    : "awaiting-initial-approval";
 
   for (let waveIndex = 0; waveIndex < waves; waveIndex += 1) {
     for (let agentIndex = 0; agentIndex < agentsPerWave; agentIndex += 1) {
@@ -260,6 +326,7 @@ export function createCreativeParallelWavePlan(input: {
         resultPath: join(outputRoot, "result.md"),
         preflightPath: join(outputRoot, "preflight.json"),
         status: "ready-for-agent",
+        recommendedAgentProfile: CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE,
         allowedActions: [
           "read the parent creative packet",
           "create exploratory prompts, notes, previews, and QA observations inside this lane only",
@@ -288,10 +355,14 @@ export function createCreativeParallelWavePlan(input: {
     brief: input.packet.brief,
     agentsPerWave,
     waves,
-    totalLanes: lanes.length,
+    totalLanes: shape.totalLanes,
     parallelRoot,
     dispatcherPromptPath: join(parallelRoot, "dispatcher-prompt.md"),
-    status: "ready-for-dispatch",
+    status,
+    statusReason: status === "ready-for-dispatch"
+      ? "Initial direction is already approved, so lane subagents may be dispatched."
+      : "Initial direction approval is required before launching lane subagents.",
+    defaultAgentProfile: CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE,
     laneContract: {
       ownsWriteAccessOnlyInsideLane: true,
       parentOwnsMergeReviewPromotion: true,
@@ -301,6 +372,7 @@ export function createCreativeParallelWavePlan(input: {
     },
     mergePolicy: [
       "dispatch one subagent per lane prompt, grouped by wave",
+      `use ${CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE.label} for lane subagents when the client exposes that model profile`,
       "run lanes in the same wave concurrently only when compute and image-generation limits allow it",
       "do not let lane agents edit shared code, manifests, public/art, or parent packet files",
       "parent session compares lane results and builds one review board or next packet",
@@ -312,8 +384,39 @@ export function createCreativeParallelWavePlan(input: {
       "promotion requires the parent pipeline and the exact phrase approved for app",
       "every lane must include housekeeping and continuous-improvement notes",
       "wacky creative swings are welcome only when the output remains technically usable",
+      "15x output may increase variety, never lower the source-quality, QA, approval, or organization bar",
     ],
     lanes,
+  };
+}
+
+export function validateCreativeParallelLaneResult(input: {
+  resultMarkdown: string;
+  imageOutputCount: number;
+  hasPreflight: boolean;
+}): CreativeParallelLaneResultValidationResult {
+  const text = input.resultMarkdown.trim();
+  const missing: string[] = [];
+
+  if (!text) missing.push("result.md content");
+
+  for (const section of [
+    "## Strongest Idea Or Output",
+    "## What Is Meaningfully Different",
+    "## Files Or Prompts Created",
+    "## Quality Risks",
+    "## Housekeeping Notes",
+    "## Continuous-Improvement Notes",
+  ]) {
+    if (!text.includes(section)) missing.push(section);
+  }
+
+  if (/\bTBD\b/i.test(text)) missing.push("resolved non-placeholder content");
+  if (input.imageOutputCount > 0 && !input.hasPreflight) missing.push("preflight.json for image outputs");
+
+  return {
+    ok: missing.length === 0,
+    missing,
   };
 }
 
@@ -323,6 +426,9 @@ export function renderCreativeParallelDispatcherPrompt(plan: CreativeParallelWav
 Parent run: ${plan.parentRunId}
 Asset: ${plan.name} (${plan.assetType})
 Parallel shape: ${plan.agentsPerWave} agents x ${plan.waves} waves = ${plan.totalLanes} lanes
+Default lane agent profile: ${plan.defaultAgentProfile.label}
+Status: ${plan.status}
+Status reason: ${plan.statusReason}
 
 ## Goal
 
@@ -331,6 +437,9 @@ Use the lane prompts to create a larger, stranger, more useful option set withou
 ## Dispatch Rules
 
 ${renderList(plan.mergePolicy)}
+
+When dispatching from Codex, prefer \`model: "${plan.defaultAgentProfile.model}"\` with \`reasoning_effort: "${plan.defaultAgentProfile.reasoningEffort}"\`. Use fast execution mode where the current client exposes it.
+${plan.status === "awaiting-initial-approval" ? "\nDo not launch lane subagents yet. First get Armaan's initial direction approval, then use this packet for 15x execution.\n" : ""}
 
 ## Safety Rules
 
@@ -357,6 +466,9 @@ You are one parallel lane for The Tower Creative Production Engine.
 Parent run: ${plan.parentRunId}
 Asset: ${plan.name} (${plan.assetType})
 Brief: ${plan.brief}
+Required subagent profile: ${lane.recommendedAgentProfile.label}
+Machine hint: model: "${lane.recommendedAgentProfile.model}", reasoning_effort: "${lane.recommendedAgentProfile.reasoningEffort}", executionMode: "${lane.recommendedAgentProfile.executionMode}" when available.
+If this profile is unavailable, record the fallback model and reason in \`result.md\`.
 Wave mandate: ${lane.waveMandate.label} - ${lane.waveMandate.mandate}
 Creative strategy: ${lane.strategy.label} - ${lane.strategy.mandate}
 
@@ -390,6 +502,7 @@ Write \`result.md\` with:
 - continuous-improvement notes
 
 Keep the work bold but usable. The parent session owns merge, final review, approval, promotion, and app integration.
+Do not trade quality for volume: this lane must meet the same source quality, labeling, QA, and organization standards as a single-run production packet.
 `;
 }
 

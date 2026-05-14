@@ -28,8 +28,10 @@ Use this skill when the user says any close variant of:
 4. Present 2-3 approaches with a recommendation.
 5. Create concept options or a concept prompt packet.
    - Prefer `npm run art:studio -- --request "<Armaan's natural-language request>"`. The engine routes characters, backgrounds, screens, buttons, animations, props, scenes, icon systems, and marketing visuals into strict organized packets.
-   - When Armaan asks for lots of variety, parallel work, more options, wacky directions, or multiple subagents, use `npm run art:studio -- --request "<request>" --parallel-agents 5 --waves 3` unless a smaller fan-out is clearly safer.
+   - Parallel wave mode is the default for every creative packet: 5 agents x 3 waves = 15 lanes.
+   - Only use `--no-parallel` for explicit single-thread diagnostics or when Armaan directly asks not to fan out.
    - Parallel mode creates a parent packet plus isolated lane prompts. Dispatch subagents only to individual lane prompts; do not let lane agents edit shared files.
+   - Default subagent profile for lane work: GPT-5.5 fast mode, extra-high reasoning (`model: "gpt-5.5"`, `reasoning_effort: "xhigh"` when available).
    - Once the brief is known, use `npm run art:studio -- --asset-type <type> --name "<asset name>" --brief "<brief>" --run-id <safe-run-id>` to create the strict packet.
 6. Wait for the initial direction approval.
 7. Build the strict production packet.
@@ -50,21 +52,25 @@ Every phase must record slow steps, manual steps, errors, quality failures, conf
 
 ## Parallel Wave Mode
 
-Use this when the user wants 5x, 15x, broad exploration, or multiple subagents running the engine.
+Use this for every normal Creative Production Engine packet. The default is always 15x output unless the run is an explicit diagnostic.
 
 1. The parent coordinator runs:
-   `npm run art:studio -- --request "<request>" --parallel-agents 5 --waves 3`
+   `npm run art:studio -- --request "<request>"`
 2. The command creates:
    - `parallel/parallel-plan.json`
    - `parallel/dispatcher-prompt.md`
    - `parallel/lanes/<wave-id-agent-id>/lane-brief.json`
    - `parallel/lanes/<wave-id-agent-id>/agent-prompt.md`
-3. Each subagent receives exactly one `agent-prompt.md`.
-4. If a lane needs command setup, it runs:
+3. If `parallel-plan.json` says `awaiting-initial-approval`, do not launch the lanes until Armaan approves the initial direction.
+4. Each subagent receives exactly one `agent-prompt.md` and should run GPT-5.5 fast mode with extra-high reasoning when the current client exposes it.
+5. If a lane needs command setup, it runs:
    `npm run art:studio -- --mode lane --lane-brief <lane-brief.json>`
-5. Lane agents may write only inside their own lane root.
-6. Lane agents must not write `public/art`, update manifests, promote assets, run cleanup, delete approved assets, or edit the parent packet.
-7. The parent coordinator reads all lane `result.md` files, merges the best ideas, runs QA, asks for final approval, and promotes only after `approved for app`.
+6. Lane agents may write only inside their own lane root.
+7. Lane agents must not write `public/art`, update manifests, promote assets, run cleanup, delete approved assets, or edit the parent packet.
+8. Before coordinator merge, validate each completed lane with:
+   `npm run art:studio -- --mode validate-lane --lane-brief <lane-brief.json>`
+9. The parent coordinator reads all validated lane `result.md` files, merges the best ideas, runs QA, asks for final approval, and promotes only after `approved for app`.
+10. Volume cannot lower standards: every lane must keep the same source-quality, QA, naming, organization, and approval bar as a single-lane production packet.
 
 ## Non-negotiables
 

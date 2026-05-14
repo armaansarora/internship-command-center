@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -62,6 +62,7 @@ describe("art:studio CLI", () => {
     ], { cwd: process.cwd(), encoding: "utf8" });
 
     expect(output).toContain("Created Creative Production Engine packet");
+    expect(output).toContain("Created Creative Production Engine parallel wave plan: 15 lanes");
     expect(output).toContain("War Room Background");
 
     const packetPath = join(root, "environments", "war-room-bg-v1", "creative-brief.json");
@@ -80,6 +81,7 @@ describe("art:studio CLI", () => {
     expect(packet.promotionPhrase).toBe("approved for app");
     expect(readFileSync(promptPath, "utf8")).toContain("A kinetic but premium applications command room background.");
     expect(readFileSync(actionPath, "utf8")).toContain("Next Legal Action");
+    expect(existsSync(join(root, "environments", "war-room-bg-v1", "parallel", "parallel-plan.json"))).toBe(true);
   });
 
   it("turns a natural-language background request into an organized environment run", () => {
@@ -96,6 +98,7 @@ describe("art:studio CLI", () => {
 
     expect(output).toContain("Routed request to environment");
     expect(output).toContain("Application War Room Background Screen");
+    expect(output).toContain("Created Creative Production Engine parallel wave plan: 15 lanes");
 
     const runRoot = join(root, "environments", `${today}-application-war-room-background-screen`);
     const packet = JSON.parse(readFileSync(join(runRoot, "creative-brief.json"), "utf8")) as {
@@ -113,6 +116,7 @@ describe("art:studio CLI", () => {
     expect(packet.requiredOutputs).toContain("desktop, tablet, and mobile crops");
     expect(packet.acceptanceChecks).toContain("approved lobby backgrounds are untouched unless the request explicitly targets a new replacement run");
     expect(readFileSync(join(runRoot, "prompt.md"), "utf8")).toContain("desktop, tablet, and mobile crops");
+    expect(existsSync(join(runRoot, "parallel", "parallel-plan.json"))).toBe(true);
   });
 
   it("turns a natural-language UI request into a ui-texture run with state outputs", () => {
@@ -165,7 +169,7 @@ describe("art:studio CLI", () => {
     expect(readFileSync(join(runRoot, "next-action.md"), "utf8")).toContain("Generate production sources");
   });
 
-  it("creates a parallel wave plan with isolated lane briefs and lane mode setup", () => {
+  it("creates a default parallel wave plan with isolated lane briefs and lane mode setup", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-studio-parallel-"));
 
     const output = execFileSync(tsx, [
@@ -176,10 +180,6 @@ describe("art:studio CLI", () => {
       "Redo Otis with the same approved design and generate lots of varied source options.",
       "--run-id",
       "otis-parallel-wave-v1",
-      "--parallel-agents",
-      "5",
-      "--waves",
-      "3",
     ], { cwd: process.cwd(), encoding: "utf8" });
 
     expect(output).toContain("Created Creative Production Engine parallel wave plan: 15 lanes");
@@ -191,14 +191,28 @@ describe("art:studio CLI", () => {
     const firstLaneBriefPath = join(firstLaneRoot, "lane-brief.json");
     const firstLanePromptPath = join(firstLaneRoot, "agent-prompt.md");
     const plan = JSON.parse(readFileSync(planPath, "utf8")) as {
+      status: string;
+      statusReason: string;
       totalLanes: number;
-      lanes: Array<{ outputRoot: string; laneId: string }>;
+      defaultAgentProfile: { model: string; reasoningEffort: string; executionMode: string; label: string };
+      lanes: Array<{ outputRoot: string; laneId: string; recommendedAgentProfile: { model: string } }>;
     };
 
+    expect(plan.status).toBe("ready-for-dispatch");
+    expect(plan.statusReason).toContain("already approved");
     expect(plan.totalLanes).toBe(15);
+    expect(plan.defaultAgentProfile).toEqual({
+      model: "gpt-5.5",
+      executionMode: "fast",
+      reasoningEffort: "xhigh",
+      label: "GPT-5.5 fast mode, extra-high reasoning",
+    });
     expect(new Set(plan.lanes.map((lane) => lane.outputRoot)).size).toBe(15);
+    expect(plan.lanes.every((lane) => lane.recommendedAgentProfile.model === "gpt-5.5")).toBe(true);
     expect(readFileSync(dispatcherPromptPath, "utf8")).toContain("5 agents x 3 waves = 15 lanes");
+    expect(readFileSync(dispatcherPromptPath, "utf8")).toContain("model: \"gpt-5.5\"");
     expect(readFileSync(firstLanePromptPath, "utf8")).toContain("You may write only inside");
+    expect(readFileSync(firstLanePromptPath, "utf8")).toContain("reasoning_effort: \"xhigh\"");
 
     const stateBeforeLane = readFileSync(join(root, "state.json"), "utf8");
     const laneOutput = execFileSync(tsx, [
@@ -218,6 +232,95 @@ describe("art:studio CLI", () => {
     expect(existsSync(join(firstLaneRoot, "outputs"))).toBe(true);
   }, 20000);
 
+  it("validates lane results before coordinator merge", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-lane-validate-"));
+
+    execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Redo Otis with the same approved design and generate source options.",
+      "--run-id",
+      "otis-lane-validate-v1",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    const firstLaneRoot = join(root, "characters", "otis-lane-validate-v1", "parallel", "lanes", "wave-01-agent-01");
+    const firstLaneBriefPath = join(firstLaneRoot, "lane-brief.json");
+
+    execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--mode",
+      "lane",
+      "--lane-brief",
+      firstLaneBriefPath,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(() =>
+      execFileSync(tsx, [
+        "scripts/creative-production-engine.ts",
+        "--state-root",
+        root,
+        "--mode",
+        "validate-lane",
+        "--lane-brief",
+        firstLaneBriefPath,
+      ], { cwd: process.cwd(), encoding: "utf8" }),
+    ).toThrow(/Lane result is incomplete/);
+
+    mkdirSync(join(firstLaneRoot, "outputs"), { recursive: true });
+    writeFileSync(join(firstLaneRoot, "outputs", "source.png"), "fake image");
+    writeFileSync(join(firstLaneRoot, "preflight.json"), "{\"ok\":true}\n");
+    writeFileSync(join(firstLaneRoot, "result.md"), [
+      "# wave-01-agent-01 Result",
+      "## Strongest Idea Or Output",
+      "Soft Otis source candidate.",
+      "## What Is Meaningfully Different",
+      "Friendlier face and softer posture.",
+      "## Files Or Prompts Created",
+      "- outputs/source.png",
+      "## Quality Risks",
+      "- Needs real image QA after generation.",
+      "## Housekeeping Notes",
+      "- Kept source prompt and preview.",
+      "## Continuous-Improvement Notes",
+      "- Preflight should be automated earlier.",
+    ].join("\n\n"));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--mode",
+      "validate-lane",
+      "--lane-brief",
+      firstLaneBriefPath,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Validated isolated CPE lane result: wave-01-agent-01");
+  }, 20000);
+
+  it("allows an explicit single-thread diagnostic escape hatch", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-no-parallel-"));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Create a diagnostic UI texture packet without fan-out.",
+      "--run-id",
+      "diagnostic-ui-texture",
+      "--no-parallel",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Created Creative Production Engine packet");
+    expect(output).not.toContain("parallel wave plan");
+    expect(existsSync(join(root, "ui-textures", "diagnostic-ui-texture", "parallel"))).toBe(false);
+  });
+
   it("creates packets for every registered asset type without character-only assumptions", () => {
     for (const assetType of CREATIVE_ASSET_TYPES) {
       const root = mkdtempSync(join(tmpdir(), `tower-${assetType}-packet-`));
@@ -235,6 +338,7 @@ describe("art:studio CLI", () => {
         `Create a production packet for ${assetType}.`,
         "--run-id",
         runId,
+        "--no-parallel",
       ], { cwd: process.cwd(), encoding: "utf8" });
 
       const folder = getCreativeAssetTypeDefinition(assetType as CreativeAssetType).outputRoot.split("/").at(-1) ?? assetType;
