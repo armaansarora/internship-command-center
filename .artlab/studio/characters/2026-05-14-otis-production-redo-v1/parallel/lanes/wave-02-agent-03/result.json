@@ -1,0 +1,27 @@
+{
+  "laneId": "wave-02-agent-03",
+  "strongestIdea": "A Mobile First Read gate for Otis that forces phone-scale silhouette, expression, safe crop, text-band clearance, and gesture clarity before style ranking or full production proceeds.",
+  "uniquenessClaim": "This lane stress-tests the approved threshold-keeper Otis against mobile Lobby failure modes instead of adding more ornament: it converts scale, crop, expression, text overlap, and gesture risks into concrete GPT Image 2 probes and QA acceptance rules.",
+  "outputFiles": [
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/outputs/otis-mobile-first-read-gpt-image-2-prompt-packet.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/outputs/otis-mobile-first-read-prompt-packet.json",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/outputs/otis-mobile-preview-spec.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/outputs/otis-mobile-qa-guard.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/result.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/result.json"
+  ],
+  "qualityRisks": [
+    "No actual GPT Image 2 source image files were generated locally in this lane.",
+    "Mobile safe text bands are inferred and should be checked against the live Lobby composition before promotion.",
+    "Safe low-gesture rules may make some poses too restrained unless balanced during image generation.",
+    "Contact sheet probes must not be treated as production sources without independent split-cell preflight."
+  ],
+  "fallbackModel": "Codex GPT-5",
+  "fallbackReason": "The requested GPT-5.5 fast mode with extra-high reasoning profile and a lane-local GPT Image 2 file-output path were not exposed in this session, so the lane produced prompt packets, preview spec, and QA guard artifacts only.",
+  "promotionBlockers": [
+    "No production image files exist in this lane.",
+    "Generated Otis candidates must pass 64, 96, 144, 192, and 256 CSS px mobile scale rungs.",
+    "Generated Otis candidates must pass safe crop, dark/light alpha halo, and compact-phone text overlap checks.",
+    "Coordinator must run final review and promotion gates; this lane is not approved for app."
+  ]
+}

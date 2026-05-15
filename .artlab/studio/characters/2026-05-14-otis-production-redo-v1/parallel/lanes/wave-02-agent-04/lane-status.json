@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "tower-creative-parallel-lane-status-v1",
+  "status": "ready-for-agent-work",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "laneId": "wave-02-agent-04",
+  "assetType": "character",
+  "name": "Otis",
+  "strategy": {
+    "id": "animation-minded",
+    "label": "Animation Minded",
+    "mandate": "Design for later motion states, pose readability, and reusable production slots."
+  },
+  "waveMandate": {
+    "id": "stress-the-brief",
+    "label": "Stress The Brief",
+    "mandate": "Challenge assumptions, identify weak spots, and produce better alternatives."
+  },
+  "recommendedAgentProfile": {
+    "model": "gpt-5.5",
+    "executionMode": "fast",
+    "reasoningEffort": "xhigh",
+    "label": "GPT-5.5 fast mode, extra-high reasoning"
+  },
+  "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04",
+  "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/result.md",
+  "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/result.json",
+  "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/preflight.json",
+  "promotionLockedToCoordinator": true,
+  "forbiddenActions": [
+    "do not edit sibling lanes",
+    "do not write to public/art",
+    "do not update the production manifest",
+    "do not promote assets",
+    "do not delete approved or live assets",
+    "do not change the parent creative-brief.json"
+  ],
+  "updatedAt": "2026-05-14T23:22:17.876Z"
+}

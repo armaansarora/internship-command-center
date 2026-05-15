@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "tower-creative-parallel-lane-brief-v1",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "assetType": "character",
+  "name": "Otis",
+  "brief": "Redo Otis Vale from scratch through the production pipeline using the same approved soft Santa concierge design, preserving his lived-in human warmth, slight belly, natural imperfections, three outfit variants, seven required poses per outfit, native high-resolution source expectations, staged QA boards, and no public/art promotion until final approval.",
+  "promotionPhrase": "approved for app",
+  "lane": {
+    "laneId": "wave-01-agent-05",
+    "waveNumber": 1,
+    "agentNumber": 5,
+    "strategy": {
+      "id": "material-simplifier",
+      "label": "Material Simplifier",
+      "mandate": "Reduce visual noise and prove the asset works cleanly at app scale."
+    },
+    "waveMandate": {
+      "id": "wide-divergence",
+      "label": "Wide Divergence",
+      "mandate": "Generate meaningfully different directions, not near-duplicates."
+    },
+    "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05",
+    "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/lane-brief.json",
+    "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/agent-prompt.md",
+    "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/outputs",
+    "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/result.md",
+    "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/result.json",
+    "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/preflight.json",
+    "status": "ready-for-agent",
+    "recommendedAgentProfile": {
+      "model": "gpt-5.5",
+      "executionMode": "fast",
+      "reasoningEffort": "xhigh",
+      "label": "GPT-5.5 fast mode, extra-high reasoning"
+    },
+    "allowedActions": [
+      "read the parent creative packet",
+      "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+      "write a final result.md with recommendation, risks, and files created",
+      "record housekeeping and continuous-improvement notes in the lane result"
+    ],
+    "forbiddenActions": [
+      "do not edit sibling lanes",
+      "do not write to public/art",
+      "do not update the production manifest",
+      "do not promote assets",
+      "do not delete approved or live assets",
+      "do not change the parent creative-brief.json"
+    ]
+  },
+  "recommendedAgentProfile": {
+    "model": "gpt-5.5",
+    "executionMode": "fast",
+    "reasoningEffort": "xhigh",
+    "label": "GPT-5.5 fast mode, extra-high reasoning"
+  },
+  "parentOwnsMergeReviewPromotion": true
+}

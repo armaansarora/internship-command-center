@@ -1,0 +1,134 @@
+{
+  "laneId": "wave-02-agent-05",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": "Otis",
+  "purpose": "Choose dramatic lighting recipes that fit preserved Tower lobby backgrounds while preserving mobile sprite readability.",
+  "paletteAnchors": [
+    "brass",
+    "ivory",
+    "burgundy",
+    "deep navy"
+  ],
+  "lightingFamilies": [
+    {
+      "id": "brass-threshold-key",
+      "recommendedRole": "default-production-family",
+      "mood": "premium warm threshold, safe dramatic depth",
+      "keyLight": "warm brass from high front-left",
+      "fillLight": "soft ivory face fill from front-right",
+      "rimOrBounce": "tiny deep navy shape separation inside figure only",
+      "accentColor": "restrained burgundy in outfit accents",
+      "bestPoses": [
+        "idle",
+        "greeting",
+        "talking",
+        "alert"
+      ],
+      "backgroundFit": {
+        "ivory": "excellent",
+        "brass": "excellent",
+        "burgundy": "good",
+        "deepNavy": "good"
+      },
+      "risks": [
+        "can become too polite if contrast is flattened",
+        "can over-warm beard if brass spills into all white values"
+      ],
+      "promptInstruction": "Warm brass key, ivory face hold, subtle deep navy separation, no visible glow outline.",
+      "qaPassCondition": "Face reads at 128px and beard separates from jacket on ivory, burgundy, and deep navy backgrounds."
+    },
+    {
+      "id": "burgundy-lantern-side",
+      "recommendedRole": "controlled-drama-probe",
+      "mood": "lobby velvet warmth, richer evening concierge presence",
+      "keyLight": "warm brass from camera-left",
+      "fillLight": "ivory face hold, never red",
+      "rimOrBounce": "soft burgundy side bounce from camera-right",
+      "accentColor": "burgundy should affect fabric edges more than skin",
+      "bestPoses": [
+        "greeting",
+        "talking",
+        "alert"
+      ],
+      "backgroundFit": {
+        "ivory": "good",
+        "brass": "good",
+        "burgundy": "risky",
+        "deepNavy": "good"
+      },
+      "risks": [
+        "skin and beard can become red-muddy",
+        "sprite can disappear against burgundy lobby panels"
+      ],
+      "promptInstruction": "Burgundy side bounce stays secondary; ivory face fill remains dominant.",
+      "qaPassCondition": "At 128px, eyes and mustache remain readable and the red side light does not turn facial planes muddy."
+    },
+    {
+      "id": "deep-navy-back-rim",
+      "recommendedRole": "stress-test-only-until-proven",
+      "mood": "night lobby depth with premium silhouette",
+      "keyLight": "brass key on face and torso",
+      "fillLight": "ivory face hold",
+      "rimOrBounce": "narrow deep navy edge separator, not a glow",
+      "accentColor": "small burgundy warmth in trim",
+      "bestPoses": [
+        "listening",
+        "thinking",
+        "working"
+      ],
+      "backgroundFit": {
+        "ivory": "good",
+        "brass": "good",
+        "burgundy": "fair",
+        "deepNavy": "risky"
+      },
+      "risks": [
+        "can become haloing around transparent sprite edge",
+        "can make dark coat collapse into deep navy UI",
+        "can make Otis feel ominous instead of welcoming"
+      ],
+      "promptInstruction": "Deep navy rim stays inside the painted form; no outer blue edge or bloom.",
+      "qaPassCondition": "No visible rim halo at 200 percent zoom and coat silhouette remains readable on deep navy background."
+    },
+    {
+      "id": "ivory-desk-glow",
+      "recommendedRole": "pose-specific-working-family",
+      "mood": "calm authority, quiet helpfulness",
+      "keyLight": "soft brass on face from above/front",
+      "fillLight": "ivory desk-adjacent glow kept below chin",
+      "rimOrBounce": "minimal navy grounding shadow inside figure",
+      "accentColor": "tiny burgundy reflection on sleeve or vest",
+      "bestPoses": [
+        "working",
+        "thinking",
+        "listening"
+      ],
+      "backgroundFit": {
+        "ivory": "good",
+        "brass": "excellent",
+        "burgundy": "good",
+        "deepNavy": "good"
+      },
+      "risks": [
+        "upward glow can become spooky if it reaches the eyes",
+        "prop can obscure belly or hands",
+        "tablet glow can accidentally become blue tech lighting"
+      ],
+      "promptInstruction": "Ivory glow supports the hands and lower beard only; face key remains warm brass.",
+      "qaPassCondition": "No horror underlighting, no blue screen cast, hands and prop remain uncropped."
+    }
+  ],
+  "globalRejectConditions": [
+    "face unreadable at 128px tall",
+    "sprite overall value is muddy or crushed",
+    "outer glow, rim halo, or background light spill touches transparent edge",
+    "photorealistic portrait rendering or fake-perfect AI model look",
+    "identity drift away from approved soft Santa concierge Otis",
+    "cropped hands, feet, beard, belly, or props",
+    "source below native 4K-class long-edge contract",
+    "non-flat chroma background or missing alpha when sprite ingest requires transparency"
+  ],
+  "recommendedDefault": "brass-threshold-key",
+  "recommendedStressProbe": "burgundy-lantern-side",
+  "highestRiskProbe": "deep-navy-back-rim"
+}

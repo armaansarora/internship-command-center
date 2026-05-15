@@ -1,0 +1,692 @@
+{
+  "schemaVersion": "tower-creative-parallel-wave-plan-v1",
+  "engineVersion": "creative-production-engine-v1",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "parentOutputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1",
+  "assetType": "character",
+  "name": "Otis",
+  "brief": "Redo Otis Vale from scratch through the production pipeline using the same approved soft Santa concierge design, preserving his lived-in human warmth, slight belly, natural imperfections, three outfit variants, seven required poses per outfit, native high-resolution source expectations, staged QA boards, and no public/art promotion until final approval.",
+  "agentsPerWave": 5,
+  "waves": 3,
+  "totalLanes": 15,
+  "parallelRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel",
+  "dispatcherPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/dispatcher-prompt.md",
+  "status": "ready-for-dispatch",
+  "statusReason": "Initial direction is already approved, so lane subagents may be dispatched.",
+  "defaultAgentProfile": {
+    "model": "gpt-5.5",
+    "executionMode": "fast",
+    "reasoningEffort": "xhigh",
+    "label": "GPT-5.5 fast mode, extra-high reasoning"
+  },
+  "laneContract": {
+    "ownsWriteAccessOnlyInsideLane": true,
+    "parentOwnsMergeReviewPromotion": true,
+    "requiresResultMarkdown": true,
+    "requiresHousekeepingNotes": true,
+    "requiresImprovementNotes": true
+  },
+  "mergePolicy": [
+    "dispatch one subagent per lane prompt, grouped by wave",
+    "use GPT-5.5 fast mode, extra-high reasoning for lane subagents when the client exposes that model profile",
+    "run lanes in the same wave concurrently only when compute and image-generation limits allow it",
+    "do not let lane agents edit shared code, manifests, public/art, or parent packet files",
+    "parent session compares lane results and builds one review board or next packet",
+    "human approval remains initial direction approval and final upload-ready approval only"
+  ],
+  "safetyRules": [
+    "each lane owns exactly one isolated outputRoot",
+    "all generated drafts remain in .artlab until parent review",
+    "promotion requires the parent pipeline and the exact phrase approved for app",
+    "every lane must include housekeeping and continuous-improvement notes",
+    "wacky creative swings are welcome only when the output remains technically usable",
+    "15x output may increase variety, never lower the source-quality, QA, approval, or organization bar"
+  ],
+  "lanes": [
+    {
+      "laneId": "wave-01-agent-01",
+      "waveNumber": 1,
+      "agentNumber": 1,
+      "strategy": {
+        "id": "canonical-safe",
+        "label": "Canonical Safe",
+        "mandate": "Stay closest to approved Tower canon while still finding one useful new angle."
+      },
+      "waveMandate": {
+        "id": "wide-divergence",
+        "label": "Wide Divergence",
+        "mandate": "Generate meaningfully different directions, not near-duplicates."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-01",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-01/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-01/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-01/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-01/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-01/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-01/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-01-agent-02",
+      "waveNumber": 1,
+      "agentNumber": 2,
+      "strategy": {
+        "id": "silhouette-breaker",
+        "label": "Silhouette Breaker",
+        "mandate": "Push shape language, posture, and read-at-a-distance variety harder than the baseline."
+      },
+      "waveMandate": {
+        "id": "wide-divergence",
+        "label": "Wide Divergence",
+        "mandate": "Generate meaningfully different directions, not near-duplicates."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-02",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-02/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-02/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-02/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-02/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-02/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-02/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-01-agent-03",
+      "waveNumber": 1,
+      "agentNumber": 3,
+      "strategy": {
+        "id": "human-imperfection",
+        "label": "Human Imperfection",
+        "mandate": "Prioritize lovable lived-in specificity over fake-perfect AI polish."
+      },
+      "waveMandate": {
+        "id": "wide-divergence",
+        "label": "Wide Divergence",
+        "mandate": "Generate meaningfully different directions, not near-duplicates."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-03",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-03/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-03/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-03/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-03/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-03/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-03/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-01-agent-04",
+      "waveNumber": 1,
+      "agentNumber": 4,
+      "strategy": {
+        "id": "game-sprite",
+        "label": "Premium Game Sprite",
+        "mandate": "Lean into Fortnite-adjacent readable game character energy without childish cartooning."
+      },
+      "waveMandate": {
+        "id": "wide-divergence",
+        "label": "Wide Divergence",
+        "mandate": "Generate meaningfully different directions, not near-duplicates."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-04",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-04/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-04/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-04/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-04/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-04/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-04/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-01-agent-05",
+      "waveNumber": 1,
+      "agentNumber": 5,
+      "strategy": {
+        "id": "material-simplifier",
+        "label": "Material Simplifier",
+        "mandate": "Reduce visual noise and prove the asset works cleanly at app scale."
+      },
+      "waveMandate": {
+        "id": "wide-divergence",
+        "label": "Wide Divergence",
+        "mandate": "Generate meaningfully different directions, not near-duplicates."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-01-agent-05/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-02-agent-01",
+      "waveNumber": 2,
+      "agentNumber": 1,
+      "strategy": {
+        "id": "prop-forward",
+        "label": "Prop Forward",
+        "mandate": "Use a signature object, costume detail, or environmental prop to sharpen story identity."
+      },
+      "waveMandate": {
+        "id": "stress-the-brief",
+        "label": "Stress The Brief",
+        "mandate": "Challenge assumptions, identify weak spots, and produce better alternatives."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-01",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-01/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-01/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-01/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-01/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-01/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-01/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-02-agent-02",
+      "waveNumber": 2,
+      "agentNumber": 2,
+      "strategy": {
+        "id": "comedic-engine",
+        "label": "Comedic Engine",
+        "mandate": "Expose the character or asset's funny recurring behavior through visual design choices."
+      },
+      "waveMandate": {
+        "id": "stress-the-brief",
+        "label": "Stress The Brief",
+        "mandate": "Challenge assumptions, identify weak spots, and produce better alternatives."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-02",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-02/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-02/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-02/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-02/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-02/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-02/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-02-agent-03",
+      "waveNumber": 2,
+      "agentNumber": 3,
+      "strategy": {
+        "id": "mobile-first-read",
+        "label": "Mobile First Read",
+        "mandate": "Optimize for instant recognition and clean composition on a small phone viewport."
+      },
+      "waveMandate": {
+        "id": "stress-the-brief",
+        "label": "Stress The Brief",
+        "mandate": "Challenge assumptions, identify weak spots, and produce better alternatives."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-03/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-02-agent-04",
+      "waveNumber": 2,
+      "agentNumber": 4,
+      "strategy": {
+        "id": "animation-minded",
+        "label": "Animation Minded",
+        "mandate": "Design for later motion states, pose readability, and reusable production slots."
+      },
+      "waveMandate": {
+        "id": "stress-the-brief",
+        "label": "Stress The Brief",
+        "mandate": "Challenge assumptions, identify weak spots, and produce better alternatives."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-04/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-02-agent-05",
+      "waveNumber": 2,
+      "agentNumber": 5,
+      "strategy": {
+        "id": "dramatic-lighting",
+        "label": "Dramatic Lighting",
+        "mandate": "Explore mood, depth, and premium lighting while staying usable behind app UI."
+      },
+      "waveMandate": {
+        "id": "stress-the-brief",
+        "label": "Stress The Brief",
+        "mandate": "Challenge assumptions, identify weak spots, and produce better alternatives."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-05",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-05/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-05/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-05/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-05/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-05/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-02-agent-05/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-03-agent-01",
+      "waveNumber": 3,
+      "agentNumber": 1,
+      "strategy": {
+        "id": "weird-but-usable",
+        "label": "Weird But Usable",
+        "mandate": "Take one unusual creative swing, then constrain it back into a shippable Tower asset."
+      },
+      "waveMandate": {
+        "id": "ship-ready-filter",
+        "label": "Ship-Ready Filter",
+        "mandate": "Favor options that can survive app integration, QA, and future asset scaling."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-01",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-01/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-01/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-01/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-01/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-01/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-01/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-03-agent-02",
+      "waveNumber": 3,
+      "agentNumber": 2,
+      "strategy": {
+        "id": "technical-cleanroom",
+        "label": "Technical Cleanroom",
+        "mandate": "Prioritize transparent edges, crop safety, derivative readiness, and manifest cleanliness."
+      },
+      "waveMandate": {
+        "id": "ship-ready-filter",
+        "label": "Ship-Ready Filter",
+        "mandate": "Favor options that can survive app integration, QA, and future asset scaling."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-03-agent-03",
+      "waveNumber": 3,
+      "agentNumber": 3,
+      "strategy": {
+        "id": "relationship-aware",
+        "label": "Relationship Aware",
+        "mandate": "Design with the asset's relationship to other Tower characters, rooms, and workflows in mind."
+      },
+      "waveMandate": {
+        "id": "ship-ready-filter",
+        "label": "Ship-Ready Filter",
+        "mandate": "Favor options that can survive app integration, QA, and future asset scaling."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-03-agent-04",
+      "waveNumber": 3,
+      "agentNumber": 4,
+      "strategy": {
+        "id": "editorial-premium",
+        "label": "Editorial Premium",
+        "mandate": "Push taste, tailoring, composition, and restraint for a more expensive product feel."
+      },
+      "waveMandate": {
+        "id": "ship-ready-filter",
+        "label": "Ship-Ready Filter",
+        "mandate": "Favor options that can survive app integration, QA, and future asset scaling."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-04",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-04/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-04/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-04/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-04/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-04/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-04/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    },
+    {
+      "laneId": "wave-03-agent-05",
+      "waveNumber": 3,
+      "agentNumber": 5,
+      "strategy": {
+        "id": "wild-card",
+        "label": "Wild Card",
+        "mandate": "Make the boldest useful variation that still obeys the asset contract and quality bar."
+      },
+      "waveMandate": {
+        "id": "ship-ready-filter",
+        "label": "Ship-Ready Filter",
+        "mandate": "Favor options that can survive app integration, QA, and future asset scaling."
+      },
+      "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-05",
+      "laneBriefPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-05/lane-brief.json",
+      "agentPromptPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-05/agent-prompt.md",
+      "outputsRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-05/outputs",
+      "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-05/result.md",
+      "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-05/result.json",
+      "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-05/preflight.json",
+      "status": "ready-for-agent",
+      "recommendedAgentProfile": {
+        "model": "gpt-5.5",
+        "executionMode": "fast",
+        "reasoningEffort": "xhigh",
+        "label": "GPT-5.5 fast mode, extra-high reasoning"
+      },
+      "allowedActions": [
+        "read the parent creative packet",
+        "create exploratory prompts, notes, previews, and QA observations inside this lane only",
+        "write a final result.md with recommendation, risks, and files created",
+        "record housekeeping and continuous-improvement notes in the lane result"
+      ],
+      "forbiddenActions": [
+        "do not edit sibling lanes",
+        "do not write to public/art",
+        "do not update the production manifest",
+        "do not promote assets",
+        "do not delete approved or live assets",
+        "do not change the parent creative-brief.json"
+      ]
+    }
+  ]
+}

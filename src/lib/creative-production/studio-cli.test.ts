@@ -312,6 +312,74 @@ describe("art:studio CLI", () => {
     expect(output).toContain("Validated isolated CPE lane result: wave-01-agent-01");
   }, 20000);
 
+  it("validates prompt-only lane artifacts without image preflight", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-prompt-lane-"));
+
+    execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Redo Otis with the same approved design and create prompt packets.",
+      "--run-id",
+      "otis-prompt-lane-v1",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    const firstLaneRoot = join(root, "characters", "otis-prompt-lane-v1", "parallel", "lanes", "wave-01-agent-01");
+    const firstLaneBriefPath = join(firstLaneRoot, "lane-brief.json");
+
+    execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--mode",
+      "lane",
+      "--lane-brief",
+      firstLaneBriefPath,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    mkdirSync(join(firstLaneRoot, "outputs"), { recursive: true });
+    writeFileSync(join(firstLaneRoot, "outputs", "prompt-packet.md"), "Prompt packet");
+    writeFileSync(join(firstLaneRoot, "result.json"), JSON.stringify({
+      laneId: "wave-01-agent-01",
+      strongestIdea: "Soft Otis prompt packet.",
+      uniquenessClaim: "Creates mergeable generation instructions without image binaries.",
+      outputFiles: ["outputs/prompt-packet.md"],
+      qualityRisks: ["Needs image generation later."],
+      fallbackModel: "gpt-5.5",
+      fallbackReason: "",
+      promotionBlockers: ["No native image sources yet."],
+    }, null, 2));
+    writeFileSync(join(firstLaneRoot, "result.md"), [
+      "# wave-01-agent-01 Result",
+      "## Strongest Idea Or Output",
+      "Soft Otis prompt packet.",
+      "## What Is Meaningfully Different",
+      "Creates mergeable generation instructions without image binaries.",
+      "## Files Or Prompts Created",
+      "- outputs/prompt-packet.md",
+      "## Quality Risks",
+      "- Needs image generation later.",
+      "## Housekeeping Notes",
+      "- Kept prompt-packet.md only.",
+      "## Continuous-Improvement Notes",
+      "- Prompt-only lanes should not require image preflight.",
+    ].join("\n\n"));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--mode",
+      "validate-lane",
+      "--lane-brief",
+      firstLaneBriefPath,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Validated isolated CPE lane result: wave-01-agent-01");
+    expect(output).toContain("Image outputs checked: 0");
+  }, 20000);
+
   it("coordinates a complete 15-lane run into review artifacts", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-studio-coordinate-"));
 

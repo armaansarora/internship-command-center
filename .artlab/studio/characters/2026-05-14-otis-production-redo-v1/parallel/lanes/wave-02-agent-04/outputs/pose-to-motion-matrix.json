@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "tower-otis-motion-matrix-v1",
+  "laneId": "wave-02-agent-04",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "characterId": "otis",
+  "motionProfile": "concierge-calm",
+  "sourceFrame": {
+    "width": 2400,
+    "height": 4096
+  },
+  "displayFrame": {
+    "width": 170,
+    "height": 290
+  },
+  "safePaddingPercent": {
+    "top": 7,
+    "right": 11,
+    "bottom": 8,
+    "left": 11
+  },
+  "runtimeContract": {
+    "transformOrigin": "50% 92%",
+    "reducedMotionRule": "When reduced motion is active, CharacterStage removes animation and transform. Every sprite must remain readable as a still pose.",
+    "mobileRule": "Pose must read in a 170x290 frame and at roughly 42vw on small screens without relying on tiny facial detail."
+  },
+  "states": [
+    {
+      "characterStageState": "idle",
+      "requiredPose": "idle",
+      "motionClass": "tower-character-stage-idle",
+      "runtimeMotion": "6s soft vertical breathing, 0 to -1.5px",
+      "staticPoseRead": "warm threshold-keeper at rest, grounded hands, soft shoulders, slight belly visible",
+      "promptRule": "Neutral center of mass. No pre-lean, no bow, no large hand gesture.",
+      "reducedMotionStill": "Still image must communicate calm availability.",
+      "rejectIf": [
+        "pose reads as executive authority instead of concierge welcome",
+        "belly or human age cues are polished away",
+        "feet baseline differs from other poses"
+      ]
+    },
+    {
+      "characterStageState": "ready",
+      "requiredPose": "idle",
+      "motionClass": "tower-character-stage-idle",
+      "runtimeMotion": "same as idle",
+      "staticPoseRead": "ready state should reuse idle without looking inactive",
+      "promptRule": "Idle pose needs enough eye contact and hand readiness to cover ready and returning states.",
+      "reducedMotionStill": "Still image must feel awake, not paused or asleep.",
+      "rejectIf": [
+        "hands are hidden",
+        "eyes are too downcast for a ready state"
+      ]
+    },
+    {
+      "characterStageState": "returning",
+      "requiredPose": "idle",
+      "motionClass": "tower-character-stage-idle",
+      "runtimeMotion": "same as idle",
+      "staticPoseRead": "Otis receives the user again without surprise",
+      "promptRule": "Keep expression warmly recognizing rather than neutral-service blank.",
+      "reducedMotionStill": "Still image should read as a familiar return point.",
+      "rejectIf": [
+        "generic hotel smile replaces quiet knowing warmth",
+        "silhouette loses the burgundy torso read"
+      ]
+    },
+    {
+      "characterStageState": "greeting",
+      "requiredPose": "greeting",
+      "motionClass": "tower-character-stage-greet",
+      "runtimeMotion": "0.9s nod, up to 1px down and -0.7deg rotation",
+      "staticPoseRead": "polite welcome, small hand opening, chin only slightly inclined",
+      "promptRule": "Generate the start/end of a nod, not the deepest bow frame.",
+      "reducedMotionStill": "Still image must already read as greeting through hand and face.",
+      "rejectIf": [
+        "deep bow plus runtime nod makes him submissive",
+        "arm sweep would crop or wobble in CharacterStage",
+        "face becomes too cheerful or mascot-like"
+      ]
+    },
+    {
+      "characterStageState": "listening",
+      "requiredPose": "listening",
+      "motionClass": "tower-character-stage-listen",
+      "runtimeMotion": "4s tiny lean, 0.75px right and -2px up",
+      "staticPoseRead": "attentive, receptive, slightly forward and side-open",
+      "promptRule": "Keep lean modest and leave extra side padding around shoulders, elbows, hands, and props.",
+      "reducedMotionStill": "Still image must read as listening without transform motion.",
+      "rejectIf": [
+        "lean is so strong he looks anxious or hunched",
+        "prop or elbow approaches frame edge",
+        "head angle hides the warm face at mobile size"
+      ]
+    },
+    {
+      "characterStageState": "thinking",
+      "requiredPose": "thinking",
+      "motionClass": "tower-character-stage-think",
+      "runtimeMotion": "3.2s soft breathing loop",
+      "staticPoseRead": "careful pause, weighing the right words",
+      "promptRule": "Use a restrained ledger/keycard/chin-adjacent gesture without covering face or belly.",
+      "reducedMotionStill": "Still image must show a thoughtful pause.",
+      "rejectIf": [
+        "gesture covers mouth or eyes",
+        "thinking reads as confusion",
+        "prop text appears"
+      ]
+    },
+    {
+      "characterStageState": "talking",
+      "requiredPose": "talking",
+      "motionClass": "tower-character-stage-talk",
+      "runtimeMotion": "2s subtle pulse, 0 to -1px and scale 1.006",
+      "staticPoseRead": "warm concise explanation, small open mouth, restrained hand cue",
+      "promptRule": "One speaking expression only. No mouth-frame sheet, no exaggerated lip sync.",
+      "reducedMotionStill": "Still image must read as speaking even without pulse.",
+      "rejectIf": [
+        "open mouth becomes cartoonish",
+        "hand gesture is too wide for the frame",
+        "runtime pulse makes the face feel rubbery"
+      ]
+    },
+    {
+      "characterStageState": "briefing",
+      "requiredPose": "talking",
+      "motionClass": "tower-character-stage-talk",
+      "runtimeMotion": "same as talking",
+      "staticPoseRead": "talking pose must also cover briefing delivery",
+      "promptRule": "Talking pose should feel like orientation, not casual chatter.",
+      "reducedMotionStill": "Still image must support a briefing card or streaming text beside him.",
+      "rejectIf": [
+        "pose is too jokey for first-session guidance",
+        "expression conflicts with serious briefing content"
+      ]
+    },
+    {
+      "characterStageState": "alert",
+      "requiredPose": "alert",
+      "motionClass": "tower-character-stage-alert",
+      "runtimeMotion": "0.9s emphasis bump, up to 1px right and -1px up",
+      "staticPoseRead": "calm threshold block, firmer eyes, small wait gesture",
+      "promptRule": "Alert through face and hand, not through a lunge. He is protective, not alarmed.",
+      "reducedMotionStill": "Still image must make alert priority clear.",
+      "rejectIf": [
+        "he turns into security guard energy",
+        "pose copies war-room kinetic pressure",
+        "raised hand is cropped or too large"
+      ]
+    },
+    {
+      "characterStageState": "writing",
+      "requiredPose": "working",
+      "motionClass": "tower-character-stage-work",
+      "runtimeMotion": "2.8s soft breathing loop",
+      "staticPoseRead": "quietly handling ledger, bell, or keycard ring",
+      "promptRule": "Keep prop close to torso and avoid readable fake text.",
+      "reducedMotionStill": "Still image must read as useful work, not idle duplication.",
+      "rejectIf": [
+        "ledger hides torso or belly",
+        "fake text appears",
+        "prop extends beyond safe padding"
+      ]
+    }
+  ],
+  "posePackRule": "All seven poses across regular, summer-light, and winter-layered must preserve face shape, body proportions, feet baseline, shoulder width, belly read, prop scale, and app-frame centering. Motion personality comes from Otis being steady under tiny CharacterStage transforms, not from large illustrated action."
+}
+

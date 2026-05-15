@@ -331,7 +331,7 @@ async function runValidateLaneMode(input: {
   const resultMarkdown = await readFile(resultPath, "utf8").catch(() => "");
   const resultJsonPath = assertSafeWorkspacePath(laneBrief.lane.resultJsonPath, [laneRoot]);
   const hasResultJson = await pathExists(resultJsonPath);
-  const imageOutputCount = await countImmediateFiles(outputsRoot);
+  const imageOutputCount = await countImmediateImageFiles(outputsRoot);
   const hasPreflight = await pathExists(preflightPath);
   const validation = validateCreativeParallelLaneResult({
     resultMarkdown,
@@ -441,10 +441,12 @@ async function readCoordinatorLaneInput(input: {
   };
 }
 
-async function countImmediateFiles(path: string): Promise<number> {
+async function countImmediateImageFiles(path: string): Promise<number> {
   const entries = await readdir(path, { withFileTypes: true }).catch(() => []);
 
-  return entries.filter((entry) => entry.isFile()).length;
+  return entries.filter((entry) =>
+    entry.isFile() && /\.(avif|gif|jpe?g|png|webp|mp4|mov|webm)$/i.test(entry.name)
+  ).length;
 }
 
 async function listImmediateFileNames(path: string): Promise<string[]> {
@@ -507,6 +509,7 @@ TBD
 ## Files Or Prompts Created
 
 - TBD
+- Create at least one concrete artifact under \`${laneBrief.lane.outputsRoot}\`. A lane with only prose and no artifact is incomplete.
 
 ## Structured Result
 

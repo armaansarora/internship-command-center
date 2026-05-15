@@ -10,6 +10,8 @@ const SECTION_TITLES = [
   "Continuous-Improvement Notes",
 ] as const;
 
+const IMAGE_OUTPUT_PATTERN = /\.(avif|gif|jpe?g|png|webp|mp4|mov|webm)$/i;
+
 type SectionTitle = (typeof SECTION_TITLES)[number];
 
 export interface CreativeLaneResultJson {
@@ -134,7 +136,7 @@ export function normalizeLaneResult(
   const validation = validateCreativeParallelLaneResult({
     resultMarkdown: lane.resultMarkdown,
     hasResultJson: lane.hasResultJson,
-    imageOutputCount: lane.outputFiles.length,
+    imageOutputCount: countImageLikeOutputs(lane.outputFiles),
     hasPreflight: lane.hasPreflight,
   });
   const strongestIdea = lane.resultJson?.strongestIdea?.trim() || sections["Strongest Idea Or Output"];
@@ -147,6 +149,7 @@ export function normalizeLaneResult(
     ...(lane.resultJson?.promotionBlockers ?? []),
     ...(lane.preflight?.blockers ?? []),
     ...(lane.preflight && lane.preflight.ok === false ? ["preflight not passing"] : []),
+    ...(lane.outputFiles.length === 0 ? ["no concrete output artifacts"] : []),
     ...validation.missing,
   ]);
   const score = scoreCreativeLaneResult({
@@ -170,8 +173,12 @@ export function normalizeLaneResult(
     validationMissing: validation.missing,
     score,
     normalizedIdeaKey: normalizeIdeaKey(strongestIdea),
-    status: promotionBlockers.length === 0 ? "complete" : "blocked",
+    status: validation.missing.length === 0 && lane.outputFiles.length > 0 ? "complete" : "blocked",
   };
+}
+
+function countImageLikeOutputs(outputFiles: string[]): number {
+  return outputFiles.filter((file) => IMAGE_OUTPUT_PATTERN.test(file)).length;
 }
 
 export function scoreCreativeLaneResult(input: {
@@ -275,7 +282,7 @@ export function evaluateCreativePromotionGate(input: {
   }
 
   for (const lane of input.lanes) {
-    if (lane.status === "blocked") {
+    if (lane.promotionBlockers.length > 0) {
       blockers.push(`${lane.laneId}: ${lane.promotionBlockers.join(", ")}`);
     }
   }
@@ -322,6 +329,8 @@ export function renderCoordinatorReviewBoardHtml(review: CreativeCoordinatorRevi
       <p>${escapeHtml(candidate.uniquenessClaim)}</p>
       <h3>Risks</h3>
       <ul>${candidate.qualityRisks.map((risk) => `<li>${escapeHtml(risk)}</li>`).join("")}</ul>
+      <h3>Files</h3>
+      <ul>${candidate.outputFiles.map((file) => `<li>${escapeHtml(file)}</li>`).join("") || "<li>No files recorded.</li>"}</ul>
     </article>
   `).join("\n");
 

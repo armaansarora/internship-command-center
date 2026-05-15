@@ -489,6 +489,8 @@ Expected files:
 - \`${lane.preflightPath}\` if you create or inspect images
 - generated or staged exploratory outputs under \`${lane.outputsRoot}\`
 
+Create at least one concrete artifact under \`${lane.outputsRoot}\`, such as a prompt packet, source image, contact sheet, QA note, component sketch, or animation plan. A lane with only prose and no artifact is incomplete.
+
 ## Allowed Actions
 
 ${renderList(lane.allowedActions)}

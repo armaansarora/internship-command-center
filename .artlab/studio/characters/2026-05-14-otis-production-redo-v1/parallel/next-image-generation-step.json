@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "tower-otis-next-image-generation-step-v1",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "characterId": "otis",
+  "status": "ready-for-source-probes",
+  "promotionGate": "blocked",
+  "directivePath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/otis-v2-generation-directive.md",
+  "approvedIdentityReference": ".artlab/characters/otis/references/identity/otis_identity-outfit-variants_v001_reference.png",
+  "generator": "GPT Image 2",
+  "generateFirst": [
+    {
+      "slot": "otis-regular-idle",
+      "outfit": "regular",
+      "pose": "idle",
+      "sourceFilename": "otis__regular__idle__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/2026-05-14-otis-production-redo-v1/incoming/regular",
+      "reason": "Proves native 4K-class source, alpha/background, identity lock, and base silhouette."
+    },
+    {
+      "slot": "otis-regular-greeting",
+      "outfit": "regular",
+      "pose": "greeting",
+      "sourceFilename": "otis__regular__greeting__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/2026-05-14-otis-production-redo-v1/incoming/regular",
+      "reason": "Stress-tests mobile-safe hand gesture, finger quality, and safe frame width."
+    },
+    {
+      "slot": "otis-regular-working",
+      "outfit": "regular",
+      "pose": "working",
+      "sourceFilename": "otis__regular__working__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/2026-05-14-otis-production-redo-v1/incoming/regular",
+      "reason": "Stress-tests restrained ledger/keycard props, hand quality, and crop safety."
+    }
+  ],
+  "sourceRequirements": {
+    "preferredFormat": "transparent PNG",
+    "targetWidth": 2400,
+    "targetHeight": 4096,
+    "minimumLongEdge": 4096,
+    "minimumShortEdge": 2300,
+    "safePaddingPercent": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "mustRejectUpscaledLowResolutionSources": true,
+    "mustPassMobileReadabilityRungs": [64, 96, 144, 192, 256]
+  },
+  "preflightCommands": [
+    "npm run art:preflight -- <source-file> --minimum-long-edge 4096 --json",
+    "npm run art:preflight -- <source-file> --minimum-long-edge 4096 --chroma-key 00ff00 --json"
+  ],
+  "stopRules": [
+    "Stop if any source long edge is below 4096px.",
+    "Stop if any full-body source short edge is below 2300px.",
+    "Stop if a source is visibly upscaled from low resolution.",
+    "Stop if true alpha is unavailable and the fallback background is not perfectly removable.",
+    "Stop if hands, feet, props, beard, glasses, coat hem, or shadow are cropped.",
+    "Stop if Otis becomes fake-perfect, literal Santa, mascot-like, photoreal, or generic hotel stock art.",
+    "Stop if the pose does not read at 96 CSS px."
+  ],
+  "afterProbePasses": [
+    "Ingest the three source probes into the Otis run ledger.",
+    "Run source preflight and dark/light/lobby-warm QA previews.",
+    "Build a small probe review board for Armaan.",
+    "Only if probes pass, expand to the remaining regular poses, then summer-light, then winter-layered.",
+    "Do not promote or update public/art until final upload-ready board approval says exactly approved for app."
+  ]
+}

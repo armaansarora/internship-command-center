@@ -77,6 +77,8 @@ describe("creative production parallel waves", () => {
     expect(prompt).toContain("reasoning_effort: \"xhigh\"");
     expect(prompt).toContain(lane!.outputRoot);
     expect(prompt).toContain("do not write to public/art");
+    expect(prompt).toContain("Create at least one concrete artifact under");
+    expect(prompt).toContain("A lane with only prose and no artifact is incomplete.");
     expect(prompt).toContain("The parent session owns merge, final review, approval, promotion, and app integration.");
   });
 

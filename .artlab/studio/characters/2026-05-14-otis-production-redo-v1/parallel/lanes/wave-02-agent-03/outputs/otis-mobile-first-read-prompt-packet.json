@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "tower-creative-mobile-first-prompt-packet-v1",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "laneId": "wave-02-agent-03",
+  "asset": "Otis Vale",
+  "status": "exploratory-prompt-artifact-not-approved-for-app",
+  "thesis": "Stress Otis at mobile Lobby scale before full production: silhouette at 96 CSS px, expression at 144 CSS px, gesture at 160 to 192 CSS px, and safe transparent crop for text overlays.",
+  "globalConstraints": [
+    "Transparent full-body character sprite",
+    "Single character only",
+    "No background, no text, no labels",
+    "Native high-resolution square master, target 4096 x 4096 or highest available",
+    "18% to 22% transparent padding on all sides",
+    "Hands, feet, beard, belly, props, and coat hems fully visible",
+    "Clean alpha and no haloing",
+    "Premium clean game-sprite materials with simplified large shapes"
+  ],
+  "negativePrompt": "No skinny fashion model, no fake-perfect AI model face, no red Santa suit, no Christmas hat, no candy cane, no anime, no flat vector, no photoreal celebrity likeness, no mascot proportions, no cropped hands, no cropped feet, no cropped props, no text, no labels, no noisy fabric patterns, no tiny unreadable fingers, no harsh black outline.",
+  "identityLock": [
+    "Older soft Santa-like concierge, late 50s to early 60s",
+    "Warm eyes and natural white-and-silver beard",
+    "Slightly rounded belly and sturdy legs",
+    "Lived-in human imperfections and subtle asymmetry",
+    "Gentle threshold-keeper authority",
+    "Adult, premium, grounded, not seasonal"
+  ],
+  "probes": [
+    {
+      "id": "probe-01-mini-read-silhouette",
+      "purpose": "Prove Otis is recognizable as a warm threshold concierge at 96 to 144 CSS px before generating the full pose matrix.",
+      "prompt": "Create a transparent full-body production sprite of Otis Vale, an older soft Santa-like concierge and threshold keeper for a premium AI internship command center called The Tower. He is warm and human, late 50s to early 60s, with kind eyes, a natural full white-and-silver beard, slightly rounded belly, sturdy legs, soft hands, and lived-in facial imperfections. He wears a premium lobby concierge outfit: deep oxblood waistcoat, warm ivory shirt, charcoal trousers, polished but comfortable shoes, small brass key ring at the belt, and restrained gold trim. Pose: idle threshold keeper. 3/4 front view, feet planted shoulder-width, one hand resting near the key ring, the other relaxed open at his side. His silhouette must be readable as a warm concierge at 96 CSS px tall: rounded beard, slight belly, waistcoat block, sturdy legs, and open hand shape. Keep all props below shoulder height so the top third of the frame remains quiet for mobile text overlays. Style: premium clean game sprite, painterly 2.5D materials, crisp large shapes, simplified fabric detail, expressive face, adult and grounded. Transparent background. Single character only. Full body visible. 18% to 22% transparent padding on every side. No text, no labels, no background.",
+      "acceptanceFocus": [
+        "Silhouette is not a generic suited person at 96 CSS px",
+        "Beard, slight belly, waistcoat, and open hand separate at 144 CSS px",
+        "No important pixel within 8% of any source edge"
+      ]
+    },
+    {
+      "id": "probe-02-expression-read",
+      "purpose": "Test whether Otis can communicate greeting, listening, thinking, and alert states on a phone without captions.",
+      "prompt": "Create a transparent high-resolution expression reference sheet for Otis Vale, the older soft Santa-like concierge threshold keeper of The Tower. Use the same identity in every expression: warm eyes, natural white-and-silver beard, slight belly, sturdy concierge posture, human imperfections, premium oxblood-and-ivory lobby outfit. Show four clean 3/4 front full-body sprites on a transparent background with generous spacing and no labels. Expressions and poses from left to right: 1. Greeting: warm smile, raised open palm below shoulder height, eyes bright. 2. Listening: soft closed-mouth attention, chin slightly tucked, one hand lightly at vest. 3. Thinking: brows gently knit, one hand near beard but not covering mouth, belly and stance still visible. 4. Alert: protective but kind, one hand lifted in a calm stop gesture, eyebrows raised, no panic. Make the facial expression readable at 144 CSS px tall and the pose intent readable at 192 CSS px tall. Keep gesture shapes broad. Avoid tiny finger acting. No text, no labels, no background, no cropped hands or feet.",
+      "acceptanceFocus": [
+        "Greeting, listening, thinking, and alert differ without labels",
+        "Thinking does not cover mouth or beard silhouette",
+        "Alert is protective, not angry"
+      ]
+    },
+    {
+      "id": "probe-03-safe-crop-text-collision",
+      "purpose": "Prevent a strong sprite from breaking the mobile Lobby composition through tall gestures, props, or unsafe padding.",
+      "prompt": "Create one transparent full-body production sprite of Otis Vale, the premium soft Santa-like concierge threshold keeper. He keeps his approved human warmth, natural beard, slight belly, lived-in face, sturdy frame, and oxblood concierge outfit. Pose: mobile-safe greeting. 3/4 front view, body angled slightly toward the viewer, right hand raised in a welcoming open palm that stays below his shoulder line, left hand near brass key ring, feet fully visible. Composition rule: the top 30% of the image must stay visually quiet, with no hand, prop, headwear, tall cane, floating object, or dramatic silhouette spike above Otis's head. Keep the widest gesture inside the middle 55% of the frame. Leave generous transparent padding around the full body so the sprite can be placed at the bottom of a phone screen without clipping or covering headline/body text. Style: premium clean game sprite, simplified rich materials, strong silhouette, transparent background, single character only, no text, no labels, full body, 18% to 22% transparent padding on all sides.",
+      "acceptanceFocus": [
+        "Raised hand remains below shoulder line",
+        "No prop creates a vertical spike above the head",
+        "Bottom-center and bottom-right mobile placements do not clip shoes or hands"
+      ]
+    },
+    {
+      "id": "probe-04-gesture-clarity",
+      "purpose": "Ensure the seven required pose states use macro body language that survives 160 to 192 CSS px mobile rendering.",
+      "prompt": "Create a transparent high-resolution pose probe sheet for Otis Vale, The Tower's older soft Santa-like concierge threshold keeper. Use the same identity in every pose: natural white-and-silver beard, warm eyes, slight belly, sturdy legs, lived-in human face, premium oxblood waistcoat, ivory shirt, charcoal trousers, brass key ring. Show seven separated full-body sprites with no labels and enough spacing to crop each cleanly later. Pose states: 1. Idle: feet planted, one relaxed open hand. 2. Greeting: open palm below shoulder height, warm smile. 3. Listening: attentive lean, hand at vest, soft eyes. 4. Thinking: hand near beard but face unobscured. 5. Talking: one broad conversational hand gesture, mouth visible. 6. Alert: calm stop gesture, protective stance, kind eyes. 7. Working: holding a compact clipboard or brass service tablet low at waist height, not covering belly or face. Every pose must remain readable at 160 CSS px tall on a phone. Use broad arms, clear hand shapes, and uncluttered props. Transparent background, no text, no labels, no cropped hands, no cropped feet, no halo.",
+      "acceptanceFocus": [
+        "No two pose states collapse into the same body language at 160 CSS px",
+        "Working prop stays low and does not become the whole silhouette",
+        "Talking differs from greeting and alert differs from hostility"
+      ]
+    }
+  ],
+  "outfitVariants": [
+    {
+      "id": "variant-a-lobby-concierge",
+      "description": "Deep oxblood waistcoat, warm ivory shirt, charcoal trousers, small brass key ring, polished comfortable shoes, restrained gold trim."
+    },
+    {
+      "id": "variant-b-formal-threshold-keeper",
+      "description": "Deep bottle-green or midnight-navy concierge coat over ivory shirt, subtle brass piping, charcoal trousers, same beard, belly, and posture."
+    },
+    {
+      "id": "variant-c-workday-steward",
+      "description": "Rolled ivory sleeves, charcoal suspenders, warm slate vest, compact brass service tablet or clipboard at waist height, same soft Santa concierge face and slight belly."
+    }
+  ],
+  "requiredPoseMatrix": [
+    "idle",
+    "greeting",
+    "listening",
+    "thinking",
+    "talking",
+    "alert",
+    "working"
+  ],
+  "promotionBlockers": [
+    "No actual image files generated in this lane",
+    "Generated sprites must pass mobile preview QA before coordinator promotion",
+    "Contact sheets cannot become production sources unless each split cell passes source preflight"
+  ]
+}
+

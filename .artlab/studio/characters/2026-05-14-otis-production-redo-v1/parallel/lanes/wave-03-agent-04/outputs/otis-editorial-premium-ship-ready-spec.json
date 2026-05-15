@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "tower-otis-editorial-premium-ship-ready-spec-v1",
+  "laneId": "wave-03-agent-04",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": {
+    "type": "character",
+    "name": "Otis",
+    "direction": "Editorial Premium / Ship-Ready Filter",
+    "strongestIdea": "Threshold-keeper Otis distilled into a premium, mobile-readable concierge sprite system."
+  },
+  "identityLock": [
+    "older soft Santa-adjacent concierge, not Santa",
+    "kind tired eyes with simple glasses",
+    "imperfect groomed white beard and hair",
+    "slight belly, relaxed uneven shoulders, natural older hands",
+    "warm overprepared competence",
+    "clean premium web-game raster sprite",
+    "simple matte materials and restrained brass"
+  ],
+  "generationStrategy": {
+    "sourcePolicy": "Generate individual sprites, not seven-pose sheets.",
+    "pilotBatch": [
+      "identity-reference-regular-neutral-threshold",
+      "regular-idle",
+      "regular-greeting"
+    ],
+    "expandOnlyAfter": [
+      "native long edge is at least 4096 px",
+      "transparent alpha or extractable flat background passes preflight",
+      "hands, feet, beard, and props are uncropped",
+      "Otis remains recognizable at 96 CSS px tall",
+      "identity is stable between pilot images"
+    ],
+    "fullPack": {
+      "outfits": [
+        "regular",
+        "formal",
+        "working"
+      ],
+      "poses": [
+        "idle",
+        "greeting",
+        "listening",
+        "thinking",
+        "talking",
+        "alert",
+        "working"
+      ],
+      "totalSprites": 21
+    }
+  },
+  "outfitDirectives": {
+    "regular": "Burgundy concierge jacket or cardigan, ivory shirt, dark tailored trousers, restrained brass pin, optional small keycard or key ring.",
+    "formal": "Deeper burgundy jacket, charcoal waistcoat, ivory shirt, one refined brass detail, polished dark shoes; ceremonial but never theatrical.",
+    "working": "Burgundy knit layer with rolled sleeves or practical vest, ivory shirt, plain ledger or tablet, small keys; active but still premium."
+  },
+  "poseDirectives": {
+    "idle": "Balanced stance, gentle weight shift, calm hands visible near midline.",
+    "greeting": "Low open-palm threshold invitation, other hand relaxed.",
+    "listening": "Slight forward lean, small ledger close, patient focus.",
+    "thinking": "Hand near chin or glasses, elbow close, no finger clutter.",
+    "talking": "Restrained chest-height explaining gesture, mouth slightly open.",
+    "alert": "Upright protective posture, keycard or keys held low, not alarmed.",
+    "working": "Ledger or tablet held clearly, eyes warm and prepared."
+  },
+  "styleGuards": {
+    "mustHave": [
+      "strong mobile silhouette",
+      "visible slight belly without caricature",
+      "visible older hands",
+      "one readable prop maximum per sprite",
+      "lobby-compatible warm dramatic lighting",
+      "generous transparent padding"
+    ],
+    "mustAvoid": [
+      "mascot bounce",
+      "fantasy innkeeper",
+      "Santa costume",
+      "heroic franchise styling",
+      "glossy AI-perfect face",
+      "overdecorated brass",
+      "multi-character or pose-sheet outputs"
+    ]
+  },
+  "preflightRequirements": {
+    "minimumLongEdgePx": 4096,
+    "background": "transparent RGBA preferred; flat temporary extraction background allowed only if uniform",
+    "scaleChecksCssPxTall": [
+      64,
+      96,
+      144,
+      192,
+      256
+    ],
+    "edgeChecks": [
+      "no haloing on dark background",
+      "no haloing on light background",
+      "beard edge remains clean",
+      "shoes and fingers are not clipped"
+    ],
+    "continuityChecks": [
+      "same glasses shape",
+      "same beard mass",
+      "same belly proportion",
+      "same shoulder slope",
+      "same shoe height",
+      "same warm older expression family"
+    ]
+  },
+  "promotionState": {
+    "laneMayPromote": false,
+    "requiresCoordinatorReview": true,
+    "requiresFinalApprovalPhrase": "approved for app",
+    "currentBlocker": "No native high-resolution transparent source images were generated or preflighted in this lane."
+  }
+}

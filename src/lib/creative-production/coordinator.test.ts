@@ -144,4 +144,111 @@ describe("creative production coordinator", () => {
     expect(html).toContain("<!doctype html>");
     expect(html).toContain("Review Board");
   });
+
+  it("blocks final approval when lanes do not produce concrete artifacts", () => {
+    const packet = createCreativeProductionPacket({
+      assetType: "character",
+      name: "Otis",
+      runId: "otis-no-artifacts-v1",
+      brief: "Redo Otis with the same approved design and generate production source options.",
+      stateRoot: ".artlab/studio",
+      intake: {
+        rawRequest: "Redo Otis with the same approved design and generate production source options.",
+        inferredAssetType: "character",
+        routingReason: "Matched Otis and approved design language.",
+        confidence: "high",
+        matchedSignals: ["Otis", "approved"],
+        initialApprovalStatus: "already-approved",
+      },
+    });
+    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 3 });
+    const lanes = Array.from({ length: 15 }, (_, index): CreativeCoordinatorLaneInput => {
+      const lane = laneInput(index);
+
+      return {
+        ...lane,
+        resultJson: {
+          ...lane.resultJson,
+          outputFiles: [],
+        },
+        outputFiles: [],
+        preflight: undefined,
+        hasPreflight: false,
+      };
+    });
+    const review = createCreativeCoordinatorReview({ plan, lanes });
+
+    expect(review.completedLaneCount).toBe(0);
+    expect(review.promotionGate.status).toBe("blocked");
+    expect(review.promotionGate.blockers.join(" ")).toContain("no concrete output artifacts");
+  });
+
+  it("does not require image preflight for non-image lane artifacts", () => {
+    const lane = normalizeLaneResult({
+      laneId: "wave-01-agent-01",
+      strategyLabel: "Canonical Safe",
+      waveMandateLabel: "Wide Divergence",
+      resultMarkdown: resultMarkdown({
+        idea: "Tower approved Otis GPT Image 2 prompt packet.",
+        difference: "Creates a concrete prompt artifact instead of a source image.",
+      }),
+      resultJson: {
+        laneId: "wave-01-agent-01",
+        strongestIdea: "Tower approved Otis GPT Image 2 prompt packet.",
+        uniquenessClaim: "Creates a concrete prompt artifact instead of a source image.",
+        outputFiles: ["outputs/prompt-packet.md"],
+        qualityRisks: ["Still needs actual source image generation."],
+        fallbackModel: "gpt-5.5",
+        fallbackReason: "",
+        promotionBlockers: ["No native 4K source images exist from this lane."],
+      },
+      outputFiles: ["outputs/prompt-packet.md"],
+      hasResultJson: true,
+      hasPreflight: false,
+    }, "Redo Otis with the same approved design.");
+
+    expect(lane.validationMissing).not.toContain("preflight.json for image outputs");
+    expect(lane.promotionBlockers).toContain("No native 4K source images exist from this lane.");
+  });
+
+  it("ranks complete prompt lanes even when promotion remains blocked", () => {
+    const packet = createCreativeProductionPacket({
+      assetType: "character",
+      name: "Otis",
+      runId: "otis-prompt-review-v1",
+      brief: "Redo Otis with the same approved design and create prompt packets.",
+      stateRoot: ".artlab/studio",
+      intake: {
+        rawRequest: "Redo Otis with the same approved design and create prompt packets.",
+        inferredAssetType: "character",
+        routingReason: "Matched Otis and approved design language.",
+        confidence: "high",
+        matchedSignals: ["Otis", "approved"],
+        initialApprovalStatus: "already-approved",
+      },
+    });
+    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 3 });
+    const lanes = Array.from({ length: 15 }, (_, index): CreativeCoordinatorLaneInput => {
+      const lane = laneInput(index, `Tower approved Otis prompt packet ${index}`);
+
+      return {
+        ...lane,
+        resultJson: {
+          ...lane.resultJson,
+          outputFiles: [`outputs/prompt-${index}.md`],
+          promotionBlockers: ["No native image sources yet."],
+        },
+        outputFiles: [`outputs/prompt-${index}.md`],
+        preflight: undefined,
+        hasPreflight: false,
+      };
+    });
+    const review = createCreativeCoordinatorReview({ plan, lanes });
+
+    expect(review.completedLaneCount).toBe(15);
+    expect(review.blockedLaneCount).toBe(0);
+    expect(review.topCandidates.length).toBeGreaterThan(0);
+    expect(review.promotionGate.status).toBe("blocked");
+    expect(review.promotionGate.blockers.join(" ")).toContain("No native image sources yet.");
+  });
 });

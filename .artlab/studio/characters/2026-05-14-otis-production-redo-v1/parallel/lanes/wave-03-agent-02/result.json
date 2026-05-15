@@ -1,0 +1,29 @@
+{
+  "laneId": "wave-03-agent-02",
+  "strongestIdea": "A Technical Cleanroom ship-ready gate: prove Otis with a strict GPT Image 2 probe sequence and exact source/derivative/file-map contract before generating the full 3 outfit x 7 pose production pack.",
+  "uniquenessClaim": "This lane contributes the production QA filter rather than new art direction: native source acceptance, alpha/chroma and padding gates, canonical file naming, probe ordering, hard rejects, and promotion blockers.",
+  "outputFiles": [
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/outputs/technical-cleanroom-ship-ready-contract.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/outputs/gpt-image-2-probe-order.json",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/outputs/otis-production-file-map.json",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/preflight.json",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/result.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/result.json"
+  ],
+  "qualityRisks": [
+    "No actual production source images were generated in this lane.",
+    "GPT Image 2 native 4K-class transparent source output remains unproven for this Otis run.",
+    "Prior parent-run probes failed long-edge and alpha/chroma source requirements.",
+    "Seasonal outfit variants may drift identity without strict reference locking.",
+    "Hands, props, beard, coat hems, and transparent edges remain high-risk QA zones."
+  ],
+  "fallbackModel": "codex-gpt-5",
+  "fallbackReason": "Required GPT-5.5 fast mode with extra-high reasoning was not exposed in this session; completed with the available Codex GPT-5 coding agent.",
+  "promotionBlockers": [
+    "No local generated source image files exist from this lane.",
+    "No image source preflight has passed for final Otis candidates.",
+    "No transparent edge QA, derivative generation, contact sheet, app-scale preview, or CharacterStage browser check has been performed on actual replacement sprites.",
+    "The full 15-lane wave must be completed and coordinated before final review.",
+    "Parent coordinator must obtain final upload-ready approval and the exact phrase approved for app before any public/art promotion."
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "tower-otis-expression-matrix-v1",
+  "laneId": "wave-02-agent-02",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": "Otis",
+  "strategy": "Comedic Engine",
+  "coreBehavior": "Warm overpreparedness: Otis anticipates the user's next need one beat early, then turns that tiny timing mismatch into warmth rather than a joke.",
+  "expressionIntensityScale": {
+    "1": "neutral production-safe Otis",
+    "2": "visible warmth with slight comic timing",
+    "3": "upper safe limit for this lane",
+    "4": "too broad for Tower premium tone",
+    "5": "reject as goofy or mascot-like"
+  },
+  "globalGuards": [
+    "Comedy must never reduce Otis's competence.",
+    "The user must read safety and warmth before humor.",
+    "No expression should rely on costume novelty, prop clutter, or childish exaggeration.",
+    "Keep slight belly, natural skin texture, tired kind eyes, asymmetry, and relaxed shoulders visible across all applicable sprites."
+  ],
+  "expressions": [
+    {
+      "id": "threshold-half-smile",
+      "targetIntensity": 2,
+      "bestForPoseStates": ["idle", "greeting"],
+      "face": "Closed-mouth half-smile, soft eyes, one brow barely lifted, smile lines visible.",
+      "body": "Relaxed stance, slight belly visible, hands calm and useful.",
+      "promptAddendum": "Otis looks as if he opened the elevator exactly before the user asked, amused only by the timing.",
+      "antiPrompt": "No wink, no big grin, no host-show pose, no toy mascot face.",
+      "failureSignals": ["too young", "smug", "cartoon brow", "broad grin", "belly erased"]
+    },
+    {
+      "id": "i-had-a-feeling",
+      "targetIntensity": 2,
+      "bestForPoseStates": ["listening", "talking"],
+      "face": "Attentive eyes, tiny knowing brow lift, mouth neutral with one soft corner.",
+      "body": "Head tilted slightly, one hand near lapel or chest, the other relaxed.",
+      "promptAddendum": "Otis seems to have predicted the user's destination but waits with complete patience.",
+      "antiPrompt": "No sarcasm, no suspicion, no raised-finger lecture, no detective caricature.",
+      "failureSignals": ["smirk", "judgmental eyes", "aggressive lean", "cartoon suspicion"]
+    },
+    {
+      "id": "beard-touch-self-correction",
+      "targetIntensity": 2,
+      "bestForPoseStates": ["thinking"],
+      "face": "Gently knit brows, eyes kind, tiny self-aware smile under the moustache.",
+      "body": "Natural fingers touching beard edge, shoulders uneven but relaxed, weight shifted.",
+      "promptAddendum": "Otis has just corrected an overprepared assumption before saying the useful thing.",
+      "antiPrompt": "No wizard thinking pose, no exaggerated confusion, no finger fused into beard.",
+      "failureSignals": ["bad fingers", "wizard energy", "face distortion", "forced laugh"]
+    },
+    {
+      "id": "protective-patience",
+      "targetIntensity": 2,
+      "bestForPoseStates": ["alert"],
+      "face": "Concerned but warm, eyes steady, mouth calm with a trace of amused reassurance.",
+      "body": "One hand raised in a low wait gesture, torso steady, feet planted.",
+      "promptAddendum": "Otis gently pauses the user because he has seen this lobby problem before.",
+      "antiPrompt": "No panic, no scolding, no guard caricature, no slapstick stop gesture.",
+      "failureSignals": ["angry", "frightened", "too stern", "hand cropped", "pose too theatrical"]
+    },
+    {
+      "id": "private-ledger-smile",
+      "targetIntensity": 2,
+      "bestForPoseStates": ["working"],
+      "face": "Focused eyes, faint private smile, human tiredness still visible.",
+      "body": "Slim ledger at waist height, both hands visible, belly not hidden.",
+      "promptAddendum": "Otis's ledger seems to already contain the answer, but he remains humble and helpful.",
+      "antiPrompt": "No accountant cliche, no oversized book, no prop covering the torso, no office mascot.",
+      "failureSignals": ["generic clerk", "prop clutter", "hands merged", "belly erased", "low mobile readability"]
+    },
+    {
+      "id": "mid-explanation-warmth",
+      "targetIntensity": 2,
+      "bestForPoseStates": ["talking"],
+      "face": "Mouth slightly open, smile lines active, eyes gentle and direct.",
+      "body": "Small hand arc near chest level, body stable, shoulders relaxed.",
+      "promptAddendum": "Otis is explaining a tiny complication with the patience of someone who already prepared the workaround.",
+      "antiPrompt": "No lecturer pose, no giant gesture, no salesman grin, no comic open mouth.",
+      "failureSignals": ["corporate presenter", "mouth too wide", "extra fingers", "overconfident smirk"]
+    }
+  ],
+  "poseStateMapping": [
+    {
+      "poseState": "idle",
+      "recommendedExpression": "threshold-half-smile",
+      "microBehavior": "Hands loosely folded over slight belly, calm face that suggests he is already ready.",
+      "generationPriority": "medium"
+    },
+    {
+      "poseState": "greeting",
+      "recommendedExpression": "threshold-half-smile",
+      "microBehavior": "Open hand paused one beat early, warm eye contact, no theatrical sweep.",
+      "generationPriority": "high"
+    },
+    {
+      "poseState": "listening",
+      "recommendedExpression": "i-had-a-feeling",
+      "microBehavior": "Knowing brow and patient head tilt without smugness.",
+      "generationPriority": "high"
+    },
+    {
+      "poseState": "thinking",
+      "recommendedExpression": "beard-touch-self-correction",
+      "microBehavior": "Natural beard touch and tiny smile as he corrects his assumption.",
+      "generationPriority": "high"
+    },
+    {
+      "poseState": "talking",
+      "recommendedExpression": "mid-explanation-warmth",
+      "microBehavior": "Small helpful hand arc, explaining the workaround instead of performing.",
+      "generationPriority": "medium"
+    },
+    {
+      "poseState": "alert",
+      "recommendedExpression": "protective-patience",
+      "microBehavior": "Low wait gesture, protective calm, amused reassurance.",
+      "generationPriority": "high"
+    },
+    {
+      "poseState": "working",
+      "recommendedExpression": "private-ledger-smile",
+      "microBehavior": "Slim ledger held low, private smile that reads prepared rather than smug.",
+      "generationPriority": "high"
+    }
+  ],
+  "recommendedFirstProbes": [
+    "expression-review-sheet-restrained-amusement",
+    "outfit-a-greeting-one-beat-early",
+    "outfit-c-working-private-ledger-smile"
+  ]
+}

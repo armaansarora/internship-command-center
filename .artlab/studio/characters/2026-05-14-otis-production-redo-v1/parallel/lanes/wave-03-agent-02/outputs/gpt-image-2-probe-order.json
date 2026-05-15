@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "tower-otis-gpt-image-2-probe-order-v1",
+  "laneId": "wave-03-agent-02",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": "otis",
+  "generator": "GPT Image 2",
+  "purpose": "Prevent another failed 21-sprite batch by proving native source size, alpha, crop safety, identity lock, outfit drift, and app-scale readability in order.",
+  "globalPromptLocks": [
+    "Otis Vale, approved soft Santa concierge identity, threshold keeper for The Tower lobby",
+    "lived-in human warmth, slight belly, natural imperfections, kind tired eyes, relaxed uneven shoulders",
+    "premium clean web-game raster sprite, simple matte materials, restrained burgundy and brass concierge palette",
+    "full body, centered, safe transparent padding, no crop, no background, no text",
+    "mobile-safe gesture, CharacterStage-compatible posture, lobby-compatible dramatic lighting"
+  ],
+  "globalNegativePromptLocks": [
+    "literal Santa costume",
+    "mascot concierge",
+    "fake-perfect fashion model",
+    "stock hotel smile",
+    "photoreal portrait",
+    "toy plastic 3D finish",
+    "cropped hands or feet",
+    "extra fingers",
+    "fused hands",
+    "prop clutter",
+    "busy background",
+    "text artifacts",
+    "low-resolution source",
+    "upscaled-only 4K"
+  ],
+  "stopRules": [
+    "Stop immediately if a probe source has long edge below 4096 px.",
+    "Stop immediately if the source lacks true alpha and has no perfectly flat removable chroma background.",
+    "Stop if a probe repeats prior non-flat chroma or missing-alpha failures.",
+    "Stop if Otis identity changes across seasonal outfit probes.",
+    "Do not generate the full 21-sprite pack until probes 1 through 3 pass source preflight and visual QA."
+  ],
+  "probes": [
+    {
+      "order": 1,
+      "slot": "otis-regular-idle",
+      "outfit": "regular",
+      "pose": "idle",
+      "sourceFilename": "otis__regular__idle__source-v001.png",
+      "goal": "Prove GPT Image 2 can produce the canonical Otis source at native 4K-class resolution with true alpha.",
+      "promptAddendum": "calm grounded idle pose, hands visible and relaxed near concierge vest/cardigan, slight belly readable, no prop required",
+      "requiredChecks": [
+        "native long edge >= 4096",
+        "short edge >= 2300",
+        "true alpha or perfectly flat chroma",
+        "safe padding passes",
+        "no crop",
+        "identity lock passes",
+        "64/96/144/192/256 px readability passes"
+      ],
+      "onFailure": "Stop full-pack generation and switch source strategy."
+    },
+    {
+      "order": 2,
+      "slot": "otis-regular-greeting",
+      "outfit": "regular",
+      "pose": "greeting",
+      "sourceFilename": "otis__regular__greeting__source-v001.png",
+      "goal": "Stress-test mobile-safe hand gesture and finger quality.",
+      "promptAddendum": "small warm greeting gesture, one hand raised modestly within frame, fingers clean, posture still grounded",
+      "requiredChecks": [
+        "all probe 1 checks",
+        "hand and finger integrity",
+        "gesture width fits 170 x 290 display frame",
+        "gesture reads at 96 px"
+      ],
+      "onFailure": "Revise gesture framing before generating any other hand-forward poses."
+    },
+    {
+      "order": 3,
+      "slot": "otis-regular-working",
+      "outfit": "regular",
+      "pose": "working",
+      "sourceFilename": "otis__regular__working__source-v001.png",
+      "goal": "Stress-test restrained ledger/keycard prop handling, prop edges, and crop safety.",
+      "promptAddendum": "holding or consulting a small guest ledger and keycard ring, props restrained, hands and prop corners fully inside padding",
+      "requiredChecks": [
+        "all probe 1 checks",
+        "ledger/keycard edges not cropped",
+        "prop does not hide face or belly silhouette",
+        "working action reads at 96 px"
+      ],
+      "onFailure": "Do not generate alert/thinking/talking until prop/crop framing is fixed."
+    },
+    {
+      "order": 4,
+      "slot": "otis-summer-light-idle",
+      "outfit": "summer-light",
+      "pose": "idle",
+      "sourceFilename": "otis__summer-light__idle__source-v001.png",
+      "goal": "Prove seasonal outfit variant preserves identity and does not become casual/resort-coded.",
+      "promptAddendum": "lighter seasonal concierge vest/cardigan treatment, still burgundy anchored, brass restrained, same face, same slight belly",
+      "requiredChecks": [
+        "all probe 1 checks",
+        "same face and body as regular",
+        "summer outfit remains Tower concierge",
+        "no resort/cruise/casual uncle drift"
+      ],
+      "onFailure": "Lock outfit edit prompts against regular identity reference before seasonal batch."
+    },
+    {
+      "order": 5,
+      "slot": "otis-winter-layered-idle",
+      "outfit": "winter-layered",
+      "pose": "idle",
+      "sourceFilename": "otis__winter-layered__idle__source-v001.png",
+      "goal": "Prove winter layering preserves identity without becoming Santa or a coat-heavy blob.",
+      "promptAddendum": "layered winter concierge treatment, scarf or overcoat detail restrained, same face, same belly and posture, no holiday costume",
+      "requiredChecks": [
+        "all probe 1 checks",
+        "same face and body as regular",
+        "layering does not swallow silhouette",
+        "no Santa costume drift"
+      ],
+      "onFailure": "Rewrite winter outfit prompt and re-probe before generating any winter poses."
+    },
+    {
+      "order": 6,
+      "slot": "otis-regular-talking",
+      "outfit": "regular",
+      "pose": "talking",
+      "sourceFilename": "otis__regular__talking__source-v001.png",
+      "goal": "Stress-test expression readability and warm overprepared comedy at app scale.",
+      "promptAddendum": "warm overprepared explanation, small self-correcting expression, mouth and hand readable but not theatrical",
+      "requiredChecks": [
+        "all probe 1 checks",
+        "face remains kind and older",
+        "talking expression reads at 96 px",
+        "no caricature mouth"
+      ],
+      "onFailure": "Generate alternate talking and alert probes before completing regular outfit."
+    },
+    {
+      "order": 7,
+      "slot": "otis-regular-alert",
+      "outfit": "regular",
+      "pose": "alert",
+      "sourceFilename": "otis__regular__alert__source-v001.png",
+      "goal": "Confirm alert can read as gentle concierge urgency without panic or guard energy.",
+      "promptAddendum": "subtle one-moment alert, concerned but calm, one hand near keycard or bell, no panic, no stern security posture",
+      "requiredChecks": [
+        "all probe 1 checks",
+        "alert emotion reads at 96 px",
+        "no panic or anger",
+        "silhouette remains stable for CharacterStage alert motion"
+      ],
+      "onFailure": "Keep alert out of the full pack until expression direction is stabilized."
+    }
+  ],
+  "fullPackExpansionRule": {
+    "allowedAfter": [
+      "probes 1, 2, and 3 pass source preflight",
+      "at least one seasonal idle probe passes identity comparison",
+      "coordinator records QA board notes"
+    ],
+    "generateRemainingOrder": [
+      "complete regular remaining poses",
+      "complete summer-light remaining poses",
+      "complete winter-layered remaining poses"
+    ]
+  }
+}

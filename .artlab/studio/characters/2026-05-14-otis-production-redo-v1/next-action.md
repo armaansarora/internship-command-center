@@ -34,6 +34,25 @@ Generate production sources for Otis.
 - no cropped hands, feet, props, or haloing in staged sprites
 - all staged files remain outside public/art until final approval
 
+## Creative Capabilities
+
+- Raster Concept Art: Static visual exploration boards for characters, scenes, props, environments, and marketing compositions.
+- Required outputs: concept options, prompt refs, style notes, rejection notes
+- QA gates: style fit, visual variety, no copied likeness, clear labels
+- Preview targets: review-board
+- Transparent Production Asset: Approved transparent sprites or props with alpha, padding, derivatives, and manifest provenance.
+- Required outputs: transparent source, normal derivative, @2x derivative, @3x derivative, dark and light QA
+- QA gates: alpha clean, no haloing, no cropped hands or props, retina sharpness
+- Preview targets: review-board, app-scale-preview
+- Sprite Animation: Character or prop pose-state animation using approved sprites and runtime motion profiles.
+- Required outputs: pose mapping, state transitions, idle behavior, reduced-motion freeze
+- QA gates: identity consistency, state readability, no pixelation, motion personality fit
+- Preview targets: character-stage-preview, desktop-route-preview, mobile-route-preview
+- Review Board: HTML contact sheet and coordinator summary for human approval.
+- Required outputs: ranked options, scores, quality risks, approval blockers, next action
+- QA gates: no placeholder lane results, deduped options, clear labels, final approval gate visible
+- Preview targets: review-board
+
 ## Brief
 
-Redo Otis Vale from scratch through the production pipeline using the same approved soft Santa concierge design, preserving his lived-in human warmth, slight belly, natural imperfections, three outfit variants, seven required poses per outfit, 4K-quality source expectations, staged QA boards, and no public/art promotion until final approval.
+Redo Otis Vale from scratch through the production pipeline using the same approved soft Santa concierge design, preserving his lived-in human warmth, slight belly, natural imperfections, three outfit variants, seven required poses per outfit, native high-resolution source expectations, staged QA boards, and no public/art promotion until final approval.

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "tower-creative-parallel-lane-status-v1",
+  "status": "ready-for-agent-work",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "laneId": "wave-03-agent-02",
+  "assetType": "character",
+  "name": "Otis",
+  "strategy": {
+    "id": "technical-cleanroom",
+    "label": "Technical Cleanroom",
+    "mandate": "Prioritize transparent edges, crop safety, derivative readiness, and manifest cleanliness."
+  },
+  "waveMandate": {
+    "id": "ship-ready-filter",
+    "label": "Ship-Ready Filter",
+    "mandate": "Favor options that can survive app integration, QA, and future asset scaling."
+  },
+  "recommendedAgentProfile": {
+    "model": "gpt-5.5",
+    "executionMode": "fast",
+    "reasoningEffort": "xhigh",
+    "label": "GPT-5.5 fast mode, extra-high reasoning"
+  },
+  "outputRoot": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02",
+  "resultPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/result.md",
+  "resultJsonPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/result.json",
+  "preflightPath": ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-02/preflight.json",
+  "promotionLockedToCoordinator": true,
+  "forbiddenActions": [
+    "do not edit sibling lanes",
+    "do not write to public/art",
+    "do not update the production manifest",
+    "do not promote assets",
+    "do not delete approved or live assets",
+    "do not change the parent creative-brief.json"
+  ],
+  "updatedAt": "2026-05-14T23:22:18.553Z"
+}

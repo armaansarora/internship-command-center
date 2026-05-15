@@ -8,8 +8,6 @@ Status: live pilot promoted; production redo planned with native individual-spri
 ## Keepers
 
 - Approved identity reference: `.artlab/characters/otis/references/identity/otis_identity-outfit-variants_v001_reference.png`
-- Expression reference: `.artlab/characters/otis/references/expressions/otis_expression-sheet_v001_reference.png`
-- Pose-sheet references: `.artlab/characters/otis/references/pose-sheets/<outfitVariant>/otis_pose-sheet_<outfitVariant>_v001_reference.png`
 - Run ledger: `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`
 - Replacement run ledger: `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`
 - Superseded replacement planning ledger: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`
@@ -32,6 +30,8 @@ Status: live pilot promoted; production redo planned with native individual-spri
 - `.artlab/characters/otis/production-candidates/`: removed old loose 340x580 sprite clutter after labeled run-owned source copies were created.
 - `.artlab/characters/otis/production-source/`: removed no-alpha pose sheets that are not production-safe.
 - Old loose `expressions/`, `outfits/`, and `poses/` folders: moved useful boards into labeled `references/`.
+- `.artlab/characters/otis/references/expressions/`: removed old expression-sheet reference before the native v2 run so it cannot be mistaken for current production source.
+- `.artlab/characters/otis/references/pose-sheets/`: removed old pose-sheet references before the native v2 run so every pose is regenerated from the approved identity anchor.
 
 ## Quality Notes
 

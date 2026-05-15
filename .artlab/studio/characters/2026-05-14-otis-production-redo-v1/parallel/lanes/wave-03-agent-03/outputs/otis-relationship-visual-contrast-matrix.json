@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "tower-otis-relationship-contrast-matrix-v1",
+  "laneId": "wave-03-agent-03",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": {
+    "characterId": "otis",
+    "displayName": "Otis Vale",
+    "role": "Lobby Concierge"
+  },
+  "visualThesis": "Otis is the front desk compass: warm institutional threshold authority that receives and orients new users before the executive cast applies pressure.",
+  "authorityMap": [
+    {
+      "character": "Otis Vale",
+      "authorityType": "institutional threshold authority",
+      "visualLanguage": "warm vertical posture, rounder human silhouette, calm hands, front-desk props, burgundy concierge layers, aged brass access details",
+      "productionRule": "Otis should invite the next step without occupying CEO or CRO power language."
+    },
+    {
+      "character": "Mara Voss",
+      "authorityType": "formal executive authority",
+      "visualLanguage": "commanding stillness, architectural silhouette, immaculate dark tailoring, controlled ivory or oxblood accent, one severe gold piece, skyline or glass energy",
+      "productionRule": "Otis must be warmer, less severe, less architectural, and less skyline-coded than Mara."
+    },
+    {
+      "character": "Rafe Calder",
+      "authorityType": "CRO conversion pressure authority",
+      "visualLanguage": "forward athletic lean, rolled sleeves, loosened tie or tactical jacket, loud sneakers, red pen or stylus, pipeline-board posture",
+      "productionRule": "Otis must never point, lunge, sell, stalk the frame, weaponize a prop, or visually chase conversion."
+    },
+    {
+      "character": "Rowan Vale",
+      "authorityType": "access and archive authority",
+      "visualLanguage": "asymmetrical lean, structured coat or cardigan, rolled sleeves, pencil, tablet, tool ring, index-card details, elevator or archive access",
+      "productionRule": "Otis may hint at Rowan only with one small access-memory cue; he must not borrow Rowan's half-turned archive silhouette or palette."
+    }
+  ],
+  "contrastAxes": [
+    {
+      "axis": "silhouette",
+      "otis": "tall soft silhouette with slight belly, rounded beard mass, relaxed shoulders, grounded feet",
+      "maraContrast": "not angular architectural tailoring or severe geometric shape",
+      "rafeContrast": "not athletic forward lean or action-ready sales stance",
+      "rowanHint": "one tiny access cue may appear, but Otis stays front-facing and lobby-grounded",
+      "shipReadyRule": "At 96 css px, Otis should read as warm concierge before any prop detail is visible."
+    },
+    {
+      "axis": "hands",
+      "otis": "low, visible, service-oriented hands near ledger, bell, keycard ring, or desk edge",
+      "maraContrast": "no command fold, no executive point, no podium grip",
+      "rafeContrast": "no red-pen weapon, no sales push, no whiteboard strike",
+      "rowanHint": "keycard ring can include one older elevator key, never a tool bundle",
+      "shipReadyRule": "Hands must stay fully inside frame with 20-30 percent transparent padding."
+    },
+    {
+      "axis": "palette",
+      "otis": "burgundy, cream, deep navy, aged brass, warm human skin and beard tones",
+      "maraContrast": "avoid CEO gold dominance and black-glass severity",
+      "rafeContrast": "avoid loud red accent as pipeline energy",
+      "rowanHint": "avoid library green takeover; index-card ivory is allowed as a tiny prop cue",
+      "shipReadyRule": "Palette must separate from lobby brass, ivory, burgundy, and deep navy backgrounds without haloing."
+    },
+    {
+      "axis": "expression",
+      "otis": "kind tired eyes, asymmetrical modest smile, observant softness, faint overprepared comedy",
+      "maraContrast": "not composed domination, not visible hesitation-free executive mask",
+      "rafeContrast": "not intensity, challenge, or competitive grin",
+      "rowanHint": "not unsettling precision or mischief-forward expression",
+      "shipReadyRule": "Face must remain readable at 128 css px with glasses, beard, and eyes separated."
+    },
+    {
+      "axis": "environmental relationship",
+      "otis": "belongs in the Lobby, near desk, elevator threshold, bell, ledger, keycard access",
+      "maraContrast": "not Penthouse window, board table, or crisis-command room",
+      "rafeContrast": "not War Room whiteboard or pipeline dashboard",
+      "rowanHint": "not Archive shelves or elevator-system control panel",
+      "shipReadyRule": "Production sprites stay transparent; environmental cues must be carried by pose and prop, not background."
+    }
+  ],
+  "allowedRowanHints": [
+    "one worn index-card bookmark tucked inside the guest ledger",
+    "one old elevator key on the brass keycard ring",
+    "a tiny pale card corner visible from a pocket during working pose"
+  ],
+  "forbiddenRowanHints": [
+    "archive shelves",
+    "library green wardrobe dominance",
+    "tool belt or large tool ring",
+    "mystery symbols",
+    "labels or text",
+    "half-turned archivist posture as the main silhouette"
+  ],
+  "poseFailurePatterns": [
+    "arms crossed like a CEO",
+    "finger pointing like a command briefing",
+    "forward lunge like a CRO",
+    "red pen or stylus weapon language",
+    "podium, skyline, whiteboard, or boardroom background",
+    "archive scene clutter",
+    "generic hotel stock-photo smile",
+    "mascot proportions or Santa costume"
+  ],
+  "recommendedProductionOrder": [
+    "regular idle lobby-anchor probe",
+    "regular greeting Mara-contrast probe",
+    "regular working Rowan-hint probe",
+    "regular talking CEO/CRO pose-guard probe",
+    "expand selected grammar to remaining regular poses",
+    "adapt selected grammar to summer-light and winter-layered outfits"
+  ]
+}

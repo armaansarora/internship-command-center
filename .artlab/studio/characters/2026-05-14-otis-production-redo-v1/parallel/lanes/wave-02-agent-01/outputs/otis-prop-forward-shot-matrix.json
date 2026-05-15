@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "tower-otis-prop-forward-shot-matrix-v1",
+  "laneId": "wave-02-agent-01",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": "Otis",
+  "sharedGenerationSettings": {
+    "modelTarget": "GPT Image 2",
+    "sourceExpectation": "native high-resolution individual sprite source, 4096 px long edge minimum when available",
+    "background": "transparent or flat neutral extraction-safe background",
+    "framing": "full body, complete hands, complete feet, complete props, 10-14 percent safe padding",
+    "style": "premium clean 2.5D game-sprite raster material, warm human soft Santa concierge identity, lived-in older face, slight belly, natural asymmetry"
+  },
+  "poseRows": [
+    {
+      "pose": "idle",
+      "activeProp": "none",
+      "passiveProp": "ivory keycard half-tucked into breast pocket or ledger band",
+      "handSafety": "Both hands relaxed and visible; no prop grip required.",
+      "composition": "Props must be costume-level accents only; Otis's belly curve and welcoming stance are the read."
+    },
+    {
+      "pose": "greeting",
+      "activeProp": "tower-keycard",
+      "passiveProp": "no bell, no ledger",
+      "handSafety": "Keycard pinched flat between thumb and index finger; other hand open palm. Do not curl fingers through loops.",
+      "composition": "Card extends slightly forward but stays below beard and within shoulder width."
+    },
+    {
+      "pose": "listening",
+      "activeProp": "leather-ledger",
+      "passiveProp": "keycard tucked in ledger band",
+      "handSafety": "Closed ledger cradled against side ribs; fingers mostly hidden behind one edge, thumb visible.",
+      "composition": "Ledger sits beside belly, not across it; face and listening expression remain dominant."
+    },
+    {
+      "pose": "thinking",
+      "activeProp": "leather-ledger",
+      "passiveProp": "none",
+      "handSafety": "Ledger tucked under one forearm; free hand near chin with relaxed fingers, not touching prop.",
+      "composition": "Use asymmetrical shoulders and slight belly; prop is a quiet memory object."
+    },
+    {
+      "pose": "talking",
+      "activeProp": "tower-keycard",
+      "passiveProp": "ledger tucked low at opposite hip only if it does not crowd silhouette",
+      "handSafety": "One open explaining hand; keycard held flat at chest-lower-rib height with simple pinch.",
+      "composition": "Card supports the explanation, not a salesman pose."
+    },
+    {
+      "pose": "alert",
+      "activeProp": "aged-brass-service-bell",
+      "passiveProp": "none",
+      "handSafety": "Bell rests on tiny half-moon threshold ledge; one index finger presses plunger. No hand wraps around bell.",
+      "composition": "The bell is readable but small; Otis's face remains calm, protective, and human."
+    },
+    {
+      "pose": "working",
+      "activeProp": "warm-tablet-folio",
+      "passiveProp": "aged-brass-service-bell resting on far side of ledge only if it stays tiny",
+      "handSafety": "Tablet folio supported against forearm like a tray; no two-thumb typing unless separately approved.",
+      "composition": "Screen stays dark and abstract; Otis is operating the Tower, not becoming a tech-dashboard mascot."
+    }
+  ],
+  "outfitSlots": [
+    {
+      "id": "outfit-a-classic-concierge",
+      "description": "Approved classic soft Santa concierge outfit; warm jacket, tailored but comfortable, subtle brass trim."
+    },
+    {
+      "id": "outfit-b-formal-threshold",
+      "description": "Slightly more formal threshold-keeper variant; deeper jacket, premium lapel, still lived-in and approachable."
+    },
+    {
+      "id": "outfit-c-working-concierge",
+      "description": "Practical working variant; refined cardigan or service jacket, sleeves and materials suited to tablet/ledger work."
+    }
+  ],
+  "shots": [
+    {"shotId": "W02A01-A-idle", "outfitSlot": "outfit-a-classic-concierge", "pose": "idle", "primaryProbeQuestion": "Can the keycard be a tiny access cue without cluttering the base identity?"},
+    {"shotId": "W02A01-A-greeting", "outfitSlot": "outfit-a-classic-concierge", "pose": "greeting", "primaryProbeQuestion": "Can a flat keycard make the threshold invitation readable while preserving hand anatomy?"},
+    {"shotId": "W02A01-A-listening", "outfitSlot": "outfit-a-classic-concierge", "pose": "listening", "primaryProbeQuestion": "Can the ledger support empathy without covering the belly or face?"},
+    {"shotId": "W02A01-A-thinking", "outfitSlot": "outfit-a-classic-concierge", "pose": "thinking", "primaryProbeQuestion": "Can a tucked ledger read as memory instead of clutter?"},
+    {"shotId": "W02A01-A-talking", "outfitSlot": "outfit-a-classic-concierge", "pose": "talking", "primaryProbeQuestion": "Can the keycard support explanation without becoming a sales badge?"},
+    {"shotId": "W02A01-A-alert", "outfitSlot": "outfit-a-classic-concierge", "pose": "alert", "primaryProbeQuestion": "Can the bell live on a ledge so fingers stay clean?"},
+    {"shotId": "W02A01-A-working", "outfitSlot": "outfit-a-classic-concierge", "pose": "working", "primaryProbeQuestion": "Can the tablet folio feel operational while staying warm and low-detail?"},
+    {"shotId": "W02A01-B-idle", "outfitSlot": "outfit-b-formal-threshold", "pose": "idle", "primaryProbeQuestion": "Does a passive keycard still read with the more formal outfit?"},
+    {"shotId": "W02A01-B-greeting", "outfitSlot": "outfit-b-formal-threshold", "pose": "greeting", "primaryProbeQuestion": "Does the formal outfit make the keycard too hotel-staff literal?"},
+    {"shotId": "W02A01-B-listening", "outfitSlot": "outfit-b-formal-threshold", "pose": "listening", "primaryProbeQuestion": "Does the ledger preserve warmth against a more formal costume?"},
+    {"shotId": "W02A01-B-thinking", "outfitSlot": "outfit-b-formal-threshold", "pose": "thinking", "primaryProbeQuestion": "Does the tucked ledger keep the premium silhouette intact?"},
+    {"shotId": "W02A01-B-talking", "outfitSlot": "outfit-b-formal-threshold", "pose": "talking", "primaryProbeQuestion": "Can the keycard stay permission-coded rather than luxury-doorman coded?"},
+    {"shotId": "W02A01-B-alert", "outfitSlot": "outfit-b-formal-threshold", "pose": "alert", "primaryProbeQuestion": "Does the bell become too ceremonial with the formal outfit?"},
+    {"shotId": "W02A01-B-working", "outfitSlot": "outfit-b-formal-threshold", "pose": "working", "primaryProbeQuestion": "Does the tablet folio modernize the formal look without breaking canon?"},
+    {"shotId": "W02A01-C-idle", "outfitSlot": "outfit-c-working-concierge", "pose": "idle", "primaryProbeQuestion": "Can the working outfit carry passive access cues without busy pockets?"},
+    {"shotId": "W02A01-C-greeting", "outfitSlot": "outfit-c-working-concierge", "pose": "greeting", "primaryProbeQuestion": "Does the keycard remain warm and personal in a practical outfit?"},
+    {"shotId": "W02A01-C-listening", "outfitSlot": "outfit-c-working-concierge", "pose": "listening", "primaryProbeQuestion": "Can ledger texture keep the working outfit from becoming generic tech support?"},
+    {"shotId": "W02A01-C-thinking", "outfitSlot": "outfit-c-working-concierge", "pose": "thinking", "primaryProbeQuestion": "Does the ledger-tuck produce a clean mobile silhouette?"},
+    {"shotId": "W02A01-C-talking", "outfitSlot": "outfit-c-working-concierge", "pose": "talking", "primaryProbeQuestion": "Can the keycard and working outfit avoid badge clutter?"},
+    {"shotId": "W02A01-C-alert", "outfitSlot": "outfit-c-working-concierge", "pose": "alert", "primaryProbeQuestion": "Does the ledge bell still feel premium in the practical variant?"},
+    {"shotId": "W02A01-C-working", "outfitSlot": "outfit-c-working-concierge", "pose": "working", "primaryProbeQuestion": "Can tablet, bell, and belly all coexist without turning into a desk scene?"}
+  ]
+}

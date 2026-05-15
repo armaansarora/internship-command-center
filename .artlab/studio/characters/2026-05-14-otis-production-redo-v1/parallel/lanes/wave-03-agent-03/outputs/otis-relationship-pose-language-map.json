@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "tower-otis-relationship-pose-language-map-v1",
+  "laneId": "wave-03-agent-03",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "poseMap": [
+    {
+      "pose": "idle",
+      "relationshipJob": "Anchor a new user at the Lobby threshold before any executive pressure appears.",
+      "allowedGesture": "calm vertical wait, one hand near ledger or bell, one hand relaxed, shoulders uneven and human",
+      "forbiddenCEOOrCRODrift": "arms crossed, podium stillness, skyline stance, sales-floor lean, whiteboard energy",
+      "rowanHintPolicy": "none; keep first read clean",
+      "motionAffordance": "subtle breathing, tiny bell polish, glasses catchlight"
+    },
+    {
+      "pose": "greeting",
+      "relationshipJob": "Make the elevator and next step feel possible.",
+      "allowedGesture": "low open palm, small keycard-presenting angle, soft asymmetrical smile",
+      "forbiddenCEOOrCRODrift": "power handshake thrust, pointed command, chin-raised executive arrival, forward CRO lunge",
+      "rowanHintPolicy": "keycard ring allowed but not emphasized",
+      "motionAffordance": "small hand lift and settle; reduced-motion freeze remains welcoming"
+    },
+    {
+      "pose": "listening",
+      "relationshipJob": "Show that Otis reads user nerves before moving them upstairs.",
+      "allowedGesture": "slight lean toward user, ledger lowered, glasses angled, hands visible",
+      "forbiddenCEOOrCRODrift": "interrogation posture, folded arms, boardroom assessment, competitive smirk",
+      "rowanHintPolicy": "none; listening is user-centered",
+      "motionAffordance": "micro nod and soft shoulder shift"
+    },
+    {
+      "pose": "thinking",
+      "relationshipJob": "Turn overwhelm into a practical next step.",
+      "allowedGesture": "one hand near ledger edge or glasses, eyes kind, body still but not severe",
+      "forbiddenCEOOrCRODrift": "chin steeple, executive strategy silhouette, tactical planning stance, red-pen emphasis",
+      "rowanHintPolicy": "ledger may show a plain ivory edge but no readable card",
+      "motionAffordance": "brief pause, tiny glance toward elevator side"
+    },
+    {
+      "pose": "talking",
+      "relationshipJob": "Explain without dominating.",
+      "allowedGesture": "low compact explanatory hand, ledger held close, feet planted",
+      "forbiddenCEOOrCRODrift": "pointing, podium speech, revenue-board pitch, aggressive follow-up energy",
+      "rowanHintPolicy": "none; keep speech visually uncluttered",
+      "motionAffordance": "hand opens and returns below chest; face remains unobstructed"
+    },
+    {
+      "pose": "alert",
+      "relationshipJob": "Protect the user's threshold without becoming security or executive command.",
+      "allowedGesture": "gentle side-step boundary, one hand steadying bell or ledger, concerned eyes",
+      "forbiddenCEOOrCRODrift": "combat stance, command point, blocking the frame, crisis CEO pose, pipeline urgency",
+      "rowanHintPolicy": "old elevator key can remain on ring if already present, not centered",
+      "motionAffordance": "slight body turn between user and pressure source"
+    },
+    {
+      "pose": "working",
+      "relationshipJob": "Show ritual care and lightly foreshadow the building's memory systems.",
+      "allowedGesture": "ledger task, keycard check, small front-desk admin motion",
+      "forbiddenCEOOrCRODrift": "executive signing ceremony, war-room analysis, performance dashboard focus",
+      "rowanHintPolicy": "exactly one small access-memory cue allowed: worn index-card bookmark, old elevator key, or pale card corner",
+      "motionAffordance": "page tap, keycard sort, brief satisfied smile"
+    }
+  ],
+  "globalPoseRule": "Every pose should be readable as receiving, orienting, and threshold-keeping before it reads as managing, selling, judging, or archiving."
+}

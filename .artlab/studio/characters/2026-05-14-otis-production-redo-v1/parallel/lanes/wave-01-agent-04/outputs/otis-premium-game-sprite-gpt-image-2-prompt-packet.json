@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "tower-otis-gpt-image-2-prompt-packet-v1",
+  "laneId": "wave-01-agent-04",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": {
+    "characterId": "otis",
+    "displayName": "Otis Vale",
+    "role": "Lobby Concierge"
+  },
+  "strategy": {
+    "id": "game-sprite",
+    "label": "Premium Game Sprite",
+    "uniqueness": "Pushes Otis toward premium playable web-game readability while preserving the approved soft Santa concierge identity."
+  },
+  "generator": {
+    "target": "GPT Image 2",
+    "artifactOnly": true,
+    "localImagesGenerated": false
+  },
+  "sourceRequirements": {
+    "preferredFormat": "transparent PNG with real alpha channel",
+    "minimumLongEdgePx": 4096,
+    "safePaddingPercent": "20-30",
+    "spriteView": "full body, centered, 3/4 front",
+    "contactSheetsAllowedForProduction": false
+  },
+  "masterPrompt": "Create a full-body transparent PNG character sprite of Otis Vale, the Lobby Concierge for a premium web-game interface called The Tower. Otis is an older warm human man with wavy gray hair, round glasses, a full white beard, kind tired eyes, smile lines, a slightly rounded belly, and a calm lived-in presence. He wears refined burgundy concierge layers, a cream shirt, a dark tie, dark trousers, worn brown shoes, a small lapel pin, brass keys, and carries a dark leather ledger. Render him as a mature premium game sprite with clean raster shapes, excellent silhouette readability at mobile scale, subtle 2.5D depth, soft ambient occlusion, controlled painterly edges, and clear material separation. Keep the approved soft Santa warmth without making him Santa, a mascot, a toy, or a fake-perfect model. Full body, centered, 3/4 front, 20-30 percent transparent padding, native high resolution with long edge at least 4096 px, clean alpha, no crop, no text, no watermark.",
+  "negativePrompt": "No ultra-realism, no photography, no celebrity likeness, no cartoon mascot, no chibi proportions, no superhero pose, no exaggerated muscles, no plastic skin, no wax face, no perfect symmetrical model, no holiday costume, no red Santa suit, no childish smile, no giant head, no tiny feet, no cropped hands, no cropped shoes, no missing keys, no noisy background, no checkerboard background, no halo, no contact sheet, no multiple characters.",
+  "outfits": {
+    "regular": "Burgundy blazer over burgundy vest, cream shirt, dark tie, dark trousers, brown shoes, ledger and brass keys.",
+    "summer-light": "Burgundy vest without blazer, rolled cream sleeves, loosened tie, dark trousers, brown shoes, ledger and brass keys.",
+    "winter-layered": "Long burgundy coat, burgundy vest, dark scarf, cream shirt, dark tie, dark trousers, brown shoes, ledger and brass keys."
+  },
+  "poses": {
+    "idle": "Relaxed upright stance, ledger held naturally against his chest with one arm, other hand near pocket or belt keys, soft closed-mouth smile.",
+    "greeting": "One hand lifted in a small welcoming wave, ledger tucked securely in the other arm, shoulders open, friendly but restrained.",
+    "listening": "Slight forward lean, brows gently attentive, one hand near chin or ledger spine, calm eye contact, no theatrical reaction.",
+    "thinking": "Gaze slightly down and aside, hand adjusting glasses or touching beard, ledger close to torso, thoughtful pause.",
+    "talking": "One hand making a small explanatory gesture, mouth lightly open, ledger held steady, composed concierge confidence.",
+    "alert": "Posture a little straighter, eyes focused, ledger hugged closer, one hand raised subtly as if noticing something important, not alarmed.",
+    "working": "Looking down at open ledger or small note, one hand writing or checking a page, still readable as full-body Otis."
+  },
+  "slots": [
+    {
+      "slot": "regular-idle",
+      "outfit": "regular",
+      "pose": "idle",
+      "recommendedSourceName": "otis_regular_idle_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "regular-greeting",
+      "outfit": "regular",
+      "pose": "greeting",
+      "recommendedSourceName": "otis_regular_greeting_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "regular-listening",
+      "outfit": "regular",
+      "pose": "listening",
+      "recommendedSourceName": "otis_regular_listening_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "regular-thinking",
+      "outfit": "regular",
+      "pose": "thinking",
+      "recommendedSourceName": "otis_regular_thinking_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "regular-talking",
+      "outfit": "regular",
+      "pose": "talking",
+      "recommendedSourceName": "otis_regular_talking_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "regular-alert",
+      "outfit": "regular",
+      "pose": "alert",
+      "recommendedSourceName": "otis_regular_alert_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "regular-working",
+      "outfit": "regular",
+      "pose": "working",
+      "recommendedSourceName": "otis_regular_working_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "summer-light-idle",
+      "outfit": "summer-light",
+      "pose": "idle",
+      "recommendedSourceName": "otis_summer-light_idle_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "summer-light-greeting",
+      "outfit": "summer-light",
+      "pose": "greeting",
+      "recommendedSourceName": "otis_summer-light_greeting_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "summer-light-listening",
+      "outfit": "summer-light",
+      "pose": "listening",
+      "recommendedSourceName": "otis_summer-light_listening_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "summer-light-thinking",
+      "outfit": "summer-light",
+      "pose": "thinking",
+      "recommendedSourceName": "otis_summer-light_thinking_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "summer-light-talking",
+      "outfit": "summer-light",
+      "pose": "talking",
+      "recommendedSourceName": "otis_summer-light_talking_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "summer-light-alert",
+      "outfit": "summer-light",
+      "pose": "alert",
+      "recommendedSourceName": "otis_summer-light_alert_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "summer-light-working",
+      "outfit": "summer-light",
+      "pose": "working",
+      "recommendedSourceName": "otis_summer-light_working_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "winter-layered-idle",
+      "outfit": "winter-layered",
+      "pose": "idle",
+      "recommendedSourceName": "otis_winter-layered_idle_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "winter-layered-greeting",
+      "outfit": "winter-layered",
+      "pose": "greeting",
+      "recommendedSourceName": "otis_winter-layered_greeting_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "winter-layered-listening",
+      "outfit": "winter-layered",
+      "pose": "listening",
+      "recommendedSourceName": "otis_winter-layered_listening_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "winter-layered-thinking",
+      "outfit": "winter-layered",
+      "pose": "thinking",
+      "recommendedSourceName": "otis_winter-layered_thinking_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "winter-layered-talking",
+      "outfit": "winter-layered",
+      "pose": "talking",
+      "recommendedSourceName": "otis_winter-layered_talking_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "winter-layered-alert",
+      "outfit": "winter-layered",
+      "pose": "alert",
+      "recommendedSourceName": "otis_winter-layered_alert_game-sprite_v2_source.png"
+    },
+    {
+      "slot": "winter-layered-working",
+      "outfit": "winter-layered",
+      "pose": "working",
+      "recommendedSourceName": "otis_winter-layered_working_game-sprite_v2_source.png"
+    }
+  ],
+  "qaPass": [
+    "Downsample to 170 x 290 and 85 x 145 and verify Otis remains readable.",
+    "Verify identity consistency across hair, beard, glasses, belly, ledger, and key scale.",
+    "Reject if the result is a seven-pose sheet instead of an individual sprite source.",
+    "Reject if source long edge is below 4096 px.",
+    "Reject if alpha is missing, background is uneven, or edge haloing appears."
+  ],
+  "promotionBlockers": [
+    "No local image source files were generated by this lane.",
+    "Prompt packet must be used by the parent coordinator or another generation lane, then source images must pass native 4K and alpha preflight before promotion."
+  ]
+}

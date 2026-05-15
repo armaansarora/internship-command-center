@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "tower-otis-prop-bible-v1",
+  "laneId": "wave-02-agent-01",
+  "parentRunId": "2026-05-14-otis-production-redo-v1",
+  "asset": "Otis",
+  "strategy": "Prop Forward / Stress The Brief",
+  "corePrinciple": "Props should clarify Otis as a threshold keeper without becoming a second character, hiding his slight belly, or forcing fragile hand anatomy.",
+  "propBudget": {
+    "maxActiveHandheldPropsPerSprite": 1,
+    "maxVisiblePropFamiliesPerSprite": 2,
+    "mobileReadRule": "At 64 px tall, only one prop should be instantly readable; all other prop details must collapse into quiet costume accents.",
+    "silhouetteRule": "Props stay inside the shoulder-to-elbow envelope or below the belt line unless the pose specifically needs a greeting card extension."
+  },
+  "canonicalProps": [
+    {
+      "id": "aged-brass-service-bell",
+      "displayName": "Aged brass service bell",
+      "storyFunction": "Threshold signal and concierge ritual; strongest for alert and working poses.",
+      "formLanguage": "Small low dome, squat black felt base, tiny plunger, warm aged brass with softened highlights.",
+      "scale": "Roughly palm-width, never larger than Otis's hand span.",
+      "safeUsage": [
+        "Resting on a narrow half-moon threshold ledge near his hip.",
+        "Pressed with one extended index finger while the other hand remains open.",
+        "Carried only on a small flat tray, never pinched or gripped around the dome."
+      ],
+      "avoid": [
+        "Do not make it shiny gold.",
+        "Do not put fingers wrapped around the plunger.",
+        "Do not let it float beside him without contact.",
+        "Do not add sound lines, sparkles, or cartoon effects."
+      ]
+    },
+    {
+      "id": "tower-keycard",
+      "displayName": "Ivory Tower keycard",
+      "storyFunction": "Permission, access, and next-step invitation; strongest for greeting and talking poses.",
+      "formLanguage": "Rounded ivory card, one brass edge stripe, simple embossed tower mark, no readable text.",
+      "scale": "Credit-card scale, oversized by only 5-10 percent for mobile readability.",
+      "safeUsage": [
+        "Pinched flat between thumb and index finger with the card face visible.",
+        "Tucked halfway into breast pocket or ledger band when not active.",
+        "Held away from the face and beard so it does not clutter the expression."
+      ],
+      "avoid": [
+        "No dangling keyrings.",
+        "No keychain clusters.",
+        "No tiny text, QR codes, barcodes, or UI labels.",
+        "No twisted fingers threading through a lanyard."
+      ]
+    },
+    {
+      "id": "leather-ledger",
+      "displayName": "Deep oxblood leather ledger",
+      "storyFunction": "Human memory, old-world concierge reliability, and lived-in warmth; strongest for listening and thinking poses.",
+      "formLanguage": "Soft rectangular folio, rounded worn corners, cream page edge, muted brass clasp.",
+      "scale": "Small notebook to tablet-folio scale; must not cover the belly curve.",
+      "safeUsage": [
+        "Closed and tucked under one forearm.",
+        "Cradled against the side ribs with fingers mostly behind the edge.",
+        "Open only as a simple two-page silhouette with no readable writing."
+      ],
+      "avoid": [
+        "No huge clipboard blocking torso.",
+        "No busy handwritten pages.",
+        "No extra papers flying out.",
+        "No anatomically complex hand positions across the spine."
+      ]
+    },
+    {
+      "id": "warm-tablet-folio",
+      "displayName": "Warm tablet folio",
+      "storyFunction": "Modern internship command-center operator without losing concierge warmth; strongest for working poses.",
+      "formLanguage": "Thin dark slate screen inside oxblood leather folio, soft reflection, one brass corner guard.",
+      "scale": "Slightly smaller than a letter sheet, tucked low enough to preserve Otis's belly silhouette.",
+      "safeUsage": [
+        "Held like a serving tray against the forearm.",
+        "Resting on the half-moon ledge beside the bell.",
+        "Screen mostly dark, with abstract warm blocks rather than legible UI."
+      ],
+      "avoid": [
+        "No bright dashboard UI competing with Otis's face.",
+        "No tiny charts or text.",
+        "No two-handed typing pose unless generated as a separate high-risk probe.",
+        "No laptop shape."
+      ]
+    }
+  ],
+  "outfitIntegration": [
+    {
+      "outfitSlot": "classic-concierge",
+      "propAccent": "Aged brass and oxblood leather feel native; keycard can match ivory shirt highlights."
+    },
+    {
+      "outfitSlot": "soft-santa-formal",
+      "propAccent": "Keep brass less shiny so the Santa warmth stays human, not costume-store festive."
+    },
+    {
+      "outfitSlot": "working-concierge",
+      "propAccent": "Tablet folio is allowed, but ledger texture should keep the lived-in threshold-keeper read."
+    }
+  ],
+  "stressFindings": [
+    "A bell is story-rich but dangerous as a handheld object; treat it as ledge/tray supported in most poses.",
+    "A keycard is readable and hand-safe only if it is flat, oversized slightly, and not attached to keys.",
+    "A ledger/tablet can accidentally erase the approved slight belly; keep it side-cradled or low.",
+    "More than one active prop per sprite makes Otis feel like inventory UI rather than a human concierge."
+  ]
+}

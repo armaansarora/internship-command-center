@@ -1,0 +1,29 @@
+{
+  "laneId": "wave-03-agent-03",
+  "strongestIdea": "Front Desk Compass Otis: a relationship-aware GPT Image 2 prompt/spec packet that keeps Otis as warm institutional threshold authority, distinct from Mara Voss's executive command, Rafe Calder's CRO pressure language, and Rowan Vale's access-archive mystique.",
+  "uniquenessClaim": "This lane contributes cast-level visual grammar rather than another isolated design tweak: it defines how Otis should anchor new users in the Lobby, contrast with future Season 1 character sprites, hint at Rowan without lore clutter, and avoid CEO/CRO pose language across all seven production poses.",
+  "outputFiles": [
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/outputs/otis-relationship-aware-gpt-image-2-prompt-packet.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/outputs/otis-relationship-visual-contrast-matrix.json",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/outputs/otis-relationship-pose-language-map.json",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/outputs/otis-ship-ready-relationship-qa-guard.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/result.md",
+    ".artlab/studio/characters/2026-05-14-otis-production-redo-v1/parallel/lanes/wave-03-agent-03/result.json"
+  ],
+  "qualityRisks": [
+    "Prompt-only lane; no native 4K transparent source images exist from this lane.",
+    "Relationship constraints can overcorrect Otis into being too passive if his institutional threshold authority is weakened.",
+    "Rowan hints can become lore clutter if more than one access-memory cue appears or if archive props enter non-working poses.",
+    "Mara contrast can become too soft if Otis loses premium tailoring, matte material separation, and strong mobile silhouette.",
+    "Generated candidates may still drift into CEO/CRO gestures, fake-perfect skin, cropped hands, or alpha-edge haloing unless the QA guard is enforced."
+  ],
+  "fallbackModel": "gpt-5-codex",
+  "fallbackReason": "The current Codex lane runtime did not expose GPT-5.5 fast mode or extra-high reasoning controls, and no local GPT Image 2 output path was available that could guarantee generated files stayed inside this lane root.",
+  "promotionBlockers": [
+    "No generated source images from this lane.",
+    "No preflight.json because no images were generated or inspected.",
+    "No transparent sprite derivatives, dark/light QA board, mobile-scale preview, or CharacterStage motion preview.",
+    "Parent coordinator must generate probes with the approved Otis identity reference attached and verify the relationship guard before expanding to all 21 sprites.",
+    "Final promotion remains locked to the parent pipeline and exact phrase approved for app."
+  ]
+}
