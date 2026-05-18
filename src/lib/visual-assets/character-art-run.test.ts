@@ -15,10 +15,12 @@ import {
 } from "@/lib/visual-assets";
 
 describe("character art run contract", () => {
+  const batchRunId = "fresh-otis-batch-test";
+
   it("creates an Otis batch run with only the initial and final human approval gates", () => {
     const run = createCharacterArtRunPlan({
       characterId: "otis",
-      runId: "2026-05-14-otis-batch",
+      runId: batchRunId,
       assetVersion: "otis-v1",
       approvedIdentityRef: ".artlab/characters/otis/model/otis_winner-ref_v001.png",
     });
@@ -70,18 +72,18 @@ describe("character art run contract", () => {
       expectedArtifacts: ["winter-layered/working"],
     });
     expect(run.directories.stagedPublicRoot).toBe(
-      ".artlab/characters/otis/staged-public/2026-05-14-otis-batch",
+      `.artlab/characters/otis/staged-public/${batchRunId}`,
     );
     expect(run.directories.mastersRoot).toBe(
-      ".artlab/characters/otis/masters/2026-05-14-otis-batch",
+      `.artlab/characters/otis/masters/${batchRunId}`,
     );
 
     for (const sprite of run.expectedSprites) {
       expect(sprite.masterPath).toMatch(
-        /^\.artlab\/characters\/otis\/masters\/2026-05-14-otis-batch\/(regular|summer-light|winter-layered)\/[a-z-]+\.png$/,
+        /^\.artlab\/characters\/otis\/masters\/fresh-otis-batch-test\/(regular|summer-light|winter-layered)\/[a-z-]+\.png$/,
       );
       expect(sprite.stagedRenditions.default.src).toMatch(
-        /^\.artlab\/characters\/otis\/staged-public\/2026-05-14-otis-batch\/art\/lobby\/otis\/(regular|summer-light|winter-layered)\/[a-z-]+\.webp$/,
+        /^\.artlab\/characters\/otis\/staged-public\/fresh-otis-batch-test\/art\/lobby\/otis\/(regular|summer-light|winter-layered)\/[a-z-]+\.webp$/,
       );
       expect(sprite.publicRenditions.default.src).toMatch(
         /^\/art\/lobby\/otis\/(regular|summer-light|winter-layered)\/[a-z-]+\.webp$/,
@@ -94,7 +96,7 @@ describe("character art run contract", () => {
   it("blocks promotion until QA passes and Armaan gives the exact final approval phrase", () => {
     const run = createCharacterArtRunPlan({
       characterId: "otis",
-      runId: "2026-05-14-otis-batch",
+      runId: batchRunId,
       assetVersion: "otis-v1",
       approvedIdentityRef: ".artlab/characters/otis/model/otis_winner-ref_v001.png",
     });
@@ -126,7 +128,7 @@ describe("character art run contract", () => {
   it("builds manifest-ready approved visual assets only from a promoted QA-passed run", () => {
     const run = createCharacterArtRunPlan({
       characterId: "otis",
-      runId: "2026-05-14-otis-batch",
+      runId: batchRunId,
       assetVersion: "otis-v1",
       approvedIdentityRef: ".artlab/characters/otis/model/otis_winner-ref_v001.png",
     });
@@ -168,7 +170,7 @@ describe("character art run contract", () => {
       kind: "character",
       src: "/art/lobby/otis/regular/idle.webp",
       approvalStatus: "approved",
-      sourceRunId: "2026-05-14-otis-batch",
+      sourceRunId: batchRunId,
       assetVersion: "otis-v1",
       checksum: "sha256-00",
       sourceResolution: { width: 2400, height: 4096 },
@@ -181,14 +183,14 @@ describe("character art run contract", () => {
   it("blocks replacement QA when source art was upscaled instead of generated at native quality", () => {
     const run = createCharacterArtRunPlan({
       characterId: "otis",
-      runId: "2026-05-14-otis-native-v2",
+      runId: "native-quality-failure-fixture",
       assetVersion: "otis-v2",
       approvedIdentityRef: ".artlab/characters/otis/references/identity/otis_identity-outfit-variants_v001_reference.png",
     });
     const processedSprites: CharacterArtProcessedSprite[] = run.expectedSprites.map(
       (sprite, index) => ({
         slotId: sprite.id,
-        sourcePath: `.artlab/runs/otis/2026-05-14-otis-native-v2/split/source-${index}.png`,
+        sourcePath: `.artlab/runs/otis/native-quality-failure-fixture/split/source-${index}.png`,
         sourceResolution: { width: 253, height: 887 },
         masterPath: sprite.masterPath,
         masterResolution: sprite.sourceFrame,

@@ -6,14 +6,35 @@ The Creative Production Engine is the Tower-wide system for producing characters
 
 ## Command Surface
 
-- `npm run art:studio`: guided conversational opening, studio state creation, Housekeeping Gate entry, and Continuous Improvement Gate entry.
-- `npm run art:studio -- --request "<natural language request>"`: adaptive request router for any Tower visual work. Use this first when Armaan asks for a character, background, screen, button, animation, prop, scene, icon system, or marketing visual in normal language. This creates the default 15x parallel wave packet.
-- `npm run art:studio -- --asset-type <type> --name "<asset name>" --brief "<brief>" --run-id <safe-run-id>`: converts an approved guided brief into a strict production packet under `.artlab/studio/<asset-type>/<run-id>/` with `creative-brief.json`, `prompt.md`, `next-action.md`, phase ledgers, and the default 15x parallel wave packet.
-- `npm run art:studio -- --request "<natural language request>" --parallel-agents 5 --waves 3`: explicit version of the default 15-lane shape. Use custom counts only for deliberate experiments.
+- `npm run art:produce -- --request "<natural language request>"`: canonical orchestrator for normal creative work. It routes the request, writes the run state, budget ledger, handoff, and next legal action.
+- `npm run art:produce -- --continue <run-id>`: resumes a creative run from `run-state.json` without inventing an illegal next step.
+- `npm run art:studio`: guided conversational opening, studio state creation, Housekeeping Gate entry, and Continuous Improvement Gate entry. Use it for orientation, diagnostics, lane work, and improvement reports.
+- `npm run art:studio -- --request "<natural language request>"`: adaptive request router for any Tower visual work. Use this first when Armaan asks for a character, background, screen, button, animation, prop, scene, icon system, or marketing visual in normal language. This creates the default five-lane parallel packet.
+- `npm run art:studio -- --asset-type <type> --name "<asset name>" --brief "<brief>" --run-id <safe-run-id>`: converts an approved guided brief into a strict production packet under `.artlab/studio/<asset-type>/<run-id>/` with `creative-brief.json`, `prompt.md`, `next-action.md`, phase ledgers, and the default five-lane parallel packet.
+- `npm run art:studio -- --request "<natural language request>" --parallel-agents 5 --waves 1`: explicit version of the default five-lane shape. Use custom counts only for deliberate experiments.
 - `npm run art:studio -- --request "<natural language request>" --no-parallel`: single-thread diagnostic escape hatch. Do not use for normal creative production.
 - `npm run art:studio -- --mode lane --lane-brief <path-to-lane-brief.json>`: prepares one isolated lane for a subagent without mutating shared studio state.
 - `npm run art:studio -- --mode validate-lane --lane-brief <path-to-lane-brief.json>`: rejects incomplete lane results before coordinator merge.
 - `npm run art:studio -- --mode coordinate --parallel-plan <path-to-parallel-plan.json>`: gathers validated lanes, scores and dedupes candidates, writes review artifacts, and blocks promotion when quality evidence is missing.
+- `npm run art:studio -- --mode improve`: reads the Continuous Improvement ledger and writes `continuous-improvement-report.json`; if it reports `upgrade-required`, patch the engine before continuing production.
+- `npm run art:generate adapters`: lists generation adapters and whether they use subscription UI, API billing, direct file save, or local test output.
+- `npm run art:generate prepare-subscription --packet <creative-brief.json> --directive <next-image-generation-step.json> --quality-mode pro`: creates a Gemini subscription browser bridge with labeled inbox slots, a prompt deck, and capture commands. This is the default no-API-billing path when Armaan wants to use Gemini Pro / Nano Banana through his subscription.
+- `npm run art:generate capture-download --bridge <generation-bridge.json> --slot <slot-id> --source <downloaded-file>`: captures a full-size Gemini download into the correct `.artlab/inbox/...` slot and writes a receipt with dimensions, alpha, bytes, and quality warnings.
+- `npm run art:generate status --bridge <generation-bridge.json>`: reports which subscription-generated slots have been captured and whether the bridge is ready for pipeline ingest.
+- `npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json>`: creates the paid Gemini API v3 plan, locks Nano Banana 2, expands the requested slots across five lanes, estimates cost, and writes the runbook.
+- `npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json>`: default initial-design mode creates exactly five total prompt-only concepts, not 15 pose probes. It rejects multiple base slots and reference images during initial design.
+- `npm run art:generate prepare-api --phase production-pack --packet <creative-brief.json> --directive <next-image-generation-step.json>`: after Armaan chooses one design, creates a one-slot canary plan plus a blocked full production plan when the run has multiple source slots.
+- `npm run art:generate run-api --plan <canary/gemini-api-plan.json> --max-attempts 2 --request-timeout-ms 300000`: runs the paid canary first. The full plan remains blocked until the canary gate passes.
+- `npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>`: writes `canary-gate.json`. The full pack may run only when this gate is `passed` and the prompt/reference/source contract hashes still match.
+- `npm run art:generate run-api --plan <full/gemini-api-plan.json> --max-attempts 2 --no-retry-warnings --request-timeout-ms 300000`: runs the full production pack only after the canary passes. Whole-pack warning retries are banned.
+- `npm run art:generate run-api --plan <full/gemini-api-plan.json> --slots <slot-id-a,slot-id-b>`: regenerates only named failed slots after repair/doctor evidence proves they need paid repair.
+- `npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --request-timeout-ms 300000`: runs a paid Gemini API plan, writing files and receipts only into `.artlab/inbox/...`. It skips clean receipts, writes `api-run-state.json`, and uses `api-run.lock` to prevent duplicate concurrent spend.
+- `npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>`: validates every generated image and every review-board image reference before approval. Add `--strict` before final upload-ready approval so receipt warnings and missing alpha become blockers. The command writes `asset-doctor.json`.
+- `npm run art:generate repair-plan --plan <gemini-api-plan.json> --board <review-board.html> --strict`: converts doctor warnings/blockers into an exact per-slot repair plan at `repair-plan.json`, including matte-aware alpha extraction commands, regeneration fallbacks, board rebuild actions, and the strict doctor command to rerun after repair.
+- `npm run art:generate repair-auto --plan <gemini-api-plan.json>`: applies safe non-paid repairs from `repair-plan.json`, starting with loss-safe alpha extraction and clean local repair receipts.
+- `npm run art:generate extract-alpha --source <matte-source.png> --output <transparent-output.png> --matte-color 00ff00`: turns approved solid-matte sources into true transparent PNGs without resizing; checkerboard or busy backgrounds are rejected.
+- `npm run art:browser plan --session gemini-art-studio --provider gemini`: creates an isolated Tower Art Studio Playwright Chromium profile, download folder, queue folder, and runbook. This command does not launch the browser by default.
+- `npm run art:browser open --session gemini-art-studio --provider gemini`: launches the isolated browser profile when Armaan explicitly wants the subscription UI path. Do not use Armaan's daily Chrome profile for image generation.
 - `npm run art:operate`: strict character-art operator packet for Season 1 character work.
 - `npm run art:status`: read-only character art status.
 - `npm run art:clean`: removes volatile run-owned art binaries while keeping ledgers, references, live `public/art`, and manifest data protected.
@@ -22,12 +43,12 @@ The Creative Production Engine is the Tower-wide system for producing characters
 
 ## Parallel Wave Mode
 
-Parallel Wave Mode is the default for normal creative production. The coordinator creates one parent packet plus a `parallel/` folder with lane briefs, lane prompts, and a dispatcher prompt. A normal run means 5 subagents can work at once for 3 waves, producing 15 distinct creative lanes.
+Parallel Wave Mode is the default for normal creative production. The coordinator creates one parent packet plus a `parallel/` folder with lane briefs, lane prompts, and a dispatcher prompt. A normal run means 5 subagents can work at once for one wave, producing five distinct creative lanes.
 
 Example:
 
 ```bash
-npm run art:studio -- --request "Redo Otis with the same approved design and generate lots of varied source options." --run-id otis-parallel-wave-v1
+npm run art:studio -- --request "Create five prompt-only initial Otis designs from scratch." --run-id otis-initial-design-v1
 ```
 
 Then give each subagent one lane prompt from:
@@ -44,7 +65,7 @@ npm run art:studio -- --mode lane --lane-brief .artlab/studio/<asset-type>/<run-
 
 If the generated plan status is `awaiting-initial-approval`, the coordinator must not launch lane subagents until Armaan approves the initial direction. If the packet was already approved, the plan status is `ready-for-dispatch`.
 
-Lane agents may write only inside their own lane root. They cannot write `public/art`, update manifests, run promotion, run cleanup, delete approved assets, or edit the parent packet. The coordinator owns merge, final review, human approval, promotion, and app integration. Completed lanes must pass `validate-lane` before coordinator merge so 15x output does not become 15x half-finished noise.
+Lane agents may write only inside their own lane root. They cannot write `public/art`, update manifests, run promotion, run cleanup, delete approved assets, or edit the parent packet. The coordinator owns merge, final review, human approval, promotion, and app integration. Completed lanes must pass `validate-lane` before coordinator merge so five-lane output does not become five-lane half-finished noise.
 
 After lane validation, run:
 
@@ -66,16 +87,182 @@ Default lane subagent profile:
 - Model: `gpt-5.5`
 - Execution mode: fast, when the client exposes a fast-mode toggle.
 - Reasoning effort: `xhigh`
-- Quality rule: 15x output increases exploration, never lowers the source-quality, QA, naming, organization, or approval bar.
-- Fan-out cap: normal runs are capped at 15 lanes unless the engine is deliberately upgraded.
+- Quality rule: five-lane output increases exploration, never lowers the source-quality, QA, naming, organization, or approval bar.
+- Fan-out cap: normal runs are capped at five lanes unless the engine is deliberately upgraded.
 
-The three-wave default is deliberate:
+The five-lane default is deliberate:
 
-- Wave 1 broadens the field with very different ideas.
-- Wave 2 stress-tests assumptions and repairs weak routes.
-- Wave 3 filters toward upload-ready, app-usable candidates.
+- Lane 1 protects the approved canon and avoids drift.
+- Lane 2 pushes human imperfection and non-AI perfection.
+- Lane 3 optimizes mobile sprite readability.
+- Lane 4 sharpens materials, props, and Tower taste.
+- Lane 5 designs for motion, pose stability, and CharacterStage integration.
 
 Every lane must return `result.md` with the strongest idea, what is meaningfully different, files created, quality risks, Housekeeping Gate notes, and Continuous Improvement Gate notes.
+
+## Generation Adapters
+
+The engine separates creative planning from image-file production. This matters because subscription image tools and API image tools behave differently.
+
+Hard browser rule: subscription UI work must use an isolated Tower Art Studio browser session. The engine must not drive Armaan's normal Chrome tabs, side panel, history, downloads, or active work. The default browser engine is Playwright Chromium / Google Chrome for Testing so Computer Use does not collide with the daily Chrome app. The command is:
+
+```bash
+npm run art:browser plan --session gemini-art-studio --provider gemini
+```
+
+When a real browser session is needed:
+
+```bash
+npm run art:browser open --session gemini-art-studio --provider gemini
+```
+
+This still is not true unattended automation. Subscription UI work is capped at two isolated interactive sessions by default. Real unattended five-lane image generation requires the Gemini API adapter with explicit billing approval. For subscription work, the speed strategy is fewer smarter batch boards for exploration, then a small number of high-quality production probes.
+
+Current adapters:
+
+- `gemini-subscription-browser`: recommended no-API-billing v1. Codex uses the signed-in Gemini web app with Create image mode, downloads full-size images, then captures them into labeled `.artlab/inbox/...` slots. This can use Armaan's Gemini Pro subscription, but it is not fully unattended from Node because the files come from the browser UI.
+- `chatgpt-subscription-inbox`: manual fallback for ChatGPT subscription image generation. The engine supplies labeled prompts and inbox slots; downloaded files are captured and QA'd the same way.
+- `openai-api`: fully automatic but API-billed. Do not use unless Armaan explicitly approves paid OpenAI API generation.
+- `gemini-api`: default paid automation path for the current v3 rewrite after Armaan approved a limited Gemini API budget. It is locked to Nano Banana 2 (`gemini-3.1-flash-image-preview`) unless the art bible is deliberately revised.
+
+Gemini API v3 shape:
+
+```bash
+npm run art:generate prepare-api \
+  --packet .artlab/studio/characters/<run-id>/creative-brief.json \
+  --directive .artlab/studio/characters/<run-id>/next-image-generation-step.json \
+  --lane-count 5 \
+  --concurrency 5 \
+  --resolution 4K \
+  --aspect-ratio 9:16 \
+  --budget-cents 1000
+```
+
+Default `prepare-api` is initial-design mode: one base concept x five lanes = five total images. For characters, this phase must not include an identity reference image; otherwise all concepts collapse toward the same face/body. If a directive tries multiple base slots during initial design, the engine rejects it. Production work after design approval must say `--phase production-pack`.
+
+The command writes:
+
+- `generation/gemini-api-v3/gemini-api-plan.json`
+- `generation/gemini-api-v3/gemini-api-runbook.md`
+- `generation/gemini-api-v3/prompt-deck.md`
+- one labeled inbox folder per lane and source slot under `.artlab/inbox/.../gemini-api-v3`
+
+The run command is:
+
+```bash
+npm run art:generate run-api --plan .artlab/studio/<asset-type>/<run-id>/generation/gemini-api-v3/gemini-api-plan.json --max-attempts 3 --request-timeout-ms 300000
+```
+
+Run-state hardening:
+
+- `api-run.lock` prevents two agents from spending against the same plan at once.
+- `api-run-state.json` records selected slots, skipped slots, retry reasons, budget projection, blockers, and failures.
+- Clean receipts are skipped on rerun so completed slots do not bill twice.
+- Warning receipts are retried as versioned attempts up to `--max-attempts`; old evidence is never overwritten.
+- Runs that finish with warning receipts write `completed-with-warnings`, not `completed`. This status is concept-only or repair-required, never production-ready.
+- Stale plans without explicit `phase: "initial-design"` or `phase: "production-pack"` are blocked before API spend.
+- Request timeouts and retryable network/provider failures are handled per slot so a slow or flaky request does not hang the whole run.
+- `--force-unlock` is only for confirmed stale locks after checking no generation process is active.
+- Provider error text is redacted for API-key-shaped strings before it reaches state files.
+
+Alpha policy:
+
+- Gemini API outputs are treated as opaque sources unless their receipt proves real alpha.
+- Production prompts should request a perfectly flat solid `#00ff00` chroma matte, not "transparent background."
+- Checkerboard/fake transparency is a hard reject because it bakes background pixels into the sprite.
+- Local alpha extraction preserves source dimensions and writes true PNG alpha:
+
+```bash
+npm run art:generate extract-alpha --source <matte-source.png> --output <transparent-output.png> --matte-color 00ff00
+```
+
+Asset Doctor Gate:
+
+```bash
+npm run art:generate doctor \
+  --plan .artlab/studio/<asset-type>/<run-id>/generation/gemini-api-v3/gemini-api-plan.json \
+  --board .artlab/studio/<asset-type>/<run-id>/generation/gemini-api-v3/review/<board>.html
+```
+
+The doctor checks that every expected generated file exists, decodes with `sharp`, meets source dimension requirements, has a receipt, and that every review-board `<img>` points at a local decodable file. It blocks missing files, corrupt files, external review images, data URI images, and broken relative paths. Use `--strict` before final approval to make receipt warnings and missing alpha fail the gate.
+
+Repair Plan Gate:
+
+```bash
+npm run art:generate repair-plan \
+  --plan .artlab/studio/<asset-type>/<run-id>/generation/gemini-api-v3/gemini-api-plan.json \
+  --board .artlab/studio/<asset-type>/<run-id>/generation/gemini-api-v3/review/<board>.html \
+  --strict
+```
+
+Run this immediately after doctor reports warnings or blockers. It writes `repair-plan.json` beside `asset-doctor.json` and gives every slot one recommended next action:
+
+- `extract-alpha`: use the local matte extractor for an existing character source that only lacks true alpha and passes the flat-matte readiness check.
+- `regenerate-slot`: rerun the generation plan when files are missing, corrupt, too small, or have warnings that cannot be safely repaired locally.
+- `none`: the slot is clean.
+- `rebuild-review-board`: the board references are broken, remote, or inline and must be rebuilt before approval.
+
+The repair plan does not promote anything. It is a self-healing operator packet: run `repair-auto` first for non-paid repairs, rerun strict doctor, then regenerate only named failed slots if the strict evidence still requires paid repair.
+
+Alpha repair is intentionally conservative. A source that is merely JPEG/no-alpha is not automatically repairable. The repair plan first checks whether the image border matches the approved solid `#00ff00` chroma matte. If that readiness check fails, the slot is marked `regenerate-slot` so the pipeline does not create a rough cutout from a normal background, gradient, shadowed wall, or fake transparency pattern.
+
+Security rules:
+
+- The API key is read only from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`.
+- The key must never be passed as a command flag, written into `.env` files by Codex, stored in a plan, or committed.
+- If an API key has been pasted into chat or a screenshot, rotate it after the run.
+
+Cost rules:
+
+- The plan estimates cost before the run and refuses to create a plan above `--budget-cents`.
+- Default Nano Banana 2 setting is five lanes, `4K`, `9:16`, and image-only responses.
+- Google Search grounding is disabled by default.
+- Failed individual slots are regenerated individually; the whole pack is not blindly rerun.
+- `local-mock`: test-only generator for pipeline hardening.
+
+Subscription bridge shape:
+
+```bash
+npm run art:generate prepare-subscription \
+  --packet .artlab/studio/characters/<run-id>/creative-brief.json \
+  --directive .artlab/studio/characters/<run-id>/next-image-generation-step.json \
+  --quality-mode pro
+```
+
+The command writes:
+
+- `generation/generation-bridge.json`
+- `generation/gemini-subscription-runbook.md`
+- `generation/prompt-deck.md`
+- one labeled inbox folder per source slot under `.artlab/inbox/...`
+
+Production image bridges must record UI generation settings:
+
+- `qualityMode`: production uses `pro`, `thinking`, or `highest-quality-available`. If the Gemini UI exposes Pro through a `Redo with Pro` action, use that before downloading. Fast is draft-only and cannot feed production source capture.
+- `stylePreset`: default is `none/default`. Leave UI presets unselected unless a preset has been explicitly approved for the run.
+- `stylePresetPolicy`: default is `none-by-default`; `approved-style-lock` is allowed only when the exact preset is recorded in `generation-bridge.json`.
+- Forbidden preset: `Color block`. It is not suitable for Tower because it over-flattens the house style and fights `tower-flat-plus-depth-v1`.
+
+Style presets can improve consistency because they add another stable conditioning signal, but they also become a strong house-style lock. The Tower rule is: use the approved identity reference, locked prompt language, and the same high-quality model mode first; only add a UI preset if it wins a deliberate style test and is recorded across the entire run.
+
+Do not assume subscription UI output is native 4K. The bridge captures the highest full-size Pro download available, then local QA records whether it misses the 4K source contract. A below-contract download may remain useful source art, but it cannot silently become "native 4K".
+
+After each Gemini download:
+
+```bash
+npm run art:generate capture-download --bridge <generation-bridge.json> --slot <slot-id> --source <downloaded-file>
+npm run art:generate status --bridge <generation-bridge.json>
+```
+
+If a retry is needed, keep the bad file and capture the new file as a new attempt:
+
+```bash
+npm run art:generate capture-download --bridge <generation-bridge.json> --slot <slot-id> --source <downloaded-file> --attempt 2
+```
+
+If the subscription UI outputs lower resolution than the source contract, the receipt must keep that warning visible. The engine may use local master/upscale processing later, but the warning cannot be hidden or treated as native 4K.
+
+Fresh-start rule: do not treat any old Otis probe, reference, browser download, or prior promoted sprite as current production source. The next Otis run must begin with prompt-only initial designs.
 
 ## Adaptive Request Router
 
@@ -83,7 +270,7 @@ The engine must accept Armaan's request in normal language and convert it into t
 
 Examples:
 
-- `npm run art:studio -- --request "redo Otis from scratch with the same approved design"` routes to `character`.
+- `npm run art:studio -- --request "create five prompt-only Otis designs from scratch"` routes to `character`.
 - `npm run art:studio -- --request "create a new immersive background screen for the application war room"` routes to `environment`.
 - `npm run art:studio -- --request "make a small premium UI button texture for the lobby controls"` routes to `ui-texture`.
 - `npm run art:studio -- --request "generate an animated elevator arrival loop for the lobby"` routes to `animation`.
@@ -102,7 +289,9 @@ Every phase inventories files, labels status, cleans loose artifacts, updates le
 
 ### Continuous Improvement Gate
 
-Every phase records friction, slowness, errors, manual work, QA failures, confusion, and rewrite triggers. The engine improves itself when a weakness repeats or becomes severe.
+Every phase records friction, slowness, errors, manual work, QA failures, confusion, and rewrite triggers. The engine improves itself when a weakness repeats or becomes severe. Repeated medium `quality-failure` entries also trigger `upgrade-required`; alpha failures, fake transparency, broken review images, low-resolution sources, and provider-format drift cannot become permanent background noise.
+
+Run `npm run art:studio -- --mode improve` after major phases or whenever a problem repeats. The report writes `continuous-improvement-report.json`; by the fifth run, repeated friction should force a command, QA gate, fixture, or rewrite before more production work continues.
 
 The command layer records both mandatory gates for orientation and production-packet phases. Later generation, ingest, QA, promotion, and app-integration phases must follow the same ledger contract before any asset is allowed into `public/art`.
 

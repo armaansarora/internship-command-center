@@ -15,13 +15,8 @@ describe("CharacterSprite Season 1 fallback", () => {
         />,
       );
 
-      if (character.id === "otis") {
-        expect(html).toContain("idle%403x.webp");
-        expect(html).not.toContain(`data-visual-asset-fallback="${character.id}"`);
-      } else {
-        expect(html).toContain(`data-visual-asset-fallback="${character.id}"`);
-        expect(html).toContain(character.shortLabel);
-      }
+      expect(html).toContain(`data-visual-asset-fallback="${character.id}"`);
+      expect(html).toContain(character.shortLabel);
       expect(html).toContain(`data-character-outfit="regular"`);
       expect(html).not.toContain("undefined");
     }

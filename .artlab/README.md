@@ -1,112 +1,94 @@
 # Tower Art Lab
 
-`.artlab` is the non-production workshop for Tower character art. It is where generated concepts, references, run ledgers, QA previews, staged derivatives, and review boards live before anything reaches the app.
+`.artlab` is the non-production workshop for Tower creative production. It is where generated concepts, references, run ledgers, QA previews, staged derivatives, browser-session downloads, and review boards live before anything reaches the app.
+
+## Fresh-Start State
+
+The studio was reset on 2026-05-15 so the next creative run starts clean.
+
+- No character production assets are currently approved.
+- No old Otis generated images, run ledgers, browser sessions, or staged derivatives are kept here.
+- Lobby backgrounds remain protected: `public/lobby/bg-1.jpg` through `public/lobby/bg-4.jpg`.
+- The engine code, docs, tests, and approval gates remain in the repo.
+- The next image-production session should generate Otis from scratch through the engine, not from old reference files.
 
 ## Start Here
 
-For broader visual work, use the Creative Production Engine:
+For the guided Creative Production Engine session:
 
 ```bash
 npm run art:studio
 ```
 
-Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
-
-After the guided brief is known, create a strict packet for any visual asset type:
-
-```bash
-npm run art:studio -- --asset-type environment --name "War Room Background" --brief "Kinetic premium applications command room." --run-id war-room-bg-v1
-```
-
-The packet command writes only under `.artlab/studio/...`, rejects unsafe paths and run ids, and preserves corrupt state backups instead of silently overwriting them.
-
-Normal creative packets now run in 15x parallel wave mode by default:
-
-```bash
-npm run art:studio -- --request "Redo Otis with the same approved design and generate lots of varied source options." --run-id otis-parallel-wave-v1
-```
-
-This creates 15 lane prompts under `.artlab/studio/<asset-type>/<run-id>/parallel/lanes/...`: 5 agents x 3 waves. If the plan says `awaiting-initial-approval`, get Armaan's initial direction approval before launching lanes. Give each subagent one lane prompt and prefer GPT-5.5 fast mode with extra-high reasoning when the current client exposes it. Lane agents may run `npm run art:studio -- --mode lane --lane-brief <lane-brief.json>` and may write only inside their lane root. Validate completed lanes with `npm run art:studio -- --mode validate-lane --lane-brief <lane-brief.json>` before coordinator merge. Then run `npm run art:studio -- --mode coordinate --parallel-plan <parallel-plan.json>` to create `coordinator-review.json`, `coordinator-report.md`, `review-board.html`, and `promotion-gate.json`. The coordinator owns merge, final review, promotion, cleanup, and app integration. Use `--no-parallel` only for explicit single-thread diagnostics.
-
-Use `npm run art:operate` only when the active asset is a Season 1 character and the engine has reached the character-art operator stage.
-
-Run this from the repo root to continue the pipeline and create the next strict action packet:
-
-```bash
-npm run art:operate
-```
-
-Run this for read-only status:
+For read-only status:
 
 ```bash
 npm run art:status
 ```
 
-`art:operate` writes `next-action.json`, `next-action.md`, and any needed prompt packet under `.artlab/operators/<characterId>/<runId>/`. `art:status` reports the locked style, promoted characters, run warnings, next recommended character, and exact continuation docs.
-
-For machine-readable output:
+For machine-readable status:
 
 ```bash
 npm --silent run art:status -- --json
 ```
 
+For a new visual request, use the studio router rather than hand-placing files:
+
+```bash
+npm run art:studio -- --request "Create five prompt-only initial Otis designs from scratch."
+```
+
+The engine routes characters, backgrounds, screens, UI surfaces, animations, props, scenes, shaders, and marketing visuals into organized `.artlab/studio/...` packets.
+
+## Image Generation Rules
+
+- Drafts and generated sources start in `.artlab`, never in `public/art`.
+- Initial character design uses exactly 5 total prompt-only images unless Armaan changes the rule.
+- Production packs happen only after initial design approval.
+- Final promotion requires Armaan's exact phrase: `approved for app`.
+- Only the coordinator can promote, clean shared state, or update manifests.
+- Gemini API runs read keys only from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`.
+- Gemini API runs use `api-run.lock` and `api-run-state.json` so duplicate agents do not double-spend against the same plan.
+- Do not write API keys into repo files, command flags, receipts, prompt decks, screenshots, or run JSON.
+- Gemini does not reliably produce true transparent PNGs; use a flat `#00ff00` matte for source art and extract alpha locally.
+- If a generated image fails to load, decodes poorly, lacks expected files, has broken preview references, or fails strict doctor, repair or regenerate before showing it as clean.
+
+## Parallel Mode
+
+Normal creative packets use five-lane parallel wave mode by default. Each lane writes only to its own lane root. The coordinator validates lanes, scores and dedupes results, creates the review board, and owns promotion.
+
+Lane subagents should use GPT-5.5 fast mode with extra-high reasoning when available. Use `--no-parallel` only for diagnostics. Validate each lane with `npm run art:studio -- --mode validate-lane --lane-brief <lane-brief.json>`, then run `npm run art:studio -- --mode coordinate --parallel-plan <parallel-plan.json>` so the coordinator writes `coordinator-review.json`, `coordinator-report.md`, `review-board.html`, and `promotion-gate.json`.
+
+API image runs use 5 lanes with concurrency 5 for initial design. Do not serialize the five initial concepts unless the run is explicitly diagnostic.
+
+## Required Gates
+
+Every phase must run:
+
+- Housekeeping Gate: inventory created files, delete loose junk, keep only used artifacts, and confirm no unapproved asset entered `public/art`.
+- Continuous Improvement Gate: run `npm run art:studio -- --mode improve` to record slow steps, errors, confusing points, quality failures, and engine rewrite needs. Repeated friction must become code, tests, or a stricter command-level guard.
+- Asset Doctor Gate before final approval boards and promotion.
+
 ## Layout
 
 ```text
 .artlab/
-  characters/<characterId>/
-    references/        approved identity, expression, outfit, and pose references
-    masters/           audited 4K transparent master sprites
-    qa/                dark/light QA previews by run
-    staged-public/     promotion-ready derivatives that mirror public/art
-    ARTIFACTS.md       current labeled inventory for the character
-    README.md          character-specific status notes
-
-  runs/<characterId>/<runId>/
-    run.json           source of truth for the run
-    prompts/           locked prompt packets generated by art:plan
-    incoming/          ingested ChatGPT image outputs
-    split/             deterministic split sprite sources
-    review/            final upload-ready HTML board and screenshots
-    browser-qa/        app/browser screenshots and QA ledgers
-
+  README.md
   studio/
-    state.json         current Creative Production Engine state snapshot
-    <asset-type>/<runId>/
+    <asset-type>/<run-id>/
       creative-brief.json
       prompt.md
       next-action.md
       parallel/
-        parallel-plan.json
-        dispatcher-prompt.md
-        coordinator-review.json
-        coordinator-report.md
-        review-board.html
-        promotion-gate.json
-        lanes/<wave-id-agent-id>/
-          lane-brief.json
-          agent-prompt.md
-          result.md
-          result.json
-          preflight.json
+      generation/
       ledgers/
+  inbox/
+    <asset-type>/<run-id>/<slot-id>/
+  characters/
+    <character-id>/
+  runs/
+    <character-id>/<run-id>/
+  browser-sessions/
 ```
 
-## Rules
-
-- Drafts and generated sources start here, never in `public/art`.
-- `public/art` receives files only through `npm run art:promote`.
-- Promotion requires Armaan's exact phrase: `approved for app`.
-- Do not delete promoted run ledgers. They are provenance.
-- Do not hide warnings such as `source-upscaled-to-master`.
-- Use `npm run art:clean` to remove volatile old run binaries; never use it to delete live `public/art` assets before a replacement is approved.
-- If the pipeline needs a repeated manual step, turn it into a script, doc, and test.
-
-## Current Anchor Run
-
-- Otis Vale: `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`
-- Status: promoted to app.
-- Caveat: sources were prototype-sized and upscaled, so Otis is a functional pilot with visible source-quality warnings.
-- Active replacement run: `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`.
-- Superseded planning run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
-- Next new character after Otis v2: Mara Voss (`ceo`).
+Those folders are recreated by the engine as needed.

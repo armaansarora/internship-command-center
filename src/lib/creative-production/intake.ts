@@ -1,7 +1,14 @@
 import type { CreativeAssetType } from "./types";
 
 export type CreativeProductionRequestConfidence = "high" | "medium" | "low";
-export type CreativeProductionInitialApprovalStatus = "required" | "already-approved";
+export type CreativeProductionInitialApprovalStatus =
+  | "required"
+  | "generation-approved"
+  | "already-approved";
+
+export interface CreativeProductionApprovalContext {
+  apiBudgetCents?: number;
+}
 
 export interface CreativeProductionRequestDraft {
   rawRequest: string;
@@ -13,6 +20,7 @@ export interface CreativeProductionRequestDraft {
   routingReason: string;
   matchedSignals: string[];
   initialApprovalStatus: CreativeProductionInitialApprovalStatus;
+  apiBudgetCents?: number;
 }
 
 interface RouteSignal {
@@ -129,6 +137,19 @@ const ROUTE_SIGNALS: readonly RouteSignal[] = [
     ],
   },
   {
+    assetType: "shader",
+    label: "shader, WebGL, WebGPU, canvas, or GPU effect language",
+    weight: 5,
+    patterns: [
+      /\bshader\b/i,
+      /\bwebgpu\b/i,
+      /\bwebgl\b/i,
+      /\bgpu\b/i,
+      /\bfragment\b/i,
+      /\bcanvas effect\b/i,
+    ],
+  },
+  {
     assetType: "scene",
     label: "scene, moment, shot, or composed beat language",
     weight: 3,
@@ -175,6 +196,7 @@ const ROUTE_SIGNALS: readonly RouteSignal[] = [
 export function inferCreativeProductionRequest(
   request: string,
   now = new Date(),
+  approvalContext: CreativeProductionApprovalContext = {},
 ): CreativeProductionRequestDraft {
   const rawRequest = request.trim().replace(/\s+/g, " ");
 
@@ -195,11 +217,15 @@ export function inferCreativeProductionRequest(
     confidence: route.confidence,
     routingReason: `Routed to ${route.assetType} because the request matched ${route.reason}.`,
     matchedSignals: route.matchedSignals,
-    initialApprovalStatus: inferInitialApprovalStatus(rawRequest),
+    initialApprovalStatus: inferInitialApprovalStatus(rawRequest, approvalContext),
+    ...(approvalContext.apiBudgetCents !== undefined ? { apiBudgetCents: approvalContext.apiBudgetCents } : {}),
   };
 }
 
-function inferInitialApprovalStatus(request: string): CreativeProductionInitialApprovalStatus {
+function inferInitialApprovalStatus(
+  request: string,
+  approvalContext: CreativeProductionApprovalContext,
+): CreativeProductionInitialApprovalStatus {
   if (
     /\b(same|existing|current|already|previously)\s+approved\b/i.test(request) ||
     /\bapproved\s+(design|direction|identity|reference|look)\b/i.test(request) ||
@@ -208,7 +234,22 @@ function inferInitialApprovalStatus(request: string): CreativeProductionInitialA
     return "already-approved";
   }
 
+  if (
+    approvalContext.apiBudgetCents !== undefined &&
+    approvalContext.apiBudgetCents > 0 &&
+    isExplicitInitialConceptGenerationRequest(request)
+  ) {
+    return "generation-approved";
+  }
+
   return "required";
+}
+
+function isExplicitInitialConceptGenerationRequest(request: string): boolean {
+  return (
+    /\b(generate|create|produce|make)\b/i.test(request) &&
+    /\b(initial|concept|concepts|design|designs|option|options|prompt-only|from scratch)\b/i.test(request)
+  );
 }
 
 function routeRequest(request: string): {

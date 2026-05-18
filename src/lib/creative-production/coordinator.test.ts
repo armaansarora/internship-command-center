@@ -92,7 +92,7 @@ describe("creative production coordinator", () => {
       brief: "Create a Tower lobby motion system.",
       stateRoot: ".artlab/studio",
     });
-    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 3 });
+    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 1 });
     const review = createCreativeCoordinatorReview({
       plan,
       lanes: [laneInput(0), laneInput(1)],
@@ -100,7 +100,7 @@ describe("creative production coordinator", () => {
 
     expect(review.completedLaneCount).toBe(2);
     expect(review.promotionGate.status).toBe("blocked");
-    expect(review.promotionGate.blockers.join(" ")).toContain("expected 15 lanes");
+    expect(review.promotionGate.blockers.join(" ")).toContain("expected 5 lanes");
   });
 
   it("dedupes highly similar lane ideas and ranks winners", () => {
@@ -113,7 +113,7 @@ describe("creative production coordinator", () => {
     expect(groups[0]?.laneIds).toEqual(["wave-1-agent-1", "wave-1-agent-2"]);
   });
 
-  it("renders review artifacts when all 15 lanes are complete", () => {
+  it("renders review artifacts when all five lanes are complete", () => {
     const packet = createCreativeProductionPacket({
       assetType: "scene",
       name: "Elevator Arrival",
@@ -129,15 +129,15 @@ describe("creative production coordinator", () => {
         initialApprovalStatus: "already-approved",
       },
     });
-    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 3 });
+    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 1 });
     const review = createCreativeCoordinatorReview({
       plan,
-      lanes: Array.from({ length: 15 }, (_, index) => laneInput(index)),
+      lanes: Array.from({ length: 5 }, (_, index) => laneInput(index)),
     });
     const report = renderCoordinatorReportMarkdown(review);
     const html = renderCoordinatorReviewBoardHtml(review);
 
-    expect(review.completedLaneCount).toBe(15);
+    expect(review.completedLaneCount).toBe(5);
     expect(review.promotionGate.status).toBe("ready-for-final-approval");
     expect(review.topCandidates.length).toBeGreaterThan(0);
     expect(report).toContain("Creative Production Coordinator Report");
@@ -161,8 +161,8 @@ describe("creative production coordinator", () => {
         initialApprovalStatus: "already-approved",
       },
     });
-    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 3 });
-    const lanes = Array.from({ length: 15 }, (_, index): CreativeCoordinatorLaneInput => {
+    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 1 });
+    const lanes = Array.from({ length: 5 }, (_, index): CreativeCoordinatorLaneInput => {
       const lane = laneInput(index);
 
       return {
@@ -227,8 +227,8 @@ describe("creative production coordinator", () => {
         initialApprovalStatus: "already-approved",
       },
     });
-    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 3 });
-    const lanes = Array.from({ length: 15 }, (_, index): CreativeCoordinatorLaneInput => {
+    const plan = createCreativeParallelWavePlan({ packet, agentsPerWave: 5, waves: 1 });
+    const lanes = Array.from({ length: 5 }, (_, index): CreativeCoordinatorLaneInput => {
       const lane = laneInput(index, `Tower approved Otis prompt packet ${index}`);
 
       return {
@@ -245,7 +245,7 @@ describe("creative production coordinator", () => {
     });
     const review = createCreativeCoordinatorReview({ plan, lanes });
 
-    expect(review.completedLaneCount).toBe(15);
+    expect(review.completedLaneCount).toBe(5);
     expect(review.blockedLaneCount).toBe(0);
     expect(review.topCandidates.length).toBeGreaterThan(0);
     expect(review.promotionGate.status).toBe("blocked");

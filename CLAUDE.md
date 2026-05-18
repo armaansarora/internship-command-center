@@ -62,16 +62,17 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 ## Character Image Pipeline
 The locked character style is `tower-flat-plus-depth-v1`: premium web-game sprites, strong silhouettes, clean raster shapes, subtle depth, adult professional energy, no ultra-realism, no fake-perfect AI people. The locked story tone is `Professional Scars`.
 
-When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate. Normal creative packets default to 15x parallel output: 5 agents x 3 waves. Lane subagents should use GPT-5.5 fast mode with extra-high reasoning when available. Each lane stays isolated; `--mode coordinate` scores, dedupes, ranks, and writes the review board; only the coordinator may merge, promote, clean, or integrate. Use `--no-parallel` only for explicit diagnostics.
+When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:produce -- --request "<natural language request>"` and follow `.agents/skills/creative-production-engine/SKILL.md`. Use `npm run art:studio` for orientation or diagnostics. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate. Normal creative packets default to five-lane parallel output: 5 agents x 1 wave. Lane subagents should use GPT-5.5 fast mode with extra-high reasoning when available. Each lane stays isolated; `--mode coordinate` scores, dedupes, ranks, and writes the review board; only the coordinator may merge, promote, clean, or integrate. Use `--no-parallel` only for explicit diagnostics.
 
-For any character image work, run `npm run art:operate` first and read `docs/CHARACTER-IMAGE-OPERATIONS.md`. The operator command writes the next legal action packet under `.artlab/operators/`. Use `npm run art:status` for read-only inspection of promoted characters, run warnings, and the next recommended character.
+For any character image work, run `npm run art:studio` first and read `docs/CHARACTER-IMAGE-OPERATIONS.md`. Use `npm run art:operate` only when the engine reaches the strict Season 1 character-art operator stage. Use `npm run art:status` for read-only inspection of promoted characters, run warnings, and the next recommended character.
 
 Current anchor state:
-- Otis Vale is promoted through `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
-- Otis works in the app, but the run intentionally keeps source warnings visible because prototype-sized sources were upscaled into 4K masters: `source-long-edge-below-4096` and `source-upscaled-to-master`.
-- The active replacement run is `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`; finish native-quality Otis v2 before starting Mara Voss (`ceo`).
+- Fresh-start art reset is active: no Season 1 character art is currently approved in the production manifest.
+- Otis Vale is the first production pilot and must be generated from scratch through the engine before Mara Voss (`ceo`).
+- Lobby backgrounds remain protected: `public/lobby/bg-1.jpg` through `public/lobby/bg-4.jpg`.
+- Do not use old Otis reference images, old run ledgers, or old public Otis sprites as source of truth.
 - Drafts and generated outputs stay in `.artlab`; only `npm run art:promote` can copy approved derivatives into `public/art`.
-- `npm run art:clean` may remove volatile old run binaries, but live `public/art` files stay until a replacement run is approved and promoted.
+- Production packs must pass the one-slot canary gate before full-pack paid generation. Whole-pack warning retries are banned; run non-paid repair first and regenerate only named failed slots.
 - Promotion requires Armaan's exact phrase: `approved for app`.
 - If the image process exposes a repeated manual workaround, strengthen the script, docs, and tests before continuing.
 

@@ -340,25 +340,24 @@ docs/RUNBOOK.md              operations playbook (synthetic canary,
 ## .artlab/  — Character image workshop
 
 ```
+.artlab/README.md                       fresh-start art lab rules
 .artlab/characters/<characterId>/     references, masters, QA, staged-public,
                                       ARTIFACTS.md inventory
 .artlab/runs/<characterId>/<runId>/   run.json, prompts, incoming sources,
                                       split sprites, review boards, browser QA
+.artlab/studio/<assetType>/<runId>/    Creative Production Engine packets
+.artlab/inbox/<assetType>/<runId>/     captured provider outputs before ingest
 ```
 
 Run `npm run art:operate` before continuing image work; use `npm run art:status`
-for read-only inspection. Current live Otis run:
-`.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
-Active Otis replacement run:
-`.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`.
-Superseded Otis planning run:
-`.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
+for read-only inspection. The art lab is currently reset: no Season 1 character
+has approved production art, and Otis Vale is the first from-scratch pilot.
 
 For broader visual work, use the Creative Production Engine. When Armaan says
 "Creative Production Engine" or asks to add/generate Tower visuals, run
 `npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`.
 Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
-Normal creative packets default to 15x parallel output: 5 agents x 3 waves.
+Normal creative packets default to five-lane parallel output: 5 agents x 1 wave.
 Each subagent gets one isolated lane prompt, should use GPT-5.5 fast mode with
 extra-high reasoning when available, and `--mode coordinate` must score,
 dedupe, rank, and write the review board before promotion. Only the coordinator

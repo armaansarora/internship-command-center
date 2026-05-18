@@ -15,15 +15,21 @@ Everything between those gates is internal factory work. Agents and scripts gene
 
 - Style name: `tower-flat-plus-depth-v1`
 - Rendering: premium web-game sprite, clean raster shapes, strong silhouette, restrained depth, controlled rim/highlight, adult professional energy.
-- Format target: transparent PNG or WebP, full body, stable frame, safe padding, no text.
-- Master target: one 4K transparent master per approved pose and outfit variant, target long edge 4096px.
+- Format target: true-alpha PNG or WebP, full body, stable frame, safe padding, no text.
+- Master target: one 4K true-alpha master per approved pose and outfit variant, target long edge 4096px.
 - Production target: optimized default, `@2x`, and `@3x` WebP derivatives generated from the 4K master.
 - Production source target: native high-resolution individual sprite sources. Pose sheets can be used for review or consistency, but not as production source when splitting would make each pose too small.
 - Production posture: straight-on or 3/4 front unless a pose definition requires otherwise.
-- Background policy: transparent for production sprites; neutral sheet backgrounds are allowed only for approval boards.
+- Background policy: true alpha for production sprites. For Gemini API source generation, prompt for a perfectly flat solid `#00ff00` chroma matte and run local alpha extraction; fake checkerboard transparency is a hard reject.
 - Tone: Professional Scars. Characters are funny because they are competent in incompatible ways, not because they are caricatures.
 - Outfit policy: every character has `regular`, `summer-light`, and `winter-layered` variants. These are wardrobe edits of the approved outfit, not new costumes, new palettes, or alternate identities.
-- Image path: use ChatGPT image generation as the approved GPT Image 2 workflow under Armaan's subscription. Do not switch to paid API generation unless Armaan explicitly approves it later.
+- Image path: use the Creative Production Engine generation adapter layer. For the v3 paid automation path, use `gemini-api` locked to Nano Banana 2 (`gemini-3.1-flash-image-preview`) with five concurrent lanes, 4K, and budget caps. Initial design is exactly five total prompt-only images; production packs after design approval must use `--phase production-pack`. The no-API-billing fallback remains `gemini-subscription-browser` with Gemini Pro / Nano Banana through Armaan's subscription; use ChatGPT subscription generation only as fallback.
+- Gemini API secret policy: API keys are read only from local `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key` and are never stored in repo files, command flags, plans, prompt decks, receipts, or screenshots.
+- Gemini API run hardening: paid runs use `api-run.lock` to prevent duplicate concurrent spend, write `api-run-state.json` for selected/skipped/retried slots, skip clean receipts on rerun, retry warning receipts as versioned attempts up to `--max-attempts`, apply request timeouts, retry transient provider/network failures, reject stale plans without an explicit phase, and refuse to continue when projected cost exceeds the approved budget.
+- Asset Doctor Gate: after generated images or a review board exists, run `npm run art:generate doctor -- --plan <gemini-api-plan.json> --board <review-board.html>`. Before final upload-ready approval, add `--strict`. `completed-with-warnings` and doctor warnings are not production-ready.
+- Generation UI lock: production prompts run in Pro, Thinking, Redo with Pro, or highest-quality available mode. Fast mode is draft-only. Style presets are off by default (`none/default`) and must be recorded if used. Color block is forbidden for Tower character production because it fights the approved premium web-game sprite direction.
+- Subscription UI source reality: Pro downloads may still be below native 4K. That does not lower the bar; it means the run keeps source-size warnings visible and either passes the local master/derivative QA honestly or switches source strategy.
+- Browser isolation: Gemini or ChatGPT subscription UI generation must use an isolated Tower Art Studio Playwright Chromium profile created by `npm run art:browser`, not the user's daily Chrome profile. True parallel five-lane image generation is now the Gemini API adapter path, not a manual multi-tab browser workflow.
 
 ## Quality Bar
 
@@ -37,6 +43,9 @@ Reject or redo the work when:
 - A sprite is only available as a small board crop or low-resolution prototype rather than a 4K transparent master.
 - A derivative set is incomplete: default, `@2x`, and `@3x` must all exist before manifest approval.
 - The character becomes fake-perfect, model-like, too muscular, too symmetrical, or less human than the approved identity.
+- The model quality mode was Fast or the UI style preset was changed without being recorded in the bridge.
+- The image was generated through Armaan's daily Chrome profile instead of an isolated Tower Art Studio browser session.
+- The output leans into a generic preset style instead of the approved character identity and `tower-flat-plus-depth-v1`.
 - The outfit variant becomes a new costume instead of an edit of the approved clothing system.
 - The sprite only works in isolation and feels weak inside `/lobby`, `/lobby/onboarding`, or the relevant floor.
 
@@ -62,7 +71,7 @@ The standard is simple: if the asset would make the Tower feel cheaper, it does 
 - Approved production sprites: `public/art/<space>/<characterId>/<outfitVariant>/<pose>.webp`
 - Required retina derivatives: `public/art/<space>/<characterId>/<outfitVariant>/<pose>@2x.webp` and `public/art/<space>/<characterId>/<outfitVariant>/<pose>@3x.webp`
 
-The original Otis `340x580` production-candidate files were `prototype-reference` only. The promoted Otis pilot uses run-owned labeled source copies and keeps the upscaling warning visible in `run.json`; future characters should use native high-resolution source art before final approval.
+The active studio has been reset. Previous Otis prototype artifacts are not part of the current production state. New Otis work starts from a prompt-only five-option concept board, then uses the approved winner as the identity source for the production pack.
 
 Drafts do not enter `public/art`. Production files are never overwritten in place; a new approved version gets a new source artifact and then the manifest changes.
 
@@ -95,13 +104,23 @@ Factory commands:
 ```bash
 npm run art:operate
 npm run art:status
-npm run art:plan -- otis --run-id 2026-05-14-otis-batch --identity-ref .artlab/characters/otis/model/otis_winner-ref_v001.png
-npm run art:ingest -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source <generated-file.png> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1
-npm run art:split -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source-asset pose-sheet-regular
-npm run art:master -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
-npm run art:qa -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
-npm run art:review -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
-npm run art:promote -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --approval-phrase "approved for app"
+npm run art:produce -- --request "Create five prompt-only initial Otis designs from scratch."
+npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json> --lane-count 5 --concurrency 5 --resolution 4K --aspect-ratio 9:16 --budget-cents 1000
+npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --request-timeout-ms 300000
+npm run art:generate prepare-api --phase production-pack --packet <creative-brief.json> --directive <next-image-generation-step.json> --lane-count 1 --concurrency 5 --budget-cents 600
+npm run art:generate run-api --plan <canary/gemini-api-plan.json> --max-attempts 2 --request-timeout-ms 300000
+npm run art:generate repair-plan --plan <canary/gemini-api-plan.json> --strict
+npm run art:generate repair-auto --plan <canary/gemini-api-plan.json>
+npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>
+npm run art:generate run-api --plan <full/gemini-api-plan.json> --max-attempts 2 --no-retry-warnings --request-timeout-ms 300000
+npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>
+npm run art:plan -- otis --run-id <approved-otis-production-run> --identity-ref .artlab/characters/otis/references/identity/<approved-file>.png
+npm run art:ingest -- <run.json> --source <generated-file.png> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1
+npm run art:split -- <run.json> --source-asset pose-sheet-regular
+npm run art:master -- <run.json>
+npm run art:qa -- <run.json>
+npm run art:review -- <run.json>
+npm run art:promote -- <run.json> --approval-phrase "approved for app"
 ```
 
 ## Runtime Motion Model
@@ -125,9 +144,9 @@ These gates are internal quality gates, not repeated Armaan approvals.
 
 The character must have an approved record in `docs/CHARACTER-BIBLE.md` with story, doctrine, relationships, visual DNA, forbidden traits, and prompt fragments.
 
-### Gate 2: Exactly 12 concept options, one winner
+### Gate 2: Exactly 5 concept options, one winner
 
-Generate exactly 12 concepts for the character. The board must vary silhouette, age impression, posture, wardrobe cut, warmth, realism level inside the locked style, and prop read. A concept board fails if the options are merely color swaps.
+Generate exactly 5 concepts for the character: one base identity prompt x five concurrent lanes. No identity reference image is attached at this stage, because references collapse variety. The board must vary silhouette, age impression, posture, wardrobe cut, warmth, realism level inside the locked style, and prop read. A concept board fails if the options are merely color swaps.
 
 Armaan selects exactly one winner. The winner becomes the character identity reference. Reject the winner if it only works at large size, overlaps another cast silhouette, feels like a mascot, or breaks the building metaphor.
 
@@ -149,11 +168,13 @@ Generated sheets are imported into the run ledger, split into deterministic per-
 
 ### Gate 6: Master, derivative, and automated QA
 
-The scripts normalize 4K transparent masters, export default/`@2x`/`@3x` derivatives into staged public paths, and block promotion when slots, dimensions, alpha, prompt refs, checksums, or QA status are missing.
+The scripts normalize 4K true-alpha masters, export default/`@2x`/`@3x` derivatives into staged public paths, and block promotion when slots, dimensions, alpha, prompt refs, checksums, or QA status are missing.
 
 ### Gate 7: Final upload-ready board
 
 The review command builds one board showing every staged sprite on dark and light backgrounds. This is the second human approval gate.
+
+Before Armaan sees this as an upload-ready board, run the Asset Doctor Gate with `--strict`. A board with missing, corrupt, external, inline, or warning-only image references is not upload-ready even if the HTML opens.
 
 ### Gate 8: Promotion and app preview
 
@@ -164,13 +185,13 @@ Only after the exact phrase `approved for app`, staged files are copied into `pu
 ### Concept board
 
 ```text
-Create exactly 12 distinct concept options for {characterName}, {title} of The Tower, an immersive internship command-center skyscraper. Style: tower-flat-plus-depth-v1, premium adult web-game sprite, clean raster shapes, strong mobile-readable silhouette, flat forms with subtle controlled depth. Character canon: {characterBibleSummary}. Visual DNA: {visualDNA}. Role doctrine: {roleDoctrine}. Relationships and comedic engine: {relationshipsAndComedy}. Vary silhouette, posture, age impression, wardrobe cut, warmth, and expression while preserving the role. No text, logo, watermark, celebrity likeness, mascot proportions, superhero costume, sci-fi armor, or random props.
+Create exactly 5 distinct prompt-only concept options for {characterName}, {title} of The Tower, an immersive internship command-center skyscraper. Style: tower-flat-plus-depth-v1, premium adult web-game sprite, clean raster shapes, strong mobile-readable silhouette, flat forms with subtle controlled depth. Character canon: {characterBibleSummary}. Visual DNA: {visualDNA}. Role doctrine: {roleDoctrine}. Relationships and comedic engine: {relationshipsAndComedy}. Vary silhouette, posture, age impression, wardrobe cut, warmth, and expression while preserving the role. No text, logo, watermark, celebrity likeness, mascot proportions, superhero costume, sci-fi armor, or random props.
 ```
 
 ### Winner reference
 
 ```text
-Using the approved concept {conceptId}, create one clean full-body identity reference for {characterName}. Preserve the exact silhouette, face DNA, hair DNA, wardrobe DNA, palette, canonical prop, and character attitude. Transparent background, safe padding, tower-flat-plus-depth-v1, no text, no logo, no watermark.
+Using the approved concept {conceptId}, create one clean full-body identity reference for {characterName}. Preserve the exact silhouette, face DNA, hair DNA, wardrobe DNA, palette, canonical prop, and character attitude. Solid neutral approval background, safe padding, tower-flat-plus-depth-v1, no text, no logo, no watermark.
 ```
 
 ### Turnaround
@@ -194,7 +215,7 @@ Using approved identity reference {refId} and approved turnaround {turnaroundId}
 ### Pose pack
 
 ```text
-Using approved identity reference {refId}, approved turnaround {turnaroundId}, approved expression sheet {expressionId}, and approved outfit variant sheet {outfitSheetId}, create the {outfitVariant} {poseName} 4K production master for {characterName}. Full-body transparent background, same identity, same proportions, same palette family, approved {outfitVariant} wardrobe edit. Pose definition: {poseDefinition}. Target source frame: {sourceFrameWidth}x{sourceFrameHeight}, long edge at least 4096px, with safe padding around hair, hands, props, and feet. Style: tower-flat-plus-depth-v1. No background, no text, no logo, no watermark.
+Using approved identity reference {refId}, approved turnaround {turnaroundId}, approved expression sheet {expressionId}, and approved outfit variant sheet {outfitSheetId}, create the {outfitVariant} {poseName} 4K production source for {characterName}. Full-body on a perfectly flat solid `#00ff00` chroma matte for local alpha extraction, same identity, same proportions, same palette family, approved {outfitVariant} wardrobe edit. Pose definition: {poseDefinition}. Target source frame: {sourceFrameWidth}x{sourceFrameHeight}, long edge at least 4096px, with safe padding around hair, hands, props, and feet. Style: tower-flat-plus-depth-v1. No checkerboard, no background scene, no text, no logo, no watermark.
 ```
 
 ## Anti-Drift Rules
@@ -210,7 +231,7 @@ Using approved identity reference {refId}, approved turnaround {turnaroundId}, a
 
 - Wave 0: Art director checks cast-level silhouette spread and style conflicts.
 - Wave 1: Character-bible agents deepen individual character records without generating images.
-- Wave 2: Concept agents generate one 12-option board per character after bible approval.
+- Wave 2: Concept agents generate one 5-option prompt-only board per character after bible approval.
 - Wave 3: Continuity agents generate turnarounds, outfit variant sheets, and expression sheets only for approved winners.
 - Wave 4: Pose agents work one character at a time, owning all three outfit variants and all seven poses for that character.
 - Wave 5: QA agent checks prompt refs, dimensions, filenames, manifest entries, alt text, and approval status.
@@ -220,25 +241,14 @@ Subagents may not commit, deploy, touch secrets, or add unapproved files to the 
 
 ## First Pilot: Otis
 
-Otis was first because the Lobby already has canonical environmental art. His completed pilot run is `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
-
-Completed:
-
-1. Otis has 21 promoted derivatives: 3 outfit variants x 7 poses.
-2. Approved files live under `public/art/lobby/otis/<outfitVariant>/`.
-3. Approved manifest entries live in `src/lib/visual-assets/approved-character-assets.generated.json`.
-4. Browser QA passed for `/lobby` and `/lobby/onboarding` on desktop and mobile.
-5. Middleware now treats `/art` as a public path so Next image optimization can fetch approved assets.
-
-Active caveat:
-
-- The pilot source sprites were prototype-sized and upscaled into 4K masters. Keep `source-long-edge-below-4096` and `source-upscaled-to-master` visible until Otis is regenerated from native high-resolution source art.
-- Otis now has an active production redo run: `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`. This run must finish before Mara Voss.
-- Superseded Otis planning run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
-- Future masters are run-owned under `.artlab/characters/<characterId>/masters/<runId>/` so replacement runs cannot overwrite historical master paths.
+Otis remains first because the Lobby already has canonical environmental art. The active studio has been reset, so Otis has no approved production sprites right now.
 
 Next:
 
-- Run `npm run art:operate`.
-- Use `npm run art:status` for read-only inspection.
-- Continue Otis v2 first, then Mara Voss (`ceo`).
+- Run `npm run art:studio`.
+- Confirm `npm run art:status` reports `0/252` approved character production sprites.
+- Generate exactly five prompt-only Otis initial designs from scratch.
+- After Armaan chooses one, generate the production pack and final upload-ready board.
+- Promote only after `approved for app`.
+- Then browser-check `/lobby` and `/lobby/onboarding`.
+- Mara Voss (`ceo`) comes after Otis is promoted.

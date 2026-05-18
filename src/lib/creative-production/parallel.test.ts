@@ -12,7 +12,7 @@ import {
 } from "./index";
 
 describe("creative production parallel waves", () => {
-  it("creates 5x3 isolated lane packets with divergent strategies", () => {
+  it("creates five isolated lane packets with divergent strategies", () => {
     const packet = createCreativeProductionPacket({
       assetType: "character",
       name: "Otis",
@@ -23,11 +23,11 @@ describe("creative production parallel waves", () => {
     const plan = createCreativeParallelWavePlan({
       packet,
       agentsPerWave: 5,
-      waves: 3,
+      waves: 1,
     });
 
     expect(plan.agentsPerWave).toBe(5);
-    expect(plan.waves).toBe(3);
+    expect(plan.waves).toBe(1);
     expect(plan.totalLanes).toBe(CREATIVE_PARALLEL_DEFAULT_TOTAL_LANES);
     expect(plan.status).toBe("awaiting-initial-approval");
     expect(plan.statusReason).toContain("Initial direction approval");
@@ -39,13 +39,13 @@ describe("creative production parallel waves", () => {
     const laneRoots = new Set(plan.lanes.map((lane) => lane.outputRoot));
     const strategies = new Set(plan.lanes.map((lane) => lane.strategy.id));
 
-    expect(laneIds.size).toBe(15);
-    expect(laneRoots.size).toBe(15);
-    expect(strategies.size).toBe(15);
+    expect(laneIds.size).toBe(5);
+    expect(laneRoots.size).toBe(5);
+    expect(strategies.size).toBe(5);
     expect([...laneRoots].every((root) => root.includes(".artlab/studio/characters/otis-parallel-v1/parallel/lanes/"))).toBe(true);
     expect(plan.lanes.every((lane) => lane.forbiddenActions.some((action) => action.includes("public/art")))).toBe(true);
     expect(plan.lanes.every((lane) => lane.recommendedAgentProfile.model === "gpt-5.5")).toBe(true);
-    expect(plan.safetyRules).toContain("15x output may increase variety, never lower the source-quality, QA, approval, or organization bar");
+    expect(plan.safetyRules).toContain("5-lane output may increase variety, never lower the source-quality, QA, approval, or organization bar");
   });
 
   it("renders lane prompts that give subagents strict write scope and coordinator-only promotion", () => {
@@ -86,7 +86,7 @@ describe("creative production parallel waves", () => {
     expect(() => assertCreativeParallelCount("--parallel-agents", 0)).toThrow(/--parallel-agents/);
     expect(() => assertCreativeParallelCount("--parallel-agents", 9)).toThrow(/--parallel-agents/);
     expect(() => assertCreativeParallelCount("--waves", 7)).toThrow(/--waves/);
-    expect(() => assertCreativeParallelShape(8, 6)).toThrow(/capped at 15 lanes/);
+    expect(() => assertCreativeParallelShape(8, 6)).toThrow(/capped at 5 lanes/);
   });
 
   it("marks already-approved production packets as ready for dispatch", () => {
@@ -108,7 +108,7 @@ describe("creative production parallel waves", () => {
     const plan = createCreativeParallelWavePlan({
       packet,
       agentsPerWave: 5,
-      waves: 3,
+      waves: 1,
     });
 
     expect(plan.status).toBe("ready-for-dispatch");

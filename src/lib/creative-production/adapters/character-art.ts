@@ -9,9 +9,9 @@ export interface CharacterCreativeAdapterSummary {
 export function buildCharacterCreativeAdapterSummary(): CharacterCreativeAdapterSummary {
   return {
     assetType: "character",
-    completed: ["Otis Vale"],
-    recommendedNext: "Otis Vale native-quality v2, then Mara Voss",
+    completed: [],
+    recommendedNext: "Otis Vale from-scratch initial design, then full production pack after approval",
     commandHints: ["npm run art:operate", "npm run art:status"],
-    warningCodes: ["source-long-edge-below-4096", "source-upscaled-to-master"],
+    warningCodes: [],
   };
 }

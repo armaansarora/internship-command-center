@@ -1,21 +1,20 @@
 {
   "schemaVersion": "tower-creative-studio-state-v1",
   "engineVersion": "creative-production-engine-v1",
-  "updatedAt": "2026-05-14T23:21:19.302Z",
+  "updatedAt": "2026-05-18T18:30:02.325Z",
   "done": [
     "Four Lobby backgrounds preserved",
-    "Otis Vale character pilot promoted",
     "Character rendering foundation added",
     "Batch character asset pipeline added",
-    "21/252 approved production sprites",
-    "Promoted characters: Otis Vale (otis)"
+    "0/252 approved production sprites",
+    "Promoted characters: none"
   ],
   "active": [
     "Otis Vale recommended next by live art status",
     "Otis Vale production packet is the next strict engine action"
   ],
   "remaining": [
-    "11 Season 1 character identities",
+    "12 Season 1 character identities",
     "Season 1 outfit, pose, and expression packs",
     "Floor environments beyond Lobby",
     "Props for character and floor storytelling",
@@ -24,13 +23,10 @@
     "Scene art for onboarding and floor moments",
     "Marketing hero imagery when product pages need it"
   ],
-  "knownWarnings": [
-    "source-long-edge-below-4096 x21",
-    "source-upscaled-to-master x21"
-  ],
+  "knownWarnings": [],
   "recommendedNext": {
     "assetType": "character",
     "name": "Otis Vale",
-    "reason": "Otis Vale has an active replacement run (2026-05-14-otis-production-redo-v1) and should be completed before new characters."
+    "reason": "Fresh-start reset is active, so Otis should be regenerated from scratch as the first production pilot."
   }
 }

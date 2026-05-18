@@ -847,13 +847,12 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
   const activeReplacementRun = getActiveReplacementRun(runLedgers, approvedCounts);
   const nextCharacter =
     characters.find((character) => character.characterId === activeReplacementRun?.characterId) ??
-    characters.find((character) => character.characterId === "ceo" && character.productionState !== "fully-promoted") ??
     characters.find((character) => character.productionState !== "fully-promoted") ??
     characters[0];
   const nextReason = activeReplacementRun
     ? `${nextCharacter.displayName} has an active replacement run (${activeReplacementRun.runId}) and should be completed before new characters.`
-    : nextCharacter.characterId === "ceo"
-      ? "Mara Voss was already chosen as the next pilot after Otis."
+    : nextCharacter.characterId === "otis"
+      ? "Fresh-start reset is active, so Otis should be regenerated from scratch as the first production pilot."
       : "This is the next unpromoted Season 1 character in the locked generation order.";
 
   return {
@@ -874,9 +873,14 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
     characters,
     runLedgers,
     commands: [
+      "npm run art:produce -- --request \"<natural language creative request>\"",
+      "npm run art:produce -- --continue <run-id>",
       "npm run art:operate",
       "npm run art:status",
       "npm --silent run art:status -- --json",
+      "npm run art:generate prepare-api --phase production-pack --packet <creative-brief.json> --directive <next-image-generation-step.json>",
+      "npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>",
+      "npm run art:generate repair-auto --plan <gemini-api-plan.json>",
       "npm run art:clean -- <characterId> --run-id <run-id>",
       "npm run art:plan -- <characterId> --run-id <yyyy-mm-dd-character-purpose> --identity-ref <approved-reference-path>",
       "npm run art:preflight -- <generated-file> --minimum-long-edge 4096 --chroma-key 00ff00",
@@ -900,7 +904,9 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
     nonNegotiables: [
       "Only two human approval gates: initial character design, then final upload-ready board.",
       "No production manifest entry without the exact final phrase: approved for app.",
-      "Do not hide source warnings; prototype upscales must stay visible until replaced by native high-resolution source art.",
+      "Production packs must pass the one-slot canary before full-pack paid generation.",
+      "Whole-pack retries are banned; repair or regenerate only named failed slots.",
+      "Do not hide source warnings; below-contract sources must be repaired or regenerated before promotion.",
       "When the pipeline needs a manual workaround twice, add a script, test, and doc update before continuing.",
     ],
   };
@@ -966,7 +972,7 @@ Prompt ref: ${character.conceptBoardPromptRef}
 Style: tower-flat-plus-depth-v1
 Tone: Professional Scars
 
-Create exactly 12 distinct concept options for ${character.displayName}, ${character.title} of The Tower.
+Create exactly 5 distinct prompt-only concept options for ${character.displayName}, ${character.title} of The Tower.
 
 Style rules:
 - Premium adult web-game sprite.
@@ -984,7 +990,7 @@ Character DNA:
 - Art direction: ${character.artDirectionNotes}
 
 Variation requirements:
-- The 12 options must vary meaningfully in silhouette, posture, age impression, wardrobe cut, warmth, expression, and prop handling.
+- The 5 options must vary meaningfully in silhouette, posture, age impression, wardrobe cut, warmth, expression, and prop handling.
 - All options must still fit the Tower style and the existing cast.
 - Show enough spread for Armaan to choose the actual identity, not just a palette preference.
 
@@ -993,7 +999,7 @@ Negative prompt:
 - No celebrity likeness, actor likeness, named fictional character styling, logo, watermark, fake text, photoreal render, superhero costume, sci-fi armor, mascot proportions, or random unrelated props.
 
 Output:
-- One reviewable concept board containing exactly 12 labeled visual options.
+- One reviewable concept board containing exactly 5 labeled visual options.
 - Keep this as draft/reference art only. Do not place any generated output in public/art.
 `;
 }
@@ -1100,9 +1106,9 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       type: "generate-concept-board",
       status: "blocked-on-human-choice",
       humanGate: "initial-character-design",
-      summary: "Generate exactly 12 initial design concepts before any production run exists.",
+      summary: "Generate exactly 5 prompt-only initial design concepts before any production run exists.",
     };
-    blockedUntil = "Armaan chooses one initial character design from the 12-option concept board.";
+    blockedUntil = "Armaan chooses one initial character design from the 5-option concept board.";
   }
 
   return {
@@ -1124,8 +1130,10 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       expectedSpritesPerCharacter,
     },
     allowedCommands: [
+      "npm run art:produce",
       "npm run art:operate",
       "npm run art:status",
+      "npm run art:generate",
       "npm run art:clean",
       "npm run art:plan",
       "npm run art:preflight",
@@ -1140,6 +1148,8 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       "Do not copy generated files directly into public/art.",
       "Do not update the approved manifest without a promoted QA-passed run.",
       "Do not proceed past the initial design gate without Armaan choosing one concept.",
+      "Do not run a full production pack before the canary gate passes.",
+      "Do not run whole-pack warning retries.",
       "Do not promote without the exact phrase approved for app.",
       "Do not hide source-quality warnings.",
     ],

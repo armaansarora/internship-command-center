@@ -60,7 +60,7 @@ function isCreativeStudioState(value: unknown): value is CreativeStudioState {
 }
 
 function formatWarningCounts(status?: CreativeLiveArtStatusInput): string[] {
-  if (!status) return ["source-long-edge-below-4096 x21", "source-upscaled-to-master x21"];
+  if (!status) return [];
 
   return status.runLedgers.flatMap((run) =>
     Object.entries(run.warningCounts).map(([warning, count]) => `${warning} x${count}`),
@@ -73,12 +73,13 @@ export function createDefaultCreativeStudioState(
 ): CreativeStudioState {
   const approvedSummary = liveStatus
     ? `${liveStatus.approvedProductionSprites}/${liveStatus.expectedProductionSprites} approved production sprites`
-    : "21/252 approved production sprites";
-  const promotedCharacters = liveStatus?.fullyPromotedCharacters ?? ["Otis Vale (otis)"];
+    : "0/252 approved production sprites";
+  const promotedCharacters = liveStatus?.fullyPromotedCharacters ?? [];
+  const remainingCharacterIdentities = Math.max(0, 12 - promotedCharacters.length);
   const nextName = liveStatus?.nextRecommendedCharacter.displayName ?? "Otis Vale";
   const nextReason =
     liveStatus?.nextRecommendedCharacter.reason ??
-    "Otis native-quality v2 must replace the prototype-upscaled pilot before new character work starts.";
+    "Fresh-start reset is active, so Otis should be generated from scratch as the first production pilot.";
 
   return {
     schemaVersion: "tower-creative-studio-state-v1",
@@ -86,18 +87,17 @@ export function createDefaultCreativeStudioState(
     updatedAt: now,
     done: [
       "Four Lobby backgrounds preserved",
-      "Otis Vale character pilot promoted",
       "Character rendering foundation added",
       "Batch character asset pipeline added",
       approvedSummary,
-      `Promoted characters: ${promotedCharacters.join(", ")}`,
+      `Promoted characters: ${promotedCharacters.length ? promotedCharacters.join(", ") : "none"}`,
     ],
     active: [
       `${nextName} recommended next by live art status`,
       `${nextName} production packet is the next strict engine action`,
     ],
     remaining: [
-      "11 Season 1 character identities",
+      `${remainingCharacterIdentities} Season 1 character identities`,
       "Season 1 outfit, pose, and expression packs",
       "Floor environments beyond Lobby",
       "Props for character and floor storytelling",
