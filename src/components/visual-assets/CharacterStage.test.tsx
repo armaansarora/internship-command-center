@@ -16,8 +16,10 @@ describe("CharacterStage", () => {
     expect(html).toContain('data-character="otis"');
     expect(html).toContain('data-character-state="talking"');
     expect(html).toContain('data-character-pose="talking"');
-    expect(html).toContain('data-character-motion-profile="concierge-calm"');
-    expect(html).toContain("tower-character-stage-talk");
+	    expect(html).toContain('data-character-motion-profile="concierge-calm"');
+	    expect(html).toContain('data-visual-stage-shadow="grounded-premium"');
+	    expect(html).toContain("tower-visual-asset-stage__shadow");
+	    expect(html).toContain("tower-character-stage-talk");
   });
 
   it("freezes motion for reduced-motion users without losing state or pose", () => {

@@ -1,0 +1,761 @@
+{
+  "schemaVersion": "tower-creative-asset-doctor-v1",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-production-v1/generation/gemini-api-v3/gemini-api-plan.json",
+  "status": "blocked",
+  "strict": true,
+  "checkedAt": "2026-05-18T19:31:33.603Z",
+  "checkedGeneratedImages": [
+    {
+      "slotId": "api-lane-01__otis-turnaround",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-turnaround/otis__turnaround__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-turnaround/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-expression-sheet",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-expression-sheet/otis__expression-sheet__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-expression-sheet/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-outfit-variants",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-outfit-variants/otis__outfit-variants__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-outfit-variants/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-idle",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-idle/otis__regular__idle__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-idle/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-greeting",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-greeting/otis__regular__greeting__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-greeting/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-listening",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-listening/otis__regular__listening__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-listening/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-thinking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-thinking/otis__regular__thinking__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-thinking/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-talking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-talking/otis__regular__talking__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-talking/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-alert",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-alert/otis__regular__alert__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-alert/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-working",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-working/otis__regular__working__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-working/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-idle",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-idle/otis__summer-light__idle__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-idle/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-greeting",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-greeting/otis__summer-light__greeting__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-greeting/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-listening",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-listening/otis__summer-light__listening__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-listening/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-thinking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-thinking/otis__summer-light__thinking__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-thinking/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-talking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-talking/otis__summer-light__talking__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-talking/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-alert",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-alert/otis__summer-light__alert__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-alert/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-working",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-working/otis__summer-light__working__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-working/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-idle",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-idle/otis__winter-layered__idle__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-idle/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-greeting",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-greeting/otis__winter-layered__greeting__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-greeting/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-listening",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-listening/otis__winter-layered__listening__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-listening/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-thinking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-thinking/otis__winter-layered__thinking__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-thinking/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-talking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-talking/otis__winter-layered__talking__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-talking/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-alert",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-alert/otis__winter-layered__alert__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-alert/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-working",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01__v002.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    }
+  ],
+  "checkedReviewImages": [],
+  "issues": [
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-turnaround/otis__turnaround__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-turnaround/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-turnaround latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-turnaround/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-turnaround latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-expression-sheet/otis__expression-sheet__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-expression-sheet/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-expression-sheet latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-expression-sheet/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-expression-sheet latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-outfit-variants/otis__outfit-variants__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-outfit-variants/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-outfit-variants latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-outfit-variants/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-outfit-variants latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-idle/otis__regular__idle__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-idle/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-idle latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-idle/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-idle latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-greeting/otis__regular__greeting__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-greeting/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-greeting latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-greeting/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-greeting latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-listening/otis__regular__listening__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-listening/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-listening latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-listening/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-listening latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-thinking/otis__regular__thinking__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-thinking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-thinking latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-thinking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-thinking latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-talking/otis__regular__talking__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-talking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-talking latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-talking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-talking latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-alert/otis__regular__alert__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-alert/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-alert latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-alert/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-alert latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-working/otis__regular__working__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-working/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-working latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-regular-working/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-regular-working latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-idle/otis__summer-light__idle__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-idle/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-idle latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-idle/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-idle latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-greeting/otis__summer-light__greeting__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-greeting/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-greeting latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-greeting/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-greeting latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-listening/otis__summer-light__listening__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-listening/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-listening latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-listening/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-listening latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-thinking/otis__summer-light__thinking__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-thinking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-thinking latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-thinking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-thinking latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-talking/otis__summer-light__talking__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-talking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-talking latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-talking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-talking latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-alert/otis__summer-light__alert__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-alert/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-alert latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-alert/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-alert latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-working/otis__summer-light__working__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-working/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-working latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-summer-light-working/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-summer-light-working latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-idle/otis__winter-layered__idle__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-idle/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-idle latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-idle/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-idle latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-greeting/otis__winter-layered__greeting__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-greeting/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-greeting latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-greeting/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-greeting latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-listening/otis__winter-layered__listening__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-listening/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-listening latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-listening/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-listening latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-thinking/otis__winter-layered__thinking__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-thinking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-thinking latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-thinking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-thinking latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-talking/otis__winter-layered__talking__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-talking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-talking latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-talking/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-talking latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-alert/otis__winter-layered__alert__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-alert/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-alert latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-alert/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-alert latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "image-missing-alpha",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01__v002.png",
+      "message": "Image is missing an alpha channel required for production sprites."
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-working latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "blocker",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/api-receipt-v002.json",
+      "message": "Slot api-lane-01__otis-winter-layered-working latest receipt warning: source-mime-image-jpeg"
+    }
+  ],
+  "recoveryActions": [
+    "Do not show this board as clean and do not promote this run.",
+    "Regenerate missing or corrupt slots with npm run art:generate run-api -- --plan <plan>.",
+    "Rebuild the review board after every referenced image is local and decodable."
+  ]
+}

@@ -4,6 +4,11 @@ import { basename, join } from "node:path";
 import type { CreativeAssetType } from "./types";
 import { createGenerationBudgetLedger } from "./budget-ledger";
 import {
+  CHARACTER_CUTOUT_THRESHOLDS,
+  createDefaultCutoutContract,
+  type CutoutContract,
+} from "./cutout-compiler";
+import {
   CHARACTER_INITIAL_CONCEPT_IDENTITY_VARIATION_RULE,
   CHARACTER_INITIAL_CONCEPT_SHARED_LANE_QUALITY_FLOOR,
 } from "./initial-concept-style-contract";
@@ -44,6 +49,7 @@ export interface GeminiApiBaseSlotInput {
   targetFilename: string;
   reason: string;
   laneId?: string;
+  cutout?: CutoutContract;
 }
 
 export interface GeminiApiReferenceImage {
@@ -78,6 +84,7 @@ export interface GeminiApiGenerationSlot {
     responseModalities: readonly ["IMAGE"];
     includeGoogleSearch: false;
   };
+  cutout: CutoutContract;
 }
 
 export interface GeminiApiGenerationPlan {
@@ -120,6 +127,17 @@ export interface GeminiApiGenerationPlan {
     targetWidth?: number;
     targetHeight?: number;
   };
+  cutoutPolicy: {
+    compilerStage: "fail-closed-visual-cutout-v1";
+    backdropContract: "premium-simple-backdrop-v1";
+    edgeRefinementStage: "edge-refinement-v1";
+    productionModeOfflineByDefault: true;
+    bootstrapMayUseNetwork: true;
+    neverUpscaleBeforeCutout: true;
+    readinessThreshold: 0.9;
+    modelSelection: "per-subject-type-and-topology";
+    failureRouting: "named-slot-regeneration-or-improvement-mode";
+  };
   referenceImages: GeminiApiReferenceImage[];
   inboxRoot: string;
   planRoot: string;
@@ -128,6 +146,7 @@ export interface GeminiApiGenerationPlan {
     requiresCanary: boolean;
     canaryGatePath?: string;
     budgetLedgerPath?: string;
+    cutoutReadinessPath?: string;
     promptContractHash: string;
     referenceContractHash: string;
     sourceContractHash: string;
@@ -253,6 +272,97 @@ export function estimateGeminiApiCostCents(input: {
   return input.billableImages * costPerImageCents;
 }
 
+function buildSlotCutoutContract(input: {
+  assetType: CreativeAssetType;
+  name: string;
+  slot: GeminiApiBaseSlotInput;
+}): CutoutContract {
+  return input.slot.cutout ?? createDefaultCutoutContract({
+    assetType: input.assetType,
+    name: input.name,
+    slotId: input.slot.slotId,
+  });
+}
+
+function buildCutoutPromptInstructions(contract: CutoutContract): string[] {
+  if (!contract.required) return [];
+
+  return [
+    `Cutout backdrop contract (${contract.backdropContract}): ${contract.backdropRequirements.join(" ")}`,
+    "Keep the full subject and all expected props fully inside frame; leave visible breathing room around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props.",
+    "Use app-owned shadow discipline: avoid baked contact shadows merging into the body because Tower renders runtime shadows after local cutout.",
+    "Use crisp foreground/background separation while preserving natural human imperfections; do not create fake-perfect AI model people.",
+  ];
+}
+
+function scoreCanarySlot(input: {
+  assetType: CreativeAssetType;
+  name: string;
+  slot: GeminiApiBaseSlotInput;
+}): number {
+  const contract = buildSlotCutoutContract(input);
+  const text = `${input.name} ${input.slot.slotId} ${input.slot.prompt} ${input.slot.reason}`.toLowerCase();
+  const tokens = [
+    "winter",
+    "layer",
+    "working",
+    "alert",
+    "greeting",
+    "hands",
+    "feet",
+    "badge",
+    "key",
+    "prop",
+    "pen",
+    "glasses",
+    "beard",
+    "hair",
+  ];
+  const tokenScore = tokens.reduce((score, token) => score + (text.includes(token) ? 1 : 0), 0);
+  const topologyScore = contract.topologyType === "hair-beard-soft-body-held-props" ? 10 : 0;
+  const propsScore = contract.expectedProps.length * 2;
+
+  return topologyScore + propsScore + tokenScore;
+}
+
+export function selectProductionCanarySlots(input: {
+  assetType: CreativeAssetType;
+  name: string;
+  slots: GeminiApiBaseSlotInput[];
+  canaryBaseSlotId?: string;
+}): GeminiApiBaseSlotInput[] {
+  if (input.canaryBaseSlotId) {
+    const explicit = input.slots.find((slot) => slot.slotId === input.canaryBaseSlotId);
+
+    if (!explicit) {
+      throw new Error(`Production firewall could not find explicit canary slot ${input.canaryBaseSlotId}.`);
+    }
+
+    return [explicit];
+  }
+
+  const byTopology = new Map<string, GeminiApiBaseSlotInput[]>();
+
+  for (const slot of input.slots) {
+    const contract = buildSlotCutoutContract({ assetType: input.assetType, name: input.name, slot });
+
+    if (!contract.required) continue;
+
+    const existing = byTopology.get(contract.topologyType) ?? [];
+    existing.push(slot);
+    byTopology.set(contract.topologyType, existing);
+  }
+
+  const selected = Array.from(byTopology.values()).map((slots) =>
+    [...slots].sort((left, right) =>
+      scoreCanarySlot({ assetType: input.assetType, name: input.name, slot: right }) -
+      scoreCanarySlot({ assetType: input.assetType, name: input.name, slot: left }),
+    )[0]!,
+  );
+
+  return selected.length ? selected : input.slots.slice(0, 1);
+}
+
 export function createGeminiGenerateContentPayload(input: {
   prompt: string;
   aspectRatio: GeminiApiAspectRatio;
@@ -350,15 +460,22 @@ export function createGeminiApiGenerationPlan(input: {
       ...mandate,
     };
   });
-  const slots = lanes.flatMap((lane) =>
-    input.slots.map((slot) => {
-      const slotId = `${lane.laneId}__${slot.slotId}`;
-      const lanePrompt = [
-        slot.prompt,
-        "",
-        ...sharedInitialConceptLaneInstructions,
-        phase === "initial-design"
-          ? `Unique identity mandate (${lane.label}): ${lane.mandate}`
+	  const slots = lanes.flatMap((lane) =>
+	    input.slots.map((slot) => {
+	      const slotId = `${lane.laneId}__${slot.slotId}`;
+	      const cutout = buildSlotCutoutContract({
+	        assetType: input.assetType,
+	        name: input.name,
+	        slot,
+	      });
+	      const lanePrompt = [
+	        slot.prompt,
+	        "",
+	        ...buildCutoutPromptInstructions(cutout),
+	        "",
+	        ...sharedInitialConceptLaneInstructions,
+	        phase === "initial-design"
+	          ? `Unique identity mandate (${lane.label}): ${lane.mandate}`
           : `API lane mandate (${lane.label}): ${lane.mandate}`,
         identityInstruction,
         "Use no external image search or grounding unless the run plan explicitly enables it.",
@@ -374,21 +491,22 @@ export function createGeminiApiGenerationPlan(input: {
         status: "ready-for-api-generation" as const,
         prompt: lanePrompt,
         promptHash: hashCreativePrompt(lanePrompt),
-        reason: `${slot.reason} Lane: ${lane.label}.`,
+	        reason: `${slot.reason} Lane: ${lane.label}.`,
         inboxDirectory,
         expectedInboxFile,
         targetDirectory: slot.targetDirectory,
         targetFilename,
-        request: {
+	        request: {
           model,
           aspectRatio,
           imageSize,
           responseModalities: ["IMAGE"] as const,
-          includeGoogleSearch: false as const,
-        },
-      };
-    }),
-  );
+	          includeGoogleSearch: false as const,
+	        },
+	        cutout,
+	      };
+	    }),
+	  );
   const estimatedCostCents = estimateGeminiApiCostCents({
     billableImages: slots.length,
     costPerImageCents,
@@ -431,8 +549,23 @@ export function createGeminiApiGenerationPlan(input: {
       defaultInitialDesignTotalImages: GEMINI_API_DEFAULT_LANE_COUNT,
       disableGroundingByDefault: true,
     },
-    sourceRequirements: input.sourceRequirements ?? {},
-    referenceImages,
+	    sourceRequirements: input.sourceRequirements ?? {
+	      minimumLongEdge: CHARACTER_CUTOUT_THRESHOLDS.minimumLongEdge,
+	      minimumShortEdge: CHARACTER_CUTOUT_THRESHOLDS.minimumShortEdge,
+	      preferredFormat: "png",
+	    },
+	    cutoutPolicy: {
+	      compilerStage: "fail-closed-visual-cutout-v1",
+	      backdropContract: "premium-simple-backdrop-v1",
+	      edgeRefinementStage: "edge-refinement-v1",
+	      productionModeOfflineByDefault: true,
+	      bootstrapMayUseNetwork: true,
+	      neverUpscaleBeforeCutout: true,
+	      readinessThreshold: 0.9,
+	      modelSelection: "per-subject-type-and-topology",
+	      failureRouting: "named-slot-regeneration-or-improvement-mode",
+	    },
+	    referenceImages,
     inboxRoot: input.inboxRoot,
     planRoot: input.planRoot,
     firewall: input.firewall ?? {
@@ -444,11 +577,14 @@ export function createGeminiApiGenerationPlan(input: {
     },
     lanes,
     slots,
-    nextCommands: [
-      `export GEMINI_API_KEY="<set locally, never commit>"`,
-      `npm run art:generate -- run-api --plan ${join(input.planRoot, "gemini-api-plan.json")}`,
-      `npm run art:generate -- status --bridge ${join(input.planRoot, "gemini-api-plan.json")}`,
-    ],
+	    nextCommands: [
+	      `npm run art:generate -- cutout-readiness --plan ${join(input.planRoot, "gemini-api-plan.json")}`,
+	      `export GEMINI_API_KEY="<set locally, never commit>"`,
+	      `npm run art:generate -- run-api --plan ${join(input.planRoot, "gemini-api-plan.json")}`,
+	      `npm run art:generate -- cutout-auto --plan ${join(input.planRoot, "gemini-api-plan.json")} --slots <slot-id>`,
+	      `npm run art:generate -- cutout-doctor --plan ${join(input.planRoot, "gemini-api-plan.json")} --strict`,
+	      `npm run art:generate -- status --bridge ${join(input.planRoot, "gemini-api-plan.json")}`,
+	    ],
   };
 }
 
@@ -456,41 +592,48 @@ export function createGeminiApiProductionFirewallPlans(input: Parameters<typeof 
   phase: "production-pack";
   canaryBaseSlotId?: string;
 }): {
-  canaryPlan: GeminiApiGenerationPlan;
-  fullPlan: GeminiApiGenerationPlan;
-  canaryGatePath: string;
-  budgetLedgerPath: string;
-  initialBudgetLedger: ReturnType<typeof createGenerationBudgetLedger>;
-} {
+	  canaryPlan: GeminiApiGenerationPlan;
+	  fullPlan: GeminiApiGenerationPlan;
+	  canaryGatePath: string;
+	  budgetLedgerPath: string;
+	  cutoutReadinessPath: string;
+	  initialBudgetLedger: ReturnType<typeof createGenerationBudgetLedger>;
+	} {
   if (input.phase !== "production-pack") {
     throw new Error("Production firewall plans are only valid for production-pack API runs.");
   }
 
-  const canaryBaseSlotId = input.canaryBaseSlotId ?? "otis-regular-idle";
-  const canarySlot = input.slots.find((slot) => slot.slotId === canaryBaseSlotId) ?? input.slots[0];
+	  const canarySlots = selectProductionCanarySlots({
+	    assetType: input.assetType,
+	    name: input.name,
+	    slots: input.slots,
+	    canaryBaseSlotId: input.canaryBaseSlotId,
+	  });
 
-  if (!canarySlot) {
-    throw new Error("Production firewall requires at least one canary slot.");
-  }
+	  if (!canarySlots.length) {
+	    throw new Error("Production firewall requires at least one canary slot.");
+	  }
 
   const canaryRoot = join(input.planRoot, "canary");
   const fullRoot = join(input.planRoot, "full");
-  const canaryGatePath = join(input.planRoot, "canary-gate.json");
-  const budgetLedgerPath = join(input.planRoot, "generation-budget-ledger.json");
-  const promptContractHash = hashCreativePrompt(input.slots.map((slot) => `${slot.slotId}:${slot.prompt}`).join("|"));
+	  const canaryGatePath = join(input.planRoot, "canary-gate.json");
+	  const budgetLedgerPath = join(input.planRoot, "generation-budget-ledger.json");
+	  const cutoutReadinessPath = join(input.planRoot, "cutout-readiness.json");
+	  const promptContractHash = hashCreativePrompt(input.slots.map((slot) => `${slot.slotId}:${slot.prompt}`).join("|"));
   const referenceContractHash = hashCreativePrompt(JSON.stringify(input.referenceImages ?? []));
   const sourceContractHash = hashCreativePrompt(JSON.stringify(input.sourceRequirements ?? {}));
   const sharedFirewall = {
-    canaryGatePath,
-    budgetLedgerPath,
-    promptContractHash,
-    referenceContractHash,
-    sourceContractHash,
+	    canaryGatePath,
+	    budgetLedgerPath,
+	    cutoutReadinessPath,
+	    promptContractHash,
+	    referenceContractHash,
+	    sourceContractHash,
   };
   const canaryPlan = createGeminiApiGenerationPlan({
-    ...input,
-    planRoot: canaryRoot,
-    slots: [canarySlot],
+	    ...input,
+	    planRoot: canaryRoot,
+	    slots: canarySlots,
     laneCount: 1,
     maxConcurrency: 1,
     status: "ready-for-api-generation",
@@ -514,10 +657,11 @@ export function createGeminiApiProductionFirewallPlans(input: Parameters<typeof 
 
   return {
     canaryPlan,
-    fullPlan,
-    canaryGatePath,
-    budgetLedgerPath,
-    initialBudgetLedger: createGenerationBudgetLedger({
+	    fullPlan,
+	    canaryGatePath,
+	    budgetLedgerPath,
+	    cutoutReadinessPath,
+	    initialBudgetLedger: createGenerationBudgetLedger({
       runId: input.runId,
       assetType: input.assetType,
     }),
@@ -560,19 +704,24 @@ Budget cap: ${(plan.budgetCents / 100).toFixed(2)} USD
 
 - API key is read only from ${plan.secretPolicy.acceptedEnvVars.map((name) => `\`${name}\``).join(" or ")} or macOS Keychain service \`${plan.secretPolicy.keychainService}\`.
 - Never write API keys into this repo, command flags, run JSON, prompt decks, receipts, or screenshots.
-- This plan disables Google Search grounding by default to avoid surprise search charges and external-source attribution obligations.
-- Initial design plans are exactly five prompt-only concepts: one base slot x five concurrent lanes, with no reference images.
-- Production packs must be generated after design approval with \`--phase production-pack\`.
-- Gemini sources should use a solid \`#00ff00\` chroma matte for local alpha extraction; fake checkerboard transparency is rejected.
-- Every output lands in the labeled inbox first. Nothing goes to \`public/art\` until QA passes and Armaan says exactly \`approved for app\`.
-- If any output is below the source contract, regenerate that slot only. Do not expand waste.
+	- This plan disables Google Search grounding by default to avoid surprise search charges and external-source attribution obligations.
+	- Initial design plans are exactly five prompt-only concepts: one base slot x five concurrent lanes, with no reference images.
+	- Production packs must be generated after design approval with \`--phase production-pack\`.
+	- Gemini sources must use the \`${plan.cutoutPolicy.backdropContract}\` contract so the local fail-closed cutout compiler can separate the foreground cleanly.
+	- Cutout order is provider source, local cutout, \`${plan.cutoutPolicy.edgeRefinementStage}\`, alpha QA, then master/upscale/derive.
+	- Production mode is offline by default for cutout models. Missing cached model evidence blocks the slot instead of downloading silently.
+	- Every output lands in the labeled inbox first. Nothing goes to \`public/art\` until QA passes and Armaan says exactly \`approved for app\`.
+	- If any output is below the source contract, regenerate that slot only. Do not expand waste.
 
 ## Commands
 
-\`\`\`bash
-npm run art:generate -- run-api --plan ${join(plan.planRoot, "gemini-api-plan.json")}
-npm run art:generate -- status --bridge ${join(plan.planRoot, "gemini-api-plan.json")}
-\`\`\`
+	\`\`\`bash
+	npm run art:generate -- cutout-readiness --plan ${join(plan.planRoot, "gemini-api-plan.json")}
+	npm run art:generate -- run-api --plan ${join(plan.planRoot, "gemini-api-plan.json")}
+	npm run art:generate -- cutout-auto --plan ${join(plan.planRoot, "gemini-api-plan.json")} --slots <slot-id>
+	npm run art:generate -- cutout-doctor --plan ${join(plan.planRoot, "gemini-api-plan.json")} --strict
+	npm run art:generate -- status --bridge ${join(plan.planRoot, "gemini-api-plan.json")}
+	\`\`\`
 
 ## Slots
 

@@ -15,6 +15,7 @@
     "art:operate": "tsx scripts/art-pipeline.ts operate",
     "art:studio": "tsx scripts/creative-production-engine.ts",
     "art:produce": "tsx scripts/creative-production-orchestrator.ts",
+    "art:health": "tsx scripts/creative-production-health.ts",
     "art:generate": "tsx scripts/creative-generation-adapter.ts",
     "art:browser": "tsx scripts/creative-browser-session.ts",
     "art:clean": "tsx scripts/art-pipeline.ts clean",

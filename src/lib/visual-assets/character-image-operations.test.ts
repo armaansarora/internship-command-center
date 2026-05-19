@@ -86,6 +86,17 @@ describe("character image operations fresh start", () => {
       nextRecommendedCharacter: { characterId: string; displayName: string; reason: string };
       commands: string[];
       continuationDocs: string[];
+      creativeRunStates: Array<{
+        runId: string;
+        runStatePath: string;
+        canaryEvidence?: {
+          canaryGatePath?: string;
+          cutoutReadinessPath?: string;
+          cutoutReceiptPaths?: string[];
+          assetDoctorPath?: string;
+          reviewBoardPath?: string;
+        };
+      }>;
       runLedgers: Array<{
         characterId: string;
         runId: string;
@@ -96,22 +107,30 @@ describe("character image operations fresh start", () => {
     };
 
     expect(status.styleId).toBe("tower-flat-plus-depth-v1");
-    expect(status.approvedProductionSprites).toBe(0);
+    expect(status.approvedProductionSprites).toBe(21);
     expect(status.expectedProductionSprites).toBe(252);
-    expect(status.fullyPromotedCharacters).toEqual([]);
-    expect(status.runLedgers.every((run) => run.promotionStatus === "not-promoted")).toBe(true);
+    expect(status.fullyPromotedCharacters).toEqual(["Otis Vale (otis)"]);
+    expect(
+      status.runLedgers.some(
+        (run) =>
+          run.characterId === "otis" &&
+          run.runId === "otis-real-rembg-full-production-v1" &&
+          run.promotionStatus === "promoted",
+      ),
+    ).toBe(true);
     expect(status.runLedgers.every((run) => Object.keys(run.warningCounts).length === 0 || run.status !== "promoted")).toBe(true);
     expect(status.nextRecommendedCharacter).toMatchObject({
-      characterId: "otis",
-      displayName: "Otis Vale",
+      characterId: "ceo",
+      displayName: "Mara Voss",
     });
-    expect(status.nextRecommendedCharacter.reason).toContain("Fresh-start reset");
+    expect(status.nextRecommendedCharacter.reason).toContain("next unpromoted Season 1 character");
     expect(status.commands).toContain("npm run art:status");
     expect(status.commands).toContain("npm run art:produce -- --request \"<natural language creative request>\"");
     expect(status.commands).toContain("npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>");
-    expect(status.commands).toContain("npm run art:preflight -- <generated-file> --minimum-long-edge 4096 --chroma-key 00ff00");
+	    expect(status.commands).toContain("npm run art:generate cutout-doctor --plan <gemini-api-plan.json> --strict");
     expect(status.commands.join("\n")).toContain("approved for app");
     expect(status.continuationDocs).toContain("docs/CHARACTER-IMAGE-OPERATIONS.md");
+    expect(Array.isArray(status.creativeRunStates)).toBe(true);
   });
 
   it("materializes a strict operator packet for the next character gate", () => {
@@ -160,36 +179,31 @@ describe("character image operations fresh start", () => {
     expect(operation.characterId).toBe("otis");
     expect(operation.displayName).toBe("Otis Vale");
     expect(operation.nextAction).toMatchObject({
-      type: "generate-concept-board",
-      humanGate: "initial-character-design",
-      status: "blocked-on-human-choice",
+      type: "complete",
+      status: "complete",
     });
-    expect(operation.blockedUntil).toContain("Armaan chooses one initial character design");
+    expect(operation.blockedUntil).toContain("already promoted");
     expect(operation.allowedCommands).toContain("npm run art:operate");
     expect(operation.forbiddenActions.join(" ")).toContain("public/art");
 
     expect(existsSync(operation.files.nextActionJson)).toBe(true);
     expect(existsSync(operation.files.nextActionMarkdown)).toBe(true);
-    expect(operation.files.conceptPrompt && existsSync(operation.files.conceptPrompt)).toBe(true);
+    expect(operation.files.conceptPrompt).toBeUndefined();
 
     const actionPacket = JSON.parse(readFileSync(operation.files.nextActionJson, "utf8")) as {
       nextAction: { type: string };
       stateContract: { approvalGates: string[]; productionPromotionPhrase: string };
     };
-    const promptPacket = readFileSync(operation.files.conceptPrompt!, "utf8");
     const markdownPacket = readFileSync(operation.files.nextActionMarkdown, "utf8");
 
-    expect(actionPacket.nextAction.type).toBe("generate-concept-board");
+    expect(actionPacket.nextAction.type).toBe("complete");
     expect(actionPacket.stateContract.approvalGates).toEqual([
       "initial-character-design",
       "final-upload-ready-board",
     ]);
     expect(actionPacket.stateContract.productionPromotionPhrase).toBe("approved for app");
-    expect(promptPacket).toContain("Create exactly 5 distinct prompt-only concept options for Otis Vale");
-    expect(promptPacket).toContain("tower-flat-plus-depth-v1");
-    expect(promptPacket).toContain("No celebrity likeness");
     expect(markdownPacket).toContain("Next Legal Action");
-    expect(markdownPacket).toContain("blocked-on-human-choice");
+    expect(markdownPacket).toContain("complete");
   });
 
   it("dry-runs volatile cleanup without deleting shared production gates", () => {

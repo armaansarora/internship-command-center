@@ -1,0 +1,141 @@
+{
+  "schemaVersion": "tower-gemini-api-run-state-v1",
+  "runId": "otis-production-v1",
+  "adapter": "gemini-api",
+  "model": "gemini-3.1-flash-image-preview",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-production-v1/generation/gemini-api-v3/gemini-api-plan.json",
+  "status": "completed-with-warnings",
+  "updatedAt": "2026-05-18T19:31:27.389Z",
+  "selected": [
+    {
+      "slotId": "api-lane-01__otis-turnaround",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-expression-sheet",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-outfit-variants",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-idle",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-greeting",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-listening",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-thinking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-talking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-alert",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-regular-working",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-idle",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-greeting",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-listening",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-thinking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-talking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-alert",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-summer-light-working",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-idle",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-greeting",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-listening",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-thinking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-talking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-alert",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__otis-winter-layered-working",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    }
+  ],
+  "skipped": [],
+  "blockers": [],
+  "failures": [],
+  "budget": {
+    "budgetCents": 1000,
+    "costPerImageCents": 15.1,
+    "billablePriorImages": 24,
+    "billableNewImages": 24,
+    "projectedCostCents": 724.8
+  }
+}

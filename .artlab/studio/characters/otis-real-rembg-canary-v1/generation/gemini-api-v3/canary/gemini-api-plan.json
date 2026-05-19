@@ -1,0 +1,176 @@
+{
+  "schemaVersion": "tower-gemini-api-generation-plan-v3",
+  "adapter": "gemini-api",
+  "status": "ready-for-api-generation",
+  "phase": "production-pack",
+  "billingPolicy": "api-billed-explicitly-approved",
+  "secretPolicy": {
+    "keyIsNeverStoredInRepo": true,
+    "acceptedEnvVars": [
+      "GEMINI_API_KEY",
+      "GOOGLE_API_KEY"
+    ],
+    "keychainService": "tower-gemini-api-key",
+    "forbiddenInputs": [
+      "command-line API key flags",
+      "checked-in .env files",
+      "run.json key fields"
+    ]
+  },
+  "runId": "otis-real-rembg-canary-v1",
+  "assetType": "character",
+  "name": "Otis",
+  "createdAt": "2026-05-19T03:17:29.741Z",
+  "apiBaseUrl": "https://generativelanguage.googleapis.com/v1beta",
+  "model": "gemini-3.1-flash-image-preview",
+  "modelLabel": "Nano Banana 2",
+  "imageSize": "4K",
+  "aspectRatio": "9:16",
+  "laneCount": 1,
+  "maxConcurrency": 1,
+  "costPerImageCents": 15.1,
+  "budgetCents": 1000,
+  "estimatedCostCents": 15.1,
+  "costGuard": {
+    "failIfEstimateExceedsBudget": true,
+    "maxBillableImages": 1,
+    "maxBaseSlotsForInitialDesign": 1,
+    "defaultInitialDesignTotalImages": 5,
+    "disableGroundingByDefault": true
+  },
+  "sourceRequirements": {
+    "minimumLongEdge": 4096,
+    "minimumShortEdge": 2300,
+    "preferredFormat": "png",
+    "targetWidth": 2400,
+    "targetHeight": 4096
+  },
+  "cutoutPolicy": {
+    "compilerStage": "fail-closed-visual-cutout-v1",
+    "backdropContract": "premium-simple-backdrop-v1",
+    "edgeRefinementStage": "edge-refinement-v1",
+    "productionModeOfflineByDefault": true,
+    "bootstrapMayUseNetwork": true,
+    "neverUpscaleBeforeCutout": true,
+    "readinessThreshold": 0.9,
+    "modelSelection": "per-subject-type-and-topology",
+    "failureRouting": "named-slot-regeneration-or-improvement-mode"
+  },
+  "referenceImages": [
+    {
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/characters/otis/model/otis_winner-ref_v001.png",
+      "mimeType": "image/png",
+      "role": "identity-reference"
+    }
+  ],
+  "inboxRoot": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3",
+  "planRoot": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary",
+  "firewall": {
+    "canaryGatePath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary-gate.json",
+    "budgetLedgerPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/generation-budget-ledger.json",
+    "cutoutReadinessPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/cutout-readiness.json",
+    "promptContractHash": "a43f94c2356148d3",
+    "referenceContractHash": "824e5cba74e38f90",
+    "sourceContractHash": "536b185f2accaa65",
+    "planRole": "canary",
+    "requiresCanary": false
+  },
+  "lanes": [
+    {
+      "laneId": "api-lane-01",
+      "laneNumber": 1,
+      "label": "Canonical Safe",
+      "mandate": "Stay closest to the approved identity and generate the cleanest production-safe version."
+    }
+  ],
+  "slots": [
+    {
+      "slotId": "api-lane-01__otis-winter-layered-working",
+      "baseSlotId": "otis-winter-layered-working",
+      "laneId": "api-lane-01",
+      "status": "ready-for-api-generation",
+      "prompt": "Generate exactly one production foreground asset image for Tower slot otis-winter-layered-working.\nOutfit: winter-layered.\nPose: working.\nUse Nano Banana 2 only. Create one image only, not a contact sheet.\nTarget output: 4K production source, portrait 9:16 character-sprite framing unless the plan says otherwise.\nUse the premium-simple-backdrop-v1 contract: high subject/background separation, no patterned walls, no furniture overlap, no same-color clothing/background collisions, full-body framing, and generous padding around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props.\nDo not draw contact shadows, ground shadows, halo, glow, haze, ambient spill, or floor-plane lighting that touches or merges with the body silhouette.\nKeep the foreground cleanly separated from the backdrop so local cutout, edge refinement, and strict alpha QA can run deterministically before mastering.\nNo text, logo, watermark, UI, frame, label, duplicate character, or pose sheet.\nDo not use a Color block preset or force a flattened color-block style. Follow the Tower flat-plus-depth style from the directive.\nPreserve natural human imperfections. Avoid fake-perfect AI model faces, superhero jawlines, overly muscular bodies, and plastic skin.\nKeep hands, feet, props, hair, beard, coat hems, and all expected slot props fully uncropped with generous safe padding.\n# Otis Real Rembg Canary Directive\n\nRun phase: production-pack canary only. This is not initial design and not a full production spend.\n\nLocked identity reference: `.artlab/characters/otis/model/otis_winner-ref_v001.png`, selected from Otis v4 Lane 05. Use no old references and do not redesign him.\n\n## Identity Lock\n\nOtis is the Tower lobby concierge and warm oddball mentor: older, kind, observant, slightly eccentric, and unmistakably human. Preserve his rounded lived-in face, warm eyes behind glasses, silver-brown hair, full beard, softened posture, and charming non-model imperfections. He should feel premium and memorable without becoming glamorous, heroic, plastic, or generic.\n\n## Visual Standard\n\nEvery output must hit premium web-game dialogue sprite quality: crisp non-photoreal character rendering, sharp readable silhouette, high contrast, dimensional lobby-style lighting, rich material detail, and a confident Tower palette. Use burgundy, brass, deep navy, ivory, and restrained warm accents. Render detailed fabric seams, buttons, lapels, cuffs, glasses, hair, beard, brass highlights, and small concierge props with polished modern game UI character art quality.\n\nReject muted storybook illustration, children book rendering, watercolor, pastel beige editorial board styling, flat vector simplicity, low-detail soft linework, generic cozy illustration, low contrast, blurred features, and fake-perfect AI model people.\n\n## Cutout Source Contract\n\nUse `premium-simple-backdrop-v1`: a quiet simple non-patterned backdrop with high subject/background separation. No patterned walls, no furniture overlap, no same-color clothing/background collision, no shadows touching or merging with the body, no floor plane, no halo, no glow, no haze, and no ambient spill outside the body silhouette. Keep the full body centered in portrait 9:16 framing with generous padding around hair, beard, fingers, glasses, keys, badges, pens, feet, coat hems, and held props.\n\nThe local cutout compiler owns transparency. Do not fake transparency, do not add checkerboard, do not include UI frames, and do not bake app shadows into the source. Tower will render runtime shadows after local cutout.\n\n## Canary Target\n\nThe canary slot is selected from slot metadata so the shared directive does not accidentally make easy slots look difficult. The selected canary must be suitable for local rembg cutout, edge refinement, strict alpha QA, mastering, derived previews, and final review-board inspection.\n\n## Full Pack Shape For Later\n\nAfter this canary passes, the later full production packet remains: turnaround, expression sheet, outfit variants, and 21 individual sprites across regular, summer-light, and winter-layered outfits. Do not run that full pack now.\n\n\nCutout backdrop contract (premium-simple-backdrop-v1): Use a premium simple backdrop with high subject/background separation. Use no patterned walls. Use no furniture or objects overlapping the body, hair, hands, feet, or held props. Avoid same-color collisions between clothing, props, and background. Use no cast or contact shadows touching or merging with the subject. Use full-body framing with generous padding around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props.\nKeep the full subject and all expected props fully inside frame; leave visible breathing room around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props.\nUse app-owned shadow discipline: avoid baked contact shadows merging into the body because Tower renders runtime shadows after local cutout.\nUse crisp foreground/background separation while preserving natural human imperfections; do not create fake-perfect AI model people.\n\nAPI lane mandate (Canonical Safe): Stay closest to the approved identity and generate the cleanest production-safe version.\nKeep this lane meaningfully different only inside that mandate. Do not redesign the approved character identity.\nUse no external image search or grounding unless the run plan explicitly enables it.\n\nNamed-slot regeneration source-framing override:\nRegenerate only otis-winter-layered-working from the locked Otis identity. The character must be shown full-body head-to-toe in a single clean standing/working pose with both feet fully visible, both hands fully visible, beard and hair fully inside frame, and generous empty padding on all sides. Use a simple high-contrast premium backdrop with no scene elements. Forbid counters, desks, furniture, rails, columns, shelves, wall panels, props touching the body, any background object overlapping the silhouette, any object crossing hair, beard, fingers, keys, badge, held prop, clothing, or feet, floor shadows, contact shadows, cast shadows touching the character, cropped feet, cropped hands, cropped head, cropped beard, or cropped held props. Keep the subject fully separated from the backdrop with crisp foreground/background separation suitable for local rembg cutout. Do not add a counter, desk, railing, furniture edge, floor contact shadow, or environmental prop even if it makes the pose feel more natural.",
+      "promptHash": "65545daad3ba1bc5",
+      "reason": "Hardest real canary slot: winter-layered working Otis with beard, hair, glasses, hands, feet, badge, keys, layered clothing, and a small held concierge prop. Lane: Canonical Safe. Named-slot regeneration after blocked local cutout: require full-body separation and forbid background overlap.",
+      "inboxDirectory": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working",
+      "expectedInboxFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01.png",
+      "targetDirectory": ".artlab/runs/otis/otis-real-rembg-canary-v1/incoming/winter-layered",
+      "targetFilename": "otis__winter-layered__working__source-v001__api-lane-01.png",
+      "request": {
+        "model": "gemini-3.1-flash-image-preview",
+        "aspectRatio": "9:16",
+        "imageSize": "4K",
+        "responseModalities": [
+          "IMAGE"
+        ],
+        "includeGoogleSearch": false
+      },
+      "cutout": {
+        "required": true,
+        "subjectType": "hair-beard-character",
+        "topologyType": "hair-beard-soft-body-held-props",
+        "expectedProps": [
+          "badge",
+          "keys",
+          "held prop"
+        ],
+        "backdropContract": "premium-simple-backdrop-v1",
+        "backdropRequirements": [
+          "Use a premium simple backdrop with high subject/background separation.",
+          "Use no patterned walls.",
+          "Use no furniture or objects overlapping the body, hair, hands, feet, or held props.",
+          "Avoid same-color collisions between clothing, props, and background.",
+          "Use no cast or contact shadows touching or merging with the subject.",
+          "Use full-body framing with generous padding around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props."
+        ],
+        "shadowPolicy": "app-owned",
+        "thresholds": {
+          "minimumLongEdge": 4096,
+          "minimumShortEdge": 2300,
+          "borderSamplePixels": 8,
+          "borderAlphaThreshold": 32,
+          "minimumPadding": {
+            "top": 0.05,
+            "right": 0.06,
+            "bottom": 0.04,
+            "left": 0.06
+          },
+          "maxTinyIslands": 5,
+          "maxTinyIslandCanvasRatio": 0.0001,
+          "maxTotalIslandCanvasRatio": 0.0003,
+          "maxHoleSubjectRatio": 0.0015,
+          "maxTotalHoleSubjectRatio": 0.005,
+          "haloMeanAlphaMax": 4,
+          "haloP99AlphaMax": 18,
+          "maxBackdropRemnantEdgeRatio": 0.005,
+          "minimumForegroundMeanConfidence": 0.92,
+          "minimumForegroundP5Confidence": 0.8,
+          "maximumBackgroundP95Confidence": 0.2
+        },
+        "review": {
+          "showOriginalSource": true,
+          "showCheckerboardCutout": true,
+          "showDarkPreview": true,
+          "showLightPreview": true,
+          "showTowerShadowPreview": true,
+          "badges": [
+            "cutout",
+            "alpha",
+            "dimensions",
+            "crop",
+            "halo",
+            "props"
+          ]
+        }
+      }
+    }
+  ],
+  "nextCommands": [
+    "npm run art:generate -- cutout-readiness --plan /Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary/gemini-api-plan.json",
+    "export GEMINI_API_KEY=\"<set locally, never commit>\"",
+    "npm run art:generate -- run-api --plan /Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary/gemini-api-plan.json",
+    "npm run art:generate -- cutout-auto --plan /Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary/gemini-api-plan.json --slots <slot-id>",
+    "npm run art:generate -- cutout-doctor --plan /Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary/gemini-api-plan.json --strict",
+    "npm run art:generate -- status --bridge /Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary/gemini-api-plan.json"
+  ]
+}

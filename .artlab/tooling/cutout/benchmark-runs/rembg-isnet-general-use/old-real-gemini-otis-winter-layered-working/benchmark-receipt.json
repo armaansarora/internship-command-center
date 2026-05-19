@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "tower-cutout-benchmark-receipt-v1",
+  "candidateId": "rembg-isnet-general-use",
+  "fixtureId": "old-real-gemini-otis-winter-layered-working",
+  "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01.png",
+  "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/benchmark-runs/rembg-isnet-general-use/old-real-gemini-otis-winter-layered-working/cutout.png",
+  "rawMaskHash": "sha256:15d273e77a0c8392a594c3e650f1eaf98f0a29fac5b465defa567df8f09b7894",
+  "refinedMaskHash": "sha256:15d273e77a0c8392a594c3e650f1eaf98f0a29fac5b465defa567df8f09b7894",
+  "refinedPngHash": "sha256:0145147ace5e5ba8f84352480fa31a9002f2e8dc96af1e85a7a26f36cf30445e",
+  "sourceSaliencyBounds": {
+    "left": 657,
+    "top": 219,
+    "right": 2513,
+    "bottom": 5382
+  },
+  "qa": {
+    "schemaVersion": "tower-cutout-alpha-qa-v1",
+    "status": "failed",
+    "imagePath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/benchmark-runs/rembg-isnet-general-use/old-real-gemini-otis-winter-layered-working/cutout.png",
+    "width": 3072,
+    "height": 5504,
+    "failures": [
+      "edge-halo"
+    ],
+    "badges": {
+      "cutout": "failed",
+      "alpha": "passed",
+      "dimensions": "passed",
+      "crop": "passed",
+      "halo": "failed",
+      "props": "passed"
+    },
+    "metrics": {
+      "borderOpaquePixels": 0,
+      "subjectPixels": 5719728,
+      "tinyIslandCount": 0,
+      "totalIslandPixels": 0,
+      "holePixels": 43,
+      "haloMeanAlpha": 5.86441279035404,
+      "haloP99Alpha": 30,
+      "padding": {
+        "top": 0.03888081395348837,
+        "right": 0.18131510416666666,
+        "bottom": 0.02688953488372093,
+        "left": 0.21354166666666666
+      }
+    }
+  },
+  "score": 0.68,
+  "createdAt": "2026-05-19T03:14:36.966Z"
+}

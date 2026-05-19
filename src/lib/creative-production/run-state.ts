@@ -70,7 +70,7 @@ export function getNextCreativeRunAction(state: CreativeRunState): string {
     case "canary-running":
       return "Let the canary finish, run non-paid repair, then verify strict QA.";
     case "canary-passed":
-      return "Run the full production pack; retry only named failed slots.";
+      return "Full-production-ready: run the full production pack from the full plan only; retry or regenerate only named failed slots.";
     case "production-running":
       return "Let production finish, then run auto repair and strict doctor.";
     case "repairing":

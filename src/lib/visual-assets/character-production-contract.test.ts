@@ -165,17 +165,17 @@ describe("Season 1 character production contract", () => {
     expect(pipeline).toContain("CharacterStage");
   });
 
-  it("reports every Season 1 character sprite as missing after the fresh-start reset", () => {
+  it("reports only unpromoted Season 1 character sprites as missing after Otis promotion", () => {
     const missing = getMissingApprovedCharacterSprites(VISUAL_ASSETS);
 
-    expect(missing).toHaveLength(252);
-    expect(missing.some((slot) => slot.characterId === "otis")).toBe(true);
+    expect(missing).toHaveLength(231);
+    expect(missing.some((slot) => slot.characterId === "otis")).toBe(false);
     expect(missing[0]).toMatchObject({
-      characterId: "otis",
+      characterId: "ceo",
       outfitVariant: "regular",
       pose: "idle",
-      src: "/art/lobby/otis/regular/idle.webp",
-      promptRef: "art-bible:otis-pose-pack-v1",
+      src: "/art/penthouse/ceo/regular/idle.webp",
+      promptRef: "art-bible:mara-voss-pose-pack-v1",
     });
   });
 });

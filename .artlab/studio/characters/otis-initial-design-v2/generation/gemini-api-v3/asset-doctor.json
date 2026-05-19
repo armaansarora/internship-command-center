@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "tower-creative-asset-doctor-v1",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v2/generation/gemini-api-v3/gemini-api-plan.json",
+  "boardPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v2/generation/gemini-api-v3/review/initial-concept-review-board.html",
+  "status": "warnings",
+  "strict": false,
+  "checkedAt": "2026-05-15T19:18:32.770Z",
+  "checkedGeneratedImages": [
+    {
+      "slotId": "api-lane-01__otis-design",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-01/otis-design/otis__design__source-v001__api-lane-01.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-01/otis-design/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-02__otis-design",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-02/otis-design/otis__design__source-v001__api-lane-02.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-02/otis-design/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-03__otis-design",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-03/otis-design/otis__design__source-v001__api-lane-03.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-03/otis-design/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-04__otis-design",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-04/otis-design/otis__design__source-v001__api-lane-04.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-04/otis-design/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-05__otis-design",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-05/otis-design/otis__design__source-v001__api-lane-05.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-05/otis-design/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    }
+  ],
+  "checkedReviewImages": [
+    {
+      "src": "../../../../../../inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-01/otis-design/otis__design__source-v001__api-lane-01.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-01/otis-design/otis__design__source-v001__api-lane-01.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../../../inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-02/otis-design/otis__design__source-v001__api-lane-02.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-02/otis-design/otis__design__source-v001__api-lane-02.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../../../inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-03/otis-design/otis__design__source-v001__api-lane-03.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-03/otis-design/otis__design__source-v001__api-lane-03.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../../../inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-04/otis-design/otis__design__source-v001__api-lane-04.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-04/otis-design/otis__design__source-v001__api-lane-04.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../../../inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-05/otis-design/otis__design__source-v001__api-lane-05.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-05/otis-design/otis__design__source-v001__api-lane-05.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    }
+  ],
+  "issues": [
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-01/otis-design/api-receipt.json",
+      "message": "Slot api-lane-01__otis-design latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-01/otis-design/api-receipt.json",
+      "message": "Slot api-lane-01__otis-design latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-02/otis-design/api-receipt.json",
+      "message": "Slot api-lane-02__otis-design latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-02/otis-design/api-receipt.json",
+      "message": "Slot api-lane-02__otis-design latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-03/otis-design/api-receipt.json",
+      "message": "Slot api-lane-03__otis-design latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-03/otis-design/api-receipt.json",
+      "message": "Slot api-lane-03__otis-design latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-04/otis-design/api-receipt.json",
+      "message": "Slot api-lane-04__otis-design latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-04/otis-design/api-receipt.json",
+      "message": "Slot api-lane-04__otis-design latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-05/otis-design/api-receipt.json",
+      "message": "Slot api-lane-05__otis-design latest receipt warning: source-missing-alpha"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v2/gemini-api-v3/api-lane-05/otis-design/api-receipt.json",
+      "message": "Slot api-lane-05__otis-design latest receipt warning: source-mime-image-jpeg"
+    }
+  ],
+  "recoveryActions": [
+    "Treat this run as concept-only or repair warnings before production promotion.",
+    "Use --strict before final upload-ready approval to turn quality warnings into blockers."
+  ]
+}

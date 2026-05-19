@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,6 +10,10 @@ const tsx = join(process.cwd(), "node_modules/.bin/tsx");
 
 function countOccurrences(text: string, pattern: RegExp): number {
   return text.match(pattern)?.length ?? 0;
+}
+
+function sha256File(path: string): string {
+  return `sha256:${createHash("sha256").update(readFileSync(path)).digest("hex")}`;
 }
 
 describe("art:generate CLI", () => {
@@ -315,6 +320,17 @@ describe("art:generate CLI", () => {
       slots: unknown[];
       firewall: { planRole: string; requiresCanary: boolean; canaryGatePath: string };
     };
+    const runState = JSON.parse(readFileSync(join(root, "studio", "characters", "otis-firewall-v1", "run-state.json"), "utf8")) as {
+      schemaVersion: string;
+      runId: string;
+      state: string;
+      canaryPlanPath: string;
+      fullPlanPath: string;
+      canaryEvidence?: {
+        canaryGatePath?: string;
+        cutoutReadinessPath?: string;
+      };
+    };
 
     expect(canaryPlan.status).toBe("ready-for-api-generation");
     expect(canaryPlan.firewall.planRole).toBe("canary");
@@ -324,9 +340,20 @@ describe("art:generate CLI", () => {
     expect(fullPlan.slots).toHaveLength(24);
     expect(existsSync(fullPlan.firewall.canaryGatePath)).toBe(true);
     expect(existsSync(join(planRoot, "generation-budget-ledger.json"))).toBe(true);
+    expect(runState).toMatchObject({
+      schemaVersion: "tower-creative-run-state-v1",
+      runId: "otis-firewall-v1",
+      state: "canary-required",
+      canaryPlanPath: join(planRoot, "canary", "gemini-api-plan.json"),
+      fullPlanPath: join(planRoot, "full", "gemini-api-plan.json"),
+      canaryEvidence: {
+        canaryGatePath: join(planRoot, "canary-gate.json"),
+        cutoutReadinessPath: join(planRoot, "cutout-readiness.json"),
+      },
+    });
   });
 
-  it("blocks a full production API plan before the canary gate passes", () => {
+	  it("blocks a full production API plan before the canary gate passes", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-run-api-full-blocked-"));
     const planRoot = join(root, "generation", "gemini-api-v3", "full");
     const gatePath = join(root, "generation", "gemini-api-v3", "canary-gate.json");
@@ -413,7 +440,334 @@ describe("art:generate CLI", () => {
       "--plan",
       planPath,
       "--dry-run",
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } })).toThrow(/canary/i);
+	    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } })).toThrow(/canary/i);
+	  });
+
+	  it("keeps full production blocked after canary until cutout readiness passes", () => {
+	    const root = mkdtempSync(join(tmpdir(), "tower-art-run-api-readiness-blocked-"));
+	    const planRoot = join(root, "generation", "gemini-api-v3", "full");
+	    const gatePath = join(root, "generation", "gemini-api-v3", "canary-gate.json");
+	    const readinessPath = join(root, "generation", "gemini-api-v3", "cutout-readiness.json");
+	    const planPath = join(planRoot, "gemini-api-plan.json");
+	    const inboxRoot = join(root, "inbox");
+	    const inboxDirectory = join(inboxRoot, "api-lane-01", "slot-a");
+
+	    mkdirSync(inboxDirectory, { recursive: true });
+	    mkdirSync(planRoot, { recursive: true });
+	    writeFileSync(gatePath, JSON.stringify({
+	      status: "passed",
+	      promptContractHash: "abc",
+	      referenceContractHash: "def",
+	      sourceContractHash: "ghi",
+	    }));
+	    writeFileSync(planPath, JSON.stringify({
+	      schemaVersion: "tower-gemini-api-generation-plan-v3",
+	      adapter: "gemini-api",
+	      status: "blocked-pending-canary",
+	      phase: "production-pack",
+	      runId: "blocked-readiness",
+	      assetType: "character",
+	      name: "Blocked Readiness",
+	      model: "gemini-3.1-flash-image-preview",
+	      modelLabel: "Nano Banana 2",
+	      imageSize: "4K",
+	      aspectRatio: "9:16",
+	      laneCount: 1,
+	      maxConcurrency: 1,
+	      costPerImageCents: 15.1,
+	      budgetCents: 600,
+	      estimatedCostCents: 15.1,
+	      sourceRequirements: {},
+	      referenceImages: [],
+	      inboxRoot,
+	      planRoot,
+	      lanes: [{ laneId: "api-lane-01", laneNumber: 1, label: "Canonical Safe", mandate: "Safe." }],
+	      firewall: {
+	        planRole: "full",
+	        requiresCanary: true,
+	        canaryGatePath: gatePath,
+	        cutoutReadinessPath: readinessPath,
+	        budgetLedgerPath: join(root, "generation", "gemini-api-v3", "generation-budget-ledger.json"),
+	        promptContractHash: "abc",
+	        referenceContractHash: "def",
+	        sourceContractHash: "ghi",
+	      },
+	      slots: [{
+	        slotId: "api-lane-01__slot-a",
+	        baseSlotId: "slot-a",
+	        laneId: "api-lane-01",
+	        status: "ready-for-api-generation",
+	        prompt: "Generate.",
+	        promptHash: "hash",
+	        reason: "Blocked.",
+	        inboxDirectory,
+	        expectedInboxFile: join(inboxDirectory, "slot-a.png"),
+	        targetDirectory: ".artlab/runs/blocked/incoming",
+	        targetFilename: "slot-a.png",
+	        request: {
+	          model: "gemini-3.1-flash-image-preview",
+	          aspectRatio: "9:16",
+	          imageSize: "4K",
+	          responseModalities: ["IMAGE"],
+	          includeGoogleSearch: false,
+	        },
+	      }],
+	      nextCommands: [],
+	    }));
+
+	    expect(() => execFileSync(tsx, [
+	      "scripts/creative-generation-adapter.ts",
+	      "run-api",
+	      "--plan",
+	      planPath,
+	      "--dry-run",
+	    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } })).toThrow(/cutout readiness/i);
+	  });
+
+  it("uses passed canary evidence and promotes the selected local model for full-plan cutout readiness", async () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-cutout-readiness-canary-"));
+    const generationRoot = join(root, "generation", "gemini-api-v3");
+    const canaryRoot = join(generationRoot, "canary");
+    const fullRoot = join(generationRoot, "full");
+    const gatePath = join(generationRoot, "canary-gate.json");
+    const readinessPath = join(generationRoot, "cutout-readiness.json");
+    const modelSelectionPath = join(generationRoot, "cutout-model-selection.json");
+    const canaryPlanPath = join(canaryRoot, "gemini-api-plan.json");
+    const fullPlanPath = join(fullRoot, "gemini-api-plan.json");
+    const inboxDirectory = join(root, "inbox", "api-lane-01", "otis-winter-layered-working");
+    const missingInboxDirectory = join(root, "inbox", "api-lane-01", "missing-full-slot");
+    const sourcePath = join(inboxDirectory, "source.jpg");
+    const cutoutPath = join(inboxDirectory, "cutout-v002.png");
+    const modelPath = join(root, ".artlab", "tooling", "cutout", "models", "isnet-general-use.onnx");
+
+    mkdirSync(canaryRoot, { recursive: true });
+    mkdirSync(fullRoot, { recursive: true });
+    mkdirSync(inboxDirectory, { recursive: true });
+    mkdirSync(missingInboxDirectory, { recursive: true });
+    mkdirSync(join(modelPath, ".."), { recursive: true });
+    writeFileSync(modelPath, "locked-model-weights");
+    await sharp({
+      create: {
+        width: 120,
+        height: 180,
+        channels: 4,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      },
+    }).png().toFile(cutoutPath);
+    await sharp({
+      create: {
+        width: 120,
+        height: 180,
+        channels: 3,
+        background: "#eef0f4",
+      },
+    }).jpeg().toFile(sourcePath);
+    const selectedCandidate = {
+      id: "rembg-isnet-general-use",
+      adapter: "rembg",
+      packageName: "rembg",
+      packageVersion: "2.0.75",
+      packageLicense: "MIT",
+      modelName: "isnet-general-use",
+      modelVersion: "bootstrap-cache",
+      modelWeightSourceUrl: "https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx",
+      modelWeightLicense: "Apache-2.0 approved for local production",
+      modelWeightSha256: sha256File(modelPath),
+      cachedModelPath: modelPath,
+      supports: [{ subjectType: "hair-beard-character" }],
+    };
+    const cutout = {
+      required: true,
+      subjectType: "hair-beard-character",
+      topologyType: "hair-beard-soft-body-held-props",
+      expectedProps: ["keys"],
+      backdropContract: "premium-simple-backdrop-v1",
+      shadowPolicy: "app-owned",
+      thresholds: {
+        minimumLongEdge: 180,
+        minimumShortEdge: 120,
+        borderSamplePixels: 1,
+        borderAlphaThreshold: 32,
+        minimumPadding: { top: 0.05, right: 0.06, bottom: 0.04, left: 0.06 },
+        maxTinyIslands: 5,
+        maxTinyIslandCanvasRatio: 0.0001,
+        maxTotalIslandCanvasRatio: 0.0003,
+        maxHoleSubjectRatio: 0.0015,
+        maxTotalHoleSubjectRatio: 0.005,
+        haloMeanAlphaMax: 4,
+        haloP99AlphaMax: 18,
+        maxBackdropRemnantEdgeRatio: 0.005,
+        minimumForegroundMeanConfidence: 0.92,
+        minimumForegroundP5Confidence: 0.8,
+        maximumBackgroundP95Confidence: 0.2,
+      },
+    };
+
+    writeFileSync(join(inboxDirectory, "cutout-receipt.json"), JSON.stringify({
+      schemaVersion: "tower-cutout-receipt-v1",
+      status: "blocked",
+      slotId: "api-lane-01__otis-winter-layered-working",
+      selectedCandidate: {
+        ...selectedCandidate,
+        supports: undefined,
+      },
+      failureCodes: ["subject-cropped"],
+      qa: {
+        status: "failed",
+        metrics: {
+          borderOpaquePixels: 24,
+          padding: { top: 0, right: 0.1, bottom: 0, left: 0.1 },
+        },
+      },
+    }, null, 2));
+    writeFileSync(join(inboxDirectory, "cutout-receipt-v002.json"), JSON.stringify({
+      schemaVersion: "tower-cutout-receipt-v1",
+      status: "passed",
+      slotId: "api-lane-01__otis-winter-layered-working",
+      outputPath: cutoutPath,
+      sourcePath,
+      parentCutoutReceiptPath: join(inboxDirectory, "cutout-receipt.json"),
+      failureCodes: [],
+      qa: {
+        status: "passed",
+        badges: {
+          cutout: "passed",
+          alpha: "passed",
+          dimensions: "passed",
+          crop: "passed",
+          halo: "passed",
+          props: "passed",
+        },
+        metrics: {
+          borderOpaquePixels: 0,
+          subjectPixels: 12000,
+          tinyIslandCount: 0,
+          totalIslandPixels: 0,
+          holePixels: 0,
+          haloMeanAlpha: 0,
+          haloP99Alpha: 0,
+          padding: { top: 0.06, right: 0.08, bottom: 0.05, left: 0.08 },
+        },
+      },
+      thresholds: cutout.thresholds,
+    }, null, 2));
+    writeFileSync(modelSelectionPath, JSON.stringify({
+      schemaVersion: "tower-cutout-model-selection-v1",
+      status: "blocked",
+      winners: {},
+      blocked: [],
+      missingSubjectTypes: ["hair-beard-character"],
+      candidateManifest: [selectedCandidate],
+    }, null, 2));
+    const canarySlot = {
+      slotId: "api-lane-01__otis-winter-layered-working",
+      baseSlotId: "otis-winter-layered-working",
+      laneId: "api-lane-01",
+      inboxDirectory,
+      expectedInboxFile: sourcePath,
+      targetFilename: "source.jpg",
+      cutout,
+    };
+    writeFileSync(canaryPlanPath, JSON.stringify({
+      schemaVersion: "tower-gemini-api-generation-plan-v3",
+      adapter: "gemini-api",
+      status: "ready-for-api-generation",
+      phase: "production-pack",
+      runId: "readiness-canary",
+      assetType: "character",
+      name: "Otis",
+      planRoot: canaryRoot,
+      firewall: {
+        planRole: "canary",
+        canaryGatePath: gatePath,
+      },
+      slots: [canarySlot],
+    }, null, 2));
+    writeFileSync(fullPlanPath, JSON.stringify({
+      schemaVersion: "tower-gemini-api-generation-plan-v3",
+      adapter: "gemini-api",
+      status: "blocked-pending-canary",
+      phase: "production-pack",
+      runId: "readiness-canary",
+      assetType: "character",
+      name: "Otis",
+      planRoot: fullRoot,
+      firewall: {
+        planRole: "full",
+        requiresCanary: true,
+        canaryGatePath: gatePath,
+        cutoutReadinessPath: readinessPath,
+      },
+      slots: [
+        canarySlot,
+        {
+          ...canarySlot,
+          slotId: "api-lane-01__missing-full-slot",
+          baseSlotId: "missing-full-slot",
+          inboxDirectory: missingInboxDirectory,
+          expectedInboxFile: join(missingInboxDirectory, "missing.png"),
+        },
+      ],
+    }, null, 2));
+    writeFileSync(gatePath, JSON.stringify({
+      schemaVersion: "tower-production-canary-gate-v1",
+      status: "passed",
+      cutoutStatus: "passed",
+      planPath: canaryPlanPath,
+      checkedImages: [{
+        slotId: "api-lane-01__otis-winter-layered-working",
+        cutoutReceiptPath: join(inboxDirectory, "cutout-receipt-v002.json"),
+        issues: [],
+      }],
+    }, null, 2));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "cutout-readiness",
+      "--plan",
+      fullPlanPath,
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const readiness = JSON.parse(readFileSync(readinessPath, "utf8")) as {
+      status: string;
+      modelSelectionPath: string;
+      componentScores: { canaryCutout: number; modelBenchmark: number };
+      slotChecks: Array<{ slotId: string; cutoutReceiptPath?: string }>;
+    };
+    const selection = JSON.parse(readFileSync(modelSelectionPath, "utf8")) as {
+      status: string;
+      winners: Record<string, { candidateId: string; score: number }>;
+      missingSubjectTypes: string[];
+      candidateManifest: Array<{ cachedModelPath: string; modelWeightSha256: string }>;
+    };
+    const doctorOutput = execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "cutout-doctor",
+      "--plan",
+      fullPlanPath,
+      "--strict",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const doctor = JSON.parse(readFileSync(join(fullRoot, "cutout-doctor.json"), "utf8")) as {
+      status: string;
+      checked: Array<{ receiptPath?: string; failureCodes: string[] }>;
+    };
+
+    expect(output).toContain("Cutout readiness: ready");
+    expect(readiness.status).toBe("ready");
+    expect(readiness.modelSelectionPath).toBe(modelSelectionPath);
+    expect(readiness.slotChecks).toHaveLength(1);
+    expect(readiness.slotChecks[0]?.cutoutReceiptPath).toContain("cutout-receipt-v002.json");
+    expect(selection.status).toBe("ready");
+    expect(selection.missingSubjectTypes).toEqual([]);
+    expect(selection.winners["hair-beard-character"]).toMatchObject({
+      candidateId: "rembg-isnet-general-use",
+      score: 0.94,
+    });
+    expect(selection.candidateManifest[0]?.modelWeightSha256).toBe(sha256File(modelPath));
+    expect(doctorOutput).toContain("Cutout doctor: passed");
+    expect(doctor.status).toBe("passed");
+    expect(doctor.checked).toHaveLength(1);
+    expect(doctor.checked[0]?.receiptPath).toContain("cutout-receipt-v002.json");
+    expect(doctor.checked[0]?.failureCodes).toEqual([]);
   });
 
   it("verifies a clean production canary and unlocks the matching full-plan contract", async () => {
@@ -424,9 +778,14 @@ describe("art:generate CLI", () => {
     const inboxDirectory = join(root, "inbox", "slot-a");
     const imagePath = join(inboxDirectory, "slot-a.png");
     const receiptPath = join(inboxDirectory, "api-receipt.json");
+    const cutoutReceiptPath = join(inboxDirectory, "cutout-receipt.json");
+    const masteredPath = join(inboxDirectory, "slot-a__master.png");
+    const derivedPath = join(inboxDirectory, "slot-a__preview.png");
+    const reviewPath = join(root, "review", "slot-a.html");
 
     mkdirSync(inboxDirectory, { recursive: true });
     mkdirSync(planRoot, { recursive: true });
+    mkdirSync(join(root, "review"), { recursive: true });
     await sharp({
       create: {
         width: 64,
@@ -439,8 +798,22 @@ describe("art:generate CLI", () => {
       slotId: "api-lane-01__slot-a",
       attempt: 1,
       capturedFile: imagePath,
-      qualityWarnings: [],
+      qualityWarnings: ["source-missing-alpha", "source-mime-image-jpeg"],
     }));
+    writeFileSync(cutoutReceiptPath, JSON.stringify({
+      slotId: "api-lane-01__slot-a",
+      status: "passed",
+      outputPath: imagePath,
+      masteredPngPath: masteredPath,
+      derivedPreviewPath: derivedPath,
+      reviewPreviewPath: reviewPath,
+      failureCodes: [],
+    }));
+    writeFileSync(masteredPath, readFileSync(imagePath));
+    writeFileSync(derivedPath, readFileSync(imagePath));
+    writeFileSync(reviewPath, "<!doctype html><title>Review</title>");
+    writeFileSync(join(planRoot, "cutout-doctor.json"), JSON.stringify({ status: "passed" }));
+    writeFileSync(join(planRoot, "asset-doctor.json"), JSON.stringify({ status: "passed" }));
     writeFileSync(planPath, JSON.stringify({
       schemaVersion: "tower-gemini-api-generation-plan-v3",
       adapter: "gemini-api",
@@ -506,6 +879,15 @@ describe("art:generate CLI", () => {
           imageSize: "4K",
           responseModalities: ["IMAGE"],
           includeGoogleSearch: false,
+        },
+        cutout: {
+          required: true,
+          subjectType: "character",
+          topologyType: "standard-character",
+          expectedProps: [],
+          backdropContract: "premium-simple-backdrop-v1",
+          shadowPolicy: "app-owned",
+          thresholds: {},
         },
       }],
       nextCommands: [],
@@ -749,129 +1131,164 @@ describe("art:generate CLI", () => {
     }
   });
 
-  it("extracts a solid chroma matte into a true transparent PNG from the CLI", async () => {
-    const root = mkdtempSync(join(tmpdir(), "tower-art-generate-alpha-cli-"));
-    const source = join(root, "source.png");
-    const outputPath = join(root, "transparent.png");
+	  it("benchmarks a local cutout candidate and compiles an alpha-safe source receipt", async () => {
+	    const root = mkdtempSync(join(tmpdir(), "tower-art-generate-cutout-cli-"));
+	    const toolingRoot = join(root, ".artlab", "tooling", "cutout");
+	    const planRoot = join(root, "generation");
+	    const inboxDirectory = join(root, "inbox", "slot-alpha");
+	    const source = join(inboxDirectory, "slot-alpha.png");
+	    const planPath = join(planRoot, "gemini-api-plan.json");
+	    const fixtureSetPath = join(root, "cutout-fixtures.json");
+	    const modelPath = join(toolingRoot, "models", "existing-alpha.json");
+	    const pixels = Buffer.alloc(16 * 16 * 4);
 
-    const pixels = Buffer.alloc(8 * 8 * 3);
+	    mkdirSync(planRoot, { recursive: true });
+	    mkdirSync(inboxDirectory, { recursive: true });
+	    mkdirSync(join(toolingRoot, "models"), { recursive: true });
+	    for (let y = 0; y < 16; y += 1) {
+	      for (let x = 0; x < 16; x += 1) {
+	        const offset = ((y * 16) + x) * 4;
+	        const inSubject = x >= 4 && x <= 11 && y >= 4 && y <= 11;
 
-    for (let y = 0; y < 8; y += 1) {
-      for (let x = 0; x < 8; x += 1) {
-        const offset = ((y * 8) + x) * 3;
-        const inSubject = x >= 2 && x <= 5 && y >= 2 && y <= 5;
+	        pixels[offset] = inSubject ? 155 : 0;
+	        pixels[offset + 1] = inSubject ? 36 : 0;
+	        pixels[offset + 2] = inSubject ? 36 : 0;
+	        pixels[offset + 3] = inSubject ? 255 : 0;
+	      }
+	    }
 
-        pixels[offset] = inSubject ? 155 : 0;
-        pixels[offset + 1] = inSubject ? 36 : 255;
-        pixels[offset + 2] = inSubject ? 36 : 0;
-      }
-    }
-
-    await sharp(pixels, { raw: { width: 8, height: 8, channels: 3 } }).png().toFile(source);
-
-    const output = execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
-      "extract-alpha",
-      "--source",
-      source,
-      "--output",
-      outputPath,
-      "--matte-color",
-      "00ff00",
-      "--border-sample-pixels",
-      "1",
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
-    const metadata = await sharp(outputPath).metadata();
-
-    expect(output).toContain("Extracted alpha");
-    expect(metadata.hasAlpha).toBe(true);
-    expect(metadata.width).toBe(8);
-    expect(metadata.height).toBe(8);
-  });
-
-  it("writes a clean local repair receipt so strict doctor can verify alpha-repaired sources", async () => {
-    const root = mkdtempSync(join(tmpdir(), "tower-art-generate-alpha-receipt-"));
-    const planRoot = join(root, "generation");
-    const inboxDirectory = join(root, "inbox", "slot-alpha");
-    const source = join(inboxDirectory, "slot-alpha.png");
-    const outputPath = join(inboxDirectory, "slot-alpha__alpha-repaired.png");
-    const planPath = join(planRoot, "gemini-api-plan.json");
-    const pixels = Buffer.alloc(8 * 8 * 3);
-
-    mkdirSync(planRoot, { recursive: true });
-    mkdirSync(inboxDirectory, { recursive: true });
-    for (let y = 0; y < 8; y += 1) {
-      for (let x = 0; x < 8; x += 1) {
-        const offset = ((y * 8) + x) * 3;
-        const inSubject = x >= 2 && x <= 5 && y >= 2 && y <= 5;
-
-        pixels[offset] = inSubject ? 155 : 0;
-        pixels[offset + 1] = inSubject ? 36 : 255;
-        pixels[offset + 2] = inSubject ? 36 : 0;
-      }
-    }
-
-    await sharp(pixels, { raw: { width: 8, height: 8, channels: 3 } }).png().toFile(source);
-    writeFileSync(join(inboxDirectory, "api-receipt.json"), JSON.stringify({
-      slotId: "slot-alpha",
-      attempt: 1,
-      capturedFile: source,
-      qualityWarnings: ["source-missing-alpha"],
-      metadata: {
-        width: 8,
-        height: 8,
-        format: "png",
-        hasAlpha: false,
-      },
-    }));
-    writeFileSync(planPath, JSON.stringify({
-      schemaVersion: "tower-gemini-api-generation-plan-v3",
-      adapter: "gemini-api",
+	    await sharp(pixels, { raw: { width: 16, height: 16, channels: 4 } }).png().toFile(source);
+	    writeFileSync(modelPath, JSON.stringify({ adapter: "local-alpha-pass-through", version: 1 }));
+	    writeFileSync(join(inboxDirectory, "api-receipt.json"), JSON.stringify({
+	      slotId: "slot-alpha",
+	      attempt: 1,
+	      capturedFile: source,
+	      qualityWarnings: [],
+	      metadata: {
+	        width: 16,
+	        height: 16,
+	        format: "png",
+	        hasAlpha: true,
+	      },
+	    }));
+	    writeFileSync(fixtureSetPath, JSON.stringify({
+	      candidates: [
+	        {
+	          id: "local-alpha-pass",
+	          adapter: "local-alpha-pass-through",
+	          packageName: "sharp",
+	          packageVersion: "0.34.5",
+	          packageLicense: "Apache-2.0",
+	          modelName: "existing-alpha",
+	          modelVersion: "1",
+	          modelWeightSourceUrl: "local://existing-alpha",
+	          modelWeightLicense: "project-owned",
+	          modelWeightSha256: sha256File(modelPath),
+	          cachedModelPath: modelPath,
+	          supports: [{ subjectType: "character" }],
+	        },
+	      ],
+	      fixtureScores: [
+	        { candidateId: "local-alpha-pass", subjectType: "character", fixtureSet: "synthetic", score: 0.99 },
+	        { candidateId: "local-alpha-pass", subjectType: "character", fixtureSet: "fresh-natural-canary", score: 0.98 },
+	      ],
+	      requiredSubjectTypes: ["character"],
+	    }));
+	    writeFileSync(planPath, JSON.stringify({
+	      schemaVersion: "tower-gemini-api-generation-plan-v3",
+	      adapter: "gemini-api",
       status: "ready-for-api-generation",
       phase: "production-pack",
       runId: "alpha-repair-doctor",
       assetType: "character",
-      name: "Alpha Repair Doctor",
-      planRoot,
-      sourceRequirements: {},
-      slots: [
-        {
-          slotId: "slot-alpha",
-          expectedInboxFile: source,
-          inboxDirectory,
-        },
-      ],
-    }));
+	      name: "Alpha Repair Doctor",
+	      planRoot,
+	      sourceRequirements: {},
+	      slots: [
+	        {
+	          slotId: "slot-alpha",
+	          expectedInboxFile: source,
+	          inboxDirectory,
+	          cutout: {
+	            required: true,
+	            subjectType: "character",
+	            topologyType: "standard-character",
+	            expectedProps: [],
+	            backdropContract: "premium-simple-backdrop-v1",
+	            backdropRequirements: [],
+	            shadowPolicy: "app-owned",
+	            thresholds: {
+	              minimumLongEdge: 16,
+	              minimumShortEdge: 16,
+	              borderSamplePixels: 1,
+	              borderAlphaThreshold: 32,
+	              minimumPadding: { top: 0.1, right: 0.1, bottom: 0.1, left: 0.1 },
+	              maxTinyIslands: 0,
+	              maxTinyIslandCanvasRatio: 0.0001,
+	              maxTotalIslandCanvasRatio: 0.0001,
+	              maxHoleSubjectRatio: 0.01,
+	              maxTotalHoleSubjectRatio: 0.01,
+	              haloMeanAlphaMax: 4,
+	              haloP99AlphaMax: 18,
+	              maxBackdropRemnantEdgeRatio: 0.005,
+	              minimumForegroundMeanConfidence: 0.92,
+	              minimumForegroundP5Confidence: 0.8,
+	              maximumBackgroundP95Confidence: 0.2,
+	            },
+	            review: {
+	              showOriginalSource: true,
+	              showCheckerboardCutout: true,
+	              showDarkPreview: true,
+	              showLightPreview: true,
+	              showTowerShadowPreview: true,
+	              badges: ["cutout", "alpha", "dimensions", "crop", "halo", "props"],
+	            },
+	          },
+	        },
+	      ],
+	    }));
 
-    execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
-      "extract-alpha",
-      "--source",
-      source,
-      "--output",
-      outputPath,
-      "--matte-color",
-      "00ff00",
-      "--border-sample-pixels",
-      "1",
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
-    const repairReceiptPath = join(inboxDirectory, "download-receipt-v002.json");
-    const repairReceipt = JSON.parse(readFileSync(repairReceiptPath, "utf8")) as {
-      capturedFile: string;
-      qualityWarnings: string[];
-    };
-    const doctorOutput = execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
-      "doctor",
-      "--plan",
-      planPath,
-      "--strict",
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+	    const benchmarkOutput = execFileSync(tsx, [
+	      "scripts/creative-generation-adapter.ts",
+	      "cutout-benchmark",
+	      "--fixture-set",
+	      fixtureSetPath,
+	      "--tooling-root",
+	      toolingRoot,
+	    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+	    const cutoutOutput = execFileSync(tsx, [
+	      "scripts/creative-generation-adapter.ts",
+	      "cutout-auto",
+	      "--plan",
+	      planPath,
+	      "--tooling-root",
+	      toolingRoot,
+	    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+	    const doctorOutput = execFileSync(tsx, [
+	      "scripts/creative-generation-adapter.ts",
+	      "cutout-doctor",
+	      "--plan",
+	      planPath,
+	      "--strict",
+	    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+	    const cutoutReceipt = JSON.parse(readFileSync(join(inboxDirectory, "cutout-receipt.json"), "utf8")) as {
+	      status: string;
+	      outputPath: string;
+	      edgeRefinement: { stage: string };
+	      rawMaskHash: string;
+	      refinedMaskHash: string;
+	    };
+	    const metadata = await sharp(cutoutReceipt.outputPath).metadata();
 
-    expect(repairReceipt.capturedFile).toBe(outputPath);
-    expect(repairReceipt.qualityWarnings).toEqual([]);
-    expect(doctorOutput).toContain("Asset doctor: passed");
-  });
+	    expect(benchmarkOutput).toContain("Cutout model selection: ready");
+	    expect(cutoutOutput).toContain("Cutout auto: passed");
+	    expect(cutoutReceipt.status).toBe("passed");
+	    expect(cutoutReceipt.edgeRefinement.stage).toBe("edge-refinement-v1");
+	    expect(cutoutReceipt.rawMaskHash).toContain("sha256:");
+	    expect(cutoutReceipt.refinedMaskHash).toContain("sha256:");
+	    expect(metadata.hasAlpha).toBe(true);
+	    expect(doctorOutput).toContain("Cutout doctor: passed");
+	  });
 
   it("prepares initial design API plans as five total prompt-only concepts", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-generate-api-initial-"));
@@ -921,8 +1338,12 @@ describe("art:generate CLI", () => {
     expect(plan.maxConcurrency).toBe(5);
     expect(plan.slots).toHaveLength(5);
     expect(plan.referenceImages).toEqual([]);
-    expect(prompts).toContain("simple solid neutral approval background");
-    expect(prompts).not.toContain("solid #00ff00 chroma matte background");
+	    expect(prompts).toContain("premium simple approval backdrop");
+	    expect(prompts).toContain("premium-simple-backdrop-v1");
+	    expect(prompts).not.toContain("#00ff00");
+	    expect(prompts).not.toContain("chroma");
+	    expect(prompts).not.toContain("green matte");
+	    expect(prompts).not.toContain("extract-alpha");
     expect(prompts).not.toContain("production source image");
     expect(countOccurrences(prompts, /clean raster shapes/gi)).toBeLessThanOrEqual(1);
     expect(countOccurrences(prompts, /subtle controlled depth/gi)).toBeLessThanOrEqual(1);
@@ -1003,15 +1424,18 @@ describe("art:generate CLI", () => {
     ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
 
     const planPath = join(root, "studio", "characters", "otis-multipose", "generation", "gemini-api-v3", "full", "gemini-api-plan.json");
-    const plan = JSON.parse(readFileSync(planPath, "utf8")) as { status: string; phase: string; laneCount: number; maxConcurrency: number; slots: unknown[] };
+	    const plan = JSON.parse(readFileSync(planPath, "utf8")) as { status: string; phase: string; laneCount: number; maxConcurrency: number; slots: Array<{ prompt: string; cutout: { backdropContract: string } }> };
 
     expect(plan.status).toBe("blocked-pending-canary");
     expect(plan.phase).toBe("production-pack");
-    expect(plan.laneCount).toBe(1);
-    expect(plan.maxConcurrency).toBe(5);
-    expect(plan.slots).toHaveLength(2);
-    expect(JSON.stringify(plan.slots)).toContain("solid #00ff00 chroma matte background");
-  });
+	    expect(plan.laneCount).toBe(1);
+	    expect(plan.maxConcurrency).toBe(5);
+	    expect(plan.slots).toHaveLength(2);
+	    expect(JSON.stringify(plan.slots)).toContain("premium-simple-backdrop-v1");
+	    expect(plan.slots.every((slot) => slot.cutout.backdropContract === "premium-simple-backdrop-v1")).toBe(true);
+	    expect(JSON.stringify(plan.slots)).not.toContain("#00ff00");
+	    expect(JSON.stringify(plan.slots)).not.toContain("chroma");
+	  });
 
   it("allows production packet sheet slots without forbidding their required multi-view layout", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-generate-api-sheet-"));
@@ -1056,13 +1480,17 @@ describe("art:generate CLI", () => {
     const plan = JSON.parse(readFileSync(planPath, "utf8")) as { slots: Array<{ prompt: string }> };
     const prompt = plan.slots[0]?.prompt ?? "";
 
-    expect(prompt).toContain("production packet sheet image");
-    expect(prompt).toContain("Multiple Otis figures are allowed only as required by this sheet");
-    expect(prompt).toContain("every outer border pixel must be an unlit RGB(0,255,0) / #00ff00 chroma fill");
-    expect(prompt).toContain("Do not draw a floor plane, ground shadow, contact shadow");
-    expect(prompt).not.toContain("not a contact sheet");
-    expect(prompt).not.toContain("or pose sheet");
-  });
+	    expect(prompt).toContain("production packet sheet image");
+	    expect(prompt).toContain("Multiple Otis figures are allowed only as required by this sheet");
+	    expect(prompt).toContain("premium-simple-backdrop-v1");
+	    expect(prompt).toContain("no patterned walls");
+	    expect(prompt).toContain("no furniture overlap");
+	    expect(prompt).toContain("Do not draw contact shadows, ground shadows");
+	    expect(prompt).not.toContain("not a contact sheet");
+	    expect(prompt).not.toContain("or pose sheet");
+	    expect(prompt).not.toContain("#00ff00");
+	    expect(prompt).not.toContain("chroma");
+	  });
 
   it("refuses an API run when a run lock already exists", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-generate-api-lock-"));
@@ -1620,14 +2048,14 @@ describe("art:generate CLI", () => {
     mkdirSync(planRoot, { recursive: true });
     mkdirSync(warningInbox, { recursive: true });
     mkdirSync(missingInbox, { recursive: true });
-    await sharp({
-      create: {
-        width: 512,
-        height: 768,
-        channels: 3,
-        background: "#00ff00",
-      },
-    }).png().toFile(warningFile);
+	    await sharp({
+	      create: {
+	        width: 512,
+	        height: 768,
+	        channels: 3,
+	        background: "#305070",
+	      },
+	    }).png().toFile(warningFile);
     writeFileSync(join(warningInbox, "api-receipt.json"), JSON.stringify({
       slotId: "slot-alpha",
       attempt: 1,
@@ -1685,53 +2113,76 @@ describe("art:generate CLI", () => {
     };
 
     expect(repairPlan.status).toBe("repair-required");
-    expect(repairPlan.slots).toContainEqual(expect.objectContaining({
-      slotId: "slot-alpha",
-      status: "repair-required",
-      recommendedAction: expect.objectContaining({
-        type: "extract-alpha",
-        command: expect.stringContaining("extract-alpha"),
-        fallbackCommand: expect.stringContaining("run-api"),
-      }),
-    }));
+	    expect(repairPlan.slots).toContainEqual(expect.objectContaining({
+	      slotId: "slot-alpha",
+	      status: "repair-required",
+	      recommendedAction: expect.objectContaining({
+	        type: "cutout-local",
+	        command: expect.stringContaining("cutout-auto"),
+	        fallbackCommand: expect.stringContaining("run-api"),
+	      }),
+	    }));
     expect(repairPlan.slots).toContainEqual(expect.objectContaining({
       slotId: "slot-missing",
       status: "repair-required",
       recommendedAction: expect.objectContaining({
-        type: "regenerate-slot",
-        command: expect.stringContaining("run-api"),
-      }),
-    }));
-    expect(existsSync(join(planRoot, "repair-plan.json"))).toBe(true);
-  });
+	        type: "regenerate-slot",
+	        command: expect.stringContaining("run-api"),
+	      }),
+	    }));
+	    expect(repairPlan.slots.find((slot) => slot.slotId === "slot-alpha")?.recommendedAction.command).toContain("--slots");
+	    expect(existsSync(join(planRoot, "repair-plan.json"))).toBe(true);
+	  });
 
-  it("refuses alpha extraction repair when a missing-alpha image is not a flat matte source", async () => {
-    const root = mkdtempSync(join(tmpdir(), "tower-art-repair-plan-no-matte-"));
+  it("routes true cropped blocked cutout receipts to named-slot regeneration instead of re-running local cutout", async () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-repair-plan-blocked-cutout-"));
     const planRoot = join(root, "generation");
     const planPath = join(planRoot, "gemini-api-plan.json");
-    const inboxDirectory = join(root, "inbox", "slot-no-matte");
-    const warningFile = join(inboxDirectory, "slot-no-matte.jpg");
+    const inboxDirectory = join(root, "inbox", "slot-blocked-cutout");
+    const sourceFile = join(inboxDirectory, "slot-blocked-cutout.jpg");
 
     mkdirSync(planRoot, { recursive: true });
     mkdirSync(inboxDirectory, { recursive: true });
     await sharp({
       create: {
-        width: 512,
-        height: 768,
+        width: 4096,
+        height: 4096,
         channels: 3,
-        background: "#ccaa66",
+        background: "#334455",
       },
-    }).jpeg().toFile(warningFile);
+    }).jpeg().toFile(sourceFile);
     writeFileSync(join(inboxDirectory, "api-receipt.json"), JSON.stringify({
-      slotId: "slot-no-matte",
+      slotId: "slot-blocked-cutout",
       attempt: 1,
-      capturedFile: warningFile,
+      capturedFile: sourceFile,
       qualityWarnings: ["source-missing-alpha", "source-mime-image-jpeg"],
       metadata: {
-        width: 512,
-        height: 768,
+        width: 4096,
+        height: 4096,
         format: "jpeg",
         hasAlpha: false,
+      },
+    }));
+    writeFileSync(join(inboxDirectory, "cutout-receipt.json"), JSON.stringify({
+      schemaVersion: "tower-cutout-receipt-v1",
+      status: "blocked",
+      slotId: "slot-blocked-cutout",
+      parentPlanSlotId: "slot-blocked-cutout",
+      sourcePath: sourceFile,
+      failureCodes: ["extra-islands", "subject-cropped", "edge-halo"],
+      qa: {
+        metrics: {
+          borderOpaquePixels: 42,
+          padding: { top: 0, right: 0.14, bottom: 0.01, left: 0.17 },
+        },
+        badges: {
+          cutout: "failed",
+          alpha: "failed",
+          dimensions: "passed",
+          crop: "failed",
+          halo: "failed",
+          props: "passed",
+        },
       },
     }));
     writeFileSync(planPath, JSON.stringify({
@@ -1739,15 +2190,25 @@ describe("art:generate CLI", () => {
       adapter: "gemini-api",
       status: "ready-for-api-generation",
       phase: "production-pack",
-      runId: "repair-plan-no-matte",
+      runId: "repair-plan-blocked-cutout",
       assetType: "character",
-      name: "Repair Plan No Matte",
+      name: "Repair Plan Blocked Cutout",
       planRoot,
       slots: [
         {
-          slotId: "slot-no-matte",
-          expectedInboxFile: warningFile,
+          slotId: "slot-blocked-cutout",
+          baseSlotId: "otis-winter-layered-working",
+          expectedInboxFile: sourceFile,
           inboxDirectory,
+          cutout: {
+            required: true,
+            subjectType: "hair-beard-character",
+            topologyType: "hair-beard-soft-body-held-props",
+            expectedProps: ["badge", "keys", "held prop"],
+            backdropContract: "premium-simple-backdrop-v1",
+            shadowPolicy: "app-owned",
+            thresholds: {},
+          },
         },
       ],
     }));
@@ -1761,25 +2222,332 @@ describe("art:generate CLI", () => {
       "--json",
     ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
     const repairPlan = JSON.parse(output) as {
+      status: string;
       slots: Array<{
+        slotId: string;
         recommendedAction: {
           type: string;
           command?: string;
           fallbackCommand?: string;
           reason: string;
-        };
-        matteReadiness?: {
-          safe: boolean;
+          promptPatch?: string[];
         };
       }>;
     };
+    const slotRepair = repairPlan.slots.find((slot) => slot.slotId === "slot-blocked-cutout");
 
-    expect(repairPlan.slots[0]?.matteReadiness?.safe).toBe(false);
-    expect(repairPlan.slots[0]?.recommendedAction).toMatchObject({
-      type: "regenerate-slot",
-      command: expect.stringContaining("run-api"),
-    });
-    expect(repairPlan.slots[0]?.recommendedAction.command).not.toContain("extract-alpha");
-    expect(repairPlan.slots[0]?.recommendedAction.reason).toContain("not a safe flat matte");
+    expect(repairPlan.status).toBe("repair-required");
+    expect(slotRepair?.recommendedAction.type).toBe("regenerate-slot");
+    expect(slotRepair?.recommendedAction.command).toContain("--slots");
+    expect(slotRepair?.recommendedAction.command).toContain("otis-winter-layered-working");
+    expect(slotRepair?.recommendedAction.fallbackCommand).toBeUndefined();
+    expect(slotRepair?.recommendedAction.reason).toContain("Local cutout already failed");
+    expect(slotRepair?.recommendedAction.promptPatch?.join("\n")).toContain("full-body head-to-toe");
+    expect(slotRepair?.recommendedAction.promptPatch?.join("\n")).toContain("no counters, desks, furniture, or rails");
   });
+
+  it("runs non-paid local padding and halo repair before regenerating complete cutouts", async () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-repair-auto-padding-halo-"));
+    const planRoot = join(root, "generation");
+    const planPath = join(planRoot, "gemini-api-plan.json");
+    const inboxDirectory = join(root, "inbox", "slot-padding-halo");
+    const sourceFile = join(inboxDirectory, "slot-padding-halo.png");
+    const cutoutFile = join(inboxDirectory, "slot-padding-halo__cutout.png");
+    const width = 120;
+    const height = 160;
+    const pixels = Buffer.alloc(width * height * 4);
+
+    mkdirSync(planRoot, { recursive: true });
+    mkdirSync(inboxDirectory, { recursive: true });
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const offset = ((y * width) + x) * 4;
+        const subject = x >= 30 && x <= 90 && y >= 5 && y <= 154;
+        const mildHalo = (x === 24 || x === 96) && y >= 40 && y <= 120;
+
+        pixels[offset] = subject ? 90 : 0;
+        pixels[offset + 1] = subject ? 54 : 0;
+        pixels[offset + 2] = subject ? 130 : 0;
+        pixels[offset + 3] = subject ? 255 : mildHalo ? 24 : 0;
+      }
+    }
+    await sharp(pixels, { raw: { width, height, channels: 4 } }).png().toFile(sourceFile);
+    await sharp(pixels, { raw: { width, height, channels: 4 } }).png().toFile(cutoutFile);
+    writeFileSync(join(inboxDirectory, "api-receipt.json"), JSON.stringify({
+      slotId: "slot-padding-halo",
+      attempt: 1,
+      capturedFile: sourceFile,
+      qualityWarnings: ["source-missing-alpha", "source-mime-image-jpeg"],
+      metadata: {
+        width,
+        height,
+        format: "png",
+        hasAlpha: false,
+      },
+    }));
+    writeFileSync(join(inboxDirectory, "cutout-receipt.json"), JSON.stringify({
+      schemaVersion: "tower-cutout-receipt-v1",
+      status: "blocked",
+      slotId: "slot-padding-halo",
+      parentPlanSlotId: "slot-padding-halo",
+      sourcePath: sourceFile,
+      sourceAttempt: 1,
+      outputPath: cutoutFile,
+      failureCodes: ["subject-cropped", "edge-halo"],
+      thresholds: {
+        minimumLongEdge: 160,
+        minimumShortEdge: 120,
+        borderSamplePixels: 1,
+        borderAlphaThreshold: 32,
+        minimumPadding: { top: 0.1, right: 0.1, bottom: 0.1, left: 0.1 },
+        maxTinyIslands: 0,
+        maxTinyIslandCanvasRatio: 0.0001,
+        maxTotalIslandCanvasRatio: 0.0001,
+        maxHoleSubjectRatio: 0.01,
+        maxTotalHoleSubjectRatio: 0.01,
+        haloMeanAlphaMax: 4,
+        haloP99AlphaMax: 18,
+        maxBackdropRemnantEdgeRatio: 0.005,
+        minimumForegroundMeanConfidence: 0.92,
+        minimumForegroundP5Confidence: 0.8,
+        maximumBackgroundP95Confidence: 0.2,
+      },
+      qa: {
+        status: "failed",
+        metrics: {
+          borderOpaquePixels: 0,
+          subjectPixels: 9150,
+          tinyIslandCount: 0,
+          totalIslandPixels: 0,
+          holePixels: 0,
+          haloMeanAlpha: 24,
+          haloP99Alpha: 24,
+          padding: { top: 0.03125, right: 0.2417, bottom: 0.03125, left: 0.25 },
+        },
+        badges: {
+          cutout: "failed",
+          alpha: "passed",
+          dimensions: "passed",
+          crop: "failed",
+          halo: "failed",
+          props: "passed",
+        },
+      },
+    }));
+    writeFileSync(planPath, JSON.stringify({
+      schemaVersion: "tower-gemini-api-generation-plan-v3",
+      adapter: "gemini-api",
+      status: "ready-for-api-generation",
+      phase: "production-pack",
+      runId: "repair-auto-padding-halo",
+      assetType: "character",
+      name: "Repair Auto Padding Halo",
+      planRoot,
+      slots: [
+        {
+          slotId: "slot-padding-halo",
+          expectedInboxFile: sourceFile,
+          inboxDirectory,
+          cutout: {
+            required: true,
+            subjectType: "character",
+            topologyType: "standard-character",
+            expectedProps: [],
+            backdropContract: "premium-simple-backdrop-v1",
+            backdropRequirements: [],
+            shadowPolicy: "app-owned",
+            thresholds: {
+              minimumLongEdge: 160,
+              minimumShortEdge: 120,
+              borderSamplePixels: 1,
+              borderAlphaThreshold: 32,
+              minimumPadding: { top: 0.1, right: 0.1, bottom: 0.1, left: 0.1 },
+              maxTinyIslands: 0,
+              maxTinyIslandCanvasRatio: 0.0001,
+              maxTotalIslandCanvasRatio: 0.0001,
+              maxHoleSubjectRatio: 0.01,
+              maxTotalHoleSubjectRatio: 0.01,
+              haloMeanAlphaMax: 4,
+              haloP99AlphaMax: 18,
+              maxBackdropRemnantEdgeRatio: 0.005,
+              minimumForegroundMeanConfidence: 0.92,
+              minimumForegroundP5Confidence: 0.8,
+              maximumBackgroundP95Confidence: 0.2,
+            },
+            review: {
+              showOriginalSource: true,
+              showCheckerboardCutout: true,
+              showDarkPreview: true,
+              showLightPreview: true,
+              showTowerShadowPreview: true,
+              badges: ["cutout", "alpha", "dimensions", "crop", "halo", "props"],
+            },
+          },
+        },
+      ],
+    }));
+
+    const repairPlanOutput = execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "repair-plan",
+      "--plan",
+      planPath,
+      "--strict",
+      "--json",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const repairPlan = JSON.parse(repairPlanOutput) as {
+      slots: Array<{ recommendedAction: { type: string; command?: string } }>;
+    };
+
+    expect(repairPlan.slots[0]?.recommendedAction.type).toBe("cutout-local-repair");
+    expect(repairPlan.slots[0]?.recommendedAction.command).toContain("repair-auto");
+
+    const repairAutoOutput = execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "repair-auto",
+      "--plan",
+      planPath,
+      "--json",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const repairAuto = JSON.parse(repairAutoOutput) as {
+      localRepairSlots: string[];
+      status: string;
+    };
+    const repairedReceipt = JSON.parse(readFileSync(join(inboxDirectory, "cutout-receipt-v002.json"), "utf8")) as {
+      status: string;
+      outputPath: string;
+      repair: { stages: string[] };
+      qa: { badges: { crop: string; halo: string }; metrics: { padding: { top: number; bottom: number }; haloP99Alpha: number } };
+    };
+    const cutoutDoctorOutput = execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "cutout-doctor",
+      "--plan",
+      planPath,
+      "--strict",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const assetDoctorOutput = execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "doctor",
+      "--plan",
+      planPath,
+      "--strict",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+
+    expect(repairAuto.status).toBe("local-repair-run");
+    expect(repairAuto.localRepairSlots).toEqual(["slot-padding-halo"]);
+    expect(repairedReceipt.status).toBe("passed");
+    expect(repairedReceipt.repair.stages).toEqual(["safe-padding-normalization", "edge-halo-defringe"]);
+    expect(repairedReceipt.qa.badges.crop).toBe("passed");
+    expect(repairedReceipt.qa.badges.halo).toBe("passed");
+    expect(repairedReceipt.qa.metrics.padding.top).toBeGreaterThanOrEqual(0.1);
+    expect(repairedReceipt.qa.metrics.padding.bottom).toBeGreaterThanOrEqual(0.1);
+    expect(repairedReceipt.qa.metrics.haloP99Alpha).toBeLessThanOrEqual(18);
+    expect(cutoutDoctorOutput).toContain("Cutout doctor: passed");
+    expect(assetDoctorOutput).toContain("Asset doctor: passed");
+  });
+
+	  it("keeps repeated expected no-alpha sources in local cutout repair mode", async () => {
+	    const root = mkdtempSync(join(tmpdir(), "tower-art-repair-plan-improvement-"));
+    const planRoot = join(root, "generation");
+    const planPath = join(planRoot, "gemini-api-plan.json");
+	    const inboxDirectory = join(root, "inbox", "slot-no-alpha-a");
+	    const secondInboxDirectory = join(root, "inbox", "slot-no-alpha-b");
+	    const warningFile = join(inboxDirectory, "slot-no-alpha-a.jpg");
+	    const secondWarningFile = join(secondInboxDirectory, "slot-no-alpha-b.jpg");
+
+	    mkdirSync(planRoot, { recursive: true });
+	    mkdirSync(inboxDirectory, { recursive: true });
+	    mkdirSync(secondInboxDirectory, { recursive: true });
+	    await sharp({
+	      create: {
+	        width: 512,
+	        height: 768,
+        channels: 3,
+	        background: "#ccaa66",
+	      },
+	    }).jpeg().toFile(warningFile);
+	    await sharp({
+	      create: {
+	        width: 512,
+	        height: 768,
+	        channels: 3,
+	        background: "#ccaa66",
+	      },
+	    }).jpeg().toFile(secondWarningFile);
+	    writeFileSync(join(inboxDirectory, "api-receipt.json"), JSON.stringify({
+	      slotId: "slot-no-alpha-a",
+	      attempt: 1,
+	      capturedFile: warningFile,
+	      qualityWarnings: ["source-missing-alpha", "source-mime-image-jpeg"],
+      metadata: {
+        width: 512,
+        height: 768,
+        format: "jpeg",
+	        hasAlpha: false,
+	      },
+	    }));
+	    writeFileSync(join(secondInboxDirectory, "api-receipt.json"), JSON.stringify({
+	      slotId: "slot-no-alpha-b",
+	      attempt: 1,
+	      capturedFile: secondWarningFile,
+	      qualityWarnings: ["source-missing-alpha", "source-mime-image-jpeg"],
+	      metadata: {
+	        width: 512,
+	        height: 768,
+	        format: "jpeg",
+	        hasAlpha: false,
+	      },
+	    }));
+	    writeFileSync(planPath, JSON.stringify({
+      schemaVersion: "tower-gemini-api-generation-plan-v3",
+      adapter: "gemini-api",
+      status: "ready-for-api-generation",
+      phase: "production-pack",
+	      runId: "repair-plan-improvement",
+	      assetType: "character",
+	      name: "Repair Plan Improvement",
+	      planRoot,
+	      slots: [
+	        {
+	          slotId: "slot-no-alpha-a",
+	          expectedInboxFile: warningFile,
+	          inboxDirectory,
+	        },
+	        {
+	          slotId: "slot-no-alpha-b",
+	          expectedInboxFile: secondWarningFile,
+	          inboxDirectory: secondInboxDirectory,
+	        },
+	      ],
+	    }));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "repair-plan",
+      "--plan",
+      planPath,
+      "--strict",
+      "--json",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+	    const repairPlan = JSON.parse(output) as {
+	      status: string;
+	      summary: { repeatedFailureCodes: string[] };
+	      slots: Array<{
+	        recommendedAction: {
+	          type: string;
+          command?: string;
+	          fallbackCommand?: string;
+	          reason: string;
+	        };
+	      }>;
+	      nextCommands: string[];
+	    };
+
+	    expect(repairPlan.status).toBe("repair-required");
+	    expect(repairPlan.summary.repeatedFailureCodes).toEqual([]);
+	    expect(repairPlan.slots.every((slot) => slot.recommendedAction.type === "cutout-local")).toBe(true);
+	    expect(repairPlan.nextCommands.join("\n")).toContain("Run the per-slot recommendedAction.command");
+	    expect(repairPlan.nextCommands.join("\n")).not.toContain("extract-alpha");
+	  });
 });

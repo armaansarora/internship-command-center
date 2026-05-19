@@ -1,26 +1,13 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
-
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import {
-  assertSafeWorkspacePath,
-  createGenerationBudgetLedger,
-  getNextCreativeRunAction,
-  type CreativeAssetType,
-  type CreativeRunState,
-} from "../src/lib/creative-production";
-
-const ASSET_ROOTS: Record<CreativeAssetType, string> = {
-  character: "characters",
-  environment: "environments",
-  prop: "props",
-  "ui-texture": "ui-textures",
-  animation: "animations",
-  scene: "scenes",
-  "icon-system": "icon-systems",
-  "marketing-hero": "marketing-heroes",
-  shader: "shaders",
-};
+  buildFinalBoardForCreativeRun,
+  importLegacyOtisRun,
+  markCreativeRunUpgradeRequired,
+  renderCreativeStatusSummary,
+  startCreativeProductionRun,
+} from "../src/lib/creative-production/operator/v1-final";
 
 function flagValue(argv: string[], name: string): string | undefined {
   const index = argv.indexOf(name);
@@ -36,189 +23,160 @@ function flagValue(argv: string[], name: string): string | undefined {
   return value;
 }
 
-function assertBudget(value: string | undefined): number | undefined {
-  if (!value) return undefined;
+function printHumanStop(input: Awaited<ReturnType<typeof startCreativeProductionRun>>): void {
+  const humanActionPath = join(input.runRoot, "human-action.json");
+  const progressPath = join(input.runRoot, "progress.json");
 
-  const parsed = Number(value);
+  console.log("Creative Production Engine orchestrator");
+  console.log("Two human gates: initial design direction, final app promotion.");
+  console.log(`Run root: ${input.runRoot}`);
+  console.log(`Current phase: ${input.state.phase}`);
+  console.log("");
+  console.log(`What I understood: ${input.humanAction.whatIUnderstood}`);
+  console.log(`Recommendation: ${input.humanAction.recommendation}`);
+  console.log(`Cost impact: estimated $${(input.humanAction.costImpact.estimatedCents / 100).toFixed(2)}, reserved $${(input.humanAction.costImpact.reservedCents / 100).toFixed(2)}`);
+  console.log(`Risk: ${input.humanAction.risk}`);
+  console.log(`Allowed responses: ${input.humanAction.allowedResponses.join("; ")}`);
+  console.log(`Recommended response: ${input.humanAction.recommendedResponse}`);
+  console.log("");
+  console.log(`Wrote: ${humanActionPath}`);
+  console.log(`Wrote: ${progressPath}`);
+  console.log("Public art and production manifests remain locked until exact phrase: approved for app");
+}
 
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error("--budget-cents must be a positive integer.");
+async function maybeImportLegacyRun(input: {
+  stateRoot: string;
+  runId: string;
+}): Promise<void> {
+  const otisRunRoot = join(input.stateRoot, "characters", input.runId);
+  const statePath = join(otisRunRoot, "run-state.json");
+  const progressPath = join(otisRunRoot, "progress.json");
+
+  if (!existsSync(statePath)) return;
+  if (existsSync(progressPath)) {
+    const state = JSON.parse(await readFile(statePath, "utf8")) as {
+      importedFrom?: unknown;
+      request?: string;
+      name?: string;
+      phase?: string;
+    };
+    const importSettledPhases = new Set([
+      "final-board-ready",
+      "app-preview-ready",
+      "approved-for-app",
+      "promoted",
+      "browser-verified",
+      "closed",
+    ]);
+    const isImportedOtis = input.runId.includes("otis") &&
+      (state.importedFrom || state.request === "Imported current Otis production canary state.");
+
+    if (isImportedOtis && !importSettledPhases.has(state.phase ?? "")) {
+      await importLegacyOtisRun({ runRoot: otisRunRoot });
+    }
+    return;
   }
 
-  return parsed;
+  const state = JSON.parse(await readFile(statePath, "utf8")) as { runId?: string; name?: string; phase?: string };
+  const isOtis = input.runId.includes("otis") || /otis/i.test(state.name ?? "");
+
+  if (!state.phase && isOtis) {
+    await importLegacyOtisRun({ runRoot: otisRunRoot });
+  }
 }
 
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 72) || "creative-run";
-}
-
-function inferAssetType(request: string): CreativeAssetType {
-  const normalized = request.toLowerCase();
-
-  if (/\b(shader|webgl|webgpu|three\.?js)\b/.test(normalized)) return "shader";
-  if (/\b(animation|motion|animated|gsap|canvas)\b/.test(normalized)) return "animation";
-  if (/\b(button|ui|control|texture|surface)\b/.test(normalized)) return "ui-texture";
-  if (/\b(background|environment|room|lobby|screen)\b/.test(normalized)) return "environment";
-  if (/\b(prop|object|item)\b/.test(normalized)) return "prop";
-  if (/\b(icon|symbol)\b/.test(normalized)) return "icon-system";
-  if (/\b(hero|marketing)\b/.test(normalized)) return "marketing-hero";
-  if (/\b(scene|composition)\b/.test(normalized)) return "scene";
-
-  return "character";
-}
-
-function inferName(request: string, assetType: CreativeAssetType): string {
-  if (/\botis\b/i.test(request)) return "Otis Vale";
-  if (/\bmara\b/i.test(request)) return "Mara Voss";
-  if (/\brafe\b/i.test(request)) return "Rafe Calder";
-
-  const cleaned = request.replace(/[.?!]+$/g, "").trim();
-
-  return cleaned || assetType;
-}
-
-function safeStateRoot(input?: string): string {
-  return assertSafeWorkspacePath(input ?? ".artlab/studio", [
-    join(process.cwd(), ".artlab"),
-    tmpdir(),
-  ]);
-}
-
-async function findRunState(root: string, runId: string): Promise<string | undefined> {
-  async function walk(directory: string): Promise<string | undefined> {
-    const entries = await readdir(directory, { withFileTypes: true }).catch(() => []);
+async function findRunRoot(stateRoot: string, runId: string): Promise<string | undefined> {
+  const { readdir } = await import("node:fs/promises");
+  const walk = async (root: string): Promise<string | undefined> => {
+    const entries = await readdir(root, { withFileTypes: true }).catch(() => []);
 
     for (const entry of entries) {
-      const fullPath = join(directory, entry.name);
+      const path = join(root, entry.name);
 
       if (entry.isDirectory()) {
-        const found = await walk(fullPath);
-
+        const found = await walk(path);
         if (found) return found;
       } else if (entry.name === "run-state.json") {
-        const state = JSON.parse(await readFile(fullPath, "utf8")) as { runId?: string };
-
-        if (state.runId === runId) return fullPath;
+        const state = JSON.parse(await readFile(path, "utf8")) as { runId?: string };
+        if (state.runId === runId) return dirname(path);
       }
     }
 
     return undefined;
-  }
-
-  return walk(root);
-}
-
-async function createRun(argv: string[]): Promise<void> {
-  const request = flagValue(argv, "--request");
-
-  if (!request) throw new Error("art:produce requires --request or --continue.");
-
-  const root = safeStateRoot(flagValue(argv, "--state-root"));
-  const assetType = inferAssetType(request);
-  const name = inferName(request, assetType);
-  const runId = flagValue(argv, "--run-id") ?? `${new Date().toISOString().slice(0, 10)}-${slugify(name)}`;
-  const budgetCents = assertBudget(flagValue(argv, "--budget-cents")) ?? 600;
-  const runRoot = join(root, ASSET_ROOTS[assetType], runId);
-  const state: {
-    schemaVersion: "tower-creative-run-state-v1";
-    runId: string;
-    assetType: CreativeAssetType;
-    name: string;
-    state: CreativeRunState;
-    budgetCents: number;
-    gates: string[];
-    nextLegalAction: string;
-    promotionPhrase: "approved for app";
-    publicArtWritesAllowed: false;
-  } = {
-    schemaVersion: "tower-creative-run-state-v1",
-    runId,
-    assetType,
-    name,
-    state: "initial-concepts",
-    budgetCents,
-    gates: ["initial-direction", "final-upload-ready-board"],
-    nextLegalAction: getNextCreativeRunAction("initial-concepts"),
-    promotionPhrase: "approved for app",
-    publicArtWritesAllowed: false,
   };
 
-  await mkdir(runRoot, { recursive: true });
-  await writeFile(join(runRoot, "creative-brief.json"), `${JSON.stringify({
-    schemaVersion: "tower-creative-brief-v1",
-    runId,
-    assetType,
-    name,
-    request,
-    outputRoot: runRoot,
-    budgetCents,
-    gates: state.gates,
-    promotionPhrase: state.promotionPhrase,
-  }, null, 2)}\n`);
-  await writeFile(join(runRoot, "run-state.json"), `${JSON.stringify(state, null, 2)}\n`);
-  await writeFile(join(runRoot, "generation-budget-ledger.json"), `${JSON.stringify(createGenerationBudgetLedger({
-    runId,
-    assetType,
-  }), null, 2)}\n`);
-  await writeFile(join(runRoot, "handoff.md"), [
-    `# ${name} Creative Production Handoff`,
-    "",
-    `Run: \`${runId}\``,
-    `State: \`${state.state}\``,
-    "",
-    "Two human gates: initial direction and final upload-ready board.",
-    "Do not ask Armaan for intermediate approvals.",
-    "Do not write public/art or promote until Armaan says `approved for app`.",
-    "",
-    `Next legal action: ${state.nextLegalAction}`,
-    "",
-  ].join("\n"));
-
-  console.log("Creative Production Engine orchestrator");
-  console.log("Two human gates: initial direction, final upload-ready board.");
-  console.log(`Run root: ${runRoot}`);
-  console.log(`Current state: ${state.state}`);
-  console.log(`Next legal action: ${state.nextLegalAction}`);
+  return walk(stateRoot);
 }
 
-async function continueRun(argv: string[]): Promise<void> {
-  const runId = flagValue(argv, "--continue");
+async function activeImprovementBlockerReason(stateRoot: string): Promise<string | undefined> {
+  const ledgerPath = join(stateRoot, "ledgers", "improvements.jsonl");
+  const raw = await readFile(ledgerPath, "utf8").catch(() => "");
+  const entries = raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as { category?: string; severity?: string; failureCode?: string });
+  const lastUpgradeIndex = entries.map((entry) => entry.category).lastIndexOf("engine-upgrade");
+  const activeEntries = lastUpgradeIndex === -1 ? entries : entries.slice(lastUpgradeIndex + 1);
+  const high = activeEntries.find((entry) => entry.severity === "high");
 
-  if (!runId) throw new Error("--continue requires a run id.");
+  if (high) return high.failureCode ?? high.category ?? "high-severity-failure";
 
-  const root = safeStateRoot(flagValue(argv, "--state-root"));
-  const runStatePath = await findRunState(root, runId);
+  const mediumCounts = activeEntries
+    .filter((entry) => entry.severity === "medium")
+    .reduce((counts, entry) => {
+      const code = entry.failureCode ?? entry.category ?? "medium-failure";
+      counts.set(code, (counts.get(code) ?? 0) + 1);
+      return counts;
+    }, new Map<string, number>());
+  const repeatedMedium = [...mediumCounts.entries()].find(([, count]) => count >= 2);
 
-  if (!runStatePath) {
-    throw new Error(`Could not find run-state.json for ${runId} under ${root}.`);
-  }
-
-  const state = JSON.parse(await readFile(runStatePath, "utf8")) as {
-    state: CreativeRunState;
-    name?: string;
-    nextLegalAction?: string;
-  };
-  const nextLegalAction = state.nextLegalAction ?? getNextCreativeRunAction(state.state);
-
-  console.log(`Continuing run: ${runId}`);
-  console.log(`Run root: ${resolve(join(runStatePath, ".."))}`);
-  console.log(`Current state: ${state.state}`);
-  console.log(`Next legal action: ${nextLegalAction}`);
+  return repeatedMedium ? repeatedMedium[0] : undefined;
 }
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
+  const stateRoot = flagValue(argv, "--state-root") ?? ".artlab/studio";
+  const continueRunId = flagValue(argv, "--continue");
+  const request = flagValue(argv, "--request");
 
-  if (argv.includes("--continue")) {
-    await continueRun(argv);
+  if (continueRunId) {
+    await maybeImportLegacyRun({ stateRoot, runId: continueRunId });
+    const blockerReason = await activeImprovementBlockerReason(stateRoot);
+
+    if (blockerReason) {
+      const runRoot = await findRunRoot(stateRoot, continueRunId);
+
+      if (!runRoot) throw new Error(`Could not find run-state.json for ${continueRunId}.`);
+
+      await markCreativeRunUpgradeRequired({ runRoot, reason: blockerReason });
+    } else {
+      const runRoot = await findRunRoot(stateRoot, continueRunId);
+
+      if (runRoot) {
+        const state = JSON.parse(await readFile(join(runRoot, "run-state.json"), "utf8")) as { phase?: string };
+
+        if (state.phase === "strict-qa") {
+          await buildFinalBoardForCreativeRun({ runRoot });
+        }
+      }
+    }
+
+    console.log(await renderCreativeStatusSummary({ stateRoot, runId: continueRunId }));
     return;
   }
 
-  await createRun(argv);
+  if (!request) {
+    throw new Error("art:produce requires --request \"...\" or --continue <runId>.");
+  }
+
+  const artifacts = await startCreativeProductionRun({
+    stateRoot,
+    request,
+    runId: flagValue(argv, "--run-id"),
+  });
+
+  printHumanStop(artifacts);
 }
 
 main().catch((error: unknown) => {

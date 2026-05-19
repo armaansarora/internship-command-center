@@ -36,6 +36,14 @@ Use this skill when the user says any close variant of:
 6. Wait for the initial direction approval.
 7. Build the strict production packet.
 8. Execute generation, ingest, QA, review board, promotion, and app integration through scripts.
+   - Normal command surface is only:
+     - `npm run art:produce -- --request "<request>"`
+     - `npm run art:produce -- --continue <run-id>`
+     - `npm run art:status`
+     - `npm run art:health`
+   - `art:produce` writes durable `run-state.json`, `progress.json`, `human-action.json`, and append-only `events.jsonl`. Future sessions resume from those files and receipts, not chat history.
+   - Every human stop must have `human-action.json` with what the engine understood, recommendation, cost impact, risk, allowed responses, and recommended response.
+   - `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Do not continue production until the command/test/doc hardening is done.
    - Do not use Armaan's daily Chrome profile for image generation. First create or reuse an isolated Playwright Chromium session with `npm run art:browser plan --session gemini-art-studio --provider gemini`.
    - If the subscription UI must be opened, use `npm run art:browser open --session gemini-art-studio --provider gemini`; keep downloads inside the isolated session path.
    - Do not open many visible provider tabs. Subscription UI work is capped at two isolated interactive sessions by default. True unattended five-lane image generation requires the Gemini API adapter and explicit billing approval.
@@ -48,13 +56,13 @@ Use this skill when the user says any close variant of:
    - For the v3 paid path, use `npm run art:generate prepare-api` then `npm run art:generate run-api`. Gemini API v3 is locked to Nano Banana 2 (`gemini-3.1-flash-image-preview`), five lanes for initial design, 4K by default, cost-capped, and image-only responses.
    - Initial character design is exactly 5 total images: one prompt-only base concept x five concurrent lanes. Do not attach identity reference images or generate multiple poses during initial design.
    - Production packs after design approval must use `--phase production-pack`; stale plans without an explicit phase are invalid and must be regenerated.
-   - Production packs with more than one source slot create a canary plan and a blocked full plan. Run `npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>` after the canary and non-paid repair pass. The full plan must not run until `canary-gate.json` is `passed`.
+   - Production packs with more than one source slot create a canary plan and a blocked full plan. Run the canary through generation, local cutout, edge refinement, strict cutout doctor, ingest/master/derive/review preview, then `npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>`. The full plan must not run until `canary-gate.json` is `passed` and `cutout-readiness.json` is `ready`.
    - Whole-pack warning retries are banned. Use `npm run art:generate repair-auto --plan <plan>` first, then regenerate only named failed slots with `npm run art:generate run-api --plan <plan> --slots <slot-id-a,slot-id-b>`.
    - API runs are protected by `api-run.lock`, `api-run-state.json`, clean-slot skipping, warning-slot retries, request timeouts, retryable network failure handling, and budget projection. Use `--max-attempts <n>` for retry caps and `--force-unlock` only after confirming no API run is active.
    - `api-run-state.json` status `completed-with-warnings` is not production-ready. Treat it as concept-only or repair-required until the warnings are fixed.
    - After generated images or review boards exist, run the Asset Doctor Gate: `npm run art:generate doctor -- --plan <gemini-api-plan.json> --board <review-board.html>`. Add `--strict` before final upload-ready approval. If it blocks, do not show the board as clean and do not promote.
    - If doctor reports warnings or blockers, immediately run `npm run art:generate repair-plan -- --plan <gemini-api-plan.json> --board <review-board.html> --strict`, then `npm run art:generate repair-auto --plan <gemini-api-plan.json>` for safe non-paid repairs, so the next step is an exact per-slot repair packet, not a human guess from raw warnings.
-   - Gemini does not reliably return true transparent PNGs. Prompt for a solid `#00ff00` chroma matte, forbid checkerboard/fake transparency, then run `npm run art:generate extract-alpha` for local alpha extraction. Checkerboard/busy backgrounds must be rejected, not cut out badly.
+   - Gemini does not reliably return production-ready transparent foregrounds. Production prompts must use the `premium-simple-backdrop-v1` contract, then local `cutout-auto` runs before edge refinement, alpha QA, mastering, derivatives, and review. Production cutout is offline by default and fails closed when the selected model/cache/license evidence is missing.
    - API keys must come only from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`. Never write API keys into repo files, command flags, prompt decks, receipts, screenshots, or run JSON.
 9. Promote only after the exact phrase `approved for app`.
 10. Run the Housekeeping Gate.
@@ -149,22 +157,27 @@ npm run art:generate repair-plan --plan <gemini-api-plan.json> --board <review-b
 
 This writes `repair-plan.json` beside `asset-doctor.json` and converts failures into exact per-slot actions:
 
-- `extract-alpha` only for character sources that exist, lack true alpha, and pass the flat `#00ff00` matte-readiness check.
+- `cutout-local` for foreground sources that exist but still need transparent production alpha.
 - `regenerate-slot` for missing, corrupt, low-resolution, or non-repairable outputs.
 - `rebuild-review-board` for broken local preview references.
 - `none` for clean slots.
+- `improvement-required` when many slots share the same failure code, because the prompt/model/threshold strategy is broken.
 
 Run strict doctor again after following the repair plan. Do not ask for final approval until the strict gate passes.
 
-Do not cut out ordinary JPEG/no-alpha images. If the repair plan says the source is not a safe flat matte, regenerate the slot instead of forcing alpha extraction.
+Do not silently cut out uncertain foregrounds. If the cutout compiler is unsure, it blocks promotion and routes to named-slot regeneration or improvement mode.
 
-Alpha workflow:
+Cutout compiler workflow:
 
 ```bash
-npm run art:generate extract-alpha --source <matte-source.png> --output <transparent-output.png> --matte-color 00ff00
+npm run art:generate cutout-bootstrap
+npm run art:generate cutout-benchmark --fixture-set <fixture-set.json>
+npm run art:generate cutout-readiness --plan <gemini-api-plan.json>
+npm run art:generate cutout-auto --plan <gemini-api-plan.json> --slots <slot-id>
+npm run art:generate cutout-doctor --plan <gemini-api-plan.json> --strict
 ```
 
-This extractor preserves source dimensions, writes true PNG alpha, and refuses checkerboard or non-flat backgrounds.
+Cutout runs on the original provider source before any upscale/mastering step. Every receipt records source hash, model/weight evidence, raw mask hash, refined mask hash, final PNG hash, thresholds, QA badges, and failure codes.
 
 ## Creative Capability Scope
 

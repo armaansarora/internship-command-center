@@ -50,7 +50,7 @@ The engine routes characters, backgrounds, screens, UI surfaces, animations, pro
 - Gemini API runs read keys only from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`.
 - Gemini API runs use `api-run.lock` and `api-run-state.json` so duplicate agents do not double-spend against the same plan.
 - Do not write API keys into repo files, command flags, receipts, prompt decks, screenshots, or run JSON.
-- Gemini does not reliably produce true transparent PNGs; use a flat `#00ff00` matte for source art and extract alpha locally.
+- Gemini does not reliably produce production-ready transparent foregrounds; use `premium-simple-backdrop-v1`, run local cutout before mastering, and keep production cutout offline/fail-closed unless cached model and license evidence is present.
 - If a generated image fails to load, decodes poorly, lacks expected files, has broken preview references, or fails strict doctor, repair or regenerate before showing it as clean.
 
 ## Parallel Mode

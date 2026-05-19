@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   CHARACTER_INITIAL_CONCEPT_IDENTITY_VARIATION_RULE,
-  CHARACTER_INITIAL_CONCEPT_SHARED_LANE_QUALITY_FLOOR,
-  GEMINI_API_DEFAULT_LANE_COUNT,
-  GEMINI_NANO_BANANA_2_MODEL,
-  assertGeminiNanoBanana2Model,
-  createGeminiApiGenerationPlan,
-  createGeminiApiProductionFirewallPlans,
+	  CHARACTER_INITIAL_CONCEPT_SHARED_LANE_QUALITY_FLOOR,
+	  GEMINI_API_DEFAULT_LANE_COUNT,
+	  GEMINI_NANO_BANANA_2_MODEL,
+	  BANNED_PRODUCTION_CUTOUT_TERMS,
+	  assertGeminiNanoBanana2Model,
+	  createDefaultCutoutContract,
+	  createGeminiApiGenerationPlan,
+	  createGeminiApiProductionFirewallPlans,
   createGeminiGenerateContentPayload,
   estimateGeminiApiCostCents,
   renderGeminiApiRunbook,
@@ -44,10 +46,14 @@ describe("Gemini API v3 generation", () => {
     expect(plan.costGuard.maxBaseSlotsForInitialDesign).toBe(1);
     expect(plan.costGuard.defaultInitialDesignTotalImages).toBe(5);
     expect(plan.secretPolicy.keyIsNeverStoredInRepo).toBe(true);
-    expect(plan.secretPolicy.acceptedEnvVars).toContain("GEMINI_API_KEY");
-    expect(plan.costGuard.disableGroundingByDefault).toBe(true);
-    expect(plan.slots[0]?.request.responseModalities).toEqual(["IMAGE"]);
-  });
+	    expect(plan.secretPolicy.acceptedEnvVars).toContain("GEMINI_API_KEY");
+	    expect(plan.costGuard.disableGroundingByDefault).toBe(true);
+	    expect(plan.slots[0]?.request.responseModalities).toEqual(["IMAGE"]);
+	    expect(plan.cutoutPolicy.compilerStage).toBe("fail-closed-visual-cutout-v1");
+	    expect(plan.cutoutPolicy.neverUpscaleBeforeCutout).toBe(true);
+	    expect(plan.slots[0]?.cutout.backdropContract).toBe("premium-simple-backdrop-v1");
+	    expect(plan.slots[0]?.cutout.shadowPolicy).toBe("app-owned");
+	  });
 
   it("uses broad prompt-only lane mandates during initial design instead of approved-identity constraints", () => {
     const plan = createGeminiApiGenerationPlan({
@@ -111,7 +117,7 @@ describe("Gemini API v3 generation", () => {
     });
   });
 
-  it("keeps approved identity constraints for production packs", () => {
+	  it("keeps approved identity constraints for production packs", () => {
     const plan = createGeminiApiGenerationPlan({
       runId: "otis-production-pack",
       assetType: "character",
@@ -137,9 +143,18 @@ describe("Gemini API v3 generation", () => {
       ],
     });
 
-    expect(plan.lanes[0]?.label).toBe("Canonical Safe");
-    expect(plan.slots[0]?.prompt).toContain("Do not redesign the approved character identity");
-  });
+	    expect(plan.lanes[0]?.label).toBe("Canonical Safe");
+	    expect(plan.slots[0]?.prompt).toContain("Do not redesign the approved character identity");
+	    expect(plan.slots[0]?.prompt).toContain("Cutout backdrop contract (premium-simple-backdrop-v1)");
+	    expect(plan.slots[0]?.prompt).toContain("high subject/background separation");
+	    expect(plan.slots[0]?.prompt).toContain("no patterned walls");
+	    expect(plan.slots[0]?.prompt).toContain("no furniture or objects overlapping");
+	    expect(plan.slots[0]?.prompt).toContain("no cast or contact shadows touching");
+	    expect(plan.slots[0]?.prompt).toContain("app-owned shadow discipline");
+	    for (const term of BANNED_PRODUCTION_CUTOUT_TERMS) {
+	      expect(plan.slots[0]?.prompt.toLowerCase()).not.toContain(term);
+	    }
+	  });
 
   it("lets production packs generate one locked lane across many assets with five-way API concurrency", () => {
     const productionSlots = Array.from({ length: 24 }, (_, index) => ({
@@ -175,13 +190,15 @@ describe("Gemini API v3 generation", () => {
     expect(plan.estimatedCostCents).toBeCloseTo(362.4);
   });
 
-  it("splits production packs into a one-slot canary plan and a blocked full plan", () => {
-    const productionSlots = Array.from({ length: 24 }, (_, index) => ({
-      slotId: index === 0 ? "otis-regular-idle" : `otis-production-${index + 1}`,
-      prompt: `Generate approved Otis production asset ${index + 1}.`,
-      targetDirectory: ".artlab/runs/otis/production/incoming",
-      targetFilename: `otis__production_${index + 1}__source-v001.png`,
-      reason: "Production packet asset.",
+	  it("splits production packs into a hard representative canary plan and a blocked full plan", () => {
+	    const productionSlots = Array.from({ length: 24 }, (_, index) => ({
+	      slotId: index === 0 ? "otis-regular-idle" : index === 1 ? "otis-winter-layered-working" : `otis-production-${index + 1}`,
+	      prompt: index === 1
+	        ? "Generate approved Otis winter layered working pose with beard, hair, hands, feet, badge, keys, pen, and held prop."
+	        : `Generate approved Otis production asset ${index + 1}.`,
+	      targetDirectory: ".artlab/runs/otis/production/incoming",
+	      targetFilename: `otis__production_${index + 1}__source-v001.png`,
+	      reason: "Production packet asset.",
     }));
     const { canaryPlan, fullPlan, canaryGatePath, budgetLedgerPath } = createGeminiApiProductionFirewallPlans({
       runId: "otis-production-firewall",
@@ -203,19 +220,81 @@ describe("Gemini API v3 generation", () => {
       slots: productionSlots,
     });
 
-    expect(canaryPlan.status).toBe("ready-for-api-generation");
-    expect(canaryPlan.firewall?.planRole).toBe("canary");
-    expect(canaryPlan.slots).toHaveLength(1);
-    expect(canaryPlan.slots[0]?.baseSlotId).toBe("otis-regular-idle");
-    expect(fullPlan.status).toBe("blocked-pending-canary");
-    expect(fullPlan.firewall?.planRole).toBe("full");
-    expect(fullPlan.firewall?.requiresCanary).toBe(true);
-    expect(fullPlan.firewall?.canaryGatePath).toBe(canaryGatePath);
-    expect(fullPlan.firewall?.budgetLedgerPath).toBe(budgetLedgerPath);
-    expect(fullPlan.slots).toHaveLength(24);
-  });
+	    expect(canaryPlan.status).toBe("ready-for-api-generation");
+	    expect(canaryPlan.firewall?.planRole).toBe("canary");
+	    expect(canaryPlan.slots).toHaveLength(1);
+	    expect(canaryPlan.slots[0]?.baseSlotId).toBe("otis-winter-layered-working");
+	    expect(fullPlan.status).toBe("blocked-pending-canary");
+	    expect(fullPlan.firewall?.planRole).toBe("full");
+	    expect(fullPlan.firewall?.requiresCanary).toBe(true);
+	    expect(fullPlan.firewall?.canaryGatePath).toBe(canaryGatePath);
+	    expect(fullPlan.firewall?.budgetLedgerPath).toBe(budgetLedgerPath);
+	    expect(fullPlan.firewall?.cutoutReadinessPath).toContain("cutout-readiness.json");
+	    expect(fullPlan.slots).toHaveLength(24);
+	  });
 
-  it("rejects initial design plans with more than one base slot so concept selection stays five total images", () => {
+	  it("requires one production canary per cutout topology type", () => {
+	    const { canaryPlan } = createGeminiApiProductionFirewallPlans({
+	      runId: "multi-topology-canary",
+	      assetType: "character",
+	      name: "Otis",
+	      planRoot: ".artlab/studio/characters/otis-multi-topology/generation/gemini-api-v3",
+	      inboxRoot: ".artlab/inbox/character/otis-multi-topology/gemini-api-v3",
+	      phase: "production-pack",
+	      laneCount: 1,
+	      maxConcurrency: 5,
+	      budgetCents: 600,
+	      referenceImages: [
+	        {
+	          path: ".artlab/characters/otis/model/otis_winner-ref_v001.png",
+	          mimeType: "image/png",
+	          role: "identity-reference",
+	        },
+	      ],
+	      slots: [
+	        {
+	          slotId: "otis-regular-idle",
+	          prompt: "Generate approved Otis regular idle.",
+	          targetDirectory: ".artlab/runs/otis/production/incoming",
+	          targetFilename: "otis__regular__idle__source-v001.png",
+	          reason: "Simple character topology.",
+	          cutout: createDefaultCutoutContract({
+	            assetType: "character",
+	            name: "Front Desk Character",
+	            slotId: "regular-idle",
+	          }),
+	        },
+	        {
+	          slotId: "otis-winter-layered-working",
+	          prompt: "Generate approved Otis winter layered working with beard hair hands feet badge keys and held prop.",
+	          targetDirectory: ".artlab/runs/otis/production/incoming",
+	          targetFilename: "otis__winter-layered__working__source-v001.png",
+	          reason: "Hardest character topology.",
+	        },
+	        {
+	          slotId: "otis-keyring-prop",
+	          prompt: "Generate the Otis keyring prop.",
+	          targetDirectory: ".artlab/runs/otis/production/incoming",
+	          targetFilename: "otis__keyring-prop__source-v001.png",
+	          reason: "Held prop topology.",
+	          cutout: createDefaultCutoutContract({
+	            assetType: "prop",
+	            name: "Otis Keyring",
+	            slotId: "otis-keyring-prop",
+	          }),
+	        },
+	      ],
+	    });
+	    const canaryBaseSlots = canaryPlan.slots.map((slot) => slot.baseSlotId);
+
+	    expect(canaryBaseSlots).toEqual([
+	      "otis-regular-idle",
+	      "otis-winter-layered-working",
+	      "otis-keyring-prop",
+	    ]);
+	  });
+
+	  it("rejects initial design plans with more than one base slot so concept selection stays five total images", () => {
     expect(() => createGeminiApiGenerationPlan({
       runId: "otis-too-many-probes",
       assetType: "character",

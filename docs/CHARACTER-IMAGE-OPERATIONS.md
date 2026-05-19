@@ -27,6 +27,12 @@ For read-only status:
 npm run art:status
 ```
 
+For engine safety before another provider or promotion step:
+
+```bash
+npm run art:health
+```
+
 For machine-readable handoff:
 
 ```bash
@@ -61,10 +67,12 @@ Production paid generation is canary-gated. After an initial design is chosen, p
 - Production packs happen only after one initial design is chosen.
 - Gemini API runs use Nano Banana 2 through the generation adapter when API spending is explicitly approved.
 - API keys must come from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`; never write keys into repo files.
-- Gemini does not reliably return real transparent backgrounds. Production character prompts should use a flat `#00ff00` chroma matte, then run local alpha extraction.
+- Gemini does not reliably return production-ready transparent foregrounds. Production character prompts should use `premium-simple-backdrop-v1`, then run local cutout, edge refinement, and alpha QA before mastering.
 - Failed slots are repaired or regenerated individually. Do not rerun a whole pack because one image failed.
 - Generated outputs stay in `.artlab` until final promotion.
 - `src/lib/visual-assets/approved-character-assets.generated.json` stays empty until a full character board is approved for app.
+- Current v1-final runs resume from `run-state.json`, `progress.json`, `human-action.json`, `events.jsonl`, receipts, and review action manifests. Do not rely on chat history.
+- `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Resolved historical failures are reset by an `engine-upgrade` ledger entry.
 
 ## If Armaan Asks What Has Been Done
 

@@ -125,6 +125,29 @@ describe("character art run contract", () => {
     );
   });
 
+  it("blocks canary-only character pipeline runs from final approval and promotion", () => {
+    const run = {
+      ...createCharacterArtRunPlan({
+        characterId: "otis",
+        runId: "otis-canary-pipeline",
+        assetVersion: "otis-v1",
+        approvedIdentityRef: ".artlab/characters/otis/model/otis_winner-ref_v001.png",
+      }),
+      canaryOnly: {
+        notProductionCompletion: true as const,
+        reason: "single cutout duplicated into all expected sprite slots to prove pipeline mechanics",
+      },
+    };
+
+    expect(() => markCharacterArtRunFinalApproved(
+      run,
+      CHARACTER_ART_FINAL_APPROVAL_PHRASE,
+    )).toThrow(/canary-only/i);
+    expect(getCharacterArtRunPromotionIssues(run)).toContain(
+      "Canary-only character pipeline runs cannot be promoted.",
+    );
+  });
+
   it("builds manifest-ready approved visual assets only from a promoted QA-passed run", () => {
     const run = createCharacterArtRunPlan({
       characterId: "otis",

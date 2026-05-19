@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "tower-generation-budget-ledger-v1",
+  "runId": "otis-real-rembg-canary-v1",
+  "assetType": "character",
+  "policy": {
+    "assetType": "character",
+    "initialDesignCents": 100,
+    "canaryCents": 50,
+    "normalCeilingCents": 500,
+    "absoluteStopCents": 1000,
+    "wholePackRetryAllowed": false
+  },
+  "entries": [
+    {
+      "phase": "canary",
+      "reason": "api-lane-01__otis-winter-layered-working:missing-output",
+      "billableImages": 1,
+      "costPerImageCents": 15.1,
+      "slotIds": [
+        "api-lane-01__otis-winter-layered-working"
+      ],
+      "attempt": 1,
+      "batchScope": "canary",
+      "createdAt": "2026-05-19T03:17:49.351Z"
+    },
+    {
+      "phase": "canary",
+      "reason": "api-lane-01__otis-winter-layered-working:retry-warning-receipt",
+      "billableImages": 1,
+      "costPerImageCents": 15.1,
+      "slotIds": [
+        "api-lane-01__otis-winter-layered-working"
+      ],
+      "attempt": 2,
+      "batchScope": "canary",
+      "createdAt": "2026-05-19T03:40:58.176Z"
+    },
+    {
+      "phase": "production-pack",
+      "reason": "api-lane-01__otis-turnaround:missing-output, api-lane-01__otis-expression-sheet:missing-output, api-lane-01__otis-outfit-variants:missing-output, api-lane-01__otis-regular-idle:missing-output, api-lane-01__otis-regular-greeting:missing-output, api-lane-01__otis-regular-listening:missing-output, api-lane-01__otis-regular-thinking:missing-output, api-lane-01__otis-regular-talking:missing-output, api-lane-01__otis-regular-alert:missing-output, api-lane-01__otis-regular-working:missing-output, api-lane-01__otis-summer-light-idle:missing-output, api-lane-01__otis-summer-light-greeting:missing-output, api-lane-01__otis-summer-light-listening:missing-output, api-lane-01__otis-summer-light-thinking:missing-output, api-lane-01__otis-summer-light-talking:missing-output, api-lane-01__otis-summer-light-alert:missing-output, api-lane-01__otis-summer-light-working:missing-output, api-lane-01__otis-winter-layered-idle:missing-output, api-lane-01__otis-winter-layered-greeting:missing-output, api-lane-01__otis-winter-layered-listening:missing-output, api-lane-01__otis-winter-layered-thinking:missing-output, api-lane-01__otis-winter-layered-talking:missing-output, api-lane-01__otis-winter-layered-alert:missing-output",
+      "billableImages": 23,
+      "costPerImageCents": 15.1,
+      "slotIds": [
+        "api-lane-01__otis-turnaround",
+        "api-lane-01__otis-expression-sheet",
+        "api-lane-01__otis-outfit-variants",
+        "api-lane-01__otis-regular-idle",
+        "api-lane-01__otis-regular-greeting",
+        "api-lane-01__otis-regular-listening",
+        "api-lane-01__otis-regular-thinking",
+        "api-lane-01__otis-regular-talking",
+        "api-lane-01__otis-regular-alert",
+        "api-lane-01__otis-regular-working",
+        "api-lane-01__otis-summer-light-idle",
+        "api-lane-01__otis-summer-light-greeting",
+        "api-lane-01__otis-summer-light-listening",
+        "api-lane-01__otis-summer-light-thinking",
+        "api-lane-01__otis-summer-light-talking",
+        "api-lane-01__otis-summer-light-alert",
+        "api-lane-01__otis-summer-light-working",
+        "api-lane-01__otis-winter-layered-idle",
+        "api-lane-01__otis-winter-layered-greeting",
+        "api-lane-01__otis-winter-layered-listening",
+        "api-lane-01__otis-winter-layered-thinking",
+        "api-lane-01__otis-winter-layered-talking",
+        "api-lane-01__otis-winter-layered-alert"
+      ],
+      "attempt": 1,
+      "batchScope": "full-pack",
+      "createdAt": "2026-05-19T04:22:16.233Z"
+    },
+    {
+      "phase": "slot-repair",
+      "reason": "api-lane-01__otis-expression-sheet:retry-warning-receipt, api-lane-01__otis-outfit-variants:retry-warning-receipt, api-lane-01__otis-regular-greeting:retry-warning-receipt, api-lane-01__otis-regular-listening:retry-warning-receipt, api-lane-01__otis-regular-thinking:retry-warning-receipt, api-lane-01__otis-regular-talking:retry-warning-receipt, api-lane-01__otis-regular-alert:retry-warning-receipt, api-lane-01__otis-regular-working:retry-warning-receipt, api-lane-01__otis-summer-light-idle:retry-warning-receipt, api-lane-01__otis-summer-light-greeting:retry-warning-receipt, api-lane-01__otis-summer-light-listening:retry-warning-receipt, api-lane-01__otis-summer-light-thinking:retry-warning-receipt, api-lane-01__otis-summer-light-talking:retry-warning-receipt, api-lane-01__otis-summer-light-alert:retry-warning-receipt, api-lane-01__otis-summer-light-working:retry-warning-receipt, api-lane-01__otis-winter-layered-listening:retry-warning-receipt, api-lane-01__otis-winter-layered-thinking:retry-warning-receipt, api-lane-01__otis-winter-layered-talking:retry-warning-receipt, api-lane-01__otis-winter-layered-alert:retry-warning-receipt",
+      "billableImages": 19,
+      "costPerImageCents": 15.1,
+      "slotIds": [
+        "api-lane-01__otis-expression-sheet",
+        "api-lane-01__otis-outfit-variants",
+        "api-lane-01__otis-regular-greeting",
+        "api-lane-01__otis-regular-listening",
+        "api-lane-01__otis-regular-thinking",
+        "api-lane-01__otis-regular-talking",
+        "api-lane-01__otis-regular-alert",
+        "api-lane-01__otis-regular-working",
+        "api-lane-01__otis-summer-light-idle",
+        "api-lane-01__otis-summer-light-greeting",
+        "api-lane-01__otis-summer-light-listening",
+        "api-lane-01__otis-summer-light-thinking",
+        "api-lane-01__otis-summer-light-talking",
+        "api-lane-01__otis-summer-light-alert",
+        "api-lane-01__otis-summer-light-working",
+        "api-lane-01__otis-winter-layered-listening",
+        "api-lane-01__otis-winter-layered-thinking",
+        "api-lane-01__otis-winter-layered-talking",
+        "api-lane-01__otis-winter-layered-alert"
+      ],
+      "attempt": 2,
+      "batchScope": "slot-repair",
+      "createdAt": "2026-05-19T05:12:10.735Z"
+    }
+  ],
+  "spend": {
+    "totalBillableImages": 44,
+    "totalProjectedCents": 664.4,
+    "remainingNormalCents": -164.39999999999998,
+    "remainingHardStopCents": 335.6
+  },
+  "budgetOverride": {
+    "appliedAt": "2026-05-19T05:11:56.114Z",
+    "reason": "Armaan explicitly instructed the legally-unlocked full Otis production pack and named-slot repair/regeneration from the full plan only.",
+    "sourcePlanPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/gemini-api-plan.json",
+    "previousAbsoluteStopCents": 600,
+    "absoluteStopCents": 1000,
+    "wholePackRetryAllowed": false
+  }
+}

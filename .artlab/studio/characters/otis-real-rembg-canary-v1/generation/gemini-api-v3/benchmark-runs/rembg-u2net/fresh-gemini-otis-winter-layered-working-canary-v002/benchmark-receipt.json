@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "tower-cutout-benchmark-receipt-v1",
+  "candidateId": "rembg-u2net",
+  "fixtureId": "fresh-gemini-otis-winter-layered-working-canary-v002",
+  "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01__v002.png",
+  "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/benchmark-runs/rembg-u2net/fresh-gemini-otis-winter-layered-working-canary-v002/cutout.png",
+  "rawMaskHash": "sha256:accdeae25639550bbbcca44323f968e39a372066286a5ee513ad10e661b452c0",
+  "refinedMaskHash": "sha256:accdeae25639550bbbcca44323f968e39a372066286a5ee513ad10e661b452c0",
+  "refinedPngHash": "sha256:7007562b91e4332ee329e244cebe53f4bfe025f22e494be13781f2f96bfb09e6",
+  "sourceSaliencyBounds": {
+    "left": 548,
+    "top": 161,
+    "right": 2617,
+    "bottom": 5384
+  },
+  "qa": {
+    "schemaVersion": "tower-cutout-alpha-qa-v1",
+    "status": "failed",
+    "imagePath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/benchmark-runs/rembg-u2net/fresh-gemini-otis-winter-layered-working-canary-v002/cutout.png",
+    "width": 3072,
+    "height": 5504,
+    "failures": [
+      "subject-cropped",
+      "edge-halo"
+    ],
+    "badges": {
+      "cutout": "failed",
+      "alpha": "passed",
+      "dimensions": "passed",
+      "crop": "failed",
+      "halo": "failed",
+      "props": "passed"
+    },
+    "metrics": {
+      "borderOpaquePixels": 0,
+      "subjectPixels": 6127962,
+      "tinyIslandCount": 0,
+      "totalIslandPixels": 0,
+      "holePixels": 0,
+      "haloMeanAlpha": 6.080597060931347,
+      "haloP99Alpha": 30,
+      "padding": {
+        "top": 0.035247093023255814,
+        "right": 0.14615885416666666,
+        "bottom": 0.02525436046511628,
+        "left": 0.17545572916666666
+      }
+    }
+  },
+  "score": 0.5,
+  "createdAt": "2026-05-19T03:45:30.253Z"
+}

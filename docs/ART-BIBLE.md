@@ -16,7 +16,7 @@ The Tower should feel like a living internship headquarters: cinematic, adult, p
 - Locked character style: `tower-flat-plus-depth-v1`.
 - Favor premium web-game sprites over ultra-realism, generic vector art, or mascot cartooning.
 - Character art uses clean raster shapes, strong silhouettes, adult professional proportions, subtle depth, controlled rim/highlight, and mobile-readable poses.
-- Use true-alpha character sprites in production. Because Gemini API does not reliably produce real transparent PNGs, source prompts must use a flat removable `#00ff00` chroma matte and the local alpha extractor must create the transparent master.
+- Use true-alpha character sprites in production. Because Gemini API does not reliably produce production-ready transparent foregrounds, source prompts must use the `premium-simple-backdrop-v1` contract and the local cutout compiler must create the transparent master before upscaling or derivatives.
 - Use stable room plates for environments.
 - Preserve the building metaphor: every asset should feel like it belongs inside the Tower, not beside it.
 - Keep UI data legible. Art sits behind, beside, or around work surfaces; it does not obscure decisions.

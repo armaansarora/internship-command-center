@@ -1,1 +1,1304 @@
-[]
+[
+  {
+    "id": "otis-regular-idle",
+    "kind": "character",
+    "src": "/art/lobby/otis/regular/idle.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale regular idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+    "characterId": "otis",
+    "outfitVariant": "regular",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/regular/idle.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/regular/idle@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/regular/idle@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:b00efab8815b25422da757e9bc91679f8b94854ffd38c65d76be4188575000fd",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5665
+    },
+    "masterResolution": {
+      "width": 2221,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-regular-greeting",
+    "kind": "character",
+    "src": "/art/lobby/otis/regular/greeting.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale regular greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, regular outfit, greeting pose.",
+    "characterId": "otis",
+    "outfitVariant": "regular",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/regular/greeting.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/regular/greeting@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/regular/greeting@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:aa8981c46abefe1d20199ecb421ab6e48c35473287e166b9b25fba4a3a8fc683",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5664
+    },
+    "masterResolution": {
+      "width": 2222,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-regular-listening",
+    "kind": "character",
+    "src": "/art/lobby/otis/regular/listening.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale regular listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, regular outfit, listening pose.",
+    "characterId": "otis",
+    "outfitVariant": "regular",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/regular/listening.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/regular/listening@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/regular/listening@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:ff3e5866339365d664075ff2c2d4dc0e9f45f458b9f91471ad4c8c122a14a74c",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5637
+    },
+    "masterResolution": {
+      "width": 2232,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-regular-thinking",
+    "kind": "character",
+    "src": "/art/lobby/otis/regular/thinking.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale regular thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, regular outfit, thinking pose.",
+    "characterId": "otis",
+    "outfitVariant": "regular",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/regular/thinking.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/regular/thinking@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/regular/thinking@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:dd8dcfbe9d47a7535141cd0e02d2e179436119144a594933f00404b89ab5470f",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5664
+    },
+    "masterResolution": {
+      "width": 2222,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-regular-talking",
+    "kind": "character",
+    "src": "/art/lobby/otis/regular/talking.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale regular talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, regular outfit, talking pose.",
+    "characterId": "otis",
+    "outfitVariant": "regular",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/regular/talking.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/regular/talking@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/regular/talking@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:ce86da3e334a79345085893bdebefb3ed654af58eba85dab0489eec17821c7ad",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5664
+    },
+    "masterResolution": {
+      "width": 2222,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-regular-alert",
+    "kind": "character",
+    "src": "/art/lobby/otis/regular/alert.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale regular alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, regular outfit, alert pose.",
+    "characterId": "otis",
+    "outfitVariant": "regular",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/regular/alert.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/regular/alert@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/regular/alert@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:7e61e329a707bac66885a6015eb61a4cc6d5e5882eadc5613b3e426962d9aaef",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5666
+    },
+    "masterResolution": {
+      "width": 2221,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-regular-working",
+    "kind": "character",
+    "src": "/art/lobby/otis/regular/working.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale regular working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, regular outfit, working pose.",
+    "characterId": "otis",
+    "outfitVariant": "regular",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/regular/working.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/regular/working@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/regular/working@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:239e1d964475d0c5f52cde59db36fb6f8683313442d294941d48f86c556dc66d",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5664
+    },
+    "masterResolution": {
+      "width": 2222,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-summer-light-idle",
+    "kind": "character",
+    "src": "/art/lobby/otis/summer-light/idle.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale summer-light idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, summer-light outfit, idle pose.",
+    "characterId": "otis",
+    "outfitVariant": "summer-light",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/summer-light/idle.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/summer-light/idle@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/summer-light/idle@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:5f36d6372d2b6a955cf2aae40e9bb69bce2ad21a2c36c948741cc91a62d03a0c",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5667
+    },
+    "masterResolution": {
+      "width": 2220,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-summer-light-greeting",
+    "kind": "character",
+    "src": "/art/lobby/otis/summer-light/greeting.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale summer-light greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, summer-light outfit, greeting pose.",
+    "characterId": "otis",
+    "outfitVariant": "summer-light",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/summer-light/greeting.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/summer-light/greeting@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/summer-light/greeting@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:64ddabf14994a6f462ad7689a4f707a6ef8d20904aa0d12ebdee8c7f23a00a31",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5677
+    },
+    "masterResolution": {
+      "width": 2216,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-summer-light-listening",
+    "kind": "character",
+    "src": "/art/lobby/otis/summer-light/listening.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale summer-light listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, summer-light outfit, listening pose.",
+    "characterId": "otis",
+    "outfitVariant": "summer-light",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/summer-light/listening.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/summer-light/listening@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/summer-light/listening@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:91ce53f3264b1268ae3ab8d41bb7af6f3502e1be225061dc1cc1db068098d822",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5659
+    },
+    "masterResolution": {
+      "width": 2224,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-summer-light-thinking",
+    "kind": "character",
+    "src": "/art/lobby/otis/summer-light/thinking.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale summer-light thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, summer-light outfit, thinking pose.",
+    "characterId": "otis",
+    "outfitVariant": "summer-light",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/summer-light/thinking.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/summer-light/thinking@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/summer-light/thinking@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:a25ea75dba4cd8e7736e09f3125c2b51c5fa4e1de88f917087491ed1a0c258e3",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5675
+    },
+    "masterResolution": {
+      "width": 2217,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-summer-light-talking",
+    "kind": "character",
+    "src": "/art/lobby/otis/summer-light/talking.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale summer-light talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, summer-light outfit, talking pose.",
+    "characterId": "otis",
+    "outfitVariant": "summer-light",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/summer-light/talking.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/summer-light/talking@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/summer-light/talking@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:50f5a61458da921e73c40ea431a4119d7b99eb609a33e7689d47a65ea4de9086",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5669
+    },
+    "masterResolution": {
+      "width": 2220,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-summer-light-alert",
+    "kind": "character",
+    "src": "/art/lobby/otis/summer-light/alert.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale summer-light alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, summer-light outfit, alert pose.",
+    "characterId": "otis",
+    "outfitVariant": "summer-light",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/summer-light/alert.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/summer-light/alert@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/summer-light/alert@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:810b19dc304c15a626de0ef7e2bf8bcc180e3093517f676374aabd54b6193e69",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5597
+    },
+    "masterResolution": {
+      "width": 2248,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-summer-light-working",
+    "kind": "character",
+    "src": "/art/lobby/otis/summer-light/working.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale summer-light working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, summer-light outfit, working pose.",
+    "characterId": "otis",
+    "outfitVariant": "summer-light",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/summer-light/working.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/summer-light/working@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/summer-light/working@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:dd1dcf6ba63845136f86b8f822a59a822806138a0757b27bf1d1f0ee4b143ba8",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5661
+    },
+    "masterResolution": {
+      "width": 2223,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-winter-layered-idle",
+    "kind": "character",
+    "src": "/art/lobby/otis/winter-layered/idle.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale winter-layered idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, winter-layered outfit, idle pose.",
+    "characterId": "otis",
+    "outfitVariant": "winter-layered",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/winter-layered/idle.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/winter-layered/idle@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/winter-layered/idle@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:14a5b3a2b80697d5f79bebf7d76bc9bd7c0048e3ce3f199f95dd9655d9b86b19",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5668
+    },
+    "masterResolution": {
+      "width": 2220,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-winter-layered-greeting",
+    "kind": "character",
+    "src": "/art/lobby/otis/winter-layered/greeting.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale winter-layered greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, winter-layered outfit, greeting pose.",
+    "characterId": "otis",
+    "outfitVariant": "winter-layered",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/winter-layered/greeting.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/winter-layered/greeting@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/winter-layered/greeting@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:d7dcf7b638d6208bc2db5a7b6f90e6457807047a9e12ce56ddcf079dfbce0ba4",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5675
+    },
+    "masterResolution": {
+      "width": 2217,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-winter-layered-listening",
+    "kind": "character",
+    "src": "/art/lobby/otis/winter-layered/listening.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale winter-layered listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, winter-layered outfit, listening pose.",
+    "characterId": "otis",
+    "outfitVariant": "winter-layered",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/winter-layered/listening.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/winter-layered/listening@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/winter-layered/listening@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:0061ea5539804e8934f52c6157c5a5845a6495650dd8097e8f835d0eb06b41a3",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5675
+    },
+    "masterResolution": {
+      "width": 2217,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-winter-layered-thinking",
+    "kind": "character",
+    "src": "/art/lobby/otis/winter-layered/thinking.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale winter-layered thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, winter-layered outfit, thinking pose.",
+    "characterId": "otis",
+    "outfitVariant": "winter-layered",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/winter-layered/thinking.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/winter-layered/thinking@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/winter-layered/thinking@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:590e3afc127eb7ae0d66b82367903b78962530666942af6bb903fcacd74ff08f",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5666
+    },
+    "masterResolution": {
+      "width": 2221,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-winter-layered-talking",
+    "kind": "character",
+    "src": "/art/lobby/otis/winter-layered/talking.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale winter-layered talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, winter-layered outfit, talking pose.",
+    "characterId": "otis",
+    "outfitVariant": "winter-layered",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/winter-layered/talking.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/winter-layered/talking@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/winter-layered/talking@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:0d72a2706ab36d49ee6f63b84b9d83d587061c06d9749506c15b5e912dcb33ad",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5666
+    },
+    "masterResolution": {
+      "width": 2221,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-winter-layered-alert",
+    "kind": "character",
+    "src": "/art/lobby/otis/winter-layered/alert.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale winter-layered alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, winter-layered outfit, alert pose.",
+    "characterId": "otis",
+    "outfitVariant": "winter-layered",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/winter-layered/alert.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/winter-layered/alert@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/winter-layered/alert@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:c0508915f2dc487276af831cc47c686c2fca66a3f8f32dedd475e2ee866e19ff",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5664
+    },
+    "masterResolution": {
+      "width": 2222,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "otis-winter-layered-working",
+    "kind": "character",
+    "src": "/art/lobby/otis/winter-layered/working.webp",
+    "width": 170,
+    "height": 290,
+    "role": "Otis Vale winter-layered working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:otis-pose-pack-v1",
+    "alt": "Otis Vale, Lobby Concierge, winter-layered outfit, working pose.",
+    "characterId": "otis",
+    "outfitVariant": "winter-layered",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2400,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 170,
+      "height": 290
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 11,
+      "bottom": 8,
+      "left": 11
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Otis must stay soft, human, slightly rounded, and warmly readable at the Lobby desk.",
+    "motionProfile": "concierge-calm",
+    "renditions": {
+      "default": {
+        "src": "/art/lobby/otis/winter-layered/working.webp",
+        "width": 170,
+        "height": 290
+      },
+      "retina2x": {
+        "src": "/art/lobby/otis/winter-layered/working@2x.webp",
+        "width": 340,
+        "height": 580
+      },
+      "retina3x": {
+        "src": "/art/lobby/otis/winter-layered/working@3x.webp",
+        "width": 510,
+        "height": 870
+      }
+    },
+    "sourceRunId": "otis-real-rembg-full-production-v1",
+    "assetVersion": "otis-v1",
+    "checksum": "sha256:b7f8cbdd2ea5864aa05c10d2f5be6624c9681c6c0e3c3426436d705022445ced",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5668
+    },
+    "masterResolution": {
+      "width": 2220,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-19T14:23:08.347Z"
+  }
+]

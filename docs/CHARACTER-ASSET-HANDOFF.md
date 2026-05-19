@@ -21,7 +21,7 @@ Before any character image is copied into `public/art` or added to the manifest,
 
 - It must exist as an individual sprite file, not only as part of a board.
 - It must be previewed on a Tower-dark background and a light neutral background.
-- The dark-background preview must show no obvious green-fringe, matte halo, chopped edge, missing limb, clipped prop, or accidental neighbor fragment.
+- The dark-background preview must show no obvious color spill, edge halo, chopped edge, missing limb, clipped prop, or accidental neighbor fragment.
 - The sprite must preserve identity, outfit variant, pose intent, body proportions, face read, and mobile silhouette from the approved references.
 - The sprite must use the locked frame dimensions and leave safe padding around hair, hands, props, and feet.
 - The source must include a 4K transparent master with a target long edge of 4096px.
@@ -147,7 +147,7 @@ npm run art:generate prepare-api --packet <creative-brief.json> --directive <nex
 npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --request-timeout-ms 300000
 npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>
 npm run art:plan -- otis --run-id <approved-otis-production-run> --identity-ref .artlab/characters/otis/references/identity/<approved-file>.png
-npm run art:preflight -- <generated-file.png> --minimum-long-edge 4096 --chroma-key 00ff00
+npm run art:generate cutout-doctor --plan <gemini-api-plan.json> --strict
 npm run art:ingest -- <run.json> --source <generated-file.png> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle
 npm run art:split -- <run.json> --source-asset <pose-sheet-id>
 npm run art:master -- <run.json>
@@ -167,7 +167,7 @@ Reject an image before manifest entry if any of these are true:
 - It has fake text, logos, watermarks, signatures, or unreadable letters.
 - It includes a background in a production sprite.
 - It changes the approved outfit instead of editing the same clothing system into `regular`, `summer-light`, or `winter-layered`.
-- It has visible green-fringe, matte halo, chopped edges, broken alpha, or source-sheet extraction artifacts.
+- It has visible color spill, edge halo, chopped edges, broken alpha, or source-sheet separation artifacts.
 - It has not been checked in a dark-background preview and a light-background preview.
 - It breaks the character's silhouette or prop read.
 - It resembles a real person, actor, celebrity, named fictional character, or protected likeness.

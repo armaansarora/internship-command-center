@@ -1,0 +1,215 @@
+{
+  "schemaVersion": "tower-creative-generation-repair-plan-v1",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json",
+  "boardPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/review/initial-concept-review-board.html",
+  "repairPlanPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/repair-plan.json",
+  "runId": "otis-initial-design-v1",
+  "adapter": "gemini-api",
+  "assetType": "character",
+  "status": "repair-required",
+  "strict": true,
+  "createdAt": "2026-05-15T19:09:00.027Z",
+  "summary": {
+    "totalSlots": 5,
+    "cleanSlots": 0,
+    "repairRequiredSlots": 5,
+    "boardIssues": 0
+  },
+  "slots": [
+    {
+      "slotId": "api-lane-01__otis-design",
+      "status": "repair-required",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-01/otis-design/otis__design__source-v001__api-lane-01.png",
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-01/otis-design/api-receipt.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "imageIssues": [
+        {
+          "code": "image-missing-alpha",
+          "severity": "blocker",
+          "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-01/otis-design/otis__design__source-v001__api-lane-01.png",
+          "message": "Image is missing an alpha channel required for production sprites."
+        }
+      ],
+      "matteReadiness": {
+        "schemaVersion": "tower-solid-matte-alpha-readiness-v1",
+        "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-01/otis-design/otis__design__source-v001__api-lane-01.png",
+        "safe": false,
+        "reason": "Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "width": 3072,
+        "height": 5504,
+        "matteColor": "#00ff00",
+        "borderMatchRatio": 0.0020570728291316527,
+        "minimumBorderMatchRatio": 0.98
+      },
+      "recommendedAction": {
+        "type": "regenerate-slot",
+        "reason": "The latest character source lacks true alpha but is not a safe flat matte source: Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "command": "npm run art:generate -- run-api --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --max-attempts 3"
+      },
+      "afterRepair": [
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/review/initial-concept-review-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-02__otis-design",
+      "status": "repair-required",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-02/otis-design/otis__design__source-v001__api-lane-02.png",
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-02/otis-design/api-receipt.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "imageIssues": [
+        {
+          "code": "image-missing-alpha",
+          "severity": "blocker",
+          "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-02/otis-design/otis__design__source-v001__api-lane-02.png",
+          "message": "Image is missing an alpha channel required for production sprites."
+        }
+      ],
+      "matteReadiness": {
+        "schemaVersion": "tower-solid-matte-alpha-readiness-v1",
+        "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-02/otis-design/otis__design__source-v001__api-lane-02.png",
+        "safe": false,
+        "reason": "Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "width": 3072,
+        "height": 5504,
+        "matteColor": "#00ff00",
+        "borderMatchRatio": 0.0006565126050420169,
+        "minimumBorderMatchRatio": 0.98
+      },
+      "recommendedAction": {
+        "type": "regenerate-slot",
+        "reason": "The latest character source lacks true alpha but is not a safe flat matte source: Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "command": "npm run art:generate -- run-api --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --max-attempts 3"
+      },
+      "afterRepair": [
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/review/initial-concept-review-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-03__otis-design",
+      "status": "repair-required",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-03/otis-design/otis__design__source-v001__api-lane-03.png",
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-03/otis-design/api-receipt.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "imageIssues": [
+        {
+          "code": "image-missing-alpha",
+          "severity": "blocker",
+          "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-03/otis-design/otis__design__source-v001__api-lane-03.png",
+          "message": "Image is missing an alpha channel required for production sprites."
+        }
+      ],
+      "matteReadiness": {
+        "schemaVersion": "tower-solid-matte-alpha-readiness-v1",
+        "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-03/otis-design/otis__design__source-v001__api-lane-03.png",
+        "safe": false,
+        "reason": "Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "width": 3072,
+        "height": 5504,
+        "matteColor": "#00ff00",
+        "borderMatchRatio": 0.0030199579831932774,
+        "minimumBorderMatchRatio": 0.98
+      },
+      "recommendedAction": {
+        "type": "regenerate-slot",
+        "reason": "The latest character source lacks true alpha but is not a safe flat matte source: Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "command": "npm run art:generate -- run-api --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --max-attempts 3"
+      },
+      "afterRepair": [
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/review/initial-concept-review-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-04__otis-design",
+      "status": "repair-required",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-04/otis-design/otis__design__source-v001__api-lane-04.png",
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-04/otis-design/api-receipt.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "imageIssues": [
+        {
+          "code": "image-missing-alpha",
+          "severity": "blocker",
+          "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-04/otis-design/otis__design__source-v001__api-lane-04.png",
+          "message": "Image is missing an alpha channel required for production sprites."
+        }
+      ],
+      "matteReadiness": {
+        "schemaVersion": "tower-solid-matte-alpha-readiness-v1",
+        "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-04/otis-design/otis__design__source-v001__api-lane-04.png",
+        "safe": false,
+        "reason": "Source border is not flat enough for loss-safe alpha extraction (2% border match).",
+        "width": 3072,
+        "height": 5504,
+        "matteColor": "#00ff00",
+        "borderMatchRatio": 0.01739028944911298,
+        "minimumBorderMatchRatio": 0.98
+      },
+      "recommendedAction": {
+        "type": "regenerate-slot",
+        "reason": "The latest character source lacks true alpha but is not a safe flat matte source: Source border is not flat enough for loss-safe alpha extraction (2% border match).",
+        "command": "npm run art:generate -- run-api --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --max-attempts 3"
+      },
+      "afterRepair": [
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/review/initial-concept-review-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-05__otis-design",
+      "status": "repair-required",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-05/otis-design/otis__design__source-v001__api-lane-05.png",
+      "latestReceiptPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-05/otis-design/api-receipt.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "imageIssues": [
+        {
+          "code": "image-missing-alpha",
+          "severity": "blocker",
+          "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-05/otis-design/otis__design__source-v001__api-lane-05.png",
+          "message": "Image is missing an alpha channel required for production sprites."
+        }
+      ],
+      "matteReadiness": {
+        "schemaVersion": "tower-solid-matte-alpha-readiness-v1",
+        "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-initial-design-v1/gemini-api-v3/api-lane-05/otis-design/otis__design__source-v001__api-lane-05.png",
+        "safe": false,
+        "reason": "Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "width": 3072,
+        "height": 5504,
+        "matteColor": "#00ff00",
+        "borderMatchRatio": 0.0035159897292250234,
+        "minimumBorderMatchRatio": 0.98
+      },
+      "recommendedAction": {
+        "type": "regenerate-slot",
+        "reason": "The latest character source lacks true alpha but is not a safe flat matte source: Source border is not flat enough for loss-safe alpha extraction (0% border match).",
+        "command": "npm run art:generate -- run-api --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --max-attempts 3"
+      },
+      "afterRepair": [
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/review/initial-concept-review-board.html\" --strict"
+      ]
+    }
+  ],
+  "boardActions": [],
+  "nextCommands": [
+    "Run the per-slot recommendedAction.command values that match the failure type.",
+    "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/review/initial-concept-review-board.html\" --strict"
+  ]
+}

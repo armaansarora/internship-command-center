@@ -10,17 +10,7 @@ interface ImageIssueOptions {
   minimumLongEdge?: number;
 }
 
-export interface ChromaKeyColor {
-  r: number;
-  g: number;
-  b: number;
-}
-
-export interface CharacterSourceImagePreflightOptions extends ImageIssueOptions {
-  chromaKey?: ChromaKeyColor & {
-    tolerance?: number;
-  };
-}
+export type CharacterSourceImagePreflightOptions = ImageIssueOptions;
 
 export interface CharacterSourceImageInspection {
   path: string;
@@ -34,12 +24,6 @@ export interface CharacterSourceImageInspection {
 
 export interface CharacterSourceImagePreflight extends CharacterSourceImageInspection {
   passed: boolean;
-  chromaKey?: {
-    expected: ChromaKeyColor;
-    tolerance: number;
-    sampledBorderPixels: number;
-    offKeyBorderPixels: number;
-  };
 }
 
 export interface PrepareCharacterSpriteAssetOptions {
@@ -137,84 +121,15 @@ export async function inspectCharacterSourceImage(
 
 export async function preflightCharacterSourceImage(
   path: string,
-  { minimumLongEdge = CHARACTER_ART_MASTER_LONG_EDGE, chromaKey }: CharacterSourceImagePreflightOptions = {},
+  { minimumLongEdge = CHARACTER_ART_MASTER_LONG_EDGE }: CharacterSourceImagePreflightOptions = {},
 ): Promise<CharacterSourceImagePreflight> {
   const inspection = await inspectCharacterSourceImage(path, { minimumLongEdge });
-  const issues = chromaKey
-    ? inspection.issues.filter((issue) => issue !== "source-missing-alpha")
-    : [...inspection.issues];
-  const chromaInspection = chromaKey
-    ? await inspectChromaKeyBorder(path, {
-        r: chromaKey.r,
-        g: chromaKey.g,
-        b: chromaKey.b,
-        tolerance: chromaKey.tolerance ?? 12,
-      })
-    : undefined;
-
-  if (chromaInspection && chromaInspection.offKeyBorderPixels > 0) {
-    issues.push("chroma-key-background-not-flat");
-  }
+  const issues = [...inspection.issues];
 
   return {
     ...inspection,
     issues,
     passed: issues.length === 0,
-    chromaKey: chromaInspection,
-  };
-}
-
-async function inspectChromaKeyBorder(
-  path: string,
-  expected: ChromaKeyColor & { tolerance: number },
-): Promise<CharacterSourceImagePreflight["chromaKey"]> {
-  const { data, info } = await sharp(path)
-    .removeAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const step = Math.max(1, Math.floor(Math.min(info.width, info.height) / 32));
-  const sampled = new Set<string>();
-  let sampledBorderPixels = 0;
-  let offKeyBorderPixels = 0;
-
-  function sample(x: number, y: number): void {
-    const key = `${x}:${y}`;
-
-    if (sampled.has(key)) return;
-    sampled.add(key);
-
-    const offset = (y * info.width + x) * info.channels;
-    const r = data[offset] ?? 0;
-    const g = data[offset + 1] ?? 0;
-    const b = data[offset + 2] ?? 0;
-    const offKey =
-      Math.abs(r - expected.r) > expected.tolerance ||
-      Math.abs(g - expected.g) > expected.tolerance ||
-      Math.abs(b - expected.b) > expected.tolerance;
-
-    sampledBorderPixels += 1;
-    if (offKey) offKeyBorderPixels += 1;
-  }
-
-  for (let x = 0; x < info.width; x += step) {
-    sample(x, 0);
-    sample(x, info.height - 1);
-  }
-
-  for (let y = 0; y < info.height; y += step) {
-    sample(0, y);
-    sample(info.width - 1, y);
-  }
-
-  return {
-    expected: {
-      r: expected.r,
-      g: expected.g,
-      b: expected.b,
-    },
-    tolerance: expected.tolerance,
-    sampledBorderPixels,
-    offKeyBorderPixels,
   };
 }
 

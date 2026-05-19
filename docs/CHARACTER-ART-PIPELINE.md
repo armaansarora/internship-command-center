@@ -20,7 +20,7 @@ Everything between those gates is internal factory work. Agents and scripts gene
 - Production target: optimized default, `@2x`, and `@3x` WebP derivatives generated from the 4K master.
 - Production source target: native high-resolution individual sprite sources. Pose sheets can be used for review or consistency, but not as production source when splitting would make each pose too small.
 - Production posture: straight-on or 3/4 front unless a pose definition requires otherwise.
-- Background policy: true alpha for production sprites. For Gemini API source generation, prompt for a perfectly flat solid `#00ff00` chroma matte and run local alpha extraction; fake checkerboard transparency is a hard reject.
+- Background policy: true alpha for production sprites. For Gemini API source generation, prompt with `premium-simple-backdrop-v1`, run local cutout on the original provider source, then edge refinement and alpha QA before mastering; fake checkerboard transparency is a hard reject.
 - Tone: Professional Scars. Characters are funny because they are competent in incompatible ways, not because they are caricatures.
 - Outfit policy: every character has `regular`, `summer-light`, and `winter-layered` variants. These are wardrobe edits of the approved outfit, not new costumes, new palettes, or alternate identities.
 - Image path: use the Creative Production Engine generation adapter layer. For the v3 paid automation path, use `gemini-api` locked to Nano Banana 2 (`gemini-3.1-flash-image-preview`) with five concurrent lanes, 4K, and budget caps. Initial design is exactly five total prompt-only images; production packs after design approval must use `--phase production-pack`. The no-API-billing fallback remains `gemini-subscription-browser` with Gemini Pro / Nano Banana through Armaan's subscription; use ChatGPT subscription generation only as fallback.
@@ -215,7 +215,7 @@ Using approved identity reference {refId} and approved turnaround {turnaroundId}
 ### Pose pack
 
 ```text
-Using approved identity reference {refId}, approved turnaround {turnaroundId}, approved expression sheet {expressionId}, and approved outfit variant sheet {outfitSheetId}, create the {outfitVariant} {poseName} 4K production source for {characterName}. Full-body on a perfectly flat solid `#00ff00` chroma matte for local alpha extraction, same identity, same proportions, same palette family, approved {outfitVariant} wardrobe edit. Pose definition: {poseDefinition}. Target source frame: {sourceFrameWidth}x{sourceFrameHeight}, long edge at least 4096px, with safe padding around hair, hands, props, and feet. Style: tower-flat-plus-depth-v1. No checkerboard, no background scene, no text, no logo, no watermark.
+Using approved identity reference {refId}, approved turnaround {turnaroundId}, approved expression sheet {expressionId}, and approved outfit variant sheet {outfitSheetId}, create the {outfitVariant} {poseName} 4K production source for {characterName}. Use premium-simple-backdrop-v1 with high subject-background separation, no patterned walls, no furniture overlap, no same-color clothing-background collision, no touching shadows, full-body framing, same identity, same proportions, same palette family, approved {outfitVariant} wardrobe edit. Pose definition: {poseDefinition}. Target source frame: {sourceFrameWidth}x{sourceFrameHeight}, long edge at least 4096px, with safe padding around hair, hands, props, and feet. Style: tower-flat-plus-depth-v1. No checkerboard, no background scene, no text, no logo, no watermark.
 ```
 
 ## Anti-Drift Rules

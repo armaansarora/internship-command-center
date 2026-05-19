@@ -2,6 +2,7 @@
 
 import type { CSSProperties, JSX } from "react";
 import { CharacterSprite } from "./CharacterSprite";
+import { VisualAssetStage } from "./VisualAssetStage";
 import {
   getCharacterVisualMetadata,
   type CharacterId,
@@ -133,15 +134,17 @@ export function CharacterStage({
         willChange: reducedMotion ? undefined : "transform",
       }}
     >
-      <style>{CHARACTER_STAGE_KEYFRAMES}</style>
-      <CharacterSprite
-        characterId={characterId}
-        outfitVariant={outfitVariant}
-        pose={pose}
-        state={state}
-        aria-label={ariaLabel}
-        style={style}
-      />
-    </div>
-  );
-}
+	      <style>{CHARACTER_STAGE_KEYFRAMES}</style>
+	      <VisualAssetStage>
+	        <CharacterSprite
+	          characterId={characterId}
+	          outfitVariant={outfitVariant}
+	          pose={pose}
+	          state={state}
+	          aria-label={ariaLabel}
+	          style={style}
+	        />
+	      </VisualAssetStage>
+	    </div>
+	  );
+	}

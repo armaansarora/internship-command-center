@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "tower-cutout-bootstrap-v1",
+  "status": "ready-for-benchmark",
+  "createdAt": "2026-05-19T03:09:37.207Z",
+  "productionOfflineByDefault": true,
+  "networkAllowedOnlyForBootstrap": true,
+  "skipInstall": false,
+  "requestedModels": [
+    "isnet-general-use",
+    "u2net"
+  ],
+  "pinnedTooling": [
+    {
+      "package": "rembg",
+      "version": "2.0.75",
+      "packageSourceUrl": "https://pypi.org/project/rembg/",
+      "projectSourceUrl": "https://github.com/danielgatis/rembg",
+      "packageLicense": "MIT",
+      "modelWeightsMustBeLicensedSeparately": true
+    },
+    {
+      "package": "@imgly/background-removal",
+      "version": "1.7.0",
+      "packageSourceUrl": "https://github.com/imgly/background-removal-js",
+      "packageLicense": "AGPL-3.0",
+      "productionUse": "license-blocked-until-reviewed"
+    }
+  ],
+  "requiredModelManifestFields": [
+    "modelWeightSourceUrl",
+    "modelWeightLicense",
+    "modelWeightSha256",
+    "cachedModelPath",
+    "provenanceNote"
+  ],
+  "paths": {
+    "root": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout",
+    "venvPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/venv",
+    "modelCachePath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/models",
+    "modelManifestPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/model-manifest.json",
+    "packageLockPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/package-lock.json",
+    "licensePath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/licenses/README.md"
+  }
+}

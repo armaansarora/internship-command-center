@@ -6,8 +6,13 @@ The Creative Production Engine is the Tower-wide system for producing characters
 
 ## Command Surface
 
-- `npm run art:produce -- --request "<natural language request>"`: canonical orchestrator for normal creative work. It routes the request, writes the run state, budget ledger, handoff, and next legal action.
-- `npm run art:produce -- --continue <run-id>`: resumes a creative run from `run-state.json` without inventing an illegal next step.
+- `npm run art:produce -- --request "<natural language request>"`: canonical normal entrypoint. It routes the request, writes `run-state.json`, `progress.json`, `human-action.json`, and `events.jsonl`, then stops only at the initial direction gate or a true blocker.
+- `npm run art:produce -- --continue <run-id>`: resumes a creative run from durable state, not chat memory. It imports legacy Otis state when needed, honors `upgrade-required`, and advances safe automatic steps such as rebuilding a local final board/action manifest.
+- `npm run art:status`: plain-English current run status from `progress.json`, including phase, slot counts, spend, locks, next automatic step, and exact human action when needed.
+- `npm run art:health`: safe-to-run report covering active locks/processes, last run, spend, repeated failures, provider health/concurrency, cutout readiness, cleanup debt, and continuous-improvement production blocks.
+
+Everything below is advanced/internal and should not be required for normal operation:
+
 - `npm run art:studio`: guided conversational opening, studio state creation, Housekeeping Gate entry, and Continuous Improvement Gate entry. Use it for orientation, diagnostics, lane work, and improvement reports.
 - `npm run art:studio -- --request "<natural language request>"`: adaptive request router for any Tower visual work. Use this first when Armaan asks for a character, background, screen, button, animation, prop, scene, icon system, or marketing visual in normal language. This creates the default five-lane parallel packet.
 - `npm run art:studio -- --asset-type <type> --name "<asset name>" --brief "<brief>" --run-id <safe-run-id>`: converts an approved guided brief into a strict production packet under `.artlab/studio/<asset-type>/<run-id>/` with `creative-brief.json`, `prompt.md`, `next-action.md`, phase ledgers, and the default five-lane parallel packet.
@@ -24,19 +29,23 @@ The Creative Production Engine is the Tower-wide system for producing characters
 - `npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json>`: creates the paid Gemini API v3 plan, locks Nano Banana 2, expands the requested slots across five lanes, estimates cost, and writes the runbook.
 - `npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json>`: default initial-design mode creates exactly five total prompt-only concepts, not 15 pose probes. It rejects multiple base slots and reference images during initial design.
 - `npm run art:generate prepare-api --phase production-pack --packet <creative-brief.json> --directive <next-image-generation-step.json>`: after Armaan chooses one design, creates a one-slot canary plan plus a blocked full production plan when the run has multiple source slots.
-- `npm run art:generate run-api --plan <canary/gemini-api-plan.json> --max-attempts 2 --request-timeout-ms 300000`: runs the paid canary first. The full plan remains blocked until the canary gate passes.
-- `npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>`: writes `canary-gate.json`. The full pack may run only when this gate is `passed` and the prompt/reference/source contract hashes still match.
+- `npm run art:generate run-api --plan <canary/gemini-api-plan.json> --max-attempts 2 --request-timeout-ms 300000`: runs the paid canary first. The full plan remains blocked until the canary gate and cutout readiness both pass.
+- `npm run art:generate cutout-bootstrap`: prepares pinned local cutout tooling records, model cache folders, and license manifests. Bootstrap may use network; production cutout must be offline.
+- `npm run art:generate cutout-benchmark --fixture-set <fixture-set.json>`: benchmarks candidate cutout models by subject type/topology and writes the selected, license-cleared model map.
+- `npm run art:generate cutout-readiness --plan <gemini-api-plan.json>`: checks backdrop separation, framing, subject complexity, benchmark status, and canary cutout before unlocking full production.
+- `npm run art:generate cutout-auto --plan <gemini-api-plan.json> --slots <slot-id-a,slot-id-b>`: runs local cutout on original provider sources for named slots, then edge refinement and alpha QA.
+- `npm run art:generate cutout-doctor --plan <gemini-api-plan.json> --strict`: validates cutout receipts, alpha badges, crop, dimensions, halo, props, and repeated failure codes.
+- `npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>`: writes `canary-gate.json`. The full pack may run only when this gate is `passed`, cutout status is passed, and the prompt/reference/source contract hashes still match.
 - `npm run art:generate run-api --plan <full/gemini-api-plan.json> --max-attempts 2 --no-retry-warnings --request-timeout-ms 300000`: runs the full production pack only after the canary passes. Whole-pack warning retries are banned.
 - `npm run art:generate run-api --plan <full/gemini-api-plan.json> --slots <slot-id-a,slot-id-b>`: regenerates only named failed slots after repair/doctor evidence proves they need paid repair.
 - `npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --request-timeout-ms 300000`: runs a paid Gemini API plan, writing files and receipts only into `.artlab/inbox/...`. It skips clean receipts, writes `api-run-state.json`, and uses `api-run.lock` to prevent duplicate concurrent spend.
 - `npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>`: validates every generated image and every review-board image reference before approval. Add `--strict` before final upload-ready approval so receipt warnings and missing alpha become blockers. The command writes `asset-doctor.json`.
-- `npm run art:generate repair-plan --plan <gemini-api-plan.json> --board <review-board.html> --strict`: converts doctor warnings/blockers into an exact per-slot repair plan at `repair-plan.json`, including matte-aware alpha extraction commands, regeneration fallbacks, board rebuild actions, and the strict doctor command to rerun after repair.
-- `npm run art:generate repair-auto --plan <gemini-api-plan.json>`: applies safe non-paid repairs from `repair-plan.json`, starting with loss-safe alpha extraction and clean local repair receipts.
-- `npm run art:generate extract-alpha --source <matte-source.png> --output <transparent-output.png> --matte-color 00ff00`: turns approved solid-matte sources into true transparent PNGs without resizing; checkerboard or busy backgrounds are rejected.
+- `npm run art:generate repair-plan --plan <gemini-api-plan.json> --board <review-board.html> --strict`: converts doctor warnings/blockers into an exact per-slot repair plan at `repair-plan.json`, including cutout commands, regeneration fallbacks, board rebuild actions, and strict doctor commands to rerun after repair.
+- `npm run art:generate repair-auto --plan <gemini-api-plan.json>`: applies safe non-paid repairs from `repair-plan.json`, starting with named-slot cutout when a foreground source exists but still needs production alpha.
 - `npm run art:browser plan --session gemini-art-studio --provider gemini`: creates an isolated Tower Art Studio Playwright Chromium profile, download folder, queue folder, and runbook. This command does not launch the browser by default.
 - `npm run art:browser open --session gemini-art-studio --provider gemini`: launches the isolated browser profile when Armaan explicitly wants the subscription UI path. Do not use Armaan's daily Chrome profile for image generation.
 - `npm run art:operate`: strict character-art operator packet for Season 1 character work.
-- `npm run art:status`: read-only character art status.
+- `npm run art:status`: normal read-only operator status. With no v1-final run selector, it can still render legacy character art status for diagnostics.
 - `npm run art:clean`: removes volatile run-owned art binaries while keeping ledgers, references, live `public/art`, and manifest data protected.
 
 `art:studio` rejects unknown flags, unsafe run ids, path traversal, symlink escapes, and production writes outside `.artlab/studio`. If the studio state is corrupt, it preserves a `.corrupt-*` backup before creating a valid state snapshot.
@@ -165,16 +174,14 @@ Run-state hardening:
 - `--force-unlock` is only for confirmed stale locks after checking no generation process is active.
 - Provider error text is redacted for API-key-shaped strings before it reaches state files.
 
-Alpha policy:
+Cutout compiler policy:
 
-- Gemini API outputs are treated as opaque sources unless their receipt proves real alpha.
-- Production prompts should request a perfectly flat solid `#00ff00` chroma matte, not "transparent background."
-- Checkerboard/fake transparency is a hard reject because it bakes background pixels into the sprite.
-- Local alpha extraction preserves source dimensions and writes true PNG alpha:
-
-```bash
-npm run art:generate extract-alpha --source <matte-source.png> --output <transparent-output.png> --matte-color 00ff00
-```
+- Gemini API outputs are treated as original provider sources. Do not upscale before cutout.
+- Production prompts must use `premium-simple-backdrop-v1`: high subject/background separation, no patterned walls, no furniture overlap, no same-color clothing/background collision, no shadows touching the body, full-body framing, and safe padding around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props.
+- Local cutout runs before edge refinement, alpha QA, mastering, derivatives, review, and promotion.
+- Model selection is by subject type/topology, not one global winner.
+- Production mode uses only cached, selected, license-cleared model/package evidence. Missing evidence fails closed with `cutout-model-missing`.
+- Review boards must show source, checkerboard cutout, dark preview, light preview, and Tower shadow preview.
 
 Asset Doctor Gate:
 
@@ -184,7 +191,7 @@ npm run art:generate doctor \
   --board .artlab/studio/<asset-type>/<run-id>/generation/gemini-api-v3/review/<board>.html
 ```
 
-The doctor checks that every expected generated file exists, decodes with `sharp`, meets source dimension requirements, has a receipt, and that every review-board `<img>` points at a local decodable file. It blocks missing files, corrupt files, external review images, data URI images, and broken relative paths. Use `--strict` before final approval to make receipt warnings and missing alpha fail the gate.
+The doctor checks that every expected generated file exists, decodes with `sharp`, meets source dimension requirements, has a receipt, and that every review-board `<img>` points at a local decodable file. It blocks missing files, corrupt files, external review images, data URI images, and broken relative paths. Use `--strict` before final approval, then run `cutout-doctor --strict` for foreground slots before mastering or promotion.
 
 Repair Plan Gate:
 
@@ -197,14 +204,15 @@ npm run art:generate repair-plan \
 
 Run this immediately after doctor reports warnings or blockers. It writes `repair-plan.json` beside `asset-doctor.json` and gives every slot one recommended next action:
 
-- `extract-alpha`: use the local matte extractor for an existing character source that only lacks true alpha and passes the flat-matte readiness check.
+- `cutout-local`: run the local cutout compiler for an existing foreground source that needs production alpha.
 - `regenerate-slot`: rerun the generation plan when files are missing, corrupt, too small, or have warnings that cannot be safely repaired locally.
 - `none`: the slot is clean.
 - `rebuild-review-board`: the board references are broken, remote, or inline and must be rebuilt before approval.
+- `improvement-required`: repeated failures indicate prompt/model/threshold strategy is broken, so benchmark or engine hardening comes before more paid slot regeneration.
 
 The repair plan does not promote anything. It is a self-healing operator packet: run `repair-auto` first for non-paid repairs, rerun strict doctor, then regenerate only named failed slots if the strict evidence still requires paid repair.
 
-Alpha repair is intentionally conservative. A source that is merely JPEG/no-alpha is not automatically repairable. The repair plan first checks whether the image border matches the approved solid `#00ff00` chroma matte. If that readiness check fails, the slot is marked `regenerate-slot` so the pipeline does not create a rough cutout from a normal background, gradient, shadowed wall, or fake transparency pattern.
+Cutout repair is intentionally conservative. If the compiler is missing a model, lacks license evidence, sees weak mask confidence, detects crop/halo/holes/islands, or repeats the same failure across many slots, it blocks promotion and routes to named-slot regeneration or improvement mode.
 
 Security rules:
 

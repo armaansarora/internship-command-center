@@ -49,6 +49,7 @@ describe("creative production run state machine", () => {
 
   it("returns the next legal operator action in plain language", () => {
     expect(getNextCreativeRunAction("canary-required")).toContain("run the one-slot production canary");
+    expect(getNextCreativeRunAction("canary-passed")).toContain("Full-production-ready");
     expect(getNextCreativeRunAction("final-board-ready")).toContain("Wait for Armaan");
     expect(getNextCreativeRunAction("promoted")).toContain("integrate promoted assets");
   });

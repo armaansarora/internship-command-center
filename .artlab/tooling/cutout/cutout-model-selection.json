@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "tower-cutout-model-selection-v1",
+  "status": "ready",
+  "winners": {
+    "hair-beard-character": {
+      "candidateId": "rembg-isnet-general-use",
+      "modelName": "isnet-general-use",
+      "modelVersion": "bootstrap-cache",
+      "score": 0.94
+    }
+  },
+  "blocked": [],
+  "missingSubjectTypes": [],
+  "candidateManifest": [
+    {
+      "id": "rembg-isnet-general-use",
+      "adapter": "rembg",
+      "packageName": "rembg",
+      "packageVersion": "2.0.75",
+      "packageLicense": "MIT",
+      "modelName": "isnet-general-use",
+      "modelVersion": "bootstrap-cache",
+      "modelWeightSourceUrl": "https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx",
+      "modelWeightLicense": "Apache-2.0; reviewed from rembg model listing and upstream xuebinqin/DIS Apache-2.0 source repo for Tower local production use",
+      "modelWeightSha256": "sha256:60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a",
+      "cachedModelPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/models/isnet-general-use.onnx",
+      "supports": [
+        {
+          "subjectType": "hair-beard-character"
+        }
+      ]
+    }
+  ],
+  "benchmarkResults": [
+    {
+      "candidateId": "rembg-isnet-general-use",
+      "subjectType": "hair-beard-character",
+      "topologyType": "hair-beard-soft-body-held-props",
+      "fixtureSet": "fresh-natural-canary",
+      "score": 0.94
+    }
+  ],
+  "selectedAt": "2026-05-19T04:09:28.284Z",
+  "promotedFromPassedCanary": true,
+  "canaryPromotionReason": "Full production readiness uses the passed canary cutout receipt and locked cached model evidence; missing full-plan source files are expected before full production generation."
+}
