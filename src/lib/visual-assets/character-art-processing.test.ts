@@ -148,66 +148,46 @@ describe("character art processing", () => {
     expect(existsSync(greetingPath)).toBe(true);
   });
 
-  it("preflights generated sources before ingesting low-quality art", async () => {
-    const dir = createTempDir();
-    const lowResGradientPath = join(dir, "low-res-gradient.png");
-    const cleanChromaPath = join(dir, "clean-chroma.png");
+	  it("preflights generated sources before ingesting low-quality art", async () => {
+	    const dir = createTempDir();
+	    const lowResSourcePath = join(dir, "low-res-source.png");
+	    const cleanAlphaPath = join(dir, "clean-alpha.png");
 
-    await sharp({
-      create: {
-        width: 948,
-        height: 1659,
-        channels: 3,
-        background: { r: 0, g: 255, b: 0 },
-      },
-    })
-      .composite([
-        {
-          input: {
-            create: {
-              width: 948,
-              height: 100,
-              channels: 3,
-              background: { r: 0, g: 220, b: 0 },
-            },
-          },
-          top: 0,
-          left: 0,
-        },
-      ])
-      .png()
-      .toFile(lowResGradientPath);
+	    await sharp({
+	      create: {
+	        width: 948,
+	        height: 1659,
+	        channels: 3,
+	        background: { r: 64, g: 92, b: 128 },
+	      },
+	    })
+	      .png()
+	      .toFile(lowResSourcePath);
 
-    await sharp({
-      create: {
-        width: 128,
-        height: 256,
-        channels: 3,
-        background: { r: 0, g: 255, b: 0 },
-      },
-    })
-      .png()
-      .toFile(cleanChromaPath);
+	    await sharp({
+	      create: {
+	        width: 128,
+	        height: 256,
+	        channels: 4,
+	        background: { r: 120, g: 40, b: 50, alpha: 1 },
+	      },
+	    })
+	      .png()
+	      .toFile(cleanAlphaPath);
 
-    const failed = await preflightCharacterSourceImage(lowResGradientPath, {
-      minimumLongEdge: 4096,
-      chromaKey: { r: 0, g: 255, b: 0 },
-    });
-    const passed = await preflightCharacterSourceImage(cleanChromaPath, {
-      minimumLongEdge: 128,
-      chromaKey: { r: 0, g: 255, b: 0 },
-    });
+	    const failed = await preflightCharacterSourceImage(lowResSourcePath, {
+	      minimumLongEdge: 4096,
+	    });
+	    const passed = await preflightCharacterSourceImage(cleanAlphaPath, {
+	      minimumLongEdge: 128,
+	    });
 
-    expect(failed.passed).toBe(false);
-    expect(failed.issues).toContain("source-long-edge-below-4096");
-    expect(failed.issues).toContain("chroma-key-background-not-flat");
-    expect(failed.issues).not.toContain("source-missing-alpha");
-    expect(passed).toMatchObject({
-      passed: true,
-      issues: [],
-      chromaKey: {
-        expected: { r: 0, g: 255, b: 0 },
-      },
-    });
-  });
+	    expect(failed.passed).toBe(false);
+	    expect(failed.issues).toContain("source-long-edge-below-4096");
+	    expect(failed.issues).toContain("source-missing-alpha");
+	    expect(passed).toMatchObject({
+	      passed: true,
+	      issues: [],
+	    });
+	  });
 });

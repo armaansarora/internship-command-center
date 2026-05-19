@@ -65,8 +65,10 @@ describe("Season 1 character image foundation", () => {
     );
 
     expect(pipeline).toContain("tower-flat-plus-depth-v1");
-    expect(pipeline).toContain("ChatGPT image generation");
-    expect(pipeline).toContain("Do not switch to paid API generation");
+    expect(pipeline).toContain("gemini-api");
+    expect(pipeline).toContain("Nano Banana 2");
+    expect(pipeline).toContain("budget caps");
+    expect(pipeline).toContain("API keys are read only");
     expect(pipeline).toContain(".artlab/characters/<characterId>/");
     expect(pipeline).toContain("public/art/<space>/<characterId>/<outfitVariant>/<pose>.webp");
 
@@ -78,7 +80,7 @@ describe("Season 1 character image foundation", () => {
 
     for (const gate of [
       "Gate 1: Character bible readiness",
-      "Gate 2: Exactly 12 concept options, one winner",
+      "Gate 2: Exactly 5 concept options, one winner",
       "Gate 3: Batch production packet",
       "Gate 4: Pose sheets",
       "Gate 5: Scripted source ingest and splitting",

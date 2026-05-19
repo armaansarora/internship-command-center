@@ -122,6 +122,16 @@ const DEFINITIONS: Record<CreativeAssetType, CreativeAssetTypeDefinition> = {
     phases: SHARED_PHASES,
     requiredEveryPhaseGates: CREATIVE_EVERY_PHASE_GATES,
   },
+  shader: {
+    id: "shader",
+    displayName: "Shader",
+    description: "WebGL, WebGPU, canvas, and Three.js-adjacent visual effects with fallbacks and performance budgets.",
+    outputRoot: ".artlab/studio/shaders",
+    productionRoot: "public/art",
+    manifestStrategy: "runtime-motion",
+    phases: SHARED_PHASES,
+    requiredEveryPhaseGates: CREATIVE_EVERY_PHASE_GATES,
+  },
 };
 
 export { CREATIVE_ASSET_TYPES, CREATIVE_PHASES } from "./types";

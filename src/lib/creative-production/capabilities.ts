@@ -188,6 +188,12 @@ const ASSET_TYPE_CAPABILITIES: Record<CreativeAssetType, CreativeCapabilityId[]>
     "marketing-composition",
     "review-board",
   ],
+  shader: [
+    "shader-effect",
+    "three-scene",
+    "code-ui-component",
+    "review-board",
+  ],
 };
 
 export function getCreativeCapabilityDefinition(

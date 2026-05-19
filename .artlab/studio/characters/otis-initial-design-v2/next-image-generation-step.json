@@ -1,0 +1,11 @@
+{
+  "directivePath": ".artlab/studio/characters/otis-initial-design-v2/image-generation-directive.md",
+  "generateFirst": [
+    {
+      "slot": "otis-design",
+      "sourceFilename": "otis__design__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-initial-design-v2/incoming",
+      "reason": "Generate five prompt-only initial concept lanes before identity approval."
+    }
+  ]
+}

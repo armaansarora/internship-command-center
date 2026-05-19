@@ -85,3 +85,10 @@ playwright-report/
 .artlab/runs/**/split/
 .artlab/runs/**/browser-qa/*.png
 .artlab/runs/**/review/*.png
+.artlab/inbox/
+.artlab/browser-sessions/**/browser-profile/
+.artlab/browser-sessions/**/chrome-profile/
+.artlab/browser-sessions/**/downloads/
+.artlab/browser-sessions/**/queue/
+.artlab/tooling/cutout/models/
+.artlab/tooling/cutout/venv/

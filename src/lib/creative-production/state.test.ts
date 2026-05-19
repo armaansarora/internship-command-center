@@ -9,15 +9,16 @@ import {
 } from "./index";
 
 describe("creative studio state", () => {
-  it("initializes durable studio state with Otis v2 before Mara continuity", () => {
+  it("initializes durable studio state for the fresh-start Otis pilot", () => {
     const state = createDefaultCreativeStudioState();
 
     expect(state.schemaVersion).toBe("tower-creative-studio-state-v1");
     expect(state.engineVersion).toBe("creative-production-engine-v1");
-    expect(state.done).toContain("Otis Vale character pilot promoted");
+    expect(state.done).toContain("0/252 approved production sprites");
+    expect(state.done).toContain("Promoted characters: none");
     expect(state.recommendedNext.assetType).toBe("character");
     expect(state.recommendedNext.name).toBe("Otis Vale");
-    expect(state.recommendedNext.reason).toContain("Otis native-quality v2");
+    expect(state.recommendedNext.reason).toContain("Fresh-start reset");
     expect(state.remaining.some((item) => item.includes("environments"))).toBe(true);
     expect(state.remaining.some((item) => item.includes("animations"))).toBe(true);
   });
@@ -40,6 +41,6 @@ describe("creative studio state", () => {
     const state = await loadCreativeStudioState(join(root, "missing.json"));
 
     expect(state.schemaVersion).toBe("tower-creative-studio-state-v1");
-    expect(state.done).toContain("Otis Vale character pilot promoted");
+    expect(state.done).toContain("0/252 approved production sprites");
   });
 });

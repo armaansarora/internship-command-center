@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "tower-creative-v1-import-report",
+  "importedAt": "2026-05-19T06:27:58.690Z",
+  "runId": "otis-real-rembg-canary-v1",
+  "phase": "strict-qa",
+  "preservedArtifacts": [
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/run-state.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/gemini-api-plan.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/generation-budget-ledger.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary/api-run-state.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/api-run-state.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary-gate.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/cutout-readiness.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/canary/repair-plan.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/repair-plan.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/cutout-doctor.json",
+    ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/asset-doctor.json"
+  ],
+  "noForceUnlock": true,
+  "noGenerationStarted": true
+}

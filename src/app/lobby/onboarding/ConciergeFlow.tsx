@@ -316,6 +316,7 @@ export function ConciergeFlow({
           }
           div[aria-label="Lobby onboarding"] main {
             grid-template-columns: 1fr !important;
+            align-items: start !important;
             align-content: start;
             overflow-y: auto !important;
           }

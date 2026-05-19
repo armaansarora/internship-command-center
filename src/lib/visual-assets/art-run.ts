@@ -163,6 +163,10 @@ export interface CharacterArtRun {
   runId: string;
   characterId: CharacterId;
   assetVersion: string;
+  canaryOnly?: {
+    notProductionCompletion: true;
+    reason: string;
+  };
   styleId: "tower-flat-plus-depth-v1";
   status: CharacterArtRunStatus;
   approvedIdentityRef: string;
@@ -456,6 +460,10 @@ export function markCharacterArtRunFinalApproved(
   approvedBy = "Armaan",
   approvedAt = new Date().toISOString(),
 ): CharacterArtRun {
+  if (run.canaryOnly?.notProductionCompletion) {
+    throw new Error("Canary-only character pipeline runs cannot receive final approval or be promoted.");
+  }
+
   if (phrase !== CHARACTER_ART_FINAL_APPROVAL_PHRASE) {
     throw new Error(`Final approval requires the exact phrase "${CHARACTER_ART_FINAL_APPROVAL_PHRASE}".`);
   }
@@ -549,6 +557,10 @@ export function getCharacterArtRunQaIssues(run: CharacterArtRun): string[] {
 
 export function getCharacterArtRunPromotionIssues(run: CharacterArtRun): string[] {
   const issues = getCharacterArtRunQaIssues(run);
+
+  if (run.canaryOnly?.notProductionCompletion) {
+    issues.push("Canary-only character pipeline runs cannot be promoted.");
+  }
 
   if (run.finalApproval.status !== "approved") {
     issues.push("Final upload-ready board has not been approved with the exact phrase.");

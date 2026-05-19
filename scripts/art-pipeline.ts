@@ -18,6 +18,13 @@ import {
   type CharacterArtHumanApprovalGateId,
   type CharacterArtRun,
 } from "../src/lib/visual-assets";
+import { renderCreativeStatusSummary } from "../src/lib/creative-production/operator/v1-final";
+import { getNextCreativeRunAction } from "../src/lib/creative-production/run-state";
+import {
+  planRetentionCleanup,
+  writeCreativeRetentionRegistry,
+  type CreativeRetentionEntry,
+} from "../src/lib/creative-production/cleanup";
 import {
   inspectCharacterSourceImage,
   preflightCharacterSourceImage,
@@ -59,7 +66,7 @@ function printUsage(): never {
   npm run art:status [-- --json]
   npm run art:operate [-- --character <characterId>] [-- --run-id <run-id>] [-- --identity-ref <path>] [-- --asset-version <version>] [-- --run <run.json>] [-- --out-root <path>] [-- --dry-run] [-- --json]
   npm run art:clean -- <characterId> --run-id <run-id> [--include-legacy-shared-masters] [--dry-run]
-  npm run art:preflight -- <source> [--minimum-long-edge 4096] [--chroma-key 00ff00] [--json]
+	  npm run art:preflight -- <source> [--minimum-long-edge 4096] [--json]
   npm run art:ingest -- <run.json> --source <path> --kind <kind> [--id <id>] [--outfit <variant>] [--pose <pose>] [--columns 7] [--rows 1]
   npm run art:split -- <run.json> --source-asset <id>
   npm run art:master -- <run.json> [--master-long-edge 4096]
@@ -192,24 +199,6 @@ function assertSourceKind(value: string): CharacterArtRun["sourceAssets"][number
   return value as CharacterArtRun["sourceAssets"][number]["kind"];
 }
 
-function optionalChromaKeyFlag(args: ParsedArgs): { r: number; g: number; b: number } | undefined {
-  const value = optionalStringFlag(args, "chroma-key");
-
-  if (!value) return undefined;
-
-  const normalized = value.replace(/^#/, "").toLowerCase();
-
-  if (!/^[0-9a-f]{6}$/.test(normalized)) {
-    throw new Error("--chroma-key must be a six-digit hex color such as 00ff00.");
-  }
-
-  return {
-    r: Number.parseInt(normalized.slice(0, 2), 16),
-    g: Number.parseInt(normalized.slice(2, 4), 16),
-    b: Number.parseInt(normalized.slice(4, 6), 16),
-  };
-}
-
 async function ensureParentDirectory(path: string): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
 }
@@ -262,10 +251,9 @@ async function commandPreflight(args: ParsedArgs): Promise<void> {
     throw new Error(`Source file does not exist: ${sourcePath}`);
   }
 
-  const result = await preflightCharacterSourceImage(sourcePath, {
-    minimumLongEdge: optionalNumberFlag(args, "minimum-long-edge") ?? 4096,
-    chromaKey: optionalChromaKeyFlag(args),
-  });
+	  const result = await preflightCharacterSourceImage(sourcePath, {
+	    minimumLongEdge: optionalNumberFlag(args, "minimum-long-edge") ?? 4096,
+	  });
 
   if (args.flags.get("json")) {
     console.log(JSON.stringify(result, null, 2));
@@ -480,28 +468,52 @@ async function commandQa(args: ParsedArgs): Promise<void> {
   console.log("Art QA passed.");
 }
 
-function getReviewBoardPreviewSrc(reviewRoot: string, publicSrc: string): string {
-  const publicPath = join("public", publicSrc.replace(/^\/+/, ""));
+function getReviewBoardFileSrc(reviewRoot: string, path: string | undefined): string {
+  if (!path) return "";
 
-  return relative(reviewRoot, publicPath).replaceAll("\\", "/");
+  return relative(reviewRoot, path).replaceAll("\\", "/");
+}
+
+function renderQaBadges(processed: CharacterArtProcessedSprite | undefined): string {
+  const issues = new Set(processed?.issues ?? []);
+  const badge = (label: string, passed: boolean) =>
+    `<span class="badge ${passed ? "pass" : "fail"}">${label}</span>`;
+
+  return [
+    badge("cutout", Boolean(processed) && !issues.has("source-missing-alpha")),
+    badge("alpha", Boolean(processed) && !issues.has("source-missing-alpha")),
+    badge("dimensions", Boolean(processed) && !Array.from(issues).some((issue) => issue.includes("long-edge") || issue.includes("dimensions"))),
+    badge("crop", Boolean(processed) && !issues.has("subject-cropped")),
+    badge("halo", Boolean(processed) && !issues.has("edge-halo")),
+    badge("props", Boolean(processed) && !issues.has("prop-lost")),
+  ].join("");
 }
 
 function renderReviewHtml(run: CharacterArtRun): string {
   const cards = run.expectedSprites
     .map((sprite) => {
-      const previewSrc = getReviewBoardPreviewSrc(
-        run.directories.reviewRoot,
-        sprite.publicRenditions.retina3x.src,
-      );
+      const appSrc = getReviewBoardFileSrc(run.directories.reviewRoot, sprite.stagedRenditions.retina3x.src);
       const processed = run.processedSprites.find((entry) => entry.slotId === sprite.id);
       const warnings = processed?.issues.length ? processed.issues.join(", ") : "none";
+      const sourceSrc = getReviewBoardFileSrc(run.directories.reviewRoot, processed?.sourcePath);
+      const masterSrc = getReviewBoardFileSrc(run.directories.reviewRoot, processed?.masterPath);
+      const darkSrc = getReviewBoardFileSrc(run.directories.reviewRoot, sprite.qaDarkPath);
+      const lightSrc = getReviewBoardFileSrc(run.directories.reviewRoot, sprite.qaLightPath);
+      const img = (src: string, alt: string) => src
+        ? `<img src="${src}" alt="${alt}">`
+        : `<div class="missing">missing</div>`;
 
       return `<article class="card">
-  <div class="preview dark"><img src="${previewSrc}" alt="${sprite.id} on dark background"></div>
-  <div class="preview light"><img src="${previewSrc}" alt="${sprite.id} on light background"></div>
+  <div class="preview source"><span>source</span>${img(sourceSrc, `${sprite.id} original source`)}</div>
+  <div class="preview checker"><span>cutout</span>${img(masterSrc, `${sprite.id} transparent cutout on checkerboard`)}</div>
+  <div class="preview dark"><span>dark</span>${img(darkSrc, `${sprite.id} on dark background`)}</div>
+  <div class="preview light"><span>light</span>${img(lightSrc, `${sprite.id} on light background`)}</div>
+  <div class="preview tower-shadow"><span>Tower shadow</span><div class="stage-shadow" aria-hidden="true"></div>${img(appSrc, `${sprite.id} with Tower shadow preview`)}</div>
   <h2>${sprite.outfitVariant} / ${sprite.pose}</h2>
+  <div class="badges">${renderQaBadges(processed)}</div>
   <p>${sprite.publicRenditions.default.src}</p>
   <p class="warnings">QA notes: ${warnings}</p>
+  <details><summary>diagnostics</summary><pre>${JSON.stringify(processed ?? { status: "missing-processed-sprite" }, null, 2)}</pre></details>
 </article>`;
     })
     .join("\n");
@@ -515,12 +527,24 @@ function renderReviewHtml(run: CharacterArtRun): string {
   <style>
     body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #111316; color: #f8f5ef; }
     header { position: sticky; top: 0; z-index: 1; padding: 20px 24px; background: #1b1d21; border-bottom: 1px solid #343842; }
-    main { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; padding: 24px; }
+    main { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; padding: 24px; }
     .card { border: 1px solid #343842; border-radius: 8px; overflow: hidden; background: #1b1d21; }
-    .preview { height: 310px; display: grid; place-items: end center; padding: 16px; }
-    .preview img { max-width: 100%; max-height: 290px; object-fit: contain; image-rendering: auto; }
+    .preview { position: relative; min-height: 230px; display: grid; place-items: end center; padding: 22px 16px 16px; }
+    .preview span { position: absolute; top: 8px; left: 10px; font-size: 11px; color: #aab0ba; text-transform: uppercase; letter-spacing: .08em; }
+    .preview img { max-width: 100%; max-height: 210px; object-fit: contain; image-rendering: auto; position: relative; z-index: 1; }
+    .source { background: #23262c; }
+    .checker { background-color: #ececec; background-image: linear-gradient(45deg, #cfcfcf 25%, transparent 25%), linear-gradient(-45deg, #cfcfcf 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #cfcfcf 75%), linear-gradient(-45deg, transparent 75%, #cfcfcf 75%); background-size: 24px 24px; background-position: 0 0, 0 12px, 12px -12px, -12px 0; }
     .dark { background: #101114; }
     .light { background: #f4efe4; }
+    .tower-shadow { background: linear-gradient(180deg, #f5efe3 0%, #d8cab4 100%); }
+    .stage-shadow { position: absolute; left: 50%; bottom: 22px; width: 68%; height: 24px; transform: translateX(-50%); border-radius: 999px; background: radial-gradient(ellipse at center, rgba(8, 9, 13, .28), rgba(8, 9, 13, 0) 72%); filter: blur(5px); }
+    .badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 14px 0; }
+    .badge { border-radius: 999px; padding: 3px 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; border: 1px solid currentColor; }
+    .badge.pass { color: #a7e3bd; }
+    .badge.fail { color: #ffb2a4; }
+    details { margin: 8px 14px 14px; color: #bfc3cc; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+    .missing { color: #ffb2a4; align-self: center; }
     h2, p { margin: 12px 14px; }
     h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; }
     p { color: #bfc3cc; font-size: 13px; overflow-wrap: anywhere; }
@@ -577,7 +601,16 @@ async function commandClean(args: ParsedArgs): Promise<void> {
     ...(await listImageFiles(`.artlab/runs/${characterId}/${runId}/review`)),
     ...(await listImageFiles(`.artlab/runs/${characterId}/${runId}/browser-qa`)),
   ];
-  const deleteTargets = [...volatileDirectories, ...legacyMasterDirectories, ...imageFiles].filter((path) =>
+  const qaEvidence = [
+    `.artlab/runs/${characterId}/${runId}/browser-qa/browser-qa.json`,
+    `.artlab/runs/${characterId}/${runId}/review/final-board-browser-check.png`,
+  ].filter((path) => existsSync(path));
+  const qaEvidenceSet = new Set(qaEvidence);
+  const deleteTargets = [
+    ...volatileDirectories,
+    ...legacyMasterDirectories,
+    ...imageFiles.filter((path) => !qaEvidenceSet.has(path)),
+  ].filter((path) =>
     existsSync(path),
   );
   const kept = [
@@ -585,13 +618,40 @@ async function commandClean(args: ParsedArgs): Promise<void> {
     `.artlab/runs/${characterId}/${runId}/prompts/`,
     `.artlab/runs/${characterId}/${runId}/review/final-upload-ready-board.html`,
     `.artlab/runs/${characterId}/${runId}/browser-qa/browser-qa.json`,
+    ...qaEvidence,
     `.artlab/characters/${characterId}/references/`,
     `public/art/lobby/${characterId}/`,
     GENERATED_MANIFEST_PATH,
+  ].filter((path, index, paths) => paths.indexOf(path) === index);
+  const registryPath = ".artlab/studio/artifact-registry.json";
+  const registryEntries: CreativeRetentionEntry[] = [
+    ...deleteTargets.map((path): CreativeRetentionEntry => ({
+      path,
+      status: "draft",
+      kind: path.includes("review") || path.includes("browser-qa") ? "orphan-preview" : "unreferenced-intermediate",
+      runId,
+    })),
+    ...kept.map((path): CreativeRetentionEntry => ({
+      path,
+      status: path.startsWith("public/art/") || path === GENERATED_MANIFEST_PATH ? "approved" : "staged",
+      kind: path.startsWith("public/art/")
+        ? "live-public-art"
+        : path === GENERATED_MANIFEST_PATH
+          ? "approved-manifest"
+          : qaEvidenceSet.has(path)
+            ? "qa-evidence"
+          : path.includes("run.json")
+            ? "active-run-state"
+            : "review-board",
+      runId,
+    })),
   ];
+  const cleanupPlan = planRetentionCleanup(registryEntries);
+
+  await writeCreativeRetentionRegistry(registryPath, registryEntries);
 
   if (!dryRun) {
-    for (const target of deleteTargets) {
+    for (const target of cleanupPlan.deleteEntries.map((entry) => entry.path)) {
       await rm(target, { recursive: true, force: true });
     }
   }
@@ -602,7 +662,14 @@ async function commandClean(args: ParsedArgs): Promise<void> {
         characterId,
         runId,
         dryRun,
-        deleted: deleteTargets,
+        registryPath,
+        cleanupPlan: {
+          protected: cleanupPlan.protectedEntries.map((entry) => entry.path),
+          archive: cleanupPlan.archiveEntries.map((entry) => entry.path),
+          delete: cleanupPlan.deleteEntries.map((entry) => entry.path),
+          keep: cleanupPlan.keepEntries.map((entry) => entry.path),
+        },
+        deleted: cleanupPlan.deleteEntries.map((entry) => entry.path),
         kept,
         protected: [
           "production public/art files stay live until a replacement run is approved and promoted",
@@ -633,6 +700,25 @@ interface ArtRunLedgerSummary {
   processedSprites: number;
   finalApprovalStatus: CharacterArtRun["finalApproval"]["status"];
   warningCounts: Record<string, number>;
+  canaryOnly: boolean;
+}
+
+interface CreativeRunStateSummary {
+  runId: string;
+  assetType?: string;
+  name?: string;
+  state: string;
+  nextLegalAction?: string;
+  runStatePath: string;
+  canaryEvidence?: {
+    canaryGatePath?: string;
+    cutoutReadinessPath?: string;
+    cutoutReceiptPaths?: string[];
+    assetDoctorPath?: string;
+    reviewBoardPath?: string;
+    recordedAt?: string;
+  };
+  productionEvidence?: Record<string, unknown>;
 }
 
 interface ArtCharacterStatus {
@@ -660,6 +746,7 @@ interface ArtPipelineStatusReport {
   };
   characters: ArtCharacterStatus[];
   runLedgers: ArtRunLedgerSummary[];
+  creativeRunStates: CreativeRunStateSummary[];
   commands: string[];
   continuationDocs: string[];
   nonNegotiables: string[];
@@ -760,6 +847,7 @@ function summarizeRunLedger(run: CharacterArtRun, runPath: string): ArtRunLedger
     processedSprites: run.processedSprites.length,
     finalApprovalStatus: run.finalApproval.status,
     warningCounts: countRunWarnings(run),
+    canaryOnly: Boolean(run.canaryOnly?.notProductionCompletion),
   };
 }
 
@@ -789,15 +877,72 @@ async function readRunLedgers(): Promise<ArtRunLedgerSummary[]> {
   );
 }
 
+async function readCreativeRunStates(root = ".artlab/studio"): Promise<CreativeRunStateSummary[]> {
+  if (!existsSync(root)) return [];
+
+  const states: CreativeRunStateSummary[] = [];
+
+  async function walk(directory: string): Promise<void> {
+    const entries = await readdir(directory, { withFileTypes: true }).catch(() => []);
+
+    for (const entry of entries) {
+      const fullPath = join(directory, entry.name);
+
+      if (entry.isDirectory()) {
+        await walk(fullPath);
+        continue;
+      }
+
+      if (entry.name !== "run-state.json") continue;
+
+      const parsed = JSON.parse(await readFile(fullPath, "utf8")) as Partial<CreativeRunStateSummary> & {
+        schemaVersion?: string;
+        phase?: string;
+      };
+
+      if (
+        parsed.schemaVersion !== "tower-creative-run-state-v1" &&
+        parsed.schemaVersion !== "tower-creative-run-state-v1-final"
+      ) continue;
+      if (!parsed.runId || (!parsed.state && !parsed.phase)) continue;
+
+      const state = parsed.phase ?? parsed.state ?? "unknown";
+
+      states.push({
+        runId: parsed.runId,
+        assetType: parsed.assetType,
+        name: parsed.name,
+        state,
+        nextLegalAction: parsed.nextLegalAction ?? getNextCreativeRunAction(state as Parameters<typeof getNextCreativeRunAction>[0]),
+        runStatePath: fullPath,
+        canaryEvidence: parsed.canaryEvidence,
+        productionEvidence: parsed.productionEvidence,
+      });
+    }
+  }
+
+  await walk(root);
+
+  return states.sort((left, right) => left.runId.localeCompare(right.runId));
+}
+
 function getLatestRunForCharacter(
   runLedgers: ArtRunLedgerSummary[],
   characterId: CharacterId,
 ): ArtRunLedgerSummary | undefined {
+  const runRank = (run: ArtRunLedgerSummary) => {
+    if (run.promotionStatus === "promoted") return 6;
+    if (run.finalApprovalStatus === "approved") return 5;
+    if (run.qaStatus === "passed") return 4;
+    if (run.processedSprites >= run.expectedSprites) return 3;
+    if (run.processedSprites > 0) return 2;
+    return 1;
+  };
   const runs = runLedgers
-    .filter((run) => run.characterId === characterId)
-    .sort((left, right) => right.runId.localeCompare(left.runId));
+    .filter((run) => run.characterId === characterId && !run.canaryOnly)
+    .sort((left, right) => runRank(right) - runRank(left) || right.runId.localeCompare(left.runId));
 
-  return runs.find((run) => run.promotionStatus !== "promoted") ?? runs[0];
+  return runs[0];
 }
 
 function getActiveReplacementRun(
@@ -807,8 +952,10 @@ function getActiveReplacementRun(
   return runLedgers
     .filter(
       (run) =>
+        !run.canaryOnly &&
         (approvedCounts.get(run.characterId) ?? 0) >= expectedSpritesPerCharacter &&
-        run.promotionStatus !== "promoted",
+        run.promotionStatus !== "promoted" &&
+        run.processedSprites >= run.expectedSprites,
     )
     .sort((left, right) => right.runId.localeCompare(left.runId))[0];
 }
@@ -816,6 +963,7 @@ function getActiveReplacementRun(
 async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> {
   const approvedAssets = await readApprovedCharacterAssets();
   const runLedgers = await readRunLedgers();
+  const creativeRunStates = await readCreativeRunStates();
   const approvedCounts = new Map<CharacterId, number>();
 
   for (const asset of approvedAssets) {
@@ -847,13 +995,12 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
   const activeReplacementRun = getActiveReplacementRun(runLedgers, approvedCounts);
   const nextCharacter =
     characters.find((character) => character.characterId === activeReplacementRun?.characterId) ??
-    characters.find((character) => character.characterId === "ceo" && character.productionState !== "fully-promoted") ??
     characters.find((character) => character.productionState !== "fully-promoted") ??
     characters[0];
   const nextReason = activeReplacementRun
     ? `${nextCharacter.displayName} has an active replacement run (${activeReplacementRun.runId}) and should be completed before new characters.`
-    : nextCharacter.characterId === "ceo"
-      ? "Mara Voss was already chosen as the next pilot after Otis."
+    : nextCharacter.characterId === "otis"
+      ? "Fresh-start reset is active, so Otis should be regenerated from scratch as the first production pilot."
       : "This is the next unpromoted Season 1 character in the locked generation order.";
 
   return {
@@ -873,13 +1020,19 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
     },
     characters,
     runLedgers,
+    creativeRunStates,
     commands: [
+      "npm run art:produce -- --request \"<natural language creative request>\"",
+      "npm run art:produce -- --continue <run-id>",
       "npm run art:operate",
       "npm run art:status",
       "npm --silent run art:status -- --json",
+      "npm run art:generate prepare-api --phase production-pack --packet <creative-brief.json> --directive <next-image-generation-step.json>",
+      "npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>",
+      "npm run art:generate repair-auto --plan <gemini-api-plan.json>",
       "npm run art:clean -- <characterId> --run-id <run-id>",
       "npm run art:plan -- <characterId> --run-id <yyyy-mm-dd-character-purpose> --identity-ref <approved-reference-path>",
-      "npm run art:preflight -- <generated-file> --minimum-long-edge 4096 --chroma-key 00ff00",
+	      "npm run art:generate cutout-doctor --plan <gemini-api-plan.json> --strict",
       "npm run art:ingest -- <run.json> --source <generated-file> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle",
       "npm run art:ingest -- <run.json> --source <generated-file> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1",
       "npm run art:split -- <run.json> --source-asset <pose-sheet-id>",
@@ -900,7 +1053,9 @@ async function buildArtPipelineStatusReport(): Promise<ArtPipelineStatusReport> 
     nonNegotiables: [
       "Only two human approval gates: initial character design, then final upload-ready board.",
       "No production manifest entry without the exact final phrase: approved for app.",
-      "Do not hide source warnings; prototype upscales must stay visible until replaced by native high-resolution source art.",
+      "Production packs must pass the one-slot canary before full-pack paid generation.",
+      "Whole-pack retries are banned; repair or regenerate only named failed slots.",
+      "Do not hide source warnings; below-contract sources must be repaired or regenerated before promotion.",
       "When the pipeline needs a manual workaround twice, add a script, test, and doc update before continuing.",
     ],
   };
@@ -928,6 +1083,22 @@ function renderArtPipelineStatus(report: ArtPipelineStatusReport): string {
   const promoted = report.fullyPromotedCharacters.length
     ? report.fullyPromotedCharacters.join(", ")
     : "none";
+  const creativeRunStateLines = report.creativeRunStates.length
+    ? report.creativeRunStates
+      .map((run) => {
+        const evidence = run.canaryEvidence
+          ? [
+            run.canaryEvidence.canaryGatePath && `canary ${run.canaryEvidence.canaryGatePath}`,
+            run.canaryEvidence.cutoutReadinessPath && `readiness ${run.canaryEvidence.cutoutReadinessPath}`,
+            run.canaryEvidence.assetDoctorPath && `asset doctor ${run.canaryEvidence.assetDoctorPath}`,
+            run.canaryEvidence.reviewBoardPath && `review ${run.canaryEvidence.reviewBoardPath}`,
+          ].filter(Boolean).join("; ")
+          : "no canary evidence recorded";
+
+        return `- ${run.name ?? run.runId} (${run.runId}): ${run.state}; ${run.runStatePath}; ${evidence}`;
+      })
+      .join("\n")
+    : "- none";
 
   return `Tower Character Image Pipeline Status
 
@@ -941,6 +1112,9 @@ Reason: ${report.nextRecommendedCharacter.reason}
 
 Character ledger:
 ${characterLines}
+
+Creative production run states:
+${creativeRunStateLines}
 
 Start-here docs:
 ${report.continuationDocs.map((doc) => `- ${doc}`).join("\n")}
@@ -966,7 +1140,7 @@ Prompt ref: ${character.conceptBoardPromptRef}
 Style: tower-flat-plus-depth-v1
 Tone: Professional Scars
 
-Create exactly 12 distinct concept options for ${character.displayName}, ${character.title} of The Tower.
+Create exactly 5 distinct prompt-only concept options for ${character.displayName}, ${character.title} of The Tower.
 
 Style rules:
 - Premium adult web-game sprite.
@@ -984,7 +1158,7 @@ Character DNA:
 - Art direction: ${character.artDirectionNotes}
 
 Variation requirements:
-- The 12 options must vary meaningfully in silhouette, posture, age impression, wardrobe cut, warmth, expression, and prop handling.
+- The 5 options must vary meaningfully in silhouette, posture, age impression, wardrobe cut, warmth, expression, and prop handling.
 - All options must still fit the Tower style and the existing cast.
 - Show enough spread for Armaan to choose the actual identity, not just a palette preference.
 
@@ -993,7 +1167,7 @@ Negative prompt:
 - No celebrity likeness, actor likeness, named fictional character styling, logo, watermark, fake text, photoreal render, superhero costume, sci-fi armor, mascot proportions, or random unrelated props.
 
 Output:
-- One reviewable concept board containing exactly 12 labeled visual options.
+- One reviewable concept board containing exactly 5 labeled visual options.
 - Keep this as draft/reference art only. Do not place any generated output in public/art.
 `;
 }
@@ -1100,9 +1274,9 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       type: "generate-concept-board",
       status: "blocked-on-human-choice",
       humanGate: "initial-character-design",
-      summary: "Generate exactly 12 initial design concepts before any production run exists.",
+      summary: "Generate exactly 5 prompt-only initial design concepts before any production run exists.",
     };
-    blockedUntil = "Armaan chooses one initial character design from the 12-option concept board.";
+    blockedUntil = "Armaan chooses one initial character design from the 5-option concept board.";
   }
 
   return {
@@ -1124,8 +1298,10 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       expectedSpritesPerCharacter,
     },
     allowedCommands: [
+      "npm run art:produce",
       "npm run art:operate",
       "npm run art:status",
+      "npm run art:generate",
       "npm run art:clean",
       "npm run art:plan",
       "npm run art:preflight",
@@ -1140,6 +1316,8 @@ function buildOperatorPacket(args: ParsedArgs, report: ArtPipelineStatusReport):
       "Do not copy generated files directly into public/art.",
       "Do not update the approved manifest without a promoted QA-passed run.",
       "Do not proceed past the initial design gate without Armaan choosing one concept.",
+      "Do not run a full production pack before the canary gate passes.",
+      "Do not run whole-pack warning retries.",
       "Do not promote without the exact phrase approved for app.",
       "Do not hide source-quality warnings.",
     ],
@@ -1191,12 +1369,32 @@ async function commandOperate(args: ParsedArgs): Promise<void> {
 }
 
 async function commandStatus(args: ParsedArgs): Promise<void> {
-  const report = await buildArtPipelineStatusReport();
+  const stateRoot = optionalStringFlag(args, "state-root") ?? process.env.TOWER_ART_STATUS_STATE_ROOT;
+  const runId = optionalStringFlag(args, "run-id");
 
   if (args.flags.get("json")) {
+    const report = await buildArtPipelineStatusReport();
+
     console.log(JSON.stringify(report, null, 2));
     return;
   }
+
+  if (stateRoot || runId) {
+    console.log(await renderCreativeStatusSummary({
+      ...(stateRoot ? { stateRoot } : {}),
+      ...(runId ? { runId } : {}),
+    }));
+    return;
+  }
+
+  const v1Summary = await renderCreativeStatusSummary({ stateRoot: ".artlab/studio" });
+
+  if (!v1Summary.startsWith("No Creative Production Engine run was found.")) {
+    console.log(v1Summary);
+    return;
+  }
+
+  const report = await buildArtPipelineStatusReport();
 
   console.log(renderArtPipelineStatus(report));
 }

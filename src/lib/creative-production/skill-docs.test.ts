@@ -33,17 +33,40 @@ describe("creative production natural-language trigger", () => {
     expect(skill).toContain("--mode lane --lane-brief");
     expect(skill).toContain("--mode validate-lane");
     expect(skill).toContain("--mode coordinate");
+    expect(skill).toContain("--mode improve");
     expect(skill).toContain("review-board.html");
     expect(skill).toContain("promotion-gate.json");
+	    expect(skill).toContain("--max-attempts");
+	    expect(skill).toContain("--request-timeout-ms");
+	    expect(skill).toContain("--force-unlock");
+	    expect(skill).toContain("cutout-bootstrap");
+	    expect(skill).toContain("cutout-benchmark");
+	    expect(skill).toContain("cutout-readiness");
+	    expect(skill).toContain("cutout-auto");
+	    expect(skill).toContain("cutout-doctor");
+	    expect(skill).toContain("exactly 5 total images");
     expect(spec).toContain("adaptive request router");
     expect(spec).toContain("Parallel Wave Mode");
-    expect(spec).toContain("default 15x parallel wave packet");
+    expect(spec).toContain("default five-lane parallel packet");
     expect(spec).toContain("awaiting-initial-approval");
     expect(spec).toContain("Creative Capabilities");
     expect(spec).toContain("shader effects");
+	    expect(spec).toContain("api-run.lock");
+	    expect(spec).toContain("api-run-state.json");
+	    expect(spec).toContain("--phase production-pack");
+	    expect(spec).toContain("cutout-auto");
+	    expect(spec).toContain("cutout-readiness");
+	    expect(spec).toContain("continuous-improvement-report.json");
+
+	    for (const text of [skill, spec, artlab]) {
+	      expect(text).not.toContain("#00ff00");
+	      expect(text.toLowerCase()).not.toContain("chroma");
+	      expect(text.toLowerCase()).not.toContain("green matte");
+	      expect(text).not.toContain("extract-alpha");
+	    }
 
     for (const text of [claude, agents, structure, artlab]) {
-      expect(text).toContain("15x parallel");
+      expect(text).toContain("five-lane parallel");
       expect(text).toContain("GPT-5.5");
       expect(text).toContain("coordinate");
     }
@@ -51,5 +74,7 @@ describe("creative production natural-language trigger", () => {
     expect(artlab).toContain("--no-parallel");
     expect(artlab).toContain("--mode validate-lane");
     expect(artlab).toContain("coordinator-review.json");
+    expect(artlab).toContain("--mode improve");
+    expect(artlab).toContain("api-run.lock");
   });
 });

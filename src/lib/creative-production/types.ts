@@ -7,6 +7,7 @@ export const CREATIVE_ASSET_TYPES = [
   "scene",
   "icon-system",
   "marketing-hero",
+  "shader",
 ] as const;
 
 export const CREATIVE_PHASES = [

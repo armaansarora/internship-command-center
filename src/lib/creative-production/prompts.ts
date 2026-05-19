@@ -14,6 +14,7 @@ export interface CreativeProductionPacketIntake {
   confidence: CreativeProductionRequestConfidence;
   matchedSignals: string[];
   initialApprovalStatus: CreativeProductionInitialApprovalStatus;
+  apiBudgetCents?: number;
 }
 
 export type CreativeProductionNextAction =
@@ -178,7 +179,7 @@ ${packet.brief}
 
 const REQUIRED_OUTPUTS: Record<CreativeAssetType, string[]> = {
   character: [
-    "12 initial concept options before identity approval",
+    "5 initial prompt-only concept options before identity approval",
     "approved identity reference with visual DNA notes",
     "turnaround sheet: front, 3/4 front, side, 3/4 back, and back",
     "expression sheet matched to the character bible",
@@ -230,6 +231,12 @@ const REQUIRED_OUTPUTS: Record<CreativeAssetType, string[]> = {
     "desktop, tablet, and mobile crops with copy-safe zones",
     "performance-ready raster derivatives and alt-text notes",
   ],
+  shader: [
+    "shader intent board with visual reference, interaction rules, and fallback behavior",
+    "prototype implementation plan for WebGL, WebGPU, canvas, CSS, or Three.js delivery",
+    "performance budget with mobile fallback and reduced-motion behavior",
+    "desktop and mobile preview notes proving the effect does not block UI",
+  ],
 };
 
 function getRequiredOutputs(
@@ -243,7 +250,7 @@ function getRequiredOutputs(
   }
 
   return outputs
-    .filter((output) => !output.startsWith("12 initial concept options"))
+    .filter((output) => !output.startsWith("5 initial prompt-only concept options"))
     .map((output) =>
       output === "approved identity reference with visual DNA notes"
         ? "approved identity reference already recorded with visual DNA notes"
@@ -296,6 +303,12 @@ const ACCEPTANCE_CHECKS: Record<CreativeAssetType, string[]> = {
     "copy-safe zones work on mobile and desktop",
     "all staged files remain outside public/art until final approval",
   ],
+  shader: [
+    "the effect has a nonblank preview and a reduced-motion fallback",
+    "the performance budget is explicit before app integration",
+    "the shader does not obscure or block required UI controls",
+    "all staged files remain outside public/art until final approval",
+  ],
 };
 
 const QUALITY_BAR: Record<CreativeAssetType, string[]> = {
@@ -339,6 +352,11 @@ const QUALITY_BAR: Record<CreativeAssetType, string[]> = {
     "first viewport crop remains strong on mobile and desktop",
     "compression target is defined before promotion",
   ],
+  shader: [
+    "frame budget and fallback path are named before promotion",
+    "preview remains stable on mobile and desktop",
+    "implementation can be disabled without breaking the route",
+  ],
 };
 
 const ORGANIZATION_POLICY = [
@@ -350,7 +368,7 @@ const ORGANIZATION_POLICY = [
 ];
 
 const FORBIDDEN_ACTIONS = [
-  "do not bypass initial direction approval",
+  "do not bypass initial direction approval; treat it as satisfied only when the request explicitly approves generation with a budget cap",
   "do not bypass final upload-ready approval",
   "do not promote low-quality or unreviewed assets",
   "do not hide warnings about softness, cropping, haloing, or manifest drift",

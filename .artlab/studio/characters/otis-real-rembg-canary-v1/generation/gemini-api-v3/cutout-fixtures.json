@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "tower-cutout-fixture-set-v1",
+  "runId": "otis-real-rembg-canary-v1",
+  "requiredSubjectTypes": [
+    "hair-beard-character"
+  ],
+  "minimumScore": 0.9,
+  "candidates": [
+    {
+      "id": "rembg-isnet-general-use",
+      "adapter": "rembg",
+      "packageName": "rembg",
+      "packageVersion": "2.0.75",
+      "packageLicense": "MIT",
+      "modelName": "isnet-general-use",
+      "modelVersion": "bootstrap-cache",
+      "modelWeightSourceUrl": "https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx",
+      "modelWeightLicense": "Apache-2.0; reviewed from rembg model listing and upstream xuebinqin/DIS Apache-2.0 source repo for Tower local production use",
+      "modelWeightSha256": "sha256:60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a",
+      "cachedModelPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/models/isnet-general-use.onnx",
+      "provenanceNote": "Downloaded by rembg 2.0.75 from the rembg v0.0.0 GitHub release into the pinned local cache. Upstream DIS/IS-Net repository is Apache-2.0; cached file hash is locked before production use.",
+      "supports": [
+        {
+          "subjectType": "character"
+        },
+        {
+          "subjectType": "hair-beard-character"
+        },
+        {
+          "subjectType": "prop"
+        },
+        {
+          "subjectType": "ui-object"
+        },
+        {
+          "subjectType": "foreground-layer"
+        }
+      ]
+    },
+    {
+      "id": "rembg-u2net",
+      "adapter": "rembg",
+      "packageName": "rembg",
+      "packageVersion": "2.0.75",
+      "packageLicense": "MIT",
+      "modelName": "u2net",
+      "modelVersion": "bootstrap-cache",
+      "modelWeightSourceUrl": "https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx",
+      "modelWeightLicense": "Apache-2.0; reviewed from rembg model listing and upstream xuebinqin/U-2-Net Apache-2.0 source repo for Tower local production use",
+      "modelWeightSha256": "sha256:8d10d2f3bb75ae3b6d527c77944fc5e7dcd94b29809d47a739a7a728a912b491",
+      "cachedModelPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/models/u2net.onnx",
+      "provenanceNote": "Downloaded by rembg 2.0.75 from the rembg v0.0.0 GitHub release into the pinned local cache. Upstream U-2-Net repository is Apache-2.0; cached file hash is locked before production use.",
+      "supports": [
+        {
+          "subjectType": "character"
+        },
+        {
+          "subjectType": "hair-beard-character"
+        },
+        {
+          "subjectType": "prop"
+        },
+        {
+          "subjectType": "ui-object"
+        },
+        {
+          "subjectType": "foreground-layer"
+        }
+      ]
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "fresh-gemini-otis-winter-layered-working-canary-v002",
+      "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01__v002.png",
+      "subjectType": "hair-beard-character",
+      "topologyType": "hair-beard-soft-body-held-props",
+      "fixtureSet": "fresh-natural-canary",
+      "contract": {
+        "required": true,
+        "subjectType": "hair-beard-character",
+        "topologyType": "hair-beard-soft-body-held-props",
+        "expectedProps": [
+          "badge",
+          "keys",
+          "held prop"
+        ],
+        "backdropContract": "premium-simple-backdrop-v1",
+        "backdropRequirements": [
+          "Use a premium simple backdrop with high subject/background separation.",
+          "Use no patterned walls.",
+          "Use no furniture or objects overlapping the body, hair, hands, feet, or held props.",
+          "Avoid same-color collisions between clothing, props, and background.",
+          "Use no cast or contact shadows touching or merging with the subject.",
+          "Use full-body framing with generous padding around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props."
+        ],
+        "shadowPolicy": "app-owned",
+        "thresholds": {
+          "minimumLongEdge": 4096,
+          "minimumShortEdge": 2300,
+          "borderSamplePixels": 8,
+          "borderAlphaThreshold": 32,
+          "minimumPadding": {
+            "top": 0.05,
+            "right": 0.06,
+            "bottom": 0.04,
+            "left": 0.06
+          },
+          "maxTinyIslands": 5,
+          "maxTinyIslandCanvasRatio": 0.0001,
+          "maxTotalIslandCanvasRatio": 0.0003,
+          "maxHoleSubjectRatio": 0.0015,
+          "maxTotalHoleSubjectRatio": 0.005,
+          "haloMeanAlphaMax": 4,
+          "haloP99AlphaMax": 18,
+          "maxBackdropRemnantEdgeRatio": 0.005,
+          "minimumForegroundMeanConfidence": 0.92,
+          "minimumForegroundP5Confidence": 0.8,
+          "maximumBackgroundP95Confidence": 0.2
+        },
+        "review": {
+          "showOriginalSource": true,
+          "showCheckerboardCutout": true,
+          "showDarkPreview": true,
+          "showLightPreview": true,
+          "showTowerShadowPreview": true,
+          "badges": [
+            "cutout",
+            "alpha",
+            "dimensions",
+            "crop",
+            "halo",
+            "props"
+          ]
+        }
+      }
+    },
+    {
+      "id": "old-real-gemini-otis-winter-layered-working-regression",
+      "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-production-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01.png",
+      "subjectType": "hair-beard-character",
+      "topologyType": "hair-beard-soft-body-held-props",
+      "fixtureSet": "old-gemini-regression",
+      "contract": {
+        "required": true,
+        "subjectType": "hair-beard-character",
+        "topologyType": "hair-beard-soft-body-held-props",
+        "expectedProps": [
+          "badge",
+          "keys",
+          "held prop"
+        ],
+        "backdropContract": "premium-simple-backdrop-v1",
+        "backdropRequirements": [
+          "Use a premium simple backdrop with high subject/background separation.",
+          "Use no patterned walls.",
+          "Use no furniture or objects overlapping the body, hair, hands, feet, or held props.",
+          "Avoid same-color collisions between clothing, props, and background.",
+          "Use no cast or contact shadows touching or merging with the subject.",
+          "Use full-body framing with generous padding around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props."
+        ],
+        "shadowPolicy": "app-owned",
+        "thresholds": {
+          "minimumLongEdge": 4096,
+          "minimumShortEdge": 2300,
+          "borderSamplePixels": 8,
+          "borderAlphaThreshold": 32,
+          "minimumPadding": {
+            "top": 0.05,
+            "right": 0.06,
+            "bottom": 0.04,
+            "left": 0.06
+          },
+          "maxTinyIslands": 5,
+          "maxTinyIslandCanvasRatio": 0.0001,
+          "maxTotalIslandCanvasRatio": 0.0003,
+          "maxHoleSubjectRatio": 0.0015,
+          "maxTotalHoleSubjectRatio": 0.005,
+          "haloMeanAlphaMax": 4,
+          "haloP99AlphaMax": 18,
+          "maxBackdropRemnantEdgeRatio": 0.005,
+          "minimumForegroundMeanConfidence": 0.92,
+          "minimumForegroundP5Confidence": 0.8,
+          "maximumBackgroundP95Confidence": 0.2
+        },
+        "review": {
+          "showOriginalSource": true,
+          "showCheckerboardCutout": true,
+          "showDarkPreview": true,
+          "showLightPreview": true,
+          "showTowerShadowPreview": true,
+          "badges": [
+            "cutout",
+            "alpha",
+            "dimensions",
+            "crop",
+            "halo",
+            "props"
+          ]
+        }
+      }
+    }
+  ]
+}

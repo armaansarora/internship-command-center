@@ -15,15 +15,17 @@ describe("CharacterSprite Season 1 fallback", () => {
         />,
       );
 
+      expect(html).toContain(`data-character-outfit="regular"`);
+      expect(html).not.toContain("undefined");
+
       if (character.id === "otis") {
-        expect(html).toContain("idle%403x.webp");
         expect(html).not.toContain(`data-visual-asset-fallback="${character.id}"`);
+        expect(html).toContain("Otis Vale, Lobby Concierge");
+        expect(html).toContain("regular%2Fidle%403x.webp");
       } else {
         expect(html).toContain(`data-visual-asset-fallback="${character.id}"`);
         expect(html).toContain(character.shortLabel);
       }
-      expect(html).toContain(`data-character-outfit="regular"`);
-      expect(html).not.toContain("undefined");
     }
   });
 

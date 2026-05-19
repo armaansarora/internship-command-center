@@ -9,39 +9,30 @@ describe("creative studio operator", () => {
     const orientation = buildCreativeStudioOrientation();
 
     expect(orientation.openingQuestion).toBe("What are we adding to The Tower today?");
-    expect(orientation.soFar).toContain("Otis Vale character pilot promoted");
+    expect(orientation.soFar).toContain("0/252 approved production sprites");
     expect(orientation.recommendation).toContain("Otis Vale");
-    expect(orientation.remaining).toContain("11 Season 1 character identities");
+    expect(orientation.remaining).toContain("Season 1 outfit, pose, and expression packs");
     expect(orientation.availableAssetTypes).toContain("environment");
     expect(orientation.availableAssetTypes).toContain("animation");
   });
 
   it("can derive orientation from live art status instead of only static defaults", () => {
     const state = createDefaultCreativeStudioState("2026-05-14T00:00:00.000Z", {
-      approvedProductionSprites: 21,
+      approvedProductionSprites: 0,
       expectedProductionSprites: 252,
-      fullyPromotedCharacters: ["Otis Vale (otis)"],
+      fullyPromotedCharacters: [],
       nextRecommendedCharacter: {
-        characterId: "ceo",
-        displayName: "Mara Voss",
-        reason: "Mara Voss was already chosen as the next pilot after Otis.",
+        characterId: "otis",
+        displayName: "Otis Vale",
+        reason: "Fresh-start reset is active, so Otis should be generated from scratch.",
       },
-      runLedgers: [
-        {
-          characterId: "otis",
-          runId: "2026-05-14-otis-pilot",
-          warningCounts: {
-            "source-long-edge-below-4096": 21,
-            "source-upscaled-to-master": 21,
-          },
-        },
-      ],
+      runLedgers: [],
     });
 
-    expect(state.done).toContain("Otis Vale character pilot promoted");
-    expect(state.done).toContain("21/252 approved production sprites");
-    expect(state.active).toContain("Mara Voss recommended next by live art status");
-    expect(state.active).toContain("Mara Voss production packet is the next strict engine action");
-    expect(state.knownWarnings).toContain("source-upscaled-to-master x21");
+    expect(state.done).toContain("0/252 approved production sprites");
+    expect(state.done).toContain("Promoted characters: none");
+    expect(state.active).toContain("Otis Vale recommended next by live art status");
+    expect(state.active).toContain("Otis Vale production packet is the next strict engine action");
+    expect(state.knownWarnings).toEqual([]);
   });
 });

@@ -154,7 +154,7 @@ describe("Season 1 character production contract", () => {
     expect(promptPack).toContain("{outfitVariantDefinition}");
     expect(handoff).toContain("No Quality Compromise Gate");
     expect(handoff).toContain("4K transparent master");
-    expect(handoff).toContain("prototype-reference");
+    expect(handoff.toLowerCase()).toContain("fresh-start reset");
     expect(handoff).toContain("pose@2x.webp");
     expect(handoff).toContain("pose@3x.webp");
     expect(handoff).toContain("dark-background preview");
@@ -165,7 +165,7 @@ describe("Season 1 character production contract", () => {
     expect(pipeline).toContain("CharacterStage");
   });
 
-  it("reports only unapproved character sprites as missing after Otis promotion", () => {
+  it("reports only unpromoted Season 1 character sprites as missing after Otis promotion", () => {
     const missing = getMissingApprovedCharacterSprites(VISUAL_ASSETS);
 
     expect(missing).toHaveLength(231);

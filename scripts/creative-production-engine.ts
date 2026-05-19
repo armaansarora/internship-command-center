@@ -14,6 +14,7 @@ import {
   createCreativeParallelWavePlan,
   createHousekeepingEntry,
   createImprovementEntry,
+  summarizeCreativeImprovementLoop,
   assertCreativeParallelCount,
   assertCreativeParallelLaneBrief,
   validateCreativeParallelLaneResult,
@@ -24,6 +25,7 @@ import {
   renderCoordinatorReviewBoardHtml,
   renderCreativeParallelDispatcherPrompt,
   renderCreativeParallelLanePrompt,
+  renderCharacterInitialConceptStyleQualityContract,
   renderCreativeProductionNextAction,
   renderCreativeProductionPrompt,
   saveCreativeStudioState,
@@ -37,6 +39,8 @@ import {
   type CreativeCoordinatorLaneInput,
   type CreativeLanePreflight,
   type CreativeLaneResultJson,
+  type CreativeProductionPacket,
+  type ImprovementEntry,
 } from "../src/lib/creative-production";
 
 const KNOWN_FLAGS = new Set([
@@ -53,6 +57,7 @@ const KNOWN_FLAGS = new Set([
   "--lane-brief",
   "--parallel-plan",
   "--no-parallel",
+  "--budget-cents",
 ]);
 const FLAG_VALUES = new Set([
   "--state-root",
@@ -67,6 +72,7 @@ const FLAG_VALUES = new Set([
   "--waves",
   "--lane-brief",
   "--parallel-plan",
+  "--budget-cents",
 ]);
 
 function validateKnownFlags(argv: string[]): void {
@@ -118,11 +124,11 @@ function assertAssetType(value: string): CreativeAssetType {
   }
 }
 
-function assertMode(value: string | undefined): "coordinator" | "lane" | "validate-lane" | "coordinate" {
+function assertMode(value: string | undefined): "coordinator" | "lane" | "validate-lane" | "coordinate" | "improve" {
   const mode = value ?? "coordinator";
 
-  if (mode !== "coordinator" && mode !== "lane" && mode !== "validate-lane" && mode !== "coordinate") {
-    throw new Error("--mode must be coordinator, lane, validate-lane, or coordinate.");
+  if (mode !== "coordinator" && mode !== "lane" && mode !== "validate-lane" && mode !== "coordinate" && mode !== "improve") {
+    throw new Error("--mode must be coordinator, lane, validate-lane, coordinate, or improve.");
   }
 
   return mode;
@@ -138,6 +144,18 @@ function assertIntegerFlag(
 
   if (!/^\d+$/.test(value)) {
     throw new Error(`${flag} must be an integer.`);
+  }
+
+  return Number(value);
+}
+
+function assertBudgetCentsFlag(argv: string[]): number | undefined {
+  const value = flagValue(argv, "--budget-cents");
+
+  if (value === undefined) return undefined;
+
+  if (!/^\d+$/.test(value) || Number(value) <= 0) {
+    throw new Error("--budget-cents must be a positive integer.");
   }
 
   return Number(value);
@@ -281,6 +299,93 @@ async function writeParallelWavePlanFiles(input: {
   };
 }
 
+function shouldCreateInitialConceptGenerationDirective(packet: CreativeProductionPacket): boolean {
+  return (
+    packet.assetType === "character" &&
+    packet.nextAction === "generate-concept-options" &&
+    packet.intake?.initialApprovalStatus === "generation-approved" &&
+    packet.intake.apiBudgetCents !== undefined
+  );
+}
+
+function createInitialConceptGenerationDirective(input: {
+  packet: CreativeProductionPacket;
+  directiveMarkdownPath: string;
+}): Record<string, unknown> {
+  const characterSlug = slugifyRunId(input.packet.name);
+
+  return {
+    directivePath: toPortableLedgerPath(input.directiveMarkdownPath),
+    generateFirst: [
+      {
+        slot: `${characterSlug}-design`,
+        sourceFilename: `${characterSlug}__design__source-v001.png`,
+        targetDirectory: `.artlab/runs/${characterSlug}/${input.packet.runId}/incoming`,
+        reason: "Generate five prompt-only initial concept lanes before identity approval.",
+      },
+    ],
+  };
+}
+
+function renderInitialConceptGenerationDirective(packet: CreativeProductionPacket): string {
+  return `# ${packet.name} Initial Concept Generation Directive
+
+Run: ${packet.runId}
+Asset type: ${packet.assetType}
+Budget cap: ${((packet.intake?.apiBudgetCents ?? 0) / 100).toFixed(2)} USD
+
+## Brief
+
+${packet.brief}
+
+## Generation Contract
+
+- Generate exactly five prompt-only initial concept options by expanding this one base slot across five API lanes.
+- Do not attach reference images; this is the identity-discovery phase.
+- Keep all outputs in .artlab inbox/staging folders.
+- Do not write to public/art and do not update production manifests.
+- Final app promotion remains locked behind Armaan saying exactly: ${packet.promotionPhrase}
+
+## Required Outputs
+
+${packet.requiredOutputs.map((output) => `- ${output}`).join("\n")}
+
+## Acceptance Checks
+
+${packet.acceptanceChecks.map((check) => `- ${check}`).join("\n")}
+
+## Hard Style Notes
+
+- No text, logo, watermark, UI, frame, label, duplicate character, or contact sheet.
+${renderCharacterInitialConceptStyleQualityContract()}
+${renderInitialConceptCharacterCanon(packet)}
+`;
+}
+
+function renderInitialConceptCharacterCanon(packet: CreativeProductionPacket): string {
+  if (packet.assetType !== "character") return "";
+
+  if (packet.name.toLowerCase() === "otis") {
+    return `
+## Otis Canon Notes
+
+- Otis Vale is the warm front desk steward of a luxury internship command-center skyscraper.
+- Visual DNA: tall soft silhouette, calm vertical posture, burgundy livery or vest-cardigan hybrid, brass keycard ring, guest ledger or bell, warm face, grounded hands near the desk.
+- Palette and world fit: burgundy, brass, ivory, and deep navy; distinct from executive agents and not CEO gold.
+- Required spread: vary age impression, uniform cut, posture, warmth, and silhouette across the five lanes.
+- Forbidden traits: no generic hotel stock-photo smile, no mascot proportions, no bowtie caricature, no magical gatekeeper costume, no superhero styling.
+- No readable text on props; ledger pages, books, and labels must be blank or abstract.
+`;
+  }
+
+  return `
+## Character Canon Notes
+
+- Use the approved character canon from docs/CHARACTER-BIBLE.md and docs/ART-BIBLE.md.
+- No readable text on props; books, documents, labels, screens, and badges must be blank or abstract unless a later production spec explicitly approves text.
+`;
+}
+
 async function runLaneMode(input: {
   stateRoot: string;
   laneBriefPath: string;
@@ -352,7 +457,7 @@ async function runValidateLaneMode(input: {
     created: [],
     kept: [resultPath, ...(hasResultJson ? [resultJsonPath] : []), ...(hasPreflight ? [preflightPath] : [])],
     housekeepingNotes: "Lane result validation confirmed the lane has merge-ready notes and required QA evidence.",
-    improvementFinding: "Lane validation prevents 15x output from overwhelming the coordinator with incomplete placeholders.",
+    improvementFinding: "Lane validation prevents five-lane output from overwhelming the coordinator with incomplete placeholders.",
     improvementAction: "Keep validating lane result bundles before coordinator review.",
   });
 
@@ -400,7 +505,7 @@ async function runCoordinateMode(input: {
     created: [reviewPath, reportPath, boardPath, gatePath],
     kept: [reviewPath, reportPath, boardPath, gatePath],
     housekeepingNotes: "Coordinator gathered lane outputs into review artifacts without touching public/art.",
-    improvementFinding: "Coordinator mode prevents 15x output from becoming unranked folder noise.",
+    improvementFinding: "Coordinator mode prevents five-lane output from becoming unranked folder noise.",
     improvementAction: "Use coordinator artifacts as the merge gate before asking for final approval.",
   });
 
@@ -468,6 +573,44 @@ async function readOptionalJson<T>(path: string): Promise<T | undefined> {
 
 async function pathExists(path: string): Promise<boolean> {
   return access(path).then(() => true, () => false);
+}
+
+async function readImprovementLedger(path: string): Promise<ImprovementEntry[]> {
+  const raw = await readFile(path, "utf8").catch(() => "");
+
+  return raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as ImprovementEntry)
+    .filter((entry) => entry.gate === "continuous-improvement");
+}
+
+async function runImproveMode(input: {
+  stateRoot: string;
+}): Promise<void> {
+  const ledgerPath = join(input.stateRoot, "ledgers", "improvements.jsonl");
+  const entries = await readImprovementLedger(ledgerPath);
+  const summary = summarizeCreativeImprovementLoop(entries);
+  const reportPath = join(input.stateRoot, "continuous-improvement-report.json");
+
+  await writeFile(reportPath, `${JSON.stringify({
+    schemaVersion: "tower-creative-continuous-improvement-report-v1",
+    generatedAt: new Date().toISOString(),
+    ledgerPath: toPortableLedgerPath(ledgerPath),
+    ...summary,
+  }, null, 2)}\n`);
+
+  console.log(`Continuous improvement report: ${reportPath}`);
+  console.log(`Maturity stage: ${summary.maturityStage}`);
+  console.log(`Upgrade required: ${summary.upgradeRequired ? "yes" : "no"}`);
+  console.log(`Runs observed: ${summary.runsObserved}; entries observed: ${summary.entriesObserved}`);
+  if (summary.nextActions.length) {
+    console.log("Next actions:");
+    for (const action of summary.nextActions) {
+      console.log(`- ${action}`);
+    }
+  }
 }
 
 function createLaneStatus(laneBrief: CreativeParallelLaneBrief): Record<string, unknown> {
@@ -580,6 +723,15 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (mode === "improve") {
+    if (laneBriefPath || parallelPlanPath) {
+      throw new Error("--mode improve cannot be combined with --lane-brief or --parallel-plan.");
+    }
+
+    await runImproveMode({ stateRoot });
+    return;
+  }
+
   if (laneBriefPath) {
     throw new Error("--lane-brief can only be used with --mode lane or --mode validate-lane.");
   }
@@ -595,6 +747,7 @@ async function main(): Promise<void> {
   const request = flagValue(argv, "--request");
   const parallelAgentsValue = assertIntegerFlag(argv, "--parallel-agents") ?? assertIntegerFlag(argv, "--agents");
   const wavesValue = assertIntegerFlag(argv, "--waves");
+  const budgetCentsValue = assertBudgetCentsFlag(argv);
   const noParallel = argv.includes("--no-parallel");
   const packetRequested = Boolean(assetTypeValue || assetName || brief || explicitRunId || request);
   const wantsParallelWave = !noParallel && packetRequested;
@@ -628,7 +781,9 @@ async function main(): Promise<void> {
   });
 
   if (packetRequested || parallelAgentsValue !== undefined || wavesValue !== undefined) {
-    const inferred = request ? inferCreativeProductionRequest(request) : undefined;
+    const inferred = request
+      ? inferCreativeProductionRequest(request, new Date(), { apiBudgetCents: budgetCentsValue })
+      : undefined;
 
     if (!inferred && (!assetTypeValue || !assetName || !brief)) {
       throw new Error("--asset-type, --name, and --brief are required together unless --request is provided.");
@@ -660,6 +815,7 @@ async function main(): Promise<void> {
             confidence: inferred.confidence,
             matchedSignals: inferred.matchedSignals,
             initialApprovalStatus: inferred.initialApprovalStatus,
+            ...(inferred.apiBudgetCents !== undefined ? { apiBudgetCents: inferred.apiBudgetCents } : {}),
           },
         }
       : packetInput);
@@ -670,18 +826,44 @@ async function main(): Promise<void> {
     const packetPath = join(packetRoot, "creative-brief.json");
     const promptPath = join(packetRoot, "prompt.md");
     const nextActionPath = join(packetRoot, "next-action.md");
+    const generationDirectivePath = join(packetRoot, "next-image-generation-step.json");
+    const generationDirectiveMarkdownPath = join(packetRoot, "image-generation-directive.md");
+    let generationDirectiveOutputs: { jsonPath: string; markdownPath: string } | undefined;
 
     await mkdir(packetRoot, { recursive: true });
     await writeFile(packetPath, `${JSON.stringify(packet, null, 2)}\n`);
     await writeFile(promptPath, renderCreativeProductionPrompt(packet));
     await writeFile(nextActionPath, renderCreativeProductionNextAction(packet));
+
+    if (shouldCreateInitialConceptGenerationDirective(packet)) {
+      await writeFile(generationDirectiveMarkdownPath, renderInitialConceptGenerationDirective(packet));
+      await writeFile(generationDirectivePath, `${JSON.stringify(createInitialConceptGenerationDirective({
+        packet,
+        directiveMarkdownPath: generationDirectiveMarkdownPath,
+      }), null, 2)}\n`);
+      generationDirectiveOutputs = {
+        jsonPath: generationDirectivePath,
+        markdownPath: generationDirectiveMarkdownPath,
+      };
+    }
+
+    const packetCreatedPaths = [
+      packetPath,
+      promptPath,
+      nextActionPath,
+      ...(generationDirectiveOutputs ? [
+        generationDirectiveOutputs.jsonPath,
+        generationDirectiveOutputs.markdownPath,
+      ] : []),
+    ];
+
     await recordAndValidatePhaseGates({
       stateRoot,
       ledgerRoot: join(packetRoot, "ledgers"),
       runId,
       phase: "production-packet",
-      created: [packetPath, promptPath, nextActionPath],
-      kept: [packetPath, promptPath, nextActionPath],
+      created: packetCreatedPaths,
+      kept: packetCreatedPaths,
       housekeepingNotes: "Production packet files are grouped under the run folder; nothing was written to public/art.",
       improvementFinding: inferred
         ? "Adaptive request mode routed natural language into a strict production packet."

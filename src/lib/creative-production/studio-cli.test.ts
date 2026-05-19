@@ -11,6 +11,10 @@ import {
 
 const tsx = join(process.cwd(), "node_modules/.bin/tsx");
 
+function countOccurrences(text: string, pattern: RegExp): number {
+  return text.match(pattern)?.length ?? 0;
+}
+
 describe("art:studio CLI", () => {
   it("prints the guided creative production opening and writes state", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-studio-"));
@@ -23,15 +27,57 @@ describe("art:studio CLI", () => {
 
     expect(output).toContain("What are we adding to The Tower today?");
     expect(output).toContain("So far we have done");
-    expect(output).toContain("I suggest we do Otis Vale");
+    expect(output).toContain("I suggest we do Mara Voss");
+    expect(output).toContain("21/252 approved production sprites");
+    expect(output).toContain("Promoted characters: Otis Vale (otis)");
     expect(output).toContain("Still remaining");
     expect(output).toContain("Known warnings");
-    expect(output).toContain("character, environment, prop, ui-texture, animation, scene, icon-system, marketing-hero");
+    expect(output).toContain("character, environment, prop, ui-texture, animation, scene, icon-system, marketing-hero, shader");
 
     const state = JSON.parse(readFileSync(join(root, "state.json"), "utf8")) as { schemaVersion: string };
     expect(state.schemaVersion).toBe("tower-creative-studio-state-v1");
     expect(existsSync(join(root, "ledgers", "housekeeping.jsonl"))).toBe(true);
     expect(existsSync(join(root, "ledgers", "improvements.jsonl"))).toBe(true);
+  });
+
+  it("summarizes continuous-improvement ledgers into an upgrade report", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-improve-"));
+    const ledgerRoot = join(root, "ledgers");
+
+    mkdirSync(ledgerRoot, { recursive: true });
+    for (let index = 1; index <= 5; index += 1) {
+      writeFileSync(join(ledgerRoot, "improvements.jsonl"), `${JSON.stringify({
+        gate: "continuous-improvement",
+        recordedAt: "2026-05-15T00:00:00.000Z",
+        runId: `run-${index}`,
+        phase: index % 2 === 0 ? "qa" : "generation",
+        category: index === 4 ? "quality-failure" : "manual-step",
+        severity: index === 4 ? "high" : "medium",
+        finding: "Repeated friction needs a pipeline patch.",
+        action: "Turn the repeated friction into a command and test.",
+      })}\n`, { flag: "a" });
+    }
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--mode",
+      "improve",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    const reportPath = join(root, "continuous-improvement-report.json");
+    const report = JSON.parse(readFileSync(reportPath, "utf8")) as {
+      maturityStage: string;
+      upgradeRequired: boolean;
+      nextActions: string[];
+    };
+
+    expect(output).toContain("Continuous improvement report");
+    expect(output).toContain("upgrade-required");
+    expect(report.maturityStage).toBe("upgrade-required");
+    expect(report.upgradeRequired).toBe(true);
+    expect(report.nextActions.join(" ")).toContain("before continuing production");
   });
 
   it("rejects state roots outside the repo or art lab unless explicitly under temp for tests", () => {
@@ -62,7 +108,7 @@ describe("art:studio CLI", () => {
     ], { cwd: process.cwd(), encoding: "utf8" });
 
     expect(output).toContain("Created Creative Production Engine packet");
-    expect(output).toContain("Created Creative Production Engine parallel wave plan: 15 lanes");
+    expect(output).toContain("Created Creative Production Engine parallel wave plan: 5 lanes");
     expect(output).toContain("War Room Background");
 
     const packetPath = join(root, "environments", "war-room-bg-v1", "creative-brief.json");
@@ -98,7 +144,7 @@ describe("art:studio CLI", () => {
 
     expect(output).toContain("Routed request to environment");
     expect(output).toContain("Application War Room Background Screen");
-    expect(output).toContain("Created Creative Production Engine parallel wave plan: 15 lanes");
+    expect(output).toContain("Created Creative Production Engine parallel wave plan: 5 lanes");
 
     const runRoot = join(root, "environments", `${today}-application-war-room-background-screen`);
     const packet = JSON.parse(readFileSync(join(runRoot, "creative-brief.json"), "utf8")) as {
@@ -169,6 +215,70 @@ describe("art:studio CLI", () => {
     expect(readFileSync(join(runRoot, "next-action.md"), "utf8")).toContain("Generate production sources");
   });
 
+  it("dispatches initial concept generation when the request is explicit and a budget cap is configured", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-studio-request-budgeted-initial-"));
+
+    execFileSync(tsx, [
+      "scripts/creative-production-engine.ts",
+      "--state-root",
+      root,
+      "--request",
+      "Generate five prompt-only initial Otis designs from scratch.",
+      "--run-id",
+      "budgeted-otis-initial",
+      "--budget-cents",
+      "1000",
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    const runRoot = join(root, "characters", "budgeted-otis-initial");
+    const packet = JSON.parse(readFileSync(join(runRoot, "creative-brief.json"), "utf8")) as {
+      nextAction: string;
+      promotionPhrase: string;
+      intake: { initialApprovalStatus: string; apiBudgetCents?: number };
+    };
+    const plan = JSON.parse(readFileSync(join(runRoot, "parallel", "parallel-plan.json"), "utf8")) as {
+      status: string;
+      statusReason: string;
+    };
+    const directive = JSON.parse(readFileSync(join(runRoot, "next-image-generation-step.json"), "utf8")) as {
+      directivePath: string;
+      generateFirst: Array<{ slot: string }>;
+    };
+
+    expect(packet.nextAction).toBe("generate-concept-options");
+    expect(packet.promotionPhrase).toBe("approved for app");
+    expect(packet.intake.initialApprovalStatus).toBe("generation-approved");
+    expect(packet.intake.apiBudgetCents).toBe(1000);
+    expect(plan.status).toBe("ready-for-dispatch");
+    expect(plan.statusReason).toContain("budget cap");
+    expect(directive.generateFirst).toEqual([{ slot: "otis-design", sourceFilename: "otis__design__source-v001.png", targetDirectory: ".artlab/runs/otis/budgeted-otis-initial/incoming", reason: "Generate five prompt-only initial concept lanes before identity approval." }]);
+    const directiveMarkdown = readFileSync(directive.directivePath, "utf8");
+
+    expect(directiveMarkdown).toContain("Generate five prompt-only initial Otis designs from scratch.");
+    expect(directiveMarkdown).toContain("warm front desk steward");
+    expect(directiveMarkdown).toContain("No readable text on props");
+    expect(directiveMarkdown).toContain("premium web-game dialogue sprite");
+    expect(directiveMarkdown).toContain("crisp non-photoreal character render");
+    expect(directiveMarkdown).toContain("high-contrast lobby lighting");
+    expect(directiveMarkdown).toContain("rich burgundy/brass/deep navy palette");
+    expect(directiveMarkdown).toContain("detailed fabric seams/buttons/hair/beard");
+    expect(directiveMarkdown).toContain("sharp readable silhouette");
+    expect(directiveMarkdown).toContain("polished modern game UI character art");
+    expect(directiveMarkdown).toContain("Shared lane quality floor");
+    expect(directiveMarkdown).toContain("Lane 05-level material detail");
+    expect(directiveMarkdown).toContain("Lane variation is only for identity direction");
+    expect(directiveMarkdown).toContain("Lane variation must not change rendering quality, amount of detail, sharpness, contrast, or polish");
+    expect(directiveMarkdown).toContain("no storybook illustration");
+    expect(directiveMarkdown).toContain("no watercolor");
+    expect(directiveMarkdown).toContain("no muted pastel palette");
+    expect(directiveMarkdown).toContain("no beige editorial board");
+    expect(directiveMarkdown).toContain("no flat vector simplicity");
+    expect(directiveMarkdown).toContain("no low-detail soft linework");
+    expect(directiveMarkdown).toContain("approved for app");
+    expect(countOccurrences(directiveMarkdown, /clean raster shapes/gi)).toBeLessThanOrEqual(1);
+    expect(countOccurrences(directiveMarkdown, /subtle controlled depth/gi)).toBeLessThanOrEqual(1);
+  });
+
   it("creates a default parallel wave plan with isolated lane briefs and lane mode setup", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-studio-parallel-"));
 
@@ -182,7 +292,7 @@ describe("art:studio CLI", () => {
       "otis-parallel-wave-v1",
     ], { cwd: process.cwd(), encoding: "utf8" });
 
-    expect(output).toContain("Created Creative Production Engine parallel wave plan: 15 lanes");
+    expect(output).toContain("Created Creative Production Engine parallel wave plan: 5 lanes");
 
     const runRoot = join(root, "characters", "otis-parallel-wave-v1");
     const planPath = join(runRoot, "parallel", "parallel-plan.json");
@@ -200,16 +310,16 @@ describe("art:studio CLI", () => {
 
     expect(plan.status).toBe("ready-for-dispatch");
     expect(plan.statusReason).toContain("already approved");
-    expect(plan.totalLanes).toBe(15);
+    expect(plan.totalLanes).toBe(5);
     expect(plan.defaultAgentProfile).toEqual({
       model: "gpt-5.5",
       executionMode: "fast",
       reasoningEffort: "xhigh",
       label: "GPT-5.5 fast mode, extra-high reasoning",
     });
-    expect(new Set(plan.lanes.map((lane) => lane.outputRoot)).size).toBe(15);
+    expect(new Set(plan.lanes.map((lane) => lane.outputRoot)).size).toBe(5);
     expect(plan.lanes.every((lane) => lane.recommendedAgentProfile.model === "gpt-5.5")).toBe(true);
-    expect(readFileSync(dispatcherPromptPath, "utf8")).toContain("5 agents x 3 waves = 15 lanes");
+    expect(readFileSync(dispatcherPromptPath, "utf8")).toContain("5 agents x 1 wave = 5 lanes");
     expect(readFileSync(dispatcherPromptPath, "utf8")).toContain("model: \"gpt-5.5\"");
     expect(readFileSync(firstLanePromptPath, "utf8")).toContain("You may write only inside");
     expect(readFileSync(firstLanePromptPath, "utf8")).toContain("reasoning_effort: \"xhigh\"");
@@ -380,7 +490,7 @@ describe("art:studio CLI", () => {
     expect(output).toContain("Image outputs checked: 0");
   }, 20000);
 
-  it("coordinates a complete 15-lane run into review artifacts", () => {
+  it("coordinates a complete five-lane run into review artifacts", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-studio-coordinate-"));
 
     execFileSync(tsx, [

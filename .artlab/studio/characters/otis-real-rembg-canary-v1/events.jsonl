@@ -1,0 +1,6 @@
+{"schemaVersion":"tower-creative-event-v1","event":"legacy-otis-imported","runId":"otis-real-rembg-canary-v1","phase":"canary-passed","recordedAt":"2026-05-19T06:18:35.344Z"}
+{"schemaVersion":"tower-creative-event-v1","event":"legacy-otis-imported","runId":"otis-real-rembg-canary-v1","phase":"strict-qa","recordedAt":"2026-05-19T06:21:54.983Z"}
+{"schemaVersion":"tower-creative-event-v1","event":"legacy-otis-imported","runId":"otis-real-rembg-canary-v1","phase":"strict-qa","recordedAt":"2026-05-19T06:27:11.573Z"}
+{"schemaVersion":"tower-creative-event-v1","event":"legacy-otis-imported","runId":"otis-real-rembg-canary-v1","phase":"strict-qa","recordedAt":"2026-05-19T06:27:58.690Z"}
+{"schemaVersion":"tower-creative-event-v1","event":"final-board-ready","runId":"otis-real-rembg-canary-v1","phase":"final-board-ready","recordedAt":"2026-05-19T06:27:58.698Z"}
+{"schemaVersion":"tower-creative-event-v1","event":"run-closed","runId":"otis-real-rembg-canary-v1","phase":"closed","recordedAt":"2026-05-19T16:30:31.017Z"}

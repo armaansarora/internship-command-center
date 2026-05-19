@@ -1,0 +1,205 @@
+{
+  "directivePath": ".artlab/studio/characters/otis-production-v1/production-pack-directive.md",
+  "referenceImages": [
+    {
+      "path": ".artlab/characters/otis/model/otis_winner-ref_v001.png",
+      "mimeType": "image/png",
+      "role": "identity-reference"
+    }
+  ],
+  "sourceRequirements": {
+    "minimumLongEdge": 4096,
+    "minimumShortEdge": 2300,
+    "preferredFormat": "png source on #00ff00 chroma matte, then transparent PNG after approved alpha extraction",
+    "targetWidth": 2400,
+    "targetHeight": 4096
+  },
+  "generateFirst": [
+    {
+      "slot": "otis-turnaround",
+      "sourceFilename": "otis__turnaround__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/model",
+      "reason": "Production turnaround sheet for locked Otis identity."
+    },
+    {
+      "slot": "otis-expression-sheet",
+      "sourceFilename": "otis__expression-sheet__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/expressions",
+      "reason": "Production expression sheet for locked Otis identity."
+    },
+    {
+      "slot": "otis-outfit-variants",
+      "sourceFilename": "otis__outfit-variants__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/outfits",
+      "reason": "Production outfit variants sheet for regular, summer-light, and winter-layered Otis."
+    },
+    {
+      "slot": "otis-regular-idle",
+      "sourceFilename": "otis__regular__idle__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/regular",
+      "reason": "Regular outfit idle production sprite.",
+      "outfit": "regular",
+      "pose": "idle"
+    },
+    {
+      "slot": "otis-regular-greeting",
+      "sourceFilename": "otis__regular__greeting__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/regular",
+      "reason": "Regular outfit greeting production sprite.",
+      "outfit": "regular",
+      "pose": "greeting"
+    },
+    {
+      "slot": "otis-regular-listening",
+      "sourceFilename": "otis__regular__listening__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/regular",
+      "reason": "Regular outfit listening production sprite.",
+      "outfit": "regular",
+      "pose": "listening"
+    },
+    {
+      "slot": "otis-regular-thinking",
+      "sourceFilename": "otis__regular__thinking__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/regular",
+      "reason": "Regular outfit thinking production sprite.",
+      "outfit": "regular",
+      "pose": "thinking"
+    },
+    {
+      "slot": "otis-regular-talking",
+      "sourceFilename": "otis__regular__talking__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/regular",
+      "reason": "Regular outfit talking production sprite.",
+      "outfit": "regular",
+      "pose": "talking"
+    },
+    {
+      "slot": "otis-regular-alert",
+      "sourceFilename": "otis__regular__alert__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/regular",
+      "reason": "Regular outfit alert production sprite.",
+      "outfit": "regular",
+      "pose": "alert"
+    },
+    {
+      "slot": "otis-regular-working",
+      "sourceFilename": "otis__regular__working__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/regular",
+      "reason": "Regular outfit working production sprite.",
+      "outfit": "regular",
+      "pose": "working"
+    },
+    {
+      "slot": "otis-summer-light-idle",
+      "sourceFilename": "otis__summer-light__idle__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/summer-light",
+      "reason": "Summer-light outfit idle production sprite.",
+      "outfit": "summer-light",
+      "pose": "idle"
+    },
+    {
+      "slot": "otis-summer-light-greeting",
+      "sourceFilename": "otis__summer-light__greeting__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/summer-light",
+      "reason": "Summer-light outfit greeting production sprite.",
+      "outfit": "summer-light",
+      "pose": "greeting"
+    },
+    {
+      "slot": "otis-summer-light-listening",
+      "sourceFilename": "otis__summer-light__listening__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/summer-light",
+      "reason": "Summer-light outfit listening production sprite.",
+      "outfit": "summer-light",
+      "pose": "listening"
+    },
+    {
+      "slot": "otis-summer-light-thinking",
+      "sourceFilename": "otis__summer-light__thinking__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/summer-light",
+      "reason": "Summer-light outfit thinking production sprite.",
+      "outfit": "summer-light",
+      "pose": "thinking"
+    },
+    {
+      "slot": "otis-summer-light-talking",
+      "sourceFilename": "otis__summer-light__talking__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/summer-light",
+      "reason": "Summer-light outfit talking production sprite.",
+      "outfit": "summer-light",
+      "pose": "talking"
+    },
+    {
+      "slot": "otis-summer-light-alert",
+      "sourceFilename": "otis__summer-light__alert__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/summer-light",
+      "reason": "Summer-light outfit alert production sprite.",
+      "outfit": "summer-light",
+      "pose": "alert"
+    },
+    {
+      "slot": "otis-summer-light-working",
+      "sourceFilename": "otis__summer-light__working__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/summer-light",
+      "reason": "Summer-light outfit working production sprite.",
+      "outfit": "summer-light",
+      "pose": "working"
+    },
+    {
+      "slot": "otis-winter-layered-idle",
+      "sourceFilename": "otis__winter-layered__idle__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/winter-layered",
+      "reason": "Winter-layered outfit idle production sprite.",
+      "outfit": "winter-layered",
+      "pose": "idle"
+    },
+    {
+      "slot": "otis-winter-layered-greeting",
+      "sourceFilename": "otis__winter-layered__greeting__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/winter-layered",
+      "reason": "Winter-layered outfit greeting production sprite.",
+      "outfit": "winter-layered",
+      "pose": "greeting"
+    },
+    {
+      "slot": "otis-winter-layered-listening",
+      "sourceFilename": "otis__winter-layered__listening__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/winter-layered",
+      "reason": "Winter-layered outfit listening production sprite.",
+      "outfit": "winter-layered",
+      "pose": "listening"
+    },
+    {
+      "slot": "otis-winter-layered-thinking",
+      "sourceFilename": "otis__winter-layered__thinking__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/winter-layered",
+      "reason": "Winter-layered outfit thinking production sprite.",
+      "outfit": "winter-layered",
+      "pose": "thinking"
+    },
+    {
+      "slot": "otis-winter-layered-talking",
+      "sourceFilename": "otis__winter-layered__talking__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/winter-layered",
+      "reason": "Winter-layered outfit talking production sprite.",
+      "outfit": "winter-layered",
+      "pose": "talking"
+    },
+    {
+      "slot": "otis-winter-layered-alert",
+      "sourceFilename": "otis__winter-layered__alert__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/winter-layered",
+      "reason": "Winter-layered outfit alert production sprite.",
+      "outfit": "winter-layered",
+      "pose": "alert"
+    },
+    {
+      "slot": "otis-winter-layered-working",
+      "sourceFilename": "otis__winter-layered__working__source-v001.png",
+      "targetDirectory": ".artlab/runs/otis/otis-production-v1/incoming/winter-layered",
+      "reason": "Winter-layered outfit working production sprite.",
+      "outfit": "winter-layered",
+      "pose": "working"
+    }
+  ]
+}

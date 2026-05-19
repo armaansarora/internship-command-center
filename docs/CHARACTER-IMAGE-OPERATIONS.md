@@ -1,14 +1,6 @@
 # Character Image Operations
 
-This is the start-here runbook for any Codex session that needs to continue character image work, answer what has been done, or strengthen the pipeline.
-
-For all future Tower visual work, start with the Creative Production Engine:
-
-```bash
-npm run art:studio
-```
-
-Use `npm run art:operate` only when the active asset is a Season 1 character and the engine has reached the character-art operator stage. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
+This is the start-here runbook for any Codex or Claude session that continues Tower character image work.
 
 ## Current State
 
@@ -16,24 +8,36 @@ Use `npm run art:operate` only when the active asset is a Season 1 character and
 - Locked tone: `Professional Scars`.
 - Runtime model: high-resolution pose sprites plus subtle `CharacterStage` motion.
 - Production gate: no character art enters `public/art` or the approved manifest until Armaan says exactly `approved for app`.
-- Otis Vale is the first promoted pilot: run `.artlab/runs/otis/2026-05-14-otis-pilot/run.json`.
-- Otis is usable in the app now, but the run ledger must keep its source warning visible: the pilot sources were prototype-sized and upscaled into 4K masters (`source-long-edge-below-4096`, `source-upscaled-to-master`).
-- Active priority: redo Otis from scratch through `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`, using the same approved design but native high-resolution individual sprite sources.
-- Superseded planning run: `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json`.
-- Next new character after Otis v2: Mara Voss (`ceo`).
+- Otis Vale is the promoted production baseline in `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json`.
+- Do not regenerate, overwrite, delete, or re-promote Otis unless Armaan explicitly asks.
+- Mara Voss (`ceo`) is the next unpromoted Season 1 character after the Otis baseline.
+- Fresh-start rule: new character image work starts from scratch unless a current run-state explicitly names an approved identity reference.
+- The four Lobby backgrounds in `public/lobby/bg-1.jpg` through `public/lobby/bg-4.jpg` are protected and untouched.
 
 ## First Commands
 
-To continue work and materialize the next strict action packet, start with:
+For the guided Creative Production Engine session:
 
 ```bash
-npm run art:operate
+npm run art:produce -- --request "<what Armaan wants to add or continue>"
 ```
 
-To inspect the current state without creating an operator packet, run:
+For read-only status:
 
 ```bash
 npm run art:status
+```
+
+For engine safety before another provider or promotion step:
+
+```bash
+npm run art:health
+```
+
+To answer a durable human-action gate:
+
+```bash
+npm run art:produce -- --answer <run-id> "<plain English answer>"
 ```
 
 For machine-readable handoff:
@@ -42,84 +46,52 @@ For machine-readable handoff:
 npm --silent run art:status -- --json
 ```
 
-To wipe volatile old run binaries while keeping provenance and live app assets, run:
-
-```bash
-npm run art:clean -- <characterId> --run-id <run-id>
-```
-
-Then read only the files needed for the question:
-
-- `CLAUDE.md` for Tower-wide doctrine and commands.
-- `STRUCTURE.md` for file locations.
-- `docs/ART-BIBLE.md` for style rules and prompt references.
-- `docs/CHARACTER-BIBLE.md` for character canon.
-- `docs/CHARACTER-ART-PIPELINE.md` for approval gates.
-- `docs/CHARACTER-ASSET-HANDOFF.md` for current implementation details.
-- `docs/CHARACTER-IMAGE-PROMPTS.md` for generation prompt packets.
-- `.artlab/README.md` for art lab layout rules.
+Use `npm run art:operate` only when the active asset is a Season 1 character and the engine has reached the strict character-art operator stage.
 
 ## If Armaan Says Continue Generating Images
 
-1. Run `npm run art:operate`.
-2. Open the generated `next-action.json`, `next-action.md`, and any prompt packet under `.artlab/operators/<characterId>/<runId>/`.
-3. Follow only the action named in the operator packet.
-4. If the packet says `generate-concept-board`, generate exactly 12 options from the generated concept prompt and wait for the initial design choice.
-5. After the initial design is chosen, let the operator create the run from the approved identity.
-
-For Otis v2, the initial identity is already approved and the replacement run is already planned:
-
-```bash
-npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json
-```
-
-For a new character, use:
-
-```bash
-npm run art:operate -- --character ceo --run-id 2026-05-14-mara-voss-pilot --identity-ref .artlab/characters/ceo/references/identity/<approved-file>.png
-```
-
-6. Use the generated prompt packet under `.artlab/runs/<characterId>/<runId>/prompts/batch-prompt-packet.md`.
-7. Ingest generated sheets and sources into the run. Never put generation output directly in `public/art`.
-8. For production-quality replacement work, prefer native individual sprite sources:
-
-```bash
-npm run art:preflight -- <generated-file.png> --minimum-long-edge 4096 --chroma-key 00ff00
-npm run art:ingest -- <run.json> --source <generated-file.png> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle
-```
-
-Preflight must pass before ingest. Pose sheets are allowed as review aids or only when every split cell independently meets the native source contract. Do not use one low-resolution seven-pose sheet as production source.
-
-9. Run split only for acceptable pose sheets, then master, QA, and review:
-
-```bash
-npm run art:split -- <run.json> --source-asset <pose-sheet-id>
-npm run art:master -- <run.json>
-npm run art:qa -- <run.json>
-npm run art:review -- <run.json>
-```
-
-10. Show Armaan the final upload-ready board only after QA passes.
-11. Promote only after the exact phrase:
+1. Run `npm run art:studio`.
+2. Confirm the current art state in plain language: promoted Otis is protected, Lobby backgrounds remain, and any new requested character starts from scratch unless a current run-state explicitly names an approved identity reference.
+3. Ask what is being added or changed today if the request is not already clear.
+4. For a new or explicitly requested character, create exactly five prompt-only initial concepts with five concurrent lanes. Do not reuse an old reference unless the current run-state says it is the approved identity reference.
+5. Show the five initial designs and wait for Armaan to pick one direction.
+6. After the initial design is approved, generate the production pack: turnaround, outfit variants, expressions, poses, masters, derivatives, QA, and final board.
+7. Show only one final upload-ready board for approval.
+8. Promote only after the exact phrase:
 
 ```bash
 npm run art:promote -- <run.json> --approval-phrase "approved for app"
 ```
 
-12. Run browser QA for `/lobby` and `/lobby/onboarding` when the promoted character affects those pages.
+Production paid generation is canary-gated. After an initial design is chosen, production packs must generate one representative canary slot, repair it locally if possible, verify the canary gate, and only then run the full pack. Whole-pack retries are banned; use slot-only regeneration for named failures.
+
+9. Run browser QA for `/lobby` and `/lobby/onboarding` when Otis is promoted.
+
+## Character Factory Rules
+
+- Initial character design is exactly five prompt-only images by default.
+- The five initial concepts must run concurrently when using the API path.
+- Production packs happen only after one initial design is chosen.
+- Gemini API runs use Nano Banana 2 through the generation adapter when API spending is explicitly approved.
+- Gemini API `run-api` execution is scheduled through the shared durable slot scheduler. Check `provider-budget-ledger.json`, `api-run-state.json`, inbox receipts, and `slot-leases/` together before assuming a retry is safe.
+- API keys must come from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`; never write keys into repo files.
+- Gemini does not reliably return production-ready transparent foregrounds. Production character prompts should use `premium-simple-backdrop-v1`, then run local cutout, edge refinement, and alpha QA before mastering.
+- Failed slots are repaired or regenerated individually. Do not rerun a whole pack because one image failed.
+- Generated outputs stay in `.artlab` until final promotion.
+- `src/lib/visual-assets/approved-character-assets.generated.json` is the production character manifest. It currently includes promoted Otis and must not be cleared or rewritten except through the final promotion firewall.
+- Current v1-final runs resume from `run-state.json`, `progress.json`, `human-action.json`, `events.jsonl`, receipts, and review action manifests. Do not rely on chat history.
+- `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Resolved historical failures are reset by an `engine-upgrade` ledger entry.
 
 ## If Armaan Asks What Has Been Done
 
 Answer from these sources, in this order:
 
 - `npm run art:status`
-- `npm run art:operate`
-- `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`
-- `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json` as superseded planning context
-- `.artlab/runs/<characterId>/<runId>/run.json`
+- `.artlab/README.md`
+- `docs/CREATIVE-PRODUCTION-ENGINE.md`
+- `docs/CHARACTER-ART-PIPELINE.md`
+- `docs/CHARACTER-ASSET-HANDOFF.md`
 - `src/lib/visual-assets/approved-character-assets.generated.json`
-- `.artlab/characters/<characterId>/ARTIFACTS.md`
-- browser QA ledgers under `.artlab/runs/<characterId>/<runId>/browser-qa/`
 
 Do not answer from memory if the status command is cheap to run.
 
@@ -138,6 +110,7 @@ Quality failures that block approval:
 - identity drift across poses
 - weak mobile read at app scale
 - mismatched Tower style or too much realism
+- missing image files or broken preview references
 
 ## Self-Improvement Loop
 
@@ -157,6 +130,6 @@ Every character run should leave the pipeline stronger than it found it.
 - Use approved raster character art, not hand-authored local SVG character art.
 - Keep `CharacterStage` as the runtime layer for pose, outfit, state, and motion.
 - Keep generated drafts in `.artlab`; keep approved app derivatives in `public/art`.
-- For replacement work, clean volatile old run images with `npm run art:clean`; do not delete current live `public/art` files until the replacement run is approved and promoted.
 - Keep all production assets manifest-gated.
-- Do not add runtime image generation or paid API generation unless Armaan explicitly approves that separate product decision.
+- Do not show a review board as clean if any image fails to load.
+- Do not add runtime image generation unless Armaan explicitly approves that separate product decision.

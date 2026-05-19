@@ -21,7 +21,7 @@ Before any character image is copied into `public/art` or added to the manifest,
 
 - It must exist as an individual sprite file, not only as part of a board.
 - It must be previewed on a Tower-dark background and a light neutral background.
-- The dark-background preview must show no obvious green-fringe, matte halo, chopped edge, missing limb, clipped prop, or accidental neighbor fragment.
+- The dark-background preview must show no obvious color spill, edge halo, chopped edge, missing limb, clipped prop, or accidental neighbor fragment.
 - The sprite must preserve identity, outfit variant, pose intent, body proportions, face read, and mobile silhouette from the approved references.
 - The sprite must use the locked frame dimensions and leave safe padding around hair, hands, props, and feet.
 - The source must include a 4K transparent master with a target long edge of 4096px.
@@ -84,7 +84,7 @@ Production receives only optimized derivatives:
 - `public/art/<space>/<characterId>/<outfitVariant>/<pose>@2x.webp`
 - `public/art/<space>/<characterId>/<outfitVariant>/<pose>@3x.webp`
 
-The original Otis `340x580` production candidates were `prototype-reference` assets only. The promoted Otis pilot uses run-owned labeled source copies and records the upscaling warning in `run.json`; future character runs should use native high-resolution source art before final approval.
+The previous Otis prototype artifacts have been wiped from the active studio state. New Otis work must start from a prompt-only five-option concept board, then use the approved winner as the identity source for the production pack.
 
 ## Manifest Drop-In Shape
 
@@ -142,15 +142,18 @@ Everything between those two rows is internal factory work. Turnaround sheets, o
 ```bash
 npm run art:operate
 npm run art:status
-npm run art:plan -- otis --run-id 2026-05-14-otis-batch --identity-ref .artlab/characters/otis/model/otis_winner-ref_v001.png
-npm run art:preflight -- <generated-file.png> --minimum-long-edge 4096 --chroma-key 00ff00
-npm run art:ingest -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source <generated-file.png> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle
-npm run art:ingest -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source <generated-sheet.png> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1
-npm run art:split -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --source-asset pose-sheet-regular
-npm run art:master -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
-npm run art:qa -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
-npm run art:review -- .artlab/runs/otis/2026-05-14-otis-batch/run.json
-npm run art:promote -- .artlab/runs/otis/2026-05-14-otis-batch/run.json --approval-phrase "approved for app"
+npm run art:studio -- --request "Create five prompt-only initial Otis designs from scratch."
+npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json> --lane-count 5 --concurrency 5 --resolution 4K --aspect-ratio 9:16 --budget-cents 1000
+npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --request-timeout-ms 300000
+npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>
+npm run art:plan -- otis --run-id <approved-otis-production-run> --identity-ref .artlab/characters/otis/references/identity/<approved-file>.png
+npm run art:generate cutout-doctor --plan <gemini-api-plan.json> --strict
+npm run art:ingest -- <run.json> --source <generated-file.png> --kind individual-sprite --id source-regular-idle --outfit regular --pose idle
+npm run art:split -- <run.json> --source-asset <pose-sheet-id>
+npm run art:master -- <run.json>
+npm run art:qa -- <run.json>
+npm run art:review -- <run.json>
+npm run art:promote -- <run.json> --approval-phrase "approved for app"
 ```
 
 Use individual-sprite source ingestion for production-quality replacement work. Preflight must pass before ingest. Pose sheets are useful for contact sheets and broad consistency checks, but they are not production source unless every split cell independently satisfies the native source-resolution contract.
@@ -164,7 +167,7 @@ Reject an image before manifest entry if any of these are true:
 - It has fake text, logos, watermarks, signatures, or unreadable letters.
 - It includes a background in a production sprite.
 - It changes the approved outfit instead of editing the same clothing system into `regular`, `summer-light`, or `winter-layered`.
-- It has visible green-fringe, matte halo, chopped edges, broken alpha, or source-sheet extraction artifacts.
+- It has visible color spill, edge halo, chopped edges, broken alpha, or source-sheet separation artifacts.
 - It has not been checked in a dark-background preview and a light-background preview.
 - It breaks the character's silhouette or prop read.
 - It resembles a real person, actor, celebrity, named fictional character, or protected likeness.
@@ -186,8 +189,8 @@ After approved files are added:
 
 ## Current State
 
-Otis Vale is promoted through `.artlab/runs/otis/2026-05-14-otis-pilot/run.json` and has 21 approved manifest entries. The remaining 231 Season 1 sprite slots are still missing by design.
+Fresh-start reset is active. No Season 1 character has approved production sprites in `src/lib/visual-assets/approved-character-assets.generated.json`.
 
-The Otis pilot is usable in the app, but its source warnings remain active: `source-long-edge-below-4096` and `source-upscaled-to-master`. Do not hide those warnings. The active replacement run is `.artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json`; finish that native high-resolution individual-sprite pass before Mara. The older `.artlab/runs/otis/2026-05-14-otis-native-v2/run.json` remains superseded planning context.
+Otis Vale is the first production pilot. Generate him from scratch through the Creative Production Engine: five prompt-only initial designs, one approved winner, then a full production pack and final upload-ready board. Mara Voss (`ceo`) comes after Otis is promoted.
 
-Run `npm run art:operate -- --run .artlab/runs/otis/2026-05-14-otis-production-redo-v1/run.json` before continuing Otis image work; use `npm run art:status` for read-only inspection. The next new character after Otis v2 is Mara Voss (`ceo`).
+Run `npm run art:studio` before continuing image work; use `npm run art:status` for read-only inspection.

@@ -2,7 +2,7 @@ import { join } from "node:path";
 import type { CreativeProductionPacket } from "./prompts";
 
 export const CREATIVE_PARALLEL_DEFAULT_AGENTS = 5;
-export const CREATIVE_PARALLEL_DEFAULT_WAVES = 3;
+export const CREATIVE_PARALLEL_DEFAULT_WAVES = 1;
 export const CREATIVE_PARALLEL_DEFAULT_TOTAL_LANES =
   CREATIVE_PARALLEL_DEFAULT_AGENTS * CREATIVE_PARALLEL_DEFAULT_WAVES;
 export const CREATIVE_PARALLEL_MAX_TOTAL_LANES = CREATIVE_PARALLEL_DEFAULT_TOTAL_LANES;
@@ -295,7 +295,9 @@ export function createCreativeParallelWavePlan(input: {
   const waves = shape.waves;
   const parallelRoot = input.parallelRoot ?? join(input.packet.outputRoot, "parallel");
   const lanes: CreativeParallelLane[] = [];
-  const status = input.packet.nextAction === "generate-production-sources"
+  const initialConceptGenerationApproved =
+    input.packet.intake?.initialApprovalStatus === "generation-approved";
+  const status = input.packet.nextAction === "generate-production-sources" || initialConceptGenerationApproved
     ? "ready-for-dispatch"
     : "awaiting-initial-approval";
 
@@ -362,9 +364,11 @@ export function createCreativeParallelWavePlan(input: {
     parallelRoot,
     dispatcherPromptPath: join(parallelRoot, "dispatcher-prompt.md"),
     status,
-    statusReason: status === "ready-for-dispatch"
+    statusReason: input.packet.nextAction === "generate-production-sources"
       ? "Initial direction is already approved, so lane subagents may be dispatched."
-      : "Initial direction approval is required before launching lane subagents.",
+      : initialConceptGenerationApproved
+        ? "Initial concept generation was explicitly requested with a budget cap, so lane generation may be dispatched."
+        : "Initial direction approval is required before launching lane subagents.",
     defaultAgentProfile: CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE,
     laneContract: {
       ownsWriteAccessOnlyInsideLane: true,
@@ -387,7 +391,7 @@ export function createCreativeParallelWavePlan(input: {
       "promotion requires the parent pipeline and the exact phrase approved for app",
       "every lane must include housekeeping and continuous-improvement notes",
       "wacky creative swings are welcome only when the output remains technically usable",
-      "15x output may increase variety, never lower the source-quality, QA, approval, or organization bar",
+      "5-lane output may increase variety, never lower the source-quality, QA, approval, or organization bar",
     ],
     lanes,
   };
@@ -430,7 +434,7 @@ export function renderCreativeParallelDispatcherPrompt(plan: CreativeParallelWav
 
 Parent run: ${plan.parentRunId}
 Asset: ${plan.name} (${plan.assetType})
-Parallel shape: ${plan.agentsPerWave} agents x ${plan.waves} waves = ${plan.totalLanes} lanes
+Parallel shape: ${plan.agentsPerWave} agents x ${plan.waves} wave${plan.waves === 1 ? "" : "s"} = ${plan.totalLanes} lanes
 Default lane agent profile: ${plan.defaultAgentProfile.label}
 Status: ${plan.status}
 Status reason: ${plan.statusReason}
@@ -444,7 +448,7 @@ Use the lane prompts to create a larger, stranger, more useful option set withou
 ${renderList(plan.mergePolicy)}
 
 When dispatching from Codex, prefer \`model: "${plan.defaultAgentProfile.model}"\` with \`reasoning_effort: "${plan.defaultAgentProfile.reasoningEffort}"\`. Use fast execution mode where the current client exposes it.
-${plan.status === "awaiting-initial-approval" ? "\nDo not launch lane subagents yet. First get Armaan's initial direction approval, then use this packet for 15x execution.\n" : ""}
+${plan.status === "awaiting-initial-approval" ? "\nDo not launch lane subagents yet. First get Armaan's initial direction approval, then use this packet for 5-lane execution.\n" : ""}
 
 ## Safety Rules
 

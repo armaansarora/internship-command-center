@@ -16,6 +16,7 @@ describe("creative production registry", () => {
       "scene",
       "icon-system",
       "marketing-hero",
+      "shader",
     ]);
 
     for (const assetType of CREATIVE_ASSET_TYPES) {

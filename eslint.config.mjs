@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     // never traverse them. Without this, husky pre-commit drowns in 60k+
     // errors from compiled output inside the worktrees.
     ".claude/worktrees/**",
+    // Creative browser profiles can contain large third-party extension code.
+    // They are disposable studio state, not project source.
+    ".artlab/browser-sessions/**",
   ]),
   {
     rules: {

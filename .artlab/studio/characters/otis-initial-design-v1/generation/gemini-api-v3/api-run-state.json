@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "tower-gemini-api-run-state-v1",
+  "runId": "otis-initial-design-v1",
+  "adapter": "gemini-api",
+  "model": "gemini-3.1-flash-image-preview",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-initial-design-v1/generation/gemini-api-v3/gemini-api-plan.json",
+  "status": "completed-with-warnings",
+  "updatedAt": "2026-05-15T19:08:03.061Z",
+  "selected": [
+    {
+      "slotId": "api-lane-02__otis-design",
+      "attempt": 1,
+      "reason": "missing-output"
+    }
+  ],
+  "skipped": [
+    {
+      "slotId": "api-lane-01__otis-design",
+      "reason": "warning-receipt-exists"
+    },
+    {
+      "slotId": "api-lane-03__otis-design",
+      "reason": "warning-receipt-exists"
+    },
+    {
+      "slotId": "api-lane-04__otis-design",
+      "reason": "warning-receipt-exists"
+    },
+    {
+      "slotId": "api-lane-05__otis-design",
+      "reason": "warning-receipt-exists"
+    }
+  ],
+  "blockers": [],
+  "failures": [],
+  "budget": {
+    "budgetCents": 1000,
+    "costPerImageCents": 15.1,
+    "billablePriorImages": 4,
+    "billableNewImages": 1,
+    "projectedCostCents": 75.5
+  }
+}

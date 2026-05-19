@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "tower.creative-review-actions.v1",
+  "runId": "otis-real-rembg-canary-v1",
+  "boardType": "final-upload-ready",
+  "historicalStatus": "closed-baseline-evidence",
+  "supersededByRunStatePhase": "closed",
+  "liveApprovalGate": false,
+  "actions": [
+    {
+      "id": "approve-for-app",
+      "label": "Approve for app",
+      "requiresExactPhrase": "approved for app"
+    },
+    {
+      "id": "regenerate-named-slots",
+      "label": "Regenerate named slots",
+      "requiresExactPhrase": false,
+      "slots": [
+        "api-lane-01__otis-winter-layered-working",
+        "api-lane-01__otis-turnaround",
+        "api-lane-01__otis-expression-sheet",
+        "api-lane-01__otis-outfit-variants",
+        "api-lane-01__otis-regular-idle",
+        "api-lane-01__otis-regular-greeting",
+        "api-lane-01__otis-regular-listening",
+        "api-lane-01__otis-regular-thinking",
+        "api-lane-01__otis-regular-talking",
+        "api-lane-01__otis-regular-alert",
+        "api-lane-01__otis-regular-working",
+        "api-lane-01__otis-summer-light-idle",
+        "api-lane-01__otis-summer-light-greeting",
+        "api-lane-01__otis-summer-light-listening",
+        "api-lane-01__otis-summer-light-thinking",
+        "api-lane-01__otis-summer-light-talking",
+        "api-lane-01__otis-summer-light-alert",
+        "api-lane-01__otis-summer-light-working",
+        "api-lane-01__otis-winter-layered-idle",
+        "api-lane-01__otis-winter-layered-greeting",
+        "api-lane-01__otis-winter-layered-listening",
+        "api-lane-01__otis-winter-layered-thinking",
+        "api-lane-01__otis-winter-layered-talking",
+        "api-lane-01__otis-winter-layered-alert"
+      ]
+    },
+    {
+      "id": "revise-brief",
+      "label": "Revise brief",
+      "requiresExactPhrase": false,
+      "input": "plain English"
+    },
+    {
+      "id": "reject-archive",
+      "label": "Reject and archive",
+      "requiresExactPhrase": false
+    }
+  ],
+  "localImagePaths": [
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-turnaround/otis__turnaround__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-expression-sheet/otis__expression-sheet__source-v001__api-lane-01__v002__cutout__repaired-v002__repaired-v003.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-outfit-variants/otis__outfit-variants__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-regular-idle/otis__regular__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-regular-greeting/otis__regular__greeting__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-regular-listening/otis__regular__listening__source-v001__api-lane-01__v002__cutout__repaired-v002__repaired-v003.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-regular-thinking/otis__regular__thinking__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-regular-talking/otis__regular__talking__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-regular-alert/otis__regular__alert__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-regular-working/otis__regular__working__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-summer-light-idle/otis__summer-light__idle__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-summer-light-greeting/otis__summer-light__greeting__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-summer-light-listening/otis__summer-light__listening__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-summer-light-thinking/otis__summer-light__thinking__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-summer-light-talking/otis__summer-light__talking__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-summer-light-alert/otis__summer-light__alert__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-summer-light-working/otis__summer-light__working__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-idle/otis__winter-layered__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-greeting/otis__winter-layered__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-listening/otis__winter-layered__listening__source-v001__api-lane-01__cutout__repaired-v002__repaired-v003__repaired-v004__repaired-v005__repaired-v006.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-thinking/otis__winter-layered__thinking__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-talking/otis__winter-layered__talking__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-alert/otis__winter-layered__alert__source-v001__api-lane-01__v002__cutout__repaired-v002.png"
+  ],
+  "promotesOnAction": false,
+  "previewChecks": [],
+  "forbiddenShortcuts": [
+    "external-image-url",
+    "data-uri"
+  ]
+}

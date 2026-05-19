@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { inferCreativeProductionRequest } from "./intake";
 
-const NOW = new Date("2026-05-14T12:00:00.000Z");
+const NOW = new Date("2026-05-15T12:00:00.000Z");
 
 describe("creative production adaptive intake", () => {
   it("routes character replacement requests without requiring engine vocabulary", () => {
@@ -12,7 +12,7 @@ describe("creative production adaptive intake", () => {
 
     expect(draft.assetType).toBe("character");
     expect(draft.name).toBe("Otis");
-    expect(draft.runId).toBe("2026-05-14-otis");
+    expect(draft.runId).toBe("2026-05-15-otis");
     expect(draft.routingReason).toContain("character");
     expect(draft.confidence).toBe("high");
     expect(draft.initialApprovalStatus).toBe("already-approved");
@@ -26,7 +26,7 @@ describe("creative production adaptive intake", () => {
 
     expect(draft.assetType).toBe("environment");
     expect(draft.name).toBe("Application War Room Background Screen");
-    expect(draft.runId).toBe("2026-05-14-application-war-room-background-screen");
+    expect(draft.runId).toBe("2026-05-15-application-war-room-background-screen");
     expect(draft.routingReason).toContain("environment");
   });
 
@@ -38,7 +38,7 @@ describe("creative production adaptive intake", () => {
 
     expect(draft.assetType).toBe("ui-texture");
     expect(draft.name).toBe("Lobby Controls Button Texture");
-    expect(draft.runId).toBe("2026-05-14-lobby-controls-button-texture");
+    expect(draft.runId).toBe("2026-05-15-lobby-controls-button-texture");
     expect(draft.routingReason).toContain("ui-texture");
   });
 
@@ -72,5 +72,15 @@ describe("creative production adaptive intake", () => {
     expect(draft.assetType).toBe("scene");
     expect(draft.routingReason).toContain("scene");
     expect(draft.matchedSignals.join(" ")).toContain("three");
+  });
+
+  it("routes standalone shader/effect requests to shader", () => {
+    const draft = inferCreativeProductionRequest(
+      "Create a premium WebGL shader effect for lobby lighting.",
+      NOW,
+    );
+
+    expect(draft.assetType).toBe("shader");
+    expect(draft.routingReason).toContain("shader");
   });
 });

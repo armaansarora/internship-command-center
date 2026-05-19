@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Otis Initial Concept Review Board v4</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10111a;
+        --panel: #1a1a27;
+        --panel-strong: #232331;
+        --line: #4e4151;
+        --text: #f7f0e8;
+        --muted: #c7bbae;
+        --brass: #d0aa4d;
+        --burgundy: #8b1831;
+        --navy: #121936;
+        --warn: #f1b84b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(139, 24, 49, 0.2), rgba(18, 25, 54, 0.1) 42%, transparent),
+          var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(1480px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 28px 0 42px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .summary,
+      .contract,
+      .warning {
+        line-height: 1.5;
+      }
+
+      .summary {
+        margin: 0 0 18px;
+        color: var(--muted);
+        max-width: 1040px;
+      }
+
+      .contract,
+      .warning {
+        margin: 0 0 16px;
+        padding: 12px 14px;
+        border-radius: 6px;
+      }
+
+      .contract {
+        border: 1px solid color-mix(in srgb, var(--brass), transparent 42%);
+        background: linear-gradient(90deg, rgba(139, 24, 49, 0.18), rgba(18, 25, 54, 0.28));
+        color: #f8e7ba;
+      }
+
+      .warning {
+        border: 1px solid color-mix(in srgb, var(--warn), transparent 34%);
+        background: color-mix(in srgb, var(--warn), transparent 88%);
+        color: #ffe2a3;
+      }
+
+      .locked {
+        margin: 0 0 16px;
+        padding: 12px 14px;
+        border: 1px solid color-mix(in srgb, var(--brass), transparent 20%);
+        background: rgba(208, 170, 77, 0.16);
+        color: #ffe8ad;
+        border-radius: 6px;
+        line-height: 1.5;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      figure {
+        margin: 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+      }
+
+      img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 9 / 16;
+        object-fit: contain;
+        background: #0c0d13;
+      }
+
+      figcaption {
+        min-height: 168px;
+        padding: 12px;
+        border-top: 1px solid var(--line);
+        background: var(--panel-strong);
+      }
+
+      strong {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--brass);
+        font-size: 14px;
+      }
+
+      small {
+        display: block;
+        color: var(--muted);
+        line-height: 1.42;
+      }
+
+      .risk {
+        margin-top: 8px;
+        color: #f2c57b;
+      }
+
+      @media (max-width: 1180px) {
+        .grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 780px) {
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        main {
+          width: min(100vw - 24px, 1480px);
+          padding-top: 20px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Otis Vale Initial Concepts v4</h1>
+      <p class="locked">Identity locked: Armaan selected Lane 05 as Otis. This is initial character design approval only; production sprites are still blocked until a clean final upload-ready board receives the exact phrase approved for app.</p>
+      <p class="summary">Run <strong>otis-initial-design-v4</strong>. Five fresh prompt-only initial identity concepts generated from scratch under the shared lane quality-floor rule. Nothing here is approved for app or promoted into public/art.</p>
+      <p class="contract">Permanent lane rule applied: every lane must hit the same minimum quality/detail floor: Lane 05-level material detail, fabric seams, buttons, hair/beard rendering, brass highlights, confident contrast, dimensional lighting, and high-resolution premium game-sprite finish. Variation is only identity direction: silhouette, age impression, posture, personality, uniform cut, props, warmth, and eccentricity.</p>
+      <p class="warning">Concept-board warning: all five files are high-resolution and locally decodable, but receipts report source-missing-alpha and source-mime-image-jpeg. That is acceptable for choosing an initial direction; it blocks final sprite promotion until a later production pack produces clean matte/alpha assets.</p>
+      <section class="grid" aria-label="Otis initial concept options v4">
+        <figure>
+          <img src="../../../../../../inbox/character/otis-initial-design-v4/gemini-api-v3/api-lane-01/otis-design/otis__design__source-v001__api-lane-01.png" alt="Otis concept option v4 from API lane 01">
+          <figcaption><strong>Lane 01 - Ledger Captain</strong><small>Premium old-hotel concierge authority: long burgundy coat, deep navy vest, brass buttons and keys, strong face detail, and confident lobby-service polish.</small><small class="risk">Risk: upper-body crop; production pack would need a full-body redraw.</small></figcaption>
+        </figure>
+        <figure>
+          <img src="../../../../../../inbox/character/otis-initial-design-v4/gemini-api-v3/api-lane-02/otis-design/otis__design__source-v001__api-lane-02.png" alt="Otis concept option v4 from API lane 02">
+          <figcaption><strong>Lane 02 - Showman Concierge</strong><small>More theatrical and open-handed: polished burgundy suit, strong brass accents, expressive posture, and enough sharpness to stay game-sprite premium.</small></figcaption>
+        </figure>
+        <figure>
+          <img src="../../../../../../inbox/character/otis-initial-design-v4/gemini-api-v3/api-lane-03/otis-design/otis__design__source-v001__api-lane-03.png" alt="Otis concept option v4 from API lane 03">
+          <figcaption><strong>Lane 03 - Cardigan Steward</strong><small>Warmest neighborly option: textured burgundy knit, rounder silhouette, visible fabric pattern, brass buttons and keys, and lived-in face/hands.</small><small class="risk">Risk: a small key tag has scribble-like text; remove in production if selected.</small></figcaption>
+        </figure>
+        <figure>
+          <img src="../../../../../../inbox/character/otis-initial-design-v4/gemini-api-v3/api-lane-04/otis-design/otis__design__source-v001__api-lane-04.png" alt="Otis concept option v4 from API lane 04">
+          <figcaption><strong>Lane 04 - Straight-Ahead Bell Steward</strong><small>Cleanest full-body read: simple burgundy cardigan, brass bell and keys, navy trousers, legible silhouette, and the most production-friendly staging.</small></figcaption>
+        </figure>
+        <figure>
+          <img src="../../../../../../inbox/character/otis-initial-design-v4/gemini-api-v3/api-lane-05/otis-design/otis__design__source-v001__api-lane-05.png" alt="Otis concept option v4 from API lane 05">
+          <figcaption><strong>Lane 05 - Oddball Desk Mentor - Locked Otis Identity</strong><small>Selected direction: glasses, vest texture, desk/bell motif, brass trim, softer humor, and a memorable non-model silhouette.</small><small class="risk">Risk: background desk and prop scribbles make this concept-only, not production-ready.</small></figcaption>
+        </figure>
+      </section>
+    </main>
+  </body>
+</html>

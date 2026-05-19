@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "tower-cutout-benchmark-receipt-v1",
+  "candidateId": "rembg-u2net",
+  "fixtureId": "fresh-gemini-otis-winter-layered-working-canary",
+  "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/otis-real-rembg-canary-v1/gemini-api-v3/api-lane-01/otis-winter-layered-working/otis__winter-layered__working__source-v001__api-lane-01.png",
+  "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/benchmark-runs/rembg-u2net/fresh-gemini-otis-winter-layered-working-canary/cutout.png",
+  "rawMaskHash": "sha256:a7ffb5037215e019316006a5d58848b3422fd684a428a6d42639e8437d5734a3",
+  "refinedMaskHash": "sha256:a7ffb5037215e019316006a5d58848b3422fd684a428a6d42639e8437d5734a3",
+  "refinedPngHash": "sha256:2448a524ecdc513a0d8a0fc71ac61e2633ccb4cf886f7adbb3b711347e4951d6",
+  "sourceSaliencyBounds": {
+    "left": 363,
+    "top": 0,
+    "right": 2874,
+    "bottom": 5388
+  },
+  "qa": {
+    "schemaVersion": "tower-cutout-alpha-qa-v1",
+    "status": "failed",
+    "imagePath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/benchmark-runs/rembg-u2net/fresh-gemini-otis-winter-layered-working-canary/cutout.png",
+    "width": 3072,
+    "height": 5504,
+    "failures": [
+      "extra-islands",
+      "subject-cropped",
+      "prop-lost",
+      "alpha-holes",
+      "edge-halo"
+    ],
+    "badges": {
+      "cutout": "failed",
+      "alpha": "failed",
+      "dimensions": "passed",
+      "crop": "failed",
+      "halo": "failed",
+      "props": "failed"
+    },
+    "metrics": {
+      "borderOpaquePixels": 0,
+      "subjectPixels": 6254265,
+      "tinyIslandCount": 6,
+      "totalIslandPixels": 4875,
+      "holePixels": 14440,
+      "haloMeanAlpha": 7.495233796599707,
+      "haloP99Alpha": 31,
+      "padding": {
+        "top": 0.03343023255813953,
+        "right": 0.15494791666666666,
+        "bottom": 0.025799418604651164,
+        "left": 0.1279296875
+      }
+    }
+  },
+  "score": 0,
+  "createdAt": "2026-05-19T03:21:51.799Z"
+}
