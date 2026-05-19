@@ -2,15 +2,15 @@
 
 `.artlab` is the non-production workshop for Tower creative production. It is where generated concepts, references, run ledgers, QA previews, staged derivatives, browser-session downloads, and review boards live before anything reaches the app.
 
-## Fresh-Start State
+## Current State
 
-The studio was reset on 2026-05-15 so the next creative run starts clean.
+The studio was reset on 2026-05-15. Since that reset, Otis completed the production pilot and is now the protected Lobby baseline.
 
-- No character production assets are currently approved.
-- No old Otis generated images, run ledgers, browser sessions, or staged derivatives are kept here.
+- Otis is promoted in `public/art/lobby/otis/` and recorded in `src/lib/visual-assets/approved-character-assets.generated.json`.
+- The Otis studio run `otis-real-rembg-canary-v1` is closed after housekeeping, continuous-improvement, promotion, and browser QA evidence.
 - Lobby backgrounds remain protected: `public/lobby/bg-1.jpg` through `public/lobby/bg-4.jpg`.
-- The engine code, docs, tests, and approval gates remain in the repo.
-- The next image-production session should generate Otis from scratch through the engine, not from old reference files.
+- New characters still start from scratch unless their current run-state names an approved identity reference.
+- The next likely production character is Mara Voss (`ceo`), but do not start her until Armaan asks.
 
 ## Start Here
 
@@ -35,7 +35,13 @@ npm --silent run art:status -- --json
 For a new visual request, use the studio router rather than hand-placing files:
 
 ```bash
-npm run art:studio -- --request "Create five prompt-only initial Otis designs from scratch."
+npm run art:produce -- --request "let's make Mara"
+```
+
+For a no-provider operator rehearsal:
+
+```bash
+npm run art:produce -- --request "let's make Mara" --dry-run
 ```
 
 The engine routes characters, backgrounds, screens, UI surfaces, animations, props, scenes, shaders, and marketing visuals into organized `.artlab/studio/...` packets.

@@ -80,4 +80,21 @@ describe("creative generation budget ledger", () => {
     expect(repaired.entries[0]?.phase).toBe("slot-repair");
     expect(repaired.spend.totalProjectedCents).toBeCloseTo(30.2);
   });
+
+  it("forbids small production-pack retries unless they are named slot repairs", () => {
+    const ledger = createGenerationBudgetLedger({
+      runId: "mara-small-pack",
+      assetType: "character",
+    });
+
+    expect(() => appendGenerationBudgetEntry(ledger, {
+      phase: "production-pack",
+      reason: "retry two warning receipts as a pack",
+      billableImages: 2,
+      costPerImageCents: 15.1,
+      slotIds: ["pose-idle", "pose-greeting"],
+      attempt: 2,
+      batchScope: "full-pack",
+    })).toThrow("Whole-pack retries are banned");
+  });
 });

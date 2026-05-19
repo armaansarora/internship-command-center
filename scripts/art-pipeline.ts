@@ -601,7 +601,16 @@ async function commandClean(args: ParsedArgs): Promise<void> {
     ...(await listImageFiles(`.artlab/runs/${characterId}/${runId}/review`)),
     ...(await listImageFiles(`.artlab/runs/${characterId}/${runId}/browser-qa`)),
   ];
-  const deleteTargets = [...volatileDirectories, ...legacyMasterDirectories, ...imageFiles].filter((path) =>
+  const qaEvidence = [
+    `.artlab/runs/${characterId}/${runId}/browser-qa/browser-qa.json`,
+    `.artlab/runs/${characterId}/${runId}/review/final-board-browser-check.png`,
+  ].filter((path) => existsSync(path));
+  const qaEvidenceSet = new Set(qaEvidence);
+  const deleteTargets = [
+    ...volatileDirectories,
+    ...legacyMasterDirectories,
+    ...imageFiles.filter((path) => !qaEvidenceSet.has(path)),
+  ].filter((path) =>
     existsSync(path),
   );
   const kept = [
@@ -609,10 +618,11 @@ async function commandClean(args: ParsedArgs): Promise<void> {
     `.artlab/runs/${characterId}/${runId}/prompts/`,
     `.artlab/runs/${characterId}/${runId}/review/final-upload-ready-board.html`,
     `.artlab/runs/${characterId}/${runId}/browser-qa/browser-qa.json`,
+    ...qaEvidence,
     `.artlab/characters/${characterId}/references/`,
     `public/art/lobby/${characterId}/`,
     GENERATED_MANIFEST_PATH,
-  ];
+  ].filter((path, index, paths) => paths.indexOf(path) === index);
   const registryPath = ".artlab/studio/artifact-registry.json";
   const registryEntries: CreativeRetentionEntry[] = [
     ...deleteTargets.map((path): CreativeRetentionEntry => ({
@@ -628,6 +638,8 @@ async function commandClean(args: ParsedArgs): Promise<void> {
         ? "live-public-art"
         : path === GENERATED_MANIFEST_PATH
           ? "approved-manifest"
+          : qaEvidenceSet.has(path)
+            ? "qa-evidence"
           : path.includes("run.json")
             ? "active-run-state"
             : "review-board",

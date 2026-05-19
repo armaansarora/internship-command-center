@@ -2,6 +2,9 @@
   "schemaVersion": "tower.creative-review-actions.v1",
   "runId": "otis-real-rembg-canary-v1",
   "boardType": "final-upload-ready",
+  "historicalStatus": "closed-baseline-evidence",
+  "supersededByRunStatePhase": "closed",
+  "liveApprovalGate": false,
   "actions": [
     {
       "id": "approve-for-app",

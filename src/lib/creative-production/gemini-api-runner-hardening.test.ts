@@ -190,6 +190,27 @@ describe("Gemini API runner hardening", () => {
     expect(execution.selectedSlots).toEqual([]);
   });
 
+  it("blocks small production whole-pack warning retries too", () => {
+    const plan = createPlan();
+    const receiptsBySlotId = Object.fromEntries(plan.slots.map((slot) => [
+      slot.slotId,
+      [receipt({
+        slotId: slot.slotId,
+        qualityWarnings: ["source-missing-alpha"],
+      })],
+    ]));
+    const execution = planGeminiApiRunExecution({
+      plan,
+      receiptsBySlotId,
+      dryRun: false,
+      maxAttempts: 2,
+      retryWarnings: true,
+    });
+
+    expect(execution.blockers.join(" ")).toContain("Whole-pack warning retries are banned");
+    expect(execution.selectedSlots).toEqual([]);
+  });
+
   it("allows slot-only production repair when explicit slot ids are provided", () => {
     const plan = createGeminiApiGenerationPlan({
       runId: "otis-slot-repair",

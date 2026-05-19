@@ -1,6 +1,6 @@
 # Creative Production Engine V1 Final Plan
 
-**Status:** Master Plan V3 saved for review. Implementation has not started.
+**Status:** V1 Final implemented and in certification. Otis is the closed production baseline; this document remains the behavior contract for future assets.
 
 **Goal:** Build the production-ready Creative Production Engine so Armaan can start a vague creative request, approve the initial direction, and then return only for true blockers or the final exact approval phrase `approved for app`.
 
@@ -24,7 +24,7 @@ Everything else is advanced/internal: `art:generate`, `art:studio`, `art:operate
 
 Normal `art:status` and review output may mention internal files for traceability, but the operator should not need to know or run internal commands during normal use.
 
-Current amendment: Otis has been promoted and integrated. The engine must treat `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json` as production truth and must not ask for `approved for app` again for the already integrated Otis baseline.
+Current amendment: Otis has been promoted, browser-QA verified, and closed. The engine must treat `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json` as production truth and must not ask for `approved for app` again for the closed Otis baseline.
 
 ---
 

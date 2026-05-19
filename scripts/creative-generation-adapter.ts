@@ -2,8 +2,8 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
-import { basename, dirname, extname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import sharp from "sharp";
 
@@ -793,9 +793,17 @@ async function runPrepareApiMode(argv: string[]): Promise<void> {
 	    await writeFile(canaryPlanPath, `${JSON.stringify(canaryPlan, null, 2)}\n`);
 	    await writeFile(join(canaryPlan.planRoot, "gemini-api-runbook.md"), canaryRunbook);
 	    await writeFile(join(canaryPlan.planRoot, "prompt-deck.md"), canaryPromptDeck);
+    await writeCreativeProviderBudgetLedger(canaryPlan, createCreativeBudgetLedger({
+      runId: canaryPlan.runId,
+      approvedBudgetCents: canaryPlan.budgetCents,
+    }));
 	    await writeFile(fullPlanPath, `${JSON.stringify(fullPlan, null, 2)}\n`);
 	    await writeFile(join(fullPlan.planRoot, "gemini-api-runbook.md"), fullRunbook);
 	    await writeFile(join(fullPlan.planRoot, "prompt-deck.md"), fullPromptDeck);
+    await writeCreativeProviderBudgetLedger(fullPlan, createCreativeBudgetLedger({
+      runId: fullPlan.runId,
+      approvedBudgetCents: fullPlan.budgetCents,
+    }));
 	    await writeFile(canaryGatePath, `${JSON.stringify({
 	      schemaVersion: "tower-production-canary-gate-v1",
 	      runId: packet.runId,
@@ -887,6 +895,10 @@ async function runPrepareApiMode(argv: string[]): Promise<void> {
 	  await writeFile(planPath, `${JSON.stringify(plan, null, 2)}\n`);
 	  await writeFile(runbookPath, runbook);
 	  await writeFile(promptDeckPath, promptDeck);
+  await writeCreativeProviderBudgetLedger(plan, createCreativeBudgetLedger({
+    runId: plan.runId,
+    approvedBudgetCents: plan.budgetCents,
+  }));
 
   console.log(`Created Gemini API v3 plan: ${planPath}`);
   console.log(`Runbook: ${runbookPath}`);
@@ -1112,9 +1124,16 @@ function creativeProviderBudgetLedgerPath(plan: GeminiApiGenerationPlan): string
   return assertSafeArtlabPath(join(plan.planRoot, "provider-budget-ledger.json"));
 }
 
-async function readCreativeProviderBudgetLedger(plan: GeminiApiGenerationPlan): Promise<CreativeBudgetLedger> {
+async function readCreativeProviderBudgetLedger(
+  plan: GeminiApiGenerationPlan,
+  options: { allowCreateMissing?: boolean } = {},
+): Promise<CreativeBudgetLedger> {
   const ledgerPath = creativeProviderBudgetLedgerPath(plan);
   if (!await pathExists(ledgerPath)) {
+    if (!options.allowCreateMissing) {
+      throw new Error(`Provider budget ledger is missing: ${ledgerPath}. Re-run prepare-api before live provider work.`);
+    }
+
     return createCreativeBudgetLedger({
       runId: plan.runId,
       approvedBudgetCents: plan.budgetCents,
@@ -1167,7 +1186,9 @@ async function runGeminiApiPlanWithScheduler(input: {
   const referenceImages = input.dryRun ? [] : await readReferenceImagesForPayload(input.plan);
   const referenceHash = hashGeminiApiReferenceContract(input.plan);
   const selectedBySlotId = new Map(input.execution.selectedSlots.map((selected) => [selected.slot.slotId, selected]));
-  const ledger = await readCreativeProviderBudgetLedger(input.plan);
+  const ledger = await readCreativeProviderBudgetLedger(input.plan, {
+    allowCreateMissing: input.dryRun,
+  });
   const provider = createGeminiApiProviderAdapter({
     costCents: input.dryRun ? 0 : input.plan.costPerImageCents,
     maxConcurrency: input.plan.maxConcurrency,
@@ -1606,6 +1627,10 @@ async function runApiMode(argv: string[]): Promise<void> {
       });
       return;
     }
+
+    await readCreativeProviderBudgetLedger(plan, {
+      allowCreateMissing: dryRun,
+    });
 
     if (!dryRun) {
       readGeminiApiKeyFromEnvironment();
@@ -3207,8 +3232,23 @@ async function runCharacterArtCanaryPipeline(input: {
 
   if (!characterId) return undefined;
 
+  const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+  const planRoot = input.plan.planRoot ? resolve(input.plan.planRoot) : undefined;
+  const relativePlanRoot = planRoot ? relative(projectRoot, planRoot) : "";
+  const planIsInsideProject =
+    !!planRoot &&
+    !relativePlanRoot.startsWith("..") &&
+    !isAbsolute(relativePlanRoot);
+  const planRootParts = planRoot?.split(sep) ?? [];
+  const generationIndex = planRootParts.lastIndexOf("generation");
+  const pipelineCwd = planIsInsideProject || generationIndex <= 0
+    ? projectRoot
+    : planRootParts.slice(0, generationIndex).join(sep) || sep;
+  const tsxBin = join(projectRoot, "node_modules/.bin/tsx");
+  const artPipelineScript = join(projectRoot, "scripts/art-pipeline.ts");
   const runId = `${input.plan.runId}-canary-pipeline`.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
   const runJsonPath = `.artlab/runs/${characterId}/${runId}/run.json`;
+  const absoluteRunJsonPath = join(pipelineCwd, runJsonPath);
   const { outfitVariant, pose } = slotOutfitAndPose(`${input.slot.baseSlotId ?? ""} ${input.slot.slotId}`);
   const maxSourceEdge = await sharp(input.cutoutPath)
     .metadata()
@@ -3220,18 +3260,18 @@ async function runCharacterArtCanaryPipeline(input: {
   const commandEnv = { ...process.env, NODE_ENV: process.env.NODE_ENV ?? "test" };
 
   execFileSync(process.execPath, [
-    "node_modules/.bin/tsx",
-    "scripts/art-pipeline.ts",
+    tsxBin,
+    artPipelineScript,
     "plan",
     characterId,
     "--run-id",
     runId,
     "--identity-ref",
     input.sourcePath,
-  ], { cwd: process.cwd(), env: commandEnv, stdio: "pipe" });
-  const plannedRun = await readJson<Record<string, unknown>>(runJsonPath);
+  ], { cwd: pipelineCwd, env: commandEnv, stdio: "pipe" });
+  const plannedRun = await readJson<Record<string, unknown>>(absoluteRunJsonPath);
 
-  await writeFile(runJsonPath, `${JSON.stringify({
+  await writeFile(absoluteRunJsonPath, `${JSON.stringify({
     ...plannedRun,
     canaryOnly: {
       notProductionCompletion: true,
@@ -3242,8 +3282,8 @@ async function runCharacterArtCanaryPipeline(input: {
   for (const variant of CHARACTER_OUTFIT_VARIANTS) {
     for (const spritePose of CHARACTER_POSES) {
       execFileSync(process.execPath, [
-        "node_modules/.bin/tsx",
-        "scripts/art-pipeline.ts",
+        tsxBin,
+        artPipelineScript,
         "ingest",
         runJsonPath,
         "--source",
@@ -3256,32 +3296,32 @@ async function runCharacterArtCanaryPipeline(input: {
         variant,
         "--pose",
         spritePose,
-      ], { cwd: process.cwd(), env: commandEnv, stdio: "pipe" });
+      ], { cwd: pipelineCwd, env: commandEnv, stdio: "pipe" });
     }
   }
 
   execFileSync(process.execPath, [
-    "node_modules/.bin/tsx",
-    "scripts/art-pipeline.ts",
+    tsxBin,
+    artPipelineScript,
     "master",
     runJsonPath,
     "--master-long-edge",
     String(masterLongEdge),
-  ], { cwd: process.cwd(), env: commandEnv, stdio: "pipe" });
+  ], { cwd: pipelineCwd, env: commandEnv, stdio: "pipe" });
   execFileSync(process.execPath, [
-    "node_modules/.bin/tsx",
-    "scripts/art-pipeline.ts",
+    tsxBin,
+    artPipelineScript,
     "derive",
     runJsonPath,
     "--master-long-edge",
     String(masterLongEdge),
-  ], { cwd: process.cwd(), env: commandEnv, stdio: "pipe" });
+  ], { cwd: pipelineCwd, env: commandEnv, stdio: "pipe" });
   execFileSync(process.execPath, [
-    "node_modules/.bin/tsx",
-    "scripts/art-pipeline.ts",
+    tsxBin,
+    artPipelineScript,
     "review",
     runJsonPath,
-  ], { cwd: process.cwd(), env: commandEnv, stdio: "pipe" });
+  ], { cwd: pipelineCwd, env: commandEnv, stdio: "pipe" });
 
   const run = await readJson<{
     expectedSprites: Array<{
@@ -3291,22 +3331,23 @@ async function runCharacterArtCanaryPipeline(input: {
       stagedRenditions: { retina3x: { src: string } };
     }>;
     directories: { reviewRoot: string };
-  }>(runJsonPath);
+  }>(absoluteRunJsonPath);
   const sprite = run.expectedSprites.find((entry) => entry.outfitVariant === outfitVariant && entry.pose === pose)
     ?? run.expectedSprites[0];
 
   if (!sprite) return undefined;
 
   const reviewPreviewPath = `${run.directories.reviewRoot}/final-upload-ready-board.html`;
+  const absoluteReviewPreviewPath = join(pipelineCwd, reviewPreviewPath);
   const canaryBanner = [
     "<div style=\"padding:12px 16px;background:#4a1f1f;color:#fff3df;border-bottom:1px solid #d88958;font-weight:700;letter-spacing:.04em;\">",
     "CANARY ONLY - one cutout was duplicated across all 21 sprite slots to prove art:master, art:derive, and art:review mechanics. This is not real production sprite completion.",
     "</div>",
   ].join("");
-  const reviewHtml = await readFile(reviewPreviewPath, "utf8");
+  const reviewHtml = await readFile(absoluteReviewPreviewPath, "utf8");
 
   if (!reviewHtml.includes("CANARY ONLY")) {
-    await writeFile(reviewPreviewPath, reviewHtml.replace("<body>", `<body>\n${canaryBanner}`));
+    await writeFile(absoluteReviewPreviewPath, reviewHtml.replace("<body>", `<body>\n${canaryBanner}`));
   }
 
   return {

@@ -243,11 +243,11 @@ Subagents may not commit, deploy, touch secrets, or add unapproved files to the 
 
 ## First Pilot: Otis
 
-Otis remains first because the Lobby already has canonical environmental art. Otis is now promoted and integrated, so he is the first production regression baseline rather than a new generation target.
+Otis remains first because the Lobby already has canonical environmental art. Otis is now promoted, browser-QA verified, closed, and protected, so he is the first production regression baseline rather than a new generation target.
 
 Next:
 
 - Run `npm run art:status`.
-- Confirm Otis reports as `integrated` and protected as the promoted baseline.
+- Confirm Otis reports as `closed`, browser-QA verified, and protected as the promoted baseline.
 - Use Otis as the first regression fixture for status, health, cleanup, manifest protection, and browser checks.
 - Mara Voss (`ceo`) is the next unpromoted character unless Armaan explicitly asks to redo Otis.

@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import {
   applyCreativeHumanResponse,
   buildFinalBoardForCreativeRun,
+  closeCreativeRunAfterGates,
   importLegacyOtisRun,
   markCreativeRunUpgradeRequired,
   renderCreativeStatusSummary,
@@ -36,25 +37,35 @@ function answerValue(argv: string[]): { runId: string; response: string } | unde
   }
 
   const responseParts = argv.slice(index + 2);
+  const nextFlagIndex = responseParts.findIndex((part) => part.startsWith("--"));
+  const answerParts = nextFlagIndex === -1
+    ? responseParts
+    : responseParts.slice(0, nextFlagIndex);
 
-  if (responseParts.length === 0 || responseParts[0]?.startsWith("--")) {
+  if (answerParts.length === 0 || answerParts[0]?.startsWith("--")) {
     throw new Error("--answer requires a plain-English response.");
   }
 
   return {
     runId,
-    response: responseParts.join(" "),
+    response: answerParts.join(" "),
   };
 }
 
 function printHumanStop(input: Awaited<ReturnType<typeof startCreativeProductionRun>>): void {
   const humanActionPath = join(input.runRoot, "human-action.json");
   const progressPath = join(input.runRoot, "progress.json");
+  const dryRun = input.state.executionMode === "dry-run";
 
   console.log("Creative Production Engine orchestrator");
   console.log("Two human gates: initial design direction, final app promotion.");
   console.log(`Run root: ${input.runRoot}`);
   console.log(`Current phase: ${input.state.phase}`);
+  if (dryRun) {
+    console.log("Dry run: yes");
+    console.log(`Provider mode: ${input.state.providerMode ?? "local-mock"}`);
+    console.log(`Projected production cost: $${(input.humanAction.costImpact.estimatedCents / 100).toFixed(2)}; reserved now: $0.00`);
+  }
   console.log("");
   console.log(`What I understood: ${input.humanAction.whatIUnderstood}`);
   console.log(`Recommendation: ${input.humanAction.recommendation}`);
@@ -199,6 +210,8 @@ async function main(): Promise<void> {
 
         if (state.phase === "strict-qa") {
           await buildFinalBoardForCreativeRun({ runRoot });
+        } else if (state.phase === "browser-verified") {
+          await closeCreativeRunAfterGates({ runRoot });
         }
       }
     }
@@ -215,6 +228,7 @@ async function main(): Promise<void> {
     stateRoot,
     request,
     runId: flagValue(argv, "--run-id"),
+    dryRun: argv.includes("--dry-run"),
   });
 
   printHumanStop(artifacts);

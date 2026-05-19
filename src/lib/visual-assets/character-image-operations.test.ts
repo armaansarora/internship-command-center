@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -8,8 +8,8 @@ function readProjectFile(path: string): string {
   return readFileSync(join(process.cwd(), path), "utf8");
 }
 
-describe("character image operations fresh start", () => {
-  it("documents the future-session entrypoint and reset state", () => {
+describe("character image operations handoff", () => {
+  it("documents the future-session entrypoint and protected Otis baseline", () => {
     const packageJson = JSON.parse(readProjectFile("package.json")) as {
       scripts: Record<string, string>;
     };
@@ -27,7 +27,7 @@ describe("character image operations fresh start", () => {
     for (const document of [operations, prompt, artLab, claude, structure]) {
       expect(document).toContain("npm run art:status");
       expect(document).toContain("Otis");
-      expect(document.toLowerCase()).toContain("fresh-start");
+      expect(document.toLowerCase()).toContain("protected");
     }
 
     for (const document of [operations, prompt, artLab, claude]) {
@@ -40,7 +40,7 @@ describe("character image operations fresh start", () => {
     expect(operations).toContain("Mara Voss");
     expect(operations).toContain("ceo");
     expect(prompt).toContain("Generate exactly 5 prompt-only initial designs");
-    expect(structure).toContain("no Season 1 character");
+    expect(structure).toContain("Otis Vale is promoted");
   });
 
   it("keeps current art-operation docs portable and free of stale run history", () => {
@@ -207,11 +207,21 @@ describe("character image operations fresh start", () => {
   });
 
   it("dry-runs volatile cleanup without deleting shared production gates", () => {
+    const projectRoot = process.cwd();
+    const tempRoot = mkdtempSync(join(tmpdir(), "tower-art-clean-visual-assets-"));
     const tsx = join(process.cwd(), "node_modules/.bin/tsx");
+    const publicArtPath = join(tempRoot, "public/art/lobby/otis/regular/idle.webp");
+    const manifestPath = join(tempRoot, "src/lib/visual-assets/approved-character-assets.generated.json");
+
+    mkdirSync(join(publicArtPath, ".."), { recursive: true });
+    mkdirSync(join(manifestPath, ".."), { recursive: true });
+    writeFileSync(publicArtPath, "webp");
+    writeFileSync(manifestPath, "[]");
+
     const rawCleanup = execFileSync(
       tsx,
       [
-        "scripts/art-pipeline.ts",
+        join(projectRoot, "scripts/art-pipeline.ts"),
         "clean",
         "otis",
         "--run-id",
@@ -219,7 +229,7 @@ describe("character image operations fresh start", () => {
         "--dry-run",
       ],
       {
-        cwd: process.cwd(),
+        cwd: tempRoot,
         encoding: "utf8",
       },
     );

@@ -62,6 +62,61 @@ describe("art:produce orchestrator", () => {
     expect(existsSync(join(runRoot, "events.jsonl"))).toBe(true);
   });
 
+  it("supports a safe dry-run request that writes durable mock state without provider spend", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-produce-dry-"));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-orchestrator.ts",
+      "--state-root",
+      root,
+      "--request",
+      "let's make Mara",
+      "--run-id",
+      "mara-dry-run-v1",
+      "--dry-run",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+
+    const runRoot = join(root, "characters", "mara-dry-run-v1");
+    const runState = readJson<{
+      phase: string;
+      executionMode?: string;
+      providerMode?: string;
+      publicArtWritesAllowed: boolean;
+    }>(join(runRoot, "run-state.json"));
+    const progress = readJson<{
+      phase: string;
+      spendSoFarCents: number;
+      reservedSpendCents: number;
+      nextAutomaticStep: string;
+    }>(join(runRoot, "progress.json"));
+    const humanAction = readJson<{
+      phase: string;
+      recommendation: string;
+      costImpact: { estimatedCents: number; reservedCents: number };
+      risk: string;
+    }>(join(runRoot, "human-action.json"));
+    const events = readFileSync(join(runRoot, "events.jsonl"), "utf8");
+
+    expect(output).toContain("Dry run: yes");
+    expect(output).toContain("Provider mode: local-mock");
+    expect(output).toContain("Projected production cost");
+    expect(runState).toMatchObject({
+      phase: "awaiting-initial-approval",
+      executionMode: "dry-run",
+      providerMode: "local-mock",
+      publicArtWritesAllowed: false,
+    });
+    expect(progress.spendSoFarCents).toBe(0);
+    expect(progress.reservedSpendCents).toBe(0);
+    expect(progress.nextAutomaticStep).toContain("Dry-run mock review");
+    expect(humanAction.phase).toBe("awaiting-initial-approval");
+    expect(humanAction.recommendation).toContain("dry-run mock review");
+    expect(humanAction.costImpact.estimatedCents).toBeGreaterThan(0);
+    expect(humanAction.costImpact.reservedCents).toBe(0);
+    expect(humanAction.risk).toContain("no provider requests");
+    expect(events).toContain("\"event\":\"dry-run-requested\"");
+  });
+
   it("continues from saved V1 files without chat memory or legacy canary command invention", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-produce-continue-"));
 
@@ -92,6 +147,68 @@ describe("art:produce orchestrator", () => {
     expect(output).not.toContain("verify-canary");
   });
 
+  it("closes a browser-verified run through housekeeping and improvement gates on continue", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-produce-close-"));
+    const runRoot = join(root, "characters", "otis-close-v1");
+
+    mkdirSync(runRoot, { recursive: true });
+    writeFileSync(join(runRoot, "run-state.json"), JSON.stringify({
+      schemaVersion: "tower-creative-run-state-v1-final",
+      runId: "otis-close-v1",
+      assetType: "character",
+      name: "Otis",
+      request: "Imported current Otis production canary state.",
+      phase: "browser-verified",
+      gates: ["initial-design-direction", "final-app-promotion"],
+      promotionPhrase: "approved for app",
+      publicArtWritesAllowed: false,
+      stateRoot: root,
+      runRoot,
+      createdAt: "2026-05-19T12:00:00.000Z",
+      updatedAt: "2026-05-19T16:00:00.000Z",
+      productionEvidence: {
+        browserQaEvidencePath: ".artlab/runs/otis/otis-real-rembg-full-production-v1/browser-qa/browser-qa.json",
+        publicArtRoot: "public/art/lobby/otis",
+        approvedManifestPath: "src/lib/visual-assets/approved-character-assets.generated.json",
+      },
+    }, null, 2));
+    writeFileSync(join(runRoot, "progress.json"), JSON.stringify({
+      schemaVersion: "tower-creative-progress-v1",
+      runId: "otis-close-v1",
+      phase: "browser-verified",
+      runningSlots: [],
+      completed: 24,
+      failed: 0,
+      repairing: 0,
+      pending: 0,
+      spendSoFarCents: 664.4,
+      reservedSpendCents: 0,
+      activeLocks: [],
+      nextAutomaticStep: "Close the run after housekeeping and continuous improvement gates pass.",
+      updatedAt: "2026-05-19T16:00:00.000Z",
+    }, null, 2));
+    writeFileSync(join(runRoot, "human-action.json"), JSON.stringify({
+      schemaVersion: "tower-creative-human-action-v1",
+      runId: "otis-close-v1",
+      phase: "browser-verified",
+    }, null, 2));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-orchestrator.ts",
+      "--state-root",
+      root,
+      "--continue",
+      "otis-close-v1",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const runState = readJson<{ phase: string }>(join(runRoot, "run-state.json"));
+
+    expect(output).toContain("Phase: closed");
+    expect(output).toContain("Armaan action: none.");
+    expect(runState.phase).toBe("closed");
+    expect(existsSync(join(root, "ledgers", "housekeeping.jsonl"))).toBe(true);
+    expect(existsSync(join(root, "ledgers", "improvements.jsonl"))).toBe(true);
+  });
+
   it("records plain-English answers and advances from durable files without stale human-action wording", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-produce-answer-"));
 
@@ -107,11 +224,11 @@ describe("art:produce orchestrator", () => {
 
     const output = execFileSync(tsx, [
       "scripts/creative-production-orchestrator.ts",
-      "--state-root",
-      root,
       "--answer",
       "mara-answer-v1",
       "approve direction",
+      "--state-root",
+      root,
     ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
     const runRoot = join(root, "characters", "mara-answer-v1");
     const runState = readJson<{ phase: string; publicArtWritesAllowed: boolean }>(join(runRoot, "run-state.json"));

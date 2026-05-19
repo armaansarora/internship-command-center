@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyCreativeHumanResponse,
   buildFinalBoardForCreativeRun,
+  closeCreativeRunAfterGates,
   importLegacyOtisRun,
   renderCreativeStatusSummary,
   startCreativeProductionRun,
@@ -120,6 +121,75 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(summary).toContain("Promoted baseline protected");
     expect(summary).not.toContain("Promotion locked: yes");
     expect(summary).not.toContain("Recommended response: approved for app");
+  });
+
+  it("closes a browser-verified promoted baseline only after recording close gates", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-close-"));
+    const runRoot = join(stateRoot, "characters", "otis-close-v1");
+    const browserQaPath = ".artlab/runs/otis/otis-real-rembg-full-production-v1/browser-qa/browser-qa.json";
+
+    mkdirSync(runRoot, { recursive: true });
+    writeFileSync(join(runRoot, "run-state.json"), JSON.stringify({
+      schemaVersion: "tower-creative-run-state-v1-final",
+      runId: "otis-close-v1",
+      assetType: "character",
+      name: "Otis",
+      request: "Imported current Otis production canary state.",
+      phase: "browser-verified",
+      gates: ["initial-design-direction", "final-app-promotion"],
+      promotionPhrase: "approved for app",
+      publicArtWritesAllowed: false,
+      stateRoot,
+      runRoot,
+      createdAt: "2026-05-19T12:00:00.000Z",
+      updatedAt: "2026-05-19T16:00:00.000Z",
+      productionEvidence: {
+        browserQaEvidencePath: browserQaPath,
+        finalReviewBoardPath: ".artlab/runs/otis/otis-real-rembg-full-production-v1/review/final-upload-ready-board.html",
+        publicArtRoot: "public/art/lobby/otis",
+        approvedManifestPath: "src/lib/visual-assets/approved-character-assets.generated.json",
+      },
+    }, null, 2));
+    writeFileSync(join(runRoot, "progress.json"), JSON.stringify({
+      schemaVersion: "tower-creative-progress-v1",
+      runId: "otis-close-v1",
+      phase: "browser-verified",
+      runningSlots: [],
+      completed: 24,
+      failed: 0,
+      repairing: 0,
+      pending: 0,
+      spendSoFarCents: 664.4,
+      reservedSpendCents: 0,
+      activeLocks: [],
+      nextAutomaticStep: "Close the run after housekeeping and continuous improvement gates pass.",
+      updatedAt: "2026-05-19T16:00:00.000Z",
+    }, null, 2));
+    writeFileSync(join(runRoot, "human-action.json"), JSON.stringify({
+      schemaVersion: "tower-creative-human-action-v1",
+      runId: "otis-close-v1",
+      phase: "browser-verified",
+    }, null, 2));
+
+    const closed = await closeCreativeRunAfterGates({
+      runRoot,
+      now: new Date("2026-05-19T16:15:00.000Z"),
+    });
+    const housekeepingLedger = readFileSync(join(stateRoot, "ledgers", "housekeeping.jsonl"), "utf8");
+    const improvementLedger = readFileSync(join(stateRoot, "ledgers", "improvements.jsonl"), "utf8");
+    const summary = await renderCreativeStatusSummary({ stateRoot, runId: "otis-close-v1" });
+
+    expect(closed.state.phase).toBe("closed");
+    expect(closed.state.publicArtWritesAllowed).toBe(false);
+    expect(closed.progress.phase).toBe("closed");
+    expect(closed.progress.activeLocks).toEqual([]);
+    expect(closed.humanAction.allowedResponses).toEqual([]);
+    expect(housekeepingLedger).toContain("\"gate\":\"housekeeping\"");
+    expect(housekeepingLedger).toContain(browserQaPath);
+    expect(improvementLedger).toContain("\"gate\":\"continuous-improvement\"");
+    expect(readFileSync(join(runRoot, "events.jsonl"), "utf8")).toContain("run-closed");
+    expect(summary).toContain("Phase: closed");
+    expect(summary).toContain("Armaan action: none.");
   });
 
   it("imports the current Otis canary state without force-unlocking or abandoning evidence", async () => {

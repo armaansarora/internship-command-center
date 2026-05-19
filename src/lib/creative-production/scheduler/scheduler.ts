@@ -88,6 +88,7 @@ export interface CreativeSlotLease {
 export interface CreativeSlotLeaseStore {
   get(input: Pick<CreativeSlotLease, "runId" | "slotId" | "stage">): CreativeSlotLease | undefined;
   set(lease: CreativeSlotLease): void;
+  setIfAbsent?(lease: CreativeSlotLease): boolean;
   delete(lease: CreativeSlotLease): void;
 }
 
@@ -104,6 +105,13 @@ export class InMemorySlotLeaseStore implements CreativeSlotLeaseStore {
 
   set(lease: CreativeSlotLease): void {
     this.leases.set(this.key(lease), lease);
+  }
+
+  setIfAbsent(lease: CreativeSlotLease): boolean {
+    const key = this.key(lease);
+    if (this.leases.has(key)) return false;
+    this.leases.set(key, lease);
+    return true;
   }
 
   delete(lease: CreativeSlotLease): void {
@@ -140,6 +148,19 @@ export class FileCreativeSlotLeaseStore implements CreativeSlotLeaseStore {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(tempPath, `${JSON.stringify(lease, null, 2)}\n`);
     renameSync(tempPath, path);
+  }
+
+  setIfAbsent(lease: CreativeSlotLease): boolean {
+    const path = this.path(lease);
+
+    mkdirSync(dirname(path), { recursive: true });
+    try {
+      writeFileSync(path, `${JSON.stringify(lease, null, 2)}\n`, { flag: "wx" });
+      return true;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EEXIST") return false;
+      throw error;
+    }
   }
 
   delete(lease: CreativeSlotLease): void {
@@ -185,7 +206,12 @@ export function acquireCreativeSlotLease(
     heartbeatAtMs: nowMs,
     timeoutMs: input.timeoutMs,
   };
-  store.set(lease);
+  if (existing || !store.setIfAbsent) {
+    store.set(lease);
+  } else if (!store.setIfAbsent(lease)) {
+    throw new Error(`Slot ${input.slotId} is already leased for ${input.stage}.`);
+  }
+
   return lease;
 }
 

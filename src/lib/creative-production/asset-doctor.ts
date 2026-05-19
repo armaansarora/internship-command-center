@@ -1,5 +1,5 @@
 import { readFile, stat } from "node:fs/promises";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import sharp from "sharp";
 
 export type CreativeAssetDoctorSeverity = "warning" | "blocker";
@@ -169,6 +169,15 @@ export async function validateCreativeImageFile(
 }
 
 function resolveReviewBoardImagePath(boardPath: string, src: string): string {
+  if (isAbsolute(src)) {
+    const absolutePath = resolve(src);
+    const relativeToProject = relative(process.cwd(), absolutePath);
+
+    if (!relativeToProject.startsWith("..") && !isAbsolute(relativeToProject)) {
+      return absolutePath;
+    }
+  }
+
   if (src.startsWith("/")) {
     return join(process.cwd(), "public", src.replace(/^\//, ""));
   }

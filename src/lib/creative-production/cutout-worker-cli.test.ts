@@ -78,7 +78,9 @@ async function writeGeminiLikeNoAlphaSource(path: string): Promise<void> {
 describe("cutout worker CLI", () => {
   it("benchmarks a real selected local worker and turns a no-alpha Gemini-like source into a transparent PNG", async () => {
     const root = mkdtempSync(join(tmpdir(), "tower-cutout-worker-"));
-    const tsx = join(process.cwd(), "node_modules/.bin/tsx");
+    const projectRoot = process.cwd();
+    const tsx = join(projectRoot, "node_modules/.bin/tsx");
+    const adapterScript = join(projectRoot, "scripts/creative-generation-adapter.ts");
     const toolingRoot = join(root, ".artlab", "tooling", "cutout");
     const modelPath = join(toolingRoot, "models", "simple-backdrop-v1.json");
     const sourcePath = join(root, "fixture-source.jpg");
@@ -88,6 +90,9 @@ describe("cutout worker CLI", () => {
     const gatePath = join(root, "generation", "gemini-api-v3", "canary-gate.json");
     const inboxDirectory = join(root, "inbox", "slot-otis-canary");
     const planPath = join(planRoot, "gemini-api-plan.json");
+    const fromRoot = (path: string): string => path.startsWith(".artlab/")
+      ? join(root, path)
+      : path;
 
     mkdirSync(join(toolingRoot, "models"), { recursive: true });
     mkdirSync(inboxDirectory, { recursive: true });
@@ -165,41 +170,41 @@ describe("cutout worker CLI", () => {
     }));
 
     const benchmarkOutput = execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
+      adapterScript,
       "cutout-benchmark",
       "--fixture-set",
       fixtureSetPath,
       "--model-selection",
       selectionPath,
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    ], { cwd: root, encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
     const cutoutOutput = execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
+      adapterScript,
       "cutout-auto",
       "--plan",
       planPath,
       "--model-selection",
       selectionPath,
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    ], { cwd: root, encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
     const doctorOutput = execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
+      adapterScript,
       "cutout-doctor",
       "--plan",
       planPath,
       "--strict",
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    ], { cwd: root, encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
     const assetDoctorOutput = execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
+      adapterScript,
       "doctor",
       "--plan",
       planPath,
       "--strict",
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    ], { cwd: root, encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
     const verifyOutput = execFileSync(tsx, [
-      "scripts/creative-generation-adapter.ts",
+      adapterScript,
       "verify-canary",
       "--plan",
       planPath,
-    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    ], { cwd: root, encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
     const receipt = JSON.parse(readFileSync(join(inboxDirectory, "cutout-receipt.json"), "utf8")) as {
       status: string;
       outputPath: string;
@@ -234,9 +239,9 @@ describe("cutout worker CLI", () => {
     expect(outputMetadata.hasAlpha).toBe(true);
     expect(alphaAt(80, 120)).toBeGreaterThan(220);
     expect(alphaAt(8, 8)).toBe(0);
-    expect(existsSync(receipt.masteredPngPath)).toBe(true);
-    expect(existsSync(receipt.derivedPreviewPath)).toBe(true);
-    expect(existsSync(receipt.reviewPreviewPath)).toBe(true);
+    expect(existsSync(fromRoot(receipt.masteredPngPath))).toBe(true);
+    expect(existsSync(fromRoot(receipt.derivedPreviewPath))).toBe(true);
+    expect(existsSync(fromRoot(receipt.reviewPreviewPath))).toBe(true);
     expect(receipt.characterPipeline?.mode).toBe("art-master-derive-review");
     expect(receipt.characterPipeline?.canaryOnly).toBe(true);
     expect(receipt.characterPipeline?.notProductionCompletion).toBe(true);
@@ -245,6 +250,6 @@ describe("cutout worker CLI", () => {
     expect(receipt.masteredPngPath).toContain(".artlab/characters/otis/masters/");
     expect(receipt.derivedPreviewPath).toContain(".artlab/characters/otis/staged-public/");
     expect(receipt.reviewPreviewPath.endsWith("final-upload-ready-board.html")).toBe(true);
-    expect(readFileSync(receipt.reviewPreviewPath, "utf8")).toContain("CANARY ONLY");
+    expect(readFileSync(fromRoot(receipt.reviewPreviewPath), "utf8")).toContain("CANARY ONLY");
   }, 30000);
 });

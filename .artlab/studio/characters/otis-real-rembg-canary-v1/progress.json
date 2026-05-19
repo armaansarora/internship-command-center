@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tower-creative-progress-v1",
   "runId": "otis-real-rembg-canary-v1",
-  "phase": "browser-verified",
+  "phase": "closed",
   "runningSlots": [],
   "completed": 24,
   "failed": 0,
@@ -10,6 +10,6 @@
   "spendSoFarCents": 664.4,
   "reservedSpendCents": 0,
   "activeLocks": [],
-  "nextAutomaticStep": "Close the run after housekeeping and continuous improvement gates pass.",
-  "updatedAt": "2026-05-19T16:08:51Z"
+  "nextAutomaticStep": "Run is closed. Do not start Mara until Armaan asks; next safe command is npm run art:produce -- --request \"let's make Mara\".",
+  "updatedAt": "2026-05-19T16:30:31.017Z"
 }

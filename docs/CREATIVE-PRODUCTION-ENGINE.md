@@ -232,8 +232,9 @@ Cost rules:
 - Google Search grounding is disabled by default.
 - Failed individual slots are regenerated individually; the whole pack is not blindly rerun.
 - `local-mock`: test-only generator for pipeline hardening.
+- `art:produce -- --request "<request>" --dry-run`: no-provider operator rehearsal. It writes mock durable state, reserves no budget, explains projected production cost, and stops at the initial direction gate.
 
-Current baseline: Otis has been promoted into `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json`. `art:status` should report the Otis studio run as `integrated`, with browser QA as the next follow-up and no renewed `approved for app` prompt. Do not regenerate, overwrite, delete, or re-promote Otis unless Armaan explicitly asks.
+Current baseline: Otis has been promoted into `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json`. `art:status` should report the Otis studio run as `closed`, browser-QA verified, and protected, with no renewed `approved for app` prompt. Do not regenerate, overwrite, delete, or re-promote Otis unless Armaan explicitly asks.
 
 Subscription bridge shape:
 
@@ -277,7 +278,7 @@ npm run art:generate capture-download --bridge <generation-bridge.json> --slot <
 
 If the subscription UI outputs lower resolution than the source contract, the receipt must keep that warning visible. The engine may use local master/upscale processing later, but the warning cannot be hidden or treated as native 4K.
 
-Fresh-start rule: do not treat any old Otis probe, reference, browser download, or prior promoted sprite as current production source. The next Otis run must begin with prompt-only initial designs.
+Fresh-start rule for new characters: do not treat old probes, references, browser downloads, or unrelated promoted sprites as current production source. Start from prompt-only initial designs unless a current durable run-state explicitly names an approved identity reference. Otis is the exception because he is already the promoted and browser-verified production baseline.
 
 ## Adaptive Request Router
 

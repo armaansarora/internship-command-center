@@ -4,7 +4,7 @@
   "assetType": "character",
   "name": "Otis",
   "request": "Imported current Otis production canary state.",
-  "phase": "browser-verified",
+  "phase": "closed",
   "gates": [
     "initial-design-direction",
     "final-app-promotion"
@@ -14,7 +14,7 @@
   "stateRoot": ".artlab/studio",
   "runRoot": ".artlab/studio/characters/otis-real-rembg-canary-v1",
   "createdAt": "2026-05-19T06:18:35.344Z",
-  "updatedAt": "2026-05-19T16:08:51Z",
+  "updatedAt": "2026-05-19T16:30:31.017Z",
   "importedFrom": {
     "legacyRunId": "otis-real-rembg-canary-v1",
     "staleOrConflictingState": true,
@@ -32,7 +32,7 @@
       ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/asset-doctor.json"
     ]
   },
-  "nextLegalAction": "Close the run after housekeeping and continuous improvement gates pass.",
+  "nextLegalAction": "Run is closed; start the next creative asset only when Armaan asks.",
   "productionEvidence": {
     "fullPlanPath": ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/gemini-api-plan.json",
     "repairPlanPath": ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/repair-plan.json",

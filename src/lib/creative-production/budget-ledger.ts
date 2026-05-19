@@ -106,7 +106,7 @@ export function appendGenerationBudgetEntry(
     throw new Error("Whole-pack retries are banned; regenerate only named failed slots.");
   }
 
-  if (entry.phase === "production-pack" && entry.attempt > 1 && entry.slotIds.length > 3) {
+  if (entry.phase === "production-pack" && entry.attempt > 1) {
     throw new Error("Whole-pack retries are banned; use slot-repair for named failed slots.");
   }
 

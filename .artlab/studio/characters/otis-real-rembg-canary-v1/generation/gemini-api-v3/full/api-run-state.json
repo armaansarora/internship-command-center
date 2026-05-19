@@ -5,6 +5,8 @@
   "model": "gemini-3.1-flash-image-preview",
   "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/gemini-api-plan.json",
   "status": "completed-with-warnings",
+  "historicalStatus": "closed-baseline-evidence",
+  "supersededByRunStatePhase": "closed",
   "updatedAt": "2026-05-19T05:40:26.104Z",
   "selected": [
     {

@@ -349,9 +349,11 @@ docs/RUNBOOK.md              operations playbook (synthetic canary,
 .artlab/inbox/<assetType>/<runId>/     captured provider outputs before ingest
 ```
 
-Run `npm run art:operate` before continuing image work; use `npm run art:status`
-for read-only inspection. The art lab is currently reset: no Season 1 character
-has approved production art, and Otis Vale is the first from-scratch pilot.
+Use `npm run art:produce -- --request "<request>"` for new visual work and
+`npm run art:status` for read-only inspection. The art lab is past the reset:
+Otis Vale is promoted, browser-QA verified, closed, and protected as the Lobby
+baseline. New characters start from scratch unless a durable run-state names an
+approved identity reference.
 
 For broader visual work, use the Creative Production Engine. When Armaan says
 "Creative Production Engine" or asks to add/generate Tower visuals, run

@@ -24,6 +24,7 @@ export type CreativeRetentionKind =
   | "approved-manifest"
   | "approval-receipt"
   | "budget-receipt"
+  | "qa-evidence"
   | "active-run-state"
   | "loose-download"
   | "duplicate-binary"
@@ -71,6 +72,7 @@ const PROTECTED_KINDS = new Set<CreativeRetentionKind>([
   "approved-manifest",
   "approval-receipt",
   "budget-receipt",
+  "qa-evidence",
   "active-run-state",
 ]);
 

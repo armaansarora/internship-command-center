@@ -67,10 +67,11 @@ When Armaan says "Creative Production Engine" or asks to add/generate Tower visu
 For any character image work, run `npm run art:studio` first and read `docs/CHARACTER-IMAGE-OPERATIONS.md`. Use `npm run art:operate` only when the engine reaches the strict Season 1 character-art operator stage. Use `npm run art:status` for read-only inspection of promoted characters, run warnings, and the next recommended character.
 
 Current anchor state:
-- Fresh-start art reset is active: no Season 1 character art is currently approved in the production manifest.
-- Otis Vale is the first production pilot and must be generated from scratch through the engine before Mara Voss (`ceo`).
+- Fresh-start art reset was the pre-Otis baseline; Otis Vale is now promoted, browser-QA verified, closed, and protected as the production Lobby baseline.
+- `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json` are production truth for Otis.
+- Mara Voss (`ceo`) is the next unpromoted Season 1 character unless Armaan explicitly asks for a different asset.
 - Lobby backgrounds remain protected: `public/lobby/bg-1.jpg` through `public/lobby/bg-4.jpg`.
-- Do not use old Otis reference images, old run ledgers, or old public Otis sprites as source of truth.
+- Do not regenerate, overwrite, delete, or re-promote Otis unless Armaan explicitly asks. New characters still start from scratch unless a durable run-state names an approved identity reference.
 - Drafts and generated outputs stay in `.artlab`; only `npm run art:promote` can copy approved derivatives into `public/art`.
 - Production packs must pass the one-slot canary gate before full-pack paid generation. Whole-pack warning retries are banned; run non-paid repair first and regenerate only named failed slots.
 - Promotion requires Armaan's exact phrase: `approved for app`.

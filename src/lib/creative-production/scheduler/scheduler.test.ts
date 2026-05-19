@@ -11,6 +11,7 @@ import {
   heartbeatCreativeSlotLease,
   releaseCreativeSlotLease,
   runCreativeSlotScheduler,
+  type CreativeSlotLeaseStore,
   type CreativeSchedulerProgressSnapshot,
 } from "./scheduler";
 
@@ -169,6 +170,27 @@ describe("creative production scheduler", () => {
     });
 
     expect(recovered.workerId).toBe("worker-b");
+  });
+
+  it("fails closed when a concurrent lease writer wins between get and set", () => {
+    const store: CreativeSlotLeaseStore = {
+      get: () => undefined,
+      set: () => {
+        throw new Error("set should not be called when setIfAbsent is available");
+      },
+      setIfAbsent: () => false,
+      delete: () => undefined,
+    };
+
+    expect(() => acquireCreativeSlotLease(store, {
+      runId: "mara-lease-race",
+      slotId: "slot-a",
+      attemptId: "slot-a-attempt-1",
+      stage: "provider",
+      workerId: "worker-a",
+      timeoutMs: 1_000,
+      nowMs: 1_000,
+    })).toThrow("already leased");
   });
 
   it("persists slot leases to disk for crash-safe resume and stale recovery", () => {

@@ -1,6 +1,14 @@
 import { appendFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import {
+  createHousekeepingEntry,
+  validateRequiredPhaseGates,
+} from "../housekeeping";
+import {
+  createImprovementEntry,
+  writeJsonlEntry,
+} from "../improvement";
 import { buildFinalUploadReadyReviewBoard } from "../review";
 import type { CreativeAssetType } from "../types";
 import { renderCreativeRunStatusLines } from "./status-summary";
@@ -87,11 +95,14 @@ export interface CreativeEngineRunState {
   gates: ["initial-design-direction", "final-app-promotion"];
   promotionPhrase: "approved for app";
   publicArtWritesAllowed: boolean;
+  executionMode?: "normal" | "dry-run";
+  providerMode?: "local-mock";
   stateRoot: string;
   runRoot: string;
   createdAt: string;
   updatedAt: string;
   nextLegalAction?: string;
+  productionEvidence?: Record<string, unknown>;
   importedFrom?: {
     legacyRunId: string;
     legacyState?: string;
@@ -282,6 +293,7 @@ export async function startCreativeProductionRun(input: {
   stateRoot?: string;
   request: string;
   runId?: string;
+  dryRun?: boolean;
   now?: Date;
 }): Promise<CreativeRunArtifacts> {
   const now = input.now ?? new Date();
@@ -305,6 +317,10 @@ export async function startCreativeProductionRun(input: {
     gates: ["initial-design-direction", "final-app-promotion"],
     promotionPhrase: "approved for app",
     publicArtWritesAllowed: false,
+    ...(input.dryRun ? {
+      executionMode: "dry-run",
+      providerMode: "local-mock",
+    } : {}),
     stateRoot,
     runRoot,
     createdAt: now.toISOString(),
@@ -314,9 +330,13 @@ export async function startCreativeProductionRun(input: {
     runId,
     phase: state.phase,
     whatIUnderstood: `You want a Tower ${assetType} run for ${name} from: "${request}".`,
-    recommendation: "Approve the initial design direction, then let the engine generate concepts, run QA, repair, and build review boards without extra mini-approvals.",
+    recommendation: input.dryRun
+      ? "This is a dry-run mock review. Approve or revise the initial direction to test the durable operator flow; no provider requests or public-art writes will run."
+      : "Approve the initial design direction, then let the engine generate concepts, run QA, repair, and build review boards without extra mini-approvals.",
     estimatedCents,
-    risk: "Low. This creates drafts and state in .artlab only; public/art and production manifests stay locked.",
+    risk: input.dryRun
+      ? "Low. This creates mock state in .artlab only, makes no provider requests, reserves no budget, and keeps public/art plus production manifests locked."
+      : "Low. This creates drafts and state in .artlab only; public/art and production manifests stay locked.",
     allowedResponses: ["approve direction", "revise: <plain English change>", "reject/archive"],
     recommendedResponse: "approve direction",
     now,
@@ -327,13 +347,15 @@ export async function startCreativeProductionRun(input: {
     pending: initialPendingSlots(assetType),
     spendSoFarCents: 0,
     reservedSpendCents: 0,
-    nextAutomaticStep: "Wait for initial design direction approval. After approval, generate controlled parallel initial concepts.",
+    nextAutomaticStep: input.dryRun
+      ? "Dry-run mock review is waiting at the initial design direction gate. No paid provider calls are legal in this run."
+      : "Wait for initial design direction approval. After approval, generate controlled parallel initial concepts.",
     now,
   });
   const artifacts = { runRoot, state, progress, humanAction };
 
   await mkdir(runRoot, { recursive: true });
-  await writeArtifacts(artifacts, "run-requested");
+  await writeArtifacts(artifacts, input.dryRun ? "dry-run-requested" : "run-requested");
 
   return artifacts;
 }
@@ -768,4 +790,112 @@ export async function buildFinalBoardForCreativeRun(input: {
     boardPath,
     actionManifestPath,
   };
+}
+
+function stringEvidence(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+export async function closeCreativeRunAfterGates(input: {
+  runRoot: string;
+  now?: Date;
+}): Promise<CreativeRunArtifacts> {
+  const now = input.now ?? new Date();
+  const statePath = join(input.runRoot, "run-state.json");
+  const progressPath = join(input.runRoot, "progress.json");
+  const state = await readJson<CreativeEngineRunState>(statePath);
+  const currentProgress = await readJson<CreativeProgressFile>(progressPath);
+
+  if (!state) throw new Error(`Missing run-state.json at ${statePath}.`);
+  if (!currentProgress) throw new Error(`Missing progress.json at ${progressPath}.`);
+  if (state.phase !== "browser-verified") {
+    throw new Error(`Run can only close from browser-verified; current phase is ${state.phase}.`);
+  }
+  if (currentProgress.activeLocks.length > 0 || currentProgress.runningSlots.length > 0) {
+    throw new Error("Run cannot close while locks or running slots are active.");
+  }
+
+  const ledgerRoot = join(state.stateRoot, "ledgers");
+  const evidence = state.productionEvidence ?? {};
+  const kept = [
+    statePath,
+    progressPath,
+    join(input.runRoot, "human-action.json"),
+    stringEvidence(evidence.browserQaEvidencePath),
+    stringEvidence(evidence.finalReviewBoardPath),
+    stringEvidence(evidence.publicArtRoot),
+    stringEvidence(evidence.approvedManifestPath),
+  ].filter((path): path is string => Boolean(path));
+  const housekeeping = createHousekeepingEntry({
+    runId: state.runId,
+    phase: "next-recommendation",
+    created: [],
+    kept,
+    archived: [],
+    deleted: [],
+    notes: "Otis browser QA evidence is recorded; live public art and generated production manifest remain protected; no generation, promotion, or cleanup deletion ran during close.",
+  });
+  const improvement = createImprovementEntry({
+    runId: state.runId,
+    phase: "next-recommendation",
+    category: "workflow",
+    severity: "low",
+    finding: "Otis closure completed from durable browser QA evidence without a new blocking engine issue.",
+    action: "Keep Otis as the promoted regression baseline and start the next asset only when Armaan explicitly asks.",
+  });
+  const gateValidation = validateRequiredPhaseGates(state.runId, "next-recommendation", [
+    housekeeping,
+    improvement,
+  ]);
+
+  if (!gateValidation.ok) {
+    throw new Error(`Missing required close gates: ${gateValidation.missing.join(", ")}`);
+  }
+
+  await writeJsonlEntry(join(ledgerRoot, "housekeeping.jsonl"), housekeeping);
+  await writeJsonlEntry(join(ledgerRoot, "improvements.jsonl"), improvement);
+
+  const nextState: CreativeEngineRunState = {
+    ...state,
+    phase: "closed",
+    publicArtWritesAllowed: false,
+    updatedAt: now.toISOString(),
+    nextLegalAction: "Run is closed; start the next creative asset only when Armaan asks.",
+  };
+  const progress = createProgress({
+    runId: state.runId,
+    phase: "closed",
+    completed: currentProgress.completed,
+    failed: currentProgress.failed,
+    repairing: currentProgress.repairing,
+    pending: currentProgress.pending,
+    runningSlots: [],
+    spendSoFarCents: currentProgress.spendSoFarCents,
+    reservedSpendCents: 0,
+    activeLocks: [],
+    nextAutomaticStep: "Run is closed. Do not start Mara until Armaan asks; next safe command is npm run art:produce -- --request \"let's make Mara\".",
+    now,
+  });
+  const humanAction = createHumanAction({
+    runId: state.runId,
+    phase: "closed",
+    whatIUnderstood: "Otis browser QA passed and the run has gone through housekeeping and continuous-improvement close gates.",
+    recommendation: "No human action is needed for Otis. Keep the promoted baseline protected and wait for Armaan before starting Mara.",
+    estimatedCents: 0,
+    reservedCents: 0,
+    risk: "Low. Closing writes only run state and audit ledgers; public art and production manifests stay unchanged.",
+    allowedResponses: [],
+    recommendedResponse: "none",
+    now,
+  });
+  const artifacts = {
+    runRoot: input.runRoot,
+    state: nextState,
+    progress,
+    humanAction,
+  };
+
+  await writeArtifacts(artifacts, "run-closed");
+
+  return artifacts;
 }

@@ -150,7 +150,7 @@ export function planGeminiApiRunExecution(input: {
   const selectedWarningRetries = selectedSlots.filter((slot) => slot.reason === "retry-warning-receipt");
   const wholeProductionPackWarningRetry = input.plan.phase === "production-pack"
     && !allowedSlotIdSet
-    && selectedWarningRetries.length > 3
+    && selectedWarningRetries.length > 0
     && selectedWarningRetries.length === input.plan.slots.length;
 
   if (wholeProductionPackWarningRetry) {

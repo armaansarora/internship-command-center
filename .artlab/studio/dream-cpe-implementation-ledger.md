@@ -59,3 +59,31 @@
 - `scripts/art-pipeline.ts` remains a pre-existing 1,452-line character pipeline CLI. This run touched only status/cleanup integration and did not expand promotion surfaces.
 - `src/lib/creative-production/operator/v1-final.ts` is 771 lines after extracting status rendering; it remains above 500 because it owns the V1-final run-state state machine and Otis import bridge.
 - `src/lib/creative-production/scheduler/scheduler.ts` is 549 lines after adding the durable file-backed lease store and optional attempt/provenance metadata; it owns scheduler, lease, overlap, and retry behavior in one module for now.
+
+## 2026-05-19 Final Certification Pass
+
+- Confirmed no old active goal was present before continuing the certification goal.
+- Baseline status/health reported Otis as `closed`, safe to run, no active locks/processes, 24 completed slots, `$6.64` spent, `$0.00` reserved, and no required Armaan action.
+- Added safe `art:produce -- --request "... " --dry-run` operator rehearsal support. Dry-runs write durable mock `run-state.json`, `progress.json`, `human-action.json`, and `events.jsonl`, mark `providerMode: local-mock`, reserve no budget, and stop at the initial design approval gate.
+- Added the legal close path for browser-verified runs. Closing records Housekeeping and Continuous Improvement ledger entries, moves Otis to `closed`, clears human action, and leaves public art plus production manifests unchanged.
+- Tightened cleanup retention so browser QA JSON and final-board browser screenshot evidence are protected as `qa-evidence` during `art:clean --dry-run`.
+- Tightened whole-pack retry blocking: small production packs are now blocked the same way as large production packs unless a retry is a named slot repair.
+- Hardened slot leases against cross-process races with an atomic `setIfAbsent` path for file-backed leases.
+- Moved live Gemini provider-budget ledger creation to `prepare-api`; live `run-api` now fails closed if the provider ledger is missing, stale, or mismatched before key/provider work can proceed.
+- Fixed review-board image validation so absolute filesystem image references inside the repo validate against the actual local file instead of being misread as web-root public paths.
+- Fixed `art:produce -- --answer` parsing so flags placed after the plain-English answer are not swallowed into the durable response.
+- Isolated cleanup and cutout-worker tests that were writing synthetic fixture state into the real `.artlab` registry/run tree; the full creative-production suite now leaves production Otis artifacts untouched except for intentional evidence refreshes.
+- Updated CPE docs, `.artlab/README.md`, `CLAUDE.md`, `STRUCTURE.md`, session prompt docs, and studio state to identify Otis as promoted, browser-QA verified, closed, and protected. Mara is now the next likely unpromoted character when Armaan asks.
+- Current app-preview note: Otis has browser QA evidence for the integrated app surfaces. A separate `app-preview-board.html` is not generated for the already closed Otis baseline because reopening the run would create stale approval semantics; new assets still pass through app-preview artifacts before promotion.
+- Verification refresh:
+  - `npm run art:produce -- --request "let's make Mara" --dry-run --state-root /tmp/tower-cpe-cert-dry-run --run-id mara-cert-dry-run-v1` wrote a local-mock run with `$0.00` reserved.
+  - `npm run art:produce -- --continue mara-cert-dry-run-v1 --state-root /tmp/tower-cpe-cert-dry-run` resumed from files.
+  - `npm run art:produce -- --answer mara-cert-dry-run-v1 "approve direction" --state-root /tmp/tower-cpe-cert-dry-run` recorded the answer durably and advanced to `initial-direction-approved`.
+  - `npm test -- src/lib/creative-production` passed 40 files / 205 tests.
+  - `npm test -- src/lib/visual-assets src/components/visual-assets` passed 8 files / 29 tests.
+  - `npm test -- src/lib/creative-production/v1-final-stress.test.ts src/lib/creative-production/dream-pipeline.test.ts` passed the 100-scenario stress suite plus dream vertical slice.
+  - `npx tsc --noEmit --pretty false`, `npm run lint`, and `git diff --check` passed.
+  - `npx playwright test tests/e2e/otis-browser-qa.spec.ts --project=chromium` passed and refreshed browser QA evidence with 8 route/viewport/motion rows.
+  - `npm run art:generate -- doctor --plan .artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/gemini-api-plan.json --board .artlab/runs/otis/otis-real-rembg-full-production-v1/review/final-upload-ready-board.html --strict` passed.
+  - `npm run art:clean -- otis --run-id otis-real-rembg-full-production-v1 --dry-run` protected public Otis, the generated manifest, browser QA JSON, and the final-board browser screenshot.
+  - Final public-art/approved-manifest diff check was empty.

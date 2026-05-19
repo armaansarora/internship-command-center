@@ -42,6 +42,7 @@ Use this skill when the user says any close variant of:
      - `npm run art:produce -- --answer <run-id> "<plain English answer>"`
      - `npm run art:status`
      - `npm run art:health`
+   - Use `npm run art:produce -- --request "<request>" --dry-run` only for a no-provider rehearsal; it writes mock durable state, reserves no budget, and must stop before paid generation.
    - `art:produce` writes durable `run-state.json`, `progress.json`, `human-action.json`, and append-only `events.jsonl`. Future sessions resume from those files and receipts, not chat history.
    - Every human stop must have `human-action.json` with what the engine understood, recommendation, cost impact, risk, allowed responses, and recommended response.
    - `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Do not continue production until the command/test/doc hardening is done.
@@ -60,7 +61,7 @@ Use this skill when the user says any close variant of:
    - Production packs after design approval must use `--phase production-pack`; stale plans without an explicit phase are invalid and must be regenerated.
    - Production packs with more than one source slot create a canary plan and a blocked full plan. Run the canary through generation, local cutout, edge refinement, strict cutout doctor, ingest/master/derive/review preview, then `npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>`. The full plan must not run until `canary-gate.json` is `passed` and `cutout-readiness.json` is `ready`.
    - Whole-pack warning retries are banned. Use `npm run art:generate repair-auto --plan <plan>` first, then regenerate only named failed slots with `npm run art:generate run-api --plan <plan> --slots <slot-id-a,slot-id-b>`.
-   - API runs are protected by `api-run.lock`, `api-run-state.json`, clean-slot skipping, warning-slot retries, request timeouts, retryable network failure handling, and budget projection. Use `--max-attempts <n>` for retry caps and `--force-unlock` only after confirming no API run is active.
+   - API runs are protected by `api-run.lock`, `api-run-state.json`, provider-budget ledgers created by `prepare-api`, clean-slot skipping, warning-slot retries, request timeouts, retryable network failure handling, and budget projection. Use `--max-attempts <n>` for retry caps and `--force-unlock` only after confirming no API run is active.
    - `api-run-state.json` status `completed-with-warnings` is not production-ready. Treat it as concept-only or repair-required until the warnings are fixed.
    - After generated images or review boards exist, run the Asset Doctor Gate: `npm run art:generate doctor -- --plan <gemini-api-plan.json> --board <review-board.html>`. Add `--strict` before final upload-ready approval. If it blocks, do not show the board as clean and do not promote.
    - If doctor reports warnings or blockers, immediately run `npm run art:generate repair-plan -- --plan <gemini-api-plan.json> --board <review-board.html> --strict`, then `npm run art:generate repair-auto --plan <gemini-api-plan.json>` for safe non-paid repairs, so the next step is an exact per-slot repair packet, not a human guess from raw warnings.

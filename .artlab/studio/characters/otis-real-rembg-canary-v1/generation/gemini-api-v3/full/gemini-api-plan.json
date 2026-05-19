@@ -2,6 +2,8 @@
   "schemaVersion": "tower-gemini-api-generation-plan-v3",
   "adapter": "gemini-api",
   "status": "blocked-pending-canary",
+  "historicalStatus": "closed-baseline-evidence",
+  "supersededByRunStatePhase": "closed",
   "phase": "production-pack",
   "billingPolicy": "api-billed-explicitly-approved",
   "secretPolicy": {

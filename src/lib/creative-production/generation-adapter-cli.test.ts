@@ -16,6 +16,26 @@ function sha256File(path: string): string {
   return `sha256:${createHash("sha256").update(readFileSync(path)).digest("hex")}`;
 }
 
+function writeProviderBudgetLedger(planRoot: string, runId: string, approvedBudgetCents: number): void {
+  writeFileSync(join(planRoot, "provider-budget-ledger.json"), `${JSON.stringify({
+    schemaVersion: "tower-creative-budget-ledger-v1",
+    runId,
+    approvedBudgetCents,
+    createdAt: "2026-05-19T12:00:00.000Z",
+    updatedAt: "2026-05-19T12:00:00.000Z",
+    totals: {
+      estimatedCents: 0,
+      reservedCents: 0,
+      spentCents: 0,
+      releasedCents: 0,
+      refundedCents: 0,
+      remainingCents: approvedBudgetCents,
+    },
+    reservations: [],
+    receipts: [],
+  }, null, 2)}\n`);
+}
+
 describe("art:generate CLI", () => {
   it("prepares a Gemini subscription bridge from an existing packet and directive", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-generate-"));
@@ -251,6 +271,7 @@ describe("art:generate CLI", () => {
     expect(plan.slots[0]?.prompt).toContain("Nano Banana 2 only");
     expect(existsSync(join(planRoot, "gemini-api-runbook.md"))).toBe(true);
     expect(existsSync(join(planRoot, "prompt-deck.md"))).toBe(true);
+    expect(existsSync(join(planRoot, "provider-budget-ledger.json"))).toBe(true);
   });
 
   it("prepares production-pack API plans behind a canary gate", () => {
@@ -954,6 +975,7 @@ describe("art:generate CLI", () => {
         },
       ],
     }));
+    writeProviderBudgetLedger(root, "no-key", 100);
 
     expect(() => execFileSync(tsx, [
       "scripts/creative-generation-adapter.ts",
@@ -970,6 +992,69 @@ describe("art:generate CLI", () => {
         GOOGLE_API_KEY: "",
       },
     })).toThrow(/Missing Gemini API key/);
+  });
+
+  it("refuses live API runs when the provider budget ledger is missing", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-generate-api-no-provider-ledger-"));
+    const planPath = join(root, "gemini-api-plan.json");
+
+    mkdirSync(root, { recursive: true });
+    writeFileSync(planPath, JSON.stringify({
+      schemaVersion: "tower-gemini-api-generation-plan-v3",
+      adapter: "gemini-api",
+      status: "ready-for-api-generation",
+      phase: "production-pack",
+      runId: "missing-provider-ledger",
+      assetType: "prop",
+      name: "Missing Provider Ledger",
+      planRoot: root,
+      apiBaseUrl: "https://generativelanguage.googleapis.com/v1beta",
+      model: "gemini-3.1-flash-image-preview",
+      modelLabel: "Nano Banana 2",
+      imageSize: "4K",
+      aspectRatio: "1:1",
+      laneCount: 1,
+      maxConcurrency: 1,
+      costPerImageCents: 15.1,
+      estimatedCostCents: 15.1,
+      budgetCents: 100,
+      sourceRequirements: {},
+      referenceImages: [],
+      slots: [
+        {
+          slotId: "slot-a",
+          laneId: "api-lane-01",
+          baseSlotId: "slot-a",
+          expectedInboxFile: join(root, "inbox", "slot-a.png"),
+          inboxDirectory: join(root, "inbox"),
+          prompt: "Generate.",
+          promptHash: "abc",
+          request: {
+            model: "gemini-3.1-flash-image-preview",
+            aspectRatio: "1:1",
+            imageSize: "4K",
+            responseModalities: ["IMAGE"],
+            includeGoogleSearch: false,
+          },
+        },
+      ],
+    }));
+
+    expect(() => execFileSync(tsx, [
+      "scripts/creative-generation-adapter.ts",
+      "run-api",
+      "--plan",
+      planPath,
+    ], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        NODE_ENV: "test",
+        GEMINI_API_KEY: `${["AI", "za"].join("")}THIS_IS_A_FAKE_TEST_KEY_SHAPE_ONLY_1234567890`,
+        GOOGLE_API_KEY: "",
+      },
+    })).toThrow(/Provider budget ledger is missing/);
   });
 
   it("refuses stale API plans that predate explicit phase gating", () => {
@@ -1053,6 +1138,7 @@ describe("art:generate CLI", () => {
         },
       ],
     }));
+    writeProviderBudgetLedger(root, "bad-key", 100);
 
     expect(() => execFileSync(tsx, [
       "scripts/creative-generation-adapter.ts",

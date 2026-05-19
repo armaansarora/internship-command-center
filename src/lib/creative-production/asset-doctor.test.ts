@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
@@ -46,6 +46,40 @@ describe("creative asset doctor", () => {
       height: 192,
       format: "png",
     });
+  });
+
+  it("passes decodable absolute filesystem image references in local review boards", async () => {
+    const root = mkdtempSync(join(process.cwd(), ".tower-review-board-absolute-"));
+    const boardPath = join(root, "review", "board.html");
+    const imagePath = join(root, "images", "otis.png");
+
+    try {
+      mkdirSync(join(root, "review"), { recursive: true });
+      mkdirSync(join(root, "images"), { recursive: true });
+      await sharp({
+        create: {
+          width: 128,
+          height: 192,
+          channels: 4,
+          background: "#aa8844",
+        },
+      }).png().toFile(imagePath);
+      writeFileSync(boardPath, `<img src="${imagePath}" alt="Otis">`);
+
+      const result = await validateReviewBoardImageReferences({ boardPath });
+
+      expect(result.ok).toBe(true);
+      expect(result.issues).toEqual([]);
+      expect(result.checkedImages[0]).toMatchObject({
+        src: imagePath,
+        resolvedPath: imagePath,
+        width: 128,
+        height: 192,
+        format: "png",
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it("blocks missing review board images before a human approval board is shown", async () => {
