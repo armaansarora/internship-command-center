@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tower-otis-browser-qa-v1",
   "runId": "otis-real-rembg-full-production-v1",
-  "checkedAt": "2026-05-19T16:55:43.367Z",
+  "checkedAt": "2026-05-19T19:14:53.123Z",
   "scope": {
     "routes": [
       "/lobby",
@@ -37,7 +37,7 @@
           "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
           "width": 72,
           "height": 123,
-          "top": 98,
+          "top": 100,
           "left": 892,
           "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75"
         }
@@ -69,10 +69,10 @@
       "otisBounds": [
         {
           "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
-          "width": 74,
-          "height": 126,
-          "top": 412,
-          "left": 41,
+          "width": 72,
+          "height": 122,
+          "top": 455,
+          "left": 46,
           "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75"
         }
       ]
