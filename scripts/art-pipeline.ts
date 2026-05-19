@@ -648,9 +648,9 @@ async function commandClean(args: ParsedArgs): Promise<void> {
   ];
   const cleanupPlan = planRetentionCleanup(registryEntries);
 
-  await writeCreativeRetentionRegistry(registryPath, registryEntries);
-
   if (!dryRun) {
+    await writeCreativeRetentionRegistry(registryPath, registryEntries);
+
     for (const target of cleanupPlan.deleteEntries.map((entry) => entry.path)) {
       await rm(target, { recursive: true, force: true });
     }

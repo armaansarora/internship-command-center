@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 const tsx = join(process.cwd(), "node_modules/.bin/tsx");
 
 describe("art:clean registry integration", () => {
-  it("writes a durable artifact registry and reports cleanup through registry rules", () => {
+  it("writes a durable artifact registry and reports cleanup through registry rules when executing", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-clean-"));
 
     const output = execFileSync(tsx, [
@@ -16,7 +16,6 @@ describe("art:clean registry integration", () => {
       "otis",
       "--run-id",
       "otis-clean-v1",
-      "--dry-run",
     ], { cwd: root, encoding: "utf8" });
     const parsed = JSON.parse(output) as {
       registryPath: string;
@@ -32,6 +31,26 @@ describe("art:clean registry integration", () => {
     expect(JSON.parse(readFileSync(join(root, parsed.registryPath), "utf8"))).toMatchObject({
       schemaVersion: "tower-creative-retention-registry-v1",
     });
+  });
+
+  it("does not write the artifact registry during dry-run cleanup", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-clean-dry-run-"));
+
+    const output = execFileSync(tsx, [
+      join(process.cwd(), "scripts/art-pipeline.ts"),
+      "clean",
+      "otis",
+      "--run-id",
+      "otis-clean-v1",
+      "--dry-run",
+    ], { cwd: root, encoding: "utf8" });
+    const parsed = JSON.parse(output) as {
+      registryPath: string;
+      dryRun: boolean;
+    };
+
+    expect(parsed.dryRun).toBe(true);
+    expect(existsSync(join(root, parsed.registryPath))).toBe(false);
   });
 
   it("protects promoted Otis public art, manifests, browser QA, and final-board browser evidence on dry-run cleanup", () => {
