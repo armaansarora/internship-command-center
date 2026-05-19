@@ -15,10 +15,13 @@ describe("creative production budget ledger", () => {
     });
     const reserved = reserveCreativeBudget(ledger, {
       providerId: "gemini-api",
+      providerModel: "gemini-3.1-flash-image-preview",
       slotId: "pose-idle",
       attemptId: "pose-idle-attempt-1",
       estimateCents: 30,
       sourceHash: "prompt-hash-a",
+      promptHash: "prompt-hash-a",
+      referenceHash: "identity-ref-hash-a",
       now: "2026-05-19T12:00:01.000Z",
     });
     const spent = recordCreativeBudgetSpend(reserved.ledger, {
@@ -54,9 +57,12 @@ describe("creative production budget ledger", () => {
     expect(spent.receipt).toMatchObject({
       slotId: "pose-idle",
       attemptId: "pose-idle-attempt-1",
+      providerModel: "gemini-3.1-flash-image-preview",
       costEstimateCents: 30,
       actualCostCents: 24,
       sourceHash: "prompt-hash-a",
+      promptHash: "prompt-hash-a",
+      referenceHash: "identity-ref-hash-a",
       outputHash: "source-hash-a",
       failureClassification: undefined,
       responseMetadata: { model: "gemini-3.1-flash-image-preview" },

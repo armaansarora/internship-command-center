@@ -1,3 +1,6 @@
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+
 export const CREATIVE_RETENTION_STATUSES = [
   "draft",
   "candidate",
@@ -49,6 +52,12 @@ export interface CreativeRetentionCleanupPlan {
   archiveEntries: CreativeRetentionEntry[];
   deleteEntries: CreativeRetentionEntry[];
   keepEntries: CreativeRetentionEntry[];
+}
+
+export interface CreativeRetentionRegistryFile {
+  schemaVersion: "tower-creative-retention-registry-v1";
+  updatedAt: string;
+  entries: CreativeRetentionEntry[];
 }
 
 const HIDDEN_IN_NORMAL = new Set<CreativeRetentionStatus>([
@@ -153,4 +162,35 @@ export function planRetentionCleanup(entries: readonly CreativeRetentionEntry[])
     deleteEntries,
     keepEntries,
   };
+}
+
+export async function writeCreativeRetentionRegistry(
+  path: string,
+  entries: readonly CreativeRetentionEntry[],
+  now = new Date(),
+): Promise<CreativeRetentionRegistryFile> {
+  const registry: CreativeRetentionRegistryFile = {
+    schemaVersion: "tower-creative-retention-registry-v1",
+    updatedAt: now.toISOString(),
+    entries: [...entries],
+  };
+  const tempPath = `${path}.${process.pid}.${Date.now()}.tmp`;
+
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(tempPath, `${JSON.stringify(registry, null, 2)}\n`);
+  await rename(tempPath, path);
+
+  return registry;
+}
+
+export async function readCreativeRetentionRegistry(
+  path: string,
+): Promise<CreativeRetentionEntry[]> {
+  const parsed = JSON.parse(await readFile(path, "utf8")) as Partial<CreativeRetentionRegistryFile>;
+
+  if (parsed.schemaVersion !== "tower-creative-retention-registry-v1" || !Array.isArray(parsed.entries)) {
+    throw new Error(`Invalid creative retention registry at ${path}.`);
+  }
+
+  return parsed.entries;
 }

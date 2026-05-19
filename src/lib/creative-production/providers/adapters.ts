@@ -26,6 +26,9 @@ export interface CreativeProviderSlotRequest {
   attemptId: string;
   prompt: string;
   sourceHash: string;
+  promptHash?: string;
+  referenceHash?: string;
+  providerModel?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -103,6 +106,9 @@ function createBaseAdapter(input: {
       attemptId: request.attemptId,
       estimateCents: request.estimateCents,
       sourceHash: request.sourceHash,
+      promptHash: request.promptHash ?? request.sourceHash,
+      ...(request.referenceHash ? { referenceHash: request.referenceHash } : {}),
+      ...(request.providerModel ? { providerModel: request.providerModel } : {}),
       namedRetryAuthorized: request.namedRetryAuthorized,
     }),
     generateSlot: async (request) => {

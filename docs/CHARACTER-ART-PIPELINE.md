@@ -71,7 +71,7 @@ The standard is simple: if the asset would make the Tower feel cheaper, it does 
 - Approved production sprites: `public/art/<space>/<characterId>/<outfitVariant>/<pose>.webp`
 - Required retina derivatives: `public/art/<space>/<characterId>/<outfitVariant>/<pose>@2x.webp` and `public/art/<space>/<characterId>/<outfitVariant>/<pose>@3x.webp`
 
-The active studio has been reset. Previous Otis prototype artifacts are not part of the current production state. New Otis work starts from a prompt-only five-option concept board, then uses the approved winner as the identity source for the production pack.
+Previous Otis draft and canary artifacts remain provenance in `.artlab`. Promoted Otis is the current production baseline in `public/art/lobby/otis/`; replacement Otis work must be a new run and must pass the same two-gate workflow before changing `public/art` or the generated manifest.
 
 Drafts do not enter `public/art`. Production files are never overwritten in place; a new approved version gets a new source artifact and then the manifest changes.
 
@@ -87,6 +87,8 @@ The runtime contract lives in `src/lib/visual-assets/production-contract.ts`.
 - `getMissingApprovedCharacterSprites(VISUAL_ASSETS)` reports what is still absent from the approved manifest.
 
 This means the image-generation phase should not invent filenames, dimensions, alt text, prompt refs, or manifest ids. It should produce approved files that satisfy the contract.
+
+Current production baseline: Otis Vale is promoted with 21 approved sprite slots and 63 WebP renditions, and the generated manifest is `src/lib/visual-assets/approved-character-assets.generated.json`. Treat that as production truth unless Armaan explicitly asks to redo Otis.
 
 ## Batch Run Contract
 
@@ -241,14 +243,11 @@ Subagents may not commit, deploy, touch secrets, or add unapproved files to the 
 
 ## First Pilot: Otis
 
-Otis remains first because the Lobby already has canonical environmental art. The active studio has been reset, so Otis has no approved production sprites right now.
+Otis remains first because the Lobby already has canonical environmental art. Otis is now promoted and integrated, so he is the first production regression baseline rather than a new generation target.
 
 Next:
 
-- Run `npm run art:studio`.
-- Confirm `npm run art:status` reports `0/252` approved character production sprites.
-- Generate exactly five prompt-only Otis initial designs from scratch.
-- After Armaan chooses one, generate the production pack and final upload-ready board.
-- Promote only after `approved for app`.
-- Then browser-check `/lobby` and `/lobby/onboarding`.
-- Mara Voss (`ceo`) comes after Otis is promoted.
+- Run `npm run art:status`.
+- Confirm Otis reports as `integrated` and protected as the promoted baseline.
+- Use Otis as the first regression fixture for status, health, cleanup, manifest protection, and browser checks.
+- Mara Voss (`ceo`) is the next unpromoted character unless Armaan explicitly asks to redo Otis.

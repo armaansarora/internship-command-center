@@ -8,9 +8,10 @@ This is the start-here runbook for any Codex or Claude session that continues To
 - Locked tone: `Professional Scars`.
 - Runtime model: high-resolution pose sprites plus subtle `CharacterStage` motion.
 - Production gate: no character art enters `public/art` or the approved manifest until Armaan says exactly `approved for app`.
-- Fresh-start reset is active: no Season 1 character has approved production sprites right now.
-- Otis Vale is the first production pilot and must be generated from scratch, not from previous Otis reference images.
-- Mara Voss (`ceo`) remains the next character after Otis is fully approved and promoted.
+- Otis Vale is the promoted production baseline in `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json`.
+- Do not regenerate, overwrite, delete, or re-promote Otis unless Armaan explicitly asks.
+- Mara Voss (`ceo`) is the next unpromoted Season 1 character after the Otis baseline.
+- Fresh-start rule: new character image work starts from scratch unless a current run-state explicitly names an approved identity reference.
 - The four Lobby backgrounds in `public/lobby/bg-1.jpg` through `public/lobby/bg-4.jpg` are protected and untouched.
 
 ## First Commands
@@ -33,6 +34,12 @@ For engine safety before another provider or promotion step:
 npm run art:health
 ```
 
+To answer a durable human-action gate:
+
+```bash
+npm run art:produce -- --answer <run-id> "<plain English answer>"
+```
+
 For machine-readable handoff:
 
 ```bash
@@ -44,9 +51,9 @@ Use `npm run art:operate` only when the active asset is a Season 1 character and
 ## If Armaan Says Continue Generating Images
 
 1. Run `npm run art:studio`.
-2. Confirm the fresh-start status in plain language: no approved character art, Otis is first, Lobby backgrounds remain.
+2. Confirm the current art state in plain language: promoted Otis is protected, Lobby backgrounds remain, and any new requested character starts from scratch unless a current run-state explicitly names an approved identity reference.
 3. Ask what is being added or changed today if the request is not already clear.
-4. For Otis from scratch, create exactly five prompt-only initial concepts with five concurrent lanes. Do not attach old Otis reference images.
+4. For a new or explicitly requested character, create exactly five prompt-only initial concepts with five concurrent lanes. Do not reuse an old reference unless the current run-state says it is the approved identity reference.
 5. Show the five initial designs and wait for Armaan to pick one direction.
 6. After the initial design is approved, generate the production pack: turnaround, outfit variants, expressions, poses, masters, derivatives, QA, and final board.
 7. Show only one final upload-ready board for approval.
@@ -66,11 +73,12 @@ Production paid generation is canary-gated. After an initial design is chosen, p
 - The five initial concepts must run concurrently when using the API path.
 - Production packs happen only after one initial design is chosen.
 - Gemini API runs use Nano Banana 2 through the generation adapter when API spending is explicitly approved.
+- Gemini API `run-api` execution is scheduled through the shared durable slot scheduler. Check `provider-budget-ledger.json`, `api-run-state.json`, inbox receipts, and `slot-leases/` together before assuming a retry is safe.
 - API keys must come from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`; never write keys into repo files.
 - Gemini does not reliably return production-ready transparent foregrounds. Production character prompts should use `premium-simple-backdrop-v1`, then run local cutout, edge refinement, and alpha QA before mastering.
 - Failed slots are repaired or regenerated individually. Do not rerun a whole pack because one image failed.
 - Generated outputs stay in `.artlab` until final promotion.
-- `src/lib/visual-assets/approved-character-assets.generated.json` stays empty until a full character board is approved for app.
+- `src/lib/visual-assets/approved-character-assets.generated.json` is the production character manifest. It currently includes promoted Otis and must not be cleared or rewritten except through the final promotion firewall.
 - Current v1-final runs resume from `run-state.json`, `progress.json`, `human-action.json`, `events.jsonl`, receipts, and review action manifests. Do not rely on chat history.
 - `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Resolved historical failures are reset by an `engine-upgrade` ledger entry.
 

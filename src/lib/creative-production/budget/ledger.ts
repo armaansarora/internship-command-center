@@ -19,8 +19,11 @@ export interface CreativeBudgetReservation {
   slotId: string;
   attemptId: string;
   providerId: CreativeProductionProviderId;
+  providerModel?: string;
   estimateCents: number;
   sourceHash: string;
+  promptHash: string;
+  referenceHash?: string;
   status: "reserved" | "spent" | "released";
   namedRetryAuthorized: boolean;
   createdAt: string;
@@ -35,11 +38,14 @@ export interface CreativeBudgetReceipt {
   slotId: string;
   attemptId: string;
   providerId: CreativeProductionProviderId;
+  providerModel?: string;
   reservationId: string;
   status: CreativeBudgetReceiptStatus;
   costEstimateCents: number;
   actualCostCents: number;
   sourceHash: string;
+  promptHash: string;
+  referenceHash?: string;
   outputHash?: string;
   responseMetadata: Record<string, unknown>;
   failureClassification?: CreativeFailureClassification;
@@ -163,10 +169,13 @@ export function reserveCreativeBudget(
   ledger: CreativeBudgetLedger | undefined,
   input: {
     providerId: CreativeProductionProviderId;
+    providerModel?: string;
     slotId: string;
     attemptId: string;
     estimateCents: number;
     sourceHash: string;
+    promptHash?: string;
+    referenceHash?: string;
     now?: string | Date;
     namedRetryAuthorized?: boolean;
   },
@@ -207,8 +216,11 @@ export function reserveCreativeBudget(
     slotId: input.slotId,
     attemptId: input.attemptId,
     providerId: input.providerId,
+    ...(input.providerModel ? { providerModel: input.providerModel } : {}),
     estimateCents: input.estimateCents,
     sourceHash: input.sourceHash,
+    promptHash: input.promptHash ?? input.sourceHash,
+    ...(input.referenceHash ? { referenceHash: input.referenceHash } : {}),
     status: "reserved",
     namedRetryAuthorized: input.namedRetryAuthorized ?? false,
     createdAt: now,
@@ -258,11 +270,14 @@ export function recordCreativeBudgetSpend(
     slotId: reservation.slotId,
     attemptId: reservation.attemptId,
     providerId: reservation.providerId,
+    ...(reservation.providerModel ? { providerModel: reservation.providerModel } : {}),
     reservationId: reservation.reservationId,
     status: input.status,
     costEstimateCents: reservation.estimateCents,
     actualCostCents: input.actualCostCents,
     sourceHash: reservation.sourceHash,
+    promptHash: reservation.promptHash,
+    ...(reservation.referenceHash ? { referenceHash: reservation.referenceHash } : {}),
     ...(input.outputHash ? { outputHash: input.outputHash } : {}),
     responseMetadata: input.responseMetadata,
     failureClassification: input.failureClassification,

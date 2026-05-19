@@ -1,9 +1,15 @@
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createCreativeBudgetLedger, recordCreativeBudgetSpend, reserveCreativeBudget } from "../budget/ledger";
 import { createLocalMockProviderAdapter } from "../providers/adapters";
 import {
   InMemorySlotLeaseStore,
+  FileCreativeSlotLeaseStore,
   acquireCreativeSlotLease,
+  heartbeatCreativeSlotLease,
+  releaseCreativeSlotLease,
   runCreativeSlotScheduler,
   type CreativeSchedulerProgressSnapshot,
 } from "./scheduler";
@@ -163,6 +169,59 @@ describe("creative production scheduler", () => {
     });
 
     expect(recovered.workerId).toBe("worker-b");
+  });
+
+  it("persists slot leases to disk for crash-safe resume and stale recovery", () => {
+    const leaseRoot = mkdtempSync(join(tmpdir(), "tower-cpe-leases-"));
+    const firstStore = new FileCreativeSlotLeaseStore(leaseRoot);
+    const first = acquireCreativeSlotLease(firstStore, {
+      runId: "mara-file-lease",
+      slotId: "slot-a",
+      attemptId: "slot-a-attempt-1",
+      stage: "provider",
+      workerId: "worker-a",
+      timeoutMs: 1_000,
+      nowMs: 1_000,
+    });
+
+    const resumedStore = new FileCreativeSlotLeaseStore(leaseRoot);
+
+    expect(() => acquireCreativeSlotLease(resumedStore, {
+      runId: "mara-file-lease",
+      slotId: "slot-a",
+      attemptId: "slot-a-attempt-1",
+      stage: "provider",
+      workerId: "worker-b",
+      timeoutMs: 1_000,
+      nowMs: 1_200,
+    })).toThrow("already leased");
+
+    const heartbeat = heartbeatCreativeSlotLease(resumedStore, first, 1_400);
+    const persisted = JSON.parse(readFileSync(join(leaseRoot, "mara-file-lease__slot-a__provider.lease.json"), "utf8")) as {
+      heartbeatAtMs: number;
+    };
+
+    expect(heartbeat.heartbeatAtMs).toBe(1_400);
+    expect(persisted.heartbeatAtMs).toBe(1_400);
+
+    const recovered = acquireCreativeSlotLease(resumedStore, {
+      runId: "mara-file-lease",
+      slotId: "slot-a",
+      attemptId: "slot-a-attempt-2",
+      stage: "provider",
+      workerId: "worker-b",
+      timeoutMs: 1_000,
+      nowMs: 2_600,
+      verifyStaleLease: (lease) => lease.leaseId === first.leaseId,
+    });
+
+    expect(recovered.attemptId).toBe("slot-a-attempt-2");
+    releaseCreativeSlotLease(resumedStore, recovered);
+    expect(resumedStore.get({
+      runId: "mara-file-lease",
+      slotId: "slot-a",
+      stage: "provider",
+    })).toBeUndefined();
   });
 
   it("skips clean receipts, retries named warning slots, and blocks whole-pack warning retries", async () => {

@@ -33,6 +33,9 @@ import {
 	  validateCreativeImageFile,
   validateReviewBoardImageReferences,
   getNextCreativeRunAction,
+  createCreativeBudgetLedger,
+  createGeminiApiProviderAdapter,
+  FileCreativeSlotLeaseStore,
   GEMINI_API_DEFAULT_BUDGET_CENTS,
   GEMINI_API_DEFAULT_CONCURRENCY,
   GEMINI_API_DEFAULT_COST_PER_4K_IMAGE_CENTS,
@@ -42,6 +45,7 @@ import {
   isRetryableGeminiApiRequestFailure,
   planGeminiApiRunExecution,
   redactGeminiApiSecretText,
+  runCreativeSlotScheduler,
   assertGeminiApiAspectRatio,
   assertGeminiApiConcurrency,
   assertGeminiApiImageResolution,
@@ -58,6 +62,8 @@ import {
   type GeminiApiGenerationPlan,
   type GeminiApiReferenceImage,
 	  type GeminiApiRunReceiptSummary,
+	  type CreativeBudgetLedger,
+	  type CreativeProviderGenerationResult,
 	  type CreativeGenerationBudgetLedger,
 	  type CutoutAlphaReport,
 	  type CutoutContract,
@@ -1102,6 +1108,174 @@ function getApiRunCompletionStatus(
   return "completed";
 }
 
+function creativeProviderBudgetLedgerPath(plan: GeminiApiGenerationPlan): string {
+  return assertSafeArtlabPath(join(plan.planRoot, "provider-budget-ledger.json"));
+}
+
+async function readCreativeProviderBudgetLedger(plan: GeminiApiGenerationPlan): Promise<CreativeBudgetLedger> {
+  const ledgerPath = creativeProviderBudgetLedgerPath(plan);
+  if (!await pathExists(ledgerPath)) {
+    return createCreativeBudgetLedger({
+      runId: plan.runId,
+      approvedBudgetCents: plan.budgetCents,
+    });
+  }
+
+  const ledger = await readJson<CreativeBudgetLedger>(ledgerPath);
+  if (ledger.schemaVersion !== "tower-creative-budget-ledger-v1") {
+    throw new Error(`Provider budget ledger is stale or malformed: ${ledgerPath}.`);
+  }
+  if (ledger.runId !== plan.runId) {
+    throw new Error(`Provider budget ledger runId mismatch at ${ledgerPath}.`);
+  }
+  if (ledger.approvedBudgetCents !== plan.budgetCents) {
+    throw new Error(`Provider budget ledger budget mismatch at ${ledgerPath}; regenerate the plan or reconcile the ledger before spending.`);
+  }
+
+  return ledger;
+}
+
+async function writeCreativeProviderBudgetLedger(
+  plan: GeminiApiGenerationPlan,
+  ledger: CreativeBudgetLedger,
+): Promise<void> {
+  const ledgerPath = creativeProviderBudgetLedgerPath(plan);
+  await mkdir(dirname(ledgerPath), { recursive: true });
+  await writeFile(ledgerPath, `${JSON.stringify(ledger, null, 2)}\n`);
+}
+
+function hashGeminiApiReferenceContract(plan: GeminiApiGenerationPlan): string {
+  return plan.firewall?.referenceContractHash
+    ?? createHash("sha256").update(JSON.stringify(plan.referenceImages)).digest("hex");
+}
+
+function hashGeminiApiSlotSource(slot: GeminiApiGenerationPlan["slots"][number]): string {
+  return createHash("sha256")
+    .update([slot.baseSlotId, slot.targetDirectory, slot.targetFilename, slot.promptHash].join("|"))
+    .digest("hex");
+}
+
+async function runGeminiApiPlanWithScheduler(input: {
+  plan: GeminiApiGenerationPlan;
+  execution: ReturnType<typeof planGeminiApiRunExecution>;
+  dryRun: boolean;
+  requestRetries: number;
+  requestTimeoutMs: number;
+  retryWarnings: boolean;
+}): Promise<void> {
+  const apiKey = input.dryRun ? "" : readGeminiApiKeyFromEnvironment();
+  const referenceImages = input.dryRun ? [] : await readReferenceImagesForPayload(input.plan);
+  const referenceHash = hashGeminiApiReferenceContract(input.plan);
+  const selectedBySlotId = new Map(input.execution.selectedSlots.map((selected) => [selected.slot.slotId, selected]));
+  const ledger = await readCreativeProviderBudgetLedger(input.plan);
+  const provider = createGeminiApiProviderAdapter({
+    costCents: input.dryRun ? 0 : input.plan.costPerImageCents,
+    maxConcurrency: input.plan.maxConcurrency,
+    generateSlot: async (request): Promise<CreativeProviderGenerationResult> => {
+      const selected = selectedBySlotId.get(request.slotId);
+      if (!selected) throw new Error(`Scheduler requested unknown Gemini API slot ${request.slotId}.`);
+
+      const image = input.dryRun
+        ? await createDryRunPng(selected.slot.slotId)
+        : await requestGeminiImageWithRetries({
+          plan: input.plan,
+          slot: selected.slot,
+          apiKey,
+          referenceImages,
+          requestRetries: input.requestRetries,
+          requestTimeoutMs: input.requestTimeoutMs,
+        });
+      const written = await writeApiGeneratedImage({
+        plan: input.plan,
+        slot: selected.slot,
+        image,
+        dryRun: input.dryRun,
+        attempt: selected.attempt,
+      });
+      const warning = written.qualityWarnings.length > 0;
+
+      return {
+        status: warning ? "warning" : "clean",
+        actualCostCents: input.dryRun ? 0 : input.plan.costPerImageCents,
+        outputHash: written.outputHash,
+        responseMetadata: {
+          provider: input.plan.adapter,
+          model: input.plan.model,
+          phase: input.plan.phase,
+          dryRun: input.dryRun,
+          capturedFile: written.capturedFile,
+          responseBytes: image.responseBytes,
+          qualityWarnings: written.qualityWarnings,
+          scheduler: "durable-slot-scheduler-v1",
+        },
+        ...(warning ? {
+          failureClassification: {
+            code: written.qualityWarnings[0] ?? "source-warning",
+            retryable: true,
+            paid: !input.dryRun,
+            severity: "warning" as const,
+          },
+        } : {}),
+      };
+    },
+  });
+  const namedRetrySlotIds = input.execution.selectedSlots
+    .filter((selected) => selected.reason === "retry-warning-receipt")
+    .map((selected) => selected.slot.slotId);
+
+  const result = await runCreativeSlotScheduler({
+    runId: input.plan.runId,
+    budgetLedger: ledger,
+    provider,
+    slots: input.execution.selectedSlots.map((selected) => ({
+      slotId: selected.slot.slotId,
+      providerId: "gemini-api" as const,
+      prompt: selected.slot.prompt,
+      sourceHash: hashGeminiApiSlotSource(selected.slot),
+      promptHash: selected.slot.promptHash,
+      referenceHash,
+      providerModel: input.plan.model,
+      attemptId: `api-attempt-${selected.attempt}`,
+      metadata: {
+        apiAttempt: selected.attempt,
+        reason: selected.reason,
+      },
+    })),
+    policy: {
+      perRunMaxConcurrency: input.plan.maxConcurrency,
+      perProviderMaxConcurrency: {
+        "gemini-api": input.plan.maxConcurrency,
+      },
+      localStageMaxConcurrency: Math.min(3, Math.max(1, input.plan.maxConcurrency)),
+      slotLeaseTimeoutMs: 120_000,
+    },
+    retry: {
+      retryWarnings: input.retryWarnings,
+      ...(namedRetrySlotIds.length ? { namedSlotIds: namedRetrySlotIds } : {}),
+    },
+    leaseStore: new FileCreativeSlotLeaseStore(assertSafeArtlabPath(join(input.plan.planRoot, "slot-leases"))),
+    workerId: `gemini-api-runner-${process.pid}`,
+    processLocalOutput: async ({ providerResult }) => ({
+      status: providerResult.status,
+      ...(providerResult.outputHash ? { outputHash: providerResult.outputHash } : {}),
+      ...(providerResult.failureClassification ? { failureClassification: providerResult.failureClassification } : {}),
+    }),
+    onProgress: (snapshot) => {
+      console.log(`Scheduler progress: provider=${snapshot.runningProviderSlots.length}, local=${snapshot.runningLocalSlots.length}, completed=${snapshot.completed}, failed=${snapshot.failed}, pending=${snapshot.pending}`);
+    },
+  });
+
+  await writeCreativeProviderBudgetLedger(input.plan, result.budgetLedger);
+
+  if (result.status === "completed-with-failures") {
+    const failures = Object.values(result.slotResults)
+      .filter((slot) => slot.stage === "failed")
+      .map((slot) => `${slot.slotId}:${slot.failureClassification?.code ?? "failed"}`);
+
+    throw new Error(`Gemini API scheduler finished with ${failures.length} failed slot(s): ${failures.join(" | ")}`);
+  }
+}
+
 function extractImagePart(response: unknown): { mimeType: string; dataBase64: string } {
   const candidates = (response as {
     candidates?: Array<{
@@ -1242,10 +1416,11 @@ async function writeApiGeneratedImage(input: {
   image: { mimeType: string; dataBase64: string; responseBytes: number };
   dryRun: boolean;
   attempt: number;
-}): Promise<void> {
+}): Promise<{ capturedFile: string; outputHash: string; qualityWarnings: string[] }> {
   const destination = assertSafeArtlabPath(versionedCapturePath(input.slot.expectedInboxFile, input.attempt));
   const receiptPath = versionedApiReceiptPath(destination, input.attempt);
   const bytes = Buffer.from(input.image.dataBase64, "base64");
+  const outputHash = createHash("sha256").update(bytes).digest("hex");
 
   if (await pathExists(destination)) {
     throw new Error(`${destination} already exists. Refusing to overwrite an existing API attempt.`);
@@ -1282,6 +1457,7 @@ async function writeApiGeneratedImage(input: {
     imageSize: input.plan.imageSize,
     aspectRatio: input.plan.aspectRatio,
     promptHash: input.slot.promptHash,
+    outputHash,
     dryRun: input.dryRun,
     capturedFile: destination,
     capturedAt: new Date().toISOString(),
@@ -1299,6 +1475,12 @@ async function writeApiGeneratedImage(input: {
   console.log(`Generated ${input.slot.slotId}: ${destination}`);
   console.log(`Dimensions: ${metadata.width ?? "unknown"}x${metadata.height ?? "unknown"}`);
   console.log(`Quality warnings: ${qualityWarnings.length ? qualityWarnings.join(", ") : "none"}`);
+
+  return {
+    capturedFile: destination,
+    outputHash,
+    qualityWarnings,
+  };
 }
 
 async function createDryRunPng(slotId: string): Promise<{ mimeType: string; dataBase64: string; responseBytes: number }> {
@@ -1316,34 +1498,6 @@ async function createDryRunPng(slotId: string): Promise<{ mimeType: string; data
     dataBase64: image.toString("base64"),
     responseBytes: image.byteLength,
   };
-}
-
-async function runWithConcurrency<T>(
-  items: readonly T[],
-  concurrency: number,
-  worker: (item: T) => Promise<void>,
-): Promise<void> {
-  let nextIndex = 0;
-  const failures: string[] = [];
-  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (nextIndex < items.length) {
-      const index = nextIndex;
-      nextIndex += 1;
-      const item = items[index]!;
-
-      try {
-        await worker(item);
-      } catch (error) {
-        failures.push(error instanceof Error ? error.message : String(error));
-      }
-    }
-  });
-
-  await Promise.all(runners);
-
-  if (failures.length) {
-    throw new Error(`Gemini API run finished with ${failures.length} failure(s): ${failures.join(" | ")}`);
-  }
 }
 
 async function runApiMode(argv: string[]): Promise<void> {
@@ -1453,8 +1607,11 @@ async function runApiMode(argv: string[]): Promise<void> {
       return;
     }
 
-    const apiKey = dryRun ? "" : readGeminiApiKeyFromEnvironment();
-    const referenceImages = dryRun ? [] : await readReferenceImagesForPayload(plan);
+    if (!dryRun) {
+      readGeminiApiKeyFromEnvironment();
+      await readReferenceImagesForPayload(plan);
+    }
+
     await writeBudgetLedgerForApiExecution({
       plan,
       execution,
@@ -1468,25 +1625,13 @@ async function runApiMode(argv: string[]): Promise<void> {
       execution,
     });
 
-    await runWithConcurrency(execution.selectedSlots, plan.maxConcurrency, async (selected) => {
-      const image = dryRun
-        ? await createDryRunPng(selected.slot.slotId)
-        : await requestGeminiImageWithRetries({
-          plan,
-          slot: selected.slot,
-          apiKey,
-          referenceImages,
-          requestRetries,
-          requestTimeoutMs,
-        });
-
-      await writeApiGeneratedImage({
-        plan,
-        slot: selected.slot,
-        image,
-        dryRun,
-        attempt: selected.attempt,
-      });
+    await runGeminiApiPlanWithScheduler({
+      plan,
+      execution,
+      dryRun,
+      requestRetries,
+      requestTimeoutMs,
+      retryWarnings,
     });
 
     const finalReceiptsBySlotId = await readApiReceiptsBySlotId(plan);

@@ -8,11 +8,13 @@ import {
   type CreativeProductionHealthReport,
   type CreativeProductionHealthSnapshot,
 } from "../src/lib/creative-production/health";
+import { getNextCreativeRunAction, type CreativeRunState } from "../src/lib/creative-production/run-state";
 
 interface RunStateFile {
   runId?: string;
   phase?: string;
   state?: string;
+  nextLegalAction?: string;
   updatedAt?: string;
 }
 
@@ -84,13 +86,35 @@ async function latestRunRoot(stateRoot: string): Promise<string | undefined> {
 
     return {
       path,
-      updatedAt: progress?.updatedAt ?? state?.updatedAt ?? "",
+      updatedAt: [progress?.updatedAt, state?.updatedAt].filter(Boolean).sort().at(-1) ?? "",
     };
   }));
 
   return candidates.sort((left, right) => left.updatedAt.localeCompare(right.updatedAt)).at(-1)?.path
     ? dirname(candidates.sort((left, right) => left.updatedAt.localeCompare(right.updatedAt)).at(-1)!.path)
     : undefined;
+}
+
+const PROMOTED_BASELINE_STATES = new Set([
+  "promoted",
+  "integrated",
+  "browser-verified",
+  "closed",
+]);
+
+function nextStepForRun(input: {
+  state: RunStateFile | undefined;
+  progress: ProgressFile | undefined;
+}): string {
+  const phase = input.state?.phase ?? input.state?.state;
+
+  if (input.state?.nextLegalAction) return input.state.nextLegalAction;
+
+  if (phase && PROMOTED_BASELINE_STATES.has(phase)) {
+    return getNextCreativeRunAction(phase as CreativeRunState);
+  }
+
+  return input.progress?.nextAutomaticStep ?? "Run art:status for the next step.";
 }
 
 function selectedModelName(value: CutoutReadinessFile["selectedModel"]): string | null {
@@ -170,7 +194,7 @@ async function buildSnapshot(stateRoot: string): Promise<CreativeProductionHealt
       runId: state.runId,
       state: state.phase ?? state.state ?? "unknown",
       updatedAt: progress?.updatedAt ?? state.updatedAt ?? new Date().toISOString(),
-      nextStep: progress?.nextAutomaticStep ?? "Run art:status for the next step.",
+      nextStep: nextStepForRun({ state, progress }),
       resumableByFreshAgent: Boolean(progress && (runRoot ? existsSync(join(runRoot, "human-action.json")) : false)),
     } : null,
     spendHistory: {

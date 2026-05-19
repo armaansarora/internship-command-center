@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 
@@ -1124,11 +1124,30 @@ describe("art:generate CLI", () => {
     const plan = JSON.parse(readFileSync(planPath, "utf8")) as {
       slots: Array<{ expectedInboxFile: string }>;
     };
+    const providerLedger = JSON.parse(readFileSync(join(dirname(planPath), "provider-budget-ledger.json"), "utf8")) as {
+      schemaVersion: string;
+      receipts: Array<{
+        providerId: string;
+        providerModel?: string;
+        actualCostCents: number;
+        promptHash?: string;
+        referenceHash?: string;
+        responseMetadata?: { scheduler?: string };
+      }>;
+    };
 
     for (const slot of plan.slots) {
       expect(existsSync(slot.expectedInboxFile)).toBe(true);
       expect(existsSync(join(slot.expectedInboxFile, "..", "api-receipt.json"))).toBe(true);
     }
+    expect(providerLedger.schemaVersion).toBe("tower-creative-budget-ledger-v1");
+    expect(providerLedger.receipts).toHaveLength(2);
+    expect(providerLedger.receipts.every((receipt) => receipt.providerId === "gemini-api")).toBe(true);
+    expect(providerLedger.receipts.every((receipt) => receipt.providerModel === "gemini-3.1-flash-image-preview")).toBe(true);
+    expect(providerLedger.receipts.every((receipt) => receipt.actualCostCents === 0)).toBe(true);
+    expect(providerLedger.receipts.every((receipt) => receipt.promptHash && receipt.referenceHash)).toBe(true);
+    expect(providerLedger.receipts.every((receipt) => receipt.responseMetadata?.scheduler === "durable-slot-scheduler-v1")).toBe(true);
+    expect(existsSync(join(dirname(planPath), "slot-leases"))).toBe(true);
   });
 
 	  it("benchmarks a local cutout candidate and compiles an alpha-safe source receipt", async () => {
@@ -1622,6 +1641,16 @@ describe("art:generate CLI", () => {
     expect(existsSync(join(inboxDirectory, "api-receipt-v002.json"))).toBe(true);
     expect(existsSync(join(planRoot, "api-run-state.json"))).toBe(true);
     expect(existsSync(join(planRoot, "api-run.lock"))).toBe(false);
+    const providerLedger = JSON.parse(readFileSync(join(planRoot, "provider-budget-ledger.json"), "utf8")) as {
+      receipts: Array<{ slotId: string; attemptId: string; actualCostCents: number }>;
+      reservations: Array<{ slotId: string; attemptId: string; status: string }>;
+    };
+    expect(providerLedger.receipts.map((receipt) => receipt.attemptId)).toEqual([
+      "api-attempt-1",
+      "api-attempt-2",
+    ]);
+    expect(providerLedger.receipts.every((receipt) => receipt.actualCostCents === 0)).toBe(true);
+    expect(providerLedger.reservations.every((reservation) => reservation.status === "spent")).toBe(true);
   });
 
   it("marks API runs with warning receipts as completed-with-warnings instead of cleanly completed", () => {

@@ -92,6 +92,41 @@ describe("art:produce orchestrator", () => {
     expect(output).not.toContain("verify-canary");
   });
 
+  it("records plain-English answers and advances from durable files without stale human-action wording", () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-art-produce-answer-"));
+
+    execFileSync(tsx, [
+      "scripts/creative-production-orchestrator.ts",
+      "--state-root",
+      root,
+      "--request",
+      "let's make Mara",
+      "--run-id",
+      "mara-answer-v1",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-orchestrator.ts",
+      "--state-root",
+      root,
+      "--answer",
+      "mara-answer-v1",
+      "approve direction",
+    ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const runRoot = join(root, "characters", "mara-answer-v1");
+    const runState = readJson<{ phase: string; publicArtWritesAllowed: boolean }>(join(runRoot, "run-state.json"));
+    const progress = readJson<{ phase: string; nextAutomaticStep: string }>(join(runRoot, "progress.json"));
+
+    expect(output).toContain("Recorded answer for mara-answer-v1");
+    expect(output).toContain("Phase: initial direction approved");
+    expect(output).toContain("Armaan action: none.");
+    expect(output).not.toContain("Recommended response: approve direction");
+    expect(runState.phase).toBe("initial-direction-approved");
+    expect(runState.publicArtWritesAllowed).toBe(false);
+    expect(progress.phase).toBe("initial-direction-approved");
+    expect(progress.nextAutomaticStep).toContain("Generate controlled parallel initial concepts");
+  });
+
   it("stops continue at upgrade-required when active improvement blockers exist", () => {
     const root = mkdtempSync(join(tmpdir(), "tower-art-produce-upgrade-"));
 

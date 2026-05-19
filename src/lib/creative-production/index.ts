@@ -26,6 +26,7 @@ export * from "./prompts";
 export * from "./provider-capabilities";
 export * from "./registry";
 export * from "./review";
+export * from "./promotion";
 export * from "./run-state";
 export * from "./scheduler";
 export * from "./state";

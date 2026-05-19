@@ -15,6 +15,7 @@ The default operator command surface is exactly:
 ```bash
 npm run art:produce -- --request "..."
 npm run art:produce -- --continue <runId>
+npm run art:produce -- --answer <runId> "<plain English answer>"
 npm run art:status
 npm run art:health
 ```
@@ -22,6 +23,8 @@ npm run art:health
 Everything else is advanced/internal: `art:generate`, `art:studio`, `art:operate`, browser helpers, cutout commands, repair commands, cleanup internals, and provider diagnostics.
 
 Normal `art:status` and review output may mention internal files for traceability, but the operator should not need to know or run internal commands during normal use.
+
+Current amendment: Otis has been promoted and integrated. The engine must treat `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json` as production truth and must not ask for `approved for app` again for the already integrated Otis baseline.
 
 ---
 
@@ -671,7 +674,7 @@ Milestone 0: Normalize/import current Otis state into the new registry without i
 
 Milestone 1: Build one end-to-end character production vertical slice from approved identity through parallel generation, receipts, cutout/QA/repair, final board, status, cleanup, and promotion firewall.
 
-Milestone 2: Harden provider scheduler, concurrency, leases, backoff, budget reservations, and stress tests.
+Milestone 2: Harden provider scheduler, concurrency, leases, backoff, budget reservations, and stress tests. Current implementation routes Gemini API `run-api` selected slots through the shared durable scheduler/provider adapter boundary while preserving the existing Gemini plan and inbox receipt format.
 
 Milestone 3: Build guided website integration and app preview board.
 
@@ -781,4 +784,3 @@ V1 final is ready to use when:
 - Continuous improvement can block production when repeated friction appears.
 - `public/art` and production manifests remain unchanged until exact `approved for app`.
 - Docs and the Creative Production Engine skill describe the same command surface, gates, and safety rules.
-

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tower-creative-progress-v1",
   "runId": "otis-real-rembg-canary-v1",
-  "phase": "final-board-ready",
+  "phase": "browser-verified",
   "runningSlots": [],
   "completed": 24,
   "failed": 0,
@@ -10,6 +10,6 @@
   "spendSoFarCents": 664.4,
   "reservedSpendCents": 0,
   "activeLocks": [],
-  "nextAutomaticStep": "Wait for Armaan to inspect the final upload-ready board and say approved for app before any promotion.",
-  "updatedAt": "2026-05-19T06:27:58.698Z"
+  "nextAutomaticStep": "Close the run after housekeeping and continuous improvement gates pass.",
+  "updatedAt": "2026-05-19T16:08:51Z"
 }

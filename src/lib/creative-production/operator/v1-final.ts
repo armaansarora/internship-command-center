@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { buildFinalUploadReadyReviewBoard } from "../review";
 import type { CreativeAssetType } from "../types";
+import { renderCreativeRunStatusLines } from "./status-summary";
 
 export const CREATIVE_ENGINE_CORE_PHASES = [
   "requested",
@@ -24,6 +25,7 @@ export const CREATIVE_ENGINE_CORE_PHASES = [
   "app-preview-ready",
   "approved-for-app",
   "promoted",
+  "integrated",
   "browser-verified",
   "closed",
 ] as const;
@@ -89,6 +91,7 @@ export interface CreativeEngineRunState {
   runRoot: string;
   createdAt: string;
   updatedAt: string;
+  nextLegalAction?: string;
   importedFrom?: {
     legacyRunId: string;
     legacyState?: string;
@@ -335,10 +338,6 @@ export async function startCreativeProductionRun(input: {
   return artifacts;
 }
 
-function humanizePhase(phase: CreativeEnginePhase): string {
-  return phase.replaceAll("-", " ");
-}
-
 export async function renderCreativeStatusSummary(input: {
   stateRoot?: string;
   runId?: string;
@@ -358,18 +357,7 @@ export async function renderCreativeStatusSummary(input: {
     throw new Error(`Run state is corrupt or incomplete at ${runRoot}.`);
   }
 
-  return [
-    `Run ${state.runId}: ${state.name} (${state.assetType})`,
-    `Phase: ${humanizePhase(state.phase)}`,
-    `Slots: ${progress.completed} completed, ${progress.failed} failed, ${progress.repairing} repairing, ${progress.pending} pending, ${progress.runningSlots.length} running.`,
-    `Spend: $${(progress.spendSoFarCents / 100).toFixed(2)} spent, $${(progress.reservedSpendCents / 100).toFixed(2)} reserved.`,
-    `Active locks: ${progress.activeLocks.length ? progress.activeLocks.join(", ") : "none"}.`,
-    `Next automatic step: ${progress.nextAutomaticStep}`,
-    humanAction
-      ? `Armaan action: ${humanAction.recommendation} Recommended response: ${humanAction.recommendedResponse}. Allowed responses: ${humanAction.allowedResponses.join("; ")}.`
-      : "Armaan action: none.",
-    `Promotion locked: ${state.publicArtWritesAllowed ? "no" : "yes, until exact phrase approved for app"}.`,
-  ].join("\n");
+  return renderCreativeRunStatusLines({ state, progress, humanAction });
 }
 
 async function listRunStatePaths(root: string): Promise<string[]> {
@@ -569,6 +557,41 @@ export async function applyCreativeHumanResponse(input: {
   }
 
   await writeJson(statePath, nextState);
+  const previousProgress = await readJson<CreativeProgressFile>(join(input.runRoot, "progress.json"));
+  const nextAutomaticStep = nextState.phase === "initial-direction-approved"
+    ? "Generate controlled parallel initial concepts with budget reservations, slot leases, receipts, local QA, and no production promotion writes."
+    : nextState.phase === "approved-for-app"
+      ? "Run the transactional promotion firewall, then update public art and production manifests only after strict QA and preview evidence are current."
+      : previousProgress?.nextAutomaticStep ?? "Continue from the updated run state.";
+  const progress = createProgress({
+    runId: nextState.runId,
+    phase: nextState.phase,
+    completed: previousProgress?.completed ?? 0,
+    failed: previousProgress?.failed ?? 0,
+    repairing: previousProgress?.repairing ?? 0,
+    pending: previousProgress?.pending ?? 0,
+    runningSlots: previousProgress?.runningSlots ?? [],
+    spendSoFarCents: previousProgress?.spendSoFarCents ?? 0,
+    reservedSpendCents: previousProgress?.reservedSpendCents ?? 0,
+    activeLocks: previousProgress?.activeLocks ?? [],
+    nextAutomaticStep,
+    now,
+  });
+  const humanAction = createHumanAction({
+    runId: nextState.runId,
+    phase: nextState.phase,
+    whatIUnderstood: `Armaan answered: "${input.response.trim()}".`,
+    recommendation: "No human action is needed right now. Continue from durable run-state and progress files.",
+    estimatedCents: 0,
+    reservedCents: progress.reservedSpendCents,
+    risk: "Low. This records the answer and advances durable state without touching public art or production manifests.",
+    allowedResponses: [],
+    recommendedResponse: "none",
+    now,
+  });
+
+  await writeJson(join(input.runRoot, "progress.json"), progress);
+  await writeJson(join(input.runRoot, "human-action.json"), humanAction);
   await appendEvent(input.runRoot, {
     schemaVersion: "tower-creative-event-v1",
     event: "human-response-applied",

@@ -39,11 +39,13 @@ Use this skill when the user says any close variant of:
    - Normal command surface is only:
      - `npm run art:produce -- --request "<request>"`
      - `npm run art:produce -- --continue <run-id>`
+     - `npm run art:produce -- --answer <run-id> "<plain English answer>"`
      - `npm run art:status`
      - `npm run art:health`
    - `art:produce` writes durable `run-state.json`, `progress.json`, `human-action.json`, and append-only `events.jsonl`. Future sessions resume from those files and receipts, not chat history.
    - Every human stop must have `human-action.json` with what the engine understood, recommendation, cost impact, risk, allowed responses, and recommended response.
    - `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Do not continue production until the command/test/doc hardening is done.
+   - `art:produce -- --answer <run-id> "<plain English answer>"` records Armaan's answer into durable run files and advances legal gates from files, not chat memory.
    - Do not use Armaan's daily Chrome profile for image generation. First create or reuse an isolated Playwright Chromium session with `npm run art:browser plan --session gemini-art-studio --provider gemini`.
    - If the subscription UI must be opened, use `npm run art:browser open --session gemini-art-studio --provider gemini`; keep downloads inside the isolated session path.
    - Do not open many visible provider tabs. Subscription UI work is capped at two isolated interactive sessions by default. True unattended five-lane image generation requires the Gemini API adapter and explicit billing approval.
@@ -141,6 +143,8 @@ Initial design is prompt-only and exactly five images total. Once Armaan chooses
 
 The runner skips slots that already have a clean receipt, retries warning receipts as versioned attempts only when explicitly legal, refuses to overwrite prior attempts, and writes `api-run-state.json` after planning, running, blocking, or failing. Whole-pack warning retries are blocked; use `--slots` for named repairs. A stale lock is a serious event: `--force-unlock` is allowed only after checking no other agent/process is currently generating. Stale API plans without `phase: "initial-design"` or `phase: "production-pack"` are blocked. `completed-with-warnings` means the run is not production-clean.
 
+`run-api` uses the shared durable scheduler/provider adapter boundary for the actual selected slot work. In addition to the legacy Gemini inbox receipts, it writes `provider-budget-ledger.json` with reservations and receipts, and uses `slot-leases/` for per-slot duplicate-spend protection. Treat missing, stale, or mismatched provider ledgers as a spend blocker until reconciled.
+
 Asset Doctor Gate:
 
 ```bash
@@ -196,6 +200,7 @@ The engine is not only for static images. It can route and produce:
 - Keep drafts in `.artlab`.
 - Keep production manifest gated.
 - Keep live `public/art` assets until a replacement passes QA, receives `approved for app`, and promotes through the manifest.
+- Treat promoted Otis in `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json` as the current production baseline unless Armaan explicitly asks to redo Otis.
 - In parallel mode, only the coordinator can mutate shared studio state, merge results, run cleanup, promote, or integrate the app.
 - Do not hide quality warnings.
 - Treat unknown flags, unsafe paths, corrupt state, and missing ledgers as engine failures to fix before continuing.

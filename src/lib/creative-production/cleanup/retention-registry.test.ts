@@ -1,8 +1,13 @@
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   CREATIVE_RETENTION_STATUSES,
   planRetentionCleanup,
+  readCreativeRetentionRegistry,
   summarizeRetentionRegistry,
+  writeCreativeRetentionRegistry,
   type CreativeRetentionEntry,
 } from "./index";
 
@@ -71,5 +76,23 @@ describe("creative production cleanup retention registry", () => {
     expect(plan.archiveEntries.map((entry) => entry.path)).toEqual([
       ".artlab/studio/mara/rejected-raw.png",
     ]);
+  });
+
+  it("persists a durable artifact registry for cleanup and fresh-agent diagnostics", async () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-retention-registry-"));
+    const registryPath = join(root, "artifact-registry.json");
+    const entries: CreativeRetentionEntry[] = [
+      { path: "public/art/lobby/otis/regular/idle.webp", status: "approved", kind: "live-public-art", runId: "otis" },
+      { path: ".artlab/studio/characters/mara/source.png", status: "candidate", kind: "source", runId: "mara" },
+    ];
+
+    await writeCreativeRetentionRegistry(registryPath, entries);
+
+    expect(existsSync(registryPath)).toBe(true);
+    expect(JSON.parse(readFileSync(registryPath, "utf8"))).toMatchObject({
+      schemaVersion: "tower-creative-retention-registry-v1",
+      entries,
+    });
+    await expect(readCreativeRetentionRegistry(registryPath)).resolves.toEqual(entries);
   });
 });

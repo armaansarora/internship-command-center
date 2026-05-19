@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import {
+  applyCreativeHumanResponse,
   buildFinalBoardForCreativeRun,
   importLegacyOtisRun,
   markCreativeRunUpgradeRequired,
@@ -21,6 +22,29 @@ function flagValue(argv: string[], name: string): string | undefined {
   }
 
   return value;
+}
+
+function answerValue(argv: string[]): { runId: string; response: string } | undefined {
+  const index = argv.indexOf("--answer");
+
+  if (index === -1) return undefined;
+
+  const runId = argv[index + 1];
+
+  if (!runId || runId.startsWith("--")) {
+    throw new Error("--answer requires a run id.");
+  }
+
+  const responseParts = argv.slice(index + 2);
+
+  if (responseParts.length === 0 || responseParts[0]?.startsWith("--")) {
+    throw new Error("--answer requires a plain-English response.");
+  }
+
+  return {
+    runId,
+    response: responseParts.join(" "),
+  };
 }
 
 function printHumanStop(input: Awaited<ReturnType<typeof startCreativeProductionRun>>): void {
@@ -138,7 +162,24 @@ async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   const stateRoot = flagValue(argv, "--state-root") ?? ".artlab/studio";
   const continueRunId = flagValue(argv, "--continue");
+  const answer = answerValue(argv);
   const request = flagValue(argv, "--request");
+
+  if (answer) {
+    await maybeImportLegacyRun({ stateRoot, runId: answer.runId });
+    const runRoot = await findRunRoot(stateRoot, answer.runId);
+
+    if (!runRoot) throw new Error(`Could not find run-state.json for ${answer.runId}.`);
+
+    await applyCreativeHumanResponse({
+      runRoot,
+      response: answer.response,
+    });
+
+    console.log(`Recorded answer for ${answer.runId}: ${answer.response}`);
+    console.log(await renderCreativeStatusSummary({ stateRoot, runId: answer.runId }));
+    return;
+  }
 
   if (continueRunId) {
     await maybeImportLegacyRun({ stateRoot, runId: continueRunId });

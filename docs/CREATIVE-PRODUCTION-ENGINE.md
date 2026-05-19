@@ -8,6 +8,7 @@ The Creative Production Engine is the Tower-wide system for producing characters
 
 - `npm run art:produce -- --request "<natural language request>"`: canonical normal entrypoint. It routes the request, writes `run-state.json`, `progress.json`, `human-action.json`, and `events.jsonl`, then stops only at the initial direction gate or a true blocker.
 - `npm run art:produce -- --continue <run-id>`: resumes a creative run from durable state, not chat memory. It imports legacy Otis state when needed, honors `upgrade-required`, and advances safe automatic steps such as rebuilding a local final board/action manifest.
+- `npm run art:produce -- --answer <run-id> "<plain English answer>"`: records Armaan's plain-English response into durable state, advances the legal gate, refreshes progress/human-action files, and prevents future sessions from relying on chat memory.
 - `npm run art:status`: plain-English current run status from `progress.json`, including phase, slot counts, spend, locks, next automatic step, and exact human action when needed.
 - `npm run art:health`: safe-to-run report covering active locks/processes, last run, spend, repeated failures, provider health/concurrency, cutout readiness, cleanup debt, and continuous-improvement production blocks.
 
@@ -47,6 +48,7 @@ Everything below is advanced/internal and should not be required for normal oper
 - `npm run art:operate`: strict character-art operator packet for Season 1 character work.
 - `npm run art:status`: normal read-only operator status. With no v1-final run selector, it can still render legacy character art status for diagnostics.
 - `npm run art:clean`: removes volatile run-owned art binaries while keeping ledgers, references, live `public/art`, and manifest data protected.
+  It writes `.artlab/studio/artifact-registry.json` and reports cleanup through registry buckets (`protected`, `archive`, `delete`, `keep`) instead of relying on broad deletion guesses.
 
 `art:studio` rejects unknown flags, unsafe run ids, path traversal, symlink escapes, and production writes outside `.artlab/studio`. If the studio state is corrupt, it preserves a `.corrupt-*` backup before creating a valid state snapshot.
 
@@ -165,6 +167,9 @@ npm run art:generate run-api --plan .artlab/studio/<asset-type>/<run-id>/generat
 Run-state hardening:
 
 - `api-run.lock` prevents two agents from spending against the same plan at once.
+- `run-api` now routes selected slots through the shared durable scheduler/provider adapter boundary. The legacy Gemini plan and inbox receipts remain compatible, but live execution is governed by slot leases, provider concurrency limits, and provider budget reservations.
+- `provider-budget-ledger.json` records scheduler-owned reservations and receipts with run id, slot id, attempt id, provider, model, prompt hash, reference hash, estimated cost, actual/assumed cost, response metadata, failure classification, and retry eligibility.
+- `slot-leases/` contains file-backed per-slot leases while work is active; leases are released when the slot finishes, and stale leases require stale-worker proof before recovery.
 - `api-run-state.json` records selected slots, skipped slots, retry reasons, budget projection, blockers, and failures.
 - Clean receipts are skipped on rerun so completed slots do not bill twice.
 - Warning receipts are retried as versioned attempts up to `--max-attempts`; old evidence is never overwritten.
@@ -227,6 +232,8 @@ Cost rules:
 - Google Search grounding is disabled by default.
 - Failed individual slots are regenerated individually; the whole pack is not blindly rerun.
 - `local-mock`: test-only generator for pipeline hardening.
+
+Current baseline: Otis has been promoted into `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json`. `art:status` should report the Otis studio run as `integrated`, with browser QA as the next follow-up and no renewed `approved for app` prompt. Do not regenerate, overwrite, delete, or re-promote Otis unless Armaan explicitly asks.
 
 Subscription bridge shape:
 

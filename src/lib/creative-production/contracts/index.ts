@@ -1,3 +1,5 @@
+import type { CreativeAssetType } from "../types";
+
 export const CREATIVE_ASSET_CONTRACT_TYPES = [
   "character",
   "background-environment",
@@ -151,7 +153,7 @@ const CONTRACTS: Record<CreativeAssetContractType, CreativeAssetContract> = {
       qa("app-pose-manifest-valid", "Pose manifest", "App pose manifest references the derived files and states."),
     ],
     previewMode: "app-preview-board",
-    promotionTarget: publicArtTarget("public/art/characters", "production-manifests/characters.json"),
+    promotionTarget: publicArtTarget("public/art/lobby/<characterId>", "src/lib/visual-assets/approved-character-assets.generated.json"),
     manifestShape: manifestShape("character", ["slotId", "sourcePath", "transparentPngPath", "alphaQa", "poseManifest"]),
     forbiddenShortcuts: [
       ...BASE_FORBIDDEN_SHORTCUTS,
@@ -322,4 +324,22 @@ export function getCreativeAssetContract(assetType: CreativeAssetContractType): 
 
 export function listCreativeAssetContracts(): CreativeAssetContract[] {
   return CREATIVE_ASSET_CONTRACT_TYPES.map((assetType) => CONTRACTS[assetType]);
+}
+
+const CONTRACT_BY_ROUTED_ASSET_TYPE: Record<CreativeAssetType, CreativeAssetContractType> = {
+  character: "character",
+  environment: "background-environment",
+  prop: "prop",
+  "ui-texture": "ui-asset-button",
+  animation: "animation",
+  scene: "scene",
+  "icon-system": "icon",
+  "marketing-hero": "marketing-visual",
+  shader: "shader",
+};
+
+export function getCreativeAssetContractForCreativeType(
+  assetType: CreativeAssetType,
+): CreativeAssetContract {
+  return getCreativeAssetContract(CONTRACT_BY_ROUTED_ASSET_TYPE[assetType]);
 }

@@ -59,6 +59,46 @@ describe("art:health command", () => {
     expect(output).toContain("Continuous improvement blocks production: no");
   });
 
+  it("renders integrated promoted baselines from run-state instead of stale final-approval progress", () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-health-integrated-"));
+    const runRoot = join(stateRoot, "characters", "otis-integrated-v1");
+
+    mkdirSync(runRoot, { recursive: true });
+    writeFileSync(join(runRoot, "run-state.json"), JSON.stringify({
+      schemaVersion: "tower-creative-run-state-v1-final",
+      runId: "otis-integrated-v1",
+      assetType: "character",
+      name: "Otis",
+      phase: "integrated",
+      nextLegalAction: "Run browser QA for desktop, mobile, reduced motion, image loading, and overlap.",
+      updatedAt: "2026-05-19T14:00:00.000Z",
+    }, null, 2));
+    writeFileSync(join(runRoot, "progress.json"), JSON.stringify({
+      schemaVersion: "tower-creative-progress-v1",
+      runId: "otis-integrated-v1",
+      phase: "final-board-ready",
+      spendSoFarCents: 664.4,
+      reservedSpendCents: 0,
+      activeLocks: [],
+      nextAutomaticStep: "Wait for Armaan to inspect the final upload-ready board and say approved for app before any promotion.",
+      updatedAt: "2026-05-19T06:27:58.698Z",
+    }, null, 2));
+    writeFileSync(join(runRoot, "human-action.json"), JSON.stringify({
+      schemaVersion: "tower-creative-human-action-v1",
+      runId: "otis-integrated-v1",
+    }, null, 2));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-health.ts",
+      "--state-root",
+      stateRoot,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Last run: otis-integrated-v1 (integrated)");
+    expect(output).toContain("Next step: Run browser QA for desktop, mobile, reduced motion, image loading, and overlap.");
+    expect(output).not.toContain("approved for app");
+  });
+
   it("fails closed when active locks and repeated high-severity improvements are present", () => {
     const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-health-blocked-"));
     const runRoot = join(stateRoot, "characters", "otis-health-v1");

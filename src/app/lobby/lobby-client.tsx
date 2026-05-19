@@ -266,7 +266,7 @@ export function LobbyClient({
       </div>
 
       {/* ── FLOATING DUST PARTICLES ── */}
-      <ParticleField />
+      <ParticleField reducedMotion={prefersReducedMotion} />
 
       {/* ── MAIN CONTENT with parallax ──
           opacity starts at 1 with CSS animation fallback;
@@ -306,7 +306,7 @@ export function LobbyClient({
                     height: "170px",
                     background: "radial-gradient(circle, rgba(201, 168, 76, 0.13) 0%, rgba(201, 168, 76, 0.035) 50%, transparent 72%)",
                     filter: "blur(22px)",
-                    animation: "logo-breathe 6s ease-in-out infinite",
+                    animation: prefersReducedMotion ? "none" : "logo-breathe 6s ease-in-out infinite",
                   }}
                   aria-hidden="true"
                 />
@@ -542,7 +542,7 @@ function ReceptionGlint(): JSX.Element {
  * animations. Each has a unique position, drift, duration, and delay for
  * organic variation. Very low opacity (0.1–0.2), slow upward drift.
  */
-function ParticleField(): JSX.Element {
+function ParticleField({ reducedMotion }: { reducedMotion: boolean }): JSX.Element {
   // Pre-defined particle configs for deterministic SSR
   const particles: Array<{
     id: number;
@@ -604,7 +604,9 @@ function ParticleField(): JSX.Element {
             borderRadius: "50%",
             background: `rgba(201, 168, 76, ${p.opacity})`,
             boxShadow: `0 0 ${p.size * 2}px rgba(201, 168, 76, ${p.opacity * 0.8})`,
-            animation: `particle-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+            animation: reducedMotion
+              ? "none"
+              : `particle-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
             // CSS custom property for horizontal drift
             ["--drift" as string]: `${p.drift}px`,
           }}

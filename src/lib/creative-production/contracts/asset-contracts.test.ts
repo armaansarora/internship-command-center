@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   getCreativeAssetContract,
+  getCreativeAssetContractForCreativeType,
   listCreativeAssetContracts,
   type CreativeAssetContractType,
 } from "./index";
+import type { CreativeAssetType } from "../types";
 
 const EXPECTED_CONTRACT_TYPES: CreativeAssetContractType[] = [
   "character",
@@ -40,6 +42,8 @@ describe("creative production asset contracts", () => {
     const character = getCreativeAssetContract("character");
 
     expect(character.verticalSlice).toBe(true);
+    expect(character.promotionTarget.targetPath).toBe("public/art/lobby/<characterId>");
+    expect(character.promotionTarget.manifestPath).toBe("src/lib/visual-assets/approved-character-assets.generated.json");
     expect(character.outputs.map((output) => output.id)).toContain("transparent-production-png");
     expect(character.outputs.map((output) => output.id)).toContain("app-pose-manifest");
     expect(character.qaChecks).toContainEqual(expect.objectContaining({
@@ -61,5 +65,34 @@ describe("creative production asset contracts", () => {
     expect(background.outputs.map((output) => output.id)).toContain("responsive-crop-set");
     expect(marketing.promotionTarget.kind).toBe("review-only");
     expect(marketing.qaChecks.map((check) => check.id)).toContain("text-safe-area");
+  });
+
+  it("maps every routed creative asset type to its canonical contract", () => {
+    const routedTypes: CreativeAssetType[] = [
+      "character",
+      "environment",
+      "prop",
+      "ui-texture",
+      "animation",
+      "scene",
+      "icon-system",
+      "marketing-hero",
+      "shader",
+    ];
+
+    const mappedContracts = routedTypes.map((assetType) =>
+      getCreativeAssetContractForCreativeType(assetType).assetType);
+
+    expect(mappedContracts).toEqual([
+      "character",
+      "background-environment",
+      "prop",
+      "ui-asset-button",
+      "animation",
+      "scene",
+      "icon",
+      "marketing-visual",
+      "shader",
+    ]);
   });
 });

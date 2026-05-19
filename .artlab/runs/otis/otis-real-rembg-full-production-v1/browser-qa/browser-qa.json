@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "tower-otis-browser-qa-v1",
+  "runId": "otis-real-rembg-full-production-v1",
+  "checkedAt": "2026-05-19T16:07:57.731Z",
+  "scope": {
+    "routes": [
+      "/lobby",
+      "/lobby/onboarding"
+    ],
+    "viewports": [
+      "desktop",
+      "mobile"
+    ],
+    "motionModes": [
+      "standard",
+      "reduced-motion"
+    ],
+    "checks": [
+      "image-loading",
+      "otis-crop-fit",
+      "layout-overlap",
+      "horizontal-overflow",
+      "reduced-motion",
+      "console-errors"
+    ]
+  },
+  "status": "passed",
+  "evidence": [
+    {
+      "route": "/lobby",
+      "viewport": "desktop",
+      "motion": "standard",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "width": 72,
+          "height": 123,
+          "top": 101,
+          "left": 892,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75"
+        }
+      ]
+    },
+    {
+      "route": "/lobby",
+      "viewport": "desktop",
+      "motion": "reduced-motion",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "width": 74,
+          "height": 126,
+          "top": 61,
+          "left": 887,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75"
+        }
+      ]
+    },
+    {
+      "route": "/lobby",
+      "viewport": "mobile",
+      "motion": "standard",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "width": 74,
+          "height": 126,
+          "top": 412,
+          "left": 41,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75"
+        }
+      ]
+    },
+    {
+      "route": "/lobby",
+      "viewport": "mobile",
+      "motion": "reduced-motion",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, idle pose.",
+          "width": 74,
+          "height": 126,
+          "top": 413,
+          "left": 41,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Fidle%403x.webp&w=384&q=75"
+        }
+      ]
+    },
+    {
+      "route": "/lobby/onboarding",
+      "viewport": "desktop",
+      "motion": "standard",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, listening pose.",
+          "width": 58,
+          "height": 99,
+          "top": 74,
+          "left": 1093,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Flistening%403x.webp&w=384&q=75"
+        }
+      ]
+    },
+    {
+      "route": "/lobby/onboarding",
+      "viewport": "desktop",
+      "motion": "reduced-motion",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, listening pose.",
+          "width": 58,
+          "height": 99,
+          "top": 75,
+          "left": 1093,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Flistening%403x.webp&w=384&q=75"
+        }
+      ]
+    },
+    {
+      "route": "/lobby/onboarding",
+      "viewport": "mobile",
+      "motion": "standard",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, listening pose.",
+          "width": 58,
+          "height": 99,
+          "top": 62,
+          "left": 209,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Flistening%403x.webp&w=384&q=75"
+        }
+      ]
+    },
+    {
+      "route": "/lobby/onboarding",
+      "viewport": "mobile",
+      "motion": "reduced-motion",
+      "imageCount": 2,
+      "otisImageCount": 1,
+      "otisBounds": [
+        {
+          "alt": "Otis Vale, Lobby Concierge, regular outfit, listening pose.",
+          "width": 58,
+          "height": 99,
+          "top": 63,
+          "left": 209,
+          "source": "http://localhost:3000/_next/image?url=%2Fart%2Flobby%2Fotis%2Fregular%2Flistening%403x.webp&w=384&q=75"
+        }
+      ]
+    }
+  ]
+}

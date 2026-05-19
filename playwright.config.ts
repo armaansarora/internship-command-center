@@ -46,7 +46,8 @@ export default defineConfig({
           // routes fail closed without it. Stub value is fine in e2e
           // because the stub Supabase server doesn't validate tokens.
           MATCH_ANON_SECRET:
-            process.env.MATCH_ANON_SECRET ?? "stub-match-anon-secret-for-e2e",
+            process.env.MATCH_ANON_SECRET ??
+            "stub-match-anon-secret-for-e2e-local",
           // CRON_SECRET — without it, verifyCronRequest returns
           // {ok:true} in non-prod and cron routes accept any caller.
           // We set it so tests can bind the "no bearer → 401" contract.

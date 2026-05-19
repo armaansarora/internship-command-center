@@ -21,6 +21,11 @@ import {
 import { renderCreativeStatusSummary } from "../src/lib/creative-production/operator/v1-final";
 import { getNextCreativeRunAction } from "../src/lib/creative-production/run-state";
 import {
+  planRetentionCleanup,
+  writeCreativeRetentionRegistry,
+  type CreativeRetentionEntry,
+} from "../src/lib/creative-production/cleanup";
+import {
   inspectCharacterSourceImage,
   preflightCharacterSourceImage,
   prepareCharacterSpriteAsset,
@@ -608,9 +613,33 @@ async function commandClean(args: ParsedArgs): Promise<void> {
     `public/art/lobby/${characterId}/`,
     GENERATED_MANIFEST_PATH,
   ];
+  const registryPath = ".artlab/studio/artifact-registry.json";
+  const registryEntries: CreativeRetentionEntry[] = [
+    ...deleteTargets.map((path): CreativeRetentionEntry => ({
+      path,
+      status: "draft",
+      kind: path.includes("review") || path.includes("browser-qa") ? "orphan-preview" : "unreferenced-intermediate",
+      runId,
+    })),
+    ...kept.map((path): CreativeRetentionEntry => ({
+      path,
+      status: path.startsWith("public/art/") || path === GENERATED_MANIFEST_PATH ? "approved" : "staged",
+      kind: path.startsWith("public/art/")
+        ? "live-public-art"
+        : path === GENERATED_MANIFEST_PATH
+          ? "approved-manifest"
+          : path.includes("run.json")
+            ? "active-run-state"
+            : "review-board",
+      runId,
+    })),
+  ];
+  const cleanupPlan = planRetentionCleanup(registryEntries);
+
+  await writeCreativeRetentionRegistry(registryPath, registryEntries);
 
   if (!dryRun) {
-    for (const target of deleteTargets) {
+    for (const target of cleanupPlan.deleteEntries.map((entry) => entry.path)) {
       await rm(target, { recursive: true, force: true });
     }
   }
@@ -621,7 +650,14 @@ async function commandClean(args: ParsedArgs): Promise<void> {
         characterId,
         runId,
         dryRun,
-        deleted: deleteTargets,
+        registryPath,
+        cleanupPlan: {
+          protected: cleanupPlan.protectedEntries.map((entry) => entry.path),
+          archive: cleanupPlan.archiveEntries.map((entry) => entry.path),
+          delete: cleanupPlan.deleteEntries.map((entry) => entry.path),
+          keep: cleanupPlan.keepEntries.map((entry) => entry.path),
+        },
+        deleted: cleanupPlan.deleteEntries.map((entry) => entry.path),
         kept,
         protected: [
           "production public/art files stay live until a replacement run is approved and promoted",

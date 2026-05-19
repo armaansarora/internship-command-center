@@ -4,7 +4,7 @@
   "assetType": "character",
   "name": "Otis",
   "request": "Imported current Otis production canary state.",
-  "phase": "integrated",
+  "phase": "browser-verified",
   "gates": [
     "initial-design-direction",
     "final-app-promotion"
@@ -14,7 +14,7 @@
   "stateRoot": ".artlab/studio",
   "runRoot": ".artlab/studio/characters/otis-real-rembg-canary-v1",
   "createdAt": "2026-05-19T06:18:35.344Z",
-  "updatedAt": "2026-05-19T14:37:11Z",
+  "updatedAt": "2026-05-19T16:08:51Z",
   "importedFrom": {
     "legacyRunId": "otis-real-rembg-canary-v1",
     "staleOrConflictingState": true,
@@ -32,7 +32,7 @@
       ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/asset-doctor.json"
     ]
   },
-  "nextLegalAction": "Run browser QA for desktop, mobile, reduced motion, image loading, and overlap.",
+  "nextLegalAction": "Close the run after housekeeping and continuous improvement gates pass.",
   "productionEvidence": {
     "fullPlanPath": ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/gemini-api-plan.json",
     "repairPlanPath": ".artlab/studio/characters/otis-real-rembg-canary-v1/generation/gemini-api-v3/full/repair-plan.json",
@@ -43,6 +43,7 @@
     "housekeepingDryRun": "npm run art:clean -- otis --run-id otis-real-rembg-full-production-v1 --dry-run",
     "continuousImprovementReportPath": ".artlab/studio/continuous-improvement-report.json",
     "browserCheckScreenshotPath": ".artlab/runs/otis/otis-real-rembg-full-production-v1/review/final-board-browser-check.png",
+    "browserQaEvidencePath": ".artlab/runs/otis/otis-real-rembg-full-production-v1/browser-qa/browser-qa.json",
     "promotedRunJsonPath": ".artlab/runs/otis/otis-real-rembg-full-production-v1/run.json",
     "approvedManifestPath": "src/lib/visual-assets/approved-character-assets.generated.json",
     "publicArtRoot": "public/art/lobby/otis",

@@ -16,6 +16,8 @@ import type {
   CreativeProviderGenerationResult,
   CreativeProviderSlotRequest,
 } from "../providers/adapters";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 export type CreativeSlotStage =
   | "pending"
   | "provider-running"
@@ -29,6 +31,10 @@ export interface CreativeSchedulerSlot {
   providerId: CreativeProductionProviderId;
   prompt: string;
   sourceHash: string;
+  promptHash?: string;
+  referenceHash?: string;
+  providerModel?: string;
+  attemptId?: string;
   metadata?: Record<string, unknown>;
 }
 export interface CreativeSchedulerPolicy {
@@ -79,7 +85,13 @@ export interface CreativeSlotLease {
   timeoutMs: number;
 }
 
-export class InMemorySlotLeaseStore {
+export interface CreativeSlotLeaseStore {
+  get(input: Pick<CreativeSlotLease, "runId" | "slotId" | "stage">): CreativeSlotLease | undefined;
+  set(lease: CreativeSlotLease): void;
+  delete(lease: CreativeSlotLease): void;
+}
+
+export class InMemorySlotLeaseStore implements CreativeSlotLeaseStore {
   private readonly leases = new Map<string, CreativeSlotLease>();
 
   key(input: Pick<CreativeSlotLease, "runId" | "slotId" | "stage">): string {
@@ -99,8 +111,44 @@ export class InMemorySlotLeaseStore {
   }
 }
 
+function safeLeasePathPart(value: string): string {
+  return value.replace(/[^a-zA-Z0-9._-]+/g, "-");
+}
+
+export class FileCreativeSlotLeaseStore implements CreativeSlotLeaseStore {
+  constructor(private readonly root: string) {}
+
+  private path(input: Pick<CreativeSlotLease, "runId" | "slotId" | "stage">): string {
+    return join(
+      this.root,
+      `${safeLeasePathPart(input.runId)}__${safeLeasePathPart(input.slotId)}__${safeLeasePathPart(input.stage)}.lease.json`,
+    );
+  }
+
+  get(input: Pick<CreativeSlotLease, "runId" | "slotId" | "stage">): CreativeSlotLease | undefined {
+    const path = this.path(input);
+
+    if (!existsSync(path)) return undefined;
+
+    return JSON.parse(readFileSync(path, "utf8")) as CreativeSlotLease;
+  }
+
+  set(lease: CreativeSlotLease): void {
+    const path = this.path(lease);
+    const tempPath = `${path}.${process.pid}.${Date.now()}.tmp`;
+
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(tempPath, `${JSON.stringify(lease, null, 2)}\n`);
+    renameSync(tempPath, path);
+  }
+
+  delete(lease: CreativeSlotLease): void {
+    rmSync(this.path(lease), { force: true });
+  }
+}
+
 export function acquireCreativeSlotLease(
-  store: InMemorySlotLeaseStore,
+  store: CreativeSlotLeaseStore,
   input: {
     runId: string;
     slotId: string;
@@ -142,7 +190,7 @@ export function acquireCreativeSlotLease(
 }
 
 export function heartbeatCreativeSlotLease(
-  store: InMemorySlotLeaseStore,
+  store: CreativeSlotLeaseStore,
   lease: CreativeSlotLease,
   nowMs = Date.now(),
 ): CreativeSlotLease {
@@ -157,7 +205,7 @@ export function heartbeatCreativeSlotLease(
 }
 
 export function releaseCreativeSlotLease(
-  store: InMemorySlotLeaseStore,
+  store: CreativeSlotLeaseStore,
   lease: CreativeSlotLease,
 ): void {
   const current = store.get(lease);
@@ -257,7 +305,7 @@ export async function runCreativeSlotScheduler(input: {
   budgetLedger: CreativeBudgetLedger;
   policy: CreativeSchedulerPolicy;
   retry?: CreativeSchedulerRetryPolicy;
-  leaseStore?: InMemorySlotLeaseStore;
+  leaseStore?: CreativeSlotLeaseStore;
   workerId?: string;
   processLocalOutput?: (input: {
     slot: CreativeSchedulerSlot;
@@ -287,7 +335,7 @@ export async function runCreativeSlotScheduler(input: {
     }
 
     const latest = getLatestCreativeBudgetReceipt(ledger, slot.slotId);
-    const attemptId = getNextCreativeAttemptId(ledger, slot.slotId);
+    const attemptId = slot.attemptId ?? getNextCreativeAttemptId(ledger, slot.slotId);
 
     if (latest?.status === "clean") {
       slotResults[slot.slotId] = {
@@ -404,7 +452,10 @@ export async function runCreativeSlotScheduler(input: {
         attemptId,
         prompt: slot.prompt,
         sourceHash: slot.sourceHash,
-        metadata: slot.metadata,
+        ...(slot.promptHash ? { promptHash: slot.promptHash } : {}),
+        ...(slot.referenceHash ? { referenceHash: slot.referenceHash } : {}),
+        ...(slot.providerModel ? { providerModel: slot.providerModel } : {}),
+        ...(slot.metadata ? { metadata: slot.metadata } : {}),
       };
       const estimate = await input.provider.estimateCost(request);
       const reserved = input.provider.reserveBudget(ledger, {

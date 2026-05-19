@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "tower-creative-retention-registry-v1",
+  "updatedAt": "2026-05-19T16:10:15.204Z",
+  "entries": [
+    {
+      "path": ".artlab/characters/otis/masters/otis-real-rembg-full-production-v1",
+      "status": "draft",
+      "kind": "unreferenced-intermediate",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/characters/otis/qa/otis-real-rembg-full-production-v1",
+      "status": "draft",
+      "kind": "unreferenced-intermediate",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/characters/otis/staged-public/otis-real-rembg-full-production-v1",
+      "status": "draft",
+      "kind": "unreferenced-intermediate",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/incoming",
+      "status": "draft",
+      "kind": "unreferenced-intermediate",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/review/final-board-browser-check.png",
+      "status": "draft",
+      "kind": "orphan-preview",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/run.json",
+      "status": "staged",
+      "kind": "active-run-state",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/prompts/",
+      "status": "staged",
+      "kind": "review-board",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/review/final-upload-ready-board.html",
+      "status": "staged",
+      "kind": "review-board",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/browser-qa/browser-qa.json",
+      "status": "staged",
+      "kind": "review-board",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": ".artlab/characters/otis/references/",
+      "status": "staged",
+      "kind": "review-board",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": "public/art/lobby/otis/",
+      "status": "approved",
+      "kind": "live-public-art",
+      "runId": "otis-real-rembg-full-production-v1"
+    },
+    {
+      "path": "src/lib/visual-assets/approved-character-assets.generated.json",
+      "status": "approved",
+      "kind": "approved-manifest",
+      "runId": "otis-real-rembg-full-production-v1"
+    }
+  ]
+}

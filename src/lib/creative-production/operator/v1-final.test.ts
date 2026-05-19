@@ -67,6 +67,61 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(summary).toContain("Next automatic step");
   });
 
+  it("renders integrated promoted baselines without stale final-approval instructions", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-integrated-"));
+    const runRoot = join(stateRoot, "characters", "otis-integrated-v1");
+
+    mkdirSync(runRoot, { recursive: true });
+    writeFileSync(join(runRoot, "run-state.json"), JSON.stringify({
+      schemaVersion: "tower-creative-run-state-v1-final",
+      runId: "otis-integrated-v1",
+      assetType: "character",
+      name: "Otis",
+      request: "Imported current Otis production canary state.",
+      phase: "integrated",
+      gates: ["initial-design-direction", "final-app-promotion"],
+      promotionPhrase: "approved for app",
+      publicArtWritesAllowed: false,
+      stateRoot,
+      runRoot,
+      createdAt: "2026-05-19T12:00:00.000Z",
+      updatedAt: "2026-05-19T14:00:00.000Z",
+      nextLegalAction: "Run browser QA for desktop, mobile, reduced motion, image loading, and overlap.",
+    }, null, 2));
+    writeFileSync(join(runRoot, "progress.json"), JSON.stringify({
+      schemaVersion: "tower-creative-progress-v1",
+      runId: "otis-integrated-v1",
+      phase: "final-board-ready",
+      runningSlots: [],
+      completed: 24,
+      failed: 0,
+      repairing: 0,
+      pending: 0,
+      spendSoFarCents: 664.4,
+      reservedSpendCents: 0,
+      activeLocks: [],
+      nextAutomaticStep: "Wait for Armaan to inspect the final upload-ready board and say approved for app before any promotion.",
+      updatedAt: "2026-05-19T06:27:58.698Z",
+    }, null, 2));
+    writeFileSync(join(runRoot, "human-action.json"), JSON.stringify({
+      schemaVersion: "tower-creative-human-action-v1",
+      runId: "otis-integrated-v1",
+      phase: "final-board-ready",
+      recommendation: "Inspect the final board. If it is truly ready for app use, respond with the exact phrase approved for app.",
+      allowedResponses: ["approved for app"],
+      recommendedResponse: "approved for app",
+    }, null, 2));
+
+    const summary = await renderCreativeStatusSummary({ stateRoot, runId: "otis-integrated-v1" });
+
+    expect(summary).toContain("Phase: integrated");
+    expect(summary).toContain("Next automatic step: Run browser QA for desktop, mobile, reduced motion, image loading, and overlap.");
+    expect(summary).toContain("Armaan action: none.");
+    expect(summary).toContain("Promoted baseline protected");
+    expect(summary).not.toContain("Promotion locked: yes");
+    expect(summary).not.toContain("Recommended response: approved for app");
+  });
+
   it("imports the current Otis canary state without force-unlocking or abandoning evidence", async () => {
     const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-import-"));
     const runRoot = join(stateRoot, "characters", "otis-real-rembg-canary-v1");
