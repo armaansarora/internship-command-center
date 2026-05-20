@@ -4,7 +4,7 @@
   "assetType": "character",
   "name": "Mara",
   "request": "Make Mara Voss as a Tower character sprite from scratch: the CEO of the C-Suite, adult professional energy, tower-flat-plus-depth-v1, Professional Scars tone, initial prompt-only character direction.",
-  "phase": "final-board-ready",
+  "phase": "closed",
   "gates": [
     "initial-design-direction",
     "final-app-promotion"
@@ -14,8 +14,8 @@
   "stateRoot": ".artlab/studio",
   "runRoot": ".artlab/studio/characters/2026-05-19-mara-voss-character",
   "createdAt": "2026-05-19T19:33:46.201Z",
-  "updatedAt": "2026-05-20T04:50:56.320Z",
-  "nextLegalAction": "Wait for Armaan to inspect the final upload-ready board and say approved for app before any promotion.",
+  "updatedAt": "2026-05-20T05:16:31.292Z",
+  "nextLegalAction": "Run is closed; start the next creative asset only when Armaan asks.",
   "approvedInitialConcept": {
     "slotId": "api-lane-01__initial-character-concept",
     "localImagePath": "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-01/initial-character-concept/mara-initial-concept__api-lane-01.png",
@@ -24,5 +24,15 @@
     "boardPath": ".artlab/studio/characters/2026-05-19-mara-voss-character/review/initial-concept-board.html",
     "approvedAt": "2026-05-19T23:35:42.559Z",
     "response": "approve direction: 01"
+  },
+  "productionEvidence": {
+    "finalReviewBoardPath": ".artlab/studio/characters/2026-05-19-mara-voss-character/review/final-upload-ready-board.html",
+    "finalActionManifestPath": ".artlab/studio/characters/2026-05-19-mara-voss-character/review/action-manifest.json",
+    "publicArtRoot": "/Users/armaanarora/Documents/The Tower/public/art/penthouse/ceo",
+    "approvedManifestPath": "/Users/armaanarora/Documents/The Tower/src/lib/visual-assets/approved-character-assets.generated.json",
+    "promotionReceiptPath": ".artlab/studio/characters/2026-05-19-mara-voss-character/promotion/promotion-receipt.json",
+    "promotedAssetCount": 21,
+    "websiteIntegration": "CharacterSprite and AgentCharacterButton consume the generated approved-character manifest at runtime.",
+    "browserQaEvidencePath": ".artlab/studio/characters/2026-05-19-mara-voss-character/review/app-browser-qa.json"
   }
 }

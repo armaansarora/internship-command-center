@@ -8,7 +8,9 @@ import {
   continueApprovedProductionForCreativeRun,
   generateInitialConceptsForCreativeRun,
   importLegacyOtisRun,
+  markCreativeRunBrowserVerified,
   markCreativeRunUpgradeRequired,
+  promoteApprovedCreativeRunForApp,
   renderCreativeStatusSummary,
   startCreativeProductionRun,
 } from "../src/lib/creative-production/operator/v1-final";
@@ -205,6 +207,11 @@ async function main(): Promise<void> {
       } else {
         await continueApprovedProductionForCreativeRun({ runRoot });
       }
+    } else if (nextState.phase === "approved-for-app") {
+      await promoteApprovedCreativeRunForApp({
+        runRoot,
+        projectRoot: process.env.TOWER_ART_PROJECT_ROOT,
+      });
     }
 
     console.log(`Recorded answer for ${answer.runId}: ${answer.response}`);
@@ -244,6 +251,18 @@ async function main(): Promise<void> {
           await continueApprovedProductionForCreativeRun({ runRoot });
         } else if (state.phase === "strict-qa") {
           await buildFinalBoardForCreativeRun({ runRoot });
+        } else if (state.phase === "approved-for-app") {
+          await promoteApprovedCreativeRunForApp({
+            runRoot,
+            projectRoot: process.env.TOWER_ART_PROJECT_ROOT,
+          });
+        } else if (state.phase === "integrated") {
+          const evidencePath = join(runRoot, "review", "app-browser-qa.json");
+
+          if (existsSync(evidencePath)) {
+            await markCreativeRunBrowserVerified({ runRoot, evidencePath });
+            await closeCreativeRunAfterGates({ runRoot });
+          }
         } else if (state.phase === "browser-verified") {
           await closeCreativeRunAfterGates({ runRoot });
         }

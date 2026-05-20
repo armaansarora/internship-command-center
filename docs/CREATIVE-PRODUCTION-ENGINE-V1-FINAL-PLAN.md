@@ -464,6 +464,8 @@ Then the engine:
 5. Writes the app preview board.
 6. Stops before final promotion unless the exact phrase `approved for app` is present.
 
+For inferable Tower character placements, the final upload-ready board is the last normal human stop. Once Armaan says the exact phrase `approved for app`, `approved-for-app` is an internal checkpoint: the coordinator must run the reusable promotion adapter, derive public renditions, update `public/art` and the generated character manifest, write the promotion receipt, and move into app integration without asking for another approval.
+
 ---
 
 ## Promotion And Integration Strategy
@@ -488,6 +490,8 @@ Only after that may the engine:
 - Write promotion receipt.
 - Run focused tests/build/browser verification.
 - Close the run.
+
+For character assets, the app integration reference is the approved character manifest consumed by `CharacterSprite`, `CharacterStage`, and each agent button. Promotion is incomplete unless all 21 required outfit/pose-expression sprites are present as public WebP renditions and the generated manifest contains the matching approved entries.
 
 ---
 

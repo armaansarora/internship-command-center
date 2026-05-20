@@ -57,11 +57,13 @@ Use `npm run art:operate` only when the active asset is a Season 1 character and
 5. Show the five initial designs and wait for Armaan to pick one direction.
 6. After the initial design is approved, generate the production pack automatically. The system-wide Tower character minimum is 21 individual source sprites: `regular`, `summer-light`, and `winter-layered` outfit variants across `idle`, `greeting`, `listening`, `thinking`, `talking`, `alert`, and `working` pose/expression states. The engine may add turnarounds or extra references internally, but it cannot stop for final approval until the required 21-slot matrix, masters, derivatives, QA, and final board are complete.
 7. Show only one final upload-ready board for approval.
-8. Promote only after the exact phrase:
+8. Promote only after the exact phrase, and do not stop at an unlocked `approved-for-app` state:
 
 ```bash
-npm run art:promote -- <run.json> --approval-phrase "approved for app"
+npm run art:produce -- --answer <run-id> "approved for app"
 ```
+
+That command must run the reusable final promotion adapter: create public WebP renditions for every required character slot, copy them into `public/art/<space>/<characterId>/`, update `src/lib/visual-assets/approved-character-assets.generated.json`, write the promotion receipt, and move the run into app integration. The legacy `npm run art:promote -- <run.json> --approval-phrase "approved for app"` remains only for older character-art run JSONs.
 
 Production paid generation is canary-gated. After an initial design is chosen, production packs must generate one representative canary slot, repair it locally if possible, verify the canary gate, and only then run the full pack. Whole-pack retries are banned; use slot-only regeneration for named failures.
 

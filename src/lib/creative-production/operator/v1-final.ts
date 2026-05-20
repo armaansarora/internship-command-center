@@ -30,6 +30,20 @@ import {
 import { buildFinalUploadReadyReviewBoard, buildInitialConceptReviewBoard } from "../review";
 import type { CreativeAssetType } from "../types";
 import { renderCreativeRunStatusLines } from "./status-summary";
+import { prepareCharacterSpriteAsset } from "../../visual-assets/art-processing";
+import { SEASON_ONE_CHARACTER_METADATA } from "../../visual-assets/characters";
+import {
+  getExpectedCharacterSpriteSlot,
+  toApprovedCharacterVisualAsset,
+} from "../../visual-assets/production-contract";
+import type {
+  CharacterId,
+  CharacterOutfitVariant,
+  CharacterPose,
+  VisualAsset,
+} from "../../visual-assets/types";
+
+const APPROVED_CHARACTER_ASSETS_MANIFEST = "src/lib/visual-assets/approved-character-assets.generated.json";
 
 export const CREATIVE_ENGINE_CORE_PHASES = [
   "requested",
@@ -2224,6 +2238,7 @@ export async function applyCreativeHumanResponse(input: {
       ...state,
       phase: "approved-for-app",
       publicArtWritesAllowed: true,
+      nextLegalAction: "Run the reusable promotion adapter now: copy approved derivatives into public/art, update the approved manifest, and integrate the app surface.",
       updatedAt: now.toISOString(),
     };
   } else {
@@ -2405,6 +2420,21 @@ interface AssetDoctorFile {
   }>;
 }
 
+interface FinalReviewActionManifestFile {
+  boardType?: string;
+  promotesOnAction?: boolean;
+  localImagePaths?: string[];
+}
+
+interface CharacterPromotionSlot {
+  slotId: string;
+  baseSlotId: string;
+  sourcePath: string;
+  characterId: CharacterId;
+  outfitVariant: CharacterOutfitVariant;
+  pose: CharacterPose;
+}
+
 export async function buildFinalBoardForCreativeRun(input: {
   runRoot: string;
   now?: Date;
@@ -2516,6 +2546,367 @@ export async function buildFinalBoardForCreativeRun(input: {
   };
 }
 
+function inferCharacterIdForCreativeRun(state: CreativeEngineRunState): CharacterId {
+  if (state.assetType !== "character") {
+    throw new Error(`App promotion for ${state.assetType} assets needs an asset-specific promotion adapter.`);
+  }
+
+  const haystack = `${state.name} ${state.request}`.toLowerCase();
+  const match = SEASON_ONE_CHARACTER_METADATA.find((character) => {
+    const displayName = character.displayName.toLowerCase();
+    const firstName = displayName.split(" ")[0] ?? displayName;
+
+    return (
+      haystack.includes(character.id) ||
+      haystack.includes(displayName) ||
+      haystack.includes(firstName) ||
+      haystack.includes(character.title.toLowerCase())
+    );
+  });
+
+  if (!match) {
+    throw new Error(`Could not infer a Season 1 character id for ${state.name}.`);
+  }
+
+  return match.id;
+}
+
+function siblingRenditionPath(path: string, suffix: "@2x" | "@3x"): string {
+  return path.replace(/\.webp$/, `${suffix}.webp`);
+}
+
+function publicPathForAssetSrc(projectRoot: string, src: string): string {
+  return join(projectRoot, "public", src.replace(/^\//, ""));
+}
+
+async function readApprovedCharacterManifest(projectRoot: string): Promise<VisualAsset[]> {
+  const manifest = await readJson<unknown>(join(projectRoot, APPROVED_CHARACTER_ASSETS_MANIFEST));
+
+  if (!manifest) return [];
+  if (!Array.isArray(manifest)) {
+    throw new Error(`${APPROVED_CHARACTER_ASSETS_MANIFEST} must contain a JSON array.`);
+  }
+
+  return manifest as VisualAsset[];
+}
+
+async function writeApprovedCharacterManifest(projectRoot: string, assets: VisualAsset[]): Promise<void> {
+  await writeJson(join(projectRoot, APPROVED_CHARACTER_ASSETS_MANIFEST), assets);
+}
+
+async function collectCharacterPromotionSlots(input: {
+  state: CreativeEngineRunState;
+  characterId: CharacterId;
+  assetDoctor: AssetDoctorFile;
+}): Promise<CharacterPromotionSlot[]> {
+  const plan = await readJson<GeminiApiGenerationPlan>(productionPlanPath(input.state.runRoot));
+
+  if (!plan || plan.phase !== "production-pack") {
+    throw new Error("Promotion requires the current production-pack plan.");
+  }
+
+  const slotToBase = new Map(plan.slots.map((slot) => [slot.slotId, slot.baseSlotId ?? slot.slotId]));
+  const imageByBaseSlotId = new Map<string, AssetDoctorImageEvidence>();
+
+  for (const image of input.assetDoctor.checkedGeneratedImages ?? []) {
+    if (!image.slotId || !image.path || (image.issues ?? []).length) continue;
+
+    const baseSlotId = slotToBase.get(image.slotId);
+
+    if (baseSlotId) imageByBaseSlotId.set(baseSlotId, image);
+  }
+
+  const slots: CharacterPromotionSlot[] = [];
+
+  for (const outfit of CHARACTER_PRODUCTION_OUTFIT_VARIANTS) {
+    for (const pose of CHARACTER_PRODUCTION_POSE_STATES) {
+      const baseSlotId = `${slugify(input.state.name)}-${outfit.id}-${pose.id}`;
+      const image = imageByBaseSlotId.get(baseSlotId);
+
+      if (!image?.path) {
+        throw new Error(`Promotion requires a strict-QA-passed source image for ${baseSlotId}.`);
+      }
+      if (!existsSync(resolve(image.path))) {
+        throw new Error(`Promotion source image is missing for ${baseSlotId}: ${image.path}`);
+      }
+
+      slots.push({
+        slotId: image.slotId ?? baseSlotId,
+        baseSlotId,
+        sourcePath: resolve(image.path),
+        characterId: input.characterId,
+        outfitVariant: outfit.id as CharacterOutfitVariant,
+        pose: pose.id as CharacterPose,
+      });
+    }
+  }
+
+  return slots;
+}
+
+export async function promoteApprovedCreativeRunForApp(input: {
+  runRoot: string;
+  projectRoot?: string;
+  masterLongEdge?: number;
+  now?: Date;
+}): Promise<CreativeRunArtifacts & {
+  receiptPath: string;
+  promotedPublicPaths: string[];
+}> {
+  const now = input.now ?? new Date();
+  const projectRoot = resolve(input.projectRoot ?? process.cwd());
+  const statePath = join(input.runRoot, "run-state.json");
+  const progressPath = join(input.runRoot, "progress.json");
+  const state = await readJson<CreativeEngineRunState>(statePath);
+  const currentProgress = await readJson<CreativeProgressFile>(progressPath);
+  const assetDoctorPath = join(input.runRoot, "generation", "gemini-api-v3", "full", "asset-doctor.json");
+  const assetDoctor = await readJson<AssetDoctorFile>(assetDoctorPath);
+  const actionManifestPath = join(input.runRoot, "review", "action-manifest.json");
+  const actionManifest = await readJson<FinalReviewActionManifestFile>(actionManifestPath);
+
+  if (!state) throw new Error(`Missing run-state.json at ${statePath}.`);
+  if (!currentProgress) throw new Error(`Missing progress.json at ${progressPath}.`);
+  if (state.phase !== "approved-for-app") {
+    throw new Error(`Promotion can only run after approved-for-app; current phase is ${state.phase}.`);
+  }
+  if (!state.publicArtWritesAllowed) {
+    throw new Error("Promotion is blocked until public art writes are unlocked by approved for app.");
+  }
+  if (!assetDoctor || assetDoctor.status !== "passed" || assetDoctor.strict !== true) {
+    throw new Error("Promotion requires passing strict asset doctor evidence.");
+  }
+  if (!actionManifest || actionManifest.boardType !== "final-upload-ready") {
+    throw new Error("Promotion requires the final upload-ready action manifest.");
+  }
+  if (actionManifest.promotesOnAction) {
+    throw new Error("Final board action manifests must not promote directly.");
+  }
+
+  const characterId = inferCharacterIdForCreativeRun(state);
+  const slots = await collectCharacterPromotionSlots({ state, characterId, assetDoctor });
+  const promotionRoot = join(input.runRoot, "promotion");
+  const stagedRoot = join(promotionRoot, "staged-public");
+  const masterRoot = join(promotionRoot, "masters");
+  const qaRoot = join(promotionRoot, "qa");
+  const receiptPath = join(promotionRoot, "promotion-receipt.json");
+  const promotedAt = now.toISOString();
+  const promotedAssets: VisualAsset[] = [];
+  const promotedPublicPaths: string[] = [];
+  const stagedPaths: string[] = [];
+
+  for (const slot of slots) {
+    const expected = getExpectedCharacterSpriteSlot(slot.characterId, slot.pose, slot.outfitVariant);
+    const stagedDefault = join(stagedRoot, expected.src.replace(/^\//, ""));
+    const publicDefault = publicPathForAssetSrc(projectRoot, expected.src);
+    const prepared = await prepareCharacterSpriteAsset({
+      sourcePath: slot.sourcePath,
+      masterPath: join(masterRoot, slot.outfitVariant, `${slot.pose}.png`),
+      stagedRenditionPaths: {
+        default: stagedDefault,
+        retina2x: siblingRenditionPath(stagedDefault, "@2x"),
+        retina3x: siblingRenditionPath(stagedDefault, "@3x"),
+      },
+      qaPreviewPaths: {
+        dark: join(qaRoot, slot.outfitVariant, `${slot.pose}-dark.png`),
+        light: join(qaRoot, slot.outfitVariant, `${slot.pose}-light.png`),
+      },
+      displayFrame: expected.displayFrame,
+      ...(input.masterLongEdge ? { masterLongEdge: input.masterLongEdge } : {}),
+    });
+
+    if (prepared.issues.length) {
+      throw new Error(`Promotion blocked for ${expected.id}: ${prepared.issues.join(", ")}`);
+    }
+
+    const renditionPairs = [
+      [stagedDefault, publicDefault],
+      [siblingRenditionPath(stagedDefault, "@2x"), siblingRenditionPath(publicDefault, "@2x")],
+      [siblingRenditionPath(stagedDefault, "@3x"), siblingRenditionPath(publicDefault, "@3x")],
+    ] as const;
+
+    for (const [stagedPath, publicPath] of renditionPairs) {
+      await mkdir(dirname(publicPath), { recursive: true });
+      await cp(stagedPath, publicPath, { force: true });
+      stagedPaths.push(stagedPath);
+      promotedPublicPaths.push(publicPath);
+    }
+
+    promotedAssets.push({
+      ...toApprovedCharacterVisualAsset(expected),
+      sourceRunId: state.runId,
+      assetVersion: `${characterId}-v1`,
+      checksum: prepared.checksum,
+      sourceResolution: {
+        width: prepared.source.width,
+        height: prepared.source.height,
+      },
+      masterResolution: prepared.master,
+      qaStatus: "passed",
+      promotionDate: promotedAt,
+    });
+  }
+
+  const existingAssets = await readApprovedCharacterManifest(projectRoot);
+  const promotedIds = new Set(promotedAssets.map((asset) => asset.id));
+  const nextAssets = [
+    ...existingAssets.filter((asset) => !promotedIds.has(asset.id)),
+    ...promotedAssets,
+  ];
+
+  await writeApprovedCharacterManifest(projectRoot, nextAssets);
+  await writeJson(receiptPath, {
+    schemaVersion: "tower-creative-character-promotion-receipt-v1",
+    runId: state.runId,
+    characterId,
+    approvalPhrase: "approved for app",
+    promotedAt,
+    strictAssetDoctorPath: assetDoctorPath,
+    finalActionManifestPath: actionManifestPath,
+    approvedManifestPath: join(projectRoot, APPROVED_CHARACTER_ASSETS_MANIFEST),
+    promotedAssets: promotedAssets.map((asset) => ({
+      id: asset.id,
+      src: asset.src,
+      renditions: asset.renditions,
+    })),
+  });
+
+  const ledgerRoot = join(state.stateRoot, "ledgers");
+  const housekeeping = createHousekeepingEntry({
+    runId: state.runId,
+    phase: "app-integration",
+    created: [
+      ...stagedPaths,
+      ...promotedPublicPaths,
+      join(projectRoot, APPROVED_CHARACTER_ASSETS_MANIFEST),
+      receiptPath,
+    ],
+    kept: [
+      statePath,
+      progressPath,
+      assetDoctorPath,
+      actionManifestPath,
+      join(input.runRoot, "review", "final-upload-ready-board.html"),
+      join(projectRoot, APPROVED_CHARACTER_ASSETS_MANIFEST),
+      ...promotedPublicPaths,
+    ],
+    archived: [],
+    deleted: [],
+    notes: `${state.name} was promoted only after approved for app; staged derivatives, public art, manifest data, receipt, and provenance were kept.`,
+  });
+  const improvement = createImprovementEntry({
+    runId: state.runId,
+    phase: "app-integration",
+    category: "workflow",
+    severity: "low",
+    finding: "Final approval now runs the reusable character promotion adapter instead of stopping at an unlocked state.",
+    action: "Keep exact approved for app as the only public-art unlock and reuse this adapter for future Tower character promotions.",
+  });
+
+  await writeJsonlEntry(join(ledgerRoot, "housekeeping.jsonl"), housekeeping);
+  await writeJsonlEntry(join(ledgerRoot, "improvements.jsonl"), improvement);
+
+  const nextState: CreativeEngineRunState = {
+    ...state,
+    phase: "integrated",
+    publicArtWritesAllowed: false,
+    updatedAt: promotedAt,
+    nextLegalAction: "Promoted assets are integrated through the approved visual asset manifest; run browser QA for the target app surface, then close the run.",
+    productionEvidence: {
+      ...(state.productionEvidence ?? {}),
+      finalReviewBoardPath: join(input.runRoot, "review", "final-upload-ready-board.html"),
+      finalActionManifestPath: actionManifestPath,
+      publicArtRoot: publicPathForAssetSrc(projectRoot, `/art/${getExpectedCharacterSpriteSlot(characterId, "idle", "regular").character.space}/${characterId}`),
+      approvedManifestPath: join(projectRoot, APPROVED_CHARACTER_ASSETS_MANIFEST),
+      promotionReceiptPath: receiptPath,
+      promotedAssetCount: promotedAssets.length,
+      websiteIntegration: "CharacterSprite and AgentCharacterButton consume the generated approved-character manifest at runtime.",
+    },
+  };
+  const progress = createProgress({
+    runId: state.runId,
+    phase: "integrated",
+    completed: promotedAssets.length,
+    failed: 0,
+    repairing: 0,
+    pending: 0,
+    runningSlots: [],
+    spendSoFarCents: currentProgress.spendSoFarCents,
+    reservedSpendCents: 0,
+    activeLocks: [],
+    nextAutomaticStep: "Run browser QA for the integrated app surface, then close the run after housekeeping and continuous-improvement gates pass.",
+    now,
+  });
+  const artifacts: CreativeRunArtifacts = {
+    runRoot: input.runRoot,
+    state: nextState,
+    progress,
+  };
+
+  await writeArtifacts(artifacts, "app-promotion-integrated");
+
+  return {
+    ...artifacts,
+    receiptPath,
+    promotedPublicPaths,
+  };
+}
+
+export async function markCreativeRunBrowserVerified(input: {
+  runRoot: string;
+  evidencePath: string;
+  now?: Date;
+}): Promise<CreativeRunArtifacts> {
+  const now = input.now ?? new Date();
+  const statePath = join(input.runRoot, "run-state.json");
+  const progressPath = join(input.runRoot, "progress.json");
+  const state = await readJson<CreativeEngineRunState>(statePath);
+  const currentProgress = await readJson<CreativeProgressFile>(progressPath);
+
+  if (!state) throw new Error(`Missing run-state.json at ${statePath}.`);
+  if (!currentProgress) throw new Error(`Missing progress.json at ${progressPath}.`);
+  if (state.phase !== "integrated") {
+    throw new Error(`Browser verification can only run from integrated; current phase is ${state.phase}.`);
+  }
+  if (!existsSync(input.evidencePath)) {
+    throw new Error(`Browser verification evidence is missing: ${input.evidencePath}`);
+  }
+
+  const nextState: CreativeEngineRunState = {
+    ...state,
+    phase: "browser-verified",
+    publicArtWritesAllowed: false,
+    updatedAt: now.toISOString(),
+    nextLegalAction: "Close the run after housekeeping and continuous improvement gates pass.",
+    productionEvidence: {
+      ...(state.productionEvidence ?? {}),
+      browserQaEvidencePath: input.evidencePath,
+    },
+  };
+  const progress = createProgress({
+    runId: state.runId,
+    phase: "browser-verified",
+    completed: currentProgress.completed,
+    failed: currentProgress.failed,
+    repairing: currentProgress.repairing,
+    pending: currentProgress.pending,
+    runningSlots: [],
+    spendSoFarCents: currentProgress.spendSoFarCents,
+    reservedSpendCents: 0,
+    activeLocks: [],
+    nextAutomaticStep: "Close the run after housekeeping and continuous improvement gates pass.",
+    now,
+  });
+  const artifacts: CreativeRunArtifacts = {
+    runRoot: input.runRoot,
+    state: nextState,
+    progress,
+  };
+
+  await writeArtifacts(artifacts, "app-browser-verified");
+
+  return artifacts;
+}
+
 function stringEvidence(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
@@ -2557,15 +2948,15 @@ export async function closeCreativeRunAfterGates(input: {
     kept,
     archived: [],
     deleted: [],
-    notes: "Otis browser QA evidence is recorded; live public art and generated production manifest remain protected; no generation, promotion, or cleanup deletion ran during close.",
+    notes: `${state.name} browser QA evidence is recorded; live public art and generated production manifest remain protected; no generation, promotion, or cleanup deletion ran during close.`,
   });
   const improvement = createImprovementEntry({
     runId: state.runId,
     phase: "next-recommendation",
     category: "workflow",
     severity: "low",
-    finding: "Otis closure completed from durable browser QA evidence without a new blocking engine issue.",
-    action: "Keep Otis as the promoted regression baseline and start the next asset only when Armaan explicitly asks.",
+    finding: `${state.name} closure completed from durable browser QA evidence without a new blocking engine issue.`,
+    action: "Keep the promoted baseline protected and start the next asset only when Armaan explicitly asks.",
   });
   const gateValidation = validateRequiredPhaseGates(state.runId, "next-recommendation", [
     housekeeping,
@@ -2597,14 +2988,14 @@ export async function closeCreativeRunAfterGates(input: {
     spendSoFarCents: currentProgress.spendSoFarCents,
     reservedSpendCents: 0,
     activeLocks: [],
-    nextAutomaticStep: "Run is closed. Do not start Mara until Armaan asks; next safe command is npm run art:produce -- --request \"let's make Mara\".",
+    nextAutomaticStep: "Run is closed. The pipeline is clean and ready for the next explicit creative request.",
     now,
   });
   const humanAction = createHumanAction({
     runId: state.runId,
     phase: "closed",
-    whatIUnderstood: "Otis browser QA passed and the run has gone through housekeeping and continuous-improvement close gates.",
-    recommendation: "No human action is needed for Otis. Keep the promoted baseline protected and wait for Armaan before starting Mara.",
+    whatIUnderstood: `${state.name} browser QA passed and the run has gone through housekeeping and continuous-improvement close gates.`,
+    recommendation: `No human action is needed for ${state.name}. Keep the promoted baseline protected and wait for Armaan before starting the next creative asset.`,
     estimatedCents: 0,
     reservedCents: 0,
     risk: "Low. Closing writes only run state and audit ledgers; public art and production manifests stay unchanged.",

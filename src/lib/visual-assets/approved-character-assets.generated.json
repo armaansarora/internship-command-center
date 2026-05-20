@@ -1300,5 +1300,1307 @@
     },
     "qaStatus": "passed",
     "promotionDate": "2026-05-19T14:23:08.347Z"
+  },
+  {
+    "id": "ceo-regular-idle",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/regular/idle.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss regular idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, regular outfit, idle pose.",
+    "characterId": "ceo",
+    "outfitVariant": "regular",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/regular/idle.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/regular/idle@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/regular/idle@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:88d2486b9e2bd5c6aea8b6e5e62a886e5ab3488a1eb1d63b207a361da651e244",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5511
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-regular-greeting",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/regular/greeting.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss regular greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, regular outfit, greeting pose.",
+    "characterId": "ceo",
+    "outfitVariant": "regular",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/regular/greeting.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/regular/greeting@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/regular/greeting@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:ab35afe3e3aff8e9f2e1b81ea58a4b77fe742a1c8ca95302c01f9e6f38e4ccf0",
+    "sourceResolution": {
+      "width": 3125,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2323,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-regular-listening",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/regular/listening.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss regular listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, regular outfit, listening pose.",
+    "characterId": "ceo",
+    "outfitVariant": "regular",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/regular/listening.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/regular/listening@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/regular/listening@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:dc417016a4fbc7c9bdf55709cea1939c6cbcd9b693d58265fe88a81b45166d58",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-regular-thinking",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/regular/thinking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss regular thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, regular outfit, thinking pose.",
+    "characterId": "ceo",
+    "outfitVariant": "regular",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/regular/thinking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/regular/thinking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/regular/thinking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:dfc2bfef4719abb1053a48a7788f8e9905397b8188d2a70940200a3478f86c4a",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-regular-talking",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/regular/talking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss regular talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, regular outfit, talking pose.",
+    "characterId": "ceo",
+    "outfitVariant": "regular",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/regular/talking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/regular/talking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/regular/talking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:b83ab3530d6432f5b48afd82efe38eeb01a01acdd4161323a9fe6adcf56c402c",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-regular-alert",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/regular/alert.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss regular alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, regular outfit, alert pose.",
+    "characterId": "ceo",
+    "outfitVariant": "regular",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/regular/alert.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/regular/alert@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/regular/alert@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:b2769f520c903e90bc4100b11522f92680b5b4cce0b683e7e803d546dea165bd",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-regular-working",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/regular/working.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss regular working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, regular outfit, working pose.",
+    "characterId": "ceo",
+    "outfitVariant": "regular",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/regular/working.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/regular/working@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/regular/working@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:93374d6c1a4da77ac343b80044d1120f9d6b39b8e3c9859f30909e07fe86b3af",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-summer-light-idle",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/summer-light/idle.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss summer-light idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, summer-light outfit, idle pose.",
+    "characterId": "ceo",
+    "outfitVariant": "summer-light",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/summer-light/idle.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/summer-light/idle@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/summer-light/idle@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:155e25ce87f689bec681d5c7fe0f5ef110d1d5e828d8d5ec2dfb5612b61a9028",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-summer-light-greeting",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/summer-light/greeting.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss summer-light greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, summer-light outfit, greeting pose.",
+    "characterId": "ceo",
+    "outfitVariant": "summer-light",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/summer-light/greeting.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/summer-light/greeting@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/summer-light/greeting@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:d8cb4660ced1377576892dc98c2e9f1697f2731479c63b86fbfcf80e857787d7",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5518
+    },
+    "masterResolution": {
+      "width": 2280,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-summer-light-listening",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/summer-light/listening.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss summer-light listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, summer-light outfit, listening pose.",
+    "characterId": "ceo",
+    "outfitVariant": "summer-light",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/summer-light/listening.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/summer-light/listening@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/summer-light/listening@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:d2fd2dea53b0b8d22e2856eafcee3dabbd9d6a3f0508cee085a1ed570ac4e903",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-summer-light-thinking",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/summer-light/thinking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss summer-light thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, summer-light outfit, thinking pose.",
+    "characterId": "ceo",
+    "outfitVariant": "summer-light",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/summer-light/thinking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/summer-light/thinking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/summer-light/thinking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:87f6b90f6da3bca4a1771e6dffa91e584311594386b3f000ed895ba002ab2b16",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-summer-light-talking",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/summer-light/talking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss summer-light talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, summer-light outfit, talking pose.",
+    "characterId": "ceo",
+    "outfitVariant": "summer-light",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/summer-light/talking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/summer-light/talking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/summer-light/talking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:d9487c02c42d7ff9efd42b2962295bd889d9dab0bd481c2745c2ce04f29572c0",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-summer-light-alert",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/summer-light/alert.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss summer-light alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, summer-light outfit, alert pose.",
+    "characterId": "ceo",
+    "outfitVariant": "summer-light",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/summer-light/alert.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/summer-light/alert@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/summer-light/alert@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:04b39a90b38664448b43187863e7cc223ad7e23ffda7f117c913df5c1d568e01",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-summer-light-working",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/summer-light/working.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss summer-light working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, summer-light outfit, working pose.",
+    "characterId": "ceo",
+    "outfitVariant": "summer-light",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/summer-light/working.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/summer-light/working@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/summer-light/working@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:a88febc97994c4dacff2e6a57ea383892a59965b01c92c9c448c2186b41980a9",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-winter-layered-idle",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/winter-layered/idle.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss winter-layered idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, winter-layered outfit, idle pose.",
+    "characterId": "ceo",
+    "outfitVariant": "winter-layered",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/winter-layered/idle.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/winter-layered/idle@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/winter-layered/idle@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:d6c27bc656a034dcbee893fedf291c8a92156e6492b07eff3607db6d82579703",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-winter-layered-greeting",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/winter-layered/greeting.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss winter-layered greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, winter-layered outfit, greeting pose.",
+    "characterId": "ceo",
+    "outfitVariant": "winter-layered",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/winter-layered/greeting.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/winter-layered/greeting@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/winter-layered/greeting@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:a0732a16963871247238ac239df852aebcf86201cff00f629fe9564cd45d19a5",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5563
+    },
+    "masterResolution": {
+      "width": 2262,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-winter-layered-listening",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/winter-layered/listening.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss winter-layered listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, winter-layered outfit, listening pose.",
+    "characterId": "ceo",
+    "outfitVariant": "winter-layered",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/winter-layered/listening.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/winter-layered/listening@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/winter-layered/listening@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:cb0a0b93e304c3a0257373cdbb71e224e10c7a69d3cf30589bfec30a8b1b3717",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-winter-layered-thinking",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/winter-layered/thinking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss winter-layered thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, winter-layered outfit, thinking pose.",
+    "characterId": "ceo",
+    "outfitVariant": "winter-layered",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/winter-layered/thinking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/winter-layered/thinking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/winter-layered/thinking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:44ee4a0781d936e9d788620e26258cd785a18df25cd5732fbffd64c425e0d32e",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5513
+    },
+    "masterResolution": {
+      "width": 2282,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-winter-layered-talking",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/winter-layered/talking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss winter-layered talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, winter-layered outfit, talking pose.",
+    "characterId": "ceo",
+    "outfitVariant": "winter-layered",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/winter-layered/talking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/winter-layered/talking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/winter-layered/talking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:d706a346f1c191e70dce8d22d00daf1c875f3f73a809a0d055ec168e0776ed63",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5525
+    },
+    "masterResolution": {
+      "width": 2277,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-winter-layered-alert",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/winter-layered/alert.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss winter-layered alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, winter-layered outfit, alert pose.",
+    "characterId": "ceo",
+    "outfitVariant": "winter-layered",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/winter-layered/alert.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/winter-layered/alert@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/winter-layered/alert@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:c619611e2306ee867d9f29750f60c8d8aaa5ad0049f3a90467a8aadb00430c70",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5516
+    },
+    "masterResolution": {
+      "width": 2281,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "ceo-winter-layered-working",
+    "kind": "character",
+    "src": "/art/penthouse/ceo/winter-layered/working.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Mara Voss winter-layered working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:mara-voss-pose-pack-v1",
+    "alt": "Mara Voss, Chief Executive Officer, winter-layered outfit, working pose.",
+    "characterId": "ceo",
+    "outfitVariant": "winter-layered",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Mara should feel controlled and architectural; her stillness is part of the authority.",
+    "motionProfile": "executive-still",
+    "renditions": {
+      "default": {
+        "src": "/art/penthouse/ceo/winter-layered/working.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/penthouse/ceo/winter-layered/working@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/penthouse/ceo/winter-layered/working@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-19-mara-voss-character",
+    "assetVersion": "ceo-v1",
+    "checksum": "sha256:fd5aa7b44f7a599bb93ca090ce5a50c1b0a534738cc15f5656a50397fa5dd45f",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5521
+    },
+    "masterResolution": {
+      "width": 2279,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T05:11:26.315Z"
   }
 ]

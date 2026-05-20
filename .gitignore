@@ -81,6 +81,9 @@ playwright-report/
 .artlab/characters/**/qa/
 .artlab/characters/**/references/
 .artlab/characters/**/staged-public/
+.artlab/studio/**/promotion/masters/
+.artlab/studio/**/promotion/qa/
+.artlab/studio/**/promotion/staged-public/
 .artlab/runs/**/incoming/
 .artlab/runs/**/split/
 .artlab/runs/**/browser-qa/*.png

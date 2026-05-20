@@ -18,10 +18,10 @@ describe("CharacterSprite Season 1 fallback", () => {
       expect(html).toContain(`data-character-outfit="regular"`);
       expect(html).not.toContain("undefined");
 
-      if (character.id === "otis") {
+      if (character.id === "otis" || character.id === "ceo") {
         expect(html).not.toContain(`data-visual-asset-fallback="${character.id}"`);
-        expect(html).toContain("Otis Vale, Lobby Concierge");
-        expect(html).toContain("regular%2Fidle%403x.webp");
+        expect(html).toContain(character.displayName);
+        expect(html).toContain(`${character.id}%2Fregular%2Fidle%403x.webp`);
       } else {
         expect(html).toContain(`data-visual-asset-fallback="${character.id}"`);
         expect(html).toContain(character.shortLabel);
@@ -29,7 +29,7 @@ describe("CharacterSprite Season 1 fallback", () => {
     }
   });
 
-  it("can request seasonal outfit variants before approved art exists", () => {
+  it("can request seasonal outfit variants after approval without falling back", () => {
     const html = renderToStaticMarkup(
       <CharacterSprite
         characterId="ceo"
@@ -39,9 +39,10 @@ describe("CharacterSprite Season 1 fallback", () => {
       />,
     );
 
-    expect(html).toContain(`data-visual-asset-fallback="ceo"`);
+    expect(html).not.toContain(`data-visual-asset-fallback="ceo"`);
     expect(html).toContain(`data-character-outfit="winter-layered"`);
     expect(html).toContain(`data-character-pose="idle"`);
+    expect(html).toContain("ceo%2Fwinter-layered%2Fidle%403x.webp");
   });
 
   it("lets agent buttons fall back to canonical character metadata", () => {

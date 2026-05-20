@@ -1,21 +1,16 @@
 {
   "schemaVersion": "tower-creative-human-action-v1",
   "runId": "2026-05-19-mara-voss-character",
-  "phase": "final-board-ready",
-  "whatIUnderstood": "Strict QA has passed and the engine prepared the final upload-ready board with a machine-readable action manifest.",
-  "recommendation": "Inspect the final board. If it is truly ready for app use, respond with the exact phrase approved for app.",
+  "phase": "closed",
+  "whatIUnderstood": "Mara browser QA passed and the run has gone through housekeeping and continuous-improvement close gates.",
+  "recommendation": "No human action is needed for Mara. Keep the promoted baseline protected and wait for Armaan before starting the next creative asset.",
   "costImpact": {
     "estimatedCents": 0,
     "reservedCents": 0,
     "additionalApprovalRequired": false
   },
-  "risk": "Low. This only writes review artifacts; public/art and manifests remain locked.",
-  "allowedResponses": [
-    "approved for app",
-    "regenerate-named-slots: <slot ids>",
-    "revise: <plain English change>",
-    "reject/archive"
-  ],
-  "recommendedResponse": "approved for app",
-  "createdAt": "2026-05-20T04:50:56.320Z"
+  "risk": "Low. Closing writes only run state and audit ledgers; public art and production manifests stay unchanged.",
+  "allowedResponses": [],
+  "recommendedResponse": "none",
+  "createdAt": "2026-05-20T05:16:31.292Z"
 }

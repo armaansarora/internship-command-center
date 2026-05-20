@@ -1,13 +1,18 @@
 {
   "schemaVersion": "tower-creative-continuous-improvement-report-v1",
-  "generatedAt": "2026-05-19T23:56:44.503Z",
+  "generatedAt": "2026-05-20T05:16:38.000Z",
   "ledgerPath": ".artlab/studio/ledgers/improvements.jsonl",
-  "runsObserved": 1,
-  "entriesObserved": 23,
-  "entriesSinceLastUpgrade": 1,
+  "runsObserved": 2,
+  "entriesObserved": 25,
+  "entriesSinceLastUpgrade": 3,
   "maturityStage": "learning",
   "upgradeRequired": false,
-  "repeatedCategories": [],
+  "repeatedCategories": [
+    {
+      "category": "workflow",
+      "count": 3
+    }
+  ],
   "highSeverityFindings": [],
   "nextActions": [
     "Keep recording housekeeping and continuous-improvement entries every phase.",

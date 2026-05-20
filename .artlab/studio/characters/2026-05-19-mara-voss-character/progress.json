@@ -1,7 +1,7 @@
 {
   "schemaVersion": "tower-creative-progress-v1",
   "runId": "2026-05-19-mara-voss-character",
-  "phase": "final-board-ready",
+  "phase": "closed",
   "runningSlots": [],
   "completed": 21,
   "failed": 0,
@@ -10,6 +10,6 @@
   "spendSoFarCents": 437.9,
   "reservedSpendCents": 0,
   "activeLocks": [],
-  "nextAutomaticStep": "Wait for Armaan to inspect the final upload-ready board and say approved for app before any promotion.",
-  "updatedAt": "2026-05-20T04:51:47.928Z"
+  "nextAutomaticStep": "Run is closed. The pipeline is clean and ready for the next explicit creative request.",
+  "updatedAt": "2026-05-20T05:16:31.292Z"
 }
