@@ -85,6 +85,177 @@ describe("Gemini API v3 generation", () => {
     expect(plan.slots[0]?.prompt).not.toContain("Do not redesign the approved character identity");
   });
 
+  it("locks character initial concepts to one shared Otis-compatible style envelope with explicit design cards", () => {
+    const plan = createGeminiApiGenerationPlan({
+      runId: "mara-style-envelope",
+      assetType: "character",
+      name: "Mara",
+      planRoot: ".artlab/studio/characters/mara-style-envelope/generation/gemini-api-v3",
+      inboxRoot: ".artlab/inbox/character/mara-style-envelope/gemini-api-v3",
+      phase: "initial-design",
+      slots: [
+        {
+          slotId: "mara-design",
+          prompt: "Make Mara Voss as the CEO of the C-Suite floor.",
+          targetDirectory: ".artlab/runs/mara/initial/incoming",
+          targetFilename: "mara__design__source-v001.png",
+          reason: "Initial prompt-only concept.",
+        },
+      ],
+    });
+    const prompts = plan.slots.map((slot) => slot.prompt);
+    const envelopes = prompts.map((prompt) =>
+      prompt.match(/## Shared Tower Character Style Envelope[\s\S]*?## End Shared Tower Character Style Envelope/)?.[0],
+    );
+
+    expect(envelopes.every(Boolean)).toBe(true);
+    expect(new Set(envelopes).size).toBe(1);
+    expect(envelopes[0]).toContain("premium stylized high-detail app/game character art");
+    expect(envelopes[0]).toContain("Otis-compatible Tower character style");
+    expect(envelopes[0]).toContain("full-body 9:16 character concept");
+    expect(envelopes[0]).toContain("controlled Tower lobby lighting");
+    expect(prompts.every((prompt) => prompt.includes("Design variation matrix"))).toBe(true);
+    expect(prompts.every((prompt) => prompt.includes("Lane design card"))).toBe(true);
+    for (const axis of [
+      "silhouette",
+      "age read",
+      "hair shape/length/texture",
+      "facial structure",
+      "wardrobe category",
+      "color palette",
+      "posture/body language",
+      "accessories/tools",
+      "personality read",
+      "Tower role archetype",
+    ]) {
+      expect(prompts.join("\n")).toContain(axis);
+    }
+  });
+
+  it("keeps banned realism and style-drift wording out of Tower character concept prompts", () => {
+    const plan = createGeminiApiGenerationPlan({
+      runId: "mara-banned-style-terms",
+      assetType: "character",
+      name: "Mara",
+      planRoot: ".artlab/studio/characters/mara-banned-style-terms/generation/gemini-api-v3",
+      inboxRoot: ".artlab/inbox/character/mara-banned-style-terms/gemini-api-v3",
+      phase: "initial-design",
+      slots: [
+        {
+          slotId: "mara-design",
+          prompt: "Make Mara Voss as the CEO of the C-Suite floor.",
+          targetDirectory: ".artlab/runs/mara/initial/incoming",
+          targetFilename: "mara__design__source-v001.png",
+          reason: "Initial prompt-only concept.",
+        },
+      ],
+    });
+    const prompts = plan.slots.map((slot) => slot.prompt).join("\n\n");
+
+    expect(prompts).not.toMatch(/\b(hyperreal|photo|photograph|photoreal|actual person|real person|person-like|storybook|watercolor|pastel|flat cartoon|corporate stock|stock photo)\b/i);
+  });
+
+  it("varies character design axes instead of collapsing every lane into the same suit hair and role archetype", () => {
+    const plan = createGeminiApiGenerationPlan({
+      runId: "mara-design-diversity",
+      assetType: "character",
+      name: "Mara",
+      planRoot: ".artlab/studio/characters/mara-design-diversity/generation/gemini-api-v3",
+      inboxRoot: ".artlab/inbox/character/mara-design-diversity/gemini-api-v3",
+      phase: "initial-design",
+      slots: [
+        {
+          slotId: "mara-design",
+          prompt: "Make Mara Voss as the CEO of the C-Suite floor.",
+          targetDirectory: ".artlab/runs/mara/initial/incoming",
+          targetFilename: "mara__design__source-v001.png",
+          reason: "Initial prompt-only concept.",
+        },
+      ],
+    });
+    const fieldValues = (label: string) =>
+      plan.slots.map((slot) => slot.prompt.match(new RegExp(`${label}: ([^\\n]+)`, "i"))?.[1]?.trim() ?? "");
+
+    expect(new Set(fieldValues("hair shape/length/texture")).size).toBeGreaterThanOrEqual(4);
+    expect(new Set(fieldValues("wardrobe category")).size).toBeGreaterThanOrEqual(4);
+    expect(new Set(fieldValues("Tower role archetype")).size).toBe(5);
+    expect(new Set(plan.slots.map((slot) => slot.promptHash)).size).toBe(5);
+  });
+
+  it("uses Mara-specific design cards even when the shared style envelope mentions Otis compatibility", () => {
+    const plan = createGeminiApiGenerationPlan({
+      runId: "mara-card-selector",
+      assetType: "character",
+      name: "Mara",
+      planRoot: ".artlab/studio/characters/mara-card-selector/generation/gemini-api-v3",
+      inboxRoot: ".artlab/inbox/character/mara-card-selector/gemini-api-v3",
+      phase: "initial-design",
+      slots: [
+        {
+          slotId: "mara-design",
+          prompt: "Make Mara Voss as a CEO character. Match the approved Otis/Tower character visual language.",
+          targetDirectory: ".artlab/runs/mara/initial/incoming",
+          targetFilename: "mara__design__source-v001.png",
+          reason: "Initial prompt-only concept.",
+        },
+      ],
+    });
+
+    expect(plan.lanes.map((lane) => lane.label)).toEqual([
+      "Knife-Edge Chairwoman",
+      "War-Room Rainmaker",
+      "Velvet Strategist",
+      "Glasshouse Technocrat",
+      "Old-Money Firebrand",
+    ]);
+    expect(plan.lanes.map((lane) => lane.label)).not.toContain("Warm Classic Concierge");
+  });
+
+  it("does not apply character concept contracts to UI or background requests", () => {
+    const uiPlan = createGeminiApiGenerationPlan({
+      runId: "ui-initial-design",
+      assetType: "ui-texture",
+      name: "Lobby control texture",
+      planRoot: ".artlab/studio/ui-textures/ui-initial-design/generation/gemini-api-v3",
+      inboxRoot: ".artlab/inbox/ui-texture/ui-initial-design/gemini-api-v3",
+      phase: "initial-design",
+      slots: [
+        {
+          slotId: "ui-design",
+          prompt: "Create a Tower dashboard control texture.",
+          targetDirectory: ".artlab/runs/ui/initial/incoming",
+          targetFilename: "ui__design__source-v001.png",
+          reason: "Initial UI concept.",
+        },
+      ],
+    });
+    const environmentPlan = createGeminiApiGenerationPlan({
+      runId: "environment-initial-design",
+      assetType: "environment",
+      name: "C-Suite floor",
+      planRoot: ".artlab/studio/environments/environment-initial-design/generation/gemini-api-v3",
+      inboxRoot: ".artlab/inbox/environment/environment-initial-design/gemini-api-v3",
+      phase: "initial-design",
+      slots: [
+        {
+          slotId: "environment-design",
+          prompt: "Create a Tower C-Suite floor background.",
+          targetDirectory: ".artlab/runs/environment/initial/incoming",
+          targetFilename: "environment__design__source-v001.png",
+          reason: "Initial environment concept.",
+        },
+      ],
+    });
+    const prompts = [...uiPlan.slots, ...environmentPlan.slots].map((slot) => slot.prompt).join("\n\n");
+
+    expect(prompts).not.toContain("Shared Tower Character Style Envelope");
+    expect(prompts).not.toContain("Lane design card");
+    expect(prompts).not.toContain("Otis-compatible Tower character style");
+    expect(prompts).not.toContain("Identity variation rule");
+    expect(uiPlan.lanes.map((lane) => lane.label)).not.toContain("Warm Classic Concierge");
+    expect(environmentPlan.lanes.map((lane) => lane.label)).not.toContain("Warm Classic Concierge");
+  });
+
   it("keeps a shared high-detail quality floor separate from every unique initial-design identity mandate", () => {
     const plan = createGeminiApiGenerationPlan({
       runId: "otis-no-quality-ramp",
@@ -108,12 +279,13 @@ describe("Gemini API v3 generation", () => {
       const lane = plan.lanes[index]!;
 
       expect(slot.prompt).toContain(`Shared initial-concept lane quality floor: ${CHARACTER_INITIAL_CONCEPT_SHARED_LANE_QUALITY_FLOOR}`);
-      expect(slot.prompt).toContain("Lane 05-level material detail");
-      expect(slot.prompt).toContain("fabric seams, buttons, hair/beard rendering, brass highlights");
-      expect(slot.prompt).toContain("confident contrast, dimensional lighting, and high-resolution premium game-sprite finish");
+      expect(slot.prompt).toContain("same premium finish");
+      expect(slot.prompt).toContain("high-detail material construction");
+      expect(slot.prompt).toContain("face and hair specificity");
+      expect(slot.prompt).toContain("controlled dimensional lighting");
       expect(slot.prompt).toContain(`Initial-concept lane variation rule: ${CHARACTER_INITIAL_CONCEPT_IDENTITY_VARIATION_RULE}`);
-      expect(slot.prompt).toContain("Lane variation must not change rendering quality, amount of detail, sharpness, contrast, or polish");
-      expect(slot.prompt).toContain(`Unique identity mandate (${lane.label}): ${lane.mandate}`);
+      expect(slot.prompt).toContain("Do not vary rendering style, quality, camera/framing, lighting, source model, or Tower-world fit");
+      expect(slot.prompt).toContain(`Unique character design mandate (${lane.label}): ${lane.mandate}`);
     });
   });
 

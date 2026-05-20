@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "tower-creative-progress-v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "phase": "final-board-ready",
+  "runningSlots": [],
+  "completed": 21,
+  "failed": 0,
+  "repairing": 0,
+  "pending": 0,
+  "spendSoFarCents": 437.9,
+  "reservedSpendCents": 0,
+  "activeLocks": [],
+  "nextAutomaticStep": "Wait for Armaan to inspect the final upload-ready board and say approved for app before any promotion.",
+  "updatedAt": "2026-05-20T04:51:47.928Z"
+}

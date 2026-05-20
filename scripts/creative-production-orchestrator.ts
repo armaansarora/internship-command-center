@@ -5,6 +5,8 @@ import {
   applyCreativeHumanResponse,
   buildFinalBoardForCreativeRun,
   closeCreativeRunAfterGates,
+  continueApprovedProductionForCreativeRun,
+  generateInitialConceptsForCreativeRun,
   importLegacyOtisRun,
   markCreativeRunUpgradeRequired,
   renderCreativeStatusSummary,
@@ -61,6 +63,14 @@ function printHumanStop(input: Awaited<ReturnType<typeof startCreativeProduction
   console.log("Two human gates: initial design direction, final app promotion.");
   console.log(`Run root: ${input.runRoot}`);
   console.log(`Current phase: ${input.state.phase}`);
+  if (!input.humanAction) {
+    console.log("");
+    console.log("No human action is required before initial concept images exist.");
+    console.log(`Next automatic step: ${input.progress.nextAutomaticStep}`);
+    console.log(`Wrote: ${progressPath}`);
+    console.log("Public art and production manifests remain locked until exact phrase: approved for app");
+    return;
+  }
   if (dryRun) {
     console.log("Dry run: yes");
     console.log(`Provider mode: ${input.state.providerMode ?? "local-mock"}`);
@@ -182,10 +192,20 @@ async function main(): Promise<void> {
 
     if (!runRoot) throw new Error(`Could not find run-state.json for ${answer.runId}.`);
 
-    await applyCreativeHumanResponse({
+    const nextState = await applyCreativeHumanResponse({
       runRoot,
       response: answer.response,
     });
+
+    if (nextState.phase === "initial-direction-approved") {
+      const blockerReason = await activeImprovementBlockerReason(stateRoot);
+
+      if (blockerReason) {
+        await markCreativeRunUpgradeRequired({ runRoot, reason: blockerReason });
+      } else {
+        await continueApprovedProductionForCreativeRun({ runRoot });
+      }
+    }
 
     console.log(`Recorded answer for ${answer.runId}: ${answer.response}`);
     console.log(await renderCreativeStatusSummary({ stateRoot, runId: answer.runId }));
@@ -206,9 +226,23 @@ async function main(): Promise<void> {
       const runRoot = await findRunRoot(stateRoot, continueRunId);
 
       if (runRoot) {
-        const state = JSON.parse(await readFile(join(runRoot, "run-state.json"), "utf8")) as { phase?: string };
+        const state = JSON.parse(await readFile(join(runRoot, "run-state.json"), "utf8")) as {
+          phase?: string;
+          approvedInitialConcept?: unknown;
+        };
 
-        if (state.phase === "strict-qa") {
+        if (state.phase === "direction-generating" || state.phase === "awaiting-initial-approval" || state.phase === "style-failed") {
+          await generateInitialConceptsForCreativeRun({ runRoot });
+        } else if (
+          state.phase === "initial-direction-approved" ||
+          state.phase === "production-planned" ||
+          state.phase === "full-pack-running" ||
+          state.phase === "repair-required" ||
+          state.phase === "final-board-ready" ||
+          (state.phase === "provider-blocked" && Boolean(state.approvedInitialConcept))
+        ) {
+          await continueApprovedProductionForCreativeRun({ runRoot });
+        } else if (state.phase === "strict-qa") {
           await buildFinalBoardForCreativeRun({ runRoot });
         } else if (state.phase === "browser-verified") {
           await closeCreativeRunAfterGates({ runRoot });

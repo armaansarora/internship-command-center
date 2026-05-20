@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "tower-creative-human-action-v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "phase": "final-board-ready",
+  "whatIUnderstood": "Strict QA has passed and the engine prepared the final upload-ready board with a machine-readable action manifest.",
+  "recommendation": "Inspect the final board. If it is truly ready for app use, respond with the exact phrase approved for app.",
+  "costImpact": {
+    "estimatedCents": 0,
+    "reservedCents": 0,
+    "additionalApprovalRequired": false
+  },
+  "risk": "Low. This only writes review artifacts; public/art and manifests remain locked.",
+  "allowedResponses": [
+    "approved for app",
+    "regenerate-named-slots: <slot ids>",
+    "revise: <plain English change>",
+    "reject/archive"
+  ],
+  "recommendedResponse": "approved for app",
+  "createdAt": "2026-05-19T23:55:36.015Z"
+}

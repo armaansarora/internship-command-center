@@ -1,12 +1,16 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  CHARACTER_PRODUCTION_OUTFIT_VARIANTS,
+  CHARACTER_PRODUCTION_POSE_STATES,
   applyCreativeHumanResponse,
   buildFinalBoardForCreativeRun,
   closeCreativeRunAfterGates,
+  continueApprovedProductionForCreativeRun,
+  generateInitialConceptsForCreativeRun,
   importLegacyOtisRun,
   renderCreativeStatusSummary,
   startCreativeProductionRun,
@@ -21,7 +25,7 @@ function readJson<T>(path: string): T {
 }
 
 describe("Creative Production Engine v1 final operator", () => {
-  it("starts a vague request as a guided run with a human action packet and progress artifact", async () => {
+  it("starts a routable character request in automatic direction generation without a pre-image human gate", async () => {
     const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-"));
     const run = await startCreativeProductionRun({
       stateRoot,
@@ -29,26 +33,345 @@ describe("Creative Production Engine v1 final operator", () => {
       now: new Date("2026-05-19T12:00:00.000Z"),
     });
 
-    expect(run.state.phase).toBe("awaiting-initial-approval");
+    expect(run.state.phase).toBe("direction-generating");
     expect(run.state.gates).toEqual(["initial-design-direction", "final-app-promotion"]);
     expect(run.state.publicArtWritesAllowed).toBe(false);
     expect(run.state.promotionPhrase).toBe("approved for app");
-    expect(run.humanAction.allowedResponses).toEqual([
-      "approve direction",
-      "revise: <plain English change>",
-      "reject/archive",
-    ]);
-    expect(run.humanAction.recommendedResponse).toBe("approve direction");
-    expect(run.progress.phase).toBe("awaiting-initial-approval");
-    expect(run.progress.pending).toBeGreaterThan(0);
-    expect(run.progress.nextAutomaticStep).toContain("Wait for initial design direction approval");
-    expect(existsSync(join(run.runRoot, "human-action.json"))).toBe(true);
+    expect(run.progress.phase).toBe("direction-generating");
+    expect(run.progress.pending).toBe(5);
+    expect(run.progress.nextAutomaticStep).toContain("Generate exactly five prompt-only initial concepts");
+    expect(existsSync(join(run.runRoot, "human-action.json"))).toBe(false);
     expect(existsSync(join(run.runRoot, "progress.json"))).toBe(true);
     expect(existsSync(join(run.runRoot, "events.jsonl"))).toBe(true);
+  });
 
-    const persistedHumanAction = readJson<typeof run.humanAction>(join(run.runRoot, "human-action.json"));
-    expect(persistedHumanAction.whatIUnderstood).toContain("Mara");
-    expect(persistedHumanAction.costImpact.estimatedCents).toBeGreaterThan(0);
+  it("routes known character requests to characters even when floor language is present", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-route-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "Make Mara Voss, the CEO character for the C-Suite floor",
+      now: new Date("2026-05-19T12:05:00.000Z"),
+    });
+
+    expect(run.state.assetType).toBe("character");
+    expect(run.runRoot).toContain(join("characters", "2026-05-19-mara"));
+    expect(run.progress.pending).toBe(5);
+    expect(existsSync(join(run.runRoot, "human-action.json"))).toBe(false);
+  });
+
+  it("rejects approve direction before a concept board exists", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-human-gate-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara",
+      runId: "mara-human-gate",
+      now: new Date("2026-05-19T12:10:00.000Z"),
+    });
+
+    await expect(applyCreativeHumanResponse({
+      runRoot: run.runRoot,
+      response: "approve direction",
+    })).rejects.toThrow("concept board");
+    expect(readJson<typeof run.state>(join(run.runRoot, "run-state.json")).phase).toBe("direction-generating");
+  });
+
+  it("runs five prompt-only initial concepts and stops at direction-review-ready with a board", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-concepts-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara Voss, CEO character from scratch",
+      runId: "mara-concepts",
+      now: new Date("2026-05-19T12:20:00.000Z"),
+    });
+
+    const finished = await generateInitialConceptsForCreativeRun({
+      runRoot: run.runRoot,
+      now: new Date("2026-05-19T12:21:00.000Z"),
+      runner: async ({ plan }) => {
+        const runningProgress = readJson<{ phase: string; runningSlots: string[]; pending: number }>(join(run.runRoot, "progress.json"));
+        expect(runningProgress.phase).toBe("direction-generating");
+        expect(runningProgress.runningSlots).toHaveLength(5);
+        expect(runningProgress.pending).toBe(5);
+
+        for (const slot of plan.slots) {
+          mkdirSync(slot.inboxDirectory, { recursive: true });
+          writeFileSync(slot.expectedInboxFile, "fake-png");
+          writeFileSync(join(slot.inboxDirectory, "api-receipt.json"), JSON.stringify({
+            slotId: slot.slotId,
+            capturedFile: slot.expectedInboxFile,
+            qualityWarnings: [],
+          }, null, 2));
+        }
+      },
+    });
+
+    expect(finished.state.phase).toBe("direction-review-ready");
+    expect(finished.progress.completed).toBe(5);
+    expect(finished.progress.pending).toBe(0);
+    expect(finished.humanAction?.allowedResponses).toContain("approve direction");
+    expect(existsSync(join(run.runRoot, "review", "initial-concept-board.html"))).toBe(true);
+    expect(existsSync(join(run.runRoot, "review", "initial-concept-action-manifest.json"))).toBe(true);
+    const boardHtml = readFileSync(join(run.runRoot, "review", "initial-concept-board.html"), "utf8");
+
+    expect(boardHtml).toContain("Initial Concept Board");
+    expect(boardHtml).not.toContain('src=".artlab/');
+
+    const summary = await renderCreativeStatusSummary({ stateRoot, runId: "mara-concepts" });
+
+    expect(summary).toContain("Armaan action:");
+    expect(summary).toContain("approve direction");
+  });
+
+  it("records the selected concept slot when Armaan approves a numbered direction", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-selected-concept-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara Voss, CEO character from scratch",
+      runId: "mara-selected-concept",
+      now: new Date("2026-05-19T12:25:00.000Z"),
+    });
+
+    await generateInitialConceptsForCreativeRun({
+      runRoot: run.runRoot,
+      now: new Date("2026-05-19T12:26:00.000Z"),
+      runner: async ({ plan }) => {
+        for (const slot of plan.slots) {
+          mkdirSync(slot.inboxDirectory, { recursive: true });
+          writeFileSync(slot.expectedInboxFile, "fake-png");
+          writeFileSync(join(slot.inboxDirectory, "api-receipt.json"), JSON.stringify({
+            slotId: slot.slotId,
+            capturedFile: slot.expectedInboxFile,
+            qualityWarnings: [],
+          }, null, 2));
+        }
+      },
+    });
+
+    const approved = await applyCreativeHumanResponse({
+      runRoot: run.runRoot,
+      response: "approve direction: 01",
+      now: new Date("2026-05-19T12:27:00.000Z"),
+    });
+    const persisted = readJson<typeof approved>(join(run.runRoot, "run-state.json"));
+    const selected = readJson<NonNullable<typeof approved.approvedInitialConcept>>(join(
+      run.runRoot,
+      "review",
+      "approved-initial-concept.json",
+    ));
+
+    expect(approved.phase).toBe("initial-direction-approved");
+    expect(approved.publicArtWritesAllowed).toBe(false);
+    expect(persisted.approvedInitialConcept?.slotId).toBe("api-lane-01__initial-character-concept");
+    expect(selected.slotId).toBe("api-lane-01__initial-character-concept");
+    expect(selected.absoluteImagePath).toContain("api-lane-01");
+    expect(approved.nextLegalAction).toContain("api-lane-01__initial-character-concept");
+    expect(approved.nextLegalAction).toContain("final upload-ready board");
+  });
+
+  it("continues from approved initial design to the final upload-ready board without another human stop", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-auto-production-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara Voss, CEO character from scratch",
+      runId: "mara-auto-production",
+      now: new Date("2026-05-19T12:28:00.000Z"),
+    });
+
+    await generateInitialConceptsForCreativeRun({
+      runRoot: run.runRoot,
+      now: new Date("2026-05-19T12:29:00.000Z"),
+      runner: async ({ plan }) => {
+        for (const slot of plan.slots) {
+          mkdirSync(slot.inboxDirectory, { recursive: true });
+          writeFileSync(slot.expectedInboxFile, "fake-png");
+          writeFileSync(join(slot.inboxDirectory, "api-receipt.json"), JSON.stringify({
+            slotId: slot.slotId,
+            capturedFile: slot.expectedInboxFile,
+            qualityWarnings: [],
+          }, null, 2));
+        }
+      },
+    });
+    await applyCreativeHumanResponse({
+      runRoot: run.runRoot,
+      response: "approve direction: 01",
+      now: new Date("2026-05-19T12:30:00.000Z"),
+    });
+
+    const expectedSpriteCount = CHARACTER_PRODUCTION_OUTFIT_VARIANTS.length * CHARACTER_PRODUCTION_POSE_STATES.length;
+    const final = await continueApprovedProductionForCreativeRun({
+      runRoot: run.runRoot,
+      now: new Date("2026-05-19T12:31:00.000Z"),
+      runner: async ({ plan }) => {
+        const runningProgress = readJson<{ phase: string; runningSlots: string[]; pending: number }>(join(run.runRoot, "progress.json"));
+
+        expect(runningProgress.phase).toBe("full-pack-running");
+        expect(runningProgress.runningSlots).toHaveLength(expectedSpriteCount);
+        expect(runningProgress.runningSlots).toContain("api-lane-01__mara-regular-idle");
+        expect(runningProgress.runningSlots).toContain("api-lane-01__mara-summer-light-talking");
+        expect(runningProgress.runningSlots).toContain("api-lane-01__mara-winter-layered-working");
+        expect(runningProgress.pending).toBe(expectedSpriteCount);
+        expect(plan.phase).toBe("production-pack");
+        expect(plan.laneCount).toBe(1);
+        expect(plan.maxConcurrency).toBe(5);
+        expect(plan.slots).toHaveLength(expectedSpriteCount);
+        expect(new Set(plan.slots.map((slot) => slot.baseSlotId))).toEqual(new Set([
+          ...CHARACTER_PRODUCTION_OUTFIT_VARIANTS.flatMap((outfit) =>
+            CHARACTER_PRODUCTION_POSE_STATES.map((pose) => `mara-${outfit.id}-${pose.id}`),
+          ),
+        ]));
+        expect(plan.referenceImages[0]?.role).toBe("identity-reference");
+        expect(plan.referenceImages[0]?.path).toContain("api-lane-01");
+        expect(plan.slots[0]?.prompt).toContain("Required character pack matrix");
+        expect(plan.slots.find((slot) => slot.baseSlotId === "mara-winter-layered-working")?.prompt).toContain("Outfit variant: winter-layered");
+        expect(plan.slots.find((slot) => slot.baseSlotId === "mara-winter-layered-working")?.prompt).toContain("Pose/expression state: working");
+
+        const checkedGeneratedImages = plan.slots.map((slot) => {
+          const outputPath = join(run.runRoot, "sources", "production", slot.targetFilename);
+          const receiptPath = join(slot.inboxDirectory, "api-receipt.json");
+
+          mkdirSync(dirname(outputPath), { recursive: true });
+          mkdirSync(slot.inboxDirectory, { recursive: true });
+          writeFileSync(outputPath, `fake-final-png-${slot.slotId}`);
+          writeFileSync(receiptPath, JSON.stringify({
+            slotId: slot.slotId,
+            capturedFile: outputPath,
+            qualityWarnings: [],
+          }, null, 2));
+
+          return {
+            slotId: slot.slotId,
+            path: outputPath,
+            latestReceiptPath: receiptPath,
+            latestReceiptWarnings: [],
+            issues: [],
+          };
+        });
+        writeFileSync(join(plan.planRoot, "asset-doctor.json"), JSON.stringify({
+          schemaVersion: "tower-creative-asset-doctor-v1",
+          status: "passed",
+          strict: true,
+          checkedGeneratedImages,
+          issues: [],
+        }, null, 2));
+      },
+    });
+    const state = readJson<typeof final.state>(join(run.runRoot, "run-state.json"));
+    const humanAction = readJson<NonNullable<typeof final.humanAction>>(join(run.runRoot, "human-action.json"));
+
+    expect(final.state.phase).toBe("final-board-ready");
+    expect(final.progress.phase).toBe("final-board-ready");
+    expect(final.progress.completed).toBe(expectedSpriteCount);
+    expect(final.boardPath).toContain("final-upload-ready-board.html");
+    expect(existsSync(join(run.runRoot, "review", "final-upload-ready-board.html"))).toBe(true);
+    expect(state.publicArtWritesAllowed).toBe(false);
+    expect(state.approvedInitialConcept?.slotId).toBe("api-lane-01__initial-character-concept");
+    expect(humanAction.allowedResponses).toContain("approved for app");
+    expect(humanAction.recommendedResponse).toBe("approved for app");
+  });
+
+  it("rejects a character final board until every outfit and pose-expression sprite passes QA", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-incomplete-character-final-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara",
+      runId: "mara-incomplete-final",
+    });
+    const statePath = join(run.runRoot, "run-state.json");
+    const assetDoctorPath = join(run.runRoot, "generation", "gemini-api-v3", "full", "asset-doctor.json");
+    const state = readJson<typeof run.state>(statePath);
+
+    mkdirSync(dirname(assetDoctorPath), { recursive: true });
+    state.phase = "strict-qa";
+    writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`);
+    writeFileSync(assetDoctorPath, JSON.stringify({
+      status: "passed",
+      strict: true,
+      checkedGeneratedImages: [
+        {
+          slotId: "api-lane-01__mara-regular-idle",
+          path: ".artlab/inbox/mara/regular-idle.png",
+          latestReceiptPath: ".artlab/inbox/mara/api-receipt.json",
+          latestReceiptWarnings: [],
+          issues: [],
+        },
+      ],
+      issues: [],
+    }, null, 2));
+
+    await expect(buildFinalBoardForCreativeRun({
+      runRoot: run.runRoot,
+    })).rejects.toThrow("complete character production pack");
+    expect(existsSync(join(run.runRoot, "review", "final-upload-ready-board.html"))).toBe(false);
+  });
+
+  it("writes pre-image human-action only for a true provider blocker", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-provider-blocker-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara",
+      runId: "mara-provider-blocker",
+      now: new Date("2026-05-19T12:30:00.000Z"),
+    });
+
+    await generateInitialConceptsForCreativeRun({
+      runRoot: run.runRoot,
+      runner: async () => {
+        throw new Error("Missing Gemini API key. Set GEMINI_API_KEY or GOOGLE_API_KEY.");
+      },
+    });
+
+    const state = readJson<typeof run.state>(join(run.runRoot, "run-state.json"));
+    const humanAction = readJson<{
+      phase: string;
+      allowedResponses: string[];
+      recommendation: string;
+    }>(join(run.runRoot, "human-action.json"));
+
+    expect(state.phase).toBe("provider-blocked");
+    expect(humanAction.phase).toBe("provider-blocked");
+    expect(humanAction.recommendation).toContain("Fix the provider blocker");
+    expect(humanAction.allowedResponses).not.toContain("approve direction");
+  });
+
+  it("does not make a concept board direction-review-ready when repeated style QA fails", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-style-fail-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara Voss, CEO character from scratch",
+      runId: "mara-style-fail",
+      now: new Date("2026-05-19T12:35:00.000Z"),
+    });
+
+    const finished = await generateInitialConceptsForCreativeRun({
+      runRoot: run.runRoot,
+      now: new Date("2026-05-19T12:36:00.000Z"),
+      runner: async ({ plan }) => {
+        for (const [index, slot] of plan.slots.entries()) {
+          mkdirSync(slot.inboxDirectory, { recursive: true });
+          writeFileSync(slot.expectedInboxFile, "fake-png");
+          writeFileSync(join(slot.inboxDirectory, "api-receipt.json"), JSON.stringify({
+            slotId: slot.slotId,
+            capturedFile: slot.expectedInboxFile,
+            qualityWarnings: index < 2 ? ["style-envelope-violation"] : [],
+          }, null, 2));
+        }
+      },
+    });
+
+    expect(finished.state.phase).toBe("style-failed");
+    expect(finished.progress.phase).toBe("style-failed");
+    expect(finished.humanAction?.allowedResponses).not.toContain("approve direction");
+    expect(existsSync(join(run.runRoot, "review", "initial-concept-board.html"))).toBe(false);
+    expect(existsSync(join(run.runRoot, "review", "initial-concept-action-manifest.json"))).toBe(false);
+
+    const qa = readJson<{
+      status: string;
+      repeatedFailureCodes: string[];
+    }>(join(run.runRoot, "review", "initial-concept-qa.json"));
+
+    expect(qa.status).toBe("failed");
+    expect(qa.repeatedFailureCodes).toContain("style-envelope-violation");
   });
 
   it("resumes from run-state/progress/human-action instead of chat memory", async () => {
@@ -63,9 +386,36 @@ describe("Creative Production Engine v1 final operator", () => {
     const summary = await renderCreativeStatusSummary({ stateRoot, runId: "otis-v1" });
 
     expect(summary).toContain("Run otis-v1");
-    expect(summary).toContain("awaiting initial approval");
-    expect(summary).toContain(run.humanAction.recommendedResponse);
+    expect(summary).toContain("direction generating");
     expect(summary).toContain("Next automatic step");
+  });
+
+  it("renders the active latest run instead of a lexicographically later archived root", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-latest-"));
+
+    const archived = await startCreativeProductionRun({
+      stateRoot,
+      request: "make a C-Suite floor environment",
+      runId: "archived-environment",
+      now: new Date("2026-05-19T12:00:00.000Z"),
+    });
+    await applyCreativeHumanResponse({
+      runRoot: archived.runRoot,
+      response: "reject/archive",
+      now: new Date("2026-05-19T12:01:00.000Z"),
+    });
+    await startCreativeProductionRun({
+      stateRoot,
+      request: "make Mara Voss, CEO character for the C-Suite floor",
+      runId: "active-mara-character",
+      now: new Date("2026-05-19T12:02:00.000Z"),
+    });
+
+    const summary = await renderCreativeStatusSummary({ stateRoot });
+
+    expect(summary).toContain("Run active-mara-character");
+    expect(summary).toContain("Mara (character)");
+    expect(summary).not.toContain("archived-environment");
   });
 
   it("renders integrated promoted baselines without stale final-approval instructions", async () => {
@@ -183,7 +533,7 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(closed.state.publicArtWritesAllowed).toBe(false);
     expect(closed.progress.phase).toBe("closed");
     expect(closed.progress.activeLocks).toEqual([]);
-    expect(closed.humanAction.allowedResponses).toEqual([]);
+    expect(closed.humanAction!.allowedResponses).toEqual([]);
     expect(housekeepingLedger).toContain("\"gate\":\"housekeeping\"");
     expect(housekeepingLedger).toContain(browserQaPath);
     expect(improvementLedger).toContain("\"gate\":\"continuous-improvement\"");
@@ -237,7 +587,7 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(imported.progress.pending).toBe(1);
     expect(imported.progress.spendSoFarCents).toBe(664.4);
     expect(imported.progress.nextAutomaticStep).toContain("strict asset doctor");
-    expect(imported.humanAction.recommendedResponse).toBe("continue");
+    expect(imported.humanAction!.recommendedResponse).toBe("continue");
     expect(existsSync(join(runRoot, "v1-import-report.json"))).toBe(true);
     expect(readFileSync(join(runRoot, "events.jsonl"), "utf8")).toContain("legacy-otis-imported");
   });
@@ -302,8 +652,8 @@ describe("Creative Production Engine v1 final operator", () => {
     const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-final-board-"));
     const run = await startCreativeProductionRun({
       stateRoot,
-      request: "make Otis",
-      runId: "otis-final-board",
+      request: "make a lobby background",
+      runId: "lobby-background-final-board",
     });
     const assetDoctorPath = join(run.runRoot, "generation", "gemini-api-v3", "full", "asset-doctor.json");
     const statePath = join(run.runRoot, "run-state.json");
@@ -333,7 +683,7 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(finalBoard.state.phase).toBe("final-board-ready");
     expect(existsSync(join(run.runRoot, "review", "final-upload-ready-board.html"))).toBe(true);
     expect(existsSync(join(run.runRoot, "review", "action-manifest.json"))).toBe(true);
-    expect(finalBoard.humanAction.allowedResponses).toContain("approved for app");
+    expect(finalBoard.humanAction!.allowedResponses).toContain("approved for app");
     expect(finalBoard.progress.nextAutomaticStep).toContain("approved for app");
   });
 
@@ -341,8 +691,8 @@ describe("Creative Production Engine v1 final operator", () => {
     const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-app-preview-"));
     const run = await startCreativeProductionRun({
       stateRoot,
-      request: "make Otis",
-      runId: "otis-app-preview",
+      request: "make a lobby background",
+      runId: "lobby-background-app-preview",
     });
     const assetDoctorPath = join(run.runRoot, "generation", "gemini-api-v3", "full", "asset-doctor.json");
     const statePath = join(run.runRoot, "run-state.json");
@@ -375,9 +725,9 @@ describe("Creative Production Engine v1 final operator", () => {
 
     expect(briefing.state.phase).toBe("integration-briefing");
     expect(briefing.state.publicArtWritesAllowed).toBe(false);
-    expect(briefing.humanAction.recommendation).toContain("where should it appear");
-    expect(briefing.humanAction.recommendation).toContain("mobile behavior");
-    expect(briefing.humanAction.recommendation).toContain("feature flag or immediate production path");
+    expect(briefing.humanAction!.recommendation).toContain("where should it appear");
+    expect(briefing.humanAction!.recommendation).toContain("mobile behavior");
+    expect(briefing.humanAction!.recommendation).toContain("feature flag or immediate production path");
 
     const preview = await buildAppPreviewForCreativeRun({
       runRoot: run.runRoot,
@@ -389,7 +739,7 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(preview.state.publicArtWritesAllowed).toBe(false);
     expect(existsSync(join(run.runRoot, "review", "app-preview-board.html"))).toBe(true);
     expect(existsSync(join(run.runRoot, "review", "app-preview-action-manifest.json"))).toBe(true);
-    expect(preview.humanAction.recommendedResponse).toBe("approved for app");
+    expect(preview.humanAction!.recommendedResponse).toBe("approved for app");
     expect(preview.progress.nextAutomaticStep).toContain("exact phrase approved for app");
   });
 });

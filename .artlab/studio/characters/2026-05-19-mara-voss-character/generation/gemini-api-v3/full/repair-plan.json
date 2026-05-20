@@ -1,0 +1,558 @@
+{
+  "schemaVersion": "tower-creative-generation-repair-plan-v1",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json",
+  "repairPlanPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/repair-plan.json",
+  "runId": "2026-05-19-mara-voss-character",
+  "adapter": "gemini-api",
+  "assetType": "character",
+  "status": "repair-required",
+  "strict": true,
+  "createdAt": "2026-05-20T04:48:40.425Z",
+  "summary": {
+    "totalSlots": 21,
+    "cleanSlots": 19,
+    "repairRequiredSlots": 2,
+    "boardIssues": 0,
+    "repeatedFailureCodes": []
+  },
+  "slots": [
+    {
+      "slotId": "api-lane-01__mara-regular-idle",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-idle/mara__regular__idle__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-idle/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-idle/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-greeting",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-greeting/mara__regular__greeting__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-greeting/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-greeting/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-listening",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-listening/mara__regular__listening__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-listening/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-listening/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-thinking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-thinking/mara__regular__thinking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-thinking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-thinking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-talking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-talking/mara__regular__talking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-talking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-talking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-alert",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-alert/mara__regular__alert__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-alert/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-alert/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-working",
+      "status": "repair-required",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-working/mara__regular__working__source-v001__api-lane-01__v002.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-working/api-receipt-v002.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-working/cutout-receipt-v003.json",
+      "latestAttempt": 2,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "cutoutAlreadyPassed": false,
+      "cutoutFailureCodes": [
+        "edge-halo"
+      ],
+      "imageIssues": [
+        {
+          "code": "image-missing-alpha",
+          "severity": "blocker",
+          "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-working/mara__regular__working__source-v001__api-lane-01__v002.png",
+          "message": "Image is missing an alpha channel required for production sprites."
+        }
+      ],
+      "recommendedAction": {
+        "type": "cutout-local-repair",
+        "reason": "Local cutout found a complete subject with insufficient safe padding and/or mild edge halo. Try transparent canvas expansion plus deterministic defringe before spending on regeneration.",
+        "command": "npm run art:generate -- repair-auto --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --slots \"mara-regular-working\"",
+        "fallbackCommand": "npm run art:generate -- run-api --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --slots \"mara-regular-working\" --max-attempts 3"
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-idle",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-idle/mara__summer-light__idle__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-idle/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-idle/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-greeting",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-greeting/mara__summer-light__greeting__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-greeting/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-greeting/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-listening",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-listening/mara__summer-light__listening__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-listening/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-listening/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-thinking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-thinking/mara__summer-light__thinking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-thinking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-thinking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-talking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-talking/mara__summer-light__talking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-talking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-talking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-alert",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-alert/mara__summer-light__alert__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-alert/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-alert/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-working",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-working/mara__summer-light__working__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-working/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-working/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-idle",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-idle/mara__winter-layered__idle__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-idle/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-idle/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-greeting",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-greeting/mara__winter-layered__greeting__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-greeting/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-greeting/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-listening",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-listening/mara__winter-layered__listening__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-listening/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-listening/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-thinking",
+      "status": "repair-required",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-thinking/mara__winter-layered__thinking__source-v001__api-lane-01__v002.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-thinking/api-receipt-v002.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-thinking/cutout-receipt-v003.json",
+      "latestAttempt": 2,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "cutoutAlreadyPassed": false,
+      "cutoutFailureCodes": [
+        "edge-halo"
+      ],
+      "imageIssues": [
+        {
+          "code": "image-missing-alpha",
+          "severity": "blocker",
+          "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-thinking/mara__winter-layered__thinking__source-v001__api-lane-01__v002.png",
+          "message": "Image is missing an alpha channel required for production sprites."
+        }
+      ],
+      "recommendedAction": {
+        "type": "cutout-local-repair",
+        "reason": "Local cutout found a complete subject with insufficient safe padding and/or mild edge halo. Try transparent canvas expansion plus deterministic defringe before spending on regeneration.",
+        "command": "npm run art:generate -- repair-auto --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --slots \"mara-winter-layered-thinking\"",
+        "fallbackCommand": "npm run art:generate -- run-api --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --slots \"mara-winter-layered-thinking\" --max-attempts 3"
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-talking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-talking/mara__winter-layered__talking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-talking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-talking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-alert",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-alert/mara__winter-layered__alert__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-alert/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-alert/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-working",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-working/mara__winter-layered__working__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-working/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-working/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+      ]
+    }
+  ],
+  "boardActions": [],
+  "nextCommands": [
+    "Run the per-slot recommendedAction.command values that match the failure type.",
+    "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+    "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict"
+  ]
+}

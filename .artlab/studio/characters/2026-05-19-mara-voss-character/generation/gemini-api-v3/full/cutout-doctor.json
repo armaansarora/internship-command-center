@@ -1,0 +1,325 @@
+{
+  "schemaVersion": "tower-cutout-doctor-v1",
+  "status": "passed",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json",
+  "scope": "plan-slots",
+  "checkedAt": "2026-05-20T04:50:26.308Z",
+  "repeatedFailureCodes": [],
+  "checked": [
+    {
+      "slotId": "api-lane-01__mara-regular-idle",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-idle/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-idle/mara__regular__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-greeting",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-greeting/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-greeting/mara__regular__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-listening",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-listening/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-listening/mara__regular__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-thinking",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-thinking/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-thinking/mara__regular__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-talking",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-talking/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-talking/mara__regular__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-alert",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-alert/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-alert/mara__regular__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-working",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-working/cutout-receipt-v005.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-working/mara__regular__working__source-v001__api-lane-01__cutout__repaired-v002__repaired-v003__repaired-v004__repaired-v005.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-idle",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-idle/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-idle/mara__summer-light__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-greeting",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-greeting/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-greeting/mara__summer-light__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-listening",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-listening/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-listening/mara__summer-light__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-thinking",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-thinking/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-thinking/mara__summer-light__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-talking",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-talking/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-talking/mara__summer-light__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-alert",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-alert/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-alert/mara__summer-light__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-working",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-working/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-working/mara__summer-light__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-idle",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-idle/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-idle/mara__winter-layered__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-greeting",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-greeting/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-greeting/mara__winter-layered__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-listening",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-listening/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-listening/mara__winter-layered__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-thinking",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-thinking/cutout-receipt-v005.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-thinking/mara__winter-layered__thinking__source-v001__api-lane-01__cutout__repaired-v002__repaired-v003__repaired-v004__repaired-v005.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-talking",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-talking/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-talking/mara__winter-layered__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-alert",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-alert/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-alert/mara__winter-layered__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-working",
+      "receiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-working/cutout-receipt-v002.json",
+      "outputPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-working/mara__winter-layered__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "status": "passed",
+      "failureCodes": [],
+      "badges": {
+        "cutout": "passed",
+        "alpha": "passed",
+        "dimensions": "passed",
+        "crop": "passed",
+        "halo": "passed",
+        "props": "passed"
+      }
+    }
+  ]
+}

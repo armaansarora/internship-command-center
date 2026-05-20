@@ -11,7 +11,7 @@ Otis Vale is already promoted, browser-QA verified, closed, and protected as the
 
 For a new character such as Mara Voss, start from scratch unless the durable run-state explicitly names an approved identity reference. Generate exactly 5 prompt-only initial designs with the approved API pipeline, five lanes, concurrency 5, Nano Banana 2, 4K, 9:16, no identity reference image, no Color block preset, and no fake-transparent background claims. Let Armaan pick one initial direction.
 
-After Armaan picks the design, create the production pack from that approved identity: turnaround, outfit variants, expression sheet, 7 poses x 3 outfits, 4K masters, local cutout compiler, edge refinement, alpha QA, derivatives, strict doctors, final upload-ready board, and app preview. Generated files stay in .artlab until promotion.
+After Armaan picks the design, continue automatically from that approved identity to the next normal human gate: production pack, required production sprite work, 4K masters, local cutout compiler, edge refinement, alpha QA, derivatives, strict doctors, and the final upload-ready board. Do not stop at `initial-direction-approved`; generated files stay in .artlab until promotion.
 
 Production promotion requires the exact phrase approved for app. If any generated image fails to load, is missing, is soft, has bad alpha, is corrupt, has broken board references, or looks fake-perfect, repair or regenerate it before asking for final approval. Every phase must run the Housekeeping Gate and Continuous Improvement Gate. If the pipeline exposes a weakness, improve the script, docs, and tests before moving on.
 ```

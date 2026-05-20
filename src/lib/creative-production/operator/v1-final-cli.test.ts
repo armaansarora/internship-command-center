@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -21,8 +21,7 @@ describe("Creative Production Engine v1 final normal command surface", () => {
     ], { cwd: process.cwd(), encoding: "utf8" });
 
     expect(startOutput).toContain("Creative Production Engine orchestrator");
-    expect(startOutput).toContain("What I understood");
-    expect(startOutput).toContain("human-action.json");
+    expect(startOutput).toContain("No human action is required before initial concept images exist");
     expect(startOutput).toContain("progress.json");
 
     const runRoot = join(stateRoot, "ui-assets", "lobby-buttons-v1");
@@ -30,8 +29,9 @@ describe("Creative Production Engine v1 final normal command surface", () => {
       phase: string;
       publicArtWritesAllowed: boolean;
     };
-    expect(state.phase).toBe("awaiting-initial-approval");
+    expect(state.phase).toBe("direction-generating");
     expect(state.publicArtWritesAllowed).toBe(false);
+    expect(existsSync(join(runRoot, "human-action.json"))).toBe(false);
 
     const continueOutput = execFileSync(tsx, [
       "scripts/creative-production-orchestrator.ts",
@@ -42,6 +42,7 @@ describe("Creative Production Engine v1 final normal command surface", () => {
     ], { cwd: process.cwd(), encoding: "utf8" });
 
     expect(continueOutput).toContain("Run lobby-buttons-v1");
+    expect(continueOutput).toContain("provider blocked");
     expect(continueOutput).toContain("Next automatic step");
     expect(continueOutput).toContain("approved for app");
   });

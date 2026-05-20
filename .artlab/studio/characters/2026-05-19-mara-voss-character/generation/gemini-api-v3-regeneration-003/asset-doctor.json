@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "tower-creative-asset-doctor-v1",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3-regeneration-003/gemini-api-plan.json",
+  "boardPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/review/initial-concept-board.html",
+  "status": "warnings",
+  "strict": false,
+  "checkedAt": "2026-05-19T20:43:47.124Z",
+  "checkedGeneratedImages": [
+    {
+      "slotId": "api-lane-01__initial-character-concept",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-01/initial-character-concept/mara-initial-concept__api-lane-01.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-01/initial-character-concept/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-02__initial-character-concept",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-02/initial-character-concept/mara-initial-concept__api-lane-02.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-02/initial-character-concept/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-03__initial-character-concept",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-03/initial-character-concept/mara-initial-concept__api-lane-03.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-03/initial-character-concept/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-04__initial-character-concept",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-04/initial-character-concept/mara-initial-concept__api-lane-04.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-04/initial-character-concept/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-05__initial-character-concept",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-05/initial-character-concept/mara-initial-concept__api-lane-05.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-05/initial-character-concept/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    }
+  ],
+  "checkedReviewImages": [
+    {
+      "src": "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-01/initial-character-concept/mara-initial-concept__api-lane-01.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-01/initial-character-concept/mara-initial-concept__api-lane-01.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-02/initial-character-concept/mara-initial-concept__api-lane-02.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-02/initial-character-concept/mara-initial-concept__api-lane-02.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-03/initial-character-concept/mara-initial-concept__api-lane-03.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-03/initial-character-concept/mara-initial-concept__api-lane-03.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-04/initial-character-concept/mara-initial-concept__api-lane-04.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-04/initial-character-concept/mara-initial-concept__api-lane-04.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    },
+    {
+      "src": "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-05/initial-character-concept/mara-initial-concept__api-lane-05.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-05/initial-character-concept/mara-initial-concept__api-lane-05.png",
+      "width": 3072,
+      "height": 5504,
+      "format": "jpeg",
+      "hasAlpha": false
+    }
+  ],
+  "issues": [
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-01/initial-character-concept/api-receipt.json",
+      "message": "Slot api-lane-01__initial-character-concept latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-02/initial-character-concept/api-receipt.json",
+      "message": "Slot api-lane-02__initial-character-concept latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-03/initial-character-concept/api-receipt.json",
+      "message": "Slot api-lane-03__initial-character-concept latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-04/initial-character-concept/api-receipt.json",
+      "message": "Slot api-lane-04__initial-character-concept latest receipt warning: source-mime-image-jpeg"
+    },
+    {
+      "code": "receipt-quality-warning",
+      "severity": "warning",
+      "path": ".artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-003/api-lane-05/initial-character-concept/api-receipt.json",
+      "message": "Slot api-lane-05__initial-character-concept latest receipt warning: source-mime-image-jpeg"
+    }
+  ],
+  "recoveryActions": [
+    "Treat this run as concept-only or repair warnings before production promotion.",
+    "Use --strict before final upload-ready approval to turn quality warnings into blockers."
+  ]
+}

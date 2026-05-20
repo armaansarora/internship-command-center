@@ -2,6 +2,12 @@
   "schemaVersion": "tower-cutout-model-selection-v1",
   "status": "ready",
   "winners": {
+    "character": {
+      "candidateId": "rembg-isnet-general-use",
+      "modelName": "isnet-general-use",
+      "modelVersion": "bootstrap-cache",
+      "score": 0.94
+    },
     "hair-beard-character": {
       "candidateId": "rembg-isnet-general-use",
       "modelName": "isnet-general-use",
@@ -26,12 +32,31 @@
       "cachedModelPath": "/Users/armaanarora/Documents/The Tower/.artlab/tooling/cutout/models/isnet-general-use.onnx",
       "supports": [
         {
+          "subjectType": "character"
+        },
+        {
           "subjectType": "hair-beard-character"
+        },
+        {
+          "subjectType": "prop"
+        },
+        {
+          "subjectType": "ui-object"
+        },
+        {
+          "subjectType": "foreground-layer"
         }
       ]
     }
   ],
   "benchmarkResults": [
+    {
+      "candidateId": "rembg-isnet-general-use",
+      "subjectType": "character",
+      "topologyType": "standard-character",
+      "fixtureSet": "fresh-natural-canary",
+      "score": 0.94
+    },
     {
       "candidateId": "rembg-isnet-general-use",
       "subjectType": "hair-beard-character",

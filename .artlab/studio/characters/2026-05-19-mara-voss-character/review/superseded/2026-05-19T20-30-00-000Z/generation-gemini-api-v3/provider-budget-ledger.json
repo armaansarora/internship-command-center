@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "tower-creative-budget-ledger-v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "approvedBudgetCents": 1000,
+  "createdAt": "2026-05-19T20:08:37.069Z",
+  "updatedAt": "2026-05-19T20:08:37.069Z",
+  "reservations": [],
+  "receipts": [],
+  "totals": {
+    "estimatedCents": 0,
+    "reservedCents": 0,
+    "spentCents": 0,
+    "releasedCents": 0,
+    "refundedCents": 0,
+    "remainingCents": 1000
+  }
+}

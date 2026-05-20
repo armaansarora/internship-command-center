@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "tower.creative-review-actions.v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "boardType": "final-upload-ready",
+  "actions": [
+    {
+      "id": "approve-for-app",
+      "label": "Approve for app",
+      "requiresExactPhrase": "approved for app"
+    },
+    {
+      "id": "regenerate-named-slots",
+      "label": "Regenerate named slots",
+      "requiresExactPhrase": false,
+      "slots": [
+        "api-lane-01__mara-regular-idle",
+        "api-lane-01__mara-regular-greeting",
+        "api-lane-01__mara-regular-listening",
+        "api-lane-01__mara-regular-thinking",
+        "api-lane-01__mara-regular-talking",
+        "api-lane-01__mara-regular-alert",
+        "api-lane-01__mara-regular-working",
+        "api-lane-01__mara-summer-light-idle",
+        "api-lane-01__mara-summer-light-greeting",
+        "api-lane-01__mara-summer-light-listening",
+        "api-lane-01__mara-summer-light-thinking",
+        "api-lane-01__mara-summer-light-talking",
+        "api-lane-01__mara-summer-light-alert",
+        "api-lane-01__mara-summer-light-working",
+        "api-lane-01__mara-winter-layered-idle",
+        "api-lane-01__mara-winter-layered-greeting",
+        "api-lane-01__mara-winter-layered-listening",
+        "api-lane-01__mara-winter-layered-thinking",
+        "api-lane-01__mara-winter-layered-talking",
+        "api-lane-01__mara-winter-layered-alert",
+        "api-lane-01__mara-winter-layered-working"
+      ]
+    },
+    {
+      "id": "revise-brief",
+      "label": "Revise brief",
+      "requiresExactPhrase": false,
+      "input": "plain English"
+    },
+    {
+      "id": "reject-archive",
+      "label": "Reject and archive",
+      "requiresExactPhrase": false
+    }
+  ],
+  "localImagePaths": [
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-idle/mara__regular__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-greeting/mara__regular__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-listening/mara__regular__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-thinking/mara__regular__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-talking/mara__regular__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-alert/mara__regular__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-regular-working/mara__regular__working__source-v001__api-lane-01__cutout__repaired-v002__repaired-v003__repaired-v004__repaired-v005.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-idle/mara__summer-light__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-greeting/mara__summer-light__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-listening/mara__summer-light__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-thinking/mara__summer-light__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-talking/mara__summer-light__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-alert/mara__summer-light__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-summer-light-working/mara__summer-light__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-idle/mara__winter-layered__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-greeting/mara__winter-layered__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-listening/mara__winter-layered__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-thinking/mara__winter-layered__thinking__source-v001__api-lane-01__cutout__repaired-v002__repaired-v003__repaired-v004__repaired-v005.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-talking/mara__winter-layered__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-alert/mara__winter-layered__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-full/api-lane-01/mara-winter-layered-working/mara__winter-layered__working__source-v001__api-lane-01__cutout__repaired-v002.png"
+  ],
+  "promotesOnAction": false,
+  "previewChecks": [],
+  "forbiddenShortcuts": [
+    "external-image-url",
+    "data-uri"
+  ]
+}

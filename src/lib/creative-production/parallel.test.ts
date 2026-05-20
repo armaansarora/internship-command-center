@@ -29,8 +29,8 @@ describe("creative production parallel waves", () => {
     expect(plan.agentsPerWave).toBe(5);
     expect(plan.waves).toBe(1);
     expect(plan.totalLanes).toBe(CREATIVE_PARALLEL_DEFAULT_TOTAL_LANES);
-    expect(plan.status).toBe("awaiting-initial-approval");
-    expect(plan.statusReason).toContain("Initial direction approval");
+    expect(plan.status).toBe("ready-for-dispatch");
+    expect(plan.statusReason).toContain("does not require pre-image approval");
     expect(plan.defaultAgentProfile).toEqual(CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE);
     expect(plan.laneContract.ownsWriteAccessOnlyInsideLane).toBe(true);
     expect(plan.laneContract.parentOwnsMergeReviewPromotion).toBe(true);

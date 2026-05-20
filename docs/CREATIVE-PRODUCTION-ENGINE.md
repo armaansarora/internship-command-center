@@ -6,9 +6,9 @@ The Creative Production Engine is the Tower-wide system for producing characters
 
 ## Command Surface
 
-- `npm run art:produce -- --request "<natural language request>"`: canonical normal entrypoint. It routes the request, writes `run-state.json`, `progress.json`, `human-action.json`, and `events.jsonl`, then stops only at the initial direction gate or a true blocker.
-- `npm run art:produce -- --continue <run-id>`: resumes a creative run from durable state, not chat memory. It imports legacy Otis state when needed, honors `upgrade-required`, and advances safe automatic steps such as rebuilding a local final board/action manifest.
-- `npm run art:produce -- --answer <run-id> "<plain English answer>"`: records Armaan's plain-English response into durable state, advances the legal gate, refreshes progress/human-action files, and prevents future sessions from relying on chat memory.
+- `npm run art:produce -- --request "<natural language request>"`: canonical normal entrypoint. It routes the request, writes `run-state.json`, `progress.json`, and `events.jsonl`, then advances routable work into automatic concept generation without a pre-image human approval gate. It writes `human-action.json` only for true blockers or post-image review gates.
+- `npm run art:produce -- --continue <run-id>`: resumes a creative run from durable state, not chat memory. It imports legacy Otis state when needed, honors `upgrade-required`, and advances safe automatic steps such as generating initial concepts, continuing approved production, running strict QA, or rebuilding a local final board/action manifest.
+- `npm run art:produce -- --answer <run-id> "<plain English answer>"`: records Armaan's plain-English response into durable state, advances the legal gate, refreshes progress/human-action files, and prevents future sessions from relying on chat memory. After a concept board, use `approve direction: 01` or a slot id when Armaan chooses a specific lane; that approval continues automatically through production until a true blocker or the final upload-ready board.
 - `npm run art:status`: plain-English current run status from `progress.json`, including phase, slot counts, spend, locks, next automatic step, and exact human action when needed.
 - `npm run art:health`: safe-to-run report covering active locks/processes, last run, spend, repeated failures, provider health/concurrency, cutout readiness, cleanup debt, and continuous-improvement production blocks.
 
@@ -74,7 +74,41 @@ Each lane may run:
 npm run art:studio -- --mode lane --lane-brief .artlab/studio/<asset-type>/<run-id>/parallel/lanes/<wave-id-agent-id>/lane-brief.json
 ```
 
-If the generated plan status is `awaiting-initial-approval`, the coordinator must not launch lane subagents until Armaan approves the initial direction. If the packet was already approved, the plan status is `ready-for-dispatch`.
+Normal routable concept work must not use a pre-image `awaiting-initial-approval` gate. If tooling, locks, and budget are clear, the five initial lanes run automatically and the first normal human gate is the initial concept review board. `approve direction` is legal only after that board and its action manifest exist; `approve direction: 01` durably records the chosen lane.
+
+`initial-direction-approved` is an internal checkpoint, not a stopping point. Once the selected concept is recorded, `art:produce -- --answer` and `art:produce -- --continue` automatically build the production pack, run approved production generation, local cutout, strict QA, and final board creation. The next normal human gate is `final-board-ready`, where Armaan inspects the upload-ready board and promotion still requires the exact phrase `approved for app`.
+
+The normal initial concept sequence is `direction-generating` while the five slots run, then `direction-review-ready` after the concept board and action manifest are written.
+
+## Initial Concept Contracts
+
+Character concept boards have a stricter contract than generic visual exploration. All five character lanes must share one locked Tower/Otis visual style envelope: premium stylized high-detail app/game character art, full-body 9:16 app-sprite framing, controlled Tower lobby lighting, adult professional energy, and Professional Scars tone. Lanes may not explore different rendering styles.
+
+Character variation belongs only inside explicit lane design cards:
+
+- silhouette
+- age read
+- hair shape/length/texture
+- facial structure
+- wardrobe category
+- color palette
+- posture/body language
+- accessories/tools
+- personality read
+- Tower role archetype
+
+The prompt builder must not let every lane collapse into the same suit, same short hair, same executive posture, or same role archetype. It also must avoid generation-trigger wording for forbidden drift such as hyperrealistic, photo, actual person, storybook, watercolor, pastel, flat cartoon, corporate stock, or stock-photo language; the prompt should describe the approved positive Tower style instead.
+
+Concept QA writes `review/initial-concept-qa.json`. A board cannot become `direction-review-ready` when style coherence or design diversity fails. If two or more lanes fail the same way, the run becomes `style-failed`, the board is superseded, and the engine must harden/regenerate before asking Armaan to choose.
+
+Other asset types do not inherit the character contract:
+
+- UI assets match the existing Tower product UI/design system: component density, states, accessibility, and interaction material.
+- Backgrounds/environments match Tower architecture, lighting, mood, spatial metaphor, and desktop/mobile crop safety.
+- Props match object readability, Tower materials, cutout needs, and story function.
+- Icon systems match product icon grid, stroke/fill rules, semantic states, and small-size readability.
+- Marketing visuals match the offer, product truth, brand mood, and responsive first-viewport composition.
+- Shaders/animations/scenes use their own performance, motion, architecture, and mood contracts.
 
 Lane agents may write only inside their own lane root. They cannot write `public/art`, update manifests, run promotion, run cleanup, delete approved assets, or edit the parent packet. The coordinator owns merge, final review, human approval, promotion, and app integration. Completed lanes must pass `validate-lane` before coordinator merge so five-lane output does not become five-lane half-finished noise.
 
@@ -313,12 +347,16 @@ The command layer records both mandatory gates for orientation and production-pa
 
 ## Human Approval Gates
 
-1. Initial direction approval.
-2. Final upload-ready approval using `approved for app`.
+1. Initial direction approval, only after the five-image concept board/action manifest exists.
+2. Final upload-ready approval using `approved for app`, only after production generation, cutout, strict QA, and the final board/action manifest exist.
+
+After initial direction approval, `initial-direction-approved`, `production-planned`, `full-pack-running`, `repairing`, and `strict-qa` are automatic pipeline states. They may write progress and blocker packets, but they must not ask Armaan to approve the same direction again. Human action in those states is legal only for true blockers such as missing credentials, budget/tooling/provider failures, active locks, corrupt state, strict-QA blockers, unsafe resume, or an active continuous-improvement upgrade requirement.
+
+For Tower character assets, approval of the initial direction means the engine must continue to the full character sprite matrix before the next normal human gate. The system-wide default is 21 source sprites: `regular`, `summer-light`, and `winter-layered` outfit variants across `idle`, `greeting`, `listening`, `thinking`, `talking`, `alert`, and `working` pose/expression states. A one-sprite character board is not a final upload-ready board; it must be marked superseded/incomplete and the missing pack slots must continue automatically. Final character approval using `approved for app` is legal only after all required slots pass strict QA and appear in the action manifest.
 
 ## V1 Asset Classes
 
-- `character`: cast members, outfits, poses, expressions, and motion profiles.
+- `character`: cast members, 21-slot outfit/pose-expression sprite packs, motion profiles, and final app integration.
 - `environment`: floor backgrounds, lighting states, and responsive crops.
 - `prop`: transparent props and storytelling objects.
 - `ui-texture`: approved raster materials and interface surfaces.

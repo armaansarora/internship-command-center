@@ -59,6 +59,42 @@ describe("art:health command", () => {
     expect(output).toContain("Continuous improvement blocks production: no");
   });
 
+  it("treats automatic post-approval phases as fresh-agent resumable without human-action", () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-health-auto-phase-"));
+    const runRoot = join(stateRoot, "characters", "mara-approved-v1");
+
+    mkdirSync(runRoot, { recursive: true });
+    writeFileSync(join(runRoot, "run-state.json"), JSON.stringify({
+      schemaVersion: "tower-creative-run-state-v1-final",
+      runId: "mara-approved-v1",
+      assetType: "character",
+      name: "Mara",
+      phase: "initial-direction-approved",
+      nextLegalAction: "Build the strict production packet from approved concept api-lane-01__initial-character-concept.",
+      updatedAt: "2026-05-19T23:35:42.559Z",
+    }, null, 2));
+    writeFileSync(join(runRoot, "progress.json"), JSON.stringify({
+      schemaVersion: "tower-creative-progress-v1",
+      runId: "mara-approved-v1",
+      phase: "initial-direction-approved",
+      spendSoFarCents: 75.5,
+      reservedSpendCents: 0,
+      activeLocks: [],
+      nextAutomaticStep: "Build the strict production packet.",
+      updatedAt: "2026-05-19T23:35:42.559Z",
+    }, null, 2));
+
+    const output = execFileSync(tsx, [
+      "scripts/creative-production-health.ts",
+      "--state-root",
+      stateRoot,
+    ], { cwd: process.cwd(), encoding: "utf8" });
+
+    expect(output).toContain("Safe to run: yes");
+    expect(output).toContain("Fresh-agent resumable: yes");
+    expect(output).toContain("Last run: mara-approved-v1 (initial-direction-approved)");
+  });
+
   it("renders integrated promoted baselines from run-state instead of stale final-approval progress", () => {
     const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-health-integrated-"));
     const runRoot = join(stateRoot, "characters", "otis-integrated-v1");

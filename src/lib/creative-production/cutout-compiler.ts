@@ -215,7 +215,7 @@ export function createDefaultCutoutContract(input: {
       ...baseThresholds,
       ...input.thresholds,
       allowInteriorNegativeSpace:
-        input.thresholds?.allowInteriorNegativeSpace ?? topologyType === "hair-beard-soft-body-held-props",
+        input.thresholds?.allowInteriorNegativeSpace ?? input.assetType === "character",
       allowMultipleForegroundComponents: input.thresholds?.allowMultipleForegroundComponents ?? false,
       minimumPadding: {
         ...baseThresholds.minimumPadding,
@@ -662,11 +662,15 @@ export async function evaluateCutoutAlpha(input: {
     : 0;
   const haloP99Alpha = percentile(backgroundAlphaValues, 99);
   const backdropRemnantRatio = backgroundAlphaValues.length / pixelCount;
+  const haloAlphaExceedsThreshold =
+    haloMeanAlpha > input.thresholds.haloMeanAlphaMax ||
+    haloP99Alpha > input.thresholds.haloP99AlphaMax;
+  const haloAreaExceedsThreshold = backdropRemnantRatio > input.thresholds.maxBackdropRemnantEdgeRatio;
+  const meaningfulHaloArea = backdropRemnantRatio > input.thresholds.maxTotalIslandCanvasRatio;
 
   if (
-    haloMeanAlpha > input.thresholds.haloMeanAlphaMax ||
-    haloP99Alpha > input.thresholds.haloP99AlphaMax ||
-    backdropRemnantRatio > input.thresholds.maxBackdropRemnantEdgeRatio
+    haloAreaExceedsThreshold ||
+    (meaningfulHaloArea && haloAlphaExceedsThreshold)
   ) {
     failures.add("edge-halo");
   }

@@ -102,6 +102,21 @@ const PROMOTED_BASELINE_STATES = new Set([
   "closed",
 ]);
 
+const HUMAN_ACTION_PHASES = new Set([
+  "awaiting-initial-approval",
+  "direction-review-ready",
+  "final-board-ready",
+  "integration-briefing",
+  "app-preview-ready",
+  "needs-human",
+  "budget-blocked",
+  "provider-blocked",
+  "repair-required",
+  "style-failed",
+  "upgrade-required",
+  "unsafe-to-run",
+]);
+
 function nextStepForRun(input: {
   state: RunStateFile | undefined;
   progress: ProgressFile | undefined;
@@ -115,6 +130,18 @@ function nextStepForRun(input: {
   }
 
   return input.progress?.nextAutomaticStep ?? "Run art:status for the next step.";
+}
+
+function isFreshAgentResumable(input: {
+  state: RunStateFile | undefined;
+  progress: ProgressFile | undefined;
+  runRoot: string | undefined;
+}): boolean {
+  if (!input.state || !input.progress || !input.runRoot) return false;
+
+  const phase = input.state.phase ?? input.state.state ?? "";
+
+  return !HUMAN_ACTION_PHASES.has(phase) || existsSync(join(input.runRoot, "human-action.json"));
 }
 
 function selectedModelName(value: CutoutReadinessFile["selectedModel"]): string | null {
@@ -195,7 +222,7 @@ async function buildSnapshot(stateRoot: string): Promise<CreativeProductionHealt
       state: state.phase ?? state.state ?? "unknown",
       updatedAt: progress?.updatedAt ?? state.updatedAt ?? new Date().toISOString(),
       nextStep: nextStepForRun({ state, progress }),
-      resumableByFreshAgent: Boolean(progress && (runRoot ? existsSync(join(runRoot, "human-action.json")) : false)),
+      resumableByFreshAgent: isFreshAgentResumable({ state, progress, runRoot }),
     } : null,
     spendHistory: {
       approvedCeilingCents: 1000,

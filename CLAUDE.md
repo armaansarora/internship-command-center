@@ -60,9 +60,12 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 - No TODO/FIXME comments in shipped code
 
 ## Character Image Pipeline
-The locked character style is `tower-flat-plus-depth-v1`: premium web-game sprites, strong silhouettes, clean raster shapes, subtle depth, adult professional energy, no ultra-realism, no fake-perfect AI people. The locked story tone is `Professional Scars`.
+The locked character style is the Tower/Otis-compatible character envelope: premium stylized high-detail app/game character art, strong silhouettes, crisp raster forms, controlled depth, adult professional energy, full-body app-sprite framing, controlled Tower lighting, and `Professional Scars` tone. Character concept lanes vary design only through explicit cards: silhouette, age read, hair, face, wardrobe, palette, posture, accessories, personality, and Tower role archetype.
+
+Do not let character lanes explore different rendering styles, and do not collapse all five lanes into the same suit/hair/executive archetype. UI assets match the Tower product UI/design system; environments match Tower architecture/lighting/mood; props/icons/marketing/shaders/animations/scenes each use their own contract rather than character rules.
 
 When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:produce -- --request "<natural language request>"` and follow `.agents/skills/creative-production-engine/SKILL.md`. Use `npm run art:studio` for orientation or diagnostics. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate. Normal creative packets default to five-lane parallel output: 5 agents x 1 wave. Lane subagents should use GPT-5.5 fast mode with extra-high reasoning when available. Each lane stays isolated; `--mode coordinate` scores, dedupes, ranks, and writes the review board; only the coordinator may merge, promote, clean, or integrate. Use `--no-parallel` only for explicit diagnostics.
+Routable concept work does not stop for `approve direction` before images exist. The first normal human gate is after the five initial concepts and concept review board/action manifest exist; before then, `human-action.json` is only for true blockers.
 
 For any character image work, run `npm run art:studio` first and read `docs/CHARACTER-IMAGE-OPERATIONS.md`. Use `npm run art:operate` only when the engine reaches the strict Season 1 character-art operator stage. Use `npm run art:status` for read-only inspection of promoted characters, run warnings, and the next recommended character.
 

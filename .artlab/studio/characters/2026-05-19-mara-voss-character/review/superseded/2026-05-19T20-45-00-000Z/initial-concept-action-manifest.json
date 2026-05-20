@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "tower.creative-review-actions.v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "boardType": "initial-concept",
+  "actions": [
+    {
+      "id": "approve-direction",
+      "label": "Approve direction",
+      "requiresExactPhrase": false
+    },
+    {
+      "id": "regenerate-named-slots",
+      "label": "Regenerate named slots",
+      "requiresExactPhrase": false,
+      "slots": [
+        "api-lane-01__initial-character-concept",
+        "api-lane-02__initial-character-concept",
+        "api-lane-03__initial-character-concept",
+        "api-lane-04__initial-character-concept",
+        "api-lane-05__initial-character-concept"
+      ]
+    },
+    {
+      "id": "revise-brief",
+      "label": "Revise brief",
+      "requiresExactPhrase": false,
+      "input": "plain English"
+    },
+    {
+      "id": "reject-archive",
+      "label": "Reject and archive",
+      "requiresExactPhrase": false
+    }
+  ],
+  "localImagePaths": [
+    "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-01/initial-character-concept/mara-initial-concept__api-lane-01.png",
+    "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-02/initial-character-concept/mara-initial-concept__api-lane-02.png",
+    "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-03/initial-character-concept/mara-initial-concept__api-lane-03.png",
+    "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-04/initial-character-concept/mara-initial-concept__api-lane-04.png",
+    "../../../../inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-05/initial-character-concept/mara-initial-concept__api-lane-05.png"
+  ],
+  "promotesOnAction": false,
+  "previewChecks": [],
+  "forbiddenShortcuts": [
+    "external-image-url",
+    "data-uri"
+  ]
+}

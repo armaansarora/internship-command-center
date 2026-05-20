@@ -26,8 +26,8 @@ describe("art:produce orchestrator", () => {
 
     expect(output).toContain("Creative Production Engine orchestrator");
     expect(output).toContain("Two human gates: initial design direction, final app promotion.");
-    expect(output).toContain("Current phase: awaiting-initial-approval");
-    expect(output).toContain("human-action.json");
+    expect(output).toContain("Current phase: direction-generating");
+    expect(output).toContain("No human action is required before initial concept images exist");
     expect(output).toContain("progress.json");
     expect(output).toContain("approved for app");
 
@@ -39,26 +39,15 @@ describe("art:produce orchestrator", () => {
       promotionPhrase: string;
     }>(join(runRoot, "run-state.json"));
     const progress = readJson<{ phase: string; pending: number; nextAutomaticStep: string }>(join(runRoot, "progress.json"));
-    const humanAction = readJson<{
-      phase: string;
-      allowedResponses: string[];
-      recommendedResponse: string;
-    }>(join(runRoot, "human-action.json"));
 
-    expect(runState.phase).toBe("awaiting-initial-approval");
+    expect(runState.phase).toBe("direction-generating");
     expect(runState.gates).toEqual(["initial-design-direction", "final-app-promotion"]);
     expect(runState.publicArtWritesAllowed).toBe(false);
     expect(runState.promotionPhrase).toBe("approved for app");
-    expect(progress.phase).toBe("awaiting-initial-approval");
-    expect(progress.pending).toBeGreaterThan(0);
-    expect(progress.nextAutomaticStep).toContain("Wait for initial design direction approval");
-    expect(humanAction.phase).toBe("awaiting-initial-approval");
-    expect(humanAction.allowedResponses).toEqual([
-      "approve direction",
-      "revise: <plain English change>",
-      "reject/archive",
-    ]);
-    expect(humanAction.recommendedResponse).toBe("approve direction");
+    expect(progress.phase).toBe("direction-generating");
+    expect(progress.pending).toBe(5);
+    expect(progress.nextAutomaticStep).toContain("Generate exactly five prompt-only initial concepts");
+    expect(existsSync(join(runRoot, "human-action.json"))).toBe(false);
     expect(existsSync(join(runRoot, "events.jsonl"))).toBe(true);
   });
 
@@ -139,7 +128,7 @@ describe("art:produce orchestrator", () => {
     ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
 
     expect(output).toContain("Run otis-produce-v1");
-    expect(output).toContain("awaiting initial approval");
+    expect(output).toContain("provider blocked");
     expect(output).toContain("Next automatic step");
     expect(output).toContain("Armaan action");
     expect(output).not.toContain("cutout-benchmark");
@@ -221,27 +210,62 @@ describe("art:produce orchestrator", () => {
       "--run-id",
       "mara-answer-v1",
     ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
+    const runRoot = join(root, "characters", "mara-answer-v1");
+
+    mkdirSync(join(runRoot, "review"), { recursive: true });
+    writeFileSync(join(runRoot, "review", "concept-01.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    writeFileSync(join(runRoot, "review", "initial-concept-board.html"), "<html>board</html>");
+    writeFileSync(join(runRoot, "review", "initial-concept-action-manifest.json"), JSON.stringify({
+      schemaVersion: "tower.creative-review-actions.v1",
+      runId: "mara-answer-v1",
+      boardType: "initial-concept",
+      actions: [
+        {
+          id: "regenerate-named-slots",
+          slots: ["api-lane-01__initial-character-concept"],
+        },
+      ],
+      localImagePaths: ["concept-01.png"],
+      promotesOnAction: false,
+      previewChecks: [],
+      forbiddenShortcuts: ["external-image-url", "data-uri"],
+    }, null, 2));
+    const state = readJson<Record<string, unknown>>(join(runRoot, "run-state.json"));
+    writeFileSync(join(runRoot, "run-state.json"), `${JSON.stringify({
+      ...state,
+      phase: "direction-review-ready",
+      updatedAt: "2026-05-19T12:00:00.000Z",
+    }, null, 2)}\n`);
+    const progressBefore = readJson<Record<string, unknown>>(join(runRoot, "progress.json"));
+    writeFileSync(join(runRoot, "progress.json"), `${JSON.stringify({
+      ...progressBefore,
+      phase: "direction-review-ready",
+      completed: 5,
+      pending: 0,
+      runningSlots: [],
+      nextAutomaticStep: "Wait at the initial concept review board.",
+    }, null, 2)}\n`);
 
     const output = execFileSync(tsx, [
       "scripts/creative-production-orchestrator.ts",
       "--answer",
       "mara-answer-v1",
-      "approve direction",
+      "approve direction: 01",
       "--state-root",
       root,
     ], { cwd: process.cwd(), encoding: "utf8", env: { ...process.env, NODE_ENV: "test" } });
-    const runRoot = join(root, "characters", "mara-answer-v1");
-    const runState = readJson<{ phase: string; publicArtWritesAllowed: boolean }>(join(runRoot, "run-state.json"));
+    const runState = readJson<{ phase: string; publicArtWritesAllowed: boolean; approvedInitialConcept?: { slotId: string } }>(join(runRoot, "run-state.json"));
     const progress = readJson<{ phase: string; nextAutomaticStep: string }>(join(runRoot, "progress.json"));
 
     expect(output).toContain("Recorded answer for mara-answer-v1");
-    expect(output).toContain("Phase: initial direction approved");
-    expect(output).toContain("Armaan action: none.");
+    expect(output).toContain("Approved concept: api-lane-01__initial-character-concept");
+    expect(output).not.toContain("Phase: initial direction approved");
     expect(output).not.toContain("Recommended response: approve direction");
-    expect(runState.phase).toBe("initial-direction-approved");
+    expect(runState.phase).toBe("provider-blocked");
     expect(runState.publicArtWritesAllowed).toBe(false);
-    expect(progress.phase).toBe("initial-direction-approved");
-    expect(progress.nextAutomaticStep).toContain("Generate controlled parallel initial concepts");
+    expect(runState.approvedInitialConcept?.slotId).toBe("api-lane-01__initial-character-concept");
+    expect(progress.phase).toBe("provider-blocked");
+    expect(progress.nextAutomaticStep).toContain("Fix this true production blocker");
   });
 
   it("stops continue at upgrade-required when active improvement blockers exist", () => {

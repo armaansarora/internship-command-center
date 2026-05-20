@@ -11,6 +11,12 @@ import {
 import {
   CHARACTER_INITIAL_CONCEPT_IDENTITY_VARIATION_RULE,
   CHARACTER_INITIAL_CONCEPT_SHARED_LANE_QUALITY_FLOOR,
+  evaluateTowerCharacterConceptPromptContract,
+  getTowerCharacterInitialConceptDesignCards,
+  renderTowerCharacterDesignVariationMatrix,
+  renderTowerCharacterLaneDesignCard,
+  renderTowerCharacterSharedStyleEnvelope,
+  type TowerCharacterInitialConceptDesignCard,
 } from "./initial-concept-style-contract";
 
 export const GEMINI_NANO_BANANA_2_MODEL = "gemini-3.1-flash-image-preview";
@@ -63,6 +69,7 @@ export interface GeminiApiLane {
   laneNumber: number;
   label: string;
   mandate: string;
+  designCard?: TowerCharacterInitialConceptDesignCard;
 }
 
 export interface GeminiApiGenerationSlot {
@@ -173,28 +180,64 @@ export interface GeminiGenerateContentPayload {
   };
 }
 
-const INITIAL_DESIGN_LANE_MANDATES: readonly Omit<GeminiApiLane, "laneId" | "laneNumber">[] = [
-  {
-    label: "Warm Classic Concierge",
-    mandate: "Explore a grounded, warmly professional lobby concierge with old-hotel charm, soft human imperfection, and an immediately readable hospitality silhouette.",
-  },
-  {
-    label: "Retired Showman",
-    mandate: "Explore a more theatrical former-performer energy: expressive posture, memorable proportions, charming eccentricity, and premium Tower restraint without becoming goofy.",
-  },
-  {
-    label: "Neighborhood Elder",
-    mandate: "Explore a softer community-anchor Otis: rounder body, lived-in face, gentle patience, familiar front-desk warmth, and natural non-model humanity.",
-  },
-  {
-    label: "Elegant Old Guard",
-    mandate: "Explore a sharper old-world professional Otis: polished tailoring, brass details, dignified stance, silver hair, and quiet authority softened by kindness.",
-  },
-  {
-    label: "Cozy Oddball Mentor",
-    mandate: "Explore a lovable offbeat mentor Otis: unusual but human silhouette, memorable glasses or small motif, gentle humor, and sprite-ready charm.",
-  },
-] as const;
+const INITIAL_DESIGN_NON_CHARACTER_LANE_MANDATES: Record<Exclude<CreativeAssetType, "character">, readonly Omit<GeminiApiLane, "laneId" | "laneNumber">[]> = {
+  environment: [
+    { label: "Architectural Establishing", mandate: "Explore Tower architecture, spatial hierarchy, premium lighting, and the floor's emotional first read." },
+    { label: "Operational Detail", mandate: "Explore a closer working-zone direction with desks, thresholds, screen glow, and lived-in command-center cues." },
+    { label: "Mood And Lighting", mandate: "Explore the strongest atmospheric lighting and material mood while staying inside the Tower architectural world." },
+    { label: "Responsive Crop Safety", mandate: "Explore a composition with clear desktop/mobile crop zones and no critical details at the edges." },
+    { label: "Human-Scale World Fit", mandate: "Explore scale, paths, furniture massing, and environmental storytelling without character rendering rules." },
+  ],
+  prop: [
+    { label: "Hero Object", mandate: "Explore a premium object silhouette with strong material identity and clean app readability." },
+    { label: "Functional Tool", mandate: "Explore a believable Tower work tool with ergonomic details and clear use-case cues." },
+    { label: "Luxury Material", mandate: "Explore brass, glass, leather, graphite, or other Tower material combinations without character styling." },
+    { label: "Small-Screen Read", mandate: "Explore the clearest icon-scale prop shape and foreground separation." },
+    { label: "Story Detail", mandate: "Explore a prop that carries floor lore, ownership, or operational status." },
+  ],
+  "ui-texture": [
+    { label: "Product System Native", mandate: "Explore a texture/control direction that matches the existing Tower app UI, spacing, density, and state logic." },
+    { label: "Mobile Dense", mandate: "Explore compact touch-safe UI material that stays readable on phone layouts." },
+    { label: "State-Rich Control", mandate: "Explore hover, focus, disabled, active, warning, and success state material language." },
+    { label: "Premium Surface", mandate: "Explore restrained glass, brass, graphite, and depth cues that support the product design system." },
+    { label: "Accessibility First", mandate: "Explore strong contrast, clear affordance, and reduced-motion-safe UI texture behavior." },
+  ],
+  animation: [
+    { label: "Subtle Ambient", mandate: "Explore a low-motion ambient direction compatible with reduced-motion fallback." },
+    { label: "Operational Feedback", mandate: "Explore state-change motion for loading, success, warning, or navigation feedback." },
+    { label: "Floor Atmosphere", mandate: "Explore motion that reinforces Tower space, lighting, and depth." },
+    { label: "Performance Safe", mandate: "Explore animation that remains efficient on mobile and avoids layout instability." },
+    { label: "Expressive Accent", mandate: "Explore a distinctive but restrained premium accent motion." },
+  ],
+  scene: [
+    { label: "Composed Story Moment", mandate: "Explore a composed Tower scene with clear narrative focus and floor context." },
+    { label: "Architectural Drama", mandate: "Explore strong architecture, lighting, and depth without character concept assumptions." },
+    { label: "Operational Moment", mandate: "Explore work-in-progress energy, tools, screens, and lived-in detail." },
+    { label: "Responsive Composition", mandate: "Explore a scene that survives desktop, tablet, and phone crops." },
+    { label: "Quiet Luxury", mandate: "Explore restrained premium materials, mood, and atmosphere." },
+  ],
+  "icon-system": [
+    { label: "Navigation Family", mandate: "Explore a consistent icon family for Tower navigation and floor identity." },
+    { label: "Status Semantics", mandate: "Explore icons for success, warning, locked, pending, and attention states." },
+    { label: "Material Accent", mandate: "Explore brass, graphite, line weight, and shape rules that match the product UI." },
+    { label: "Tiny Size Read", mandate: "Explore maximum clarity at small app sizes." },
+    { label: "System Consistency", mandate: "Explore strict grid, stroke, fill, and corner rules for reuse." },
+  ],
+  "marketing-hero": [
+    { label: "Offer First", mandate: "Explore a first-viewport hero direction with clear Tower offer and product signal." },
+    { label: "Product Context", mandate: "Explore composed product/UI context without character rendering assumptions." },
+    { label: "Editorial Premium", mandate: "Explore premium visual drama that still feels like The Tower product." },
+    { label: "Mobile First", mandate: "Explore mobile-safe crop, type space, and focal hierarchy." },
+    { label: "Conversion Detail", mandate: "Explore visual proof, feature signal, or trust detail for a public-facing page." },
+  ],
+  shader: [
+    { label: "Material Depth", mandate: "Explore a shader/material direction for Tower glass, brass, shadow, or floor depth." },
+    { label: "Ambient Motion", mandate: "Explore subtle movement that remains reduced-motion safe." },
+    { label: "Performance Safe", mandate: "Explore a mobile-friendly rendering strategy." },
+    { label: "Interaction Feedback", mandate: "Explore pointer or state feedback without layout instability." },
+    { label: "World Fit", mandate: "Explore how the shader reinforces Tower architecture, lighting, and mood." },
+  ],
+} as const;
 
 const PRODUCTION_PACK_LANE_MANDATES: readonly Omit<GeminiApiLane, "laneId" | "laneNumber">[] = [
   {
@@ -284,15 +327,52 @@ function buildSlotCutoutContract(input: {
   });
 }
 
-function buildCutoutPromptInstructions(contract: CutoutContract): string[] {
+function buildCutoutPromptInstructions(contract: CutoutContract, assetType: CreativeAssetType): string[] {
   if (!contract.required) return [];
+
+  if (assetType !== "character") {
+    const subjectLabel =
+      assetType === "ui-texture"
+        ? "UI object"
+        : assetType === "icon-system"
+        ? "icon artwork"
+        : assetType === "prop"
+        ? "prop"
+        : "foreground asset";
+
+    return [
+      `Cutout backdrop contract (${contract.backdropContract}): ${contract.backdropRequirements.join(" ")}`,
+      `Keep the full ${subjectLabel} fully inside frame with generous transparent-source padding and crisp foreground/background separation.`,
+      "Use app-owned shadow discipline: avoid baked contact shadows merging into the asset because Tower renders runtime shadows after local cutout.",
+      "Do not apply character sprite anatomy, wardrobe, face, hair, or pose rules to this asset type.",
+    ];
+  }
 
   return [
     `Cutout backdrop contract (${contract.backdropContract}): ${contract.backdropRequirements.join(" ")}`,
-    "Keep the full subject and all expected props fully inside frame; leave visible breathing room around hair, beard, fingers, glasses, keys, badges, pens, feet, and held props.",
+    "Keep the full character and all expected tools fully inside frame; leave visible breathing room around hair, fingers, glasses, keys, badges, pens, feet, and held tools.",
     "Use app-owned shadow discipline: avoid baked contact shadows merging into the body because Tower renders runtime shadows after local cutout.",
     "Use crisp foreground/background separation while preserving natural human imperfections; do not create fake-perfect AI model people.",
   ];
+}
+
+function initialDesignLaneMandatesForInput(input: {
+  assetType: CreativeAssetType;
+  name: string;
+  prompt: string;
+}): readonly Omit<GeminiApiLane, "laneId" | "laneNumber">[] {
+  if (input.assetType === "character") {
+    return getTowerCharacterInitialConceptDesignCards({
+      name: input.name,
+      prompt: input.prompt,
+    }).map((card) => ({
+      label: card.label,
+      mandate: `${card.towerRoleArchetype}: vary the character identity through the explicit lane design card while keeping the shared Tower character style envelope locked.`,
+      designCard: card,
+    }));
+  }
+
+  return INITIAL_DESIGN_NON_CHARACTER_LANE_MANDATES[input.assetType];
 }
 
 function scoreCanarySlot(input: {
@@ -439,12 +519,23 @@ export function createGeminiApiGenerationPlan(input: {
     throw new Error("Initial design API runs cannot include reference images; use prompt-only lanes so concepts are meaningfully different.");
   }
 
-  const laneMandates = phase === "initial-design" ? INITIAL_DESIGN_LANE_MANDATES : PRODUCTION_PACK_LANE_MANDATES;
+  const isCharacterInitialDesign = phase === "initial-design" && input.assetType === "character";
+  const laneMandates = phase === "initial-design"
+    ? initialDesignLaneMandatesForInput({
+        assetType: input.assetType,
+        name: input.name,
+        prompt: input.slots[0]?.prompt ?? "",
+      })
+    : PRODUCTION_PACK_LANE_MANDATES;
   const identityInstruction = phase === "initial-design"
     ? "No character identity has been approved yet. Make this lane a genuinely distinct prompt-only interpretation while staying inside the character bible and Tower style."
     : "Keep this lane meaningfully different only inside that mandate. Do not redesign the approved character identity.";
-  const sharedInitialConceptLaneInstructions = phase === "initial-design"
+  const sharedInitialConceptLaneInstructions = isCharacterInitialDesign
     ? [
+        renderTowerCharacterSharedStyleEnvelope(),
+        "",
+        renderTowerCharacterDesignVariationMatrix(),
+        "",
         `Shared initial-concept lane quality floor: ${CHARACTER_INITIAL_CONCEPT_SHARED_LANE_QUALITY_FLOOR}`,
         `Initial-concept lane variation rule: ${CHARACTER_INITIAL_CONCEPT_IDENTITY_VARIATION_RULE}`,
       ]
@@ -471,13 +562,20 @@ export function createGeminiApiGenerationPlan(input: {
 	      const lanePrompt = [
 	        slot.prompt,
 	        "",
-	        ...buildCutoutPromptInstructions(cutout),
+	        ...buildCutoutPromptInstructions(cutout, input.assetType),
 	        "",
 	        ...sharedInitialConceptLaneInstructions,
+        ...(isCharacterInitialDesign && lane.designCard
+          ? ["", renderTowerCharacterLaneDesignCard(lane.designCard), ""]
+          : []),
 	        phase === "initial-design"
-	          ? `Unique identity mandate (${lane.label}): ${lane.mandate}`
+	          ? input.assetType === "character"
+              ? `Unique character design mandate (${lane.label}): ${lane.mandate}`
+              : `Initial ${input.assetType} lane mandate (${lane.label}): ${lane.mandate}`
           : `API lane mandate (${lane.label}): ${lane.mandate}`,
-        identityInstruction,
+        input.assetType === "character"
+          ? identityInstruction
+          : "Keep this lane distinct inside the asset-type contract. Do not import character concept style, pose, wardrobe, or anatomy assumptions.",
         "Use no external image search or grounding unless the run plan explicitly enables it.",
       ].join("\n");
       const targetFilename = slot.targetFilename.replace(/(\.[^.]+)$/, `__${lane.laneId}$1`);
@@ -507,6 +605,16 @@ export function createGeminiApiGenerationPlan(input: {
 	      };
 	    }),
 	  );
+  const promptQa = evaluateTowerCharacterConceptPromptContract({
+    assetType: input.assetType,
+    phase,
+    slots,
+  });
+
+  if (promptQa.status === "failed") {
+    throw new Error(`Initial character concept prompt contract failed: ${promptQa.failures.map((failure) => `${failure.slotId}:${failure.code}`).join(", ")}`);
+  }
+
   const estimatedCostCents = estimateGeminiApiCostCents({
     billableImages: slots.length,
     costPerImageCents,

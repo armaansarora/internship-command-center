@@ -61,6 +61,18 @@ describe("fail-closed visual cutout compiler", () => {
     expect(PREMIUM_SIMPLE_BACKDROP_CONTRACT.join("\n")).toContain("no cast or contact shadows touching");
   });
 
+  it("allows natural interior negative space for standard Tower character sprites", () => {
+    const contract = createDefaultCutoutContract({
+      assetType: "character",
+      name: "Mara",
+      slotId: "mara-regular-idle",
+    });
+
+    expect(contract.subjectType).toBe("character");
+    expect(contract.topologyType).toBe("standard-character");
+    expect(contract.thresholds.allowInteriorNegativeSpace).toBe(true);
+  });
+
   it("selects benchmark winners by subject type and blocks candidates without model-weight license evidence", () => {
     const selection = selectCutoutModelWinners({
       candidates: [
@@ -274,6 +286,37 @@ describe("fail-closed visual cutout compiler", () => {
     expect(report.badges.alpha).toBe("failed");
     expect(report.badges.crop).toBe("failed");
     expect(report.badges.halo).toBe("failed");
+  });
+
+  it("does not fail edge halo for tiny remnants already below the island-area limit", async () => {
+    const root = mkdtempSync(join(tmpdir(), "tower-cutout-tiny-remnants-"));
+    const source = join(root, "tiny-remnants.png");
+    const width = 200;
+    const height = 200;
+    const pixels = Buffer.alloc(width * height * 4);
+
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const offset = ((y * width) + x) * 4;
+        const body = x >= 50 && x <= 150 && y >= 40 && y <= 160;
+        const tinyRemnant = x === 170 && y >= 80 && y <= 83;
+
+        pixels[offset] = 130;
+        pixels[offset + 1] = 70;
+        pixels[offset + 2] = 60;
+        pixels[offset + 3] = body ? 255 : tinyRemnant ? 120 : 0;
+      }
+    }
+
+    await sharp(pixels, { raw: { width, height, channels: 4 } }).png().toFile(source);
+    const report = await evaluateCutoutAlpha({
+      imagePath: source,
+      thresholds: permissiveCutoutThresholds(),
+    });
+
+    expect(report.status).toBe("passed");
+    expect(report.metrics.haloP99Alpha).toBe(120);
+    expect(report.badges.halo).toBe("passed");
   });
 
   it("does not flag prop loss from a noisy source saliency box when saliency pixels are retained", async () => {

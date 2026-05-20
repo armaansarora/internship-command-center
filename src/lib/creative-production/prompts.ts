@@ -325,7 +325,7 @@ const QUALITY_BAR: Record<CreativeAssetType, string[]> = {
   prop: [
     "high-resolution transparent source with clean alpha",
     "silhouette reads at small and medium app scale",
-    "material style matches tower-flat-plus-depth-v1 unless overridden",
+    "material style matches the Tower prop/object contract unless overridden",
   ],
   "ui-texture": [
     "crisp at the component's maximum supported display scale",
@@ -348,7 +348,7 @@ const QUALITY_BAR: Record<CreativeAssetType, string[]> = {
     "custom art is justified against library-icon alternatives",
   ],
   "marketing-hero": [
-    "image is inspection-worthy, not vague stock-like atmosphere",
+    "image is inspection-worthy, not vague brochure-like atmosphere",
     "first viewport crop remains strong on mobile and desktop",
     "compression target is defined before promotion",
   ],
@@ -368,7 +368,7 @@ const ORGANIZATION_POLICY = [
 ];
 
 const FORBIDDEN_ACTIONS = [
-  "do not bypass initial direction approval; treat it as satisfied only when the request explicitly approves generation with a budget cap",
+  "do not treat initial direction approval as satisfied before a concept board exists; after board approval, continue automatically to the final upload-ready board",
   "do not bypass final upload-ready approval",
   "do not promote low-quality or unreviewed assets",
   "do not hide warnings about softness, cropping, haloing, or manifest drift",

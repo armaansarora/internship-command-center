@@ -55,7 +55,7 @@ Use `npm run art:operate` only when the active asset is a Season 1 character and
 3. Ask what is being added or changed today if the request is not already clear.
 4. For a new or explicitly requested character, create exactly five prompt-only initial concepts with five concurrent lanes. Do not reuse an old reference unless the current run-state says it is the approved identity reference.
 5. Show the five initial designs and wait for Armaan to pick one direction.
-6. After the initial design is approved, generate the production pack: turnaround, outfit variants, expressions, poses, masters, derivatives, QA, and final board.
+6. After the initial design is approved, generate the production pack automatically. The system-wide Tower character minimum is 21 individual source sprites: `regular`, `summer-light`, and `winter-layered` outfit variants across `idle`, `greeting`, `listening`, `thinking`, `talking`, `alert`, and `working` pose/expression states. The engine may add turnarounds or extra references internally, but it cannot stop for final approval until the required 21-slot matrix, masters, derivatives, QA, and final board are complete.
 7. Show only one final upload-ready board for approval.
 8. Promote only after the exact phrase:
 
@@ -72,6 +72,7 @@ Production paid generation is canary-gated. After an initial design is chosen, p
 - Initial character design is exactly five prompt-only images by default.
 - The five initial concepts must run concurrently when using the API path.
 - Production packs happen only after one initial design is chosen.
+- Production packs are not character-specific one-offs. Every approved Tower character uses the shared outfit/pose-expression matrix unless a future documented character contract explicitly extends it.
 - Gemini API runs use Nano Banana 2 through the generation adapter when API spending is explicitly approved.
 - Gemini API `run-api` execution is scheduled through the shared durable slot scheduler. Check `provider-budget-ledger.json`, `api-run-state.json`, inbox receipts, and `slot-leases/` together before assuming a retry is safe.
 - API keys must come from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`; never write keys into repo files.

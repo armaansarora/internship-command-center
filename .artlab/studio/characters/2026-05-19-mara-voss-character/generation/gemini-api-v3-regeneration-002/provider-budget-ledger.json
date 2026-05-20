@@ -1,0 +1,289 @@
+{
+  "schemaVersion": "tower-creative-budget-ledger-v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "approvedBudgetCents": 1000,
+  "createdAt": "2026-05-19T20:29:09.833Z",
+  "updatedAt": "2026-05-19T20:37:06.737Z",
+  "reservations": [
+    {
+      "reservationId": "api-lane-01__initial-character-concept__api-attempt-1__reservation-1",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-01__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "estimateCents": 15.1,
+      "sourceHash": "cb707f3315126857399adf4930614255b22512a494a6ad34e601bb6a1be82ea2",
+      "promptHash": "62093bf3e3a2127d",
+      "referenceHash": "4f53cda18c2baa0c",
+      "status": "spent",
+      "namedRetryAuthorized": false,
+      "createdAt": "2026-05-19T20:29:10.048Z",
+      "updatedAt": "2026-05-19T20:29:37.557Z"
+    },
+    {
+      "reservationId": "api-lane-02__initial-character-concept__api-attempt-1__reservation-2",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-02__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "estimateCents": 15.1,
+      "sourceHash": "f79b6fcb435a2ed6cddc3f12969f071043fca4b5cd61a81c6f717753f11bba6e",
+      "promptHash": "c0044fe7ea843e5e",
+      "referenceHash": "4f53cda18c2baa0c",
+      "status": "spent",
+      "namedRetryAuthorized": false,
+      "createdAt": "2026-05-19T20:29:10.057Z",
+      "updatedAt": "2026-05-19T20:30:09.627Z"
+    },
+    {
+      "reservationId": "api-lane-03__initial-character-concept__api-attempt-1__reservation-3",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-03__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "estimateCents": 15.1,
+      "sourceHash": "e647f6d32f4d3187e87eae8e6a05df051577b5a93bdbf27be4b5a6d05e98941d",
+      "promptHash": "6e9d6fa8c8e39a9a",
+      "referenceHash": "4f53cda18c2baa0c",
+      "status": "spent",
+      "namedRetryAuthorized": false,
+      "createdAt": "2026-05-19T20:29:10.058Z",
+      "updatedAt": "2026-05-19T20:37:06.737Z"
+    },
+    {
+      "reservationId": "api-lane-04__initial-character-concept__api-attempt-1__reservation-4",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-04__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "estimateCents": 15.1,
+      "sourceHash": "7e146eb84c05ecf59d2452af4f6016cb9e955fc80055cd71523ac2a3a6fba478",
+      "promptHash": "b220a02022abaf23",
+      "referenceHash": "4f53cda18c2baa0c",
+      "status": "spent",
+      "namedRetryAuthorized": false,
+      "createdAt": "2026-05-19T20:29:10.058Z",
+      "updatedAt": "2026-05-19T20:29:42.806Z"
+    },
+    {
+      "reservationId": "api-lane-05__initial-character-concept__api-attempt-1__reservation-5",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-05__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "estimateCents": 15.1,
+      "sourceHash": "0a5077d33a415a079560647904a13e76deec0693cd77cac4174cafc6774a6870",
+      "promptHash": "a1dd8cb47f400087",
+      "referenceHash": "4f53cda18c2baa0c",
+      "status": "spent",
+      "namedRetryAuthorized": false,
+      "createdAt": "2026-05-19T20:29:10.058Z",
+      "updatedAt": "2026-05-19T20:29:35.868Z"
+    }
+  ],
+  "receipts": [
+    {
+      "schemaVersion": "tower-creative-budget-receipt-v1",
+      "receiptId": "api-lane-05__initial-character-concept__api-attempt-1__receipt-1",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-05__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "reservationId": "api-lane-05__initial-character-concept__api-attempt-1__reservation-5",
+      "status": "warning",
+      "costEstimateCents": 15.1,
+      "actualCostCents": 15.1,
+      "sourceHash": "0a5077d33a415a079560647904a13e76deec0693cd77cac4174cafc6774a6870",
+      "promptHash": "a1dd8cb47f400087",
+      "referenceHash": "4f53cda18c2baa0c",
+      "outputHash": "e0a7b3408680c8e4679ac06bb7eb524663e715f986394c0ca524b5959e530742",
+      "responseMetadata": {
+        "provider": "gemini-api",
+        "model": "gemini-3.1-flash-image-preview",
+        "phase": "initial-design",
+        "dryRun": false,
+        "capturedFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-05/initial-character-concept/mara-initial-concept__api-lane-05.png",
+        "responseBytes": 19135989,
+        "qualityWarnings": [
+          "source-missing-alpha",
+          "source-mime-image-jpeg"
+        ],
+        "scheduler": "durable-slot-scheduler-v1"
+      },
+      "failureClassification": {
+        "code": "source-missing-alpha",
+        "retryable": true,
+        "paid": true,
+        "severity": "warning"
+      },
+      "startedAt": "2026-05-19T20:29:10.058Z",
+      "completedAt": "2026-05-19T20:29:35.868Z"
+    },
+    {
+      "schemaVersion": "tower-creative-budget-receipt-v1",
+      "receiptId": "api-lane-01__initial-character-concept__api-attempt-1__receipt-2",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-01__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "reservationId": "api-lane-01__initial-character-concept__api-attempt-1__reservation-1",
+      "status": "warning",
+      "costEstimateCents": 15.1,
+      "actualCostCents": 15.1,
+      "sourceHash": "cb707f3315126857399adf4930614255b22512a494a6ad34e601bb6a1be82ea2",
+      "promptHash": "62093bf3e3a2127d",
+      "referenceHash": "4f53cda18c2baa0c",
+      "outputHash": "d25546eca3540d62fc1596bd0b1363f3aef0ecdf24dca474509f37d08bd67e6c",
+      "responseMetadata": {
+        "provider": "gemini-api",
+        "model": "gemini-3.1-flash-image-preview",
+        "phase": "initial-design",
+        "dryRun": false,
+        "capturedFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-01/initial-character-concept/mara-initial-concept__api-lane-01.png",
+        "responseBytes": 18469653,
+        "qualityWarnings": [
+          "source-missing-alpha",
+          "source-mime-image-jpeg"
+        ],
+        "scheduler": "durable-slot-scheduler-v1"
+      },
+      "failureClassification": {
+        "code": "source-missing-alpha",
+        "retryable": true,
+        "paid": true,
+        "severity": "warning"
+      },
+      "startedAt": "2026-05-19T20:29:10.048Z",
+      "completedAt": "2026-05-19T20:29:37.557Z"
+    },
+    {
+      "schemaVersion": "tower-creative-budget-receipt-v1",
+      "receiptId": "api-lane-04__initial-character-concept__api-attempt-1__receipt-3",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-04__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "reservationId": "api-lane-04__initial-character-concept__api-attempt-1__reservation-4",
+      "status": "warning",
+      "costEstimateCents": 15.1,
+      "actualCostCents": 15.1,
+      "sourceHash": "7e146eb84c05ecf59d2452af4f6016cb9e955fc80055cd71523ac2a3a6fba478",
+      "promptHash": "b220a02022abaf23",
+      "referenceHash": "4f53cda18c2baa0c",
+      "outputHash": "7b4a53d9ca799954e35482af8f814e0816154238952cb46ce99e7b3d040ae93b",
+      "responseMetadata": {
+        "provider": "gemini-api",
+        "model": "gemini-3.1-flash-image-preview",
+        "phase": "initial-design",
+        "dryRun": false,
+        "capturedFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-04/initial-character-concept/mara-initial-concept__api-lane-04.png",
+        "responseBytes": 16750157,
+        "qualityWarnings": [
+          "source-missing-alpha",
+          "source-mime-image-jpeg"
+        ],
+        "scheduler": "durable-slot-scheduler-v1"
+      },
+      "failureClassification": {
+        "code": "source-missing-alpha",
+        "retryable": true,
+        "paid": true,
+        "severity": "warning"
+      },
+      "startedAt": "2026-05-19T20:29:10.058Z",
+      "completedAt": "2026-05-19T20:29:42.806Z"
+    },
+    {
+      "schemaVersion": "tower-creative-budget-receipt-v1",
+      "receiptId": "api-lane-02__initial-character-concept__api-attempt-1__receipt-4",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-02__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "reservationId": "api-lane-02__initial-character-concept__api-attempt-1__reservation-2",
+      "status": "warning",
+      "costEstimateCents": 15.1,
+      "actualCostCents": 15.1,
+      "sourceHash": "f79b6fcb435a2ed6cddc3f12969f071043fca4b5cd61a81c6f717753f11bba6e",
+      "promptHash": "c0044fe7ea843e5e",
+      "referenceHash": "4f53cda18c2baa0c",
+      "outputHash": "482388421d5206654b31adde4184da2a6088ca285d006566fd22c7334fb78c99",
+      "responseMetadata": {
+        "provider": "gemini-api",
+        "model": "gemini-3.1-flash-image-preview",
+        "phase": "initial-design",
+        "dryRun": false,
+        "capturedFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-02/initial-character-concept/mara-initial-concept__api-lane-02.png",
+        "responseBytes": 18074412,
+        "qualityWarnings": [
+          "source-missing-alpha",
+          "source-mime-image-jpeg"
+        ],
+        "scheduler": "durable-slot-scheduler-v1"
+      },
+      "failureClassification": {
+        "code": "source-missing-alpha",
+        "retryable": true,
+        "paid": true,
+        "severity": "warning"
+      },
+      "startedAt": "2026-05-19T20:29:10.057Z",
+      "completedAt": "2026-05-19T20:30:09.627Z"
+    },
+    {
+      "schemaVersion": "tower-creative-budget-receipt-v1",
+      "receiptId": "api-lane-03__initial-character-concept__api-attempt-1__receipt-5",
+      "runId": "2026-05-19-mara-voss-character",
+      "slotId": "api-lane-03__initial-character-concept",
+      "attemptId": "api-attempt-1",
+      "providerId": "gemini-api",
+      "providerModel": "gemini-3.1-flash-image-preview",
+      "reservationId": "api-lane-03__initial-character-concept__api-attempt-1__reservation-3",
+      "status": "warning",
+      "costEstimateCents": 15.1,
+      "actualCostCents": 15.1,
+      "sourceHash": "e647f6d32f4d3187e87eae8e6a05df051577b5a93bdbf27be4b5a6d05e98941d",
+      "promptHash": "6e9d6fa8c8e39a9a",
+      "referenceHash": "4f53cda18c2baa0c",
+      "outputHash": "405351fa7251432b492ee749e2b992933220002014b842ecaf8faad13b8d5683",
+      "responseMetadata": {
+        "provider": "gemini-api",
+        "model": "gemini-3.1-flash-image-preview",
+        "phase": "initial-design",
+        "dryRun": false,
+        "capturedFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-19-mara-voss-character/gemini-api-v3-regeneration-002/api-lane-03/initial-character-concept/mara-initial-concept__api-lane-03.png",
+        "responseBytes": 18495625,
+        "qualityWarnings": [
+          "source-missing-alpha",
+          "source-mime-image-jpeg"
+        ],
+        "scheduler": "durable-slot-scheduler-v1"
+      },
+      "failureClassification": {
+        "code": "source-missing-alpha",
+        "retryable": true,
+        "paid": true,
+        "severity": "warning"
+      },
+      "startedAt": "2026-05-19T20:29:10.058Z",
+      "completedAt": "2026-05-19T20:37:06.737Z"
+    }
+  ],
+  "totals": {
+    "estimatedCents": 75.5,
+    "reservedCents": 0,
+    "spentCents": 75.5,
+    "releasedCents": 0,
+    "refundedCents": 0,
+    "remainingCents": 924.5
+  }
+}

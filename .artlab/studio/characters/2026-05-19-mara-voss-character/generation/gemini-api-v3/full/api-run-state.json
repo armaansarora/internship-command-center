@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "tower-gemini-api-run-state-v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "adapter": "gemini-api",
+  "model": "gemini-3.1-flash-image-preview",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-19-mara-voss-character/generation/gemini-api-v3/full/gemini-api-plan.json",
+  "status": "completed-with-warnings",
+  "updatedAt": "2026-05-20T04:48:17.923Z",
+  "selected": [
+    {
+      "slotId": "api-lane-01__mara-regular-working",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-thinking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    }
+  ],
+  "skipped": [
+    {
+      "slotId": "api-lane-01__mara-regular-idle",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-greeting",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-listening",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-thinking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-talking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-regular-alert",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-idle",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-greeting",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-listening",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-thinking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-talking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-alert",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-summer-light-working",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-idle",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-greeting",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-listening",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-talking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-alert",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__mara-winter-layered-working",
+      "reason": "not-in-selected-slot-filter"
+    }
+  ],
+  "blockers": [],
+  "failures": [],
+  "budget": {
+    "budgetCents": 1000,
+    "costPerImageCents": 15.1,
+    "billablePriorImages": 21,
+    "billableNewImages": 2,
+    "projectedCostCents": 347.3
+  }
+}

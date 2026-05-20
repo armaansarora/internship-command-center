@@ -50,6 +50,11 @@ The engine routes characters, backgrounds, screens, UI surfaces, animations, pro
 
 - Drafts and generated sources start in `.artlab`, never in `public/art`.
 - Initial character design uses exactly 5 total prompt-only images unless Armaan changes the rule.
+- Character concept lanes share one locked Tower/Otis-compatible style envelope. Variation happens only through lane design cards for silhouette, age read, hair, face, wardrobe, palette, posture, accessories, personality, and Tower role archetype.
+- Concept QA blocks `direction-review-ready` if style coherence or design diversity fails; repeated same-code failures mark the board `style-failed` and superseded before regeneration.
+- UI, environment, prop, icon, shader, animation, scene, and marketing assets use asset-specific contracts instead of inheriting character style rules.
+- Normal routable requests do not stop for `approve direction` before those images exist; the first normal human gate is the initial concept review board.
+- Before initial images exist, `human-action.json` appears only for true blockers such as missing secrets, budget/provider blocks, active locks, corrupt state, unsafe-to-run, or an unclear brief.
 - Production packs happen only after initial design approval.
 - Final promotion requires Armaan's exact phrase: `approved for app`.
 - Only the coordinator can promote, clean shared state, or update manifests.

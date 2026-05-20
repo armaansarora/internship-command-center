@@ -33,9 +33,12 @@ Use this skill when the user says any close variant of:
    - Parallel mode creates a parent packet plus isolated lane prompts. Dispatch subagents only to individual lane prompts; do not let lane agents edit shared files.
    - Default subagent profile for lane work: GPT-5.5 fast mode, extra-high reasoning (`model: "gpt-5.5"`, `reasoning_effort: "xhigh"` when available).
    - Once the brief is known, use `npm run art:studio -- --asset-type <type> --name "<asset name>" --brief "<brief>" --run-id <safe-run-id>` to create the strict packet.
-6. Wait for the initial direction approval.
-7. Build the strict production packet.
-8. Execute generation, ingest, QA, review board, promotion, and app integration through scripts.
+6. Do not ask for `approve direction` before images exist. If the brief is routable, tooling/key/budget checks pass, and no lock exists, continue automatically through five-lane initial concept generation.
+7. Stop for the first normal human gate only after the five initial concepts and initial concept review board/action manifest exist. At that point `approve direction` means Armaan has seen the board and selected/approved a visual direction; prefer `approve direction: 01` or the exact slot id so the chosen lane is durable.
+8. After that approval, do not stop at `initial-direction-approved`. Treat it as an internal checkpoint: automatically build the strict production packet, generate the approved production pack, run local cutout, run strict QA, and build the final upload-ready board.
+   - For Tower character assets, the default approved production pack is system-wide, not character-specific: exactly 3 outfit variants (`regular`, `summer-light`, `winter-layered`) x 7 pose/expression states (`idle`, `greeting`, `listening`, `thinking`, `talking`, `alert`, `working`) = 21 individual source sprites.
+   - Character final boards are illegal until every required outfit/pose-expression source exists, passes cutout/strict QA, and appears in the action manifest.
+9. Execute generation, ingest, QA, review board, promotion, and app integration through scripts.
    - Normal command surface is only:
      - `npm run art:produce -- --request "<request>"`
      - `npm run art:produce -- --continue <run-id>`
@@ -43,10 +46,11 @@ Use this skill when the user says any close variant of:
      - `npm run art:status`
      - `npm run art:health`
    - Use `npm run art:produce -- --request "<request>" --dry-run` only for a no-provider rehearsal; it writes mock durable state, reserves no budget, and must stop before paid generation.
-   - `art:produce` writes durable `run-state.json`, `progress.json`, `human-action.json`, and append-only `events.jsonl`. Future sessions resume from those files and receipts, not chat history.
+   - `art:produce` writes durable `run-state.json`, `progress.json`, and append-only `events.jsonl`; it writes `human-action.json` only when a true blocker or post-image review gate needs Armaan. Future sessions resume from those files and receipts, not chat history.
+   - Before initial images exist, `human-action.json` is legal only for true blockers: missing secret, budget-blocked, provider-blocked, active lock, corrupt state, unsafe-to-run, or an actually unclear brief.
    - Every human stop must have `human-action.json` with what the engine understood, recommendation, cost impact, risk, allowed responses, and recommended response.
    - `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Do not continue production until the command/test/doc hardening is done.
-   - `art:produce -- --answer <run-id> "<plain English answer>"` records Armaan's answer into durable run files and advances legal gates from files, not chat memory.
+   - `art:produce -- --answer <run-id> "<plain English answer>"` records Armaan's answer into durable run files and advances legal gates from files, not chat memory. When the answer approves a concept board direction, the command continues automatically through production until a true blocker or the final upload-ready board.
    - Do not use Armaan's daily Chrome profile for image generation. First create or reuse an isolated Playwright Chromium session with `npm run art:browser plan --session gemini-art-studio --provider gemini`.
    - If the subscription UI must be opened, use `npm run art:browser open --session gemini-art-studio --provider gemini`; keep downloads inside the isolated session path.
    - Do not open many visible provider tabs. Subscription UI work is capped at two isolated interactive sessions by default. True unattended five-lane image generation requires the Gemini API adapter and explicit billing approval.
@@ -58,7 +62,13 @@ Use this skill when the user says any close variant of:
    - Run `npm run art:generate status` before ingest so missing slots and low-resolution warnings stay visible.
    - For the v3 paid path, use `npm run art:generate prepare-api` then `npm run art:generate run-api`. Gemini API v3 is locked to Nano Banana 2 (`gemini-3.1-flash-image-preview`), five lanes for initial design, 4K by default, cost-capped, and image-only responses.
    - Initial character design is exactly 5 total images: one prompt-only base concept x five concurrent lanes. Do not attach identity reference images or generate multiple poses during initial design.
+   - Character initial concepts must use one shared Tower/Otis character style envelope across all lanes: premium stylized high-detail app/game character art, full-body 9:16 app-sprite framing, controlled Tower lighting, and Professional Scars tone. Do not vary rendering style between lanes.
+   - Character lane variation belongs only in explicit design cards: silhouette, age read, hair shape/length/texture, facial structure, wardrobe category, color palette, posture/body language, accessories/tools, personality read, and Tower role archetype. Do not let all five lanes become the same suit, same short hair, or same executive archetype.
+   - Tower character prompts must avoid realism/style-drift trigger words such as hyperrealistic, photo, actual person, storybook, watercolor, pastel, flat cartoon, corporate stock, and similar wording. Use the locked positive style envelope instead of naming forbidden styles in the generation prompt.
+   - Concept QA must block `direction-review-ready` when style coherence or design diversity fails. If two or more lanes fail the same way, mark the board `style-failed`, supersede the board, harden the prompt builder, and regenerate before asking Armaan to choose.
+   - Do not apply character concept contracts to other asset types. UI assets match the existing Tower product UI/design system; backgrounds/environments match Tower architecture, lighting, mood, and crops; props, icons, shaders, animations, scenes, and marketing visuals use their own asset contracts.
    - Production packs after design approval must use `--phase production-pack`; stale plans without an explicit phase are invalid and must be regenerated.
+   - `initial-direction-approved`, `production-planned`, `full-pack-running`, `repairing`, and `strict-qa` are not normal human stops after concept approval. The next normal human stop is only `final-board-ready`, with an upload-ready board/action manifest and the exact final phrase `approved for app`.
    - Production packs with more than one source slot create a canary plan and a blocked full plan. Run the canary through generation, local cutout, edge refinement, strict cutout doctor, ingest/master/derive/review preview, then `npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>`. The full plan must not run until `canary-gate.json` is `passed` and `cutout-readiness.json` is `ready`.
    - Whole-pack warning retries are banned. Use `npm run art:generate repair-auto --plan <plan>` first, then regenerate only named failed slots with `npm run art:generate run-api --plan <plan> --slots <slot-id-a,slot-id-b>`.
    - API runs are protected by `api-run.lock`, `api-run-state.json`, provider-budget ledgers created by `prepare-api`, clean-slot skipping, warning-slot retries, request timeouts, retryable network failure handling, and budget projection. Use `--max-attempts <n>` for retry caps and `--force-unlock` only after confirming no API run is active.
@@ -67,12 +77,12 @@ Use this skill when the user says any close variant of:
    - If doctor reports warnings or blockers, immediately run `npm run art:generate repair-plan -- --plan <gemini-api-plan.json> --board <review-board.html> --strict`, then `npm run art:generate repair-auto --plan <gemini-api-plan.json>` for safe non-paid repairs, so the next step is an exact per-slot repair packet, not a human guess from raw warnings.
    - Gemini does not reliably return production-ready transparent foregrounds. Production prompts must use the `premium-simple-backdrop-v1` contract, then local `cutout-auto` runs before edge refinement, alpha QA, mastering, derivatives, and review. Production cutout is offline by default and fails closed when the selected model/cache/license evidence is missing.
    - API keys must come only from `GEMINI_API_KEY`, `GOOGLE_API_KEY`, or macOS Keychain service `tower-gemini-api-key`. Never write API keys into repo files, command flags, prompt decks, receipts, screenshots, or run JSON.
-9. Promote only after the exact phrase `approved for app`.
-10. Run the Housekeeping Gate.
+10. Promote only after the exact phrase `approved for app`.
+11. Run the Housekeeping Gate.
     - Use `npm run art:clean` for volatile old character-run binaries when replacing approved art.
-11. Run the Continuous Improvement Gate.
+12. Run the Continuous Improvement Gate.
     - Use `npm run art:studio -- --mode improve` when friction repeats or after major phases. The report writes `continuous-improvement-report.json` and can block production until the engine is upgraded.
-12. Recommend the next best action.
+13. Recommend the next best action.
 
 ## Housekeeping Gate
 
@@ -101,7 +111,7 @@ Use this for every normal Creative Production Engine packet. The default is alwa
    - `parallel/dispatcher-prompt.md`
    - `parallel/lanes/<wave-id-agent-id>/lane-brief.json`
    - `parallel/lanes/<wave-id-agent-id>/agent-prompt.md`
-3. If `parallel-plan.json` says `awaiting-initial-approval`, do not launch the lanes until Armaan approves the initial direction.
+3. Do not use a pre-image `awaiting-initial-approval` gate for normal routable concept work. Five-lane initial concept generation runs automatically; stop only for true blockers before images exist.
 4. Each subagent receives exactly one `agent-prompt.md` and should run GPT-5.5 fast mode with extra-high reasoning when the current client exposes it.
 5. If a lane needs command setup, it runs:
    `npm run art:studio -- --mode lane --lane-brief <lane-brief.json>`
@@ -112,7 +122,7 @@ Use this for every normal Creative Production Engine packet. The default is alwa
 9. The parent coordinator reads all validated lane outputs with:
    `npm run art:studio -- --mode coordinate --parallel-plan <parallel-plan.json>`
 10. Coordinator mode writes `coordinator-review.json`, `coordinator-report.md`, `review-board.html`, and `promotion-gate.json`.
-11. Ask for `approved for app` only when `promotion-gate.json` is `ready-for-final-approval`.
+11. Ask for `approve direction` only after the initial concept board exists; ask for `approved for app` only when `promotion-gate.json` is `ready-for-final-approval`.
 12. The parent coordinator merges the best ideas, runs QA, asks for final approval, and promotes only after `approved for app`.
 13. Volume cannot lower standards: every lane must keep the same source-quality, QA, naming, organization, and approval bar as a single-lane production packet.
 
@@ -140,7 +150,7 @@ npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --re
 npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>
 ```
 
-Initial design is prompt-only and exactly five images total. Once Armaan chooses the design, regenerate the next plan with `--phase production-pack` for outfits, poses, expressions, turnarounds, or app-ready source work. Multi-slot production packs are firewall-protected: the canary plan runs first, `verify-canary` writes the unlock gate, and the full plan remains blocked until the canary passes with the same prompt/reference/source contract.
+Initial design is prompt-only and exactly five images total. Once Armaan chooses the design, regenerate the next plan with `--phase production-pack` for outfits, poses, expressions, turnarounds, or app-ready source work. Character production packs must use the shared Tower matrix of `regular`, `summer-light`, and `winter-layered` outfits across `idle`, `greeting`, `listening`, `thinking`, `talking`, `alert`, and `working` pose/expression states. A one-sprite character board is incomplete, must be superseded, and must continue automatically. Multi-slot production packs are firewall-protected: the canary plan runs first, `verify-canary` writes the unlock gate, and the full plan remains blocked until the canary passes with the same prompt/reference/source contract.
 
 The runner skips slots that already have a clean receipt, retries warning receipts as versioned attempts only when explicitly legal, refuses to overwrite prior attempts, and writes `api-run-state.json` after planning, running, blocking, or failing. Whole-pack warning retries are blocked; use `--slots` for named repairs. A stale lock is a serious event: `--force-unlock` is allowed only after checking no other agent/process is currently generating. Stale API plans without `phase: "initial-design"` or `phase: "production-pack"` are blocked. `completed-with-warnings` means the run is not production-clean.
 

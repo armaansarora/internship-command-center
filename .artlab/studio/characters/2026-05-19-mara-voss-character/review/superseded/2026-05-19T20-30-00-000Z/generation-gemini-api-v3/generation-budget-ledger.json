@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "tower-generation-budget-ledger-v1",
+  "runId": "2026-05-19-mara-voss-character",
+  "assetType": "character",
+  "policy": {
+    "assetType": "character",
+    "initialDesignCents": 100,
+    "canaryCents": 50,
+    "normalCeilingCents": 500,
+    "absoluteStopCents": 600,
+    "wholePackRetryAllowed": false
+  },
+  "entries": [
+    {
+      "phase": "initial-design",
+      "reason": "api-lane-01__initial-character-concept:missing-output, api-lane-02__initial-character-concept:missing-output, api-lane-03__initial-character-concept:missing-output, api-lane-04__initial-character-concept:missing-output, api-lane-05__initial-character-concept:missing-output",
+      "billableImages": 5,
+      "costPerImageCents": 15.1,
+      "slotIds": [
+        "api-lane-01__initial-character-concept",
+        "api-lane-02__initial-character-concept",
+        "api-lane-03__initial-character-concept",
+        "api-lane-04__initial-character-concept",
+        "api-lane-05__initial-character-concept"
+      ],
+      "attempt": 1,
+      "batchScope": "initial-design",
+      "createdAt": "2026-05-19T20:00:02.564Z"
+    }
+  ],
+  "spend": {
+    "totalBillableImages": 5,
+    "totalProjectedCents": 75.5,
+    "remainingNormalCents": 424.5,
+    "remainingHardStopCents": 524.5
+  }
+}

@@ -18,6 +18,7 @@ const PROMOTED_BASELINE_PHASES = new Set<CreativeEnginePhase>([
 
 const HUMAN_ACTION_PHASES = new Set<CreativeEnginePhase>([
   "awaiting-initial-approval",
+  "direction-review-ready",
   "final-board-ready",
   "integration-briefing",
   "app-preview-ready",
@@ -25,6 +26,7 @@ const HUMAN_ACTION_PHASES = new Set<CreativeEnginePhase>([
   "budget-blocked",
   "provider-blocked",
   "repair-required",
+  "style-failed",
   "upgrade-required",
   "unsafe-to-run",
 ]);
@@ -80,9 +82,14 @@ export function renderCreativeRunStatusLines(input: {
   progress: CreativeProgressFile;
   humanAction?: CreativeHumanActionPacket;
 }): string {
+  const selectedConceptLine = input.state.approvedInitialConcept
+    ? [`Approved concept: ${input.state.approvedInitialConcept.slotId}.`]
+    : [];
+
   return [
     `Run ${input.state.runId}: ${input.state.name} (${input.state.assetType})`,
     `Phase: ${humanizePhase(input.state.phase)}`,
+    ...selectedConceptLine,
     `Slots: ${input.progress.completed} completed, ${input.progress.failed} failed, ${input.progress.repairing} repairing, ${input.progress.pending} pending, ${input.progress.runningSlots.length} running.`,
     `Spend: $${(input.progress.spendSoFarCents / 100).toFixed(2)} spent, $${(input.progress.reservedSpendCents / 100).toFixed(2)} reserved.`,
     `Active locks: ${input.progress.activeLocks.length ? input.progress.activeLocks.join(", ") : "none"}.`,

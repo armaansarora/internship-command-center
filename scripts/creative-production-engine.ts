@@ -357,9 +357,37 @@ ${packet.acceptanceChecks.map((check) => `- ${check}`).join("\n")}
 ## Hard Style Notes
 
 - No text, logo, watermark, UI, frame, label, duplicate character, or contact sheet.
-${renderCharacterInitialConceptStyleQualityContract()}
-${renderInitialConceptCharacterCanon(packet)}
+${renderInitialConceptAssetContract(packet)}
 `;
+}
+
+function renderInitialConceptAssetContract(packet: CreativeProductionPacket): string {
+  if (packet.assetType === "character") {
+    return `${renderCharacterInitialConceptStyleQualityContract()}
+${renderInitialConceptCharacterCanon(packet)}`;
+  }
+
+  if (packet.assetType === "ui-texture") {
+    return "## UI Asset Contract\n\n- Match the existing Tower product UI/design system, component density, interaction states, accessibility, and responsive constraints.\n- Do not inherit character style, anatomy, wardrobe, pose, or dialogue-sprite assumptions.\n";
+  }
+
+  if (packet.assetType === "environment") {
+    return "## Environment Asset Contract\n\n- Match Tower architecture, lighting, mood, spatial metaphor, and desktop/mobile crop safety.\n- Do not inherit character rendering or cutout assumptions.\n";
+  }
+
+  if (packet.assetType === "prop") {
+    return "## Prop Asset Contract\n\n- Match Tower object readability, material language, cutout needs, scale, and story function.\n- Do not inherit character anatomy, wardrobe, or pose assumptions.\n";
+  }
+
+  if (packet.assetType === "icon-system") {
+    return "## Icon Asset Contract\n\n- Match Tower product icon grid, stroke/fill rules, semantic states, contrast, and small-size readability.\n- Do not inherit character rendering assumptions.\n";
+  }
+
+  if (packet.assetType === "marketing-hero") {
+    return "## Marketing Visual Contract\n\n- Match the offer, product truth, brand mood, responsive crop, and first-viewport composition.\n- Do not inherit character rendering assumptions unless the brief explicitly features a character.\n";
+  }
+
+  return "## Asset-Type Contract\n\n- Use the contract for this routed asset type; do not inherit character concept rules unless the request is explicitly a character asset.\n";
 }
 
 function renderInitialConceptCharacterCanon(packet: CreativeProductionPacket): string {
@@ -373,7 +401,7 @@ function renderInitialConceptCharacterCanon(packet: CreativeProductionPacket): s
 - Visual DNA: tall soft silhouette, calm vertical posture, burgundy livery or vest-cardigan hybrid, brass keycard ring, guest ledger or bell, warm face, grounded hands near the desk.
 - Palette and world fit: burgundy, brass, ivory, and deep navy; distinct from executive agents and not CEO gold.
 - Required spread: vary age impression, uniform cut, posture, warmth, and silhouette across the five lanes.
-- Forbidden traits: no generic hotel stock-photo smile, no mascot proportions, no bowtie caricature, no magical gatekeeper costume, no superhero styling.
+- Forbidden traits: no generic hotel-brochure grin, no mascot proportions, no bowtie caricature, no magical gatekeeper costume, no superhero styling.
 - No readable text on props; ledger pages, books, and labels must be blank or abstract.
 `;
   }

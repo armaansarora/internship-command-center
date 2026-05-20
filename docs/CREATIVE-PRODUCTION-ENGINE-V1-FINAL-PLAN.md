@@ -2,9 +2,9 @@
 
 **Status:** V1 Final implemented and in certification. Otis is the closed production baseline; this document remains the behavior contract for future assets.
 
-**Goal:** Build the production-ready Creative Production Engine so Armaan can start a vague creative request, approve the initial direction, and then return only for true blockers or the final exact approval phrase `approved for app`.
+**Goal:** Build the production-ready Creative Production Engine so Armaan can start a routable creative request, automatically get the initial concept images, approve a direction only after seeing the concept board, and then return only for true blockers or the final upload-ready board with the exact approval phrase `approved for app`.
 
-**North Star:** `art:produce` becomes a guided creative assistant, not a command maze. Armaan can say "let's make Mara" or "make lobby buttons," see what the engine understood, approve the initial direction, and let the engine own planning, generation, spend control, QA, repair, cleanup, review boards, handoff, and guarded app integration.
+**North Star:** `art:produce` becomes a guided creative assistant, not a command maze. Armaan can say "let's make Mara" or "make lobby buttons," see what the engine understood, get routable initial concepts automatically, approve the direction from the concept board, and let the engine own planning, generation, spend control, QA, repair, cleanup, review boards, handoff, and guarded app integration.
 
 ---
 
@@ -65,30 +65,31 @@ The engine responds in plain English:
 - What it will do next automatically.
 - When it needs Armaan and exactly why.
 
-Every time the engine needs Armaan, it must output and write a standard human action packet:
+Before initial images exist, the engine must write a human action packet only for true blockers such as missing secrets, budget blocks, provider blocks, active locks, corrupt state, unsafe-to-run, or an actually unclear brief. For normal routable work, the first standard human action packet appears after the initial concept board exists:
 
 ```json
 {
   "runId": "mara-v1",
-  "phase": "awaiting-initial-approval",
-  "whatIUnderstood": "You want a Tower character named Mara...",
-  "recommendation": "Generate five initial design directions...",
+  "phase": "direction-review-ready",
+  "whatIUnderstood": "The engine generated exactly five prompt-only initial concept images...",
+  "recommendation": "Inspect the initial concept board and approve one direction only if it establishes the right visual identity.",
   "costImpact": {
     "estimatedCents": 120,
     "reservedCents": 0,
     "additionalApprovalRequired": false
   },
-  "risk": "Low. This only creates drafts in .artlab.",
+  "risk": "Low. This only created drafts in .artlab.",
   "allowedResponses": [
-    "approve direction",
+    "approve direction: 01",
+    "approve direction: <slot id>",
     "revise: <plain English change>",
     "reject/archive"
   ],
-  "recommendedResponse": "approve direction"
+  "recommendedResponse": "approve direction: 01"
 }
 ```
 
-This file lives at:
+When present, this file lives at:
 
 ```text
 .artlab/studio/<run>/human-action.json
@@ -102,10 +103,10 @@ Future Codex/Claude sessions must resume from `human-action.json`, `run-state.js
 
 There are only two normal human approval gates:
 
-1. Initial design direction approval.
-2. Final app promotion approval with the exact phrase `approved for app`.
+1. Initial design direction approval after the five-image concept board exists.
+2. Final app promotion approval with the exact phrase `approved for app`, after the final upload-ready board exists.
 
-The engine must not introduce accidental mini-approval gates. For non-critical choices, it chooses sensible defaults and continues.
+The engine must not introduce accidental mini-approval gates. `approve direction` before images exist is invalid. After a valid `approve direction: 01` or slot-id response, `initial-direction-approved` is an internal checkpoint, not a stop. The engine must continue through production planning, production generation, local cutout, strict QA, and final upload-ready board creation unless a true blocker occurs. For non-critical choices, it chooses sensible defaults and continues.
 
 The engine may stop outside those two gates only for true blockers:
 
@@ -118,6 +119,8 @@ The engine may stop outside those two gates only for true blockers:
 - Strict QA blocker.
 - Promotion firewall blocker.
 - Continuous improvement report marked `upgrade-required`.
+
+Human action between concept approval and the final board is allowed only for those blockers. It must not ask Armaan to approve the same direction again.
 
 ---
 
@@ -343,10 +346,10 @@ The engine must route by asset type before choosing a pipeline.
 
 Contracts:
 
-- Character: identity, outfit, pose, expression, turnarounds, transparent production PNGs, alpha QA, app pose manifest.
-- Background/environment: responsive crops, focal areas, no character cutout requirement, contrast/readability QA, desktop/mobile preview.
-- UI assets/buttons: states, hover/pressed/disabled variants, sizing constraints, accessibility contrast, integration with real components.
-- Props: transparent or contextual variants depending on use, scale reference, shadow/floor contact QA when needed.
+- Character: initial concepts share one locked Tower/Otis character style envelope; lane variation uses explicit design cards only for silhouette, age read, hair, face, wardrobe, palette, posture, accessories, personality, and Tower role archetype. Production then covers identity, outfit, pose, expression, turnarounds, transparent production PNGs, alpha QA, and app pose manifest. The default Tower character production pack is 21 source sprites: 3 outfit variants (`regular`, `summer-light`, `winter-layered`) x 7 pose/expression states (`idle`, `greeting`, `listening`, `thinking`, `talking`, `alert`, `working`). A final board must not become `final-board-ready` until all 21 required slots pass strict QA and are listed in the action manifest.
+- Background/environment: Tower architecture, lighting, mood, spatial metaphor, responsive crops, focal areas, no character cutout requirement, contrast/readability QA, desktop/mobile preview.
+- UI assets/buttons: existing Tower product UI/design system, states, hover/pressed/disabled variants, sizing constraints, accessibility contrast, integration with real components.
+- Props: object readability, Tower material fit, transparent or contextual variants depending on use, scale reference, shadow/floor contact QA when needed.
 - Animations: frames or motion spec, reduced-motion fallback, timing, performance budget, browser verification.
 - Shaders: code artifact, fallback, performance budget, reduced-motion behavior, integration preview.
 - Scenes: composed multi-asset layout, responsive framing, foreground/background layering, app preview.
@@ -354,6 +357,8 @@ Contracts:
 - Marketing visuals: social/hero/export sizes, crop safety, text-safe areas, no production manifest write unless explicitly routed.
 
 Do not force every asset through the character/cutout pipeline.
+
+Initial character concept QA blocks the board before `direction-review-ready` if any lane violates the shared style envelope or the five lanes are not meaningfully different. If two or more lanes fail the same way, the run is `style-failed`; the old board is superseded and the engine must harden/regenerate before asking Armaan to choose.
 
 Implementation starts with one real character vertical slice before broad contract expansion.
 
@@ -401,6 +406,7 @@ Initial concept board:
 - Shows options.
 - Shows what the engine recommends.
 - Shows projected cost before production spending.
+- Exists only after concept QA passes style coherence and design diversity.
 - Allows approve direction, revise brief, regenerate named direction slots, or reject/archive.
 - Does not accept `approved for app`.
 

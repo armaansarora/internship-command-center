@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "tower-creative-next-image-generation-step-v1",
+  "directivePath": ".artlab/studio/characters/2026-05-19-mara-voss-character/initial-concept-directive.md",
+  "referenceImages": [],
+  "sourceRequirements": {
+    "preferredFormat": "png"
+  },
+  "generateFirst": [
+    {
+      "slot": "initial-character-concept",
+      "sourceFilename": "mara-initial-concept.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-19-mara-voss-character/sources/initial-concepts",
+      "reason": "Prompt-only initial Mara character direction. Exactly five lane concepts, no references."
+    }
+  ]
+}

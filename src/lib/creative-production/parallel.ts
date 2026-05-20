@@ -160,7 +160,7 @@ export interface CreativeParallelWavePlan {
   totalLanes: number;
   parallelRoot: string;
   dispatcherPromptPath: string;
-  status: "awaiting-initial-approval" | "ready-for-dispatch";
+  status: "ready-for-dispatch";
   statusReason: string;
   defaultAgentProfile: CreativeParallelAgentProfile;
   laneContract: {
@@ -297,9 +297,7 @@ export function createCreativeParallelWavePlan(input: {
   const lanes: CreativeParallelLane[] = [];
   const initialConceptGenerationApproved =
     input.packet.intake?.initialApprovalStatus === "generation-approved";
-  const status = input.packet.nextAction === "generate-production-sources" || initialConceptGenerationApproved
-    ? "ready-for-dispatch"
-    : "awaiting-initial-approval";
+  const status = "ready-for-dispatch";
 
   for (let waveIndex = 0; waveIndex < waves; waveIndex += 1) {
     for (let agentIndex = 0; agentIndex < agentsPerWave; agentIndex += 1) {
@@ -365,10 +363,10 @@ export function createCreativeParallelWavePlan(input: {
     dispatcherPromptPath: join(parallelRoot, "dispatcher-prompt.md"),
     status,
     statusReason: input.packet.nextAction === "generate-production-sources"
-      ? "Initial direction is already approved, so lane subagents may be dispatched."
+      ? "Initial direction is already approved, so production lane subagents may be dispatched."
       : initialConceptGenerationApproved
         ? "Initial concept generation was explicitly requested with a budget cap, so lane generation may be dispatched."
-        : "Initial direction approval is required before launching lane subagents.",
+        : "Routable concept work does not require pre-image approval; lane generation may be dispatched and must stop at the concept review board.",
     defaultAgentProfile: CREATIVE_PARALLEL_DEFAULT_AGENT_PROFILE,
     laneContract: {
       ownsWriteAccessOnlyInsideLane: true,
@@ -383,7 +381,7 @@ export function createCreativeParallelWavePlan(input: {
       "run lanes in the same wave concurrently only when compute and image-generation limits allow it",
       "do not let lane agents edit shared code, manifests, public/art, or parent packet files",
       "parent session compares lane results and builds one review board or next packet",
-      "human approval remains initial direction approval and final upload-ready approval only",
+      "human approval remains the post-image concept review board and final upload-ready approval only",
     ],
     safetyRules: [
       "each lane owns exactly one isolated outputRoot",
@@ -448,7 +446,6 @@ Use the lane prompts to create a larger, stranger, more useful option set withou
 ${renderList(plan.mergePolicy)}
 
 When dispatching from Codex, prefer \`model: "${plan.defaultAgentProfile.model}"\` with \`reasoning_effort: "${plan.defaultAgentProfile.reasoningEffort}"\`. Use fast execution mode where the current client exposes it.
-${plan.status === "awaiting-initial-approval" ? "\nDo not launch lane subagents yet. First get Armaan's initial direction approval, then use this packet for 5-lane execution.\n" : ""}
 
 ## Safety Rules
 
