@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "tower.creative-review-actions.v1",
+  "runId": "2026-05-20-rafe-calder-character",
+  "boardType": "final-upload-ready",
+  "actions": [
+    {
+      "id": "approve-for-app",
+      "label": "Approve for app",
+      "requiresExactPhrase": "approved for app"
+    },
+    {
+      "id": "regenerate-named-slots",
+      "label": "Regenerate named slots",
+      "requiresExactPhrase": false,
+      "slots": [
+        "api-lane-01__rafe-regular-idle",
+        "api-lane-01__rafe-regular-greeting",
+        "api-lane-01__rafe-regular-listening",
+        "api-lane-01__rafe-regular-thinking",
+        "api-lane-01__rafe-regular-talking",
+        "api-lane-01__rafe-regular-alert",
+        "api-lane-01__rafe-regular-working",
+        "api-lane-01__rafe-summer-light-idle",
+        "api-lane-01__rafe-summer-light-greeting",
+        "api-lane-01__rafe-summer-light-listening",
+        "api-lane-01__rafe-summer-light-thinking",
+        "api-lane-01__rafe-summer-light-talking",
+        "api-lane-01__rafe-summer-light-alert",
+        "api-lane-01__rafe-summer-light-working",
+        "api-lane-01__rafe-winter-layered-idle",
+        "api-lane-01__rafe-winter-layered-greeting",
+        "api-lane-01__rafe-winter-layered-listening",
+        "api-lane-01__rafe-winter-layered-thinking",
+        "api-lane-01__rafe-winter-layered-talking",
+        "api-lane-01__rafe-winter-layered-alert",
+        "api-lane-01__rafe-winter-layered-working"
+      ]
+    },
+    {
+      "id": "revise-brief",
+      "label": "Revise brief",
+      "requiresExactPhrase": false,
+      "input": "plain English"
+    },
+    {
+      "id": "reject-archive",
+      "label": "Reject and archive",
+      "requiresExactPhrase": false
+    }
+  ],
+  "localImagePaths": [
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/rafe__regular__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/rafe__regular__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/rafe__regular__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/rafe__regular__thinking__source-v001__api-lane-01__v002__cutout__repaired-v003.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/rafe__regular__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/rafe__regular__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/rafe__regular__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/rafe__summer-light__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/rafe__summer-light__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/rafe__summer-light__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/rafe__summer-light__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/rafe__summer-light__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/rafe__summer-light__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/rafe__summer-light__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/rafe__winter-layered__idle__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/rafe__winter-layered__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/rafe__winter-layered__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/rafe__winter-layered__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/rafe__winter-layered__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/rafe__winter-layered__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+    "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/rafe__winter-layered__working__source-v001__api-lane-01__cutout__repaired-v002.png"
+  ],
+  "promotesOnAction": false,
+  "previewChecks": [],
+  "forbiddenShortcuts": [
+    "external-image-url",
+    "data-uri"
+  ]
+}

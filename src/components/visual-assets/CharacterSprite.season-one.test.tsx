@@ -18,7 +18,7 @@ describe("CharacterSprite Season 1 fallback", () => {
       expect(html).toContain(`data-character-outfit="regular"`);
       expect(html).not.toContain("undefined");
 
-      if (character.id === "otis" || character.id === "ceo") {
+      if (character.id === "otis" || character.id === "ceo" || character.id === "cro") {
         expect(html).not.toContain(`data-visual-asset-fallback="${character.id}"`);
         expect(html).toContain(character.displayName);
         expect(html).toContain(`${character.id}%2Fregular%2Fidle%403x.webp`);

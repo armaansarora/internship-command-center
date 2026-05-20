@@ -1,78 +1,48 @@
 {
   "schemaVersion": "tower-creative-retention-registry-v1",
-  "updatedAt": "2026-05-19T19:14:17.847Z",
+  "updatedAt": "2026-05-20T18:30:20.914Z",
   "entries": [
     {
-      "path": ".artlab/characters/otis/masters/otis-real-rembg-full-production-v1",
-      "status": "draft",
-      "kind": "unreferenced-intermediate",
-      "runId": "otis-real-rembg-full-production-v1"
-    },
-    {
-      "path": ".artlab/characters/otis/qa/otis-real-rembg-full-production-v1",
-      "status": "draft",
-      "kind": "unreferenced-intermediate",
-      "runId": "otis-real-rembg-full-production-v1"
-    },
-    {
-      "path": ".artlab/characters/otis/staged-public/otis-real-rembg-full-production-v1",
-      "status": "draft",
-      "kind": "unreferenced-intermediate",
-      "runId": "otis-real-rembg-full-production-v1"
-    },
-    {
-      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/incoming",
-      "status": "draft",
-      "kind": "unreferenced-intermediate",
-      "runId": "otis-real-rembg-full-production-v1"
-    },
-    {
-      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/run.json",
+      "path": ".artlab/runs/cro/2026-05-20-rafe-calder-character/run.json",
       "status": "staged",
       "kind": "active-run-state",
-      "runId": "otis-real-rembg-full-production-v1"
+      "runId": "2026-05-20-rafe-calder-character"
     },
     {
-      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/prompts/",
+      "path": ".artlab/runs/cro/2026-05-20-rafe-calder-character/prompts/",
       "status": "staged",
       "kind": "review-board",
-      "runId": "otis-real-rembg-full-production-v1"
+      "runId": "2026-05-20-rafe-calder-character"
     },
     {
-      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/review/final-upload-ready-board.html",
+      "path": ".artlab/runs/cro/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html",
       "status": "staged",
       "kind": "review-board",
-      "runId": "otis-real-rembg-full-production-v1"
+      "runId": "2026-05-20-rafe-calder-character"
     },
     {
-      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/browser-qa/browser-qa.json",
-      "status": "staged",
-      "kind": "qa-evidence",
-      "runId": "otis-real-rembg-full-production-v1"
-    },
-    {
-      "path": ".artlab/runs/otis/otis-real-rembg-full-production-v1/review/final-board-browser-check.png",
-      "status": "staged",
-      "kind": "qa-evidence",
-      "runId": "otis-real-rembg-full-production-v1"
-    },
-    {
-      "path": ".artlab/characters/otis/references/",
+      "path": ".artlab/runs/cro/2026-05-20-rafe-calder-character/browser-qa/browser-qa.json",
       "status": "staged",
       "kind": "review-board",
-      "runId": "otis-real-rembg-full-production-v1"
+      "runId": "2026-05-20-rafe-calder-character"
     },
     {
-      "path": "public/art/lobby/otis/",
+      "path": ".artlab/characters/cro/references/",
+      "status": "staged",
+      "kind": "review-board",
+      "runId": "2026-05-20-rafe-calder-character"
+    },
+    {
+      "path": "public/art/lobby/cro/",
       "status": "approved",
       "kind": "live-public-art",
-      "runId": "otis-real-rembg-full-production-v1"
+      "runId": "2026-05-20-rafe-calder-character"
     },
     {
       "path": "src/lib/visual-assets/approved-character-assets.generated.json",
       "status": "approved",
       "kind": "approved-manifest",
-      "runId": "otis-real-rembg-full-production-v1"
+      "runId": "2026-05-20-rafe-calder-character"
     }
   ]
 }

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "tower-creative-run-state-v1-final",
+  "runId": "2026-05-20-rafe-calder-character",
+  "assetType": "character",
+  "name": "Rafe",
+  "request": "Create the next Season 1 character initial designs for Rafe Calder, characterId cro, based directly on docs/CHARACTER-BIBLE.md Rafe Calder entry and docs/CHARACTER-IMAGE-PROMPTS.md Rafe Calder prompt refs. Generate the five initial prompt-only Tower character concept designs for Armaan to choose from before production. Rafe is the CRO of the War Room: a competitive application demolition expert, forward-leaning athletic silhouette, rolled sleeves, loosened tie or tactical jacket, loud sneakers, red pen or stylus like a weapon, expressive brows, whiteboard/pipeline-board energy, loud useful pressure. Preserve the locked tower-flat-plus-depth-v1 / Professional Scars character style envelope and do not vary rendering style between lanes. Vary only character design axes from the bible: posture, intensity, wardrobe cut, age impression, prop handling, silhouette, personality read. Avoid finance-bro stock pose, luxury flex, generic salesman grin, superhero stance, full tactical armor, fake text, logos, watermarks, photorealism, and celebrity likeness.",
+  "phase": "closed",
+  "gates": [
+    "initial-design-direction",
+    "final-app-promotion"
+  ],
+  "promotionPhrase": "approved for app",
+  "publicArtWritesAllowed": false,
+  "stateRoot": ".artlab/studio",
+  "runRoot": ".artlab/studio/characters/2026-05-20-rafe-calder-character",
+  "createdAt": "2026-05-20T14:12:33.795Z",
+  "updatedAt": "2026-05-20T18:28:52.321Z",
+  "nextLegalAction": "Run is closed; start the next creative asset only when Armaan asks.",
+  "approvedInitialConcept": {
+    "slotId": "api-lane-01__initial-character-concept",
+    "localImagePath": "../../../../inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3/api-lane-01/initial-character-concept/rafe-initial-concept__api-lane-01.png",
+    "absoluteImagePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3/api-lane-01/initial-character-concept/rafe-initial-concept__api-lane-01.png",
+    "actionManifestPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/initial-concept-action-manifest.json",
+    "boardPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/initial-concept-board.html",
+    "approvedAt": "2026-05-20T14:32:38.008Z",
+    "response": "approve direction: 01"
+  },
+  "productionEvidence": {
+    "finalReviewBoardPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html",
+    "finalActionManifestPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/action-manifest.json",
+    "publicArtRoot": "/Users/armaanarora/Documents/The Tower/public/art/war-room/cro",
+    "approvedManifestPath": "/Users/armaanarora/Documents/The Tower/src/lib/visual-assets/approved-character-assets.generated.json",
+    "promotionReceiptPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/promotion/promotion-receipt.json",
+    "promotedAssetCount": 21,
+    "websiteIntegration": "CharacterSprite and AgentCharacterButton consume the generated approved-character manifest at runtime.",
+    "browserQaEvidencePath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/app-browser-qa.json"
+  }
+}

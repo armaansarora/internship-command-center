@@ -238,6 +238,74 @@ const MARA_INITIAL_DESIGN_CARDS: readonly TowerCharacterInitialConceptDesignCard
   },
 ] as const;
 
+const RAFE_INITIAL_DESIGN_CARDS: readonly TowerCharacterInitialConceptDesignCard[] = [
+  {
+    label: "Pipeline Streetfighter",
+    silhouette: "forward-leaning athletic wedge with one shoulder already moving",
+    ageRead: "late 30s",
+    hairShapeLengthTexture: "short dark textured hair pushed back by motion",
+    facialStructure: "sharp brows, square jaw, tired alert eyes, half-smirk held back",
+    wardrobeCategory: "rolled-sleeve shirt, loosened tie, tailored trousers, loud sneakers",
+    colorPalette: "deep navy, white, signal red, scuffed brass",
+    postureBodyLanguage: "one foot forward, torso angled toward the next conversion problem",
+    accessoriesTools: "red pen held like a pointer, folded pipeline card, marker cap",
+    personalityRead: "hungry, allergic to passivity, generous under pressure",
+    towerRoleArchetype: "streetwise conversion fighter",
+  },
+  {
+    label: "Red-Pen Operator",
+    silhouette: "tall narrow slash with active elbows and restless hands",
+    ageRead: "early 40s",
+    hairShapeLengthTexture: "close-cropped curls with a controlled side fade",
+    facialStructure: "long face, expressive brow ridge, skeptical mouth, bright eyes",
+    wardrobeCategory: "tactical sales jacket over crisp shirt, sleeves shoved up",
+    colorPalette: "charcoal, oxblood red, ivory, electric blue accent",
+    postureBodyLanguage: "leaning over an invisible resume line, pen raised mid-correction",
+    accessoriesTools: "red stylus, clipped edit cards, slim tablet angled away from body",
+    personalityRead: "blunt, surgical, impossible to bore",
+    towerRoleArchetype: "application demolition lead",
+  },
+  {
+    label: "Conversion Coach",
+    silhouette: "compact spring-loaded rectangle with open coaching gesture",
+    ageRead: "mid 30s",
+    hairShapeLengthTexture: "messy swept hair with one stubborn front lock",
+    facialStructure: "broad cheekbones, quick grin, intense brows, lived-in under-eye detail",
+    wardrobeCategory: "premium track-jacket blazer hybrid over open-collar work shirt",
+    colorPalette: "ink blue, cream, copper, bright red accent",
+    postureBodyLanguage: "half-crouched encouraging lean, one palm open and one pen ready",
+    accessoriesTools: "small whiteboard marker, red pen, pipeline score card",
+    personalityRead: "competitive, funny, demanding because he cares",
+    towerRoleArchetype: "high-energy conversion coach",
+  },
+  {
+    label: "War-Room Closer",
+    silhouette: "broad-shouldered diagonal stance with sharp triangular jacket shape",
+    ageRead: "early 40s",
+    hairShapeLengthTexture: "short wavy hair with a clean hard part",
+    facialStructure: "strong nose, concentrated eyes, tense smile lines, expressive brows",
+    wardrobeCategory: "cropped tactical jacket, rolled black shirt sleeves, tailored utility pants",
+    colorPalette: "black navy, slate, red, muted brass",
+    postureBodyLanguage: "marker pointed toward a decision, body angled like a countdown",
+    accessoriesTools: "red marker, folded offer sheet, clipped floor badge",
+    personalityRead: "decisive, loud, protective through pressure",
+    towerRoleArchetype: "war-room closing captain",
+  },
+  {
+    label: "Honest Pressure Mentor",
+    silhouette: "looser athletic silhouette with relaxed shoulders and quick hands",
+    ageRead: "mid 40s",
+    hairShapeLengthTexture: "salt-and-pepper textured waves with slight temple volume",
+    facialStructure: "kind tired eyes, strong brow, crooked smile, weathered face detail",
+    wardrobeCategory: "soft tactical cardigan over rolled-sleeve shirt and clean sneakers",
+    colorPalette: "deep green, navy, ivory, red pen accent",
+    postureBodyLanguage: "forward lean softened by one open hand and one correcting pen",
+    accessoriesTools: "red pencil, annotated follow-up card, tiny brass whistle charm",
+    personalityRead: "older-brother honesty, impatient with dead ends, secretly tender",
+    towerRoleArchetype: "protective momentum mentor",
+  },
+] as const;
+
 const GENERIC_CHARACTER_INITIAL_DESIGN_CARDS: readonly TowerCharacterInitialConceptDesignCard[] = [
   {
     label: "Angular Operator",
@@ -319,8 +387,10 @@ export function getTowerCharacterInitialConceptDesignCards(input: {
 
   if (/\bmara\b/.test(name)) return MARA_INITIAL_DESIGN_CARDS;
   if (/\botis\b/.test(name)) return OTIS_INITIAL_DESIGN_CARDS;
+  if (/\brafe\b/.test(name)) return RAFE_INITIAL_DESIGN_CARDS;
   if (/\bmara\b/.test(text)) return MARA_INITIAL_DESIGN_CARDS;
   if (/\botis\b/.test(text)) return OTIS_INITIAL_DESIGN_CARDS;
+  if (/\brafe\b|\bcro\b/.test(text)) return RAFE_INITIAL_DESIGN_CARDS;
 
   return GENERIC_CHARACTER_INITIAL_DESIGN_CARDS;
 }

@@ -1,0 +1,213 @@
+{
+  "schemaVersion": "tower-creative-production-pack-directive-v1",
+  "directivePath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/production-pack-directive.md",
+  "approvedInitialConcept": {
+    "slotId": "api-lane-01__initial-character-concept",
+    "localImagePath": "../../../../inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3/api-lane-01/initial-character-concept/rafe-initial-concept__api-lane-01.png",
+    "absoluteImagePath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3/api-lane-01/initial-character-concept/rafe-initial-concept__api-lane-01.png",
+    "actionManifestPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/initial-concept-action-manifest.json",
+    "boardPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/initial-concept-board.html",
+    "approvedAt": "2026-05-20T14:32:38.008Z",
+    "response": "approve direction: 01"
+  },
+  "referenceImages": [
+    {
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3/api-lane-01/initial-character-concept/rafe-initial-concept__api-lane-01.png",
+      "mimeType": "image/jpeg",
+      "role": "identity-reference"
+    }
+  ],
+  "sourceRequirements": {
+    "minimumLongEdge": 4096,
+    "minimumShortEdge": 2300,
+    "preferredFormat": "png"
+  },
+  "characterPackContract": {
+    "requiredOutfitVariants": [
+      "regular",
+      "summer-light",
+      "winter-layered"
+    ],
+    "requiredPoseStates": [
+      "idle",
+      "greeting",
+      "listening",
+      "thinking",
+      "talking",
+      "alert",
+      "working"
+    ],
+    "requiredSourceImages": 21,
+    "finalBoardRequiresAllSlots": true
+  },
+  "generateFirst": [
+    {
+      "slot": "rafe-regular-idle",
+      "sourceFilename": "rafe__regular__idle__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe regular idle production sprite from the approved initial concept.",
+      "outfitVariant": "regular",
+      "pose": "idle"
+    },
+    {
+      "slot": "rafe-regular-greeting",
+      "sourceFilename": "rafe__regular__greeting__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe regular greeting production sprite from the approved initial concept.",
+      "outfitVariant": "regular",
+      "pose": "greeting"
+    },
+    {
+      "slot": "rafe-regular-listening",
+      "sourceFilename": "rafe__regular__listening__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe regular listening production sprite from the approved initial concept.",
+      "outfitVariant": "regular",
+      "pose": "listening"
+    },
+    {
+      "slot": "rafe-regular-thinking",
+      "sourceFilename": "rafe__regular__thinking__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe regular thinking production sprite from the approved initial concept.",
+      "outfitVariant": "regular",
+      "pose": "thinking"
+    },
+    {
+      "slot": "rafe-regular-talking",
+      "sourceFilename": "rafe__regular__talking__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe regular talking production sprite from the approved initial concept.",
+      "outfitVariant": "regular",
+      "pose": "talking"
+    },
+    {
+      "slot": "rafe-regular-alert",
+      "sourceFilename": "rafe__regular__alert__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe regular alert production sprite from the approved initial concept.",
+      "outfitVariant": "regular",
+      "pose": "alert"
+    },
+    {
+      "slot": "rafe-regular-working",
+      "sourceFilename": "rafe__regular__working__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe regular working production sprite from the approved initial concept.",
+      "outfitVariant": "regular",
+      "pose": "working"
+    },
+    {
+      "slot": "rafe-summer-light-idle",
+      "sourceFilename": "rafe__summer-light__idle__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe summer-light idle production sprite from the approved initial concept.",
+      "outfitVariant": "summer-light",
+      "pose": "idle"
+    },
+    {
+      "slot": "rafe-summer-light-greeting",
+      "sourceFilename": "rafe__summer-light__greeting__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe summer-light greeting production sprite from the approved initial concept.",
+      "outfitVariant": "summer-light",
+      "pose": "greeting"
+    },
+    {
+      "slot": "rafe-summer-light-listening",
+      "sourceFilename": "rafe__summer-light__listening__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe summer-light listening production sprite from the approved initial concept.",
+      "outfitVariant": "summer-light",
+      "pose": "listening"
+    },
+    {
+      "slot": "rafe-summer-light-thinking",
+      "sourceFilename": "rafe__summer-light__thinking__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe summer-light thinking production sprite from the approved initial concept.",
+      "outfitVariant": "summer-light",
+      "pose": "thinking"
+    },
+    {
+      "slot": "rafe-summer-light-talking",
+      "sourceFilename": "rafe__summer-light__talking__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe summer-light talking production sprite from the approved initial concept.",
+      "outfitVariant": "summer-light",
+      "pose": "talking"
+    },
+    {
+      "slot": "rafe-summer-light-alert",
+      "sourceFilename": "rafe__summer-light__alert__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe summer-light alert production sprite from the approved initial concept.",
+      "outfitVariant": "summer-light",
+      "pose": "alert"
+    },
+    {
+      "slot": "rafe-summer-light-working",
+      "sourceFilename": "rafe__summer-light__working__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe summer-light working production sprite from the approved initial concept.",
+      "outfitVariant": "summer-light",
+      "pose": "working"
+    },
+    {
+      "slot": "rafe-winter-layered-idle",
+      "sourceFilename": "rafe__winter-layered__idle__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe winter-layered idle production sprite from the approved initial concept.",
+      "outfitVariant": "winter-layered",
+      "pose": "idle"
+    },
+    {
+      "slot": "rafe-winter-layered-greeting",
+      "sourceFilename": "rafe__winter-layered__greeting__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe winter-layered greeting production sprite from the approved initial concept.",
+      "outfitVariant": "winter-layered",
+      "pose": "greeting"
+    },
+    {
+      "slot": "rafe-winter-layered-listening",
+      "sourceFilename": "rafe__winter-layered__listening__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe winter-layered listening production sprite from the approved initial concept.",
+      "outfitVariant": "winter-layered",
+      "pose": "listening"
+    },
+    {
+      "slot": "rafe-winter-layered-thinking",
+      "sourceFilename": "rafe__winter-layered__thinking__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe winter-layered thinking production sprite from the approved initial concept.",
+      "outfitVariant": "winter-layered",
+      "pose": "thinking"
+    },
+    {
+      "slot": "rafe-winter-layered-talking",
+      "sourceFilename": "rafe__winter-layered__talking__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe winter-layered talking production sprite from the approved initial concept.",
+      "outfitVariant": "winter-layered",
+      "pose": "talking"
+    },
+    {
+      "slot": "rafe-winter-layered-alert",
+      "sourceFilename": "rafe__winter-layered__alert__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe winter-layered alert production sprite from the approved initial concept.",
+      "outfitVariant": "winter-layered",
+      "pose": "alert"
+    },
+    {
+      "slot": "rafe-winter-layered-working",
+      "sourceFilename": "rafe__winter-layered__working__source-v001.png",
+      "targetDirectory": ".artlab/studio/characters/2026-05-20-rafe-calder-character/sources/production",
+      "reason": "Final app-ready Rafe winter-layered working production sprite from the approved initial concept.",
+      "outfitVariant": "winter-layered",
+      "pose": "working"
+    }
+  ]
+}

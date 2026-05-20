@@ -2602,5 +2602,1307 @@
     },
     "qaStatus": "passed",
     "promotionDate": "2026-05-20T05:11:26.315Z"
+  },
+  {
+    "id": "cro-regular-idle",
+    "kind": "character",
+    "src": "/art/war-room/cro/regular/idle.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder regular idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, regular outfit, idle pose.",
+    "characterId": "cro",
+    "outfitVariant": "regular",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/regular/idle.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/regular/idle@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/regular/idle@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:ba89c4b199b6ab48fc2bddff94ccf2c07447ec5d1bbe384f3d20c83ce9016dbb",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5511
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-regular-greeting",
+    "kind": "character",
+    "src": "/art/war-room/cro/regular/greeting.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder regular greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, regular outfit, greeting pose.",
+    "characterId": "cro",
+    "outfitVariant": "regular",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/regular/greeting.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/regular/greeting@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/regular/greeting@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:390d62da7ae5dd9aa0e2c9081047ab80cc20aba03c01b1d2b7d12bedd2ca72ef",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-regular-listening",
+    "kind": "character",
+    "src": "/art/war-room/cro/regular/listening.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder regular listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, regular outfit, listening pose.",
+    "characterId": "cro",
+    "outfitVariant": "regular",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/regular/listening.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/regular/listening@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/regular/listening@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:7bfe56291b56755e86696806c11490e494913a699710ec489e09042671373bda",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-regular-thinking",
+    "kind": "character",
+    "src": "/art/war-room/cro/regular/thinking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder regular thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, regular outfit, thinking pose.",
+    "characterId": "cro",
+    "outfitVariant": "regular",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/regular/thinking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/regular/thinking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/regular/thinking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:f88a1a8b914f906ec0119dd9be2493bc470528d0c80e3332f16cfeccb1adc17d",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5513
+    },
+    "masterResolution": {
+      "width": 2282,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-regular-talking",
+    "kind": "character",
+    "src": "/art/war-room/cro/regular/talking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder regular talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, regular outfit, talking pose.",
+    "characterId": "cro",
+    "outfitVariant": "regular",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/regular/talking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/regular/talking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/regular/talking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:22752d3ad51feb31b45c0c7d1093de25b7be17e6eda5efb6e73f246f9e073f36",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5511
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-regular-alert",
+    "kind": "character",
+    "src": "/art/war-room/cro/regular/alert.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder regular alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, regular outfit, alert pose.",
+    "characterId": "cro",
+    "outfitVariant": "regular",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/regular/alert.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/regular/alert@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/regular/alert@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:7384439194ee05739de9cd1d9cb2b6ae1fe508a736df8740a818661407ce23d8",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-regular-working",
+    "kind": "character",
+    "src": "/art/war-room/cro/regular/working.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder regular working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, regular outfit, working pose.",
+    "characterId": "cro",
+    "outfitVariant": "regular",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/regular/working.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/regular/working@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/regular/working@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:1fa2191e31229a6d99299cfd54548a2976ae82840a16f9b08dc15f11e6f4ab91",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-summer-light-idle",
+    "kind": "character",
+    "src": "/art/war-room/cro/summer-light/idle.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder summer-light idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, summer-light outfit, idle pose.",
+    "characterId": "cro",
+    "outfitVariant": "summer-light",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/summer-light/idle.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/summer-light/idle@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/summer-light/idle@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:d61cbff63df221f60d60d1828b83d543bf0f84d6ad202dafb09526eab7b52653",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5511
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-summer-light-greeting",
+    "kind": "character",
+    "src": "/art/war-room/cro/summer-light/greeting.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder summer-light greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, summer-light outfit, greeting pose.",
+    "characterId": "cro",
+    "outfitVariant": "summer-light",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/summer-light/greeting.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/summer-light/greeting@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/summer-light/greeting@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:b9e832153b578ef8d3729dfccdba738ecb9496202ede6781cd6521bc9e7157f9",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-summer-light-listening",
+    "kind": "character",
+    "src": "/art/war-room/cro/summer-light/listening.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder summer-light listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, summer-light outfit, listening pose.",
+    "characterId": "cro",
+    "outfitVariant": "summer-light",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/summer-light/listening.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/summer-light/listening@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/summer-light/listening@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:5498cac66ab6505d41dd8072432d1e69b9de6d99355b816c4bd8b8bbb68e6362",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5510
+    },
+    "masterResolution": {
+      "width": 2284,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-summer-light-thinking",
+    "kind": "character",
+    "src": "/art/war-room/cro/summer-light/thinking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder summer-light thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, summer-light outfit, thinking pose.",
+    "characterId": "cro",
+    "outfitVariant": "summer-light",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/summer-light/thinking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/summer-light/thinking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/summer-light/thinking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:1a0860d42ce74ad1914fa11b56366dce2824425817aaa30a06ddccbdebaab1cc",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-summer-light-talking",
+    "kind": "character",
+    "src": "/art/war-room/cro/summer-light/talking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder summer-light talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, summer-light outfit, talking pose.",
+    "characterId": "cro",
+    "outfitVariant": "summer-light",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/summer-light/talking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/summer-light/talking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/summer-light/talking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:6d1247a3857784e54bce398e96a2143bcd05a4ef08a93ece51f5ee840e0d44ad",
+    "sourceResolution": {
+      "width": 3115,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2315,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-summer-light-alert",
+    "kind": "character",
+    "src": "/art/war-room/cro/summer-light/alert.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder summer-light alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, summer-light outfit, alert pose.",
+    "characterId": "cro",
+    "outfitVariant": "summer-light",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/summer-light/alert.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/summer-light/alert@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/summer-light/alert@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:2b9bd6d95e5823dc154529ebf228cd525c4ea4ac6e222965b2758822c07d90e4",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-summer-light-working",
+    "kind": "character",
+    "src": "/art/war-room/cro/summer-light/working.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder summer-light working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, summer-light outfit, working pose.",
+    "characterId": "cro",
+    "outfitVariant": "summer-light",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/summer-light/working.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/summer-light/working@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/summer-light/working@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:26d1786bb3f41ae1df64451ea6802a92a47d4c446ac24a887f1e3a8445636937",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-winter-layered-idle",
+    "kind": "character",
+    "src": "/art/war-room/cro/winter-layered/idle.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder winter-layered idle production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, winter-layered outfit, idle pose.",
+    "characterId": "cro",
+    "outfitVariant": "winter-layered",
+    "pose": "idle",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/winter-layered/idle.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/winter-layered/idle@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/winter-layered/idle@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:9750b8aa27fb1531336a3dd1715cde80c31679fefefaa3f7c88bb1e242dbdc16",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5514
+    },
+    "masterResolution": {
+      "width": 2282,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-winter-layered-greeting",
+    "kind": "character",
+    "src": "/art/war-room/cro/winter-layered/greeting.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder winter-layered greeting production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, winter-layered outfit, greeting pose.",
+    "characterId": "cro",
+    "outfitVariant": "winter-layered",
+    "pose": "greeting",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/winter-layered/greeting.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/winter-layered/greeting@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/winter-layered/greeting@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:c7b1cd163f6616975811099e8d78efcc354314fa370d99208615383795ac1e18",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-winter-layered-listening",
+    "kind": "character",
+    "src": "/art/war-room/cro/winter-layered/listening.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder winter-layered listening production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, winter-layered outfit, listening pose.",
+    "characterId": "cro",
+    "outfitVariant": "winter-layered",
+    "pose": "listening",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/winter-layered/listening.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/winter-layered/listening@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/winter-layered/listening@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:123ec54e2ce67c34758245f55d5e1e1255b7b8084b4769af2c4e8ff1be61cf37",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-winter-layered-thinking",
+    "kind": "character",
+    "src": "/art/war-room/cro/winter-layered/thinking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder winter-layered thinking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, winter-layered outfit, thinking pose.",
+    "characterId": "cro",
+    "outfitVariant": "winter-layered",
+    "pose": "thinking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/winter-layered/thinking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/winter-layered/thinking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/winter-layered/thinking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:4786c00a8b5314ac12db1f99e8054851ce2d969082af9a6ad16d72745633035e",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5511
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-winter-layered-talking",
+    "kind": "character",
+    "src": "/art/war-room/cro/winter-layered/talking.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder winter-layered talking production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, winter-layered outfit, talking pose.",
+    "characterId": "cro",
+    "outfitVariant": "winter-layered",
+    "pose": "talking",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/winter-layered/talking.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/winter-layered/talking@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/winter-layered/talking@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:12d34a14a258a3a24211dfb32242b0a00fdc50c100d06b2e51ed3bbd6f440b6e",
+    "sourceResolution": {
+      "width": 3117,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2316,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-winter-layered-alert",
+    "kind": "character",
+    "src": "/art/war-room/cro/winter-layered/alert.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder winter-layered alert production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, winter-layered outfit, alert pose.",
+    "characterId": "cro",
+    "outfitVariant": "winter-layered",
+    "pose": "alert",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/winter-layered/alert.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/winter-layered/alert@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/winter-layered/alert@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:37395de9021c15dc58b9b41c1b74a0b44c7c2c227d13fbf25cdc7d25549142de",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5511
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "id": "cro-winter-layered-working",
+    "kind": "character",
+    "src": "/art/war-room/cro/winter-layered/working.webp",
+    "width": 160,
+    "height": 280,
+    "role": "Rafe Calder winter-layered working production sprite",
+    "approvalStatus": "approved",
+    "promptRef": "art-bible:rafe-calder-pose-pack-v1",
+    "alt": "Rafe Calder, Chief Revenue Officer, winter-layered outfit, working pose.",
+    "characterId": "cro",
+    "outfitVariant": "winter-layered",
+    "pose": "working",
+    "masterQuality": "4k-source-approved",
+    "sourceFrame": {
+      "width": 2341,
+      "height": 4096
+    },
+    "displayFrame": {
+      "width": 160,
+      "height": 280
+    },
+    "safePadding": {
+      "top": 7,
+      "right": 10,
+      "bottom": 8,
+      "left": 10
+    },
+    "maxDisplayScale": 3,
+    "artDirectionNotes": "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop.",
+    "motionProfile": "war-room-kinetic",
+    "renditions": {
+      "default": {
+        "src": "/art/war-room/cro/winter-layered/working.webp",
+        "width": 160,
+        "height": 280
+      },
+      "retina2x": {
+        "src": "/art/war-room/cro/winter-layered/working@2x.webp",
+        "width": 320,
+        "height": 560
+      },
+      "retina3x": {
+        "src": "/art/war-room/cro/winter-layered/working@3x.webp",
+        "width": 480,
+        "height": 840
+      }
+    },
+    "sourceRunId": "2026-05-20-rafe-calder-character",
+    "assetVersion": "cro-v1",
+    "checksum": "sha256:175e6d5dc7858a9afadb65b220392cfe9b9e8dd263cbe7581a33f49d288fe07c",
+    "sourceResolution": {
+      "width": 3072,
+      "height": 5512
+    },
+    "masterResolution": {
+      "width": 2283,
+      "height": 4096
+    },
+    "qaStatus": "passed",
+    "promotionDate": "2026-05-20T18:11:09.350Z"
   }
 ]

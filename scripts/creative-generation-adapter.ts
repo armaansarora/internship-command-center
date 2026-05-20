@@ -2524,7 +2524,12 @@ async function readLatestCutoutReceipt(input: {
 
   return receipts
     .filter((receipt) => !receipt.slotId || receipt.slotId === input.slotId)
-    .sort((left, right) => right.order - left.order)[0];
+    .sort((left, right) => {
+      const attemptDelta = (right.sourceAttempt ?? 0) - (left.sourceAttempt ?? 0);
+      if (attemptDelta !== 0) return attemptDelta;
+
+      return right.order - left.order;
+    })[0];
 }
 
 async function extractAlphaMaskHash(imagePath: string): Promise<string> {

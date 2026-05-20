@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "tower-creative-progress-v1",
+  "runId": "2026-05-20-rafe-calder-character",
+  "phase": "closed",
+  "runningSlots": [],
+  "completed": 21,
+  "failed": 0,
+  "repairing": 0,
+  "pending": 0,
+  "spendSoFarCents": 75.5,
+  "reservedSpendCents": 0,
+  "activeLocks": [],
+  "nextAutomaticStep": "Run is closed. The pipeline is clean and ready for the next explicit creative request.",
+  "updatedAt": "2026-05-20T18:28:52.321Z"
+}

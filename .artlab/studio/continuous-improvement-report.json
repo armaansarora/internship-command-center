@@ -1,16 +1,16 @@
 {
   "schemaVersion": "tower-creative-continuous-improvement-report-v1",
-  "generatedAt": "2026-05-20T05:16:38.000Z",
+  "generatedAt": "2026-05-20T18:29:20.117Z",
   "ledgerPath": ".artlab/studio/ledgers/improvements.jsonl",
-  "runsObserved": 2,
-  "entriesObserved": 25,
-  "entriesSinceLastUpgrade": 3,
-  "maturityStage": "learning",
+  "runsObserved": 4,
+  "entriesObserved": 28,
+  "entriesSinceLastUpgrade": 6,
+  "maturityStage": "watch",
   "upgradeRequired": false,
   "repeatedCategories": [
     {
       "category": "workflow",
-      "count": 3
+      "count": 5
     }
   ],
   "highSeverityFindings": [],

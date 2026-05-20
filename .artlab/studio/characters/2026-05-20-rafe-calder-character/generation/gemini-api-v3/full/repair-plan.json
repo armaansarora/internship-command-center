@@ -1,0 +1,529 @@
+{
+  "schemaVersion": "tower-creative-generation-repair-plan-v1",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json",
+  "boardPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html",
+  "repairPlanPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/repair-plan.json",
+  "runId": "2026-05-20-rafe-calder-character",
+  "adapter": "gemini-api",
+  "assetType": "character",
+  "status": "clean",
+  "strict": true,
+  "createdAt": "2026-05-20T15:27:47.142Z",
+  "summary": {
+    "totalSlots": 21,
+    "cleanSlots": 21,
+    "repairRequiredSlots": 0,
+    "boardIssues": 0,
+    "repeatedFailureCodes": []
+  },
+  "slots": [
+    {
+      "slotId": "api-lane-01__rafe-regular-idle",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/rafe__regular__idle__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-greeting",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/rafe__regular__greeting__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-listening",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/rafe__regular__listening__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-thinking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/rafe__regular__thinking__source-v001__api-lane-01__v002.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/api-receipt-v002.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/cutout-receipt-v003.json",
+      "latestAttempt": 2,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-talking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/rafe__regular__talking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-alert",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/rafe__regular__alert__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-working",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/rafe__regular__working__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-idle",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/rafe__summer-light__idle__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-greeting",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/rafe__summer-light__greeting__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-listening",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/rafe__summer-light__listening__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-thinking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/rafe__summer-light__thinking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-talking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/rafe__summer-light__talking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-alert",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/rafe__summer-light__alert__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-working",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/rafe__summer-light__working__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-idle",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/rafe__winter-layered__idle__source-v001__api-lane-01__v002.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/api-receipt-v002.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/cutout-receipt-v002.json",
+      "latestAttempt": 2,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-greeting",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/rafe__winter-layered__greeting__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-listening",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/rafe__winter-layered__listening__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-thinking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/rafe__winter-layered__thinking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-talking",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/rafe__winter-layered__talking__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-alert",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/rafe__winter-layered__alert__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-working",
+      "status": "clean",
+      "currentFile": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/rafe__winter-layered__working__source-v001__api-lane-01.png",
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/api-receipt.json",
+      "latestCutoutReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/cutout-receipt-v002.json",
+      "latestAttempt": 1,
+      "qualityWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ],
+      "actionableQualityWarnings": [],
+      "cutoutAlreadyPassed": true,
+      "cutoutFailureCodes": [],
+      "imageIssues": [],
+      "recommendedAction": {
+        "type": "none",
+        "reason": "The latest slot has no file or receipt issues."
+      },
+      "afterRepair": [
+        "npm run art:generate -- cutout-doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --strict",
+        "npm run art:generate -- doctor --plan \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json\" --board \"/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html\" --strict"
+      ]
+    }
+  ],
+  "boardActions": [],
+  "nextCommands": [
+    "No repair is required. Continue to the next approval or promotion gate."
+  ]
+}

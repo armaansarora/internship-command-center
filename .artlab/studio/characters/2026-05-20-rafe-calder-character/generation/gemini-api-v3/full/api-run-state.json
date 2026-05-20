@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "tower-gemini-api-run-state-v1",
+  "runId": "2026-05-20-rafe-calder-character",
+  "adapter": "gemini-api",
+  "model": "gemini-3.1-flash-image-preview",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json",
+  "status": "completed-with-warnings",
+  "updatedAt": "2026-05-20T15:19:05.374Z",
+  "selected": [
+    {
+      "slotId": "api-lane-01__rafe-regular-thinking",
+      "attempt": 2,
+      "reason": "retry-warning-receipt"
+    }
+  ],
+  "skipped": [
+    {
+      "slotId": "api-lane-01__rafe-regular-idle",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-greeting",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-listening",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-talking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-alert",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-working",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-idle",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-greeting",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-listening",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-thinking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-talking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-alert",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-working",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-idle",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-greeting",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-listening",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-thinking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-talking",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-alert",
+      "reason": "not-in-selected-slot-filter"
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-working",
+      "reason": "not-in-selected-slot-filter"
+    }
+  ],
+  "blockers": [],
+  "failures": [],
+  "budget": {
+    "budgetCents": 1000,
+    "costPerImageCents": 15.1,
+    "billablePriorImages": 22,
+    "billableNewImages": 1,
+    "projectedCostCents": 347.3
+  }
+}

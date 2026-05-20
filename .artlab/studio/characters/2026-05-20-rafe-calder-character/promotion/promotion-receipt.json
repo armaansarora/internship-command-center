@@ -1,0 +1,453 @@
+{
+  "schemaVersion": "tower-creative-character-promotion-receipt-v1",
+  "runId": "2026-05-20-rafe-calder-character",
+  "characterId": "cro",
+  "approvalPhrase": "approved for app",
+  "promotedAt": "2026-05-20T18:11:09.350Z",
+  "strictAssetDoctorPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/asset-doctor.json",
+  "finalActionManifestPath": ".artlab/studio/characters/2026-05-20-rafe-calder-character/review/action-manifest.json",
+  "approvedManifestPath": "/Users/armaanarora/Documents/The Tower/src/lib/visual-assets/approved-character-assets.generated.json",
+  "promotedAssets": [
+    {
+      "id": "cro-regular-idle",
+      "src": "/art/war-room/cro/regular/idle.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/regular/idle.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/regular/idle@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/regular/idle@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-regular-greeting",
+      "src": "/art/war-room/cro/regular/greeting.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/regular/greeting.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/regular/greeting@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/regular/greeting@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-regular-listening",
+      "src": "/art/war-room/cro/regular/listening.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/regular/listening.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/regular/listening@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/regular/listening@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-regular-thinking",
+      "src": "/art/war-room/cro/regular/thinking.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/regular/thinking.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/regular/thinking@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/regular/thinking@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-regular-talking",
+      "src": "/art/war-room/cro/regular/talking.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/regular/talking.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/regular/talking@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/regular/talking@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-regular-alert",
+      "src": "/art/war-room/cro/regular/alert.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/regular/alert.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/regular/alert@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/regular/alert@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-regular-working",
+      "src": "/art/war-room/cro/regular/working.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/regular/working.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/regular/working@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/regular/working@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-summer-light-idle",
+      "src": "/art/war-room/cro/summer-light/idle.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/summer-light/idle.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/summer-light/idle@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/summer-light/idle@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-summer-light-greeting",
+      "src": "/art/war-room/cro/summer-light/greeting.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/summer-light/greeting.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/summer-light/greeting@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/summer-light/greeting@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-summer-light-listening",
+      "src": "/art/war-room/cro/summer-light/listening.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/summer-light/listening.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/summer-light/listening@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/summer-light/listening@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-summer-light-thinking",
+      "src": "/art/war-room/cro/summer-light/thinking.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/summer-light/thinking.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/summer-light/thinking@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/summer-light/thinking@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-summer-light-talking",
+      "src": "/art/war-room/cro/summer-light/talking.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/summer-light/talking.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/summer-light/talking@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/summer-light/talking@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-summer-light-alert",
+      "src": "/art/war-room/cro/summer-light/alert.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/summer-light/alert.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/summer-light/alert@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/summer-light/alert@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-summer-light-working",
+      "src": "/art/war-room/cro/summer-light/working.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/summer-light/working.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/summer-light/working@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/summer-light/working@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-winter-layered-idle",
+      "src": "/art/war-room/cro/winter-layered/idle.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/winter-layered/idle.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/winter-layered/idle@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/winter-layered/idle@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-winter-layered-greeting",
+      "src": "/art/war-room/cro/winter-layered/greeting.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/winter-layered/greeting.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/winter-layered/greeting@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/winter-layered/greeting@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-winter-layered-listening",
+      "src": "/art/war-room/cro/winter-layered/listening.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/winter-layered/listening.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/winter-layered/listening@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/winter-layered/listening@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-winter-layered-thinking",
+      "src": "/art/war-room/cro/winter-layered/thinking.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/winter-layered/thinking.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/winter-layered/thinking@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/winter-layered/thinking@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-winter-layered-talking",
+      "src": "/art/war-room/cro/winter-layered/talking.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/winter-layered/talking.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/winter-layered/talking@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/winter-layered/talking@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-winter-layered-alert",
+      "src": "/art/war-room/cro/winter-layered/alert.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/winter-layered/alert.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/winter-layered/alert@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/winter-layered/alert@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    },
+    {
+      "id": "cro-winter-layered-working",
+      "src": "/art/war-room/cro/winter-layered/working.webp",
+      "renditions": {
+        "default": {
+          "src": "/art/war-room/cro/winter-layered/working.webp",
+          "width": 160,
+          "height": 280
+        },
+        "retina2x": {
+          "src": "/art/war-room/cro/winter-layered/working@2x.webp",
+          "width": 320,
+          "height": 560
+        },
+        "retina3x": {
+          "src": "/art/war-room/cro/winter-layered/working@3x.webp",
+          "width": 480,
+          "height": 840
+        }
+      }
+    }
+  ]
+}

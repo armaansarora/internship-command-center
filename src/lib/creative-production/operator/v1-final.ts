@@ -310,6 +310,10 @@ function titleCase(value: string): string {
     .join(" ");
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function inferAssetType(request: string): CreativeAssetType {
   const normalized = request.toLowerCase();
 
@@ -327,11 +331,47 @@ function inferAssetType(request: string): CreativeAssetType {
 }
 
 function inferName(request: string, assetType: CreativeAssetType): string {
-  if (/\botis\b/i.test(request)) return "Otis";
-  if (/\bmara\b/i.test(request)) return "Mara";
-  if (/\brafe\b/i.test(request)) return "Rafe";
+  if (assetType === "character") {
+    const matchedCharacter = inferSeasonOneCharacterName(request);
+
+    if (matchedCharacter) return matchedCharacter;
+  }
 
   return titleCase(request.replace(/[.?!]+$/g, "").trim()) || titleCase(assetType);
+}
+
+function inferSeasonOneCharacterName(request: string): string | undefined {
+  const titleTokens = new Set(["dr", "dr."]);
+  const displayToken = (displayName: string): string => {
+    const parts = displayName.split(/\s+/).filter(Boolean);
+    const firstNameIndex = parts.findIndex((part) => !titleTokens.has(part.toLowerCase()));
+
+    return parts[firstNameIndex === -1 ? 0 : firstNameIndex] ?? displayName;
+  };
+  const wordPattern = (value: string): RegExp => new RegExp(`\\b${escapeRegExp(value)}\\b(?!-compatible)`, "i");
+  let bestMatch: { name: string; score: number; index: number } | undefined;
+
+  SEASON_ONE_CHARACTER_METADATA.forEach((character, index) => {
+    const firstName = displayToken(character.displayName);
+    const lastName = character.displayName.split(/\s+/).filter(Boolean).at(-1) ?? character.displayName;
+    const signals: Array<{ score: number; pattern: RegExp }> = [
+      { score: 100, pattern: wordPattern(character.displayName) },
+      { score: 95, pattern: new RegExp(`\\b(?:character\\s*id|character-id|character_id)\\s*:?\\s*${escapeRegExp(character.id)}\\b`, "i") },
+      { score: 90, pattern: wordPattern(character.id) },
+      { score: 85, pattern: wordPattern(character.shortLabel) },
+      { score: 75, pattern: wordPattern(character.title) },
+      { score: 60, pattern: wordPattern(firstName) },
+      { score: 45, pattern: wordPattern(lastName) },
+    ];
+    const match = signals.find((signal) => signal.pattern.test(request));
+
+    if (!match) return;
+    if (!bestMatch || match.score > bestMatch.score || (match.score === bestMatch.score && index < bestMatch.index)) {
+      bestMatch = { name: firstName, score: match.score, index };
+    }
+  });
+
+  return bestMatch?.name;
 }
 
 function assetRootName(assetType: CreativeAssetType): string {
@@ -752,7 +792,29 @@ function initialConceptTargetFilename(name: string): string {
   return `${slugify(name)}-initial-concept.png`;
 }
 
+function sanitizeCharacterConceptDirectiveText(value: string): string {
+  return value
+    .replace(/\bhyperreal(?:istic|ism)?\b/gi, "lens-captured style drift")
+    .replace(/\bphotoreal(?:istic|ism)?\b/gi, "lens-captured style drift")
+    .replace(/\bphotograph(?:y|ic|er|s)?\b/gi, "lens-captured reference")
+    .replace(/\bphoto\b/gi, "lens-captured reference")
+    .replace(/\bactual person\b/gi, "copied human likeness")
+    .replace(/\breal person\b/gi, "copied human likeness")
+    .replace(/\bperson-like\b/gi, "copied-human-likeness")
+    .replace(/\bstorybook\b/gi, "nursery-book illustration")
+    .replace(/\bwatercolor\b/gi, "washed pigment media")
+    .replace(/\bpastel\b/gi, "powder-soft color wash")
+    .replace(/\bflat cartoon\b/gi, "plain vector toon simplification")
+    .replace(/\bcorporate stock\b/gi, "generic office asset")
+    .replace(/\bstock photo\b/gi, "generic office asset")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function renderInitialConceptDirective(state: CreativeEngineRunState): string {
+  const request = state.assetType === "character"
+    ? sanitizeCharacterConceptDirectiveText(state.request)
+    : state.request;
   const assetContractLines: Record<CreativeAssetType, string[]> = {
     character: [
       "Asset contract: Tower character concept. Match the approved Otis/Tower character visual language: premium stylized high-detail app/game character art.",
@@ -797,7 +859,7 @@ function renderInitialConceptDirective(state: CreativeEngineRunState): string {
   return [
     `# ${state.name} Initial ${state.assetType === "character" ? "Character " : ""}Concepts`,
     "",
-    `Request: ${state.request}`,
+    `Request: ${request}`,
     "",
     "Create a prompt-only initial concept for The Tower. This is not a production pack, not a pose sheet, and not an app promotion.",
     "No old references, no identity reference images, no previous character art, and no external image grounding.",
@@ -969,6 +1031,7 @@ function renderApprovedProductionDirective(state: CreativeEngineRunState): strin
     "Stay inside the Tower/Otis-compatible premium stylized high-detail app/game character language when this is a character asset.",
     "Use full production mode: 4K source, 9:16 framing, single foreground asset, generous safe padding, premium-simple-backdrop-v1, and clean foreground/background separation for local cutout.",
     "Generate one and only one sprite per slot. No alternate design lanes, no redesign, no contact sheet, no duplicate character, no text, no logo, no watermark, no UI, no frame, no scene background, no old references except the approved concept image.",
+    "Anatomy is a production QA requirement: exactly one head, two arms, two hands, two legs, and two feet. No duplicate limbs, phantom hands, fused arms, hidden extra arms, impossible elbows, or extra fingers.",
     "Preserve natural human imperfections. Avoid fake-perfect AI model faces, overly sharp model jawlines, superhero anatomy, plastic skin, style drift, or corporate stock posing.",
     "Public art writes and production manifest promotion remain forbidden until the final board is inspected and Armaan says the exact phrase approved for app.",
   ].filter(Boolean).join("\n");
@@ -987,6 +1050,7 @@ function renderCharacterProductionSlotPrompt(input: {
     "Keep the approved identity locked across every outfit and expression: same face read, proportions, hair identity, body language family, palette discipline, and Tower role.",
     "Vary only the requested outfit edit and pose/expression state for this slot. Do not create a new Mara, a new art style, a scene, or a contact sheet.",
     "Maintain exact Tower/Otis-compatible character rendering: premium stylized high-detail app/game character art, clean full-body 9:16 sprite framing, controlled Tower lighting, mobile-readable silhouette.",
+    "Keep the body plan legible in this exact pose: two arms and two hands only, two legs and two feet only, no duplicate forearms or extra chin-hand/prop-hand combinations.",
     "Make hands, feet, hair, glasses, accessories, and any small working prop fully visible and separated from the backdrop for local cutout.",
   ].join("\n");
 }

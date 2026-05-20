@@ -1,0 +1,457 @@
+{
+  "schemaVersion": "tower-creative-asset-doctor-v1",
+  "planPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/generation/gemini-api-v3/full/gemini-api-plan.json",
+  "boardPath": "/Users/armaanarora/Documents/The Tower/.artlab/studio/characters/2026-05-20-rafe-calder-character/review/final-upload-ready-board.html",
+  "status": "passed",
+  "strict": true,
+  "checkedAt": "2026-05-20T15:26:04.327Z",
+  "checkedGeneratedImages": [
+    {
+      "slotId": "api-lane-01__rafe-regular-idle",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/rafe__regular__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-greeting",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/rafe__regular__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-listening",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/rafe__regular__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-thinking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/rafe__regular__thinking__source-v001__api-lane-01__v002__cutout__repaired-v003.png",
+      "width": 3072,
+      "height": 5513,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-talking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/rafe__regular__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-alert",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/rafe__regular__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-regular-working",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/rafe__regular__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-idle",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/rafe__summer-light__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-greeting",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/rafe__summer-light__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-listening",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/rafe__summer-light__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5510,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-thinking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/rafe__summer-light__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-talking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/rafe__summer-light__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3115,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-alert",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/rafe__summer-light__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-summer-light-working",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/rafe__summer-light__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-idle",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/rafe__winter-layered__idle__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5514,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/api-receipt-v002.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-greeting",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/rafe__winter-layered__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-listening",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/rafe__winter-layered__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-thinking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/rafe__winter-layered__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-talking",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/rafe__winter-layered__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3117,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-alert",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/rafe__winter-layered__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    },
+    {
+      "slotId": "api-lane-01__rafe-winter-layered-working",
+      "path": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/rafe__winter-layered__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true,
+      "latestReceiptPath": ".artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/api-receipt.json",
+      "latestReceiptWarnings": [
+        "source-missing-alpha",
+        "source-mime-image-jpeg"
+      ]
+    }
+  ],
+  "checkedReviewImages": [
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/rafe__regular__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-idle/rafe__regular__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/rafe__regular__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-greeting/rafe__regular__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/rafe__regular__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-listening/rafe__regular__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/rafe__regular__thinking__source-v001__api-lane-01__v002__cutout__repaired-v003.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-thinking/rafe__regular__thinking__source-v001__api-lane-01__v002__cutout__repaired-v003.png",
+      "width": 3072,
+      "height": 5513,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/rafe__regular__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-talking/rafe__regular__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/rafe__regular__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-alert/rafe__regular__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/rafe__regular__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-regular-working/rafe__regular__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/rafe__summer-light__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-idle/rafe__summer-light__idle__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/rafe__summer-light__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-greeting/rafe__summer-light__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/rafe__summer-light__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-listening/rafe__summer-light__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5510,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/rafe__summer-light__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-thinking/rafe__summer-light__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/rafe__summer-light__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-talking/rafe__summer-light__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3115,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/rafe__summer-light__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-alert/rafe__summer-light__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/rafe__summer-light__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-summer-light-working/rafe__summer-light__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/rafe__winter-layered__idle__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-idle/rafe__winter-layered__idle__source-v001__api-lane-01__v002__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5514,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/rafe__winter-layered__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-greeting/rafe__winter-layered__greeting__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/rafe__winter-layered__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-listening/rafe__winter-layered__listening__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/rafe__winter-layered__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-thinking/rafe__winter-layered__thinking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/rafe__winter-layered__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-talking/rafe__winter-layered__talking__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3117,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/rafe__winter-layered__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-alert/rafe__winter-layered__alert__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5511,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "src": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/rafe__winter-layered__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "resolvedPath": "/Users/armaanarora/Documents/The Tower/.artlab/inbox/character/2026-05-20-rafe-calder-character/gemini-api-v3-full/api-lane-01/rafe-winter-layered-working/rafe__winter-layered__working__source-v001__api-lane-01__cutout__repaired-v002.png",
+      "width": 3072,
+      "height": 5512,
+      "format": "png",
+      "hasAlpha": true
+    }
+  ],
+  "issues": [],
+  "recoveryActions": [
+    "Generated image and review-board references are locally loadable."
+  ]
+}

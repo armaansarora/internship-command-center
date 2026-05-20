@@ -211,6 +211,37 @@ describe("Gemini API v3 generation", () => {
     expect(plan.lanes.map((lane) => lane.label)).not.toContain("Warm Classic Concierge");
   });
 
+  it("uses Rafe-specific design cards from the character bible for CRO concept lanes", () => {
+    const plan = createGeminiApiGenerationPlan({
+      runId: "rafe-card-selector",
+      assetType: "character",
+      name: "Rafe",
+      planRoot: ".artlab/studio/characters/rafe-card-selector/generation/gemini-api-v3",
+      inboxRoot: ".artlab/inbox/character/rafe-card-selector/gemini-api-v3",
+      phase: "initial-design",
+      slots: [
+        {
+          slotId: "rafe-design",
+          prompt: "Make Rafe Calder as the CRO of the War Room from his character bible entry.",
+          targetDirectory: ".artlab/runs/rafe/initial/incoming",
+          targetFilename: "rafe__design__source-v001.png",
+          reason: "Initial prompt-only concept.",
+        },
+      ],
+    });
+
+    expect(plan.lanes.map((lane) => lane.label)).toEqual([
+      "Pipeline Streetfighter",
+      "Red-Pen Operator",
+      "Conversion Coach",
+      "War-Room Closer",
+      "Honest Pressure Mentor",
+    ]);
+    expect(plan.slots.map((slot) => slot.prompt).join("\n")).toContain("application demolition");
+    expect(plan.slots.map((slot) => slot.prompt).join("\n")).toContain("red pen");
+    expect(plan.lanes.map((lane) => lane.label)).not.toContain("Angular Operator");
+  });
+
   it("does not apply character concept contracts to UI or background requests", () => {
     const uiPlan = createGeminiApiGenerationPlan({
       runId: "ui-initial-design",

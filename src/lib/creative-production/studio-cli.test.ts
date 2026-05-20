@@ -27,9 +27,9 @@ describe("art:studio CLI", () => {
 
     expect(output).toContain("What are we adding to The Tower today?");
     expect(output).toContain("So far we have done");
-    expect(output).toContain("I suggest we do Rafe Calder");
-    expect(output).toContain("42/252 approved production sprites");
-    expect(output).toContain("Promoted characters: Otis Vale (otis), Mara Voss (ceo)");
+    expect(output).toContain("I suggest we do Priya Sen");
+    expect(output).toContain("63/252 approved production sprites");
+    expect(output).toContain("Promoted characters: Otis Vale (otis), Mara Voss (ceo), Rafe Calder (cro)");
     expect(output).toContain("Still remaining");
     expect(output).toContain("Known warnings");
     expect(output).toContain("character, environment, prop, ui-texture, animation, scene, icon-system, marketing-hero, shader");

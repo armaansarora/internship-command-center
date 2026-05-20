@@ -74,6 +74,20 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(existsSync(join(run.runRoot, "human-action.json"))).toBe(false);
   });
 
+  it("uses the explicit requested character instead of Otis-compatible style language", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-route-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "Create Rafe Calder, characterId cro, in the Tower/Otis-compatible style envelope.",
+      now: new Date("2026-05-20T12:05:00.000Z"),
+    });
+
+    expect(run.state.assetType).toBe("character");
+    expect(run.state.name).toBe("Rafe");
+    expect(run.runRoot).toContain(join("characters", "2026-05-20-rafe"));
+    expect(run.progress.pending).toBe(5);
+  });
+
   it("rejects approve direction before a concept board exists", async () => {
     const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-human-gate-"));
     const run = await startCreativeProductionRun({
@@ -238,6 +252,9 @@ describe("Creative Production Engine v1 final operator", () => {
         expect(plan.referenceImages[0]?.role).toBe("identity-reference");
         expect(plan.referenceImages[0]?.path).toContain("api-lane-01");
         expect(plan.slots[0]?.prompt).toContain("Required character pack matrix");
+        expect(plan.slots[0]?.prompt).toContain("Anatomy is a production QA requirement: exactly one head, two arms, two hands, two legs, and two feet.");
+        expect(plan.slots.find((slot) => slot.baseSlotId === "mara-regular-thinking")?.prompt).toContain("two arms and two hands only");
+        expect(plan.slots.find((slot) => slot.baseSlotId === "mara-regular-thinking")?.prompt).toContain("no duplicate forearms");
         expect(plan.slots.find((slot) => slot.baseSlotId === "mara-winter-layered-working")?.prompt).toContain("Outfit variant: winter-layered");
         expect(plan.slots.find((slot) => slot.baseSlotId === "mara-winter-layered-working")?.prompt).toContain("Pose/expression state: working");
 
@@ -467,6 +484,39 @@ describe("Creative Production Engine v1 final operator", () => {
     expect(humanAction.phase).toBe("provider-blocked");
     expect(humanAction.recommendation).toContain("Fix the provider blocker");
     expect(humanAction.allowedResponses).not.toContain("approve direction");
+  });
+
+  it("sanitizes forbidden style-drift terms from initial character concept prompts before QA", async () => {
+    const stateRoot = mkdtempSync(join(tmpdir(), "tower-cpe-v1-sanitize-"));
+    const run = await startCreativeProductionRun({
+      stateRoot,
+      request: "Create Rafe Calder, characterId cro, and avoid photorealism, stock photo posture, and watercolor drift.",
+      runId: "rafe-sanitized-prompt",
+      now: new Date("2026-05-20T12:30:00.000Z"),
+    });
+
+    const finished = await generateInitialConceptsForCreativeRun({
+      runRoot: run.runRoot,
+      now: new Date("2026-05-20T12:31:00.000Z"),
+      runner: async ({ plan }) => {
+        const prompts = plan.slots.map((slot) => slot.prompt).join("\n");
+
+        expect(prompts).not.toMatch(/\b(photoreal|stock photo|watercolor)\b/i);
+
+        for (const slot of plan.slots) {
+          mkdirSync(slot.inboxDirectory, { recursive: true });
+          writeFileSync(slot.expectedInboxFile, "fake-png");
+          writeFileSync(join(slot.inboxDirectory, "api-receipt.json"), JSON.stringify({
+            slotId: slot.slotId,
+            capturedFile: slot.expectedInboxFile,
+            qualityWarnings: [],
+          }, null, 2));
+        }
+      },
+    });
+
+    expect(finished.state.phase).toBe("direction-review-ready");
+    expect(existsSync(join(run.runRoot, "review", "initial-concept-board.html"))).toBe(true);
   });
 
   it("does not make a concept board direction-review-ready when repeated style QA fails", async () => {
