@@ -9447,6 +9447,1095 @@ EOF
 - [ ] Heartbeat file's atomic write is verified by existence check after the tick.
 - [ ] No background timers leak — vitest's default 5s timeout proves it.
 
+### Subphase 3C — Self-evolution (Tasks 3.23–3.26)
+
+### Task 3.23: Friction detector (hourly scan of improvements.jsonl)
+
+**Files:**
+- Create: `src/lib/artlab/self-evolution/friction-detector.ts`
+- Test: `src/lib/artlab/self-evolution/friction-detector.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/self-evolution/friction-detector.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { detectFriction, FRICTION_THRESHOLD } from "./friction-detector";
+
+describe("friction detector", () => {
+  let workspaceRoot: string;
+  beforeEach(() => {
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-fd-"));
+    mkdirSync(join(workspaceRoot, "ledgers"));
+  });
+
+  it("FRICTION_THRESHOLD is 5 (spec section 10)", () => {
+    expect(FRICTION_THRESHOLD).toBe(5);
+  });
+
+  it("groups improvements.jsonl entries by failureCode and reports occurrences ≥ threshold", async () => {
+    const path = join(workspaceRoot, "ledgers", "improvements.jsonl");
+    const events = [
+      { at: "2026-05-20T00:00:00Z", failureCode: "rembg-edge-halo", severity: "medium" },
+      { at: "2026-05-20T00:01:00Z", failureCode: "rembg-edge-halo", severity: "medium" },
+      { at: "2026-05-20T00:02:00Z", failureCode: "rembg-edge-halo", severity: "medium" },
+      { at: "2026-05-20T00:03:00Z", failureCode: "rembg-edge-halo", severity: "medium" },
+      { at: "2026-05-20T00:04:00Z", failureCode: "rembg-edge-halo", severity: "medium" },
+      { at: "2026-05-20T00:05:00Z", failureCode: "concept-style-drift", severity: "low" },
+    ];
+    writeFileSync(path, events.map((e) => JSON.stringify(e)).join("\n") + "\n");
+    const result = await detectFriction({ workspaceRoot });
+    expect(result.actionable).toHaveLength(1);
+    expect(result.actionable[0]!.failureCode).toBe("rembg-edge-halo");
+    expect(result.actionable[0]!.occurrences).toBe(5);
+  });
+
+  it("filters severity < medium out of actionable", async () => {
+    const path = join(workspaceRoot, "ledgers", "improvements.jsonl");
+    const events = Array.from({ length: 6 }, (_, i) => ({
+      at: `2026-05-20T00:0${i}:00Z`,
+      failureCode: "minor-quibble",
+      severity: "low",
+    }));
+    writeFileSync(path, events.map((e) => JSON.stringify(e)).join("\n") + "\n");
+    const result = await detectFriction({ workspaceRoot });
+    expect(result.actionable).toHaveLength(0);
+  });
+
+  it("returns empty when no ledger exists", async () => {
+    const result = await detectFriction({ workspaceRoot });
+    expect(result.actionable).toEqual([]);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/self-evolution/friction-detector.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/self-evolution/friction-detector.ts
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
+export const FRICTION_THRESHOLD = 5;
+
+interface ImprovementEvent {
+  at: string;
+  failureCode: string;
+  severity: "low" | "medium" | "high";
+  runId?: string;
+  context?: Record<string, unknown>;
+}
+
+export interface FrictionGroup {
+  failureCode: string;
+  occurrences: number;
+  highestSeverity: "low" | "medium" | "high";
+  mostRecentAt: string;
+  recentContext: Record<string, unknown>[];
+}
+
+export interface FrictionDetectionResult {
+  actionable: FrictionGroup[];
+  belowThreshold: FrictionGroup[];
+}
+
+const SEVERITY_RANK: Record<ImprovementEvent["severity"], number> = { low: 0, medium: 1, high: 2 };
+
+export async function detectFriction(input: { workspaceRoot: string }): Promise<FrictionDetectionResult> {
+  const path = join(input.workspaceRoot, "ledgers", "improvements.jsonl");
+  if (!existsSync(path)) return { actionable: [], belowThreshold: [] };
+  const lines = readFileSync(path, "utf8").trim().split("\n").filter((l) => l.length > 0);
+  const groups = new Map<string, FrictionGroup>();
+  for (const line of lines) {
+    let event: ImprovementEvent;
+    try { event = JSON.parse(line) as ImprovementEvent; } catch { continue; }
+    let group = groups.get(event.failureCode);
+    if (!group) {
+      group = {
+        failureCode: event.failureCode,
+        occurrences: 0,
+        highestSeverity: "low",
+        mostRecentAt: event.at,
+        recentContext: [],
+      };
+      groups.set(event.failureCode, group);
+    }
+    group.occurrences += 1;
+    if (SEVERITY_RANK[event.severity] > SEVERITY_RANK[group.highestSeverity]) {
+      group.highestSeverity = event.severity;
+    }
+    if (event.at > group.mostRecentAt) group.mostRecentAt = event.at;
+    if (event.context) group.recentContext.push(event.context);
+  }
+  const actionable: FrictionGroup[] = [];
+  const belowThreshold: FrictionGroup[] = [];
+  for (const group of groups.values()) {
+    group.recentContext = group.recentContext.slice(-10);
+    if (group.occurrences >= FRICTION_THRESHOLD && SEVERITY_RANK[group.highestSeverity] >= 1) {
+      actionable.push(group);
+    } else {
+      belowThreshold.push(group);
+    }
+  }
+  return { actionable, belowThreshold };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/self-evolution/friction-detector.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/self-evolution/friction-detector.ts src/lib/artlab/self-evolution/friction-detector.test.ts
+git commit -m "$(cat <<'EOF'
+Add friction detector (spec section 10, threshold=5, severity≥medium)
+
+Scans improvements.jsonl, groups by failureCode, surfaces groups
+with ≥5 occurrences and severity ≥ medium as actionable.
+Below-threshold groups are also returned so future runs can see
+trends. Caps recentContext at 10 entries to keep Codex prompts
+small.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `FRICTION_THRESHOLD` is a module-level const = 5 matching spec §10.
+- [ ] Severity-rank uses an explicit map (no string comparison).
+- [ ] Malformed lines skipped, never crashing.
+- [ ] `recentContext` capped at 10 entries (prevents prompt bloat).
+
+### Task 3.24: Codex summoner (constructs goal, invokes adapter)
+
+**Files:**
+- Create: `src/lib/artlab/self-evolution/codex-summoner.ts`
+- Test: `src/lib/artlab/self-evolution/codex-summoner.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/self-evolution/codex-summoner.test.ts
+import { describe, expect, it } from "vitest";
+import { buildCodexGoal, summonCodex } from "./codex-summoner";
+
+describe("codex summoner", () => {
+  const group = {
+    failureCode: "rembg-edge-halo",
+    occurrences: 7,
+    highestSeverity: "medium" as const,
+    mostRecentAt: "2026-05-20T03:14:00Z",
+    recentContext: [{ slotId: "slot-12" }],
+  };
+
+  it("buildCodexGoal includes the failureCode, occurrence count, and a branch name", () => {
+    const goal = buildCodexGoal(group, "2026-05-20");
+    expect(goal).toContain("rembg-edge-halo");
+    expect(goal).toContain("7 occurrences");
+    expect(goal).toContain("artlab/fix/rembg-edge-halo-2026-05-20");
+    expect(goal).toMatch(/do not open a pr/i);
+    expect(goal).toMatch(/never run gh pr/i);
+  });
+
+  it("summonCodex skips when ARTLAB_CODEX_MODE=mock and reports the would-be branch name", async () => {
+    process.env.ARTLAB_CODEX_MODE = "mock";
+    const result = await summonCodex({ group, cwd: "/tmp", today: "2026-05-20" });
+    delete process.env.ARTLAB_CODEX_MODE;
+    expect(result.mode).toBe("mock");
+    expect(result.branchName).toBe("artlab/fix/rembg-edge-halo-2026-05-20");
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/self-evolution/codex-summoner.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/self-evolution/codex-summoner.ts
+import { invokeCodex } from "@/lib/artlab/adapters/codex";
+import type { FrictionGroup } from "./friction-detector";
+
+export interface SummonCodexInput {
+  group: FrictionGroup;
+  cwd: string;
+  today: string; // ISO date string YYYY-MM-DD
+}
+
+export interface SummonCodexResult {
+  mode: "real" | "mock";
+  branchName: string;
+  goalSent: string;
+  exitCode?: number;
+  summary?: string;
+}
+
+export function buildCodexGoal(group: FrictionGroup, today: string): string {
+  const branchName = `artlab/fix/${group.failureCode}-${today}`;
+  return [
+    `Goal: harden the ArtLab engine against repeated failure: ${group.failureCode}.`,
+    `${group.occurrences} occurrences observed (highest severity: ${group.highestSeverity}, most recent: ${group.mostRecentAt}).`,
+    "Recent context (last 10 events):",
+    JSON.stringify(group.recentContext, null, 2),
+    "",
+    "Required steps:",
+    `1. git checkout -b ${branchName}`,
+    "2. Read the relevant ArtLab module(s) and the spec at docs/superpowers/specs/2026-05-20-artlab-creative-engine-design.md.",
+    "3. Add a test that would have caught this failure.",
+    "4. Implement the fix.",
+    "5. Run vitest + tsc + lint; all must pass.",
+    "6. git commit with a descriptive message including the failure code.",
+    "7. git push the branch.",
+    "",
+    "DO NOT OPEN A PR. NEVER run `gh pr create` or `gh pr merge`. ArtLab spec safety property #5 requires human review of every branch before merge.",
+    "",
+    `Branch must be named exactly: ${branchName}`,
+  ].join("\n");
+}
+
+export async function summonCodex(input: SummonCodexInput): Promise<SummonCodexResult> {
+  const branchName = `artlab/fix/${input.group.failureCode}-${input.today}`;
+  const goalSent = buildCodexGoal(input.group, input.today);
+  const result = await invokeCodex({
+    goal: goalSent,
+    sandboxLevel: "workspace-write",
+    cwd: input.cwd,
+    approvalPolicy: "never",
+  });
+  return {
+    mode: result.mode,
+    branchName,
+    goalSent,
+    exitCode: result.exitCode,
+    summary: result.summary,
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/self-evolution/codex-summoner.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/self-evolution/codex-summoner.ts src/lib/artlab/self-evolution/codex-summoner.test.ts
+git commit -m "$(cat <<'EOF'
+Add Codex summoner (spec section 10 + safety property #5)
+
+buildCodexGoal renders a deterministic instruction string with
+the branch name, occurrence count, recent context, and an
+explicit ban on `gh pr create` / `gh pr merge` (spec safety
+property #5: no PR auto-merge). summonCodex calls the Phase 2
+codex adapter with sandboxLevel=workspace-write so Codex can
+write the branch but not affect the engine's runtime state.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Goal text includes the literal `"DO NOT OPEN A PR"` and `"never run gh pr"` to make spec safety property #5 traceable.
+- [ ] Branch name format is exactly `artlab/fix/<failureCode>-<YYYY-MM-DD>`.
+- [ ] `sandboxLevel: "workspace-write"` (not `"danger-full-access"`) so Codex cannot trigger paid provider calls.
+- [ ] `approvalPolicy: "never"` so Codex runs unattended.
+
+### Task 3.25: Self-evolution scheduler (hourly trigger)
+
+**Files:**
+- Create: `src/lib/artlab/self-evolution/scheduler.ts`
+- Test: `src/lib/artlab/self-evolution/scheduler.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/self-evolution/scheduler.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { runSelfEvolutionScheduler } from "./scheduler";
+
+describe("self-evolution scheduler", () => {
+  let workspaceRoot: string;
+  beforeEach(() => {
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-se-"));
+    mkdirSync(join(workspaceRoot, "ledgers"));
+  });
+
+  it("does nothing if last-run was within the past hour", async () => {
+    const lastRunPath = join(workspaceRoot, "self-evolution-last-run.json");
+    writeFileSync(lastRunPath, JSON.stringify({ at: new Date().toISOString() }));
+    const result = await runSelfEvolutionScheduler({ workspaceRoot, today: "2026-05-20", now: () => new Date() });
+    expect(result.skipped).toBe("cooldown");
+  });
+
+  it("runs when last-run is > 1 hour ago and writes a new last-run record", async () => {
+    process.env.ARTLAB_CODEX_MODE = "mock";
+    const lastRunPath = join(workspaceRoot, "self-evolution-last-run.json");
+    writeFileSync(lastRunPath, JSON.stringify({ at: new Date(Date.now() - 2 * 60 * 60_000).toISOString() }));
+    // No friction in ledger → still runs the scheduler but produces 0 branches
+    const result = await runSelfEvolutionScheduler({ workspaceRoot, today: "2026-05-20", now: () => new Date() });
+    delete process.env.ARTLAB_CODEX_MODE;
+    expect(result.skipped).toBeUndefined();
+    expect(result.summonedBranches).toEqual([]);
+    expect(existsSync(lastRunPath)).toBe(true);
+  });
+
+  it("summons codex for each actionable friction group", async () => {
+    process.env.ARTLAB_CODEX_MODE = "mock";
+    const ledgerPath = join(workspaceRoot, "ledgers", "improvements.jsonl");
+    const events = Array.from({ length: 6 }, (_, i) => ({
+      at: `2026-05-20T0${i}:00:00Z`,
+      failureCode: "rembg-edge-halo",
+      severity: "medium",
+    }));
+    writeFileSync(ledgerPath, events.map((e) => JSON.stringify(e)).join("\n") + "\n");
+    const result = await runSelfEvolutionScheduler({ workspaceRoot, today: "2026-05-20", now: () => new Date() });
+    delete process.env.ARTLAB_CODEX_MODE;
+    expect(result.summonedBranches).toEqual(["artlab/fix/rembg-edge-halo-2026-05-20"]);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/self-evolution/scheduler.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/self-evolution/scheduler.ts
+import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { detectFriction } from "./friction-detector";
+import { summonCodex } from "./codex-summoner";
+
+const COOLDOWN_MS = 60 * 60_000;
+
+export interface SelfEvolutionInput {
+  workspaceRoot: string;
+  today: string;
+  now: () => Date;
+}
+
+export interface SelfEvolutionResult {
+  skipped?: "cooldown";
+  summonedBranches: string[];
+}
+
+function lastRunPath(workspaceRoot: string): string {
+  return join(workspaceRoot, "self-evolution-last-run.json");
+}
+
+function readLastRunAt(workspaceRoot: string): Date | null {
+  const path = lastRunPath(workspaceRoot);
+  if (!existsSync(path)) return null;
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8")) as { at?: string };
+    return parsed.at ? new Date(parsed.at) : null;
+  } catch { return null; }
+}
+
+function writeLastRun(workspaceRoot: string, at: Date): void {
+  const path = lastRunPath(workspaceRoot);
+  const tmp = `${path}.tmp.${process.pid}.${Date.now()}`;
+  writeFileSync(tmp, JSON.stringify({ at: at.toISOString() }, null, 2) + "\n");
+  renameSync(tmp, path);
+}
+
+export async function runSelfEvolutionScheduler(input: SelfEvolutionInput): Promise<SelfEvolutionResult> {
+  const now = input.now();
+  const lastRunAt = readLastRunAt(input.workspaceRoot);
+  if (lastRunAt && now.getTime() - lastRunAt.getTime() < COOLDOWN_MS) {
+    return { skipped: "cooldown", summonedBranches: [] };
+  }
+  const friction = await detectFriction({ workspaceRoot: input.workspaceRoot });
+  const summonedBranches: string[] = [];
+  for (const group of friction.actionable) {
+    const result = await summonCodex({ group, cwd: input.workspaceRoot, today: input.today });
+    summonedBranches.push(result.branchName);
+  }
+  writeLastRun(input.workspaceRoot, now);
+  return { summonedBranches };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/self-evolution/scheduler.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/self-evolution/scheduler.ts src/lib/artlab/self-evolution/scheduler.test.ts
+git commit -m "$(cat <<'EOF'
+Add self-evolution scheduler (hourly cooldown)
+
+Composition: detectFriction → summonCodex per actionable group →
+write self-evolution-last-run.json. Cooldown of 1h prevents
+codex spam if the daemon restarts repeatedly. Daemon calls this
+from its main tick loop (no separate scheduler thread).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `COOLDOWN_MS` = 1 hour matching spec §10.
+- [ ] `now` is injectable for deterministic tests.
+- [ ] Skip is reported as `skipped: "cooldown"` (no boolean — explicit reason).
+- [ ] No friction → still writes last-run record (resets the cooldown clock).
+
+### Task 3.26: Self-evolution branch-policy assertion (spec safety property #5)
+
+**Files:**
+- Create: `src/lib/artlab/self-evolution/branch-policy.test.ts`
+
+- [ ] **Step 1: Write the asserting test**
+
+```ts
+// src/lib/artlab/self-evolution/branch-policy.test.ts
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { buildCodexGoal } from "./codex-summoner";
+
+describe("self-evolution branch policy (spec safety property #5)", () => {
+  it("every codex goal explicitly bans gh pr create / gh pr merge", () => {
+    const group = {
+      failureCode: "any-code",
+      occurrences: 5,
+      highestSeverity: "medium" as const,
+      mostRecentAt: "2026-05-20T00:00:00Z",
+      recentContext: [],
+    };
+    const goal = buildCodexGoal(group, "2026-05-20");
+    expect(goal).toMatch(/do not open a pr/i);
+    expect(goal).toMatch(/gh pr create/i);
+    expect(goal).toMatch(/gh pr merge/i);
+  });
+
+  it("module surface never exports a 'mergePR' or 'openPR' function", () => {
+    const codexSummoner = readFileSync(
+      join("src", "lib", "artlab", "self-evolution", "codex-summoner.ts"),
+      "utf8",
+    );
+    const scheduler = readFileSync(
+      join("src", "lib", "artlab", "self-evolution", "scheduler.ts"),
+      "utf8",
+    );
+    expect(codexSummoner).not.toMatch(/openPR|mergePR|gh\s+pr\s+(create|merge)/);
+    expect(scheduler).not.toMatch(/openPR|mergePR|gh\s+pr\s+(create|merge)/);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/self-evolution/branch-policy.test.ts`
+Expected: PASS
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/artlab/self-evolution/branch-policy.test.ts
+git commit -m "$(cat <<'EOF'
+Add self-evolution branch-policy assertion (spec safety #5)
+
+Two assertions: (1) every generated Codex goal contains the
+explicit no-PR ban verbatim; (2) neither self-evolution module
+contains any string matching gh pr create | gh pr merge | openPR
+| mergePR. Future regressions of these will fail this test.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Test fails loudly if anyone adds a `gh pr ...` call anywhere in self-evolution modules.
+- [ ] Test reads source files at runtime (not at test-compile time) so refactors are caught.
+- [ ] Both modules (`codex-summoner.ts` and `scheduler.ts`) are scanned.
+- [ ] Goal contents contain the literal `"DO NOT OPEN A PR"` text for human-greppability.
+
+### Subphase 3D — CLI subcommand bodies (Tasks 3.27–3.30)
+
+These tasks replace the Phase 0 stubs in `scripts/artlab.ts` with real implementations.
+
+### Task 3.27: artlab produce subcommand (CLI → inbox intent)
+
+**Files:**
+- Create: `src/lib/artlab/cli/produce.ts`
+- Test: `src/lib/artlab/cli/produce.test.ts`
+- Modify: `scripts/artlab.ts` (replace the `produce` stub)
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/cli/produce.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { runProduceSubcommand } from "./produce";
+
+describe("artlab produce subcommand", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-cli-prod-")); });
+
+  it("writes a produce intent into inbox/cli/produce-<runId>.json", async () => {
+    const result = await runProduceSubcommand({
+      workspaceRoot,
+      args: ["make", "Sol", "Navarro"],
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.runId).toMatch(/^[0-9a-f-]{36}$/);
+    const files = readdirSync(join(workspaceRoot, "inbox", "cli"));
+    expect(files).toHaveLength(1);
+    const body = JSON.parse(readFileSync(join(workspaceRoot, "inbox", "cli", files[0]!), "utf8"));
+    expect(body.request).toBe("make Sol Navarro");
+  });
+
+  it("exits 2 with empty args", async () => {
+    const result = await runProduceSubcommand({ workspaceRoot, args: [] });
+    expect(result.exitCode).toBe(2);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/cli/produce.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/cli/produce.ts
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { randomUUID } from "node:crypto";
+
+export interface ProduceSubcommandInput {
+  workspaceRoot: string;
+  args: string[];
+}
+
+export interface ProduceSubcommandResult {
+  exitCode: number;
+  runId?: string;
+  message?: string;
+}
+
+export async function runProduceSubcommand(input: ProduceSubcommandInput): Promise<ProduceSubcommandResult> {
+  const request = input.args.join(" ").trim();
+  if (request.length === 0) {
+    return { exitCode: 2, message: "produce: expected <request> as positional args" };
+  }
+  const runId = randomUUID();
+  const inboxDir = join(input.workspaceRoot, "inbox", "cli");
+  if (!existsSync(inboxDir)) mkdirSync(inboxDir, { recursive: true });
+  const intentPath = join(inboxDir, `produce-${runId}.json`);
+  writeFileSync(intentPath, JSON.stringify({
+    runId,
+    request,
+    sourceSurface: "cli",
+    createdAt: new Date().toISOString(),
+  }, null, 2));
+  return { exitCode: 0, runId, message: `Queued run ${runId}` };
+}
+```
+
+- [ ] **Step 4: Wire up the stub in scripts/artlab.ts**
+
+Replace the `produce` case body in `scripts/artlab.ts`:
+
+```ts
+// in scripts/artlab.ts, replace `case "produce": return stub("produce", rest, io);`
+case "produce": {
+  const { runProduceSubcommand } = await import("@/lib/artlab/cli/produce");
+  const result = await runProduceSubcommand({
+    workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine",
+    args: rest,
+  });
+  if (result.message) io.stdout(result.message);
+  return result.exitCode;
+}
+```
+
+- [ ] **Step 5: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/cli/produce.test.ts`
+Expected: PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/artlab/cli/produce.ts src/lib/artlab/cli/produce.test.ts scripts/artlab.ts
+git commit -m "$(cat <<'EOF'
+Wire artlab produce subcommand — writes inbox intent for daemon
+
+CLI generates a runId (UUID v4), writes a produce intent file
+into inbox/cli/, exits 0 immediately. Daemon picks up via inbox
+drainer (Task 3.21) and dispatches through intake router.
+Empty args → exit 2 with help text.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] runId is UUID v4 (verify regex `^[0-9a-f-]{36}$`).
+- [ ] CLI does NOT block waiting for the daemon — exits as soon as the intent file is written.
+- [ ] Intent file is atomic-write protected (use `writeFileSync` directly is OK here since the daemon scans by prefix and skips files that fail to parse).
+- [ ] `ARTLAB_WORKSPACE_ROOT` env var override is respected (default `.artlab/engine`).
+
+### Task 3.28: artlab continue subcommand
+
+**Files:**
+- Create: `src/lib/artlab/cli/continue.ts`
+- Test: `src/lib/artlab/cli/continue.test.ts`
+- Modify: `scripts/artlab.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/cli/continue.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { runContinueSubcommand } from "./continue";
+
+describe("artlab continue subcommand", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-cli-cont-")); });
+
+  it("writes a continue intent file", async () => {
+    const runId = "abc-123";
+    mkdirSync(join(workspaceRoot, "runs", runId), { recursive: true });
+    writeFileSync(join(workspaceRoot, "runs", runId, "run-state.json"), JSON.stringify({
+      runId, assetType: "character", phase: "concept-review",
+      createdAt: "2026-05-20T00:00:00.000Z", updatedAt: "2026-05-20T00:00:00.000Z",
+      request: "x",
+    }));
+    const result = await runContinueSubcommand({ workspaceRoot, args: [runId] });
+    expect(result.exitCode).toBe(0);
+    const files = readdirSync(join(workspaceRoot, "inbox", "cli"));
+    expect(files.some((f) => f.startsWith(`continue-${runId}-`))).toBe(true);
+  });
+
+  it("exits 2 when runId missing", async () => {
+    const result = await runContinueSubcommand({ workspaceRoot, args: [] });
+    expect(result.exitCode).toBe(2);
+  });
+
+  it("exits 1 when runId does not exist", async () => {
+    const result = await runContinueSubcommand({ workspaceRoot, args: ["nope"] });
+    expect(result.exitCode).toBe(1);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/cli/continue.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/cli/continue.ts
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+export interface ContinueSubcommandInput {
+  workspaceRoot: string;
+  args: string[];
+}
+
+export interface ContinueSubcommandResult {
+  exitCode: number;
+  message?: string;
+}
+
+export async function runContinueSubcommand(input: ContinueSubcommandInput): Promise<ContinueSubcommandResult> {
+  const runId = input.args[0];
+  if (!runId) return { exitCode: 2, message: "continue: expected <runId>" };
+  const runDir = join(input.workspaceRoot, "runs", runId);
+  if (!existsSync(runDir)) return { exitCode: 1, message: `continue: run ${runId} not found` };
+  const inboxDir = join(input.workspaceRoot, "inbox", "cli");
+  if (!existsSync(inboxDir)) mkdirSync(inboxDir, { recursive: true });
+  const intentPath = join(inboxDir, `continue-${runId}-${Date.now()}.json`);
+  writeFileSync(intentPath, JSON.stringify({
+    runId,
+    intent: "continue",
+    requestedAt: new Date().toISOString(),
+  }, null, 2));
+  return { exitCode: 0, message: `Continue intent recorded for ${runId}` };
+}
+```
+
+- [ ] **Step 4: Wire up the stub in scripts/artlab.ts**
+
+```ts
+// scripts/artlab.ts: replace `case "continue": return stub("continue", rest, io);`
+case "continue": {
+  const { runContinueSubcommand } = await import("@/lib/artlab/cli/continue");
+  const result = await runContinueSubcommand({
+    workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine",
+    args: rest,
+  });
+  if (result.message) io.stdout(result.message);
+  return result.exitCode;
+}
+```
+
+- [ ] **Step 5: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/cli/continue.test.ts`
+Expected: PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/artlab/cli/continue.ts src/lib/artlab/cli/continue.test.ts scripts/artlab.ts
+git commit -m "$(cat <<'EOF'
+Wire artlab continue subcommand
+
+Writes inbox/cli/continue-<runId>-<timestamp>.json. Daemon
+picks up and re-runs the state machine for the named runId.
+Missing runId → exit 2. runId-not-found → exit 1.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Distinct exit codes for distinct failure modes (2 = bad args, 1 = not found).
+- [ ] Intent file timestamp prevents collision when continue is invoked twice quickly.
+- [ ] CLI does NOT advance the state machine itself — only writes the intent.
+
+### Task 3.29: artlab answer subcommand
+
+**Files:**
+- Create: `src/lib/artlab/cli/answer.ts`
+- Test: `src/lib/artlab/cli/answer.test.ts`
+- Modify: `scripts/artlab.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/cli/answer.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { runAnswerSubcommand } from "./answer";
+
+describe("artlab answer subcommand", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-cli-ans-")); });
+
+  it("writes an answer intent with runId + answer text", async () => {
+    const runId = "abc-123";
+    mkdirSync(join(workspaceRoot, "runs", runId), { recursive: true });
+    writeFileSync(join(workspaceRoot, "runs", runId, "run-state.json"), JSON.stringify({
+      runId, assetType: "character", phase: "concept-review",
+      createdAt: "2026-05-20T00:00:00.000Z", updatedAt: "2026-05-20T00:00:00.000Z",
+      request: "x",
+    }));
+    const result = await runAnswerSubcommand({ workspaceRoot, args: [runId, "approve direction 2"] });
+    expect(result.exitCode).toBe(0);
+    const files = readdirSync(join(workspaceRoot, "inbox", "cli"));
+    const intent = files.find((f) => f.startsWith(`answer-${runId}-`))!;
+    const body = JSON.parse(readFileSync(join(workspaceRoot, "inbox", "cli", intent), "utf8"));
+    expect(body.answer).toBe("approve direction 2");
+  });
+
+  it("exits 2 when answer text missing", async () => {
+    const result = await runAnswerSubcommand({ workspaceRoot, args: ["some-run-id"] });
+    expect(result.exitCode).toBe(2);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/cli/answer.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/cli/answer.ts
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+export interface AnswerSubcommandInput {
+  workspaceRoot: string;
+  args: string[];
+}
+
+export interface AnswerSubcommandResult {
+  exitCode: number;
+  message?: string;
+}
+
+export async function runAnswerSubcommand(input: AnswerSubcommandInput): Promise<AnswerSubcommandResult> {
+  const [runId, ...answerParts] = input.args;
+  if (!runId) return { exitCode: 2, message: "answer: expected <runId> \"<answer>\"" };
+  const answer = answerParts.join(" ").trim();
+  if (answer.length === 0) return { exitCode: 2, message: "answer: expected non-empty answer text" };
+  const runDir = join(input.workspaceRoot, "runs", runId);
+  if (!existsSync(runDir)) return { exitCode: 1, message: `answer: run ${runId} not found` };
+  const inboxDir = join(input.workspaceRoot, "inbox", "cli");
+  if (!existsSync(inboxDir)) mkdirSync(inboxDir, { recursive: true });
+  const intentPath = join(inboxDir, `answer-${runId}-${Date.now()}.json`);
+  writeFileSync(intentPath, JSON.stringify({
+    runId,
+    intent: "answer",
+    answer,
+    requestedAt: new Date().toISOString(),
+  }, null, 2));
+  return { exitCode: 0, message: `Answer recorded for ${runId}` };
+}
+```
+
+- [ ] **Step 4: Wire up the stub**
+
+```ts
+// scripts/artlab.ts
+case "answer": {
+  const { runAnswerSubcommand } = await import("@/lib/artlab/cli/answer");
+  const result = await runAnswerSubcommand({
+    workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine",
+    args: rest,
+  });
+  if (result.message) io.stdout(result.message);
+  return result.exitCode;
+}
+```
+
+- [ ] **Step 5: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/cli/answer.test.ts`
+Expected: PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/artlab/cli/answer.ts src/lib/artlab/cli/answer.test.ts scripts/artlab.ts
+git commit -m "$(cat <<'EOF'
+Wire artlab answer subcommand — records human gate response
+
+Writes inbox/cli/answer-<runId>-<timestamp>.json with runId +
+answer text. Daemon picks up and re-runs the state machine after
+applying the answer via the reply parser. Mirror of the Telegram
+'gate-reply' classification at the CLI surface.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Multi-word answer is preserved via `.join(" ")` (test the `approve direction 2` case).
+- [ ] Missing runId → exit 2; missing answer text → exit 2; runId not found → exit 1.
+- [ ] No reply-parser invocation in the CLI — the daemon's parser owns interpretation.
+
+### Task 3.30: artlab bot setup (interactive Keychain bootstrap)
+
+**Files:**
+- Create: `src/lib/artlab/cli/bot-setup.ts`
+- Test: `src/lib/artlab/cli/bot-setup.test.ts`
+- Modify: `scripts/artlab.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/cli/bot-setup.test.ts
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { runBotSetupSubcommand } from "./bot-setup";
+import { getKeychainSecret, deleteKeychainSecret, ARTLAB_KEYCHAIN_PREFIX } from "@/lib/artlab/bot/keychain";
+
+describe("artlab bot setup", () => {
+  const TOKEN_SVC = `${ARTLAB_KEYCHAIN_PREFIX}-telegram-token`;
+  const CHAT_ID_SVC = `${ARTLAB_KEYCHAIN_PREFIX}-chat-id`;
+
+  beforeEach(async () => {
+    await deleteKeychainSecret(TOKEN_SVC).catch(() => undefined);
+    await deleteKeychainSecret(CHAT_ID_SVC).catch(() => undefined);
+  });
+  afterEach(async () => {
+    await deleteKeychainSecret(TOKEN_SVC).catch(() => undefined);
+    await deleteKeychainSecret(CHAT_ID_SVC).catch(() => undefined);
+  });
+
+  it("writes both Keychain entries when --token and --chat-id provided non-interactively", async () => {
+    const result = await runBotSetupSubcommand({
+      args: ["--token", "TEST_TOKEN_123", "--chat-id", "8675309"],
+    });
+    expect(result.exitCode).toBe(0);
+    expect(await getKeychainSecret(TOKEN_SVC)).toBe("TEST_TOKEN_123");
+    expect(await getKeychainSecret(CHAT_ID_SVC)).toBe("8675309");
+  });
+
+  it("exits 2 when --token missing", async () => {
+    const result = await runBotSetupSubcommand({ args: ["--chat-id", "8675309"] });
+    expect(result.exitCode).toBe(2);
+  });
+
+  it("exits 2 when --chat-id is not numeric", async () => {
+    const result = await runBotSetupSubcommand({ args: ["--token", "T", "--chat-id", "not-a-number"] });
+    expect(result.exitCode).toBe(2);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/cli/bot-setup.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/cli/bot-setup.ts
+import { setKeychainSecret, ARTLAB_KEYCHAIN_PREFIX } from "@/lib/artlab/bot/keychain";
+
+export interface BotSetupSubcommandInput {
+  args: string[];
+}
+
+export interface BotSetupSubcommandResult {
+  exitCode: number;
+  message?: string;
+}
+
+function getFlag(args: string[], flag: string): string | undefined {
+  const idx = args.indexOf(flag);
+  if (idx === -1 || idx === args.length - 1) return undefined;
+  return args[idx + 1];
+}
+
+export async function runBotSetupSubcommand(input: BotSetupSubcommandInput): Promise<BotSetupSubcommandResult> {
+  const token = getFlag(input.args, "--token");
+  const chatId = getFlag(input.args, "--chat-id");
+  if (!token) return { exitCode: 2, message: "bot setup: expected --token <BotFather-token>" };
+  if (!chatId) return { exitCode: 2, message: "bot setup: expected --chat-id <numeric>" };
+  if (!/^-?\d+$/.test(chatId)) return { exitCode: 2, message: "bot setup: --chat-id must be numeric" };
+  await setKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-telegram-token`, token);
+  await setKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-chat-id`, chatId);
+  return {
+    exitCode: 0,
+    message: `Bot setup complete. Token and chat.id stored in macOS Keychain under ${ARTLAB_KEYCHAIN_PREFIX}-* services.`,
+  };
+}
+```
+
+- [ ] **Step 4: Wire up the stub**
+
+```ts
+// scripts/artlab.ts
+case "bot": {
+  const sub = rest[0];
+  if (sub === "setup") {
+    const { runBotSetupSubcommand } = await import("@/lib/artlab/cli/bot-setup");
+    const result = await runBotSetupSubcommand({ args: rest.slice(1) });
+    if (result.message) io.stdout(result.message);
+    return result.exitCode;
+  }
+  io.stderr(`bot: expected subcommand "setup". Got "${sub ?? ""}".`);
+  return 2;
+}
+```
+
+- [ ] **Step 5: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/cli/bot-setup.test.ts`
+Expected: PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/artlab/cli/bot-setup.ts src/lib/artlab/cli/bot-setup.test.ts scripts/artlab.ts
+git commit -m "$(cat <<'EOF'
+Wire artlab bot setup — Keychain bootstrap for Telegram credentials
+
+Non-interactive: --token <BotFather-token> --chat-id <numeric>.
+Writes both into macOS Keychain under tower-artlab-* services.
+chat.id validation prevents accidental string-typo writes that
+would silently break the identity check.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] chat.id must parse as integer (positive or negative — Telegram groups have negative IDs).
+- [ ] Keychain entries use the exact prefix `tower-artlab-` (matches what identity verifier reads).
+- [ ] No secret value echoed to stdout (the success message lists service names, not values).
+- [ ] `afterEach` in the test cleans up real Keychain entries.
+
+### Phase 3 completion criteria
+
+Run these commands; all must exit 0 / produce expected output:
+
+```bash
+# All Phase 3 tests pass
+npx vitest run src/lib/artlab/bot src/lib/artlab/daemon src/lib/artlab/self-evolution src/lib/artlab/cli
+
+# Integration tests both green
+npx vitest run src/lib/artlab/bot/bot.integration.test.ts src/lib/artlab/daemon/daemon.integration.test.ts
+
+# Branch policy assertion (spec safety property #5)
+npx vitest run src/lib/artlab/self-evolution/branch-policy.test.ts
+
+# All ten CLI subcommands return non-stub output (greps for 'stub' in their stdout)
+npm run artlab -- produce 2>&1 | grep -v "stub"
+npm run artlab -- continue 2>&1 | grep -v "stub"
+npm run artlab -- answer 2>&1 | grep -v "stub"
+npm run artlab -- status 2>&1 | grep -v "stub" || true   # may print "No runs yet."
+npm run artlab -- queue 2>&1 | grep -v "stub"
+npm run artlab -- health 2>&1 | grep -v "stub"
+npm run artlab -- cancel 2>&1 | grep -v "stub"
+npm run artlab -- bot 2>&1 | grep -v "stub"
+
+# Typecheck clean
+npx tsc --noEmit
+
+# Lint clean for Phase 3 modules
+npx eslint src/lib/artlab/bot src/lib/artlab/daemon src/lib/artlab/self-evolution src/lib/artlab/cli
+
+# Tag the phase
+git tag artlab-phase-3-complete
+```
+
 ---
 
 
