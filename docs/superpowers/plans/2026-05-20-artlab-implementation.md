@@ -15862,4 +15862,174 @@ git tag artlab-phase-8-complete
 
 ---
 
+## Appendix A — Coverage Matrix (Spec → Tasks)
+
+Every spec section maps to one or more tasks. Use this to verify the plan covers the design without gaps.
+
+| Spec section | Topic | Covered by |
+|---|---|---|
+| §1 North Star | Two-gate autonomy, Telegram-first | Header Goal; Phase 3 bot + parser tasks |
+| §2 Locked decisions table | Ambition, brain, surface, budget, voice, memory, machine, etc. | Distributed across phases — every cell from spec §2 traces to ≥1 task |
+| §3.1 Module map (11 modules) | intake/state/queue/runners/orchestrator/memory/coherence/bot/daemon/self-evolution/health + migration | Phase 0 Task 0.1 (tree); each subsequent phase fills a module |
+| §3.2 Data flow diagram | Mac daemon → orchestrator → runners → bot | Phase 3 daemon subphase + Phase 1 orchestrator |
+| §3.3 CLI subcommands (10) | produce/continue/answer/status/queue/health/cancel/daemon/bot/migrate | Phase 0 Task 0.7 (stubs); Phase 3 Tasks 3.27-3.30 (bodies) |
+| §4.1 10 phases | routed→…→closed | Phase 1 Tasks 1.1-1.2 (machine + blockers) |
+| §4.2 7 blockers | needs-human/budget-blocked/etc. | Phase 1 Task 1.2 |
+| §4.3 Transitions table | PhaseTransition type + validate/apply contract | Phase 1 Task 1.1 |
+| §4.4 Reconciler RunReality | Single read path | Phase 1 Task 1.5 |
+| §4.5 Heartbeat | progress.json every 10s | Phase 1 Task 1.17; Phase 5 enforces |
+| §4.6 Atomic writes | temp + rename | Convention + Phase 1 Task 1.4 |
+| §4.7 Cancel flow | SIGTERM + grace + refund | Phase 3 Task 3.19 + Task 3.5 |
+| §5.1 Telegram bot | Identity / 3-tier parser / image attachments | Phase 3 Tasks 3.1-3.12 |
+| §5.2 CLI | Same surface as bot | Phase 3 Tasks 3.27-3.30 |
+| §5.3 Daemon | launchd / poller / supervisor / blocker watcher / crash recovery / sleep guard | Phase 3 Tasks 3.13-3.22 |
+| §6.1 Deterministic scheduler | Orchestrator walks machine | Phase 1 Task 1.18 |
+| §6.2 LLM brain decisions | 6 decision kinds | Phase 2 Tasks 2.14-2.17 |
+| §6.3 Ambiguity detector | Confidence < 0.7 → needs-human | Phase 2 Task 2.2; Phase 3 Task 3.7 (threshold const) |
+| §7 Memory (3 ledgers + retrieval) | style-wins / rejections / prompt-evolution + getRelevantMemory | Phase 2 Tasks 2.6-2.9 |
+| §8 Cast coherence | Hashes + diversity + envelope | Phase 2 Tasks 2.10-2.13; Phase 6 Task 6.3 regression |
+| §9 Multi-asset bundles | BundleSpec, child runs, atomic policy | Phase 2 Task 2.3 (parser); Phase 6 Task 6.4 (acceptance) |
+| §10 Self-evolution | 5x friction → Codex CLI → branch | Phase 3 Tasks 3.23-3.26 |
+| §11 Budget (monthly cap + per-run) | budget/per-month-cap layered on existing ledger | Phase 0 Task 0.3 (re-export); Phase 8 Task 8.2 (move into ArtLab) |
+| §12 Real health snapshot | scanners replace stubbed zeros | Phase 1 Tasks 1.19-1.23; Phase 5 Task 5.11 (speed dashboard) |
+| §13.1 Promotion firewall | Refuses without exact phrase | Phase 1 Task 1.14; Phase 8 Task 8.11 |
+| §13.2 No duplicate spend | Slot leases + budget ledger | Phase 0 Task 0.3 + Phase 8 Task 8.11 |
+| §13.3 Cancellation honest | SIGTERM + grace + refund | Phase 3 Task 3.19; Phase 8 Task 8.11 |
+| §13.4 Resume after crash | reconcileCrashedRuns | Phase 3 Task 3.18; Phase 6 Task 6.5 |
+| §13.5 No PR auto-merge | Codex goal explicit ban + module-level grep test | Phase 3 Tasks 3.24, 3.26 |
+| §13.6 Identity check | Silent drop on chat.id mismatch | Phase 3 Task 3.3 |
+| §13.7 Secret hygiene | Keychain only | Phase 3 Task 3.1; Phase 8 Task 8.11 |
+| §13.8 Promoted state preservation | Byte-diff CI for Otis + Mara | Phase 4 Task 4.10 |
+| §13.9 Mid-run progress accuracy | 10s heartbeat | Phase 1 Task 1.17; Phase 5 conventions |
+| §13.10 Two-gate purity | Exact + pattern only; LLM tier routes to clarification | Phase 3 Tasks 3.5-3.7 |
+| §14 Migration plan (phases 0-7) | Plan maps to its 9 phases | Plan Map at top |
+| §15 Testing strategy | Unit / integration / e2e / stress / regression / coherence | Distributed; Phase 4 Task 4.11 (Rafe e2e); Phase 5 (benchmark); Phase 7 (per-asset e2e) |
+| §16 Doc consolidation (12→3) | docs/artlab/ENGINE/OPERATIONS/CHARACTER-PIPELINE | Phase 8 Tasks 8.5-8.8 |
+| §17 Open questions | Out of scope by design | Not implemented (deliberate per spec) |
+| §18 Success criteria | 10 criteria for "done" | Phase 8 Task 8.12 final-acceptance |
+
+**Coverage check passes if every spec section above has at least one task reference, AND every task in this plan traces back to at least one spec section (or to the Phase 5 speed override).**
+
+---
+
+## Appendix B — `/goal` Command Library
+
+The complete library of `/goal` commands. Copy-paste these into Claude Code. Replace `<placeholders>` with concrete values.
+
+### B.1 Whole-plan `/goal` (run once at the start; walk away)
+
+```
+/goal Execute every unchecked task in docs/superpowers/plans/2026-05-20-artlab-implementation.md following the Execution Protocol exactly. Use superpowers:subagent-driven-development for dispatch. Per-task: invoke a fresh implementer subagent for the TDD pass, then a fresh reviewer subagent (superpowers:requesting-code-review) on the diff, then apply the receiving-code-review tweak loop (max 3 rounds), then run the verification gate (vitest + tsc + lint + grep against the task's Files block) before committing the exact prescribed message. Cross-task validation every 5 tasks (full vitest + tsc + lint). Phase boundary tagging with git tag artlab-phase-<N>-complete. Done when (1) every checkbox in the plan is ticked, (2) all 9 phase tags exist (artlab-phase-0 through artlab-phase-8), (3) `npm test && npx tsc --noEmit && npm run lint && npx playwright test` all exit 0, (4) the Coverage Matrix in Appendix A still maps every spec section to a task. Halt and escalate to me via .artlab/engine/escalations/<runId>-<timestamp>.json if any single task fails Acceptance criteria after 3 reviewer-tweak rounds, OR if cross-task validation regresses an unrelated test, OR if a phase completion criterion fails after a clean per-task pass.
+```
+
+### B.2 Per-phase `/goal` (run one phase at a time; recommended for first run-through)
+
+#### B.2.0 Phase 0 — Scaffold
+
+```
+/goal Execute every unchecked task in Phase 0 of docs/superpowers/plans/2026-05-20-artlab-implementation.md. Use superpowers:subagent-driven-development. Per-task loop: implementer → reviewer (requesting-code-review) → tweak (max 3) → verification (vitest+tsc+lint+grep) → commit prescribed message. Done when: every Phase 0 checkbox ticked AND `find src/lib/artlab -type d | wc -l` ≥ 22 AND `npm run artlab -- help` exits 0 AND full vitest exits 0 AND `git tag artlab-phase-0-complete` succeeds.
+```
+
+#### B.2.1 Phase 1 — Foundation
+
+```
+/goal Execute every unchecked task in Phase 1 of docs/superpowers/plans/2026-05-20-artlab-implementation.md per the Execution Protocol. Done when: every Phase 1 checkbox ticked AND `npx vitest run src/lib/artlab/state src/lib/artlab/queue src/lib/artlab/runners src/lib/artlab/orchestrator src/lib/artlab/health` exits 0 AND the Phase 1 integration test (Task 1.24) passes (synthetic run routed→closed) AND `git tag artlab-phase-1-complete` succeeds.
+```
+
+#### B.2.2 Phase 2 — Intelligence
+
+```
+/goal Execute every unchecked task in Phase 2 of docs/superpowers/plans/2026-05-20-artlab-implementation.md per the Execution Protocol. Done when: every Phase 2 checkbox ticked AND the Rafe→Otis routing regression test (Task 2.5) passes AND `npx vitest run src/lib/artlab/intake src/lib/artlab/memory src/lib/artlab/coherence src/lib/artlab/orchestrator src/lib/artlab/adapters` exits 0 AND `git tag artlab-phase-2-complete` succeeds.
+```
+
+#### B.2.3 Phase 3 — Surfaces
+
+```
+/goal Execute every unchecked task in Phase 3 of docs/superpowers/plans/2026-05-20-artlab-implementation.md per the Execution Protocol. Done when: every Phase 3 checkbox ticked AND `npx vitest run src/lib/artlab/bot src/lib/artlab/daemon src/lib/artlab/self-evolution src/lib/artlab/cli` exits 0 AND branch-policy test (Task 3.26) passes AND every CLI subcommand prints non-stub output AND `git tag artlab-phase-3-complete` succeeds.
+```
+
+#### B.2.4 Phase 4 — Migration + first Rafe
+
+```
+/goal Execute Phase 4 of docs/superpowers/plans/2026-05-20-artlab-implementation.md tasks 4.1 through 4.10 and 4.12 per the Execution Protocol. Task 4.11 (Rafe acceptance test) is describe.skip by design — I will run it manually after this /goal closes. Done when: tasks 4.1-4.10 and 4.12 checkboxes ticked AND each legacy script exits 1 with the DEPRECATED banner AND `.github/workflows/artlab-byte-diff.yml` exists AND `git tag artlab-phase-4-complete` succeeds. Notify me before tagging that Phase 4 is ready for the manual Rafe run.
+```
+
+#### B.2.5 Phase 5 — Speed
+
+```
+/goal Execute Phase 5 of docs/superpowers/plans/2026-05-20-artlab-implementation.md tasks 5.1 through 5.13 and 5.15 per the Execution Protocol. Task 5.14 (Rafe-rerun acceptance) is describe.skip — I will un-skip and run after ≥ 3 post-Phase-5 rafe-run measurements exist. Done when: tasks 5.1-5.13 and 5.15 checkboxes ticked AND prompt-caching assertion passes AND Phase 1 quality tests still pass (no regressions) AND daily benchmark + speed gate workflows exist AND docs/artlab/SPEED.md exists AND `git tag artlab-phase-5-complete` succeeds.
+```
+
+#### B.2.6 Phase 6 — Cast push
+
+```
+/goal Execute Phase 6 of docs/superpowers/plans/2026-05-20-artlab-implementation.md per the Execution Protocol. Note: Phase 6 task bodies are runbook-driven, not implementation-heavy. Done when: docs/artlab/CAST-PUSH-RUNBOOK.md exists AND every test file in tasks 6.2-6.5 exists (most are describe.skip — that's intended; un-skip happens after each character lands) AND `git tag artlab-phase-6-complete` succeeds. The actual 9-character production happens via my Telegram triggers between this /goal and the Phase 7 /goal.
+```
+
+#### B.2.7 Phase 7 — Asset-type expansion
+
+```
+/goal Execute Phase 7 of docs/superpowers/plans/2026-05-20-artlab-implementation.md per the Execution Protocol. Done when: every Phase 7 checkbox ticked AND `npx vitest run src/lib/artlab/contracts src/lib/artlab/runners` exits 0 AND all 3 e2e specs exist (artlab-environment-promotion / artlab-ui-texture-promotion / artlab-animation-promotion) AND `git tag artlab-phase-7-complete` succeeds. The actual 1-of-each promotion happens via my Telegram triggers between this /goal and the Phase 8 /goal.
+```
+
+#### B.2.8 Phase 8 — Legacy retirement (FINALE)
+
+```
+/goal Execute Phase 8 of docs/superpowers/plans/2026-05-20-artlab-implementation.md per the Execution Protocol. This is the irreversible deletion phase — be extra strict on cross-task validation (run full vitest + tsc + lint between every Phase 8 task, not just every 5). Done when: every Phase 8 checkbox ticked AND `grep -rl creative-production src scripts | wc -l` returns 0 AND src/lib/creative-production does NOT exist AND docs/legacy has ≥ 12 archived docs + README AND 3 ArtLab docs are non-placeholder AND SKILL.md ≤ 80 lines AND CLAUDE.md says ArtLab and does NOT say `npm run art:produce` AND safety-properties/all-ten.test.ts passes AND final-acceptance.test.ts passes AND full `npm test && npx tsc --noEmit && npm run lint && npx playwright test` exit 0 AND `git tag artlab-phase-8-complete` succeeds.
+```
+
+### B.3 Per-task `/goal` (auto-invoked by the dispatcher; you almost never type this manually)
+
+Template — replace `<N.M>` with the task ID and `<test-paths>` / `<files>` with the values from the task's Files block:
+
+```
+/goal Implement Task <N.M> as written in docs/superpowers/plans/2026-05-20-artlab-implementation.md. Done when (1) the task's Acceptance criteria block is satisfied (verified by a fresh reviewer subagent using superpowers:requesting-code-review against both the per-task criteria AND the Universal Acceptance Criteria), (2) `npx vitest run <test-paths>` exits 0, (3) `npx tsc --noEmit` shows no new errors vs the pre-task baseline, (4) `npx eslint <files>` exits 0, (5) `grep -nE "console\.log|TODO|FIXME|XXX" <files>` returns 0 matches, (6) the task commit appears in git with the prescribed message verbatim. Max 3 reviewer-tweak rounds; if still failing after round 3, halt and escalate.
+```
+
+### B.4 Recovery `/goal` (use after escalation to investigate without committing)
+
+```
+/goal Investigate the most recent escalation in .artlab/engine/escalations/. Read the failed task's body and the reviewer's complaints. Diagnose the root cause without making any changes. Done when: the diagnosis is written to .artlab/engine/escalations/<runId>-diagnosis.md with (1) the task ID and reviewer rejection summary, (2) the root cause, (3) the recommended fix, (4) an explicit yes/no on whether the plan needs revision.
+```
+
+### B.5 Repair `/goal` (after recovery diagnosis approves a one-off fix)
+
+```
+/goal Apply the fix described in <path-to-diagnosis.md>. Use superpowers:requesting-code-review on the diff before commit. Done when: the fix is committed AND the originally-failing task's tests pass AND no unrelated test regressed AND the diagnosis file is moved to .artlab/engine/escalations/resolved/ with a closing note appended.
+```
+
+### B.6 Phase rerun `/goal` (rare — when a phase tag must be re-asserted after fixes)
+
+```
+/goal Re-verify Phase <N> completion criteria for docs/superpowers/plans/2026-05-20-artlab-implementation.md. Do NOT re-execute completed tasks; only re-run the Phase <N> completion criteria block at the end of that phase. Done when every shell command in the block exits 0 AND the existing artlab-phase-<N>-complete tag still points at the right commit (if not, delete and re-tag at HEAD).
+```
+
+---
+
+## Appendix C — Self-Review Notes
+
+This appendix is filled in during the writing-plans self-review pass. Each entry is one of:
+- **Coverage gap** — a spec requirement with no task; resolution = add a task.
+- **Placeholder** — a "TBD" / "TODO" pattern that should be replaced; resolution = inline replacement.
+- **Type/name inconsistency** — function/type/const used differently in different tasks; resolution = pick one, update references.
+
+| Entry | Type | Location | Resolution |
+|---|---|---|---|
+| (none — initial pass complete; this appendix updates over time as the plan is executed and gaps surface) | — | — | — |
+
+**Self-review checklist (run after every plan revision):**
+
+- [ ] Every Phase has a completion-criteria block at its end.
+- [ ] Every task has Step 1-5 with explicit code and commit message.
+- [ ] Every task has a per-task Acceptance criteria block.
+- [ ] Every code block compiles in isolation (no missing import statements).
+- [ ] Every spec section in Coverage Matrix has at least one task reference.
+- [ ] No task references a function defined nowhere in the plan.
+- [ ] No "TBD", "TODO", "FIXME", "fill in details" in task bodies.
+- [ ] Commit messages use imperative mood and end with Co-Authored-By trailer.
+
+---
+
+**End of plan.** 142 tasks · 9 phases · ~5,000 lines of new ArtLab code · ~12,000 lines of legacy CPE deleted · 10 safety properties under test · ≥ 40% wall-clock improvement target · two human gates only.
+
 
