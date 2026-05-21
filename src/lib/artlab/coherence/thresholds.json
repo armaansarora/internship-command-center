@@ -1,0 +1,5 @@
+{
+  "silhouette": { "minPairwiseDistance": 0.08, "maxCohesionDistance": 0.40 },
+  "palette": { "minPairwiseDistance": 22, "maxCohesionDistance": 70 },
+  "age": { "maxImpressionGapYears": 18 }
+}
