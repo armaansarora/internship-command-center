@@ -63,3 +63,39 @@ export function parseReplyPattern(input: string): Tier2Result {
   }
   return { kind: "no-match" };
 }
+
+import type { ArtLabLlmBrain, ArtLabLlmDecisionResult } from "../orchestrator/llm-brain";
+
+const LLM_CONFIDENCE_THRESHOLD = 0.7;
+
+export type ComposedReplyResult =
+  | { kind: "promotion-accepted" }
+  | { kind: "matched"; action: Tier2Action }
+  | { kind: "echo-back-required-phrase"; message: string }
+  | { kind: "needs-clarification"; text: string };
+
+function brainResultToAction(r: ArtLabLlmDecisionResult): Tier2Action | null {
+  const j = r.outputJson as { action?: string; laneIndex?: number; text?: string; runId?: string };
+  if (j.action === "approve-direction" && typeof j.laneIndex === "number") {
+    return { type: "approve-direction", laneIndex: j.laneIndex };
+  }
+  if (j.action === "revise" && typeof j.text === "string") return { type: "revise", text: j.text };
+  if (j.action === "reject") return { type: "reject" };
+  if (j.action === "cancel" && typeof j.runId === "string") return { type: "cancel", runId: j.runId };
+  return null;
+}
+
+export async function parseReply(input: string, brain: ArtLabLlmBrain): Promise<ComposedReplyResult> {
+  const tier1 = parseReplyExact(input);
+  if (tier1.kind === "promotion-accepted") return { kind: "promotion-accepted" };
+  if (tier1.kind === "echo-back-required-phrase") return tier1;
+  const tier2 = parseReplyPattern(input);
+  if (tier2.kind === "matched") return { kind: "matched", action: tier2.action };
+  const brainResult = await brain.decide({ kind: "reply-parser-fallback", input: { text: input } });
+  if (brainResult.confidence < LLM_CONFIDENCE_THRESHOLD) {
+    return { kind: "needs-clarification", text: input };
+  }
+  const action = brainResultToAction(brainResult);
+  if (!action) return { kind: "needs-clarification", text: input };
+  return { kind: "matched", action };
+}
