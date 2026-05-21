@@ -11557,57 +11557,73 @@ EOF
 - [ ] Test verifies both "passes when identical" and "fails when changed" cases.
 - [ ] Both Otis (lobby/otis) and Mara (penthouse/ceo) are scanned.
 
-### Task 4.11: First Rafe Calder acceptance test (end-to-end)
+### Task 4.11: First Rafe Calder acceptance test (post-/goal artifact)
+
+**This test is a POST-/goal artifact.** It NEVER runs during any `/goal` execution — it lives in Appendix D's Post-/goal Manual Validation suite. Three layers of protection prevent accidental execution: (1) the whole describe block is `describe.skip`, (2) the test body asserts a `ARTLAB_ALLOW_REAL_MONEY_VALIDATION=yes` env var and throws immediately if missing, (3) Appendix D's runbook is the only documented path that sets the env var.
 
 **Files:**
 - Create: `src/lib/artlab/migration/rafe-acceptance.test.ts`
 
-- [ ] **Step 1: Write the acceptance test (marked `it.skip` by default — real-money run)**
+- [ ] **Step 1: Write the acceptance test (three layers of protection)**
 
 ```ts
 // src/lib/artlab/migration/rafe-acceptance.test.ts
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, existsSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { runProduceSubcommand } from "@/lib/artlab/cli/produce";
 
-// This test is the Phase 4 go-live acceptance gate. It costs real money
-// (one full Rafe Calder run). Marked it.skip by default; un-skip and run
-// manually for the migration cutover. The Phase 5 baseline measurement
-// reads the wall-clock from this run's events.jsonl.
+// =============================================================================
+// POST-/goal ARTIFACT — runs in Appendix D Post-/goal Manual Validation, never
+// during /goal execution.
+//
+// Three layers of protection:
+//   1. describe.skip — vitest skips the whole block by default.
+//   2. Env guard — even if someone un-skips, the test throws immediately
+//      unless ARTLAB_ALLOW_REAL_MONEY_VALIDATION === "yes".
+//   3. Appendix D runbook is the only documented path that sets the env var.
+//
+// Real money: this triggers a full Rafe Calder run via the real Gemini API.
+// =============================================================================
 describe.skip("Phase 4 acceptance — first real Rafe run via ArtLab", () => {
   it("artlab produce 'make Rafe Calder' completes through closed phase", async () => {
-    const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? join(process.cwd(), ".artlab", "engine");
-    // Real run, real Gemini, real money. Production gate: ARTLAB_GEMINI_MODE must be unset.
+    if (process.env.ARTLAB_ALLOW_REAL_MONEY_VALIDATION !== "yes") {
+      throw new Error(
+        "Refusing to run real-money acceptance test. " +
+        "This test costs real Gemini API spend. " +
+        "If you intentionally want to run it, follow Appendix D of the plan, " +
+        "which sets ARTLAB_ALLOW_REAL_MONEY_VALIDATION=yes before un-skipping.",
+      );
+    }
     expect(process.env.ARTLAB_GEMINI_MODE).toBeFalsy();
+    const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? join(process.cwd(), ".artlab", "engine");
     const result = await runProduceSubcommand({
       workspaceRoot,
       args: ["make", "Rafe", "Calder"],
     });
     expect(result.exitCode).toBe(0);
     expect(result.runId).toBeTruthy();
-    // The actual phase progression happens via the running daemon.
-    // This test only verifies the produce intent was accepted; Armaan watches
-    // Telegram to confirm the two gates land (`approve direction <n>` then
+    // Actual phase progression happens via the running daemon. This test only
+    // verifies the produce intent was accepted; Armaan watches Telegram to
+    // confirm the two gates land (`approve direction <n>` then
     // `approved for app`).
     expect(existsSync(join(workspaceRoot, "inbox", "cli", `produce-${result.runId}.json`))).toBe(true);
   }, 30 * 60_000);
 });
 ```
 
-- [ ] **Step 2: Commit (no fail/pass — the test is skipped by design)**
+- [ ] **Step 2: Commit (no fail/pass — the test is skipped by design and env-guarded)**
 
 ```bash
 git add src/lib/artlab/migration/rafe-acceptance.test.ts
 git commit -m "$(cat <<'EOF'
-Add Phase 4 acceptance test scaffold — first real Rafe Calder run
+Add Phase 4 acceptance test scaffold (post-/goal, env-guarded)
 
-Marked describe.skip — un-skip and run manually for the migration
-cutover. Real Gemini, real money. The test only verifies the
-produce intent was accepted; the actual phase progression and
-two human gates are observed via Telegram. Phase 5 baseline
-measurement reads wall-clock from this run's events.jsonl.
+Three layers of protection: describe.skip + env-guard inside
+the test body (ARTLAB_ALLOW_REAL_MONEY_VALIDATION=yes) + only
+Appendix D documents the path that sets the env var. Test
+NEVER runs during /goal execution. Real Gemini, real money,
+manually invoked from Appendix D's runbook only.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -11615,10 +11631,11 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Test is `describe.skip` by default — vitest never accidentally bills the Gemini API.
+- [ ] `describe.skip` (layer 1).
+- [ ] Env guard throws if `ARTLAB_ALLOW_REAL_MONEY_VALIDATION` is not `"yes"` (layer 2).
+- [ ] Error message names Appendix D explicitly so an accidental un-skipper sees the right path.
 - [ ] Test asserts `ARTLAB_GEMINI_MODE` is unset (mock would defeat the purpose).
-- [ ] 30-minute timeout per `expect(...).toBe(0)` call (cli-produce returns fast; the comment notes real flow happens in daemon).
-- [ ] Comment block explicitly tells the operator to watch Telegram for gate confirmations.
+- [ ] 30-minute timeout (cli-produce returns fast; comment notes real flow happens in daemon).
 
 ### Task 4.12: Baseline wall-clock recorder (input to Phase 5)
 
@@ -11765,9 +11782,10 @@ ARTLAB_WORKSPACE_ROOT=$(mktemp -d) npx tsx -e "import('./src/lib/artlab/migratio
 # Byte-diff CI workflow exists
 test -f .github/workflows/artlab-byte-diff.yml
 
-# Real Rafe run reached closed (manual check — un-skip rafe-acceptance.test.ts, run, confirm Telegram round-trip)
-# After successful Rafe run, record the baseline:
-npx tsx -e "import('./src/lib/artlab/migration/baseline-recorder').then(async m=>{const r=await m.recordBaseline({workspaceRoot:'.artlab/engine',runId:'<rafe-run-id>',label:'phase-4-rafe-baseline'});console.log('Baseline recorded:',r.wallClockMs,'ms')})"
+# Task 4.11 (Rafe acceptance test) is intentionally describe.skip throughout the /goal.
+# It runs in Appendix D — Post-/goal Manual Validation, AFTER the whole plan tags complete.
+# The baseline recorder (Task 4.12) exists as a helper; the actual phase-4-rafe-baseline
+# entry is written during Appendix D, not here.
 
 # Typecheck clean
 npx tsc --noEmit
@@ -13302,12 +13320,14 @@ EOF
 - [ ] Message includes both absolute ms numbers AND percentage.
 - [ ] Workflow only runs on PRs touching `src/lib/artlab/**` (no noise on doc-only PRs).
 
-### Task 5.14: Phase 5 acceptance — Rafe-rerun proves ≥ 40% improvement
+### Task 5.14: Phase 5 acceptance — Rafe-rerun proves ≥ 40% improvement (post-/goal artifact)
+
+**This test is a POST-/goal artifact.** Same three-layer protection as Task 4.11: `describe.skip` + env guard + Appendix D is the only runbook path. NEVER runs during `/goal` execution.
 
 **Files:**
 - Create: `src/lib/artlab/speed/phase-5-acceptance.test.ts`
 
-- [ ] **Step 1: Write the asserting test (describe.skip — real-money rerun)**
+- [ ] **Step 1: Write the asserting test (three layers of protection)**
 
 ```ts
 // src/lib/artlab/speed/phase-5-acceptance.test.ts
@@ -13315,13 +13335,28 @@ import { describe, expect, it } from "vitest";
 import { readBaseline } from "@/lib/artlab/migration/baseline-recorder";
 import { readMeasurements } from "./measure";
 
+// =============================================================================
+// POST-/goal ARTIFACT — runs in Appendix D Post-/goal Manual Validation, never
+// during /goal execution.
+//
+// Same three-layer protection as Task 4.11 — see that file's comment for the
+// detailed rationale.
+// =============================================================================
 describe.skip("Phase 5 acceptance — Rafe-rerun ≥ 40% faster than baseline", () => {
   it("median post-Phase-5 rafe-run measurement beats the baseline by ≥ 40%", async () => {
+    if (process.env.ARTLAB_ALLOW_REAL_MONEY_VALIDATION !== "yes") {
+      throw new Error(
+        "Refusing to assert Phase 5 acceptance without explicit consent. " +
+        "This test requires ≥ 3 real Rafe-rerun measurements (each costs real " +
+        "Gemini API spend). Follow Appendix D of the plan to record those runs " +
+        "and set ARTLAB_ALLOW_REAL_MONEY_VALIDATION=yes before un-skipping.",
+      );
+    }
     const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine";
     const baseline = await readBaseline({ workspaceRoot, label: "phase-4-rafe-baseline" });
     expect(baseline).toBeTruthy();
     const measurements = await readMeasurements({ workspaceRoot, label: "rafe-run" });
-    expect(measurements.length).toBeGreaterThanOrEqual(3); // need ≥ 3 post-speed runs
+    expect(measurements.length).toBeGreaterThanOrEqual(3);
     const recentMs = measurements.slice(-3).map((m) => m.durationMs).sort((a, b) => a - b);
     const median = recentMs[1]!;
     const improvement = ((baseline!.wallClockMs - median) / baseline!.wallClockMs) * 100;
@@ -13330,18 +13365,20 @@ describe.skip("Phase 5 acceptance — Rafe-rerun ≥ 40% faster than baseline", 
 });
 ```
 
-- [ ] **Step 2: Commit (the test is skipped — Armaan un-skips after re-running Rafe)**
+- [ ] **Step 2: Commit**
 
 ```bash
 git add src/lib/artlab/speed/phase-5-acceptance.test.ts
 git commit -m "$(cat <<'EOF'
-Phase 5 acceptance test — assert Rafe-rerun ≥ 40% faster
+Phase 5 acceptance test (post-/goal, env-guarded)
 
-describe.skip until Armaan reruns Rafe through the Phase 5
-engine and records ≥ 3 'rafe-run' measurements. When un-skipped,
-the test asserts median post-Phase-5 wall-clock beats the
-phase-4-rafe-baseline by ≥ 40%. This is the Phase 5 completion
-gate.
+Three layers of protection: describe.skip + env-guard inside
+the test body (ARTLAB_ALLOW_REAL_MONEY_VALIDATION=yes) +
+Appendix D documents the only path that sets the env var.
+Test NEVER runs during /goal execution. Asserts median of the
+last 3 rafe-run measurements beats phase-4-rafe-baseline by
+≥ 40%. Both Task 4.11 (baseline) and the ≥ 3 reruns are
+recorded in Appendix D before un-skipping.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -13349,7 +13386,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `describe.skip` so vitest does not run it automatically.
+- [ ] `describe.skip` (layer 1).
+- [ ] Env guard throws on missing `ARTLAB_ALLOW_REAL_MONEY_VALIDATION` (layer 2).
+- [ ] Error message names Appendix D and the env var explicitly.
 - [ ] Asserts ≥ 3 post-Phase-5 runs exist (single measurement is noise).
 - [ ] Median (not min, not mean) used — robust to outliers.
 - [ ] Threshold is `≥ 40%` matching the Phase 5 promise.
@@ -13442,8 +13481,10 @@ test -f .github/workflows/artlab-benchmark.yml
 test -f .github/workflows/artlab-speed-regression-gate.yml
 test -f docs/artlab/SPEED.md
 
-# Phase 5 acceptance test (manual): un-skip and run after ≥ 3 Rafe-rerun measurements exist
-# Median wall-clock of last 3 rafe-runs must beat phase-4-rafe-baseline by ≥ 40%
+# Task 5.14 (Phase 5 acceptance — Rafe-rerun ≥ 40% faster) is intentionally
+# describe.skip throughout the /goal. It runs in Appendix D — Post-/goal Manual
+# Validation, AFTER the whole plan tags complete and you have ≥ 3 real Rafe-rerun
+# measurements in .artlab/engine/ledgers/measurements.jsonl.
 
 # Tag the phase
 git tag artlab-phase-5-complete
@@ -15919,7 +15960,7 @@ The complete library of `/goal` commands. Copy-paste these into Claude Code. Rep
 ### B.1 Whole-plan `/goal` (run once at the start; walk away)
 
 ```
-/goal Execute every unchecked task in docs/superpowers/plans/2026-05-20-artlab-implementation.md following the Execution Protocol exactly. Use superpowers:subagent-driven-development for dispatch. Per-task: invoke a fresh implementer subagent for the TDD pass, then a fresh reviewer subagent (superpowers:requesting-code-review) on the diff, then apply the receiving-code-review tweak loop (max 3 rounds), then run the verification gate (vitest + tsc + lint + grep against the task's Files block) before committing the exact prescribed message. Cross-task validation every 5 tasks (full vitest + tsc + lint). Phase boundary tagging with git tag artlab-phase-<N>-complete. Done when (1) every checkbox in the plan is ticked, (2) all 9 phase tags exist (artlab-phase-0 through artlab-phase-8), (3) `npm test && npx tsc --noEmit && npm run lint && npx playwright test` all exit 0, (4) the Coverage Matrix in Appendix A still maps every spec section to a task. Halt and escalate to me via .artlab/engine/escalations/<runId>-<timestamp>.json if any single task fails Acceptance criteria after 3 reviewer-tweak rounds, OR if cross-task validation regresses an unrelated test, OR if a phase completion criterion fails after a clean per-task pass.
+/goal Execute every unchecked task in docs/superpowers/plans/2026-05-20-artlab-implementation.md following the Execution Protocol exactly. Use superpowers:subagent-driven-development for dispatch. Per-task: invoke a fresh implementer subagent for the TDD pass, then a fresh reviewer subagent (superpowers:requesting-code-review) on the diff, then apply the receiving-code-review tweak loop (max 3 rounds), then run the verification gate (vitest + tsc + lint + grep against the task's Files block) before committing the exact prescribed message. Cross-task validation every 5 tasks (full vitest + tsc + lint). Phase boundary tagging with git tag artlab-phase-<N>-complete. CRITICAL RULE — DO NOT un-skip or modify Tasks 4.11 (rafe-acceptance.test.ts) or 5.14 (phase-5-acceptance.test.ts) anywhere during this /goal — they are post-/goal artifacts with three layers of protection (describe.skip + ARTLAB_ALLOW_REAL_MONEY_VALIDATION env guard + Appendix D as the only documented runbook). They MUST stay describe.skip throughout. Never set ARTLAB_ALLOW_REAL_MONEY_VALIDATION during this /goal. Never invoke a real Rafe Calder run through artlab produce. The Phase 4 and Phase 5 completion criteria are written so they tag complete without those tests running. Done when (1) every checkbox in the plan is ticked, (2) all 9 phase tags exist (artlab-phase-0 through artlab-phase-8), (3) `npm test && npx tsc --noEmit && npm run lint && npx playwright test` all exit 0 (the two post-/goal tests stay describe.skip — that's expected), (4) the Coverage Matrix in Appendix A still maps every spec section to a task. Halt and escalate to me via .artlab/engine/escalations/<runId>-<timestamp>.json if any single task fails Acceptance criteria after 3 reviewer-tweak rounds, OR if cross-task validation regresses an unrelated test, OR if a phase completion criterion fails after a clean per-task pass. When everything tags complete, print the message: "ArtLab /goal complete. Run Appendix D Post-/goal Manual Validation when ready to validate end-to-end with real money."
 ```
 
 ### B.2 Per-phase `/goal` (run one phase at a time; recommended for first run-through)
@@ -15951,13 +15992,13 @@ The complete library of `/goal` commands. Copy-paste these into Claude Code. Rep
 #### B.2.4 Phase 4 — Migration + first Rafe
 
 ```
-/goal Execute Phase 4 of docs/superpowers/plans/2026-05-20-artlab-implementation.md tasks 4.1 through 4.10 and 4.12 per the Execution Protocol. Task 4.11 (Rafe acceptance test) is describe.skip by design — I will run it manually after this /goal closes. Done when: tasks 4.1-4.10 and 4.12 checkboxes ticked AND each legacy script exits 1 with the DEPRECATED banner AND `.github/workflows/artlab-byte-diff.yml` exists AND `git tag artlab-phase-4-complete` succeeds. Notify me before tagging that Phase 4 is ready for the manual Rafe run.
+/goal Execute Phase 4 of docs/superpowers/plans/2026-05-20-artlab-implementation.md tasks 4.1 through 4.12 per the Execution Protocol. Task 4.11 (Rafe acceptance test) is intentionally describe.skip and stays skipped throughout this /goal — it runs in Appendix D Post-/goal Manual Validation, never in this /goal. Done when: every Phase 4 checkbox ticked AND each legacy script exits 1 with the DEPRECATED banner AND `.github/workflows/artlab-byte-diff.yml` exists AND `git tag artlab-phase-4-complete` succeeds. Tag without waiting for any manual step — the post-/goal validation suite is fully decoupled.
 ```
 
 #### B.2.5 Phase 5 — Speed
 
 ```
-/goal Execute Phase 5 of docs/superpowers/plans/2026-05-20-artlab-implementation.md tasks 5.1 through 5.13 and 5.15 per the Execution Protocol. Task 5.14 (Rafe-rerun acceptance) is describe.skip — I will un-skip and run after ≥ 3 post-Phase-5 rafe-run measurements exist. Done when: tasks 5.1-5.13 and 5.15 checkboxes ticked AND prompt-caching assertion passes AND Phase 1 quality tests still pass (no regressions) AND daily benchmark + speed gate workflows exist AND docs/artlab/SPEED.md exists AND `git tag artlab-phase-5-complete` succeeds.
+/goal Execute Phase 5 of docs/superpowers/plans/2026-05-20-artlab-implementation.md tasks 5.1 through 5.15 per the Execution Protocol. Task 5.14 (Rafe-rerun acceptance) is intentionally describe.skip and stays skipped throughout this /goal — it runs in Appendix D Post-/goal Manual Validation, never in this /goal. Done when: every Phase 5 checkbox ticked AND prompt-caching assertion passes AND Phase 1 quality tests still pass (no regressions) AND daily benchmark + speed gate workflows exist AND docs/artlab/SPEED.md exists AND `git tag artlab-phase-5-complete` succeeds.
 ```
 
 #### B.2.6 Phase 6 — Cast push
@@ -16030,6 +16071,147 @@ This appendix is filled in during the writing-plans self-review pass. Each entry
 
 ---
 
-**End of plan.** 142 tasks · 9 phases · ~5,000 lines of new ArtLab code · ~12,000 lines of legacy CPE deleted · 10 safety properties under test · ≥ 40% wall-clock improvement target · two human gates only.
+---
+
+## Appendix D — Post-`/goal` Manual Validation
+
+**When to run this:** ONLY after the whole-plan or per-phase `/goal` has completed and tagged `artlab-phase-8-complete`. This appendix is the canonical runbook for the two real-money validation tests that the `/goal` deliberately skipped. Running these confirms the engine actually works end-to-end with real Gemini API spend and real Telegram round-trips.
+
+**Why this is decoupled from `/goal`:** the `/goal` produces a complete, well-tested codebase autonomously without ever spending real money. Real-money validation is a separate, human-supervised step. Both Tasks 4.11 and 5.14 carry three layers of protection (`describe.skip` + `ARTLAB_ALLOW_REAL_MONEY_VALIDATION` env guard + this appendix as the only documented invocation path) so they cannot accidentally fire during automation.
+
+**Estimated cost:** ~$15-20 for the Phase 4 Rafe run + ~$45-60 for three Phase 5 Rafe reruns. Total ≈ $60-80 to fully validate.
+
+### D.0 Pre-flight checks
+
+```bash
+# All 9 phase tags must exist
+for n in 0 1 2 3 4 5 6 7 8; do
+  git rev-parse --verify "artlab-phase-$n-complete" >/dev/null 2>&1 || { echo "FAIL: missing tag artlab-phase-$n-complete"; exit 1; }
+done
+
+# Daemon is installed and running
+launchctl list | grep com.tower.artlab || { echo "FAIL: daemon not loaded — see docs/artlab/OPERATIONS.md"; exit 1; }
+
+# Telegram credentials are in Keychain (Task 3.30 was run with real values, not mocks)
+security find-generic-password -a artlab -s tower-artlab-telegram-token -w >/dev/null 2>&1 || { echo "FAIL: missing telegram token in Keychain"; exit 1; }
+security find-generic-password -a artlab -s tower-artlab-chat-id -w >/dev/null 2>&1 || { echo "FAIL: missing chat-id in Keychain"; exit 1; }
+
+# Gemini API key is set (env or Keychain)
+test -n "$GEMINI_API_KEY" || security find-generic-password -a artlab -s tower-artlab-gemini-key -w >/dev/null 2>&1 || { echo "FAIL: no Gemini API key found"; exit 1; }
+
+# ARTLAB_GEMINI_MODE must be UNSET (real spend, not mock)
+test -z "$ARTLAB_GEMINI_MODE" || { echo "FAIL: unset ARTLAB_GEMINI_MODE first"; exit 1; }
+
+# Promoted state is intact (byte-diff would catch any drift)
+test -d public/art/lobby/otis && test -d public/art/penthouse/ceo
+```
+
+All checks must pass before proceeding.
+
+### D.1 — Phase 4 validation: real Rafe Calder run
+
+This is the Phase 4 go-live acceptance gate. One real Rafe run, end-to-end via Telegram.
+
+```bash
+# Step 1 — un-skip the test
+sed -i '' 's/^describe\.skip(/describe(/' src/lib/artlab/migration/rafe-acceptance.test.ts
+
+# Step 2 — run with the env guard set
+ARTLAB_ALLOW_REAL_MONEY_VALIDATION=yes \
+  npx vitest run src/lib/artlab/migration/rafe-acceptance.test.ts
+```
+
+**Then watch Telegram.** The daemon will send (over the course of ~10-20 minutes if Phase 5 speed improvements landed; ~22 minutes baseline if they didn't):
+
+1. A concept board with 5 lane images and the prompt: `Rafe concepts ready. Reply: approve direction 1-5, revise: <change>, or reject/archive.`
+2. Reply: `approve direction <n>` (pick the lane closest to a "pipeline closer" energy).
+3. A final 21-sprite board with the prompt: `Rafe final upload-ready board (21 sprites). Reply: approved for app to promote.`
+4. Reply (exactly): `approved for app`
+5. A completion message: `Rafe shipped. 21 sprites promoted, $X.XX spent, browser QA passed.`
+
+```bash
+# Step 3 — record the baseline (reads the just-finished run's events.jsonl)
+RAFE_RUN_ID=$(ls -1t .artlab/engine/runs | head -1)
+npx tsx -e "import('./src/lib/artlab/migration/baseline-recorder').then(async m=>{const r=await m.recordBaseline({workspaceRoot:'.artlab/engine',runId:'$RAFE_RUN_ID',label:'phase-4-rafe-baseline'});console.log('Baseline:',r.wallClockMs,'ms')})"
+
+# Step 4 — re-skip the test (so future /goal re-runs stay safe)
+sed -i '' 's/^describe(/describe.skip(/' src/lib/artlab/migration/rafe-acceptance.test.ts
+
+# Step 5 — verify nothing else changed
+git status
+# Expect: no changes (sed reverted the un-skip). If anything else changed, investigate.
+
+# Step 6 — verify Otis + Mara still byte-identical
+test "$(git diff origin/main -- public/art/lobby/otis public/art/penthouse/ceo | wc -l)" -eq 0
+```
+
+D.1 passes when: the Telegram completion message arrives, the baseline is recorded, and the byte-diff check is clean.
+
+### D.2 — Phase 5 validation: assert ≥ 40% speed improvement
+
+After D.1 records the baseline, run Rafe three more times via Telegram (or any character — `rafe-run` is just the measurement label). Each run produces a fresh `rafe-run` measurement.
+
+```bash
+# Step 1 — Confirm baseline exists
+test -f .artlab/engine/ledgers/baselines.jsonl
+grep -q phase-4-rafe-baseline .artlab/engine/ledgers/baselines.jsonl
+
+# Step 2 — Trigger 3 reruns via Telegram (one at a time, wait for each `closed`)
+# From Telegram: "make Rafe Calder"
+# Reply through both gates as in D.1
+# Repeat 2 more times so 3 fresh rafe-run measurements land in ledgers/measurements.jsonl
+
+# Step 3 — Confirm ≥ 3 rafe-run measurements exist
+test "$(grep -c '"label":"rafe-run"' .artlab/engine/ledgers/measurements.jsonl)" -ge 3
+
+# Step 4 — Un-skip + run the assertion
+sed -i '' 's/^describe\.skip(/describe(/' src/lib/artlab/speed/phase-5-acceptance.test.ts
+ARTLAB_ALLOW_REAL_MONEY_VALIDATION=yes \
+  npx vitest run src/lib/artlab/speed/phase-5-acceptance.test.ts
+
+# Step 5 — Re-skip the test
+sed -i '' 's/^describe(/describe.skip(/' src/lib/artlab/speed/phase-5-acceptance.test.ts
+
+# Step 6 — Verify nothing else changed
+git status
+```
+
+D.2 passes when the assertion test exits 0 (median of last 3 rafe-runs is ≥ 40% faster than the baseline recorded in D.1).
+
+### D.3 — Final validation tag
+
+```bash
+# Speed dashboard now shows real numbers
+npm run artlab -- health
+
+# Byte-diff still clean
+test "$(git diff origin/main -- public/art/lobby/otis public/art/penthouse/ceo | wc -l)" -eq 0
+
+# Full suite still green
+npm test && npx tsc --noEmit && npm run lint && npx playwright test
+
+# Tag the validation milestone
+git tag artlab-production-validated
+```
+
+When `artlab-production-validated` exists, ArtLab is fully production-validated end-to-end. At this point:
+
+- You can delete `.artlab/legacy/` if you want to reclaim disk (the workspace archive from Phase 4).
+- You can `npx playwright test` regularly to confirm no regression.
+- You can leave the daemon running indefinitely; future `make <character>` Telegram triggers just work.
+
+### D.4 — Troubleshooting
+
+| Symptom | Action |
+|---|---|
+| `describe.skip` not reverted (sed failed) | Manually edit the test file; verify `git diff` afterwards |
+| `ARTLAB_ALLOW_REAL_MONEY_VALIDATION` set but test still throws | Confirm the env var is the literal string `"yes"`, not `"true"` |
+| Telegram bot doesn't respond | Verify daemon is running: `launchctl list \| grep com.tower.artlab` |
+| Run never reaches `closed` | Check `npm run artlab -- status <runId>`; look for `blocker:` field |
+| Byte-diff drift after D.1 | Promotion firewall failure — engine wrote to public/art outside the approved flow. Investigate immediately; do not proceed to D.2 |
+
+---
+
+**End of plan.** 142 tasks · 9 phases (0–8) · 4 appendices (A Coverage Matrix · B `/goal` Command Library · C Self-Review · D Post-`/goal` Manual Validation) · ~5,000 lines of new ArtLab code · ~12,000 lines of legacy CPE deleted · 10 safety properties under test · ≥ 40% wall-clock improvement target · two human gates only.
 
 
