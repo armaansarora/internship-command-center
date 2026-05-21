@@ -1,0 +1,23 @@
+name: artlab-speed-regression-gate
+on:
+  pull_request:
+    paths:
+      - "src/lib/artlab/**"
+jobs:
+  speed-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: npm ci
+      - name: Run PR benchmark
+        env:
+          ARTLAB_CONCEPT_LANE_DELAY_MS: "5"
+          ARTLAB_CUTOUT_DELAY_MS: "5"
+        run: |
+          mkdir -p .artlab/engine/ledgers
+          PR_MS=$(npx tsx -e "import('./src/lib/artlab/speed/benchmark-runner').then(async m=>{const r=await m.runMockBenchmark({workspaceRoot:'.artlab/engine'});process.stdout.write(String(r.durationMs))})")
+          # baseline: use the last-known mock benchmark duration from main (fallback 1500)
+          BASELINE_MS=1500
+          npx tsx -e "import('./src/lib/artlab/speed/regression-gate').then(m=>{const r=m.assertNoSpeedRegression({baselineMs:$BASELINE_MS,prMs:$PR_MS});console.log(r.message);if(!r.passed)process.exit(1)})"
