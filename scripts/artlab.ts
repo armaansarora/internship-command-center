@@ -62,8 +62,15 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
       if (result.message) io.stdout(result.message);
       return result.exitCode;
     }
-    case "continue":
-      return stub("continue", rest, io);
+    case "continue": {
+      const { runContinueSubcommand } = await import("@/lib/artlab/cli/continue");
+      const result = await runContinueSubcommand({
+        workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine",
+        args: rest,
+      });
+      if (result.message) io.stdout(result.message);
+      return result.exitCode;
+    }
     case "answer":
       return stub("answer", rest, io);
     case "status":
