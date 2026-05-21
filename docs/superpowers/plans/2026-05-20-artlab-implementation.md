@@ -13451,4 +13451,351 @@ git tag artlab-phase-5-complete
 
 ---
 
+## Phase 6 — Cast push
+
+Take the engine from "works once" to "shipped at scale." 9 more characters move from concept through `closed`, memory accumulates, cast coherence becomes a meaningful constraint, the daemon runs unattended overnight (because *the daemon* is overnight — Armaan triggers, walks away, wakes to a ready board), and one bundle (`war room with Rafe`) proves multi-asset linkage.
+
+This phase is mostly **runbook + acceptance assertions**, not implementation. The engine is built; here it produces. Each character is a `npm run artlab -- produce` from Telegram, two human gates per character, and an acceptance test that verifies the run reached `closed` cleanly.
+
+**Spec sections covered:** §14 Phase 5; §7 Memory; §8 Cast coherence; §9 Multi-asset bundles.
+
+**Phase 6 dependencies:** `artlab-phase-5-complete` git tag.
+
+### Task 6.1: Per-character production runbook
+
+**Files:**
+- Create: `docs/artlab/CAST-PUSH-RUNBOOK.md`
+
+- [ ] **Step 1: Write the runbook**
+
+```markdown
+# ArtLab — Cast Push Runbook (Phase 6)
+
+The 9 Season-1 characters to produce after Rafe Calder is promoted:
+
+| # | Character ID | Telegram trigger | Floor / role | Special notes |
+|---|---|---|---|---|
+| 1 | priya | `make Priya Vasquez` | Floor 7 War Room / CRO | Pipeline closer energy; deep colors |
+| 2 | dylan | `make Dylan Marsh` | Floor 6 Rolodex / CNO | Warm extrovert; relationship-focused |
+| 3 | vera | `make Vera Bloom` | Floor 5 Writing Room / CMO | Editorial precision; "atelier confidence" |
+| 4 | sol | `make Sol Navarro` | Floor 4 Situation / COO | Calm authority; situational adaptability |
+| 5 | inez | `make Inez Reyes` | Floor 3 Briefing / CPO | Coaching/interview prep persona |
+| 6 | mina | `make Mina Hart` | Floor 2 Observatory / CFO | Analytical; comfort with numbers |
+| 7 | etta | `make Etta Brooks` | Floor 6 secondary / CIO | Information-architecture mind |
+| 8 | rowan | `make Rowan Park` | Floor 4 secondary | Operations support |
+| 9 | nadia | `make Nadia Saito` | Floor 3 secondary | Interview-prep coach |
+
+**Per-character protocol:**
+
+1. From Telegram: send the exact trigger text (column 3).
+2. Wait for concept-board notification (5 lanes) — typical wall-clock < 4 minutes (post-Phase-5).
+3. Reply `approve direction <n>` selecting the lane closest to the character's role.
+4. Wait for final-board notification (21-sprite grid) — typical wall-clock < 10 minutes.
+5. Inspect the final board carefully against the character's role + voice.
+6. Reply `approved for app` to promote.
+7. `npm run artlab:status -- <runId>` confirms `closed` phase.
+8. Browser-QA the affected floor: `npx playwright test tests/e2e/<floor>-browser-qa.spec.ts`.
+9. Run `npm run artlab -- health` and verify the speed/quality dashboard shows no regression.
+
+**If a concept board fails QA:** reply `revise: <one-sentence direction>`. Engine regenerates. Three consecutive coherence failures escalate to Armaan via Telegram blocker.
+
+**If the production pack is wrong:** cancel via Telegram `/cancel <runId>` — engine releases budget reservations and writes a refund-confirmation message.
+
+**Memory checkpoint after every promote:**
+- `wc -l .artlab/engine/memory/style-wins.jsonl` increased by 1.
+- `wc -l .artlab/engine/memory/style-rejections.jsonl` may have grown if any concepts were rejected.
+- `wc -l .artlab/engine/memory/prompt-evolution.jsonl` may have grown if the prompt builder hardened.
+
+**Bundle test (after at least 3 characters promoted):** send `make the war room with Rafe in it` from Telegram. Engine should parse as a bundle, spawn ≥ 2 linked sub-runs (war-room environment + Rafe co-appears scene), and promote atomically.
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add docs/artlab/CAST-PUSH-RUNBOOK.md
+git commit -m "$(cat <<'EOF'
+Add Cast Push runbook for Phase 6 (9 character production)
+
+Per-character protocol (Telegram trigger → concept → approve →
+final → approved for app → status → browser QA), memory
+checkpoints, escalation paths, and the bundle test that proves
+multi-asset linkage works end-to-end.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Each of the 9 character IDs matches the existing agent hierarchy in `docs/CHAIN-OF-COMMAND.md`.
+- [ ] Per-character protocol references exact CLI commands and Telegram phrases.
+- [ ] Memory checkpoint section names the three ledger files explicitly.
+- [ ] Bundle test instruction is included.
+
+### Task 6.2: Memory accumulation acceptance test
+
+**Files:**
+- Create: `src/lib/artlab/memory/cast-push-accumulation.test.ts`
+
+- [ ] **Step 1: Write the asserting test (real workspace, run manually after each character)**
+
+```ts
+// src/lib/artlab/memory/cast-push-accumulation.test.ts
+import { describe, expect, it } from "vitest";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
+
+describe.skip("Phase 6 memory accumulation (manual — run after each character)", () => {
+  const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine";
+
+  it("style-wins.jsonl grows by 1 per promoted character", () => {
+    const path = join(workspaceRoot, "memory", "style-wins.jsonl");
+    expect(existsSync(path)).toBe(true);
+    const lines = readFileSync(path, "utf8").trim().split("\n").filter((l) => l);
+    const wins = lines.map((l) => JSON.parse(l)) as { characterId: string; source?: string }[];
+    const characterIds = new Set(wins.map((w) => w.characterId));
+    // After Otis + Mara import + Rafe + 9 cast = 12 distinct character IDs by end of Phase 6
+    expect(characterIds.size).toBeGreaterThanOrEqual(3); // adjust as cast push progresses
+  });
+
+  it("style-wins from legacy-import are preserved (Otis + Mara/ceo)", () => {
+    const path = join(workspaceRoot, "memory", "style-wins.jsonl");
+    const wins = readFileSync(path, "utf8").trim().split("\n").map((l) => JSON.parse(l)) as { characterId: string; source?: string }[];
+    expect(wins.some((w) => w.characterId === "otis" && w.source === "legacy-import")).toBe(true);
+    expect(wins.some((w) => w.characterId === "ceo" && w.source === "legacy-import")).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/lib/artlab/memory/cast-push-accumulation.test.ts
+git commit -m "$(cat <<'EOF'
+Add memory accumulation acceptance test (Phase 6 manual gate)
+
+describe.skip — un-skip and adjust the expected-count assertion
+after each character lands. Confirms the legacy-import wins for
+Otis and Mara/ceo are preserved throughout the cast push.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `describe.skip` so vitest doesn't fail on a not-yet-pushed cast.
+- [ ] Asserts legacy-import wins specifically (no quiet overwrite).
+- [ ] Threshold is adjustable — comment notes "adjust as cast push progresses".
+
+### Task 6.3: Cast diversity regression suite
+
+**Files:**
+- Create: `src/lib/artlab/coherence/cast-diversity-regression.test.ts`
+
+- [ ] **Step 1: Write the asserting test**
+
+```ts
+// src/lib/artlab/coherence/cast-diversity-regression.test.ts
+import { describe, expect, it } from "vitest";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { computePerceptualHash } from "./hashes";
+
+describe.skip("Phase 6 cast diversity (manual — run after each character)", () => {
+  const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine";
+  const publicArtRoot = "public/art/lobby";
+
+  it("every promoted character's idle.webp has a distinct perceptual hash from all others", async () => {
+    if (!existsSync(publicArtRoot)) return;
+    const characters = readdirSync(publicArtRoot).filter((d) =>
+      existsSync(join(publicArtRoot, d, "idle.webp")),
+    );
+    expect(characters.length).toBeGreaterThan(0);
+    const hashes: { characterId: string; hash: string }[] = [];
+    for (const characterId of characters) {
+      const bytes = readFileSync(join(publicArtRoot, characterId, "idle.webp"));
+      const hash = await computePerceptualHash(bytes);
+      hashes.push({ characterId, hash });
+    }
+    // All hashes must be distinct — no character's idle pose collides with another's.
+    const distinct = new Set(hashes.map((h) => h.hash));
+    expect(distinct.size).toBe(hashes.length);
+  }, 60_000);
+});
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/lib/artlab/coherence/cast-diversity-regression.test.ts
+git commit -m "$(cat <<'EOF'
+Add cast diversity regression test (Phase 6 manual gate)
+
+Computes perceptual hash of every promoted character's
+idle.webp; asserts no two characters share a hash. Catches
+the failure mode where two cast members converge on the same
+silhouette/palette and read as the same person.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Uses the Phase 2 Task 2.10 `computePerceptualHash` helper (no parallel implementation).
+- [ ] Asserts strict distinctness (no `>= 0.8 similarity` softness — hashes must be literally different).
+- [ ] Tolerates the early state (returns silently if no characters yet promoted).
+
+### Task 6.4: Bundle resolution acceptance test (war room + Rafe)
+
+**Files:**
+- Create: `src/lib/artlab/intake/bundle-acceptance.test.ts`
+
+- [ ] **Step 1: Write the asserting test**
+
+```ts
+// src/lib/artlab/intake/bundle-acceptance.test.ts
+import { describe, expect, it } from "vitest";
+import { parseBundleSpec } from "./bundle-parser";
+
+describe.skip("Phase 6 bundle acceptance — war room with Rafe", () => {
+  it("'make the war room with Rafe in it' parses to a bundle with ≥ 2 children", () => {
+    const bundle = parseBundleSpec("make the war room with Rafe in it");
+    expect(bundle.children.length).toBeGreaterThanOrEqual(2);
+    const types = bundle.children.map((c) => c.assetType);
+    expect(types).toContain("environment");
+    // Rafe co-appears via either a character reference or a scene asset linked to him
+    expect(bundle.links.some((l) => l.linkType === "co-appears-in" || l.linkType === "references")).toBe(true);
+  });
+
+  it("promotionPolicy is 'atomic' for war-room bundles (env + character)", () => {
+    const bundle = parseBundleSpec("make the war room with Rafe in it");
+    expect(bundle.promotionPolicy).toBe("atomic");
+  });
+});
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/lib/artlab/intake/bundle-acceptance.test.ts
+git commit -m "$(cat <<'EOF'
+Add bundle acceptance test for 'war room with Rafe' (Phase 6)
+
+describe.skip — un-skip after the war-room background is
+generated (Phase 7 environment slice). Asserts the bundle
+parser produces a multi-child spec with atomic promotion.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Bundle has ≥ 2 children with `environment` among the asset types.
+- [ ] Linkage between children is `co-appears-in` or `references`.
+- [ ] Atomic promotion enforced for env+character bundles.
+
+### Task 6.5: Daemon unattended-overnight smoke test
+
+**Files:**
+- Create: `src/lib/artlab/daemon/unattended-smoke.test.ts`
+
+- [ ] **Step 1: Write the asserting test**
+
+```ts
+// src/lib/artlab/daemon/unattended-smoke.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, writeFileSync, existsSync, readFileSync, mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { reconcileCrashedRuns } from "./crash-recovery";
+
+describe("daemon unattended smoke — simulate daemon restart mid-run", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-unattended-")); });
+
+  it("runs with stale heartbeats are reconciled and leases released", async () => {
+    // Simulate: daemon was running a Rafe-style production, then crashed 12 minutes ago.
+    const runDir = join(workspaceRoot, "runs", "rafe-overnight");
+    mkdirSync(join(runDir, "slot-leases"), { recursive: true });
+    writeFileSync(join(runDir, "run-state.json"), JSON.stringify({
+      runId: "rafe-overnight", assetType: "character", phase: "production",
+      createdAt: "2026-05-21T00:00:00.000Z", updatedAt: "2026-05-21T00:00:00.000Z",
+      request: "make Rafe Calder",
+    }));
+    writeFileSync(join(runDir, "progress.json"), JSON.stringify({
+      runId: "rafe-overnight",
+      at: new Date(Date.now() - 12 * 60_000).toISOString(),
+      phase: "production",
+      slotsCompleted: 14, slotsRunning: 2, slotsFailed: 0,
+      actualSpendCents: 800, reservedCents: 200,
+    }));
+    for (let i = 1; i <= 2; i += 1) {
+      writeFileSync(join(runDir, "slot-leases", `slot-${i}.lease.json`), JSON.stringify({ slotId: `slot-${i}` }));
+    }
+    const result = await reconcileCrashedRuns({ workspaceRoot });
+    expect(result.staleRunsReconciled).toContain("rafe-overnight");
+    expect(result.leasesReleased.length).toBe(2);
+    expect(existsSync(join(runDir, "slot-leases", "slot-1.lease.json"))).toBe(false);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it passes (Task 3.18 already implements reconcile)**
+
+Run: `npx vitest run src/lib/artlab/daemon/unattended-smoke.test.ts`
+Expected: PASS
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/artlab/daemon/unattended-smoke.test.ts
+git commit -m "$(cat <<'EOF'
+Add daemon unattended-overnight smoke test (Phase 6)
+
+Simulates: daemon crashed 12 min ago mid-production. Reconciler
+releases stale leases (spec safety property #4). This is the
+non-real-money proxy for the 'wake to ready board' usage
+pattern.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Uses the Phase 3 Task 3.18 `reconcileCrashedRuns` (no parallel implementation).
+- [ ] Asserts exact lease count released (2/2).
+- [ ] Tests the actual lease file removal (filesystem assertion, not just return value).
+
+### Phase 6 completion criteria
+
+Run these commands; expected results listed:
+
+```bash
+# All Phase 6 tests pass (skipped tests don't fail)
+npx vitest run src/lib/artlab/memory/cast-push-accumulation.test.ts src/lib/artlab/coherence/cast-diversity-regression.test.ts src/lib/artlab/intake/bundle-acceptance.test.ts src/lib/artlab/daemon/unattended-smoke.test.ts
+
+# Cast push runbook exists
+test -f docs/artlab/CAST-PUSH-RUNBOOK.md
+
+# All 9 characters promoted via ArtLab (Telegram-driven; verify by directory presence)
+for c in priya dylan vera sol inez mina etta rowan nadia; do
+  test -d public/art/lobby/$c || { echo "FAIL: missing $c"; exit 1; }
+done
+
+# style-wins.jsonl has at least 12 entries (Otis + Mara + Rafe + 9 cast)
+test "$(wc -l < .artlab/engine/memory/style-wins.jsonl)" -ge 12
+
+# Bundle test passed (manual; war room + Rafe atomically promoted)
+# Daemon unattended smoke test passes (automated)
+
+# Tag the phase
+git tag artlab-phase-6-complete
+```
+
+---
+
 
