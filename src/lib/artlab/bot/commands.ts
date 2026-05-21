@@ -46,8 +46,8 @@ function handleCancel(workspaceRoot: string, args: string[]): string {
   return `Cancel intent recorded for ${runId}. Daemon will send SIGTERM next sweep.`;
 }
 
-function handleHealth(workspaceRoot: string): string {
-  const snapshot = buildArtLabHealthSnapshot(workspaceRoot);
+async function handleHealth(workspaceRoot: string): Promise<string> {
+  const snapshot = await buildArtLabHealthSnapshot(workspaceRoot);
   return [
     `Health @ ${snapshot.collectedAt}`,
     `Active locks: ${snapshot.locks.locks.length}`,
@@ -76,7 +76,7 @@ export async function handleBotCommand(input: BotCommandInput): Promise<BotComma
     case "status": return { kind: "text", text: await handleStatus(input.workspaceRoot, input.args) };
     case "queue": return { kind: "text", text: handleQueue(input.workspaceRoot) };
     case "cancel": return { kind: "text", text: handleCancel(input.workspaceRoot, input.args) };
-    case "health": return { kind: "text", text: handleHealth(input.workspaceRoot) };
+    case "health": return { kind: "text", text: await handleHealth(input.workspaceRoot) };
     case "help": return { kind: "text", text: helpText() };
   }
 }
