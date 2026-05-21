@@ -16,7 +16,7 @@ const KNOWN = ["status", "queue", "cancel", "health", "help"] as const;
 
 async function handleStatus(workspaceRoot: string, args: string[]): Promise<string> {
   const runsDir = join(workspaceRoot, "runs");
-  if (!existsSync(runsDir)) return "No runs yet.";
+  if (!existsSync(runsDir)) return "No active runs.";
   const runs = readdirSync(runsDir).filter((f) => !f.startsWith("."));
   if (runs.length === 0) return "No active runs.";
   if (args.length === 0) return `Active runs:\n${runs.map((r) => `  ${r}`).join("\n")}`;
