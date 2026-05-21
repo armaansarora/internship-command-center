@@ -11778,4 +11778,1677 @@ git tag artlab-phase-4-complete
 
 ---
 
+## Phase 5 — Speed (quality preserved)
+
+**Phase 5 exists because of a directive from Armaan on 2026-05-20:** ArtLab runs as fast as quality allows, *with quality identical to a slow run*. The spec called it "autonomous overnight." It is not overnight. It is fast.
+
+Every task in this phase pairs a speed improvement with an **explicit quality-preservation assertion**. The improvement ships only when the assertion proves the engine produces byte-identical artifacts (or, where bytes would naturally differ — e.g., timestamp fields — strictly QA-equivalent output: same `asset-doctor.json` shape, same final-board grid count, same `style-wins.jsonl` schema). Tasks that cannot prove preservation are **not in this phase** — they would go to a future spec revision.
+
+**Spec sections covered in this phase:** none directly (Phase 5 is the override). Indirectly: §4.5 Heartbeat accuracy, §6.2 LLM brain caching, §15 Testing strategy (stress).
+
+**Phase 5 dependencies:** Requires `artlab-phase-4-complete` git tag AND a recorded `phase-4-rafe-baseline` entry in `.artlab/engine/ledgers/baselines.jsonl` (Task 4.12). Without the baseline there is nothing to measure against.
+
+**The Phase 5 promise:** the Rafe-equivalent wall-clock drops by **≥ 40%** from the baseline, and every quality-preservation assertion passes.
+
+### Task 5.1: Speed measurement harness
+
+**Files:**
+- Create: `src/lib/artlab/speed/measure.ts`
+- Test: `src/lib/artlab/speed/measure.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/measure.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { measureWallClock, recordMeasurement, readMeasurements } from "./measure";
+
+describe("speed measurement harness", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-meas-")); });
+
+  it("measureWallClock returns durationMs", async () => {
+    const result = await measureWallClock("test-op", async () => {
+      await new Promise((r) => setTimeout(r, 25));
+      return "x";
+    });
+    expect(result.label).toBe("test-op");
+    expect(result.durationMs).toBeGreaterThanOrEqual(20);
+    expect(result.result).toBe("x");
+  });
+
+  it("recordMeasurement appends to ledgers/measurements.jsonl", async () => {
+    await recordMeasurement({ workspaceRoot, label: "concept-runner", durationMs: 4200, runId: "r1" });
+    const path = join(workspaceRoot, "ledgers", "measurements.jsonl");
+    expect(existsSync(path)).toBe(true);
+    const parsed = JSON.parse(readFileSync(path, "utf8").trim());
+    expect(parsed.label).toBe("concept-runner");
+    expect(parsed.durationMs).toBe(4200);
+  });
+
+  it("readMeasurements filters by label", async () => {
+    await recordMeasurement({ workspaceRoot, label: "concept-runner", durationMs: 4000, runId: "r1" });
+    await recordMeasurement({ workspaceRoot, label: "production-runner", durationMs: 60000, runId: "r1" });
+    await recordMeasurement({ workspaceRoot, label: "concept-runner", durationMs: 3500, runId: "r2" });
+    const conceptOnly = await readMeasurements({ workspaceRoot, label: "concept-runner" });
+    expect(conceptOnly).toHaveLength(2);
+    expect(conceptOnly.map((m) => m.durationMs)).toEqual([4000, 3500]);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/measure.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/measure.ts
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
+export interface Measurement {
+  label: string;
+  durationMs: number;
+  runId?: string;
+  at: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface WallClockResult<T> {
+  label: string;
+  durationMs: number;
+  result: T;
+}
+
+export async function measureWallClock<T>(label: string, fn: () => Promise<T>): Promise<WallClockResult<T>> {
+  const startedAt = Date.now();
+  const result = await fn();
+  return { label, durationMs: Date.now() - startedAt, result };
+}
+
+export async function recordMeasurement(input: { workspaceRoot: string; label: string; durationMs: number; runId?: string; meta?: Record<string, unknown> }): Promise<void> {
+  const dir = join(input.workspaceRoot, "ledgers");
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const entry: Measurement = {
+    label: input.label,
+    durationMs: input.durationMs,
+    runId: input.runId,
+    at: new Date().toISOString(),
+    meta: input.meta,
+  };
+  appendFileSync(join(dir, "measurements.jsonl"), JSON.stringify(entry) + "\n");
+}
+
+export async function readMeasurements(input: { workspaceRoot: string; label?: string }): Promise<Measurement[]> {
+  const path = join(input.workspaceRoot, "ledgers", "measurements.jsonl");
+  if (!existsSync(path)) return [];
+  const all = readFileSync(path, "utf8").trim().split("\n").filter((l) => l).map((l) => JSON.parse(l) as Measurement);
+  return input.label ? all.filter((m) => m.label === input.label) : all;
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/measure.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/speed/measure.ts src/lib/artlab/speed/measure.test.ts
+git commit -m "$(cat <<'EOF'
+Add speed measurement harness — per-op wall-clock to ledger
+
+measureWallClock wraps any async fn. recordMeasurement appends
+to ledgers/measurements.jsonl. readMeasurements filters by
+label. Every Phase 5 speed task reports through this surface;
+Phase 5 dashboard reads from it.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] No throttling / batching — every measurement is recorded individually.
+- [ ] Append-only (no rewriting; measurements never lie about history).
+- [ ] Label filter is the only query path (no SQL-ish complexity).
+
+### Task 5.2: True 5-lane concept parallelism (Promise.all)
+
+**Files:**
+- Modify: `src/lib/artlab/runners/concept-runner.ts`
+- Test: `src/lib/artlab/runners/concept-runner.parallel.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/runners/concept-runner.parallel.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { conceptRunner } from "./concept-runner";
+
+describe("concept runner — true 5-lane parallelism (Phase 5)", () => {
+  let runDir: string;
+  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "artlab-cr-par-")); });
+
+  it("five-lane wall-clock is approximately max(lane time), not sum", async () => {
+    process.env.ARTLAB_CONCEPT_LANE_DELAY_MS = "100"; // each mock lane "takes" 100ms
+    const startedAt = Date.now();
+    const result = await conceptRunner.run({
+      runId: "r1",
+      runDir,
+      assetType: "character",
+      characterId: "cro",
+      providerId: "local-mock",
+    });
+    const wallClock = Date.now() - startedAt;
+    delete process.env.ARTLAB_CONCEPT_LANE_DELAY_MS;
+    expect(result.status).toBe("ok");
+    expect(wallClock).toBeLessThan(300); // 5x sequential would be 500ms; parallel is ~100ms + overhead
+    expect(readdirSync(join(runDir, "concept-slots"))).toHaveLength(5);
+  });
+
+  it("each lane file still exists with the right slot json (quality preserved)", async () => {
+    const result = await conceptRunner.run({
+      runId: "r1",
+      runDir,
+      assetType: "character",
+      characterId: "cro",
+      providerId: "local-mock",
+    });
+    expect(result.status).toBe("ok");
+    const slots = readdirSync(join(runDir, "concept-slots")).sort();
+    expect(slots).toEqual(["lane-1.json", "lane-2.json", "lane-3.json", "lane-4.json", "lane-5.json"]);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails (current implementation is sequential)**
+
+Run: `npx vitest run src/lib/artlab/runners/concept-runner.parallel.test.ts`
+Expected: FAIL — wall-clock > 300ms because of sequential for-loop
+
+- [ ] **Step 3: Rewrite concept runner to use Promise.all**
+
+```ts
+// src/lib/artlab/runners/concept-runner.ts (full replacement)
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+
+const TARGET_LANES = 5;
+
+async function generateMockConceptSlot(runDir: string, laneIndex: number): Promise<string> {
+  const dir = join(runDir, "concept-slots");
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const path = join(dir, `lane-${laneIndex}.json`);
+  const delayMs = Number.parseInt(process.env.ARTLAB_CONCEPT_LANE_DELAY_MS ?? "0", 10);
+  if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
+  writeFileSync(path, JSON.stringify({ laneIndex, mock: true, generatedAt: new Date().toISOString() }));
+  return path;
+}
+
+export const conceptRunner: AtelierRunner = {
+  kind: "concept",
+  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+    const startedAt = Date.now();
+    if (input.abortSignal?.aborted) {
+      return {
+        runnerKind: "concept", status: "failed", durationMs: Date.now() - startedAt,
+        artifacts: {}, blockerHint: "cancelled", failureCode: "aborted",
+      };
+    }
+    // SPEED: Phase 5 — five lanes run in parallel via Promise.all.
+    // Each lane writes its own file under concept-slots/; no shared mutable state.
+    const laneIndexes = Array.from({ length: TARGET_LANES }, (_, i) => i + 1);
+    const slotOutputs = await Promise.all(laneIndexes.map((idx) => generateMockConceptSlot(input.runDir, idx)));
+    if (input.abortSignal?.aborted) {
+      return {
+        runnerKind: "concept", status: "failed", durationMs: Date.now() - startedAt,
+        artifacts: { slotOutputs }, blockerHint: "cancelled", failureCode: "aborted",
+      };
+    }
+    const conceptBoardPath = join(input.runDir, "concept-board.json");
+    writeFileSync(
+      conceptBoardPath,
+      JSON.stringify({
+        runId: input.runId,
+        characterId: input.characterId,
+        lanes: slotOutputs.map((path, idx) => ({ laneIndex: idx + 1, slotPath: path })),
+        createdAt: new Date().toISOString(),
+      }),
+    );
+    return {
+      runnerKind: "concept", status: "ok", durationMs: Date.now() - startedAt,
+      artifacts: { slotOutputs, conceptBoardPath },
+    };
+  },
+};
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/runners/concept-runner.parallel.test.ts src/lib/artlab/runners/concept-runner.test.ts`
+Expected: PASS — both new parallel test AND existing Phase 1 sequential test continue to pass (quality preserved).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/runners/concept-runner.ts src/lib/artlab/runners/concept-runner.parallel.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: true 5-lane concept parallelism (Promise.all)
+
+Replaces the sequential for-loop with Promise.all over the 5
+lane indexes. Quality preservation: existing concept-runner.
+test.ts still passes byte-equivalent; slot file count and lane
+indices unchanged. Wall-clock proves ~5x speedup on mocked
+lanes.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Phase 1 Task 1.9 test still passes (no quality regression).
+- [ ] New parallel test demonstrates wall-clock improvement (≥3x for mocked delay).
+- [ ] Promise.all error propagation is preserved — one lane's failure rejects all.
+- [ ] `// SPEED:` comment marker present per Convention.
+
+### Task 5.3: LLM prompt caching enforcement test
+
+**Files:**
+- Create: `src/lib/artlab/speed/prompt-caching-assertion.test.ts`
+
+- [ ] **Step 1: Write the asserting test**
+
+```ts
+// src/lib/artlab/speed/prompt-caching-assertion.test.ts
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+describe("LLM prompt caching enforcement (Phase 5 convention)", () => {
+  it("every generateText call against a stable system prompt uses cacheControl", () => {
+    const claudeBrain = readFileSync(join("src", "lib", "artlab", "orchestrator", "claude-brain.ts"), "utf8");
+    // Each generateText call body must contain the cacheControl marker on the system message.
+    const generateTextBlocks = claudeBrain.match(/generateText\s*\(\s*{[\s\S]*?\)\s*[,;]/g) ?? [];
+    expect(generateTextBlocks.length).toBeGreaterThan(0);
+    for (const block of generateTextBlocks) {
+      expect(block).toMatch(/cacheControl/);
+      expect(block).toMatch(/ephemeral/);
+    }
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it passes (Task 2.17 already implements this)**
+
+Run: `npx vitest run src/lib/artlab/speed/prompt-caching-assertion.test.ts`
+Expected: PASS
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/artlab/speed/prompt-caching-assertion.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: assert every claude-brain generateText uses cacheControl
+
+Regex grep over claude-brain.ts: every generateText block must
+contain the literal cacheControl + ephemeral. Future refactors
+that drop caching will fail this test — Phase 5 budget assumed
+~90% token discount on stable system prompts.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Test fails loudly if anyone removes cacheControl from any generateText call.
+- [ ] Test reads source at runtime (not at test-compile time).
+- [ ] No assertion about cost — that's the dashboard's job; this just enforces the convention.
+
+### Task 5.4: Pipeline phase overlap — canary prep during concept QA
+
+**Files:**
+- Create: `src/lib/artlab/speed/pipeline-overlap.ts`
+- Test: `src/lib/artlab/speed/pipeline-overlap.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/pipeline-overlap.test.ts
+import { describe, expect, it, vi } from "vitest";
+import { runWithCanaryPrepOverlap } from "./pipeline-overlap";
+
+describe("pipeline overlap — canary prep during concept QA", () => {
+  it("canary-prep starts as soon as concept-runner returns ok, not after QA", async () => {
+    const events: string[] = [];
+    const runConceptQa = vi.fn().mockImplementation(async () => {
+      events.push("qa-start");
+      await new Promise((r) => setTimeout(r, 100));
+      events.push("qa-end");
+      return { ok: true };
+    });
+    const prepCanary = vi.fn().mockImplementation(async () => {
+      events.push("prep-start");
+      await new Promise((r) => setTimeout(r, 100));
+      events.push("prep-end");
+    });
+    const result = await runWithCanaryPrepOverlap({
+      conceptOk: true,
+      runConceptQa,
+      prepCanary,
+    });
+    expect(result.qaResult).toEqual({ ok: true });
+    // prep-start should appear before qa-end (overlap proven)
+    const prepStartIdx = events.indexOf("prep-start");
+    const qaEndIdx = events.indexOf("qa-end");
+    expect(prepStartIdx).toBeLessThan(qaEndIdx);
+    expect(prepStartIdx).toBeGreaterThanOrEqual(0);
+  });
+
+  it("does NOT prep canary when concept failed (quality preserved)", async () => {
+    const runConceptQa = vi.fn().mockResolvedValue({ ok: true });
+    const prepCanary = vi.fn().mockResolvedValue(undefined);
+    await runWithCanaryPrepOverlap({
+      conceptOk: false,
+      runConceptQa,
+      prepCanary,
+    });
+    expect(prepCanary).not.toHaveBeenCalled();
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/pipeline-overlap.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/pipeline-overlap.ts
+export interface PipelineOverlapInput<T> {
+  conceptOk: boolean;
+  runConceptQa(): Promise<T>;
+  prepCanary(): Promise<void>;
+}
+
+export interface PipelineOverlapResult<T> {
+  qaResult: T;
+}
+
+/**
+ * SPEED: Phase 5 — run concept QA and canary prep in parallel when concept
+ * succeeded. If concept failed, do NOT prep canary (canary is wasted work
+ * on a board that won't be approved). Quality preservation: canary prep
+ * artifacts are not consumed until concept QA passes downstream, so the
+ * overlap is purely a wall-clock optimization.
+ */
+export async function runWithCanaryPrepOverlap<T>(input: PipelineOverlapInput<T>): Promise<PipelineOverlapResult<T>> {
+  if (!input.conceptOk) {
+    const qaResult = await input.runConceptQa();
+    return { qaResult };
+  }
+  const [qaResult] = await Promise.all([
+    input.runConceptQa(),
+    input.prepCanary(),
+  ]);
+  return { qaResult };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/pipeline-overlap.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/speed/pipeline-overlap.ts src/lib/artlab/speed/pipeline-overlap.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: overlap canary prep with concept QA when concept ok
+
+Canary prep is wasted work if concept fails — we explicitly gate
+on conceptOk so the overlap is only taken on the happy path.
+Test proves prep-start happens before qa-end (true overlap, not
+serialization).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Overlap is gated on `conceptOk` — failed concept never wastes canary work.
+- [ ] Test verifies overlap empirically via event ordering.
+- [ ] Promise.all error propagation: if either fails, the function rejects (no silent ignoring).
+
+### Task 5.5: Sharp + rembg cutout worker pool
+
+**Files:**
+- Create: `src/lib/artlab/speed/cutout-pool.ts`
+- Test: `src/lib/artlab/speed/cutout-pool.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/cutout-pool.test.ts
+import { describe, expect, it } from "vitest";
+import { runCutoutPool, DEFAULT_CUTOUT_CONCURRENCY } from "./cutout-pool";
+
+describe("cutout worker pool", () => {
+  it("DEFAULT_CUTOUT_CONCURRENCY is at least 4 (or os.cpus().length, whichever is smaller)", () => {
+    expect(DEFAULT_CUTOUT_CONCURRENCY).toBeGreaterThanOrEqual(2);
+  });
+
+  it("runs up to concurrency cutouts in parallel", async () => {
+    let active = 0;
+    let maxActive = 0;
+    const cutout = async () => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((r) => setTimeout(r, 30));
+      active -= 1;
+    };
+    const tasks = Array.from({ length: 10 }, () => cutout);
+    await runCutoutPool({ tasks, concurrency: 3 });
+    expect(maxActive).toBeLessThanOrEqual(3);
+    expect(maxActive).toBeGreaterThan(1);
+  });
+
+  it("propagates errors (no silent swallowing)", async () => {
+    const tasks = [async () => { throw new Error("nope"); }];
+    await expect(runCutoutPool({ tasks, concurrency: 2 })).rejects.toThrow(/nope/);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/cutout-pool.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/cutout-pool.ts
+import { cpus } from "node:os";
+
+export const DEFAULT_CUTOUT_CONCURRENCY = Math.max(2, Math.min(4, cpus().length));
+
+export interface CutoutPoolInput {
+  tasks: Array<() => Promise<unknown>>;
+  concurrency?: number;
+}
+
+export async function runCutoutPool(input: CutoutPoolInput): Promise<void> {
+  const concurrency = input.concurrency ?? DEFAULT_CUTOUT_CONCURRENCY;
+  let cursor = 0;
+  const workers = Array.from({ length: concurrency }, async () => {
+    while (cursor < input.tasks.length) {
+      const idx = cursor;
+      cursor += 1;
+      await input.tasks[idx]!();
+    }
+  });
+  await Promise.all(workers);
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/cutout-pool.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/speed/cutout-pool.ts src/lib/artlab/speed/cutout-pool.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: cutout worker pool with capped concurrency
+
+Cursor-shared worker pool — each worker pulls the next task as
+it finishes the previous. Default concurrency clamped to
+[2, 4] to avoid OOM on rembg + sharp inference. Cutout runner
+will adopt this in the next task.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Concurrency cap respected (test verifies `maxActive <= concurrency`).
+- [ ] Errors propagate (no silent swallowing).
+- [ ] No global state — every invocation is independent.
+- [ ] Concurrency clamped to [2, 4] by default to avoid memory pressure.
+
+### Task 5.6: Cutout runner adopts the worker pool
+
+**Files:**
+- Modify: `src/lib/artlab/runners/cutout-runner.ts`
+- Test: `src/lib/artlab/runners/cutout-runner.pool.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/runners/cutout-runner.pool.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { cutoutRunner } from "./cutout-runner";
+
+describe("cutout runner — uses worker pool (Phase 5)", () => {
+  let runDir: string;
+  beforeEach(() => {
+    runDir = mkdtempSync(join(tmpdir(), "artlab-cr-pool-"));
+    const productionDir = join(runDir, "production-slots");
+    mkdirSync(productionDir);
+    for (let i = 1; i <= 8; i += 1) {
+      writeFileSync(join(productionDir, `slot-${i}.json`), JSON.stringify({ slotId: `slot-${i}` }));
+    }
+  });
+
+  it("wall-clock for 8 cutouts is < 4x the per-cutout latency (parallelism proof)", async () => {
+    process.env.ARTLAB_CUTOUT_DELAY_MS = "60";
+    const startedAt = Date.now();
+    const result = await cutoutRunner.run({
+      runId: "r1", runDir, assetType: "character", characterId: "cro", providerId: "local-mock",
+    });
+    const wallClock = Date.now() - startedAt;
+    delete process.env.ARTLAB_CUTOUT_DELAY_MS;
+    expect(result.status).toBe("ok");
+    // 8 cutouts × 60ms sequential = 480ms; pool of ≥2 should beat 4x = 240ms by some margin
+    expect(wallClock).toBeLessThan(240);
+    expect((result.artifacts.cutoutPaths as string[])).toHaveLength(8);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails (current impl is sequential)**
+
+Run: `npx vitest run src/lib/artlab/runners/cutout-runner.pool.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Rewrite cutout runner to use the pool**
+
+```ts
+// src/lib/artlab/runners/cutout-runner.ts (full replacement)
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import type { AtelierAssetType } from "../types";
+import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import { runCutoutPool } from "@/lib/artlab/speed/cutout-pool";
+
+const CUTOUT_REQUIRED: ReadonlySet<AtelierAssetType> = new Set(["character", "prop"]);
+
+async function cutoutOne(sourceDir: string, cutoutDir: string, src: string): Promise<string> {
+  const delayMs = Number.parseInt(process.env.ARTLAB_CUTOUT_DELAY_MS ?? "0", 10);
+  if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
+  const path = join(cutoutDir, `${src.replace(/\.json$/, ".png")}`);
+  writeFileSync(path, JSON.stringify({ source: src, alpha: true, mock: true }));
+  return path;
+}
+
+export const cutoutRunner: AtelierRunner = {
+  kind: "cutout",
+  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+    const startedAt = Date.now();
+    if (!CUTOUT_REQUIRED.has(input.assetType)) {
+      return {
+        runnerKind: "cutout", status: "ok", durationMs: Date.now() - startedAt,
+        artifacts: { skippedReason: "asset-type-has-no-cutout" },
+      };
+    }
+    const sourceDir = join(input.runDir, "production-slots");
+    const cutoutDir = join(input.runDir, "cutouts");
+    if (!existsSync(cutoutDir)) mkdirSync(cutoutDir, { recursive: true });
+    const sources = existsSync(sourceDir) ? readdirSync(sourceDir).filter((f) => f.endsWith(".json")) : [];
+    const cutoutPaths: string[] = [];
+    // SPEED: Phase 5 — runCutoutPool with capped concurrency. Each task
+    // writes to its own file; no shared mutable state. Quality preservation:
+    // exactly one cutout per source file, same naming.
+    const tasks = sources.map((src) => async () => {
+      cutoutPaths.push(await cutoutOne(sourceDir, cutoutDir, src));
+    });
+    await runCutoutPool({ tasks });
+    return {
+      runnerKind: "cutout", status: "ok", durationMs: Date.now() - startedAt,
+      artifacts: { cutoutPaths: cutoutPaths.sort() },
+    };
+  },
+};
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/runners/cutout-runner.pool.test.ts src/lib/artlab/runners/cutout-runner.test.ts`
+Expected: PASS — both new pool test AND existing Phase 1 cutout test continue to pass.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/runners/cutout-runner.ts src/lib/artlab/runners/cutout-runner.pool.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: cutout runner uses runCutoutPool (parallel cutouts)
+
+Each cutout task writes its own file independently. Quality
+preservation: cutoutPaths is sorted before return so the
+artifact order is deterministic across pool scheduling; Phase 1
+Task 1.12 test still passes.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Phase 1 Task 1.12 test still passes (no behavior regression).
+- [ ] Output `cutoutPaths` is sorted (deterministic despite pool scheduling).
+- [ ] Wall-clock test demonstrates ≥ 2x parallelism on 8 slots.
+
+### Task 5.7: Memory retrieval LRU cache
+
+**Files:**
+- Create: `src/lib/artlab/speed/lru-cache.ts`
+- Test: `src/lib/artlab/speed/lru-cache.test.ts`
+- Modify: `src/lib/artlab/memory/retrieve.ts` (wrap getRelevantMemory)
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/lru-cache.test.ts
+import { describe, expect, it, vi } from "vitest";
+import { createLruCache } from "./lru-cache";
+
+describe("LRU cache", () => {
+  it("hits cache for repeated key", async () => {
+    const fetcher = vi.fn().mockResolvedValue({ payload: "data" });
+    const cache = createLruCache<string, { payload: string }>({ capacity: 3 });
+    const a = await cache.getOrFetch("k1", fetcher);
+    const b = await cache.getOrFetch("k1", fetcher);
+    expect(a).toEqual(b);
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("evicts least-recently-used when capacity exceeded", async () => {
+    const fetcher = vi.fn().mockImplementation((k: string) => Promise.resolve({ payload: k }));
+    const cache = createLruCache<string, { payload: string }>({ capacity: 2 });
+    await cache.getOrFetch("a", () => fetcher("a"));
+    await cache.getOrFetch("b", () => fetcher("b"));
+    await cache.getOrFetch("a", () => fetcher("a")); // bumps a to MRU
+    await cache.getOrFetch("c", () => fetcher("c")); // evicts b
+    expect(cache.has("a")).toBe(true);
+    expect(cache.has("b")).toBe(false);
+    expect(cache.has("c")).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/lru-cache.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/lru-cache.ts
+export interface LruCache<K, V> {
+  getOrFetch(key: K, fetcher: () => Promise<V>): Promise<V>;
+  has(key: K): boolean;
+  clear(): void;
+}
+
+export function createLruCache<K, V>(options: { capacity: number }): LruCache<K, V> {
+  const map = new Map<K, V>();
+  function touch(key: K, value: V): void {
+    map.delete(key);
+    map.set(key, value);
+    while (map.size > options.capacity) {
+      const oldest = map.keys().next().value as K;
+      map.delete(oldest);
+    }
+  }
+  return {
+    async getOrFetch(key: K, fetcher: () => Promise<V>): Promise<V> {
+      if (map.has(key)) {
+        const v = map.get(key)!;
+        touch(key, v);
+        return v;
+      }
+      const v = await fetcher();
+      touch(key, v);
+      return v;
+    },
+    has(key: K): boolean { return map.has(key); },
+    clear(): void { map.clear(); },
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/lru-cache.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/speed/lru-cache.ts src/lib/artlab/speed/lru-cache.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: in-memory LRU cache (used by memory retrieval)
+
+Insertion-ordered Map serves as LRU storage — re-insert on hit
+to bump the key to MRU. capacity-bounded eviction on every
+touch. Memory retrieve.ts adopts this in the next task to cache
+getRelevantMemory results across same-character runs.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] LRU semantics verified via test (recent access bumps key).
+- [ ] No global state — each `createLruCache` returns an isolated instance.
+- [ ] Eviction runs on every touch (no batched eviction).
+- [ ] Capacity 0 is degenerate but doesn't crash.
+
+### Task 5.8: Provider request retry-then-batch helper
+
+**Files:**
+- Create: `src/lib/artlab/speed/provider-batch.ts`
+- Test: `src/lib/artlab/speed/provider-batch.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/provider-batch.test.ts
+import { describe, expect, it, vi } from "vitest";
+import { withRetryAndBackoff, DEFAULT_RETRY_OPTIONS } from "./provider-batch";
+
+describe("provider retry+backoff helper", () => {
+  it("succeeds on first try without sleep", async () => {
+    const op = vi.fn().mockResolvedValue("ok");
+    const result = await withRetryAndBackoff(op, { ...DEFAULT_RETRY_OPTIONS, maxAttempts: 3, baseDelayMs: 1 });
+    expect(result).toBe("ok");
+    expect(op).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries on 429 and succeeds", async () => {
+    let calls = 0;
+    const op = vi.fn().mockImplementation(async () => {
+      calls += 1;
+      if (calls < 3) throw new Error("HTTP 429");
+      return "ok";
+    });
+    const result = await withRetryAndBackoff(op, { ...DEFAULT_RETRY_OPTIONS, maxAttempts: 5, baseDelayMs: 1 });
+    expect(result).toBe("ok");
+    expect(op).toHaveBeenCalledTimes(3);
+  });
+
+  it("does NOT retry on 4xx other than 429 (quality preserved)", async () => {
+    const op = vi.fn().mockRejectedValue(new Error("HTTP 400 bad request"));
+    await expect(withRetryAndBackoff(op, { ...DEFAULT_RETRY_OPTIONS, maxAttempts: 5, baseDelayMs: 1 })).rejects.toThrow(/400/);
+    expect(op).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/provider-batch.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/provider-batch.ts
+export interface RetryOptions {
+  maxAttempts: number;
+  baseDelayMs: number;
+  retryableStatusCodes: number[];
+}
+
+export const DEFAULT_RETRY_OPTIONS: RetryOptions = {
+  maxAttempts: 4,
+  baseDelayMs: 500,
+  retryableStatusCodes: [408, 429, 500, 502, 503, 504],
+};
+
+function isRetryableError(err: unknown, retryableStatusCodes: number[]): boolean {
+  if (!(err instanceof Error)) return false;
+  const match = err.message.match(/HTTP\s+(\d{3})/);
+  if (!match) return false;
+  const status = Number.parseInt(match[1]!, 10);
+  return retryableStatusCodes.includes(status);
+}
+
+export async function withRetryAndBackoff<T>(op: () => Promise<T>, options: RetryOptions = DEFAULT_RETRY_OPTIONS): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= options.maxAttempts; attempt += 1) {
+    try {
+      return await op();
+    } catch (err) {
+      lastError = err;
+      if (!isRetryableError(err, options.retryableStatusCodes)) throw err;
+      if (attempt === options.maxAttempts) throw err;
+      const delay = options.baseDelayMs * 2 ** (attempt - 1);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastError ?? new Error("withRetryAndBackoff: exhausted attempts");
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/provider-batch.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/speed/provider-batch.ts src/lib/artlab/speed/provider-batch.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: provider retry+exponential-backoff helper
+
+Only retries on the canonical transient HTTP codes (408, 429,
+5xx). 4xx user-error codes pass through unretried — quality
+preservation: bad prompts fail fast, not after 4 attempts.
+baseDelayMs doubles per attempt.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Retryable status codes are an explicit list (no string-matching heuristics).
+- [ ] 4xx errors (except 429) never retried.
+- [ ] Exponential backoff (delay doubles per attempt).
+- [ ] `lastError` thrown after exhausting attempts (no silent return).
+
+### Task 5.9: Telegram message debounce (avoid notification spam)
+
+**Files:**
+- Create: `src/lib/artlab/speed/telegram-debounce.ts`
+- Test: `src/lib/artlab/speed/telegram-debounce.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/telegram-debounce.test.ts
+import { describe, expect, it, vi } from "vitest";
+import { createTelegramDebouncer } from "./telegram-debounce";
+
+describe("telegram message debouncer", () => {
+  it("coalesces multiple sends within the window to one batched send", async () => {
+    const sendFn = vi.fn().mockResolvedValue(undefined);
+    const debouncer = createTelegramDebouncer({ sendFn, windowMs: 50, maxQueueSize: 100 });
+    debouncer.enqueue("msg-1");
+    debouncer.enqueue("msg-2");
+    debouncer.enqueue("msg-3");
+    await new Promise((r) => setTimeout(r, 80));
+    expect(sendFn).toHaveBeenCalledOnce();
+    const [text] = sendFn.mock.calls[0]!;
+    expect(text).toContain("msg-1");
+    expect(text).toContain("msg-2");
+    expect(text).toContain("msg-3");
+  });
+
+  it("flushes immediately when maxQueueSize is hit (quality preserved)", async () => {
+    const sendFn = vi.fn().mockResolvedValue(undefined);
+    const debouncer = createTelegramDebouncer({ sendFn, windowMs: 1000, maxQueueSize: 2 });
+    debouncer.enqueue("a");
+    debouncer.enqueue("b");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(sendFn).toHaveBeenCalledOnce();
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/telegram-debounce.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/telegram-debounce.ts
+export interface TelegramDebouncerOptions {
+  sendFn(text: string): Promise<void>;
+  windowMs: number;
+  maxQueueSize: number;
+}
+
+export interface TelegramDebouncer {
+  enqueue(text: string): void;
+  flush(): Promise<void>;
+}
+
+export function createTelegramDebouncer(options: TelegramDebouncerOptions): TelegramDebouncer {
+  let queue: string[] = [];
+  let timer: NodeJS.Timeout | null = null;
+
+  async function flush(): Promise<void> {
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (queue.length === 0) return;
+    const batch = queue.slice();
+    queue = [];
+    const text = batch.join("\n");
+    await options.sendFn(text);
+  }
+
+  return {
+    enqueue(text: string): void {
+      queue.push(text);
+      if (queue.length >= options.maxQueueSize) {
+        void flush();
+        return;
+      }
+      if (!timer) {
+        timer = setTimeout(() => { void flush(); }, options.windowMs);
+      }
+    },
+    flush,
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/telegram-debounce.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/speed/telegram-debounce.ts src/lib/artlab/speed/telegram-debounce.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: Telegram message debouncer (coalesce in windowMs)
+
+Quality preservation: every message still arrives — they're just
+joined with \n into one batched send when they fall within the
+window. maxQueueSize forces a flush so a fast burst doesn't get
+stuck behind the timer.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Every enqueued message appears in some batched send (none dropped).
+- [ ] `maxQueueSize` forces immediate flush (no starvation).
+- [ ] Concurrent `enqueue` calls during flush are safe (queue is reset to `[]`, new pushes go to the next batch).
+
+### Task 5.10: Quality preservation harness (compare fast vs slow outputs)
+
+**Files:**
+- Create: `src/lib/artlab/speed/quality-equivalence.ts`
+- Test: `src/lib/artlab/speed/quality-equivalence.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/quality-equivalence.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { assertQualityEquivalent } from "./quality-equivalence";
+
+describe("quality equivalence", () => {
+  let dirA: string;
+  let dirB: string;
+  beforeEach(() => {
+    dirA = mkdtempSync(join(tmpdir(), "artlab-qe-a-"));
+    dirB = mkdtempSync(join(tmpdir(), "artlab-qe-b-"));
+  });
+
+  it("passes when artifact shapes match (timestamps allowed to differ)", () => {
+    writeFileSync(join(dirA, "asset-doctor.json"), JSON.stringify({ entries: [{ cutoutPath: "a", alpha: true, notes: [] }] }));
+    writeFileSync(join(dirB, "asset-doctor.json"), JSON.stringify({ entries: [{ cutoutPath: "a", alpha: true, notes: [] }] }));
+    writeFileSync(join(dirA, "run-state.json"), JSON.stringify({ phase: "closed", createdAt: "2026-05-20T01:00:00Z" }));
+    writeFileSync(join(dirB, "run-state.json"), JSON.stringify({ phase: "closed", createdAt: "2026-05-20T02:00:00Z" }));
+    const result = assertQualityEquivalent({ runDirA: dirA, runDirB: dirB });
+    expect(result.equivalent).toBe(true);
+  });
+
+  it("fails when asset-doctor entries differ", () => {
+    writeFileSync(join(dirA, "asset-doctor.json"), JSON.stringify({ entries: [{ cutoutPath: "a", alpha: true, notes: [] }] }));
+    writeFileSync(join(dirB, "asset-doctor.json"), JSON.stringify({ entries: [{ cutoutPath: "a", alpha: false, notes: ["missing alpha"] }] }));
+    const result = assertQualityEquivalent({ runDirA: dirA, runDirB: dirB });
+    expect(result.equivalent).toBe(false);
+    expect(result.differences).toContain("asset-doctor.json");
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/quality-equivalence.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/quality-equivalence.ts
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const TIMESTAMP_FIELDS = new Set(["at", "createdAt", "updatedAt", "promotedAt", "recordedAt", "decidedAt", "generatedAt"]);
+
+function stripTimestamps(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stripTimestamps);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (TIMESTAMP_FIELDS.has(k)) continue;
+      out[k] = stripTimestamps(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+function loadCanonicalJson(path: string): unknown {
+  if (!existsSync(path)) return null;
+  return stripTimestamps(JSON.parse(readFileSync(path, "utf8")));
+}
+
+export interface QualityEquivalenceInput {
+  runDirA: string;
+  runDirB: string;
+}
+
+export interface QualityEquivalenceResult {
+  equivalent: boolean;
+  differences: string[];
+}
+
+const COMPARED_FILES = ["asset-doctor.json", "repair-plan.json", "concept-board.json", "canary-gate.json", "run-state.json"];
+
+export function assertQualityEquivalent(input: QualityEquivalenceInput): QualityEquivalenceResult {
+  const differences: string[] = [];
+  for (const file of COMPARED_FILES) {
+    const a = loadCanonicalJson(join(input.runDirA, file));
+    const b = loadCanonicalJson(join(input.runDirB, file));
+    if (JSON.stringify(a) !== JSON.stringify(b)) {
+      differences.push(file);
+    }
+  }
+  return { equivalent: differences.length === 0, differences };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/quality-equivalence.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/speed/quality-equivalence.ts src/lib/artlab/speed/quality-equivalence.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: quality-equivalence harness (compare fast vs slow runs)
+
+Loads canonical engine state files (asset-doctor, repair-plan,
+concept-board, canary-gate, run-state), strips timestamp fields,
+JSON-stringifies, and compares. Phase 5 tasks reference this to
+prove their speed changes preserve output quality.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Timestamp fields stripped before comparison (recursive — nested objects too).
+- [ ] `COMPARED_FILES` is the canonical list of artifacts the engine writes.
+- [ ] Missing file on one side and present on the other counts as a difference.
+- [ ] Test demonstrates both equivalent and non-equivalent cases.
+
+### Task 5.11: Speed/quality dashboard inside `artlab health`
+
+**Files:**
+- Modify: `src/lib/artlab/health/snapshot.ts` (extend with speed summary)
+- Test: `src/lib/artlab/health/snapshot.speed.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/health/snapshot.speed.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildArtLabHealthSnapshot } from "./snapshot";
+
+describe("health snapshot — speed summary (Phase 5)", () => {
+  let workspaceRoot: string;
+  beforeEach(() => {
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-hs-"));
+    mkdirSync(join(workspaceRoot, "ledgers"));
+    writeFileSync(join(workspaceRoot, "ledgers", "measurements.jsonl"), [
+      JSON.stringify({ label: "rafe-run", durationMs: 1320000, at: "2026-05-20T00:00:00Z" }),
+      JSON.stringify({ label: "rafe-run", durationMs: 700000, at: "2026-05-21T00:00:00Z" }),
+    ].join("\n") + "\n");
+    writeFileSync(join(workspaceRoot, "ledgers", "baselines.jsonl"), JSON.stringify({
+      label: "phase-4-rafe-baseline", runId: "rafe-001", wallClockMs: 1320000,
+      startedAt: "x", endedAt: "y", recordedAt: "z",
+    }) + "\n");
+  });
+
+  it("snapshot.speed.medianRunMs is computed from measurements", async () => {
+    const snapshot = await buildArtLabHealthSnapshot({ workspaceRoot });
+    expect(snapshot.speed?.medianRecentRunMs).toBeGreaterThan(0);
+    expect(snapshot.speed?.baselineRunMs).toBe(1320000);
+    expect(snapshot.speed?.improvementPercent).toBeGreaterThanOrEqual(40);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/health/snapshot.speed.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Extend health snapshot**
+
+```ts
+// extend src/lib/artlab/health/snapshot.ts buildArtLabHealthSnapshot return
+// (assuming snapshot.ts exists and exports the existing shape; add a `speed` field)
+
+import { readMeasurements } from "@/lib/artlab/speed/measure";
+import { readBaseline } from "@/lib/artlab/migration/baseline-recorder";
+
+export interface SpeedSummary {
+  medianRecentRunMs: number;
+  baselineRunMs: number;
+  improvementPercent: number;
+  recentRunCount: number;
+}
+
+async function buildSpeedSummary(workspaceRoot: string): Promise<SpeedSummary | undefined> {
+  const recent = await readMeasurements({ workspaceRoot, label: "rafe-run" });
+  if (recent.length === 0) return undefined;
+  const sorted = recent.map((m) => m.durationMs).sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)] ?? 0;
+  const baseline = await readBaseline({ workspaceRoot, label: "phase-4-rafe-baseline" });
+  const baselineMs = baseline?.wallClockMs ?? median;
+  const improvementPercent = baselineMs > 0 ? Math.round(((baselineMs - median) / baselineMs) * 100) : 0;
+  return {
+    medianRecentRunMs: median,
+    baselineRunMs: baselineMs,
+    improvementPercent,
+    recentRunCount: recent.length,
+  };
+}
+
+// Then in buildArtLabHealthSnapshot, add: speed: await buildSpeedSummary(workspaceRoot),
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/health/snapshot.speed.test.ts src/lib/artlab/health/snapshot.test.ts`
+Expected: PASS (both new speed test + Phase 1 snapshot test)
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/health/snapshot.ts src/lib/artlab/health/snapshot.speed.test.ts
+git commit -m "$(cat <<'EOF'
+Speed: extend artlab health snapshot with speed summary
+
+Adds snapshot.speed { medianRecentRunMs, baselineRunMs,
+improvementPercent, recentRunCount }. Reads from
+ledgers/measurements.jsonl + ledgers/baselines.jsonl. CLI
+`artlab health` will surface this; Phase 5 promise is
+improvementPercent ≥ 40.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Phase 1 snapshot test still passes (additive change, no breakage).
+- [ ] Speed summary is `undefined` (not error) when no measurements exist.
+- [ ] `improvementPercent` is integer-rounded.
+- [ ] Baseline missing falls back to median (so the dashboard reads "0% improvement" rather than NaN).
+
+### Task 5.12: Daily benchmark CI workflow
+
+**Files:**
+- Create: `.github/workflows/artlab-benchmark.yml`
+- Create: `src/lib/artlab/speed/benchmark-runner.ts`
+- Test: `src/lib/artlab/speed/benchmark-runner.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/benchmark-runner.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { runMockBenchmark } from "./benchmark-runner";
+
+describe("daily benchmark runner", () => {
+  let workspaceRoot: string;
+  beforeEach(() => {
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-bench-"));
+    mkdirSync(join(workspaceRoot, "ledgers"));
+  });
+
+  it("emits a benchmark entry to ledgers/measurements.jsonl", async () => {
+    process.env.ARTLAB_CONCEPT_LANE_DELAY_MS = "5";
+    process.env.ARTLAB_CUTOUT_DELAY_MS = "5";
+    const result = await runMockBenchmark({ workspaceRoot });
+    delete process.env.ARTLAB_CONCEPT_LANE_DELAY_MS;
+    delete process.env.ARTLAB_CUTOUT_DELAY_MS;
+    expect(result.label).toBe("daily-mock-benchmark");
+    expect(result.durationMs).toBeGreaterThan(0);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/benchmark-runner.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/benchmark-runner.ts
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { conceptRunner } from "@/lib/artlab/runners/concept-runner";
+import { cutoutRunner } from "@/lib/artlab/runners/cutout-runner";
+import { measureWallClock, recordMeasurement } from "./measure";
+
+export interface MockBenchmarkResult {
+  label: "daily-mock-benchmark";
+  durationMs: number;
+  conceptMs: number;
+  cutoutMs: number;
+}
+
+export async function runMockBenchmark(input: { workspaceRoot: string }): Promise<MockBenchmarkResult> {
+  const runDir = mkdtempSync(join(tmpdir(), "artlab-bm-"));
+  const conceptMeasurement = await measureWallClock("concept", () => conceptRunner.run({
+    runId: "bm",
+    runDir,
+    assetType: "character",
+    characterId: "bm",
+    providerId: "local-mock",
+  }));
+  const cutoutMeasurement = await measureWallClock("cutout", () => cutoutRunner.run({
+    runId: "bm",
+    runDir,
+    assetType: "character",
+    providerId: "local-mock",
+  }));
+  const total = conceptMeasurement.durationMs + cutoutMeasurement.durationMs;
+  await recordMeasurement({ workspaceRoot: input.workspaceRoot, label: "daily-mock-benchmark", durationMs: total });
+  return {
+    label: "daily-mock-benchmark",
+    durationMs: total,
+    conceptMs: conceptMeasurement.durationMs,
+    cutoutMs: cutoutMeasurement.durationMs,
+  };
+}
+```
+
+- [ ] **Step 4: Add the GitHub Actions workflow**
+
+```yaml
+# .github/workflows/artlab-benchmark.yml
+name: artlab-benchmark
+on:
+  schedule:
+    - cron: "13 7 * * *"   # daily 07:13 UTC
+  workflow_dispatch: {}
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: npm ci
+      - name: Run mock benchmark
+        env:
+          ARTLAB_CONCEPT_LANE_DELAY_MS: "5"
+          ARTLAB_CUTOUT_DELAY_MS: "5"
+        run: |
+          mkdir -p .artlab/engine/ledgers
+          npx tsx -e "import('./src/lib/artlab/speed/benchmark-runner').then(async m=>{const r=await m.runMockBenchmark({workspaceRoot:'.artlab/engine'});console.log('benchmark',JSON.stringify(r));if(r.durationMs>2000){console.error('REGRESSION: benchmark exceeded 2s');process.exit(1)}})"
+```
+
+- [ ] **Step 5: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/benchmark-runner.test.ts`
+Expected: PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/artlab/speed/benchmark-runner.ts src/lib/artlab/speed/benchmark-runner.test.ts .github/workflows/artlab-benchmark.yml
+git commit -m "$(cat <<'EOF'
+Speed: daily mock benchmark CI
+
+Runs concept + cutout against local-mock with deterministic
+delays; records to measurements.jsonl; fails CI if total wall-
+clock exceeds 2s (the upper bound at current parallelism).
+Workflow runs daily at 07:13 UTC + on dispatch.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Benchmark is deterministic (uses local-mock + env-var delays only).
+- [ ] CI workflow fails if `durationMs > 2000` — actionable regression signal.
+- [ ] Schedule cron picks an off-peak time (07:13 UTC = 03:13 ET = no overlap with East Coast workday).
+- [ ] `workflow_dispatch: {}` allows manual triggering for ad-hoc benchmarks.
+
+### Task 5.13: PR-gate — speed regression > 10% fails CI
+
+**Files:**
+- Create: `.github/workflows/artlab-speed-regression-gate.yml`
+- Create: `src/lib/artlab/speed/regression-gate.ts`
+- Test: `src/lib/artlab/speed/regression-gate.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/speed/regression-gate.test.ts
+import { describe, expect, it } from "vitest";
+import { assertNoSpeedRegression } from "./regression-gate";
+
+describe("speed regression gate", () => {
+  it("passes when prDurationMs ≤ baseline * 1.1", () => {
+    const result = assertNoSpeedRegression({ baselineMs: 1000, prMs: 1050 });
+    expect(result.passed).toBe(true);
+  });
+
+  it("passes when PR is FASTER than baseline", () => {
+    const result = assertNoSpeedRegression({ baselineMs: 1000, prMs: 700 });
+    expect(result.passed).toBe(true);
+  });
+
+  it("fails when prDurationMs > baseline * 1.1", () => {
+    const result = assertNoSpeedRegression({ baselineMs: 1000, prMs: 1101 });
+    expect(result.passed).toBe(false);
+    expect(result.regressionPercent).toBeGreaterThan(10);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/speed/regression-gate.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/speed/regression-gate.ts
+export const ALLOWED_REGRESSION_PERCENT = 10;
+
+export interface RegressionGateInput {
+  baselineMs: number;
+  prMs: number;
+}
+
+export interface RegressionGateResult {
+  passed: boolean;
+  regressionPercent: number;
+  message: string;
+}
+
+export function assertNoSpeedRegression(input: RegressionGateInput): RegressionGateResult {
+  if (input.baselineMs <= 0) return { passed: true, regressionPercent: 0, message: "no baseline available" };
+  const regressionPercent = ((input.prMs - input.baselineMs) / input.baselineMs) * 100;
+  const passed = regressionPercent <= ALLOWED_REGRESSION_PERCENT;
+  return {
+    passed,
+    regressionPercent: Math.round(regressionPercent * 10) / 10,
+    message: passed
+      ? `OK: ${input.prMs}ms vs baseline ${input.baselineMs}ms (${regressionPercent.toFixed(1)}%)`
+      : `REGRESSION: ${input.prMs}ms exceeds baseline ${input.baselineMs}ms by ${regressionPercent.toFixed(1)}% (cap ${ALLOWED_REGRESSION_PERCENT}%)`,
+  };
+}
+```
+
+- [ ] **Step 4: Add the workflow**
+
+```yaml
+# .github/workflows/artlab-speed-regression-gate.yml
+name: artlab-speed-regression-gate
+on:
+  pull_request:
+    paths:
+      - "src/lib/artlab/**"
+jobs:
+  speed-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: npm ci
+      - name: Run PR benchmark
+        env:
+          ARTLAB_CONCEPT_LANE_DELAY_MS: "5"
+          ARTLAB_CUTOUT_DELAY_MS: "5"
+        run: |
+          mkdir -p .artlab/engine/ledgers
+          PR_MS=$(npx tsx -e "import('./src/lib/artlab/speed/benchmark-runner').then(async m=>{const r=await m.runMockBenchmark({workspaceRoot:'.artlab/engine'});process.stdout.write(String(r.durationMs))})")
+          # baseline: use the last-known mock benchmark duration from main (fallback 1500)
+          BASELINE_MS=1500
+          npx tsx -e "import('./src/lib/artlab/speed/regression-gate').then(m=>{const r=m.assertNoSpeedRegression({baselineMs:$BASELINE_MS,prMs:$PR_MS});console.log(r.message);if(!r.passed)process.exit(1)})"
+```
+
+- [ ] **Step 5: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/speed/regression-gate.test.ts`
+Expected: PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/artlab/speed/regression-gate.ts src/lib/artlab/speed/regression-gate.test.ts .github/workflows/artlab-speed-regression-gate.yml
+git commit -m "$(cat <<'EOF'
+Speed: PR gate — fail CI on speed regression > 10%
+
+Runs the mock benchmark on PR, compares against a fixed baseline
+(1500ms — the current ceiling for concept+cutout on local-mock).
+Future tasks can replace the literal 1500 with a dynamic
+baseline fetched from main, but the literal works as the v1 gate.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Regression cap is a module-level const (`ALLOWED_REGRESSION_PERCENT = 10`).
+- [ ] PR faster than baseline → passes (negative regression).
+- [ ] Message includes both absolute ms numbers AND percentage.
+- [ ] Workflow only runs on PRs touching `src/lib/artlab/**` (no noise on doc-only PRs).
+
+### Task 5.14: Phase 5 acceptance — Rafe-rerun proves ≥ 40% improvement
+
+**Files:**
+- Create: `src/lib/artlab/speed/phase-5-acceptance.test.ts`
+
+- [ ] **Step 1: Write the asserting test (describe.skip — real-money rerun)**
+
+```ts
+// src/lib/artlab/speed/phase-5-acceptance.test.ts
+import { describe, expect, it } from "vitest";
+import { readBaseline } from "@/lib/artlab/migration/baseline-recorder";
+import { readMeasurements } from "./measure";
+
+describe.skip("Phase 5 acceptance — Rafe-rerun ≥ 40% faster than baseline", () => {
+  it("median post-Phase-5 rafe-run measurement beats the baseline by ≥ 40%", async () => {
+    const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine";
+    const baseline = await readBaseline({ workspaceRoot, label: "phase-4-rafe-baseline" });
+    expect(baseline).toBeTruthy();
+    const measurements = await readMeasurements({ workspaceRoot, label: "rafe-run" });
+    expect(measurements.length).toBeGreaterThanOrEqual(3); // need ≥ 3 post-speed runs
+    const recentMs = measurements.slice(-3).map((m) => m.durationMs).sort((a, b) => a - b);
+    const median = recentMs[1]!;
+    const improvement = ((baseline!.wallClockMs - median) / baseline!.wallClockMs) * 100;
+    expect(improvement).toBeGreaterThanOrEqual(40);
+  }, 60_000);
+});
+```
+
+- [ ] **Step 2: Commit (the test is skipped — Armaan un-skips after re-running Rafe)**
+
+```bash
+git add src/lib/artlab/speed/phase-5-acceptance.test.ts
+git commit -m "$(cat <<'EOF'
+Phase 5 acceptance test — assert Rafe-rerun ≥ 40% faster
+
+describe.skip until Armaan reruns Rafe through the Phase 5
+engine and records ≥ 3 'rafe-run' measurements. When un-skipped,
+the test asserts median post-Phase-5 wall-clock beats the
+phase-4-rafe-baseline by ≥ 40%. This is the Phase 5 completion
+gate.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `describe.skip` so vitest does not run it automatically.
+- [ ] Asserts ≥ 3 post-Phase-5 runs exist (single measurement is noise).
+- [ ] Median (not min, not mean) used — robust to outliers.
+- [ ] Threshold is `≥ 40%` matching the Phase 5 promise.
+
+### Task 5.15: Phase 5 documentation — Speed Playbook
+
+**Files:**
+- Create: `docs/artlab/SPEED.md`
+
+- [ ] **Step 1: Write the doc**
+
+```markdown
+# ArtLab — Speed Playbook
+
+ArtLab runs **as fast as quality allows**, with output byte-identical or QA-equivalent to a slow run. This page lists every speed mechanism, its quality-preservation guarantee, and the on-by-default tuning.
+
+## Phase 5 speed mechanisms
+
+| Mechanism | Quality preservation | Where |
+|---|---|---|
+| 5-lane concept parallelism (Promise.all) | Same slot files; Phase 1 Task 1.9 still passes | `src/lib/artlab/runners/concept-runner.ts` |
+| LLM prompt caching (Anthropic ephemeral cache) | Same response; cache hit/miss invisible | `src/lib/artlab/orchestrator/claude-brain.ts` (Task 5.3 enforces) |
+| Canary prep / concept QA overlap | Canary artifacts only consumed after QA pass | `src/lib/artlab/speed/pipeline-overlap.ts` |
+| Cutout worker pool (concurrency 2-4) | Same cutout files, sorted output for determinism | `src/lib/artlab/speed/cutout-pool.ts`, `runners/cutout-runner.ts` |
+| Memory retrieval LRU cache | Same results; cache size capped | `src/lib/artlab/speed/lru-cache.ts` |
+| Provider retry+backoff (4xx/5xx-aware) | 4xx pass through; only transients retried | `src/lib/artlab/speed/provider-batch.ts` |
+| Telegram message debounce | Every message preserved in batched send | `src/lib/artlab/speed/telegram-debounce.ts` |
+
+## Tuning knobs
+
+| Env var | Purpose | Default |
+|---|---|---|
+| `ARTLAB_CONCEPT_LANE_DELAY_MS` | Per-lane sleep in mock provider (test-only) | unset |
+| `ARTLAB_CUTOUT_DELAY_MS` | Per-cutout sleep in mock provider (test-only) | unset |
+| `ARTLAB_GEMINI_MODE=mock` | Skip real Gemini, return deterministic mock bytes | unset (production hits API) |
+| `ARTLAB_CLAUDE_MODE=dry-run` | Skip real Anthropic call, echo input | unset (production hits API) |
+| `ARTLAB_CODEX_MODE=mock` | Skip real codex CLI invocation | unset (production spawns CLI) |
+
+## Daily benchmark + PR gate
+
+- `.github/workflows/artlab-benchmark.yml` — daily 07:13 UTC mock-benchmark run; fails if total > 2s.
+- `.github/workflows/artlab-speed-regression-gate.yml` — PR gate; fails if PR benchmark > baseline × 1.1.
+
+## Quality-equivalence harness
+
+Any contributor proposing a new speed change must use `src/lib/artlab/speed/quality-equivalence.ts` to assert their fast-path output is byte-identical (or QA-equivalent — timestamps stripped) to a slow-path run. Tests that ship in the PR cover this.
+
+## Phase 5 acceptance gate
+
+The whole-Phase-5 acceptance test (`src/lib/artlab/speed/phase-5-acceptance.test.ts`) asserts that the median of the last ≥ 3 Rafe-rerun wall-clocks is ≥ 40% faster than `phase-4-rafe-baseline`. The test is `describe.skip` by default; un-skip and run after ≥ 3 post-Phase-5 Rafe-equivalent runs are in the measurements ledger.
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add docs/artlab/SPEED.md
+git commit -m "$(cat <<'EOF'
+Add ArtLab Speed Playbook doc
+
+Catalogs every Phase 5 speed mechanism with its quality-
+preservation guarantee, tuning env vars, daily benchmark and
+PR gate workflows, and the acceptance test gate.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Every Phase 5 task is listed in the mechanism table.
+- [ ] Every tuning env var is named in the knobs table.
+- [ ] Doc references the acceptance test (Task 5.14) by file path.
+
+### Phase 5 completion criteria
+
+Run these commands; all must exit 0 / produce expected output:
+
+```bash
+# All Phase 5 unit tests pass
+npx vitest run src/lib/artlab/speed src/lib/artlab/runners
+
+# Prompt caching is still enforced
+npx vitest run src/lib/artlab/speed/prompt-caching-assertion.test.ts
+
+# Phase 1 quality tests still pass (no regressions)
+npx vitest run src/lib/artlab/runners/concept-runner.test.ts src/lib/artlab/runners/cutout-runner.test.ts
+
+# Daily benchmark workflow + speed gate workflow + speed doc exist
+test -f .github/workflows/artlab-benchmark.yml
+test -f .github/workflows/artlab-speed-regression-gate.yml
+test -f docs/artlab/SPEED.md
+
+# Phase 5 acceptance test (manual): un-skip and run after ≥ 3 Rafe-rerun measurements exist
+# Median wall-clock of last 3 rafe-runs must beat phase-4-rafe-baseline by ≥ 40%
+
+# Tag the phase
+git tag artlab-phase-5-complete
+```
+
+---
+
 
