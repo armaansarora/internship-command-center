@@ -33,14 +33,17 @@ describe("artlab CLI shell", () => {
     expect(code).toBe(2);
   });
 
-  it("stub produce returns exit-code 0 and prints a banner", async () => {
+  it("produce returns exit-code 0 and prints an acknowledgement", async () => {
+    const tmpRoot = `/tmp/artlab-cli-test-${Date.now()}`;
+    process.env.ARTLAB_WORKSPACE_ROOT = tmpRoot;
     const lines: string[] = [];
     const code = await artlabCliEntry({
       argv: ["produce", "make Rafe"],
       stdout: (s) => lines.push(s),
       stderr: () => {},
     });
+    delete process.env.ARTLAB_WORKSPACE_ROOT;
     expect(code).toBe(0);
-    expect(lines.join("\n")).toMatch(/artlab produce: stub/i);
+    expect(lines.join("\n")).toMatch(/queued|produce/i);
   });
 });
