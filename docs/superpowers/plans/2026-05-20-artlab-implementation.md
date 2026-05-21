@@ -1,86 +1,258 @@
-# Atelier Creative Engine Implementation Plan
+# ArtLab Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers — required execution skill stack (use ALL of these together):**
+> 1. **`superpowers:subagent-driven-development`** — fresh implementer subagent per task (recommended). Alternative: `superpowers:executing-plans` for batched in-session execution.
+> 2. **`superpowers:requesting-code-review`** — runs a fresh reviewer subagent on every diff before commit.
+> 3. **`superpowers:receiving-code-review`** — runs inside the implementer subagent when the reviewer pushes back.
+> 4. **`superpowers:verification-before-completion`** — gate before every commit (tests/typecheck/lint pass with evidence, not assertion).
+> 5. **Claude Code `/goal` command** (CLI 2.1.139+) — the outer wrapper that auto-iterates the entire stack. See **Execution Protocol** for the exact `/goal` commands.
+>
+> Steps in every task use checkbox (`- [ ]`) syntax. Every task has an explicit **Acceptance criteria** block that the reviewer subagent verifies. Every phase ends with a **Phase completion criteria** block that the `/goal` evaluator verifies.
 
-**Goal:** Replace the 12,000-line legacy Creative Production Engine with **Atelier** — an autonomous overnight Telegram-driven engine that generates Tower character art and other visual assets through two human gates (`approve direction <n>` and `approved for app`), backed by a 10-phase state machine, an LLM brain for novel decisions, persistent memory ledgers, cast coherence checks, real Playwright pre-promotion QA, and a self-healing daemon that drafts its own refactor branches via Codex when friction repeats.
+**Goal:** Replace the 12,000-line legacy Creative Production Engine with **ArtLab** — a Telegram-driven creative engine that generates Tower character art and other visual assets through exactly two human gates (`approve direction <n>` and `approved for app`). The engine runs **as fast as quality allows** — Phase 5 is dedicated to wall-clock reduction with quality byte-identical to a slow run. Backed by a 10-phase state machine with orthogonal blockers, a deterministic scheduler that delegates only novel decisions to an LLM brain (Claude Opus 4.7 + Codex), persistent style-wins / rejections / prompt-evolution memory ledgers, cast coherence checks (silhouette + palette + age impression), real Playwright e2e pre-promotion QA, a Mac daemon supervised by launchd, and a self-evolution loop that drafts its own refactor branches via `mcp__codex__codex` when friction repeats five times.
 
-**Architecture:** New module tree at `src/lib/atelier/` (11 focused modules ≤ ~500 lines each) plus one CLI entry point `scripts/atelier.ts` plus one long-running daemon process supervised by `launchd`. The deterministic scheduler walks the state machine for predictable transitions and only invokes `mcp__codex__codex` / Claude Opus for routing, ambiguity, QA adjudication, prompt enrichment, and reply parsing fallback. The Mac daemon long-polls the Telegram Bot API directly (no Vercel webhook) and supervises max-2 parallel child runners that each emit a 10s heartbeat to `progress.json`. Salvaged leaf modules (`budget/ledger.ts`, `scheduler/scheduler.ts`, `providers/adapters.ts`, `promotion/`, `review/`, `cleanup/`, `contracts/`) are re-exported unchanged. Legacy CPE stays alive behind a deprecation banner until atelier has produced ≥10 characters and ≥3 non-character asset types.
+**Architecture:** New module tree at `src/lib/artlab/` (12 focused modules ≤ ~500 lines each — the 11 from the spec plus `migration/`) + one CLI entry point `scripts/artlab.ts` + one long-running daemon supervised by `launchd`. Deterministic scheduler walks the state machine; LLM brain handles only routing-ambiguity, clarification-wording, QA-failure adjudication, reply-parser fallback, prompt enrichment, and blocker-message drafting. Mac daemon long-polls the Telegram Bot API directly (no Vercel webhook); supervises max-2 parallel child runners; each emits a 10s heartbeat to `progress.json`. Salvaged leaf modules (`budget/ledger.ts`, `scheduler/scheduler.ts`, `providers/adapters.ts`, `promotion/`, `review/`, `cleanup/`, `contracts/`) re-export from legacy unchanged. Legacy CPE stays behind a deprecation banner until ArtLab has shipped ≥10 characters + ≥3 non-character asset types; then Phase 8 deletes ~12,000 lines.
 
-**Tech Stack:** TypeScript 5 (strict, no `any`), Node 24, Vitest 4 (unit + integration), Playwright 1.59 (e2e), Zod v4 (validation), `sharp` 0.34 (image hashes + bbox), Telegram Bot API (long-poll), `mcp__codex__codex` (self-evolution), Claude Opus 4.7 via `@ai-sdk/anthropic` (LLM brain), launchd (daemon supervision), macOS Keychain via `security` CLI (secret storage), existing `@supabase/ssr` patterns elsewhere in the repo are NOT used here (atelier is filesystem-only state).
+**Tech Stack:** TypeScript 5 (strict, no `any`), Node 24, Vitest 4 (unit + integration + property-based via `fast-check`), Playwright 1.59 (e2e), Zod v4 (validation), `sharp` 0.34 (perceptual hashes + bbox extraction), Telegram Bot API (HTTPS long-poll, no third-party library), `mcp__codex__codex` (self-evolution branch drafting), Claude Opus 4.7 via `@ai-sdk/anthropic` (LLM brain — with Anthropic prompt caching on system prompts; this dep is already installed at 3.0.58), `launchd` (daemon supervision), macOS Keychain via `security` CLI (secret storage). Existing `@supabase/ssr` patterns elsewhere in the repo are NOT used — ArtLab is filesystem-only state.
 
-**Spec reference:** `docs/superpowers/specs/2026-05-20-atelier-creative-engine-design.md` — every locked decision is sourced from there.
+**Spec reference:** `docs/superpowers/specs/2026-05-20-artlab-creative-engine-design.md` — every locked design decision is sourced from there. This plan diverges from the spec on three deliberate points (each noted again at point of use):
+1. **Project name** — spec was first written as "Atelier" (historical); rebranded to **ArtLab** 2026-05-20 and renamed throughout.
+2. **Workspace path** — spec says `.artlab/atelier/`; plan uses **`.artlab/engine/`** to avoid collision with the legacy `.artlab/studio/` workspace during Phases 0-3. Phase 4 archives legacy to `.artlab/legacy/` and the engine workspace stays at `.artlab/engine/` (no further moves).
+3. **Speed framing** — spec calls it "autonomous overnight"; per Armaan's 2026-05-20 directive, the engine runs **as fast as quality allows**. Phase 5 (Speed) is dedicated to wall-clock reduction with byte-identical / QA-equivalent output guarantees. Never call this engine "overnight" in code, comments, prompts, or docs.
+
+---
+
+## Plan Map
+
+| Phase | Name | Tasks | Cumulative | Purpose | Phase-completion criterion (the `/goal` for that phase) |
+|---|---|---:|---:|---|---|
+| 0 | Scaffold | 10 | 10 | Module tree, salvaged re-exports, CLI stub, workspace, placeholder docs | `find src/lib/artlab -type d \| wc -l` ≥ 22; `npm run artlab -- help` exits 0; full vitest exits 0 |
+| 1 | Foundation | 24 | 34 | State machine, reconciler, atomic snapshots, 7 runners, deterministic orchestrator, real health snapshot | Phase 1 integration test (Task 1.24) passes: synthetic run routed→closed via local-mock provider |
+| 2 | Intelligence | 18 | 52 | Intake router (Rafe→Otis regression gated), memory ledgers, coherence checks, LLM brain, Codex adapter, real Claude Opus implementation | All 21 intake regression variants in Task 2.5 pass; cast-coherence smoke test green; decision-log audit trail emitted |
+| 3 | Surfaces | 30 | 82 | Telegram bot (long-poll, identity check, 3-tier reply parser, image attachments), Mac daemon (launchd plist, supervisor, heartbeat, crash recovery, SIGTERM cancel, sleep guard), self-evolution (friction detector, Codex summoner, branch-only), CLI subcommand bodies (replace 10 stubs), `artlab bot setup` interactive, per-run + monthly budget caps | `npm run artlab:daemon -- start` runs; Telegram echo round-trip green; all CLI subcommands return non-stub output; `npx vitest run src/lib/artlab/bot src/lib/artlab/daemon src/lib/artlab/self-evolution` exits 0 |
+| 4 | Migration + first Rafe | 12 | 94 | Import promoted Otis + Mara state into ArtLab `closed` shape, archive `.artlab/studio/` → `.artlab/legacy/`, deprecation banners on 4 legacy scripts (exit 1 if invoked), end-to-end Rafe Calder run as go-live acceptance | Rafe run reaches `closed` via Telegram round-trip; `diff -r public/art/lobby/otis@pre public/art/lobby/otis@post` is empty; legacy scripts print deprecation and exit 1 |
+| **5** | **Speed (quality preserved)** — NEW | **15** | **109** | True 5-lane concept parallelism, pipeline phase overlap, Anthropic prompt caching, sharp+rembg worker pool, Playwright parallel pages, memory LRU cache, daily benchmark gate, speed/quality dashboard inside `artlab health` | Baseline-Rafe wall-clock from Phase 4 reduced ≥40%; every speed task's quality-preservation assertion passes byte-identical; daily benchmark CI shows no quality regression |
+| 6 | Cast push | 6 | 115 | 9 more characters through ArtLab (Priya, Dylan, Vera, Sol, Inez, Mina, Etta, Rowan, Nadia), memory accumulation verification, one bundle test | All 9 characters promoted via ArtLab; `style-wins.jsonl` has ≥ 10 entries (including Rafe); bundle `war room with Rafe` resolves to 3 linked children with atomic promotion |
+| 7 | Asset-type expansion | 12 | 127 | Vertical slices: one war-room environment, one Tower button UI texture, one ambient animation — each with its own asset-type contract, runner extension, promotion path, and per-type Playwright assertions | One environment + one UI texture + one animation promoted; per-type e2e specs green; manifest schema extended for each type |
+| 8 | Legacy retirement | 15 | 142 | Delete 4 giant scripts (~6,857 lines) + `operator/v1-final.ts` (~3,080 lines), write 3 consolidated docs (`atelier/ENGINE.md` already renamed to `artlab/ENGINE.md`, `OPERATIONS.md`, `CHARACTER-PIPELINE.md`), move 12 legacy docs to `docs/legacy/`, slim SKILL.md (220 → ~80 lines), update CLAUDE.md, install byte-diff CI for Otis/Mara promoted state | `grep -rl "creative-production" src scripts` returns 0; `ls docs/legacy/ \| wc -l` ≥ 12; `wc -l .agents/skills/creative-production-engine/SKILL.md` ≤ 100; CLAUDE.md says ArtLab, not CPE |
+
+**Estimated total:** 142 tasks producing ~5,000 lines of ArtLab code spread across ~50 focused files, deleting ~12,000 lines of legacy CPE.
+
+**Hard dependencies between phases:**
+- Phase 1 needs Phase 0 (uses scaffolded modules + types).
+- Phase 2 needs Phase 1 (uses state machine, runners, reconciler).
+- Phase 3 needs Phase 2 (Telegram reply-parser fallback uses LLM brain; daemon supervises runners).
+- Phase 4 needs Phase 3 (first real Rafe run is Telegram-driven).
+- Phase 5 needs Phase 4 (baseline measurement requires a real run).
+- Phase 6 needs Phase 5 (cast push benefits from speed gains; 9× speed-up is the point).
+- Phase 7 *can* begin after Phase 4 in parallel with 5/6 IF Armaan green-lights asset-type expansion early.
+- Phase 8 needs Phases 6 + 7 complete (legacy retirement waits until ArtLab has shipped enough volume to prove it).
 
 ---
 
 ## Conventions for every task in this plan
 
+### Code conventions
+
 - All file paths are absolute from the repo root `/Users/armaanarora/Documents/The Tower/`.
-- Every task follows TDD: write failing test, confirm fail, implement, confirm pass, commit.
-- Commit messages use imperative mood and end with the Co-Authored-By trailer baked into the working repo standard.
-- No `console.log`. Use the structured event emitter (`atelier/state/events.ts`) for any runtime output.
+- Every task follows TDD: write failing test → confirm fail → implement → confirm pass → commit.
+- Commit messages use imperative mood and end with the Co-Authored-By trailer.
+- No `console.log` anywhere. Use the structured event emitter (`artlab/state/events.ts`) for any runtime output.
 - No `TODO`, `FIXME`, or `XXX` comments in shipped code.
-- All Zod schemas use `z.object({...}).strict()` and are exported alongside the inferred type.
-- Atomic file writes everywhere: write to `<path>.tmp.<pid>` then `renameSync`.
+- All Zod schemas use `z.object({...}).strict()` and are exported alongside the inferred type via `z.infer<typeof Schema>`.
+- Atomic file writes everywhere: write to `<path>.tmp.<pid>.<timestamp>` then `renameSync`.
 - All timestamps are ISO-8601 UTC produced by `new Date().toISOString()`.
-- All IDs are UUID v4 from `node:crypto.randomUUID()` unless explicitly slug-based.
-- Imports use `@/lib/atelier/...` path alias (already configured in `tsconfig.json`).
-- React 19 / Next 16 conventions do not apply here — atelier is server-side Node only, no JSX.
+- All IDs are UUID v4 from `node:crypto.randomUUID()` unless explicitly slug-based for human readability.
+- Imports use the `@/lib/artlab/...` path alias (configured in `tsconfig.json`).
+- React 19 / Next 16 conventions do not apply here — ArtLab is server-side Node only, no JSX.
+- No `any` types; use `unknown` + Zod parse at boundaries.
+- No silent `catch (err) {}` — every catch either rethrows, records an event via the events emitter, or returns a typed error result.
+
+### Brand conventions (mandatory for naming)
+
+- Project name in prose: **ArtLab** (one word, two caps — never "ArtLab Engine", "Atelier", "CPE", or "Creative Production Engine V2").
+- TypeScript types: `ArtLab<Noun>` — e.g., `ArtLabPhase`, `ArtLabRunState`, `ArtLabRunner`.
+- Functions: `<verb>ArtLab<Noun>` — e.g., `acquireArtLabLock`, `readArtLabReality`, `enqueueArtLabRun`.
+- Constants: `ARTLAB_<NOUN>` — e.g., `ARTLAB_PHASES`, `ARTLAB_BLOCKERS`, `ARTLAB_RUNNER_KINDS`.
+- Paths / filenames / npm scripts / commit tags: lowercase `artlab` — e.g., `src/lib/artlab/`, `scripts/artlab.ts`, `npm run artlab:produce`, `artlab-phase-3-complete`.
+- launchd label: `com.tower.artlab`.
+- Keychain entries: `tower-artlab-<purpose>` — e.g., `tower-artlab-telegram-token`, `tower-artlab-chat-id`, `tower-artlab-gemini-key`.
+
+### Speed conventions (Phase 5 enforces project-wide; previous phases must comply prospectively)
+
+- Any new long-running operation must publish a heartbeat at ≤ 10s intervals.
+- Any new sequential `for-of` loop calling I/O must have a documented `// SPEED:` comment explaining why it is not `Promise.all` parallel.
+- Any new LLM call against a stable system prompt must use Anthropic prompt caching (`cache_control: { type: "ephemeral" }`).
+- Any new file read/write that happens > 10 times per run must use an LRU cache or a single batched read.
+- Any new I/O-bound test must use the in-memory fixture pattern (`memfs` or tmpdir) rather than the real filesystem when possible.
+
+---
+
+## Execution Protocol
+
+This plan is designed to be executed by Claude Code with **`/goal` as the outer driver** and **subagent-driven-development as the inner mechanism**. The combination gives you "set a finish line and walk away" with rigorous code-review-and-tweak supervision per task.
+
+### Three layers of `/goal`
+
+**Layer 1 — Whole-plan `/goal` (start once, walk away).** Type this once at the top of an empty Claude Code session:
+
+```
+/goal Execute every unchecked task in docs/superpowers/plans/2026-05-20-artlab-implementation.md following the Execution Protocol exactly. Use superpowers:subagent-driven-development for dispatch. Done when (1) every checkbox in the plan is ticked, (2) every artlab-phase-N-complete tag exists in git for N in 0..8, (3) `npm test && npx tsc --noEmit && npm run lint && npx playwright test` all exit 0, (4) the Coverage Matrix appendix in the plan is filled in. Stop and escalate to me if any single task fails its Acceptance criteria after 3 reviewer-tweak rounds, OR if any cross-task validation regresses an unrelated test.
+```
+
+**Layer 2 — Per-phase `/goal` (preferred for staged rollout — run one phase at a time):**
+
+```
+/goal Execute every unchecked task in Phase <N> of docs/superpowers/plans/2026-05-20-artlab-implementation.md per the Execution Protocol. Use superpowers:subagent-driven-development. Done when (1) every Phase <N> checkbox ticked, (2) the Phase <N> completion criteria block at the end of the phase passes (run those exact shell commands), (3) `git tag artlab-phase-<N>-complete` succeeds. Halt and escalate if any task fails its Acceptance criteria after 3 reviewer-tweak rounds.
+```
+
+**Layer 3 — Per-task `/goal` (auto-invoked by the dispatcher between tasks; you almost never type this manually):**
+
+```
+/goal Implement Task <N.M> as written in docs/superpowers/plans/2026-05-20-artlab-implementation.md. Done when (1) the task's Acceptance criteria block is satisfied (verified by a fresh reviewer subagent using superpowers:requesting-code-review), (2) all Universal Acceptance Criteria pass, (3) `npx vitest run <test paths from Files block> && npx tsc --noEmit && npx eslint <files from Files block>` exit 0, (4) `grep -nE "console\\.log|TODO|FIXME|XXX" <files from Files block>` returns 0 matches, (5) the task commit appears in git with the prescribed message verbatim.
+```
+
+The `/goal` evaluator (a smaller, faster model) reads the transcript after each turn and answers `done? yes / no / escalate`. The dispatcher does not need to be told "next task" — it just keeps working until the condition closes.
+
+### Per-task loop (what the executor does between `/goal` checks)
+
+For each task in the plan:
+
+1. **Context injection.** Dispatcher reads the task body, then `grep`s for the 3 most-related existing ArtLab files (by import path match and sibling-test name match). Implementer subagent receives: the full task body, the Conventions section, the related-files content, and a pointer to the spec for "why" questions.
+
+2. **TDD pass.** Implementer runs the task's numbered steps:
+   - Step 1: Write the failing test exactly as specified.
+   - Step 2: Run the test command from the task. Confirm it fails for the stated reason.
+   - Step 3: Implement the minimal code shown in the task.
+   - Step 4: Run the test command again. Confirm it passes.
+   - Reports back: diff, test output, commands run.
+
+3. **Code-review pass.** A fresh **reviewer subagent** (separate context window, no working knowledge of the implementer's reasoning) is dispatched with `superpowers:requesting-code-review`, the diff, the task's **Acceptance criteria** block, and the Universal Acceptance Criteria. It returns `PASS` or a structured list of `changes-required`.
+
+4. **Tweak loop.** If reviewer says `changes-required`:
+   - Implementer receives the review using `superpowers:receiving-code-review`.
+   - Addresses each item. Re-runs tests. Resubmits the new diff.
+   - Reviewer re-reviews the new diff.
+   - **Max 3 rounds.** If still not `PASS` after round 3, the dispatcher halts and escalates to Armaan via `.artlab/engine/escalations/<runId>-<timestamp>.json`. Do NOT commit a half-passing task. The Phase 3 friction detector picks this up if it recurs five times.
+
+5. **Verification gate** (`superpowers:verification-before-completion`). Before any commit:
+   - `npx vitest run <test-paths-touched>` exits 0 — capture and quote the output line "Test Files: X passed".
+   - `npx tsc --noEmit` exits 0 with no new errors vs the pre-task baseline (compare error count, not just exit code).
+   - `npx eslint <files-touched>` exits 0.
+   - `grep -nE "console\\.log|TODO|FIXME|XXX" <files-touched>` returns 0 matches — quote the empty output.
+   - File paths in the actual diff match the task's **Files** block exactly. Any drift halts the task.
+
+6. **Commit.** Use the exact commit message in the task body. New commit, no `--amend`. After commit, confirm `git status` is clean.
+
+7. **Cross-task validation (every 5 tasks).** Dispatcher runs the full vitest suite + `tsc --noEmit` + lint. Any regression vs the 5-tasks-ago baseline halts the plan. Escalate.
+
+8. **Phase boundary.** When the last task in a phase commits, the dispatcher runs the phase's **Phase completion criteria** suite (defined at the end of each phase). On pass, it runs `git tag artlab-phase-<N>-complete`. On fail, halt + escalate.
+
+### Universal Acceptance Criteria (every task; reviewer MUST verify on every diff)
+
+These are the floor. Per-task acceptance criteria add task-specific items on top.
+
+- [ ] Test was written FIRST and confirmed failing before implementation (verifiable from `git log -p` if needed).
+- [ ] Implementation is the minimum code that makes the test pass — no premature abstraction, no speculative features, no error handling for paths the spec/task does not name.
+- [ ] No `any` types introduced (`grep -nE ": any[,\\s)]"` should return 0 matches in changed files).
+- [ ] No `console.log`, `TODO`, `FIXME`, or `XXX` in shipped code.
+- [ ] All exported Zod schemas use `.strict()` and are paired with `z.infer<typeof …>` type export.
+- [ ] All file writes that could collide use the atomic `temp + rename` pattern.
+- [ ] All file paths use the `@/lib/artlab/...` alias (not relative `../../../` traversal beyond two levels).
+- [ ] All timestamps are ISO-8601 UTC.
+- [ ] All IDs are UUID v4 from `node:crypto.randomUUID()` unless slug-based for human readability.
+- [ ] No silent `catch (err) {}` — every catch records via events emitter, rethrows, or returns a typed error.
+- [ ] Names follow Brand conventions (ArtLab in types, artlab in paths).
+- [ ] Commit message is the exact one prescribed in the task body (no improvisation).
+- [ ] No file outside the task's **Files** block was modified.
+
+### Per-task Acceptance criteria pattern
+
+Every task in this plan ends with a section like:
+
+```markdown
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] <task-specific assertion 1>
+- [ ] <task-specific assertion 2>
+```
+
+The reviewer subagent checks both lists. The per-task list is the part that makes the `/goal` condition specific enough to evaluate — without it, the reviewer is vibing.
+
+### Phase completion criteria pattern
+
+The last subsection of every phase is `### Phase <N> completion criteria` listing:
+1. Concrete tests that must pass (with exact `npx vitest run …` commands).
+2. Concrete artifacts that must exist (with exact `test -f …` shell commands).
+3. Concrete grep checks (with exact `grep -nE … | wc -l` commands and expected outputs).
+4. The exact `git tag artlab-phase-<N>-complete` command to run on success.
+
+These commands ARE the `/goal` condition for the per-phase `/goal` wrapper.
+
+### Escalation rules
+
+The dispatcher escalates to Armaan (writes a one-paragraph summary to `.artlab/engine/escalations/<runId>-<timestamp>.json` and halts the `/goal`) when:
+- A task's reviewer rejects after 3 tweak rounds.
+- A cross-task validation regresses an unrelated test.
+- A phase completion criterion fails after a clean per-task pass (indicates a hidden interaction).
+- `vitest --bail` triggers on a flake threshold > 1 in 10 runs.
+
+Escalation never auto-rolls-back; the in-progress branch is preserved for Armaan to inspect.
 
 ---
 
 ## Phase 0 — Scaffold
 
-Establish the module tree, public re-exports of salvaged code, CLI shell with stub subcommands, npm scripts, and workspace directories. After Phase 0 the legacy CPE still works unchanged; atelier exists as inert scaffolding that compiles and tests green.
+Establish the module tree, public re-exports of salvaged code, CLI shell with stub subcommands, npm scripts, and workspace directories. After Phase 0 the legacy CPE still works unchanged; artlab exists as inert scaffolding that compiles and tests green.
 
-### Task 0.1: Create atelier module directory tree
+### Task 0.1: Create artlab module directory tree
 
 **Files:**
-- Create: `src/lib/atelier/.gitkeep`
-- Create: `src/lib/atelier/intake/.gitkeep`
-- Create: `src/lib/atelier/state/.gitkeep`
-- Create: `src/lib/atelier/queue/.gitkeep`
-- Create: `src/lib/atelier/runners/.gitkeep`
-- Create: `src/lib/atelier/orchestrator/.gitkeep`
-- Create: `src/lib/atelier/memory/.gitkeep`
-- Create: `src/lib/atelier/coherence/.gitkeep`
-- Create: `src/lib/atelier/bot/.gitkeep`
-- Create: `src/lib/atelier/daemon/.gitkeep`
-- Create: `src/lib/atelier/self-evolution/.gitkeep`
-- Create: `src/lib/atelier/health/.gitkeep`
-- Create: `src/lib/atelier/budget/.gitkeep`
-- Create: `src/lib/atelier/scheduler/.gitkeep`
-- Create: `src/lib/atelier/providers/.gitkeep`
-- Create: `src/lib/atelier/promotion/.gitkeep`
-- Create: `src/lib/atelier/review/.gitkeep`
-- Create: `src/lib/atelier/cleanup/.gitkeep`
-- Create: `src/lib/atelier/contracts/.gitkeep`
-- Create: `src/lib/atelier/adapters/.gitkeep`
-- Create: `src/lib/atelier/migration/.gitkeep`
+- Create: `src/lib/artlab/.gitkeep`
+- Create: `src/lib/artlab/intake/.gitkeep`
+- Create: `src/lib/artlab/state/.gitkeep`
+- Create: `src/lib/artlab/queue/.gitkeep`
+- Create: `src/lib/artlab/runners/.gitkeep`
+- Create: `src/lib/artlab/orchestrator/.gitkeep`
+- Create: `src/lib/artlab/memory/.gitkeep`
+- Create: `src/lib/artlab/coherence/.gitkeep`
+- Create: `src/lib/artlab/bot/.gitkeep`
+- Create: `src/lib/artlab/daemon/.gitkeep`
+- Create: `src/lib/artlab/self-evolution/.gitkeep`
+- Create: `src/lib/artlab/health/.gitkeep`
+- Create: `src/lib/artlab/budget/.gitkeep`
+- Create: `src/lib/artlab/scheduler/.gitkeep`
+- Create: `src/lib/artlab/providers/.gitkeep`
+- Create: `src/lib/artlab/promotion/.gitkeep`
+- Create: `src/lib/artlab/review/.gitkeep`
+- Create: `src/lib/artlab/cleanup/.gitkeep`
+- Create: `src/lib/artlab/contracts/.gitkeep`
+- Create: `src/lib/artlab/adapters/.gitkeep`
+- Create: `src/lib/artlab/migration/.gitkeep`
 
 - [ ] **Step 1: Create all directories with placeholder files**
 
 ```bash
 cd "/Users/armaanarora/Documents/The Tower"
 for d in intake state queue runners orchestrator memory coherence bot daemon self-evolution health budget scheduler providers promotion review cleanup contracts adapters migration; do
-  mkdir -p "src/lib/atelier/$d"
-  touch "src/lib/atelier/$d/.gitkeep"
+  mkdir -p "src/lib/artlab/$d"
+  touch "src/lib/artlab/$d/.gitkeep"
 done
-mkdir -p src/lib/atelier && touch src/lib/atelier/.gitkeep
+mkdir -p src/lib/artlab && touch src/lib/artlab/.gitkeep
 ```
 
 - [ ] **Step 2: Verify tree**
 
-Run: `find src/lib/atelier -type d | sort`
+Run: `find src/lib/artlab -type d | sort`
 Expected: 22 directories (root + 21 subdirs)
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/lib/atelier
+git add src/lib/artlab
 git commit -m "$(cat <<'EOF'
-Scaffold atelier module directory tree
+Scaffold artlab module directory tree
 
-21 focused subdirectories under src/lib/atelier/ ready for the
+21 focused subdirectories under src/lib/artlab/ ready for the
 new creative engine. Each module will be filled in subsequent
 tasks; .gitkeep placeholders ensure the tree is checked in.
 
@@ -89,24 +261,24 @@ EOF
 )"
 ```
 
-### Task 0.2: Define shared atelier types
+### Task 0.2: Define shared artlab types
 
 **Files:**
-- Create: `src/lib/atelier/types.ts`
-- Test: `src/lib/atelier/types.test.ts`
+- Create: `src/lib/artlab/types.ts`
+- Test: `src/lib/artlab/types.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/types.test.ts
+// src/lib/artlab/types.test.ts
 import { describe, expect, it } from "vitest";
 import {
   ATELIER_PHASES,
   ATELIER_BLOCKERS,
-  AtelierRunStateSchema,
+  ArtLabRunStateSchema,
 } from "./types";
 
-describe("atelier shared types", () => {
+describe("artlab shared types", () => {
   it("declares all 10 core phases in canonical order", () => {
     expect(ATELIER_PHASES).toEqual([
       "routed",
@@ -135,7 +307,7 @@ describe("atelier shared types", () => {
   });
 
   it("validates a minimal run state", () => {
-    const result = AtelierRunStateSchema.parse({
+    const result = ArtLabRunStateSchema.parse({
       runId: "test-run-1",
       assetType: "character",
       phase: "routed",
@@ -148,7 +320,7 @@ describe("atelier shared types", () => {
 
   it("rejects unknown phase", () => {
     expect(() =>
-      AtelierRunStateSchema.parse({
+      ArtLabRunStateSchema.parse({
         runId: "x",
         assetType: "character",
         phase: "rogue",
@@ -163,13 +335,13 @@ describe("atelier shared types", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/types.test.ts`
+Run: `npx vitest run src/lib/artlab/types.test.ts`
 Expected: FAIL — "Cannot find module './types'"
 
 - [ ] **Step 3: Implement shared types**
 
 ```ts
-// src/lib/atelier/types.ts
+// src/lib/artlab/types.ts
 import { z } from "zod";
 import type { CreativeAssetType } from "@/lib/creative-production/types";
 
@@ -185,7 +357,7 @@ export const ATELIER_PHASES = [
   "verifying",
   "closed",
 ] as const;
-export type AtelierPhase = (typeof ATELIER_PHASES)[number];
+export type ArtLabPhase = (typeof ATELIER_PHASES)[number];
 
 export const ATELIER_BLOCKERS = [
   "needs-human",
@@ -196,7 +368,7 @@ export const ATELIER_BLOCKERS = [
   "upgrade-required",
   "cancelled",
 ] as const;
-export type AtelierBlocker = (typeof ATELIER_BLOCKERS)[number];
+export type ArtLabBlocker = (typeof ATELIER_BLOCKERS)[number];
 
 export const ATELIER_ASSET_TYPES = [
   "character",
@@ -209,18 +381,18 @@ export const ATELIER_ASSET_TYPES = [
   "marketing-hero",
   "shader",
 ] as const satisfies readonly CreativeAssetType[];
-export type AtelierAssetType = (typeof ATELIER_ASSET_TYPES)[number];
+export type ArtLabAssetType = (typeof ATELIER_ASSET_TYPES)[number];
 
-export const AtelierApprovedConceptSchema = z
+export const ArtLabApprovedConceptSchema = z
   .object({
     laneIndex: z.number().int().min(1).max(5),
     approvedAt: z.string().datetime({ offset: true }),
     approvedBy: z.literal("human"),
   })
   .strict();
-export type AtelierApprovedConcept = z.infer<typeof AtelierApprovedConceptSchema>;
+export type ArtLabApprovedConcept = z.infer<typeof ArtLabApprovedConceptSchema>;
 
-export const AtelierRunStateSchema = z
+export const ArtLabRunStateSchema = z
   .object({
     runId: z.string().min(1),
     assetType: z.enum(ATELIER_ASSET_TYPES),
@@ -231,14 +403,14 @@ export const AtelierRunStateSchema = z
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     request: z.string().min(1),
-    approvedConcept: AtelierApprovedConceptSchema.optional(),
+    approvedConcept: ArtLabApprovedConceptSchema.optional(),
     referenceImagePaths: z.array(z.string()).optional(),
     sourceSurface: z.enum(["telegram", "cli", "daemon-resume", "migration"]).optional(),
   })
   .strict();
-export type AtelierRunState = z.infer<typeof AtelierRunStateSchema>;
+export type ArtLabRunState = z.infer<typeof ArtLabRunStateSchema>;
 
-export interface AtelierWorkspacePaths {
+export interface ArtLabWorkspacePaths {
   root: string;
   inbox: string;
   runs: string;
@@ -247,20 +419,20 @@ export interface AtelierWorkspacePaths {
   slotLeases: string;
 }
 
-export const ATELIER_WORKSPACE_RELATIVE = ".artlab/atelier";
+export const ATELIER_WORKSPACE_RELATIVE = ".artlab/artlab";
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/types.test.ts`
+Run: `npx vitest run src/lib/artlab/types.test.ts`
 Expected: PASS — all 4 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/types.ts src/lib/atelier/types.test.ts
+git add src/lib/artlab/types.ts src/lib/artlab/types.test.ts
 git commit -m "$(cat <<'EOF'
-Define atelier shared types and Zod schemas
+Define artlab shared types and Zod schemas
 
 Locks the 10 phase + 7 blocker enum at the type level. Run state
 schema is strict and validates every state file we ever write.
@@ -273,56 +445,56 @@ EOF
 ### Task 0.3: Re-export salvaged budget module
 
 **Files:**
-- Create: `src/lib/atelier/budget/index.ts`
-- Test: `src/lib/atelier/budget/index.test.ts`
+- Create: `src/lib/artlab/budget/index.ts`
+- Test: `src/lib/artlab/budget/index.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/budget/index.test.ts
+// src/lib/artlab/budget/index.test.ts
 import { describe, expect, it } from "vitest";
-import * as atelierBudget from "./index";
+import * as artlabBudget from "./index";
 
-describe("atelier budget re-export", () => {
+describe("artlab budget re-export", () => {
   it("re-exports reserveCreativeBudget from legacy ledger", () => {
-    expect(typeof atelierBudget.reserveCreativeBudget).toBe("function");
+    expect(typeof artlabBudget.reserveCreativeBudget).toBe("function");
   });
 
   it("re-exports releaseCreativeBudgetReservation", () => {
-    expect(typeof atelierBudget.releaseCreativeBudgetReservation).toBe("function");
+    expect(typeof artlabBudget.releaseCreativeBudgetReservation).toBe("function");
   });
 
   it("re-exports recordCreativeBudgetSpend", () => {
-    expect(typeof atelierBudget.recordCreativeBudgetSpend).toBe("function");
+    expect(typeof artlabBudget.recordCreativeBudgetSpend).toBe("function");
   });
 });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/budget/index.test.ts`
+Run: `npx vitest run src/lib/artlab/budget/index.test.ts`
 Expected: FAIL — "Cannot find module './index'"
 
 - [ ] **Step 3: Implement re-export**
 
 ```ts
-// src/lib/atelier/budget/index.ts
+// src/lib/artlab/budget/index.ts
 export * from "@/lib/creative-production/budget";
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/budget/index.test.ts`
+Run: `npx vitest run src/lib/artlab/budget/index.test.ts`
 Expected: PASS — 3 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/budget/index.ts src/lib/atelier/budget/index.test.ts
+git add src/lib/artlab/budget/index.ts src/lib/artlab/budget/index.test.ts
 git commit -m "$(cat <<'EOF'
-Re-export salvaged budget ledger via atelier/budget
+Re-export salvaged budget ledger via artlab/budget
 
-Atelier consumers import from @/lib/atelier/budget so the legacy
+ArtLab consumers import from @/lib/artlab/budget so the legacy
 namespace can be deleted without touching call sites in Phase 7.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
@@ -333,46 +505,46 @@ EOF
 ### Task 0.4: Re-export salvaged scheduler module
 
 **Files:**
-- Create: `src/lib/atelier/scheduler/index.ts`
-- Test: `src/lib/atelier/scheduler/index.test.ts`
+- Create: `src/lib/artlab/scheduler/index.ts`
+- Test: `src/lib/artlab/scheduler/index.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/scheduler/index.test.ts
+// src/lib/artlab/scheduler/index.test.ts
 import { describe, expect, it } from "vitest";
-import * as atelierScheduler from "./index";
+import * as artlabScheduler from "./index";
 
-describe("atelier scheduler re-export", () => {
+describe("artlab scheduler re-export", () => {
   it("re-exports runCreativeScheduler", () => {
-    expect(typeof atelierScheduler.runCreativeScheduler).toBe("function");
+    expect(typeof artlabScheduler.runCreativeScheduler).toBe("function");
   });
 });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/scheduler/index.test.ts`
+Run: `npx vitest run src/lib/artlab/scheduler/index.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement re-export**
 
 ```ts
-// src/lib/atelier/scheduler/index.ts
+// src/lib/artlab/scheduler/index.ts
 export * from "@/lib/creative-production/scheduler";
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/scheduler/index.test.ts`
+Run: `npx vitest run src/lib/artlab/scheduler/index.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/scheduler/index.ts src/lib/atelier/scheduler/index.test.ts
+git add src/lib/artlab/scheduler/index.ts src/lib/artlab/scheduler/index.test.ts
 git commit -m "$(cat <<'EOF'
-Re-export salvaged scheduler via atelier/scheduler
+Re-export salvaged scheduler via artlab/scheduler
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -382,17 +554,17 @@ EOF
 ### Task 0.5: Re-export salvaged providers, promotion, review, cleanup, contracts
 
 **Files:**
-- Create: `src/lib/atelier/providers/index.ts`
-- Create: `src/lib/atelier/promotion/index.ts`
-- Create: `src/lib/atelier/review/index.ts`
-- Create: `src/lib/atelier/cleanup/index.ts`
-- Create: `src/lib/atelier/contracts/index.ts`
-- Test: `src/lib/atelier/reexports.test.ts`
+- Create: `src/lib/artlab/providers/index.ts`
+- Create: `src/lib/artlab/promotion/index.ts`
+- Create: `src/lib/artlab/review/index.ts`
+- Create: `src/lib/artlab/cleanup/index.ts`
+- Create: `src/lib/artlab/contracts/index.ts`
+- Test: `src/lib/artlab/reexports.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/reexports.test.ts
+// src/lib/artlab/reexports.test.ts
 import { describe, expect, it } from "vitest";
 import * as providers from "./providers";
 import * as promotion from "./promotion";
@@ -400,7 +572,7 @@ import * as review from "./review";
 import * as cleanup from "./cleanup";
 import * as contracts from "./contracts";
 
-describe("atelier salvaged re-exports", () => {
+describe("artlab salvaged re-exports", () => {
   it("providers exposes runCreativeProviderGeneration", () => {
     expect(typeof providers.runCreativeProviderGeneration).toBe("function");
   });
@@ -421,51 +593,51 @@ describe("atelier salvaged re-exports", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/reexports.test.ts`
+Run: `npx vitest run src/lib/artlab/reexports.test.ts`
 Expected: FAIL — modules not found
 
 - [ ] **Step 3: Implement five re-exports**
 
 ```ts
-// src/lib/atelier/providers/index.ts
+// src/lib/artlab/providers/index.ts
 export * from "@/lib/creative-production/providers";
 ```
 
 ```ts
-// src/lib/atelier/promotion/index.ts
+// src/lib/artlab/promotion/index.ts
 export * from "@/lib/creative-production/promotion";
 ```
 
 ```ts
-// src/lib/atelier/review/index.ts
+// src/lib/artlab/review/index.ts
 export * from "@/lib/creative-production/review";
 ```
 
 ```ts
-// src/lib/atelier/cleanup/index.ts
+// src/lib/artlab/cleanup/index.ts
 export * from "@/lib/creative-production/cleanup";
 ```
 
 ```ts
-// src/lib/atelier/contracts/index.ts
+// src/lib/artlab/contracts/index.ts
 export * from "@/lib/creative-production/contracts";
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/reexports.test.ts`
+Run: `npx vitest run src/lib/artlab/reexports.test.ts`
 Expected: PASS — 5 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/providers src/lib/atelier/promotion src/lib/atelier/review src/lib/atelier/cleanup src/lib/atelier/contracts src/lib/atelier/reexports.test.ts
+git add src/lib/artlab/providers src/lib/artlab/promotion src/lib/artlab/review src/lib/artlab/cleanup src/lib/artlab/contracts src/lib/artlab/reexports.test.ts
 git commit -m "$(cat <<'EOF'
 Re-export salvaged providers, promotion, review, cleanup, contracts
 
-Five-module re-export pass. Atelier now has a complete leaf-module
+Five-module re-export pass. ArtLab now has a complete leaf-module
 surface backed by the legacy implementations. Phase 7 deletes the
-legacy paths once all atelier imports are stable.
+legacy paths once all artlab imports are stable.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -475,17 +647,17 @@ EOF
 ### Task 0.6: Public index entry point
 
 **Files:**
-- Create: `src/lib/atelier/index.ts`
-- Test: `src/lib/atelier/index.test.ts`
+- Create: `src/lib/artlab/index.ts`
+- Test: `src/lib/artlab/index.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/index.test.ts
+// src/lib/artlab/index.test.ts
 import { describe, expect, it } from "vitest";
 import { ATELIER_PHASES, ATELIER_BLOCKERS, ATELIER_WORKSPACE_RELATIVE } from "./index";
 
-describe("atelier public surface", () => {
+describe("artlab public surface", () => {
   it("re-exports phase enum", () => {
     expect(ATELIER_PHASES.length).toBe(10);
   });
@@ -493,20 +665,20 @@ describe("atelier public surface", () => {
     expect(ATELIER_BLOCKERS.length).toBe(7);
   });
   it("exports workspace path constant", () => {
-    expect(ATELIER_WORKSPACE_RELATIVE).toBe(".artlab/atelier");
+    expect(ATELIER_WORKSPACE_RELATIVE).toBe(".artlab/artlab");
   });
 });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/index.test.ts`
+Run: `npx vitest run src/lib/artlab/index.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement index**
 
 ```ts
-// src/lib/atelier/index.ts
+// src/lib/artlab/index.ts
 export * from "./types";
 export * as budget from "./budget";
 export * as scheduler from "./scheduler";
@@ -519,15 +691,15 @@ export * as contracts from "./contracts";
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/index.test.ts`
+Run: `npx vitest run src/lib/artlab/index.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/index.ts src/lib/atelier/index.test.ts
+git add src/lib/artlab/index.ts src/lib/artlab/index.test.ts
 git commit -m "$(cat <<'EOF'
-Add atelier public index re-exporting all leaf modules
+Add artlab public index re-exporting all leaf modules
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -537,17 +709,17 @@ EOF
 ### Task 0.7: CLI shell with stub subcommands
 
 **Files:**
-- Create: `scripts/atelier.ts`
-- Test: `scripts/atelier.test.ts`
+- Create: `scripts/artlab.ts`
+- Test: `scripts/artlab.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// scripts/atelier.test.ts
+// scripts/artlab.test.ts
 import { describe, expect, it } from "vitest";
-import { atelierCliEntry, ATELIER_SUBCOMMANDS } from "./atelier";
+import { artlabCliEntry, ATELIER_SUBCOMMANDS } from "./artlab";
 
-describe("atelier CLI shell", () => {
+describe("artlab CLI shell", () => {
   it("declares all subcommands", () => {
     expect(ATELIER_SUBCOMMANDS).toEqual([
       "produce",
@@ -565,42 +737,42 @@ describe("atelier CLI shell", () => {
   });
 
   it("entry returns exit-code 2 with no args", async () => {
-    const code = await atelierCliEntry({ argv: [], stdout: () => {}, stderr: () => {} });
+    const code = await artlabCliEntry({ argv: [], stdout: () => {}, stderr: () => {} });
     expect(code).toBe(2);
   });
 
   it("entry returns exit-code 0 for help", async () => {
-    const code = await atelierCliEntry({ argv: ["help"], stdout: () => {}, stderr: () => {} });
+    const code = await artlabCliEntry({ argv: ["help"], stdout: () => {}, stderr: () => {} });
     expect(code).toBe(0);
   });
 
   it("entry returns exit-code 2 for unknown subcommand", async () => {
-    const code = await atelierCliEntry({ argv: ["dance"], stdout: () => {}, stderr: () => {} });
+    const code = await artlabCliEntry({ argv: ["dance"], stdout: () => {}, stderr: () => {} });
     expect(code).toBe(2);
   });
 
   it("stub produce returns exit-code 0 and prints a banner", async () => {
     const lines: string[] = [];
-    const code = await atelierCliEntry({
+    const code = await artlabCliEntry({
       argv: ["produce", "make Rafe"],
       stdout: (s) => lines.push(s),
       stderr: () => {},
     });
     expect(code).toBe(0);
-    expect(lines.join("\n")).toMatch(/atelier produce: stub/i);
+    expect(lines.join("\n")).toMatch(/artlab produce: stub/i);
   });
 });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run scripts/atelier.test.ts`
+Run: `npx vitest run scripts/artlab.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement CLI shell**
 
 ```ts
-// scripts/atelier.ts
+// scripts/artlab.ts
 export const ATELIER_SUBCOMMANDS = [
   "produce",
   "continue",
@@ -614,45 +786,45 @@ export const ATELIER_SUBCOMMANDS = [
   "migrate",
   "help",
 ] as const;
-export type AtelierSubcommand = (typeof ATELIER_SUBCOMMANDS)[number];
+export type ArtLabSubcommand = (typeof ATELIER_SUBCOMMANDS)[number];
 
-export interface AtelierCliIo {
+export interface ArtLabCliIo {
   argv: string[];
   stdout: (line: string) => void;
   stderr: (line: string) => void;
 }
 
-const HELP_TEXT = `atelier — Tower creative engine CLI
+const HELP_TEXT = `artlab — Tower creative engine CLI
 Usage:
-  atelier produce <request>            new run; LLM brain routes
-  atelier continue <runId>             advance a continuable phase
-  atelier answer <runId> "<response>"  record human response
-  atelier status [runId]               plain-English status
-  atelier queue                        queued + active runs
-  atelier health                       real engine health report
-  atelier cancel <runId>               cancel a run with refund
-  atelier daemon <start|stop|restart|status|logs>
-  atelier bot <setup>                  interactive bot setup
-  atelier migrate --import <list>      one-shot legacy import
+  artlab produce <request>            new run; LLM brain routes
+  artlab continue <runId>             advance a continuable phase
+  artlab answer <runId> "<response>"  record human response
+  artlab status [runId]               plain-English status
+  artlab queue                        queued + active runs
+  artlab health                       real engine health report
+  artlab cancel <runId>               cancel a run with refund
+  artlab daemon <start|stop|restart|status|logs>
+  artlab bot <setup>                  interactive bot setup
+  artlab migrate --import <list>      one-shot legacy import
 `;
 
-async function stub(name: string, args: string[], io: AtelierCliIo): Promise<number> {
-  io.stdout(`atelier ${name}: stub — fills in during Phase 1-3 implementation`);
+async function stub(name: string, args: string[], io: ArtLabCliIo): Promise<number> {
+  io.stdout(`artlab ${name}: stub — fills in during Phase 1-3 implementation`);
   if (args.length > 0) io.stdout(`  args: ${args.join(" ")}`);
   return 0;
 }
 
-export async function atelierCliEntry(io: AtelierCliIo): Promise<number> {
+export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
   const [subcommand, ...rest] = io.argv;
   if (!subcommand) {
     io.stderr(HELP_TEXT);
     return 2;
   }
-  if (!ATELIER_SUBCOMMANDS.includes(subcommand as AtelierSubcommand)) {
-    io.stderr(`atelier: unknown subcommand "${subcommand}"\n\n${HELP_TEXT}`);
+  if (!ATELIER_SUBCOMMANDS.includes(subcommand as ArtLabSubcommand)) {
+    io.stderr(`artlab: unknown subcommand "${subcommand}"\n\n${HELP_TEXT}`);
     return 2;
   }
-  switch (subcommand as AtelierSubcommand) {
+  switch (subcommand as ArtLabSubcommand) {
     case "help":
       io.stdout(HELP_TEXT);
       return 0;
@@ -680,7 +852,7 @@ export async function atelierCliEntry(io: AtelierCliIo): Promise<number> {
 }
 
 if (require.main === module) {
-  void atelierCliEntry({
+  void artlabCliEntry({
     argv: process.argv.slice(2),
     stdout: (line) => process.stdout.write(`${line}\n`),
     stderr: (line) => process.stderr.write(`${line}\n`),
@@ -690,17 +862,17 @@ if (require.main === module) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run scripts/atelier.test.ts`
+Run: `npx vitest run scripts/artlab.test.ts`
 Expected: PASS — 5 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/atelier.ts scripts/atelier.test.ts
+git add scripts/artlab.ts scripts/artlab.test.ts
 git commit -m "$(cat <<'EOF'
-Add atelier CLI shell with 10 stub subcommands
+Add artlab CLI shell with 10 stub subcommands
 
-Single entry point scripts/atelier.ts dispatches by subcommand.
+Single entry point scripts/artlab.ts dispatches by subcommand.
 Every subcommand stub returns exit 0 and prints a placeholder so
 the wire-up is testable before subcommand bodies land.
 
@@ -709,31 +881,31 @@ EOF
 )"
 ```
 
-### Task 0.8: npm scripts for atelier CLI
+### Task 0.8: npm scripts for artlab CLI
 
 **Files:**
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Add atelier scripts to package.json**
+- [ ] **Step 1: Add artlab scripts to package.json**
 
 Insert in the `scripts` block alongside existing `art:*` entries:
 
 ```json
 {
-  "atelier": "tsx scripts/atelier.ts",
-  "atelier:produce": "tsx scripts/atelier.ts produce",
-  "atelier:status": "tsx scripts/atelier.ts status",
-  "atelier:queue": "tsx scripts/atelier.ts queue",
-  "atelier:health": "tsx scripts/atelier.ts health",
-  "atelier:daemon": "tsx scripts/atelier.ts daemon",
-  "atelier:bot": "tsx scripts/atelier.ts bot",
-  "atelier:migrate": "tsx scripts/atelier.ts migrate"
+  "artlab": "tsx scripts/artlab.ts",
+  "artlab:produce": "tsx scripts/artlab.ts produce",
+  "artlab:status": "tsx scripts/artlab.ts status",
+  "artlab:queue": "tsx scripts/artlab.ts queue",
+  "artlab:health": "tsx scripts/artlab.ts health",
+  "artlab:daemon": "tsx scripts/artlab.ts daemon",
+  "artlab:bot": "tsx scripts/artlab.ts bot",
+  "artlab:migrate": "tsx scripts/artlab.ts migrate"
 }
 ```
 
 - [ ] **Step 2: Verify scripts resolve**
 
-Run: `npm run atelier -- help`
+Run: `npm run artlab -- help`
 Expected: prints the help text from Task 0.7
 
 - [ ] **Step 3: Commit**
@@ -741,58 +913,58 @@ Expected: prints the help text from Task 0.7
 ```bash
 git add package.json
 git commit -m "$(cat <<'EOF'
-Add npm scripts for atelier CLI subcommands
+Add npm scripts for artlab CLI subcommands
 
-Eight wrappers (atelier, atelier:produce, atelier:status,
-atelier:queue, atelier:health, atelier:daemon, atelier:bot,
-atelier:migrate) wired to scripts/atelier.ts.
+Eight wrappers (artlab, artlab:produce, artlab:status,
+artlab:queue, artlab:health, artlab:daemon, artlab:bot,
+artlab:migrate) wired to scripts/artlab.ts.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
 
-### Task 0.9: Create .artlab/atelier workspace
+### Task 0.9: Create .artlab/artlab workspace
 
 **Files:**
-- Create: `.artlab/atelier/.gitkeep`
-- Create: `.artlab/atelier/inbox/.gitkeep`
-- Create: `.artlab/atelier/inbox/cli/.gitkeep`
-- Create: `.artlab/atelier/runs/.gitkeep`
-- Create: `.artlab/atelier/memory/.gitkeep`
-- Create: `.artlab/atelier/ledgers/.gitkeep`
-- Create: `.artlab/atelier/slot-leases/.gitkeep`
+- Create: `.artlab/engine/.gitkeep`
+- Create: `.artlab/engine/inbox/.gitkeep`
+- Create: `.artlab/engine/inbox/cli/.gitkeep`
+- Create: `.artlab/engine/runs/.gitkeep`
+- Create: `.artlab/engine/memory/.gitkeep`
+- Create: `.artlab/engine/ledgers/.gitkeep`
+- Create: `.artlab/engine/slot-leases/.gitkeep`
 - Modify: `.gitignore`
 
 - [ ] **Step 1: Create workspace tree**
 
 ```bash
 cd "/Users/armaanarora/Documents/The Tower"
-mkdir -p .artlab/atelier/inbox/cli .artlab/atelier/runs .artlab/atelier/memory .artlab/atelier/ledgers .artlab/atelier/slot-leases
-for d in . inbox inbox/cli runs memory ledgers slot-leases; do touch ".artlab/atelier/$d/.gitkeep"; done
+mkdir -p .artlab/engine/inbox/cli .artlab/engine/runs .artlab/engine/memory .artlab/engine/ledgers .artlab/engine/slot-leases
+for d in . inbox inbox/cli runs memory ledgers slot-leases; do touch ".artlab/engine/$d/.gitkeep"; done
 ```
 
-- [ ] **Step 2: Update .gitignore to exclude transient atelier artifacts**
+- [ ] **Step 2: Update .gitignore to exclude transient artlab artifacts**
 
 Append to `.gitignore`:
 
 ```
-# atelier transient workspace (only .gitkeep files tracked)
-.artlab/atelier/runs/**/run-state.json
-.artlab/atelier/runs/**/progress.json
-.artlab/atelier/runs/**/events.jsonl
-.artlab/atelier/slot-leases/*.lease.json
-.artlab/atelier/inbox/**/*.json
-.artlab/atelier/ledgers/*.jsonl
-.artlab/atelier/memory/*.jsonl
+# artlab transient workspace (only .gitkeep files tracked)
+.artlab/engine/runs/**/run-state.json
+.artlab/engine/runs/**/progress.json
+.artlab/engine/runs/**/events.jsonl
+.artlab/engine/slot-leases/*.lease.json
+.artlab/engine/inbox/**/*.json
+.artlab/engine/ledgers/*.jsonl
+.artlab/engine/memory/*.jsonl
 ```
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add .artlab/atelier .gitignore
+git add .artlab/artlab .gitignore
 git commit -m "$(cat <<'EOF'
-Create .artlab/atelier workspace with .gitkeep placeholders
+Create .artlab/artlab workspace with .gitkeep placeholders
 
 Six subdirectories (inbox, inbox/cli, runs, memory, ledgers,
 slot-leases) ready for runtime use. .gitignore prevents transient
@@ -803,34 +975,34 @@ EOF
 )"
 ```
 
-### Task 0.10: Placeholder atelier docs
+### Task 0.10: Placeholder artlab docs
 
 **Files:**
-- Create: `docs/atelier/ENGINE.md`
-- Create: `docs/atelier/OPERATIONS.md`
-- Create: `docs/atelier/CHARACTER-PIPELINE.md`
+- Create: `docs/artlab/ENGINE.md`
+- Create: `docs/artlab/OPERATIONS.md`
+- Create: `docs/artlab/CHARACTER-PIPELINE.md`
 
 - [ ] **Step 1: Write placeholder docs**
 
 ```markdown
-<!-- docs/atelier/ENGINE.md -->
-# Atelier — Engine reference
+<!-- docs/artlab/ENGINE.md -->
+# ArtLab — Engine reference
 
 Status: WIP placeholder. Real reference written in Phase 7 retirement task.
 
-See `docs/superpowers/specs/2026-05-20-atelier-creative-engine-design.md` for the design.
+See `docs/superpowers/specs/2026-05-20-artlab-creative-engine-design.md` for the design.
 ```
 
 ```markdown
-<!-- docs/atelier/OPERATIONS.md -->
-# Atelier — Operations runbook
+<!-- docs/artlab/OPERATIONS.md -->
+# ArtLab — Operations runbook
 
 Status: WIP placeholder. Real runbook written in Phase 7 retirement task.
 ```
 
 ```markdown
-<!-- docs/atelier/CHARACTER-PIPELINE.md -->
-# Atelier — Character pipeline
+<!-- docs/artlab/CHARACTER-PIPELINE.md -->
+# ArtLab — Character pipeline
 
 Status: WIP placeholder. Merged character pipeline reference written in Phase 7 retirement task.
 ```
@@ -838,9 +1010,9 @@ Status: WIP placeholder. Merged character pipeline reference written in Phase 7 
 - [ ] **Step 2: Commit**
 
 ```bash
-git add docs/atelier
+git add docs/artlab
 git commit -m "$(cat <<'EOF'
-Create docs/atelier/ placeholder reference docs
+Create docs/artlab/ placeholder reference docs
 
 Three placeholder pages (ENGINE.md, OPERATIONS.md, CHARACTER-PIPELINE.md)
 filled in during Phase 7. Keeps the docs tree visible in PRs.
@@ -859,13 +1031,13 @@ The state machine, runners, deterministic orchestrator, and real health snapshot
 ### Task 1.1: State machine — phase transitions table
 
 **Files:**
-- Create: `src/lib/atelier/state/machine.ts`
-- Test: `src/lib/atelier/state/machine.test.ts`
+- Create: `src/lib/artlab/state/machine.ts`
+- Test: `src/lib/artlab/state/machine.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/state/machine.test.ts
+// src/lib/artlab/state/machine.test.ts
 import { describe, expect, it } from "vitest";
 import {
   ATELIER_TRANSITIONS,
@@ -873,7 +1045,7 @@ import {
   legalNextPhases,
 } from "./machine";
 
-describe("atelier state machine", () => {
+describe("artlab state machine", () => {
   it("declares the 10 forward transitions in order", () => {
     const sequence = ATELIER_TRANSITIONS
       .filter((t) => t.trigger === "auto" || t.trigger === "human")
@@ -915,32 +1087,32 @@ describe("atelier state machine", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/state/machine.test.ts`
+Run: `npx vitest run src/lib/artlab/state/machine.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement machine**
 
 ```ts
-// src/lib/atelier/state/machine.ts
-import type { AtelierBlocker, AtelierPhase, AtelierRunState } from "../types";
+// src/lib/artlab/state/machine.ts
+import type { ArtLabBlocker, ArtLabPhase, ArtLabRunState } from "../types";
 
-export type AtelierTransitionTrigger = "auto" | "human" | "blocker" | "cancel" | "resume";
+export type ArtLabTransitionTrigger = "auto" | "human" | "blocker" | "cancel" | "resume";
 
-export interface AtelierTransitionContext {
+export interface ArtLabTransitionContext {
   workspaceRoot: string;
   now: () => Date;
 }
 
-export interface AtelierTransition {
-  from: AtelierPhase;
-  to: AtelierPhase;
-  blocker?: AtelierBlocker;
-  trigger: AtelierTransitionTrigger;
-  validate(state: AtelierRunState, ctx: AtelierTransitionContext): Promise<void>;
-  apply(state: AtelierRunState, ctx: AtelierTransitionContext): Promise<AtelierRunState>;
+export interface ArtLabTransition {
+  from: ArtLabPhase;
+  to: ArtLabPhase;
+  blocker?: ArtLabBlocker;
+  trigger: ArtLabTransitionTrigger;
+  validate(state: ArtLabRunState, ctx: ArtLabTransitionContext): Promise<void>;
+  apply(state: ArtLabRunState, ctx: ArtLabTransitionContext): Promise<ArtLabRunState>;
 }
 
-function patch(state: AtelierRunState, to: AtelierPhase, ctx: AtelierTransitionContext, blocker?: AtelierBlocker): AtelierRunState {
+function patch(state: ArtLabRunState, to: ArtLabPhase, ctx: ArtLabTransitionContext, blocker?: ArtLabBlocker): ArtLabRunState {
   return {
     ...state,
     phase: to,
@@ -949,7 +1121,7 @@ function patch(state: AtelierRunState, to: AtelierPhase, ctx: AtelierTransitionC
   };
 }
 
-const auto = (from: AtelierPhase, to: AtelierPhase): AtelierTransition => ({
+const auto = (from: ArtLabPhase, to: ArtLabPhase): ArtLabTransition => ({
   from,
   to,
   trigger: "auto",
@@ -957,7 +1129,7 @@ const auto = (from: AtelierPhase, to: AtelierPhase): AtelierTransition => ({
   async apply(state, ctx) { return patch(state, to, ctx); },
 });
 
-const human = (from: AtelierPhase, to: AtelierPhase): AtelierTransition => ({
+const human = (from: ArtLabPhase, to: ArtLabPhase): ArtLabTransition => ({
   from,
   to,
   trigger: "human",
@@ -969,7 +1141,7 @@ const human = (from: AtelierPhase, to: AtelierPhase): AtelierTransition => ({
   async apply(state, ctx) { return patch(state, to, ctx); },
 });
 
-export const ATELIER_TRANSITIONS: readonly AtelierTransition[] = [
+export const ATELIER_TRANSITIONS: readonly ArtLabTransition[] = [
   auto("routed", "generating-concepts"),
   auto("generating-concepts", "concept-review"),
   human("concept-review", "canary"),
@@ -981,30 +1153,30 @@ export const ATELIER_TRANSITIONS: readonly AtelierTransition[] = [
   auto("verifying", "closed"),
 ];
 
-export function isLegalTransition(from: AtelierPhase, to: AtelierPhase): boolean {
+export function isLegalTransition(from: ArtLabPhase, to: ArtLabPhase): boolean {
   return ATELIER_TRANSITIONS.some((t) => t.from === from && t.to === to);
 }
 
-export function legalNextPhases(from: AtelierPhase): AtelierPhase[] {
+export function legalNextPhases(from: ArtLabPhase): ArtLabPhase[] {
   return ATELIER_TRANSITIONS.filter((t) => t.from === from).map((t) => t.to);
 }
 
-export function getTransition(from: AtelierPhase, to: AtelierPhase): AtelierTransition | undefined {
+export function getTransition(from: ArtLabPhase, to: ArtLabPhase): ArtLabTransition | undefined {
   return ATELIER_TRANSITIONS.find((t) => t.from === from && t.to === to);
 }
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/state/machine.test.ts`
+Run: `npx vitest run src/lib/artlab/state/machine.test.ts`
 Expected: PASS — 5 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/state/machine.ts src/lib/atelier/state/machine.test.ts
+git add src/lib/artlab/state/machine.ts src/lib/artlab/state/machine.test.ts
 git commit -m "$(cat <<'EOF'
-Implement atelier state machine forward transitions
+Implement artlab state machine forward transitions
 
 Nine forward transitions (routed → closed) with validate+apply
 contract. Two are human-gated (concept-review→canary,
@@ -1018,8 +1190,8 @@ EOF
 ### Task 1.2: State machine — blocker transitions
 
 **Files:**
-- Modify: `src/lib/atelier/state/machine.ts`
-- Modify: `src/lib/atelier/state/machine.test.ts`
+- Modify: `src/lib/artlab/state/machine.ts`
+- Modify: `src/lib/artlab/state/machine.test.ts`
 
 - [ ] **Step 1: Write the failing test (append to existing test file)**
 
@@ -1040,7 +1212,7 @@ it("supports cancellation from any non-terminal phase", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/state/machine.test.ts`
+Run: `npx vitest run src/lib/artlab/state/machine.test.ts`
 Expected: FAIL — `isLegalTransition` only takes 2 args
 
 - [ ] **Step 3: Extend implementation**
@@ -1048,9 +1220,9 @@ Expected: FAIL — `isLegalTransition` only takes 2 args
 Update `isLegalTransition` and add a `BLOCKER_TRANSITIONS` table:
 
 ```ts
-// in src/lib/atelier/state/machine.ts, append:
+// in src/lib/artlab/state/machine.ts, append:
 
-const BLOCKER_PHASES_NONTERMINAL: AtelierPhase[] = [
+const BLOCKER_PHASES_NONTERMINAL: ArtLabPhase[] = [
   "routed",
   "generating-concepts",
   "concept-review",
@@ -1062,7 +1234,7 @@ const BLOCKER_PHASES_NONTERMINAL: AtelierPhase[] = [
   "verifying",
 ];
 
-export const BLOCKER_TRANSITIONS: readonly AtelierTransition[] = BLOCKER_PHASES_NONTERMINAL.flatMap(
+export const BLOCKER_TRANSITIONS: readonly ArtLabTransition[] = BLOCKER_PHASES_NONTERMINAL.flatMap(
   (phase) =>
     [
       "needs-human",
@@ -1072,37 +1244,37 @@ export const BLOCKER_TRANSITIONS: readonly AtelierTransition[] = BLOCKER_PHASES_
       "style-failed",
       "upgrade-required",
       "cancelled",
-    ].map<AtelierTransition>((blocker) => ({
+    ].map<ArtLabTransition>((blocker) => ({
       from: phase,
       to: phase,
-      blocker: blocker as AtelierBlocker,
+      blocker: blocker as ArtLabBlocker,
       trigger: blocker === "cancelled" ? "cancel" : "blocker",
       async validate() {},
-      async apply(state, ctx) { return patch(state, phase, ctx, blocker as AtelierBlocker); },
+      async apply(state, ctx) { return patch(state, phase, ctx, blocker as ArtLabBlocker); },
     })),
 );
 
-export function isLegalTransition(from: AtelierPhase, to: AtelierPhase, blocker?: AtelierBlocker): boolean {
+export function isLegalTransition(from: ArtLabPhase, to: ArtLabPhase, blocker?: ArtLabBlocker): boolean {
   if (blocker) {
     return BLOCKER_TRANSITIONS.some((t) => t.from === from && t.to === to && t.blocker === blocker);
   }
   return ATELIER_TRANSITIONS.some((t) => t.from === from && t.to === to);
 }
 
-export function findBlockerTransition(phase: AtelierPhase, blocker: AtelierBlocker): AtelierTransition | undefined {
+export function findBlockerTransition(phase: ArtLabPhase, blocker: ArtLabBlocker): ArtLabTransition | undefined {
   return BLOCKER_TRANSITIONS.find((t) => t.from === phase && t.blocker === blocker);
 }
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/state/machine.test.ts`
+Run: `npx vitest run src/lib/artlab/state/machine.test.ts`
 Expected: PASS — all assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/state/machine.ts src/lib/atelier/state/machine.test.ts
+git add src/lib/artlab/state/machine.ts src/lib/artlab/state/machine.test.ts
 git commit -m "$(cat <<'EOF'
 Add blocker transitions orthogonal to phase
 
@@ -1117,27 +1289,27 @@ EOF
 ### Task 1.3: Event log writer (jsonl, append-only)
 
 **Files:**
-- Create: `src/lib/atelier/state/events.ts`
-- Test: `src/lib/atelier/state/events.test.ts`
+- Create: `src/lib/artlab/state/events.ts`
+- Test: `src/lib/artlab/state/events.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/state/events.test.ts
+// src/lib/artlab/state/events.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { appendAtelierEvent, readAtelierEvents } from "./events";
+import { appendArtLabEvent, readArtLabEvents } from "./events";
 
-describe("atelier events.jsonl writer", () => {
+describe("artlab events.jsonl writer", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "atelier-events-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-events-"));
   });
 
   it("appends one event as one line of JSON", () => {
-    appendAtelierEvent(dir, {
+    appendArtLabEvent(dir, {
       runId: "r1",
       at: "2026-05-20T00:00:00.000Z",
       kind: "phase-transition",
@@ -1151,34 +1323,34 @@ describe("atelier events.jsonl writer", () => {
     expect(parsed.kind).toBe("phase-transition");
   });
 
-  it("readAtelierEvents returns all events as objects", () => {
-    appendAtelierEvent(dir, { runId: "r1", at: "2026-05-20T00:00:00.000Z", kind: "a", payload: {} });
-    appendAtelierEvent(dir, { runId: "r1", at: "2026-05-20T00:00:01.000Z", kind: "b", payload: {} });
-    const events = readAtelierEvents(dir);
+  it("readArtLabEvents returns all events as objects", () => {
+    appendArtLabEvent(dir, { runId: "r1", at: "2026-05-20T00:00:00.000Z", kind: "a", payload: {} });
+    appendArtLabEvent(dir, { runId: "r1", at: "2026-05-20T00:00:01.000Z", kind: "b", payload: {} });
+    const events = readArtLabEvents(dir);
     expect(events).toHaveLength(2);
     expect(events.map((e) => e.kind)).toEqual(["a", "b"]);
   });
 
-  it("readAtelierEvents on missing file returns []", () => {
-    expect(readAtelierEvents(dir)).toEqual([]);
+  it("readArtLabEvents on missing file returns []", () => {
+    expect(readArtLabEvents(dir)).toEqual([]);
   });
 });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/state/events.test.ts`
+Run: `npx vitest run src/lib/artlab/state/events.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement events writer**
 
 ```ts
-// src/lib/atelier/state/events.ts
+// src/lib/artlab/state/events.ts
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 
-export const AtelierEventSchema = z
+export const ArtLabEventSchema = z
   .object({
     runId: z.string().min(1),
     at: z.string().datetime({ offset: true }),
@@ -1186,32 +1358,32 @@ export const AtelierEventSchema = z
     payload: z.record(z.string(), z.unknown()),
   })
   .strict();
-export type AtelierEvent = z.infer<typeof AtelierEventSchema>;
+export type ArtLabEvent = z.infer<typeof ArtLabEventSchema>;
 
-export function appendAtelierEvent(runDir: string, event: AtelierEvent): void {
-  AtelierEventSchema.parse(event);
+export function appendArtLabEvent(runDir: string, event: ArtLabEvent): void {
+  ArtLabEventSchema.parse(event);
   const path = join(runDir, "events.jsonl");
   appendFileSync(path, `${JSON.stringify(event)}\n`, { encoding: "utf8" });
 }
 
-export function readAtelierEvents(runDir: string): AtelierEvent[] {
+export function readArtLabEvents(runDir: string): ArtLabEvent[] {
   const path = join(runDir, "events.jsonl");
   if (!existsSync(path)) return [];
   const raw = readFileSync(path, "utf8").trim();
   if (!raw) return [];
-  return raw.split("\n").map((line) => AtelierEventSchema.parse(JSON.parse(line)));
+  return raw.split("\n").map((line) => ArtLabEventSchema.parse(JSON.parse(line)));
 }
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/state/events.test.ts`
+Run: `npx vitest run src/lib/artlab/state/events.test.ts`
 Expected: PASS — 3 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/state/events.ts src/lib/atelier/state/events.test.ts
+git add src/lib/artlab/state/events.ts src/lib/artlab/state/events.test.ts
 git commit -m "$(cat <<'EOF'
 Add append-only events.jsonl writer per run
 
@@ -1226,23 +1398,23 @@ EOF
 ### Task 1.4: Atomic snapshot writer for run-state.json and progress.json
 
 **Files:**
-- Create: `src/lib/atelier/state/snapshots.ts`
-- Test: `src/lib/atelier/state/snapshots.test.ts`
+- Create: `src/lib/artlab/state/snapshots.ts`
+- Test: `src/lib/artlab/state/snapshots.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/state/snapshots.test.ts
+// src/lib/artlab/state/snapshots.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { writeRunStateSnapshot, readRunStateSnapshot, writeProgressSnapshot, readProgressSnapshot } from "./snapshots";
 
-describe("atelier atomic snapshots", () => {
+describe("artlab atomic snapshots", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "atelier-snap-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-snap-"));
   });
 
   it("writes run-state.json with no tmp leftover", () => {
@@ -1304,19 +1476,19 @@ describe("atelier atomic snapshots", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/state/snapshots.test.ts`
+Run: `npx vitest run src/lib/artlab/state/snapshots.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement snapshots**
 
 ```ts
-// src/lib/atelier/state/snapshots.ts
+// src/lib/artlab/state/snapshots.ts
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { AtelierRunStateSchema, type AtelierRunState, ATELIER_PHASES } from "../types";
+import { ArtLabRunStateSchema, type ArtLabRunState, ATELIER_PHASES } from "../types";
 
-export const AtelierProgressSnapshotSchema = z
+export const ArtLabProgressSnapshotSchema = z
   .object({
     runId: z.string().min(1),
     at: z.string().datetime({ offset: true }),
@@ -1328,7 +1500,7 @@ export const AtelierProgressSnapshotSchema = z
     reservedCents: z.number().int().min(0),
   })
   .strict();
-export type AtelierProgressSnapshot = z.infer<typeof AtelierProgressSnapshotSchema>;
+export type ArtLabProgressSnapshot = z.infer<typeof ArtLabProgressSnapshotSchema>;
 
 function atomicWrite(targetPath: string, content: string): void {
   const dir = targetPath.substring(0, targetPath.lastIndexOf("/"));
@@ -1338,38 +1510,38 @@ function atomicWrite(targetPath: string, content: string): void {
   renameSync(tmp, targetPath);
 }
 
-export function writeRunStateSnapshot(runDir: string, state: AtelierRunState): void {
-  const parsed = AtelierRunStateSchema.parse(state);
+export function writeRunStateSnapshot(runDir: string, state: ArtLabRunState): void {
+  const parsed = ArtLabRunStateSchema.parse(state);
   atomicWrite(join(runDir, "run-state.json"), `${JSON.stringify(parsed, null, 2)}\n`);
 }
 
-export function readRunStateSnapshot(runDir: string): AtelierRunState | null {
+export function readRunStateSnapshot(runDir: string): ArtLabRunState | null {
   const path = join(runDir, "run-state.json");
   if (!existsSync(path)) return null;
-  return AtelierRunStateSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+  return ArtLabRunStateSchema.parse(JSON.parse(readFileSync(path, "utf8")));
 }
 
-export function writeProgressSnapshot(runDir: string, progress: AtelierProgressSnapshot): void {
-  const parsed = AtelierProgressSnapshotSchema.parse(progress);
+export function writeProgressSnapshot(runDir: string, progress: ArtLabProgressSnapshot): void {
+  const parsed = ArtLabProgressSnapshotSchema.parse(progress);
   atomicWrite(join(runDir, "progress.json"), `${JSON.stringify(parsed, null, 2)}\n`);
 }
 
-export function readProgressSnapshot(runDir: string): AtelierProgressSnapshot | null {
+export function readProgressSnapshot(runDir: string): ArtLabProgressSnapshot | null {
   const path = join(runDir, "progress.json");
   if (!existsSync(path)) return null;
-  return AtelierProgressSnapshotSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+  return ArtLabProgressSnapshotSchema.parse(JSON.parse(readFileSync(path, "utf8")));
 }
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/state/snapshots.test.ts`
+Run: `npx vitest run src/lib/artlab/state/snapshots.test.ts`
 Expected: PASS — 4 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/state/snapshots.ts src/lib/atelier/state/snapshots.test.ts
+git add src/lib/artlab/state/snapshots.ts src/lib/artlab/state/snapshots.test.ts
 git commit -m "$(cat <<'EOF'
 Add atomic run-state.json and progress.json snapshot writers
 
@@ -1385,25 +1557,25 @@ EOF
 ### Task 1.5: Reconciler — single read path for run reality
 
 **Files:**
-- Create: `src/lib/atelier/state/reconciler.ts`
-- Test: `src/lib/atelier/state/reconciler.test.ts`
+- Create: `src/lib/artlab/state/reconciler.ts`
+- Test: `src/lib/artlab/state/reconciler.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/state/reconciler.test.ts
+// src/lib/artlab/state/reconciler.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readRunReality } from "./reconciler";
 import { writeRunStateSnapshot, writeProgressSnapshot } from "./snapshots";
-import { appendAtelierEvent } from "./events";
+import { appendArtLabEvent } from "./events";
 
-describe("atelier reconciler", () => {
+describe("artlab reconciler", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "atelier-recon-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-recon-"));
   });
 
   it("composes run reality from snapshots, events, and absent artifacts", async () => {
@@ -1425,7 +1597,7 @@ describe("atelier reconciler", () => {
       actualSpendCents: 833,
       reservedCents: 100,
     });
-    appendAtelierEvent(dir, {
+    appendArtLabEvent(dir, {
       runId: "r1",
       at: "2026-05-20T00:00:00.000Z",
       kind: "phase-transition",
@@ -1464,19 +1636,19 @@ describe("atelier reconciler", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/state/reconciler.test.ts`
+Run: `npx vitest run src/lib/artlab/state/reconciler.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 3: Implement reconciler**
 
 ```ts
-// src/lib/atelier/state/reconciler.ts
+// src/lib/artlab/state/reconciler.ts
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import type { AtelierBlocker, AtelierPhase, AtelierRunState } from "../types";
+import type { ArtLabBlocker, ArtLabPhase, ArtLabRunState } from "../types";
 import { readRunStateSnapshot, readProgressSnapshot } from "./snapshots";
-import { readAtelierEvents, type AtelierEvent } from "./events";
+import { readArtLabEvents, type ArtLabEvent } from "./events";
 
 export interface RunRealitySpend {
   actualCents: number;
@@ -1495,18 +1667,18 @@ export interface RunRealitySlots {
 
 export interface RunReality {
   runId: string;
-  assetType: AtelierRunState["assetType"];
-  phase: AtelierPhase;
-  blocker?: AtelierBlocker;
+  assetType: ArtLabRunState["assetType"];
+  phase: ArtLabPhase;
+  blocker?: ArtLabBlocker;
   slots: RunRealitySlots;
   spend: RunRealitySpend;
-  approvedConcept?: AtelierRunState["approvedConcept"];
+  approvedConcept?: ArtLabRunState["approvedConcept"];
   health: {
     activeLeaseCount: number;
     lastHeartbeatAt?: string;
   };
-  events: AtelierEvent[];
-  raw: AtelierRunState;
+  events: ArtLabEvent[];
+  raw: ArtLabRunState;
 }
 
 const MonthlySpendShapeSchema = z.object({
@@ -1530,7 +1702,7 @@ export async function readRunReality(runDir: string): Promise<RunReality | null>
   const state = readRunStateSnapshot(runDir);
   if (!state) return null;
   const progress = readProgressSnapshot(runDir);
-  const events = readAtelierEvents(runDir).slice(-20);
+  const events = readArtLabEvents(runDir).slice(-20);
   const monthly = readMonthlySpend(runDir);
   return {
     runId: state.runId,
@@ -1563,13 +1735,13 @@ export async function readRunReality(runDir: string): Promise<RunReality | null>
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/state/reconciler.test.ts`
+Run: `npx vitest run src/lib/artlab/state/reconciler.test.ts`
 Expected: PASS — 3 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/state/reconciler.ts src/lib/atelier/state/reconciler.test.ts
+git add src/lib/artlab/state/reconciler.ts src/lib/artlab/state/reconciler.test.ts
 git commit -m "$(cat <<'EOF'
 Add reconciler — single read path for run reality
 
@@ -1586,44 +1758,44 @@ EOF
 ### Task 1.6: Engine-level lock with stale detection
 
 **Files:**
-- Create: `src/lib/atelier/queue/lock.ts`
-- Test: `src/lib/atelier/queue/lock.test.ts`
+- Create: `src/lib/artlab/queue/lock.ts`
+- Test: `src/lib/artlab/queue/lock.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/queue/lock.test.ts
+// src/lib/artlab/queue/lock.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { acquireAtelierLock, releaseAtelierLock, isAtelierLocked } from "./lock";
+import { acquireArtLabLock, releaseArtLabLock, isArtLabLocked } from "./lock";
 
-describe("atelier engine lock", () => {
+describe("artlab engine lock", () => {
   let dir: string;
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "atelier-lock-")); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "artlab-lock-")); });
 
   it("acquires and releases", () => {
-    const lock = acquireAtelierLock(dir, "test-scope");
+    const lock = acquireArtLabLock(dir, "test-scope");
     expect(lock.acquired).toBe(true);
-    expect(isAtelierLocked(dir, "test-scope")).toBe(true);
-    releaseAtelierLock(dir, "test-scope");
-    expect(isAtelierLocked(dir, "test-scope")).toBe(false);
+    expect(isArtLabLocked(dir, "test-scope")).toBe(true);
+    releaseArtLabLock(dir, "test-scope");
+    expect(isArtLabLocked(dir, "test-scope")).toBe(false);
   });
 
   it("refuses second acquire while held", () => {
-    acquireAtelierLock(dir, "scope-a");
-    const second = acquireAtelierLock(dir, "scope-a");
+    acquireArtLabLock(dir, "scope-a");
+    const second = acquireArtLabLock(dir, "scope-a");
     expect(second.acquired).toBe(false);
     expect(second.reason).toMatch(/already held/i);
-    releaseAtelierLock(dir, "scope-a");
+    releaseArtLabLock(dir, "scope-a");
   });
 
   it("considers stale lock with no live PID as expired", () => {
     // forge a lock with non-existent PID
     const path = join(dir, ".lock.scope-stale.json");
     writeFileSync(path, JSON.stringify({ pid: 999999, scope: "scope-stale", acquiredAt: new Date().toISOString() }));
-    const result = acquireAtelierLock(dir, "scope-stale");
+    const result = acquireArtLabLock(dir, "scope-stale");
     expect(result.acquired).toBe(true);
     expect(result.tookFromStale).toBe(true);
   });
@@ -1632,23 +1804,23 @@ describe("atelier engine lock", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/queue/lock.test.ts`
+Run: `npx vitest run src/lib/artlab/queue/lock.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement lock**
 
 ```ts
-// src/lib/atelier/queue/lock.ts
+// src/lib/artlab/queue/lock.ts
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-export interface AtelierLockFile {
+export interface ArtLabLockFile {
   pid: number;
   scope: string;
   acquiredAt: string;
 }
 
-export interface AtelierLockResult {
+export interface ArtLabLockResult {
   acquired: boolean;
   tookFromStale?: boolean;
   reason?: string;
@@ -1668,40 +1840,40 @@ function isPidAlive(pid: number): boolean {
   }
 }
 
-export function acquireAtelierLock(workspaceRoot: string, scope: string): AtelierLockResult {
+export function acquireArtLabLock(workspaceRoot: string, scope: string): ArtLabLockResult {
   const path = lockPath(workspaceRoot, scope);
   if (existsSync(path)) {
-    const existing = JSON.parse(readFileSync(path, "utf8")) as AtelierLockFile;
+    const existing = JSON.parse(readFileSync(path, "utf8")) as ArtLabLockFile;
     if (isPidAlive(existing.pid)) {
       return { acquired: false, reason: `already held by pid ${existing.pid}` };
     }
     unlinkSync(path);
-    writeFileSync(path, JSON.stringify({ pid: process.pid, scope, acquiredAt: new Date().toISOString() } satisfies AtelierLockFile), { flag: "wx" });
+    writeFileSync(path, JSON.stringify({ pid: process.pid, scope, acquiredAt: new Date().toISOString() } satisfies ArtLabLockFile), { flag: "wx" });
     return { acquired: true, tookFromStale: true };
   }
-  writeFileSync(path, JSON.stringify({ pid: process.pid, scope, acquiredAt: new Date().toISOString() } satisfies AtelierLockFile), { flag: "wx" });
+  writeFileSync(path, JSON.stringify({ pid: process.pid, scope, acquiredAt: new Date().toISOString() } satisfies ArtLabLockFile), { flag: "wx" });
   return { acquired: true };
 }
 
-export function releaseAtelierLock(workspaceRoot: string, scope: string): void {
+export function releaseArtLabLock(workspaceRoot: string, scope: string): void {
   const path = lockPath(workspaceRoot, scope);
   if (existsSync(path)) unlinkSync(path);
 }
 
-export function isAtelierLocked(workspaceRoot: string, scope: string): boolean {
+export function isArtLabLocked(workspaceRoot: string, scope: string): boolean {
   return existsSync(lockPath(workspaceRoot, scope));
 }
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/queue/lock.test.ts`
+Run: `npx vitest run src/lib/artlab/queue/lock.test.ts`
 Expected: PASS — 3 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/queue/lock.ts src/lib/atelier/queue/lock.test.ts
+git add src/lib/artlab/queue/lock.ts src/lib/artlab/queue/lock.test.ts
 git commit -m "$(cat <<'EOF'
 Add engine-level lock with stale-PID detection
 
@@ -1717,23 +1889,23 @@ EOF
 ### Task 1.7: Queue (max-2 parallelism) and priority
 
 **Files:**
-- Create: `src/lib/atelier/queue/queue.ts`
-- Create: `src/lib/atelier/queue/priorities.ts`
-- Test: `src/lib/atelier/queue/queue.test.ts`
+- Create: `src/lib/artlab/queue/queue.ts`
+- Create: `src/lib/artlab/queue/priorities.ts`
+- Test: `src/lib/artlab/queue/queue.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/queue/queue.test.ts
+// src/lib/artlab/queue/queue.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { enqueueRun, listQueuedRuns, dequeueNextRun, ATELIER_MAX_PARALLELISM, type AtelierQueueEntry } from "./queue";
+import { enqueueRun, listQueuedRuns, dequeueNextRun, ATELIER_MAX_PARALLELISM, type ArtLabQueueEntry } from "./queue";
 
-describe("atelier queue", () => {
+describe("artlab queue", () => {
   let dir: string;
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "atelier-queue-")); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "artlab-queue-")); });
 
   it("ATELIER_MAX_PARALLELISM equals 2", () => {
     expect(ATELIER_MAX_PARALLELISM).toBe(2);
@@ -1760,17 +1932,17 @@ describe("atelier queue", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/queue/queue.test.ts`
+Run: `npx vitest run src/lib/artlab/queue/queue.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement priorities**
 
 ```ts
-// src/lib/atelier/queue/priorities.ts
+// src/lib/artlab/queue/priorities.ts
 export const ATELIER_PRIORITIES = ["human-flagged", "scheduled", "default"] as const;
-export type AtelierPriority = (typeof ATELIER_PRIORITIES)[number];
+export type ArtLabPriority = (typeof ATELIER_PRIORITIES)[number];
 
-export function priorityRank(priority: AtelierPriority): number {
+export function priorityRank(priority: ArtLabPriority): number {
   return ATELIER_PRIORITIES.indexOf(priority);
 }
 ```
@@ -1778,15 +1950,15 @@ export function priorityRank(priority: AtelierPriority): number {
 - [ ] **Step 4: Implement queue**
 
 ```ts
-// src/lib/atelier/queue/queue.ts
+// src/lib/artlab/queue/queue.ts
 import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { priorityRank, ATELIER_PRIORITIES, type AtelierPriority } from "./priorities";
+import { priorityRank, ATELIER_PRIORITIES, type ArtLabPriority } from "./priorities";
 
 export const ATELIER_MAX_PARALLELISM = 2;
 
-export const AtelierQueueEntrySchema = z
+export const ArtLabQueueEntrySchema = z
   .object({
     runId: z.string().min(1),
     priority: z.enum(ATELIER_PRIORITIES),
@@ -1794,7 +1966,7 @@ export const AtelierQueueEntrySchema = z
     spec: z.record(z.string(), z.unknown()),
   })
   .strict();
-export type AtelierQueueEntry = z.infer<typeof AtelierQueueEntrySchema>;
+export type ArtLabQueueEntry = z.infer<typeof ArtLabQueueEntrySchema>;
 
 function queueDir(root: string): string {
   const path = join(root, "queue");
@@ -1802,17 +1974,17 @@ function queueDir(root: string): string {
   return path;
 }
 
-export function enqueueRun(root: string, entry: AtelierQueueEntry): void {
-  AtelierQueueEntrySchema.parse(entry);
+export function enqueueRun(root: string, entry: ArtLabQueueEntry): void {
+  ArtLabQueueEntrySchema.parse(entry);
   const path = join(queueDir(root), `${entry.runId}.json`);
   writeFileSync(path, JSON.stringify(entry), { flag: "wx" });
 }
 
-export function listQueuedRuns(root: string): AtelierQueueEntry[] {
+export function listQueuedRuns(root: string): ArtLabQueueEntry[] {
   const path = queueDir(root);
   return readdirSync(path)
     .filter((f) => f.endsWith(".json"))
-    .map((f) => AtelierQueueEntrySchema.parse(JSON.parse(readFileSync(join(path, f), "utf8"))))
+    .map((f) => ArtLabQueueEntrySchema.parse(JSON.parse(readFileSync(join(path, f), "utf8"))))
     .sort((a, b) => {
       const rank = priorityRank(a.priority) - priorityRank(b.priority);
       if (rank !== 0) return rank;
@@ -1820,7 +1992,7 @@ export function listQueuedRuns(root: string): AtelierQueueEntry[] {
     });
 }
 
-export function dequeueNextRun(root: string): AtelierQueueEntry | null {
+export function dequeueNextRun(root: string): ArtLabQueueEntry | null {
   const list = listQueuedRuns(root);
   if (list.length === 0) return null;
   const next = list[0]!;
@@ -1838,18 +2010,18 @@ export function removeFromQueue(root: string, runId: string): boolean {
 
 - [ ] **Step 5: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/queue/queue.test.ts`
+Run: `npx vitest run src/lib/artlab/queue/queue.test.ts`
 Expected: PASS — 3 assertions pass
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/lib/atelier/queue
+git add src/lib/artlab/queue
 git commit -m "$(cat <<'EOF'
 Add queue with max-2 parallelism and 3-tier priority
 
 Priorities: human-flagged > scheduled > default. Within a tier,
-earlier enqueuedAt wins. Files live at .artlab/atelier/queue/.
+earlier enqueuedAt wins. Files live at .artlab/engine/queue/.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -1859,17 +2031,17 @@ EOF
 ### Task 1.8: Runner contract — shared types
 
 **Files:**
-- Create: `src/lib/atelier/runners/runner-contract.ts`
-- Test: `src/lib/atelier/runners/runner-contract.test.ts`
+- Create: `src/lib/artlab/runners/runner-contract.ts`
+- Test: `src/lib/artlab/runners/runner-contract.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/runner-contract.test.ts
+// src/lib/artlab/runners/runner-contract.test.ts
 import { describe, expect, it } from "vitest";
-import { AtelierRunnerResultSchema, ATELIER_RUNNER_KINDS } from "./runner-contract";
+import { ArtLabRunnerResultSchema, ATELIER_RUNNER_KINDS } from "./runner-contract";
 
-describe("atelier runner contract", () => {
+describe("artlab runner contract", () => {
   it("declares the 7 runner kinds", () => {
     expect(ATELIER_RUNNER_KINDS).toEqual([
       "concept",
@@ -1883,7 +2055,7 @@ describe("atelier runner contract", () => {
   });
 
   it("validates a successful result", () => {
-    const result = AtelierRunnerResultSchema.parse({
+    const result = ArtLabRunnerResultSchema.parse({
       runnerKind: "concept",
       status: "ok",
       durationMs: 1234,
@@ -1893,7 +2065,7 @@ describe("atelier runner contract", () => {
   });
 
   it("validates a failed result with blocker hint", () => {
-    const result = AtelierRunnerResultSchema.parse({
+    const result = ArtLabRunnerResultSchema.parse({
       runnerKind: "canary",
       status: "failed",
       durationMs: 1,
@@ -1908,15 +2080,15 @@ describe("atelier runner contract", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/runner-contract.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/runner-contract.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement contract**
 
 ```ts
-// src/lib/atelier/runners/runner-contract.ts
+// src/lib/artlab/runners/runner-contract.ts
 import { z } from "zod";
-import { ATELIER_BLOCKERS, type AtelierAssetType } from "../types";
+import { ATELIER_BLOCKERS, type ArtLabAssetType } from "../types";
 
 export const ATELIER_RUNNER_KINDS = [
   "concept",
@@ -1927,19 +2099,19 @@ export const ATELIER_RUNNER_KINDS = [
   "promotion",
   "verifying",
 ] as const;
-export type AtelierRunnerKind = (typeof ATELIER_RUNNER_KINDS)[number];
+export type ArtLabRunnerKind = (typeof ATELIER_RUNNER_KINDS)[number];
 
-export interface AtelierRunnerInput {
+export interface ArtLabRunnerInput {
   runId: string;
   runDir: string;
-  assetType: AtelierAssetType;
+  assetType: ArtLabAssetType;
   characterId?: string;
   approvedLaneIndex?: number;
   providerId: "gemini-api" | "local-mock";
   abortSignal?: AbortSignal;
 }
 
-export const AtelierRunnerResultSchema = z
+export const ArtLabRunnerResultSchema = z
   .object({
     runnerKind: z.enum(ATELIER_RUNNER_KINDS),
     status: z.enum(["ok", "failed", "needs-human"]),
@@ -1949,28 +2121,28 @@ export const AtelierRunnerResultSchema = z
     failureCode: z.string().optional(),
   })
   .strict();
-export type AtelierRunnerResult = z.infer<typeof AtelierRunnerResultSchema>;
+export type ArtLabRunnerResult = z.infer<typeof ArtLabRunnerResultSchema>;
 
-export interface AtelierRunner {
-  kind: AtelierRunnerKind;
-  run(input: AtelierRunnerInput): Promise<AtelierRunnerResult>;
+export interface ArtLabRunner {
+  kind: ArtLabRunnerKind;
+  run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult>;
 }
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/runner-contract.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/runner-contract.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/runner-contract.ts src/lib/atelier/runners/runner-contract.test.ts
+git add src/lib/artlab/runners/runner-contract.ts src/lib/artlab/runners/runner-contract.test.ts
 git commit -m "$(cat <<'EOF'
-Add atelier runner contract
+Add artlab runner contract
 
-Seven runner kinds, AtelierRunnerInput, AtelierRunner interface,
-AtelierRunnerResult Zod schema. Every runner is plug-compatible.
+Seven runner kinds, ArtLabRunnerInput, ArtLabRunner interface,
+ArtLabRunnerResult Zod schema. Every runner is plug-compatible.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -1980,13 +2152,13 @@ EOF
 ### Task 1.9: Concept runner (5 lanes, local-mock provider)
 
 **Files:**
-- Create: `src/lib/atelier/runners/concept-runner.ts`
-- Test: `src/lib/atelier/runners/concept-runner.test.ts`
+- Create: `src/lib/artlab/runners/concept-runner.ts`
+- Test: `src/lib/artlab/runners/concept-runner.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/concept-runner.test.ts
+// src/lib/artlab/runners/concept-runner.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readdirSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -1995,7 +2167,7 @@ import { conceptRunner } from "./concept-runner";
 
 describe("concept runner", () => {
   let runDir: string;
-  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "atelier-concept-")); });
+  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "artlab-concept-")); });
 
   it("produces 5 concept slot outputs and a concept board artifact", async () => {
     const result = await conceptRunner.run({
@@ -2027,16 +2199,16 @@ describe("concept runner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/concept-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/concept-runner.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement concept runner**
 
 ```ts
-// src/lib/atelier/runners/concept-runner.ts
+// src/lib/artlab/runners/concept-runner.ts
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const TARGET_LANES = 5;
 
@@ -2048,9 +2220,9 @@ async function generateMockConceptSlot(runDir: string, laneIndex: number): Promi
   return path;
 }
 
-export const conceptRunner: AtelierRunner = {
+export const conceptRunner: ArtLabRunner = {
   kind: "concept",
-  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+  async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     if (input.abortSignal?.aborted) {
       return {
@@ -2098,13 +2270,13 @@ export const conceptRunner: AtelierRunner = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/concept-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/concept-runner.test.ts`
 Expected: PASS — 2 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/concept-runner.ts src/lib/atelier/runners/concept-runner.test.ts
+git add src/lib/artlab/runners/concept-runner.ts src/lib/artlab/runners/concept-runner.test.ts
 git commit -m "$(cat <<'EOF'
 Add concept runner — 5 lanes, mock or real provider
 
@@ -2119,13 +2291,13 @@ EOF
 ### Task 1.10: Canary runner
 
 **Files:**
-- Create: `src/lib/atelier/runners/canary-runner.ts`
-- Test: `src/lib/atelier/runners/canary-runner.test.ts`
+- Create: `src/lib/artlab/runners/canary-runner.ts`
+- Test: `src/lib/artlab/runners/canary-runner.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/canary-runner.test.ts
+// src/lib/artlab/runners/canary-runner.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -2135,7 +2307,7 @@ import { canaryRunner } from "./canary-runner";
 describe("canary runner", () => {
   let runDir: string;
   beforeEach(() => {
-    runDir = mkdtempSync(join(tmpdir(), "atelier-canary-"));
+    runDir = mkdtempSync(join(tmpdir(), "artlab-canary-"));
     writeFileSync(join(runDir, "approved-concept.json"), JSON.stringify({ laneIndex: 2 }));
   });
 
@@ -2168,20 +2340,20 @@ describe("canary runner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/canary-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/canary-runner.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement canary runner**
 
 ```ts
-// src/lib/atelier/runners/canary-runner.ts
+// src/lib/artlab/runners/canary-runner.ts
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
-export const canaryRunner: AtelierRunner = {
+export const canaryRunner: ArtLabRunner = {
   kind: "canary",
-  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+  async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     if (typeof input.approvedLaneIndex !== "number") {
       return {
@@ -2216,13 +2388,13 @@ export const canaryRunner: AtelierRunner = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/canary-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/canary-runner.test.ts`
 Expected: PASS — 2 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/canary-runner.ts src/lib/atelier/runners/canary-runner.test.ts
+git add src/lib/artlab/runners/canary-runner.ts src/lib/artlab/runners/canary-runner.test.ts
 git commit -m "$(cat <<'EOF'
 Add canary runner — 1-slot gate before paid production
 
@@ -2234,13 +2406,13 @@ EOF
 ### Task 1.11: Production runner
 
 **Files:**
-- Create: `src/lib/atelier/runners/production-runner.ts`
-- Test: `src/lib/atelier/runners/production-runner.test.ts`
+- Create: `src/lib/artlab/runners/production-runner.ts`
+- Test: `src/lib/artlab/runners/production-runner.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/production-runner.test.ts
+// src/lib/artlab/runners/production-runner.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -2249,7 +2421,7 @@ import { productionRunner, PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE } from "./produc
 
 describe("production runner", () => {
   let runDir: string;
-  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "atelier-prod-")); });
+  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "artlab-prod-")); });
 
   it("produces the configured slot count per asset type", async () => {
     expect(PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE.character).toBeGreaterThan(0);
@@ -2271,19 +2443,19 @@ describe("production runner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/production-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/production-runner.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement production runner**
 
 ```ts
-// src/lib/atelier/runners/production-runner.ts
+// src/lib/artlab/runners/production-runner.ts
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { AtelierAssetType } from "../types";
-import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import type { ArtLabAssetType } from "../types";
+import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
-export const PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE: Record<AtelierAssetType, number> = {
+export const PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE: Record<ArtLabAssetType, number> = {
   character: 20,
   environment: 4,
   prop: 6,
@@ -2295,9 +2467,9 @@ export const PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE: Record<AtelierAssetType, numb
   shader: 3,
 };
 
-export const productionRunner: AtelierRunner = {
+export const productionRunner: ArtLabRunner = {
   kind: "production",
-  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+  async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     const target = PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE[input.assetType];
     const dir = join(input.runDir, "production-slots");
@@ -2330,13 +2502,13 @@ export const productionRunner: AtelierRunner = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/production-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/production-runner.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/production-runner.ts src/lib/atelier/runners/production-runner.test.ts
+git add src/lib/artlab/runners/production-runner.ts src/lib/artlab/runners/production-runner.test.ts
 git commit -m "$(cat <<'EOF'
 Add production runner with per-asset-type slot counts
 
@@ -2351,13 +2523,13 @@ EOF
 ### Task 1.12: Cutout runner
 
 **Files:**
-- Create: `src/lib/atelier/runners/cutout-runner.ts`
-- Test: `src/lib/atelier/runners/cutout-runner.test.ts`
+- Create: `src/lib/artlab/runners/cutout-runner.ts`
+- Test: `src/lib/artlab/runners/cutout-runner.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/cutout-runner.test.ts
+// src/lib/artlab/runners/cutout-runner.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -2367,7 +2539,7 @@ import { cutoutRunner } from "./cutout-runner";
 describe("cutout runner", () => {
   let runDir: string;
   beforeEach(() => {
-    runDir = mkdtempSync(join(tmpdir(), "atelier-cutout-"));
+    runDir = mkdtempSync(join(tmpdir(), "artlab-cutout-"));
     const productionDir = join(runDir, "production-slots");
     mkdirSync(productionDir);
     for (let i = 1; i <= 3; i += 1) {
@@ -2404,23 +2576,23 @@ describe("cutout runner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/cutout-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/cutout-runner.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement cutout runner**
 
 ```ts
-// src/lib/atelier/runners/cutout-runner.ts
+// src/lib/artlab/runners/cutout-runner.ts
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { AtelierAssetType } from "../types";
-import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import type { ArtLabAssetType } from "../types";
+import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
-const CUTOUT_REQUIRED: ReadonlySet<AtelierAssetType> = new Set(["character", "prop"]);
+const CUTOUT_REQUIRED: ReadonlySet<ArtLabAssetType> = new Set(["character", "prop"]);
 
-export const cutoutRunner: AtelierRunner = {
+export const cutoutRunner: ArtLabRunner = {
   kind: "cutout",
-  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+  async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     if (!CUTOUT_REQUIRED.has(input.assetType)) {
       return {
@@ -2452,13 +2624,13 @@ export const cutoutRunner: AtelierRunner = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/cutout-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/cutout-runner.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/cutout-runner.ts src/lib/atelier/runners/cutout-runner.test.ts
+git add src/lib/artlab/runners/cutout-runner.ts src/lib/artlab/runners/cutout-runner.test.ts
 git commit -m "$(cat <<'EOF'
 Add cutout runner — character + prop assets only
 
@@ -2473,13 +2645,13 @@ EOF
 ### Task 1.13: Strict QA runner
 
 **Files:**
-- Create: `src/lib/atelier/runners/strict-qa-runner.ts`
-- Test: `src/lib/atelier/runners/strict-qa-runner.test.ts`
+- Create: `src/lib/artlab/runners/strict-qa-runner.ts`
+- Test: `src/lib/artlab/runners/strict-qa-runner.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/strict-qa-runner.test.ts
+// src/lib/artlab/runners/strict-qa-runner.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -2489,7 +2661,7 @@ import { strictQaRunner } from "./strict-qa-runner";
 describe("strict QA runner", () => {
   let runDir: string;
   beforeEach(() => {
-    runDir = mkdtempSync(join(tmpdir(), "atelier-qa-"));
+    runDir = mkdtempSync(join(tmpdir(), "artlab-qa-"));
     const cutoutDir = join(runDir, "cutouts");
     mkdirSync(cutoutDir);
     writeFileSync(join(cutoutDir, "slot-1.png"), JSON.stringify({ alpha: true }));
@@ -2523,16 +2695,16 @@ describe("strict QA runner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/strict-qa-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/strict-qa-runner.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement strict QA runner**
 
 ```ts
-// src/lib/atelier/runners/strict-qa-runner.ts
+// src/lib/artlab/runners/strict-qa-runner.ts
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 interface AssetDoctorEntry {
   cutoutPath: string;
@@ -2546,9 +2718,9 @@ interface RepairPlanEntry {
   remediation: string;
 }
 
-export const strictQaRunner: AtelierRunner = {
+export const strictQaRunner: ArtLabRunner = {
   kind: "strict-qa",
-  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+  async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     const cutoutDir = join(input.runDir, "cutouts");
     const entries: AssetDoctorEntry[] = [];
@@ -2593,13 +2765,13 @@ export const strictQaRunner: AtelierRunner = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/strict-qa-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/strict-qa-runner.test.ts`
 Expected: PASS — 2 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/strict-qa-runner.ts src/lib/atelier/runners/strict-qa-runner.test.ts
+git add src/lib/artlab/runners/strict-qa-runner.ts src/lib/artlab/runners/strict-qa-runner.test.ts
 git commit -m "$(cat <<'EOF'
 Add strict QA runner — alpha check + repair plan
 
@@ -2614,13 +2786,13 @@ EOF
 ### Task 1.14: Promotion runner (writes are firewalled)
 
 **Files:**
-- Create: `src/lib/atelier/runners/promotion-runner.ts`
-- Test: `src/lib/atelier/runners/promotion-runner.test.ts`
+- Create: `src/lib/artlab/runners/promotion-runner.ts`
+- Test: `src/lib/artlab/runners/promotion-runner.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/promotion-runner.test.ts
+// src/lib/artlab/runners/promotion-runner.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, existsSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -2631,8 +2803,8 @@ describe("promotion runner", () => {
   let runDir: string;
   let publicArtRoot: string;
   beforeEach(() => {
-    runDir = mkdtempSync(join(tmpdir(), "atelier-promote-"));
-    publicArtRoot = mkdtempSync(join(tmpdir(), "atelier-public-art-"));
+    runDir = mkdtempSync(join(tmpdir(), "artlab-promote-"));
+    publicArtRoot = mkdtempSync(join(tmpdir(), "artlab-public-art-"));
     mkdirSync(join(runDir, "cutouts"));
     writeFileSync(join(runDir, "cutouts", "slot-1.png"), JSON.stringify({ alpha: true }));
     writeFileSync(join(runDir, "approval.json"), JSON.stringify({ phrase: "approved for app" }));
@@ -2670,16 +2842,16 @@ describe("promotion runner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/promotion-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/promotion-runner.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement promotion runner**
 
 ```ts
-// src/lib/atelier/runners/promotion-runner.ts
+// src/lib/artlab/runners/promotion-runner.ts
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const REQUIRED_PHRASE = "approved for app";
 
@@ -2687,7 +2859,7 @@ function publicArtRoot(): string {
   return process.env.ATELIER_PUBLIC_ART_ROOT ?? "/Users/armaanarora/Documents/The Tower/public/art";
 }
 
-function targetDir(input: AtelierRunnerInput): string {
+function targetDir(input: ArtLabRunnerInput): string {
   if (input.assetType === "character" && input.characterId) {
     return join(publicArtRoot(), "lobby", input.characterId);
   }
@@ -2700,9 +2872,9 @@ function targetDir(input: AtelierRunnerInput): string {
   return join(publicArtRoot(), "misc", input.runId);
 }
 
-export const promotionRunner: AtelierRunner = {
+export const promotionRunner: ArtLabRunner = {
   kind: "promotion",
-  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+  async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     const approvalPath = join(input.runDir, "approval.json");
     if (!existsSync(approvalPath)) {
@@ -2748,13 +2920,13 @@ export const promotionRunner: AtelierRunner = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/promotion-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/promotion-runner.test.ts`
 Expected: PASS — 2 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/promotion-runner.ts src/lib/atelier/runners/promotion-runner.test.ts
+git add src/lib/artlab/runners/promotion-runner.ts src/lib/artlab/runners/promotion-runner.test.ts
 git commit -m "$(cat <<'EOF'
 Add promotion runner with approval firewall
 
@@ -2769,13 +2941,13 @@ EOF
 ### Task 1.15: Verifying runner (stub for Playwright wiring in Phase 3)
 
 **Files:**
-- Create: `src/lib/atelier/runners/verifying-runner.ts`
-- Test: `src/lib/atelier/runners/verifying-runner.test.ts`
+- Create: `src/lib/artlab/runners/verifying-runner.ts`
+- Test: `src/lib/artlab/runners/verifying-runner.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/verifying-runner.test.ts
+// src/lib/artlab/runners/verifying-runner.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -2784,7 +2956,7 @@ import { verifyingRunner } from "./verifying-runner";
 
 describe("verifying runner (Phase 1 stub)", () => {
   let runDir: string;
-  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "atelier-verify-")); });
+  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "artlab-verify-")); });
 
   it("returns ok when ATELIER_PLAYWRIGHT_MODE=mock", async () => {
     process.env.ATELIER_PLAYWRIGHT_MODE = "mock";
@@ -2817,20 +2989,20 @@ describe("verifying runner (Phase 1 stub)", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/verifying-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/verifying-runner.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement verifying runner stub**
 
 ```ts
-// src/lib/atelier/runners/verifying-runner.ts
+// src/lib/artlab/runners/verifying-runner.ts
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { AtelierRunner, AtelierRunnerInput, AtelierRunnerResult } from "./runner-contract";
+import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
-export const verifyingRunner: AtelierRunner = {
+export const verifyingRunner: ArtLabRunner = {
   kind: "verifying",
-  async run(input: AtelierRunnerInput): Promise<AtelierRunnerResult> {
+  async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     const mode = process.env.ATELIER_PLAYWRIGHT_MODE ?? "real";
     if (mode === "mock") {
@@ -2866,13 +3038,13 @@ export const verifyingRunner: AtelierRunner = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/verifying-runner.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/verifying-runner.test.ts`
 Expected: PASS — 2 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/verifying-runner.ts src/lib/atelier/runners/verifying-runner.test.ts
+git add src/lib/artlab/runners/verifying-runner.ts src/lib/artlab/runners/verifying-runner.test.ts
 git commit -m "$(cat <<'EOF'
 Add verifying runner (Phase 1 stub)
 
@@ -2887,13 +3059,13 @@ EOF
 ### Task 1.16: Runners registry
 
 **Files:**
-- Create: `src/lib/atelier/runners/index.ts`
-- Test: `src/lib/atelier/runners/index.test.ts`
+- Create: `src/lib/artlab/runners/index.ts`
+- Test: `src/lib/artlab/runners/index.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/runners/index.test.ts
+// src/lib/artlab/runners/index.test.ts
 import { describe, expect, it } from "vitest";
 import { ATELIER_RUNNERS, getRunner } from "./index";
 
@@ -2917,13 +3089,13 @@ describe("runner registry", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/runners/index.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/index.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement registry**
 
 ```ts
-// src/lib/atelier/runners/index.ts
+// src/lib/artlab/runners/index.ts
 import { conceptRunner } from "./concept-runner";
 import { canaryRunner } from "./canary-runner";
 import { productionRunner } from "./production-runner";
@@ -2931,11 +3103,11 @@ import { cutoutRunner } from "./cutout-runner";
 import { strictQaRunner } from "./strict-qa-runner";
 import { promotionRunner } from "./promotion-runner";
 import { verifyingRunner } from "./verifying-runner";
-import type { AtelierRunner, AtelierRunnerKind } from "./runner-contract";
+import type { ArtLabRunner, ArtLabRunnerKind } from "./runner-contract";
 
 export * from "./runner-contract";
 
-export const ATELIER_RUNNERS: Record<AtelierRunnerKind, AtelierRunner> = {
+export const ATELIER_RUNNERS: Record<ArtLabRunnerKind, ArtLabRunner> = {
   concept: conceptRunner,
   canary: canaryRunner,
   production: productionRunner,
@@ -2945,20 +3117,20 @@ export const ATELIER_RUNNERS: Record<AtelierRunnerKind, AtelierRunner> = {
   verifying: verifyingRunner,
 };
 
-export function getRunner(kind: AtelierRunnerKind): AtelierRunner {
+export function getRunner(kind: ArtLabRunnerKind): ArtLabRunner {
   return ATELIER_RUNNERS[kind];
 }
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/runners/index.test.ts`
+Run: `npx vitest run src/lib/artlab/runners/index.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/runners/index.ts src/lib/atelier/runners/index.test.ts
+git add src/lib/artlab/runners/index.ts src/lib/artlab/runners/index.test.ts
 git commit -m "$(cat <<'EOF'
 Add runners registry — getRunner(kind)
 
@@ -2970,13 +3142,13 @@ EOF
 ### Task 1.17: Progress publisher (heartbeat)
 
 **Files:**
-- Create: `src/lib/atelier/orchestrator/progress-publisher.ts`
-- Test: `src/lib/atelier/orchestrator/progress-publisher.test.ts`
+- Create: `src/lib/artlab/orchestrator/progress-publisher.ts`
+- Test: `src/lib/artlab/orchestrator/progress-publisher.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/orchestrator/progress-publisher.test.ts
+// src/lib/artlab/orchestrator/progress-publisher.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -2987,7 +3159,7 @@ import { readProgressSnapshot, writeRunStateSnapshot } from "../state/snapshots"
 describe("progress publisher", () => {
   let runDir: string;
   beforeEach(() => {
-    runDir = mkdtempSync(join(tmpdir(), "atelier-progress-"));
+    runDir = mkdtempSync(join(tmpdir(), "artlab-progress-"));
     writeRunStateSnapshot(runDir, {
       runId: "r1",
       assetType: "character",
@@ -3021,13 +3193,13 @@ describe("progress publisher", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/progress-publisher.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/progress-publisher.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement progress publisher**
 
 ```ts
-// src/lib/atelier/orchestrator/progress-publisher.ts
+// src/lib/artlab/orchestrator/progress-publisher.ts
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { writeProgressSnapshot, readRunStateSnapshot } from "../state/snapshots";
@@ -3099,13 +3271,13 @@ export function startProgressHeartbeat(runDir: string, intervalMs = 10_000): () 
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/progress-publisher.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/progress-publisher.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/orchestrator/progress-publisher.ts src/lib/atelier/orchestrator/progress-publisher.test.ts
+git add src/lib/artlab/orchestrator/progress-publisher.ts src/lib/artlab/orchestrator/progress-publisher.test.ts
 git commit -m "$(cat <<'EOF'
 Add progress publisher — 10s heartbeat per active runner
 
@@ -3121,13 +3293,13 @@ EOF
 ### Task 1.18: Deterministic orchestrator
 
 **Files:**
-- Create: `src/lib/atelier/orchestrator/deterministic.ts`
-- Test: `src/lib/atelier/orchestrator/deterministic.test.ts`
+- Create: `src/lib/artlab/orchestrator/deterministic.ts`
+- Test: `src/lib/artlab/orchestrator/deterministic.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/orchestrator/deterministic.test.ts
+// src/lib/artlab/orchestrator/deterministic.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -3138,7 +3310,7 @@ import { writeRunStateSnapshot, readRunStateSnapshot } from "../state/snapshots"
 describe("deterministic orchestrator", () => {
   let runDir: string;
   beforeEach(() => {
-    runDir = mkdtempSync(join(tmpdir(), "atelier-orch-"));
+    runDir = mkdtempSync(join(tmpdir(), "artlab-orch-"));
   });
 
   it("auto-advances routed → generating-concepts → concept-review", async () => {
@@ -3178,21 +3350,21 @@ describe("deterministic orchestrator", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/deterministic.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/deterministic.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement deterministic orchestrator**
 
 ```ts
-// src/lib/atelier/orchestrator/deterministic.ts
-import type { AtelierPhase } from "../types";
+// src/lib/artlab/orchestrator/deterministic.ts
+import type { ArtLabPhase } from "../types";
 import { ATELIER_TRANSITIONS } from "../state/machine";
 import { readRunStateSnapshot, writeRunStateSnapshot } from "../state/snapshots";
-import { appendAtelierEvent } from "../state/events";
+import { appendArtLabEvent } from "../state/events";
 import { getRunner } from "../runners";
-import type { AtelierRunnerKind } from "../runners/runner-contract";
+import type { ArtLabRunnerKind } from "../runners/runner-contract";
 
-const PHASE_RUNNER: Partial<Record<AtelierPhase, AtelierRunnerKind>> = {
+const PHASE_RUNNER: Partial<Record<ArtLabPhase, ArtLabRunnerKind>> = {
   "generating-concepts": "concept",
   canary: "canary",
   production: "production",
@@ -3201,7 +3373,7 @@ const PHASE_RUNNER: Partial<Record<AtelierPhase, AtelierRunnerKind>> = {
   verifying: "verifying",
 };
 
-const NEXT_PHASE: Partial<Record<AtelierPhase, AtelierPhase>> = {
+const NEXT_PHASE: Partial<Record<ArtLabPhase, ArtLabPhase>> = {
   routed: "generating-concepts",
   "generating-concepts": "concept-review",
   canary: "production",
@@ -3219,8 +3391,8 @@ export interface DeterministicTransitionInput {
 export interface DeterministicTransitionOutcome {
   applied: boolean;
   reason?: string;
-  fromPhase?: AtelierPhase;
-  toPhase?: AtelierPhase;
+  fromPhase?: ArtLabPhase;
+  toPhase?: ArtLabPhase;
 }
 
 export async function runDeterministicTransition(input: DeterministicTransitionInput): Promise<DeterministicTransitionOutcome> {
@@ -3242,7 +3414,7 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
       approvedLaneIndex: state.approvedConcept?.laneIndex,
       providerId: input.providerId,
     });
-    appendAtelierEvent(input.runDir, {
+    appendArtLabEvent(input.runDir, {
       runId: state.runId,
       at: new Date().toISOString(),
       kind: "runner-completed",
@@ -3259,7 +3431,7 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
   if (!transition) return { applied: false, reason: "no-transition-defined" };
   const updated = await transition.apply(state, { workspaceRoot: input.runDir, now: () => new Date() });
   writeRunStateSnapshot(input.runDir, updated);
-  appendAtelierEvent(input.runDir, {
+  appendArtLabEvent(input.runDir, {
     runId: state.runId,
     at: updated.updatedAt,
     kind: "phase-transition",
@@ -3271,13 +3443,13 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/deterministic.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/deterministic.test.ts`
 Expected: PASS — 2 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/orchestrator/deterministic.ts src/lib/atelier/orchestrator/deterministic.test.ts
+git add src/lib/artlab/orchestrator/deterministic.ts src/lib/artlab/orchestrator/deterministic.test.ts
 git commit -m "$(cat <<'EOF'
 Add deterministic orchestrator — single-step transition walker
 
@@ -3293,13 +3465,13 @@ EOF
 ### Task 1.19: Health snapshot scanners — leases
 
 **Files:**
-- Create: `src/lib/atelier/health/scanners/leases.ts`
-- Test: `src/lib/atelier/health/scanners/leases.test.ts`
+- Create: `src/lib/artlab/health/scanners/leases.ts`
+- Test: `src/lib/artlab/health/scanners/leases.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/health/scanners/leases.test.ts
+// src/lib/artlab/health/scanners/leases.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -3308,7 +3480,7 @@ import { scanLeases } from "./leases";
 
 describe("leases scanner", () => {
   let workspaceRoot: string;
-  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "atelier-leases-")); });
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-leases-")); });
 
   it("returns empty when no leases directory exists", () => {
     expect(scanLeases(workspaceRoot)).toEqual([]);
@@ -3328,13 +3500,13 @@ describe("leases scanner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/health/scanners/leases.test.ts`
+Run: `npx vitest run src/lib/artlab/health/scanners/leases.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement leases scanner**
 
 ```ts
-// src/lib/atelier/health/scanners/leases.ts
+// src/lib/artlab/health/scanners/leases.ts
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -3376,13 +3548,13 @@ export function scanLeases(workspaceRoot: string): LeaseScanEntry[] {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/health/scanners/leases.test.ts`
+Run: `npx vitest run src/lib/artlab/health/scanners/leases.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/health/scanners/leases.ts src/lib/atelier/health/scanners/leases.test.ts
+git add src/lib/artlab/health/scanners/leases.ts src/lib/artlab/health/scanners/leases.test.ts
 git commit -m "$(cat <<'EOF'
 Add leases health scanner — counts active and stale across runs
 
@@ -3394,13 +3566,13 @@ EOF
 ### Task 1.20: Health snapshot scanners — ledgers
 
 **Files:**
-- Create: `src/lib/atelier/health/scanners/ledgers.ts`
-- Test: `src/lib/atelier/health/scanners/ledgers.test.ts`
+- Create: `src/lib/artlab/health/scanners/ledgers.ts`
+- Test: `src/lib/artlab/health/scanners/ledgers.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/health/scanners/ledgers.test.ts
+// src/lib/artlab/health/scanners/ledgers.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -3409,7 +3581,7 @@ import { scanLedgers } from "./ledgers";
 
 describe("ledgers scanner", () => {
   let workspaceRoot: string;
-  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "atelier-ledgers-")); });
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-ledgers-")); });
 
   it("returns zero when no runs", () => {
     const result = scanLedgers(workspaceRoot);
@@ -3434,13 +3606,13 @@ describe("ledgers scanner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/health/scanners/ledgers.test.ts`
+Run: `npx vitest run src/lib/artlab/health/scanners/ledgers.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement ledgers scanner**
 
 ```ts
-// src/lib/atelier/health/scanners/ledgers.ts
+// src/lib/artlab/health/scanners/ledgers.ts
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -3474,13 +3646,13 @@ export function scanLedgers(workspaceRoot: string): LedgerScanResult {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/health/scanners/ledgers.test.ts`
+Run: `npx vitest run src/lib/artlab/health/scanners/ledgers.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/health/scanners/ledgers.ts src/lib/atelier/health/scanners/ledgers.test.ts
+git add src/lib/artlab/health/scanners/ledgers.ts src/lib/artlab/health/scanners/ledgers.test.ts
 git commit -m "$(cat <<'EOF'
 Add ledgers health scanner — sums spend per run and overall
 
@@ -3492,16 +3664,16 @@ EOF
 ### Task 1.21: Health snapshot scanners — processes, receipts, locks, cleanup
 
 **Files:**
-- Create: `src/lib/atelier/health/scanners/processes.ts`
-- Create: `src/lib/atelier/health/scanners/receipts.ts`
-- Create: `src/lib/atelier/health/scanners/locks.ts`
-- Create: `src/lib/atelier/health/scanners/cleanup.ts`
-- Test: `src/lib/atelier/health/scanners/extra-scanners.test.ts`
+- Create: `src/lib/artlab/health/scanners/processes.ts`
+- Create: `src/lib/artlab/health/scanners/receipts.ts`
+- Create: `src/lib/artlab/health/scanners/locks.ts`
+- Create: `src/lib/artlab/health/scanners/cleanup.ts`
+- Test: `src/lib/artlab/health/scanners/extra-scanners.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/health/scanners/extra-scanners.test.ts
+// src/lib/artlab/health/scanners/extra-scanners.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -3513,7 +3685,7 @@ import { scanCleanup } from "./cleanup";
 
 describe("supplementary health scanners", () => {
   let root: string;
-  beforeEach(() => { root = mkdtempSync(join(tmpdir(), "atelier-scan-")); });
+  beforeEach(() => { root = mkdtempSync(join(tmpdir(), "artlab-scan-")); });
 
   it("scanProcesses counts active leases as live processes", () => {
     const leaseDir = join(root, "runs", "r1", "slot-leases");
@@ -3551,13 +3723,13 @@ describe("supplementary health scanners", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/health/scanners/extra-scanners.test.ts`
+Run: `npx vitest run src/lib/artlab/health/scanners/extra-scanners.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement processes scanner**
 
 ```ts
-// src/lib/atelier/health/scanners/processes.ts
+// src/lib/artlab/health/scanners/processes.ts
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -3587,7 +3759,7 @@ export function scanProcesses(workspaceRoot: string): ProcessesScanResult {
 - [ ] **Step 4: Implement receipts scanner**
 
 ```ts
-// src/lib/atelier/health/scanners/receipts.ts
+// src/lib/artlab/health/scanners/receipts.ts
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -3615,7 +3787,7 @@ export function scanReceipts(workspaceRoot: string): ReceiptsScanResult {
 - [ ] **Step 5: Implement locks scanner**
 
 ```ts
-// src/lib/atelier/health/scanners/locks.ts
+// src/lib/artlab/health/scanners/locks.ts
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -3652,7 +3824,7 @@ export function scanLocks(workspaceRoot: string): LockScanResult {
 - [ ] **Step 6: Implement cleanup scanner**
 
 ```ts
-// src/lib/atelier/health/scanners/cleanup.ts
+// src/lib/artlab/health/scanners/cleanup.ts
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -3689,13 +3861,13 @@ export function scanCleanup(workspaceRoot: string): CleanupScanResult {
 
 - [ ] **Step 7: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/health/scanners/extra-scanners.test.ts`
+Run: `npx vitest run src/lib/artlab/health/scanners/extra-scanners.test.ts`
 Expected: PASS — 4 assertions pass
 
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/lib/atelier/health/scanners
+git add src/lib/artlab/health/scanners
 git commit -m "$(cat <<'EOF'
 Add processes/receipts/locks/cleanup health scanners
 
@@ -3711,29 +3883,29 @@ EOF
 ### Task 1.22: Health snapshot builder
 
 **Files:**
-- Create: `src/lib/atelier/health/snapshot.ts`
-- Test: `src/lib/atelier/health/snapshot.test.ts`
+- Create: `src/lib/artlab/health/snapshot.ts`
+- Test: `src/lib/artlab/health/snapshot.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/health/snapshot.test.ts
+// src/lib/artlab/health/snapshot.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildAtelierHealthSnapshot } from "./snapshot";
+import { buildArtLabHealthSnapshot } from "./snapshot";
 
-describe("atelier health snapshot", () => {
+describe("artlab health snapshot", () => {
   let workspaceRoot: string;
-  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "atelier-health-")); });
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-health-")); });
 
   it("returns real numbers across all 6 scanners", () => {
     const runDir = join(workspaceRoot, "runs", "r1");
     mkdirSync(join(runDir, "slot-leases"), { recursive: true });
     writeFileSync(join(runDir, "slot-leases", "s1.lease.json"), JSON.stringify({ acquiredAt: new Date().toISOString() }));
     writeFileSync(join(runDir, "provider-budget-ledger.json"), JSON.stringify({ totals: { spentCents: 500 } }));
-    const snap = buildAtelierHealthSnapshot(workspaceRoot);
+    const snap = buildArtLabHealthSnapshot(workspaceRoot);
     expect(snap.leases.length).toBe(1);
     expect(snap.spend.totalSpentCents).toBe(500);
     expect(snap.processes.activeProcessCount).toBe(1);
@@ -3744,13 +3916,13 @@ describe("atelier health snapshot", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/health/snapshot.test.ts`
+Run: `npx vitest run src/lib/artlab/health/snapshot.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement snapshot builder**
 
 ```ts
-// src/lib/atelier/health/snapshot.ts
+// src/lib/artlab/health/snapshot.ts
 import { scanLeases, type LeaseScanEntry } from "./scanners/leases";
 import { scanLedgers, type LedgerScanResult } from "./scanners/ledgers";
 import { scanProcesses, type ProcessesScanResult } from "./scanners/processes";
@@ -3758,7 +3930,7 @@ import { scanReceipts, type ReceiptsScanResult } from "./scanners/receipts";
 import { scanLocks, type LockScanResult } from "./scanners/locks";
 import { scanCleanup, type CleanupScanResult } from "./scanners/cleanup";
 
-export interface AtelierHealthSnapshot {
+export interface ArtLabHealthSnapshot {
   collectedAt: string;
   workspaceRoot: string;
   leases: LeaseScanEntry[];
@@ -3769,7 +3941,7 @@ export interface AtelierHealthSnapshot {
   cleanup: CleanupScanResult;
 }
 
-export function buildAtelierHealthSnapshot(workspaceRoot: string): AtelierHealthSnapshot {
+export function buildArtLabHealthSnapshot(workspaceRoot: string): ArtLabHealthSnapshot {
   return {
     collectedAt: new Date().toISOString(),
     workspaceRoot,
@@ -3785,15 +3957,15 @@ export function buildAtelierHealthSnapshot(workspaceRoot: string): AtelierHealth
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/health/snapshot.test.ts`
+Run: `npx vitest run src/lib/artlab/health/snapshot.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/health/snapshot.ts src/lib/atelier/health/snapshot.test.ts
+git add src/lib/artlab/health/snapshot.ts src/lib/artlab/health/snapshot.test.ts
 git commit -m "$(cat <<'EOF'
-Add buildAtelierHealthSnapshot — wires all 6 scanners
+Add buildArtLabHealthSnapshot — wires all 6 scanners
 
 Replaces the hard-coded-zeros snapshot in
 scripts/creative-production-health.ts. Every count is real.
@@ -3806,19 +3978,19 @@ EOF
 ### Task 1.23: Health render
 
 **Files:**
-- Create: `src/lib/atelier/health/render.ts`
-- Test: `src/lib/atelier/health/render.test.ts`
+- Create: `src/lib/artlab/health/render.ts`
+- Test: `src/lib/artlab/health/render.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/health/render.test.ts
+// src/lib/artlab/health/render.test.ts
 import { describe, expect, it } from "vitest";
-import { renderAtelierHealth } from "./render";
+import { renderArtLabHealth } from "./render";
 
-describe("renderAtelierHealth", () => {
+describe("renderArtLabHealth", () => {
   it("renders a plain-text report with section headings", () => {
-    const text = renderAtelierHealth({
+    const text = renderArtLabHealth({
       collectedAt: "2026-05-20T00:00:00.000Z",
       workspaceRoot: "/x",
       leases: [],
@@ -3828,7 +4000,7 @@ describe("renderAtelierHealth", () => {
       locks: { locks: [] },
       cleanup: { orphanPreviewCount: 0, staleBoardCount: 0, staleLockCount: 0 },
     });
-    expect(text).toContain("Atelier Health");
+    expect(text).toContain("ArtLab Health");
     expect(text).toContain("$12.34");
     expect(text).toContain("active processes: 1");
   });
@@ -3837,22 +4009,22 @@ describe("renderAtelierHealth", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/health/render.test.ts`
+Run: `npx vitest run src/lib/artlab/health/render.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement render**
 
 ```ts
-// src/lib/atelier/health/render.ts
-import type { AtelierHealthSnapshot } from "./snapshot";
+// src/lib/artlab/health/render.ts
+import type { ArtLabHealthSnapshot } from "./snapshot";
 
 function dollars(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-export function renderAtelierHealth(snapshot: AtelierHealthSnapshot): string {
+export function renderArtLabHealth(snapshot: ArtLabHealthSnapshot): string {
   const lines: string[] = [];
-  lines.push("Atelier Health");
+  lines.push("ArtLab Health");
   lines.push(`Collected at: ${snapshot.collectedAt}`);
   lines.push(`Workspace: ${snapshot.workspaceRoot}`);
   lines.push("");
@@ -3888,15 +4060,15 @@ export function renderAtelierHealth(snapshot: AtelierHealthSnapshot): string {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/health/render.test.ts`
+Run: `npx vitest run src/lib/artlab/health/render.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/health/render.ts src/lib/atelier/health/render.test.ts
+git add src/lib/artlab/health/render.ts src/lib/artlab/health/render.test.ts
 git commit -m "$(cat <<'EOF'
-Add atelier health render — plain-text report
+Add artlab health render — plain-text report
 
 Sectioned spend, processes, leases, receipts, locks, cleanup.
 
@@ -3908,12 +4080,12 @@ EOF
 ### Task 1.24: Phase 1 integration test — mock end-to-end run
 
 **Files:**
-- Create: `src/lib/atelier/e2e-mock.integration.test.ts`
+- Create: `src/lib/artlab/e2e-mock.integration.test.ts`
 
 - [ ] **Step 1: Write the failing integration test**
 
 ```ts
-// src/lib/atelier/e2e-mock.integration.test.ts
+// src/lib/artlab/e2e-mock.integration.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -3921,11 +4093,11 @@ import { join } from "node:path";
 import { writeRunStateSnapshot, readRunStateSnapshot } from "./state/snapshots";
 import { runDeterministicTransition } from "./orchestrator/deterministic";
 
-describe("atelier end-to-end mock run", () => {
+describe("artlab end-to-end mock run", () => {
   let runDir: string;
   beforeEach(() => {
-    runDir = mkdtempSync(join(tmpdir(), "atelier-e2e-"));
-    process.env.ATELIER_PUBLIC_ART_ROOT = mkdtempSync(join(tmpdir(), "atelier-e2e-public-"));
+    runDir = mkdtempSync(join(tmpdir(), "artlab-e2e-"));
+    process.env.ATELIER_PUBLIC_ART_ROOT = mkdtempSync(join(tmpdir(), "artlab-e2e-public-"));
     process.env.ATELIER_PLAYWRIGHT_MODE = "mock";
   });
 
@@ -3978,17 +4150,17 @@ describe("atelier end-to-end mock run", () => {
 
 - [ ] **Step 2: Run test to verify it fails initially**
 
-Run: `npx vitest run src/lib/atelier/e2e-mock.integration.test.ts`
+Run: `npx vitest run src/lib/artlab/e2e-mock.integration.test.ts`
 Expected: PASS (all the Phase 1 building blocks should already make this green)
 
 - [ ] **Step 3: If failing, inspect which transition stalls and fix that runner**
 
-Re-run the test with verbose output: `npx vitest run src/lib/atelier/e2e-mock.integration.test.ts --reporter=verbose`
+Re-run the test with verbose output: `npx vitest run src/lib/artlab/e2e-mock.integration.test.ts --reporter=verbose`
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/lib/atelier/e2e-mock.integration.test.ts
+git add src/lib/artlab/e2e-mock.integration.test.ts
 git commit -m "$(cat <<'EOF'
 Add Phase 1 end-to-end mock run integration test
 
@@ -4004,18 +4176,18 @@ EOF
 
 ## Phase 2 — Intelligence
 
-LLM brain, persistent memory ledgers, cast coherence checks, intake routing with the Rafe→Otis regression test, bundle parsing, ambiguity detection. Phase 2 lands the brain that makes atelier autonomous overnight.
+LLM brain, persistent memory ledgers, cast coherence checks, intake routing with the Rafe→Otis regression test, bundle parsing, ambiguity detection. Phase 2 lands the brain that makes artlab autonomous overnight.
 
 ### Task 2.1: Known cast — single source
 
 **Files:**
-- Create: `src/lib/atelier/intake/known-cast.ts`
-- Test: `src/lib/atelier/intake/known-cast.test.ts`
+- Create: `src/lib/artlab/intake/known-cast.ts`
+- Test: `src/lib/artlab/intake/known-cast.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/intake/known-cast.test.ts
+// src/lib/artlab/intake/known-cast.test.ts
 import { describe, expect, it } from "vitest";
 import { KNOWN_CAST, findCastMember, listCastByCharacterId } from "./known-cast";
 
@@ -4042,13 +4214,13 @@ describe("known cast", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/intake/known-cast.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/known-cast.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement known cast**
 
 ```ts
-// src/lib/atelier/intake/known-cast.ts
+// src/lib/artlab/intake/known-cast.ts
 import { SEASON_ONE_CHARACTER_METADATA } from "@/lib/visual-assets/characters";
 
 export interface KnownCastMember {
@@ -4101,17 +4273,17 @@ export function findCastMember(query: string): KnownCastMember | undefined {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/intake/known-cast.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/known-cast.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/intake/known-cast.ts src/lib/atelier/intake/known-cast.test.ts
+git add src/lib/artlab/intake/known-cast.ts src/lib/artlab/intake/known-cast.test.ts
 git commit -m "$(cat <<'EOF'
 Add KNOWN_CAST derived from SEASON_ONE_CHARACTER_METADATA
 
-One source of truth. Atelier intake, coherence, and migration all
+One source of truth. ArtLab intake, coherence, and migration all
 read from this list. Lookup helpers cover id, displayName,
 shortLabel, firstName, lastName.
 
@@ -4123,13 +4295,13 @@ EOF
 ### Task 2.2: Ambiguity detector
 
 **Files:**
-- Create: `src/lib/atelier/intake/ambiguity-detector.ts`
-- Test: `src/lib/atelier/intake/ambiguity-detector.test.ts`
+- Create: `src/lib/artlab/intake/ambiguity-detector.ts`
+- Test: `src/lib/artlab/intake/ambiguity-detector.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/intake/ambiguity-detector.test.ts
+// src/lib/artlab/intake/ambiguity-detector.test.ts
 import { describe, expect, it } from "vitest";
 import { detectAmbiguity } from "./ambiguity-detector";
 
@@ -4166,13 +4338,13 @@ describe("ambiguity detector", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/intake/ambiguity-detector.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/ambiguity-detector.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement detector**
 
 ```ts
-// src/lib/atelier/intake/ambiguity-detector.ts
+// src/lib/artlab/intake/ambiguity-detector.ts
 import { KNOWN_CAST, type KnownCastMember } from "./known-cast";
 
 export type AmbiguityReasonCode =
@@ -4263,13 +4435,13 @@ export function detectAmbiguity(input: { request: string }): AmbiguityDetectorRe
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/intake/ambiguity-detector.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/ambiguity-detector.test.ts`
 Expected: PASS — 4 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/intake/ambiguity-detector.ts src/lib/atelier/intake/ambiguity-detector.test.ts
+git add src/lib/artlab/intake/ambiguity-detector.ts src/lib/artlab/intake/ambiguity-detector.test.ts
 git commit -m "$(cat <<'EOF'
 Add ambiguity detector — fires the Rafe→Otis bug pattern
 
@@ -4286,13 +4458,13 @@ EOF
 ### Task 2.3: Intake bundle parser
 
 **Files:**
-- Create: `src/lib/atelier/intake/bundle-parser.ts`
-- Test: `src/lib/atelier/intake/bundle-parser.test.ts`
+- Create: `src/lib/artlab/intake/bundle-parser.ts`
+- Test: `src/lib/artlab/intake/bundle-parser.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/intake/bundle-parser.test.ts
+// src/lib/artlab/intake/bundle-parser.test.ts
 import { describe, expect, it } from "vitest";
 import { parseBundle } from "./bundle-parser";
 
@@ -4334,20 +4506,20 @@ describe("bundle parser", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/intake/bundle-parser.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/bundle-parser.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement bundle parser**
 
 ```ts
-// src/lib/atelier/intake/bundle-parser.ts
+// src/lib/artlab/intake/bundle-parser.ts
 import { randomUUID } from "node:crypto";
-import type { AtelierAssetType } from "../types";
+import type { ArtLabAssetType } from "../types";
 import { KNOWN_CAST } from "./known-cast";
 
 export interface ChildAssetSpec {
   childId: string;
-  assetType: AtelierAssetType;
+  assetType: ArtLabAssetType;
   characterHint?: string;
   request: string;
 }
@@ -4360,7 +4532,7 @@ export interface BundleSpec {
   links: { childA: string; childB: string; linkType: "shares-style" | "co-appears-in" | "references" }[];
 }
 
-const ROOMS: Record<string, AtelierAssetType> = {
+const ROOMS: Record<string, ArtLabAssetType> = {
   "war room": "environment",
   lobby: "environment",
   observatory: "environment",
@@ -4385,7 +4557,7 @@ function detectCharacterFirstNames(text: string): string[] {
   return [...found];
 }
 
-function child(assetType: AtelierAssetType, request: string, characterHint?: string): ChildAssetSpec {
+function child(assetType: ArtLabAssetType, request: string, characterHint?: string): ChildAssetSpec {
   return {
     childId: randomUUID(),
     assetType,
@@ -4466,13 +4638,13 @@ export function parseBundle(request: string): BundleSpec | null {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/intake/bundle-parser.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/bundle-parser.test.ts`
 Expected: PASS — 5 assertions pass
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/intake/bundle-parser.ts src/lib/atelier/intake/bundle-parser.test.ts
+git add src/lib/artlab/intake/bundle-parser.ts src/lib/artlab/intake/bundle-parser.test.ts
 git commit -m "$(cat <<'EOF'
 Add bundle parser — 4 phrase patterns
 
@@ -4488,13 +4660,13 @@ EOF
 ### Task 2.4: Reference attachment store
 
 **Files:**
-- Create: `src/lib/atelier/intake/reference-attachment.ts`
-- Test: `src/lib/atelier/intake/reference-attachment.test.ts`
+- Create: `src/lib/artlab/intake/reference-attachment.ts`
+- Test: `src/lib/artlab/intake/reference-attachment.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/intake/reference-attachment.test.ts
+// src/lib/artlab/intake/reference-attachment.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -4503,7 +4675,7 @@ import { storeReferenceImage, listReferenceImages } from "./reference-attachment
 
 describe("reference attachment store", () => {
   let runDir: string;
-  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "atelier-ref-")); });
+  beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "artlab-ref-")); });
 
   it("stores a reference image with metadata", async () => {
     const bytes = Buffer.from("PNG-bytes-here");
@@ -4523,13 +4695,13 @@ describe("reference attachment store", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/intake/reference-attachment.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/reference-attachment.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement reference attachment**
 
 ```ts
-// src/lib/atelier/intake/reference-attachment.ts
+// src/lib/artlab/intake/reference-attachment.ts
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -4600,13 +4772,13 @@ export function listReferenceImages(runDir: string): StoredReferenceImage[] {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/intake/reference-attachment.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/reference-attachment.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/intake/reference-attachment.ts src/lib/atelier/intake/reference-attachment.test.ts
+git add src/lib/artlab/intake/reference-attachment.ts src/lib/artlab/intake/reference-attachment.test.ts
 git commit -m "$(cat <<'EOF'
 Add reference-image attachment store per run
 
@@ -4621,14 +4793,14 @@ EOF
 ### Task 2.5: Intake router with Rafe→Otis regression test
 
 **Files:**
-- Create: `src/lib/atelier/intake/router.ts`
-- Test: `src/lib/atelier/intake/router.test.ts`
-- Test: `src/lib/atelier/intake/router.rafe-regression.test.ts`
+- Create: `src/lib/artlab/intake/router.ts`
+- Test: `src/lib/artlab/intake/router.test.ts`
+- Test: `src/lib/artlab/intake/router.rafe-regression.test.ts`
 
 - [ ] **Step 1: Write the regression test (this is THE bug we must fix)**
 
 ```ts
-// src/lib/atelier/intake/router.rafe-regression.test.ts
+// src/lib/artlab/intake/router.rafe-regression.test.ts
 import { describe, expect, it } from "vitest";
 import { routeRequest } from "./router";
 
@@ -4658,7 +4830,7 @@ describe("intake router — Rafe→Otis regression", () => {
 - [ ] **Step 2: Write router basic test**
 
 ```ts
-// src/lib/atelier/intake/router.test.ts
+// src/lib/artlab/intake/router.test.ts
 import { describe, expect, it } from "vitest";
 import { routeRequest } from "./router";
 
@@ -4689,14 +4861,14 @@ describe("intake router", () => {
 
 - [ ] **Step 3: Run tests to verify they fail**
 
-Run: `npx vitest run src/lib/atelier/intake/router.test.ts src/lib/atelier/intake/router.rafe-regression.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/router.test.ts src/lib/artlab/intake/router.rafe-regression.test.ts`
 Expected: FAIL — module not found
 
 - [ ] **Step 4: Implement router**
 
 ```ts
-// src/lib/atelier/intake/router.ts
-import type { AtelierAssetType } from "../types";
+// src/lib/artlab/intake/router.ts
+import type { ArtLabAssetType } from "../types";
 import { detectAmbiguity, type AmbiguityReasonCode } from "./ambiguity-detector";
 import { findCastMember, KNOWN_CAST } from "./known-cast";
 
@@ -4704,7 +4876,7 @@ export type RouterOutcomeKind = "ambiguous-resolved-or-confident" | "needs-human
 
 export interface RouterOutcome {
   kind: RouterOutcomeKind;
-  assetType: AtelierAssetType;
+  assetType: ArtLabAssetType;
   characterId?: string;
   displayName?: string;
   reasonCodes: AmbiguityReasonCode[];
@@ -4714,7 +4886,7 @@ export interface RouterOutcome {
 
 const EXPLICIT_CHARACTER_ID = /\bcharacter[\s-]?id\s*:?\s*([a-z][a-z0-9-]+)\b/i;
 
-const ASSET_TYPE_KEYWORDS: Array<{ pattern: RegExp; assetType: AtelierAssetType }> = [
+const ASSET_TYPE_KEYWORDS: Array<{ pattern: RegExp; assetType: ArtLabAssetType }> = [
   { pattern: /\b(background|environment|skyline|war\s*room|lobby|observatory)\b/i, assetType: "environment" },
   { pattern: /\b(button|panel|texture|knob|ui\s*asset)\b/i, assetType: "ui-texture" },
   { pattern: /\b(prop|object|tool|item)\b/i, assetType: "prop" },
@@ -4725,7 +4897,7 @@ const ASSET_TYPE_KEYWORDS: Array<{ pattern: RegExp; assetType: AtelierAssetType 
   { pattern: /\b(shader)\b/i, assetType: "shader" },
 ];
 
-function inferAssetType(request: string, hasExplicitCharacter: boolean): AtelierAssetType {
+function inferAssetType(request: string, hasExplicitCharacter: boolean): ArtLabAssetType {
   if (hasExplicitCharacter) return "character";
   for (const candidate of ASSET_TYPE_KEYWORDS) {
     if (candidate.pattern.test(request)) return candidate.assetType;
@@ -4840,13 +5012,13 @@ export function routeRequest(input: { request: string }): RouterOutcome {
 
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `npx vitest run src/lib/atelier/intake/router.test.ts src/lib/atelier/intake/router.rafe-regression.test.ts`
+Run: `npx vitest run src/lib/artlab/intake/router.test.ts src/lib/artlab/intake/router.rafe-regression.test.ts`
 Expected: PASS — all 7 assertions pass, including the critical regression that misrouted Rafe→Otis
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/lib/atelier/intake/router.ts src/lib/atelier/intake/router.test.ts src/lib/atelier/intake/router.rafe-regression.test.ts
+git add src/lib/artlab/intake/router.ts src/lib/artlab/intake/router.test.ts src/lib/artlab/intake/router.rafe-regression.test.ts
 git commit -m "$(cat <<'EOF'
 Add intake router that fixes today's Rafe→Otis misrouting
 
@@ -4865,13 +5037,13 @@ EOF
 ### Task 2.6: Memory — style-wins ledger
 
 **Files:**
-- Create: `src/lib/atelier/memory/style-ledger.ts`
-- Test: `src/lib/atelier/memory/style-ledger.test.ts`
+- Create: `src/lib/artlab/memory/style-ledger.ts`
+- Test: `src/lib/artlab/memory/style-ledger.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/memory/style-ledger.test.ts
+// src/lib/artlab/memory/style-ledger.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -4880,7 +5052,7 @@ import { appendStyleWin, readStyleWins } from "./style-ledger";
 
 describe("style-wins ledger", () => {
   let dir: string;
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "atelier-style-")); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "artlab-style-")); });
 
   it("appends a win and reads it back", () => {
     appendStyleWin(dir, {
@@ -4906,13 +5078,13 @@ describe("style-wins ledger", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/memory/style-ledger.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/style-ledger.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement style-wins ledger**
 
 ```ts
-// src/lib/atelier/memory/style-ledger.ts
+// src/lib/artlab/memory/style-ledger.ts
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
@@ -4951,13 +5123,13 @@ export function readStyleWins(workspaceMemoryDir: string, filter?: { characterId
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/memory/style-ledger.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/style-ledger.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/memory/style-ledger.ts src/lib/atelier/memory/style-ledger.test.ts
+git add src/lib/artlab/memory/style-ledger.ts src/lib/artlab/memory/style-ledger.test.ts
 git commit -m "$(cat <<'EOF'
 Add style-wins jsonl ledger (per-promotion memory)
 
@@ -4969,13 +5141,13 @@ EOF
 ### Task 2.7: Memory — rejection ledger
 
 **Files:**
-- Create: `src/lib/atelier/memory/rejection-ledger.ts`
-- Test: `src/lib/atelier/memory/rejection-ledger.test.ts`
+- Create: `src/lib/artlab/memory/rejection-ledger.ts`
+- Test: `src/lib/artlab/memory/rejection-ledger.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/memory/rejection-ledger.test.ts
+// src/lib/artlab/memory/rejection-ledger.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -4984,7 +5156,7 @@ import { appendRejection, readRejections } from "./rejection-ledger";
 
 describe("rejection ledger", () => {
   let dir: string;
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "atelier-rej-")); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "artlab-rej-")); });
 
   it("appends and reads rejections", () => {
     appendRejection(dir, {
@@ -5005,13 +5177,13 @@ describe("rejection ledger", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/memory/rejection-ledger.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/rejection-ledger.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement rejection ledger**
 
 ```ts
-// src/lib/atelier/memory/rejection-ledger.ts
+// src/lib/artlab/memory/rejection-ledger.ts
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
@@ -5051,13 +5223,13 @@ export function readRejections(memoryDir: string, filter?: { characterId?: strin
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/memory/rejection-ledger.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/rejection-ledger.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/memory/rejection-ledger.ts src/lib/atelier/memory/rejection-ledger.test.ts
+git add src/lib/artlab/memory/rejection-ledger.ts src/lib/artlab/memory/rejection-ledger.test.ts
 git commit -m "$(cat <<'EOF'
 Add style-rejections jsonl ledger
 
@@ -5069,13 +5241,13 @@ EOF
 ### Task 2.8: Memory — prompt-evolution ledger
 
 **Files:**
-- Create: `src/lib/atelier/memory/prompt-evolution.ts`
-- Test: `src/lib/atelier/memory/prompt-evolution.test.ts`
+- Create: `src/lib/artlab/memory/prompt-evolution.ts`
+- Test: `src/lib/artlab/memory/prompt-evolution.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/memory/prompt-evolution.test.ts
+// src/lib/artlab/memory/prompt-evolution.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -5084,7 +5256,7 @@ import { appendPromptEvolution, readPromptEvolution } from "./prompt-evolution";
 
 describe("prompt-evolution ledger", () => {
   let dir: string;
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "atelier-evo-")); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "artlab-evo-")); });
 
   it("appends a prompt-builder change", () => {
     appendPromptEvolution(dir, {
@@ -5104,13 +5276,13 @@ describe("prompt-evolution ledger", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/memory/prompt-evolution.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/prompt-evolution.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement prompt-evolution ledger**
 
 ```ts
-// src/lib/atelier/memory/prompt-evolution.ts
+// src/lib/artlab/memory/prompt-evolution.ts
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
@@ -5150,13 +5322,13 @@ export function readPromptEvolution(memoryDir: string): PromptEvolutionEntry[] {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/memory/prompt-evolution.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/prompt-evolution.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/memory/prompt-evolution.ts src/lib/atelier/memory/prompt-evolution.test.ts
+git add src/lib/artlab/memory/prompt-evolution.ts src/lib/artlab/memory/prompt-evolution.test.ts
 git commit -m "$(cat <<'EOF'
 Add prompt-evolution jsonl ledger
 
@@ -5168,13 +5340,13 @@ EOF
 ### Task 2.9: Memory retrieval API
 
 **Files:**
-- Create: `src/lib/atelier/memory/retrieve.ts`
-- Test: `src/lib/atelier/memory/retrieve.test.ts`
+- Create: `src/lib/artlab/memory/retrieve.ts`
+- Test: `src/lib/artlab/memory/retrieve.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/memory/retrieve.test.ts
+// src/lib/artlab/memory/retrieve.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -5187,7 +5359,7 @@ import { appendPromptEvolution } from "./prompt-evolution";
 describe("getRelevantMemory", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "atelier-mem-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-mem-"));
     for (let i = 0; i < 4; i += 1) {
       appendStyleWin(dir, {
         characterId: i % 2 === 0 ? "otis" : "ceo",
@@ -5232,21 +5404,21 @@ describe("getRelevantMemory", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/memory/retrieve.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/retrieve.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement retrieve**
 
 ```ts
-// src/lib/atelier/memory/retrieve.ts
-import type { AtelierAssetType } from "../types";
+// src/lib/artlab/memory/retrieve.ts
+import type { ArtLabAssetType } from "../types";
 import { readStyleWins, type StyleWinEntry } from "./style-ledger";
 import { readRejections, type RejectionEntry } from "./rejection-ledger";
 import { readPromptEvolution, type PromptEvolutionEntry } from "./prompt-evolution";
 
 export interface RelevantMemoryInput {
   memoryDir: string;
-  assetType: AtelierAssetType;
+  assetType: ArtLabAssetType;
   characterId?: string;
   topN?: number;
 }
@@ -5272,13 +5444,13 @@ export async function getRelevantMemory(input: RelevantMemoryInput): Promise<Rel
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/memory/retrieve.test.ts`
+Run: `npx vitest run src/lib/artlab/memory/retrieve.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/memory/retrieve.ts src/lib/atelier/memory/retrieve.test.ts
+git add src/lib/artlab/memory/retrieve.ts src/lib/artlab/memory/retrieve.test.ts
 git commit -m "$(cat <<'EOF'
 Add getRelevantMemory — top-N recency retrieval per character
 
@@ -5290,13 +5462,13 @@ EOF
 ### Task 2.10: Coherence — perceptual hashes (silhouette + palette)
 
 **Files:**
-- Create: `src/lib/atelier/coherence/hashes.ts`
-- Test: `src/lib/atelier/coherence/hashes.test.ts`
+- Create: `src/lib/artlab/coherence/hashes.ts`
+- Test: `src/lib/artlab/coherence/hashes.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/coherence/hashes.test.ts
+// src/lib/artlab/coherence/hashes.test.ts
 import { describe, expect, it } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -5306,7 +5478,7 @@ import { computeSilhouetteHash, computePaletteHistogram } from "./hashes";
 
 describe("perceptual hashes", () => {
   it("computes a silhouette hash from a solid rectangle", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "atelier-hash-"));
+    const dir = mkdtempSync(join(tmpdir(), "artlab-hash-"));
     const png = await sharp({ create: { width: 128, height: 128, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
       .composite([{ input: Buffer.from(`<svg width="128" height="128"><rect x="32" y="32" width="64" height="64" fill="red"/></svg>`), top: 0, left: 0 }])
       .png()
@@ -5320,7 +5492,7 @@ describe("perceptual hashes", () => {
   });
 
   it("computes a 5-color palette histogram", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "atelier-hash-"));
+    const dir = mkdtempSync(join(tmpdir(), "artlab-hash-"));
     const png = await sharp({ create: { width: 64, height: 64, channels: 3, background: { r: 30, g: 30, b: 60 } } })
       .png()
       .toBuffer();
@@ -5335,13 +5507,13 @@ describe("perceptual hashes", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/coherence/hashes.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/hashes.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement hashes**
 
 ```ts
-// src/lib/atelier/coherence/hashes.ts
+// src/lib/artlab/coherence/hashes.ts
 import sharp from "sharp";
 
 export interface SilhouetteHash {
@@ -5442,13 +5614,13 @@ export function silhouetteDistance(a: SilhouetteHash, b: SilhouetteHash): number
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/coherence/hashes.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/hashes.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/coherence/hashes.ts src/lib/atelier/coherence/hashes.test.ts
+git add src/lib/artlab/coherence/hashes.ts src/lib/artlab/coherence/hashes.test.ts
 git commit -m "$(cat <<'EOF'
 Add silhouette + palette perceptual hashes via sharp
 
@@ -5464,14 +5636,14 @@ EOF
 ### Task 2.11: Coherence — coherence thresholds config
 
 **Files:**
-- Create: `src/lib/atelier/coherence/thresholds.json`
-- Create: `src/lib/atelier/coherence/thresholds.ts`
-- Test: `src/lib/atelier/coherence/thresholds.test.ts`
+- Create: `src/lib/artlab/coherence/thresholds.json`
+- Create: `src/lib/artlab/coherence/thresholds.ts`
+- Test: `src/lib/artlab/coherence/thresholds.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/coherence/thresholds.test.ts
+// src/lib/artlab/coherence/thresholds.test.ts
 import { describe, expect, it } from "vitest";
 import { loadCoherenceThresholds } from "./thresholds";
 
@@ -5488,13 +5660,13 @@ describe("coherence thresholds", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/coherence/thresholds.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/thresholds.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement thresholds**
 
 ```json
-// src/lib/atelier/coherence/thresholds.json
+// src/lib/artlab/coherence/thresholds.json
 {
   "silhouette": { "minPairwiseDistance": 0.08, "maxCohesionDistance": 0.40 },
   "palette": { "minPairwiseDistance": 22, "maxCohesionDistance": 70 },
@@ -5503,7 +5675,7 @@ Expected: FAIL
 ```
 
 ```ts
-// src/lib/atelier/coherence/thresholds.ts
+// src/lib/artlab/coherence/thresholds.ts
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -5521,13 +5693,13 @@ export function loadCoherenceThresholds(): CoherenceThresholds {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/coherence/thresholds.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/thresholds.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/coherence/thresholds.json src/lib/atelier/coherence/thresholds.ts src/lib/atelier/coherence/thresholds.test.ts
+git add src/lib/artlab/coherence/thresholds.json src/lib/artlab/coherence/thresholds.ts src/lib/artlab/coherence/thresholds.test.ts
 git commit -m "$(cat <<'EOF'
 Add tunable coherence thresholds JSON
 
@@ -5542,13 +5714,13 @@ EOF
 ### Task 2.12: Coherence — cast diversity check
 
 **Files:**
-- Create: `src/lib/atelier/coherence/cast-diversity.ts`
-- Test: `src/lib/atelier/coherence/cast-diversity.test.ts`
+- Create: `src/lib/artlab/coherence/cast-diversity.ts`
+- Test: `src/lib/artlab/coherence/cast-diversity.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/coherence/cast-diversity.test.ts
+// src/lib/artlab/coherence/cast-diversity.test.ts
 import { describe, expect, it } from "vitest";
 import { checkCastDiversity } from "./cast-diversity";
 
@@ -5588,13 +5760,13 @@ describe("cast diversity check", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/coherence/cast-diversity.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/cast-diversity.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement cast-diversity**
 
 ```ts
-// src/lib/atelier/coherence/cast-diversity.ts
+// src/lib/artlab/coherence/cast-diversity.ts
 import { paletteDistance, silhouetteDistance, type PaletteHistogram, type SilhouetteHash } from "./hashes";
 import { loadCoherenceThresholds } from "./thresholds";
 
@@ -5666,13 +5838,13 @@ export function checkCastDiversity(input: { lanes: LaneSignature[]; promotedCast
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/coherence/cast-diversity.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/cast-diversity.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/coherence/cast-diversity.ts src/lib/atelier/coherence/cast-diversity.test.ts
+git add src/lib/artlab/coherence/cast-diversity.ts src/lib/artlab/coherence/cast-diversity.test.ts
 git commit -m "$(cat <<'EOF'
 Add cast diversity check across 5 lanes + promoted cast
 
@@ -5689,13 +5861,13 @@ EOF
 ### Task 2.13: Coherence — style envelope cohesion check
 
 **Files:**
-- Create: `src/lib/atelier/coherence/style-envelope.ts`
-- Test: `src/lib/atelier/coherence/style-envelope.test.ts`
+- Create: `src/lib/artlab/coherence/style-envelope.ts`
+- Test: `src/lib/artlab/coherence/style-envelope.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/coherence/style-envelope.test.ts
+// src/lib/artlab/coherence/style-envelope.test.ts
 import { describe, expect, it } from "vitest";
 import { computeStyleEnvelopeReport } from "./style-envelope";
 
@@ -5717,13 +5889,13 @@ describe("style envelope report", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/coherence/style-envelope.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/style-envelope.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement style envelope report**
 
 ```ts
-// src/lib/atelier/coherence/style-envelope.ts
+// src/lib/artlab/coherence/style-envelope.ts
 import { paletteDistance, silhouetteDistance } from "./hashes";
 import type { LaneSignature, PromotedCastSignature, CoherenceFailureCode } from "./cast-diversity";
 import { loadCoherenceThresholds } from "./thresholds";
@@ -5762,13 +5934,13 @@ export function computeStyleEnvelopeReport(input: { lanes: LaneSignature[]; prom
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/coherence/style-envelope.test.ts`
+Run: `npx vitest run src/lib/artlab/coherence/style-envelope.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/coherence/style-envelope.ts src/lib/atelier/coherence/style-envelope.test.ts
+git add src/lib/artlab/coherence/style-envelope.ts src/lib/artlab/coherence/style-envelope.test.ts
 git commit -m "$(cat <<'EOF'
 Add per-lane style envelope cohesion report
 
@@ -5780,13 +5952,13 @@ EOF
 ### Task 2.14: LLM brain — decision interface
 
 **Files:**
-- Create: `src/lib/atelier/orchestrator/llm-brain.ts`
-- Test: `src/lib/atelier/orchestrator/llm-brain.test.ts`
+- Create: `src/lib/artlab/orchestrator/llm-brain.ts`
+- Test: `src/lib/artlab/orchestrator/llm-brain.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/orchestrator/llm-brain.test.ts
+// src/lib/artlab/orchestrator/llm-brain.test.ts
 import { describe, expect, it } from "vitest";
 import { decideWithMockBrain, ATELIER_LLM_DECISION_KINDS } from "./llm-brain";
 
@@ -5815,13 +5987,13 @@ describe("LLM brain decision interface", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/llm-brain.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/llm-brain.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement LLM brain interface and mock**
 
 ```ts
-// src/lib/atelier/orchestrator/llm-brain.ts
+// src/lib/artlab/orchestrator/llm-brain.ts
 import { z } from "zod";
 
 export const ATELIER_LLM_DECISION_KINDS = [
@@ -5832,18 +6004,18 @@ export const ATELIER_LLM_DECISION_KINDS = [
   "prompt-enrichment",
   "blocker-message-drafting",
 ] as const;
-export type AtelierLlmDecisionKind = (typeof ATELIER_LLM_DECISION_KINDS)[number];
+export type ArtLabLlmDecisionKind = (typeof ATELIER_LLM_DECISION_KINDS)[number];
 
-export const AtelierLlmDecisionRequestSchema = z
+export const ArtLabLlmDecisionRequestSchema = z
   .object({
     kind: z.enum(ATELIER_LLM_DECISION_KINDS),
     input: z.record(z.string(), z.unknown()),
   })
   .strict();
-export type AtelierLlmDecisionRequest = z.infer<typeof AtelierLlmDecisionRequestSchema>;
+export type ArtLabLlmDecisionRequest = z.infer<typeof ArtLabLlmDecisionRequestSchema>;
 
-export interface AtelierLlmDecisionResult {
-  kind: AtelierLlmDecisionKind;
+export interface ArtLabLlmDecisionResult {
+  kind: ArtLabLlmDecisionKind;
   outputJson: Record<string, unknown>;
   confidence: number;
   tokensIn: number;
@@ -5851,12 +6023,12 @@ export interface AtelierLlmDecisionResult {
   model: string;
 }
 
-export interface AtelierLlmBrain {
-  decide(req: AtelierLlmDecisionRequest): Promise<AtelierLlmDecisionResult>;
+export interface ArtLabLlmBrain {
+  decide(req: ArtLabLlmDecisionRequest): Promise<ArtLabLlmDecisionResult>;
 }
 
-export async function decideWithMockBrain(req: AtelierLlmDecisionRequest): Promise<AtelierLlmDecisionResult> {
-  AtelierLlmDecisionRequestSchema.parse(req);
+export async function decideWithMockBrain(req: ArtLabLlmDecisionRequest): Promise<ArtLabLlmDecisionResult> {
+  ArtLabLlmDecisionRequestSchema.parse(req);
   return {
     kind: req.kind,
     outputJson: { mock: true, echoedInput: req.input },
@@ -5870,13 +6042,13 @@ export async function decideWithMockBrain(req: AtelierLlmDecisionRequest): Promi
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/llm-brain.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/llm-brain.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/orchestrator/llm-brain.ts src/lib/atelier/orchestrator/llm-brain.test.ts
+git add src/lib/artlab/orchestrator/llm-brain.ts src/lib/artlab/orchestrator/llm-brain.test.ts
 git commit -m "$(cat <<'EOF'
 Add LLM brain interface and mock implementation
 
@@ -5892,13 +6064,13 @@ EOF
 ### Task 2.15: Decision log (audit trail)
 
 **Files:**
-- Create: `src/lib/atelier/orchestrator/decision-log.ts`
-- Test: `src/lib/atelier/orchestrator/decision-log.test.ts`
+- Create: `src/lib/artlab/orchestrator/decision-log.ts`
+- Test: `src/lib/artlab/orchestrator/decision-log.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/orchestrator/decision-log.test.ts
+// src/lib/artlab/orchestrator/decision-log.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -5907,7 +6079,7 @@ import { appendLlmDecision, readLlmDecisions } from "./decision-log";
 
 describe("LLM decision log", () => {
   let dir: string;
-  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "atelier-dec-")); });
+  beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "artlab-dec-")); });
 
   it("appends and reads decisions", () => {
     appendLlmDecision(dir, {
@@ -5928,13 +6100,13 @@ describe("LLM decision log", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/decision-log.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/decision-log.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement decision log**
 
 ```ts
-// src/lib/atelier/orchestrator/decision-log.ts
+// src/lib/artlab/orchestrator/decision-log.ts
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
@@ -5975,13 +6147,13 @@ export function readLlmDecisions(workspaceMemoryDir: string): LlmDecisionEntry[]
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/decision-log.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/decision-log.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/orchestrator/decision-log.ts src/lib/atelier/orchestrator/decision-log.test.ts
+git add src/lib/artlab/orchestrator/decision-log.ts src/lib/artlab/orchestrator/decision-log.test.ts
 git commit -m "$(cat <<'EOF'
 Add LLM decision-log jsonl writer (audit trail)
 
@@ -5996,13 +6168,13 @@ EOF
 ### Task 2.16: Codex adapter for LLM brain
 
 **Files:**
-- Create: `src/lib/atelier/adapters/codex.ts`
-- Test: `src/lib/atelier/adapters/codex.test.ts`
+- Create: `src/lib/artlab/adapters/codex.ts`
+- Test: `src/lib/artlab/adapters/codex.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/adapters/codex.test.ts
+// src/lib/artlab/adapters/codex.test.ts
 import { describe, expect, it } from "vitest";
 import { invokeCodex, type CodexInvokeInput } from "./codex";
 
@@ -6023,13 +6195,13 @@ describe("codex adapter", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/adapters/codex.test.ts`
+Run: `npx vitest run src/lib/artlab/adapters/codex.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement codex adapter**
 
 ```ts
-// src/lib/atelier/adapters/codex.ts
+// src/lib/artlab/adapters/codex.ts
 export interface CodexInvokeInput {
   goal: string;
   sandboxLevel: "danger-full-access" | "workspace-write" | "read-only";
@@ -6055,13 +6227,13 @@ export async function invokeCodex(input: CodexInvokeInput): Promise<CodexInvokeR
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/adapters/codex.test.ts`
+Run: `npx vitest run src/lib/artlab/adapters/codex.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/adapters/codex.ts src/lib/atelier/adapters/codex.test.ts
+git add src/lib/artlab/adapters/codex.ts src/lib/artlab/adapters/codex.test.ts
 git commit -m "$(cat <<'EOF'
 Add codex adapter (mock-mode for tests)
 
@@ -6076,13 +6248,13 @@ EOF
 ### Task 2.17: LLM brain — real Claude Opus implementation
 
 **Files:**
-- Create: `src/lib/atelier/orchestrator/claude-brain.ts`
-- Test: `src/lib/atelier/orchestrator/claude-brain.test.ts`
+- Create: `src/lib/artlab/orchestrator/claude-brain.ts`
+- Test: `src/lib/artlab/orchestrator/claude-brain.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// src/lib/atelier/orchestrator/claude-brain.test.ts
+// src/lib/artlab/orchestrator/claude-brain.test.ts
 import { describe, expect, it } from "vitest";
 import { createClaudeBrain } from "./claude-brain";
 
@@ -6108,23 +6280,23 @@ describe("Claude Opus brain", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/claude-brain.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/claude-brain.test.ts`
 Expected: FAIL
 
 - [ ] **Step 3: Implement Claude brain**
 
 ```ts
-// src/lib/atelier/orchestrator/claude-brain.ts
+// src/lib/artlab/orchestrator/claude-brain.ts
 import Anthropic from "@anthropic-ai/sdk";
-import type { AtelierLlmBrain, AtelierLlmDecisionRequest, AtelierLlmDecisionResult } from "./llm-brain";
+import type { ArtLabLlmBrain, ArtLabLlmDecisionRequest, ArtLabLlmDecisionResult } from "./llm-brain";
 
 interface ClaudeBrainOptions {
   apiKey: string;
   model: string;
 }
 
-const SYSTEM_PROMPTS: Record<AtelierLlmDecisionRequest["kind"], string> = {
-  "route-ambiguous-brief": "You are the atelier intake brain. Given a brief, return a JSON object with assetType, characterId (if any), confidence (0-1), and reasoning. Never invent characters not on the known list. If a style modifier names one character and the subject is another, return the subject.",
+const SYSTEM_PROMPTS: Record<ArtLabLlmDecisionRequest["kind"], string> = {
+  "route-ambiguous-brief": "You are the artlab intake brain. Given a brief, return a JSON object with assetType, characterId (if any), confidence (0-1), and reasoning. Never invent characters not on the known list. If a style modifier names one character and the subject is another, return the subject.",
   "clarification-wording": "Phrase a short Telegram clarification message. Plain text. No persona. Offer concrete numbered choices.",
   "concept-qa-adjudication": "Decide regenerate vs supersede vs escalate for failed concept lanes. Return JSON action.",
   "reply-parser-fallback": "Parse an ambiguous human reply against current run state. Return JSON {action, args, askBack}.",
@@ -6132,15 +6304,15 @@ const SYSTEM_PROMPTS: Record<AtelierLlmDecisionRequest["kind"], string> = {
   "blocker-message-drafting": "Draft a 1-2 sentence Telegram message explaining a blocker with a concrete suggested action. Return JSON {message}.",
 };
 
-export interface AtelierClaudeBrain extends AtelierLlmBrain {
+export interface ArtLabClaudeBrain extends ArtLabLlmBrain {
   modelId: string;
 }
 
-export function createClaudeBrain(options: ClaudeBrainOptions): AtelierClaudeBrain {
+export function createClaudeBrain(options: ClaudeBrainOptions): ArtLabClaudeBrain {
   const client = new Anthropic({ apiKey: options.apiKey });
   return {
     modelId: options.model,
-    async decide(req: AtelierLlmDecisionRequest): Promise<AtelierLlmDecisionResult> {
+    async decide(req: ArtLabLlmDecisionRequest): Promise<ArtLabLlmDecisionResult> {
       if (process.env.ATELIER_CLAUDE_MODE === "dry-run") {
         return {
           kind: req.kind,
@@ -6183,13 +6355,13 @@ export function createClaudeBrain(options: ClaudeBrainOptions): AtelierClaudeBra
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/atelier/orchestrator/claude-brain.test.ts`
+Run: `npx vitest run src/lib/artlab/orchestrator/claude-brain.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/atelier/orchestrator/claude-brain.ts src/lib/atelier/orchestrator/claude-brain.test.ts
+git add src/lib/artlab/orchestrator/claude-brain.ts src/lib/artlab/orchestrator/claude-brain.test.ts
 git commit -m "$(cat <<'EOF'
 Add real Claude Opus 4.7 LLM brain
 
@@ -6204,14 +6376,14 @@ EOF
 ### Task 2.18: Public memory + intake + coherence index
 
 **Files:**
-- Create: `src/lib/atelier/memory/index.ts`
-- Create: `src/lib/atelier/intake/index.ts`
-- Create: `src/lib/atelier/coherence/index.ts`
+- Create: `src/lib/artlab/memory/index.ts`
+- Create: `src/lib/artlab/intake/index.ts`
+- Create: `src/lib/artlab/coherence/index.ts`
 
 - [ ] **Step 1: Implement index files**
 
 ```ts
-// src/lib/atelier/memory/index.ts
+// src/lib/artlab/memory/index.ts
 export * from "./style-ledger";
 export * from "./rejection-ledger";
 export * from "./prompt-evolution";
@@ -6219,7 +6391,7 @@ export * from "./retrieve";
 ```
 
 ```ts
-// src/lib/atelier/intake/index.ts
+// src/lib/artlab/intake/index.ts
 export * from "./known-cast";
 export * from "./ambiguity-detector";
 export * from "./bundle-parser";
@@ -6228,7 +6400,7 @@ export * from "./router";
 ```
 
 ```ts
-// src/lib/atelier/coherence/index.ts
+// src/lib/artlab/coherence/index.ts
 export * from "./hashes";
 export * from "./cast-diversity";
 export * from "./style-envelope";
@@ -6243,7 +6415,7 @@ Expected: no errors
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/lib/atelier/memory/index.ts src/lib/atelier/intake/index.ts src/lib/atelier/coherence/index.ts
+git add src/lib/artlab/memory/index.ts src/lib/artlab/intake/index.ts src/lib/artlab/coherence/index.ts
 git commit -m "$(cat <<'EOF'
 Add public index for memory, intake, coherence modules
 
