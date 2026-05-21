@@ -1,0 +1,57 @@
+// src/lib/artlab/daemon/launchd.ts
+export const ARTLAB_LAUNCHD_LABEL = "com.tower.artlab";
+
+export interface LaunchdPlistInput {
+  nodeBinary: string;
+  daemonEntry: string;
+  workspaceRoot: string;
+  logRoot: string;
+}
+
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+export function renderLaunchdPlist(input: LaunchdPlistInput): string {
+  const args = [input.nodeBinary, input.daemonEntry, "daemon", "run"];
+  const argsXml = args.map((a) => `      <string>${escapeXml(a)}</string>`).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>${ARTLAB_LAUNCHD_LABEL}</string>
+  <key>ProgramArguments</key>
+  <array>
+${argsXml}
+  </array>
+  <key>WorkingDirectory</key>
+  <string>${escapeXml(input.workspaceRoot)}</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>${escapeXml(input.logRoot)}/artlab.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>${escapeXml(input.logRoot)}/artlab.err.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>ARTLAB_WORKSPACE_ROOT</key>
+    <string>${escapeXml(input.workspaceRoot)}</string>
+    <key>NODE_ENV</key>
+    <string>production</string>
+  </dict>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
+`;
+}
