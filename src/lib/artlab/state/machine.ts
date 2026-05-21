@@ -57,7 +57,46 @@ export const ARTLAB_TRANSITIONS: readonly ArtLabTransition[] = [
   auto("verifying", "closed"),
 ];
 
-export function isLegalTransition(from: ArtLabPhase, to: ArtLabPhase): boolean {
+const BLOCKER_PHASES_NONTERMINAL: ArtLabPhase[] = [
+  "routed",
+  "generating-concepts",
+  "concept-review",
+  "canary",
+  "production",
+  "strict-qa",
+  "final-review",
+  "promoting",
+  "verifying",
+];
+
+const BLOCKERS_FOR_TRANSITIONS = [
+  "needs-human",
+  "budget-blocked",
+  "provider-blocked",
+  "repair-required",
+  "style-failed",
+  "upgrade-required",
+  "cancelled",
+] as const satisfies readonly ArtLabBlocker[];
+
+export const BLOCKER_TRANSITIONS: readonly ArtLabTransition[] = BLOCKER_PHASES_NONTERMINAL.flatMap(
+  (phase) =>
+    BLOCKERS_FOR_TRANSITIONS.map<ArtLabTransition>((blocker) => ({
+      from: phase,
+      to: phase,
+      blocker,
+      trigger: blocker === "cancelled" ? "cancel" : "blocker",
+      async validate() {},
+      async apply(state, ctx) {
+        return patch(state, phase, ctx, blocker);
+      },
+    })),
+);
+
+export function isLegalTransition(from: ArtLabPhase, to: ArtLabPhase, blocker?: ArtLabBlocker): boolean {
+  if (blocker) {
+    return BLOCKER_TRANSITIONS.some((t) => t.from === from && t.to === to && t.blocker === blocker);
+  }
   return ARTLAB_TRANSITIONS.some((t) => t.from === from && t.to === to);
 }
 
@@ -67,4 +106,8 @@ export function legalNextPhases(from: ArtLabPhase): ArtLabPhase[] {
 
 export function getTransition(from: ArtLabPhase, to: ArtLabPhase): ArtLabTransition | undefined {
   return ARTLAB_TRANSITIONS.find((t) => t.from === from && t.to === to);
+}
+
+export function findBlockerTransition(phase: ArtLabPhase, blocker: ArtLabBlocker): ArtLabTransition | undefined {
+  return BLOCKER_TRANSITIONS.find((t) => t.from === phase && t.blocker === blocker);
 }

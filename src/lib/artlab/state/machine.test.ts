@@ -42,4 +42,16 @@ describe("artlab state machine", () => {
       expect(legalNextPhases(phase).length).toBeGreaterThan(0);
     }
   });
+
+  it("supports entering any phase's blocker without changing phase", () => {
+    for (const phase of ["routed", "canary", "production"] as const) {
+      expect(isLegalTransition(phase, phase, "needs-human")).toBe(true);
+      expect(isLegalTransition(phase, phase, "provider-blocked")).toBe(true);
+    }
+  });
+
+  it("supports cancellation from any non-terminal phase", () => {
+    expect(isLegalTransition("canary", "canary", "cancelled")).toBe(true);
+    expect(isLegalTransition("closed", "closed", "cancelled")).toBe(false);
+  });
 });
