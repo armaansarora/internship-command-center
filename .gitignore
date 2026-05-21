@@ -95,3 +95,12 @@ playwright-report/
 .artlab/browser-sessions/**/queue/
 .artlab/tooling/cutout/models/
 .artlab/tooling/cutout/venv/
+
+# artlab transient workspace (only .gitkeep files tracked)
+.artlab/engine/runs/**/run-state.json
+.artlab/engine/runs/**/progress.json
+.artlab/engine/runs/**/events.jsonl
+.artlab/engine/slot-leases/*.lease.json
+.artlab/engine/inbox/**/*.json
+.artlab/engine/ledgers/*.jsonl
+.artlab/engine/memory/*.jsonl
