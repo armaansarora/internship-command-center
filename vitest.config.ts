@@ -16,6 +16,9 @@ export default defineConfig({
     // Prevent test env bleed.
     unstubEnvs: true,
     unstubGlobals: true,
+    // Sequential file execution prevents Keychain race conditions in tests
+    // that share the same macOS Keychain service names (bot-setup + bot.integration).
+    fileParallelism: false,
   },
   resolve: {
     alias: {
