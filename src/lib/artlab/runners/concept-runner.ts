@@ -8,6 +8,8 @@ async function generateMockConceptSlot(runDir: string, laneIndex: number): Promi
   const dir = join(runDir, "concept-slots");
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   const path = join(dir, `lane-${laneIndex}.json`);
+  const delayMs = Number.parseInt(process.env.ARTLAB_CONCEPT_LANE_DELAY_MS ?? "0", 10);
+  if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
   writeFileSync(path, JSON.stringify({ laneIndex, mock: true, generatedAt: new Date().toISOString() }));
   return path;
 }
@@ -18,27 +20,19 @@ export const conceptRunner: ArtLabRunner = {
     const startedAt = Date.now();
     if (input.abortSignal?.aborted) {
       return {
-        runnerKind: "concept",
-        status: "failed",
-        durationMs: Date.now() - startedAt,
-        artifacts: {},
-        blockerHint: "cancelled",
-        failureCode: "aborted",
+        runnerKind: "concept", status: "failed", durationMs: Date.now() - startedAt,
+        artifacts: {}, blockerHint: "cancelled", failureCode: "aborted",
       };
     }
-    const slotOutputs: string[] = [];
-    for (let lane = 1; lane <= TARGET_LANES; lane += 1) {
-      if (input.abortSignal?.aborted) {
-        return {
-          runnerKind: "concept",
-          status: "failed",
-          durationMs: Date.now() - startedAt,
-          artifacts: { slotOutputs },
-          blockerHint: "cancelled",
-          failureCode: "aborted",
-        };
-      }
-      slotOutputs.push(await generateMockConceptSlot(input.runDir, lane));
+    // SPEED: Phase 5 — five lanes run in parallel via Promise.all.
+    // Each lane writes its own file under concept-slots/; no shared mutable state.
+    const laneIndexes = Array.from({ length: TARGET_LANES }, (_, i) => i + 1);
+    const slotOutputs = await Promise.all(laneIndexes.map((idx) => generateMockConceptSlot(input.runDir, idx)));
+    if (input.abortSignal?.aborted) {
+      return {
+        runnerKind: "concept", status: "failed", durationMs: Date.now() - startedAt,
+        artifacts: { slotOutputs }, blockerHint: "cancelled", failureCode: "aborted",
+      };
     }
     const conceptBoardPath = join(input.runDir, "concept-board.json");
     writeFileSync(
@@ -51,9 +45,7 @@ export const conceptRunner: ArtLabRunner = {
       }),
     );
     return {
-      runnerKind: "concept",
-      status: "ok",
-      durationMs: Date.now() - startedAt,
+      runnerKind: "concept", status: "ok", durationMs: Date.now() - startedAt,
       artifacts: { slotOutputs, conceptBoardPath },
     };
   },
