@@ -1,0 +1,20 @@
+name: artlab-benchmark
+on:
+  schedule:
+    - cron: "13 7 * * *"   # daily 07:13 UTC
+  workflow_dispatch: {}
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: npm ci
+      - name: Run mock benchmark
+        env:
+          ARTLAB_CONCEPT_LANE_DELAY_MS: "5"
+          ARTLAB_CUTOUT_DELAY_MS: "5"
+        run: |
+          mkdir -p .artlab/engine/ledgers
+          npx tsx -e "import('./src/lib/artlab/speed/benchmark-runner').then(async m=>{const r=await m.runMockBenchmark({workspaceRoot:'.artlab/engine'});console.log('benchmark',JSON.stringify(r));if(r.durationMs>2000){console.error('REGRESSION: benchmark exceeded 2s');process.exit(1)}})"
