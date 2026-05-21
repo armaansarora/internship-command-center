@@ -1,3 +1,30 @@
+#!/usr/bin/env node
+// =============================================================================
+// DEPRECATED — replaced by ArtLab on 2026-05-20.
+// This script exits non-zero so accidental invocations are caught immediately.
+// Migrate to:
+//   npm run artlab -- produce "<request>"
+//   npm run artlab -- status
+//   npm run artlab -- health
+//   npm run artlab:daemon -- start
+// Docs: docs/artlab/ENGINE.md  (written in Phase 8)
+// =============================================================================
+process.stderr.write([
+  "",
+  "*** DEPRECATED: creative-production-health.ts is no longer supported. ***",
+  "ArtLab replaced this script on 2026-05-20.",
+  "",
+  "Migrate to:",
+  "  npm run artlab -- produce \"<request>\"",
+  "  npm run artlab -- status",
+  "  npm run artlab -- health",
+  "  npm run artlab:daemon -- start",
+  "",
+  "See docs/artlab/ENGINE.md for the full mapping.",
+  "",
+].join("\n") + "\n");
+process.exit(1);
+
 import { readdir, readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
