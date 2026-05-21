@@ -1,5 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { parseReplyExact, REQUIRED_PROMOTION_PHRASE, parseReplyPattern } from "./reply-parser";
+import { parseReplyExact, REQUIRED_PROMOTION_PHRASE, parseReplyPattern, parseReply } from "./reply-parser";
+import type { ArtLabLlmBrain } from "../orchestrator/llm-brain";
+
+const mockBrainHighConf: ArtLabLlmBrain = {
+  async decide() {
+    return {
+      kind: "reply-parser-fallback",
+      outputJson: { action: "approve-direction", laneIndex: 4 },
+      confidence: 0.92, tokensIn: 50, tokensOut: 12, model: "claude-opus-4-7",
+    };
+  },
+};
+
+const mockBrainLowConf: ArtLabLlmBrain = {
+  async decide() {
+    return {
+      kind: "reply-parser-fallback",
+      outputJson: { action: "approve-direction", laneIndex: 1 },
+      confidence: 0.5, tokensIn: 0, tokensOut: 0, model: "claude-opus-4-7",
+    };
+  },
+};
 
 describe("reply parser — tier 1 exact", () => {
   it("phrase is the canonical literal", () => {
@@ -55,5 +76,39 @@ describe("reply parser — tier 2 pattern", () => {
 
   it("returns no-match on unrelated text", () => {
     expect(parseReplyPattern("hello")).toEqual({ kind: "no-match" });
+  });
+});
+
+describe("reply parser — composed cascade", () => {
+  it("tier 1 short-circuits — brain not called", async () => {
+    let called = false;
+    const brain: ArtLabLlmBrain = {
+      async decide(...a) { called = true; return mockBrainHighConf.decide(...a); },
+    };
+    expect(await parseReply("approved for app", brain)).toEqual({ kind: "promotion-accepted" });
+    expect(called).toBe(false);
+  });
+
+  it("tier 2 short-circuits — brain not called", async () => {
+    let called = false;
+    const brain: ArtLabLlmBrain = {
+      async decide(...a) { called = true; return mockBrainHighConf.decide(...a); },
+    };
+    expect(await parseReply("approve direction 1", brain)).toEqual({
+      kind: "matched", action: { type: "approve-direction", laneIndex: 1 },
+    });
+    expect(called).toBe(false);
+  });
+
+  it("tier 3 brain matches ambiguous text with high confidence", async () => {
+    expect(await parseReply("lane four please", mockBrainHighConf)).toEqual({
+      kind: "matched", action: { type: "approve-direction", laneIndex: 4 },
+    });
+  });
+
+  it("needs-clarification when brain confidence < 0.7", async () => {
+    expect(await parseReply("idk maybe", mockBrainLowConf)).toEqual({
+      kind: "needs-clarification", text: "idk maybe",
+    });
   });
 });
