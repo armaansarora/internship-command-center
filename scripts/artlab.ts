@@ -90,8 +90,17 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
       return stub("cancel", rest, io);
     case "daemon":
       return stub("daemon", rest, io);
-    case "bot":
-      return stub("bot", rest, io);
+    case "bot": {
+      const sub = rest[0];
+      if (sub === "setup") {
+        const { runBotSetupSubcommand } = await import("@/lib/artlab/cli/bot-setup");
+        const result = await runBotSetupSubcommand({ args: rest.slice(1) });
+        if (result.message) io.stdout(result.message);
+        return result.exitCode;
+      }
+      io.stderr(`bot: expected subcommand "setup". Got "${sub ?? ""}".`);
+      return 2;
+    }
     case "migrate":
       return stub("migrate", rest, io);
   }
