@@ -1,0 +1,26 @@
+name: artlab-byte-diff
+on:
+  pull_request:
+    paths:
+      - "public/art/lobby/otis/**"
+      - "public/art/penthouse/ceo/**"
+      - "src/lib/artlab/migration/**"
+      - "src/lib/artlab/promotion/**"
+jobs:
+  byte-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - name: Install deps
+        run: npm ci
+      - name: Snapshot baseline (main)
+        run: git checkout origin/main -- public/art
+      - name: Snapshot baseline run
+        run: npx tsx -e "import('./src/lib/artlab/migration/byte-diff-gate').then(async m=>{const r=await m.assertByteIdenticalPromotedState({publicArtRoot:'public/art',baseline:null});require('fs').writeFileSync('/tmp/baseline.json',JSON.stringify(r.snapshot))})"
+      - name: Restore PR public/art
+        run: git checkout HEAD -- public/art
+      - name: Assert byte-identical
+        run: npx tsx -e "const fs=require('fs');import('./src/lib/artlab/migration/byte-diff-gate').then(async m=>{const baseline=JSON.parse(fs.readFileSync('/tmp/baseline.json','utf8'));const r=await m.assertByteIdenticalPromotedState({publicArtRoot:'public/art',baseline});if(!r.passed){console.error('byte-diff failed:',JSON.stringify(r.diff,null,2));process.exit(1)}})"
