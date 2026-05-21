@@ -6,7 +6,7 @@ import {
 } from "./machine";
 
 describe("artlab state machine", () => {
-  it("declares the 10 forward transitions in order", () => {
+  it("declares the 9 forward transitions in order", () => {
     const sequence = ARTLAB_TRANSITIONS
       .filter((t) => t.trigger === "auto" || t.trigger === "human")
       .map((t) => `${t.from}->${t.to}`);
