@@ -6504,6 +6504,1662 @@ EOF
 )"
 ```
 
+### Phase 2 completion criteria
+
+Run these commands; all must exit 0 / produce the expected output:
+
+```bash
+# All Phase 2 tests pass
+npx vitest run src/lib/artlab/intake src/lib/artlab/memory src/lib/artlab/coherence src/lib/artlab/orchestrator src/lib/artlab/adapters
+
+# The Rafe→Otis routing regression (Task 2.5) locks the historical bug
+npx vitest run src/lib/artlab/intake/router.test.ts -t "rafe-otis-regression"
+
+# Typecheck clean
+npx tsc --noEmit
+
+# All public indices exist
+test -f src/lib/artlab/memory/index.ts && test -f src/lib/artlab/intake/index.ts && test -f src/lib/artlab/coherence/index.ts
+
+# Decision log writes are exercised
+npx vitest run src/lib/artlab/orchestrator/decision-log.test.ts
+
+# Tag the phase
+git tag artlab-phase-2-complete
+```
+
+---
+
+## Phase 3 — Surfaces
+
+This phase replaces 10 stub CLI subcommands with real implementations, builds the Telegram bot (with three-tier reply parser, identity verification, and image attachments in both directions), assembles the Mac daemon (launchd-supervised, max-2 child runners, 10s heartbeats, crash recovery, SIGTERM cancellation, sleep guard), and stands up the self-evolution loop (friction detector + Codex CLI subprocess drafting branches but never opening PRs). After Phase 3, `npm run artlab:daemon -- start` starts a long-running process that accepts Telegram messages from Armaan's chat and runs the deterministic scheduler on local-mock provider end-to-end. The real Gemini provider wires in during Phase 4.
+
+**Spec sections covered in this phase:**
+- §5.1 Telegram bot (identity, three-tier parser, message types, image attachments).
+- §5.3 Daemon (process model, components, crash recovery).
+- §6.2 LLM brain reply-parser-fallback (used by Tier 3; the brain itself is from Task 2.17).
+- §10 Self-evolution (friction detector, Codex summoner, branch-only policy).
+- §13 Safety property #6 (Identity check) and #5 (No PR auto-merge) — both gain explicit tests in this phase.
+
+**Phase 3 dependencies:** Requires Phases 0-2 complete (state machine, runners, reconciler, LLM brain, Codex adapter, memory ledgers all wired). Phase 3 cannot start until `git tag artlab-phase-2-complete` exists.
+
+### Subphase 3A — Telegram bot (Tasks 3.1–3.12)
+
+### Task 3.1: macOS Keychain helpers
+
+**Files:**
+- Create: `src/lib/artlab/bot/keychain.ts`
+- Test: `src/lib/artlab/bot/keychain.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/keychain.test.ts
+import { describe, expect, it } from "vitest";
+import { getKeychainSecret, setKeychainSecret, deleteKeychainSecret, ARTLAB_KEYCHAIN_PREFIX } from "./keychain";
+
+describe("artlab keychain helpers", () => {
+  const testService = `${ARTLAB_KEYCHAIN_PREFIX}-test-${Date.now()}`;
+
+  it("declares the canonical Keychain prefix", () => {
+    expect(ARTLAB_KEYCHAIN_PREFIX).toBe("tower-artlab");
+  });
+
+  it("set → get → delete round trip", async () => {
+    await setKeychainSecret(testService, "the-value");
+    const got = await getKeychainSecret(testService);
+    expect(got).toBe("the-value");
+    await deleteKeychainSecret(testService);
+    const goneOrNull = await getKeychainSecret(testService);
+    expect(goneOrNull).toBeNull();
+  });
+
+  it("getKeychainSecret returns null for missing entries", async () => {
+    const missing = await getKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-does-not-exist-${Date.now()}`);
+    expect(missing).toBeNull();
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/keychain.test.ts`
+Expected: FAIL — module not found
+
+- [ ] **Step 3: Implement keychain helpers**
+
+```ts
+// src/lib/artlab/bot/keychain.ts
+import { spawn } from "node:child_process";
+
+export const ARTLAB_KEYCHAIN_PREFIX = "tower-artlab";
+
+function runSecurity(args: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn("security", args, { stdio: ["ignore", "pipe", "pipe"] });
+    const stdoutChunks: string[] = [];
+    const stderrChunks: string[] = [];
+    child.stdout.on("data", (c: Buffer) => stdoutChunks.push(c.toString("utf8")));
+    child.stderr.on("data", (c: Buffer) => stderrChunks.push(c.toString("utf8")));
+    child.on("error", reject);
+    child.on("exit", (exitCode) => {
+      resolve({
+        exitCode: exitCode ?? -1,
+        stdout: stdoutChunks.join(""),
+        stderr: stderrChunks.join(""),
+      });
+    });
+  });
+}
+
+export async function setKeychainSecret(service: string, value: string): Promise<void> {
+  const result = await runSecurity([
+    "add-generic-password",
+    "-U",
+    "-a", "artlab",
+    "-s", service,
+    "-w", value,
+  ]);
+  if (result.exitCode !== 0) {
+    throw new Error(`failed to write Keychain secret ${service}: ${result.stderr}`);
+  }
+}
+
+export async function getKeychainSecret(service: string): Promise<string | null> {
+  const result = await runSecurity([
+    "find-generic-password",
+    "-a", "artlab",
+    "-s", service,
+    "-w",
+  ]);
+  if (result.exitCode === 44) return null;
+  if (result.exitCode !== 0) {
+    throw new Error(`failed to read Keychain secret ${service}: ${result.stderr}`);
+  }
+  return result.stdout.replace(/\n$/, "");
+}
+
+export async function deleteKeychainSecret(service: string): Promise<void> {
+  const result = await runSecurity([
+    "delete-generic-password",
+    "-a", "artlab",
+    "-s", service,
+  ]);
+  if (result.exitCode !== 0 && result.exitCode !== 44) {
+    throw new Error(`failed to delete Keychain secret ${service}: ${result.stderr}`);
+  }
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/keychain.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/keychain.ts src/lib/artlab/bot/keychain.test.ts
+git commit -m "$(cat <<'EOF'
+Add macOS Keychain helpers via `security` CLI
+
+ArtLab stores Telegram bot token, chat.id, Gemini key, and any
+other secrets in macOS Keychain under the tower-artlab-* prefix.
+Spawns the `security` CLI as a subprocess; exit code 44
+(SecKeychainItemNotFound) is normalized to null.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `exitCode === 44` (SecKeychainItemNotFound) returns `null`, not an error.
+- [ ] No secret value ever appears in a returned error message.
+- [ ] No persistent state outside macOS Keychain (no temp files holding the secret).
+
+### Task 3.2: Telegram client — long-poll, send, attach
+
+**Files:**
+- Create: `src/lib/artlab/bot/telegram-client.ts`
+- Test: `src/lib/artlab/bot/telegram-client.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/telegram-client.test.ts
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { createTelegramClient } from "./telegram-client";
+
+describe("telegram client", () => {
+  beforeEach(() => { vi.restoreAllMocks(); });
+
+  it("getUpdates uses long-poll with timeout=60 and offset", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, result: [{ update_id: 5, message: { chat: { id: 1 }, text: "hi" } }] }),
+    } as Response);
+    const client = createTelegramClient({ token: "T", fetch: fetchMock });
+    const result = await client.getUpdates({ offset: 0 });
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url] = fetchMock.mock.calls[0]!;
+    expect(String(url)).toMatch(/timeout=60/);
+    expect(String(url)).toMatch(/offset=0/);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.update_id).toBe(5);
+  });
+
+  it("sendMessage POSTs JSON to /sendMessage", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, result: { message_id: 9 } }),
+    } as Response);
+    const client = createTelegramClient({ token: "T", fetch: fetchMock });
+    const result = await client.sendMessage({ chatId: 99, text: "hello" });
+    const [, init] = fetchMock.mock.calls[0]!;
+    expect(init!.method).toBe("POST");
+    expect(JSON.parse(init!.body as string)).toEqual({ chat_id: 99, text: "hello" });
+    expect(result.message_id).toBe(9);
+  });
+
+  it("throws on non-ok HTTP response with status in message", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      json: async () => ({ ok: false, description: "Too Many Requests" }),
+    } as Response);
+    const client = createTelegramClient({ token: "T", fetch: fetchMock });
+    await expect(client.sendMessage({ chatId: 1, text: "x" })).rejects.toThrow(/429/);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/telegram-client.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement client**
+
+```ts
+// src/lib/artlab/bot/telegram-client.ts
+import { readFileSync } from "node:fs";
+import { basename } from "node:path";
+
+export interface TelegramUpdate {
+  update_id: number;
+  message?: TelegramMessage;
+  edited_message?: TelegramMessage;
+}
+
+export interface TelegramMessage {
+  message_id: number;
+  chat: { id: number };
+  from?: { id: number; username?: string };
+  text?: string;
+  caption?: string;
+  photo?: { file_id: string; file_unique_id: string; width: number; height: number; file_size?: number }[];
+  date: number;
+}
+
+export interface TelegramSendResult { message_id: number; }
+
+export interface TelegramMediaPhoto {
+  type: "photo";
+  path: string;
+  caption?: string;
+}
+
+export interface TelegramClientOptions {
+  token: string;
+  fetch?: typeof fetch;
+}
+
+export interface TelegramClient {
+  getUpdates(opts: { offset: number; timeoutSec?: number }): Promise<TelegramUpdate[]>;
+  sendMessage(opts: { chatId: number; text: string; replyTo?: number }): Promise<TelegramSendResult>;
+  sendMediaGroup(opts: { chatId: number; media: TelegramMediaPhoto[] }): Promise<TelegramSendResult[]>;
+  downloadFile(opts: { fileId: string }): Promise<{ contentType: string; bytes: Buffer }>;
+}
+
+const TELEGRAM_API_BASE = "https://api.telegram.org";
+
+export function createTelegramClient(options: TelegramClientOptions): TelegramClient {
+  const f = options.fetch ?? fetch;
+  const apiUrl = (m: string) => `${TELEGRAM_API_BASE}/bot${options.token}/${m}`;
+  const fileUrl = (p: string) => `${TELEGRAM_API_BASE}/file/bot${options.token}/${p}`;
+
+  async function callJson<T>(method: string, body: Record<string, unknown>): Promise<T> {
+    const response = await f(apiUrl(method), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const json = (await response.json()) as { ok: boolean; result?: T; description?: string };
+    if (!response.ok || !json.ok) {
+      throw new Error(`telegram ${method} failed: HTTP ${response.status} ${json.description ?? ""}`);
+    }
+    return json.result as T;
+  }
+
+  return {
+    async getUpdates({ offset, timeoutSec = 60 }) {
+      const url = new URL(apiUrl("getUpdates"));
+      url.searchParams.set("offset", String(offset));
+      url.searchParams.set("timeout", String(timeoutSec));
+      url.searchParams.set("allowed_updates", JSON.stringify(["message", "edited_message"]));
+      const response = await f(url.toString());
+      const json = (await response.json()) as { ok: boolean; result?: TelegramUpdate[]; description?: string };
+      if (!response.ok || !json.ok) {
+        throw new Error(`telegram getUpdates failed: HTTP ${response.status} ${json.description ?? ""}`);
+      }
+      return json.result ?? [];
+    },
+
+    async sendMessage({ chatId, text, replyTo }) {
+      const body: Record<string, unknown> = { chat_id: chatId, text };
+      if (replyTo) body.reply_to_message_id = replyTo;
+      return await callJson<TelegramSendResult>("sendMessage", body);
+    },
+
+    async sendMediaGroup({ chatId, media }) {
+      const form = new FormData();
+      form.set("chat_id", String(chatId));
+      const mediaPayload = media.map((m, idx) => {
+        const fileKey = `media${idx}`;
+        const bytes = readFileSync(m.path);
+        const blob = new Blob([new Uint8Array(bytes)], { type: "image/png" });
+        form.set(fileKey, blob, basename(m.path));
+        return { type: m.type, media: `attach://${fileKey}`, caption: m.caption };
+      });
+      form.set("media", JSON.stringify(mediaPayload));
+      const response = await f(apiUrl("sendMediaGroup"), { method: "POST", body: form });
+      const json = (await response.json()) as { ok: boolean; result?: TelegramSendResult[]; description?: string };
+      if (!response.ok || !json.ok) {
+        throw new Error(`telegram sendMediaGroup failed: HTTP ${response.status} ${json.description ?? ""}`);
+      }
+      return json.result ?? [];
+    },
+
+    async downloadFile({ fileId }) {
+      const meta = await callJson<{ file_path: string }>("getFile", { file_id: fileId });
+      const url = fileUrl(meta.file_path);
+      const response = await f(url);
+      if (!response.ok) throw new Error(`telegram downloadFile HTTP ${response.status}`);
+      const arrayBuffer = await response.arrayBuffer();
+      return {
+        contentType: response.headers.get("content-type") ?? "application/octet-stream",
+        bytes: Buffer.from(arrayBuffer),
+      };
+    },
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/telegram-client.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/telegram-client.ts src/lib/artlab/bot/telegram-client.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram client (long-poll, send, media group, download)
+
+HTTPS long-poll loop with 60s timeout. sendMediaGroup uses
+multipart/form-data with attach:// references — required for
+concept-board and final-board image attachments. fetch is
+injectable for tests; production uses the runtime global.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] No third-party Telegram library is added to `package.json` (spec mandates direct API use).
+- [ ] `fetch` is dependency-injected; tests use `vi.fn()` and never touch the network.
+- [ ] `getUpdates` URL includes `timeout=60`, `offset=<n>`, and `allowed_updates=["message","edited_message"]`.
+- [ ] All errors include the HTTP status code for triage.
+
+### Task 3.3: Identity verifier — chat.id match against Keychain
+
+**Files:**
+- Create: `src/lib/artlab/bot/identity.ts`
+- Test: `src/lib/artlab/bot/identity.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/identity.test.ts
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { isAuthorizedSender, ARTLAB_CHAT_ID_KEYCHAIN_SERVICE } from "./identity";
+import * as keychain from "./keychain";
+
+describe("telegram identity verifier", () => {
+  beforeEach(() => vi.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
+
+  it("returns true when chat.id matches the Keychain stored id", async () => {
+    vi.spyOn(keychain, "getKeychainSecret").mockResolvedValue("12345");
+    expect(await isAuthorizedSender({ chat: { id: 12345 } } as any)).toBe(true);
+  });
+
+  it("returns false when chat.id does not match", async () => {
+    vi.spyOn(keychain, "getKeychainSecret").mockResolvedValue("12345");
+    expect(await isAuthorizedSender({ chat: { id: 99999 } } as any)).toBe(false);
+  });
+
+  it("returns false (no throw) when Keychain entry missing", async () => {
+    vi.spyOn(keychain, "getKeychainSecret").mockResolvedValue(null);
+    expect(await isAuthorizedSender({ chat: { id: 1 } } as any)).toBe(false);
+  });
+
+  it("uses the canonical Keychain service slug", () => {
+    expect(ARTLAB_CHAT_ID_KEYCHAIN_SERVICE).toBe("tower-artlab-chat-id");
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/identity.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement identity**
+
+```ts
+// src/lib/artlab/bot/identity.ts
+import { getKeychainSecret } from "./keychain";
+import type { TelegramMessage } from "./telegram-client";
+
+export const ARTLAB_CHAT_ID_KEYCHAIN_SERVICE = "tower-artlab-chat-id";
+
+/**
+ * Returns true ONLY when message.chat.id matches the chat.id stored in
+ * macOS Keychain. Any mismatch — including missing or unparseable entry
+ * — returns false. Spec safety property #6: messages from any other
+ * chat.id are silently dropped.
+ */
+export async function isAuthorizedSender(message: TelegramMessage): Promise<boolean> {
+  const stored = await getKeychainSecret(ARTLAB_CHAT_ID_KEYCHAIN_SERVICE);
+  if (stored === null) return false;
+  const storedId = Number.parseInt(stored, 10);
+  if (!Number.isFinite(storedId)) return false;
+  return message.chat.id === storedId;
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/identity.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/identity.ts src/lib/artlab/bot/identity.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram identity verifier (spec safety property #6)
+
+Returns true only when message.chat.id matches the chat.id stored
+in macOS Keychain. Missing entry, parse failure, or mismatch all
+return false — never throws, never logs.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Returns `Promise<boolean>`; never throws and never logs (silent-drop semantics).
+- [ ] Missing Keychain entry returns `false`, not an error.
+- [ ] Non-numeric Keychain value returns `false`.
+- [ ] No I/O other than the single Keychain read.
+
+### Task 3.4: Inbound message classifier
+
+**Files:**
+- Create: `src/lib/artlab/bot/inbound-classifier.ts`
+- Test: `src/lib/artlab/bot/inbound-classifier.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/inbound-classifier.test.ts
+import { describe, expect, it } from "vitest";
+import { classifyInbound, ARTLAB_INBOUND_KINDS } from "./inbound-classifier";
+
+describe("inbound message classifier", () => {
+  it("declares the 6 inbound kinds", () => {
+    expect(ARTLAB_INBOUND_KINDS).toEqual([
+      "trigger", "trigger-with-photo", "gate-reply", "bundle", "command", "promotion",
+    ]);
+  });
+
+  it("classifies plain text 'make Sol' as trigger", () => {
+    const r = classifyInbound({ chat: { id: 1 }, message_id: 1, text: "make Sol Navarro", date: 0 });
+    expect(r.kind).toBe("trigger");
+  });
+
+  it("classifies text + photo as trigger-with-photo with largest file_id", () => {
+    const r = classifyInbound({
+      chat: { id: 1 }, message_id: 1, date: 0,
+      caption: "make Priya like this",
+      photo: [
+        { file_id: "small", file_unique_id: "s", width: 100, height: 100 },
+        { file_id: "large", file_unique_id: "l", width: 800, height: 800 },
+      ],
+    });
+    expect(r.kind).toBe("trigger-with-photo");
+    expect(r.photoFileId).toBe("large");
+  });
+
+  it("classifies 'approve direction 2' as gate-reply", () => {
+    expect(classifyInbound({ chat: { id: 1 }, message_id: 1, text: "approve direction 2", date: 0 }).kind).toBe("gate-reply");
+  });
+
+  it("classifies 'approved for app' (any case) as promotion", () => {
+    expect(classifyInbound({ chat: { id: 1 }, message_id: 1, text: "Approved For App", date: 0 }).kind).toBe("promotion");
+  });
+
+  it("classifies '/status' as command", () => {
+    const r = classifyInbound({ chat: { id: 1 }, message_id: 1, text: "/status", date: 0 });
+    expect(r.kind).toBe("command");
+    expect(r.commandName).toBe("status");
+  });
+
+  it("classifies bundle phrasing 'war room with Rafe in it' as bundle", () => {
+    expect(classifyInbound({ chat: { id: 1 }, message_id: 1, text: "make the war room with Rafe in it", date: 0 }).kind).toBe("bundle");
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/inbound-classifier.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement classifier**
+
+```ts
+// src/lib/artlab/bot/inbound-classifier.ts
+import type { TelegramMessage } from "./telegram-client";
+
+export const ARTLAB_INBOUND_KINDS = [
+  "trigger", "trigger-with-photo", "gate-reply", "bundle", "command", "promotion",
+] as const;
+export type ArtLabInboundKind = (typeof ARTLAB_INBOUND_KINDS)[number];
+
+export interface ArtLabInboundClassification {
+  kind: ArtLabInboundKind;
+  text: string;
+  photoFileId?: string;
+  commandName?: string;
+}
+
+const PROMOTION_PHRASE = /^\s*approved\s+for\s+app\s*$/i;
+const GATE_REPLY = /^\s*(approve\s+direction\s+\d+|revise:.*|reject|archive|cancel(\s+\S+)?)\s*$/i;
+const COMMAND = /^\/([a-z]+)(?:\s|$)/i;
+const BUNDLE_PHRASES = [
+  /\bwith\s+\S+\s+in\s+it\b/i,
+  /\b\S+\s+and\s+\S+\s+together\b/i,
+  /\bthe\s+\w+\s+floor\b/i,
+];
+
+export function classifyInbound(message: TelegramMessage): ArtLabInboundClassification {
+  const text = (message.text ?? message.caption ?? "").trim();
+  if (PROMOTION_PHRASE.test(text)) return { kind: "promotion", text };
+  if (GATE_REPLY.test(text)) return { kind: "gate-reply", text };
+  const commandMatch = text.match(COMMAND);
+  if (commandMatch) return { kind: "command", text, commandName: commandMatch[1]!.toLowerCase() };
+  if ((message.photo?.length ?? 0) > 0) {
+    const photoFileId = message.photo!.at(-1)!.file_id;
+    return { kind: "trigger-with-photo", text, photoFileId };
+  }
+  if (BUNDLE_PHRASES.some((p) => p.test(text))) return { kind: "bundle", text };
+  return { kind: "trigger", text };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/inbound-classifier.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/inbound-classifier.ts src/lib/artlab/bot/inbound-classifier.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram inbound message classifier (6 kinds)
+
+Routes incoming messages to: trigger, trigger-with-photo, gate-
+reply, bundle, command, promotion. Classification precedence
+matches spec §5.1. Selects largest-resolution photo (last in the
+Telegram photo array) for reference attachments.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Promotion phrase classifier matches case-insensitively but rejects extra characters (test `approved for app!` returns `trigger`, not `promotion`).
+- [ ] Largest-resolution photo (`message.photo.at(-1)`) is selected — Telegram sorts smallest→largest.
+- [ ] Classification is deterministic — same input → same output.
+- [ ] No catch-all `else` masking unhandled inputs.
+
+### Task 3.5: Reply parser tier 1 — exact phrase
+
+**Files:**
+- Create: `src/lib/artlab/bot/reply-parser.ts`
+- Test: `src/lib/artlab/bot/reply-parser.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/reply-parser.test.ts
+import { describe, expect, it } from "vitest";
+import { parseReplyExact, REQUIRED_PROMOTION_PHRASE } from "./reply-parser";
+
+describe("reply parser — tier 1 exact", () => {
+  it("phrase is the canonical literal", () => {
+    expect(REQUIRED_PROMOTION_PHRASE).toBe("approved for app");
+  });
+
+  it("accepts the exact phrase case-insensitively, trimmed", () => {
+    expect(parseReplyExact("approved for app")).toEqual({ kind: "promotion-accepted" });
+    expect(parseReplyExact("  Approved For App  ")).toEqual({ kind: "promotion-accepted" });
+    expect(parseReplyExact("APPROVED FOR APP")).toEqual({ kind: "promotion-accepted" });
+  });
+
+  it("echoes back the required phrase on near-misses", () => {
+    expect(parseReplyExact("approve for app")).toMatchObject({ kind: "echo-back-required-phrase" });
+    expect(parseReplyExact("approved for the app")).toMatchObject({ kind: "echo-back-required-phrase" });
+  });
+
+  it("returns no-match for unrelated text", () => {
+    expect(parseReplyExact("approve direction 3")).toEqual({ kind: "no-match" });
+    expect(parseReplyExact("hello")).toEqual({ kind: "no-match" });
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/reply-parser.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement tier 1**
+
+```ts
+// src/lib/artlab/bot/reply-parser.ts
+export const REQUIRED_PROMOTION_PHRASE = "approved for app";
+
+export type Tier1Result =
+  | { kind: "promotion-accepted" }
+  | { kind: "echo-back-required-phrase"; message: string }
+  | { kind: "no-match" };
+
+const NEAR_PROMOTION_PATTERNS = [
+  /\bapprove\s+for\s+app\b/i,
+  /\bapproved\s+for\s+the\s+app\b/i,
+  /\bapprove\s+app\b/i,
+  /\bship\s+(it|to\s+app)\b/i,
+  /\bpromote\s+(it|to\s+app)\b/i,
+];
+
+export function parseReplyExact(input: string): Tier1Result {
+  const trimmed = input.trim().toLowerCase();
+  if (trimmed === REQUIRED_PROMOTION_PHRASE) return { kind: "promotion-accepted" };
+  if (NEAR_PROMOTION_PATTERNS.some((p) => p.test(input))) {
+    return {
+      kind: "echo-back-required-phrase",
+      message: `I read that as wanting to promote — please reply with the exact phrase: ${REQUIRED_PROMOTION_PHRASE}`,
+    };
+  }
+  return { kind: "no-match" };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/reply-parser.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/reply-parser.ts src/lib/artlab/bot/reply-parser.test.ts
+git commit -m "$(cat <<'EOF'
+Add reply parser tier 1 — exact promotion phrase
+
+Locks the literal `approved for app`. Case-insensitive, trimmed,
+no LLM fallback. Near-misses get an echo-back asking for the
+exact phrase per spec §5.1. All other inputs return no-match.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `REQUIRED_PROMOTION_PHRASE` is a single source of truth (no duplicate literals elsewhere).
+- [ ] No LLM call ever invoked from this tier.
+- [ ] Echo-back message wording matches spec §5.1 example verbatim.
+
+### Task 3.6: Reply parser tier 2 — pattern regex
+
+**Files:**
+- Modify: `src/lib/artlab/bot/reply-parser.ts`
+- Modify: `src/lib/artlab/bot/reply-parser.test.ts`
+
+- [ ] **Step 1: Append failing tests**
+
+```ts
+// append to src/lib/artlab/bot/reply-parser.test.ts
+import { parseReplyPattern } from "./reply-parser";
+
+describe("reply parser — tier 2 pattern", () => {
+  it("parses 'approve direction 3' as approve-direction action", () => {
+    expect(parseReplyPattern("approve direction 3")).toEqual({
+      kind: "matched", action: { type: "approve-direction", laneIndex: 3 },
+    });
+  });
+
+  it("tolerates whitespace and casing", () => {
+    expect(parseReplyPattern("  Approve  Direction  2  ")).toEqual({
+      kind: "matched", action: { type: "approve-direction", laneIndex: 2 },
+    });
+  });
+
+  it("parses 'revise: make her older' as revise action", () => {
+    expect(parseReplyPattern("revise: make her older")).toEqual({
+      kind: "matched", action: { type: "revise", text: "make her older" },
+    });
+  });
+
+  it("parses 'reject' and 'archive' as reject action", () => {
+    expect(parseReplyPattern("reject")).toEqual({ kind: "matched", action: { type: "reject" } });
+    expect(parseReplyPattern("archive")).toEqual({ kind: "matched", action: { type: "reject" } });
+  });
+
+  it("parses 'cancel <runId>' as cancel action", () => {
+    expect(parseReplyPattern("cancel run-abc-123")).toEqual({
+      kind: "matched", action: { type: "cancel", runId: "run-abc-123" },
+    });
+  });
+
+  it("returns no-match on unrelated text", () => {
+    expect(parseReplyPattern("hello")).toEqual({ kind: "no-match" });
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/reply-parser.test.ts`
+Expected: FAIL — parseReplyPattern not exported
+
+- [ ] **Step 3: Append implementation**
+
+```ts
+// append to src/lib/artlab/bot/reply-parser.ts
+export type Tier2Action =
+  | { type: "approve-direction"; laneIndex: number }
+  | { type: "revise"; text: string }
+  | { type: "reject" }
+  | { type: "cancel"; runId: string };
+
+export type Tier2Result =
+  | { kind: "matched"; action: Tier2Action }
+  | { kind: "no-match" };
+
+const APPROVE_DIRECTION = /^\s*approve\s+direction\s+(\d+)\s*$/i;
+const REVISE = /^\s*revise:\s*(.+?)\s*$/i;
+const REJECT = /^\s*(reject|archive)\s*$/i;
+const CANCEL = /^\s*cancel\s+(\S+)\s*$/i;
+
+export function parseReplyPattern(input: string): Tier2Result {
+  let m: RegExpMatchArray | null;
+  if ((m = input.match(APPROVE_DIRECTION))) {
+    return { kind: "matched", action: { type: "approve-direction", laneIndex: Number.parseInt(m[1]!, 10) } };
+  }
+  if ((m = input.match(REVISE))) {
+    return { kind: "matched", action: { type: "revise", text: m[1]! } };
+  }
+  if (REJECT.test(input)) return { kind: "matched", action: { type: "reject" } };
+  if ((m = input.match(CANCEL))) {
+    return { kind: "matched", action: { type: "cancel", runId: m[1]! } };
+  }
+  return { kind: "no-match" };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/reply-parser.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/reply-parser.ts src/lib/artlab/bot/reply-parser.test.ts
+git commit -m "$(cat <<'EOF'
+Add reply parser tier 2 — pattern regex (4 action types)
+
+Approve direction N, revise:, reject/archive, cancel <runId> via
+strict regex (no fuzzy matching at this tier). Tier 3 (LLM) is
+only consulted when tiers 1 and 2 both return no-match.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] All four action types parsed without LLM.
+- [ ] `laneIndex` parsed as integer, not string.
+- [ ] `reject` and `archive` collapse to the same canonical action.
+- [ ] No LLM call from this tier.
+
+### Task 3.7: Reply parser tier 3 — LLM fallback + composed cascade
+
+**Files:**
+- Modify: `src/lib/artlab/bot/reply-parser.ts`
+- Modify: `src/lib/artlab/bot/reply-parser.test.ts`
+
+- [ ] **Step 1: Append failing tests**
+
+```ts
+// append to src/lib/artlab/bot/reply-parser.test.ts
+import { parseReply } from "./reply-parser";
+import type { ArtLabLlmBrain } from "@/lib/artlab/orchestrator/llm-brain";
+
+const mockBrainHighConf: ArtLabLlmBrain = {
+  async decide() {
+    return {
+      kind: "reply-parser-fallback",
+      outputJson: { action: "approve-direction", laneIndex: 4 },
+      confidence: 0.92, tokensIn: 50, tokensOut: 12, model: "claude-opus-4-7",
+    };
+  },
+};
+
+const mockBrainLowConf: ArtLabLlmBrain = {
+  async decide() {
+    return {
+      kind: "reply-parser-fallback",
+      outputJson: { action: "approve-direction", laneIndex: 1 },
+      confidence: 0.5, tokensIn: 0, tokensOut: 0, model: "claude-opus-4-7",
+    };
+  },
+};
+
+describe("reply parser — composed cascade", () => {
+  it("tier 1 short-circuits — brain not called", async () => {
+    let called = false;
+    const brain: ArtLabLlmBrain = {
+      async decide(...a) { called = true; return mockBrainHighConf.decide(...a); },
+    };
+    expect(await parseReply("approved for app", brain)).toEqual({ kind: "promotion-accepted" });
+    expect(called).toBe(false);
+  });
+
+  it("tier 2 short-circuits — brain not called", async () => {
+    let called = false;
+    const brain: ArtLabLlmBrain = {
+      async decide(...a) { called = true; return mockBrainHighConf.decide(...a); },
+    };
+    expect(await parseReply("approve direction 1", brain)).toEqual({
+      kind: "matched", action: { type: "approve-direction", laneIndex: 1 },
+    });
+    expect(called).toBe(false);
+  });
+
+  it("tier 3 brain matches ambiguous text with high confidence", async () => {
+    expect(await parseReply("lane four please", mockBrainHighConf)).toEqual({
+      kind: "matched", action: { type: "approve-direction", laneIndex: 4 },
+    });
+  });
+
+  it("needs-clarification when brain confidence < 0.7", async () => {
+    expect(await parseReply("idk maybe", mockBrainLowConf)).toEqual({
+      kind: "needs-clarification", text: "idk maybe",
+    });
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/reply-parser.test.ts`
+Expected: FAIL — parseReply not exported
+
+- [ ] **Step 3: Append composition**
+
+```ts
+// append to src/lib/artlab/bot/reply-parser.ts
+import type { ArtLabLlmBrain, ArtLabLlmDecisionResult } from "@/lib/artlab/orchestrator/llm-brain";
+
+const LLM_CONFIDENCE_THRESHOLD = 0.7;
+
+export type ComposedReplyResult =
+  | { kind: "promotion-accepted" }
+  | { kind: "matched"; action: Tier2Action }
+  | { kind: "echo-back-required-phrase"; message: string }
+  | { kind: "needs-clarification"; text: string };
+
+function brainResultToAction(r: ArtLabLlmDecisionResult): Tier2Action | null {
+  const j = r.outputJson as { action?: string; laneIndex?: number; text?: string; runId?: string };
+  if (j.action === "approve-direction" && typeof j.laneIndex === "number") {
+    return { type: "approve-direction", laneIndex: j.laneIndex };
+  }
+  if (j.action === "revise" && typeof j.text === "string") return { type: "revise", text: j.text };
+  if (j.action === "reject") return { type: "reject" };
+  if (j.action === "cancel" && typeof j.runId === "string") return { type: "cancel", runId: j.runId };
+  return null;
+}
+
+export async function parseReply(input: string, brain: ArtLabLlmBrain): Promise<ComposedReplyResult> {
+  const tier1 = parseReplyExact(input);
+  if (tier1.kind === "promotion-accepted") return { kind: "promotion-accepted" };
+  if (tier1.kind === "echo-back-required-phrase") return tier1;
+  const tier2 = parseReplyPattern(input);
+  if (tier2.kind === "matched") return { kind: "matched", action: tier2.action };
+  const brainResult = await brain.decide({ kind: "reply-parser-fallback", input: { text: input } });
+  if (brainResult.confidence < LLM_CONFIDENCE_THRESHOLD) {
+    return { kind: "needs-clarification", text: input };
+  }
+  const action = brainResultToAction(brainResult);
+  if (!action) return { kind: "needs-clarification", text: input };
+  return { kind: "matched", action };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/reply-parser.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/reply-parser.ts src/lib/artlab/bot/reply-parser.test.ts
+git commit -m "$(cat <<'EOF'
+Add reply parser tier 3 — LLM fallback + composed cascade
+
+parseReply runs tier 1 (exact) → tier 2 (pattern) → tier 3 (LLM)
+in order. Brain only invoked when both prior tiers return
+no-match. Confidence < 0.7 routes to needs-clarification (bot
+asks back), not an action — matches spec §6.3.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Tier 1 short-circuits both `promotion-accepted` and `echo-back-required-phrase` (brain never invoked).
+- [ ] Tier 2 short-circuits all four pattern matches (brain never invoked).
+- [ ] Confidence threshold (`0.7`) lives in a module-level const, not a magic number in the cascade.
+- [ ] Brain output is type-narrowed via `brainResultToAction` rather than blindly trusted.
+- [ ] `needs-clarification` carries the original `text` so the bot can quote it back.
+
+### Task 3.8: Reference photo store (download + atomic save)
+
+**Files:**
+- Create: `src/lib/artlab/intake/reference-attachment-fs.ts`
+- Test: `src/lib/artlab/intake/reference-attachment-fs.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/intake/reference-attachment-fs.test.ts
+import { describe, expect, it, beforeEach, vi } from "vitest";
+import { mkdtempSync, existsSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { saveReferenceAttachment } from "./reference-attachment-fs";
+
+describe("reference attachment fs", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-attach-")); });
+
+  it("writes a downloaded photo into inbox/attachments/<runId>/<fileId>.png", async () => {
+    const downloader = {
+      downloadFile: vi.fn().mockResolvedValue({ contentType: "image/png", bytes: Buffer.from([0x89, 0x50, 0x4e, 0x47]) }),
+    };
+    const path = await saveReferenceAttachment({ workspaceRoot, runId: "run-1", fileId: "fABC", downloader });
+    expect(existsSync(path)).toBe(true);
+    expect(statSync(path).size).toBe(4);
+    expect(path).toMatch(/inbox\/attachments\/run-1\/fABC\.png$/);
+  });
+
+  it("uses .jpg extension when contentType is image/jpeg", async () => {
+    const downloader = {
+      downloadFile: vi.fn().mockResolvedValue({ contentType: "image/jpeg", bytes: Buffer.from([0xff, 0xd8]) }),
+    };
+    const path = await saveReferenceAttachment({ workspaceRoot, runId: "run-1", fileId: "fJPG", downloader });
+    expect(path.endsWith(".jpg")).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/intake/reference-attachment-fs.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/intake/reference-attachment-fs.ts
+import { mkdirSync, writeFileSync, existsSync, renameSync } from "node:fs";
+import { join } from "node:path";
+
+const CONTENT_TYPE_TO_EXT: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/jpg": "jpg",
+  "image/webp": "webp",
+};
+
+export interface AttachmentDownloader {
+  downloadFile(opts: { fileId: string }): Promise<{ contentType: string; bytes: Buffer }>;
+}
+
+export interface SaveReferenceAttachmentInput {
+  workspaceRoot: string;
+  runId: string;
+  fileId: string;
+  downloader: AttachmentDownloader;
+}
+
+export async function saveReferenceAttachment(input: SaveReferenceAttachmentInput): Promise<string> {
+  const downloaded = await input.downloader.downloadFile({ fileId: input.fileId });
+  const ext = CONTENT_TYPE_TO_EXT[downloaded.contentType.toLowerCase()] ?? "bin";
+  const dir = join(input.workspaceRoot, "inbox", "attachments", input.runId);
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const path = join(dir, `${input.fileId}.${ext}`);
+  const tmp = `${path}.tmp.${process.pid}.${Date.now()}`;
+  writeFileSync(tmp, downloaded.bytes);
+  renameSync(tmp, path);
+  return path;
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/intake/reference-attachment-fs.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/intake/reference-attachment-fs.ts src/lib/artlab/intake/reference-attachment-fs.test.ts
+git commit -m "$(cat <<'EOF'
+Add reference photo store (Telegram → inbox/attachments/<runId>/)
+
+Downloads via injected TelegramClient downloader, maps content-
+type to extension, atomic write (temp + rename) to
+inbox/attachments/<runId>/<fileId>.<ext>. Intake router reads
+from this path when starting the run.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Atomic write (`temp + rename`) used so a partial download never appears as a final file.
+- [ ] Unknown content types fall through to `.bin` (rather than dropping data silently).
+- [ ] No I/O outside the workspace root.
+
+### Task 3.9: Board image attachment builders (concept + final)
+
+**Files:**
+- Create: `src/lib/artlab/bot/board-attachments.ts`
+- Test: `src/lib/artlab/bot/board-attachments.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/board-attachments.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, unlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildConceptBoardAttachments, buildFinalBoardAttachments } from "./board-attachments";
+
+describe("board attachment builders", () => {
+  let runDir: string;
+  beforeEach(() => {
+    runDir = mkdtempSync(join(tmpdir(), "artlab-board-"));
+    mkdirSync(join(runDir, "concept-slots"));
+    for (let i = 1; i <= 5; i += 1) {
+      writeFileSync(join(runDir, "concept-slots", `lane-${i}.png`), `mock-${i}`);
+    }
+  });
+
+  it("concept board: 5 photos with numbered captions", () => {
+    const result = buildConceptBoardAttachments({ runDir, characterId: "sol" });
+    expect(result.media).toHaveLength(5);
+    expect(result.media[0]!.caption).toBe("Sol — direction 1");
+    expect(result.media[4]!.caption).toBe("Sol — direction 5");
+  });
+
+  it("final board: single grid image with sprite count", () => {
+    writeFileSync(join(runDir, "final-board.png"), "mock-final");
+    const result = buildFinalBoardAttachments({ runDir, characterId: "sol", spriteCount: 21 });
+    expect(result.media).toHaveLength(1);
+    expect(result.media[0]!.caption).toContain("21 sprites");
+  });
+
+  it("concept board throws when fewer than 5 lane files exist", () => {
+    unlinkSync(join(runDir, "concept-slots", "lane-4.png"));
+    unlinkSync(join(runDir, "concept-slots", "lane-5.png"));
+    expect(() => buildConceptBoardAttachments({ runDir, characterId: "sol" })).toThrow(/expected 5/i);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/board-attachments.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/bot/board-attachments.ts
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import type { TelegramMediaPhoto } from "./telegram-client";
+
+function capitalize(s: string): string { return s.length > 0 ? s[0]!.toUpperCase() + s.slice(1) : s; }
+
+export interface BoardAttachmentsResult {
+  media: TelegramMediaPhoto[];
+  caption: string;
+}
+
+export function buildConceptBoardAttachments(input: { runDir: string; characterId: string }): BoardAttachmentsResult {
+  const conceptDir = join(input.runDir, "concept-slots");
+  const lanes = existsSync(conceptDir)
+    ? readdirSync(conceptDir).filter((f) => /^lane-\d+\.(png|jpg|webp)$/.test(f)).sort()
+    : [];
+  if (lanes.length !== 5) throw new Error(`expected 5 concept lane files; found ${lanes.length}`);
+  const name = capitalize(input.characterId);
+  const media: TelegramMediaPhoto[] = lanes.map((file, idx) => ({
+    type: "photo",
+    path: join(conceptDir, file),
+    caption: `${name} — direction ${idx + 1}`,
+  }));
+  return {
+    media,
+    caption: `${name} concepts ready. Reply: \`approve direction 1-5\`, \`revise: <change>\`, or \`reject/archive\`.`,
+  };
+}
+
+export function buildFinalBoardAttachments(input: { runDir: string; characterId: string; spriteCount: number }): BoardAttachmentsResult {
+  const finalBoardPath = join(input.runDir, "final-board.png");
+  if (!existsSync(finalBoardPath)) throw new Error(`final-board.png missing at ${finalBoardPath}`);
+  const name = capitalize(input.characterId);
+  const caption = `${name} final upload-ready board (${input.spriteCount} sprites). Reply: \`approved for app\` to promote.`;
+  return {
+    media: [{ type: "photo", path: finalBoardPath, caption }],
+    caption,
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/board-attachments.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/board-attachments.ts src/lib/artlab/bot/board-attachments.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram board attachment builders
+
+Concept board: 5 lane PNGs as sendMediaGroup with numbered
+captions per spec §5.1. Final board: single grid PNG with sprite
+count. Refuses to build when expected files are missing.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Concept board enforces exactly 5 lane files — throws on any other count.
+- [ ] Final board enforces existence of `final-board.png` — throws if missing.
+- [ ] Captions match spec §5.1 example wording verbatim.
+- [ ] Builder only reads — no file modification.
+
+### Task 3.10: Telegram bot command handlers
+
+**Files:**
+- Create: `src/lib/artlab/bot/commands.ts`
+- Test: `src/lib/artlab/bot/commands.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/commands.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, existsSync, readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { handleBotCommand } from "./commands";
+
+describe("bot command handlers", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-cmd-")); });
+
+  it("/status with no runs returns text", async () => {
+    const r = await handleBotCommand({ workspaceRoot, commandName: "status", args: [] });
+    expect(r.kind).toBe("text");
+    expect(r.text).toMatch(/no .* runs/i);
+  });
+
+  it("/queue returns 'empty' when nothing queued", async () => {
+    const r = await handleBotCommand({ workspaceRoot, commandName: "queue", args: [] });
+    expect(r.text).toMatch(/empty|0 queued/i);
+  });
+
+  it("/cancel writes inbox/cancel-<runId>-*.json", async () => {
+    await handleBotCommand({ workspaceRoot, commandName: "cancel", args: ["run-abc-123"] });
+    expect(existsSync(join(workspaceRoot, "inbox"))).toBe(true);
+    const files = readdirSync(join(workspaceRoot, "inbox"));
+    expect(files.some((f) => f.startsWith("cancel-run-abc-123"))).toBe(true);
+  });
+
+  it("/health returns multi-line summary", async () => {
+    const r = await handleBotCommand({ workspaceRoot, commandName: "health", args: [] });
+    expect(r.text.split("\n").length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("unknown command returns help text", async () => {
+    const r = await handleBotCommand({ workspaceRoot, commandName: "dance", args: [] });
+    expect(r.text).toMatch(/unknown|known commands/i);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/commands.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/bot/commands.ts
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { readRunReality } from "@/lib/artlab/state/reconciler";
+import { listQueuedRuns } from "@/lib/artlab/queue/queue";
+import { buildArtLabHealthSnapshot } from "@/lib/artlab/health/snapshot";
+
+export interface BotCommandInput {
+  workspaceRoot: string;
+  commandName: string;
+  args: string[];
+}
+
+export interface BotCommandResult { kind: "text"; text: string; }
+
+const KNOWN = ["status", "queue", "cancel", "health", "help"] as const;
+
+async function handleStatus(workspaceRoot: string, args: string[]): Promise<string> {
+  const runsDir = join(workspaceRoot, "runs");
+  if (!existsSync(runsDir)) return "No runs yet.";
+  const runs = readdirSync(runsDir).filter((f) => !f.startsWith("."));
+  if (runs.length === 0) return "No active runs.";
+  if (args.length === 0) return `Active runs:\n${runs.map((r) => `  ${r}`).join("\n")}`;
+  const runId = args[0]!;
+  const reality = await readRunReality(join(runsDir, runId));
+  if (!reality) return `No run found for ${runId}`;
+  return [
+    `Run ${runId}: ${reality.phase}${reality.blocker ? ` (blocked: ${reality.blocker})` : ""}`,
+    `Slots — completed: ${reality.slots.completed}, running: ${reality.slots.running}, failed: ${reality.slots.failed}`,
+    `Spend — $${(reality.spend.actualCents / 100).toFixed(2)} of $${(reality.spend.monthlyCeilingCents / 100).toFixed(2)} monthly`,
+  ].join("\n");
+}
+
+async function handleQueue(workspaceRoot: string): Promise<string> {
+  const queued = listQueuedRuns(workspaceRoot);
+  if (queued.length === 0) return "Queue empty — 0 queued runs.";
+  return `${queued.length} queued runs:\n${queued.map((q) => `  ${q.runId} (${q.priority})`).join("\n")}`;
+}
+
+async function handleCancel(workspaceRoot: string, args: string[]): Promise<string> {
+  if (args.length === 0) return "cancel: expected <runId>";
+  const runId = args[0]!;
+  const inboxDir = join(workspaceRoot, "inbox");
+  if (!existsSync(inboxDir)) mkdirSync(inboxDir, { recursive: true });
+  const path = join(inboxDir, `cancel-${runId}-${Date.now()}.json`);
+  writeFileSync(path, JSON.stringify({ runId, requestedAt: new Date().toISOString() }));
+  return `Cancel intent recorded for ${runId}. Daemon will send SIGTERM next sweep.`;
+}
+
+async function handleHealth(workspaceRoot: string): Promise<string> {
+  const snapshot = await buildArtLabHealthSnapshot({ workspaceRoot });
+  return [
+    `Health @ ${snapshot.builtAt}`,
+    `Active locks: ${snapshot.locks.activeCount}`,
+    `Active runs: ${snapshot.runs.activeCount}`,
+    `Active leases: ${snapshot.leases.activeCount}`,
+    `Monthly spend: $${(snapshot.spend.monthlySpentCents / 100).toFixed(2)}`,
+  ].join("\n");
+}
+
+function helpText(): string {
+  return [
+    "Known commands:",
+    "  /status [runId] — engine status (plain English)",
+    "  /queue — queued + active runs",
+    "  /cancel <runId> — cancel a run",
+    "  /health — engine health report",
+  ].join("\n");
+}
+
+export async function handleBotCommand(input: BotCommandInput): Promise<BotCommandResult> {
+  const name = input.commandName.toLowerCase();
+  if (!(KNOWN as readonly string[]).includes(name)) {
+    return { kind: "text", text: `Unknown command /${input.commandName}.\n\n${helpText()}` };
+  }
+  switch (name as typeof KNOWN[number]) {
+    case "status": return { kind: "text", text: await handleStatus(input.workspaceRoot, input.args) };
+    case "queue": return { kind: "text", text: await handleQueue(input.workspaceRoot) };
+    case "cancel": return { kind: "text", text: await handleCancel(input.workspaceRoot, input.args) };
+    case "health": return { kind: "text", text: await handleHealth(input.workspaceRoot) };
+    case "help": return { kind: "text", text: helpText() };
+  }
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/commands.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/commands.ts src/lib/artlab/bot/commands.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram bot command handlers (/status /queue /cancel /health)
+
+Each handler resolves through the canonical surface — reconciler
+for status, queue module for queue, health snapshot for health,
+inbox file for cancel intent. Bot commands and CLI subcommands
+share the same engine boundary; no bypass paths.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Every command output is plain text (no markdown, no HTML).
+- [ ] `/cancel` writes to `inbox/cancel-<runId>-<timestamp>.json` — daemon picks up next sweep, no direct process signaling.
+- [ ] `/health` uses the same `buildArtLabHealthSnapshot` as `artlab health` CLI; no parallel implementation.
+- [ ] Unknown command returns help (never silent).
+
+### Task 3.11: Telegram bot dispatcher (composes identity + classify + parse)
+
+**Files:**
+- Create: `src/lib/artlab/bot/bot-dispatcher.ts`
+- Test: `src/lib/artlab/bot/bot-dispatcher.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/bot/bot-dispatcher.test.ts
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { dispatchInboundMessage } from "./bot-dispatcher";
+import * as identity from "./identity";
+
+describe("telegram bot dispatcher", () => {
+  let workspaceRoot: string;
+  let sentMessages: { chatId: number; text: string }[];
+  beforeEach(() => {
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-disp-"));
+    sentMessages = [];
+    vi.restoreAllMocks();
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  const mockClient = {
+    sendMessage: vi.fn().mockImplementation(async (o: any) => {
+      sentMessages.push({ chatId: o.chatId, text: o.text });
+      return { message_id: 1 };
+    }),
+    sendMediaGroup: vi.fn(),
+    getUpdates: vi.fn(),
+    downloadFile: vi.fn(),
+  } as any;
+
+  const mockBrain = {
+    async decide() {
+      return { kind: "reply-parser-fallback" as const, outputJson: {}, confidence: 0, tokensIn: 0, tokensOut: 0, model: "claude-opus-4-7" };
+    },
+  };
+
+  it("silently drops messages from unauthorized chat.id (safety property #6)", async () => {
+    vi.spyOn(identity, "isAuthorizedSender").mockResolvedValue(false);
+    await dispatchInboundMessage({
+      workspaceRoot, telegram: mockClient, brain: mockBrain,
+      message: { chat: { id: 99 }, message_id: 1, text: "evil", date: 0 },
+    });
+    expect(sentMessages).toHaveLength(0);
+  });
+
+  it("handles /status for authorized sender", async () => {
+    vi.spyOn(identity, "isAuthorizedSender").mockResolvedValue(true);
+    await dispatchInboundMessage({
+      workspaceRoot, telegram: mockClient, brain: mockBrain,
+      message: { chat: { id: 1 }, message_id: 1, text: "/status", date: 0 },
+    });
+    expect(sentMessages).toHaveLength(1);
+    expect(sentMessages[0]!.text).toMatch(/no .* runs/i);
+  });
+
+  it("accepts 'approved for app'", async () => {
+    vi.spyOn(identity, "isAuthorizedSender").mockResolvedValue(true);
+    const r = await dispatchInboundMessage({
+      workspaceRoot, telegram: mockClient, brain: mockBrain,
+      message: { chat: { id: 1 }, message_id: 1, text: "approved for app", date: 0 },
+    });
+    expect(r.action).toEqual({ type: "promotion-accepted" });
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/bot/bot-dispatcher.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement dispatcher**
+
+```ts
+// src/lib/artlab/bot/bot-dispatcher.ts
+import { classifyInbound } from "./inbound-classifier";
+import { handleBotCommand } from "./commands";
+import { parseReply, type ComposedReplyResult } from "./reply-parser";
+import { isAuthorizedSender } from "./identity";
+import type { TelegramClient, TelegramMessage } from "./telegram-client";
+import type { ArtLabLlmBrain } from "@/lib/artlab/orchestrator/llm-brain";
+
+export interface DispatchInboundInput {
+  workspaceRoot: string;
+  telegram: TelegramClient;
+  brain: ArtLabLlmBrain;
+  message: TelegramMessage;
+}
+
+export interface DispatchInboundResult {
+  action:
+    | { type: "dropped"; reason: "unauthorized" }
+    | { type: "command-handled"; commandName: string }
+    | { type: "gate-reply"; reply: ComposedReplyResult }
+    | { type: "promotion-accepted" }
+    | { type: "trigger-enqueued"; runId: string };
+}
+
+export async function dispatchInboundMessage(input: DispatchInboundInput): Promise<DispatchInboundResult> {
+  if (!(await isAuthorizedSender(input.message))) {
+    return { action: { type: "dropped", reason: "unauthorized" } };
+  }
+  const classified = classifyInbound(input.message);
+  switch (classified.kind) {
+    case "command": {
+      const out = await handleBotCommand({
+        workspaceRoot: input.workspaceRoot,
+        commandName: classified.commandName!,
+        args: classified.text.split(/\s+/).slice(1),
+      });
+      await input.telegram.sendMessage({ chatId: input.message.chat.id, text: out.text });
+      return { action: { type: "command-handled", commandName: classified.commandName! } };
+    }
+    case "promotion": {
+      const parsed = await parseReply(classified.text, input.brain);
+      if (parsed.kind === "promotion-accepted") {
+        await input.telegram.sendMessage({ chatId: input.message.chat.id, text: "Promotion accepted. Engine continuing." });
+        return { action: { type: "promotion-accepted" } };
+      }
+      if (parsed.kind === "echo-back-required-phrase") {
+        await input.telegram.sendMessage({ chatId: input.message.chat.id, text: parsed.message });
+      }
+      return { action: { type: "gate-reply", reply: parsed } };
+    }
+    case "gate-reply": {
+      const parsed = await parseReply(classified.text, input.brain);
+      await input.telegram.sendMessage({ chatId: input.message.chat.id, text: `Reply received: ${classified.text}` });
+      return { action: { type: "gate-reply", reply: parsed } };
+    }
+    case "trigger":
+    case "trigger-with-photo":
+    case "bundle": {
+      await input.telegram.sendMessage({
+        chatId: input.message.chat.id,
+        text: `Got it — ${classified.kind}. Engine routing.`,
+      });
+      return { action: { type: "trigger-enqueued", runId: "pending-routing" } };
+    }
+  }
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/bot-dispatcher.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/bot/bot-dispatcher.ts src/lib/artlab/bot/bot-dispatcher.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram bot dispatcher composing identity + classifier + parser
+
+Single entry: dispatchInboundMessage. Order: identity (silent
+drop if unauthorized — spec safety property #6) → classify kind →
+route to command / parser / inbox writer. Acknowledgements live
+in this layer; actual state machine progression happens via the
+orchestrator (Phase 3D CLI wiring composes the two).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Unauthorized chat.id → zero outbound messages AND zero filesystem writes.
+- [ ] Every authorized branch sends exactly one outbound acknowledgement (plain text, no parse_mode).
+- [ ] Dispatcher never mutates `run-state.json` directly — only writes inbox intents.
+- [ ] `switch` over `classified.kind` is exhaustive (TS narrowing enforces it).
+
+### Task 3.12: Telegram bot integration test (real Keychain)
+
+**Files:**
+- Create: `src/lib/artlab/bot/bot.integration.test.ts`
+
+- [ ] **Step 1: Write the integration test**
+
+```ts
+// src/lib/artlab/bot/bot.integration.test.ts
+import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { dispatchInboundMessage } from "./bot-dispatcher";
+import { setKeychainSecret, deleteKeychainSecret, ARTLAB_KEYCHAIN_PREFIX } from "./keychain";
+
+const TEST_CHAT_ID = 8675309;
+const TEST_SERVICE = `${ARTLAB_KEYCHAIN_PREFIX}-chat-id`;
+
+describe("bot integration — auth + classify + parse + ack", () => {
+  let workspaceRoot: string;
+  let sentMessages: { chatId: number; text: string }[];
+
+  beforeEach(async () => {
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-bot-int-"));
+    sentMessages = [];
+    await setKeychainSecret(TEST_SERVICE, String(TEST_CHAT_ID));
+  });
+
+  afterEach(async () => {
+    await deleteKeychainSecret(TEST_SERVICE).catch(() => undefined);
+  });
+
+  const mockClient = {
+    sendMessage: vi.fn().mockImplementation(async (o: any) => {
+      sentMessages.push({ chatId: o.chatId, text: o.text });
+      return { message_id: 1 };
+    }),
+    sendMediaGroup: vi.fn(),
+    getUpdates: vi.fn(),
+    downloadFile: vi.fn(),
+  } as any;
+
+  const mockBrain = {
+    async decide() {
+      return { kind: "reply-parser-fallback" as const, outputJson: {}, confidence: 0, tokensIn: 0, tokensOut: 0, model: "claude-opus-4-7" };
+    },
+  };
+
+  it("rejects unauthorized chat.id silently", async () => {
+    const r = await dispatchInboundMessage({
+      workspaceRoot, telegram: mockClient, brain: mockBrain,
+      message: { chat: { id: 1234 }, message_id: 1, text: "make Sol", date: 0 },
+    });
+    expect(r.action).toEqual({ type: "dropped", reason: "unauthorized" });
+    expect(sentMessages).toHaveLength(0);
+  });
+
+  it("authorized /status replies with 'no runs'", async () => {
+    const r = await dispatchInboundMessage({
+      workspaceRoot, telegram: mockClient, brain: mockBrain,
+      message: { chat: { id: TEST_CHAT_ID }, message_id: 1, text: "/status", date: 0 },
+    });
+    expect(r.action.type).toBe("command-handled");
+    expect(sentMessages[0]!.text).toMatch(/no .* runs/i);
+  });
+
+  it("'approved for app' yields Promotion accepted", async () => {
+    const r = await dispatchInboundMessage({
+      workspaceRoot, telegram: mockClient, brain: mockBrain,
+      message: { chat: { id: TEST_CHAT_ID }, message_id: 1, text: "approved for app", date: 0 },
+    });
+    expect(r.action).toEqual({ type: "promotion-accepted" });
+    expect(sentMessages[0]!.text).toMatch(/promotion accepted/i);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/bot/bot.integration.test.ts`
+Expected: PASS
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/artlab/bot/bot.integration.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram bot integration test (real Keychain + dispatch)
+
+Round-trips real macOS Keychain writes/reads through the
+dispatcher. Confirms spec safety property #6 (silent drop) and
+that the authorized happy path produces the expected
+acknowledgement text. afterEach cleans up the test Keychain
+entry so repeated runs leave no drift in user Keychain.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Test uses the REAL `security` CLI (no `vi.spyOn` on Keychain functions).
+- [ ] `afterEach` removes the test entry; running twice leaves no drift.
+- [ ] Unauthorized-drop assertion checks both `action.type === "dropped"` AND `sentMessages.length === 0`.
+- [ ] No real Telegram API calls (network fully mocked).
+
 ---
 
 
