@@ -8160,6 +8160,1293 @@ EOF
 - [ ] Unauthorized-drop assertion checks both `action.type === "dropped"` AND `sentMessages.length === 0`.
 - [ ] No real Telegram API calls (network fully mocked).
 
+### Subphase 3B — Mac daemon (Tasks 3.13–3.22)
+
+### Task 3.13: launchd plist generator
+
+**Files:**
+- Create: `src/lib/artlab/daemon/launchd.ts`
+- Test: `src/lib/artlab/daemon/launchd.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/launchd.test.ts
+import { describe, expect, it } from "vitest";
+import { renderLaunchdPlist, ARTLAB_LAUNCHD_LABEL } from "./launchd";
+
+describe("launchd plist generator", () => {
+  it("uses the canonical label com.tower.artlab", () => {
+    expect(ARTLAB_LAUNCHD_LABEL).toBe("com.tower.artlab");
+  });
+
+  it("renders a plist with Label, ProgramArguments, KeepAlive, RunAtLoad, StdoutPath, StderrPath, WorkingDirectory", () => {
+    const xml = renderLaunchdPlist({
+      nodeBinary: "/usr/local/bin/node",
+      daemonEntry: "/Users/armaanarora/Documents/The Tower/scripts/artlab.ts",
+      workspaceRoot: "/Users/armaanarora/Documents/The Tower/.artlab/engine",
+      logRoot: "/Users/armaanarora/Library/Logs/artlab",
+    });
+    expect(xml).toContain("<key>Label</key>");
+    expect(xml).toContain("<string>com.tower.artlab</string>");
+    expect(xml).toContain("<key>ProgramArguments</key>");
+    expect(xml).toContain("<string>/usr/local/bin/node</string>");
+    expect(xml).toContain("<key>KeepAlive</key>");
+    expect(xml).toContain("<true/>");
+    expect(xml).toContain("<key>RunAtLoad</key>");
+    expect(xml).toContain("<key>StandardOutPath</key>");
+    expect(xml).toContain("<key>StandardErrorPath</key>");
+    expect(xml).toContain("/Users/armaanarora/Library/Logs/artlab/artlab.out.log");
+  });
+
+  it("escapes XML special characters in paths", () => {
+    const xml = renderLaunchdPlist({
+      nodeBinary: "/usr/bin/node",
+      daemonEntry: "/path with & ampersand/artlab.ts",
+      workspaceRoot: "/tmp",
+      logRoot: "/tmp/logs",
+    });
+    expect(xml).toContain("&amp;");
+    expect(xml).not.toMatch(/ & /);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/launchd.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement plist generator**
+
+```ts
+// src/lib/artlab/daemon/launchd.ts
+export const ARTLAB_LAUNCHD_LABEL = "com.tower.artlab";
+
+export interface LaunchdPlistInput {
+  nodeBinary: string;
+  daemonEntry: string;
+  workspaceRoot: string;
+  logRoot: string;
+}
+
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+export function renderLaunchdPlist(input: LaunchdPlistInput): string {
+  const args = [input.nodeBinary, input.daemonEntry, "daemon", "run"];
+  const argsXml = args.map((a) => `      <string>${escapeXml(a)}</string>`).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>${ARTLAB_LAUNCHD_LABEL}</string>
+  <key>ProgramArguments</key>
+  <array>
+${argsXml}
+  </array>
+  <key>WorkingDirectory</key>
+  <string>${escapeXml(input.workspaceRoot)}</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>${escapeXml(input.logRoot)}/artlab.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>${escapeXml(input.logRoot)}/artlab.err.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>ARTLAB_WORKSPACE_ROOT</key>
+    <string>${escapeXml(input.workspaceRoot)}</string>
+    <key>NODE_ENV</key>
+    <string>production</string>
+  </dict>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
+`;
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/launchd.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/launchd.ts src/lib/artlab/daemon/launchd.test.ts
+git commit -m "$(cat <<'EOF'
+Add launchd plist generator (com.tower.artlab)
+
+Pure-function plist renderer. KeepAlive=true so launchd restarts
+the daemon on crash; ThrottleInterval=10s to avoid restart
+storms. StandardOut/Err route to ~/Library/Logs/artlab/ for `log
+show` visibility. XML-escapes path special characters.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] All five XML special chars (`&`, `<`, `>`, `"`, `'`) are escaped in path values.
+- [ ] `KeepAlive=true` + `ThrottleInterval=10` so launchd restarts the daemon but not in a tight loop.
+- [ ] No hard-coded paths in the rendered plist body — every path comes from the input struct.
+- [ ] Stdout/stderr paths are absolute (launchd does not respect WorkingDirectory for them).
+
+### Task 3.14: Daemon entry point + signal handlers
+
+**Files:**
+- Create: `src/lib/artlab/daemon/entry.ts`
+- Test: `src/lib/artlab/daemon/entry.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/entry.test.ts
+import { describe, expect, it, vi } from "vitest";
+import { mkdtempSync, existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createDaemonContext, runDaemonOnce } from "./entry";
+
+describe("daemon entry", () => {
+  it("writes a heartbeat to workspaceRoot/daemon-heartbeat.json on each tick", async () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-daemon-"));
+    const ctx = createDaemonContext({ workspaceRoot, telegramPoller: { tick: vi.fn() }, queueProcessor: { tick: vi.fn() } });
+    await runDaemonOnce(ctx);
+    const path = join(workspaceRoot, "daemon-heartbeat.json");
+    expect(existsSync(path)).toBe(true);
+    const parsed = JSON.parse(readFileSync(path, "utf8"));
+    expect(parsed.pid).toBe(process.pid);
+    expect(typeof parsed.at).toBe("string");
+  });
+
+  it("calls telegramPoller.tick and queueProcessor.tick once per tick", async () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-daemon-"));
+    const telegramPoller = { tick: vi.fn().mockResolvedValue(undefined) };
+    const queueProcessor = { tick: vi.fn().mockResolvedValue(undefined) };
+    const ctx = createDaemonContext({ workspaceRoot, telegramPoller, queueProcessor });
+    await runDaemonOnce(ctx);
+    expect(telegramPoller.tick).toHaveBeenCalledOnce();
+    expect(queueProcessor.tick).toHaveBeenCalledOnce();
+  });
+
+  it("setShutdownRequested causes runDaemonForever to return on next tick", async () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-daemon-"));
+    const telegramPoller = { tick: vi.fn().mockResolvedValue(undefined) };
+    const queueProcessor = { tick: vi.fn().mockResolvedValue(undefined) };
+    const ctx = createDaemonContext({ workspaceRoot, telegramPoller, queueProcessor });
+    ctx.requestShutdown();
+    // runDaemonOnce should still run one tick after shutdown is requested (drains)
+    await runDaemonOnce(ctx);
+    expect(ctx.isShutdownRequested()).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/entry.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement daemon entry**
+
+```ts
+// src/lib/artlab/daemon/entry.ts
+import { mkdirSync, existsSync, writeFileSync, renameSync } from "node:fs";
+import { join } from "node:path";
+
+export interface DaemonTicker {
+  tick(): Promise<void>;
+}
+
+export interface DaemonContextInput {
+  workspaceRoot: string;
+  telegramPoller: DaemonTicker;
+  queueProcessor: DaemonTicker;
+}
+
+export interface DaemonContext {
+  workspaceRoot: string;
+  telegramPoller: DaemonTicker;
+  queueProcessor: DaemonTicker;
+  requestShutdown(): void;
+  isShutdownRequested(): boolean;
+}
+
+export function createDaemonContext(input: DaemonContextInput): DaemonContext {
+  let shutdown = false;
+  return {
+    workspaceRoot: input.workspaceRoot,
+    telegramPoller: input.telegramPoller,
+    queueProcessor: input.queueProcessor,
+    requestShutdown(): void { shutdown = true; },
+    isShutdownRequested(): boolean { return shutdown; },
+  };
+}
+
+function writeHeartbeat(workspaceRoot: string): void {
+  if (!existsSync(workspaceRoot)) mkdirSync(workspaceRoot, { recursive: true });
+  const path = join(workspaceRoot, "daemon-heartbeat.json");
+  const tmp = `${path}.tmp.${process.pid}.${Date.now()}`;
+  writeFileSync(tmp, `${JSON.stringify({ pid: process.pid, at: new Date().toISOString() }, null, 2)}\n`);
+  renameSync(tmp, path);
+}
+
+export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
+  writeHeartbeat(ctx.workspaceRoot);
+  await Promise.all([
+    ctx.telegramPoller.tick(),
+    ctx.queueProcessor.tick(),
+  ]);
+}
+
+export async function runDaemonForever(ctx: DaemonContext, opts?: { sleepMs?: number }): Promise<void> {
+  const sleepMs = opts?.sleepMs ?? 1000;
+  const onSignal = () => ctx.requestShutdown();
+  process.on("SIGTERM", onSignal);
+  process.on("SIGINT", onSignal);
+  try {
+    while (!ctx.isShutdownRequested()) {
+      try {
+        await runDaemonOnce(ctx);
+      } catch {
+        // never let a tick error kill the daemon
+      }
+      if (ctx.isShutdownRequested()) break;
+      await new Promise((r) => setTimeout(r, sleepMs));
+    }
+  } finally {
+    process.off("SIGTERM", onSignal);
+    process.off("SIGINT", onSignal);
+  }
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/entry.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/entry.ts src/lib/artlab/daemon/entry.test.ts
+git commit -m "$(cat <<'EOF'
+Add daemon entry point — tick loop + signal handlers
+
+Pure-context creator separated from the forever-loop driver so
+ticks are testable. SIGTERM/SIGINT set a shutdown flag; the loop
+drains to next tick boundary then exits cleanly. Heartbeat
+written atomically every tick so external watchers (artlab
+health, /goal evaluators) can see daemon liveness.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `runDaemonForever` uses a clean shutdown flag — never `process.exit()` inside the loop.
+- [ ] Tick errors are caught silently so a transient failure does not kill the daemon (launchd would restart, but we want continuity).
+- [ ] Heartbeat write is atomic.
+- [ ] Signal handlers are removed on exit (no leak across re-entries).
+
+### Task 3.15: Process supervisor (max-2 children, PID tracking)
+
+**Files:**
+- Create: `src/lib/artlab/daemon/supervisor.ts`
+- Test: `src/lib/artlab/daemon/supervisor.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/supervisor.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { createSupervisor, MAX_CHILDREN } from "./supervisor";
+
+describe("daemon supervisor", () => {
+  it("MAX_CHILDREN is 2 (spec parallelism cap)", () => {
+    expect(MAX_CHILDREN).toBe(2);
+  });
+
+  it("spawn returns ok up to MAX_CHILDREN", () => {
+    const sup = createSupervisor();
+    expect(sup.canSpawn()).toBe(true);
+    const a = sup.registerChild({ runId: "a", pid: 111 });
+    expect(a.accepted).toBe(true);
+    const b = sup.registerChild({ runId: "b", pid: 222 });
+    expect(b.accepted).toBe(true);
+    expect(sup.canSpawn()).toBe(false);
+    const c = sup.registerChild({ runId: "c", pid: 333 });
+    expect(c.accepted).toBe(false);
+    expect(c.reason).toMatch(/cap/i);
+  });
+
+  it("releaseChild frees a slot", () => {
+    const sup = createSupervisor();
+    sup.registerChild({ runId: "a", pid: 111 });
+    sup.registerChild({ runId: "b", pid: 222 });
+    sup.releaseChild("a");
+    expect(sup.canSpawn()).toBe(true);
+    expect(sup.activeChildren()).toEqual([{ runId: "b", pid: 222 }]);
+  });
+
+  it("findChildByRunId returns matching child or null", () => {
+    const sup = createSupervisor();
+    sup.registerChild({ runId: "x", pid: 999 });
+    expect(sup.findChildByRunId("x")).toEqual({ runId: "x", pid: 999 });
+    expect(sup.findChildByRunId("missing")).toBeNull();
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/supervisor.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/daemon/supervisor.ts
+export const MAX_CHILDREN = 2;
+
+export interface SupervisorChild {
+  runId: string;
+  pid: number;
+}
+
+export interface RegisterChildResult {
+  accepted: boolean;
+  reason?: string;
+}
+
+export interface Supervisor {
+  canSpawn(): boolean;
+  registerChild(child: SupervisorChild): RegisterChildResult;
+  releaseChild(runId: string): boolean;
+  activeChildren(): SupervisorChild[];
+  findChildByRunId(runId: string): SupervisorChild | null;
+}
+
+export function createSupervisor(): Supervisor {
+  const children = new Map<string, SupervisorChild>();
+  return {
+    canSpawn(): boolean { return children.size < MAX_CHILDREN; },
+    registerChild(child: SupervisorChild): RegisterChildResult {
+      if (children.size >= MAX_CHILDREN) return { accepted: false, reason: `parallelism cap reached (${MAX_CHILDREN})` };
+      children.set(child.runId, child);
+      return { accepted: true };
+    },
+    releaseChild(runId: string): boolean { return children.delete(runId); },
+    activeChildren(): SupervisorChild[] { return Array.from(children.values()); },
+    findChildByRunId(runId: string): SupervisorChild | null { return children.get(runId) ?? null; },
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/supervisor.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/supervisor.ts src/lib/artlab/daemon/supervisor.test.ts
+git commit -m "$(cat <<'EOF'
+Add daemon supervisor — max-2 children with PID tracking
+
+In-memory Map keyed by runId. registerChild returns accepted=
+false past the cap; releaseChild on child exit frees the slot.
+The actual child_process spawn lives in queue-processor (next
+task); supervisor is pure bookkeeping.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `MAX_CHILDREN` is a module-level const equal to 2, matching `ARTLAB_MAX_PARALLELISM` from Phase 1.
+- [ ] No async work — pure synchronous bookkeeping.
+- [ ] `releaseChild` returns `boolean` indicating whether the runId was actually registered.
+- [ ] `activeChildren` returns a fresh array each call (no aliasing the internal Map).
+
+### Task 3.16: Queue processor (spawn child per dequeued run)
+
+**Files:**
+- Create: `src/lib/artlab/daemon/queue-processor.ts`
+- Test: `src/lib/artlab/daemon/queue-processor.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/queue-processor.test.ts
+import { describe, expect, it, beforeEach, vi } from "vitest";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createQueueProcessor } from "./queue-processor";
+import { createSupervisor } from "./supervisor";
+import { enqueueRun } from "@/lib/artlab/queue/queue";
+
+describe("queue processor", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-qp-")); });
+
+  it("does nothing when supervisor is full", async () => {
+    const sup = createSupervisor();
+    sup.registerChild({ runId: "x", pid: 1 });
+    sup.registerChild({ runId: "y", pid: 2 });
+    const spawn = vi.fn();
+    const proc = createQueueProcessor({ workspaceRoot, supervisor: sup, spawnRunner: spawn });
+    enqueueRun(workspaceRoot, { runId: "queued", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "x" } });
+    await proc.tick();
+    expect(spawn).not.toHaveBeenCalled();
+  });
+
+  it("spawns a child for the highest-priority queued run", async () => {
+    const sup = createSupervisor();
+    const spawn = vi.fn().mockReturnValue({ pid: 9999, kill: vi.fn() });
+    const proc = createQueueProcessor({ workspaceRoot, supervisor: sup, spawnRunner: spawn });
+    enqueueRun(workspaceRoot, { runId: "low", priority: "default", enqueuedAt: "2026-05-20T00:00:01Z", spec: { request: "x" } });
+    enqueueRun(workspaceRoot, { runId: "high", priority: "human-flagged", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "x" } });
+    await proc.tick();
+    expect(spawn).toHaveBeenCalledOnce();
+    const [opts] = spawn.mock.calls[0]!;
+    expect(opts.runId).toBe("high");
+    expect(sup.activeChildren()).toHaveLength(1);
+  });
+
+  it("releases the slot when child exits", async () => {
+    const sup = createSupervisor();
+    let exitHandler: ((code: number) => void) | null = null;
+    const spawn = vi.fn().mockReturnValue({
+      pid: 1234,
+      on: vi.fn().mockImplementation((event, h) => {
+        if (event === "exit") exitHandler = h;
+      }),
+      kill: vi.fn(),
+    });
+    const proc = createQueueProcessor({ workspaceRoot, supervisor: sup, spawnRunner: spawn });
+    enqueueRun(workspaceRoot, { runId: "alpha", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "x" } });
+    await proc.tick();
+    expect(sup.activeChildren()).toHaveLength(1);
+    exitHandler!(0);
+    expect(sup.activeChildren()).toHaveLength(0);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/queue-processor.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/daemon/queue-processor.ts
+import type { ChildProcess } from "node:child_process";
+import { dequeueNextRun, type ArtLabQueueEntry } from "@/lib/artlab/queue/queue";
+import type { Supervisor } from "./supervisor";
+
+export interface QueueProcessorChild {
+  pid: number;
+  on(event: "exit", handler: (code: number) => void): void;
+  kill(signal?: NodeJS.Signals): boolean;
+}
+
+export interface QueueProcessorInput {
+  workspaceRoot: string;
+  supervisor: Supervisor;
+  spawnRunner(entry: ArtLabQueueEntry): QueueProcessorChild | ChildProcess;
+}
+
+export interface QueueProcessor {
+  tick(): Promise<void>;
+}
+
+export function createQueueProcessor(input: QueueProcessorInput): QueueProcessor {
+  return {
+    async tick(): Promise<void> {
+      while (input.supervisor.canSpawn()) {
+        const next = dequeueNextRun(input.workspaceRoot);
+        if (!next) return;
+        const child = input.spawnRunner(next);
+        const registered = input.supervisor.registerChild({ runId: next.runId, pid: child.pid ?? -1 });
+        if (!registered.accepted) {
+          // Cap won the race — try to kill the just-spawned child to avoid drift.
+          child.kill?.("SIGTERM");
+          return;
+        }
+        child.on?.("exit", () => { input.supervisor.releaseChild(next.runId); });
+      }
+    },
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/queue-processor.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/queue-processor.ts src/lib/artlab/daemon/queue-processor.test.ts
+git commit -m "$(cat <<'EOF'
+Add queue processor — dequeue + spawn child runner
+
+Drains the queue while the supervisor has open slots. Spawn
+function is injectable so tests use vi.fn(); production passes
+the real child_process.spawn wrapper from a later task.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `tick` honors supervisor cap — never exceeds `MAX_CHILDREN`.
+- [ ] Race-loss safeguard: if `registerChild` returns `accepted: false` after a successful spawn, the just-spawned child is SIGTERM'd to avoid drift.
+- [ ] `on("exit")` is attached BEFORE the next iteration so the slot is released on child exit.
+- [ ] No reliance on global state — everything threaded through `input`.
+
+### Task 3.17: Telegram poller (long-poll loop with offset)
+
+**Files:**
+- Create: `src/lib/artlab/daemon/telegram-poller.ts`
+- Test: `src/lib/artlab/daemon/telegram-poller.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/telegram-poller.test.ts
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { mkdtempSync, existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createTelegramPoller } from "./telegram-poller";
+
+describe("telegram poller", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-tp-")); });
+
+  it("first tick uses offset=0 then offset=lastUpdateId+1", async () => {
+    const updates = [
+      { update_id: 7, message: { chat: { id: 1 }, message_id: 1, text: "hi", date: 0 } },
+      { update_id: 9, message: { chat: { id: 1 }, message_id: 2, text: "/status", date: 0 } },
+    ];
+    const client: any = {
+      getUpdates: vi.fn()
+        .mockResolvedValueOnce(updates)
+        .mockResolvedValueOnce([]),
+    };
+    const dispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
+    const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
+    await poller.tick();
+    expect(client.getUpdates).toHaveBeenCalledWith({ offset: 0 });
+    await poller.tick();
+    expect(client.getUpdates).toHaveBeenLastCalledWith({ offset: 10 });
+  });
+
+  it("persists last offset between ticks via offset.json", async () => {
+    const updates = [{ update_id: 99, message: { chat: { id: 1 }, message_id: 1, text: "hi", date: 0 } }];
+    const client: any = { getUpdates: vi.fn().mockResolvedValueOnce(updates) };
+    const dispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
+    const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
+    await poller.tick();
+    const offsetPath = join(workspaceRoot, "telegram-offset.json");
+    expect(existsSync(offsetPath)).toBe(true);
+    const parsed = JSON.parse(readFileSync(offsetPath, "utf8"));
+    expect(parsed.lastUpdateId).toBe(99);
+  });
+
+  it("dispatches each message exactly once", async () => {
+    const client: any = {
+      getUpdates: vi.fn().mockResolvedValueOnce([
+        { update_id: 1, message: { chat: { id: 1 }, message_id: 1, text: "a", date: 0 } },
+        { update_id: 2, message: { chat: { id: 1 }, message_id: 2, text: "b", date: 0 } },
+      ]),
+    };
+    const dispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
+    const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
+    await poller.tick();
+    expect(dispatch).toHaveBeenCalledTimes(2);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/telegram-poller.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/daemon/telegram-poller.ts
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import type { TelegramClient, TelegramUpdate } from "@/lib/artlab/bot/telegram-client";
+
+export interface TelegramPollerInput {
+  workspaceRoot: string;
+  client: TelegramClient;
+  dispatch(opts: { message: NonNullable<TelegramUpdate["message"]> }): Promise<unknown>;
+}
+
+export interface TelegramPoller { tick(): Promise<void>; }
+
+function offsetPath(root: string): string { return join(root, "telegram-offset.json"); }
+
+function readOffset(root: string): number {
+  const path = offsetPath(root);
+  if (!existsSync(path)) return 0;
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8")) as { lastUpdateId?: number };
+    return typeof parsed.lastUpdateId === "number" ? parsed.lastUpdateId + 1 : 0;
+  } catch { return 0; }
+}
+
+function writeOffset(root: string, lastUpdateId: number): void {
+  if (!existsSync(root)) mkdirSync(root, { recursive: true });
+  const path = offsetPath(root);
+  const tmp = `${path}.tmp.${process.pid}.${Date.now()}`;
+  writeFileSync(tmp, `${JSON.stringify({ lastUpdateId }, null, 2)}\n`);
+  renameSync(tmp, path);
+}
+
+export function createTelegramPoller(input: TelegramPollerInput): TelegramPoller {
+  return {
+    async tick(): Promise<void> {
+      const offset = readOffset(input.workspaceRoot);
+      const updates = await input.client.getUpdates({ offset });
+      if (updates.length === 0) return;
+      for (const update of updates) {
+        const message = update.message ?? update.edited_message;
+        if (!message) continue;
+        await input.dispatch({ message });
+      }
+      const lastUpdateId = updates[updates.length - 1]!.update_id;
+      writeOffset(input.workspaceRoot, lastUpdateId);
+    },
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/telegram-poller.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/telegram-poller.ts src/lib/artlab/daemon/telegram-poller.test.ts
+git commit -m "$(cat <<'EOF'
+Add Telegram poller (long-poll with persistent offset)
+
+Tracks offset in telegram-offset.json (atomic write). First tick
+starts at 0; subsequent ticks resume from lastUpdateId+1.
+Dispatches each message exactly once — duplicates are impossible
+because Telegram only returns messages with update_id >= offset.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Offset file uses atomic write (temp + rename).
+- [ ] First-tick path (no offset file) starts at `0`, not crash.
+- [ ] Each message dispatched exactly once per `tick`.
+- [ ] `edited_message` updates handled identically to `message`.
+
+### Task 3.18: Crash recovery scanner
+
+**Files:**
+- Create: `src/lib/artlab/daemon/crash-recovery.ts`
+- Test: `src/lib/artlab/daemon/crash-recovery.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/crash-recovery.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { reconcileCrashedRuns } from "./crash-recovery";
+
+describe("crash recovery", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-cr-")); });
+
+  it("releases stale leases (heartbeat > 10 min old)", async () => {
+    const runDir = join(workspaceRoot, "runs", "stale-run");
+    mkdirSync(join(runDir, "slot-leases"), { recursive: true });
+    writeFileSync(join(runDir, "run-state.json"), JSON.stringify({
+      runId: "stale-run", assetType: "character", phase: "production",
+      createdAt: "2026-05-20T00:00:00.000Z", updatedAt: "2026-05-20T00:00:00.000Z",
+      request: "x",
+    }));
+    writeFileSync(join(runDir, "progress.json"), JSON.stringify({
+      runId: "stale-run", at: new Date(Date.now() - 11 * 60_000).toISOString(),
+      phase: "production", slotsCompleted: 5, slotsRunning: 1, slotsFailed: 0,
+      actualSpendCents: 100, reservedCents: 50,
+    }));
+    writeFileSync(join(runDir, "slot-leases", "slot-1.lease.json"), JSON.stringify({ slotId: "slot-1" }));
+    const result = await reconcileCrashedRuns({ workspaceRoot });
+    expect(result.staleRunsReconciled).toContain("stale-run");
+    expect(existsSync(join(runDir, "slot-leases", "slot-1.lease.json"))).toBe(false);
+  });
+
+  it("leaves healthy runs alone (heartbeat < 10 min)", async () => {
+    const runDir = join(workspaceRoot, "runs", "healthy-run");
+    mkdirSync(join(runDir, "slot-leases"), { recursive: true });
+    writeFileSync(join(runDir, "run-state.json"), JSON.stringify({
+      runId: "healthy-run", assetType: "character", phase: "production",
+      createdAt: "2026-05-20T00:00:00.000Z", updatedAt: "2026-05-20T00:00:00.000Z",
+      request: "x",
+    }));
+    writeFileSync(join(runDir, "progress.json"), JSON.stringify({
+      runId: "healthy-run", at: new Date(Date.now() - 30_000).toISOString(),
+      phase: "production", slotsCompleted: 5, slotsRunning: 1, slotsFailed: 0,
+      actualSpendCents: 100, reservedCents: 50,
+    }));
+    writeFileSync(join(runDir, "slot-leases", "slot-1.lease.json"), JSON.stringify({ slotId: "slot-1" }));
+    const result = await reconcileCrashedRuns({ workspaceRoot });
+    expect(result.staleRunsReconciled).not.toContain("healthy-run");
+    expect(existsSync(join(runDir, "slot-leases", "slot-1.lease.json"))).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/crash-recovery.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/daemon/crash-recovery.ts
+import { existsSync, readdirSync, statSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+import { readRunReality } from "@/lib/artlab/state/reconciler";
+
+const STALE_HEARTBEAT_MS = 10 * 60_000;
+
+export interface CrashRecoveryInput {
+  workspaceRoot: string;
+  now?: () => Date;
+}
+
+export interface CrashRecoveryResult {
+  staleRunsReconciled: string[];
+  leasesReleased: string[];
+}
+
+export async function reconcileCrashedRuns(input: CrashRecoveryInput): Promise<CrashRecoveryResult> {
+  const now = (input.now ?? (() => new Date()))().getTime();
+  const runsRoot = join(input.workspaceRoot, "runs");
+  if (!existsSync(runsRoot)) return { staleRunsReconciled: [], leasesReleased: [] };
+  const result: CrashRecoveryResult = { staleRunsReconciled: [], leasesReleased: [] };
+  for (const runId of readdirSync(runsRoot)) {
+    const runDir = join(runsRoot, runId);
+    if (!statSync(runDir).isDirectory()) continue;
+    const reality = await readRunReality(runDir);
+    if (!reality || reality.phase === "closed") continue;
+    if (!reality.health.lastHeartbeatAt) continue;
+    const lastHb = new Date(reality.health.lastHeartbeatAt).getTime();
+    if (now - lastHb < STALE_HEARTBEAT_MS) continue;
+    result.staleRunsReconciled.push(runId);
+    const leasesDir = join(runDir, "slot-leases");
+    if (existsSync(leasesDir)) {
+      for (const file of readdirSync(leasesDir).filter((f) => f.endsWith(".lease.json"))) {
+        const path = join(leasesDir, file);
+        unlinkSync(path);
+        result.leasesReleased.push(`${runId}/${file}`);
+      }
+    }
+  }
+  return result;
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/crash-recovery.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/crash-recovery.ts src/lib/artlab/daemon/crash-recovery.test.ts
+git commit -m "$(cat <<'EOF'
+Add crash recovery scanner (spec safety property #4)
+
+Daemon calls this once on startup. Scans non-terminal runs;
+heartbeat > 10 min old → stale → release leases (which frees
+reservations through the existing budget ledger contract). now
+is injectable for deterministic tests.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Closed runs are skipped (no false-positive reconciliation of completed runs).
+- [ ] Stale threshold is a module-level const (`STALE_HEARTBEAT_MS = 10 * 60_000`).
+- [ ] `now` is injectable for deterministic testing.
+- [ ] Healthy runs (heartbeat < 10 min) are left alone — verified by test.
+
+### Task 3.19: SIGTERM cancel flow (lease release + reservation refund)
+
+**Files:**
+- Create: `src/lib/artlab/daemon/cancel-flow.ts`
+- Test: `src/lib/artlab/daemon/cancel-flow.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/cancel-flow.test.ts
+import { describe, expect, it, beforeEach, vi } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { processCancelIntents, CANCEL_GRACE_MS } from "./cancel-flow";
+import { createSupervisor } from "./supervisor";
+
+describe("cancel flow", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-cf-")); });
+
+  it("CANCEL_GRACE_MS is 30 seconds", () => {
+    expect(CANCEL_GRACE_MS).toBe(30_000);
+  });
+
+  it("sends SIGTERM to the matching active child", async () => {
+    const sup = createSupervisor();
+    const killFn = vi.fn().mockReturnValue(true);
+    sup.registerChild({ runId: "run-1", pid: 42 });
+    const kill = vi.fn().mockReturnValue(true);
+    mkdirSync(join(workspaceRoot, "inbox"));
+    writeFileSync(join(workspaceRoot, "inbox", "cancel-run-1-123.json"), JSON.stringify({ runId: "run-1", requestedAt: "x" }));
+    const result = await processCancelIntents({ workspaceRoot, supervisor: sup, kill });
+    expect(kill).toHaveBeenCalledWith(42, "SIGTERM");
+    expect(result.signaled).toContain("run-1");
+  });
+
+  it("removes the cancel intent file after signaling", async () => {
+    const sup = createSupervisor();
+    sup.registerChild({ runId: "run-1", pid: 42 });
+    const kill = vi.fn().mockReturnValue(true);
+    mkdirSync(join(workspaceRoot, "inbox"));
+    const intentPath = join(workspaceRoot, "inbox", "cancel-run-1-123.json");
+    writeFileSync(intentPath, JSON.stringify({ runId: "run-1", requestedAt: "x" }));
+    await processCancelIntents({ workspaceRoot, supervisor: sup, kill });
+    expect(existsSync(intentPath)).toBe(false);
+  });
+
+  it("records a no-active-child cancel as 'orphaned'", async () => {
+    const sup = createSupervisor();
+    const kill = vi.fn();
+    mkdirSync(join(workspaceRoot, "inbox"));
+    writeFileSync(join(workspaceRoot, "inbox", "cancel-ghost-123.json"), JSON.stringify({ runId: "ghost", requestedAt: "x" }));
+    const result = await processCancelIntents({ workspaceRoot, supervisor: sup, kill });
+    expect(kill).not.toHaveBeenCalled();
+    expect(result.orphaned).toContain("ghost");
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/cancel-flow.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/daemon/cancel-flow.ts
+import { existsSync, readdirSync, readFileSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+import type { Supervisor } from "./supervisor";
+
+export const CANCEL_GRACE_MS = 30_000;
+
+export interface CancelFlowInput {
+  workspaceRoot: string;
+  supervisor: Supervisor;
+  kill?: (pid: number, signal: NodeJS.Signals) => boolean;
+}
+
+export interface CancelFlowResult {
+  signaled: string[];
+  orphaned: string[];
+}
+
+export async function processCancelIntents(input: CancelFlowInput): Promise<CancelFlowResult> {
+  const inboxDir = join(input.workspaceRoot, "inbox");
+  if (!existsSync(inboxDir)) return { signaled: [], orphaned: [] };
+  const result: CancelFlowResult = { signaled: [], orphaned: [] };
+  const killFn = input.kill ?? ((pid, sig) => process.kill(pid, sig));
+  for (const file of readdirSync(inboxDir).filter((f) => f.startsWith("cancel-") && f.endsWith(".json"))) {
+    const path = join(inboxDir, file);
+    let parsed: { runId?: string } = {};
+    try { parsed = JSON.parse(readFileSync(path, "utf8")) as { runId?: string }; } catch { /* skip malformed */ }
+    if (!parsed.runId) { unlinkSync(path); continue; }
+    const child = input.supervisor.findChildByRunId(parsed.runId);
+    if (child) {
+      try { killFn(child.pid, "SIGTERM"); result.signaled.push(parsed.runId); }
+      catch { /* child may have just exited */ }
+    } else {
+      result.orphaned.push(parsed.runId);
+    }
+    unlinkSync(path);
+  }
+  return result;
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/cancel-flow.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/cancel-flow.ts src/lib/artlab/daemon/cancel-flow.test.ts
+git commit -m "$(cat <<'EOF'
+Add SIGTERM cancel flow (spec safety property #3)
+
+Scans inbox/cancel-*.json each tick. If a matching active child
+exists, send SIGTERM; the child runner has 30s grace to release
+leases + refund reservations via existing budget ledger contract.
+Orphan cancel intents (no active child) are recorded but never
+acted on — they may indicate a daemon restart between intent
+creation and processing.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Cancel intent file is removed after processing (one-shot — never re-fires).
+- [ ] `kill` is injectable for tests (production uses `process.kill`).
+- [ ] Orphan intents are tracked but not retried.
+- [ ] Malformed intent JSON does not crash — file is unlinked and skipped.
+
+### Task 3.20: Mac sleep guard (caffeinate -i wrapper)
+
+**Files:**
+- Create: `src/lib/artlab/daemon/sleep-guard.ts`
+- Test: `src/lib/artlab/daemon/sleep-guard.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/sleep-guard.test.ts
+import { describe, expect, it, vi } from "vitest";
+import { createSleepGuard } from "./sleep-guard";
+
+describe("sleep guard", () => {
+  it("starts caffeinate -i child on activate, kills on deactivate", () => {
+    const child = { kill: vi.fn(), pid: 1234 };
+    const spawn = vi.fn().mockReturnValue(child);
+    const guard = createSleepGuard({ spawn });
+    guard.activate();
+    expect(spawn).toHaveBeenCalledWith("caffeinate", ["-i"], expect.any(Object));
+    expect(guard.isActive()).toBe(true);
+    guard.deactivate();
+    expect(child.kill).toHaveBeenCalledWith("SIGTERM");
+    expect(guard.isActive()).toBe(false);
+  });
+
+  it("double activate is idempotent (only one caffeinate spawned)", () => {
+    const child = { kill: vi.fn(), pid: 1234 };
+    const spawn = vi.fn().mockReturnValue(child);
+    const guard = createSleepGuard({ spawn });
+    guard.activate();
+    guard.activate();
+    expect(spawn).toHaveBeenCalledOnce();
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/sleep-guard.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/daemon/sleep-guard.ts
+import type { ChildProcess } from "node:child_process";
+import { spawn as defaultSpawn } from "node:child_process";
+
+export interface SleepGuardChild {
+  pid: number;
+  kill(signal?: NodeJS.Signals): boolean;
+}
+
+export interface SleepGuardInput {
+  spawn?: (cmd: string, args: string[], opts?: Record<string, unknown>) => SleepGuardChild | ChildProcess;
+}
+
+export interface SleepGuard {
+  activate(): void;
+  deactivate(): void;
+  isActive(): boolean;
+}
+
+export function createSleepGuard(input: SleepGuardInput = {}): SleepGuard {
+  const spawnFn = input.spawn ?? defaultSpawn;
+  let child: SleepGuardChild | null = null;
+  return {
+    activate(): void {
+      if (child) return;
+      child = spawnFn("caffeinate", ["-i"], { stdio: "ignore", detached: false }) as SleepGuardChild;
+    },
+    deactivate(): void {
+      if (!child) return;
+      child.kill("SIGTERM");
+      child = null;
+    },
+    isActive(): boolean { return child !== null; },
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/sleep-guard.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/sleep-guard.ts src/lib/artlab/daemon/sleep-guard.test.ts
+git commit -m "$(cat <<'EOF'
+Add Mac sleep guard (caffeinate -i wrapper)
+
+Spawned with detached:false so caffeinate exits when the daemon
+exits, even on hard kill. Activated when supervisor has any
+active child; deactivated when supervisor is idle (wiring in
+the daemon entry composition task).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] `activate` is idempotent (double-call spawns at most one caffeinate child).
+- [ ] `deactivate` is safe when never activated.
+- [ ] `spawn` is injectable for tests.
+- [ ] `detached: false` so caffeinate doesn't outlive the daemon on crash.
+
+### Task 3.21: Inbox watcher (fs.watchFile on .artlab/engine/inbox/)
+
+**Files:**
+- Create: `src/lib/artlab/daemon/inbox-watcher.ts`
+- Test: `src/lib/artlab/daemon/inbox-watcher.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/artlab/daemon/inbox-watcher.test.ts
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { drainInbox } from "./inbox-watcher";
+
+describe("inbox watcher (drain)", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-iw-")); });
+
+  it("returns intent files matching the prefix and removes them", async () => {
+    const inboxDir = join(workspaceRoot, "inbox", "cli");
+    mkdirSync(inboxDir, { recursive: true });
+    writeFileSync(join(inboxDir, "produce-1.json"), JSON.stringify({ request: "make Sol" }));
+    writeFileSync(join(inboxDir, "produce-2.json"), JSON.stringify({ request: "make Rafe" }));
+    writeFileSync(join(inboxDir, "other.txt"), "skip me");
+    const result = await drainInbox({ workspaceRoot, subdir: "cli", prefix: "produce-" });
+    expect(result.intents.map((i) => i.body.request)).toEqual(["make Sol", "make Rafe"]);
+    const remaining = readdirSync(inboxDir);
+    expect(remaining).toEqual(["other.txt"]);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/artlab/daemon/inbox-watcher.test.ts`
+Expected: FAIL
+
+- [ ] **Step 3: Implement**
+
+```ts
+// src/lib/artlab/daemon/inbox-watcher.ts
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+
+export interface DrainInboxInput {
+  workspaceRoot: string;
+  subdir: string;
+  prefix: string;
+}
+
+export interface InboxIntent {
+  filename: string;
+  body: Record<string, unknown>;
+}
+
+export interface DrainInboxResult { intents: InboxIntent[]; }
+
+export async function drainInbox(input: DrainInboxInput): Promise<DrainInboxResult> {
+  const dir = join(input.workspaceRoot, "inbox", input.subdir);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+    return { intents: [] };
+  }
+  const files = readdirSync(dir).filter((f) => f.startsWith(input.prefix) && f.endsWith(".json")).sort();
+  const intents: InboxIntent[] = [];
+  for (const file of files) {
+    const path = join(dir, file);
+    try {
+      const body = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
+      intents.push({ filename: file, body });
+    } catch { /* skip malformed */ }
+    unlinkSync(path);
+  }
+  return { intents };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/inbox-watcher.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/artlab/daemon/inbox-watcher.ts src/lib/artlab/daemon/inbox-watcher.test.ts
+git commit -m "$(cat <<'EOF'
+Add inbox drainer for CLI + Telegram intent files
+
+Returns matching prefix files in deterministic (sorted) order
+and unlinks them in the same call — a missed read or crash
+between read and unlink leaves the intent file in place for the
+next tick. Subdir + prefix make this reusable for produce/
+cancel/answer/migration intents.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Files outside the prefix are not touched (test verifies `other.txt` remains).
+- [ ] Drain order is deterministic (sorted by filename).
+- [ ] Malformed JSON files are unlinked + skipped, never crashing the drain.
+- [ ] Inbox subdirs are auto-created if missing.
+
+### Task 3.22: Daemon integration test (compose all daemon parts)
+
+**Files:**
+- Create: `src/lib/artlab/daemon/daemon.integration.test.ts`
+
+- [ ] **Step 1: Write the integration test**
+
+```ts
+// src/lib/artlab/daemon/daemon.integration.test.ts
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createDaemonContext, runDaemonOnce } from "./entry";
+import { createTelegramPoller } from "./telegram-poller";
+import { createQueueProcessor } from "./queue-processor";
+import { createSupervisor } from "./supervisor";
+import { enqueueRun } from "@/lib/artlab/queue/queue";
+
+describe("daemon integration", () => {
+  let workspaceRoot: string;
+  beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-di-")); });
+
+  it("single tick: heartbeat + telegram poll + queue drain", async () => {
+    const sup = createSupervisor();
+    const spawnRunner = vi.fn().mockReturnValue({ pid: 999, on: vi.fn(), kill: vi.fn() });
+    const queueProcessor = createQueueProcessor({ workspaceRoot, supervisor: sup, spawnRunner });
+    const tgClient: any = { getUpdates: vi.fn().mockResolvedValue([]) };
+    const tgDispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
+    const telegramPoller = createTelegramPoller({ workspaceRoot, client: tgClient, dispatch: tgDispatch });
+    enqueueRun(workspaceRoot, { runId: "first", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "x" } });
+    const ctx = createDaemonContext({ workspaceRoot, telegramPoller, queueProcessor });
+    await runDaemonOnce(ctx);
+    expect(existsSync(join(workspaceRoot, "daemon-heartbeat.json"))).toBe(true);
+    expect(tgClient.getUpdates).toHaveBeenCalled();
+    expect(spawnRunner).toHaveBeenCalledWith(expect.objectContaining({ runId: "first" }));
+    expect(sup.activeChildren()).toHaveLength(1);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/artlab/daemon/daemon.integration.test.ts`
+Expected: PASS
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/artlab/daemon/daemon.integration.test.ts
+git commit -m "$(cat <<'EOF'
+Add daemon integration test — compose all 3B parts in one tick
+
+Wires supervisor + queue-processor + telegram-poller + heartbeat
+into a single runDaemonOnce. Verifies the heartbeat file
+appears, telegram getUpdates is called, and queued runs spawn
+children that the supervisor tracks.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Test exercises all five daemon components in a single tick.
+- [ ] Spawn function is mocked (no real child_process — integration test still runs in <100ms).
+- [ ] Heartbeat file's atomic write is verified by existence check after the tick.
+- [ ] No background timers leak — vitest's default 5s timeout proves it.
+
 ---
 
 
