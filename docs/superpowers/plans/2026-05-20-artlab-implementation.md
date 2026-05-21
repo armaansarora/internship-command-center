@@ -13,7 +13,7 @@
 
 **Architecture:** New module tree at `src/lib/artlab/` (12 focused modules ≤ ~500 lines each — the 11 from the spec plus `migration/`) + one CLI entry point `scripts/artlab.ts` + one long-running daemon supervised by `launchd`. Deterministic scheduler walks the state machine; LLM brain handles only routing-ambiguity, clarification-wording, QA-failure adjudication, reply-parser fallback, prompt enrichment, and blocker-message drafting. Mac daemon long-polls the Telegram Bot API directly (no Vercel webhook); supervises max-2 parallel child runners; each emits a 10s heartbeat to `progress.json`. Salvaged leaf modules (`budget/ledger.ts`, `scheduler/scheduler.ts`, `providers/adapters.ts`, `promotion/`, `review/`, `cleanup/`, `contracts/`) re-export from legacy unchanged. Legacy CPE stays behind a deprecation banner until ArtLab has shipped ≥10 characters + ≥3 non-character asset types; then Phase 8 deletes ~12,000 lines.
 
-**Tech Stack:** TypeScript 5 (strict, no `any`), Node 24, Vitest 4 (unit + integration + property-based via `fast-check`), Playwright 1.59 (e2e), Zod v4 (validation), `sharp` 0.34 (perceptual hashes + bbox extraction), Telegram Bot API (HTTPS long-poll, no third-party library), `mcp__codex__codex` (self-evolution branch drafting), Claude Opus 4.7 via `@ai-sdk/anthropic` (LLM brain — with Anthropic prompt caching on system prompts; this dep is already installed at 3.0.58), `launchd` (daemon supervision), macOS Keychain via `security` CLI (secret storage). Existing `@supabase/ssr` patterns elsewhere in the repo are NOT used — ArtLab is filesystem-only state.
+**Tech Stack:** TypeScript 5 (strict, no `any`), Node 24, Vitest 4 (unit + integration + property-based via `fast-check`), Playwright 1.59 (e2e), Zod v4 (validation), `sharp` 0.34 (perceptual hashes + bbox extraction), Telegram Bot API (HTTPS long-poll, no third-party library), **Codex CLI** (`codex exec` via `child_process` — the daemon shells out for self-evolution branch drafting; the `mcp__codex__codex` MCP tool is the parallel path available inside interactive Claude Code sessions and is NOT used by the long-running daemon since MCP tools require a session host), Claude Opus 4.7 via `@ai-sdk/anthropic` (LLM brain — invoked through the `ai` core package's `generateText({model: anthropic(...)})` with Anthropic prompt caching on stable system prompts via `providerOptions.anthropic.cacheControl: {type: "ephemeral"}`; this dep is already installed at 3.0.58 alongside the `ai` core package), `launchd` (daemon supervision), macOS Keychain via `security` CLI (secret storage). Existing `@supabase/ssr` patterns elsewhere in the repo are NOT used — ArtLab is filesystem-only state.
 
 **Spec reference:** `docs/superpowers/specs/2026-05-20-artlab-creative-engine-design.md` — every locked design decision is sourced from there. This plan diverges from the spec on three deliberate points (each noted again at point of use):
 1. **Project name** — spec was first written as "Atelier" (historical); rebranded to **ArtLab** 2026-05-20 and renamed throughout.
@@ -273,14 +273,14 @@ EOF
 // src/lib/artlab/types.test.ts
 import { describe, expect, it } from "vitest";
 import {
-  ATELIER_PHASES,
-  ATELIER_BLOCKERS,
+  ARTLAB_PHASES,
+  ARTLAB_BLOCKERS,
   ArtLabRunStateSchema,
 } from "./types";
 
 describe("artlab shared types", () => {
   it("declares all 10 core phases in canonical order", () => {
-    expect(ATELIER_PHASES).toEqual([
+    expect(ARTLAB_PHASES).toEqual([
       "routed",
       "generating-concepts",
       "concept-review",
@@ -295,7 +295,7 @@ describe("artlab shared types", () => {
   });
 
   it("declares all 7 blockers", () => {
-    expect(ATELIER_BLOCKERS).toEqual([
+    expect(ARTLAB_BLOCKERS).toEqual([
       "needs-human",
       "budget-blocked",
       "provider-blocked",
@@ -345,7 +345,7 @@ Expected: FAIL — "Cannot find module './types'"
 import { z } from "zod";
 import type { CreativeAssetType } from "@/lib/creative-production/types";
 
-export const ATELIER_PHASES = [
+export const ARTLAB_PHASES = [
   "routed",
   "generating-concepts",
   "concept-review",
@@ -357,9 +357,9 @@ export const ATELIER_PHASES = [
   "verifying",
   "closed",
 ] as const;
-export type ArtLabPhase = (typeof ATELIER_PHASES)[number];
+export type ArtLabPhase = (typeof ARTLAB_PHASES)[number];
 
-export const ATELIER_BLOCKERS = [
+export const ARTLAB_BLOCKERS = [
   "needs-human",
   "budget-blocked",
   "provider-blocked",
@@ -368,9 +368,9 @@ export const ATELIER_BLOCKERS = [
   "upgrade-required",
   "cancelled",
 ] as const;
-export type ArtLabBlocker = (typeof ATELIER_BLOCKERS)[number];
+export type ArtLabBlocker = (typeof ARTLAB_BLOCKERS)[number];
 
-export const ATELIER_ASSET_TYPES = [
+export const ARTLAB_ASSET_TYPES = [
   "character",
   "environment",
   "prop",
@@ -381,7 +381,7 @@ export const ATELIER_ASSET_TYPES = [
   "marketing-hero",
   "shader",
 ] as const satisfies readonly CreativeAssetType[];
-export type ArtLabAssetType = (typeof ATELIER_ASSET_TYPES)[number];
+export type ArtLabAssetType = (typeof ARTLAB_ASSET_TYPES)[number];
 
 export const ArtLabApprovedConceptSchema = z
   .object({
@@ -395,11 +395,11 @@ export type ArtLabApprovedConcept = z.infer<typeof ArtLabApprovedConceptSchema>;
 export const ArtLabRunStateSchema = z
   .object({
     runId: z.string().min(1),
-    assetType: z.enum(ATELIER_ASSET_TYPES),
+    assetType: z.enum(ARTLAB_ASSET_TYPES),
     characterId: z.string().min(1).optional(),
     bundleId: z.string().min(1).optional(),
-    phase: z.enum(ATELIER_PHASES),
-    blocker: z.enum(ATELIER_BLOCKERS).optional(),
+    phase: z.enum(ARTLAB_PHASES),
+    blocker: z.enum(ARTLAB_BLOCKERS).optional(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
     request: z.string().min(1),
@@ -419,7 +419,7 @@ export interface ArtLabWorkspacePaths {
   slotLeases: string;
 }
 
-export const ATELIER_WORKSPACE_RELATIVE = ".artlab/artlab";
+export const ARTLAB_WORKSPACE_RELATIVE = ".artlab/engine";
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -655,17 +655,17 @@ EOF
 ```ts
 // src/lib/artlab/index.test.ts
 import { describe, expect, it } from "vitest";
-import { ATELIER_PHASES, ATELIER_BLOCKERS, ATELIER_WORKSPACE_RELATIVE } from "./index";
+import { ARTLAB_PHASES, ARTLAB_BLOCKERS, ARTLAB_WORKSPACE_RELATIVE } from "./index";
 
 describe("artlab public surface", () => {
   it("re-exports phase enum", () => {
-    expect(ATELIER_PHASES.length).toBe(10);
+    expect(ARTLAB_PHASES.length).toBe(10);
   });
   it("re-exports blocker enum", () => {
-    expect(ATELIER_BLOCKERS.length).toBe(7);
+    expect(ARTLAB_BLOCKERS.length).toBe(7);
   });
   it("exports workspace path constant", () => {
-    expect(ATELIER_WORKSPACE_RELATIVE).toBe(".artlab/artlab");
+    expect(ARTLAB_WORKSPACE_RELATIVE).toBe(".artlab/engine");
   });
 });
 ```
@@ -717,11 +717,11 @@ EOF
 ```ts
 // scripts/artlab.test.ts
 import { describe, expect, it } from "vitest";
-import { artlabCliEntry, ATELIER_SUBCOMMANDS } from "./artlab";
+import { artlabCliEntry, ARTLAB_SUBCOMMANDS } from "./artlab";
 
 describe("artlab CLI shell", () => {
   it("declares all subcommands", () => {
-    expect(ATELIER_SUBCOMMANDS).toEqual([
+    expect(ARTLAB_SUBCOMMANDS).toEqual([
       "produce",
       "continue",
       "answer",
@@ -773,7 +773,7 @@ Expected: FAIL — module not found
 
 ```ts
 // scripts/artlab.ts
-export const ATELIER_SUBCOMMANDS = [
+export const ARTLAB_SUBCOMMANDS = [
   "produce",
   "continue",
   "answer",
@@ -786,7 +786,7 @@ export const ATELIER_SUBCOMMANDS = [
   "migrate",
   "help",
 ] as const;
-export type ArtLabSubcommand = (typeof ATELIER_SUBCOMMANDS)[number];
+export type ArtLabSubcommand = (typeof ARTLAB_SUBCOMMANDS)[number];
 
 export interface ArtLabCliIo {
   argv: string[];
@@ -820,7 +820,7 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
     io.stderr(HELP_TEXT);
     return 2;
   }
-  if (!ATELIER_SUBCOMMANDS.includes(subcommand as ArtLabSubcommand)) {
+  if (!ARTLAB_SUBCOMMANDS.includes(subcommand as ArtLabSubcommand)) {
     io.stderr(`artlab: unknown subcommand "${subcommand}"\n\n${HELP_TEXT}`);
     return 2;
   }
@@ -924,7 +924,7 @@ EOF
 )"
 ```
 
-### Task 0.9: Create .artlab/artlab workspace
+### Task 0.9: Create .artlab/engine workspace
 
 **Files:**
 - Create: `.artlab/engine/.gitkeep`
@@ -962,9 +962,9 @@ Append to `.gitignore`:
 - [ ] **Step 3: Commit**
 
 ```bash
-git add .artlab/artlab .gitignore
+git add .artlab/engine .gitignore
 git commit -m "$(cat <<'EOF'
-Create .artlab/artlab workspace with .gitkeep placeholders
+Create .artlab/engine workspace with .gitkeep placeholders
 
 Six subdirectories (inbox, inbox/cli, runs, memory, ledgers,
 slot-leases) ready for runtime use. .gitignore prevents transient
@@ -1040,14 +1040,14 @@ The state machine, runners, deterministic orchestrator, and real health snapshot
 // src/lib/artlab/state/machine.test.ts
 import { describe, expect, it } from "vitest";
 import {
-  ATELIER_TRANSITIONS,
+  ARTLAB_TRANSITIONS,
   isLegalTransition,
   legalNextPhases,
 } from "./machine";
 
 describe("artlab state machine", () => {
   it("declares the 10 forward transitions in order", () => {
-    const sequence = ATELIER_TRANSITIONS
+    const sequence = ARTLAB_TRANSITIONS
       .filter((t) => t.trigger === "auto" || t.trigger === "human")
       .map((t) => `${t.from}->${t.to}`);
     expect(sequence).toContain("routed->generating-concepts");
@@ -1141,7 +1141,7 @@ const human = (from: ArtLabPhase, to: ArtLabPhase): ArtLabTransition => ({
   async apply(state, ctx) { return patch(state, to, ctx); },
 });
 
-export const ATELIER_TRANSITIONS: readonly ArtLabTransition[] = [
+export const ARTLAB_TRANSITIONS: readonly ArtLabTransition[] = [
   auto("routed", "generating-concepts"),
   auto("generating-concepts", "concept-review"),
   human("concept-review", "canary"),
@@ -1154,15 +1154,15 @@ export const ATELIER_TRANSITIONS: readonly ArtLabTransition[] = [
 ];
 
 export function isLegalTransition(from: ArtLabPhase, to: ArtLabPhase): boolean {
-  return ATELIER_TRANSITIONS.some((t) => t.from === from && t.to === to);
+  return ARTLAB_TRANSITIONS.some((t) => t.from === from && t.to === to);
 }
 
 export function legalNextPhases(from: ArtLabPhase): ArtLabPhase[] {
-  return ATELIER_TRANSITIONS.filter((t) => t.from === from).map((t) => t.to);
+  return ARTLAB_TRANSITIONS.filter((t) => t.from === from).map((t) => t.to);
 }
 
 export function getTransition(from: ArtLabPhase, to: ArtLabPhase): ArtLabTransition | undefined {
-  return ATELIER_TRANSITIONS.find((t) => t.from === from && t.to === to);
+  return ARTLAB_TRANSITIONS.find((t) => t.from === from && t.to === to);
 }
 ```
 
@@ -1258,7 +1258,7 @@ export function isLegalTransition(from: ArtLabPhase, to: ArtLabPhase, blocker?: 
   if (blocker) {
     return BLOCKER_TRANSITIONS.some((t) => t.from === from && t.to === to && t.blocker === blocker);
   }
-  return ATELIER_TRANSITIONS.some((t) => t.from === from && t.to === to);
+  return ARTLAB_TRANSITIONS.some((t) => t.from === from && t.to === to);
 }
 
 export function findBlockerTransition(phase: ArtLabPhase, blocker: ArtLabBlocker): ArtLabTransition | undefined {
@@ -1486,13 +1486,13 @@ Expected: FAIL — module not found
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { ArtLabRunStateSchema, type ArtLabRunState, ATELIER_PHASES } from "../types";
+import { ArtLabRunStateSchema, type ArtLabRunState, ARTLAB_PHASES } from "../types";
 
 export const ArtLabProgressSnapshotSchema = z
   .object({
     runId: z.string().min(1),
     at: z.string().datetime({ offset: true }),
-    phase: z.enum(ATELIER_PHASES),
+    phase: z.enum(ARTLAB_PHASES),
     slotsCompleted: z.number().int().min(0),
     slotsRunning: z.number().int().min(0),
     slotsFailed: z.number().int().min(0),
@@ -1901,14 +1901,14 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { enqueueRun, listQueuedRuns, dequeueNextRun, ATELIER_MAX_PARALLELISM, type ArtLabQueueEntry } from "./queue";
+import { enqueueRun, listQueuedRuns, dequeueNextRun, ARTLAB_MAX_PARALLELISM, type ArtLabQueueEntry } from "./queue";
 
 describe("artlab queue", () => {
   let dir: string;
   beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "artlab-queue-")); });
 
-  it("ATELIER_MAX_PARALLELISM equals 2", () => {
-    expect(ATELIER_MAX_PARALLELISM).toBe(2);
+  it("ARTLAB_MAX_PARALLELISM equals 2", () => {
+    expect(ARTLAB_MAX_PARALLELISM).toBe(2);
   });
 
   it("enqueues and lists in priority order", () => {
@@ -1939,11 +1939,11 @@ Expected: FAIL
 
 ```ts
 // src/lib/artlab/queue/priorities.ts
-export const ATELIER_PRIORITIES = ["human-flagged", "scheduled", "default"] as const;
-export type ArtLabPriority = (typeof ATELIER_PRIORITIES)[number];
+export const ARTLAB_PRIORITIES = ["human-flagged", "scheduled", "default"] as const;
+export type ArtLabPriority = (typeof ARTLAB_PRIORITIES)[number];
 
 export function priorityRank(priority: ArtLabPriority): number {
-  return ATELIER_PRIORITIES.indexOf(priority);
+  return ARTLAB_PRIORITIES.indexOf(priority);
 }
 ```
 
@@ -1954,14 +1954,14 @@ export function priorityRank(priority: ArtLabPriority): number {
 import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { priorityRank, ATELIER_PRIORITIES, type ArtLabPriority } from "./priorities";
+import { priorityRank, ARTLAB_PRIORITIES, type ArtLabPriority } from "./priorities";
 
-export const ATELIER_MAX_PARALLELISM = 2;
+export const ARTLAB_MAX_PARALLELISM = 2;
 
 export const ArtLabQueueEntrySchema = z
   .object({
     runId: z.string().min(1),
-    priority: z.enum(ATELIER_PRIORITIES),
+    priority: z.enum(ARTLAB_PRIORITIES),
     enqueuedAt: z.string().min(1),
     spec: z.record(z.string(), z.unknown()),
   })
@@ -2039,11 +2039,11 @@ EOF
 ```ts
 // src/lib/artlab/runners/runner-contract.test.ts
 import { describe, expect, it } from "vitest";
-import { ArtLabRunnerResultSchema, ATELIER_RUNNER_KINDS } from "./runner-contract";
+import { ArtLabRunnerResultSchema, ARTLAB_RUNNER_KINDS } from "./runner-contract";
 
 describe("artlab runner contract", () => {
   it("declares the 7 runner kinds", () => {
-    expect(ATELIER_RUNNER_KINDS).toEqual([
+    expect(ARTLAB_RUNNER_KINDS).toEqual([
       "concept",
       "canary",
       "production",
@@ -2088,9 +2088,9 @@ Expected: FAIL
 ```ts
 // src/lib/artlab/runners/runner-contract.ts
 import { z } from "zod";
-import { ATELIER_BLOCKERS, type ArtLabAssetType } from "../types";
+import { ARTLAB_BLOCKERS, type ArtLabAssetType } from "../types";
 
-export const ATELIER_RUNNER_KINDS = [
+export const ARTLAB_RUNNER_KINDS = [
   "concept",
   "canary",
   "production",
@@ -2099,7 +2099,7 @@ export const ATELIER_RUNNER_KINDS = [
   "promotion",
   "verifying",
 ] as const;
-export type ArtLabRunnerKind = (typeof ATELIER_RUNNER_KINDS)[number];
+export type ArtLabRunnerKind = (typeof ARTLAB_RUNNER_KINDS)[number];
 
 export interface ArtLabRunnerInput {
   runId: string;
@@ -2113,11 +2113,11 @@ export interface ArtLabRunnerInput {
 
 export const ArtLabRunnerResultSchema = z
   .object({
-    runnerKind: z.enum(ATELIER_RUNNER_KINDS),
+    runnerKind: z.enum(ARTLAB_RUNNER_KINDS),
     status: z.enum(["ok", "failed", "needs-human"]),
     durationMs: z.number().int().min(0),
     artifacts: z.record(z.string(), z.unknown()),
-    blockerHint: z.enum(ATELIER_BLOCKERS).optional(),
+    blockerHint: z.enum(ARTLAB_BLOCKERS).optional(),
     failureCode: z.string().optional(),
   })
   .strict();
@@ -2824,7 +2824,7 @@ describe("promotion runner", () => {
   });
 
   it("copies cutouts to public/art/lobby/<characterId> when phrase is exact", async () => {
-    process.env.ATELIER_PUBLIC_ART_ROOT = publicArtRoot;
+    process.env.ARTLAB_PUBLIC_ART_ROOT = publicArtRoot;
     const result = await promotionRunner.run({
       runId: "r1",
       runDir,
@@ -2832,7 +2832,7 @@ describe("promotion runner", () => {
       characterId: "cro",
       providerId: "local-mock",
     });
-    delete process.env.ATELIER_PUBLIC_ART_ROOT;
+    delete process.env.ARTLAB_PUBLIC_ART_ROOT;
     expect(result.status).toBe("ok");
     expect(existsSync(join(publicArtRoot, "lobby", "cro"))).toBe(true);
     expect(readdirSync(join(publicArtRoot, "lobby", "cro")).length).toBeGreaterThan(0);
@@ -2856,7 +2856,7 @@ import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runn
 const REQUIRED_PHRASE = "approved for app";
 
 function publicArtRoot(): string {
-  return process.env.ATELIER_PUBLIC_ART_ROOT ?? "/Users/armaanarora/Documents/The Tower/public/art";
+  return process.env.ARTLAB_PUBLIC_ART_ROOT ?? "/Users/armaanarora/Documents/The Tower/public/art";
 }
 
 function targetDir(input: ArtLabRunnerInput): string {
@@ -2931,7 +2931,7 @@ git commit -m "$(cat <<'EOF'
 Add promotion runner with approval firewall
 
 Refuses to copy without 'approved for app' exact phrase. Env var
-ATELIER_PUBLIC_ART_ROOT lets tests redirect to tmpdir.
+ARTLAB_PUBLIC_ART_ROOT lets tests redirect to tmpdir.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -2958,21 +2958,21 @@ describe("verifying runner (Phase 1 stub)", () => {
   let runDir: string;
   beforeEach(() => { runDir = mkdtempSync(join(tmpdir(), "artlab-verify-")); });
 
-  it("returns ok when ATELIER_PLAYWRIGHT_MODE=mock", async () => {
-    process.env.ATELIER_PLAYWRIGHT_MODE = "mock";
+  it("returns ok when ARTLAB_PLAYWRIGHT_MODE=mock", async () => {
+    process.env.ARTLAB_PLAYWRIGHT_MODE = "mock";
     const result = await verifyingRunner.run({
       runId: "r1",
       runDir,
       assetType: "character",
       providerId: "local-mock",
     });
-    delete process.env.ATELIER_PLAYWRIGHT_MODE;
+    delete process.env.ARTLAB_PLAYWRIGHT_MODE;
     expect(result.status).toBe("ok");
     expect(result.artifacts.mode).toBe("mock");
   });
 
   it("returns failed when failure marker file exists", async () => {
-    process.env.ATELIER_PLAYWRIGHT_MODE = "mock";
+    process.env.ARTLAB_PLAYWRIGHT_MODE = "mock";
     writeFileSync(join(runDir, "playwright-force-fail.flag"), "");
     const result = await verifyingRunner.run({
       runId: "r1",
@@ -2980,7 +2980,7 @@ describe("verifying runner (Phase 1 stub)", () => {
       assetType: "character",
       providerId: "local-mock",
     });
-    delete process.env.ATELIER_PLAYWRIGHT_MODE;
+    delete process.env.ARTLAB_PLAYWRIGHT_MODE;
     expect(result.status).toBe("failed");
     expect(result.failureCode).toBe("playwright-forced-failure");
   });
@@ -3004,7 +3004,7 @@ export const verifyingRunner: ArtLabRunner = {
   kind: "verifying",
   async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
-    const mode = process.env.ATELIER_PLAYWRIGHT_MODE ?? "real";
+    const mode = process.env.ARTLAB_PLAYWRIGHT_MODE ?? "real";
     if (mode === "mock") {
       const failFlag = join(input.runDir, "playwright-force-fail.flag");
       if (existsSync(failFlag)) {
@@ -3067,11 +3067,11 @@ EOF
 ```ts
 // src/lib/artlab/runners/index.test.ts
 import { describe, expect, it } from "vitest";
-import { ATELIER_RUNNERS, getRunner } from "./index";
+import { ARTLAB_RUNNERS, getRunner } from "./index";
 
 describe("runner registry", () => {
   it("exposes all 7 runners", () => {
-    expect(Object.keys(ATELIER_RUNNERS).sort()).toEqual([
+    expect(Object.keys(ARTLAB_RUNNERS).sort()).toEqual([
       "canary",
       "concept",
       "cutout",
@@ -3107,7 +3107,7 @@ import type { ArtLabRunner, ArtLabRunnerKind } from "./runner-contract";
 
 export * from "./runner-contract";
 
-export const ATELIER_RUNNERS: Record<ArtLabRunnerKind, ArtLabRunner> = {
+export const ARTLAB_RUNNERS: Record<ArtLabRunnerKind, ArtLabRunner> = {
   concept: conceptRunner,
   canary: canaryRunner,
   production: productionRunner,
@@ -3118,7 +3118,7 @@ export const ATELIER_RUNNERS: Record<ArtLabRunnerKind, ArtLabRunner> = {
 };
 
 export function getRunner(kind: ArtLabRunnerKind): ArtLabRunner {
-  return ATELIER_RUNNERS[kind];
+  return ARTLAB_RUNNERS[kind];
 }
 ```
 
@@ -3358,7 +3358,7 @@ Expected: FAIL
 ```ts
 // src/lib/artlab/orchestrator/deterministic.ts
 import type { ArtLabPhase } from "../types";
-import { ATELIER_TRANSITIONS } from "../state/machine";
+import { ARTLAB_TRANSITIONS } from "../state/machine";
 import { readRunStateSnapshot, writeRunStateSnapshot } from "../state/snapshots";
 import { appendArtLabEvent } from "../state/events";
 import { getRunner } from "../runners";
@@ -3427,7 +3427,7 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
   }
   const next = NEXT_PHASE[state.phase];
   if (!next) return { applied: false, reason: "no-next-phase" };
-  const transition = ATELIER_TRANSITIONS.find((t) => t.from === state.phase && t.to === next);
+  const transition = ARTLAB_TRANSITIONS.find((t) => t.from === state.phase && t.to === next);
   if (!transition) return { applied: false, reason: "no-transition-defined" };
   const updated = await transition.apply(state, { workspaceRoot: input.runDir, now: () => new Date() });
   writeRunStateSnapshot(input.runDir, updated);
@@ -4097,8 +4097,8 @@ describe("artlab end-to-end mock run", () => {
   let runDir: string;
   beforeEach(() => {
     runDir = mkdtempSync(join(tmpdir(), "artlab-e2e-"));
-    process.env.ATELIER_PUBLIC_ART_ROOT = mkdtempSync(join(tmpdir(), "artlab-e2e-public-"));
-    process.env.ATELIER_PLAYWRIGHT_MODE = "mock";
+    process.env.ARTLAB_PUBLIC_ART_ROOT = mkdtempSync(join(tmpdir(), "artlab-e2e-public-"));
+    process.env.ARTLAB_PLAYWRIGHT_MODE = "mock";
   });
 
   it("walks routed → closed with two simulated human gate approvals", async () => {
@@ -5960,11 +5960,11 @@ EOF
 ```ts
 // src/lib/artlab/orchestrator/llm-brain.test.ts
 import { describe, expect, it } from "vitest";
-import { decideWithMockBrain, ATELIER_LLM_DECISION_KINDS } from "./llm-brain";
+import { decideWithMockBrain, ARTLAB_LLM_DECISION_KINDS } from "./llm-brain";
 
 describe("LLM brain decision interface", () => {
   it("enumerates the 6 decision kinds", () => {
-    expect(ATELIER_LLM_DECISION_KINDS).toEqual([
+    expect(ARTLAB_LLM_DECISION_KINDS).toEqual([
       "route-ambiguous-brief",
       "clarification-wording",
       "concept-qa-adjudication",
@@ -5996,7 +5996,7 @@ Expected: FAIL
 // src/lib/artlab/orchestrator/llm-brain.ts
 import { z } from "zod";
 
-export const ATELIER_LLM_DECISION_KINDS = [
+export const ARTLAB_LLM_DECISION_KINDS = [
   "route-ambiguous-brief",
   "clarification-wording",
   "concept-qa-adjudication",
@@ -6004,11 +6004,11 @@ export const ATELIER_LLM_DECISION_KINDS = [
   "prompt-enrichment",
   "blocker-message-drafting",
 ] as const;
-export type ArtLabLlmDecisionKind = (typeof ATELIER_LLM_DECISION_KINDS)[number];
+export type ArtLabLlmDecisionKind = (typeof ARTLAB_LLM_DECISION_KINDS)[number];
 
 export const ArtLabLlmDecisionRequestSchema = z
   .object({
-    kind: z.enum(ATELIER_LLM_DECISION_KINDS),
+    kind: z.enum(ARTLAB_LLM_DECISION_KINDS),
     input: z.record(z.string(), z.unknown()),
   })
   .strict();
@@ -6110,12 +6110,12 @@ Expected: FAIL
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { ATELIER_LLM_DECISION_KINDS } from "./llm-brain";
+import { ARTLAB_LLM_DECISION_KINDS } from "./llm-brain";
 
 export const LlmDecisionEntrySchema = z
   .object({
     decisionAt: z.string().datetime({ offset: true }),
-    kind: z.enum(ATELIER_LLM_DECISION_KINDS),
+    kind: z.enum(ARTLAB_LLM_DECISION_KINDS),
     input: z.unknown(),
     prompt: z.string(),
     output: z.record(z.string(), z.unknown()),
@@ -6179,14 +6179,14 @@ import { describe, expect, it } from "vitest";
 import { invokeCodex, type CodexInvokeInput } from "./codex";
 
 describe("codex adapter", () => {
-  it("uses ATELIER_CODEX_MODE=mock to skip the real MCP call", async () => {
-    process.env.ATELIER_CODEX_MODE = "mock";
+  it("uses ARTLAB_CODEX_MODE=mock to skip the real MCP call", async () => {
+    process.env.ARTLAB_CODEX_MODE = "mock";
     const result = await invokeCodex({
       goal: "test goal",
       sandboxLevel: "danger-full-access",
       cwd: "/tmp",
     } as CodexInvokeInput);
-    delete process.env.ATELIER_CODEX_MODE;
+    delete process.env.ARTLAB_CODEX_MODE;
     expect(result.mode).toBe("mock");
     expect(result.summary).toContain("test goal");
   });
@@ -6202,26 +6202,81 @@ Expected: FAIL
 
 ```ts
 // src/lib/artlab/adapters/codex.ts
+import { spawn } from "node:child_process";
+
 export interface CodexInvokeInput {
   goal: string;
   sandboxLevel: "danger-full-access" | "workspace-write" | "read-only";
   cwd: string;
-  approvalPolicy?: "auto" | "always";
+  approvalPolicy?: "never" | "on-failure" | "always";
+  timeoutMs?: number;
 }
 
 export interface CodexInvokeResult {
   mode: "real" | "mock";
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  durationMs: number;
   summary: string;
-  branchOrPath?: string;
 }
 
+const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
+
+/**
+ * The daemon shells out to the `codex` CLI (codex-cli >= 0.132.0). The
+ * `mcp__codex__codex` MCP tool is the parallel path available inside
+ * interactive Claude Code sessions; the long-running daemon cannot use
+ * MCP because it has no session host. CLI subprocess is the only path
+ * the daemon uses.
+ */
 export async function invokeCodex(input: CodexInvokeInput): Promise<CodexInvokeResult> {
-  if (process.env.ATELIER_CODEX_MODE === "mock") {
-    return { mode: "mock", summary: `mock codex received: ${input.goal}` };
+  if (process.env.ARTLAB_CODEX_MODE === "mock") {
+    return {
+      mode: "mock",
+      exitCode: 0,
+      stdout: "",
+      stderr: "",
+      durationMs: 0,
+      summary: `mock codex received: ${input.goal}`,
+    };
   }
-  // In production the daemon spawns codex via mcp__codex__codex MCP bridge.
-  // This branch is exercised in Phase 3 when the daemon wires the call.
-  throw new Error("codex invocation requires ATELIER_CODEX_MODE=mock or daemon MCP bridge");
+  const startedAt = Date.now();
+  return await new Promise<CodexInvokeResult>((resolve, reject) => {
+    const args = ["exec", "--sandbox", input.sandboxLevel, "--cwd", input.cwd];
+    if (input.approvalPolicy) args.push("--approval-policy", input.approvalPolicy);
+    args.push(input.goal);
+    const child = spawn("codex", args, {
+      cwd: input.cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env },
+    });
+    const stdoutChunks: string[] = [];
+    const stderrChunks: string[] = [];
+    child.stdout.on("data", (c: Buffer) => stdoutChunks.push(c.toString("utf8")));
+    child.stderr.on("data", (c: Buffer) => stderrChunks.push(c.toString("utf8")));
+    const timer = setTimeout(() => {
+      child.kill("SIGTERM");
+      reject(new Error(`codex exec timed out after ${input.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms`));
+    }, input.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+    child.on("error", (err) => {
+      clearTimeout(timer);
+      reject(err);
+    });
+    child.on("exit", (exitCode) => {
+      clearTimeout(timer);
+      const fullStdout = stdoutChunks.join("");
+      const fullStderr = stderrChunks.join("");
+      resolve({
+        mode: "real",
+        exitCode: exitCode ?? -1,
+        stdout: fullStdout,
+        stderr: fullStderr,
+        durationMs: Date.now() - startedAt,
+        summary: fullStdout.split("\n").slice(-20).join("\n"),
+      });
+    });
+  });
 }
 ```
 
@@ -6235,15 +6290,23 @@ Expected: PASS
 ```bash
 git add src/lib/artlab/adapters/codex.ts src/lib/artlab/adapters/codex.test.ts
 git commit -m "$(cat <<'EOF'
-Add codex adapter (mock-mode for tests)
+Add codex CLI adapter (codex exec via child_process)
 
-Real MCP bridge fills in in Phase 3 via daemon. Tests use
-ATELIER_CODEX_MODE=mock to skip real invocation.
+Real production path shells out to the codex CLI subprocess; the
+mcp__codex__codex MCP tool is the parallel interactive path and is
+not used by the long-running daemon (no session host). Tests use
+ARTLAB_CODEX_MODE=mock to skip the spawn.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Mock-mode path returns deterministic `summary` containing the input goal.
+- [ ] Real-mode path uses `spawn("codex", ...)` (no shell interpolation, no string concatenation into a shell string — `spawn` with arg array only).
+- [ ] Timeout fires SIGTERM (not SIGKILL) so the codex CLI's graceful-shutdown handler runs.
+- [ ] No fallthrough to a third behavior — only `mock` or `real`.
 
 ### Task 2.17: LLM brain — real Claude Opus implementation
 
@@ -6265,13 +6328,13 @@ describe("Claude Opus brain", () => {
   });
 
   it("dry-run mode short-circuits without calling the API", async () => {
-    process.env.ATELIER_CLAUDE_MODE = "dry-run";
+    process.env.ARTLAB_CLAUDE_MODE = "dry-run";
     const brain = createClaudeBrain({ apiKey: "test", model: "claude-opus-4-7" });
     const result = await brain.decide({
       kind: "route-ambiguous-brief",
       input: { request: "make Sol" },
     });
-    delete process.env.ATELIER_CLAUDE_MODE;
+    delete process.env.ARTLAB_CLAUDE_MODE;
     expect(result.model).toBe("claude-opus-4-7");
     expect(result.outputJson.dryRun).toBe(true);
   });
@@ -6287,7 +6350,8 @@ Expected: FAIL
 
 ```ts
 // src/lib/artlab/orchestrator/claude-brain.ts
-import Anthropic from "@anthropic-ai/sdk";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText } from "ai";
 import type { ArtLabLlmBrain, ArtLabLlmDecisionRequest, ArtLabLlmDecisionResult } from "./llm-brain";
 
 interface ClaudeBrainOptions {
@@ -6309,11 +6373,11 @@ export interface ArtLabClaudeBrain extends ArtLabLlmBrain {
 }
 
 export function createClaudeBrain(options: ClaudeBrainOptions): ArtLabClaudeBrain {
-  const client = new Anthropic({ apiKey: options.apiKey });
+  const provider = createAnthropic({ apiKey: options.apiKey });
   return {
     modelId: options.model,
     async decide(req: ArtLabLlmDecisionRequest): Promise<ArtLabLlmDecisionResult> {
-      if (process.env.ATELIER_CLAUDE_MODE === "dry-run") {
+      if (process.env.ARTLAB_CLAUDE_MODE === "dry-run") {
         return {
           kind: req.kind,
           outputJson: { dryRun: true, echoedInput: req.input },
@@ -6324,16 +6388,22 @@ export function createClaudeBrain(options: ClaudeBrainOptions): ArtLabClaudeBrai
         };
       }
       const system = SYSTEM_PROMPTS[req.kind];
-      const message = await client.messages.create({
-        model: options.model,
-        max_tokens: 1024,
-        system,
-        messages: [{ role: "user", content: JSON.stringify(req.input) }],
+      // AI SDK v6 + @ai-sdk/anthropic with Anthropic prompt caching on the
+      // (stable) system prompt — the cacheControl marker on the system block
+      // tells Anthropic to cache it across requests, cutting tokenIn cost by
+      // ~90% on repeated routing/clarification decisions.
+      const { text, usage } = await generateText({
+        model: provider(options.model),
+        maxTokens: 1024,
+        messages: [
+          {
+            role: "system",
+            content: system,
+            providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
+          },
+          { role: "user", content: JSON.stringify(req.input) },
+        ],
       });
-      const text = message.content
-        .filter((c): c is { type: "text"; text: string } => c.type === "text")
-        .map((c) => c.text)
-        .join("");
       let outputJson: Record<string, unknown> = {};
       try {
         outputJson = JSON.parse(text);
@@ -6344,8 +6414,8 @@ export function createClaudeBrain(options: ClaudeBrainOptions): ArtLabClaudeBrai
         kind: req.kind,
         outputJson,
         confidence: typeof outputJson.confidence === "number" ? outputJson.confidence : 0.5,
-        tokensIn: message.usage.input_tokens ?? 0,
-        tokensOut: message.usage.output_tokens ?? 0,
+        tokensIn: usage.inputTokens ?? 0,
+        tokensOut: usage.outputTokens ?? 0,
         model: options.model,
       };
     },
@@ -6363,15 +6433,25 @@ Expected: PASS
 ```bash
 git add src/lib/artlab/orchestrator/claude-brain.ts src/lib/artlab/orchestrator/claude-brain.test.ts
 git commit -m "$(cat <<'EOF'
-Add real Claude Opus 4.7 LLM brain
+Add real Claude Opus 4.7 LLM brain via @ai-sdk/anthropic
 
-Uses @anthropic-ai/sdk. ATELIER_CLAUDE_MODE=dry-run skips the
-network for tests. Each decision kind has its own system prompt.
+Uses AI SDK v6 generateText with the @ai-sdk/anthropic provider
+(both already in deps). Anthropic prompt caching applied to the
+stable system prompt via providerOptions.anthropic.cacheControl —
+cuts tokenIn cost ~90% on repeated routing/clarification decisions.
+ARTLAB_CLAUDE_MODE=dry-run skips the network for tests.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
+
+**Acceptance criteria (per-task, in addition to Universal):**
+- [ ] Uses `@ai-sdk/anthropic` (already installed at 3.0.58) — NOT `@anthropic-ai/sdk` (not installed).
+- [ ] Uses `createAnthropic({ apiKey })` from the provider, NOT `new Anthropic(...)` from the bare SDK.
+- [ ] System prompt is sent as a `system` message (NOT as the deprecated `system:` top-level field) with `providerOptions.anthropic.cacheControl: { type: "ephemeral" }`.
+- [ ] Reads `usage.inputTokens` / `usage.outputTokens` (AI SDK v6 names), NOT `promptTokens` / `completionTokens` (v5) or `input_tokens` / `output_tokens` (raw Anthropic SDK).
+- [ ] Dry-run path requires NO API key validity — test passes with `apiKey: "test"`.
 
 ### Task 2.18: Public memory + intake + coherence index
 
