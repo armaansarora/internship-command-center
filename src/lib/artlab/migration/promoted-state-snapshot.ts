@@ -1,7 +1,7 @@
 // src/lib/artlab/migration/promoted-state-snapshot.ts
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 
 export interface PromotedStateEntry {
   path: string;

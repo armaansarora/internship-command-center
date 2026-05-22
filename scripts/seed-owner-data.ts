@@ -11,7 +11,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
-const OWNER_USER_ID = "9e6df479-8aaa-4b34-8cce-e9998f9da3b6";
+let OWNER_USER_ID = "9e6df479-8aaa-4b34-8cce-e9998f9da3b6";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
 const SERVICE_KEY =
@@ -979,14 +979,14 @@ async function seedProgression() {
   if (error) throw error;
 }
 
-async function seedProfile() {
+async function seedProfile(email: string, displayName: string) {
   // Make the owner profile look like an onboarded user (lobby fast-lane to PH).
   const { error } = await sb
     .from("user_profiles")
     .upsert({
       id: OWNER_USER_ID,
-      email: "armaansarora007@gmail.com",
-      display_name: "Armaan",
+      email: email,
+      display_name: displayName,
       timezone: "America/New_York",
       onboarding_step: 99,
       progression_level: 9,
@@ -1001,15 +1001,15 @@ async function seedProfile() {
   if (error) throw error;
 }
 
-async function main() {
-  console.log("Seeding owner account:", OWNER_USER_ID);
-  console.log("");
+async function seedSingleUser(userId: string, email: string, displayName: string) {
+  OWNER_USER_ID = userId;
+  console.log(`Seeding account for user: ${displayName} (${email}) [ID: ${userId}]`);
 
   console.log("  wiping prior data…");
   await wipe();
 
   console.log("  user_profiles…");
-  await seedProfile();
+  await seedProfile(email, displayName);
 
   console.log("  companies (12)…");
   const companies = await seedCompanies();
@@ -1043,9 +1043,31 @@ async function main() {
 
   console.log("  progression milestones (10)…");
   await seedProgression();
+}
+
+async function main() {
+  console.log("Fetching profiles from database…");
+  const { data: profiles, error: pError } = await sb
+    .from("user_profiles")
+    .select("id, email, display_name");
+
+  if (pError) {
+    console.error("Error fetching profiles:", pError);
+    process.exit(1);
+  }
+
+  if (!profiles || profiles.length === 0) {
+    console.log("No profiles found. Seeding default owner account.");
+    await seedSingleUser("9e6df479-8aaa-4b34-8cce-e9998f9da3b6", "armaansarora007@gmail.com", "Armaan");
+  } else {
+    for (const profile of profiles) {
+      console.log("");
+      await seedSingleUser(profile.id, profile.email, profile.display_name ?? "Armaan");
+    }
+  }
 
   console.log("");
-  console.log("Done. Visit https://www.interntower.com — your account now has");
+  console.log("Done. Visit http://localhost:3000 — all accounts now have");
   console.log("a believable internship-search story to play with.");
 }
 

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "tower-creative-progress-v1",
+  "runId": "2026-05-19-mara",
+  "phase": "closed",
+  "runningSlots": [],
+  "completed": 0,
+  "failed": 0,
+  "repairing": 0,
+  "pending": 0,
+  "spendSoFarCents": 0,
+  "reservedSpendCents": 0,
+  "activeLocks": [],
+  "nextAutomaticStep": "Run is closed. Start a fresh creative request when ready.",
+  "updatedAt": "2026-05-19T19:33:39.089Z"
+}

@@ -1,16 +1,16 @@
-# Atelier — Creative Engine Dream Design
+# ArtLab — Creative Engine Dream Design
 
 **Status:** Design approved, not yet implemented
 **Author:** Brainstormed with Claude (Opus 4.7) on 2026-05-20
 **Supersedes:** `docs/CREATIVE-PRODUCTION-ENGINE-V1-FINAL-PLAN.md`
-**Implementation target:** `src/lib/atelier/` (new); legacy `src/lib/creative-production/` retires over 9-12 weeks
+**Implementation target:** `src/lib/artlab/` (new); legacy `src/lib/creative-production/` retires over 9-12 weeks
 **Migration approach:** Greenfield with compat bridge (legacy frozen, drained asset-type by asset-type)
 
 ---
 
 ## 1. North Star
 
-The Tower's Creative Production Engine becomes **Atelier** — an autonomous overnight engine that:
+The Tower's Creative Production Engine becomes **ArtLab** — an autonomous overnight engine that:
 
 1. Receives a creative request via Telegram (with optional reference image attachments) or CLI.
 2. Routes it through an LLM-backed brain that understands ambiguity ("Otis-compatible style envelope" ≠ "make Otis").
@@ -45,7 +45,7 @@ These came from the brainstorm Q&A. Each is non-negotiable in the V1 spec.
 | Memory | Persistent style-wins + style-rejections + prompt-evolution ledgers |
 | State machine | Simplify 22 → 10 core phases, blockers as orthogonal dimension |
 | Asset roadmap | Cast first (10 more characters), then asset types one vertical slice at a time |
-| .artlab/ history | Preserve as `.artlab/studio-legacy/`, start fresh in `.artlab/atelier/` |
+| .artlab/ history | Preserve as `.artlab/studio-legacy/`, start fresh in `.artlab/engine/` |
 | Cancellation | Real cancel — SIGTERM runner, refund unused reservations |
 | Notification scope | Gates + blockers + completion; poll `/status` for everything else |
 | Self-evolution | At 5x repeated friction, spawn Codex to draft a branch; never auto-PR |
@@ -63,7 +63,7 @@ These came from the brainstorm Q&A. Each is non-negotiable in the V1 spec.
 
 ### 3.1 Module map
 
-`src/lib/atelier/` houses 11 focused modules, each ≤ ~500 lines and not aware of other modules' internals:
+`src/lib/artlab/` houses 11 focused modules, each ≤ ~500 lines and not aware of other modules' internals:
 
 | Module | Responsibility |
 |---|---|
@@ -79,7 +79,7 @@ These came from the brainstorm Q&A. Each is non-negotiable in the V1 spec.
 | `self-evolution/` | Friction detector, Codex summoner (drafts branches only — never opens PRs). |
 | `health/` | Real snapshot builder — replaces today's hard-coded zeros with actual scans. |
 
-**Reused unchanged from legacy:** `budget/ledger.ts`, `scheduler/scheduler.ts`, `providers/adapters.ts`, `promotion/index.ts`, `review/index.ts`, `cleanup/index.ts`, `contracts/index.ts`. Atelier re-exports these so the same plumbing serves both engines during migration.
+**Reused unchanged from legacy:** `budget/ledger.ts`, `scheduler/scheduler.ts`, `providers/adapters.ts`, `promotion/index.ts`, `review/index.ts`, `cleanup/index.ts`, `contracts/index.ts`. ArtLab re-exports these so the same plumbing serves both engines during migration.
 
 ### 3.2 Data flow
 
@@ -95,7 +95,7 @@ Mac Daemon ◄──── launchd auto-restart ─────┘
    ├── Queue processor (max 2 active)
    │
    ▼
-Atelier orchestrator
+ArtLab orchestrator
    │
    ├── Intake (route + ambiguity + bundle)
    │     └── LLM brain (if ambiguous or novel)
@@ -119,21 +119,21 @@ Atelier orchestrator
 
 ### 3.3 CLI
 
-One entry point: `scripts/atelier.ts` with subcommands.
+One entry point: `scripts/artlab.ts` with subcommands.
 
 ```bash
-atelier produce <request>            # New run; LLM brain routes
-atelier continue <runId>             # Advance a continuable phase
-atelier answer <runId> "<response>"  # Record human response
-atelier status [runId]               # Plain English via reconciler
-atelier queue                        # Queued + active runs
-atelier health                       # Real health report
-atelier cancel <runId>               # Send cancel signal
-atelier daemon <start|stop|restart|status|logs>
-atelier bot setup                    # Interactive Telegram setup
+artlab produce <request>            # New run; LLM brain routes
+artlab continue <runId>             # Advance a continuable phase
+artlab answer <runId> "<response>"  # Record human response
+artlab status [runId]               # Plain English via reconciler
+artlab queue                        # Queued + active runs
+artlab health                       # Real health report
+artlab cancel <runId>               # Send cancel signal
+artlab daemon <start|stop|restart|status|logs>
+artlab bot setup                    # Interactive Telegram setup
 ```
 
-The four existing giant scripts (`creative-production-orchestrator.ts`, `creative-generation-adapter.ts`, `art-pipeline.ts`, `creative-production-health.ts`) get a deprecation banner pointing to atelier.
+The four existing giant scripts (`creative-production-orchestrator.ts`, `creative-generation-adapter.ts`, `art-pipeline.ts`, `creative-production-health.ts`) get a deprecation banner pointing to artlab.
 
 ---
 
@@ -183,12 +183,12 @@ Phase + blocker is the full state. A run is `(phase: "production", blocker: "pro
 
 ```ts
 type PhaseTransition = {
-  from: AtelierPhase;
-  to: AtelierPhase;
-  blocker?: AtelierBlocker;
+  from: ArtLabPhase;
+  to: ArtLabPhase;
+  blocker?: ArtLabBlocker;
   trigger: "auto" | "human" | "blocker" | "cancel";
   validate(state, ctx): Promise<void>;  // throws if illegal
-  apply(state, ctx): Promise<AtelierRunState>;
+  apply(state, ctx): Promise<ArtLabRunState>;
 };
 ```
 
@@ -207,8 +207,8 @@ await readRunReality(runId): Promise<RunReality>
 ```ts
 interface RunReality {
   runId: string;
-  phase: AtelierPhase;
-  blocker?: AtelierBlocker;
+  phase: ArtLabPhase;
+  blocker?: ArtLabBlocker;
   slots: {
     completed: SlotResult[];
     running: SlotResult[];       // ← derived from slot-leases/ in real time
@@ -255,7 +255,7 @@ interface RunReality {
 - Writes `progress.json` atomically (temp + rename)
 - Exits when the parent runner exits
 
-`atelier status` mid-run returns real numbers. This eliminates the existing "21 slots running" frozen snapshot.
+`artlab status` mid-run returns real numbers. This eliminates the existing "21 slots running" frozen snapshot.
 
 ### 4.6 Atomic writes everywhere
 
@@ -266,7 +266,7 @@ interface RunReality {
 
 ### 4.7 Cancel flow
 
-1. `atelier cancel <runId>` (or Telegram `/cancel <runId>`)
+1. `artlab cancel <runId>` (or Telegram `/cancel <runId>`)
 2. Bot/CLI writes `inbox/cancel-<runId>.json`
 3. Daemon picks up, validates the runner is active
 4. Daemon sends SIGTERM to the runner child PID
@@ -321,7 +321,7 @@ See section 3.3.
 **Process model:** one long-running Node daemon on the Mac, started by `launchd`.
 
 ```
-~/Library/LaunchAgents/com.tower.atelier.plist
+~/Library/LaunchAgents/com.tower.artlab.plist
 ```
 
 **Inside the daemon:**
@@ -329,7 +329,7 @@ See section 3.3.
 | Component | Responsibility |
 |---|---|
 | Telegram poller | `getUpdates` long-poll loop with 60s timeout |
-| CLI inbox watcher | `fs.watchFile` on `.artlab/atelier/inbox/cli/*.json` |
+| CLI inbox watcher | `fs.watchFile` on `.artlab/engine/inbox/cli/*.json` |
 | Queue processor | Max 2 concurrent runs; priority: human-flagged > scheduled > default cast order |
 | Active runner manager | Spawns child processes per runner, tracks PIDs |
 | Heartbeat scheduler | Calls `progress-publisher` every 10s per active runner |
@@ -391,7 +391,7 @@ Bot then sends LLM-drafted clarification with explicit choices. Run stays in `ro
 
 ## 7. Memory
 
-Three ledgers in `.artlab/atelier/memory/`:
+Three ledgers in `.artlab/engine/memory/`:
 
 **`style-wins.jsonl`** — every promoted asset, what worked:
 ```json
@@ -502,19 +502,19 @@ If `atomic` and one child fails, parent enters `repair-required` and bot pings.
 
 `self-evolution/friction-detector.ts` runs hourly:
 
-1. Reads `.artlab/atelier/ledgers/improvements.jsonl`
+1. Reads `.artlab/engine/ledgers/improvements.jsonl`
 2. Groups by `failureCode`
 3. For each group with `occurrences >= 5` and `severity >= medium`:
-   - If branch `atelier/fix/<failureCode>-*` already exists, skip
+   - If branch `artlab/fix/<failureCode>-*` already exists, skip
    - Else spawn Codex via `mcp__codex__codex`:
      ```
-     Goal: harden the atelier engine against repeated failure: <failureCode>
+     Goal: harden the artlab engine against repeated failure: <failureCode>
      Recent occurrences: <last 10 with context>
      Suggested hardening from CI report: <command, test, doc>
-     Create a branch atelier/fix/<failureCode>-<date>, write the fix and test, commit, push.
+     Create a branch artlab/fix/<failureCode>-<date>, write the fix and test, commit, push.
      Do not open a PR.
      ```
-   - When Codex completes, bot pings: *"5x repeated '<code>' friction. Codex drafted fix on branch atelier/fix/<code>-2026-05-21. Reply `/show <code>` to see the diff."*
+   - When Codex completes, bot pings: *"5x repeated '<code>' friction. Codex drafted fix on branch artlab/fix/<code>-2026-05-21. Reply `/show <code>` to see the diff."*
 
 Engine never opens PRs. Human reviews the branch first.
 
@@ -537,7 +537,7 @@ if (estimated > monthlyRemaining) {
 }
 ```
 
-Config in `.artlab/atelier/config.json` with per-asset-type defaults.
+Config in `.artlab/engine/config.json` with per-asset-type defaults.
 
 ---
 
@@ -569,7 +569,7 @@ These are invariants the engine must enforce. Tests prove each.
 6. **Identity check.** Telegram messages from any chat.id other than configured one are silently dropped.
 7. **Secret hygiene.** API keys read only from env or macOS Keychain. Never written to state files, plans, prompt decks, receipts, screenshots, or branch commits.
 8. **Promoted state preservation.** Migration must not change a single byte of promoted Otis or Mara public art or manifest entries.
-9. **Mid-run progress accuracy.** Heartbeat updates progress.json every 10s during active generation. `atelier status` mid-run shows real numbers (completed slots, running slots, actual spend).
+9. **Mid-run progress accuracy.** Heartbeat updates progress.json every 10s during active generation. `artlab status` mid-run shows real numbers (completed slots, running slots, actual spend).
 10. **Two-gate purity.** No mini-gates between approve direction and approved for app. Engine continues automatically through canary, production, cutout, QA, final board unless a true blocker fires.
 
 ---
@@ -577,9 +577,9 @@ These are invariants the engine must enforce. Tests prove each.
 ## 14. Migration plan
 
 ### Phase 0 — Scaffold (week 1)
-- Create `src/lib/atelier/` skeleton with all 11 module directories.
+- Create `src/lib/artlab/` skeleton with all 11 module directories.
 - Re-export salvaged leaf modules.
-- Add `scripts/atelier.ts` CLI shell with stub subcommands.
+- Add `scripts/artlab.ts` CLI shell with stub subcommands.
 - Legacy CPE keeps working.
 
 ### Phase 1 — Foundation (weeks 1-2)
@@ -601,16 +601,16 @@ These are invariants the engine must enforce. Tests prove each.
 - Daemon (launchd, heartbeat, crash recovery, SIGTERM).
 - Self-evolution (Codex summoner — branches only).
 - CLI subcommands wired.
-- `atelier bot setup` interactive command.
+- `artlab bot setup` interactive command.
 
 ### Phase 4 — Migration & cutover (weeks 4-5)
-- `migration/import-otis.ts` and `import-mara.ts` read promoted state, write atelier-shape `closed` state files.
-- Move `.artlab/studio/` → `.artlab/studio-legacy/`. Atelier starts fresh in `.artlab/atelier/`.
+- `migration/import-otis.ts` and `import-mara.ts` read promoted state, write artlab-shape `closed` state files.
+- Move `.artlab/studio/` → `.artlab/studio-legacy/`. ArtLab starts fresh in `.artlab/engine/`.
 - Deprecation banners on the four giant scripts (single warning line, exit 1 if invoked).
-- First new run through atelier: **Rafe Calder** (fixes today's misrouted run). This run is the production go-live and the first acceptance test.
+- First new run through artlab: **Rafe Calder** (fixes today's misrouted run). This run is the production go-live and the first acceptance test.
 
 ### Phase 5 — Cast push (weeks 5-9)
-- Generate 9 more characters via atelier (Rafe, Priya, Dylan, Vera, Sol, Inez, Mina, Etta, Rowan, Nadia).
+- Generate 9 more characters via artlab (Rafe, Priya, Dylan, Vera, Sol, Inez, Mina, Etta, Rowan, Nadia).
 - Memory accumulates; cast coherence becomes meaningful at character 5+.
 - Daemon runs unattended overnight for several.
 - Bundle test on at least one (e.g., "war room with Rafe").
@@ -623,8 +623,8 @@ These are invariants the engine must enforce. Tests prove each.
 ### Phase 7 — Legacy retirement
 - Delete `scripts/creative-production-orchestrator.ts`, `creative-generation-adapter.ts`, `art-pipeline.ts`, `creative-production-health.ts`.
 - Delete `src/lib/creative-production/operator/v1-final.ts`.
-- Keep only the salvaged leaf modules that atelier imports.
-- Final tally: legacy ~12,000 lines → 0; atelier ~5,000 lines spread across ~50 files.
+- Keep only the salvaged leaf modules that artlab imports.
+- Final tally: legacy ~12,000 lines → 0; artlab ~5,000 lines spread across ~50 files.
 
 **Estimated total: 9-12 weeks solo, overnight runs concurrent with day-time development.**
 
@@ -663,13 +663,13 @@ These are invariants the engine must enforce. Tests prove each.
 
 **12 docs → 3:**
 
-- `docs/atelier/ENGINE.md` — architecture, state machine, modules, commands
-- `docs/atelier/OPERATIONS.md` — runbook, troubleshooting, daemon, recovery
-- `docs/atelier/CHARACTER-PIPELINE.md` — character bible, contracts, prompts (merged from CHARACTER-ART-PIPELINE + CHARACTER-IMAGE-OPERATIONS + CHARACTER-IMAGE-PROMPTS + CHARACTER-PROMPTS + CHARACTER-BIBLE + CHARACTER-RELATIONSHIPS)
+- `docs/artlab/ENGINE.md` — architecture, state machine, modules, commands
+- `docs/artlab/OPERATIONS.md` — runbook, troubleshooting, daemon, recovery
+- `docs/artlab/CHARACTER-PIPELINE.md` — character bible, contracts, prompts (merged from CHARACTER-ART-PIPELINE + CHARACTER-IMAGE-OPERATIONS + CHARACTER-IMAGE-PROMPTS + CHARACTER-PROMPTS + CHARACTER-BIBLE + CHARACTER-RELATIONSHIPS)
 
 All 12 existing docs move to `docs/legacy/`. SKILL.md slims from 220 lines → ~80 lines covering only the new CLI + Telegram surface + the two gates + safety rules.
 
-CLAUDE.md updates: replace "Creative Production Engine" section with the new Atelier surface; legacy section moves to `docs/legacy/CLAUDE-LEGACY.md` for reference.
+CLAUDE.md updates: replace "Creative Production Engine" section with the new ArtLab surface; legacy section moves to `docs/legacy/CLAUDE-LEGACY.md` for reference.
 
 ---
 
@@ -680,7 +680,7 @@ These deliberately out of scope for V1 but worth noting:
 - **Weekly digest** — decided no, but could revisit if engine usage scales beyond solo.
 - **Multi-user / multi-tenant** — currently single-Armaan via identity check; multi-user would need auth layer, per-user budget, per-user memory.
 - **Video / animation generation** — `animation` asset type stays paper for V1; real video model integration is post-cast.
-- **In-Tower Studio surface** — decided no for V1 but could be added on top of the atelier API surface if usage pattern changes.
+- **In-Tower Studio surface** — decided no for V1 but could be added on top of the artlab API surface if usage pattern changes.
 - **A/B testing in production** — engine could generate two character variants and ship both behind a feature flag; deferred.
 - **Procedural NPCs** — secondary characters generated on demand (e.g., a war room intern background extra); deferred.
 - **Self-generated style envelope updates** — engine occasionally generates a new envelope candidate and proposes it; deferred until baseline cast is locked.
@@ -689,14 +689,14 @@ These deliberately out of scope for V1 but worth noting:
 
 ## 18. Success criteria
 
-V1 atelier is done when:
-- `atelier produce "make Rafe"` from Telegram triggers a full overnight run.
+V1 artlab is done when:
+- `artlab produce "make Rafe"` from Telegram triggers a full overnight run.
 - Mac wakes up with concept-board notification on Telegram by morning.
 - Reply `approve direction 2` continues automatically through canary → production → QA → final board.
 - Reply `approved for app` promotes assets, updates manifest, runs Playwright e2e, confirms ship via Telegram.
-- 10 characters successfully promoted via atelier.
-- One war room background, one button texture, one animation through atelier.
-- `npm test -- src/lib/atelier` passes with ≥90% on state/reconciler/runners, ≥80% overall.
+- 10 characters successfully promoted via artlab.
+- One war room background, one button texture, one animation through artlab.
+- `npm test -- src/lib/artlab` passes with ≥90% on state/reconciler/runners, ≥80% overall.
 - `npm run lint`, `npx tsc --noEmit`, `npx playwright test` all pass.
 - Promoted Otis + Mara art and manifests unchanged from pre-migration baseline (byte-level diff is empty).
 - Four legacy scripts deleted. `src/lib/creative-production/operator/v1-final.ts` deleted. Legacy retired.

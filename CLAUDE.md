@@ -58,6 +58,7 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 - Aria attributes on all interactive elements, prefers-reduced-motion respected
 - No console.logs in shipped code
 - No TODO/FIXME comments in shipped code
+- Do not pause for implementation plan approval unless the user explicitly requests a review before execution.
 
 ## Character Image Pipeline
 The locked character style is the Tower/Otis-compatible character envelope: premium stylized high-detail app/game character art, strong silhouettes, crisp raster forms, controlled depth, adult professional energy, full-body app-sprite framing, controlled Tower lighting, and `Professional Scars` tone. Character concept lanes vary design only through explicit cards: silhouette, age read, hair, face, wardrobe, palette, posture, accessories, personality, and Tower role archetype.
