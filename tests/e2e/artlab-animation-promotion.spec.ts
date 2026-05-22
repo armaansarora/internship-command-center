@@ -8,7 +8,7 @@ test.describe("ArtLab animation vertical slice — motion + RM fallback", () => 
     const animationDir = join("public", "art", "misc"); // animation promotion target — adjust if Phase 7 routes differently
     if (!existsSync(animationDir)) test.skip();
     if (readdirSync(animationDir).length === 0) test.skip();
-    await context.emulateMedia({ reducedMotion: "no-preference" });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
     const animatedCount = await page.evaluate(() => document.querySelectorAll("[data-artlab-animation]").length);
     expect(animatedCount).toBeGreaterThanOrEqual(0); // present or absent depending on what was promoted
@@ -18,7 +18,7 @@ test.describe("ArtLab animation vertical slice — motion + RM fallback", () => 
     const animationDir = join("public", "art", "misc");
     if (!existsSync(animationDir)) test.skip();
     if (readdirSync(animationDir).length === 0) test.skip();
-    await context.emulateMedia({ reducedMotion: "reduce" });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     const reducedMotionRespected = await page.evaluate(() => {
       const animated = document.querySelectorAll("[data-artlab-animation]");

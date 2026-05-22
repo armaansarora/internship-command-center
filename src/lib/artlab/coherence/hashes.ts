@@ -108,14 +108,19 @@ export async function computePerceptualHash(bytes: Buffer): Promise<string> {
     .greyscale()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  // Compute mean
   let sum = 0;
   for (let i = 0; i < data.length; i += 1) sum += data[i]!;
   const mean = sum / data.length;
-  // Build bit string: 1 if pixel >= mean, else 0
-  let bits = 0n;
-  for (let i = 0; i < data.length; i += 1) {
-    bits = (bits << 1n) | (data[i]! >= mean ? 1n : 0n);
+  // Build hex string by packing 4 bits at a time to avoid BigInt (ES2017 target).
+  const HEX_LEN = (SIZE * SIZE) / 4;
+  let hex = "";
+  for (let nibble = 0; nibble < HEX_LEN; nibble += 1) {
+    let v = 0;
+    for (let bit = 0; bit < 4; bit += 1) {
+      const idx = nibble * 4 + bit;
+      v = (v << 1) | (data[idx]! >= mean ? 1 : 0);
+    }
+    hex += v.toString(16);
   }
-  return bits.toString(16).padStart(SIZE * SIZE / 4, "0");
+  return hex;
 }
