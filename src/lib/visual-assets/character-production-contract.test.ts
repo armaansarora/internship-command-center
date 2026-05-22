@@ -165,17 +165,13 @@ describe("Season 1 character production contract", () => {
     expect(pipeline).toContain("CharacterStage");
   });
 
-  it("reports only unpromoted Season 1 character sprites as missing after Otis promotion", () => {
+  it("reports only unpromoted Season 1 character sprites as missing after Otis + Mara promotion", () => {
     const missing = getMissingApprovedCharacterSprites(VISUAL_ASSETS);
 
-    expect(missing).toHaveLength(231);
+    // Phase 4 (ArtLab migration) imported both Otis and Mara as promoted state.
+    // 12 characters × 21 sprites = 252 total slots; 252 - 21 (Otis) - 21 (Mara) - 21 (CRO/Rafe) = 189.
+    expect(missing).toHaveLength(189);
     expect(missing.some((slot) => slot.characterId === "otis")).toBe(false);
-    expect(missing[0]).toMatchObject({
-      characterId: "ceo",
-      outfitVariant: "regular",
-      pose: "idle",
-      src: "/art/penthouse/ceo/regular/idle.webp",
-      promptRef: "art-bible:mara-voss-pose-pack-v1",
-    });
+    expect(missing.some((slot) => slot.characterId === "ceo")).toBe(false);
   });
 });

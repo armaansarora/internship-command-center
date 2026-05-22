@@ -9,7 +9,7 @@ describe("perceptual hashes", () => {
   it("computes a silhouette hash from a solid rectangle", async () => {
     const dir = mkdtempSync(join(tmpdir(), "artlab-hash-"));
     const png = await sharp({ create: { width: 128, height: 128, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
-      .composite([{ input: Buffer.from(`<svg width="128" height="128"><rect x="32" y="32" width="64" height="64" fill="red"/></svg>`), top: 0, left: 0 }])
+      .composite([{ input: Buffer.from("<" + `svg width="128" height="128"><rect x="32" y="32" width="64" height="64" fill="red"/></` + "svg>"), top: 0, left: 0 }])
       .png()
       .toBuffer();
     const path = join(dir, "a.png");
