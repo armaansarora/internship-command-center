@@ -14,6 +14,8 @@ describe("artlab CLI shell", () => {
       "daemon",
       "bot",
       "migrate",
+      "run-worker",
+      "smoke",
       "help",
     ]);
   });

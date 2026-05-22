@@ -1,12 +1,15 @@
 // src/lib/artlab/migration/promoted-state-snapshot.ts
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { lstatSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
+
+export const SYMLINK_REJECTION_SHA256 = "symlink-rejected";
 
 export interface PromotedStateEntry {
   path: string;
   sha256: string;
   sizeBytes: number;
+  isSymlink?: boolean;
 }
 
 export interface PromotedStateSnapshot {
@@ -21,16 +24,23 @@ export interface PromotedStateDiff {
   changed: { path: string; before: string; after: string }[];
 }
 
-function walk(rootDir: string, sub = ""): string[] {
-  const result: string[] = [];
+interface WalkEntry { rel: string; isSymlink: boolean; isFile: boolean; }
+
+function walk(rootDir: string, sub = ""): WalkEntry[] {
+  const result: WalkEntry[] = [];
   const dir = join(rootDir, sub);
   for (const name of readdirSync(dir).sort()) {
     const full = join(dir, name);
     const rel = sub ? `${sub}/${name}` : name;
-    if (statSync(full).isDirectory()) {
+    const st = lstatSync(full);
+    if (st.isSymbolicLink()) {
+      result.push({ rel, isSymlink: true, isFile: false });
+      continue;
+    }
+    if (st.isDirectory()) {
       result.push(...walk(rootDir, rel));
-    } else {
-      result.push(rel);
+    } else if (st.isFile()) {
+      result.push({ rel, isSymlink: false, isFile: true });
     }
   }
   return result;
@@ -41,7 +51,10 @@ export async function snapshotPromotedState(input: { rootDir: string }): Promise
     return { rootDir: input.rootDir, at: new Date().toISOString(), entries: [] };
   }
   const files = walk(input.rootDir);
-  const entries: PromotedStateEntry[] = files.map((rel) => {
+  const entries: PromotedStateEntry[] = files.map(({ rel, isSymlink }) => {
+    if (isSymlink) {
+      return { path: rel, sha256: SYMLINK_REJECTION_SHA256, sizeBytes: 0, isSymlink: true };
+    }
     const bytes = readFileSync(join(input.rootDir, rel));
     return {
       path: rel,

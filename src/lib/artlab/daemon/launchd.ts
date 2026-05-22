@@ -1,4 +1,11 @@
 // src/lib/artlab/daemon/launchd.ts
+//
+// Renders the launchd plist that supervises the ArtLab daemon. Note that
+// `ThrottleInterval` is the launchd RESTART-BACKOFF interval (seconds between
+// successive restarts when the process exits), NOT the daemon heartbeat
+// cadence. The heartbeat is written every tick from daemon/entry.ts:
+// `writeHeartbeat` runs at the top of `runDaemonOnce` and the default sleep
+// between ticks is 1 second.
 export const ARTLAB_LAUNCHD_LABEL = "com.tower.artlab";
 
 export interface LaunchdPlistInput {

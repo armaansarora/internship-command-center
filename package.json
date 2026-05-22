@@ -18,6 +18,7 @@
     "artlab:daemon": "tsx scripts/artlab.ts daemon",
     "artlab:bot": "tsx scripts/artlab.ts bot",
     "artlab:migrate": "tsx scripts/artlab.ts migrate",
+    "artlab:smoke": "tsx scripts/artlab.ts smoke",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",

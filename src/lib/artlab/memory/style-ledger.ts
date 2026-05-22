@@ -10,6 +10,9 @@ export const StyleWinEntrySchema = z
     promptHash: z.string().min(1),
     cutoutModelUsed: z.string().optional(),
     totalCostCents: z.number().int().min(0),
+    source: z.string().optional(),
+    fileCount: z.number().int().min(0).optional(),
+    note: z.string().optional(),
   })
   .strict();
 export type StyleWinEntry = z.infer<typeof StyleWinEntrySchema>;

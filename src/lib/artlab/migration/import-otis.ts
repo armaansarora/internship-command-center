@@ -1,7 +1,9 @@
 // src/lib/artlab/migration/import-otis.ts
-import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { snapshotPromotedState } from "./promoted-state-snapshot";
+import { writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
+import { appendStyleWin } from "@/lib/artlab/memory/style-ledger";
 
 export interface ImportOtisInput {
   workspaceRoot: string;
@@ -21,27 +23,28 @@ export async function importOtisIntoArtLab(input: ImportOtisInput): Promise<Impo
   const promotedDir = join(input.publicArtRoot, "lobby", "otis");
   const snapshot = await snapshotPromotedState({ rootDir: promotedDir });
   const now = new Date().toISOString();
-  const state = {
+  writeRunStateSnapshot(runDir, {
     runId,
-    assetType: "character" as const,
+    assetType: "character",
     characterId: "otis",
-    phase: "closed" as const,
+    phase: "closed",
     createdAt: now,
     updatedAt: now,
     request: "[migration import] otis — pre-existing promoted state",
-    sourceSurface: "migration" as const,
-  };
-  writeFileSync(join(runDir, "run-state.json"), JSON.stringify(state, null, 2) + "\n");
+    sourceSurface: "migration",
+  });
   writeFileSync(join(runDir, "promoted-snapshot.json"), JSON.stringify(snapshot, null, 2) + "\n");
   const memoryDir = join(input.workspaceRoot, "memory");
   if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
-  const win = {
+  appendStyleWin(memoryDir, {
     characterId: "otis",
     promotedAt: now,
+    winningTechniques: ["legacy-import"],
+    promptHash: "legacy",
+    totalCostCents: 0,
     source: "legacy-import",
     fileCount: snapshot.entries.length,
     note: "Pre-ArtLab Otis baseline preserved verbatim from legacy CPE.",
-  };
-  appendFileSync(join(memoryDir, "style-wins.jsonl"), JSON.stringify(win) + "\n");
+  });
   return { runId, importedFileCount: snapshot.entries.length };
 }

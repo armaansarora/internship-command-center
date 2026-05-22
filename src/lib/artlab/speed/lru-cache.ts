@@ -6,6 +6,7 @@ export interface LruCache<K, V> {
 
 export function createLruCache<K, V>(options: { capacity: number }): LruCache<K, V> {
   const map = new Map<K, V>();
+  const inFlight = new Map<K, Promise<V>>();
   function touch(key: K, value: V): void {
     map.delete(key);
     map.set(key, value);
@@ -21,11 +22,21 @@ export function createLruCache<K, V>(options: { capacity: number }): LruCache<K,
         touch(key, v);
         return v;
       }
-      const v = await fetcher();
-      touch(key, v);
-      return v;
+      const pending = inFlight.get(key);
+      if (pending) return pending;
+      const promise = (async () => {
+        try {
+          const v = await fetcher();
+          touch(key, v);
+          return v;
+        } finally {
+          inFlight.delete(key);
+        }
+      })();
+      inFlight.set(key, promise);
+      return promise;
     },
     has(key: K): boolean { return map.has(key); },
-    clear(): void { map.clear(); },
+    clear(): void { map.clear(); inFlight.clear(); },
   };
 }

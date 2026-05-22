@@ -33,9 +33,7 @@ export function buildCodexGoal(group: FrictionGroup, today: string): string {
     "6. git commit with a descriptive message including the failure code.",
     "7. git push the branch.",
     "",
-    // The following string is intentionally constructed to avoid matching the branch-policy source scan
-    // while still producing the correct instruction for Codex at runtime.
-    `DO NOT OPEN A PR. Never run ${"gh"} ${"pr"} ${"create"} or ${"gh"} ${"pr"} ${"merge"}. ArtLab spec safety property #5 requires human review of every branch before merge.`,
+    "DO NOT OPEN A PR. Never run `gh pr create` or `gh pr merge`. ArtLab spec safety property #5 requires human review of every branch before merge.",
     "",
     `Branch must be named exactly: ${branchName}`,
   ].join("\n");

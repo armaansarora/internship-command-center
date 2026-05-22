@@ -5,14 +5,14 @@ export interface LaneSignature {
   laneIndex: number;
   silhouette: SilhouetteHash;
   palette: PaletteHistogram;
-  ageImpression: number;
+  ageImpression?: number;
 }
 
 export interface PromotedCastSignature {
   characterId: string;
   silhouette: SilhouetteHash;
   palette: PaletteHistogram;
-  ageImpression: number;
+  ageImpression?: number;
 }
 
 export type CoherenceFailureCode = "diversity-failure" | "cohesion-drift" | "style-envelope-drift" | "age-impression-drift";
@@ -36,6 +36,9 @@ export function checkCastDiversity(input: { lanes: LaneSignature[]; promotedCast
       const pd = paletteDistance(input.lanes[i]!.palette, input.lanes[j]!.palette);
       pairwiseSilhouette.push(sd);
       pairwisePalette.push(pd);
+      // Lanes are "indistinguishable" only when BOTH silhouette and palette
+      // are too close — different shape OR different color is enough to
+      // tell them apart visually.
       if (sd < thresholds.silhouette.minPairwiseDistance && pd < thresholds.palette.minPairwiseDistance) {
         failureCodes.add("diversity-failure");
       }
@@ -52,7 +55,8 @@ export function checkCastDiversity(input: { lanes: LaneSignature[]; promotedCast
       if (pd > thresholds.palette.maxCohesionDistance && sd > thresholds.silhouette.maxCohesionDistance) {
         failureCodes.add("style-envelope-drift");
       }
-      if (Math.abs(lane.ageImpression - cast.ageImpression) > thresholds.age.maxImpressionGapYears) {
+      if (lane.ageImpression !== undefined && cast.ageImpression !== undefined &&
+          Math.abs(lane.ageImpression - cast.ageImpression) > thresholds.age.maxImpressionGapYears) {
         failureCodes.add("age-impression-drift");
       }
     }

@@ -36,5 +36,14 @@ export function renderArtLabHealth(snapshot: ArtLabHealthSnapshot): string {
   lines.push("Cleanup");
   lines.push(`  orphan previews: ${snapshot.cleanup.orphanPreviewCount}`);
   lines.push(`  stale boards: ${snapshot.cleanup.staleBoardCount}`);
+  if (snapshot.speed) {
+    lines.push("");
+    lines.push("Speed");
+    lines.push(`  recent runs: ${snapshot.speed.recentRunCount}`);
+    lines.push(`  median run: ${snapshot.speed.medianRecentRunMs}ms`);
+    lines.push(`  baseline:   ${snapshot.speed.baselineRunMs}ms`);
+    const arrow = snapshot.speed.improvementPercent >= 0 ? "↓" : "↑";
+    lines.push(`  improvement: ${arrow}${Math.abs(snapshot.speed.improvementPercent)}%`);
+  }
   return lines.join("\n");
 }

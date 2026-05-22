@@ -8,7 +8,8 @@ export interface CutoutPoolInput {
 }
 
 export async function runCutoutPool(input: CutoutPoolInput): Promise<void> {
-  const concurrency = input.concurrency ?? DEFAULT_CUTOUT_CONCURRENCY;
+  const requested = input.concurrency;
+  const concurrency = typeof requested === "number" && requested > 0 ? requested : DEFAULT_CUTOUT_CONCURRENCY;
   let cursor = 0;
   const workers = Array.from({ length: concurrency }, async () => {
     while (cursor < input.tasks.length) {

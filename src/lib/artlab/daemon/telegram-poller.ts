@@ -1,5 +1,5 @@
 // src/lib/artlab/daemon/telegram-poller.ts
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { TelegramClient, TelegramUpdate } from "@/lib/artlab/bot/telegram-client";
 
@@ -30,6 +30,20 @@ function writeOffset(root: string, lastUpdateId: number): void {
   renameSync(tmp, path);
 }
 
+function recordPoisonMessage(root: string, updateId: number, err: unknown): void {
+  try {
+    if (!existsSync(root)) mkdirSync(root, { recursive: true });
+    const line = JSON.stringify({
+      at: new Date().toISOString(),
+      source: "telegram-poller",
+      updateId,
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    });
+    appendFileSync(join(root, "daemon-errors.jsonl"), `${line}\n`);
+  } catch { /* never let logging crash the poller */ }
+}
+
 export function createTelegramPoller(input: TelegramPollerInput): TelegramPoller {
   return {
     async tick(): Promise<void> {
@@ -38,11 +52,15 @@ export function createTelegramPoller(input: TelegramPollerInput): TelegramPoller
       if (updates.length === 0) return;
       for (const update of updates) {
         const message = update.message ?? update.edited_message;
-        if (!message) continue;
-        await input.dispatch({ message });
+        if (message) {
+          try {
+            await input.dispatch({ message });
+          } catch (err) {
+            recordPoisonMessage(input.workspaceRoot, update.update_id, err);
+          }
+        }
+        writeOffset(input.workspaceRoot, update.update_id);
       }
-      const lastUpdateId = updates[updates.length - 1]!.update_id;
-      writeOffset(input.workspaceRoot, lastUpdateId);
     },
   };
 }

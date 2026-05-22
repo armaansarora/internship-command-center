@@ -18,10 +18,29 @@ export function appendArtLabEvent(runDir: string, event: ArtLabEvent): void {
   appendFileSync(path, `${JSON.stringify(event)}\n`, { encoding: "utf8" });
 }
 
-export function readArtLabEvents(runDir: string): ArtLabEvent[] {
+export interface ReadArtLabEventsResult {
+  events: ArtLabEvent[];
+  malformedLines: number;
+}
+
+export function readArtLabEventsWithDiagnostics(runDir: string): ReadArtLabEventsResult {
   const path = join(runDir, "events.jsonl");
-  if (!existsSync(path)) return [];
+  if (!existsSync(path)) return { events: [], malformedLines: 0 };
   const raw = readFileSync(path, "utf8").trim();
-  if (!raw) return [];
-  return raw.split("\n").map((line) => ArtLabEventSchema.parse(JSON.parse(line)));
+  if (!raw) return { events: [], malformedLines: 0 };
+  const events: ArtLabEvent[] = [];
+  let malformedLines = 0;
+  for (const line of raw.split("\n")) {
+    if (line.length === 0) continue;
+    try {
+      events.push(ArtLabEventSchema.parse(JSON.parse(line)));
+    } catch {
+      malformedLines += 1;
+    }
+  }
+  return { events, malformedLines };
+}
+
+export function readArtLabEvents(runDir: string): ArtLabEvent[] {
+  return readArtLabEventsWithDiagnostics(runDir).events;
 }

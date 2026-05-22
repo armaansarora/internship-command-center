@@ -17,7 +17,7 @@ describe("codex summoner", () => {
     expect(goal).toContain("7 occurrences");
     expect(goal).toContain("artlab/fix/rembg-edge-halo-2026-05-20");
     expect(goal).toMatch(/do not open a pr/i);
-    expect(goal).toMatch(/never run gh pr/i);
+    expect(goal).toMatch(/never run\s+`?gh pr/i);
   });
 
   it("summonCodex skips when ARTLAB_CODEX_MODE=mock and reports the would-be branch name", async () => {

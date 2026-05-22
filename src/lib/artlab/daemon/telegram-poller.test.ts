@@ -63,4 +63,37 @@ describe("telegram poller", () => {
     await poller.tick();
     expect(dispatch).toHaveBeenCalledTimes(2);
   });
+
+  it("does not stall on a poison message — advances offset past the failing update and logs to daemon-errors.jsonl", async () => {
+    const client = {
+      getUpdates: vi.fn()
+        .mockResolvedValueOnce([
+          { update_id: 1, message: { chat: { id: 1 }, message_id: 1, text: "good", date: 0 } },
+          { update_id: 2, message: { chat: { id: 1 }, message_id: 2, text: "poison", date: 0 } },
+          { update_id: 3, message: { chat: { id: 1 }, message_id: 3, text: "good", date: 0 } },
+        ])
+        .mockResolvedValueOnce([]),
+      sendMessage: vi.fn(),
+      sendMediaGroup: vi.fn(),
+      downloadFile: vi.fn(),
+    } satisfies TelegramClient;
+    const dispatch = vi.fn(async (opts: { message: { text?: string } }) => {
+      if (opts.message.text === "poison") throw new Error("dispatch failure");
+      return { action: { type: "dropped" as const, reason: "unauthorized" as const } };
+    });
+    const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
+    await poller.tick();
+    expect(dispatch).toHaveBeenCalledTimes(3); // all three messages tried, poison did not block #3
+    const offsetPath = join(workspaceRoot, "telegram-offset.json");
+    expect(JSON.parse(readFileSync(offsetPath, "utf8")).lastUpdateId).toBe(3);
+    const errorsPath = join(workspaceRoot, "daemon-errors.jsonl");
+    expect(existsSync(errorsPath)).toBe(true);
+    const errorLine = readFileSync(errorsPath, "utf8").trim().split("\n")[0]!;
+    const parsed = JSON.parse(errorLine);
+    expect(parsed.source).toBe("telegram-poller");
+    expect(parsed.updateId).toBe(2);
+    expect(parsed.message).toContain("dispatch failure");
+    await poller.tick();
+    expect(client.getUpdates).toHaveBeenLastCalledWith({ offset: 4 });
+  });
 });

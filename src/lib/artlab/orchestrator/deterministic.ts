@@ -46,7 +46,7 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
   if (state.blocker) return { applied: false, reason: `blocked-${state.blocker}` };
   const runnerKind = PHASE_RUNNER[state.phase];
   if (runnerKind) {
-    const runner = getRunner(runnerKind);
+    const runner = getRunner(runnerKind, state.assetType);
     const result = await runner.run({
       runId: state.runId,
       runDir: input.runDir,
@@ -61,8 +61,20 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
       kind: "runner-completed",
       payload: { runnerKind, status: result.status, durationMs: result.durationMs },
     });
-    if (result.status === "failed" && result.blockerHint) {
-      writeRunStateSnapshot(input.runDir, { ...state, blocker: result.blockerHint, updatedAt: new Date().toISOString() });
+    if (result.status === "needs-human") {
+      writeRunStateSnapshot(input.runDir, {
+        ...state,
+        blocker: "needs-human",
+        updatedAt: new Date().toISOString(),
+      });
+      return { applied: false, reason: `runner-needs-human-${result.failureCode ?? runnerKind}`, fromPhase: state.phase };
+    }
+    if (result.status === "failed") {
+      writeRunStateSnapshot(input.runDir, {
+        ...state,
+        blocker: result.blockerHint ?? "repair-required",
+        updatedAt: new Date().toISOString(),
+      });
       return { applied: false, reason: `runner-failed-${result.failureCode ?? "unknown"}`, fromPhase: state.phase };
     }
   }

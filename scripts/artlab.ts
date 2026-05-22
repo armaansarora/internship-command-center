@@ -9,6 +9,8 @@ export const ARTLAB_SUBCOMMANDS = [
   "daemon",
   "bot",
   "migrate",
+  "run-worker",
+  "smoke",
   "help",
 ] as const;
 export type ArtLabSubcommand = (typeof ARTLAB_SUBCOMMANDS)[number];
@@ -28,10 +30,15 @@ Usage:
   artlab queue                        queued + active runs
   artlab health                       real engine health report
   artlab cancel <runId>               cancel a run with refund
-  artlab daemon <start|stop|restart|status|logs>
+  artlab daemon <run|start|stop|restart|status|logs>
   artlab bot <setup>                  interactive bot setup
   artlab migrate --import <list>      one-shot legacy import
+  artlab smoke                        free end-to-end mock-mode smoke test
 `;
+
+function defaultWorkspaceRoot(): string {
+  return process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine";
+}
 
 async function stub(name: string, args: string[], io: ArtLabCliIo): Promise<number> {
   io.stdout(`artlab ${name}: stub — fills in during Phase 1-3 implementation`);
@@ -56,7 +63,7 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
     case "produce": {
       const { runProduceSubcommand } = await import("@/lib/artlab/cli/produce");
       const result = await runProduceSubcommand({
-        workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine",
+        workspaceRoot: defaultWorkspaceRoot(),
         args: rest,
       });
       if (result.message) io.stdout(result.message);
@@ -65,7 +72,7 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
     case "continue": {
       const { runContinueSubcommand } = await import("@/lib/artlab/cli/continue");
       const result = await runContinueSubcommand({
-        workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine",
+        workspaceRoot: defaultWorkspaceRoot(),
         args: rest,
       });
       if (result.message) io.stdout(result.message);
@@ -74,22 +81,73 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
     case "answer": {
       const { runAnswerSubcommand } = await import("@/lib/artlab/cli/answer");
       const result = await runAnswerSubcommand({
-        workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine",
+        workspaceRoot: defaultWorkspaceRoot(),
         args: rest,
       });
       if (result.message) io.stdout(result.message);
       return result.exitCode;
     }
-    case "status":
-      return stub("status", rest, io);
-    case "queue":
-      return stub("queue", rest, io);
-    case "health":
-      return stub("health", rest, io);
+    case "status": {
+      const { runStatusSubcommand } = await import("@/lib/artlab/cli/status");
+      const result = await runStatusSubcommand({
+        workspaceRoot: defaultWorkspaceRoot(),
+        log: (line) => io.stdout(line),
+      });
+      return result.exitCode;
+    }
+    case "queue": {
+      const { runQueueSubcommand } = await import("@/lib/artlab/cli/queue");
+      const result = await runQueueSubcommand({
+        workspaceRoot: defaultWorkspaceRoot(),
+        log: (line) => io.stdout(line),
+      });
+      return result.exitCode;
+    }
+    case "health": {
+      const { renderHealthView } = await import("@/lib/artlab/cli/ui/render");
+      const { buildArtLabHealthSnapshot } = await import("@/lib/artlab/health/snapshot");
+      const snapshot = await buildArtLabHealthSnapshot({ workspaceRoot: defaultWorkspaceRoot() });
+      io.stdout(renderHealthView(snapshot));
+      return 0;
+    }
     case "cancel":
       return stub("cancel", rest, io);
-    case "daemon":
-      return stub("daemon", rest, io);
+    case "daemon": {
+      const sub = rest[0];
+      const tail = rest.slice(1);
+      if (!sub) {
+        io.stderr(`daemon: expected one of run|start|stop|restart|status|logs`);
+        return 2;
+      }
+      if (sub === "run") {
+        const { runDaemonRunSubcommand } = await import("@/lib/artlab/cli/daemon-run");
+        return await runDaemonRunSubcommand({
+          workspaceRoot: defaultWorkspaceRoot(),
+          log: (line) => io.stdout(line),
+        });
+      }
+      if (sub === "start" || sub === "stop" || sub === "restart" || sub === "status" || sub === "logs") {
+        const { runDaemonControlSubcommand } = await import("@/lib/artlab/cli/daemon-control");
+        return runDaemonControlSubcommand({
+          verb: sub,
+          workspaceRoot: defaultWorkspaceRoot(),
+          log: (line) => io.stdout(line),
+          err: (line) => io.stderr(line),
+        });
+      }
+      io.stderr(`daemon: unknown subcommand "${sub}". Expected run|start|stop|restart|status|logs.`);
+      if (tail.length > 0) io.stderr(`  trailing args: ${tail.join(" ")}`);
+      return 2;
+    }
+    case "run-worker": {
+      const { runWorkerSubcommand } = await import("@/lib/artlab/cli/run-worker");
+      const result = await runWorkerSubcommand({
+        workspaceRoot: defaultWorkspaceRoot(),
+        args: rest,
+        log: (line) => io.stdout(line),
+      });
+      return result.exitCode;
+    }
     case "bot": {
       const sub = rest[0];
       if (sub === "setup") {
@@ -103,6 +161,14 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
     }
     case "migrate":
       return stub("migrate", rest, io);
+    case "smoke": {
+      const { runSmokeSubcommand } = await import("@/lib/artlab/cli/smoke");
+      const result = await runSmokeSubcommand({
+        log: (line) => io.stdout(line),
+        err: (line) => io.stderr(line),
+      });
+      return result.exitCode;
+    }
   }
 }
 
