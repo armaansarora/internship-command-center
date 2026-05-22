@@ -26,7 +26,7 @@ Target aesthetic: luxury game UI meets Bloomberg Terminal meets Apple spatial de
 | L | The Lobby (Login/Onboarding) | Otis |
 
 Full agent hierarchy spec: `docs/CHAIN-OF-COMMAND.md`
-Character voice prompts: `docs/CHARACTER-PROMPTS.md`
+Character voice prompts: `docs/legacy/CHARACTER-PROMPTS.md`
 Spatial design metaphor: `docs/VISION-SPEC.md`
 
 ## Key Commands
@@ -38,9 +38,9 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 - `npx tsc --noEmit` — type check
 - `npx drizzle-kit generate` — generate migration SQL
 - `npm run env:init` — local env init helper
-- `npm run art:status` — current character image pipeline status and next step
-- `npm run art:operate` — strict character image pipeline operator; writes the next legal action packet
-- `npm run art:plan|clean|ingest|split|master|qa|review|promote` — batch character asset factory
+- `npm run artlab -- status` — ArtLab run status
+- `npm run artlab -- health` — ArtLab health snapshot + speed dashboard
+- `npm run artlab:daemon -- start` — start ArtLab daemon
 
 ## Conventions
 - Server Components by default; "use client" only when needed
@@ -60,26 +60,32 @@ Spatial design metaphor: `docs/VISION-SPEC.md`
 - No TODO/FIXME comments in shipped code
 - Do not pause for implementation plan approval unless the user explicitly requests a review before execution.
 
-## Character Image Pipeline
-The locked character style is the Tower/Otis-compatible character envelope: premium stylized high-detail app/game character art, strong silhouettes, crisp raster forms, controlled depth, adult professional energy, full-body app-sprite framing, controlled Tower lighting, and `Professional Scars` tone. Character concept lanes vary design only through explicit cards: silhouette, age read, hair, face, wardrobe, palette, posture, accessories, personality, and Tower role archetype.
+## ArtLab — Tower creative engine
 
-Do not let character lanes explore different rendering styles, and do not collapse all five lanes into the same suit/hair/executive archetype. UI assets match the Tower product UI/design system; environments match Tower architecture/lighting/mood; props/icons/marketing/shaders/animations/scenes each use their own contract rather than character rules.
+ArtLab replaces the legacy CPE. Telegram-driven, two human gates (`approve direction <n>` and `approved for app`), 10-phase state machine with orthogonal blockers, autonomous-with-oversight.
 
-When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, run `npm run art:produce -- --request "<natural language request>"` and follow `.agents/skills/creative-production-engine/SKILL.md`. Use `npm run art:studio` for orientation or diagnostics. Every phase must run the Housekeeping Gate and the Continuous Improvement Gate. Normal creative packets default to five-lane parallel output: 5 agents x 1 wave. Lane subagents should use GPT-5.5 fast mode with extra-high reasoning when available. Each lane stays isolated; `--mode coordinate` scores, dedupes, ranks, and writes the review board; only the coordinator may merge, promote, clean, or integrate. Use `--no-parallel` only for explicit diagnostics.
-Routable concept work does not stop for `approve direction` before images exist. The first normal human gate is after the five initial concepts and concept review board/action manifest exist; before then, `human-action.json` is only for true blockers.
+**Entry points:**
+- Telegram bot (preferred): trigger via DM to the configured bot.
+- CLI mirror: `npm run artlab -- produce "<request>"`, `npm run artlab -- status`, `npm run artlab -- health`.
 
-For any character image work, run `npm run art:studio` first and read `docs/CHARACTER-IMAGE-OPERATIONS.md`. Use `npm run art:operate` only when the engine reaches the strict Season 1 character-art operator stage. Use `npm run art:status` for read-only inspection of promoted characters, run warnings, and the next recommended character.
+**Daemon:** `npm run artlab:daemon -- start` (launchd-supervised; see `docs/artlab/OPERATIONS.md`).
 
-Current anchor state:
-- Fresh-start art reset was the pre-Otis baseline; Otis Vale is now promoted, browser-QA verified, closed, and protected as the production Lobby baseline.
-- `public/art/lobby/otis/` and `src/lib/visual-assets/approved-character-assets.generated.json` are production truth for Otis.
-- Mara Voss (`ceo`) is the next unpromoted Season 1 character unless Armaan explicitly asks for a different asset.
-- Lobby backgrounds remain protected: `public/lobby/bg-1.jpg` through `public/lobby/bg-4.jpg`.
-- Do not regenerate, overwrite, delete, or re-promote Otis unless Armaan explicitly asks. New characters still start from scratch unless a durable run-state names an approved identity reference.
-- Drafts and generated outputs stay in `.artlab`; only `npm run art:promote` can copy approved derivatives into `public/art`.
-- Production packs must pass the one-slot canary gate before full-pack paid generation. Whole-pack warning retries are banned; run non-paid repair first and regenerate only named failed slots.
-- Promotion requires Armaan's exact phrase: `approved for app`.
-- If the image process exposes a repeated manual workaround, strengthen the script, docs, and tests before continuing.
+**Quality + safety non-negotiables:**
+- Lobby backgrounds protected: `public/lobby/bg-1.jpg`…`bg-4.jpg`.
+- Otis (`public/art/lobby/otis/`) and CEO/Mara (`public/art/penthouse/ceo/`) byte-protected by CI (`.github/workflows/artlab-byte-diff.yml`).
+- Promotion requires EXACT phrase `approved for app`.
+- Self-evolution drafts branches only — never opens PRs.
+
+**Docs:**
+- `docs/artlab/ENGINE.md` — architecture + state machine.
+- `docs/artlab/OPERATIONS.md` — runbook + troubleshooting.
+- `docs/artlab/CHARACTER-PIPELINE.md` — character matrix + cast coherence.
+- `docs/artlab/SPEED.md` — Phase 5 speed mechanisms.
+- `docs/artlab/CAST-PUSH-RUNBOOK.md` — per-character protocol.
+
+**Implementation plan:** `docs/superpowers/plans/2026-05-20-artlab-implementation.md` (142 tasks across 9 phases — use the Execution Protocol with `/goal`).
+
+Legacy CPE docs moved to `docs/legacy/`.
 
 ## Critical Technical Gotchas
 1. **DB Access from Vercel Serverless:** NEVER use Drizzle ORM's `db` object in server components or API routes deployed to Vercel. The Supabase DB is IPv6-only at `db.jzrsrruugcajohvvmevg.supabase.co:5432` and the pooler returns "Tenant not found." ALL server-side data access MUST use the Supabase REST client: `supabase.from('table').select('*')`. Drizzle is only used for schema definition and migrations (`drizzle-kit push`).
@@ -124,5 +130,5 @@ Stripe price IDs live alongside in `src/lib/stripe/config.ts`. CODEOWNERS gates 
 - `STRUCTURE.md` — **READ FIRST.** Complete file map. Where things live, "where do I look to do X" table, conventions.
 - `docs/VISION-SPEC.md` — spatial UI metaphor (sacred)
 - `docs/CHAIN-OF-COMMAND.md` — AI agent hierarchy
-- `docs/CHARACTER-PROMPTS.md` — 8 agent system prompts
+- `docs/legacy/CHARACTER-PROMPTS.md` — 8 agent system prompts (legacy; see docs/artlab/CHARACTER-PIPELINE.md)
 - `docs/LAUNCH-READY.md` — locked business decisions + remaining ops checklist
