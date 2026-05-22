@@ -1,1 +1,1 @@
-export * from "@/lib/creative-production/promotion";
+export * from "./promotion";

@@ -1,1 +1,1 @@
-export * from "@/lib/creative-production/providers";
+export * from "./adapters";
