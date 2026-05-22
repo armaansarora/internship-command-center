@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Inline definition — formerly imported from legacy @/lib/creative-production/types
+// Inline definition — migrated from the legacy CPE (Phase 8 Task 8.2)
 export type CreativeAssetType =
   | "character"
   | "environment"
