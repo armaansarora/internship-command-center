@@ -94,3 +94,28 @@ export function paletteDistance(a: PaletteHistogram, b: PaletteHistogram): numbe
 export function silhouetteDistance(a: SilhouetteHash, b: SilhouetteHash): number {
   return Math.abs(a.aspectRatio - b.aspectRatio);
 }
+
+/**
+ * Compute a perceptual hash string from raw image bytes.
+ * Returns a compact hex string; two images with identical visual content will
+ * return the same hash. Used by the cast-diversity regression suite to detect
+ * character silhouette/palette collisions.
+ */
+export async function computePerceptualHash(bytes: Buffer): Promise<string> {
+  const SIZE = 8;
+  const { data } = await sharp(bytes)
+    .resize(SIZE, SIZE, { fit: "fill" })
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  // Compute mean
+  let sum = 0;
+  for (let i = 0; i < data.length; i += 1) sum += data[i]!;
+  const mean = sum / data.length;
+  // Build bit string: 1 if pixel >= mean, else 0
+  let bits = 0n;
+  for (let i = 0; i < data.length; i += 1) {
+    bits = (bits << 1n) | (data[i]! >= mean ? 1n : 0n);
+  }
+  return bits.toString(16).padStart(SIZE * SIZE / 4, "0");
+}
