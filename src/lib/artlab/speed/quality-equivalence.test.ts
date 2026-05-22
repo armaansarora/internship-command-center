@@ -1,6 +1,6 @@
 // src/lib/artlab/speed/quality-equivalence.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { assertQualityEquivalent } from "./quality-equivalence";

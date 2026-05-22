@@ -1,6 +1,6 @@
 // src/lib/artlab/daemon/cancel-flow.test.ts
 import { describe, expect, it, beforeEach, vi } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { processCancelIntents, CANCEL_GRACE_MS } from "./cancel-flow";
@@ -16,7 +16,6 @@ describe("cancel flow", () => {
 
   it("sends SIGTERM to the matching active child", async () => {
     const sup = createSupervisor();
-    const killFn = vi.fn().mockReturnValue(true);
     sup.registerChild({ runId: "run-1", pid: 42 });
     const kill = vi.fn().mockReturnValue(true);
     mkdirSync(join(workspaceRoot, "inbox"));

@@ -26,7 +26,7 @@ Target aesthetic: luxury game UI meets Bloomberg Terminal meets Apple spatial de
 | L | The Lobby (Login/Onboarding) | Otis |
 
 Full agent hierarchy spec: `docs/CHAIN-OF-COMMAND.md`
-Character voice prompts: `docs/legacy/CHARACTER-PROMPTS.md`
+Character voice prompts: `docs/CHARACTER-PROMPTS.md`
 Spatial design metaphor: `docs/VISION-SPEC.md`
 
 ## Key Commands
@@ -130,5 +130,5 @@ Stripe price IDs live alongside in `src/lib/stripe/config.ts`. CODEOWNERS gates 
 - `STRUCTURE.md` — **READ FIRST.** Complete file map. Where things live, "where do I look to do X" table, conventions.
 - `docs/VISION-SPEC.md` — spatial UI metaphor (sacred)
 - `docs/CHAIN-OF-COMMAND.md` — AI agent hierarchy
-- `docs/legacy/CHARACTER-PROMPTS.md` — 8 agent system prompts (legacy; see docs/artlab/CHARACTER-PIPELINE.md)
+- `docs/CHARACTER-PROMPTS.md` — 8 agent system prompts (legacy; see docs/artlab/CHARACTER-PIPELINE.md)
 - `docs/LAUNCH-READY.md` — locked business decisions + remaining ops checklist

@@ -4,7 +4,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 test.describe("ArtLab animation vertical slice — motion + RM fallback", () => {
-  test("animation plays when prefers-reduced-motion is no-preference", async ({ page, context }) => {
+  test("animation plays when prefers-reduced-motion is no-preference", async ({ page }) => {
     const animationDir = join("public", "art", "misc"); // animation promotion target — adjust if Phase 7 routes differently
     if (!existsSync(animationDir)) test.skip();
     if (readdirSync(animationDir).length === 0) test.skip();
@@ -14,7 +14,7 @@ test.describe("ArtLab animation vertical slice — motion + RM fallback", () => 
     expect(animatedCount).toBeGreaterThanOrEqual(0); // present or absent depending on what was promoted
   });
 
-  test("animation suppressed and poster shown when prefers-reduced-motion: reduce", async ({ page, context }) => {
+  test("animation suppressed and poster shown when prefers-reduced-motion: reduce", async ({ page }) => {
     const animationDir = join("public", "art", "misc");
     if (!existsSync(animationDir)) test.skip();
     if (readdirSync(animationDir).length === 0) test.skip();

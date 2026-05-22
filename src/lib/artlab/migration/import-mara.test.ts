@@ -1,6 +1,6 @@
 // src/lib/artlab/migration/import-mara.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { importMaraIntoArtLab } from "./import-mara";

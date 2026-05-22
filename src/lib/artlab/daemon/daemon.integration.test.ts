@@ -1,6 +1,6 @@
 // src/lib/artlab/daemon/daemon.integration.test.ts
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { mkdtempSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDaemonContext, runDaemonOnce } from "./entry";

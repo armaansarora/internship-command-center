@@ -1,6 +1,6 @@
 // src/lib/artlab/self-evolution/scheduler.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runSelfEvolutionScheduler } from "./scheduler";

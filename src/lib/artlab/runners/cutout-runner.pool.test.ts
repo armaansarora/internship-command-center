@@ -1,6 +1,6 @@
 // src/lib/artlab/runners/cutout-runner.pool.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { cutoutRunner } from "./cutout-runner";

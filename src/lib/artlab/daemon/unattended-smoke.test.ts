@@ -1,6 +1,6 @@
 // src/lib/artlab/daemon/unattended-smoke.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, writeFileSync, existsSync, readFileSync, mkdirSync } from "node:fs";
+import { mkdtempSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { reconcileCrashedRuns } from "./crash-recovery";
