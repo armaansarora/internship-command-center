@@ -1,5 +1,16 @@
 import { z } from "zod";
-import type { CreativeAssetType } from "@/lib/creative-production/types";
+
+// Inline definition — formerly imported from legacy @/lib/creative-production/types
+export type CreativeAssetType =
+  | "character"
+  | "environment"
+  | "prop"
+  | "ui-texture"
+  | "animation"
+  | "scene"
+  | "icon-system"
+  | "marketing-hero"
+  | "shader";
 
 export const ARTLAB_PHASES = [
   "routed",
