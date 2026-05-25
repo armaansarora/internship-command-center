@@ -205,13 +205,18 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
     const anthropicKeyPresent = !!(await resolveAnthropicKey());
     input.log(banner({ subtitle: "Daemon running — supervising queue + telegram + cancel + crash-recovery" }));
     input.log("");
+    const brainProvider = anthropicKeyPresent
+      ? "claude (anthropic)"
+      : geminiKeyPresent
+        ? "gemini (reusing image key)"
+        : "mock (no key — bible fallback only)";
     input.log(box([kvList([
       { label: "workspace", value: input.workspaceRoot },
       { label: "pid", value: String(process.pid) },
       { label: "tick", value: "1000ms" },
       { label: "telegram", value: telegramTokenPresent ? "live" : "noop (no token in env or keychain)", status: telegramTokenPresent ? "ok" : "muted" },
-      { label: "gemini", value: geminiKeyPresent ? "live" : "noop (no key in env or keychain)", status: geminiKeyPresent ? "ok" : "muted" },
-      { label: "claude", value: anthropicKeyPresent ? "live" : "noop (no ANTHROPIC_API_KEY)", status: anthropicKeyPresent ? "ok" : "muted" },
+      { label: "gemini images", value: geminiKeyPresent ? "live" : "noop (no key in env or keychain)", status: geminiKeyPresent ? "ok" : "muted" },
+      { label: "brain", value: brainProvider, status: anthropicKeyPresent || geminiKeyPresent ? "ok" : "muted" },
     ])], { title: "Daemon configuration" }));
     input.log("");
     input.log(`${gold("●")} daemon online — Ctrl-C to stop`);

@@ -21,6 +21,7 @@ import { renderPlaceholderImage } from "../speed/placeholder-images";
 import { displayFor } from "../intake/known-cast";
 import { createGeminiProvider, type GeminiProvider } from "../providers/gemini-adapter";
 import { createClaudeBrain } from "../orchestrator/claude-brain";
+import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
 import { buildConceptLanePrompts, type ConceptLanePrompt } from "../orchestrator/prompt-builder";
@@ -47,11 +48,21 @@ function shouldUseRealGemini(): boolean {
 }
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
+  // Brain preference: Anthropic (if key present) > Gemini (reuses image key) > mock.
+  // The Gemini-brain path is the user's default when only GEMINI_API_KEY is wired —
+  // same key powers both image generation and prompt-variation authoring.
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const model = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
-  const raw: ArtLabLlmBrain = anthropicKey
-    ? createClaudeBrain({ apiKey: anthropicKey, model })
-    : { decide: decideWithMockBrain };
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const geminiKey = geminiKeyFromEnv();
+  const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL; // optional override
+  let raw: ArtLabLlmBrain;
+  if (anthropicKey && process.env.ARTLAB_BRAIN_PROVIDER !== "gemini") {
+    raw = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
+  } else if (geminiKey) {
+    raw = createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel });
+  } else {
+    raw = { decide: decideWithMockBrain };
+  }
   return createLoggedBrain({ inner: raw, workspaceRoot });
 }
 
