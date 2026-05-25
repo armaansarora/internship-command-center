@@ -7,7 +7,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { ARTLAB_LAUNCHD_LABEL, renderLaunchdPlist } from "@/lib/artlab/daemon/launchd";
 
 export type DaemonControlVerb = "start" | "stop" | "restart" | "status" | "logs";
@@ -24,6 +24,11 @@ function plistPath(): string { return join(plistDir(), `${ARTLAB_LAUNCHD_LABEL}.
 function logRoot(workspaceRoot: string): string { return join(workspaceRoot, "logs"); }
 function gid(): string { return `gui/${process.getuid?.() ?? 0}`; }
 
+function findTsxLoaderPath(): string | undefined {
+  const candidate = join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs");
+  return existsSync(candidate) ? candidate : undefined;
+}
+
 function tryLaunchctl(args: string[]): { ok: boolean; output: string } {
   try {
     const output = execFileSync("launchctl", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
@@ -37,13 +42,21 @@ function tryLaunchctl(args: string[]): { ok: boolean; output: string } {
 function start(input: DaemonControlInput): number {
   const path = plistPath();
   if (!existsSync(plistDir())) mkdirSync(plistDir(), { recursive: true });
-  if (!existsSync(logRoot(input.workspaceRoot))) mkdirSync(logRoot(input.workspaceRoot), { recursive: true });
-  const entryScript = process.argv[1] ?? join(process.cwd(), "scripts", "artlab.ts");
+  const absWorkspaceRoot = resolve(input.workspaceRoot);
+  const absLogRoot = logRoot(absWorkspaceRoot);
+  if (!existsSync(absLogRoot)) mkdirSync(absLogRoot, { recursive: true });
+  const entryScript = resolve(process.argv[1] ?? join(process.cwd(), "scripts", "artlab.ts"));
+  const tsxLoaderPath = findTsxLoaderPath();
+  if (!tsxLoaderPath) {
+    input.err(`artlab daemon: cannot find node_modules/tsx/dist/cli.mjs — run \`npm install\` from the project root.`);
+    return 1;
+  }
   const plist = renderLaunchdPlist({
     nodeBinary: process.execPath,
     daemonEntry: entryScript,
-    workspaceRoot: input.workspaceRoot,
-    logRoot: logRoot(input.workspaceRoot),
+    workspaceRoot: absWorkspaceRoot,
+    logRoot: absLogRoot,
+    tsxLoaderPath,
   });
   writeFileSync(path, plist);
   tryLaunchctl(["bootout", `${gid()}/${ARTLAB_LAUNCHD_LABEL}`]);

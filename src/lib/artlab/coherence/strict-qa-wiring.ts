@@ -45,26 +45,30 @@ export interface RunCoherenceCheckResult {
 }
 
 export async function runCoherenceCheck(input: RunCoherenceCheckInput): Promise<RunCoherenceCheckResult> {
-  const cutoutDir = join(input.runDir, "cutouts");
-  if (!existsSync(cutoutDir)) {
-    return { skipped: true, skippedReason: "no-cutouts-dir" };
+  // Diversity is a check on the 5-direction CONCEPT BOARD — are the lanes
+  // visually distinct from each other? Production cutouts share a character
+  // by definition (same outfit / same identity across 20+ sprites), so
+  // diversity-checking those would always fail and isn't the intent.
+  const conceptDir = join(input.runDir, "concept-slots");
+  if (!existsSync(conceptDir)) {
+    return { skipped: true, skippedReason: "no-concept-slots-dir" };
   }
-  const cutouts = readdirSync(cutoutDir).filter((f) => /\.(png|webp|jpe?g)$/i.test(f));
-  if (cutouts.length === 0) {
-    return { skipped: true, skippedReason: "no-cutouts" };
+  const lanes = readdirSync(conceptDir).filter((f) => /^lane-\d+\.(png|webp|jpe?g)$/.test(f)).sort();
+  if (lanes.length === 0) {
+    return { skipped: true, skippedReason: "no-concept-lanes" };
   }
-  const realCutouts = cutouts.filter((f) => looksLikeRealImage(join(cutoutDir, f)));
-  if (realCutouts.length < 2) {
-    return { skipped: true, skippedReason: "mock-or-too-few-real-cutouts" };
+  const realLanes = lanes.filter((f) => looksLikeRealImage(join(conceptDir, f)));
+  if (realLanes.length < 2) {
+    return { skipped: true, skippedReason: "mock-or-too-few-real-lanes" };
   }
-  const lanes: LaneSignature[] = await Promise.all(
-    realCutouts.map(async (file, idx) => ({
+  const laneSigs: LaneSignature[] = await Promise.all(
+    realLanes.map(async (file, idx) => ({
       laneIndex: idx + 1,
-      silhouette: await computeSilhouetteHash(join(cutoutDir, file)),
-      palette: await computePaletteHistogram(join(cutoutDir, file)),
+      silhouette: await computeSilhouetteHash(join(conceptDir, file)),
+      palette: await computePaletteHistogram(join(conceptDir, file)),
     })),
   );
   const promotedCast: PromotedCastSignature[] = [];
-  const diversity = checkCastDiversity({ lanes, promotedCast });
+  const diversity = checkCastDiversity({ lanes: laneSigs, promotedCast });
   return { skipped: false, diversity };
 }

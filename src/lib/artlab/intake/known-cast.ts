@@ -46,3 +46,38 @@ export function findCastMember(query: string): KnownCastMember | undefined {
       c.lastName.toLowerCase() === q,
   );
 }
+
+let cachedById: Record<string, KnownCastMember> | null = null;
+
+export interface CastDisplay {
+  characterId: string;
+  displayName: string; // "Sol Navarro"
+  firstName: string;   // "Sol"
+  title: string;       // "Chief Operations Officer" or similar
+  space: string;       // "Floor 4 — The Situation Room"
+}
+
+/**
+ * Resolve a characterId (e.g. "cno", "ceo") to a structured display tuple for
+ * user-facing rendering. Falls back to a capitalized characterId when the id
+ * isn't in the known cast — guarantees a non-empty `displayName` and
+ * `firstName` so callers can interpolate without null checks.
+ */
+export function displayFor(characterId: string | undefined): CastDisplay {
+  if (!characterId) {
+    return { characterId: "character", displayName: "Character", firstName: "Character", title: "", space: "" };
+  }
+  if (!cachedById) cachedById = listCastByCharacterId();
+  const member = cachedById[characterId];
+  if (member) {
+    return {
+      characterId: member.characterId,
+      displayName: member.displayName,
+      firstName: member.firstName,
+      title: member.title,
+      space: member.space,
+    };
+  }
+  const cap = characterId.length > 0 ? characterId[0]!.toUpperCase() + characterId.slice(1) : characterId;
+  return { characterId, displayName: cap, firstName: cap, title: "", space: "" };
+}

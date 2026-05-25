@@ -36,4 +36,20 @@ describe("launchd plist generator", () => {
     expect(xml).toContain("&amp;");
     expect(xml).not.toMatch(/ & /);
   });
+
+  it("inserts tsxLoaderPath before daemonEntry so node can load TypeScript", () => {
+    const xml = renderLaunchdPlist({
+      nodeBinary: "/usr/local/bin/node",
+      daemonEntry: "/proj/scripts/artlab.ts",
+      workspaceRoot: "/proj/.artlab/engine",
+      logRoot: "/proj/.artlab/engine/logs",
+      tsxLoaderPath: "/proj/node_modules/tsx/dist/cli.mjs",
+    });
+    const nodeIdx = xml.indexOf("<string>/usr/local/bin/node</string>");
+    const tsxIdx = xml.indexOf("<string>/proj/node_modules/tsx/dist/cli.mjs</string>");
+    const entryIdx = xml.indexOf("<string>/proj/scripts/artlab.ts</string>");
+    expect(nodeIdx).toBeGreaterThan(-1);
+    expect(tsxIdx).toBeGreaterThan(nodeIdx);
+    expect(entryIdx).toBeGreaterThan(tsxIdx);
+  });
 });

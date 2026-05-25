@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ArtLabAssetType } from "../types";
+import { renderPlaceholderImage } from "../speed/placeholder-images";
+import { displayFor } from "../intake/known-cast";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 export const PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE: Record<ArtLabAssetType, number> = {
@@ -34,9 +36,17 @@ export const productionRunner: ArtLabRunner = {
           failureCode: "aborted",
         };
       }
-      const path = join(dir, `slot-${i}.json`);
-      writeFileSync(path, JSON.stringify({ slotId: `slot-${i}`, laneIndex: input.approvedLaneIndex, mock: true }));
-      slotOutputs.push(path);
+      const jsonPath = join(dir, `slot-${i}.json`);
+      const pngPath = join(dir, `slot-${i}.png`);
+      writeFileSync(jsonPath, JSON.stringify({ slotId: `slot-${i}`, laneIndex: input.approvedLaneIndex, mock: true, alpha: true }));
+      const display = displayFor(input.characterId);
+      const png = await renderPlaceholderImage({
+        title: display.firstName,
+        subtitle: `Sprite ${i} of ${target}`,
+        laneIndex: input.approvedLaneIndex ?? 1,
+      });
+      writeFileSync(pngPath, png);
+      slotOutputs.push(jsonPath);
     }
     return {
       runnerKind: "production",

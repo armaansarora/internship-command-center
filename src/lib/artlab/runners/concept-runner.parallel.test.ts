@@ -22,8 +22,9 @@ describe("concept runner — true 5-lane parallelism (Phase 5)", () => {
     const wallClock = Date.now() - startedAt;
     delete process.env.ARTLAB_CONCEPT_LANE_DELAY_MS;
     expect(result.status).toBe("ok");
-    expect(wallClock).toBeLessThan(300); // 5x sequential would be 500ms; parallel is ~100ms + overhead
-    expect(readdirSync(join(runDir, "concept-slots"))).toHaveLength(5);
+    expect(wallClock).toBeLessThan(800); // 5x sequential would be ≥500ms; parallel + sharp render is ~250-400ms
+    // 10 files: lane-N.json + lane-N.png, N=1..5
+    expect(readdirSync(join(runDir, "concept-slots"))).toHaveLength(10);
   });
 
   it("each lane file still exists with the right slot json (quality preserved)", async () => {
@@ -36,6 +37,12 @@ describe("concept runner — true 5-lane parallelism (Phase 5)", () => {
     });
     expect(result.status).toBe("ok");
     const slots = readdirSync(join(runDir, "concept-slots")).sort();
-    expect(slots).toEqual(["lane-1.json", "lane-2.json", "lane-3.json", "lane-4.json", "lane-5.json"]);
+    expect(slots).toEqual([
+      "lane-1.json", "lane-1.png",
+      "lane-2.json", "lane-2.png",
+      "lane-3.json", "lane-3.png",
+      "lane-4.json", "lane-4.png",
+      "lane-5.json", "lane-5.png",
+    ]);
   });
 });

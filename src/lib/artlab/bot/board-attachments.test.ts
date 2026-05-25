@@ -17,8 +17,8 @@ describe("board attachment builders", () => {
   it("concept board: 5 photos with numbered captions", () => {
     const result = buildConceptBoardAttachments({ runDir, characterId: "sol" });
     expect(result.media).toHaveLength(5);
-    expect(result.media[0]!.caption).toBe("Sol — direction 1");
-    expect(result.media[4]!.caption).toBe("Sol — direction 5");
+    expect(result.media[0]!.caption).toBe("Sol · direction 1");
+    expect(result.media[4]!.caption).toBe("Sol · direction 5");
   });
 
   it("final board: single grid image with sprite count", () => {

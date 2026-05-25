@@ -18,8 +18,11 @@ describe("concept runner", () => {
     });
     expect(result.status).toBe("ok");
     expect(result.runnerKind).toBe("concept");
-    expect((result.artifacts.slotOutputs as string[]).length).toBe(5);
+    expect((result.artifacts.slotOutputs as Array<{ jsonPath: string; pngPath: string }>).length).toBe(5);
     expect(existsSync(join(runDir, "concept-board.json"))).toBe(true);
+    for (let i = 1; i <= 5; i += 1) {
+      expect(existsSync(join(runDir, "concept-slots", `lane-${i}.png`))).toBe(true);
+    }
   });
 
   it("returns failed when slot count target unreachable", async () => {

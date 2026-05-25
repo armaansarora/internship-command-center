@@ -9,6 +9,10 @@ import { routeRequest } from "../intake/router";
 import { parseBundle } from "../intake/bundle-parser";
 import { saveReferenceAttachment } from "../intake/reference-attachment-fs";
 import { enqueueRun } from "../queue/queue";
+import { advanceConceptApproval, advancePromotionApproval } from "./gate-advance";
+import { displayFor } from "../intake/known-cast";
+
+function shortId(runId: string): string { return runId.slice(0, 8); }
 
 export interface DispatchInboundInput {
   workspaceRoot: string;
@@ -46,7 +50,31 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
     case "promotion": {
       const parsed = await parseReply(classified.text, input.brain);
       if (parsed.kind === "promotion-accepted") {
-        await input.telegram.sendMessage({ chatId: input.message.chat.id, text: "Promotion accepted. Engine continuing." });
+        const advance = await advancePromotionApproval({ workspaceRoot: input.workspaceRoot });
+        if (advance.ok) {
+          await input.telegram.sendMessage({
+            chatId: input.message.chat.id,
+            text: [
+              `🚀 Promotion accepted`,
+              ``,
+              `Run: ${shortId(advance.runId)}`,
+              `Status: writing to public/art now…`,
+              ``,
+              `I'll send a confirmation when the assets land.`,
+            ].join("\n"),
+          });
+        } else {
+          await input.telegram.sendMessage({
+            chatId: input.message.chat.id,
+            text: [
+              `🤔 Heard "approved for app" — but no run is parked at the final-review gate.`,
+              ``,
+              `Reason: ${advance.reason}`,
+              ``,
+              `Trigger a new run with: make <character name>`,
+            ].join("\n"),
+          });
+        }
         return { action: { type: "promotion-accepted" } };
       }
       if (parsed.kind === "echo-back-required-phrase") {
@@ -56,10 +84,46 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
     }
     case "gate-reply": {
       const parsed = await parseReply(classified.text, input.brain);
-      await input.telegram.sendMessage({ chatId: input.message.chat.id, text: `Reply received: ${classified.text}` });
+      if (parsed.kind === "matched" && parsed.action.type === "approve-direction") {
+        const advance = await advanceConceptApproval({
+          workspaceRoot: input.workspaceRoot,
+          laneIndex: parsed.action.laneIndex,
+        });
+        if (advance.ok) {
+          await input.telegram.sendMessage({
+            chatId: input.message.chat.id,
+            text: [
+              `✅ Direction ${parsed.action.laneIndex} locked in`,
+              ``,
+              `Run: ${shortId(advance.runId)}`,
+              `Walking: canary → production → strict-qa → final-review`,
+              ``,
+              `I'll send the final board the moment it's ready.`,
+            ].join("\n"),
+          });
+        } else {
+          await input.telegram.sendMessage({
+            chatId: input.message.chat.id,
+            text: [
+              `🤔 Heard "approve direction ${parsed.action.laneIndex}" — but no run is parked at the concept-review gate.`,
+              ``,
+              `Reason: ${advance.reason}`,
+              ``,
+              `Trigger a new run with: make <character name>`,
+            ].join("\n"),
+          });
+        }
+      } else {
+        await input.telegram.sendMessage({
+          chatId: input.message.chat.id,
+          text: `📝 Reply received: "${classified.text}"\n\n(Waiting on the engine to surface a gate — no immediate action taken.)`,
+        });
+      }
       return { action: { type: "gate-reply", reply: parsed } };
     }
     case "trigger": {
+      const outcome = routeRequest({ request: classified.text });
+      const display = displayFor(outcome.characterId);
       const runId = enqueueSingleRun({
         workspaceRoot: input.workspaceRoot,
         request: classified.text,
@@ -69,7 +133,14 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
       });
       await input.telegram.sendMessage({
         chatId: input.message.chat.id,
-        text: `Got it — engine queued run ${runId}.`,
+        text: [
+          `🎨 Queued`,
+          ``,
+          `Subject: ${display.displayName}${display.title ? ` — ${display.title}` : ""}`,
+          `Run: ${shortId(runId)}`,
+          ``,
+          `Generating 5 concept directions… (~5-15s)`,
+        ].join("\n"),
       });
       return { action: { type: "trigger-enqueued", runIds: [runId] } };
     }
@@ -87,6 +158,7 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
         // attachment fetch failure is non-fatal — proceed with text-only routing
       }
       const outcome = routeRequest({ request: classified.text });
+      const display = displayFor(outcome.characterId);
       enqueueRun(input.workspaceRoot, {
         runId,
         priority: "default",
@@ -103,7 +175,14 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
       });
       await input.telegram.sendMessage({
         chatId: input.message.chat.id,
-        text: `Got it — engine queued run ${runId} with your reference photo.`,
+        text: [
+          `📸 Queued (with reference photo)`,
+          ``,
+          `Subject: ${display.displayName}${display.title ? ` — ${display.title}` : ""}`,
+          `Run: ${shortId(runId)}`,
+          ``,
+          `Generating 5 concept directions using your reference…`,
+        ].join("\n"),
       });
       return { action: { type: "trigger-enqueued", runIds: [runId] } };
     }
@@ -140,7 +219,12 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
       }
       await input.telegram.sendMessage({
         chatId: input.message.chat.id,
-        text: `Got it — engine queued ${runIds.length} run${runIds.length === 1 ? "" : "s"} from your bundle.`,
+        text: [
+          `📦 Bundle queued`,
+          ``,
+          `${runIds.length} linked run${runIds.length === 1 ? "" : "s"}.`,
+          `I'll surface concept boards for each as they finish.`,
+        ].join("\n"),
       });
       return { action: { type: "trigger-enqueued", runIds } };
     }

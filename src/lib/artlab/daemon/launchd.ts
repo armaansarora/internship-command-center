@@ -13,6 +13,10 @@ export interface LaunchdPlistInput {
   daemonEntry: string;
   workspaceRoot: string;
   logRoot: string;
+  // When set, ProgramArguments invokes node with the tsx CLI loader before the
+  // daemon entry script — required because vanilla node cannot execute the
+  // TypeScript daemon entry directly. tsx's CLI is at node_modules/tsx/dist/cli.mjs.
+  tsxLoaderPath?: string;
 }
 
 function escapeXml(s: string): string {
@@ -25,7 +29,9 @@ function escapeXml(s: string): string {
 }
 
 export function renderLaunchdPlist(input: LaunchdPlistInput): string {
-  const args = [input.nodeBinary, input.daemonEntry, "daemon", "run"];
+  const args = input.tsxLoaderPath
+    ? [input.nodeBinary, input.tsxLoaderPath, input.daemonEntry, "daemon", "run"]
+    : [input.nodeBinary, input.daemonEntry, "daemon", "run"];
   const argsXml = args.map((a) => `      <string>${escapeXml(a)}</string>`).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

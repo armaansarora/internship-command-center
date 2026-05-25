@@ -25,8 +25,11 @@ describe("cutout runner — uses worker pool (Phase 5)", () => {
     const wallClock = Date.now() - startedAt;
     delete process.env.ARTLAB_CUTOUT_DELAY_MS;
     expect(result.status).toBe("ok");
-    // 8 cutouts × 60ms sequential = 480ms; pool of ≥2 should beat 4x = 240ms by some margin
-    expect(wallClock).toBeLessThan(240);
+    // 8 cutouts × 60ms sequential = 480ms; pool of ≥2 should beat sequential by a wide margin.
+    // The runner now pre-renders one placeholder PNG via sharp (~50-80ms first-call overhead)
+    // before the pool starts; the threshold accommodates that setup cost while still rejecting
+    // any code path that falls back to sequential cutouts (which would land near 480ms).
+    expect(wallClock).toBeLessThan(360);
     expect((result.artifacts.cutoutPaths as string[])).toHaveLength(8);
   });
 });

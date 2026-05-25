@@ -104,3 +104,12 @@ playwright-report/
 .artlab/engine/inbox/**/*.json
 .artlab/engine/ledgers/*.jsonl
 .artlab/engine/memory/*.jsonl
+
+# artlab daemon runtime files (per-machine, never committed)
+.artlab/engine/runs/*/
+.artlab/engine/queue/*.json
+.artlab/engine/daemon-heartbeat.json
+.artlab/engine/daemon-errors.jsonl
+.artlab/engine/telegram-offset.json
+.artlab/engine/logs/
+.artlab/engine/escalations/*.json

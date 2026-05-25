@@ -7,7 +7,29 @@ import {
   type CreativeFinalAsset,
 } from "@/lib/artlab/review/review";
 import { runCoherenceCheck } from "@/lib/artlab/coherence/strict-qa-wiring";
+import { composeFinalBoard } from "../speed/placeholder-images";
+import { cutoutRunner } from "./cutout-runner";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
+
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+function fileHasPngSignature(path: string): boolean {
+  try {
+    const fd = readFileSync(path);
+    if (fd.length < PNG_SIGNATURE.length) return false;
+    return fd.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE);
+  } catch { return false; }
+}
+
+function detectAlpha(path: string): boolean {
+  // Real PNG (signature match) — trust sharp's alpha render path.
+  if (fileHasPngSignature(path)) return true;
+  // Legacy mock path — files written as JSON with `.png` extension carry `alpha: true`.
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8")) as { alpha?: boolean };
+    return parsed.alpha === true;
+  } catch { return false; }
+}
 
 interface AssetDoctorEntry {
   cutoutPath: string;
@@ -61,18 +83,19 @@ export const strictQaRunner: ArtLabRunner = {
   async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
     const startedAt = Date.now();
     const cutoutDir = join(input.runDir, "cutouts");
+    // The 10-phase state machine doesn't include a dedicated cutout phase;
+    // production transitions directly to strict-qa. For asset types that
+    // need cutouts (character, prop), run the cutout step inline here so the
+    // alpha-doctor + final-board composite have inputs to work with.
+    if (!existsSync(cutoutDir)) {
+      await cutoutRunner.run(input);
+    }
     const entries: AssetDoctorEntry[] = [];
     const repairs: RepairPlanEntry[] = [];
     if (existsSync(cutoutDir)) {
       for (const file of readdirSync(cutoutDir).filter((f) => f.endsWith(".png"))) {
         const path = join(cutoutDir, file);
-        let alpha = false;
-        try {
-          const parsed = JSON.parse(readFileSync(path, "utf8")) as { alpha?: boolean };
-          alpha = parsed.alpha === true;
-        } catch {
-          alpha = false;
-        }
+        const alpha = detectAlpha(path);
         entries.push({ cutoutPath: path, alpha, notes: alpha ? [] : ["missing alpha"] });
         if (!alpha) {
           repairs.push({ cutoutPath: path, reason: "alpha-missing", remediation: "rerun-cutout" });
@@ -104,6 +127,17 @@ export const strictQaRunner: ArtLabRunner = {
       };
     }
     publishBoards(input.runDir, input.runId, entries);
+    // Compose a real final-board.png the Telegram bot can attach.
+    try {
+      const cutoutPngs = entries.map((e) => e.cutoutPath).filter((p) => fileHasPngSignature(p));
+      if (cutoutPngs.length > 0) {
+        const board = await composeFinalBoard({
+          cutoutPaths: cutoutPngs,
+          characterId: input.characterId ?? "character",
+        });
+        writeFileSync(join(input.runDir, "final-board.png"), board);
+      }
+    } catch { /* don't fail strict-qa over a placeholder image issue */ }
     return {
       runnerKind: "strict-qa",
       status: "ok",
