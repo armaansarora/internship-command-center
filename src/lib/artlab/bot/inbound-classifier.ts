@@ -1,7 +1,8 @@
-import type { TelegramMessage } from "./telegram-client";
+import type { TelegramCallbackQuery, TelegramMessage } from "./telegram-client";
+import { decodeCallback, type DecodedCallback } from "./inline-keyboards";
 
 export const ARTLAB_INBOUND_KINDS = [
-  "trigger", "trigger-with-photo", "gate-reply", "bundle", "command", "promotion",
+  "trigger", "trigger-with-photo", "gate-reply", "bundle", "command", "promotion", "callback",
 ] as const;
 export type ArtLabInboundKind = (typeof ARTLAB_INBOUND_KINDS)[number];
 
@@ -10,6 +11,7 @@ export interface ArtLabInboundClassification {
   text: string;
   photoFileId?: string;
   commandName?: string;
+  callback?: DecodedCallback;
 }
 
 const PROMOTION_PHRASE = /^\s*approved\s+for\s+app\s*$/i;
@@ -33,4 +35,11 @@ export function classifyInbound(message: TelegramMessage): ArtLabInboundClassifi
   }
   if (BUNDLE_PHRASES.some((p) => p.test(text))) return { kind: "bundle", text };
   return { kind: "trigger", text };
+}
+
+export function classifyCallback(callback: TelegramCallbackQuery): ArtLabInboundClassification | null {
+  if (!callback.data) return null;
+  const decoded = decodeCallback(callback.data);
+  if (!decoded) return null;
+  return { kind: "callback", text: callback.data, callback: decoded };
 }

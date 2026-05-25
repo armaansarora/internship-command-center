@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { classifyInbound } from "./inbound-classifier";
+import { classifyCallback, classifyInbound } from "./inbound-classifier";
 import { handleBotCommand } from "./commands";
 import { parseReply, type ComposedReplyResult } from "./reply-parser";
-import { isAuthorizedSender } from "./identity";
-import type { TelegramClient, TelegramMessage } from "./telegram-client";
+import { isAuthorizedSender, isAuthorizedCallback } from "./identity";
+import type { TelegramCallbackQuery, TelegramClient, TelegramMessage, TelegramInlineKeyboard } from "./telegram-client";
 import type { ArtLabLlmBrain } from "../orchestrator/llm-brain";
 import { routeRequest } from "../intake/router";
 import { parseBundle } from "../intake/bundle-parser";
@@ -11,31 +11,134 @@ import { saveReferenceAttachment } from "../intake/reference-attachment-fs";
 import { enqueueRun } from "../queue/queue";
 import { advanceConceptApproval, advancePromotionApproval } from "./gate-advance";
 import { displayFor } from "../intake/known-cast";
+import {
+  triggerAck,
+  triggerWithPhotoAck,
+  bundleAck,
+  conceptApprovedAck,
+  promotionAcceptedAck,
+  gateReplyEcho,
+  gateReplyNoMatch,
+  callbackAck,
+  type TelegramOutboundMessage,
+} from "./message-templates";
+import type { DecodedCallback } from "./inline-keyboards";
 
-function shortId(runId: string): string { return runId.slice(0, 8); }
+async function send(telegram: TelegramClient, chatId: number, msg: TelegramOutboundMessage): Promise<void> {
+  await telegram.sendMessage({
+    chatId,
+    text: msg.text,
+    ...(msg.parseMode ? { parseMode: msg.parseMode } : {}),
+    ...(msg.replyMarkup ? { replyMarkup: msg.replyMarkup } : {}),
+    ...(msg.disableWebPagePreview ? { disableWebPagePreview: true } : {}),
+  });
+}
+
+function spaceLabelFor(space: string): string {
+  return space
+    .split("-")
+    .map((w) => w[0]!.toUpperCase() + w.slice(1))
+    .join(" ");
+}
 
 export interface DispatchInboundInput {
   workspaceRoot: string;
   telegram: TelegramClient;
   brain: ArtLabLlmBrain;
-  message: TelegramMessage;
+  message?: TelegramMessage;
+  callbackQuery?: TelegramCallbackQuery;
   now?: () => Date;
 }
 
 export interface DispatchInboundResult {
   action:
-    | { type: "dropped"; reason: "unauthorized" }
+    | { type: "dropped"; reason: "unauthorized" | "no-payload" | "unrecognized-callback" }
     | { type: "command-handled"; commandName: string }
     | { type: "gate-reply"; reply: ComposedReplyResult }
     | { type: "promotion-accepted" }
+    | { type: "callback-handled"; callback: DecodedCallback }
     | { type: "trigger-enqueued"; runIds: string[] };
 }
 
 export async function dispatchInboundMessage(input: DispatchInboundInput): Promise<DispatchInboundResult> {
-  if (!(await isAuthorizedSender(input.message))) {
+  if (input.callbackQuery) {
+    return await dispatchCallback(input, input.callbackQuery);
+  }
+  if (!input.message) {
+    return { action: { type: "dropped", reason: "no-payload" } };
+  }
+  return await dispatchTextOrPhoto(input, input.message);
+}
+
+async function dispatchCallback(input: DispatchInboundInput, callback: TelegramCallbackQuery): Promise<DispatchInboundResult> {
+  if (!(await isAuthorizedCallback(callback))) {
     return { action: { type: "dropped", reason: "unauthorized" } };
   }
-  const classified = classifyInbound(input.message);
+  const classified = classifyCallback(callback);
+  if (!classified || !classified.callback) {
+    await safeAnswerCallback(input.telegram, callback.id, "Unrecognized button.");
+    return { action: { type: "dropped", reason: "unrecognized-callback" } };
+  }
+  const decoded = classified.callback;
+  const chatId = callback.message?.chat.id;
+  if (decoded.kind === "gate") {
+    if (decoded.surface === "concept" && decoded.action.kind === "approve-direction") {
+      const advance = await advanceConceptApproval({
+        workspaceRoot: input.workspaceRoot,
+        laneIndex: decoded.action.laneIndex,
+      });
+      if (advance.ok && chatId) {
+        await safeAnswerCallback(
+          input.telegram,
+          callback.id,
+          callbackAck({ surface: "concept", action: `d${decoded.action.laneIndex}` }).text,
+        );
+        if (callback.message) await safeClearKeyboard(input.telegram, callback.message.chat.id, callback.message.message_id);
+        await send(input.telegram, chatId, conceptApprovedAck({ laneIndex: decoded.action.laneIndex, runId: advance.runId }));
+      } else if (chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, "No run waiting at concept-review.", true);
+        await send(input.telegram, chatId, gateReplyNoMatch({
+          surface: "concept",
+          laneIndex: decoded.action.laneIndex,
+          reason: advance.ok ? "unknown" : advance.reason,
+        }));
+      }
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.surface === "final" && decoded.action.kind === "approve-final") {
+      const advance = await advancePromotionApproval({ workspaceRoot: input.workspaceRoot });
+      if (advance.ok && chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, callbackAck({ surface: "final", action: "a" }).text);
+        if (callback.message) await safeClearKeyboard(input.telegram, callback.message.chat.id, callback.message.message_id);
+        await send(input.telegram, chatId, promotionAcceptedAck({ runId: advance.runId }));
+      } else if (chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, "No run waiting at final-review.", true);
+        await send(input.telegram, chatId, gateReplyNoMatch({
+          surface: "promotion",
+          reason: advance.ok ? "unknown" : advance.reason,
+        }));
+      }
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.action.kind === "revise") {
+      await safeAnswerCallback(input.telegram, callback.id, "Reply with: revise: <your change>");
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.action.kind === "reject") {
+      await safeAnswerCallback(input.telegram, callback.id, "Reply 'reject' to abandon this run.");
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+  }
+  // Clarification callbacks aren't wired yet (Phase C) — ack so the user sees feedback.
+  await safeAnswerCallback(input.telegram, callback.id, "Got it.");
+  return { action: { type: "callback-handled", callback: decoded } };
+}
+
+async function dispatchTextOrPhoto(input: DispatchInboundInput, message: TelegramMessage): Promise<DispatchInboundResult> {
+  if (!(await isAuthorizedSender(message))) {
+    return { action: { type: "dropped", reason: "unauthorized" } };
+  }
+  const classified = classifyInbound(message);
   const now = input.now ?? (() => new Date());
   switch (classified.kind) {
     case "command": {
@@ -44,7 +147,7 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
         commandName: classified.commandName!,
         args: classified.text.split(/\s+/).slice(1),
       });
-      await input.telegram.sendMessage({ chatId: input.message.chat.id, text: out.text });
+      await send(input.telegram, message.chat.id, out.message);
       return { action: { type: "command-handled", commandName: classified.commandName! } };
     }
     case "promotion": {
@@ -52,33 +155,17 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
       if (parsed.kind === "promotion-accepted") {
         const advance = await advancePromotionApproval({ workspaceRoot: input.workspaceRoot });
         if (advance.ok) {
-          await input.telegram.sendMessage({
-            chatId: input.message.chat.id,
-            text: [
-              `🚀 Promotion accepted`,
-              ``,
-              `Run: ${shortId(advance.runId)}`,
-              `Status: writing to public/art now…`,
-              ``,
-              `I'll send a confirmation when the assets land.`,
-            ].join("\n"),
-          });
+          await send(input.telegram, message.chat.id, promotionAcceptedAck({ runId: advance.runId }));
         } else {
-          await input.telegram.sendMessage({
-            chatId: input.message.chat.id,
-            text: [
-              `🤔 Heard "approved for app" — but no run is parked at the final-review gate.`,
-              ``,
-              `Reason: ${advance.reason}`,
-              ``,
-              `Trigger a new run with: make <character name>`,
-            ].join("\n"),
-          });
+          await send(input.telegram, message.chat.id, gateReplyNoMatch({
+            surface: "promotion",
+            reason: advance.reason,
+          }));
         }
         return { action: { type: "promotion-accepted" } };
       }
       if (parsed.kind === "echo-back-required-phrase") {
-        await input.telegram.sendMessage({ chatId: input.message.chat.id, text: parsed.message });
+        await input.telegram.sendMessage({ chatId: message.chat.id, text: parsed.message });
       }
       return { action: { type: "gate-reply", reply: parsed } };
     }
@@ -90,34 +177,19 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
           laneIndex: parsed.action.laneIndex,
         });
         if (advance.ok) {
-          await input.telegram.sendMessage({
-            chatId: input.message.chat.id,
-            text: [
-              `✅ Direction ${parsed.action.laneIndex} locked in`,
-              ``,
-              `Run: ${shortId(advance.runId)}`,
-              `Walking: canary → production → strict-qa → final-review`,
-              ``,
-              `I'll send the final board the moment it's ready.`,
-            ].join("\n"),
-          });
+          await send(input.telegram, message.chat.id, conceptApprovedAck({
+            laneIndex: parsed.action.laneIndex,
+            runId: advance.runId,
+          }));
         } else {
-          await input.telegram.sendMessage({
-            chatId: input.message.chat.id,
-            text: [
-              `🤔 Heard "approve direction ${parsed.action.laneIndex}" — but no run is parked at the concept-review gate.`,
-              ``,
-              `Reason: ${advance.reason}`,
-              ``,
-              `Trigger a new run with: make <character name>`,
-            ].join("\n"),
-          });
+          await send(input.telegram, message.chat.id, gateReplyNoMatch({
+            surface: "concept",
+            laneIndex: parsed.action.laneIndex,
+            reason: advance.reason,
+          }));
         }
       } else {
-        await input.telegram.sendMessage({
-          chatId: input.message.chat.id,
-          text: `📝 Reply received: "${classified.text}"\n\n(Waiting on the engine to surface a gate — no immediate action taken.)`,
-        });
+        await send(input.telegram, message.chat.id, gateReplyEcho({ rawText: classified.text }));
       }
       return { action: { type: "gate-reply", reply: parsed } };
     }
@@ -128,20 +200,15 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
         workspaceRoot: input.workspaceRoot,
         request: classified.text,
         sourceSurface: "telegram",
-        chatId: input.message.chat.id,
+        chatId: message.chat.id,
         now,
       });
-      await input.telegram.sendMessage({
-        chatId: input.message.chat.id,
-        text: [
-          `🎨 Queued`,
-          ``,
-          `Subject: ${display.displayName}${display.title ? ` — ${display.title}` : ""}`,
-          `Run: ${shortId(runId)}`,
-          ``,
-          `Generating 5 concept directions… (~5-15s)`,
-        ].join("\n"),
-      });
+      await send(input.telegram, message.chat.id, triggerAck({
+        displayName: display.displayName,
+        title: display.title,
+        spaceLabel: display.space ? spaceLabelFor(display.space) : undefined,
+        runId,
+      }));
       return { action: { type: "trigger-enqueued", runIds: [runId] } };
     }
     case "trigger-with-photo": {
@@ -169,21 +236,16 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
           request: classified.text,
           assetType: outcome.assetType,
           characterId: outcome.characterId,
-          chatId: input.message.chat.id,
+          chatId: message.chat.id,
           attachmentPath,
         },
       });
-      await input.telegram.sendMessage({
-        chatId: input.message.chat.id,
-        text: [
-          `📸 Queued (with reference photo)`,
-          ``,
-          `Subject: ${display.displayName}${display.title ? ` — ${display.title}` : ""}`,
-          `Run: ${shortId(runId)}`,
-          ``,
-          `Generating 5 concept directions using your reference…`,
-        ].join("\n"),
-      });
+      await send(input.telegram, message.chat.id, triggerWithPhotoAck({
+        displayName: display.displayName,
+        title: display.title,
+        spaceLabel: display.space ? spaceLabelFor(display.space) : undefined,
+        runId,
+      }));
       return { action: { type: "trigger-enqueued", runIds: [runId] } };
     }
     case "bundle": {
@@ -202,7 +264,7 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
               request: child.request,
               assetType: child.assetType,
               characterId: child.characterHint,
-              chatId: input.message.chat.id,
+              chatId: message.chat.id,
               bundleId: bundle.bundleId,
             },
           });
@@ -213,22 +275,18 @@ export async function dispatchInboundMessage(input: DispatchInboundInput): Promi
           workspaceRoot: input.workspaceRoot,
           request: classified.text,
           sourceSurface: "telegram",
-          chatId: input.message.chat.id,
+          chatId: message.chat.id,
           now,
         }));
       }
-      await input.telegram.sendMessage({
-        chatId: input.message.chat.id,
-        text: [
-          `📦 Bundle queued`,
-          ``,
-          `${runIds.length} linked run${runIds.length === 1 ? "" : "s"}.`,
-          `I'll surface concept boards for each as they finish.`,
-        ].join("\n"),
-      });
+      await send(input.telegram, message.chat.id, bundleAck({ runCount: runIds.length }));
       return { action: { type: "trigger-enqueued", runIds } };
     }
+    case "callback":
+      // Should never reach here — callbacks go through dispatchCallback.
+      return { action: { type: "dropped", reason: "no-payload" } };
   }
+  return { action: { type: "dropped", reason: "no-payload" } };
 }
 
 function enqueueSingleRun(input: {
@@ -254,4 +312,25 @@ function enqueueSingleRun(input: {
     },
   });
   return runId;
+}
+
+async function safeAnswerCallback(
+  telegram: TelegramClient,
+  callbackQueryId: string,
+  text?: string,
+  showAlert?: boolean,
+): Promise<void> {
+  try {
+    await telegram.answerCallbackQuery({
+      callbackQueryId,
+      ...(text ? { text } : {}),
+      ...(showAlert ? { showAlert: true } : {}),
+    });
+  } catch { /* non-fatal */ }
+}
+
+async function safeClearKeyboard(telegram: TelegramClient, chatId: number, messageId: number): Promise<void> {
+  try {
+    await telegram.editMessageReplyMarkup({ chatId, messageId, replyMarkup: undefined as unknown as TelegramInlineKeyboard });
+  } catch { /* editing fails when markup is already cleared — non-fatal */ }
 }

@@ -6,6 +6,18 @@ import { join } from "node:path";
 import type { TelegramClient } from "@/lib/artlab/bot/telegram-client";
 import { createTelegramPoller } from "./telegram-poller";
 
+function mockClient(overrides: Partial<TelegramClient> = {}): TelegramClient {
+  return {
+    getUpdates: vi.fn().mockResolvedValue([]),
+    sendMessage: vi.fn(),
+    sendMediaGroup: vi.fn(),
+    downloadFile: vi.fn(),
+    answerCallbackQuery: vi.fn(),
+    editMessageReplyMarkup: vi.fn(),
+    ...overrides,
+  };
+}
+
 describe("telegram poller", () => {
   let workspaceRoot: string;
   beforeEach(() => { workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-tp-")); });
@@ -15,14 +27,11 @@ describe("telegram poller", () => {
       { update_id: 7, message: { chat: { id: 1 }, message_id: 1, text: "hi", date: 0 } },
       { update_id: 9, message: { chat: { id: 1 }, message_id: 2, text: "/status", date: 0 } },
     ];
-    const client = {
+    const client = mockClient({
       getUpdates: vi.fn()
         .mockResolvedValueOnce(updates)
         .mockResolvedValueOnce([]),
-      sendMessage: vi.fn(),
-      sendMediaGroup: vi.fn(),
-      downloadFile: vi.fn(),
-    } satisfies TelegramClient;
+    });
     const dispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
     const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
     await poller.tick();
@@ -33,12 +42,9 @@ describe("telegram poller", () => {
 
   it("persists last offset between ticks via offset.json", async () => {
     const updates = [{ update_id: 99, message: { chat: { id: 1 }, message_id: 1, text: "hi", date: 0 } }];
-    const client = {
+    const client = mockClient({
       getUpdates: vi.fn().mockResolvedValueOnce(updates),
-      sendMessage: vi.fn(),
-      sendMediaGroup: vi.fn(),
-      downloadFile: vi.fn(),
-    } satisfies TelegramClient;
+    });
     const dispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
     const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
     await poller.tick();
@@ -49,23 +55,42 @@ describe("telegram poller", () => {
   });
 
   it("dispatches each message exactly once", async () => {
-    const client = {
+    const client = mockClient({
       getUpdates: vi.fn().mockResolvedValueOnce([
         { update_id: 1, message: { chat: { id: 1 }, message_id: 1, text: "a", date: 0 } },
         { update_id: 2, message: { chat: { id: 1 }, message_id: 2, text: "b", date: 0 } },
       ]),
-      sendMessage: vi.fn(),
-      sendMediaGroup: vi.fn(),
-      downloadFile: vi.fn(),
-    } satisfies TelegramClient;
+    });
     const dispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
     const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
     await poller.tick();
     expect(dispatch).toHaveBeenCalledTimes(2);
   });
 
+  it("passes callback_query updates through to dispatch", async () => {
+    const client = mockClient({
+      getUpdates: vi.fn().mockResolvedValueOnce([
+        {
+          update_id: 4,
+          callback_query: {
+            id: "cb-1",
+            from: { id: 1 },
+            data: "gate:c:a4f3c721:d3",
+            message: { chat: { id: 1 }, message_id: 5, date: 0 },
+          },
+        },
+      ]),
+    });
+    const dispatch = vi.fn().mockResolvedValue({ action: { type: "callback-handled" } });
+    const poller = createTelegramPoller({ workspaceRoot, client, dispatch });
+    await poller.tick();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    const arg = dispatch.mock.calls[0]![0] as { callbackQuery?: { id: string } };
+    expect(arg.callbackQuery?.id).toBe("cb-1");
+  });
+
   it("does not stall on a poison message — advances offset past the failing update and logs to daemon-errors.jsonl", async () => {
-    const client = {
+    const client = mockClient({
       getUpdates: vi.fn()
         .mockResolvedValueOnce([
           { update_id: 1, message: { chat: { id: 1 }, message_id: 1, text: "good", date: 0 } },
@@ -73,12 +98,9 @@ describe("telegram poller", () => {
           { update_id: 3, message: { chat: { id: 1 }, message_id: 3, text: "good", date: 0 } },
         ])
         .mockResolvedValueOnce([]),
-      sendMessage: vi.fn(),
-      sendMediaGroup: vi.fn(),
-      downloadFile: vi.fn(),
-    } satisfies TelegramClient;
-    const dispatch = vi.fn(async (opts: { message: { text?: string } }) => {
-      if (opts.message.text === "poison") throw new Error("dispatch failure");
+    });
+    const dispatch = vi.fn(async (opts: { message?: { text?: string } }) => {
+      if (opts.message?.text === "poison") throw new Error("dispatch failure");
       return { action: { type: "dropped" as const, reason: "unauthorized" as const } };
     });
     const poller = createTelegramPoller({ workspaceRoot, client, dispatch });

@@ -19,6 +19,13 @@ import {
   buildFinalBoardAttachments,
 } from "@/lib/artlab/bot/board-attachments";
 import { displayFor } from "@/lib/artlab/intake/known-cast";
+import {
+  blockerNotice,
+  conceptBoardCaption,
+  finalBoardCaption,
+  promotedConfirmation,
+  type TelegramOutboundMessage,
+} from "@/lib/artlab/bot/message-templates";
 
 export interface PhaseNotifierInput {
   workspaceRoot: string;
@@ -46,6 +53,26 @@ function characterDisplayId(runDir: string, fallback: string | undefined): strin
   return entry?.spec?.characterId ?? fallback ?? "character";
 }
 
+function spaceLabelFor(space: string): string {
+  if (!space) return "";
+  return space
+    .split("-")
+    .map((w) => w[0]!.toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function readRecommendation(runDir: string): { laneIndex: number; reasoning: string } | undefined {
+  const path = join(runDir, "recommendation.json");
+  if (!existsSync(path)) return undefined;
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8")) as { laneIndex?: number; reasoning?: string };
+    if (typeof parsed.laneIndex === "number" && typeof parsed.reasoning === "string") {
+      return { laneIndex: parsed.laneIndex, reasoning: parsed.reasoning };
+    }
+  } catch { /* fall through */ }
+  return undefined;
+}
+
 export async function notifyPhase(input: PhaseNotifierInput): Promise<void> {
   const runDir = join(input.workspaceRoot, "runs", input.runId);
   const state = readRunStateSnapshot(runDir);
@@ -53,28 +80,33 @@ export async function notifyPhase(input: PhaseNotifierInput): Promise<void> {
   const chatId = chatIdForRun(runDir);
   if (!chatId) return; // CLI-originated runs don't get Telegram replies
   const characterId = characterDisplayId(runDir, state.characterId);
+  const display = displayFor(characterId);
 
   if (state.blocker) {
-    const display = displayFor(characterId);
-    await safeSendText(input.telegram, chatId, [
-      `⚠️ Run blocked`,
-      ``,
-      `Subject: ${display.displayName}`,
-      `Run: ${shortId(input.runId)}`,
-      `Phase: ${state.phase}`,
-      `Blocker: ${state.blocker}`,
-      ``,
-      `Reply 'cancel ${input.runId}' to abandon, or wait for the engine to retry.`,
-    ].join("\n"));
+    await safeSend(input.telegram, chatId, blockerNotice({
+      displayName: display.displayName,
+      runId: input.runId,
+      phase: state.phase,
+      blocker: state.blocker,
+    }));
     return;
   }
 
   switch (state.phase) {
     case "concept-review": {
       try {
-        const { media, caption } = buildConceptBoardAttachments({ runDir, characterId });
+        const { media } = buildConceptBoardAttachments({ runDir, characterId });
         await input.telegram.sendMediaGroup({ chatId, media });
-        await safeSendText(input.telegram, chatId, caption);
+        const recommendation = readRecommendation(runDir);
+        const subtitle = display.title
+          ? `${display.title}${display.space ? ` · ${spaceLabelFor(display.space)}` : ""}`
+          : undefined;
+        await safeSend(input.telegram, chatId, conceptBoardCaption({
+          displayName: display.displayName,
+          subtitle,
+          runId: input.runId,
+          recommendation,
+        }));
       } catch (err) {
         await safeSendText(input.telegram, chatId, fallbackConceptCaption(input.runId, characterId, err));
       }
@@ -85,30 +117,36 @@ export async function notifyPhase(input: PhaseNotifierInput): Promise<void> {
         const finalBoardPath = join(runDir, "final-board.png");
         if (!existsSync(finalBoardPath)) throw new Error("final-board.png missing");
         const sprites = countSprites(runDir);
-        const { media, caption } = buildFinalBoardAttachments({ runDir, characterId, spriteCount: sprites });
+        const { media } = buildFinalBoardAttachments({ runDir, characterId, spriteCount: sprites });
         await input.telegram.sendMediaGroup({ chatId, media });
-        await safeSendText(input.telegram, chatId, caption);
+        const subtitle = display.title
+          ? `${display.title}${display.space ? ` · ${spaceLabelFor(display.space)}` : ""}`
+          : undefined;
+        await safeSend(input.telegram, chatId, finalBoardCaption({
+          displayName: display.displayName,
+          subtitle,
+          spriteCount: sprites,
+          runId: input.runId,
+          space: display.space || undefined,
+        }));
       } catch (err) {
         await safeSendText(input.telegram, chatId, fallbackFinalCaption(input.runId, characterId, err));
       }
       return;
     }
     case "closed": {
-      const display = displayFor(characterId);
       const receiptPath = join(runDir, "promotion-receipt.json");
       const receipt = existsSync(receiptPath) ? safeParse<{ promotedAssets?: Array<{ targetRelativePath: string }> }>(receiptPath) : null;
       const promoted = receipt?.promotedAssets?.length ?? 0;
-      const sample = receipt?.promotedAssets?.[0];
-      const lines = [
-        `🚀 ${display.displayName} promoted to the app`,
-        ``,
-        `Run: ${shortId(input.runId)}`,
-        `Assets: ${promoted} written to public/art`,
-      ];
-      if (sample) lines.push(`Sample path: /art/${sample.targetRelativePath}`);
-      lines.push("");
-      lines.push("Ship it.");
-      await safeSendText(input.telegram, chatId, lines.join("\n"));
+      const spendPath = join(runDir, "run-state.json");
+      const spend = readSpend(spendPath);
+      await safeSend(input.telegram, chatId, promotedConfirmation({
+        displayName: display.displayName,
+        runId: input.runId,
+        assetCount: promoted,
+        space: display.space || undefined,
+        spend,
+      }));
       return;
     }
     default:
@@ -125,12 +163,39 @@ function safeParse<T>(path: string): T | null {
   try { return JSON.parse(readFileSync(path, "utf8")) as T; } catch { return null; }
 }
 
+function readSpend(runStatePath: string): { actualCents: number; capCents: number } | undefined {
+  if (!existsSync(runStatePath)) return undefined;
+  try {
+    const parsed = JSON.parse(readFileSync(runStatePath, "utf8")) as {
+      spend?: { actualCents?: number; perRunCapCents?: number; monthlyCeilingCents?: number };
+    };
+    const actual = parsed.spend?.actualCents;
+    const cap = parsed.spend?.perRunCapCents ?? parsed.spend?.monthlyCeilingCents;
+    if (typeof actual === "number" && typeof cap === "number") {
+      return { actualCents: actual, capCents: cap };
+    }
+  } catch { /* fall through */ }
+  return undefined;
+}
+
 function countSprites(runDir: string): number {
   const cutoutDir = join(runDir, "cutouts");
   if (!existsSync(cutoutDir)) return 0;
   try {
     return readdirSync(cutoutDir).filter((f) => f.endsWith(".png")).length;
   } catch { return 0; }
+}
+
+async function safeSend(telegram: TelegramClient, chatId: number, msg: TelegramOutboundMessage): Promise<void> {
+  try {
+    await telegram.sendMessage({
+      chatId,
+      text: msg.text,
+      ...(msg.parseMode ? { parseMode: msg.parseMode } : {}),
+      ...(msg.replyMarkup ? { replyMarkup: msg.replyMarkup } : {}),
+      ...(msg.disableWebPagePreview ? { disableWebPagePreview: true } : {}),
+    });
+  } catch { /* swallow */ }
 }
 
 async function safeSendText(telegram: TelegramClient, chatId: number, text: string): Promise<void> {
@@ -163,4 +228,3 @@ function fallbackFinalCaption(runId: string, characterId: string, err: unknown):
     `Reply 'approved for app' to promote.`,
   ].join("\n");
 }
-

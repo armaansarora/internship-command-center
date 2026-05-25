@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import {
   evaluateCreativePromotionFirewall,
   promoteCreativeAssetsTransactionally,
@@ -7,6 +7,8 @@ import {
   type CreativePromotionStagedAsset,
 } from "@/lib/artlab/promotion/promotion";
 import { appendStyleWin } from "@/lib/artlab/memory/style-ledger";
+import { autoCommitPromotion } from "@/lib/artlab/daemon/git-commit";
+import { displayFor } from "@/lib/artlab/intake/known-cast";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const REQUIRED_PHRASE = "approved for app";
@@ -152,11 +154,48 @@ export const promotionRunner: ArtLabRunner = {
       }
     }
 
+    // Auto-commit + push so the user's "Live now" link actually resolves to
+    // the new asset after Vercel deploys. Path-scoped staging is enforced
+    // inside autoCommitPromotion — the daemon can ONLY stage files under
+    // public/art/ or the generated manifest JSON.
+    const projectRoot = process.env.ARTLAB_PROJECT_ROOT;
+    let gitResult: ReturnType<typeof autoCommitPromotion> | null = null;
+    if (projectRoot && process.env.ARTLAB_AUTO_COMMIT !== "off") {
+      const promotedAbs = result.promotedPaths.map((p) => resolve(p));
+      const manifestAbs = resolve(manifestPath(input));
+      try {
+        gitResult = autoCommitPromotion({
+          projectRoot,
+          runId: input.runId,
+          displayName: input.characterId ? displayFor(input.characterId).displayName : undefined,
+          promotedPaths: promotedAbs,
+          manifestPath: manifestAbs,
+          skipPush: process.env.ARTLAB_AUTO_PUSH === "off",
+        });
+        writeFileSync(
+          join(input.runDir, "git-commit-result.json"),
+          JSON.stringify(gitResult, null, 2),
+        );
+      } catch (err) {
+        // Auto-commit failures must not break promotion — record + continue.
+        try {
+          writeFileSync(
+            join(input.runDir, "git-commit-result.json"),
+            JSON.stringify({
+              status: "failed",
+              reason: err instanceof Error ? err.message : String(err),
+              stagedPaths: [],
+            }, null, 2),
+          );
+        } catch { /* ignore */ }
+      }
+    }
+
     return {
       runnerKind: "promotion",
       status: "ok",
       durationMs: Date.now() - startedAt,
-      artifacts: { promotedPaths: result.promotedPaths, receipt: result.receipt },
+      artifacts: { promotedPaths: result.promotedPaths, receipt: result.receipt, gitResult },
     };
   },
 };

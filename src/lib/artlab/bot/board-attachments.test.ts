@@ -25,7 +25,8 @@ describe("board attachment builders", () => {
     writeFileSync(join(runDir, "final-board.png"), "mock-final");
     const result = buildFinalBoardAttachments({ runDir, characterId: "sol", spriteCount: 21 });
     expect(result.media).toHaveLength(1);
-    expect(result.media[0]!.caption).toContain("21 sprites");
+    expect(result.media[0]!.caption).toContain("21");
+    expect(result.media[0]!.caption).toMatch(/sprite/i);
   });
 
   it("concept board throws when fewer than 5 lane files exist", () => {

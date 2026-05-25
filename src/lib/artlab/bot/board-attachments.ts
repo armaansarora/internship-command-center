@@ -2,6 +2,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { displayFor } from "../intake/known-cast";
 import type { TelegramMediaPhoto } from "./telegram-client";
+import { esc } from "./message-templates";
 
 export interface BoardAttachmentsResult {
   media: TelegramMediaPhoto[];
@@ -18,17 +19,18 @@ export function buildConceptBoardAttachments(input: { runDir: string; characterI
   const media: TelegramMediaPhoto[] = lanes.map((file, idx) => ({
     type: "photo",
     path: join(conceptDir, file),
-    caption: `${display.firstName} · direction ${idx + 1}`,
+    caption: `${esc(display.firstName)} · direction ${idx + 1}`,
+    parseMode: "HTML",
   }));
   const caption = [
-    `🎨 ${display.displayName} — Concept Board`,
-    display.title ? `   ${display.title}${display.space ? ` · ${display.space}` : ""}` : "",
+    `🎨 <b>${esc(display.displayName)} — Concept Board</b>`,
+    display.title ? `   <i>${esc(display.title)}${display.space ? ` · ${esc(spaceLabel(display.space))}` : ""}</i>` : "",
     "",
-    "5 directions ready. Pick the one that feels right:",
+    "5 directions ready. Tap a button or reply:",
     "",
-    "  ✅  approve direction 1-5",
-    "  🔁  revise: <your change>",
-    "  ❌  reject",
+    "  <code>approve direction 1-5</code>",
+    "  <code>revise: &lt;your change&gt;</code>",
+    "  <code>reject</code>",
   ].filter(Boolean).join("\n");
   return { media, caption };
 }
@@ -38,16 +40,23 @@ export function buildFinalBoardAttachments(input: { runDir: string; characterId:
   if (!existsSync(finalBoardPath)) throw new Error(`final-board.png missing at ${finalBoardPath}`);
   const display = displayFor(input.characterId);
   const caption = [
-    `📐 ${display.displayName} — Final Board`,
-    display.title ? `   ${display.title}${display.space ? ` · ${display.space}` : ""}` : "",
+    `📐 <b>${esc(display.displayName)} — Final Board</b>`,
+    display.title ? `   <i>${esc(display.title)}${display.space ? ` · ${esc(spaceLabel(display.space))}` : ""}</i>` : "",
     "",
-    `${input.spriteCount} sprite${input.spriteCount === 1 ? "" : "s"} composed · upload-ready`,
+    `<b>${input.spriteCount}</b> sprite${input.spriteCount === 1 ? "" : "s"} composed · upload-ready`,
     "",
-    "  ✅  approved for app   (promotes to public/art)",
-    "  ❌  reject",
+    "  <code>approved for app</code>   promotes to public/art",
+    "  <code>reject</code>",
   ].filter(Boolean).join("\n");
   return {
-    media: [{ type: "photo", path: finalBoardPath, caption }],
+    media: [{ type: "photo", path: finalBoardPath, caption, parseMode: "HTML" }],
     caption,
   };
+}
+
+function spaceLabel(space: string): string {
+  return space
+    .split("-")
+    .map((w) => w[0]!.toUpperCase() + w.slice(1))
+    .join(" ");
 }

@@ -1,10 +1,30 @@
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 
+export interface TelegramInlineKeyboardButton {
+  text: string;
+  callback_data?: string;     // ≤ 64 bytes per Telegram spec
+  url?: string;               // alternative to callback_data
+}
+
+export interface TelegramInlineKeyboard {
+  inline_keyboard: TelegramInlineKeyboardButton[][];
+}
+
+export type TelegramParseMode = "HTML" | "MarkdownV2";
+
+export interface TelegramCallbackQuery {
+  id: string;
+  from: { id: number; username?: string };
+  message?: TelegramMessage;
+  data?: string;
+}
+
 export interface TelegramUpdate {
   update_id: number;
   message?: TelegramMessage;
   edited_message?: TelegramMessage;
+  callback_query?: TelegramCallbackQuery;
 }
 
 export interface TelegramMessage {
@@ -23,6 +43,7 @@ export interface TelegramMediaPhoto {
   type: "photo";
   path: string;
   caption?: string;
+  parseMode?: TelegramParseMode;
 }
 
 export interface TelegramClientOptions {
@@ -32,9 +53,18 @@ export interface TelegramClientOptions {
 
 export interface TelegramClient {
   getUpdates(opts: { offset: number; timeoutSec?: number }): Promise<TelegramUpdate[]>;
-  sendMessage(opts: { chatId: number; text: string; replyTo?: number }): Promise<TelegramSendResult>;
+  sendMessage(opts: {
+    chatId: number;
+    text: string;
+    replyTo?: number;
+    parseMode?: TelegramParseMode;
+    replyMarkup?: TelegramInlineKeyboard;
+    disableWebPagePreview?: boolean;
+  }): Promise<TelegramSendResult>;
   sendMediaGroup(opts: { chatId: number; media: TelegramMediaPhoto[] }): Promise<TelegramSendResult[]>;
   downloadFile(opts: { fileId: string }): Promise<{ contentType: string; bytes: Buffer }>;
+  answerCallbackQuery(opts: { callbackQueryId: string; text?: string; showAlert?: boolean }): Promise<void>;
+  editMessageReplyMarkup(opts: { chatId: number; messageId: number; replyMarkup?: TelegramInlineKeyboard }): Promise<void>;
 }
 
 const TELEGRAM_API_BASE = "https://api.telegram.org";
@@ -62,7 +92,7 @@ export function createTelegramClient(options: TelegramClientOptions): TelegramCl
       const url = new URL(apiUrl("getUpdates"));
       url.searchParams.set("offset", String(offset));
       url.searchParams.set("timeout", String(timeoutSec));
-      url.searchParams.set("allowed_updates", JSON.stringify(["message", "edited_message"]));
+      url.searchParams.set("allowed_updates", JSON.stringify(["message", "edited_message", "callback_query"]));
       const response = await f(url.toString());
       const json = (await response.json()) as { ok: boolean; result?: TelegramUpdate[]; description?: string };
       if (!response.ok || !json.ok) {
@@ -71,9 +101,12 @@ export function createTelegramClient(options: TelegramClientOptions): TelegramCl
       return json.result ?? [];
     },
 
-    async sendMessage({ chatId, text, replyTo }) {
+    async sendMessage({ chatId, text, replyTo, parseMode, replyMarkup, disableWebPagePreview }) {
       const body: Record<string, unknown> = { chat_id: chatId, text };
       if (replyTo) body.reply_to_message_id = replyTo;
+      if (parseMode) body.parse_mode = parseMode;
+      if (replyMarkup) body.reply_markup = replyMarkup;
+      if (disableWebPagePreview) body.disable_web_page_preview = true;
       return await callJson<TelegramSendResult>("sendMessage", body);
     },
 
@@ -85,7 +118,10 @@ export function createTelegramClient(options: TelegramClientOptions): TelegramCl
         const bytes = readFileSync(m.path);
         const blob = new Blob([new Uint8Array(bytes)], { type: "image/png" });
         form.set(fileKey, blob, basename(m.path));
-        return { type: m.type, media: `attach://${fileKey}`, caption: m.caption };
+        const payload: Record<string, unknown> = { type: m.type, media: `attach://${fileKey}` };
+        if (m.caption) payload.caption = m.caption;
+        if (m.parseMode) payload.parse_mode = m.parseMode;
+        return payload;
       });
       form.set("media", JSON.stringify(mediaPayload));
       const response = await f(apiUrl("sendMediaGroup"), { method: "POST", body: form });
@@ -106,6 +142,23 @@ export function createTelegramClient(options: TelegramClientOptions): TelegramCl
         contentType: response.headers.get("content-type") ?? "application/octet-stream",
         bytes: Buffer.from(arrayBuffer),
       };
+    },
+
+    async answerCallbackQuery({ callbackQueryId, text, showAlert }) {
+      const body: Record<string, unknown> = { callback_query_id: callbackQueryId };
+      if (text) body.text = text;
+      if (showAlert) body.show_alert = true;
+      await callJson<true>("answerCallbackQuery", body);
+    },
+
+    async editMessageReplyMarkup({ chatId, messageId, replyMarkup }) {
+      const body: Record<string, unknown> = { chat_id: chatId, message_id: messageId };
+      if (replyMarkup) body.reply_markup = replyMarkup;
+      try {
+        await callJson<unknown>("editMessageReplyMarkup", body);
+      } catch {
+        // editing fails when the markup is identical or the message is too old — non-fatal
+      }
     },
   };
 }

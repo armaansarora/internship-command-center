@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { classifyInbound, ARTLAB_INBOUND_KINDS } from "./inbound-classifier";
 
 describe("inbound message classifier", () => {
-  it("declares the 6 inbound kinds", () => {
+  it("declares the 7 inbound kinds", () => {
     expect(ARTLAB_INBOUND_KINDS).toEqual([
-      "trigger", "trigger-with-photo", "gate-reply", "bundle", "command", "promotion",
+      "trigger", "trigger-with-photo", "gate-reply", "bundle", "command", "promotion", "callback",
     ]);
   });
 

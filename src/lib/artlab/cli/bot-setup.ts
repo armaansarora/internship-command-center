@@ -1,4 +1,15 @@
 // src/lib/artlab/cli/bot-setup.ts
+//
+// Stores secrets that the daemon reads at start time. All three secrets are
+// macOS Keychain entries under the `tower-artlab-*` service namespace:
+//
+//   tower-artlab-telegram-token  — BotFather token; daemon's telegram-poller uses it
+//   tower-artlab-chat-id         — authorized chat.id; identity check rejects others
+//   tower-artlab-gemini-key      — Gemini API key; runners use for real image generation
+//
+// At least one of (--token + --chat-id) OR --gemini-key must be supplied.
+// --token and --chat-id are paired (set together or not at all).
+
 import { setKeychainSecret, ARTLAB_KEYCHAIN_PREFIX } from "@/lib/artlab/bot/keychain";
 
 export interface BotSetupSubcommandInput {
@@ -19,13 +30,35 @@ function getFlag(args: string[], flag: string): string | undefined {
 export async function runBotSetupSubcommand(input: BotSetupSubcommandInput): Promise<BotSetupSubcommandResult> {
   const token = getFlag(input.args, "--token");
   const chatId = getFlag(input.args, "--chat-id");
-  if (!token) return { exitCode: 2, message: "bot setup: expected --token <BotFather-token>" };
-  if (!chatId) return { exitCode: 2, message: "bot setup: expected --chat-id <numeric>" };
-  if (!/^-?\d+$/.test(chatId)) return { exitCode: 2, message: "bot setup: --chat-id must be numeric" };
-  await setKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-telegram-token`, token);
-  await setKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-chat-id`, chatId);
+  const geminiKey = getFlag(input.args, "--gemini-key");
+
+  const hasTelegram = token !== undefined || chatId !== undefined;
+  if (hasTelegram) {
+    if (!token) return { exitCode: 2, message: "bot setup: expected --token <BotFather-token>" };
+    if (!chatId) return { exitCode: 2, message: "bot setup: expected --chat-id <numeric>" };
+    if (!/^-?\d+$/.test(chatId)) return { exitCode: 2, message: "bot setup: --chat-id must be numeric" };
+  }
+
+  if (!hasTelegram && !geminiKey) {
+    return {
+      exitCode: 2,
+      message: "bot setup: expected --token <T> --chat-id <N> and/or --gemini-key <K>",
+    };
+  }
+
+  const stored: string[] = [];
+  if (token && chatId) {
+    await setKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-telegram-token`, token);
+    await setKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-chat-id`, chatId);
+    stored.push("telegram-token", "chat-id");
+  }
+  if (geminiKey) {
+    await setKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-gemini-key`, geminiKey);
+    stored.push("gemini-key");
+  }
+
   return {
     exitCode: 0,
-    message: `Bot setup complete. Token and chat.id stored in macOS Keychain under ${ARTLAB_KEYCHAIN_PREFIX}-* services.`,
+    message: `Bot setup complete. Stored in macOS Keychain under ${ARTLAB_KEYCHAIN_PREFIX}-* services: ${stored.join(", ")}.`,
   };
 }

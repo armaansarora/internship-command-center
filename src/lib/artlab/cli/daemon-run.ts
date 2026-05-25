@@ -7,7 +7,7 @@
 // every 10 seconds forever.
 
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, openSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
   createDaemonContext,
@@ -42,6 +42,8 @@ function noopTelegramClient(): TelegramClient {
     async sendMessage() { return { message_id: 0 }; },
     async sendMediaGroup() { return []; },
     async downloadFile() { return { contentType: "application/octet-stream", bytes: Buffer.alloc(0) }; },
+    async answerCallbackQuery() { /* noop */ },
+    async editMessageReplyMarkup() { /* noop */ },
   };
 }
 
@@ -52,6 +54,40 @@ async function resolveTelegramToken(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+async function resolveGeminiKey(): Promise<string | null> {
+  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
+  try {
+    return await getKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-gemini-key`);
+  } catch {
+    return null;
+  }
+}
+
+// Load `<projectRoot>/.env.local` and merge into process.env. The daemon is
+// supervised by launchd which only inherits a minimal environment; Next.js's
+// own .env.local loader runs only inside `next dev`/`next build`, so the
+// daemon process needs to read the file itself. Existing process.env values
+// take precedence over .env.local entries.
+function loadDotEnvLocal(projectRoot: string): void {
+  const path = join(projectRoot, ".env.local");
+  if (!existsSync(path)) return;
+  try {
+    const text = readFileSync(path, "utf8");
+    for (const rawLine of text.split("\n")) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const eq = line.indexOf("=");
+      if (eq === -1) continue;
+      const key = line.slice(0, eq).trim();
+      let value = line.slice(eq + 1).trim();
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      if (!process.env[key]) process.env[key] = value;
+    }
+  } catch { /* swallow — daemon should boot even if .env.local is malformed */ }
 }
 
 function findTsxLoaderPath(projectRoot: string): string | undefined {
@@ -69,27 +105,31 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
   const { workspaceRoot } = input;
   if (!existsSync(workspaceRoot)) mkdirSync(workspaceRoot, { recursive: true });
 
+  // entryScript is .../scripts/artlab.ts when invoked via npm/tsx. Project root
+  // is two levels up; needed below for .env.local + tsx loader resolution.
+  const entryScript = process.argv[1] ?? join(process.cwd(), "scripts", "artlab.ts");
+  const projectRoot = dirname(dirname(entryScript));
+  loadDotEnvLocal(projectRoot);
+
   const supervisor = createSupervisor();
   const rawBrain: ArtLabLlmBrain = { decide: decideWithMockBrain };
   const brain = createLoggedBrain({ inner: rawBrain, workspaceRoot });
   const token = await resolveTelegramToken();
+  const geminiKey = await resolveGeminiKey();
   const telegramClient = token ? createTelegramClient({ token }) : noopTelegramClient();
 
   const telegramPoller = createTelegramPoller({
     workspaceRoot,
     client: telegramClient,
-    dispatch: ({ message }) => dispatchInboundMessage({
+    dispatch: ({ message, callbackQuery }) => dispatchInboundMessage({
       workspaceRoot,
       telegram: telegramClient,
       brain,
       message,
+      callbackQuery,
     }),
   });
 
-  // entryScript is .../scripts/artlab.ts when invoked via npm/tsx. The
-  // project root (which holds node_modules and tsconfig.json) is two levels up.
-  const entryScript = process.argv[1] ?? join(process.cwd(), "scripts", "artlab.ts");
-  const projectRoot = dirname(dirname(entryScript));
   const tsxLoaderPath = findTsxLoaderPath(projectRoot);
   const queueProcessor = createQueueProcessor({
     workspaceRoot,
@@ -103,9 +143,18 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
         : [entryScript, "run-worker", entry.runId];
       const workerOutFd = openSync(join(runRoot, "worker.out.log"), "a");
       const workerErrFd = openSync(join(runRoot, "worker.err.log"), "a");
+      // Pass the resolved Gemini key + parent process env into the worker so
+      // it can construct providers without re-reading Keychain (which may
+      // require an interactive unlock in launchd contexts).
+      const workerEnv: NodeJS.ProcessEnv = {
+        ...process.env,
+        ARTLAB_WORKSPACE_ROOT: workspaceRoot,
+        ARTLAB_PROJECT_ROOT: projectRoot,
+      };
+      if (geminiKey && !workerEnv.GEMINI_API_KEY) workerEnv.GEMINI_API_KEY = geminiKey;
       const child = spawn(process.execPath, args, {
         cwd: projectRoot,
-        env: { ...process.env, ARTLAB_WORKSPACE_ROOT: workspaceRoot },
+        env: workerEnv,
         stdio: ["ignore", workerOutFd, workerErrFd],
         detached: false,
       });
@@ -140,7 +189,9 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
   const { gold, muted } = await import("./ui/widgets");
   try {
     const ctx = await build({ workspaceRoot: input.workspaceRoot });
-    const telegramTokenPresent = !!(process.env.TELEGRAM_BOT_TOKEN ?? await getKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-telegram-token`).catch(() => null));
+    const telegramTokenPresent = !!(await resolveTelegramToken());
+    const geminiKeyPresent = !!(await resolveGeminiKey());
+    const anthropicKeyPresent = !!process.env.ANTHROPIC_API_KEY;
     input.log(banner({ subtitle: "Daemon running — supervising queue + telegram + cancel + crash-recovery" }));
     input.log("");
     input.log(box([kvList([
@@ -148,6 +199,8 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
       { label: "pid", value: String(process.pid) },
       { label: "tick", value: "1000ms" },
       { label: "telegram", value: telegramTokenPresent ? "live" : "noop (no token in env or keychain)", status: telegramTokenPresent ? "ok" : "muted" },
+      { label: "gemini", value: geminiKeyPresent ? "live" : "noop (no key in env or keychain)", status: geminiKeyPresent ? "ok" : "muted" },
+      { label: "claude", value: anthropicKeyPresent ? "live" : "noop (no ANTHROPIC_API_KEY)", status: anthropicKeyPresent ? "ok" : "muted" },
     ])], { title: "Daemon configuration" }));
     input.log("");
     input.log(`${gold("●")} daemon online — Ctrl-C to stop`);

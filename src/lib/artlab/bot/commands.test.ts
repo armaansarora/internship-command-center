@@ -11,12 +11,12 @@ describe("bot command handlers", () => {
   it("/status with no runs returns text", async () => {
     const r = await handleBotCommand({ workspaceRoot, commandName: "status", args: [] });
     expect(r.kind).toBe("text");
-    expect(r.text).toMatch(/no .* runs/i);
+    expect(r.message.text).toMatch(/no active runs|active runs \(0\)/i);
   });
 
   it("/queue returns 'empty' when nothing queued", async () => {
     const r = await handleBotCommand({ workspaceRoot, commandName: "queue", args: [] });
-    expect(r.text).toMatch(/empty|0 queued/i);
+    expect(r.message.text).toMatch(/empty|queue \(0\)/i);
   });
 
   it("/cancel writes inbox/cancel-<runId>-*.json", async () => {
@@ -28,11 +28,16 @@ describe("bot command handlers", () => {
 
   it("/health returns multi-line summary", async () => {
     const r = await handleBotCommand({ workspaceRoot, commandName: "health", args: [] });
-    expect(r.text.split("\n").length).toBeGreaterThanOrEqual(3);
+    expect(r.message.text.split("\n").length).toBeGreaterThanOrEqual(3);
   });
 
   it("unknown command returns help text", async () => {
     const r = await handleBotCommand({ workspaceRoot, commandName: "dance", args: [] });
-    expect(r.text).toMatch(/unknown|known commands/i);
+    expect(r.message.text).toMatch(/unknown|tower creative engine/i);
+  });
+
+  it("/decisions <runId> returns 'no brain decisions' when log missing", async () => {
+    const r = await handleBotCommand({ workspaceRoot, commandName: "decisions", args: ["abc123ff"] });
+    expect(r.message.text).toMatch(/no brain decisions|brain reasoning/i);
   });
 });

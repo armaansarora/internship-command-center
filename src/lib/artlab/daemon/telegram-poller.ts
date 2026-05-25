@@ -6,7 +6,10 @@ import type { TelegramClient, TelegramUpdate } from "@/lib/artlab/bot/telegram-c
 export interface TelegramPollerInput {
   workspaceRoot: string;
   client: TelegramClient;
-  dispatch(opts: { message: NonNullable<TelegramUpdate["message"]> }): Promise<unknown>;
+  dispatch(opts: {
+    message?: NonNullable<TelegramUpdate["message"]>;
+    callbackQuery?: NonNullable<TelegramUpdate["callback_query"]>;
+  }): Promise<unknown>;
 }
 
 export interface TelegramPoller { tick(): Promise<void>; }
@@ -52,9 +55,10 @@ export function createTelegramPoller(input: TelegramPollerInput): TelegramPoller
       if (updates.length === 0) return;
       for (const update of updates) {
         const message = update.message ?? update.edited_message;
-        if (message) {
+        const callbackQuery = update.callback_query;
+        if (message || callbackQuery) {
           try {
-            await input.dispatch({ message });
+            await input.dispatch({ message, callbackQuery });
           } catch (err) {
             recordPoisonMessage(input.workspaceRoot, update.update_id, err);
           }

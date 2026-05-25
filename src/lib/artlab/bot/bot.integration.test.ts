@@ -42,6 +42,8 @@ describe("bot integration — auth + classify + parse + ack", () => {
       sendMediaGroup: vi.fn(),
       getUpdates: vi.fn(),
       downloadFile: vi.fn(),
+      answerCallbackQuery: vi.fn(),
+      editMessageReplyMarkup: vi.fn(),
     } as unknown as TelegramClient;
   }
 
@@ -66,7 +68,7 @@ describe("bot integration — auth + classify + parse + ack", () => {
       message: { chat: { id: TEST_CHAT_ID }, message_id: 1, text: "/status", date: 0 },
     });
     expect(r.action.type).toBe("command-handled");
-    expect(sentMessages[0]!.text).toMatch(/no .* runs/i);
+    expect(sentMessages[0]!.text).toMatch(/no active runs|active runs \(0\)/i);
   });
 
   it("'approved for app' is routed as promotion-accepted (action type is the contract)", async () => {

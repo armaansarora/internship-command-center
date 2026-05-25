@@ -1,12 +1,21 @@
 import { z } from "zod";
 
 export const ARTLAB_LLM_DECISION_KINDS = [
+  // Phase-3 originals (already in spec)
   "route-ambiguous-brief",
   "clarification-wording",
   "concept-qa-adjudication",
   "reply-parser-fallback",
   "prompt-enrichment",
   "blocker-message-drafting",
+  // Tranche-1+ additions for Tower-context-aware generation
+  "generate-concept-prompts",
+  "generate-environment-prompts",
+  "generate-ui-prompts",
+  "generate-animation-prompts",
+  "recommend-direction",
+  "revise-concept-board",
+  "compose-trigger-clarification",
 ] as const;
 export type ArtLabLlmDecisionKind = (typeof ARTLAB_LLM_DECISION_KINDS)[number];
 

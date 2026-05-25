@@ -27,6 +27,8 @@ describe("telegram bot dispatcher", () => {
       sendMediaGroup: vi.fn(),
       getUpdates: vi.fn(),
       downloadFile: vi.fn(),
+      answerCallbackQuery: vi.fn(),
+      editMessageReplyMarkup: vi.fn(),
     } as unknown as TelegramClient;
   }
 
@@ -52,7 +54,7 @@ describe("telegram bot dispatcher", () => {
       message: { chat: { id: 1 }, message_id: 1, text: "/status", date: 0 },
     });
     expect(sentMessages).toHaveLength(1);
-    expect(sentMessages[0]!.text).toMatch(/no .* runs/i);
+    expect(sentMessages[0]!.text).toMatch(/no active runs|active runs \(0\)/i);
   });
 
   it("accepts 'approved for app'", async () => {

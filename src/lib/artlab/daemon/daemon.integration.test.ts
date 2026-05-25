@@ -22,6 +22,8 @@ describe("daemon integration", () => {
       sendMessage: vi.fn(),
       sendMediaGroup: vi.fn(),
       downloadFile: vi.fn(),
+      answerCallbackQuery: vi.fn(),
+      editMessageReplyMarkup: vi.fn(),
     };
     const tgDispatch = vi.fn().mockResolvedValue({ action: { type: "dropped", reason: "unauthorized" } });
     const telegramPoller = createTelegramPoller({ workspaceRoot, client: tgClient, dispatch: tgDispatch });
