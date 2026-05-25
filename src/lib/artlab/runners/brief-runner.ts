@@ -14,7 +14,7 @@
 
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadTowerContext, pickCharacterContext, pickFloorContext, type TowerCharacterContext } from "../context/tower-context";
+import { loadTowerContext, pickCharacterContext, type TowerCharacterContext } from "../context/tower-context";
 import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
@@ -146,22 +146,14 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
   const bundle = await loadTowerContext({ workspaceRoot });
   const ctx = input.characterId ? pickCharacterContext(bundle, input.characterId) : null;
   if (!ctx) {
-    // Floor / asset-only briefs are a fast-follow. For now we just return a
-    // minimal canonical brief so the flow continues.
-    const floor = input.characterId ? null : pickFloorContext(bundle, "lobby");
-    const fallbackBrief: DesignBrief = DesignBriefSchema.parse({
-      runId: input.runId,
-      composedAt: new Date().toISOString(),
-      iteration: 0,
-      identity: floor
-        ? `Floor: ${floor.roomName} (${floor.floorNumber}). ${floor.atmosphere}`
-        : `Generic asset request — ${input.assetType}.`,
-      plannedVariation: ["Direction A", "Direction B", "Direction C", "Direction D", "Direction E"],
-      referenceAnchor: "Painterly luxury editorial Tower envelope. Neutral backdrop.",
-      adjustmentOptions: [{ label: "✏️ Free-text feedback", dimension: "freetext" }],
-      source: "canonical-fallback",
-    });
-    return { brief: fallbackBrief, source: "canonical-fallback" };
+    // No character match. We REFUSE the silent lobby-fallback that the
+    // previous implementation had — it confused users into thinking their
+    // "make Sol Navarro" request had been routed to the lobby. Instead,
+    // throw so the runner surfaces a needs-human blocker; the bot will
+    // show a "couldn't route — please specify" message.
+    throw new Error(
+      `brief-runner: no character context for "${input.characterId ?? "<missing>"}" — request needs clarification`,
+    );
   }
 
   const existing = readExistingBrief(input.runDir);
@@ -295,13 +287,14 @@ export const briefRunner: ArtLabRunner = {
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      const isRoutingFailure = message.includes("no character context") || message.includes("needs clarification");
       return {
         runnerKind: "brief",
         status: "failed",
         durationMs: Date.now() - startedAt,
         artifacts: { errorMessage: message },
-        blockerHint: "provider-blocked",
-        failureCode: "brief-compose-failed",
+        blockerHint: isRoutingFailure ? "needs-human" : "provider-blocked",
+        failureCode: isRoutingFailure ? "no-character-match" : "brief-compose-failed",
       };
     }
   },

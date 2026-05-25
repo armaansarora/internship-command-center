@@ -111,15 +111,26 @@ export async function cancelBrief(input: { workspaceRoot: string; runId?: string
 }
 
 export function findParkedBriefRunForChat(workspaceRoot: string, chatId: number): string | null {
+  return findParkedRunForChat(workspaceRoot, chatId, ["brief-review"]);
+}
+
+export function findParkedConceptRunForChat(workspaceRoot: string, chatId: number): string | null {
+  return findParkedRunForChat(workspaceRoot, chatId, ["concept-review"]);
+}
+
+function findParkedRunForChat(
+  workspaceRoot: string,
+  chatId: number,
+  phases: readonly string[],
+): string | null {
   const runsDir = join(workspaceRoot, "runs");
   if (!existsSync(runsDir)) return null;
-const candidates: Array<{ runId: string; updatedAt: string }> = [];
+  const candidates: Array<{ runId: string; updatedAt: string }> = [];
   for (const id of readdirSync(runsDir)) {
     if (id.startsWith(".")) continue;
     const runDir = join(runsDir, id);
     const state = readRunStateSnapshot(runDir);
-    if (!state || state.blocker || state.phase !== "brief-review") continue;
-    // Match by chatId from queue-entry.json
+    if (!state || state.blocker || !phases.includes(state.phase)) continue;
     const queueEntryPath = join(runDir, "queue-entry.json");
     if (!existsSync(queueEntryPath)) continue;
     try {
@@ -132,4 +143,35 @@ const candidates: Array<{ runId: string; updatedAt: string }> = [];
   if (candidates.length === 0) return null;
   candidates.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   return candidates[0]!.runId;
+}
+
+// When the user types free-text while a concept-review is parked, treat the
+// text as a free-text refinement note: append to concept-feedback.jsonl and
+// bump state to refining-concepts so the next worker tick regenerates.
+export async function recordConceptFeedbackAndRefine(input: {
+  workspaceRoot: string;
+  runId: string;
+  freeText: string;
+}): Promise<BriefGateResult> {
+  const runDir = join(input.workspaceRoot, "runs", input.runId);
+  const state = readRunStateSnapshot(runDir);
+  if (!state || state.phase !== "concept-review" || state.blocker) {
+    return { ok: false, reason: "state-not-concept-review" };
+  }
+  const { appendConceptFeedback } = await import("@/lib/artlab/brainstorm/feedback-ledger");
+  appendConceptFeedback(runDir, {
+    at: new Date().toISOString(),
+    polarity: "freetext",
+    freeText: input.freeText,
+  });
+  const now = new Date().toISOString();
+  writeRunStateSnapshot(runDir, { ...state, phase: "refining-concepts", updatedAt: now });
+  appendArtLabEvent(runDir, {
+    runId: input.runId,
+    at: now,
+    kind: "phase-transition",
+    payload: { from: "concept-review", to: "refining-concepts", source: "bot", trigger: "freetext-feedback" },
+  });
+  reEnqueueRun(input.workspaceRoot, input.runId);
+  return { ok: true, runId: input.runId };
 }

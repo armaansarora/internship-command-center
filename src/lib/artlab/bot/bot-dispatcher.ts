@@ -10,7 +10,14 @@ import { parseBundle } from "../intake/bundle-parser";
 import { saveReferenceAttachment } from "../intake/reference-attachment-fs";
 import { enqueueRun } from "../queue/queue";
 import { advanceConceptApproval, advancePromotionApproval } from "./gate-advance";
-import { approveBrief, cancelBrief, recordBriefAdjustmentAndReAuthor, findParkedBriefRunForChat } from "./brief-advance";
+import {
+  approveBrief,
+  cancelBrief,
+  recordBriefAdjustmentAndReAuthor,
+  recordConceptFeedbackAndRefine,
+  findParkedBriefRunForChat,
+  findParkedConceptRunForChat,
+} from "./brief-advance";
 import { displayFor } from "../intake/known-cast";
 import {
   triggerAck,
@@ -360,20 +367,27 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
   const classified = classifyInbound(message);
   const now = input.now ?? (() => new Date());
 
-  // Stateful free-text routing: when a brief is parked at brief-review for
-  // this chat and the user sends a plain text message (not a command,
-  // promotion phrase, or recognized gate reply), route the text as a
-  // free-text adjustment to the parked brief. Triggers / commands /
-  // promotion phrases still take precedence.
+  // Stateful free-text routing: when a run is parked at brief-review or
+  // concept-review for this chat AND the user sends plain text (not a
+  // command, promotion phrase, gate reply, or "make X" trigger), route the
+  // text as feedback on the parked run.
+  //
+  // brief-review → record as brief adjustment, re-author brief
+  // concept-review → record as concept feedback, advance to refining-concepts
+  //
+  // Triggers starting with "make " always take precedence (so the user can
+  // start a new run while parked).
   if (
     (classified.kind === "trigger" || classified.kind === "bundle") &&
-    !classified.commandName
+    !classified.commandName &&
+    classified.text.length > 0 &&
+    !/^make\s/i.test(classified.text)
   ) {
-    const parkedRunId = findParkedBriefRunForChat(input.workspaceRoot, message.chat.id);
-    if (parkedRunId && classified.text.length > 0 && !/^make\s/i.test(classified.text)) {
+    const parkedBriefRunId = findParkedBriefRunForChat(input.workspaceRoot, message.chat.id);
+    if (parkedBriefRunId) {
       const advance = await recordBriefAdjustmentAndReAuthor({
         workspaceRoot: input.workspaceRoot,
-        runId: parkedRunId,
+        runId: parkedBriefRunId,
         entry: {
           at: new Date().toISOString(),
           dimension: "freetext",
@@ -382,7 +396,19 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
       });
       if (advance.ok) {
         await send(input.telegram, message.chat.id, briefRegeneratingAck({ runId: advance.runId }));
-        return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: parkedRunId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
+        return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: parkedBriefRunId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
+      }
+    }
+    const parkedConceptRunId = findParkedConceptRunForChat(input.workspaceRoot, message.chat.id);
+    if (parkedConceptRunId) {
+      const advance = await recordConceptFeedbackAndRefine({
+        workspaceRoot: input.workspaceRoot,
+        runId: parkedConceptRunId,
+        freeText: classified.text,
+      });
+      if (advance.ok) {
+        await send(input.telegram, message.chat.id, briefRegeneratingAck({ runId: advance.runId }));
+        return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: parkedConceptRunId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
       }
     }
   }
