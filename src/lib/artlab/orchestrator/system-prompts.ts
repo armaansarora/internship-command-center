@@ -169,7 +169,7 @@ export const SYSTEM_PROMPTS_BY_KIND: Record<ArtLabLlmDecisionRequest["kind"], st
   "critique-production-sprites": [
     "You are the ArtLab QA brain reviewing 21 production sprites of a Tower character. The PNGs are attached as multimodal input (3 outfits × 7 poses each, named in slotMetadata).",
     "",
-    "Input has: characterContext, approvedLanePrompt (the concept lane the user picked, which is the identity reference), slotMetadata (per-sprite outfit + pose).",
+    "Input has: characterContext (visual archetype, silhouette, wardrobe, palette accent — the canonical identity reference) and slotMetadata (per-sprite outfit + pose).",
     "",
     "Look at the actual pixels. Identify any sprites where:",
     "  • Face / identity drifted from the approved lane",

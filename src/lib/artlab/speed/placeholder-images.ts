@@ -70,36 +70,95 @@ export async function renderPlaceholderImage(options: PlaceholderImageOptions): 
 export interface FinalBoardCompositeInput {
   cutoutPaths: string[];
   characterId: string;
+  displayName?: string;
+  title?: string;
   width?: number;
   height?: number;
 }
 
 export async function composeFinalBoard(input: FinalBoardCompositeInput): Promise<Buffer> {
-  const tile = 256;
+  // Tower palette: deep navy + warm gold. Larger tiles + per-tile soft card so
+  // each sprite reads cleanly against a lighter card chip rather than fading
+  // into the dark composite background.
+  const tile = 320;
   const cols = Math.min(7, Math.max(1, input.cutoutPaths.length));
   const rows = Math.max(1, Math.ceil(input.cutoutPaths.length / cols));
-  const pad = 16;
+  const pad = 22;
+  const headerH = 110;
+  const footerH = 56;
   const width = input.width ?? cols * tile + (cols + 1) * pad;
-  const height = input.height ?? rows * tile + (rows + 1) * pad + 80;
-  const tone = paletteFor(1);
+  const height = input.height ?? rows * tile + (rows + 1) * pad + headerH + footerH;
+  const titleText = escapeXml(input.displayName ?? input.characterId.toUpperCase());
+  const subtitleText = escapeXml(input.title ?? `${input.cutoutPaths.length} upload-ready production sprites`);
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <rect width="100%" height="100%" fill="${tone.bg}"/>
-  <text x="50%" y="40" font-family="Georgia, serif" font-size="28" font-weight="bold" text-anchor="middle" fill="${tone.fg}">${escapeXml(input.characterId.toUpperCase())} — Final Upload-Ready Board</text>
-  <text x="50%" y="64" font-family="monospace" font-size="12" text-anchor="middle" fill="${tone.fg}" opacity="0.5">${input.cutoutPaths.length} sprites · ArtLab promotion candidate</text>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#101226" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#1A1A2E" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#F4E8D3" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#E5D6B8" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  <text x="50%" y="56" font-family="Georgia, serif" font-size="38" font-weight="bold" text-anchor="middle" fill="#C9A84C" letter-spacing="1">${titleText}</text>
+  <text x="50%" y="86" font-family="Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#C9A84C" opacity="0.72">${subtitleText}</text>
+  <line x1="${pad * 2}" y1="${headerH - 6}" x2="${width - pad * 2}" y2="${headerH - 6}" stroke="#C9A84C" stroke-width="1" opacity="0.18"/>
+  ${cardRectsSvg(input.cutoutPaths.length, cols, tile, pad, headerH)}
+  <text x="50%" y="${height - 22}" font-family="monospace" font-size="11" text-anchor="middle" fill="#C9A84C" opacity="0.45">artlab · upload-ready · ${new Date().toISOString().slice(0, 10)}</text>
 </svg>`;
   const tiles: sharp.OverlayOptions[] = [];
   for (let i = 0; i < input.cutoutPaths.length; i += 1) {
     const c = i % cols;
     const r = Math.floor(i / cols);
     const left = pad + c * (tile + pad);
-    const top = 80 + pad + r * (tile + pad);
+    const top = headerH + pad + r * (tile + pad);
     try {
-      const resized = await sharp(input.cutoutPaths[i]!).resize(tile, tile, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer();
-      tiles.push({ input: resized, left, top });
+      // Crop to alpha-channel bounding box ourselves (sharp's `trim` confuses
+      // dark-body pixels with the alpha=0 background when an explicit
+      // background colour is given, so we read the alpha buffer + compute the
+      // bounding box of opaque pixels directly).
+      const meta = await sharp(input.cutoutPaths[i]!).metadata();
+      const W = meta.width ?? 0;
+      const H = meta.height ?? 0;
+      const decoded = await sharp(input.cutoutPaths[i]!).ensureAlpha().raw().toBuffer();
+      let minX = W, minY = H, maxX = -1, maxY = -1;
+      for (let y = 0; y < H; y += 1) {
+        for (let x = 0; x < W; x += 1) {
+          const a = decoded[(y * W + x) * 4 + 3]!;
+          if (a > 24) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+      const cropW = Math.max(1, maxX - minX + 1);
+      const cropH = Math.max(1, maxY - minY + 1);
+      const cropped = await sharp(input.cutoutPaths[i]!)
+        .extract({ left: minX, top: minY, width: cropW, height: cropH })
+        .resize(tile - 16, tile - 16, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .png()
+        .toBuffer();
+      tiles.push({ input: cropped, left: left + 8, top: top + 8 });
     } catch {
-      // ignore unreadable cutouts; the composite will leave that tile blank
+      // ignore unreadable cutouts; the composite leaves the card empty
     }
   }
   return sharp(Buffer.from(svg)).composite(tiles).png().toBuffer();
+}
+
+function cardRectsSvg(count: number, cols: number, tile: number, pad: number, headerH: number): string {
+  const rects: string[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const c = i % cols;
+    const r = Math.floor(i / cols);
+    const left = pad + c * (tile + pad);
+    const top = headerH + pad + r * (tile + pad);
+    rects.push(`<rect x="${left}" y="${top}" width="${tile}" height="${tile}" rx="14" ry="14" fill="url(#card)" opacity="0.96"/>`);
+  }
+  return rects.join("\n  ");
 }

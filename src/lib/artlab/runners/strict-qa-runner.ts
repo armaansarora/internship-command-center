@@ -9,6 +9,7 @@ import {
 import { runCoherenceCheck } from "@/lib/artlab/coherence/strict-qa-wiring";
 import { composeFinalBoard } from "../speed/placeholder-images";
 import { cutoutRunner } from "./cutout-runner";
+import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -138,9 +139,23 @@ export const strictQaRunner: ArtLabRunner = {
     try {
       const cutoutPngs = entries.map((e) => e.cutoutPath).filter((p) => fileHasPngSignature(p));
       if (cutoutPngs.length > 0) {
+        let displayName: string | undefined;
+        let title: string | undefined;
+        if (input.characterId) {
+          try {
+            const bundle = await loadTowerContext({ workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? "" });
+            const ctx = pickCharacterContext(bundle, input.characterId);
+            if (ctx) {
+              displayName = ctx.displayName;
+              title = `${ctx.title} · ${cutoutPngs.length} upload-ready sprites`;
+            }
+          } catch { /* fall through to defaults */ }
+        }
         const board = await composeFinalBoard({
           cutoutPaths: cutoutPngs,
           characterId: input.characterId ?? "character",
+          displayName,
+          title,
         });
         writeFileSync(join(input.runDir, "final-board.png"), board);
       }

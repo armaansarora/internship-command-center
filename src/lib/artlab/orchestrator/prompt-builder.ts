@@ -116,26 +116,31 @@ function parseLanePromptsOutput(json: unknown): ConceptLanePrompt[] | null {
 // Each lane varies on multiple axes (age, hair, posture, signature-prop
 // arrangement, color emphasis) so the 5 directions actually look like
 // 5 different design takes — not 5 stance variations of the same face.
+// Lane axes intentionally vary on IDENTITY-side dimensions only — age, hair
+// geometry, face character, palette emphasis. POSE/STANCE is the slot
+// runner's job (idle/greeting/listening/etc.) and must NOT be baked into
+// lane definitions, otherwise all 21 production sprites inherit the lane's
+// pose and look identical regardless of slot.
 const FALLBACK_AXES = [
   {
-    axis: "younger-composed-front",
-    clause: "Younger interpretation (early 30s). Short, sharply cropped hair. Composed front-facing stance, weight even, hands relaxed. The canonical accent color leads the wardrobe palette in a confident editorial way.",
+    axis: "younger-sharp-crop",
+    clause: "Younger interpretation (early 30s). Short, sharply cropped hair. Confident editorial palette emphasis with the canonical accent leading the wardrobe.",
   },
   {
-    axis: "mid-career-three-quarter-lean",
-    clause: "Mid-career (early 40s) with a hint of stubble or a defined jawline. Hair slightly textured. Three-quarter relaxed lean, weight on back foot, one signature prop held casually at hip level. Wardrobe deepens the canonical palette toward richer tones.",
+    axis: "mid-career-textured",
+    clause: "Mid-career (early 40s) with a hint of stubble or defined jawline. Hair slightly textured. Wardrobe deepens the canonical palette toward richer tones.",
   },
   {
-    axis: "engaged-late-thirties-tilted",
-    clause: "Late 30s, longer styled hair or pronounced hair geometry. Head slightly tilted, slight forward lean, attentive listening posture. Eye contact warm but focused. Secondary prop visible, primary prop lowered.",
+    axis: "late-thirties-styled",
+    clause: "Late 30s with longer styled hair or pronounced hair geometry. Warm focused eyes. Canonical palette held true.",
   },
   {
-    axis: "senior-grounded-working",
-    clause: "Senior interpretation (early 50s) with distinguished gray at the temples or fuller silver. Squared grounded stance, signature prop in active use, expressive hands mid-gesture. Wardrobe leans into structured tailored cuts.",
+    axis: "senior-silver",
+    clause: "Senior interpretation (early 50s) with distinguished gray at the temples or fuller silver. Wardrobe leans into structured tailored cuts.",
   },
   {
-    axis: "approachable-greeting",
-    clause: "Mid-40s with glasses or another characterful face detail. Open shoulders, small genuine smile, hand gesturing in warm greeting toward the viewer. Lighter, more inviting reading of the canonical palette.",
+    axis: "characterful-glasses",
+    clause: "Mid-40s with glasses or another characterful face detail (mole, scar, signature mark). Lighter, more inviting reading of the canonical palette.",
   },
 ];
 
@@ -200,13 +205,16 @@ function buildSingleImagePrompt(ctx: TowerCharacterContext): string {
   return lines.join("\n");
 }
 
-// Production-slot prompts — one per (outfit, pose) combo. For tonight we build
-// them deterministically from the approved-lane concept prompt + the pose pack
-// template; the brain isn't invoked per-slot (would add 21 LLM calls per run).
+// Production-slot prompts — one per (outfit, pose) combo. Built from scratch
+// so each slot's pose+outfit are the SOLE pose/outfit signal in the prompt —
+// previously we injected the full approved-lane concept prompt which contained
+// the lane's own pose/stance language and overrode the per-slot pose, making
+// all 21 sprites land in roughly the same pose. The lane is now referenced as
+// an identity anchor only (face, hair, palette).
 export interface BuildProductionSlotPromptsInput {
   characterId: string;
   workspaceRoot: string;
-  approvedLanePrompt: string;
+  approvedLaneIndex: number;
   outfits: readonly string[];
   poses: readonly string[];
   bundle?: TowerContextBundle;
@@ -223,32 +231,63 @@ export async function buildProductionSlotPrompts(input: BuildProductionSlotPromp
   const bundle = input.bundle ?? await loadTowerContext({ workspaceRoot: input.workspaceRoot });
   const ctx = pickCharacterContext(bundle, input.characterId);
   if (!ctx) throw new Error(`prompt-builder: no character context for "${input.characterId}"`);
-  const template = ctx.posePackPromptTemplate || `Using approved ${ctx.displayName} identity reference, create the {outfitVariantName} {poseName} production sprite.`;
   const negative = ctx.negativePrompt || ctx.negativeDNA || "no identity drift, fake text, logo, watermark.";
+  const identityBlock = buildIdentityAnchorBlock(ctx);
+  const styleBlock = buildStyleBlock();
   const slots: ProductionSlotPrompt[] = [];
   for (const outfit of input.outfits) {
     for (const pose of input.poses) {
       const slotId = `${outfit}-${pose}`;
-      const filled = template
-        .replace(/\{outfitVariantName\}/g, outfit)
-        .replace(/\{poseName\}/g, pose)
-        .replace(/\{outfitVariantDefinition\}/g, outfitDefinition(outfit))
-        .replace(/\{poseDefinition\}/g, poseDefinition(pose));
-      slots.push({
-        slotId,
-        outfit,
-        pose,
-        prompt: [
-          filled,
-          "",
-          `Approved lane direction: ${input.approvedLanePrompt}`,
-          "",
-          `Negative: ${negative}`,
-        ].join("\n"),
-      });
+      const prompt = [
+        `Create production sprite for ${ctx.displayName}, ${ctx.title} of The Tower — outfit "${outfit}", pose "${pose}".`,
+        ``,
+        styleBlock,
+        ``,
+        identityBlock,
+        ``,
+        `THIS SPRITE`,
+        `  • Outfit: ${outfitDefinition(outfit)}.`,
+        `  • Pose: ${poseDefinition(pose)}.`,
+        `  • Expression: matches pose energy, never neutral if pose is greeting/talking/listening.`,
+        ``,
+        `IDENTITY ANCHOR — match the exact face, hair, skin tone, body proportions, and accent palette established in the approved concept lane #${input.approvedLaneIndex}. Do not introduce new features, change ethnicity, age the character beyond ±2 years, or shift the palette.`,
+        ``,
+        `COMPOSITION`,
+        `  • Single full-body figure, centered, 9:16 portrait framing.`,
+        `  • Solid neutral pastel-cream backdrop (#F4E8D3) with high subject-background separation. NO patterned walls, NO furniture, NO scenery.`,
+        `  • Soft ambient occlusion under the feet only — no dramatic cast shadow on the backdrop.`,
+        `  • Generous safe padding around the figure for downstream cutout.`,
+        ``,
+        `AVOID: ${negative}. No flat vector, no cell-shaded cartoon, no corporate-startup illustration, no chibi, no anime, no 3D render, no photography, no environmental background, no text or logos.`,
+      ].join("\n");
+      slots.push({ slotId, outfit, pose, prompt });
     }
   }
   return slots;
+}
+
+function buildIdentityAnchorBlock(ctx: TowerCharacterContext): string {
+  const lines = [
+    `IDENTITY (locked — match the canonical bible)`,
+    `  • Visual archetype: ${ctx.visualArchetype}`,
+    `  • Silhouette: ${ctx.silhouette}`,
+    `  • Wardrobe base palette: ${ctx.wardrobe}`,
+    `  • Signature props: ${ctx.props}`,
+  ];
+  if (ctx.accent) lines.push(`  • Accent color: ${ctx.accent}`);
+  return lines.join("\n");
+}
+
+function buildStyleBlock(): string {
+  return [
+    `STYLE — premium painterly editorial character illustration:`,
+    `  • Rich painterly brushwork, dimensional volume, deep saturated colors.`,
+    `  • Soft cinematic studio lighting (warm key upper-front, gentle cool fill).`,
+    `  • Detailed face anatomy, grounded realistic proportions.`,
+    `  • Crisp clean rendering; wardrobe fabric weight + texture visible.`,
+    `  • Reference quality: Square Enix / Riot character art card; Pixar concept-art polish.`,
+    `  • NOT flat vector, NOT cell-shaded, NOT chibi, NOT anime, NOT 3D-rendered, NOT photographic.`,
+  ].join("\n");
 }
 
 function outfitDefinition(outfit: string): string {

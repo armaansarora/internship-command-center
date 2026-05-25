@@ -129,6 +129,7 @@ async function generateGeminiSlot(
   prompt: ProductionSlotPrompt,
   provider: GeminiProvider,
   laneIndex: number,
+  referenceImageBytes: Buffer | undefined,
 ): Promise<SlotOutput> {
   const dir = join(runDir, "production-slots");
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -139,6 +140,7 @@ async function generateGeminiSlot(
       prompt: prompt.prompt,
       aspectRatio: "9:16",
       laneIndex,
+      referenceImageBytes,
     });
     writeFileSync(pngPath, result.bytes);
     writeFileSync(jsonPath, JSON.stringify({
@@ -176,20 +178,6 @@ async function runWithConcurrency<T>(tasks: Array<() => Promise<T>>, limit: numb
   return results;
 }
 
-function readApprovedLanePrompt(runDir: string, approvedLaneIndex: number): string | null {
-  // Recover the approved lane's full prompt from concept-slots/lane-N.json
-  // (written by concept-runner). Falls back to concept-board.json's
-  // recorded prompts[] block.
-  const conceptSlot = join(runDir, "concept-slots", `lane-${approvedLaneIndex}.json`);
-  if (existsSync(conceptSlot)) {
-    try {
-      const parsed = JSON.parse(readFileSync(conceptSlot, "utf8")) as { prompt?: string };
-      if (typeof parsed.prompt === "string" && parsed.prompt.length > 20) return parsed.prompt;
-    } catch { /* fall through */ }
-  }
-  return null;
-}
-
 export const productionRunner: ArtLabRunner = {
   kind: "production",
   async run(input: ArtLabRunnerInput): Promise<ArtLabRunnerResult> {
@@ -205,11 +193,10 @@ export const productionRunner: ArtLabRunner = {
       try {
         const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
         const bundle = await loadTowerContext({ workspaceRoot });
-        const approvedLanePrompt = readApprovedLanePrompt(input.runDir, input.approvedLaneIndex!) ?? "";
         const prompts = await buildProductionSlotPrompts({
           characterId: input.characterId!,
           workspaceRoot,
-          approvedLanePrompt,
+          approvedLaneIndex: input.approvedLaneIndex!,
           outfits: CHARACTER_OUTFIT_VARIANTS,
           poses: CHARACTER_POSES,
           bundle,
@@ -219,11 +206,16 @@ export const productionRunner: ArtLabRunner = {
         // Override via ARTLAB_PRODUCTION_IMAGE_MODEL.
         const productionModel = process.env.ARTLAB_PRODUCTION_IMAGE_MODEL ?? "nano-banana-pro-preview";
         const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()!, modelId: productionModel });
+        // Anchor every production sprite to the approved lane's PNG so the
+        // 21 sprites all share the same face / identity instead of drifting
+        // into 21 different people.
+        const referenceLanePath = join(input.runDir, "concept-slots", `lane-${input.approvedLaneIndex!}.png`);
+        const referenceImageBytes = existsSync(referenceLanePath) ? readFileSync(referenceLanePath) : undefined;
         const tasks = prompts.map((p) => async () => {
           if (input.abortSignal?.aborted) {
             return writePlaceholderSlot(input.runDir, p.slotId, input.approvedLaneIndex, `${p.outfit} · ${p.pose}`, input.characterId, "aborted");
           }
-          return generateGeminiSlot(input.runDir, input.characterId, p, provider, input.approvedLaneIndex!);
+          return generateGeminiSlot(input.runDir, input.characterId, p, provider, input.approvedLaneIndex!, referenceImageBytes);
         });
         slotOutputs = await runWithConcurrency(tasks, PARALLEL_LIMIT);
       } catch (err) {

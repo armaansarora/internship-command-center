@@ -64,8 +64,21 @@ export function createGeminiProvider(options: GeminiProviderOptions): GeminiProv
       }
       const startedAt = Date.now();
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${options.apiKey}`;
+      // Image-conditioning: if a reference image is supplied (e.g. the
+      // approved concept-lane PNG for production sprites) include it inline
+      // so the model preserves the same face/identity across the run.
+      const parts: Array<Record<string, unknown>> = [];
+      if (input.referenceImageBytes) {
+        parts.push({
+          inlineData: {
+            mimeType: "image/png",
+            data: input.referenceImageBytes.toString("base64"),
+          },
+        });
+      }
+      parts.push({ text: input.prompt });
       const body = JSON.stringify({
-        contents: [{ parts: [{ text: input.prompt }] }],
+        contents: [{ parts }],
         generationConfig: { responseModalities: ["IMAGE"] },
       });
       let response: Response | undefined;

@@ -26,67 +26,114 @@ import { runCutoutPool } from "@/lib/artlab/speed/cutout-pool";
 
 const CUTOUT_REQUIRED: ReadonlySet<ArtLabAssetType> = new Set(["character", "prop"]);
 
-// Color distance threshold in RGB space. The backdrop is a near-uniform
-// cream (~#F4E8D3) and the subject has saturated colors well-separated
-// from it; 50 gives a clean cut on real Gemini output with a small feather.
-const BACKDROP_DISTANCE_THRESHOLD = 50;
-const ALPHA_FEATHER_SIGMA = 1.2;
+// Flood-fill from the perimeter with a tight color tolerance. Only pixels
+// CONNECTED to a perimeter backdrop region get alpha = 0; everything else
+// (the character, including shadows + skin that happen to be close to the
+// backdrop cream) stays opaque. This is what fixed the "ghost halo" output
+// where naive per-pixel thresholding ate skin tones and washed the character
+// translucent.
+//
+// We deliberately skip a Gaussian feather on the alpha mask: the painterly
+// brush-edges in the source are already anti-aliased, and sharp's `blur` on
+// a 1-channel raw alpha buffer was destroying the head + face by aggressively
+// pulling interior alpha down. A hard alpha cut at the flood-fill boundary
+// gives a clean cutout that matches the source edge softness.
+const BACKDROP_FILL_THRESHOLD = 42;
 
-interface CornerColor { r: number; g: number; b: number; }
+interface RgbColor { r: number; g: number; b: number; }
 
-function colorDistance(a: CornerColor, b: CornerColor): number {
+function colorDistance(a: RgbColor, b: RgbColor): number {
   const dr = a.r - b.r;
   const dg = a.g - b.g;
   const db = a.b - b.b;
   return Math.sqrt(dr * dr + dg * dg + db * db);
 }
 
-function averageCorners(buf: Buffer, width: number, height: number, channels: number): CornerColor {
-  const samples: CornerColor[] = [];
-  const sampleAt = (x: number, y: number): CornerColor => {
+function sampleBackdrop(buf: Buffer, width: number, height: number, channels: number): RgbColor {
+  const samples: RgbColor[] = [];
+  const sampleAt = (x: number, y: number): RgbColor => {
     const idx = (y * width + x) * channels;
     return { r: buf[idx]!, g: buf[idx + 1]!, b: buf[idx + 2]! };
   };
-  // 4 corners + 1-pixel inset to avoid potential edge artifacts.
-  const corners: Array<[number, number]> = [
-    [4, 4], [width - 5, 4], [4, height - 5], [width - 5, height - 5],
-    // Plus a few edge-midpoint samples for robustness.
-    [Math.floor(width / 2), 4], [Math.floor(width / 2), height - 5],
-    [4, Math.floor(height / 2)], [width - 5, Math.floor(height / 2)],
-  ];
-  for (const [x, y] of corners) {
-    if (x >= 0 && x < width && y >= 0 && y < height) samples.push(sampleAt(x, y));
+  // Sample a strip along each edge so we average over enough pixels to
+  // suppress JPEG/encode noise (corners alone are unreliable).
+  const step = Math.max(8, Math.floor(width / 32));
+  for (let x = step; x < width - step; x += step) {
+    samples.push(sampleAt(x, 2));
+    samples.push(sampleAt(x, height - 3));
+  }
+  for (let y = step; y < height - step; y += step) {
+    samples.push(sampleAt(2, y));
+    samples.push(sampleAt(width - 3, y));
   }
   const sum = samples.reduce((acc, c) => ({ r: acc.r + c.r, g: acc.g + c.g, b: acc.b + c.b }), { r: 0, g: 0, b: 0 });
   return { r: sum.r / samples.length, g: sum.g / samples.length, b: sum.b / samples.length };
 }
 
+function floodFillBackdrop(
+  rgb: Buffer,
+  width: number,
+  height: number,
+  channels: number,
+  backdrop: RgbColor,
+): Buffer {
+  const pixelCount = width * height;
+  // alpha[i] === 0 means backdrop (transparent), 255 means subject (opaque).
+  const alpha = Buffer.alloc(pixelCount, 255);
+  // BFS queue of pixel indices. Using a head pointer avoids O(n) shift().
+  const queue = new Int32Array(pixelCount);
+  let head = 0;
+  let tail = 0;
+
+  const tryEnqueue = (x: number, y: number): void => {
+    if (x < 0 || x >= width || y < 0 || y >= height) return;
+    const idx = y * width + x;
+    if (alpha[idx] === 0) return;
+    const pxIdx = idx * channels;
+    const px: RgbColor = { r: rgb[pxIdx]!, g: rgb[pxIdx + 1]!, b: rgb[pxIdx + 2]! };
+    if (colorDistance(px, backdrop) < BACKDROP_FILL_THRESHOLD) {
+      alpha[idx] = 0;
+      queue[tail++] = idx;
+    }
+  };
+
+  // Seed from the entire image perimeter (1px border).
+  for (let x = 0; x < width; x += 1) {
+    tryEnqueue(x, 0);
+    tryEnqueue(x, height - 1);
+  }
+  for (let y = 0; y < height; y += 1) {
+    tryEnqueue(0, y);
+    tryEnqueue(width - 1, y);
+  }
+
+  // 4-way flood fill.
+  while (head < tail) {
+    const idx = queue[head++]!;
+    const x = idx % width;
+    const y = (idx - x) / width;
+    tryEnqueue(x + 1, y);
+    tryEnqueue(x - 1, y);
+    tryEnqueue(x, y + 1);
+    tryEnqueue(x, y - 1);
+  }
+  return alpha;
+}
+
 async function backdropSubtractToRgba(sourceBytes: Buffer): Promise<Buffer> {
-  // 1. Decode to raw RGB. sharp auto-detects PNG/JPEG/etc.
+  // 1. Decode to raw RGB.
   const decoded = await sharp(sourceBytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width, height, channels } = decoded.info;
   const rgb = decoded.data;
 
-  // 2. Detect backdrop color from corner pixels.
-  const backdrop = averageCorners(rgb, width, height, channels);
+  // 2. Detect the backdrop color from edge-strip samples.
+  const backdrop = sampleBackdrop(rgb, width, height, channels);
 
-  // 3. Build per-pixel alpha mask: 0 for backdrop pixels, 255 otherwise.
+  // 3. Flood-fill backdrop from the perimeter.
+  const alpha = floodFillBackdrop(rgb, width, height, channels, backdrop);
+
+  // 4. Compose RGB + alpha → RGBA.
   const pixelCount = width * height;
-  const alpha = Buffer.allocUnsafe(pixelCount);
-  for (let i = 0; i < pixelCount; i += 1) {
-    const idx = i * channels;
-    const px: CornerColor = { r: rgb[idx]!, g: rgb[idx + 1]!, b: rgb[idx + 2]! };
-    const distance = colorDistance(px, backdrop);
-    alpha[i] = distance < BACKDROP_DISTANCE_THRESHOLD ? 0 : 255;
-  }
-
-  // 4. Smooth the alpha mask to feather edges. A small Gaussian blur on the
-  //    grayscale alpha gives a clean cut without sharp artifacts.
-  const blurredAlpha = await sharp(alpha, {
-    raw: { width, height, channels: 1 },
-  }).blur(ALPHA_FEATHER_SIGMA).raw().toBuffer();
-
-  // 5. Compose RGB + new alpha into RGBA buffer.
   const rgba = Buffer.allocUnsafe(pixelCount * 4);
   for (let i = 0; i < pixelCount; i += 1) {
     const srcIdx = i * channels;
@@ -94,10 +141,10 @@ async function backdropSubtractToRgba(sourceBytes: Buffer): Promise<Buffer> {
     rgba[dstIdx] = rgb[srcIdx]!;
     rgba[dstIdx + 1] = rgb[srcIdx + 1]!;
     rgba[dstIdx + 2] = rgb[srcIdx + 2]!;
-    rgba[dstIdx + 3] = blurredAlpha[i]!;
+    rgba[dstIdx + 3] = alpha[i]!;
   }
 
-  // 6. Encode as PNG (lossless, alpha preserved).
+  // 5. Encode as PNG (lossless).
   return await sharp(rgba, {
     raw: { width, height, channels: 4 },
   }).png().toBuffer();
