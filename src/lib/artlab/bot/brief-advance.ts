@@ -118,6 +118,103 @@ export function findParkedConceptRunForChat(workspaceRoot: string, chatId: numbe
   return findParkedRunForChat(workspaceRoot, chatId, ["concept-review"]);
 }
 
+// Returns the SINGLE most-recently-updated parked run for the chat across
+// both brief-review and concept-review. The routing layer uses this to
+// decide where a free-text message goes — the run the user just interacted
+// with wins, not whichever phase happens to be alphabetically first.
+export function findMostRecentParkedRunForChat(
+  workspaceRoot: string,
+  chatId: number,
+): { runId: string; phase: "brief-review" | "concept-review" } | null {
+  const runsDir = join(workspaceRoot, "runs");
+  if (!existsSync(runsDir)) return null;
+  let best: { runId: string; phase: "brief-review" | "concept-review"; updatedAt: string } | null = null;
+  for (const id of readdirSync(runsDir)) {
+    if (id.startsWith(".")) continue;
+    const runDir = join(runsDir, id);
+    const state = readRunStateSnapshot(runDir);
+    if (!state || state.blocker) continue;
+    if (state.phase !== "brief-review" && state.phase !== "concept-review") continue;
+    const queueEntryPath = join(runDir, "queue-entry.json");
+    if (!existsSync(queueEntryPath)) continue;
+    try {
+      const entry = JSON.parse(readFileSync(queueEntryPath, "utf8")) as { spec?: { chatId?: number } };
+      if (entry.spec?.chatId !== chatId) continue;
+    } catch { continue; }
+    if (!best || state.updatedAt > best.updatedAt) {
+      best = { runId: id, phase: state.phase, updatedAt: state.updatedAt };
+    }
+  }
+  return best ? { runId: best.runId, phase: best.phase } : null;
+}
+
+// Cancels every parked run for a chat (across brief-review, concept-review,
+// final-review, AND blocked-with-cancellable-blocker). Returns count.
+export function cancelAllParkedRunsForChat(workspaceRoot: string, chatId: number): number {
+  const runsDir = join(workspaceRoot, "runs");
+  if (!existsSync(runsDir)) return 0;
+  let cancelled = 0;
+  for (const id of readdirSync(runsDir)) {
+    if (id.startsWith(".")) continue;
+    const runDir = join(runsDir, id);
+    const state = readRunStateSnapshot(runDir);
+    if (!state) continue;
+    if (state.phase === "closed") continue;
+    if (state.blocker === "cancelled") continue;
+    const queueEntryPath = join(runDir, "queue-entry.json");
+    if (!existsSync(queueEntryPath)) continue;
+    try {
+      const entry = JSON.parse(readFileSync(queueEntryPath, "utf8")) as { spec?: { chatId?: number } };
+      if (entry.spec?.chatId !== chatId) continue;
+    } catch { continue; }
+    const now = new Date().toISOString();
+    writeRunStateSnapshot(runDir, { ...state, blocker: "cancelled", updatedAt: now });
+    appendArtLabEvent(runDir, {
+      runId: id,
+      at: now,
+      kind: "phase-transition",
+      payload: { from: state.phase, to: state.phase, blocker: "cancelled", source: "bot-cancel-all" },
+    });
+    cancelled += 1;
+  }
+  return cancelled;
+}
+
+// Auto-cancel any parked run > 30 min old for the given chat. Called on
+// every free-text message — keeps the parked-run set fresh so stale runs
+// from prior broken sessions don't hijack new feedback.
+export function autoCancelStaleParkedRuns(workspaceRoot: string, chatId: number, maxAgeMs = 30 * 60 * 1000): number {
+  const runsDir = join(workspaceRoot, "runs");
+  if (!existsSync(runsDir)) return 0;
+  const cutoff = new Date(Date.now() - maxAgeMs).toISOString();
+  let cancelled = 0;
+  for (const id of readdirSync(runsDir)) {
+    if (id.startsWith(".")) continue;
+    const runDir = join(runsDir, id);
+    const state = readRunStateSnapshot(runDir);
+    if (!state) continue;
+    if (state.phase === "closed" || state.blocker === "cancelled") continue;
+    if (state.phase !== "brief-review" && state.phase !== "concept-review" && state.phase !== "final-review") continue;
+    if (state.updatedAt >= cutoff) continue; // still fresh
+    const queueEntryPath = join(runDir, "queue-entry.json");
+    if (!existsSync(queueEntryPath)) continue;
+    try {
+      const entry = JSON.parse(readFileSync(queueEntryPath, "utf8")) as { spec?: { chatId?: number } };
+      if (entry.spec?.chatId !== chatId) continue;
+    } catch { continue; }
+    const now = new Date().toISOString();
+    writeRunStateSnapshot(runDir, { ...state, blocker: "cancelled", updatedAt: now });
+    appendArtLabEvent(runDir, {
+      runId: id,
+      at: now,
+      kind: "phase-transition",
+      payload: { from: state.phase, to: state.phase, blocker: "cancelled", source: "auto-cancel-stale" },
+    });
+    cancelled += 1;
+  }
+  return cancelled;
+}
+
 function findParkedRunForChat(
   workspaceRoot: string,
   chatId: number,

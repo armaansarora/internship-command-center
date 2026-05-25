@@ -25,6 +25,7 @@ export interface BotCommandInput {
   workspaceRoot: string;
   commandName: string;
   args: string[];
+  chatId?: number;
 }
 
 export interface BotCommandResult {
@@ -56,9 +57,24 @@ function handleQueue(workspaceRoot: string): TelegramOutboundMessage {
   return queueList({ entries: queued });
 }
 
-function handleCancel(workspaceRoot: string, args: string[]): TelegramOutboundMessage {
+function handleCancel(workspaceRoot: string, args: string[], chatId?: number): TelegramOutboundMessage {
+  // /cancel with no arg → cancel ALL parked runs for the calling chat.
+  // /cancel <runId> → cancel just that one.
   if (args.length === 0) {
-    return { text: "❌ Usage: <code>/cancel &lt;runId&gt;</code>", parseMode: "HTML" };
+    if (typeof chatId === "number") {
+      // Lazy-load to avoid a circular import (commands.ts ↔ brief-advance.ts).
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { cancelAllParkedRunsForChat } = require("./brief-advance") as typeof import("./brief-advance");
+      const count = cancelAllParkedRunsForChat(workspaceRoot, chatId);
+      if (count === 0) {
+        return { text: "📭 <b>Nothing parked.</b>  No runs to cancel.", parseMode: "HTML" };
+      }
+      return {
+        text: `🛑  <b>Cancelled ${count} parked run${count === 1 ? "" : "s"}.</b>  Clean slate.`,
+        parseMode: "HTML",
+      };
+    }
+    return { text: "❌ Usage: <code>/cancel</code> (all parked) or <code>/cancel &lt;runId&gt;</code>", parseMode: "HTML" };
   }
   const runId = args[0]!;
   const inboxDir = join(workspaceRoot, "inbox");
@@ -209,7 +225,7 @@ export async function handleBotCommand(input: BotCommandInput): Promise<BotComma
   switch (name as typeof KNOWN[number]) {
     case "status": return { kind: "text", message: await handleStatus(input.workspaceRoot, input.args) };
     case "queue": return { kind: "text", message: handleQueue(input.workspaceRoot) };
-    case "cancel": return { kind: "text", message: handleCancel(input.workspaceRoot, input.args) };
+    case "cancel": return { kind: "text", message: handleCancel(input.workspaceRoot, input.args, input.chatId) };
     case "health": return { kind: "text", message: await handleHealth(input.workspaceRoot) };
     case "help": return { kind: "text", message: helpTemplate() };
     case "decisions": return { kind: "text", message: handleDecisions(input.workspaceRoot, input.args) };

@@ -16,7 +16,8 @@ import {
   recordBriefAdjustmentAndReAuthor,
   recordConceptFeedbackAndRefine,
   findParkedBriefRunForChat,
-  findParkedConceptRunForChat,
+  findMostRecentParkedRunForChat,
+  autoCancelStaleParkedRuns,
 } from "./brief-advance";
 import { displayFor } from "../intake/known-cast";
 import {
@@ -370,45 +371,44 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
   // Stateful free-text routing: when a run is parked at brief-review or
   // concept-review for this chat AND the user sends plain text (not a
   // command, promotion phrase, gate reply, or "make X" trigger), route the
-  // text as feedback on the parked run.
+  // text as feedback on the MOST RECENTLY UPDATED parked run (the one the
+  // user just interacted with — not whichever phase comes alphabetically
+  // first).
   //
-  // brief-review → record as brief adjustment, re-author brief
-  // concept-review → record as concept feedback, advance to refining-concepts
-  //
-  // Triggers starting with "make " always take precedence (so the user can
-  // start a new run while parked).
+  // Triggers starting with "make " always take precedence so the user can
+  // start a new run regardless of parked state.
   if (
     (classified.kind === "trigger" || classified.kind === "bundle") &&
     !classified.commandName &&
     classified.text.length > 0 &&
     !/^make\s/i.test(classified.text)
   ) {
-    const parkedBriefRunId = findParkedBriefRunForChat(input.workspaceRoot, message.chat.id);
-    if (parkedBriefRunId) {
-      const advance = await recordBriefAdjustmentAndReAuthor({
-        workspaceRoot: input.workspaceRoot,
-        runId: parkedBriefRunId,
-        entry: {
-          at: new Date().toISOString(),
-          dimension: "freetext",
+    // First, sweep any stale parked runs > 30 min old for this chat. This
+    // prevents zombie runs from older sessions from hijacking feedback.
+    autoCancelStaleParkedRuns(input.workspaceRoot, message.chat.id);
+
+    const target = findMostRecentParkedRunForChat(input.workspaceRoot, message.chat.id);
+    if (target) {
+      if (target.phase === "brief-review") {
+        const advance = await recordBriefAdjustmentAndReAuthor({
+          workspaceRoot: input.workspaceRoot,
+          runId: target.runId,
+          entry: { at: new Date().toISOString(), dimension: "freetext", freeText: classified.text },
+        });
+        if (advance.ok) {
+          await send(input.telegram, message.chat.id, briefRegeneratingAck({ runId: advance.runId }));
+          return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: target.runId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
+        }
+      } else if (target.phase === "concept-review") {
+        const advance = await recordConceptFeedbackAndRefine({
+          workspaceRoot: input.workspaceRoot,
+          runId: target.runId,
           freeText: classified.text,
-        },
-      });
-      if (advance.ok) {
-        await send(input.telegram, message.chat.id, briefRegeneratingAck({ runId: advance.runId }));
-        return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: parkedBriefRunId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
-      }
-    }
-    const parkedConceptRunId = findParkedConceptRunForChat(input.workspaceRoot, message.chat.id);
-    if (parkedConceptRunId) {
-      const advance = await recordConceptFeedbackAndRefine({
-        workspaceRoot: input.workspaceRoot,
-        runId: parkedConceptRunId,
-        freeText: classified.text,
-      });
-      if (advance.ok) {
-        await send(input.telegram, message.chat.id, briefRegeneratingAck({ runId: advance.runId }));
-        return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: parkedConceptRunId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
+        });
+        if (advance.ok) {
+          await send(input.telegram, message.chat.id, briefRegeneratingAck({ runId: advance.runId }));
+          return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: target.runId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
+        }
       }
     }
   }
@@ -419,6 +419,7 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
         workspaceRoot: input.workspaceRoot,
         commandName: classified.commandName!,
         args: classified.text.split(/\s+/).slice(1),
+        chatId: message.chat.id,
       });
       await send(input.telegram, message.chat.id, out.message);
       return { action: { type: "command-handled", commandName: classified.commandName! } };
