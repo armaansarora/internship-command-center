@@ -122,21 +122,47 @@ const FALLBACK_AXES = [
 ];
 
 function canonicalFallbackPrompts(ctx: TowerCharacterContext): ConceptLanePrompt[] {
-  const base = ctx.conceptBoardPrompt || `Create a tower-flat-plus-depth-v1 premium adult web-game sprite of ${ctx.displayName}, ${ctx.title}. Silhouette: ${ctx.silhouette}. Wardrobe: ${ctx.wardrobe}. Props: ${ctx.props}. Mobile read: ${ctx.mobileRead}.`;
+  // IMPORTANT: ctx.conceptBoardPrompt from CHARACTER-IMAGE-PROMPTS.md is a
+  // META-prompt that instructs an LLM to author 5 image prompts. We must NOT
+  // send it verbatim to an image model — it confuses the model (it tries to
+  // "create 5 distinct prompt-only concept options" as if writing text).
+  // Always build a single-subject image prompt from the bible fields instead.
+  const base = buildSingleImagePrompt(ctx);
   const negative = ctx.negativePrompt || ctx.negativeDNA || "no celebrity likeness, fake text, logo, watermark, identity drift.";
   return FALLBACK_AXES.map((axis, idx) => ({
     laneIndex: idx + 1,
     prompt: [
       base,
       "",
-      `Variation for this concept option: ${axis.clause}`,
+      `Pose variation for this concept: ${axis.clause}`,
       "",
-      "premium-simple-backdrop-v1: solid neutral background, high subject-background separation, no patterned walls, no furniture overlap, no same-color clothing-background collision, no touching shadows, full-body framing, generous safe padding.",
+      "Backdrop (premium-simple-backdrop-v1): solid neutral pastel-cream backdrop (#F4E8D3 or similar warm off-white), high subject-background separation, no patterned walls, no furniture, no scenery, no touching shadows, generous safe padding around the full-body figure. Single subject, centered, 9:16 portrait framing.",
       "",
-      `Negative: ${negative}`,
+      `Avoid: ${negative}. No cartoon mascot, no chibi proportions, no anime style, no 3D render, no photography, no realistic skin texture, no scenic background, no environmental props beyond the character's signature items, no visible text or logos or watermarks.`,
     ].join("\n"),
     variationAxis: axis.axis,
   }));
+}
+
+// Build a single-subject image prompt from the bible fields. This is the
+// shape Gemini expects for image generation: declarative description of
+// ONE character, not instructions to generate multiple prompts.
+function buildSingleImagePrompt(ctx: TowerCharacterContext): string {
+  const lines: string[] = [
+    `Design ${ctx.displayName}, the ${ctx.title} of The Tower (an immersive internship command-center skyscraper).`,
+    ``,
+    `Style: tower-flat-plus-depth-v1 — premium adult web-game character sprite, clean raster shapes, strong mobile-readable silhouette, flat illustrated forms with subtle controlled depth shading. NOT photorealistic, NOT 3D-rendered, NOT anime, NOT chibi. Premium editorial illustration style like an upscale game UI.`,
+    ``,
+    `Identity (from canonical bible — do not deviate):`,
+    `  • Visual archetype: ${ctx.visualArchetype}`,
+    `  • Silhouette: ${ctx.silhouette}`,
+    `  • Wardrobe: ${ctx.wardrobe}`,
+    `  • Signature props: ${ctx.props}`,
+    `  • Mobile read: ${ctx.mobileRead}`,
+  ];
+  if (ctx.accent) lines.push(`  • Color accent: ${ctx.accent}`);
+  if (ctx.artDirectionNotes) lines.push(`  • Art direction: ${ctx.artDirectionNotes}`);
+  return lines.join("\n");
 }
 
 // Production-slot prompts — one per (outfit, pose) combo. For tonight we build

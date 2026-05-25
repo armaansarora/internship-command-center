@@ -49,15 +49,31 @@ function shouldUseRealGemini(): boolean {
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
   // Brain preference: Anthropic (if key present) > Gemini (reuses image key) > mock.
-  // The Gemini-brain path is the user's default when only GEMINI_API_KEY is wired —
-  // same key powers both image generation and prompt-variation authoring.
+  // If Anthropic is configured but throws at runtime (invalid key / 401 / 5xx)
+  // we transparently retry the same decision against the Gemini brain — that
+  // way a stale ANTHROPIC_API_KEY doesn't cascade into canonical-fallback
+  // when the user has a perfectly good Gemini key available.
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
   const geminiKey = geminiKeyFromEnv();
   const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL; // optional override
+  const forceGemini = process.env.ARTLAB_BRAIN_PROVIDER === "gemini";
   let raw: ArtLabLlmBrain;
-  if (anthropicKey && process.env.ARTLAB_BRAIN_PROVIDER !== "gemini") {
-    raw = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
+  if (anthropicKey && !forceGemini) {
+    const claude = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
+    const fallback = geminiKey
+      ? createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel })
+      : null;
+    raw = {
+      async decide(req) {
+        try {
+          return await claude.decide(req);
+        } catch (err) {
+          if (!fallback) throw err;
+          return fallback.decide(req);
+        }
+      },
+    };
   } else if (geminiKey) {
     raw = createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel });
   } else {
