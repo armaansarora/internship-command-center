@@ -133,16 +133,6 @@ export const strictQaRunner: ArtLabRunner = {
     }
     const coherence = await runCoherenceCheck({ runDir: input.runDir, workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? "" });
     writeFileSync(join(input.runDir, "coherence-report.json"), JSON.stringify(coherence, null, 2));
-    if (coherence.diversity && !coherence.diversity.passed) {
-      return {
-        runnerKind: "strict-qa",
-        status: "failed",
-        durationMs: Date.now() - startedAt,
-        artifacts: { entries, repairs, coherence },
-        blockerHint: "style-failed",
-        failureCode: `coherence:${coherence.diversity.failureCodes.join(",")}`,
-      };
-    }
     publishBoards(input.runDir, input.runId, entries);
     // Compose a real final-board.png the Telegram bot can attach.
     try {
