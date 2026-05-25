@@ -113,12 +113,30 @@ function parseLanePromptsOutput(json: unknown): ConceptLanePrompt[] | null {
 // built directly from the canonical concept-board prompt in
 // docs/CHARACTER-IMAGE-PROMPTS.md. Each axis is a documented allowed
 // variation per CHARACTER-PIPELINE.md.
+// Each lane varies on multiple axes (age, hair, posture, signature-prop
+// arrangement, color emphasis) so the 5 directions actually look like
+// 5 different design takes — not 5 stance variations of the same face.
 const FALLBACK_AXES = [
-  { axis: "stance-confident-front", clause: "Composed front-facing stance, weight even, hands relaxed at sides." },
-  { axis: "stance-relaxed-three-quarter", clause: "Three-quarter relaxed lean, weight on back foot, one prop held casually." },
-  { axis: "stance-engaged-listening", clause: "Slight forward lean, head tilted, attentive listening posture." },
-  { axis: "stance-grounded-working", clause: "Squared grounded stance, primary prop in active use, expressive hands." },
-  { axis: "stance-warm-greeting", clause: "Open shoulders, small smile, hand gesturing toward the viewer." },
+  {
+    axis: "younger-composed-front",
+    clause: "Younger interpretation (early 30s). Short, sharply cropped hair. Composed front-facing stance, weight even, hands relaxed. The canonical accent color leads the wardrobe palette in a confident editorial way.",
+  },
+  {
+    axis: "mid-career-three-quarter-lean",
+    clause: "Mid-career (early 40s) with a hint of stubble or a defined jawline. Hair slightly textured. Three-quarter relaxed lean, weight on back foot, one signature prop held casually at hip level. Wardrobe deepens the canonical palette toward richer tones.",
+  },
+  {
+    axis: "engaged-late-thirties-tilted",
+    clause: "Late 30s, longer styled hair or pronounced hair geometry. Head slightly tilted, slight forward lean, attentive listening posture. Eye contact warm but focused. Secondary prop visible, primary prop lowered.",
+  },
+  {
+    axis: "senior-grounded-working",
+    clause: "Senior interpretation (early 50s) with distinguished gray at the temples or fuller silver. Squared grounded stance, signature prop in active use, expressive hands mid-gesture. Wardrobe leans into structured tailored cuts.",
+  },
+  {
+    axis: "approachable-greeting",
+    clause: "Mid-40s with glasses or another characterful face detail. Open shoulders, small genuine smile, hand gesturing in warm greeting toward the viewer. Lighter, more inviting reading of the canonical palette.",
+  },
 ];
 
 function canonicalFallbackPrompts(ctx: TowerCharacterContext): ConceptLanePrompt[] {
@@ -133,12 +151,16 @@ function canonicalFallbackPrompts(ctx: TowerCharacterContext): ConceptLanePrompt
     laneIndex: idx + 1,
     prompt: [
       base,
-      "",
-      `Pose variation for this concept: ${axis.clause}`,
-      "",
-      "Backdrop (premium-simple-backdrop-v1): solid neutral pastel-cream backdrop (#F4E8D3 or similar warm off-white), high subject-background separation, no patterned walls, no furniture, no scenery, no touching shadows, generous safe padding around the full-body figure. Single subject, centered, 9:16 portrait framing.",
-      "",
-      `Avoid: ${negative}. No cartoon mascot, no chibi proportions, no anime style, no 3D render, no photography, no realistic skin texture, no scenic background, no environmental props beyond the character's signature items, no visible text or logos or watermarks.`,
+      ``,
+      `THIS LANE — ${axis.axis}: ${axis.clause}`,
+      ``,
+      `COMPOSITION:`,
+      `  • Single full-body figure, centered, 9:16 portrait framing.`,
+      `  • Solid neutral pastel-cream backdrop (#F4E8D3) with high subject-background separation. NO patterned walls, NO furniture, NO scenery, NO environmental props beyond the character's own signature items.`,
+      `  • Soft ambient occlusion shadow under the feet only — no touching dramatic shadow, no cast shadow on the backdrop.`,
+      `  • Generous safe padding around the figure for downstream cutout work.`,
+      ``,
+      `AVOID — these break the Tower envelope: ${negative}. No flat vector cartoon, no cell-shaded webcomic style, no corporate-startup illustration, no Slack-onboarding doodle look, no minimal-flat-illustration, no chibi proportions, no anime, no 3D render, no photography or photorealistic skin texture, no environmental scenic background, no visible text or logos or watermarks.`,
     ].join("\n"),
     variationAxis: axis.axis,
   }));
@@ -147,21 +169,34 @@ function canonicalFallbackPrompts(ctx: TowerCharacterContext): ConceptLanePrompt
 // Build a single-subject image prompt from the bible fields. This is the
 // shape Gemini expects for image generation: declarative description of
 // ONE character, not instructions to generate multiple prompts.
+//
+// Style reference: Otis Vale and Mara Voss in public/art/lobby/otis and
+// public/art/penthouse/ceo set the Tower bar — painterly luxury editorial
+// illustration, NOT flat cell-shaded vector art. The prompt below is
+// engineered to make Gemini reproduce that quality.
 function buildSingleImagePrompt(ctx: TowerCharacterContext): string {
   const lines: string[] = [
     `Design ${ctx.displayName}, the ${ctx.title} of The Tower (an immersive internship command-center skyscraper).`,
     ``,
-    `Style: tower-flat-plus-depth-v1 — premium adult web-game character sprite, clean raster shapes, strong mobile-readable silhouette, flat illustrated forms with subtle controlled depth shading. NOT photorealistic, NOT 3D-rendered, NOT anime, NOT chibi. Premium editorial illustration style like an upscale game UI.`,
+    `STYLE — premium painterly editorial character illustration, like a luxury video-game character portrait card or a high-end art-of book cover:`,
+    `  • Rich painterly brushwork with subtle gradient shading and dimensional volume.`,
+    `  • Deep, saturated colors with soft cinematic studio lighting (warm key from upper-front, gentle cool fill).`,
+    `  • Detailed face anatomy with grounded realistic proportions — a real person you'd see on a luxury book cover, not a stylized avatar.`,
+    `  • Crisp clean rendering with smooth shading transitions; wardrobe fabrics have visible weight and texture (wool, twill, fine knit).`,
+    `  • Strong mobile-readable silhouette without sacrificing detail.`,
+    `  • Subtle ambient occlusion around the figure's feet anchoring them to the ground plane.`,
+    `  • NOT flat vector art, NOT cell-shaded cartoon, NOT corporate-startup illustration, NOT minimal-flat-style, NOT chibi, NOT anime, NOT 3D-rendered, NOT photorealistic photography.`,
+    `  • Reference quality: think Square Enix or Riot Games character art card, or a Pixar/Disney concept-art painting refined for an editorial luxury brand.`,
     ``,
-    `Identity (from canonical bible — do not deviate):`,
+    `IDENTITY (from canonical bible — do not deviate):`,
     `  • Visual archetype: ${ctx.visualArchetype}`,
     `  • Silhouette: ${ctx.silhouette}`,
     `  • Wardrobe: ${ctx.wardrobe}`,
     `  • Signature props: ${ctx.props}`,
     `  • Mobile read: ${ctx.mobileRead}`,
   ];
-  if (ctx.accent) lines.push(`  • Color accent: ${ctx.accent}`);
-  if (ctx.artDirectionNotes) lines.push(`  • Art direction: ${ctx.artDirectionNotes}`);
+  if (ctx.accent) lines.push(`  • Color accent (lead color in palette): ${ctx.accent}`);
+  if (ctx.artDirectionNotes) lines.push(`  • Art direction notes: ${ctx.artDirectionNotes}`);
   return lines.join("\n");
 }
 
