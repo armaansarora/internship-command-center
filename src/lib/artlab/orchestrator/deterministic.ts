@@ -6,7 +6,9 @@ import { getRunner } from "../runners";
 import type { ArtLabRunnerKind } from "../runners/runner-contract";
 
 const PHASE_RUNNER: Partial<Record<ArtLabPhase, ArtLabRunnerKind>> = {
+  briefing: "brief",
   "generating-concepts": "concept",
+  "refining-concepts": "refinement",
   canary: "canary",
   production: "production",
   "strict-qa": "strict-qa",
@@ -15,8 +17,10 @@ const PHASE_RUNNER: Partial<Record<ArtLabPhase, ArtLabRunnerKind>> = {
 };
 
 const NEXT_PHASE: Partial<Record<ArtLabPhase, ArtLabPhase>> = {
-  routed: "generating-concepts",
+  routed: "briefing",
+  briefing: "brief-review",
   "generating-concepts": "concept-review",
+  "refining-concepts": "concept-review",
   canary: "production",
   production: "strict-qa",
   "strict-qa": "final-review",
@@ -40,7 +44,11 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
   const state = readRunStateSnapshot(input.runDir);
   if (!state) return { applied: false, reason: "no-state" };
   if (state.phase === "closed") return { applied: false, reason: "terminal" };
-  if (state.phase === "concept-review" || state.phase === "final-review") {
+  if (
+    state.phase === "brief-review" ||
+    state.phase === "concept-review" ||
+    state.phase === "final-review"
+  ) {
     return { applied: false, reason: "awaiting-human-gate" };
   }
   if (state.blocker) return { applied: false, reason: `blocked-${state.blocker}` };

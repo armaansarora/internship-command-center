@@ -1,4 +1,6 @@
+import { briefRunner } from "./brief-runner";
 import { conceptRunner } from "./concept-runner";
+import { refinementRunner } from "./refinement-runner";
 import { canaryRunner } from "./canary-runner";
 import { productionRunner } from "./production-runner";
 import { animationRunner } from "./animation-runner";
@@ -20,7 +22,9 @@ const PRODUCTION_RUNNERS_BY_ASSET_TYPE: Partial<Record<ArtLabAssetType, ArtLabRu
 };
 
 export const ARTLAB_RUNNERS: Record<ArtLabRunnerKind, ArtLabRunner> = {
+  brief: briefRunner,
   concept: conceptRunner,
+  refinement: refinementRunner,
   canary: canaryRunner,
   production: productionRunner,
   cutout: cutoutRunner,

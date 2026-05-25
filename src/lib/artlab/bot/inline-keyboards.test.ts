@@ -61,11 +61,12 @@ describe("inline-keyboards encode/decode", () => {
     expect(decodeCallback("gate:c:abc:zz")).toBeNull();
   });
 
-  it("concept inline keyboard has 5 direction buttons + revise + reject", () => {
+  it("concept inline keyboard has 5 direction buttons + refine + revise/reject", () => {
     const kb = buildConceptInlineKeyboard(SAMPLE_RUN_ID);
-    expect(kb.inline_keyboard).toHaveLength(2);
-    expect(kb.inline_keyboard[0]).toHaveLength(5);
-    expect(kb.inline_keyboard[1]).toHaveLength(2);
+    expect(kb.inline_keyboard).toHaveLength(3);
+    expect(kb.inline_keyboard[0]).toHaveLength(5); // 5 direction buttons
+    expect(kb.inline_keyboard[1]).toHaveLength(1); // refine
+    expect(kb.inline_keyboard[2]).toHaveLength(2); // revise + reject
     for (const row of kb.inline_keyboard) {
       for (const btn of row) {
         if (btn.callback_data) {

@@ -9,7 +9,83 @@ import {
 import { appendStyleWin } from "@/lib/artlab/memory/style-ledger";
 import { autoCommitPromotion } from "@/lib/artlab/daemon/git-commit";
 import { displayFor } from "@/lib/artlab/intake/known-cast";
+import { loadTowerContext, pickCharacterContext } from "@/lib/artlab/context/tower-context";
+import { createClaudeBrain } from "@/lib/artlab/orchestrator/claude-brain";
+import { createGeminiBrain } from "@/lib/artlab/orchestrator/gemini-brain";
+import { createLoggedBrain } from "@/lib/artlab/orchestrator/logged-brain";
+import { decideWithMockBrain, type ArtLabLlmBrain } from "@/lib/artlab/orchestrator/llm-brain";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
+
+async function composeAndPersistPromotionCelebration(input: {
+  workspaceRoot: string;
+  runDir: string;
+  characterId: string;
+  assetCount: number;
+  spendCents: number;
+  capCents: number;
+}): Promise<void> {
+  const bundle = await loadTowerContext({ workspaceRoot: input.workspaceRoot });
+  const ctx = pickCharacterContext(bundle, input.characterId);
+  if (!ctx) return;
+  const brain = buildBrainForPromotion(input.workspaceRoot);
+  const result = await brain.decide({
+    kind: "compose-promotion-celebration",
+    input: {
+      characterContext: {
+        characterId: ctx.characterId,
+        displayName: ctx.displayName,
+        title: ctx.title,
+        space: ctx.space,
+        accent: ctx.accent,
+        visualArchetype: ctx.visualArchetype,
+      },
+      runId: input.runDir.split("/").pop()?.slice(0, 8) ?? "",
+      assetCount: input.assetCount,
+      liveUrl: `https://www.interntower.com/${ctx.space}`,
+      spendCents: input.spendCents,
+      capCents: input.capCents,
+      castContinuity: Object.values(bundle.characters)
+        .filter((c) => c.characterId !== ctx.characterId)
+        .slice(0, 6)
+        .map((c) => ({ characterId: c.characterId, displayName: c.displayName, accent: c.accent, space: c.space })),
+    },
+  });
+  const text = (result.outputJson as { text?: unknown }).text;
+  if (typeof text === "string" && text.length > 0) {
+    writeFileSync(join(input.runDir, "promotion-celebration.json"), JSON.stringify({ text }, null, 2));
+  }
+}
+
+function buildBrainForPromotion(workspaceRoot: string): ArtLabLlmBrain {
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
+    ? process.env.GEMINI_API_KEY
+    : null;
+  const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL;
+  const forceGemini = process.env.ARTLAB_BRAIN_PROVIDER === "gemini";
+  let raw: ArtLabLlmBrain;
+  if (anthropicKey && !forceGemini) {
+    const claude = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
+    const fallback = geminiKey
+      ? createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel })
+      : null;
+    raw = {
+      async decide(req) {
+        try { return await claude.decide(req); }
+        catch (err) {
+          if (!fallback) throw err;
+          return fallback.decide(req);
+        }
+      },
+    };
+  } else if (geminiKey) {
+    raw = createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel });
+  } else {
+    raw = { decide: decideWithMockBrain };
+  }
+  return createLoggedBrain({ inner: raw, workspaceRoot });
+}
 
 const REQUIRED_PHRASE = "approved for app";
 
@@ -151,6 +227,19 @@ export const promotionRunner: ArtLabRunner = {
             totalCostCents: 0,
           });
         } catch { /* memory write failure must not break promotion */ }
+
+        // Brain-authored promotion celebration — phase-notifier picks this
+        // up and renders it when state hits closed. Best-effort.
+        try {
+          await composeAndPersistPromotionCelebration({
+            workspaceRoot,
+            runDir: input.runDir,
+            characterId: input.characterId,
+            assetCount: result.promotedPaths.length,
+            spendCents: 0,
+            capCents: 350,
+          });
+        } catch { /* non-fatal */ }
       }
     }
 

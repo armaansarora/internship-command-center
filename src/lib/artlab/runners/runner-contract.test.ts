@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { ArtLabRunnerResultSchema, ARTLAB_RUNNER_KINDS } from "./runner-contract";
 
 describe("artlab runner contract", () => {
-  it("declares the 7 runner kinds", () => {
+  it("declares all 9 runner kinds (incl. brainstorm-mode brief + refinement)", () => {
     expect(ARTLAB_RUNNER_KINDS).toEqual([
+      "brief",
       "concept",
+      "refinement",
       "canary",
       "production",
       "cutout",

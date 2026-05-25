@@ -14,7 +14,12 @@ import {
   buildFinalInlineKeyboard,
   type ClarificationOption,
   buildClarificationKeyboard,
+  buildBriefInlineKeyboard,
+  buildBriefAdjustmentKeyboard,
+  buildFeedbackKeyboard,
+  type FeedbackOption,
 } from "./inline-keyboards";
+import type { DesignBrief } from "../brainstorm/brief-schema";
 
 export interface TelegramOutboundMessage {
   text: string;
@@ -445,6 +450,246 @@ export function unknownCommandTemplate(input: { commandName: string }): Telegram
       `❓ Unknown command <code>/${esc(input.commandName)}</code>`,
       ``,
       help.text,
+    ]),
+    parseMode: "HTML",
+    disableWebPagePreview: true,
+  };
+}
+
+// ─── Brainstorm-mode templates (Tranche B-D) ───────────────────────────
+
+export function briefProposalCaption(input: { brief: DesignBrief }): TelegramOutboundMessage {
+  const { brief } = input;
+  const variationLines = brief.plannedVariation.map((v, i) => `   <b>${i + 1}.</b> ${esc(v)}`);
+  const deltaLine = brief.deltaSummary
+    ? [``, `<i>📝 ${esc(brief.deltaSummary)}</i>`]
+    : [];
+  return {
+    text: block([
+      `💡 <b>Design brief</b>${brief.iteration > 0 ? ` <i>(revision ${brief.iteration})</i>` : ""}`,
+      ``,
+      `<b>IDENTITY</b>`,
+      `${esc(brief.identity)}`,
+      ``,
+      `<b>PLANNED VARIATION</b> (5 lanes)`,
+      ...variationLines,
+      ``,
+      `<b>REFERENCE ANCHOR</b>`,
+      `<i>${esc(brief.referenceAnchor)}</i>`,
+      ...deltaLine,
+      ``,
+      `Looks right? Tap a button — or send free-text to refine.`,
+    ]),
+    parseMode: "HTML",
+    replyMarkup: buildBriefInlineKeyboard(brief.runId, brief.adjustmentOptions),
+    disableWebPagePreview: true,
+  };
+}
+
+export function briefAdjustmentPrompt(input: {
+  runId: string;
+  dimensionLabel: string;
+  options: Array<{ id: string; label: string }>;
+}): TelegramOutboundMessage {
+  return {
+    text: block([
+      `🎛️ <b>${esc(input.dimensionLabel)}</b>`,
+      ``,
+      `Pick a direction — or send free-text to refine.`,
+    ]),
+    parseMode: "HTML",
+    replyMarkup: buildBriefAdjustmentKeyboard(input.runId, input.options),
+    disableWebPagePreview: true,
+  };
+}
+
+export function briefCancelledAck(input: { runId: string }): TelegramOutboundMessage {
+  return {
+    text: block([
+      `❌ <b>Brief cancelled</b>`,
+      ``,
+      `Run <code>${esc(shortRunId(input.runId))}</code> stopped before any images were generated.`,
+      `Send <code>make &lt;character&gt;</code> to start a new one.`,
+    ]),
+    parseMode: "HTML",
+    disableWebPagePreview: true,
+  };
+}
+
+export function briefRegeneratingAck(_input: { runId: string }): TelegramOutboundMessage {
+  return {
+    text: block([
+      `🔄 <b>Updating brief</b>`,
+      ``,
+      `Incorporating your feedback. New proposal in ~5s.`,
+    ]),
+    parseMode: "HTML",
+    disableWebPagePreview: true,
+  };
+}
+
+export function feedbackPositivePrompt(input: {
+  runId: string;
+  options: FeedbackOption[];
+  isLast?: boolean;
+}): TelegramOutboundMessage {
+  return {
+    text: block([
+      `👍 <b>What worked?</b>`,
+      ``,
+      `<i>Tap any that apply (multi-select), then go next. Free-text works too.</i>`,
+    ]),
+    parseMode: "HTML",
+    replyMarkup: buildFeedbackKeyboard(input.runId, "pos", input.options, input.isLast ?? false),
+    disableWebPagePreview: true,
+  };
+}
+
+export function feedbackNegativePrompt(input: {
+  runId: string;
+  options: FeedbackOption[];
+}): TelegramOutboundMessage {
+  return {
+    text: block([
+      `👎 <b>What didn't work?</b>`,
+      ``,
+      `<i>Tap any that apply, then regenerate. Free-text adds a note.</i>`,
+    ]),
+    parseMode: "HTML",
+    replyMarkup: buildFeedbackKeyboard(input.runId, "neg", input.options, true),
+    disableWebPagePreview: true,
+  };
+}
+
+export function conceptCritiqueCaption(input: {
+  runId: string;
+  displayName: string;
+  subtitle?: string;
+  critique?: {
+    summary?: string;
+    recommendedLane?: number;
+    perLane?: Array<{ laneIndex: number; critique: string; stars?: number; fitToBible?: string }>;
+  };
+  iteration?: number;
+}): TelegramOutboundMessage {
+  const c = input.critique;
+  const perLaneLines = c?.perLane?.slice(0, 5).map((l) => {
+    const stars = typeof l.stars === "number" ? ` ${"★".repeat(Math.max(1, Math.min(5, l.stars)))}${"☆".repeat(5 - Math.max(1, Math.min(5, l.stars)))}` : "";
+    return `   <b>${l.laneIndex}.</b> ${esc(l.critique)}${stars}`;
+  }) ?? [];
+  const recommendation = c?.recommendedLane
+    ? [``, `💡 <b>My pick: Direction ${c.recommendedLane}</b>${c.summary ? ` — <i>${esc(c.summary)}</i>` : ""}`]
+    : c?.summary
+      ? [``, `<i>${esc(c.summary)}</i>`]
+      : [];
+  return {
+    text: block([
+      `📋 <b>${esc(input.displayName)} — Concept Board</b>${input.iteration && input.iteration > 0 ? ` <i>(revision ${input.iteration})</i>` : ""}`,
+      input.subtitle ? `   <i>${esc(input.subtitle)}</i>` : null,
+      ``,
+      ...perLaneLines,
+      ...recommendation,
+      ``,
+      `Tap a lane to lock it in — or 🔁 to regenerate with feedback.`,
+    ]),
+    parseMode: "HTML",
+    replyMarkup: buildConceptInlineKeyboard(input.runId),
+    disableWebPagePreview: true,
+  };
+}
+
+export function productionCritiqueCaption(input: {
+  runId: string;
+  displayName: string;
+  subtitle?: string;
+  spriteCount: number;
+  space?: string;
+  critique?: {
+    overallVerdict?: "tight" | "minor-drift" | "major-drift";
+    summary?: string;
+    flaggedSprites?: Array<{ slotId: string; issue: string; severity: "minor" | "major" }>;
+    approvedSpriteCount?: number;
+  };
+}): TelegramOutboundMessage {
+  const verdictEmoji = input.critique?.overallVerdict === "tight"
+    ? "✓"
+    : input.critique?.overallVerdict === "minor-drift"
+      ? "⚠"
+      : input.critique?.overallVerdict === "major-drift"
+        ? "✗"
+        : "•";
+  const flagLines = (input.critique?.flaggedSprites ?? []).slice(0, 5).map((f) => {
+    const icon = f.severity === "major" ? "❗" : "⚠";
+    return `   ${icon} <code>${esc(f.slotId)}</code> — ${esc(f.issue)}`;
+  });
+  const previewLine = input.space
+    ? [``, `🪟 <b>Preview where this lands:</b>`, `   ${liveFloorUrl(input.space)}`]
+    : [];
+  return {
+    text: block([
+      `📐 <b>${esc(input.displayName)} — Final Board</b>`,
+      input.subtitle ? `   <i>${esc(input.subtitle)}</i>` : null,
+      ``,
+      `${verdictEmoji} <b>${input.critique?.approvedSpriteCount ?? input.spriteCount}/${input.spriteCount}</b> sprites passed bible check`,
+      input.critique?.summary ? `<i>${esc(input.critique.summary)}</i>` : null,
+      ...flagLines,
+      ...previewLine,
+      ``,
+      `Tap a button below.`,
+    ]),
+    parseMode: "HTML",
+    replyMarkup: buildFinalInlineKeyboard(input.runId),
+    disableWebPagePreview: true,
+  };
+}
+
+export function triggerAckBrainAuthored(input: { text: string; runId: string }): TelegramOutboundMessage {
+  return {
+    text: block([
+      `${esc(input.text)}`,
+      ``,
+      `<i>Run <code>${esc(shortRunId(input.runId))}</code></i>`,
+    ]),
+    parseMode: "HTML",
+    disableWebPagePreview: true,
+  };
+}
+
+export function promotionCelebrationBrainAuthored(input: {
+  text: string;
+  runId: string;
+  liveUrl: string;
+  spendCents?: number;
+  capCents?: number;
+}): TelegramOutboundMessage {
+  const spendLine = input.spendCents !== undefined && input.capCents !== undefined
+    ? `   <b>Spend</b>  $${(input.spendCents / 100).toFixed(2)} of $${(input.capCents / 100).toFixed(2)} cap`
+    : null;
+  return {
+    text: block([
+      `🚀 ${esc(input.text)}`,
+      ``,
+      `<b>Live now:</b>`,
+      `   ${input.liveUrl}`,
+      `   <i>(deploying via Vercel… ready in ~90s)</i>`,
+      ``,
+      spendLine,
+      `Run <code>/decisions ${esc(shortRunId(input.runId))}</code> for the brain's reasoning chain.`,
+    ]),
+    parseMode: "HTML",
+    disableWebPagePreview: false,
+  };
+}
+
+export function askAnswerTemplate(input: { question: string; answer: string; references?: string[] }): TelegramOutboundMessage {
+  const refs = (input.references ?? []).slice(0, 3);
+  return {
+    text: block([
+      `🧠 <b>Q:</b> <i>${esc(input.question)}</i>`,
+      ``,
+      `${esc(input.answer)}`,
+      refs.length > 0 ? `` : null,
+      refs.length > 0 ? `<i>Refs: ${refs.map((r) => esc(r)).join(" · ")}</i>` : null,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,

@@ -10,6 +10,7 @@ import { parseBundle } from "../intake/bundle-parser";
 import { saveReferenceAttachment } from "../intake/reference-attachment-fs";
 import { enqueueRun } from "../queue/queue";
 import { advanceConceptApproval, advancePromotionApproval } from "./gate-advance";
+import { approveBrief, cancelBrief, recordBriefAdjustmentAndReAuthor, findParkedBriefRunForChat } from "./brief-advance";
 import { displayFor } from "../intake/known-cast";
 import {
   triggerAck,
@@ -20,9 +21,27 @@ import {
   gateReplyEcho,
   gateReplyNoMatch,
   callbackAck,
+  briefAdjustmentPrompt,
+  briefCancelledAck,
+  briefRegeneratingAck,
+  feedbackPositivePrompt,
+  feedbackNegativePrompt,
+  triggerAckBrainAuthored,
   type TelegramOutboundMessage,
 } from "./message-templates";
+import { appendConceptFeedback } from "../brainstorm/feedback-ledger";
+import type { FeedbackOption } from "./inline-keyboards";
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import { readRunStateSnapshot, writeRunStateSnapshot } from "../state/snapshots";
+import { appendArtLabEvent } from "../state/events";
+import { readFileSync } from "node:fs";
+import type { ArtLabQueueEntry } from "../queue/queue";
 import type { DecodedCallback } from "./inline-keyboards";
+import {
+  DEFAULT_ADJUSTMENT_SUBOPTIONS,
+  type BriefAdjustmentDimension,
+} from "../brainstorm/brief-schema";
 
 async function send(telegram: TelegramClient, chatId: number, msg: TelegramOutboundMessage): Promise<void> {
   await telegram.sendMessage({
@@ -128,10 +147,210 @@ async function dispatchCallback(input: DispatchInboundInput, callback: TelegramC
       await safeAnswerCallback(input.telegram, callback.id, "Reply 'reject' to abandon this run.");
       return { action: { type: "callback-handled", callback: decoded } };
     }
+    if (decoded.action.kind === "refine-concept") {
+      if (chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, "Let me hear what worked.");
+        if (callback.message) await safeClearKeyboard(input.telegram, callback.message.chat.id, callback.message.message_id);
+        await send(input.telegram, chatId, feedbackPositivePrompt({
+          runId: decoded.shortRunId,
+          options: FEEDBACK_POSITIVE_OPTIONS,
+          isLast: false,
+        }));
+      }
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
   }
-  // Clarification callbacks aren't wired yet (Phase C) — ack so the user sees feedback.
+  if (decoded.kind === "brief") {
+    if (decoded.action.kind === "approve") {
+      const advance = await approveBrief({ workspaceRoot: input.workspaceRoot });
+      if (advance.ok && chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, "✅ Generating 5 concept lanes…");
+        if (callback.message) await safeClearKeyboard(input.telegram, callback.message.chat.id, callback.message.message_id);
+      } else if (chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, "No brief waiting for approval.", true);
+      }
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.action.kind === "cancel") {
+      const advance = await cancelBrief({ workspaceRoot: input.workspaceRoot });
+      if (advance.ok && chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, "❌ Cancelled.");
+        if (callback.message) await safeClearKeyboard(input.telegram, callback.message.chat.id, callback.message.message_id);
+        await send(input.telegram, chatId, briefCancelledAck({ runId: advance.runId }));
+      }
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.action.kind === "adjust") {
+      const dimension = decoded.action.dimension as BriefAdjustmentDimension;
+      if (!Object.prototype.hasOwnProperty.call(DEFAULT_ADJUSTMENT_SUBOPTIONS, dimension)) {
+        await safeAnswerCallback(input.telegram, callback.id, "Unknown adjustment.");
+        return { action: { type: "callback-handled", callback: decoded } };
+      }
+      if (dimension === "freetext") {
+        await safeAnswerCallback(input.telegram, callback.id, "Send your feedback as a message — I'll incorporate it.");
+        return { action: { type: "callback-handled", callback: decoded } };
+      }
+      const subOptions = DEFAULT_ADJUSTMENT_SUBOPTIONS[dimension];
+      const runId = findParkedBriefRunForChat(input.workspaceRoot, callback.from.id) ?? "";
+      if (!runId || !chatId) {
+        await safeAnswerCallback(input.telegram, callback.id, "No parked brief found.", true);
+        return { action: { type: "callback-handled", callback: decoded } };
+      }
+      const label = ADJUSTMENT_DIMENSION_LABELS[dimension] ?? `Adjust ${dimension}`;
+      await safeAnswerCallback(input.telegram, callback.id, "Pick a direction.");
+      await send(input.telegram, chatId, briefAdjustmentPrompt({ runId, dimensionLabel: label, options: subOptions }));
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+  }
+  if (decoded.kind === "feedback") {
+    const runId = findFullRunIdByShortId(input.workspaceRoot, decoded.shortRunId);
+    if (!runId || !chatId) {
+      await safeAnswerCallback(input.telegram, callback.id, "Run not found.");
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    const runDir = join(input.workspaceRoot, "runs", runId);
+    if (decoded.action.kind === "toggle") {
+      appendConceptFeedback(runDir, {
+        at: new Date().toISOString(),
+        polarity: decoded.action.polarity === "pos" ? "positive" : "negative",
+        token: decoded.action.token,
+      });
+      await safeAnswerCallback(input.telegram, callback.id, `✓ ${decoded.action.token}`);
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.action.kind === "next") {
+      await safeAnswerCallback(input.telegram, callback.id, "Now what didn't work?");
+      await send(input.telegram, chatId, feedbackNegativePrompt({
+        runId: decoded.shortRunId,
+        options: FEEDBACK_NEGATIVE_OPTIONS,
+      }));
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.action.kind === "done") {
+      // Advance run from concept-review → refining-concepts and re-enqueue.
+      const state = readRunStateSnapshot(runDir);
+      if (state && state.phase === "concept-review" && !state.blocker) {
+        const now = new Date().toISOString();
+        writeRunStateSnapshot(runDir, { ...state, phase: "refining-concepts", updatedAt: now });
+        appendArtLabEvent(runDir, {
+          runId,
+          at: now,
+          kind: "phase-transition",
+          payload: { from: "concept-review", to: "refining-concepts", source: "bot" },
+        });
+        // Re-enqueue
+        const queueEntryPath = join(runDir, "queue-entry.json");
+        if (existsSync(queueEntryPath)) {
+          try {
+            const entry = JSON.parse(readFileSync(queueEntryPath, "utf8")) as ArtLabQueueEntry;
+            const { enqueueRun: enq } = await import("../queue/queue");
+            enq(input.workspaceRoot, { ...entry, enqueuedAt: now });
+          } catch { /* ignore */ }
+        }
+        await safeAnswerCallback(input.telegram, callback.id, "🔁 Regenerating with your feedback…");
+      } else {
+        await safeAnswerCallback(input.telegram, callback.id, "Run isn't at concept-review.", true);
+      }
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    if (decoded.action.kind === "cancel") {
+      await safeAnswerCallback(input.telegram, callback.id, "Cancelled feedback collection.");
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+  }
+  if (decoded.kind === "briefadj") {
+    if (decoded.action.kind === "back") {
+      await safeAnswerCallback(input.telegram, callback.id, "Back to the main brief — tap an adjustment when ready.");
+      return { action: { type: "callback-handled", callback: decoded } };
+    }
+    const subToken = decoded.action.subToken;
+    // Map sub-token back to its parent dimension (the prefix before the first dash).
+    const dimensionPrefix = subToken.split("-")[0] ?? "";
+    const dimension = (["palette", "age", "energy", "props", "references"].includes(dimensionPrefix)
+      ? dimensionPrefix
+      : "freetext") as BriefAdjustmentDimension;
+    const advance = await recordBriefAdjustmentAndReAuthor({
+      workspaceRoot: input.workspaceRoot,
+      entry: {
+        at: new Date().toISOString(),
+        dimension,
+        chosenOption: subToken,
+      },
+    });
+    if (advance.ok && chatId) {
+      await safeAnswerCallback(input.telegram, callback.id, "🔄 Updating brief…");
+      if (callback.message) await safeClearKeyboard(input.telegram, callback.message.chat.id, callback.message.message_id);
+      await send(input.telegram, chatId, briefRegeneratingAck({ runId: advance.runId }));
+    } else if (chatId) {
+      await safeAnswerCallback(input.telegram, callback.id, "No parked brief.", true);
+    }
+    return { action: { type: "callback-handled", callback: decoded } };
+  }
+  // Clarification + feedback callbacks aren't wired yet (Tranche C) — ack so the user sees feedback.
   await safeAnswerCallback(input.telegram, callback.id, "Got it.");
   return { action: { type: "callback-handled", callback: decoded } };
+}
+
+const ADJUSTMENT_DIMENSION_LABELS: Record<string, string> = {
+  palette: "How should the palette shift?",
+  age: "How should the age range shift?",
+  energy: "What energy should we lean into?",
+  props: "How should the signature prop appear?",
+  references: "Which references should we echo?",
+};
+
+const FEEDBACK_POSITIVE_OPTIONS: FeedbackOption[] = [
+  { token: "stance", label: "Stance / posture" },
+  { token: "palette", label: "Palette" },
+  { token: "prop", label: "Prop arrangement" },
+  { token: "face", label: "Face proportions" },
+  { token: "backdrop", label: "Backdrop tone" },
+];
+
+const FEEDBACK_NEGATIVE_OPTIONS: FeedbackOption[] = [
+  { token: "faces-similar", label: "Faces too similar" },
+  { token: "palette-drift", label: "Palette drifted" },
+  { token: "too-neutral", label: "Too neutral" },
+  { token: "off-bible", label: "Off-bible lane(s)" },
+  { token: "style-flat", label: "Style too flat" },
+];
+
+function findFullRunIdByShortId(workspaceRoot: string, shortId: string): string | null {
+  const runsDir = join(workspaceRoot, "runs");
+  if (!existsSync(runsDir)) return null;
+  const target = shortId.replace(/-/g, "").slice(0, 8);
+  for (const id of readdirSync(runsDir)) {
+    if (id.startsWith(".")) continue;
+    if (id.replace(/-/g, "").slice(0, 8) === target) return id;
+  }
+  return null;
+}
+
+async function tryBrainTriggerAck(
+  brain: ArtLabLlmBrain,
+  request: string,
+  display: ReturnType<typeof displayFor>,
+): Promise<string | null> {
+  try {
+    const result = await brain.decide({
+      kind: "compose-trigger-ack",
+      input: {
+        request,
+        characterContext: {
+          characterId: display.characterId,
+          displayName: display.displayName,
+          title: display.title,
+          space: display.space,
+        },
+        etaSeconds: 45,
+      },
+    });
+    const text = (result.outputJson as { text?: unknown }).text;
+    if (typeof text === "string" && text.length > 0 && text.length < 400) return text;
+  } catch {
+    // non-fatal
+  }
+  return null;
 }
 
 async function dispatchTextOrPhoto(input: DispatchInboundInput, message: TelegramMessage): Promise<DispatchInboundResult> {
@@ -140,6 +359,34 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
   }
   const classified = classifyInbound(message);
   const now = input.now ?? (() => new Date());
+
+  // Stateful free-text routing: when a brief is parked at brief-review for
+  // this chat and the user sends a plain text message (not a command,
+  // promotion phrase, or recognized gate reply), route the text as a
+  // free-text adjustment to the parked brief. Triggers / commands /
+  // promotion phrases still take precedence.
+  if (
+    (classified.kind === "trigger" || classified.kind === "bundle") &&
+    !classified.commandName
+  ) {
+    const parkedRunId = findParkedBriefRunForChat(input.workspaceRoot, message.chat.id);
+    if (parkedRunId && classified.text.length > 0 && !/^make\s/i.test(classified.text)) {
+      const advance = await recordBriefAdjustmentAndReAuthor({
+        workspaceRoot: input.workspaceRoot,
+        runId: parkedRunId,
+        entry: {
+          at: new Date().toISOString(),
+          dimension: "freetext",
+          freeText: classified.text,
+        },
+      });
+      if (advance.ok) {
+        await send(input.telegram, message.chat.id, briefRegeneratingAck({ runId: advance.runId }));
+        return { action: { type: "callback-handled", callback: { kind: "brief", shortRunId: parkedRunId.slice(0, 8), action: { kind: "adjust", dimension: "freetext" } } } };
+      }
+    }
+  }
+
   switch (classified.kind) {
     case "command": {
       const out = await handleBotCommand({
@@ -203,12 +450,18 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
         chatId: message.chat.id,
         now,
       });
-      await send(input.telegram, message.chat.id, triggerAck({
-        displayName: display.displayName,
-        title: display.title,
-        spaceLabel: display.space ? spaceLabelFor(display.space) : undefined,
-        runId,
-      }));
+      // Try brain-authored trigger ack first; fall back to deterministic template.
+      const brainAck = await tryBrainTriggerAck(input.brain, classified.text, display);
+      if (brainAck) {
+        await send(input.telegram, message.chat.id, triggerAckBrainAuthored({ text: brainAck, runId }));
+      } else {
+        await send(input.telegram, message.chat.id, triggerAck({
+          displayName: display.displayName,
+          title: display.title,
+          spaceLabel: display.space ? spaceLabelFor(display.space) : undefined,
+          runId,
+        }));
+      }
       return { action: { type: "trigger-enqueued", runIds: [runId] } };
     }
     case "trigger-with-photo": {

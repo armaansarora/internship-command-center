@@ -27,6 +27,7 @@ import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-br
 import { buildConceptLanePrompts, type ConceptLanePrompt } from "../orchestrator/prompt-builder";
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
 import { recommendDirection } from "../orchestrator/recommend-direction";
+import { readConceptFeedback } from "../brainstorm/feedback-ledger";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const TARGET_LANES = 5;
@@ -45,6 +46,58 @@ function geminiKeyFromEnv(): string | null {
 function shouldUseRealGemini(): boolean {
   if (process.env.ARTLAB_GEMINI_MODE === "mock") return false;
   return geminiKeyFromEnv() !== null;
+}
+
+interface RefineFromFeedbackInput {
+  workspaceRoot: string;
+  brain: ArtLabLlmBrain;
+  bundle: Awaited<ReturnType<typeof loadTowerContext>>;
+  characterId: string;
+  feedback: ReturnType<typeof readConceptFeedback>;
+}
+
+async function refineConceptPromptsFromFeedback(input: RefineFromFeedbackInput): Promise<{ prompts: ConceptLanePrompt[]; source: "brain" | "canonical-fallback" } | null> {
+  const ctx = pickCharacterContext(input.bundle, input.characterId);
+  if (!ctx) return null;
+  try {
+    const result = await input.brain.decide({
+      kind: "refine-concept-prompts",
+      input: {
+        characterContext: {
+          characterId: ctx.characterId,
+          displayName: ctx.displayName,
+          title: ctx.title,
+          space: ctx.space,
+          visualArchetype: ctx.visualArchetype,
+          silhouette: ctx.silhouette,
+          wardrobe: ctx.wardrobe,
+          props: ctx.props,
+          mobileRead: ctx.mobileRead,
+          accent: ctx.accent,
+          negativeDNA: ctx.negativeDNA,
+        },
+        feedback: input.feedback,
+      },
+    });
+    const arr = (result.outputJson as { prompts?: unknown }).prompts;
+    if (!Array.isArray(arr)) return null;
+    const prompts: ConceptLanePrompt[] = [];
+    for (const item of arr) {
+      if (!item || typeof item !== "object") continue;
+      const i = item as { laneIndex?: unknown; prompt?: unknown; variationAxis?: unknown };
+      if (typeof i.laneIndex !== "number" || typeof i.prompt !== "string") continue;
+      prompts.push({
+        laneIndex: i.laneIndex,
+        prompt: i.prompt,
+        variationAxis: typeof i.variationAxis === "string" ? i.variationAxis : "refined",
+      });
+    }
+    prompts.sort((a, b) => a.laneIndex - b.laneIndex);
+    if (prompts.length === 5) return { prompts, source: "brain" };
+  } catch {
+    // fall through
+  }
+  return null;
 }
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
@@ -176,12 +229,33 @@ export const conceptRunner: ArtLabRunner = {
         const bundle = await loadTowerContext({ workspaceRoot });
         towerBundle = bundle;
         towerCtx = pickCharacterContext(bundle, input.characterId);
-        const built = await buildConceptLanePrompts({
-          characterId: input.characterId,
-          workspaceRoot,
-          brain,
-          bundle,
-        });
+
+        // Refinement path: if concept-feedback.jsonl has entries from a prior
+        // round, ask the brain to rewrite the 5 prompts incorporating feedback.
+        // Otherwise compose fresh prompts via buildConceptLanePrompts.
+        const feedback = readConceptFeedback(input.runDir);
+        let built: { prompts: ConceptLanePrompt[]; source: "brain" | "canonical-fallback" };
+        if (feedback.length > 0) {
+          built = await refineConceptPromptsFromFeedback({
+            workspaceRoot,
+            brain,
+            bundle,
+            characterId: input.characterId,
+            feedback,
+          }) ?? await buildConceptLanePrompts({
+            characterId: input.characterId,
+            workspaceRoot,
+            brain,
+            bundle,
+          });
+        } else {
+          built = await buildConceptLanePrompts({
+            characterId: input.characterId,
+            workspaceRoot,
+            brain,
+            bundle,
+          });
+        }
         promptsUsed = built.prompts;
         promptSource = built.source;
         // Concept exploration uses the cheap fast tier by default — we
@@ -270,6 +344,51 @@ export const conceptRunner: ArtLabRunner = {
         writeFileSync(join(input.runDir, "recommendation.json"), JSON.stringify(recommendation, null, 2));
       } catch {
         // swallow — recommendation is optional
+      }
+
+      // Multimodal critique — brain SEES the 5 generated PNGs and writes a
+      // grounded critique with per-lane notes + star ratings. This is the
+      // brainstorm-mode killer feature: real visual critique, not just
+      // "middle lane is the safe pick".
+      try {
+        const laneImages = slotOutputs
+          .filter((s) => s.mode === "gemini")  // only critique real images, not placeholders
+          .map((s) => ({ path: s.pngPath }));
+        if (laneImages.length === slotOutputs.length && laneImages.length === promptsUsed.length) {
+          const critiqueResult = await recommendBrain.decide({
+            kind: "critique-concept-board",
+            input: {
+              characterContext: {
+                characterId: towerCtx.characterId,
+                displayName: towerCtx.displayName,
+                title: towerCtx.title,
+                space: towerCtx.space,
+                visualArchetype: towerCtx.visualArchetype,
+                silhouette: towerCtx.silhouette,
+                wardrobe: towerCtx.wardrobe,
+                props: towerCtx.props,
+                mobileRead: towerCtx.mobileRead,
+                accent: towerCtx.accent,
+                forbiddenVisualTraits: towerCtx.forbiddenVisualTraits,
+              },
+              laneMetadata: promptsUsed.map((p) => ({
+                laneIndex: p.laneIndex,
+                variationAxis: p.variationAxis,
+                promptExcerpt: p.prompt.slice(0, 400),
+              })),
+              promotedCast: Object.values(towerBundle.characters)
+                .filter((c) => c.characterId !== towerCtx.characterId)
+                .map((c) => ({ characterId: c.characterId, displayName: c.displayName, accent: c.accent, silhouette: c.silhouette })),
+            },
+            images: laneImages,
+          });
+          // Persist the critique JSON for phase-notifier to render.
+          if (critiqueResult.outputJson && typeof critiqueResult.outputJson === "object") {
+            writeFileSync(join(input.runDir, "concept-critique.json"), JSON.stringify(critiqueResult.outputJson, null, 2));
+          }
+        }
+      } catch {
+        // swallow — critique is optional; phase-notifier falls back to deterministic caption
       }
     }
 

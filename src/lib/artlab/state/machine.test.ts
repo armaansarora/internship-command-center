@@ -6,13 +6,18 @@ import {
 } from "./machine";
 
 describe("artlab state machine", () => {
-  it("declares the 9 forward transitions in order", () => {
+  it("declares all forward transitions including brainstorm-mode phases", () => {
     const sequence = ARTLAB_TRANSITIONS
       .filter((t) => t.trigger === "auto" || t.trigger === "human")
       .map((t) => `${t.from}->${t.to}`);
-    expect(sequence).toContain("routed->generating-concepts");
+    expect(sequence).toContain("routed->briefing");
+    expect(sequence).toContain("briefing->brief-review");
+    expect(sequence).toContain("brief-review->briefing");
+    expect(sequence).toContain("brief-review->generating-concepts");
     expect(sequence).toContain("generating-concepts->concept-review");
     expect(sequence).toContain("concept-review->canary");
+    expect(sequence).toContain("concept-review->refining-concepts");
+    expect(sequence).toContain("refining-concepts->concept-review");
     expect(sequence).toContain("canary->production");
     expect(sequence).toContain("production->strict-qa");
     expect(sequence).toContain("strict-qa->final-review");
@@ -24,20 +29,27 @@ describe("artlab state machine", () => {
   it("rejects illegal jumps", () => {
     expect(isLegalTransition("routed", "production")).toBe(false);
     expect(isLegalTransition("concept-review", "promoting")).toBe(false);
+    expect(isLegalTransition("routed", "generating-concepts")).toBe(false); // must go through briefing now
   });
 
   it("permits legal forward transitions", () => {
-    expect(isLegalTransition("routed", "generating-concepts")).toBe(true);
+    expect(isLegalTransition("routed", "briefing")).toBe(true);
+    expect(isLegalTransition("brief-review", "generating-concepts")).toBe(true);
+    expect(isLegalTransition("brief-review", "briefing")).toBe(true);
+    expect(isLegalTransition("concept-review", "refining-concepts")).toBe(true);
+    expect(isLegalTransition("refining-concepts", "concept-review")).toBe(true);
     expect(isLegalTransition("canary", "production")).toBe(true);
   });
 
   it("legalNextPhases returns destinations", () => {
-    expect(legalNextPhases("routed")).toContain("generating-concepts");
+    expect(legalNextPhases("routed")).toContain("briefing");
+    expect(legalNextPhases("brief-review")).toEqual(expect.arrayContaining(["briefing", "generating-concepts"]));
+    expect(legalNextPhases("concept-review")).toEqual(expect.arrayContaining(["canary", "refining-concepts"]));
     expect(legalNextPhases("closed")).toEqual([]);
   });
 
   it("every non-closed phase has at least one outgoing transition", () => {
-    const phases = ["routed", "generating-concepts", "concept-review", "canary", "production", "strict-qa", "final-review", "promoting", "verifying"] as const;
+    const phases = ["routed", "briefing", "brief-review", "generating-concepts", "concept-review", "refining-concepts", "canary", "production", "strict-qa", "final-review", "promoting", "verifying"] as const;
     for (const phase of phases) {
       expect(legalNextPhases(phase).length).toBeGreaterThan(0);
     }

@@ -11,7 +11,7 @@ describe("deterministic orchestrator", () => {
     runDir = mkdtempSync(join(tmpdir(), "artlab-orch-"));
   });
 
-  it("auto-advances routed → generating-concepts → concept-review", async () => {
+  it("auto-advances routed → briefing → brief-review (gate)", async () => {
     writeRunStateSnapshot(runDir, {
       runId: "r1",
       assetType: "character",
@@ -23,8 +23,27 @@ describe("deterministic orchestrator", () => {
     });
     let outcome = await runDeterministicTransition({ runDir, providerId: "local-mock" });
     expect(outcome.applied).toBe(true);
-    expect(readRunStateSnapshot(runDir)?.phase).toBe("generating-concepts");
+    expect(readRunStateSnapshot(runDir)?.phase).toBe("briefing");
     outcome = await runDeterministicTransition({ runDir, providerId: "local-mock" });
+    expect(outcome.applied).toBe(true);
+    expect(readRunStateSnapshot(runDir)?.phase).toBe("brief-review");
+    // brief-review is a human gate — should now halt
+    outcome = await runDeterministicTransition({ runDir, providerId: "local-mock" });
+    expect(outcome.applied).toBe(false);
+    expect(outcome.reason).toBe("awaiting-human-gate");
+  });
+
+  it("walks generating-concepts → concept-review when seeded mid-flow", async () => {
+    writeRunStateSnapshot(runDir, {
+      runId: "r1",
+      assetType: "character",
+      characterId: "cro",
+      phase: "generating-concepts",
+      createdAt: "2026-05-20T00:00:00.000Z",
+      updatedAt: "2026-05-20T00:00:00.000Z",
+      request: "make Rafe",
+    });
+    const outcome = await runDeterministicTransition({ runDir, providerId: "local-mock" });
     expect(outcome.applied).toBe(true);
     expect(readRunStateSnapshot(runDir)?.phase).toBe("concept-review");
   });

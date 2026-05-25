@@ -78,14 +78,15 @@ describe("HTML message templates", () => {
     expect(bundleAck({ runCount: 3 }).text).toContain("3 linked runs");
   });
 
-  it("conceptBoardCaption attaches the 5-direction inline keyboard", () => {
+  it("conceptBoardCaption attaches the 5-direction inline keyboard + refine + revise/reject", () => {
     const msg = conceptBoardCaption({
       displayName: "Sol Navarro",
       subtitle: "Chief Networking Officer · Rolodex Lounge",
       runId: SAMPLE_RUN_ID,
     });
     expect(msg.replyMarkup?.inline_keyboard[0]).toHaveLength(5);
-    expect(msg.replyMarkup?.inline_keyboard[1]).toHaveLength(2);
+    expect(msg.replyMarkup?.inline_keyboard[1]).toHaveLength(1);
+    expect(msg.replyMarkup?.inline_keyboard[2]).toHaveLength(2);
   });
 
   it("conceptBoardCaption includes recommendation when provided", () => {

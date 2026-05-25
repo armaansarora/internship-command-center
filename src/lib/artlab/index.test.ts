@@ -3,7 +3,7 @@ import { ARTLAB_PHASES, ARTLAB_BLOCKERS, ARTLAB_WORKSPACE_RELATIVE } from "./ind
 
 describe("artlab public surface", () => {
   it("re-exports phase enum", () => {
-    expect(ARTLAB_PHASES.length).toBe(10);
+    expect(ARTLAB_PHASES.length).toBe(13);
   });
   it("re-exports blocker enum", () => {
     expect(ARTLAB_BLOCKERS.length).toBe(7);

@@ -6,11 +6,14 @@ import {
 } from "./types";
 
 describe("artlab shared types", () => {
-  it("declares all 10 core phases in canonical order", () => {
+  it("declares all 13 core phases (10 originals + 3 brainstorm-mode) in canonical order", () => {
     expect(ARTLAB_PHASES).toEqual([
       "routed",
+      "briefing",
+      "brief-review",
       "generating-concepts",
       "concept-review",
+      "refining-concepts",
       "canary",
       "production",
       "strict-qa",

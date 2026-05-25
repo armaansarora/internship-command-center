@@ -16,13 +16,33 @@ export const ARTLAB_LLM_DECISION_KINDS = [
   "recommend-direction",
   "revise-concept-board",
   "compose-trigger-clarification",
+  // Brainstorm-mode (Tranche A-D) additions — LLM as the conversational host
+  "compose-brief",
+  "refine-brief",
+  "critique-concept-board",
+  "refine-concept-prompts",
+  "critique-production-sprites",
+  "compose-trigger-ack",
+  "compose-promotion-celebration",
+  "answer-ask",
 ] as const;
 export type ArtLabLlmDecisionKind = (typeof ARTLAB_LLM_DECISION_KINDS)[number];
+
+// Vision-aware brain calls pass image bytes alongside the JSON input. The
+// brain adapter (gemini-brain / claude-brain) encodes these as inlineData
+// parts in the request. Path-based references avoid copying large PNG
+// buffers between processes.
+const ImageInputSchema = z.union([
+  z.object({ path: z.string().min(1), mimeType: z.string().optional() }).strict(),
+  z.object({ bytes: z.instanceof(Buffer), mimeType: z.string().min(1) }).strict(),
+]);
+export type ArtLabLlmImageInput = z.infer<typeof ImageInputSchema>;
 
 export const ArtLabLlmDecisionRequestSchema = z
   .object({
     kind: z.enum(ARTLAB_LLM_DECISION_KINDS),
     input: z.record(z.string(), z.unknown()),
+    images: z.array(ImageInputSchema).optional(),
   })
   .strict();
 export type ArtLabLlmDecisionRequest = z.infer<typeof ArtLabLlmDecisionRequestSchema>;

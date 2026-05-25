@@ -2,7 +2,9 @@ import { z } from "zod";
 import { ARTLAB_BLOCKERS, type ArtLabAssetType } from "../types";
 
 export const ARTLAB_RUNNER_KINDS = [
+  "brief",
   "concept",
+  "refinement",
   "canary",
   "production",
   "cutout",

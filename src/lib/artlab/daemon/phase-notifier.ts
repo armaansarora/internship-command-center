@@ -22,10 +22,15 @@ import { displayFor } from "@/lib/artlab/intake/known-cast";
 import {
   blockerNotice,
   conceptBoardCaption,
+  conceptCritiqueCaption,
   finalBoardCaption,
+  productionCritiqueCaption,
   promotedConfirmation,
+  promotionCelebrationBrainAuthored,
+  briefProposalCaption,
   type TelegramOutboundMessage,
 } from "@/lib/artlab/bot/message-templates";
+import { DesignBriefSchema, type DesignBrief } from "@/lib/artlab/brainstorm/brief-schema";
 
 export interface PhaseNotifierInput {
   workspaceRoot: string;
@@ -61,6 +66,43 @@ function spaceLabelFor(space: string): string {
     .join(" ");
 }
 
+function readBrief(runDir: string): DesignBrief | null {
+  const path = join(runDir, "brief.json");
+  if (!existsSync(path)) return null;
+  try { return DesignBriefSchema.parse(JSON.parse(readFileSync(path, "utf8"))); }
+  catch { return null; }
+}
+
+function readCritique(runDir: string): {
+  summary?: string;
+  recommendedLane?: number;
+  perLane?: Array<{ laneIndex: number; critique: string; stars?: number; fitToBible?: string }>;
+} | null {
+  const path = join(runDir, "concept-critique.json");
+  if (!existsSync(path)) return null;
+  try { return JSON.parse(readFileSync(path, "utf8")) as ReturnType<typeof readCritique>; }
+  catch { return null; }
+}
+
+function readProductionCritique(runDir: string): {
+  overallVerdict?: "tight" | "minor-drift" | "major-drift";
+  summary?: string;
+  flaggedSprites?: Array<{ slotId: string; issue: string; severity: "minor" | "major" }>;
+  approvedSpriteCount?: number;
+} | null {
+  const path = join(runDir, "production-critique.json");
+  if (!existsSync(path)) return null;
+  try { return JSON.parse(readFileSync(path, "utf8")) as ReturnType<typeof readProductionCritique>; }
+  catch { return null; }
+}
+
+function readPromotionCelebration(runDir: string): { text: string } | null {
+  const path = join(runDir, "promotion-celebration.json");
+  if (!existsSync(path)) return null;
+  try { return JSON.parse(readFileSync(path, "utf8")) as { text: string }; }
+  catch { return null; }
+}
+
 function readRecommendation(runDir: string): { laneIndex: number; reasoning: string } | undefined {
   const path = join(runDir, "recommendation.json");
   if (!existsSync(path)) return undefined;
@@ -93,20 +135,38 @@ export async function notifyPhase(input: PhaseNotifierInput): Promise<void> {
   }
 
   switch (state.phase) {
+    case "brief-review": {
+      const brief = readBrief(runDir);
+      if (!brief) return;
+      await safeSend(input.telegram, chatId, briefProposalCaption({ brief }));
+      return;
+    }
     case "concept-review": {
       try {
         const { media } = buildConceptBoardAttachments({ runDir, characterId });
         await input.telegram.sendMediaGroup({ chatId, media });
-        const recommendation = readRecommendation(runDir);
         const subtitle = display.title
           ? `${display.title}${display.space ? ` · ${spaceLabelFor(display.space)}` : ""}`
           : undefined;
-        await safeSend(input.telegram, chatId, conceptBoardCaption({
-          displayName: display.displayName,
-          subtitle,
-          runId: input.runId,
-          recommendation,
-        }));
+        const critique = readCritique(runDir);
+        const brief = readBrief(runDir);
+        if (critique) {
+          await safeSend(input.telegram, chatId, conceptCritiqueCaption({
+            runId: input.runId,
+            displayName: display.displayName,
+            subtitle,
+            critique,
+            iteration: brief?.iteration,
+          }));
+        } else {
+          const recommendation = readRecommendation(runDir);
+          await safeSend(input.telegram, chatId, conceptBoardCaption({
+            displayName: display.displayName,
+            subtitle,
+            runId: input.runId,
+            recommendation,
+          }));
+        }
       } catch (err) {
         await safeSendText(input.telegram, chatId, fallbackConceptCaption(input.runId, characterId, err));
       }
@@ -122,13 +182,25 @@ export async function notifyPhase(input: PhaseNotifierInput): Promise<void> {
         const subtitle = display.title
           ? `${display.title}${display.space ? ` · ${spaceLabelFor(display.space)}` : ""}`
           : undefined;
-        await safeSend(input.telegram, chatId, finalBoardCaption({
-          displayName: display.displayName,
-          subtitle,
-          spriteCount: sprites,
-          runId: input.runId,
-          space: display.space || undefined,
-        }));
+        const productionCritique = readProductionCritique(runDir);
+        if (productionCritique) {
+          await safeSend(input.telegram, chatId, productionCritiqueCaption({
+            runId: input.runId,
+            displayName: display.displayName,
+            subtitle,
+            spriteCount: sprites,
+            space: display.space || undefined,
+            critique: productionCritique,
+          }));
+        } else {
+          await safeSend(input.telegram, chatId, finalBoardCaption({
+            displayName: display.displayName,
+            subtitle,
+            spriteCount: sprites,
+            runId: input.runId,
+            space: display.space || undefined,
+          }));
+        }
       } catch (err) {
         await safeSendText(input.telegram, chatId, fallbackFinalCaption(input.runId, characterId, err));
       }
@@ -140,13 +212,24 @@ export async function notifyPhase(input: PhaseNotifierInput): Promise<void> {
       const promoted = receipt?.promotedAssets?.length ?? 0;
       const spendPath = join(runDir, "run-state.json");
       const spend = readSpend(spendPath);
-      await safeSend(input.telegram, chatId, promotedConfirmation({
-        displayName: display.displayName,
-        runId: input.runId,
-        assetCount: promoted,
-        space: display.space || undefined,
-        spend,
-      }));
+      const celebration = readPromotionCelebration(runDir);
+      if (celebration && display.space) {
+        await safeSend(input.telegram, chatId, promotionCelebrationBrainAuthored({
+          text: celebration.text,
+          runId: input.runId,
+          liveUrl: `https://www.interntower.com/${display.space}?v=${input.runId.replace(/-/g, "").slice(0, 8)}`,
+          spendCents: spend?.actualCents,
+          capCents: spend?.capCents,
+        }));
+      } else {
+        await safeSend(input.telegram, chatId, promotedConfirmation({
+          displayName: display.displayName,
+          runId: input.runId,
+          assetCount: promoted,
+          space: display.space || undefined,
+          spend,
+        }));
+      }
       return;
     }
     default:

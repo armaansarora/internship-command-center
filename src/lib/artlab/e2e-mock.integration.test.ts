@@ -13,7 +13,7 @@ describe("artlab end-to-end mock run", () => {
     process.env.ARTLAB_PLAYWRIGHT_MODE = "mock";
   });
 
-  it("walks routed → closed with two simulated human gate approvals", async () => {
+  it("walks routed → closed with three simulated human gate approvals (brief, concept, final)", async () => {
     writeRunStateSnapshot(runDir, {
       runId: "rE2E",
       assetType: "character",
@@ -22,6 +22,21 @@ describe("artlab end-to-end mock run", () => {
       createdAt: "2026-05-20T00:00:00.000Z",
       updatedAt: "2026-05-20T00:00:00.000Z",
       request: "mock e2e run",
+    });
+
+    // Walk routed → briefing → brief-review (halts at human gate)
+    for (let i = 0; i < 20; i += 1) {
+      const outcome = await runDeterministicTransition({ runDir, providerId: "local-mock" });
+      if (!outcome.applied) break;
+    }
+    expect(readRunStateSnapshot(runDir)?.phase).toBe("brief-review");
+
+    // Simulate user approving the brief → walks brief-review → generating-concepts → concept-review
+    const stateBrief = readRunStateSnapshot(runDir)!;
+    writeRunStateSnapshot(runDir, {
+      ...stateBrief,
+      phase: "generating-concepts",
+      updatedAt: new Date().toISOString(),
     });
 
     for (let i = 0; i < 20; i += 1) {

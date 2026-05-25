@@ -30,7 +30,7 @@ describe("gemini-brain", () => {
     expect(result.outputJson.prompts).toBeDefined();
     expect(result.tokensIn).toBe(50);
     expect(result.tokensOut).toBe(100);
-    expect(result.model).toBe("gemini-3.5-flash");
+    expect(result.model).toBe("gemini-3-pro-preview");
   });
 
   it("calls the configured Gemini text-completion endpoint with json response mime", async () => {
@@ -39,7 +39,7 @@ describe("gemini-brain", () => {
     await brain.decide({ kind: "recommend-direction", input: { lanes: [] } });
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [url, opts] = fetchSpy.mock.calls[0] as unknown as [string, { body: string }];
-    expect(url).toContain("gemini-3.5-flash:generateContent");
+    expect(url).toContain("gemini-3-pro-preview:generateContent");
     expect(url).toContain("key=test-key");
     const body = JSON.parse(opts.body) as {
       systemInstruction?: { parts: { text: string }[] };
@@ -73,5 +73,46 @@ describe("gemini-brain", () => {
     await brain.decide({ kind: "recommend-direction", input: {} });
     const [url] = fetchSpy.mock.calls[0] as unknown as [string];
     expect(url).toContain("gemini-2.5-pro:generateContent");
+  });
+
+  it("attaches inlineData parts when req.images is provided (multimodal)", async () => {
+    fetchSpy.mockResolvedValue(mockOkResponse(JSON.stringify({ recommendedLane: 3, summary: "ok" })));
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const bytes = Buffer.from("fake-png-bytes");
+    await brain.decide({
+      kind: "critique-concept-board",
+      input: { laneCount: 5 },
+      images: [{ bytes, mimeType: "image/png" }],
+    });
+    const [, opts] = fetchSpy.mock.calls[0] as unknown as [string, { body: string }];
+    const body = JSON.parse(opts.body) as {
+      contents: Array<{ parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> }>;
+    };
+    const userParts = body.contents[0]!.parts;
+    expect(userParts).toHaveLength(2); // text + 1 image
+    expect(userParts[0]!.text).toBeDefined();
+    expect(userParts[1]!.inlineData?.mimeType).toBe("image/png");
+    expect(userParts[1]!.inlineData?.data).toBe(bytes.toString("base64"));
+  });
+
+  it("attaches multiple images in order", async () => {
+    fetchSpy.mockResolvedValue(mockOkResponse(JSON.stringify({ ok: true })));
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const a = Buffer.from("aaa");
+    const b = Buffer.from("bbb");
+    await brain.decide({
+      kind: "critique-production-sprites",
+      input: {},
+      images: [{ bytes: a, mimeType: "image/png" }, { bytes: b, mimeType: "image/jpeg" }],
+    });
+    const [, opts] = fetchSpy.mock.calls[0] as unknown as [string, { body: string }];
+    const body = JSON.parse(opts.body) as {
+      contents: Array<{ parts: Array<{ inlineData?: { mimeType: string; data: string } }> }>;
+    };
+    const parts = body.contents[0]!.parts;
+    expect(parts).toHaveLength(3); // 1 text + 2 images
+    expect(parts[1]!.inlineData?.data).toBe(a.toString("base64"));
+    expect(parts[2]!.inlineData?.data).toBe(b.toString("base64"));
+    expect(parts[2]!.inlineData?.mimeType).toBe("image/jpeg");
   });
 });

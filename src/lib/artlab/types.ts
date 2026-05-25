@@ -14,8 +14,11 @@ export type CreativeAssetType =
 
 export const ARTLAB_PHASES = [
   "routed",
+  "briefing",
+  "brief-review",
   "generating-concepts",
   "concept-review",
+  "refining-concepts",
   "canary",
   "production",
   "strict-qa",

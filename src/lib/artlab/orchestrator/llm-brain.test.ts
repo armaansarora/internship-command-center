@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { decideWithMockBrain, ARTLAB_LLM_DECISION_KINDS } from "./llm-brain";
 
 describe("LLM brain decision interface", () => {
-  it("enumerates all decision kinds (Phase-3 originals + Tranche-1+ Tower-aware additions)", () => {
+  it("enumerates all decision kinds (Phase-3 originals + Tranche-1+ Tower-aware + brainstorm-mode additions)", () => {
     expect(ARTLAB_LLM_DECISION_KINDS).toEqual([
       "route-ambiguous-brief",
       "clarification-wording",
@@ -17,6 +17,14 @@ describe("LLM brain decision interface", () => {
       "recommend-direction",
       "revise-concept-board",
       "compose-trigger-clarification",
+      "compose-brief",
+      "refine-brief",
+      "critique-concept-board",
+      "refine-concept-prompts",
+      "critique-production-sprites",
+      "compose-trigger-ack",
+      "compose-promotion-celebration",
+      "answer-ask",
     ]);
   });
 

@@ -3,7 +3,13 @@ import { join } from "node:path";
 import { readRunReality } from "../state/reconciler";
 import { listQueuedRuns } from "../queue/queue";
 import { buildArtLabHealthSnapshot } from "../health/snapshot";
+import { loadTowerContext } from "../context/tower-context";
+import { createClaudeBrain } from "../orchestrator/claude-brain";
+import { createGeminiBrain } from "../orchestrator/gemini-brain";
+import { createLoggedBrain } from "../orchestrator/logged-brain";
+import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
 import {
+  askAnswerTemplate,
   cancelAck,
   decisionsTemplate,
   healthSnapshot,
@@ -26,7 +32,7 @@ export interface BotCommandResult {
   message: TelegramOutboundMessage;
 }
 
-const KNOWN = ["status", "queue", "cancel", "health", "help", "decisions"] as const;
+const KNOWN = ["status", "queue", "cancel", "health", "help", "decisions", "ask"] as const;
 
 async function handleStatus(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
   const runsDir = join(workspaceRoot, "runs");
@@ -102,6 +108,88 @@ function handleDecisions(workspaceRoot: string, args: string[]): TelegramOutboun
   return decisionsTemplate({ runId: wantedRunId, decisions: matched });
 }
 
+function buildAskBrain(workspaceRoot: string): ArtLabLlmBrain {
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
+    ? process.env.GEMINI_API_KEY
+    : null;
+  const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL;
+  const forceGemini = process.env.ARTLAB_BRAIN_PROVIDER === "gemini";
+  let raw: ArtLabLlmBrain;
+  if (anthropicKey && !forceGemini) {
+    const claude = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
+    const fallback = geminiKey
+      ? createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel })
+      : null;
+    raw = {
+      async decide(req) {
+        try { return await claude.decide(req); }
+        catch (err) {
+          if (!fallback) throw err;
+          return fallback.decide(req);
+        }
+      },
+    };
+  } else if (geminiKey) {
+    raw = createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel });
+  } else {
+    raw = { decide: decideWithMockBrain };
+  }
+  return createLoggedBrain({ inner: raw, workspaceRoot });
+}
+
+async function handleAsk(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
+  const question = args.join(" ").trim();
+  if (!question) {
+    return { text: "❌ Usage: <code>/ask &lt;question&gt;</code>", parseMode: "HTML" };
+  }
+  try {
+    const bundle = await loadTowerContext({ workspaceRoot });
+    const brain = buildAskBrain(workspaceRoot);
+    const result = await brain.decide({
+      kind: "answer-ask",
+      input: {
+        question,
+        towerContext: {
+          styleEnvelope: { id: bundle.styleEnvelope.id, storyTone: bundle.styleEnvelope.storyTone },
+          characters: Object.values(bundle.characters).map((c) => ({
+            characterId: c.characterId,
+            displayName: c.displayName,
+            title: c.title,
+            space: c.space,
+            accent: c.accent,
+            visualArchetype: c.visualArchetype,
+            silhouette: c.silhouette,
+            wardrobe: c.wardrobe,
+            wound: c.wound,
+            doctrine: c.doctrine,
+          })),
+          floors: Object.values(bundle.floors).map((f) => ({
+            space: f.space,
+            roomName: f.roomName,
+            floorNumber: f.floorNumber,
+            atmosphere: f.atmosphere,
+          })),
+        },
+      },
+    });
+    const answer = (result.outputJson as { text?: unknown }).text;
+    const references = (result.outputJson as { references?: unknown }).references;
+    if (typeof answer !== "string" || answer.length === 0) {
+      return { text: "🤔 Brain didn't return a clean answer. Try rephrasing?", parseMode: "HTML" };
+    }
+    return askAnswerTemplate({
+      question,
+      answer,
+      references: Array.isArray(references) ? references.filter((r): r is string => typeof r === "string") : undefined,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { text: `⚠️ Couldn't answer right now — ${msg}`, parseMode: "HTML" };
+  }
+}
+
 function summarizeJson(json: unknown): string {
   if (!json) return "(no output)";
   if (typeof json === "string") return json.length > 80 ? `${json.slice(0, 80)}…` : json;
@@ -125,5 +213,6 @@ export async function handleBotCommand(input: BotCommandInput): Promise<BotComma
     case "health": return { kind: "text", message: await handleHealth(input.workspaceRoot) };
     case "help": return { kind: "text", message: helpTemplate() };
     case "decisions": return { kind: "text", message: handleDecisions(input.workspaceRoot, input.args) };
+    case "ask": return { kind: "text", message: await handleAsk(input.workspaceRoot, input.args) };
   }
 }

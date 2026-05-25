@@ -46,9 +46,16 @@ const human = (from: ArtLabPhase, to: ArtLabPhase): ArtLabTransition => ({
 });
 
 export const ARTLAB_TRANSITIONS: readonly ArtLabTransition[] = [
-  auto("routed", "generating-concepts"),
+  // Brainstorm flow: routed → briefing → brief-review (gate) → generating-concepts.
+  // When brainstorm mode is off, brief-runner auto-approves and the gate is a no-op.
+  auto("routed", "briefing"),
+  auto("briefing", "brief-review"),
+  human("brief-review", "briefing"),            // user adjusts brief → re-author
+  human("brief-review", "generating-concepts"), // user approves brief → generate lanes
   auto("generating-concepts", "concept-review"),
-  human("concept-review", "canary"),
+  human("concept-review", "canary"),            // user approves lane N → existing path
+  human("concept-review", "refining-concepts"), // user wants refinement loop
+  auto("refining-concepts", "concept-review"),  // regenerated lanes loop back to gate
   auto("canary", "production"),
   auto("production", "strict-qa"),
   auto("strict-qa", "final-review"),
@@ -59,8 +66,11 @@ export const ARTLAB_TRANSITIONS: readonly ArtLabTransition[] = [
 
 const BLOCKER_PHASES_NONTERMINAL: ArtLabPhase[] = [
   "routed",
+  "briefing",
+  "brief-review",
   "generating-concepts",
   "concept-review",
+  "refining-concepts",
   "canary",
   "production",
   "strict-qa",

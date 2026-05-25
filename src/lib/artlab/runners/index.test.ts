@@ -6,13 +6,15 @@ import { uiTextureRunner } from "./ui-texture-runner";
 import { productionRunner } from "./production-runner";
 
 describe("runner registry", () => {
-  it("exposes all 7 runner kinds", () => {
+  it("exposes all 9 runner kinds (incl. brainstorm-mode brief + refinement)", () => {
     expect(Object.keys(ARTLAB_RUNNERS).sort()).toEqual([
+      "brief",
       "canary",
       "concept",
       "cutout",
       "production",
       "promotion",
+      "refinement",
       "strict-qa",
       "verifying",
     ]);
