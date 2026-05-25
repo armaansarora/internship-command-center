@@ -119,6 +119,12 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
   const entryScript = process.argv[1] ?? join(process.cwd(), "scripts", "artlab.ts");
   const projectRoot = dirname(dirname(entryScript));
   loadDotEnvLocal(projectRoot);
+  // Make projectRoot available to in-process consumers (engine version
+  // capture, promotion-runner auto-commit, brain wiring). Under launchd the
+  // plist doesn't set ARTLAB_PROJECT_ROOT so we set it here at boot.
+  if (!process.env.ARTLAB_PROJECT_ROOT) {
+    process.env.ARTLAB_PROJECT_ROOT = projectRoot;
+  }
 
   const supervisor = createSupervisor();
   const rawBrain: ArtLabLlmBrain = { decide: decideWithMockBrain };
