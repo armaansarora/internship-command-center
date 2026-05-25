@@ -169,12 +169,15 @@ export const conceptRunner: ArtLabRunner = {
         promptsUsed = built.prompts;
         promptSource = built.source;
         const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()! });
-        slotOutputs = await Promise.all(
-          laneIndexes.map((idx) => {
-            const lanePrompt = built.prompts.find((p) => p.laneIndex === idx) ?? built.prompts[idx - 1]!;
-            return generateGeminiLane(input.runDir, input.characterId, idx, lanePrompt, provider);
-          }),
-        );
+        // Sequential with small delay to be rate-limit-friendly. 5 lanes × 8s
+        // each ≈ 40s, which matches the ETA in the trigger ack. Parallelism
+        // here was triggering 503s from the preview image model.
+        slotOutputs = [];
+        for (const idx of laneIndexes) {
+          const lanePrompt = built.prompts.find((p) => p.laneIndex === idx) ?? built.prompts[idx - 1]!;
+          const out = await generateGeminiLane(input.runDir, input.characterId, idx, lanePrompt, provider);
+          slotOutputs.push(out);
+        }
       } catch (err) {
         // Fatal prompt-builder failure — fall back to all-placeholder.
         const errMsg = err instanceof Error ? err.message : String(err);
