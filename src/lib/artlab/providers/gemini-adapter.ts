@@ -23,13 +23,33 @@ export interface GeminiProvider {
   generateImage(input: GenerateImageInput): Promise<GenerateImageResult>;
 }
 
-// gemini-2.5-flash-image is GA + stable. gemini-3.1-flash-image-preview
-// (Nano Banana 2) is more capable but still preview-tier and prone to 503s
-// during high demand. Allow override via ARTLAB_GEMINI_IMAGE_MODEL or
-// constructor option.
+// Default image model. Callers (concept-runner, production-runner) override
+// this via the constructor option to apply a tiered strategy:
+//   • concept exploration: cheap fast model (gemini-2.5-flash-image)
+//   • production / final renders: premium model (nano-banana-pro-preview)
+// See costCentsForModel() below for the per-image price table that the
+// budget ledger reads off of.
 const DEFAULT_MODEL = "gemini-2.5-flash-image";
 const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
 const MAX_RETRIES = 3;
+
+// Per-image list price in cents, by model. Used by the budget ledger.
+// Update these when Google's pricing changes — they're roughly:
+//   gemini-2.5-flash-image:        $0.039/image  → 4¢
+//   gemini-3.1-flash-image-preview: $0.039/image → 4¢ (Nano Banana 2)
+//   nano-banana-pro-preview:        $0.13/image  → 13¢ (Nano Banana Pro)
+//   imagen-4.0-generate-001:        $0.04/image  → 4¢
+//   imagen-4.0-ultra-generate-001:  $0.06/image  → 6¢
+//   imagen-4.0-fast-generate-001:   $0.02/image  → 2¢
+function costCentsForModel(model: string): number {
+  if (model.startsWith("nano-banana-pro")) return 13;
+  if (model.startsWith("imagen-4.0-ultra")) return 6;
+  if (model.startsWith("imagen-4.0-fast")) return 2;
+  if (model.startsWith("imagen-4.0")) return 4;
+  if (model.startsWith("gemini-3.1-flash-image")) return 4;
+  if (model.startsWith("gemini-2.5-flash-image")) return 4;
+  return 5; // unknown — middle estimate
+}
 
 export function createGeminiProvider(options: GeminiProviderOptions): GeminiProvider {
   const model = options.modelId ?? process.env.ARTLAB_GEMINI_IMAGE_MODEL ?? DEFAULT_MODEL;
@@ -91,7 +111,7 @@ export function createGeminiProvider(options: GeminiProviderOptions): GeminiProv
         mode: "real",
         bytes,
         contentType: "image/png",
-        costCents: 200, // Nano Banana 2 list price; refine when ledger confirms actual
+        costCents: costCentsForModel(model),
         durationMs: Date.now() - startedAt,
       };
     },

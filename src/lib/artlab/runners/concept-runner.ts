@@ -184,7 +184,11 @@ export const conceptRunner: ArtLabRunner = {
         });
         promptsUsed = built.prompts;
         promptSource = built.source;
-        const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()! });
+        // Concept exploration uses the cheap fast tier by default — we
+        // generate a lot of variations, the user picks one, and only the
+        // winner advances to the premium production tier downstream.
+        const conceptModel = process.env.ARTLAB_CONCEPT_IMAGE_MODEL ?? "gemini-2.5-flash-image";
+        const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()!, modelId: conceptModel });
         // Sequential with small delay to be rate-limit-friendly. 5 lanes × 8s
         // each ≈ 40s, which matches the ETA in the trigger ack. Parallelism
         // here was triggering 503s from the preview image model.

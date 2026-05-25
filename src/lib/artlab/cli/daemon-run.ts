@@ -206,16 +206,19 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
     input.log(banner({ subtitle: "Daemon running — supervising queue + telegram + cancel + crash-recovery" }));
     input.log("");
     const brainProvider = anthropicKeyPresent
-      ? "claude (anthropic)"
+      ? "claude (anthropic) → gemini fallback"
       : geminiKeyPresent
         ? "gemini (reusing image key)"
         : "mock (no key — bible fallback only)";
+    const conceptModel = process.env.ARTLAB_CONCEPT_IMAGE_MODEL ?? "gemini-2.5-flash-image";
+    const productionModel = process.env.ARTLAB_PRODUCTION_IMAGE_MODEL ?? "nano-banana-pro-preview";
     input.log(box([kvList([
       { label: "workspace", value: input.workspaceRoot },
       { label: "pid", value: String(process.pid) },
       { label: "tick", value: "1000ms" },
       { label: "telegram", value: telegramTokenPresent ? "live" : "noop (no token in env or keychain)", status: telegramTokenPresent ? "ok" : "muted" },
-      { label: "gemini images", value: geminiKeyPresent ? "live" : "noop (no key in env or keychain)", status: geminiKeyPresent ? "ok" : "muted" },
+      { label: "concept tier", value: geminiKeyPresent ? `${conceptModel} (cheap exploration)` : "noop (no key)", status: geminiKeyPresent ? "ok" : "muted" },
+      { label: "production tier", value: geminiKeyPresent ? `${productionModel} (premium ship)` : "noop (no key)", status: geminiKeyPresent ? "ok" : "muted" },
       { label: "brain", value: brainProvider, status: anthropicKeyPresent || geminiKeyPresent ? "ok" : "muted" },
     ])], { title: "Daemon configuration" }));
     input.log("");

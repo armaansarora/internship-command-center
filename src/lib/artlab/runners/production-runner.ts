@@ -181,7 +181,11 @@ export const productionRunner: ArtLabRunner = {
           poses: CHARACTER_POSES,
           bundle,
         });
-        const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()! });
+        // Production sprites land in public/art/ and ship to interntower.com,
+        // so we use the premium image tier by default (Nano Banana Pro).
+        // Override via ARTLAB_PRODUCTION_IMAGE_MODEL.
+        const productionModel = process.env.ARTLAB_PRODUCTION_IMAGE_MODEL ?? "nano-banana-pro-preview";
+        const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()!, modelId: productionModel });
         const tasks = prompts.map((p) => async () => {
           if (input.abortSignal?.aborted) {
             return writePlaceholderSlot(input.runDir, p.slotId, input.approvedLaneIndex, `${p.outfit} · ${p.pose}`, input.characterId, "aborted");
