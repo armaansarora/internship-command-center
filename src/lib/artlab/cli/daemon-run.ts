@@ -65,6 +65,15 @@ async function resolveGeminiKey(): Promise<string | null> {
   }
 }
 
+async function resolveAnthropicKey(): Promise<string | null> {
+  if (process.env.ANTHROPIC_API_KEY) return process.env.ANTHROPIC_API_KEY;
+  try {
+    return await getKeychainSecret(`${ARTLAB_KEYCHAIN_PREFIX}-anthropic-key`);
+  } catch {
+    return null;
+  }
+}
+
 // Load `<projectRoot>/.env.local` and merge into process.env. The daemon is
 // supervised by launchd which only inherits a minimal environment; Next.js's
 // own .env.local loader runs only inside `next dev`/`next build`, so the
@@ -116,6 +125,7 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
   const brain = createLoggedBrain({ inner: rawBrain, workspaceRoot });
   const token = await resolveTelegramToken();
   const geminiKey = await resolveGeminiKey();
+  const anthropicKey = await resolveAnthropicKey();
   const telegramClient = token ? createTelegramClient({ token }) : noopTelegramClient();
 
   const telegramPoller = createTelegramPoller({
@@ -152,6 +162,7 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
         ARTLAB_PROJECT_ROOT: projectRoot,
       };
       if (geminiKey && !workerEnv.GEMINI_API_KEY) workerEnv.GEMINI_API_KEY = geminiKey;
+      if (anthropicKey && !workerEnv.ANTHROPIC_API_KEY) workerEnv.ANTHROPIC_API_KEY = anthropicKey;
       const child = spawn(process.execPath, args, {
         cwd: projectRoot,
         env: workerEnv,
@@ -191,7 +202,7 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
     const ctx = await build({ workspaceRoot: input.workspaceRoot });
     const telegramTokenPresent = !!(await resolveTelegramToken());
     const geminiKeyPresent = !!(await resolveGeminiKey());
-    const anthropicKeyPresent = !!process.env.ANTHROPIC_API_KEY;
+    const anthropicKeyPresent = !!(await resolveAnthropicKey());
     input.log(banner({ subtitle: "Daemon running — supervising queue + telegram + cancel + crash-recovery" }));
     input.log("");
     input.log(box([kvList([

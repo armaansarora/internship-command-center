@@ -37,47 +37,55 @@ export async function buildConceptLanePrompts(input: BuildConceptLanePromptsInpu
   // Brain decides how to vary the 5 lanes. The canonical concept-board prompt
   // from CHARACTER-IMAGE-PROMPTS.md is the "seed" — the brain produces
   // variations on stance/age/hair/prop/palette axes.
-  const result = await input.brain.decide({
-    kind: "generate-concept-prompts",
-    input: {
-      characterId: ctx.characterId,
-      displayName: ctx.displayName,
-      title: ctx.title,
-      space: ctx.space,
-      characterContext: {
-        visualArchetype: ctx.visualArchetype,
-        silhouette: ctx.silhouette,
-        wardrobe: ctx.wardrobe,
-        props: ctx.props,
-        mobileRead: ctx.mobileRead,
-        negativeDNA: ctx.negativeDNA,
-        accent: ctx.accent,
-        wound: ctx.wound,
-        doctrine: ctx.doctrine,
-        flaw: ctx.flaw,
-        secretStrength: ctx.secretStrength,
-        comedicEngine: ctx.comedicEngine,
-        visualDNA: ctx.visualDNA,
-        forbiddenVisualTraits: ctx.forbiddenVisualTraits,
-        promptFragments: ctx.promptFragments,
+  //
+  // Brain failures (bad ANTHROPIC_API_KEY, rate-limit, network) are NOT fatal:
+  // we have a deterministic bible-derived fallback that produces 5 reasonable
+  // canonical prompts. Real Gemini still runs against those prompts — the
+  // user only loses brain-authored creativity, not real images.
+  try {
+    const result = await input.brain.decide({
+      kind: "generate-concept-prompts",
+      input: {
+        characterId: ctx.characterId,
+        displayName: ctx.displayName,
+        title: ctx.title,
+        space: ctx.space,
+        characterContext: {
+          visualArchetype: ctx.visualArchetype,
+          silhouette: ctx.silhouette,
+          wardrobe: ctx.wardrobe,
+          props: ctx.props,
+          mobileRead: ctx.mobileRead,
+          negativeDNA: ctx.negativeDNA,
+          accent: ctx.accent,
+          wound: ctx.wound,
+          doctrine: ctx.doctrine,
+          flaw: ctx.flaw,
+          secretStrength: ctx.secretStrength,
+          comedicEngine: ctx.comedicEngine,
+          visualDNA: ctx.visualDNA,
+          forbiddenVisualTraits: ctx.forbiddenVisualTraits,
+          promptFragments: ctx.promptFragments,
+        },
+        canonicalConceptBoardPrompt: ctx.conceptBoardPrompt,
+        negativePrompt: ctx.negativePrompt,
+        styleEnvelope: {
+          id: bundle.styleEnvelope.id,
+          storyTone: bundle.styleEnvelope.storyTone,
+        },
+        recentMemory: {
+          winsCount: ctx.recentStyleWins.length,
+          rejectionsCount: ctx.recentRejections.length,
+        },
+        targetLanes: 5,
       },
-      canonicalConceptBoardPrompt: ctx.conceptBoardPrompt,
-      negativePrompt: ctx.negativePrompt,
-      styleEnvelope: {
-        id: bundle.styleEnvelope.id,
-        storyTone: bundle.styleEnvelope.storyTone,
-      },
-      recentMemory: {
-        winsCount: ctx.recentStyleWins.length,
-        rejectionsCount: ctx.recentRejections.length,
-      },
-      targetLanes: 5,
-    },
-  });
-
-  const parsed = parseLanePromptsOutput(result.outputJson);
-  if (parsed && parsed.length === 5) {
-    return { prompts: parsed, source: "brain", characterContext: ctx };
+    });
+    const parsed = parseLanePromptsOutput(result.outputJson);
+    if (parsed && parsed.length === 5) {
+      return { prompts: parsed, source: "brain", characterContext: ctx };
+    }
+  } catch {
+    // brain unavailable — fall through to canonical fallback
   }
   return { prompts: canonicalFallbackPrompts(ctx), source: "canonical-fallback", characterContext: ctx };
 }
@@ -222,20 +230,24 @@ export async function buildEnvironmentPrompts(input: BuildEnvironmentPromptsInpu
   const bundle = input.bundle ?? await loadTowerContext({ workspaceRoot: input.workspaceRoot });
   const floor = pickFloorContext(bundle, input.space);
   if (!floor) throw new Error(`prompt-builder: no floor context for "${input.space}"`);
-  const result = await input.brain.decide({
-    kind: "generate-environment-prompts",
-    input: {
-      space: floor.space,
-      roomName: floor.roomName,
-      floorNumber: floor.floorNumber,
-      atmosphere: floor.atmosphere,
-      function: floor.function,
-      requiredSlots: input.slots,
-      styleEnvelope: { id: bundle.styleEnvelope.id, storyTone: bundle.styleEnvelope.storyTone },
-    },
-  });
-  const parsed = parseEnvironmentPromptsOutput(result.outputJson, input.slots);
-  if (parsed && parsed.length === input.slots.length) return { prompts: parsed, source: "brain" };
+  try {
+    const result = await input.brain.decide({
+      kind: "generate-environment-prompts",
+      input: {
+        space: floor.space,
+        roomName: floor.roomName,
+        floorNumber: floor.floorNumber,
+        atmosphere: floor.atmosphere,
+        function: floor.function,
+        requiredSlots: input.slots,
+        styleEnvelope: { id: bundle.styleEnvelope.id, storyTone: bundle.styleEnvelope.storyTone },
+      },
+    });
+    const parsed = parseEnvironmentPromptsOutput(result.outputJson, input.slots);
+    if (parsed && parsed.length === input.slots.length) return { prompts: parsed, source: "brain" };
+  } catch {
+    // brain unavailable — fall through to canonical fallback
+  }
   return {
     prompts: input.slots.map((slot) => ({
       slotId: slot,
