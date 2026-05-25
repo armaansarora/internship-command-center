@@ -263,6 +263,28 @@ export const productionRunner: ArtLabRunner = {
       };
     }
 
+    // Placeholder gate — if Gemini failed on enough slots that the run would
+    // ship placeholders into public/art/, halt with provider-blocked instead
+    // of continuing through cutout + strict-qa + promotion.
+    if (useReal && input.characterId) {
+      const placeholderCount = slotOutputs.filter((s) => s.mode === "placeholder").length;
+      const placeholderThreshold = Math.max(2, Math.floor(slotOutputs.length * 0.1));
+      if (placeholderCount > placeholderThreshold) {
+        return {
+          runnerKind: "production",
+          status: "failed",
+          durationMs: Date.now() - startedAt,
+          artifacts: {
+            slotOutputs: slotOutputs.map((s) => s.jsonPath),
+            placeholderCount,
+            placeholderThreshold,
+          },
+          blockerHint: "provider-blocked",
+          failureCode: `placeholder-gate:${placeholderCount}-of-${slotOutputs.length}`,
+        };
+      }
+    }
+
     // Multimodal QA — brain SEES all the production sprites and flags drift.
     // Optional + best-effort; failures are non-fatal.
     if (useReal && input.characterId && slotOutputs.length > 0) {

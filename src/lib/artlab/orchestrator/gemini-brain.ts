@@ -23,6 +23,8 @@ import type {
   ArtLabLlmImageInput,
 } from "./llm-brain";
 import { SYSTEM_PROMPTS_BY_KIND } from "./system-prompts";
+import { defaultTimeoutForKind, isRetryableHttpStatus, withRetryAndTimeout } from "./brain-retry";
+import { validateDecisionOutput } from "./decision-schemas";
 
 interface GeminiBrainOptions {
   apiKey: string;
@@ -69,23 +71,43 @@ export function createGeminiBrain(options: GeminiBrainOptions): ArtLabGeminiBrai
             : { thinkingConfig: { thinkingBudget: 0 } }),
         },
       };
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) {
-        const errText = await safeReadText(response);
-        throw new Error(`gemini-brain ${modelId} HTTP ${response.status}: ${errText}`);
-      }
-      const json = (await response.json()) as GeminiResponseShape;
+      const bodyString = JSON.stringify(body);
+      const startedAt = Date.now();
+      const envelope = await withRetryAndTimeout(
+        async (signal) => {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: bodyString,
+            signal,
+          });
+          if (!response.ok) {
+            const errText = await safeReadText(response);
+            const err = new Error(`gemini-brain ${modelId} HTTP ${response.status}: ${errText}`);
+            // Tag retryable HTTP errors so withRetryAndTimeout actually retries.
+            if (isRetryableHttpStatus(response.status)) {
+              (err as Error & { status?: number }).status = response.status;
+            }
+            throw err;
+          }
+          return (await response.json()) as GeminiResponseShape;
+        },
+        {
+          opName: `gemini-brain[${req.kind}]`,
+          timeoutMs: defaultTimeoutForKind(req.kind),
+        },
+      );
+      const json = envelope.result;
       const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
       let outputJson: Record<string, unknown> = {};
       try {
         outputJson = JSON.parse(text) as Record<string, unknown>;
       } catch {
-        outputJson = { rawText: text };
+        // Tag parse failure VISIBLY so callers (and /decisions) know the
+        // brain returned garbage rather than silently treating it as missing.
+        outputJson = { _parseError: "malformed-json", rawText: text.slice(0, 500) };
       }
+      const validation = validateDecisionOutput(req.kind, outputJson);
       const usage = json.usageMetadata;
       return {
         kind: req.kind,
@@ -94,6 +116,10 @@ export function createGeminiBrain(options: GeminiBrainOptions): ArtLabGeminiBrai
         tokensIn: usage?.promptTokenCount ?? 0,
         tokensOut: usage?.candidatesTokenCount ?? 0,
         model: modelId,
+        retryCount: envelope.retryCount,
+        lastTransientError: envelope.lastError,
+        validationError: validation.ok ? undefined : validation.error,
+        durationMs: Date.now() - startedAt,
       };
     },
   };

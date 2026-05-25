@@ -14,6 +14,13 @@ export const LlmDecisionEntrySchema = z
     tokensOut: z.number().int().min(0),
     model: z.string().min(1),
     confidence: z.number().min(0).max(1),
+    // Optional reliability metadata. When present, /decisions surfaces
+    // transient flakiness + structured-output validation failures so the
+    // user can see WHY a brain call degraded to canonical fallback.
+    retryCount: z.number().int().min(0).optional(),
+    lastTransientError: z.string().optional(),
+    validationError: z.string().optional(),
+    durationMs: z.number().int().min(0).optional(),
   })
   .strict();
 export type LlmDecisionEntry = z.infer<typeof LlmDecisionEntrySchema>;

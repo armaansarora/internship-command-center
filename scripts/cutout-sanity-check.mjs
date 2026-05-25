@@ -26,7 +26,8 @@ const board = await composeMod.composeFinalBoard({
   cutoutPaths: cutPaths,
   characterId: "cno",
   displayName: "Sol Navarro",
-  title: "Chief Networking Officer · 21 upload-ready sprites (FIXED)",
+  title: "Chief Networking Officer · 21 upload-ready sprites",
+  verdict: "tight",
 });
 writeFileSync(join(OUT_DIR, "final-board.png"), board);
 console.log("Wrote", join(OUT_DIR, "final-board.png"));

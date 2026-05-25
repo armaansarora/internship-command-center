@@ -95,6 +95,72 @@ describe("gemini-brain", () => {
     expect(userParts[1]!.inlineData?.data).toBe(bytes.toString("base64"));
   });
 
+  it("retries on transient 503 then succeeds", async () => {
+    const fail = new Response("temporarily unavailable", { status: 503 });
+    const ok = mockOkResponse(JSON.stringify({ recommendedLane: 3, summary: "ok" }));
+    fetchSpy
+      .mockResolvedValueOnce(fail as never)
+      .mockResolvedValueOnce(ok as never);
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const result = await brain.decide({ kind: "recommend-direction", input: {} });
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(result.retryCount).toBe(1);
+    expect(result.lastTransientError).toMatch(/503/);
+  }, 20_000);
+
+  it("does NOT retry on non-retryable 400", async () => {
+    fetchSpy.mockResolvedValue(new Response("API_KEY_INVALID", { status: 400 }) as never);
+    const brain = createGeminiBrain({ apiKey: "bad" });
+    await expect(brain.decide({ kind: "recommend-direction", input: {} }))
+      .rejects.toThrow(/400/);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("tags _parseError when Gemini emits non-JSON", async () => {
+    fetchSpy.mockResolvedValue(mockOkResponse("this is not json"));
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const result = await brain.decide({ kind: "blocker-message-drafting", input: { blocker: "x" } });
+    expect(result.outputJson._parseError).toBe("malformed-json");
+    expect(result.outputJson.rawText).toBe("this is not json");
+    expect(result.validationError).toMatch(/raw-text/);
+  });
+
+  it("sets validationError when output misses required schema fields", async () => {
+    // generate-concept-prompts requires {prompts: [...].length===5}; supply 2.
+    fetchSpy.mockResolvedValue(mockOkResponse(JSON.stringify({
+      prompts: [
+        { laneIndex: 1, prompt: "p1 here is enough content", variationAxis: "axis" },
+        { laneIndex: 2, prompt: "p2 here is enough content", variationAxis: "axis" },
+      ],
+    })));
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const result = await brain.decide({
+      kind: "generate-concept-prompts",
+      input: { characterId: "cno" },
+    });
+    expect(result.validationError).toBeDefined();
+    expect(result.validationError).toMatch(/prompts/);
+  });
+
+  it("returns no validationError for clean valid output", async () => {
+    fetchSpy.mockResolvedValue(mockOkResponse(JSON.stringify({
+      laneIndex: 3,
+      reasoning: "balanced",
+    })));
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const result = await brain.decide({ kind: "recommend-direction", input: {} });
+    expect(result.validationError).toBeUndefined();
+    expect(result.retryCount).toBe(0);
+  });
+
+  it("records durationMs", async () => {
+    fetchSpy.mockResolvedValue(mockOkResponse(JSON.stringify({ ok: true })));
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const result = await brain.decide({ kind: "blocker-message-drafting", input: { blocker: "x" } });
+    expect(typeof result.durationMs).toBe("number");
+    expect(result.durationMs!).toBeGreaterThanOrEqual(0);
+  });
+
   it("attaches multiple images in order", async () => {
     fetchSpy.mockResolvedValue(mockOkResponse(JSON.stringify({ ok: true })));
     const brain = createGeminiBrain({ apiKey: "k" });

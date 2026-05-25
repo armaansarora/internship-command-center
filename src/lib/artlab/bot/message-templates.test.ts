@@ -147,6 +147,29 @@ describe("HTML message templates", () => {
     expect(msg.text).toContain("provider-blocked");
   });
 
+  it("blockerNotice includes an actionable recovery hint per blocker type", () => {
+    const provider = blockerNotice({
+      displayName: "Sol", runId: SAMPLE_RUN_ID, phase: "production", blocker: "provider-blocked",
+    });
+    expect(provider.text).toMatch(/wait/i);
+
+    const budget = blockerNotice({
+      displayName: "Sol", runId: SAMPLE_RUN_ID, phase: "production", blocker: "budget-blocked",
+    });
+    expect(budget.text).toMatch(/cap|ceiling/i);
+
+    const needsHuman = blockerNotice({
+      displayName: "Sol", runId: SAMPLE_RUN_ID, phase: "concept-review", blocker: "needs-human",
+    });
+    expect(needsHuman.text).toMatch(/gate|reply/i);
+
+    // Unknown blocker still falls back to a cancel hint (not a dead end).
+    const unknown = blockerNotice({
+      displayName: "Sol", runId: SAMPLE_RUN_ID, phase: "production", blocker: "mystery-blocker",
+    });
+    expect(unknown.text).toMatch(/cancel/i);
+  });
+
   it("clarificationPrompt attaches an inline keyboard per option", () => {
     const msg = clarificationPrompt({
       question: "That's wide-open. Want to narrow it?",
@@ -208,12 +231,16 @@ describe("HTML message templates", () => {
     expect(msg.text).toContain("$5.00");
   });
 
-  it("helpTemplate includes triggers, gates, commands", () => {
+  it("helpTemplate covers brainstorm flow, gates, and all commands", () => {
     const msg = helpTemplate();
-    expect(msg.text).toContain("Triggers");
+    expect(msg.text).toContain("Brainstorm flow");
     expect(msg.text).toContain("Gates");
     expect(msg.text).toContain("Commands");
     expect(msg.text).toContain("/decisions");
+    expect(msg.text).toContain("/ask");
+    expect(msg.text).toContain("/health");
+    expect(msg.text).toContain("approve direction 1-5");
+    expect(msg.text).toContain("approved for app");
   });
 
   it("unknownCommandTemplate includes the command name + help body", () => {

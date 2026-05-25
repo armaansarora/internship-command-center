@@ -54,6 +54,13 @@ export interface ArtLabLlmDecisionResult {
   tokensIn: number;
   tokensOut: number;
   model: string;
+  // Reliability metadata — optional so existing callers + mock brain don't
+  // need to set them. logged-brain reads these and writes them into the
+  // decision log entry so /decisions can surface transient flakiness.
+  retryCount?: number;
+  lastTransientError?: string;
+  validationError?: string;
+  durationMs?: number;
 }
 
 export interface ArtLabLlmBrain {

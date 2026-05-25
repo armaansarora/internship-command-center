@@ -12,6 +12,7 @@ describe("renderArtLabHealth", () => {
       receipts: { totalReceipts: 4, byRun: { r1: 4 } },
       locks: { locks: [] },
       cleanup: { orphanPreviewCount: 0, staleBoardCount: 0, staleLockCount: 0 },
+      daemon: { recent24hCount: 0 },
     });
     expect(text).toContain("ArtLab Health");
     expect(text).toContain("$12.34");

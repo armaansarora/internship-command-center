@@ -39,8 +39,24 @@ const CUTOUT_REQUIRED: ReadonlySet<ArtLabAssetType> = new Set(["character", "pro
 // pulling interior alpha down. A hard alpha cut at the flood-fill boundary
 // gives a clean cutout that matches the source edge softness.
 const BACKDROP_FILL_THRESHOLD = 42;
+// Edge feather: pixels at the rim of the flood-filled backdrop get a softer
+// alpha so the original backdrop-bleed at the anti-aliased painterly edge
+// contributes less to the composite. Hand-coded morphological — sharp.blur
+// on a 1-channel raw alpha buffer was destroying interior pixels.
+const EDGE_FEATHER_ALPHA = 168;
+// Backdrop is considered "noisy" if edge-sample standard deviation exceeds
+// this — Gemini occasionally returns a busy scene instead of the prompted
+// solid cream backdrop. We surface a warning so the user knows the cutout
+// quality may suffer; the cutout still runs.
+const BACKDROP_NOISE_STDDEV_THRESHOLD = 28;
 
 interface RgbColor { r: number; g: number; b: number; }
+
+interface BackdropSample {
+  color: RgbColor;
+  stddev: number;        // perceptual variance of edge samples (R/G/B avg)
+  sampleCount: number;
+}
 
 function colorDistance(a: RgbColor, b: RgbColor): number {
   const dr = a.r - b.r;
@@ -49,7 +65,7 @@ function colorDistance(a: RgbColor, b: RgbColor): number {
   return Math.sqrt(dr * dr + dg * dg + db * db);
 }
 
-function sampleBackdrop(buf: Buffer, width: number, height: number, channels: number): RgbColor {
+function sampleBackdrop(buf: Buffer, width: number, height: number, channels: number): BackdropSample {
   const samples: RgbColor[] = [];
   const sampleAt = (x: number, y: number): RgbColor => {
     const idx = (y * width + x) * channels;
@@ -67,7 +83,44 @@ function sampleBackdrop(buf: Buffer, width: number, height: number, channels: nu
     samples.push(sampleAt(width - 3, y));
   }
   const sum = samples.reduce((acc, c) => ({ r: acc.r + c.r, g: acc.g + c.g, b: acc.b + c.b }), { r: 0, g: 0, b: 0 });
-  return { r: sum.r / samples.length, g: sum.g / samples.length, b: sum.b / samples.length };
+  const avg = { r: sum.r / samples.length, g: sum.g / samples.length, b: sum.b / samples.length };
+  // Standard deviation across channels (max of per-channel stddev).
+  let rVar = 0, gVar = 0, bVar = 0;
+  for (const s of samples) {
+    rVar += (s.r - avg.r) ** 2;
+    gVar += (s.g - avg.g) ** 2;
+    bVar += (s.b - avg.b) ** 2;
+  }
+  const stddev = Math.max(
+    Math.sqrt(rVar / samples.length),
+    Math.sqrt(gVar / samples.length),
+    Math.sqrt(bVar / samples.length),
+  );
+  return { color: avg, stddev, sampleCount: samples.length };
+}
+
+/**
+ * Soften the alpha mask at the rim by one pixel. After flood-fill, alpha is
+ * binary 0/255. This pass finds opaque pixels with at least one transparent
+ * 4-neighbor and lowers their alpha to EDGE_FEATHER_ALPHA. Single-pass, no
+ * sharp/Gaussian — that's what destroyed faces last time.
+ */
+function featherEdge(alpha: Buffer, width: number, height: number): void {
+  // Work on a snapshot so neighbor checks see the pre-feather state.
+  const snapshot = Buffer.from(alpha);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const idx = y * width + x;
+      if (snapshot[idx] !== 255) continue;
+      const left = x > 0 ? snapshot[idx - 1] : 255;
+      const right = x < width - 1 ? snapshot[idx + 1] : 255;
+      const up = y > 0 ? snapshot[idx - width] : 255;
+      const down = y < height - 1 ? snapshot[idx + width] : 255;
+      if (left === 0 || right === 0 || up === 0 || down === 0) {
+        alpha[idx] = EDGE_FEATHER_ALPHA;
+      }
+    }
+  }
 }
 
 function floodFillBackdrop(
@@ -120,34 +173,61 @@ function floodFillBackdrop(
   return alpha;
 }
 
-async function backdropSubtractToRgba(sourceBytes: Buffer): Promise<Buffer> {
+interface BackdropSubtractResult {
+  bytes: Buffer;
+  backdropStddev: number;
+  backdropColor: RgbColor;
+  noisyBackdropWarning: boolean;
+  opaquePixelRatio: number;        // fraction of pixels marked as subject (1 - alpha=0 ratio)
+}
+
+async function backdropSubtractToRgba(sourceBytes: Buffer): Promise<BackdropSubtractResult> {
   // 1. Decode to raw RGB.
   const decoded = await sharp(sourceBytes).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width, height, channels } = decoded.info;
   const rgb = decoded.data;
 
-  // 2. Detect the backdrop color from edge-strip samples.
+  // 2. Detect the backdrop color from edge-strip samples (returns variance too).
   const backdrop = sampleBackdrop(rgb, width, height, channels);
+  const noisyBackdropWarning = backdrop.stddev > BACKDROP_NOISE_STDDEV_THRESHOLD;
 
   // 3. Flood-fill backdrop from the perimeter.
-  const alpha = floodFillBackdrop(rgb, width, height, channels, backdrop);
+  const alpha = floodFillBackdrop(rgb, width, height, channels, backdrop.color);
 
-  // 4. Compose RGB + alpha → RGBA.
+  // 4. Feather the rim by one pixel for cleaner edges over dark composites.
+  featherEdge(alpha, width, height);
+
+  // 5. Compose RGB + alpha → RGBA. Track opaque ratio while we're here.
   const pixelCount = width * height;
   const rgba = Buffer.allocUnsafe(pixelCount * 4);
+  let opaqueCount = 0;
   for (let i = 0; i < pixelCount; i += 1) {
     const srcIdx = i * channels;
     const dstIdx = i * 4;
     rgba[dstIdx] = rgb[srcIdx]!;
     rgba[dstIdx + 1] = rgb[srcIdx + 1]!;
     rgba[dstIdx + 2] = rgb[srcIdx + 2]!;
-    rgba[dstIdx + 3] = alpha[i]!;
+    const a = alpha[i]!;
+    rgba[dstIdx + 3] = a;
+    if (a > 200) opaqueCount += 1;
   }
 
-  // 5. Encode as PNG (lossless).
-  return await sharp(rgba, {
+  // 6. Encode as PNG (lossless).
+  const bytes = await sharp(rgba, {
     raw: { width, height, channels: 4 },
   }).png().toBuffer();
+  return {
+    bytes,
+    backdropStddev: backdrop.stddev,
+    backdropColor: backdrop.color,
+    noisyBackdropWarning,
+    opaquePixelRatio: opaqueCount / pixelCount,
+  };
+}
+
+interface CutoutOutcome {
+  cutoutPath: string;
+  warning?: { slotId: string; reason: string; backdropStddev?: number; opaqueRatio?: number };
 }
 
 async function cutoutOne(
@@ -155,10 +235,11 @@ async function cutoutOne(
   cutoutDir: string,
   src: string,
   fallbackPng: Buffer,
-): Promise<string> {
+): Promise<CutoutOutcome> {
   const delayMs = Number.parseInt(process.env.ARTLAB_CUTOUT_DELAY_MS ?? "0", 10);
   if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
   const dstName = src.replace(/\.json$/, ".png");
+  const slotId = dstName.replace(/\.png$/, "");
   const cutoutPath = join(cutoutDir, dstName);
   const srcPng = join(sourceDir, src.replace(/\.json$/, ".png"));
   if (existsSync(srcPng)) {
@@ -168,8 +249,19 @@ async function cutoutOne(
       // (sharp-rendered, no real backdrop to subtract). Heuristic: real
       // Gemini outputs are >150 KB. Placeholders are ~30 KB.
       if (sourceBytes.length > 100_000) {
-        const rgba = await backdropSubtractToRgba(sourceBytes);
-        writeFileSync(cutoutPath, rgba);
+        const result = await backdropSubtractToRgba(sourceBytes);
+        writeFileSync(cutoutPath, result.bytes);
+        if (result.noisyBackdropWarning) {
+          return {
+            cutoutPath,
+            warning: {
+              slotId,
+              reason: "noisy-backdrop",
+              backdropStddev: Number(result.backdropStddev.toFixed(2)),
+              opaqueRatio: Number(result.opaquePixelRatio.toFixed(3)),
+            },
+          };
+        }
       } else {
         copyFileSync(srcPng, cutoutPath);
       }
@@ -181,7 +273,7 @@ async function cutoutOne(
   } else {
     writeFileSync(cutoutPath, fallbackPng);
   }
-  return cutoutPath;
+  return { cutoutPath };
 }
 
 export const cutoutRunner: ArtLabRunner = {
@@ -198,19 +290,33 @@ export const cutoutRunner: ArtLabRunner = {
     const cutoutDir = join(input.runDir, "cutouts");
     if (!existsSync(cutoutDir)) mkdirSync(cutoutDir, { recursive: true });
     const sources = existsSync(sourceDir) ? readdirSync(sourceDir).filter((f) => f.endsWith(".json")) : [];
-    const cutoutPaths: string[] = [];
+    const outcomes: CutoutOutcome[] = [];
     const display = displayFor(input.characterId);
     const fallbackPng = await renderPlaceholderImage({
       title: display.firstName,
       subtitle: "production sprite · cutout",
     });
     const tasks = sources.map((src) => async () => {
-      cutoutPaths.push(await cutoutOne(sourceDir, cutoutDir, src, fallbackPng));
+      outcomes.push(await cutoutOne(sourceDir, cutoutDir, src, fallbackPng));
     });
     await runCutoutPool({ tasks });
+
+    const warnings = outcomes.map((o) => o.warning).filter((w): w is NonNullable<typeof w> => Boolean(w));
+    if (warnings.length > 0) {
+      // Persist a warning sidecar so strict-qa + phase-notifier can surface
+      // backdrop-quality drift to the user.
+      writeFileSync(
+        join(input.runDir, "cutout-warnings.json"),
+        JSON.stringify({ count: warnings.length, warnings }, null, 2),
+      );
+    }
+
     return {
       runnerKind: "cutout", status: "ok", durationMs: Date.now() - startedAt,
-      artifacts: { cutoutPaths: cutoutPaths.sort() },
+      artifacts: {
+        cutoutPaths: outcomes.map((o) => o.cutoutPath).sort(),
+        warningCount: warnings.length,
+      },
     };
   },
 };

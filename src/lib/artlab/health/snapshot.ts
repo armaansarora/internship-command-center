@@ -4,6 +4,7 @@ import { scanProcesses, type ProcessesScanResult } from "./scanners/processes";
 import { scanReceipts, type ReceiptsScanResult } from "./scanners/receipts";
 import { scanLocks, type LockScanResult } from "./scanners/locks";
 import { scanCleanup, type CleanupScanResult } from "./scanners/cleanup";
+import { scanDaemonErrors, type DaemonErrorsScanResult } from "./scanners/daemon-errors";
 import { readMeasurements } from "@/lib/artlab/speed/measure";
 import { readBaseline } from "@/lib/artlab/migration/baseline-recorder";
 
@@ -24,6 +25,7 @@ export interface ArtLabHealthSnapshot {
   locks: LockScanResult;
   cleanup: CleanupScanResult;
   speed?: SpeedSummary;
+  daemon: DaemonErrorsScanResult;
 }
 
 async function buildSpeedSummary(workspaceRoot: string): Promise<SpeedSummary | undefined> {
@@ -54,5 +56,6 @@ export async function buildArtLabHealthSnapshot(input: string | { workspaceRoot:
     locks: scanLocks(workspaceRoot),
     cleanup: scanCleanup(workspaceRoot),
     speed: await buildSpeedSummary(workspaceRoot),
+    daemon: scanDaemonErrors(workspaceRoot),
   };
 }

@@ -79,9 +79,22 @@ function handleCancel(workspaceRoot: string, args: string[], chatId?: number): T
   const runId = args[0]!;
   const inboxDir = join(workspaceRoot, "inbox");
   if (!existsSync(inboxDir)) mkdirSync(inboxDir, { recursive: true });
+  // Dedup: if a cancel intent for this runId already exists in the inbox
+  // (queued from a previous /cancel), don't spam another file. The daemon
+  // will process the existing one on the next sweep.
+  if (cancelIntentExists(inboxDir, runId)) {
+    return cancelAck({ runId });
+  }
   const path = join(inboxDir, `cancel-${runId}-${Date.now()}.json`);
   writeFileSync(path, JSON.stringify({ runId, requestedAt: new Date().toISOString() }));
   return cancelAck({ runId });
+}
+
+function cancelIntentExists(inboxDir: string, runId: string): boolean {
+  if (!existsSync(inboxDir)) return false;
+  try {
+    return readdirSync(inboxDir).some((f) => f.startsWith(`cancel-${runId}-`) && f.endsWith(".json"));
+  } catch { return false; }
 }
 
 async function handleHealth(workspaceRoot: string): Promise<TelegramOutboundMessage> {
@@ -92,12 +105,40 @@ async function handleHealth(workspaceRoot: string): Promise<TelegramOutboundMess
     activeLeases: snapshot.leases.length,
     monthlySpendCents: snapshot.spend.totalSpentCents,
     collectedAt: snapshot.collectedAt,
+    daemonErrors24h: snapshot.daemon.recent24hCount,
+    lastDaemonError: snapshot.daemon.lastError,
+    heartbeatStaleMs: snapshot.daemon.heartbeat?.staleMs,
   });
 }
 
+// Flat decision-log entry shape (matches what logged-brain writes via
+// appendLlmDecision). The legacy `entry.runId` filter was buggy — entries
+// don't carry runId. We now filter by timestamp window from the run's
+// own createdAt/updatedAt so /decisions <runId> shows the decisions that
+// landed during that run's lifetime.
 interface DecisionLogEntry {
-  runId?: string;
-  decision?: { kind?: string; outputJson?: unknown; rationale?: string };
+  decisionAt?: string;
+  kind?: string;
+  input?: unknown;
+  output?: Record<string, unknown>;
+  tokensIn?: number;
+  tokensOut?: number;
+  retryCount?: number;
+  validationError?: string;
+}
+
+interface RunStateLite { runId: string; createdAt: string; updatedAt: string }
+
+function readRunWindow(workspaceRoot: string, runId: string): { startMs: number; endMs: number } | null {
+  try {
+    const statePath = join(workspaceRoot, "runs", runId, "run-state.json");
+    if (!existsSync(statePath)) return null;
+    const parsed = JSON.parse(readFileSync(statePath, "utf8")) as RunStateLite;
+    const start = new Date(parsed.createdAt).getTime() - 30_000;
+    const end = new Date(parsed.updatedAt).getTime() + 30_000;
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+    return { startMs: start, endMs: end };
+  } catch { return null; }
 }
 
 function handleDecisions(workspaceRoot: string, args: string[]): TelegramOutboundMessage {
@@ -109,16 +150,44 @@ function handleDecisions(workspaceRoot: string, args: string[]): TelegramOutboun
   if (!existsSync(logPath)) {
     return decisionsTemplate({ runId: wantedRunId, decisions: [] });
   }
+  // Resolve the run's full UUID from the short prefix to read its time window.
+  const runsDir = join(workspaceRoot, "runs");
+  const fullRunId = existsSync(runsDir)
+    ? readdirSync(runsDir).find((d) => d.startsWith(wantedRunId.slice(0, 8))) ?? wantedRunId
+    : wantedRunId;
+  const window = readRunWindow(workspaceRoot, fullRunId);
   const lines = readFileSync(logPath, "utf8").split("\n").filter(Boolean);
-  const matched: Array<{ kind: string; summary: string }> = [];
+  const matched: Array<{
+    kind: string;
+    summary: string;
+    decisionAt?: string;
+    tokensIn?: number;
+    tokensOut?: number;
+    retryCount?: number;
+    validationError?: string;
+  }> = [];
   for (const line of lines) {
     try {
       const entry = JSON.parse(line) as DecisionLogEntry;
-      if (!entry.runId || !entry.runId.startsWith(wantedRunId.slice(0, 8))) continue;
-      const kind = entry.decision?.kind ?? "unknown";
-      const rationale = entry.decision?.rationale;
-      const summary = rationale ?? summarizeJson(entry.decision?.outputJson);
-      matched.push({ kind, summary });
+      if (!entry.kind || !entry.decisionAt) continue;
+      if (window) {
+        const ts = new Date(entry.decisionAt).getTime();
+        if (!Number.isFinite(ts) || ts < window.startMs || ts > window.endMs) continue;
+      }
+      const output = entry.output ?? {};
+      const rationale = typeof (output as { rationale?: unknown }).rationale === "string"
+        ? (output as { rationale: string }).rationale
+        : undefined;
+      const summary = rationale ?? summarizeJson(output);
+      matched.push({
+        kind: entry.kind,
+        summary,
+        decisionAt: entry.decisionAt,
+        tokensIn: entry.tokensIn,
+        tokensOut: entry.tokensOut,
+        retryCount: entry.retryCount,
+        validationError: entry.validationError,
+      });
     } catch { /* skip malformed line */ }
   }
   return decisionsTemplate({ runId: wantedRunId, decisions: matched });

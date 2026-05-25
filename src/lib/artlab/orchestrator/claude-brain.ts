@@ -2,6 +2,8 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import type { ArtLabLlmBrain, ArtLabLlmDecisionRequest, ArtLabLlmDecisionResult } from "./llm-brain";
 import { SYSTEM_PROMPTS_BY_KIND } from "./system-prompts";
+import { defaultTimeoutForKind, withRetryAndTimeout } from "./brain-retry";
+import { validateDecisionOutput } from "./decision-schemas";
 
 interface ClaudeBrainOptions {
   apiKey: string;
@@ -28,23 +30,35 @@ export function createClaudeBrain(options: ClaudeBrainOptions): ArtLabClaudeBrai
         };
       }
       const system = SYSTEM_PROMPTS_BY_KIND[req.kind];
-      const { text, usage } = await generateText({
-        model: provider(options.model),
-        messages: [
-          {
-            role: "system",
-            content: system,
-            providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
-          },
-          { role: "user", content: JSON.stringify(req.input) },
-        ],
-      });
+      const startedAt = Date.now();
+      const envelope = await withRetryAndTimeout(
+        async (signal) => {
+          return await generateText({
+            model: provider(options.model),
+            abortSignal: signal,
+            messages: [
+              {
+                role: "system",
+                content: system,
+                providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
+              },
+              { role: "user", content: JSON.stringify(req.input) },
+            ],
+          });
+        },
+        {
+          opName: `claude-brain[${req.kind}]`,
+          timeoutMs: defaultTimeoutForKind(req.kind),
+        },
+      );
+      const { text, usage } = envelope.result;
       let outputJson: Record<string, unknown> = {};
       try {
         outputJson = JSON.parse(text);
       } catch {
-        outputJson = { rawText: text };
+        outputJson = { _parseError: "malformed-json", rawText: text.slice(0, 500) };
       }
+      const validation = validateDecisionOutput(req.kind, outputJson);
       return {
         kind: req.kind,
         outputJson,
@@ -52,6 +66,10 @@ export function createClaudeBrain(options: ClaudeBrainOptions): ArtLabClaudeBrai
         tokensIn: usage.inputTokens ?? 0,
         tokensOut: usage.outputTokens ?? 0,
         model: options.model,
+        retryCount: envelope.retryCount,
+        lastTransientError: envelope.lastError,
+        validationError: validation.ok ? undefined : validation.error,
+        durationMs: Date.now() - startedAt,
       };
     },
   };

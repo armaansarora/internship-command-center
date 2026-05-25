@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { enqueueRun, listQueuedRuns, dequeueNextRun, ARTLAB_MAX_PARALLELISM } from "./queue";
@@ -27,5 +27,20 @@ describe("artlab queue", () => {
     expect(first?.runId).toBe("r2");
     const remaining = listQueuedRuns(dir);
     expect(remaining.map((q) => q.runId)).toEqual(["r1"]);
+  });
+
+  it("quarantines corrupted queue entries into .bad/ instead of throwing", () => {
+    enqueueRun(dir, { runId: "r-good", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "a" } });
+    // Drop a malformed JSON file in the queue dir.
+    writeFileSync(join(dir, "queue", "r-bad.json"), "not valid json");
+    // Drop a JSON-valid but schema-invalid entry.
+    writeFileSync(join(dir, "queue", "r-schema.json"), JSON.stringify({ noFields: true }));
+    const list = listQueuedRuns(dir);
+    expect(list.map((q) => q.runId)).toEqual(["r-good"]);
+    // Bad entries should have been moved to .bad/
+    const badDir = join(dir, "queue", ".bad");
+    expect(existsSync(badDir)).toBe(true);
+    const quarantined = readdirSync(badDir);
+    expect(quarantined.length).toBe(2);
   });
 });

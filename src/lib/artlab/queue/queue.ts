@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import { priorityRank, ARTLAB_PRIORITIES } from "./priorities";
@@ -27,16 +27,44 @@ export function enqueueRun(root: string, entry: ArtLabQueueEntry): void {
   writeFileSync(path, JSON.stringify(entry), { flag: "wx" });
 }
 
+/**
+ * Read all queue entries. Corrupted JSON files (truncated mid-write, bad
+ * schema) are moved to `<queue>/.bad/` with a timestamped name so the
+ * processor doesn't keep tripping over them — and the operator can still
+ * inspect what landed there.
+ */
 export function listQueuedRuns(root: string): ArtLabQueueEntry[] {
   const path = queueDir(root);
-  return readdirSync(path)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => ArtLabQueueEntrySchema.parse(JSON.parse(readFileSync(join(path, f), "utf8"))))
-    .sort((a, b) => {
-      const rank = priorityRank(a.priority) - priorityRank(b.priority);
-      if (rank !== 0) return rank;
-      return a.enqueuedAt.localeCompare(b.enqueuedAt);
-    });
+  const entries: ArtLabQueueEntry[] = [];
+  for (const f of readdirSync(path).filter((f) => f.endsWith(".json"))) {
+    const filePath = join(path, f);
+    try {
+      const raw = readFileSync(filePath, "utf8");
+      const parsed = ArtLabQueueEntrySchema.parse(JSON.parse(raw));
+      entries.push(parsed);
+    } catch {
+      quarantineCorruptEntry(root, filePath, f);
+    }
+  }
+  return entries.sort((a, b) => {
+    const rank = priorityRank(a.priority) - priorityRank(b.priority);
+    if (rank !== 0) return rank;
+    return a.enqueuedAt.localeCompare(b.enqueuedAt);
+  });
+}
+
+function quarantineCorruptEntry(root: string, src: string, fileName: string): void {
+  try {
+    const badDir = join(queueDir(root), ".bad");
+    if (!existsSync(badDir)) mkdirSync(badDir, { recursive: true });
+    const dst = join(badDir, `${Date.now()}-${fileName}`);
+    // Move via rename — if rename fails (cross-device), fall back to unlink.
+    try {
+      renameSync(src, dst);
+    } catch {
+      try { unlinkSync(src); } catch { /* swallow */ }
+    }
+  } catch { /* never let quarantine break the queue */ }
 }
 
 export function dequeueNextRun(root: string): ArtLabQueueEntry | null {

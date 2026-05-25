@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { readRunStateSnapshot } from "@/lib/artlab/state/snapshots";
 import { join, resolve } from "node:path";
 import {
   evaluateCreativePromotionFirewall,
@@ -88,6 +89,30 @@ function buildBrainForPromotion(workspaceRoot: string): ArtLabLlmBrain {
 }
 
 const REQUIRED_PHRASE = "approved for app";
+const DEFAULT_CAP_CENTS = 350;
+
+function readSpendFromRunState(runDir: string): { actualCents: number; capCents: number } {
+  // run-state.json (when populated by the spend ledger) carries:
+  //   spend: { actualCents, perRunCapCents?, monthlyCeilingCents? }
+  // Promotion-celebration prefers per-run cap; falls back to monthly ceiling
+  // and finally a sensible default so the message is never blank.
+  try {
+    const state = readRunStateSnapshot(runDir) as
+      | (Awaited<ReturnType<typeof readRunStateSnapshot>> & {
+          spend?: { actualCents?: number; perRunCapCents?: number; monthlyCeilingCents?: number };
+        })
+      | null;
+    const spend = state?.spend;
+    if (spend) {
+      const actual = typeof spend.actualCents === "number" ? spend.actualCents : 0;
+      const cap = typeof spend.perRunCapCents === "number"
+        ? spend.perRunCapCents
+        : (typeof spend.monthlyCeilingCents === "number" ? spend.monthlyCeilingCents : DEFAULT_CAP_CENTS);
+      return { actualCents: actual, capCents: cap };
+    }
+  } catch { /* fall through */ }
+  return { actualCents: 0, capCents: DEFAULT_CAP_CENTS };
+}
 
 function publicArtRoot(): string {
   return process.env.ARTLAB_PUBLIC_ART_ROOT ?? "/Users/armaanarora/Documents/The Tower/public/art";
@@ -230,14 +255,17 @@ export const promotionRunner: ArtLabRunner = {
 
         // Brain-authored promotion celebration — phase-notifier picks this
         // up and renders it when state hits closed. Best-effort.
+        // Read real spend from run-state.json so the celebration says the
+        // actual cost instead of a placeholder $0.00.
+        const realSpend = readSpendFromRunState(input.runDir);
         try {
           await composeAndPersistPromotionCelebration({
             workspaceRoot,
             runDir: input.runDir,
             characterId: input.characterId,
             assetCount: result.promotedPaths.length,
-            spendCents: 0,
-            capCents: 350,
+            spendCents: realSpend.actualCents,
+            capCents: realSpend.capCents,
           });
         } catch { /* non-fatal */ }
       }
@@ -284,7 +312,30 @@ export const promotionRunner: ArtLabRunner = {
       runnerKind: "promotion",
       status: "ok",
       durationMs: Date.now() - startedAt,
-      artifacts: { promotedPaths: result.promotedPaths, receipt: result.receipt, gitResult },
+      artifacts: {
+        promotedPaths: result.promotedPaths,
+        receipt: result.receipt,
+        gitResult,
+        // Promote-time push status flag — phase-notifier reads this to warn
+        // the user when commit succeeded but push failed (so "Live now" link
+        // won't actually deploy until manual push).
+        pushFailed: pushFailed(gitResult),
+        pushFailureReason: pushFailureReason(gitResult),
+      },
     };
   },
 };
+
+function pushFailed(gitResult: ReturnType<typeof autoCommitPromotion> | null): boolean {
+  if (!gitResult) return false;
+  if (gitResult.status === "committed" && !gitResult.pushedTo) return true;
+  if (gitResult.status === "failed") return true;
+  return false;
+}
+
+function pushFailureReason(gitResult: ReturnType<typeof autoCommitPromotion> | null): string | undefined {
+  if (!gitResult) return undefined;
+  if (gitResult.status === "committed" && !gitResult.pushedTo) return gitResult.reason ?? "push failed";
+  if (gitResult.status === "failed") return gitResult.reason ?? "commit failed";
+  return undefined;
+}

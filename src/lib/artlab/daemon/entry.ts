@@ -1,6 +1,7 @@
 // src/lib/artlab/daemon/entry.ts
 import { appendFileSync, mkdirSync, existsSync, writeFileSync, renameSync } from "node:fs";
 import { join } from "node:path";
+import { rotateDaemonLogs } from "./log-rotation";
 
 export interface DaemonTicker {
   tick(): Promise<void>;
@@ -53,6 +54,7 @@ export interface DaemonContext {
   supervisor?: DaemonSupervisorView;
   now: () => Date;
   lastCrashRecoveryAt: number;
+  lastLogRotationAt: number;
   requestShutdown(): void;
   isShutdownRequested(): boolean;
 }
@@ -71,10 +73,15 @@ export function createDaemonContext(input: DaemonContextInput): DaemonContext {
     supervisor: input.supervisor,
     now: input.now ?? (() => new Date()),
     lastCrashRecoveryAt: 0,
+    lastLogRotationAt: 0,
     requestShutdown(): void { shutdown = true; },
     isShutdownRequested(): boolean { return shutdown; },
   };
 }
+
+const LOG_ROTATION_INTERVAL_MS = 60_000;
+const SHUTDOWN_DRAIN_MS = 30_000;
+const SHUTDOWN_POLL_MS = 500;
 
 function writeHeartbeat(workspaceRoot: string): void {
   if (!existsSync(workspaceRoot)) mkdirSync(workspaceRoot, { recursive: true });
@@ -103,6 +110,13 @@ async function runStep(workspaceRoot: string, source: string, fn: () => Promise<
 
 export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
   writeHeartbeat(ctx.workspaceRoot);
+
+  // Log rotation runs at most once per minute; cheap when files are small.
+  const nowMs = ctx.now().getTime();
+  if (nowMs - ctx.lastLogRotationAt >= LOG_ROTATION_INTERVAL_MS) {
+    ctx.lastLogRotationAt = nowMs;
+    await runStep(ctx.workspaceRoot, "log-rotation", async () => rotateDaemonLogs(ctx.workspaceRoot));
+  }
 
   if (ctx.cancelDrain) {
     await runStep(ctx.workspaceRoot, "cancel-drain", () => ctx.cancelDrain!.processCancelIntents());
@@ -141,9 +155,39 @@ export async function runDaemonForever(ctx: DaemonContext, opts?: { sleepMs?: nu
       if (ctx.isShutdownRequested()) break;
       await new Promise((r) => setTimeout(r, sleepMs));
     }
+    // Drain child workers gracefully so they don't leave mid-write state.
+    await drainChildren(ctx);
   } finally {
     process.off("SIGTERM", onSignal);
     process.off("SIGINT", onSignal);
     if (ctx.sleepGuard?.isActive()) ctx.sleepGuard.deactivate();
+  }
+}
+
+/**
+ * After shutdown is requested, SIGTERM each child worker and wait up to
+ * SHUTDOWN_DRAIN_MS for them to exit (poll every 500ms). Force-kill any
+ * stragglers with SIGKILL to guarantee daemon exit.
+ */
+async function drainChildren(ctx: DaemonContext): Promise<void> {
+  const supervisor = ctx.supervisor;
+  if (!supervisor) return;
+  const children = supervisor.activeChildren() as Array<{ pid?: unknown }>;
+  if (children.length === 0) return;
+  for (const child of children) {
+    if (typeof child.pid === "number") {
+      try { process.kill(child.pid, "SIGTERM"); } catch { /* already dead */ }
+    }
+  }
+  const deadline = Date.now() + SHUTDOWN_DRAIN_MS;
+  while (Date.now() < deadline) {
+    if (supervisor.activeChildren().length === 0) return;
+    await new Promise((r) => setTimeout(r, SHUTDOWN_POLL_MS));
+  }
+  // Time's up — force kill any remaining children.
+  for (const child of supervisor.activeChildren() as Array<{ pid?: unknown }>) {
+    if (typeof child.pid === "number") {
+      try { process.kill(child.pid, "SIGKILL"); } catch { /* already dead */ }
+    }
   }
 }

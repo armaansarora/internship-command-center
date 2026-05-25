@@ -74,6 +74,8 @@ export interface FinalBoardCompositeInput {
   title?: string;
   width?: number;
   height?: number;
+  /** Optional brain critique verdict — surfaces as a colored badge top-right. */
+  verdict?: "tight" | "minor-drift" | "major-drift";
 }
 
 export async function composeFinalBoard(input: FinalBoardCompositeInput): Promise<Buffer> {
@@ -90,6 +92,7 @@ export async function composeFinalBoard(input: FinalBoardCompositeInput): Promis
   const height = input.height ?? rows * tile + (rows + 1) * pad + headerH + footerH;
   const titleText = escapeXml(input.displayName ?? input.characterId.toUpperCase());
   const subtitleText = escapeXml(input.title ?? `${input.cutoutPaths.length} upload-ready production sprites`);
+  const badge = verdictBadgeSvg(input.verdict, width);
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs>
@@ -106,6 +109,7 @@ export async function composeFinalBoard(input: FinalBoardCompositeInput): Promis
   <text x="50%" y="56" font-family="Georgia, serif" font-size="38" font-weight="bold" text-anchor="middle" fill="#C9A84C" letter-spacing="1">${titleText}</text>
   <text x="50%" y="86" font-family="Helvetica, sans-serif" font-size="14" text-anchor="middle" fill="#C9A84C" opacity="0.72">${subtitleText}</text>
   <line x1="${pad * 2}" y1="${headerH - 6}" x2="${width - pad * 2}" y2="${headerH - 6}" stroke="#C9A84C" stroke-width="1" opacity="0.18"/>
+  ${badge}
   ${cardRectsSvg(input.cutoutPaths.length, cols, tile, pad, headerH)}
   <text x="50%" y="${height - 22}" font-family="monospace" font-size="11" text-anchor="middle" fill="#C9A84C" opacity="0.45">artlab · upload-ready · ${new Date().toISOString().slice(0, 10)}</text>
 </svg>`;
@@ -149,6 +153,23 @@ export async function composeFinalBoard(input: FinalBoardCompositeInput): Promis
     }
   }
   return sharp(Buffer.from(svg)).composite(tiles).png().toBuffer();
+}
+
+function verdictBadgeSvg(verdict: FinalBoardCompositeInput["verdict"], width: number): string {
+  if (!verdict) return "";
+  const palette = {
+    "tight": { fill: "#1E8449", text: "✓ tight" },
+    "minor-drift": { fill: "#B7791F", text: "⚠ minor drift" },
+    "major-drift": { fill: "#B91C1C", text: "⛔ major drift" },
+  }[verdict];
+  const bw = 130;
+  const bh = 28;
+  const x = width - bw - 22;
+  const y = 26;
+  return [
+    `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="14" ry="14" fill="${palette.fill}" opacity="0.92"/>`,
+    `<text x="${x + bw / 2}" y="${y + 19}" font-family="Helvetica, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#FFFFFF">${escapeXml(palette.text)}</text>`,
+  ].join("\n  ");
 }
 
 function cardRectsSvg(count: number, cols: number, tile: number, pad: number, headerH: number): string {

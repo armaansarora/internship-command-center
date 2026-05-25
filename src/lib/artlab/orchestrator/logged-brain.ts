@@ -36,6 +36,13 @@ export function createLoggedBrain(input: LoggedBrainInput): ArtLabLlmBrain {
           tokensOut: result.tokensOut,
           model: result.model,
           confidence: result.confidence,
+          // Reliability metadata. Optional — undefined fields are omitted by
+          // JSON.stringify so the log line stays compact when the call was
+          // clean (first-attempt success, valid output).
+          retryCount: result.retryCount,
+          lastTransientError: result.lastTransientError,
+          validationError: result.validationError,
+          durationMs: result.durationMs,
         });
       } catch { /* never let decision logging break the call */ }
       return result;

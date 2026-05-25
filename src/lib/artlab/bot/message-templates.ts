@@ -236,13 +236,27 @@ export interface BlockerNoticeInput {
   blocker: string;
 }
 
+// Map each blocker code to one actionable recovery hint. Keeps blockerNotice
+// from being a dead-end ("blocked" → "/cancel") and instead tells the user
+// exactly what they can do next.
+const BLOCKER_HINTS: Record<string, string> = {
+  "repair-required": "Cutout failed alpha check. <code>/cancel</code> to abandon, or wait for next sweep retry.",
+  "provider-blocked": "Image API errored. Wait ~1 min for retry, or <code>/cancel</code> to abandon.",
+  "style-failed": "Brain flagged style drift. <code>/cancel</code> and re-trigger with sharper brief.",
+  "budget-blocked": "Monthly cap hit. Bump <code>ARTLAB_MONTHLY_CEILING_CENTS</code> or wait for ledger reset.",
+  "needs-human": "Engine paused for your input. Reply to the latest gate above.",
+  "cancelled": "Already cancelled. No further action needed.",
+  "upgrade-required": "Engine version mismatch — ask the operator to redeploy.",
+};
+
 export function blockerNotice(input: BlockerNoticeInput): TelegramOutboundMessage {
+  const hint = BLOCKER_HINTS[input.blocker] ?? `<code>/cancel ${esc(shortRunId(input.runId))}</code> to abandon.`;
   return {
     text: block([
       `⚠️  <b>${esc(input.displayName)}</b>  ·  blocked`,
       `<code>${esc(shortRunId(input.runId))}</code>  ·  ${esc(input.phase)}  ·  <i>${esc(input.blocker)}</i>`,
       ``,
-      `<code>/cancel ${esc(shortRunId(input.runId))}</code>  to abandon.`,
+      hint,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -316,24 +330,27 @@ export function helpTemplate(): TelegramOutboundMessage {
     text: block([
       `🎨 <b>ArtLab — Tower creative engine</b>`,
       ``,
-      `<b>Triggers</b>`,
-      `   <code>make &lt;character&gt;</code>          start a new run`,
-      `   <code>make &lt;floor&gt; background</code>     environment plate`,
-      `   <code>make &lt;something cool&gt;</code>     I'll ask what you mean`,
+      `<b>Brainstorm flow</b>`,
+      `  1. <code>make &lt;character&gt;</code> → brain proposes design brief`,
+      `  2. Tap an adjustment or send free-text to refine`,
+      `  3. Approve → 5 concept lanes`,
+      `  4. Tap a lane <b>or</b> Refine to iterate with feedback`,
+      `  5. Final board → <code>approved for app</code> ships live`,
       ``,
       `<b>Gates</b>`,
-      `   <code>approve direction 1-5</code>     pick a concept lane`,
-      `   <code>approved for app</code>          promote final board`,
-      `   <code>revise: &lt;change&gt;</code>          request a revision`,
-      `   <code>reject</code>                     abandon the run`,
+      `  <code>approve direction 1-5</code>  pick a concept lane`,
+      `  <code>approved for app</code>       promote final board`,
+      `  <code>revise: &lt;change&gt;</code>      request a revision`,
+      `  <code>reject</code>                  abandon the run`,
       ``,
       `<b>Commands</b>`,
-      `   <code>/status [runId]</code>           engine status`,
-      `   <code>/queue</code>                    queued + active runs`,
-      `   <code>/cancel &lt;runId&gt;</code>          cancel a run`,
-      `   <code>/health</code>                   engine health`,
-      `   <code>/decisions &lt;runId&gt;</code>       brain reasoning chain`,
-      `   <code>/help</code>                     this message`,
+      `  <code>/status [runId]</code>     run state + ETA`,
+      `  <code>/queue</code>              queued + active runs`,
+      `  <code>/cancel [runId]</code>     cancel one or all parked`,
+      `  <code>/health</code>             engine + daemon health`,
+      `  <code>/decisions &lt;runId&gt;</code>  brain reasoning chain`,
+      `  <code>/ask &lt;question&gt;</code>     ask the brain (bible-grounded)`,
+      `  <code>/help</code>               this message`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -355,6 +372,24 @@ export function statusList(input: { runs: string[] }): TelegramOutboundMessage {
   };
 }
 
+// Rough per-phase ETA + work expected, used to give /status a "remaining"
+// hint. Numbers are intentionally conservative — they're a hint, not a SLO.
+const PHASE_ETA_HINT: Record<string, string> = {
+  routed: "~5s — routing",
+  briefing: "~10s — brain composing brief",
+  "brief-review": "awaiting your input",
+  "generating-concepts": "~45s — 5 lanes rendering",
+  "concept-review": "awaiting your direction",
+  "refining-concepts": "~45s — regenerating with feedback",
+  canary: "~5s — canary check",
+  production: "~3-4 min — 21 sprites",
+  "strict-qa": "~30s — alpha + coherence",
+  "final-review": "awaiting your approval",
+  promoting: "~10s — writing to public/art",
+  verifying: "~5s — post-write verify",
+  closed: "complete",
+};
+
 export function statusOne(input: {
   runId: string;
   phase: string;
@@ -362,11 +397,13 @@ export function statusOne(input: {
   slots: { running: number; completed: number; failed: number };
   spend: { actualCents: number; monthlyCeilingCents: number };
 }): TelegramOutboundMessage {
+  const etaHint = PHASE_ETA_HINT[input.phase];
   return {
     text: block([
       `📊 <b>Run ${esc(shortRunId(input.runId))}</b>`,
       ``,
       `   <b>Phase</b>  ${esc(input.phase)}${input.blocker ? ` <i>⚠️ blocked: ${esc(input.blocker)}</i>` : ""}`,
+      etaHint ? `   <b>ETA</b>    <i>${esc(etaHint)}</i>` : null,
       `   <b>Slots</b>  ${input.slots.completed} done · ${input.slots.running} running · ${input.slots.failed} failed`,
       `   <b>Spend</b>  $${(input.spend.actualCents / 100).toFixed(2)} / $${(input.spend.monthlyCeilingCents / 100).toFixed(2)} monthly`,
     ]),
@@ -410,15 +447,31 @@ export function healthSnapshot(input: {
   activeLeases: number;
   monthlySpendCents: number;
   collectedAt: string;
+  daemonErrors24h?: number;
+  lastDaemonError?: { source: string; message: string; at: string };
+  heartbeatStaleMs?: number;
 }): TelegramOutboundMessage {
+  const lead = input.heartbeatStaleMs !== undefined && input.heartbeatStaleMs > 10_000
+    ? `⚠️  <b>Daemon heartbeat stale</b>  ·  last ${Math.round(input.heartbeatStaleMs / 1000)}s ago — restart with <code>npm run artlab:daemon -- restart</code>`
+    : null;
+  const errCount = input.daemonErrors24h ?? 0;
+  const errLine = errCount === 0
+    ? `   <b>Errors (24h)</b>   ✓ none`
+    : `   <b>Errors (24h)</b>   ⚠️ ${errCount}`;
+  const lastErrLine = errCount > 0 && input.lastDaemonError
+    ? `   <i>last: ${esc(input.lastDaemonError.source)} — ${esc(truncate(input.lastDaemonError.message, 90))}</i>`
+    : null;
   return {
     text: block([
       `💚 <b>Engine health</b>`,
+      lead,
       ``,
       `   <b>Active locks</b>   ${input.activeLocks}`,
       `   <b>Active runs</b>    ${input.activeRuns}`,
       `   <b>Active leases</b>  ${input.activeLeases}`,
       `   <b>Spend (mo)</b>     $${(input.monthlySpendCents / 100).toFixed(2)}`,
+      errLine,
+      lastErrLine,
       ``,
       `<i>Snapshot: ${esc(input.collectedAt)}</i>`,
     ]),
@@ -442,27 +495,31 @@ export function unknownCommandTemplate(input: { commandName: string }): Telegram
 
 // ─── Brainstorm-mode templates (Tranche B-D) ───────────────────────────
 
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s;
+  return `${s.slice(0, max - 1).trimEnd()}…`;
+}
+
 export function briefProposalCaption(input: { brief: DesignBrief }): TelegramOutboundMessage {
   const { brief } = input;
-  const variationLines = brief.plannedVariation.map((v, i) => `<b>${i + 1}</b>  ${esc(v)}`);
-  const revTag = brief.iteration > 0 ? `  <i>rev ${brief.iteration}</i>` : "";
+  const variationLines = brief.plannedVariation.map((v, i) => `<b>${i + 1}.</b> ${esc(truncate(v, 80))}`);
+  const revTag = brief.iteration > 0 ? ` <i>· rev ${brief.iteration}</i>` : "";
   const deltaLine = brief.deltaSummary
-    ? [`<i>📝 ${esc(brief.deltaSummary)}</i>`, ``]
+    ? [`<i>📝 ${esc(truncate(brief.deltaSummary, 140))}</i>`, ``]
     : [];
   return {
     text: block([
-      `💡  <b>Design brief</b>${revTag}`,
-      `─────────────────────`,
+      `💡 <b>Design brief</b>${revTag}`,
       ``,
       ...deltaLine,
-      esc(brief.identity),
+      esc(truncate(brief.identity, 220)),
       ``,
       `<b>5 lanes</b>`,
       ...variationLines,
       ``,
-      `<b>Style</b>  <i>${esc(brief.referenceAnchor)}</i>`,
+      `<b>Style</b> <i>${esc(truncate(brief.referenceAnchor, 120))}</i>`,
       ``,
-      `<i>Tap an action below — or send free-text to refine.</i>`,
+      `<i>Tap an action — or send free-text to refine.</i>`,
     ]),
     parseMode: "HTML",
     replyMarkup: buildBriefInlineKeyboard(brief.runId, brief.adjustmentOptions),
@@ -677,7 +734,15 @@ export function askAnswerTemplate(input: { question: string; answer: string; ref
 
 export function decisionsTemplate(input: {
   runId: string;
-  decisions: Array<{ kind: string; summary: string }>;
+  decisions: Array<{
+    kind: string;
+    summary: string;
+    decisionAt?: string;
+    tokensIn?: number;
+    tokensOut?: number;
+    retryCount?: number;
+    validationError?: string;
+  }>;
 }): TelegramOutboundMessage {
   if (input.decisions.length === 0) {
     return {
@@ -694,7 +759,24 @@ export function decisionsTemplate(input: {
     text: block([
       `🧠 <b>Brain reasoning — run <code>${esc(shortRunId(input.runId))}</code></b>`,
       ``,
-      ...input.decisions.map((d, i) => `   ${i + 1}. <b>${esc(d.kind)}</b> — <i>${esc(d.summary)}</i>`),
+      ...input.decisions.flatMap((d, i) => {
+        const meta: string[] = [];
+        if (d.decisionAt) meta.push(d.decisionAt.slice(11, 19) /* HH:MM:SS */);
+        if (typeof d.tokensIn === "number" && typeof d.tokensOut === "number") {
+          meta.push(`${d.tokensIn + d.tokensOut} tok`);
+        }
+        if (typeof d.retryCount === "number" && d.retryCount > 0) {
+          meta.push(`⚠️ retried ×${d.retryCount}`);
+        }
+        if (d.validationError) {
+          meta.push(`⚠️ schema:${d.validationError.slice(0, 50)}`);
+        }
+        const metaLine = meta.length > 0 ? `      <i>${esc(meta.join(" · "))}</i>` : null;
+        return [
+          `   ${i + 1}. <b>${esc(d.kind)}</b> — ${esc(truncate(d.summary, 140))}`,
+          metaLine,
+        ].filter(Boolean) as string[];
+      }),
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,

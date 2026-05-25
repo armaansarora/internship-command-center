@@ -17,5 +17,8 @@ describe("Claude Opus brain", () => {
     delete process.env.ARTLAB_CLAUDE_MODE;
     expect(result.model).toBe("claude-opus-4-7");
     expect(result.outputJson.dryRun).toBe(true);
+    // Dry-run path skips retry/validation — those fields should be absent.
+    expect(result.retryCount).toBeUndefined();
+    expect(result.validationError).toBeUndefined();
   });
 });

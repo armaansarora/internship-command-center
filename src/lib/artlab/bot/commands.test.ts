@@ -40,4 +40,13 @@ describe("bot command handlers", () => {
     const r = await handleBotCommand({ workspaceRoot, commandName: "decisions", args: ["abc123ff"] });
     expect(r.message.text).toMatch(/no brain decisions|brain reasoning/i);
   });
+
+  it("/cancel is idempotent — repeating writes only one intent file", async () => {
+    await handleBotCommand({ workspaceRoot, commandName: "cancel", args: ["run-dedup-1"] });
+    await handleBotCommand({ workspaceRoot, commandName: "cancel", args: ["run-dedup-1"] });
+    await handleBotCommand({ workspaceRoot, commandName: "cancel", args: ["run-dedup-1"] });
+    const files = readdirSync(join(workspaceRoot, "inbox"))
+      .filter((f) => f.startsWith("cancel-run-dedup-1"));
+    expect(files.length).toBe(1);
+  });
 });

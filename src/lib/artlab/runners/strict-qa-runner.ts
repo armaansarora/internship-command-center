@@ -10,6 +10,7 @@ import { runCoherenceCheck } from "@/lib/artlab/coherence/strict-qa-wiring";
 import { composeFinalBoard } from "../speed/placeholder-images";
 import { cutoutRunner } from "./cutout-runner";
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
+import { measureIdentityDrift } from "../coherence/identity-drift";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -134,6 +135,31 @@ export const strictQaRunner: ArtLabRunner = {
     }
     const coherence = await runCoherenceCheck({ runDir: input.runDir, workspaceRoot: process.env.ARTLAB_WORKSPACE_ROOT ?? "" });
     writeFileSync(join(input.runDir, "coherence-report.json"), JSON.stringify(coherence, null, 2));
+
+    // Identity-drift probe (informational): compare each cutout's pHash to the
+    // approved concept lane. Surfaces in production-critique.json so the
+    // final-board caption can flag drift when image-conditioning didn't hold.
+    if (input.assetType === "character" && input.characterId && typeof input.approvedLaneIndex === "number") {
+      try {
+        const refPath = join(input.runDir, "concept-slots", `lane-${input.approvedLaneIndex}.png`);
+        if (existsSync(refPath) && entries.length > 0) {
+          const sprites = entries.map((e) => ({
+            slotId: e.cutoutPath.split("/").pop()!.replace(/\.png$/, ""),
+            pngPath: e.cutoutPath,
+          }));
+          const drift = await measureIdentityDrift(refPath, sprites);
+          // Merge into production-critique.json (create the file if the brain
+          // didn't write one).
+          const critiquePath = join(input.runDir, "production-critique.json");
+          let critique: Record<string, unknown> = {};
+          if (existsSync(critiquePath)) {
+            try { critique = JSON.parse(readFileSync(critiquePath, "utf8")); } catch { /* keep empty */ }
+          }
+          critique.identityDrift = drift;
+          writeFileSync(critiquePath, JSON.stringify(critique, null, 2));
+        }
+      } catch { /* drift probe is informational — never fail strict-qa over it */ }
+    }
     publishBoards(input.runDir, input.runId, entries);
     // Compose a real final-board.png the Telegram bot can attach.
     try {
@@ -151,11 +177,23 @@ export const strictQaRunner: ArtLabRunner = {
             }
           } catch { /* fall through to defaults */ }
         }
+        // Read brain verdict (if it ran + parsed cleanly) for the composite badge.
+        let verdict: "tight" | "minor-drift" | "major-drift" | undefined;
+        try {
+          const critiquePath = join(input.runDir, "production-critique.json");
+          if (existsSync(critiquePath)) {
+            const parsed = JSON.parse(readFileSync(critiquePath, "utf8")) as { overallVerdict?: unknown };
+            if (parsed.overallVerdict === "tight" || parsed.overallVerdict === "minor-drift" || parsed.overallVerdict === "major-drift") {
+              verdict = parsed.overallVerdict;
+            }
+          }
+        } catch { /* no verdict, no badge */ }
         const board = await composeFinalBoard({
           cutoutPaths: cutoutPngs,
           characterId: input.characterId ?? "character",
           displayName,
           title,
+          verdict,
         });
         writeFileSync(join(input.runDir, "final-board.png"), board);
       }

@@ -103,6 +103,17 @@ function readPromotionCelebration(runDir: string): { text: string } | null {
   catch { return null; }
 }
 
+function readPushIssue(runDir: string): string | null {
+  const path = join(runDir, "git-commit-result.json");
+  if (!existsSync(path)) return null;
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8")) as { status?: string; pushedTo?: string; reason?: string };
+    if (parsed.status === "committed" && !parsed.pushedTo) return parsed.reason ?? "push did not land";
+    if (parsed.status === "failed") return parsed.reason ?? "auto-commit failed";
+    return null;
+  } catch { return null; }
+}
+
 function readRecommendation(runDir: string): { laneIndex: number; reasoning: string } | undefined {
   const path = join(runDir, "recommendation.json");
   if (!existsSync(path)) return undefined;
@@ -230,6 +241,17 @@ export async function notifyPhase(input: PhaseNotifierInput): Promise<void> {
           spend,
         }));
       }
+      // If git push failed, send a one-line warning AFTER the celebration so
+      // the user knows the asset won't actually appear on interntower.com
+      // until someone manually pushes the local commit.
+      const pushIssue = readPushIssue(runDir);
+      if (pushIssue) {
+        await safeSendText(
+          input.telegram,
+          chatId,
+          `⚠️  Local commit OK but push to origin failed — interntower.com won't show the new asset until manual push.\n${pushIssue}`,
+        );
+      }
       return;
     }
     default:
@@ -269,20 +291,58 @@ function countSprites(runDir: string): number {
   } catch { return 0; }
 }
 
+// Retry Telegram sendMessage on transient 429/5xx with exponential backoff.
+// Failures after all retries are recorded to daemon-errors.jsonl so /health
+// can surface delivery failures — previously these were silently dropped.
 async function safeSend(telegram: TelegramClient, chatId: number, msg: TelegramOutboundMessage): Promise<void> {
-  try {
-    await telegram.sendMessage({
-      chatId,
-      text: msg.text,
-      ...(msg.parseMode ? { parseMode: msg.parseMode } : {}),
-      ...(msg.replyMarkup ? { replyMarkup: msg.replyMarkup } : {}),
-      ...(msg.disableWebPagePreview ? { disableWebPagePreview: true } : {}),
-    });
-  } catch { /* swallow */ }
+  const payload = {
+    chatId,
+    text: msg.text,
+    ...(msg.parseMode ? { parseMode: msg.parseMode } : {}),
+    ...(msg.replyMarkup ? { replyMarkup: msg.replyMarkup } : {}),
+    ...(msg.disableWebPagePreview ? { disableWebPagePreview: true } : {}),
+  };
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await telegram.sendMessage(payload);
+      return;
+    } catch (err) {
+      lastErr = err;
+      if (!isRetryableTelegramError(err) || attempt === 2) break;
+      await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+    }
+  }
+  recordTelegramFailure("phase-notifier.safeSend", lastErr);
 }
 
 async function safeSendText(telegram: TelegramClient, chatId: number, text: string): Promise<void> {
-  try { await telegram.sendMessage({ chatId, text }); } catch { /* swallow */ }
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try { await telegram.sendMessage({ chatId, text }); return; }
+    catch (err) {
+      lastErr = err;
+      if (!isRetryableTelegramError(err) || attempt === 2) break;
+      await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+    }
+  }
+  recordTelegramFailure("phase-notifier.safeSendText", lastErr);
+}
+
+function isRetryableTelegramError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  return /429|500|502|503|504|timeout|aborted|ECONNRESET|network/i.test(err.message);
+}
+
+function recordTelegramFailure(source: string, err: unknown): void {
+  const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+  if (!workspaceRoot) return;
+  try {
+    // Lazy-require to avoid circular imports.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { recordDaemonError } = require("./entry") as typeof import("./entry");
+    recordDaemonError(workspaceRoot, source, err);
+  } catch { /* never let logging crash the notifier */ }
 }
 
 function fallbackConceptCaption(runId: string, characterId: string, err: unknown): string {
