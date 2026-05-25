@@ -63,4 +63,26 @@ describe("log-rotation", () => {
     expect(result.rotated).toContain(logPath);
     expect(existsSync(`${logPath}.1`)).toBe(true);
   });
+
+  it("rotates memory/decision-log.jsonl when it exceeds 1MB", () => {
+    const memoryDir = join(workspace, "memory");
+    mkdirSync(memoryDir, { recursive: true });
+    const decisionLog = join(memoryDir, "decision-log.jsonl");
+    write1mb(decisionLog, "{\"kind\":\"x\"}\n");
+    const result = rotateDaemonLogs(workspace);
+    expect(result.rotated).toContain(decisionLog);
+    expect(existsSync(`${decisionLog}.1`)).toBe(true);
+  });
+
+  it("also covers style-wins.jsonl + style-rejections.jsonl", () => {
+    const memoryDir = join(workspace, "memory");
+    mkdirSync(memoryDir, { recursive: true });
+    const wins = join(memoryDir, "style-wins.jsonl");
+    const rejs = join(memoryDir, "style-rejections.jsonl");
+    write1mb(wins);
+    write1mb(rejs);
+    const result = rotateDaemonLogs(workspace);
+    expect(result.rotated).toContain(wins);
+    expect(result.rotated).toContain(rejs);
+  });
 });

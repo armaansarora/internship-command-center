@@ -25,6 +25,7 @@ import {
   type BriefAdjustmentOption,
 } from "../brainstorm/brief-schema";
 import { readBriefAdjustments } from "../brainstorm/feedback-ledger";
+import { summariseFeedbackForBrain } from "../memory/feedback-summary";
 import { writeRunStateSnapshot, readRunStateSnapshot } from "../state/snapshots";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
@@ -99,7 +100,12 @@ function canonicalBriefFromContext(ctx: TowerCharacterContext, runId: string): O
   };
 }
 
-function parseBriefFromBrain(json: unknown, runId: string, characterId: string | undefined): Partial<DesignBrief> | null {
+function parseBriefFromBrain(
+  json: unknown,
+  runId: string,
+  characterId: string | undefined,
+  existing?: DesignBrief,
+): Partial<DesignBrief> | null {
   if (!json || typeof json !== "object") return null;
   const j = json as {
     identity?: unknown;
@@ -108,11 +114,14 @@ function parseBriefFromBrain(json: unknown, runId: string, characterId: string |
     adjustmentOptions?: unknown;
     deltaSummary?: unknown;
   };
-  if (typeof j.identity !== "string" || !Array.isArray(j.plannedVariation) || typeof j.referenceAnchor !== "string") {
-    return null;
-  }
-  const planned = j.plannedVariation.filter((v): v is string => typeof v === "string");
-  if (planned.length === 0) return null;
+  // Delta-merge path: when refining and the brain omits unchanged fields,
+  // carry forward from the existing brief instead of rejecting the response.
+  const identity = typeof j.identity === "string" ? j.identity : existing?.identity;
+  const referenceAnchor = typeof j.referenceAnchor === "string" ? j.referenceAnchor : existing?.referenceAnchor;
+  const planned = Array.isArray(j.plannedVariation)
+    ? j.plannedVariation.filter((v): v is string => typeof v === "string")
+    : existing?.plannedVariation ?? [];
+  if (!identity || !referenceAnchor || planned.length === 0) return null;
   const adjustments: BriefAdjustmentOption[] = [];
   if (Array.isArray(j.adjustmentOptions)) {
     for (const opt of j.adjustmentOptions) {
@@ -125,6 +134,8 @@ function parseBriefFromBrain(json: unknown, runId: string, characterId: string |
         }
       }
     }
+  } else if (existing) {
+    adjustments.push(...existing.adjustmentOptions);
   }
   // Always ensure freetext is offered as a fallback.
   if (!adjustments.some((a) => a.dimension === "freetext")) {
@@ -133,9 +144,9 @@ function parseBriefFromBrain(json: unknown, runId: string, characterId: string |
   return {
     runId,
     characterId,
-    identity: j.identity,
+    identity,
     plannedVariation: planned.slice(0, 8),
-    referenceAnchor: j.referenceAnchor,
+    referenceAnchor,
     adjustmentOptions: adjustments.slice(0, 6),
     deltaSummary: typeof j.deltaSummary === "string" ? j.deltaSummary : undefined,
   };
@@ -197,6 +208,7 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
             forbiddenVisualTraits: ctx.forbiddenVisualTraits,
             artDirectionNotes: ctx.artDirectionNotes,
           },
+          recentMemory: summariseFeedbackForBrain(ctx.recentStyleWins, ctx.recentRejections),
         },
       }
     : {
@@ -222,10 +234,7 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
             artDirectionNotes: ctx.artDirectionNotes,
           },
           styleEnvelope: { id: bundle.styleEnvelope.id, storyTone: bundle.styleEnvelope.storyTone },
-          recentMemory: {
-            winsCount: ctx.recentStyleWins.length,
-            rejectionsCount: ctx.recentRejections.length,
-          },
+          recentMemory: summariseFeedbackForBrain(ctx.recentStyleWins, ctx.recentRejections),
           castContinuity: Object.values(bundle.characters)
             .filter((c) => c.characterId !== ctx.characterId)
             .map((c) => ({ characterId: c.characterId, displayName: c.displayName, accent: c.accent, space: c.space })),
@@ -234,7 +243,7 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
 
   try {
     const result = await brain.decide(brainInput);
-    const parsed = parseBriefFromBrain(result.outputJson, input.runId, ctx.characterId);
+    const parsed = parseBriefFromBrain(result.outputJson, input.runId, ctx.characterId, existing ?? undefined);
     if (parsed) {
       const brief: DesignBrief = DesignBriefSchema.parse({
         ...parsed,

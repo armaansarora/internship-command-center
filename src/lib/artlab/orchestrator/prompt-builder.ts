@@ -6,6 +6,7 @@
 // canonical-bible prompt if the brain is unavailable / returns malformed JSON.
 
 import { loadTowerContext, pickCharacterContext, pickFloorContext, type TowerContextBundle, type TowerCharacterContext } from "@/lib/artlab/context/tower-context";
+import { summariseFeedbackForBrain } from "@/lib/artlab/memory/feedback-summary";
 import type { ArtLabLlmBrain } from "./llm-brain";
 
 export interface BuildConceptLanePromptsInput {
@@ -73,10 +74,7 @@ export async function buildConceptLanePrompts(input: BuildConceptLanePromptsInpu
           id: bundle.styleEnvelope.id,
           storyTone: bundle.styleEnvelope.storyTone,
         },
-        recentMemory: {
-          winsCount: ctx.recentStyleWins.length,
-          rejectionsCount: ctx.recentRejections.length,
-        },
+        recentMemory: summariseFeedbackForBrain(ctx.recentStyleWins, ctx.recentRejections),
         targetLanes: 5,
       },
     });

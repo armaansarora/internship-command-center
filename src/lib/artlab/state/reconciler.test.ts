@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readRunReality } from "./reconciler";
@@ -49,6 +49,45 @@ describe("artlab reconciler", () => {
   it("returns null when run-state.json is missing", async () => {
     const reality = await readRunReality(dir);
     expect(reality).toBeNull();
+  });
+
+  it("computes phase elapsed + remaining when phaseStartedAt is set", async () => {
+    const startedAt = "2026-05-25T00:00:00.000Z";
+    const now = new Date("2026-05-25T00:00:45.000Z");
+    writeRunStateSnapshot(dir, {
+      runId: "r1",
+      assetType: "character",
+      phase: "production",
+      createdAt: "2026-05-25T00:00:00.000Z",
+      updatedAt: "2026-05-25T00:00:30.000Z",
+      phaseStartedAt: startedAt,
+      request: "make Sol",
+    });
+    const reality = await readRunReality(dir, () => now);
+    expect(reality?.progress.phaseStartedAt).toBe(startedAt);
+    expect(reality?.progress.phaseElapsedMs).toBe(45_000);
+    // production target ~210s → 165s remaining at +45s
+    expect(reality?.progress.estimatedRemainingMs).toBe(165_000);
+  });
+
+  it("surfaces live slot count for production phase", async () => {
+    writeRunStateSnapshot(dir, {
+      runId: "r1",
+      assetType: "character",
+      phase: "production",
+      createdAt: "2026-05-25T00:00:00.000Z",
+      updatedAt: "2026-05-25T00:00:00.000Z",
+      phaseStartedAt: "2026-05-25T00:00:00.000Z",
+      request: "make Sol",
+    });
+    mkdirSync(join(dir, "production-slots"));
+    writeFileSync(join(dir, "production-slots", "regular-greeting.png"), "x");
+    writeFileSync(join(dir, "production-slots", "regular-talking.png"), "x");
+    writeFileSync(join(dir, "production-slots", "winter-layered-idle.png"), "x");
+    writeFileSync(join(dir, "production-slots", "skip-me.json"), "ignored");
+    const reality = await readRunReality(dir);
+    expect(reality?.progress.expectedSlotCount).toBe(21);
+    expect(reality?.progress.renderedSlotCount).toBe(3);
   });
 
   it("propagates monthly spend from external ledger when available", async () => {

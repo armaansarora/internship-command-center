@@ -91,7 +91,14 @@ export async function runDeterministicTransition(input: DeterministicTransitionI
   const transition = ARTLAB_TRANSITIONS.find((t) => t.from === state.phase && t.to === next);
   if (!transition) return { applied: false, reason: "no-transition-defined" };
   const updated = await transition.apply(state, { workspaceRoot: input.runDir, now: () => new Date() });
-  writeRunStateSnapshot(input.runDir, updated);
+  // Stamp phaseStartedAt on every phase change so /status can show elapsed
+  // time within the current phase (previously only updatedAt was tracked,
+  // which moves on every state mutation).
+  const phaseChanged = updated.phase !== state.phase;
+  const stamped = phaseChanged
+    ? { ...updated, phaseStartedAt: updated.updatedAt }
+    : updated;
+  writeRunStateSnapshot(input.runDir, stamped);
   appendArtLabEvent(input.runDir, {
     runId: state.runId,
     at: updated.updatedAt,

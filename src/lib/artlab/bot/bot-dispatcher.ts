@@ -8,6 +8,7 @@ import type { ArtLabLlmBrain } from "../orchestrator/llm-brain";
 import { routeRequest } from "../intake/router";
 import { parseBundle } from "../intake/bundle-parser";
 import { saveReferenceAttachment } from "../intake/reference-attachment-fs";
+import { validateReferencePhoto } from "../intake/reference-attachment";
 import { enqueueRun } from "../queue/queue";
 import { advanceConceptApproval, advancePromotionApproval } from "./gate-advance";
 import {
@@ -19,7 +20,7 @@ import {
   findMostRecentParkedRunForChat,
   autoCancelStaleParkedRuns,
 } from "./brief-advance";
-import { displayFor } from "../intake/known-cast";
+import { displayFor, findCastMember } from "../intake/known-cast";
 import {
   triggerAck,
   triggerWithPhotoAck,
@@ -66,6 +67,13 @@ function spaceLabelFor(space: string): string {
     .split("-")
     .map((w) => w[0]!.toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+function inferContentType(path: string): string {
+  if (/\.png$/i.test(path)) return "image/png";
+  if (/\.(jpe?g)$/i.test(path)) return "image/jpeg";
+  if (/\.webp$/i.test(path)) return "image/webp";
+  return "application/octet-stream";
 }
 
 export interface DispatchInboundInput {
@@ -494,15 +502,34 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
     case "trigger-with-photo": {
       const runId = randomUUID();
       let attachmentPath: string | undefined;
+      let photoMeta: { width: number; height: number; sizeKB: number; format?: string } | undefined;
+      let photoRejection: string | undefined;
       try {
-        attachmentPath = await saveReferenceAttachment({
+        const savedPath = await saveReferenceAttachment({
           workspaceRoot: input.workspaceRoot,
           runId,
           fileId: classified.photoFileId!,
           downloader: input.telegram,
         });
+        // Validate AFTER save: read the file and check size + format + dims.
+        // On reject, drop the path so the run proceeds text-only.
+        const { readFileSync } = await import("node:fs");
+        const bytes = readFileSync(savedPath);
+        const contentType = inferContentType(savedPath);
+        const validation = await validateReferencePhoto({ bytes, contentType });
+        if (validation.ok) {
+          attachmentPath = savedPath;
+          photoMeta = {
+            width: validation.width!,
+            height: validation.height!,
+            sizeKB: validation.sizeKB!,
+            format: validation.format,
+          };
+        } else {
+          photoRejection = validation.reason;
+        }
       } catch {
-        // attachment fetch failure is non-fatal — proceed with text-only routing
+        // attachment fetch / validation failure is non-fatal — proceed text-only
       }
       const outcome = routeRequest({ request: classified.text });
       const display = displayFor(outcome.characterId);
@@ -525,12 +552,15 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
         title: display.title,
         spaceLabel: display.space ? spaceLabelFor(display.space) : undefined,
         runId,
+        photoMeta,
+        photoRejection,
       }));
       return { action: { type: "trigger-enqueued", runIds: [runId] } };
     }
     case "bundle": {
       const bundle = parseBundle(classified.text);
       const runIds: string[] = [];
+      const subjects: string[] = [];
       if (bundle) {
         for (const child of bundle.children) {
           const runId = randomUUID();
@@ -549,6 +579,16 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
             },
           });
           runIds.push(runId);
+          // Build a human-friendly subject for the ack. characterHint may be
+          // a firstName ("Sol") rather than a characterId — resolve via
+          // findCastMember which accepts either form, then fall back to the
+          // raw request.
+          if (child.characterHint) {
+            const member = findCastMember(child.characterHint);
+            subjects.push(member?.displayName ?? child.characterHint);
+          } else {
+            subjects.push(child.request);
+          }
         }
       } else {
         runIds.push(enqueueSingleRun({
@@ -559,7 +599,10 @@ async function dispatchTextOrPhoto(input: DispatchInboundInput, message: Telegra
           now,
         }));
       }
-      await send(input.telegram, message.chat.id, bundleAck({ runCount: runIds.length }));
+      await send(input.telegram, message.chat.id, bundleAck({
+        runCount: runIds.length,
+        subjects: subjects.length > 0 ? subjects : undefined,
+      }));
       return { action: { type: "trigger-enqueued", runIds } };
     }
     case "callback":

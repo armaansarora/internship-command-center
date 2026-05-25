@@ -34,4 +34,35 @@ describe("bundle parser", () => {
     expect(parsed).not.toBeNull();
     expect(parsed!.children.some((c) => c.assetType === "environment")).toBe(true);
   });
+
+  it("parses 'X and Y' (no 'together') as two characters bundle", () => {
+    const parsed = parseBundle("make Sol and Mara");
+    expect(parsed).not.toBeNull();
+    expect(parsed!.children.length).toBe(2);
+    expect(parsed!.children.every((c) => c.assetType === "character")).toBe(true);
+  });
+
+  it("parses 'X + Y' (plus glue) as two characters bundle", () => {
+    const parsed = parseBundle("design Sol + Otis");
+    expect(parsed).not.toBeNull();
+    expect(parsed!.children.length).toBe(2);
+  });
+
+  it("parses a comma-separated cast list", () => {
+    const parsed = parseBundle("make Sol, Mara, Otis");
+    expect(parsed).not.toBeNull();
+    expect(parsed!.children.length).toBe(3);
+  });
+
+  it("does NOT bundle a single character mentioned alone", () => {
+    expect(parseBundle("make Sol")).toBeNull();
+  });
+
+  it("does NOT bundle multi-character text when a room is also named (defer to the room+character path)", () => {
+    // Room is named with a character → bundle parser's catch-all defers
+    // (the "with X in it" form already handles this above). Returns null
+    // here; the dispatcher classifier routes to single-character intake.
+    const parsed = parseBundle("Sol in the lobby");
+    expect(parsed).toBeNull();
+  });
 });

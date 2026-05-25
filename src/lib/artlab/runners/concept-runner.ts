@@ -28,9 +28,24 @@ import { buildConceptLanePrompts, type ConceptLanePrompt } from "../orchestrator
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
 import { recommendDirection } from "../orchestrator/recommend-direction";
 import { readConceptFeedback } from "../brainstorm/feedback-ledger";
+import { summariseFeedbackForBrain } from "../memory/feedback-summary";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const TARGET_LANES = 5;
+
+async function runConceptConcurrency<T>(tasks: Array<() => Promise<T>>, limit: number): Promise<T[]> {
+  const results: T[] = new Array(tasks.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, async () => {
+    while (cursor < tasks.length) {
+      const idx = cursor;
+      cursor += 1;
+      results[idx] = await tasks[idx]!();
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
 
 interface ConceptSlotOutputs {
   jsonPath: string;
@@ -77,6 +92,7 @@ async function refineConceptPromptsFromFeedback(input: RefineFromFeedbackInput):
           negativeDNA: ctx.negativeDNA,
         },
         feedback: input.feedback,
+        recentMemory: summariseFeedbackForBrain(ctx.recentStyleWins, ctx.recentRejections),
       },
     });
     const arr = (result.outputJson as { prompts?: unknown }).prompts;
@@ -263,15 +279,16 @@ export const conceptRunner: ArtLabRunner = {
         // winner advances to the premium production tier downstream.
         const conceptModel = process.env.ARTLAB_CONCEPT_IMAGE_MODEL ?? "gemini-2.5-flash-image";
         const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()!, modelId: conceptModel });
-        // Sequential with small delay to be rate-limit-friendly. 5 lanes × 8s
-        // each ≈ 40s, which matches the ETA in the trigger ack. Parallelism
-        // here was triggering 503s from the preview image model.
-        slotOutputs = [];
-        for (const idx of laneIndexes) {
+        // Concurrency=2 cuts 5-lane wall time roughly in half (~40s → ~20s).
+        // The image-adapter retry layer (round 1) transparently absorbs the
+        // occasional 503 the preview model throws under concurrent load.
+        // Override with ARTLAB_CONCEPT_PARALLELISM for env tuning.
+        const concurrency = Math.max(1, Number.parseInt(process.env.ARTLAB_CONCEPT_PARALLELISM ?? "2", 10));
+        const conceptTasks = laneIndexes.map((idx) => async () => {
           const lanePrompt = built.prompts.find((p) => p.laneIndex === idx) ?? built.prompts[idx - 1]!;
-          const out = await generateGeminiLane(input.runDir, input.characterId, idx, lanePrompt, provider);
-          slotOutputs.push(out);
-        }
+          return generateGeminiLane(input.runDir, input.characterId, idx, lanePrompt, provider);
+        });
+        slotOutputs = await runConceptConcurrency(conceptTasks, concurrency);
       } catch (err) {
         // Fatal prompt-builder failure — fall back to all-placeholder.
         const errMsg = err instanceof Error ? err.message : String(err);

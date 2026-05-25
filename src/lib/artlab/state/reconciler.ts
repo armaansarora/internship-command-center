@@ -32,6 +32,15 @@ export interface RunReality {
     activeLeaseCount: number;
     lastHeartbeatAt?: string;
   };
+  progress: {
+    phaseStartedAt?: string;
+    phaseElapsedMs?: number;
+    estimatedRemainingMs?: number;
+    /** Total slot files expected for this phase (e.g. 21 for production). */
+    expectedSlotCount?: number;
+    /** Slot files actually on disk right now. */
+    renderedSlotCount?: number;
+  };
   events: ArtLabEvent[];
   raw: ArtLabRunState;
 }
@@ -53,7 +62,59 @@ function countActiveLeases(runDir: string): number {
   return readdirSync(dir).filter((f) => f.endsWith(".lease.json")).length;
 }
 
-export async function readRunReality(runDir: string): Promise<RunReality | null> {
+// Rough per-phase wall-time budget in ms. Used to compute "remaining" hints
+// in /status. Pulled from the same numbers as PHASE_ETA_HINT in templates.
+const PHASE_TARGET_MS: Partial<Record<ArtLabPhase, number>> = {
+  routed: 5_000,
+  briefing: 10_000,
+  "generating-concepts": 45_000,
+  "refining-concepts": 45_000,
+  canary: 5_000,
+  production: 210_000,        // ~3.5 min
+  "strict-qa": 30_000,
+  promoting: 10_000,
+  verifying: 5_000,
+};
+
+const PHASE_SLOT_DIR: Partial<Record<ArtLabPhase, { dir: string; expected: number }>> = {
+  "generating-concepts": { dir: "concept-slots", expected: 5 },
+  "refining-concepts": { dir: "concept-slots", expected: 5 },
+  production: { dir: "production-slots", expected: 21 },
+  "strict-qa": { dir: "cutouts", expected: 21 },
+};
+
+function countPngsIn(runDir: string, sub: string): number {
+  const path = join(runDir, sub);
+  if (!existsSync(path)) return 0;
+  try { return readdirSync(path).filter((f) => f.endsWith(".png")).length; }
+  catch { return 0; }
+}
+
+function computeProgress(runDir: string, state: ArtLabRunState, now: () => Date): RunReality["progress"] {
+  const phaseStartedAt = state.phaseStartedAt;
+  const phaseTarget = PHASE_TARGET_MS[state.phase];
+  const slotInfo = PHASE_SLOT_DIR[state.phase];
+  let phaseElapsedMs: number | undefined;
+  let estimatedRemainingMs: number | undefined;
+  if (phaseStartedAt) {
+    const startMs = new Date(phaseStartedAt).getTime();
+    if (Number.isFinite(startMs)) {
+      phaseElapsedMs = Math.max(0, now().getTime() - startMs);
+      if (phaseTarget !== undefined) {
+        estimatedRemainingMs = Math.max(0, phaseTarget - phaseElapsedMs);
+      }
+    }
+  }
+  let expectedSlotCount: number | undefined;
+  let renderedSlotCount: number | undefined;
+  if (slotInfo) {
+    expectedSlotCount = slotInfo.expected;
+    renderedSlotCount = countPngsIn(runDir, slotInfo.dir);
+  }
+  return { phaseStartedAt, phaseElapsedMs, estimatedRemainingMs, expectedSlotCount, renderedSlotCount };
+}
+
+export async function readRunReality(runDir: string, now: () => Date = () => new Date()): Promise<RunReality | null> {
   const state = readRunStateSnapshot(runDir);
   if (!state) return null;
   const progress = readProgressSnapshot(runDir);
@@ -82,6 +143,7 @@ export async function readRunReality(runDir: string): Promise<RunReality | null>
       activeLeaseCount: countActiveLeases(runDir),
       lastHeartbeatAt: progress?.at,
     },
+    progress: computeProgress(runDir, state, now),
     events,
     raw: state,
   };

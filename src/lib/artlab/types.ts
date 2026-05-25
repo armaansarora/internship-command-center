@@ -72,6 +72,10 @@ export const ArtLabRunStateSchema = z
     blocker: z.enum(ARTLAB_BLOCKERS).optional(),
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
+    // Set when the current phase began. Lets /status show "elapsed 1m 50s"
+    // against the per-phase ETA target instead of always rendering a generic
+    // estimate. Optional so older state files still parse.
+    phaseStartedAt: z.string().datetime({ offset: true }).optional(),
     request: z.string().min(1),
     approvedConcept: ArtLabApprovedConceptSchema.optional(),
     referenceImagePaths: z.array(z.string()).optional(),

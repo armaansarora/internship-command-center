@@ -77,16 +77,28 @@ export function triggerAck(input: TriggerAckInput): TelegramOutboundMessage {
   };
 }
 
-export function triggerWithPhotoAck(input: TriggerAckInput): TelegramOutboundMessage {
+export interface TriggerWithPhotoAckInput extends TriggerAckInput {
+  /** Present when the photo passed validation. */
+  photoMeta?: { width: number; height: number; sizeKB: number; format?: string };
+  /** Present when the photo was rejected; the run still proceeds text-only. */
+  photoRejection?: string;
+}
+
+export function triggerWithPhotoAck(input: TriggerWithPhotoAckInput): TelegramOutboundMessage {
   const subtitle = [input.title, input.spaceLabel].filter(Boolean).join(" · ");
+  const photoLine = input.photoMeta
+    ? `📸 <b>Reference accepted</b>  <code>${input.photoMeta.width}×${input.photoMeta.height}</code> · ${input.photoMeta.sizeKB}KB${input.photoMeta.format ? ` · ${esc(input.photoMeta.format)}` : ""}`
+    : input.photoRejection
+      ? `⚠️ <b>Reference dropped</b> — <i>${esc(input.photoRejection)}</i>. Proceeding text-only.`
+      : `📸 <b>Queued</b> (with reference photo)`;
   return {
     text: block([
-      `📸 <b>Queued</b> (with reference photo)`,
+      photoLine,
       ``,
       `   <b>Subject</b>  <b>${esc(input.displayName)}</b>${subtitle ? ` — <i>${esc(subtitle)}</i>` : ""}`,
       `   <b>Run</b>      <code>${esc(shortRunId(input.runId))}</code>`,
       ``,
-      `Pulling Tower context + your reference, generating 5 concept directions…`,
+      `Pulling Tower context, generating 5 concept directions…`,
       `<i>ETA ~45s</i>`,
     ]),
     parseMode: "HTML",
@@ -94,12 +106,15 @@ export function triggerWithPhotoAck(input: TriggerAckInput): TelegramOutboundMes
   };
 }
 
-export function bundleAck(input: { runCount: number }): TelegramOutboundMessage {
+export function bundleAck(input: { runCount: number; subjects?: string[] }): TelegramOutboundMessage {
+  const subjectLine = input.subjects && input.subjects.length > 0
+    ? `   <b>${input.runCount} linked run${input.runCount === 1 ? "" : "s"}</b> · ${esc(input.subjects.join(", "))}`
+    : `   <b>${input.runCount} linked run${input.runCount === 1 ? "" : "s"}</b>`;
   return {
     text: block([
       `📦 <b>Bundle queued</b>`,
       ``,
-      `   <b>${input.runCount} linked run${input.runCount === 1 ? "" : "s"}</b>`,
+      subjectLine,
       ``,
       `I'll surface concept boards for each as they finish.`,
     ]),
@@ -390,20 +405,51 @@ const PHASE_ETA_HINT: Record<string, string> = {
   closed: "complete",
 };
 
+function formatDuration(ms: number): string {
+  if (!Number.isFinite(ms) || ms < 0) return "—";
+  const secs = Math.round(ms / 1000);
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.floor(secs / 60);
+  const remSec = secs % 60;
+  return remSec === 0 ? `${mins}m` : `${mins}m ${remSec}s`;
+}
+
 export function statusOne(input: {
   runId: string;
   phase: string;
   blocker?: string;
   slots: { running: number; completed: number; failed: number };
   spend: { actualCents: number; monthlyCeilingCents: number };
+  /** Optional live progress. When present, replaces the generic ETA hint. */
+  progress?: {
+    phaseElapsedMs?: number;
+    estimatedRemainingMs?: number;
+    expectedSlotCount?: number;
+    renderedSlotCount?: number;
+  };
 }): TelegramOutboundMessage {
-  const etaHint = PHASE_ETA_HINT[input.phase];
+  const elapsed = input.progress?.phaseElapsedMs;
+  const remaining = input.progress?.estimatedRemainingMs;
+  const expected = input.progress?.expectedSlotCount;
+  const rendered = input.progress?.renderedSlotCount;
+  // Prefer live progress line when we have it; fall back to generic ETA hint.
+  const etaLine = (() => {
+    if (elapsed !== undefined && remaining !== undefined) {
+      return `   <b>ETA</b>    <i>${formatDuration(elapsed)} in · ~${formatDuration(remaining)} left</i>`;
+    }
+    const hint = PHASE_ETA_HINT[input.phase];
+    return hint ? `   <b>ETA</b>    <i>${esc(hint)}</i>` : null;
+  })();
+  const liveLine = (expected !== undefined && rendered !== undefined)
+    ? `   <b>Live</b>   ${rendered} of ${expected} rendered`
+    : null;
   return {
     text: block([
       `📊 <b>Run ${esc(shortRunId(input.runId))}</b>`,
       ``,
       `   <b>Phase</b>  ${esc(input.phase)}${input.blocker ? ` <i>⚠️ blocked: ${esc(input.blocker)}</i>` : ""}`,
-      etaHint ? `   <b>ETA</b>    <i>${esc(etaHint)}</i>` : null,
+      etaLine,
+      liveLine,
       `   <b>Slots</b>  ${input.slots.completed} done · ${input.slots.running} running · ${input.slots.failed} failed`,
       `   <b>Spend</b>  $${(input.spend.actualCents / 100).toFixed(2)} / $${(input.spend.monthlyCeilingCents / 100).toFixed(2)} monthly`,
     ]),
@@ -450,6 +496,8 @@ export function healthSnapshot(input: {
   daemonErrors24h?: number;
   lastDaemonError?: { source: string; message: string; at: string };
   heartbeatStaleMs?: number;
+  engineVersion?: string;
+  engineVersionAt?: string;
 }): TelegramOutboundMessage {
   const lead = input.heartbeatStaleMs !== undefined && input.heartbeatStaleMs > 10_000
     ? `⚠️  <b>Daemon heartbeat stale</b>  ·  last ${Math.round(input.heartbeatStaleMs / 1000)}s ago — restart with <code>npm run artlab:daemon -- restart</code>`
@@ -461,11 +509,15 @@ export function healthSnapshot(input: {
   const lastErrLine = errCount > 0 && input.lastDaemonError
     ? `   <i>last: ${esc(input.lastDaemonError.source)} — ${esc(truncate(input.lastDaemonError.message, 90))}</i>`
     : null;
+  const versionLine = input.engineVersion
+    ? `   <b>Engine</b>         <code>${esc(input.engineVersion)}</code>${input.engineVersionAt ? ` <i>· ${esc(formatRelativeAge(input.engineVersionAt))}</i>` : ""}`
+    : null;
   return {
     text: block([
       `💚 <b>Engine health</b>`,
       lead,
       ``,
+      versionLine,
       `   <b>Active locks</b>   ${input.activeLocks}`,
       `   <b>Active runs</b>    ${input.activeRuns}`,
       `   <b>Active leases</b>  ${input.activeLeases}`,
@@ -478,6 +530,16 @@ export function healthSnapshot(input: {
     parseMode: "HTML",
     disableWebPagePreview: true,
   };
+}
+
+function formatRelativeAge(isoTimestamp: string): string {
+  const then = new Date(isoTimestamp).getTime();
+  if (!Number.isFinite(then)) return isoTimestamp;
+  const ms = Date.now() - then;
+  if (ms < 60_000) return "just now";
+  if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m old`;
+  if (ms < 86_400_000) return `${Math.round(ms / 3_600_000)}h old`;
+  return `${Math.round(ms / 86_400_000)}d old`;
 }
 
 export function unknownCommandTemplate(input: { commandName: string }): TelegramOutboundMessage {

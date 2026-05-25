@@ -23,9 +23,22 @@ export interface LogRotationResult {
 export function rotateDaemonLogs(workspaceRoot: string): LogRotationResult {
   if (!existsSync(workspaceRoot)) mkdirSync(workspaceRoot, { recursive: true });
   const rotated: string[] = [];
-  const errPath = join(workspaceRoot, "daemon-errors.jsonl");
-  if (rotateOne(errPath)) rotated.push(errPath);
-
+  // Top-level daemon logs.
+  for (const rel of ["daemon-errors.jsonl"]) {
+    const p = join(workspaceRoot, rel);
+    if (rotateOne(p)) rotated.push(p);
+  }
+  // Memory ledgers — decision-log is the noisy one (every brain call writes
+  // an entry); style-wins + rejections are smaller but should still rotate
+  // for forward safety.
+  const memoryDir = join(workspaceRoot, "memory");
+  if (existsSync(memoryDir)) {
+    for (const rel of ["decision-log.jsonl", "style-wins.jsonl", "style-rejections.jsonl"]) {
+      const p = join(memoryDir, rel);
+      if (rotateOne(p)) rotated.push(p);
+    }
+  }
+  // Per-run worker logs.
   const runsDir = join(workspaceRoot, "runs");
   if (existsSync(runsDir)) {
     for (const runId of readdirSync(runsDir)) {

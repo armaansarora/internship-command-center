@@ -103,7 +103,13 @@ export interface TowerContextBundle {
 const TOWER_LIVE_BASE_URL = "https://www.interntower.com";
 const LOCAL_PROJECT_ROOT_GUESS = "/Users/armaanarora/Documents/The Tower";
 
+// Cache the bundle for up to 5 minutes per worker process. Bible files
+// change rarely — re-reading them on every brain call costs a few hundred
+// ms of disk I/O. The TTL ensures long-lived daemons eventually pick up
+// edited bible files without needing a restart.
+const TOWER_CONTEXT_TTL_MS = 5 * 60_000;
 let cachedBundle: TowerContextBundle | null = null;
+let cachedAtMs = 0;
 
 export interface LoadTowerContextOpts {
   workspaceRoot: string;
@@ -112,7 +118,9 @@ export interface LoadTowerContextOpts {
 }
 
 export async function loadTowerContext(opts: LoadTowerContextOpts): Promise<TowerContextBundle> {
-  if (!opts.reload && cachedBundle) return cachedBundle;
+  if (!opts.reload && cachedBundle && (Date.now() - cachedAtMs) < TOWER_CONTEXT_TTL_MS) {
+    return cachedBundle;
+  }
 
   const projectRoot = opts.projectRoot ?? resolveProjectRootFromWorkspace(opts.workspaceRoot);
   const styleEnvelope = parseStyleEnvelope(readDoc(projectRoot, "docs/ART-BIBLE.md"));
@@ -184,6 +192,7 @@ export async function loadTowerContext(opts: LoadTowerContextOpts): Promise<Towe
   };
 
   cachedBundle = bundle;
+  cachedAtMs = Date.now();
   return bundle;
 }
 

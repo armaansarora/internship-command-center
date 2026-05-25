@@ -17,21 +17,30 @@ export interface DaemonErrorsScanResult {
   recent24hCount: number;
   lastError?: DaemonErrorSample;
   heartbeat?: { pid: number; at: string; staleMs: number };
+  engineVersion?: string;        // short git sha
+  engineVersionAt?: string;      // ISO commit timestamp
 }
 
 const HEARTBEAT_STALE_THRESHOLD_MS = 10_000;
 
 export function scanDaemonErrors(workspaceRoot: string, now: () => Date = () => new Date()): DaemonErrorsScanResult {
   const result: DaemonErrorsScanResult = { recent24hCount: 0 };
-  // Heartbeat freshness.
+  // Heartbeat freshness + engine version.
   try {
     const hbPath = join(workspaceRoot, "daemon-heartbeat.json");
     if (existsSync(hbPath)) {
-      const parsed = JSON.parse(readFileSync(hbPath, "utf8")) as { pid?: number; at?: string };
+      const parsed = JSON.parse(readFileSync(hbPath, "utf8")) as {
+        pid?: number;
+        at?: string;
+        engineVersion?: string;
+        engineVersionAt?: string;
+      };
       if (typeof parsed.at === "string" && typeof parsed.pid === "number") {
         const staleMs = now().getTime() - new Date(parsed.at).getTime();
         result.heartbeat = { pid: parsed.pid, at: parsed.at, staleMs };
       }
+      if (typeof parsed.engineVersion === "string") result.engineVersion = parsed.engineVersion;
+      if (typeof parsed.engineVersionAt === "string") result.engineVersionAt = parsed.engineVersionAt;
     }
   } catch { /* keep result.heartbeat undefined */ }
   // Recent errors.

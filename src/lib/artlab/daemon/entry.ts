@@ -1,7 +1,9 @@
 // src/lib/artlab/daemon/entry.ts
 import { appendFileSync, mkdirSync, existsSync, writeFileSync, renameSync } from "node:fs";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 import { rotateDaemonLogs } from "./log-rotation";
+import { archiveOldRuns } from "./run-archival";
 
 export interface DaemonTicker {
   tick(): Promise<void>;
@@ -80,14 +82,38 @@ export function createDaemonContext(input: DaemonContextInput): DaemonContext {
 }
 
 const LOG_ROTATION_INTERVAL_MS = 60_000;
+const RUN_ARCHIVAL_INTERVAL_MS = 60 * 60_000; // hourly
 const SHUTDOWN_DRAIN_MS = 30_000;
 const SHUTDOWN_POLL_MS = 500;
+
+let lastRunArchivalAt = 0;
+
+// Captured once at boot so /health can answer "did my changes deploy?" with
+// a single line instead of forcing the operator to ssh + git log.
+let cachedEngineVersion: string | null = null;
+let cachedEngineVersionAt: string | null = null;
+
+function captureEngineVersion(): void {
+  const projectRoot = process.env.ARTLAB_PROJECT_ROOT;
+  if (!projectRoot) return;
+  try {
+    const sha = spawnSync("git", ["rev-parse", "--short", "HEAD"], { cwd: projectRoot, encoding: "utf8" });
+    if (sha.status === 0) cachedEngineVersion = sha.stdout.trim() || null;
+    const at = spawnSync("git", ["log", "-1", "--format=%cI"], { cwd: projectRoot, encoding: "utf8" });
+    if (at.status === 0) cachedEngineVersionAt = at.stdout.trim() || null;
+  } catch { /* git missing or repo absent — version stays null */ }
+}
 
 function writeHeartbeat(workspaceRoot: string): void {
   if (!existsSync(workspaceRoot)) mkdirSync(workspaceRoot, { recursive: true });
   const path = join(workspaceRoot, "daemon-heartbeat.json");
   const tmp = `${path}.tmp.${process.pid}.${Date.now()}`;
-  writeFileSync(tmp, `${JSON.stringify({ pid: process.pid, at: new Date().toISOString() }, null, 2)}\n`);
+  writeFileSync(tmp, `${JSON.stringify({
+    pid: process.pid,
+    at: new Date().toISOString(),
+    engineVersion: cachedEngineVersion ?? undefined,
+    engineVersionAt: cachedEngineVersionAt ?? undefined,
+  }, null, 2)}\n`);
   renameSync(tmp, path);
 }
 
@@ -118,6 +144,12 @@ export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
     await runStep(ctx.workspaceRoot, "log-rotation", async () => rotateDaemonLogs(ctx.workspaceRoot));
   }
 
+  // Hourly: archive completed runs older than 30 days into tar.gz.
+  if (nowMs - lastRunArchivalAt >= RUN_ARCHIVAL_INTERVAL_MS) {
+    lastRunArchivalAt = nowMs;
+    await runStep(ctx.workspaceRoot, "run-archival", async () => archiveOldRuns(ctx.workspaceRoot));
+  }
+
   if (ctx.cancelDrain) {
     await runStep(ctx.workspaceRoot, "cancel-drain", () => ctx.cancelDrain!.processCancelIntents());
   }
@@ -145,6 +177,9 @@ export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
 }
 
 export async function runDaemonForever(ctx: DaemonContext, opts?: { sleepMs?: number }): Promise<void> {
+  // Snapshot the engine version once at boot so /health can answer
+  // "what's deployed?" without forking git on every snapshot.
+  captureEngineVersion();
   const sleepMs = opts?.sleepMs ?? 1000;
   const onSignal = () => ctx.requestShutdown();
   process.on("SIGTERM", onSignal);

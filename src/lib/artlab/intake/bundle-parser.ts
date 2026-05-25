@@ -70,20 +70,6 @@ export function parseBundle(request: string): BundleSpec | null {
     }
   }
 
-  if (/\band\b.*\btogether\b/i.test(request)) {
-    const chars = detectCharacterFirstNames(request);
-    if (chars.length >= 2) {
-      const children = chars.map((c) => child("character", c, c));
-      return {
-        bundleId: randomUUID(),
-        source: "and-together",
-        children,
-        promotionPolicy: "atomic",
-        links: [{ childA: children[0]!.childId, childB: children[1]!.childId, linkType: "shares-style" }],
-      };
-    }
-  }
-
   if (/\bbutton\s+for\s+/i.test(request)) {
     const room = detectRoom(request);
     if (room) {
@@ -113,6 +99,24 @@ export function parseBundle(request: string): BundleSpec | null {
         links: [],
       };
     }
+  }
+
+  // Catch-all multi-character bundle. Matches "Sol and Mara", "Sol + Otis",
+  // "Sol, Mara, Vera", "make Sol Otis Mara" — anything that names 2+ known
+  // characters without also naming an environment (the room+character cases
+  // above already covered the "with X in it" mixed bundle).
+  const chars = detectCharacterFirstNames(request);
+  const namedRoom = detectRoom(request);
+  if (chars.length >= 2 && !namedRoom) {
+    const children = chars.map((c) => child("character", c, c));
+    const policy: BundleSpec["promotionPolicy"] = /\bfor\b/i.test(request) ? "independent" : "atomic";
+    return {
+      bundleId: randomUUID(),
+      source: "and-together",
+      children,
+      promotionPolicy: policy,
+      links: children.slice(1).map((c) => ({ childA: children[0]!.childId, childB: c.childId, linkType: "shares-style" })),
+    };
   }
 
   return null;

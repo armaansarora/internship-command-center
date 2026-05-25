@@ -49,6 +49,12 @@ async function handleStatus(workspaceRoot: string, args: string[]): Promise<Tele
     blocker: reality.blocker ?? undefined,
     slots: reality.slots,
     spend: reality.spend,
+    progress: {
+      phaseElapsedMs: reality.progress.phaseElapsedMs,
+      estimatedRemainingMs: reality.progress.estimatedRemainingMs,
+      expectedSlotCount: reality.progress.expectedSlotCount,
+      renderedSlotCount: reality.progress.renderedSlotCount,
+    },
   });
 }
 
@@ -108,6 +114,8 @@ async function handleHealth(workspaceRoot: string): Promise<TelegramOutboundMess
     daemonErrors24h: snapshot.daemon.recent24hCount,
     lastDaemonError: snapshot.daemon.lastError,
     heartbeatStaleMs: snapshot.daemon.heartbeat?.staleMs,
+    engineVersion: snapshot.daemon.engineVersion,
+    engineVersionAt: snapshot.daemon.engineVersionAt,
   });
 }
 
