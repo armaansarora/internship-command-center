@@ -99,10 +99,10 @@ describe("HTML message templates", () => {
     expect(msg.text).toContain("Brass-green palette stays canon");
   });
 
-  it("conceptApprovedAck names the lane + walks the next phases", () => {
+  it("conceptApprovedAck names the lane + describes production", () => {
     const msg = conceptApprovedAck({ laneIndex: 3, runId: SAMPLE_RUN_ID });
     expect(msg.text).toContain("Direction 3");
-    expect(msg.text).toMatch(/canary.*production.*strict-qa.*final-review/);
+    expect(msg.text).toMatch(/21 production sprites/);
   });
 
   it("finalBoardCaption attaches the approve+reject keyboard + live preview link", () => {

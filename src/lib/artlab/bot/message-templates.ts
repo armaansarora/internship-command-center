@@ -64,18 +64,13 @@ export interface TriggerAckInput {
 export function triggerAck(input: TriggerAckInput): TelegramOutboundMessage {
   const subtitle = [input.title, input.spaceLabel].filter(Boolean).join(" · ");
   const reserved = input.reservedCents !== undefined && input.capCents !== undefined
-    ? `   <b>Cost</b>     reserved $${(input.reservedCents / 100).toFixed(2)} of $${(input.capCents / 100).toFixed(2)} cap`
+    ? `<b>Cost</b>  reserved $${(input.reservedCents / 100).toFixed(2)} / $${(input.capCents / 100).toFixed(2)}`
     : null;
   return {
     text: block([
-      `🎨 <b>Queued</b>`,
-      ``,
-      `   <b>Subject</b>  <b>${esc(input.displayName)}</b>${subtitle ? ` — <i>${esc(subtitle)}</i>` : ""}`,
-      `   <b>Run</b>      <code>${esc(shortRunId(input.runId))}</code>`,
+      `🎨  <b>${esc(input.displayName)}</b>${subtitle ? `  ·  <i>${esc(subtitle)}</i>` : ""}`,
+      `<code>${esc(shortRunId(input.runId))}</code>  ·  Pulling Tower context  ·  ETA ~45s`,
       reserved,
-      ``,
-      `Pulling Tower context and generating 5 real concept directions…`,
-      `<i>ETA ~45s</i>`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -147,13 +142,8 @@ export function conceptBoardCaption(input: ConceptBoardCaptionInput): TelegramOu
 export function conceptApprovedAck(input: { laneIndex: number; runId: string }): TelegramOutboundMessage {
   return {
     text: block([
-      `✅ <b>Direction ${input.laneIndex} locked in</b>`,
-      ``,
-      `   <b>Run</b>      <code>${esc(shortRunId(input.runId))}</code>`,
-      `   <b>Walking</b>  canary → production → strict-qa → final-review`,
-      ``,
-      `Generating 21 production sprites (3 outfits × 7 poses)…`,
-      `<i>ETA ~3-4 min</i>`,
+      `✅  <b>Direction ${input.laneIndex} locked</b>`,
+      `<code>${esc(shortRunId(input.runId))}</code>  ·  21 production sprites  ·  ETA ~3-4 min`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -195,10 +185,8 @@ export function finalBoardCaption(input: FinalBoardCaptionInput): TelegramOutbou
 export function promotionAcceptedAck(input: { runId: string }): TelegramOutboundMessage {
   return {
     text: block([
-      `🚀 <b>Promotion accepted</b>`,
-      ``,
-      `   <b>Run</b>     <code>${esc(shortRunId(input.runId))}</code>`,
-      `   <b>Status</b>  writing assets + manifest entries to <code>public/art/</code>…`,
+      `🚀  <b>Promotion accepted</b>`,
+      `<code>${esc(shortRunId(input.runId))}</code>  ·  Writing to <code>public/art/</code>`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -251,14 +239,10 @@ export interface BlockerNoticeInput {
 export function blockerNotice(input: BlockerNoticeInput): TelegramOutboundMessage {
   return {
     text: block([
-      `⚠️ <b>Run blocked</b>`,
+      `⚠️  <b>${esc(input.displayName)}</b>  ·  blocked`,
+      `<code>${esc(shortRunId(input.runId))}</code>  ·  ${esc(input.phase)}  ·  <i>${esc(input.blocker)}</i>`,
       ``,
-      `   <b>Subject</b>  ${esc(input.displayName)}`,
-      `   <b>Run</b>      <code>${esc(shortRunId(input.runId))}</code>`,
-      `   <b>Phase</b>    ${esc(input.phase)}`,
-      `   <b>Blocker</b>  <i>${esc(input.blocker)}</i>`,
-      ``,
-      `Reply <code>/cancel ${esc(shortRunId(input.runId))}</code> to abandon, or wait for the engine to retry.`,
+      `<code>/cancel ${esc(shortRunId(input.runId))}</code>  to abandon.`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -460,25 +444,25 @@ export function unknownCommandTemplate(input: { commandName: string }): Telegram
 
 export function briefProposalCaption(input: { brief: DesignBrief }): TelegramOutboundMessage {
   const { brief } = input;
-  const variationLines = brief.plannedVariation.map((v, i) => `   <b>${i + 1}.</b> ${esc(v)}`);
+  const variationLines = brief.plannedVariation.map((v, i) => `<b>${i + 1}</b>  ${esc(v)}`);
+  const revTag = brief.iteration > 0 ? `  <i>rev ${brief.iteration}</i>` : "";
   const deltaLine = brief.deltaSummary
-    ? [``, `<i>📝 ${esc(brief.deltaSummary)}</i>`]
+    ? [`<i>📝 ${esc(brief.deltaSummary)}</i>`, ``]
     : [];
   return {
     text: block([
-      `💡 <b>Design brief</b>${brief.iteration > 0 ? ` <i>(revision ${brief.iteration})</i>` : ""}`,
+      `💡  <b>Design brief</b>${revTag}`,
+      `─────────────────────`,
       ``,
-      `<b>IDENTITY</b>`,
-      `${esc(brief.identity)}`,
+      ...deltaLine,
+      esc(brief.identity),
       ``,
-      `<b>PLANNED VARIATION</b> (5 lanes)`,
+      `<b>5 lanes</b>`,
       ...variationLines,
       ``,
-      `<b>REFERENCE ANCHOR</b>`,
-      `<i>${esc(brief.referenceAnchor)}</i>`,
-      ...deltaLine,
+      `<b>Style</b>  <i>${esc(brief.referenceAnchor)}</i>`,
       ``,
-      `Looks right? Tap a button — or send free-text to refine.`,
+      `<i>Tap an action below — or send free-text to refine.</i>`,
     ]),
     parseMode: "HTML",
     replyMarkup: buildBriefInlineKeyboard(brief.runId, brief.adjustmentOptions),
@@ -493,9 +477,7 @@ export function briefAdjustmentPrompt(input: {
 }): TelegramOutboundMessage {
   return {
     text: block([
-      `🎛️ <b>${esc(input.dimensionLabel)}</b>`,
-      ``,
-      `Pick a direction — or send free-text to refine.`,
+      `🎛️  <b>${esc(input.dimensionLabel)}</b>  <i>or send free-text</i>`,
     ]),
     parseMode: "HTML",
     replyMarkup: buildBriefAdjustmentKeyboard(input.runId, input.options),
@@ -519,9 +501,7 @@ export function briefCancelledAck(input: { runId: string }): TelegramOutboundMes
 export function briefRegeneratingAck(_input: { runId: string }): TelegramOutboundMessage {
   return {
     text: block([
-      `🔄 <b>Updating brief</b>`,
-      ``,
-      `Incorporating your feedback. New proposal in ~5s.`,
+      `🔄  <b>Updating brief</b>  ·  <i>incorporating feedback · new proposal in ~5s</i>`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -535,9 +515,7 @@ export function feedbackPositivePrompt(input: {
 }): TelegramOutboundMessage {
   return {
     text: block([
-      `👍 <b>What worked?</b>`,
-      ``,
-      `<i>Tap any that apply (multi-select), then go next. Free-text works too.</i>`,
+      `👍  <b>What worked?</b>  <i>multi-select, then Next</i>`,
     ]),
     parseMode: "HTML",
     replyMarkup: buildFeedbackKeyboard(input.runId, "pos", input.options, input.isLast ?? false),
@@ -551,9 +529,7 @@ export function feedbackNegativePrompt(input: {
 }): TelegramOutboundMessage {
   return {
     text: block([
-      `👎 <b>What didn't work?</b>`,
-      ``,
-      `<i>Tap any that apply, then regenerate. Free-text adds a note.</i>`,
+      `👎  <b>What didn't?</b>  <i>multi-select, then Regenerate</i>`,
     ]),
     parseMode: "HTML",
     replyMarkup: buildFeedbackKeyboard(input.runId, "neg", input.options, true),
@@ -574,23 +550,24 @@ export function conceptCritiqueCaption(input: {
 }): TelegramOutboundMessage {
   const c = input.critique;
   const perLaneLines = c?.perLane?.slice(0, 5).map((l) => {
-    const stars = typeof l.stars === "number" ? ` ${"★".repeat(Math.max(1, Math.min(5, l.stars)))}${"☆".repeat(5 - Math.max(1, Math.min(5, l.stars)))}` : "";
-    return `   <b>${l.laneIndex}.</b> ${esc(l.critique)}${stars}`;
+    const star = typeof l.stars === "number" ? Math.max(1, Math.min(5, l.stars)) : 3;
+    const stars = "★".repeat(star) + "☆".repeat(5 - star);
+    const recommended = l.laneIndex === c?.recommendedLane ? "  ⬅" : "";
+    return `<b>${l.laneIndex}</b>  ${stars}  ${esc(l.critique)}${recommended}`;
   }) ?? [];
-  const recommendation = c?.recommendedLane
-    ? [``, `💡 <b>My pick: Direction ${c.recommendedLane}</b>${c.summary ? ` — <i>${esc(c.summary)}</i>` : ""}`]
-    : c?.summary
-      ? [``, `<i>${esc(c.summary)}</i>`]
-      : [];
+  const revTag = input.iteration && input.iteration > 0 ? `  <i>rev ${input.iteration}</i>` : "";
+  const summaryLine = c?.summary ? `<i>${esc(c.summary)}</i>` : null;
+  const pickLine = c?.recommendedLane ? `💡  <b>Pick: Direction ${c.recommendedLane}</b>` : null;
   return {
     text: block([
-      `📋 <b>${esc(input.displayName)} — Concept Board</b>${input.iteration && input.iteration > 0 ? ` <i>(revision ${input.iteration})</i>` : ""}`,
-      input.subtitle ? `   <i>${esc(input.subtitle)}</i>` : null,
+      `📋  <b>${esc(input.displayName)}</b>${revTag}`,
+      input.subtitle ? `<i>${esc(input.subtitle)}</i>` : null,
+      `─────────────────────`,
       ``,
       ...perLaneLines,
-      ...recommendation,
       ``,
-      `Tap a lane to lock it in — or 🔁 to regenerate with feedback.`,
+      pickLine,
+      summaryLine,
     ]),
     parseMode: "HTML",
     replyMarkup: buildConceptInlineKeyboard(input.runId),
@@ -611,31 +588,31 @@ export function productionCritiqueCaption(input: {
     approvedSpriteCount?: number;
   };
 }): TelegramOutboundMessage {
-  const verdictEmoji = input.critique?.overallVerdict === "tight"
-    ? "✓"
+  const verdictBadge = input.critique?.overallVerdict === "tight"
+    ? "✓ Tight"
     : input.critique?.overallVerdict === "minor-drift"
-      ? "⚠"
+      ? "⚠ Minor drift"
       : input.critique?.overallVerdict === "major-drift"
-        ? "✗"
-        : "•";
+        ? "✗ Major drift"
+        : "• Reviewed";
   const flagLines = (input.critique?.flaggedSprites ?? []).slice(0, 5).map((f) => {
     const icon = f.severity === "major" ? "❗" : "⚠";
-    return `   ${icon} <code>${esc(f.slotId)}</code> — ${esc(f.issue)}`;
+    return `${icon} <code>${esc(f.slotId)}</code> — ${esc(f.issue)}`;
   });
-  const previewLine = input.space
-    ? [``, `🪟 <b>Preview where this lands:</b>`, `   ${liveFloorUrl(input.space)}`]
-    : [];
+  const approved = input.critique?.approvedSpriteCount ?? input.spriteCount;
+  const previewLine = input.space ? `<b>Preview</b>  ${liveFloorUrl(input.space)}` : null;
   return {
     text: block([
-      `📐 <b>${esc(input.displayName)} — Final Board</b>`,
-      input.subtitle ? `   <i>${esc(input.subtitle)}</i>` : null,
+      `📐  <b>${esc(input.displayName)}</b>  ·  Final Board`,
+      input.subtitle ? `<i>${esc(input.subtitle)}</i>` : null,
+      `─────────────────────`,
       ``,
-      `${verdictEmoji} <b>${input.critique?.approvedSpriteCount ?? input.spriteCount}/${input.spriteCount}</b> sprites passed bible check`,
+      `<b>${approved}/${input.spriteCount}</b> sprites passed bible check  ·  ${verdictBadge}`,
       input.critique?.summary ? `<i>${esc(input.critique.summary)}</i>` : null,
+      flagLines.length > 0 ? `` : null,
       ...flagLines,
-      ...previewLine,
-      ``,
-      `Tap a button below.`,
+      previewLine ? `` : null,
+      previewLine,
     ]),
     parseMode: "HTML",
     replyMarkup: buildFinalInlineKeyboard(input.runId),
@@ -646,9 +623,9 @@ export function productionCritiqueCaption(input: {
 export function triggerAckBrainAuthored(input: { text: string; runId: string }): TelegramOutboundMessage {
   return {
     text: block([
-      `${esc(input.text)}`,
+      `<i>${esc(input.text)}</i>`,
       ``,
-      `<i>Run <code>${esc(shortRunId(input.runId))}</code></i>`,
+      `<code>${esc(shortRunId(input.runId))}</code>  ·  ETA ~45s`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: true,
@@ -662,19 +639,21 @@ export function promotionCelebrationBrainAuthored(input: {
   spendCents?: number;
   capCents?: number;
 }): TelegramOutboundMessage {
-  const spendLine = input.spendCents !== undefined && input.capCents !== undefined
-    ? `   <b>Spend</b>  $${(input.spendCents / 100).toFixed(2)} of $${(input.capCents / 100).toFixed(2)} cap`
+  const spendLine = input.spendCents !== undefined && input.capCents !== undefined && input.capCents > 0
+    ? `<b>Spend</b>  $${(input.spendCents / 100).toFixed(2)} / $${(input.capCents / 100).toFixed(2)}`
     : null;
   return {
     text: block([
-      `🚀 ${esc(input.text)}`,
+      `🚀  <b>Shipped</b>`,
+      `─────────────────────`,
       ``,
-      `<b>Live now:</b>`,
-      `   ${input.liveUrl}`,
-      `   <i>(deploying via Vercel… ready in ~90s)</i>`,
+      esc(input.text),
       ``,
+      `<b>Live</b>  ${input.liveUrl}`,
+      `<i>Deploying via Vercel · ready ~90s</i>`,
       spendLine,
-      `Run <code>/decisions ${esc(shortRunId(input.runId))}</code> for the brain's reasoning chain.`,
+      ``,
+      `<code>/decisions ${esc(shortRunId(input.runId))}</code>  for the reasoning chain.`,
     ]),
     parseMode: "HTML",
     disableWebPagePreview: false,

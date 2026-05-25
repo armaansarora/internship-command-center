@@ -22,8 +22,25 @@ function fileHasPngSignature(path: string): boolean {
 }
 
 function detectAlpha(path: string): boolean {
-  // Real PNG (signature match) — trust sharp's alpha render path.
-  if (fileHasPngSignature(path)) return true;
+  // Real PNG (signature match) — verify alpha channel via sharp metadata,
+  // since Gemini's image API returns opaque PNGs/JPEGs without alpha. The
+  // cutout-runner is responsible for converting those to RGBA via backdrop
+  // subtraction; this is the QA gate that ensures the conversion happened.
+  if (fileHasPngSignature(path)) {
+    try {
+      // Synchronous PNG header parse: bytes 8-15 are IHDR length+type,
+      // bytes 24-26 are width/height/bit-depth/colortype. Color type 4 (gray+alpha)
+      // and 6 (RGB+alpha) carry alpha; 0 (gray), 2 (RGB), 3 (paletted) do not.
+      // This avoids loading sharp synchronously, which is needed because
+      // detectAlpha is called inside the strict-qa sync loop.
+      const buf = readFileSync(path);
+      // PNG signature is 8 bytes, then IHDR chunk (length=4, type=4, data=13, CRC=4).
+      // Color type is at offset 8 (signature) + 8 (length+type) + 9 (= 25 from start).
+      const colorType = buf[25];
+      // Color types with alpha: 4 (grayscale+alpha), 6 (RGB+alpha)
+      return colorType === 4 || colorType === 6;
+    } catch { return false; }
+  }
   // Legacy mock path — files written as JSON with `.png` extension carry `alpha: true`.
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8")) as { alpha?: boolean };
