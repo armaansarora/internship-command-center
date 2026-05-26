@@ -1,0 +1,43 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: mara-voss
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Mara Voss"
+shortLabel: "Mara"
+title: "CEO — Chief Executive Officer"
+floorId: penthouse
+floorLabel: "PH — The Penthouse"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "still-architectural-executive"
+silhouette: "long-lean-line, structured-shoulders, executive-stillness"
+wardrobe: "tailored-charcoal-suit, ivory-shell, single-pearl-earring"
+props:
+  - leather-portfolio
+  - fountain-pen
+mobileRead: "eyes-first, jawline-second, posture-third"
+negativeDNA: "no-warmth-for-warmth's-sake, no-soft-volumes, no-color-pop"
+accent: "single-pearl-earring"
+doctrine: "decide-fast-decide-once"
+flaw: "withholds-praise"
+secretStrength: "reads-rooms-instantly"
+wound: "outmaneuvered-once, never-again"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: promoted
+paletteRef: tower-default
+motionProfile: executive-still
+artDirectionNotes: |
+  Mara should feel controlled and architectural; her stillness is part of the
+  authority. Byte-protected by .github/workflows/artlab-byte-diff.yml at
+  public/art/penthouse/ceo/. Never regenerate without explicit migration plan.
