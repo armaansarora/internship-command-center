@@ -3,7 +3,20 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { FOUNDRY_MCP_TOOL_NAMES, type FoundryMcpToolName } from "./tools";
+import { z } from "zod";
+import {
+  FOUNDRY_MCP_TOOL_NAMES,
+  FoundryAssetPackGetInputSchema,
+  FoundryAssetPackIntegrationInputSchema,
+  FoundryAssetPackListInputSchema,
+  FoundryCanonGetInputSchema,
+  FoundryCanonListInputSchema,
+  FoundryDiagnosticsInputSchema,
+  FoundryGenerateInputSchema,
+  FoundryGenerateStatusInputSchema,
+  FoundrySlotAuditInputSchema,
+  type FoundryMcpToolName,
+} from "./tools";
 import { handleFoundryCanonList } from "./tool-handlers/canon-list";
 import { handleFoundryCanonGet } from "./tool-handlers/canon-get";
 import { handleFoundryAssetPackList } from "./tool-handlers/asset-pack-list";
@@ -21,6 +34,60 @@ import type {
   FoundryAnthropicCall,
   FoundryAnthropicResponse,
 } from "../brain/anthropic-client";
+
+/**
+ * Per-tool Zod input schemas. Threaded through `z.toJSONSchema()` so the
+ * MCP `ListTools` response advertises real argument contracts (enums,
+ * required fields, min-length, UUID patterns) instead of the previous
+ * placeholder `{ type: "object", additionalProperties: true }`. MCP
+ * clients (Claude Code, Cursor, etc.) now see the same shape the runtime
+ * validator enforces.
+ */
+const TOOL_INPUT_SCHEMAS: Record<FoundryMcpToolName, z.ZodTypeAny> = {
+  "foundry/canon_list": FoundryCanonListInputSchema,
+  "foundry/canon_get": FoundryCanonGetInputSchema,
+  "foundry/asset_pack_list": FoundryAssetPackListInputSchema,
+  "foundry/asset_pack_get": FoundryAssetPackGetInputSchema,
+  "foundry/asset_pack_integration": FoundryAssetPackIntegrationInputSchema,
+  "foundry/slot_audit": FoundrySlotAuditInputSchema,
+  "foundry/generate": FoundryGenerateInputSchema,
+  "foundry/generate_status": FoundryGenerateStatusInputSchema,
+  "foundry/diagnostics": FoundryDiagnosticsInputSchema,
+};
+
+/** Shape every MCP client expects in the `ListTools` response. */
+export interface FoundryMcpToolDescriptor {
+  name: FoundryMcpToolName;
+  description: string;
+  inputSchema: {
+    type: "object";
+    properties?: Record<string, unknown>;
+    required?: string[];
+    additionalProperties?: boolean;
+    [k: string]: unknown;
+  };
+}
+
+function buildToolDescriptors(): FoundryMcpToolDescriptor[] {
+  return FOUNDRY_MCP_TOOL_NAMES.map((name) => {
+    // `z.toJSONSchema` is a first-party Zod v4 API (returns a JSON Schema
+    // 2020-12 document). MCP only needs the schema body — strip the
+    // top-level `$schema` URL because some clients reject unknown keys.
+    const raw = z.toJSONSchema(TOOL_INPUT_SCHEMAS[name]) as Record<string, unknown>;
+    delete raw.$schema;
+    if (raw.type !== "object") {
+      throw new Error(
+        `foundry tool '${name}' has a non-object input schema (got '${String(raw.type)}'); ` +
+          `MCP requires object-shaped inputs.`,
+      );
+    }
+    return {
+      name,
+      description: TOOL_SUMMARIES[name],
+      inputSchema: raw as FoundryMcpToolDescriptor["inputSchema"],
+    };
+  });
+}
 
 export interface FoundryMcpServerConfig {
   workspaceRoot: string;
@@ -52,6 +119,11 @@ export interface FoundryMcpServer {
   registeredTools: FoundryMcpToolName[];
   server: Server;
   invokeForTest(tool: FoundryMcpToolName | string, rawInput: unknown): Promise<unknown>;
+  /**
+   * Test seam — returns the same tool descriptors the server emits via the
+   * `ListTools` MCP request. Pinned in `server.tool-schema.test.ts`.
+   */
+  listToolsForTest(): FoundryMcpToolDescriptor[];
 }
 
 type HandlerFn = (rawInput: unknown) => Promise<unknown>;
@@ -111,12 +183,10 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
     "foundry/diagnostics": (i) => handleFoundryDiagnostics(i, ctxDiag),
   };
 
+  const toolDescriptors = buildToolDescriptors();
+
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: FOUNDRY_MCP_TOOL_NAMES.map((name) => ({
-      name,
-      description: TOOL_SUMMARIES[name],
-      inputSchema: { type: "object" as const, additionalProperties: true },
-    })),
+    tools: toolDescriptors,
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
@@ -136,6 +206,9 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
     async invokeForTest(tool: string, rawInput: unknown): Promise<unknown> {
       if (!(tool in handlers)) throw new Error(`unknown tool: ${tool}`);
       return handlers[tool as FoundryMcpToolName](rawInput);
+    },
+    listToolsForTest(): FoundryMcpToolDescriptor[] {
+      return toolDescriptors;
     },
   };
 }
