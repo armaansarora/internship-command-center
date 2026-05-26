@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { SpriteSheetPlayer } from "@/components/foundry/sprite-sheet-player";
+import { SpriteSheetPlayer } from "@/components/artlab/sprite-sheet-player";
 import { FOUNDRY_DEMO_PACKS, type FoundryDemoPack } from "@/lib/artlab/sdk/integration/demo-fixtures";
 
 function findDemo(kind: FoundryDemoPack["kind"]): FoundryDemoPack | undefined {

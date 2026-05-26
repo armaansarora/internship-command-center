@@ -7,4 +7,4 @@ export * from "./slot-registry";
 export * from "./manifest-slot-check";
 export * from "./integration-snippet";
 export * from "./legacy-shim";
-export * from "./build-foundry-asset-pack";
+export * from "./build-asset-pack";

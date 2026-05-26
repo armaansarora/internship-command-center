@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createGeminiFoundryProvider } from "./gemini-foundry-provider";
+import { createGeminiFoundryProvider } from "./gemini-provider";
 
 describe("createGeminiFoundryProvider", () => {
   it("returns a provider with stable id 'gemini-foundry'", () => {

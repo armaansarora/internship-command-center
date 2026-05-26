@@ -12,7 +12,7 @@ describe("renderFoundryIconIntegrationSnippet", () => {
       packPath: ".foundry/packs/icon-elevator-door",
     });
     expect(out).toContain(
-      'import { ElevatorDoorIcon } from "@/components/foundry/icons/elevator-door";',
+      'import { ElevatorDoorIcon } from "@/components/artlab/icons/elevator-door";',
     );
   });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildFoundryAssetPack } from "./build-foundry-asset-pack";
+import { buildFoundryAssetPack } from "./build-asset-pack";
 
 const VALID_MANIFEST = {
   manifestVersion: "1.0.0",

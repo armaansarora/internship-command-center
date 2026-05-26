@@ -15,7 +15,7 @@ export function renderFoundrySpriteIntegrationSnippet(
   return [
     `// Foundry sprite pack: ${input.packPath}`,
     `// fps=${input.fps} loops=${input.loops}`,
-    `import { AnimatedSprite } from "@/components/foundry/animated-sprite";`,
+    `import { AnimatedSprite } from "@/components/artlab/animated-sprite";`,
     ``,
     `<AnimatedSprite pack="${packTag}" />`,
   ].join("\n");
@@ -35,7 +35,7 @@ export function renderFoundryLottieIntegrationSnippet(
   return [
     `// Foundry Lottie pack: ${input.packPath}`,
     `// GSAP timeline duration: ${input.durationMs}ms`,
-    `import { LottieAnimation } from "@/components/foundry/lottie-animation";`,
+    `import { LottieAnimation } from "@/components/artlab/lottie-animation";`,
     ``,
     `<LottieAnimation src="${input.lottiePath}" />`,
   ].join("\n");

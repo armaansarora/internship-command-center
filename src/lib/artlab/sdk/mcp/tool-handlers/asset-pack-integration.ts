@@ -120,7 +120,7 @@ function snippetForSpriteAnimation(m: ManifestForIntegration): {
   const fps = Number(m.integration?.fps ?? 24);
   return {
     importStatement:
-      'import { SpriteSheetPlayer } from "@/components/foundry/sprite-sheet-player";',
+      'import { SpriteSheetPlayer } from "@/components/artlab/sprite-sheet-player";',
     snippet: `<SpriteSheetPlayer sheet=${quote(m.publicPath)} fps={${fps}} loop />`,
   };
 }

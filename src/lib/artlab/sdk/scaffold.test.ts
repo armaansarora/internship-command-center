@@ -17,7 +17,7 @@ const FOUNDRY_SUBDIRS = [
   "docs/foundry/canon/motion-language",
   "docs/foundry/canon/space-tokens",
   "docs/foundry/canon/iconography-rules",
-  ".artlab/foundry",
+  ".artlab/sdk",
 ];
 
 describe("foundry scaffold", () => {

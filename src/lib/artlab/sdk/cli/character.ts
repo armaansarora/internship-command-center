@@ -1,6 +1,6 @@
 import { runCharacterMaster } from "@/lib/artlab/sdk/agents/character-master";
 import { createMockFoundryImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
-import { createGeminiFoundryProvider } from "@/lib/artlab/sdk/providers/gemini-foundry-provider";
+import { createGeminiFoundryProvider } from "@/lib/artlab/sdk/providers/gemini-provider";
 import { registerFoundrySlot, isFoundrySlotRegistered } from "@/lib/artlab/sdk/asset-pack";
 import type { FoundryImageProvider } from "@/lib/artlab/sdk/providers/types";
 import type { CharacterMasterStage } from "@/lib/artlab/sdk/agents/character-master/types";

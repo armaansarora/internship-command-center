@@ -8,7 +8,7 @@ describe("renderFoundryFloorIntegrationSnippet", () => {
       packPath: ".foundry/packs/floor-war-room",
     });
     expect(out).toContain("import { FloorBackground }");
-    expect(out).toContain("@/components/foundry/floor-background");
+    expect(out).toContain("@/components/artlab/floor-background");
   });
 
   it("renders the JSX block with the floor prop", () => {

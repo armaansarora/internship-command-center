@@ -19,7 +19,7 @@ export function renderFoundryIconIntegrationSnippet(
   return [
     `// Foundry asset pack: ${input.packPath}`,
     `// Building-metaphor icon — drop directly into JSX.`,
-    `import { ${component} } from "@/components/foundry/icons/${input.name}";`,
+    `import { ${component} } from "@/components/artlab/icons/${input.name}";`,
     ``,
     `<${component} />`,
   ].join("\n");

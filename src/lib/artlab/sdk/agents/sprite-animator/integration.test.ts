@@ -25,7 +25,7 @@ describe("renderFoundrySpriteIntegrationSnippet", () => {
       fps: 12,
       loops: true,
     });
-    expect(out).toContain('from "@/components/foundry/animated-sprite"');
+    expect(out).toContain('from "@/components/artlab/animated-sprite"');
   });
 
   it("documents fps and loops as comments", () => {
