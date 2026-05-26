@@ -19,6 +19,8 @@
     "artlab:bot": "tsx scripts/artlab.ts bot",
     "artlab:migrate": "tsx scripts/artlab.ts migrate",
     "artlab:smoke": "tsx scripts/artlab.ts smoke",
+    "foundry": "tsx scripts/foundry.ts",
+    "foundry:canon-validate": "tsx scripts/foundry.ts canon validate",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
