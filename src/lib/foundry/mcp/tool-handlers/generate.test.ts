@@ -129,10 +129,12 @@ describe("handleFoundryGenerate", () => {
       expect(mainAfter.brainHint).toBeUndefined();
     });
 
-    it("does NOT resurrect the inbox file when enrichment completes after poller archives it", async () => {
+    it("routes the sidecar to .processed/ when enrichment completes after poller archives the trigger", async () => {
       // Race simulation: poller archives the inbox file BEFORE enrichment
       // resolves. The post-enrichment write must NOT recreate the trigger
-      // file at the inbox path.
+      // in the live inbox; instead, the sidecar lands in `.processed/` so
+      // operators can still audit the enrichment outcome and the poller's
+      // trigger-file glob never picks it up.
       let resolveEnrich!: (v: Record<string, unknown>) => void;
       const enrichPromise = new Promise<Record<string, unknown>>((res) => {
         resolveEnrich = res;
@@ -150,11 +152,11 @@ describe("handleFoundryGenerate", () => {
       mkdirSync(processed, { recursive: true });
       renameSync(result.inboxPath!, join(processed, `${result.runId}.json`));
       expect(existsSync(result.inboxPath!)).toBe(false);
-      // Now finish enrichment and wait for the sidecar to land.
+      // Now finish enrichment and wait for the archived sidecar to land.
       resolveEnrich({ targetStyle: "silk" });
-      const sidecar = result.inboxPath!.replace(/\.json$/, ".brain-hint.json");
+      const archivedSidecar = join(processed, `${result.runId}.brain-hint.json`);
       for (let i = 0; i < 50; i += 1) {
-        if (existsSync(sidecar)) break;
+        if (existsSync(archivedSidecar)) break;
         await new Promise((r) => setTimeout(r, 10));
       }
       // CRITICAL: the main inbox trigger file must NOT have been recreated.
@@ -164,6 +166,17 @@ describe("handleFoundryGenerate", () => {
         (f) => f.startsWith("generate-") && f.endsWith(".json") && !f.includes(".brain-hint"),
       );
       expect(triggerFiles).toEqual([]);
+      // The sidecar lands in `.processed/` so the brain hint isn't lost on
+      // the floor — see the foundry-poller race regression for the
+      // run-state merge path that completes the picture.
+      expect(existsSync(archivedSidecar)).toBe(true);
+      const hint = JSON.parse(readFileSync(archivedSidecar, "utf8")) as Record<string, unknown>;
+      expect(hint.brainHintStatus).toBe("ready");
+      expect(hint.brainHint).toEqual({ targetStyle: "silk" });
+      // The orphan-sidecar-in-inbox path is retired — the live inbox must
+      // NOT contain a sidecar for this runId.
+      const liveSidecar = result.inboxPath!.replace(/\.json$/, ".brain-hint.json");
+      expect(existsSync(liveSidecar)).toBe(false);
     });
 
     it("records enrichment failure on the sidecar without touching the main file", async () => {

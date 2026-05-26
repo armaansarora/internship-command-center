@@ -7,6 +7,7 @@ import {
   type FoundryGenerateInput,
   type FoundryGenerateOutput,
 } from "../tools";
+import { mergeBrainHintIntoRunState } from "@/lib/artlab/state/snapshots";
 
 export interface FoundryGenerateContext {
   /** ArtLab workspace root (typically `.artlab/engine`). */
@@ -115,33 +116,81 @@ export async function handleFoundryGenerate(
   //   By writing only to the sidecar:
   //   - the trigger file glob in the poller (`generate-*.json` minus
   //     `.brain-hint`) never picks up a sidecar
-  //   - the poller reads the sidecar (if present) and merges it into the
-  //     job payload before archival, archiving both files together
-  //   - if the sidecar lands AFTER the inbox file is archived, it becomes
-  //     an orphan in the inbox dir and is ignored by the next tick — no
-  //     resurrection, no duplicated work.
+  //   - if the trigger file is STILL in the inbox when enrichment resolves,
+  //     the poller reads the sidecar and merges it into the job payload
+  //     before archival, archiving both files together (fast-enrich path)
+  //   - if the trigger has ALREADY been archived (slow-enrich path), we
+  //     route the sidecar straight into `.processed/` AND merge the brain
+  //     hint into `runs/<runId>/run-state.json` so it still reaches the
+  //     run-worker and `generate_status`. The trigger file is never
+  //     resurrected in the live inbox.
   if (ctx.brainEnrich) {
     const enrich = ctx.brainEnrich;
-    const sidecarPath = sidecarPathFor(inboxPath);
+    const inboxSidecarPath = sidecarPathFor(inboxPath);
     void (async (): Promise<void> => {
+      const completedAt = (): string => new Date().toISOString();
+      const writeSidecar = (sidecar: BrainHintSidecar): void => {
+        // If the trigger file is still in the inbox, the poller hasn't
+        // archived this run yet — drop the sidecar next to it so the
+        // poller's `mergeSidecarIfPresent` picks it up on the next tick.
+        // If the trigger has ALREADY been archived (race lost), route the
+        // sidecar to `.processed/` for audit and merge the hint into
+        // run-state.json directly. The orphan-sidecar-in-inbox path is no
+        // longer used — it dropped the brain hint on the floor.
+        const archived = !existsSync(inboxPath);
+        if (!archived) {
+          atomicWriteJson(inboxSidecarPath, sidecar);
+          return;
+        }
+        const processed = join(ctx.workspaceRoot, "inbox", "foundry", ".processed");
+        if (!existsSync(processed)) mkdirSync(processed, { recursive: true });
+        atomicWriteJson(join(processed, `${runId}.brain-hint.json`), sidecar);
+        // Best-effort direct merge into run-state.json. If the poller
+        // hasn't seeded run-state yet (extremely tight race), the merge
+        // returns false — the `.processed/` sidecar above is the audit
+        // trail, but the hint won't reach the run-worker. Log so /health
+        // surfaces it; the trigger archive sequence in the poller
+        // (seedRunState → enqueue → moveFile) means run-state is seeded
+        // before the inbox file is renamed, so this only fires on a real
+        // ordering bug.
+        try {
+          const runDir = join(ctx.workspaceRoot, "runs", runId);
+          const merged = mergeBrainHintIntoRunState(runDir, {
+            status: sidecar.brainHintStatus === "ready" ? "ready" : "failed",
+            hint: sidecar.brainHint,
+            error: sidecar.brainHintError,
+            completedAt: sidecar.brainHintCompletedAt,
+          });
+          if (!merged) {
+            recordEnrichError(
+              ctx.workspaceRoot,
+              runId,
+              new Error(
+                "brain-enrich landed post-archive but run-state.json missing — sidecar archived to .processed/",
+              ),
+            );
+          }
+        } catch (mergeErr) {
+          recordEnrichError(ctx.workspaceRoot, runId, mergeErr);
+        }
+      };
       try {
         const brainHint = await enrich(input);
-        const sidecar: BrainHintSidecar = {
+        writeSidecar({
           runId,
           brainHintStatus: "ready",
           brainHint,
-          brainHintCompletedAt: new Date().toISOString(),
-        };
-        atomicWriteJson(sidecarPath, sidecar);
+          brainHintCompletedAt: completedAt(),
+        });
       } catch (err) {
         const sidecar: BrainHintSidecar = {
           runId,
           brainHintStatus: "failed",
           brainHintError: (err instanceof Error ? err.message : String(err)).slice(0, 500),
-          brainHintCompletedAt: new Date().toISOString(),
+          brainHintCompletedAt: completedAt(),
         };
         try {
-          atomicWriteJson(sidecarPath, sidecar);
+          writeSidecar(sidecar);
         } catch {
           /* even if the sidecar write fails, the daemon-errors log below
              still captures the original brain failure. */

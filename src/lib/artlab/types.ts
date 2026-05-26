@@ -87,6 +87,17 @@ export const ArtLabRunStateSchema = z
     // Derived as `${assetType}-${runId.slice(0,8)}` — stable across replays
     // and human-recognisable in logs.
     promotedPackId: z.string().min(1).optional(),
+    // Brain enrichment hint produced by the Foundry MCP `generate` handler.
+    // Normally the hint lands on the queue spec via the foundry-poller's
+    // sidecar merge. If the poller archives the trigger file BEFORE
+    // enrichment resolves (slow LLM vs fast drain), the sidecar emitter
+    // merges the hint directly here so the run-worker and `generate_status`
+    // still see it. Optional — runs without a brainEnrich callback never
+    // populate these fields. See `src/lib/foundry/mcp/tool-handlers/generate.ts`.
+    brainHintStatus: z.enum(["pending", "ready", "failed"]).optional(),
+    brainHint: z.record(z.string(), z.unknown()).optional(),
+    brainHintError: z.string().optional(),
+    brainHintCompletedAt: z.string().datetime({ offset: true }).optional(),
   })
   .strict();
 export type ArtLabRunState = z.infer<typeof ArtLabRunStateSchema>;

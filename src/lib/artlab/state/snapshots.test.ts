@@ -2,7 +2,13 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeRunStateSnapshot, readRunStateSnapshot, writeProgressSnapshot, readProgressSnapshot } from "./snapshots";
+import {
+  writeRunStateSnapshot,
+  readRunStateSnapshot,
+  writeProgressSnapshot,
+  readProgressSnapshot,
+  mergeBrainHintIntoRunState,
+} from "./snapshots";
 
 describe("artlab atomic snapshots", () => {
   let dir: string;
@@ -63,5 +69,61 @@ describe("artlab atomic snapshots", () => {
     });
     const parsed = readRunStateSnapshot(dir);
     expect(parsed?.phase).toBe("canary");
+  });
+
+  describe("mergeBrainHintIntoRunState", () => {
+    it("merges a ready brain hint into an existing run-state snapshot", () => {
+      writeRunStateSnapshot(dir, {
+        runId: "r1",
+        assetType: "character",
+        phase: "routed",
+        createdAt: "2026-05-20T00:00:00.000Z",
+        updatedAt: "2026-05-20T00:00:00.000Z",
+        request: "test",
+      });
+      const ok = mergeBrainHintIntoRunState(dir, {
+        status: "ready",
+        hint: { targetStyle: "satin-lapel" },
+        completedAt: "2026-05-20T00:00:05.000Z",
+      });
+      expect(ok).toBe(true);
+      const parsed = readRunStateSnapshot(dir);
+      expect(parsed?.brainHintStatus).toBe("ready");
+      expect(parsed?.brainHint).toEqual({ targetStyle: "satin-lapel" });
+      expect(parsed?.brainHintCompletedAt).toBe("2026-05-20T00:00:05.000Z");
+      // Other fields are preserved.
+      expect(parsed?.phase).toBe("routed");
+      expect(parsed?.request).toBe("test");
+    });
+
+    it("returns false when run-state.json does not exist (poller hasn't seeded yet)", () => {
+      const ok = mergeBrainHintIntoRunState(dir, {
+        status: "ready",
+        hint: { x: 1 },
+        completedAt: "2026-05-20T00:00:05.000Z",
+      });
+      expect(ok).toBe(false);
+      expect(existsSync(join(dir, "run-state.json"))).toBe(false);
+    });
+
+    it("merges a failed brain hint with an error message", () => {
+      writeRunStateSnapshot(dir, {
+        runId: "r1",
+        assetType: "character",
+        phase: "routed",
+        createdAt: "2026-05-20T00:00:00.000Z",
+        updatedAt: "2026-05-20T00:00:00.000Z",
+        request: "test",
+      });
+      mergeBrainHintIntoRunState(dir, {
+        status: "failed",
+        error: "provider down",
+        completedAt: "2026-05-20T00:00:05.000Z",
+      });
+      const parsed = readRunStateSnapshot(dir);
+      expect(parsed?.brainHintStatus).toBe("failed");
+      expect(parsed?.brainHintError).toBe("provider down");
+      expect(parsed?.brainHint).toBeUndefined();
+    });
   });
 });

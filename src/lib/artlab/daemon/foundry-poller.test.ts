@@ -14,6 +14,7 @@ import { randomUUID } from "node:crypto";
 import { createFoundryPoller, FoundryGenerateJobSchema } from "./foundry-poller";
 import { listQueuedRuns } from "@/lib/artlab/queue/queue";
 import { readRunStateSnapshot } from "@/lib/artlab/state/snapshots";
+import { handleFoundryGenerate } from "@/lib/foundry/mcp/tool-handlers/generate";
 
 describe("foundry-poller", () => {
   let workspaceRoot: string;
@@ -259,6 +260,73 @@ describe("foundry-poller", () => {
       // daemon-errors.jsonl records the sidecar failure for /health.
       const errs = readFileSync(join(workspaceRoot, "daemon-errors.jsonl"), "utf8");
       expect(errs).toMatch(/foundry-poller:sidecar/);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Regression: slow-brain-enrichment vs fast-poller race (Codex finding).
+  //
+  // Before the fix, if the poller drained and archived the trigger file
+  // BEFORE brain enrichment resolved, the sidecar landed as a quiet orphan
+  // in the live inbox and was filtered out forever — the brain hint never
+  // reached run-state, the queue spec, or the run worker. The doc comment
+  // claimed "no resurrection, no duplicated work" but it was also "no
+  // enrichment, no visibility."
+  //
+  // The fix: when the sidecar emitter wakes up to find the trigger already
+  // archived, it (a) writes the sidecar into `.processed/` (operator audit)
+  // AND (b) merges the brain hint directly into `runs/<runId>/run-state.json`
+  // so the run-worker and `generate_status` can see it.
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("slow-brain vs fast-poller race", () => {
+    it("brain hint reaches run-state.json even when poller archives the trigger first", async () => {
+      // 1. Submit the job via the real MCP handler with a slow brain enrich.
+      let resolveEnrich!: (v: Record<string, unknown>) => void;
+      const enrichPromise = new Promise<Record<string, unknown>>((res) => {
+        resolveEnrich = res;
+      });
+      const result = await handleFoundryGenerate(
+        { kind: "character", description: "Rafe charcoal jacket post-archive enrichment" },
+        {
+          workspaceRoot,
+          brainEnrich: () => enrichPromise,
+        },
+      );
+      // 2. Immediately drain the poller — the trigger file gets archived
+      //    while enrichment is still pending.
+      const poller = createFoundryPoller({ workspaceRoot });
+      const drain = await poller.tick();
+      expect(drain.enqueuedRunIds).toEqual([result.runId]);
+      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      expect(existsSync(result.inboxPath!)).toBe(false);
+      expect(existsSync(join(inboxDir, ".processed", `${result.runId}.json`))).toBe(true);
+      // 3. Now resolve the brain enrichment promise — simulating the slow
+      //    LLM finally returning a hint long after the trigger was archived.
+      resolveEnrich({ targetStyle: "wool-luxe-after-race" });
+      // Wait for the post-archive emitter path to land the hint.
+      const runDir = join(workspaceRoot, "runs", result.runId);
+      const statePath = join(runDir, "run-state.json");
+      let merged: Record<string, unknown> | null = null;
+      for (let i = 0; i < 50; i += 1) {
+        const raw = JSON.parse(readFileSync(statePath, "utf8")) as Record<string, unknown>;
+        if (raw.brainHintStatus === "ready") {
+          merged = raw;
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 10));
+      }
+      // 4. The brain hint must have reached run-state.json — not been lost.
+      expect(merged).not.toBeNull();
+      expect(merged!.brainHintStatus).toBe("ready");
+      expect(merged!.brainHint).toEqual({ targetStyle: "wool-luxe-after-race" });
+      expect(typeof merged!.brainHintCompletedAt).toBe("string");
+      // The trigger file MUST NOT have been resurrected in the live inbox.
+      expect(existsSync(result.inboxPath!)).toBe(false);
+      // The post-archive sidecar must also be archived alongside the
+      // trigger for operator audit.
+      expect(
+        existsSync(join(inboxDir, ".processed", `${result.runId}.brain-hint.json`)),
+      ).toBe(true);
     });
   });
 });
