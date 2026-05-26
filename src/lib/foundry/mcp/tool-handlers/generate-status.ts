@@ -23,8 +23,33 @@ interface ArtLabRunStateLite {
   promotedPackId?: string;
 }
 
+/**
+ * Map an ArtLab run-state `(phase, blocker)` pair onto the Foundry MCP run
+ * status enum.
+ *
+ * Order matters. In production, terminal lifecycle events surface as
+ * `blocker: "cancelled"` or `blocker: "failed"` rather than as phase values.
+ * The previous implementation tested `blocker` first and returned the generic
+ * `'blocked'` for both — so cancelled runs leaked out as "blocked" and
+ * consumers could not distinguish "user cancelled" from "system blocker".
+ *
+ * The fix is to hoist the terminal-blocker check above the generic-blocker
+ * branch:
+ *
+ *   1. `blocker === "cancelled"` → `'cancelled'` (terminal, user-initiated)
+ *   2. `blocker === "failed"`    → `'failed'`    (terminal, system-initiated)
+ *   3. `blocker` set otherwise   → `'blocked'`   (recoverable, awaiting input)
+ *   4. phase-based mapping       → `'promoted' | 'cancelled' | 'failed' | 'running'`
+ *
+ * The literal string `"null"` is treated as no-blocker because some JSON
+ * writers stringify null as the four-character literal.
+ */
 function mapStatus(phase: string, blocker: string | null): FoundryRunStatus {
-  if (blocker && blocker !== "null") return "blocked";
+  if (blocker && blocker !== "null") {
+    if (blocker === "cancelled") return "cancelled";
+    if (blocker === "failed") return "failed";
+    return "blocked";
+  }
   if (phase === "closed") return "promoted";
   if (phase === "cancelled") return "cancelled";
   if (phase === "failed") return "failed";

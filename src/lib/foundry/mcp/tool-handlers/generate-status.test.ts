@@ -80,6 +80,54 @@ describe("handleFoundryGenerateStatus", () => {
     expect(result.blockers).toEqual(["needs-human"]);
   });
 
+  it("maps blocker='cancelled' to status='cancelled' (NOT 'blocked')", async () => {
+    // In production cancellation surfaces as `blocker: "cancelled"`. Before
+    // this contract fix it leaked out as status='blocked', so consumers could
+    // not distinguish "user cancelled" from "system blocker". The blocker
+    // 'cancelled' must short-circuit before the generic blocker branch.
+    seedRun({
+      runId: RUN_ID,
+      phase: "production",
+      blocker: "cancelled",
+      createdAt: "2026-05-25T12:00:00.000Z",
+      updatedAt: "2026-05-25T12:20:00.000Z",
+      progress: { expectedSlotCount: 4, renderedSlotCount: 1 },
+    });
+    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    expect(result.status).toBe("cancelled");
+    expect(result.blockers).toEqual(["cancelled"]);
+  });
+
+  it("maps phase='cancelled' (no blocker) to status='cancelled'", async () => {
+    // Some runs land at phase='cancelled' without a blocker field set; the
+    // mapping must still resolve to 'cancelled' rather than 'running'.
+    seedRun({
+      runId: RUN_ID,
+      phase: "cancelled",
+      blocker: null,
+      createdAt: "2026-05-25T12:00:00.000Z",
+      updatedAt: "2026-05-25T12:21:00.000Z",
+    });
+    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    expect(result.status).toBe("cancelled");
+    expect(result.blockers).toEqual([]);
+  });
+
+  it("maps blocker='failed' to status='failed' (terminal blocker precedence)", async () => {
+    // Symmetric with the cancelled case — 'failed' as a blocker must surface
+    // as the terminal status, not as the generic 'blocked'.
+    seedRun({
+      runId: RUN_ID,
+      phase: "production",
+      blocker: "failed",
+      createdAt: "2026-05-25T12:00:00.000Z",
+      updatedAt: "2026-05-25T12:22:00.000Z",
+    });
+    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    expect(result.status).toBe("failed");
+    expect(result.blockers).toEqual(["failed"]);
+  });
+
   it("throws if runId is unknown", async () => {
     await expect(
       handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot }),
