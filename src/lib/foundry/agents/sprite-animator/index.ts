@@ -26,6 +26,13 @@ export interface FoundrySpriteAnimatorProviders {
 export interface FoundrySpriteAnimatorContext {
   runDir: string;
   /**
+   * Root directory holding promoted character packs. `resolveFoundrySpriteSourcePack`
+   * joins this with the `sourcePackId` to locate the pack on disk. Tests
+   * may pass any prefix and rely on the `loadFoundryAssetPack` mock; the
+   * production daemon wires this from `FOUNDRY_PACKS_ROOT`.
+   */
+  packsRoot: string;
+  /**
    * Override the anchor PNG bytes loaded from disk. Tests pass this so the
    * identity-drift gate can operate without populating a real file system.
    */
@@ -59,7 +66,9 @@ export async function runFoundrySpriteAnimator(
   context: FoundrySpriteAnimatorContext,
 ): Promise<FoundrySpriteAnimatorResult> {
   const input = FoundrySpriteAnimatorInputSchema.parse(rawInput);
-  const source = await resolveFoundrySpriteSourcePack(input.sourcePackId);
+  const source = await resolveFoundrySpriteSourcePack(input.sourcePackId, {
+    packsRoot: context.packsRoot,
+  });
   const anchorBytes = loadAnchorBytes(source, context);
   if (input.format === "sprite") {
     const video = await providers.video.generateFrames({

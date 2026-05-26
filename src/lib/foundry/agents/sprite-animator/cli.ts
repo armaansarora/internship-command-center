@@ -13,6 +13,13 @@ export interface FoundrySpriteAnimatorCliInput {
   action: FoundrySpriteAction;
   format: FoundrySpriteFormat;
   runDir?: string;
+  /**
+   * Root directory containing promoted character packs. Defaults to the
+   * `FOUNDRY_PACKS_ROOT` env var so the CLI works against the production
+   * pack registry without explicit wiring; tests pass an explicit value
+   * (often a tmp dir) and rely on the `loadFoundryAssetPack` mock.
+   */
+  packsRoot?: string;
   providerKind: "mock" | "sora" | "runway" | "claude";
   seed?: number;
   dryRun?: boolean;
@@ -50,13 +57,14 @@ export async function runFoundrySpriteAnimatorCli(
       `foundry/sprite-animator cli: provider kind ${input.providerKind} not yet wired`,
     );
   }
+  const packsRoot = input.packsRoot ?? process.env.FOUNDRY_PACKS_ROOT ?? join(tmpdir(), "foundry-cli-packs");
   const result = await runFoundrySpriteAnimator(
     parsed,
     {
       video: createFoundrySpriteMockVideoProvider(),
       lottie: createFoundrySpriteMockLottieProvider(),
     },
-    { runDir, anchorBytesOverride: input.anchorBytesOverride },
+    { runDir, packsRoot, anchorBytesOverride: input.anchorBytesOverride },
   );
   return {
     summary: `animation ${parsed.sourcePackId}/${parsed.action}/${parsed.format} pack ${result.packId} validated`,

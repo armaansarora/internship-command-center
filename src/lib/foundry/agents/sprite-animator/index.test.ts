@@ -24,21 +24,46 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
   hash: "0000000000000000",
 };
 
-vi.mock("@/lib/foundry/asset-pack", () => ({
-  buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
-    packId: "anim-pack-1",
-    manifest,
-  })),
-  loadFoundryAssetPack: vi.fn(async () => ({
-    packId: "char-otis-v3",
-    manifest: {
-      assetKind: "character",
-      characterId: "otis",
-      anchorImagePath: "anchor.png",
-      anchorPerceptualHash: ANCHOR_FIXTURE.hash,
-    },
-  })),
-}));
+const MOCK_PACK_DIR = "/tmp/foundry-anim-test/char-otis-v3";
+
+// Critical 1 alignment: the mocked loadFoundryAssetPack now returns the
+// strict on-disk manifest shape (the same shape `character-master` writes
+// and the strict schema validates), not the legacy fixture-only flat
+// shape. resolveFoundrySpriteSourcePack reads characterId from canonRefs
+// and resolves the anchor relPath under the pack dir.
+vi.mock("@/lib/foundry/asset-pack", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/foundry/asset-pack")>(
+    "@/lib/foundry/asset-pack",
+  );
+  return {
+    ...actual,
+    buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
+      packId: "anim-pack-1",
+      manifest,
+    })),
+    loadFoundryAssetPack: vi.fn(async () => ({
+      packId: "char-otis-v3",
+      packDir: MOCK_PACK_DIR,
+      manifest: {
+        manifestVersion: "1.0.0",
+        packId: "char-otis-v3",
+        kind: "character-spritesheet",
+        agent: "character-master",
+        canonRefs: { characterId: "otis", paletteRef: "tower-default", typographyRef: null, motionLanguageRef: null },
+        dimensions: { sourceWidthPx: 2400, sourceHeightPx: 4096, displayWidthPx: 160, displayHeightPx: 280, aspectRatio: "9:16" },
+        colorTokensUsed: ["primaryDark"],
+        intendedSlot: { slotId: "lobby/otis/regular/idle", appPath: "public/art/lobby/otis/regular/idle.webp", component: "OtisCharacter", requiresGsap: false },
+        gsapCues: [],
+        accessibility: { altText: "x", role: "img", prefersReducedMotionStrategy: "static-fallback" },
+        integrationSnippetTemplate: "character-sprite-img",
+        payload: { files: [{ relPath: "regular/idle.webp", sha256: "0".repeat(64), bytes: 1 }], primaryFileRelPath: "regular/idle.webp" },
+        generation: { agentName: "character-master", provider: "x", modelId: "x", seed: 0, costCents: 0, durationMs: 0, generatedAt: "2026-05-25T00:00:00.000Z" },
+        anchorImageRelPath: "regular/idle.webp",
+        anchorPerceptualHash: ANCHOR_FIXTURE.hash,
+      },
+    })),
+  };
+});
 
 describe("runFoundrySpriteAnimator", () => {
   let dir: string;
@@ -65,7 +90,7 @@ describe("runFoundrySpriteAnimator", () => {
         video: createFoundrySpriteMockVideoProvider(),
         lottie: createFoundrySpriteMockLottieProvider(),
       },
-      { runDir: dir, anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
     const manifest = result.manifest as { sprite: { frames: unknown[]; fps: number } };
     expect(manifest.sprite.frames).toHaveLength(12);
@@ -90,7 +115,7 @@ describe("runFoundrySpriteAnimator", () => {
         video: createFoundrySpriteMockVideoProvider(),
         lottie: createFoundrySpriteMockLottieProvider(),
       },
-      { runDir: dir, anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
     const manifest = result.manifest as { lottie: { durationMs: number }; qa: { failedGates: ReadonlyArray<string> } };
     expect(manifest.lottie.durationMs).toBeGreaterThan(0);
@@ -117,7 +142,7 @@ describe("runFoundrySpriteAnimator", () => {
         video: createFoundrySpriteMockVideoProvider(),
         lottie: createFoundrySpriteMockLottieProvider(),
       },
-      { runDir: dir, anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
     const manifest = result.manifest as { integrationSnippet: string };
     expect(manifest.integrationSnippet).toContain("<AnimatedSprite");
@@ -131,10 +156,22 @@ describe("runFoundrySpriteAnimator", () => {
     const { loadFoundryAssetPack } = await import("@/lib/foundry/asset-pack");
     vi.mocked(loadFoundryAssetPack).mockImplementationOnce(async () => ({
       packId: "char-otis-v3",
+      packDir: MOCK_PACK_DIR,
       manifest: {
-        assetKind: "character",
-        characterId: "otis",
-        anchorImagePath: "anchor.png",
+        manifestVersion: "1.0.0",
+        packId: "char-otis-v3",
+        kind: "character-spritesheet",
+        agent: "character-master",
+        canonRefs: { characterId: "otis", paletteRef: "tower-default", typographyRef: null, motionLanguageRef: null },
+        dimensions: { sourceWidthPx: 2400, sourceHeightPx: 4096, displayWidthPx: 160, displayHeightPx: 280, aspectRatio: "9:16" },
+        colorTokensUsed: ["primaryDark"],
+        intendedSlot: { slotId: "lobby/otis/regular/idle", appPath: "public/art/lobby/otis/regular/idle.webp", component: "OtisCharacter", requiresGsap: false },
+        gsapCues: [],
+        accessibility: { altText: "x", role: "img", prefersReducedMotionStrategy: "static-fallback" },
+        integrationSnippetTemplate: "character-sprite-img",
+        payload: { files: [{ relPath: "regular/idle.webp", sha256: "0".repeat(64), bytes: 1 }], primaryFileRelPath: "regular/idle.webp" },
+        generation: { agentName: "character-master", provider: "x", modelId: "x", seed: 0, costCents: 0, durationMs: 0, generatedAt: "2026-05-25T00:00:00.000Z" },
+        anchorImageRelPath: "regular/idle.webp",
         anchorPerceptualHash: "5a5a5a5a5a5a5a5a",
       },
     }));
@@ -155,7 +192,7 @@ describe("runFoundrySpriteAnimator", () => {
           video: createFoundrySpriteMockVideoProvider(),
           lottie: createFoundrySpriteMockLottieProvider(),
         },
-        { runDir: dir, anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+        { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
       ),
     ).rejects.toThrow(/lottie-identity/);
   });

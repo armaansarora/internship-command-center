@@ -21,21 +21,39 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
   hash: "0000000000000000",
 };
 
-vi.mock("@/lib/foundry/asset-pack", () => ({
-  buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
-    packId: "lottie-golden",
-    manifest,
-  })),
-  loadFoundryAssetPack: vi.fn(async () => ({
-    packId: "char-otis-v3",
-    manifest: {
-      assetKind: "character",
-      characterId: "otis",
-      anchorImagePath: "anchor.png",
-      anchorPerceptualHash: ANCHOR_FIXTURE.hash,
-    },
-  })),
-}));
+vi.mock("@/lib/foundry/asset-pack", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/foundry/asset-pack")>(
+    "@/lib/foundry/asset-pack",
+  );
+  return {
+    ...actual,
+    buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
+      packId: "lottie-golden",
+      manifest,
+    })),
+    loadFoundryAssetPack: vi.fn(async () => ({
+      packId: "char-otis-v3",
+      packDir: "/tmp/foundry-test/char-otis-v3",
+      manifest: {
+        manifestVersion: "1.0.0",
+        packId: "char-otis-v3",
+        kind: "character-spritesheet",
+        agent: "character-master",
+        canonRefs: { characterId: "otis", paletteRef: "tower-default", typographyRef: null, motionLanguageRef: null },
+        dimensions: { sourceWidthPx: 2400, sourceHeightPx: 4096, displayWidthPx: 160, displayHeightPx: 280, aspectRatio: "9:16" },
+        colorTokensUsed: ["primaryDark"],
+        intendedSlot: { slotId: "lobby/otis/regular/idle", appPath: "public/art/lobby/otis/regular/idle.webp", component: "OtisCharacter", requiresGsap: false },
+        gsapCues: [],
+        accessibility: { altText: "x", role: "img", prefersReducedMotionStrategy: "static-fallback" },
+        integrationSnippetTemplate: "character-sprite-img",
+        payload: { files: [{ relPath: "regular/idle.webp", sha256: "0".repeat(64), bytes: 1 }], primaryFileRelPath: "regular/idle.webp" },
+        generation: { agentName: "character-master", provider: "x", modelId: "x", seed: 0, costCents: 0, durationMs: 0, generatedAt: "2026-05-25T00:00:00.000Z" },
+        anchorImageRelPath: "regular/idle.webp",
+        anchorPerceptualHash: ANCHOR_FIXTURE.hash,
+      },
+    })),
+  };
+});
 
 describe("golden lottie pulse", () => {
   let dir: string;
