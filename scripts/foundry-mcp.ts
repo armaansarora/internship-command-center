@@ -16,6 +16,7 @@ Environment:
   FOUNDRY_CANON_ROOT        Path to canon root      (default: .artlab/canon)
   FOUNDRY_PACKS_ROOT        Path to promoted packs  (default: .artlab/engine/promoted)
   FOUNDRY_SLOT_REGISTRY     Path to slot registry   (default: .artlab/engine/slots/registry.json)
+  FOUNDRY_MEMORY_DIR        Path to memory ledger   (default: .artlab/engine/memory)
 `;
 
 function readVersion(): string {
@@ -41,6 +42,7 @@ async function main(argv: string[]): Promise<number> {
   const packsRoot = process.env.FOUNDRY_PACKS_ROOT ?? join(workspaceRoot, "promoted");
   const slotRegistryPath =
     process.env.FOUNDRY_SLOT_REGISTRY ?? join(workspaceRoot, "slots", "registry.json");
+  const memoryDir = process.env.FOUNDRY_MEMORY_DIR ?? join(workspaceRoot, "memory");
 
   if (!existsSync(workspaceRoot)) {
     if (process.env.FOUNDRY_AUTOCREATE_WORKSPACE === "1") {
@@ -56,8 +58,10 @@ async function main(argv: string[]): Promise<number> {
     canonRoot,
     packsRoot,
     slotRegistryPath,
+    memoryDir,
     providerProbes: {},
     version: readVersion(),
+    env: process.env,
   });
   const transport = new StdioServerTransport();
   await built.server.connect(transport);

@@ -27,6 +27,18 @@ export interface FoundryMcpServerConfig {
   canonRoot: string;
   packsRoot: string;
   slotRegistryPath: string;
+  /**
+   * Path to the ArtLab memory ledger directory (typically
+   * `<workspaceRoot>/memory`). When supplied, brain enrichment hydrates
+   * `recentWins`/`recentRejections` from `style-wins.jsonl` +
+   * `style-rejections.jsonl` before calling the per-agent brain. When
+   * omitted, the brain receives empty arrays — every call still parses,
+   * but no feedback signals are propagated.
+   *
+   * Wiring is intentionally additive: dropping this field in callers that
+   * never set it has zero behavioural effect.
+   */
+  memoryDir?: string;
   providerProbes: Record<string, () => Promise<boolean>>;
   version: string;
   /** Optional env map for per-agent brain wiring. If unset, brain enrichment is skipped. */
@@ -78,6 +90,7 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
       ? async (input) => {
           const result = await routeFoundryRequest(input.description, {
             env: config.env ?? {},
+            memoryDir: config.memoryDir,
             metaCallOverride: config.brainCallOverride,
           });
           return result as Record<string, unknown>;
