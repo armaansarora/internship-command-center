@@ -21,6 +21,7 @@
     "artlab:smoke": "tsx scripts/artlab.ts smoke",
     "foundry": "tsx scripts/foundry.ts",
     "foundry:canon-validate": "tsx scripts/foundry.ts canon validate",
+    "foundry:mcp": "tsx scripts/foundry-mcp.ts",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
