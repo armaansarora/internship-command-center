@@ -1,0 +1,5 @@
+{
+  "totalOpaquePxMin": 10000,
+  "totalTransparentPxMin": 10000,
+  "note": "Synthetic fixture: 128x192 dark foreground on 256x256 light backdrop. Envelopes are lower bounds, not exact values."
+}

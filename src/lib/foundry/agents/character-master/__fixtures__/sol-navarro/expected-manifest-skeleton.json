@@ -1,0 +1,22 @@
+{
+  "manifestVersion": "1.0.0",
+  "kind": "character-spritesheet",
+  "agent": "character-master",
+  "canonRefs": {
+    "characterId": "sol-navarro",
+    "paletteRef": "tower-default",
+    "typographyRef": null,
+    "motionLanguageRef": null
+  },
+  "intendedSlot": {
+    "slotId": "rolodex-lounge/sol-navarro/regular/idle",
+    "appPath": "public/art/rolodex-lounge/sol-navarro/regular/idle.webp",
+    "component": "SolCharacter",
+    "requiresGsap": false
+  },
+  "accessibility": {
+    "altText": "Sol Navarro character sprite set",
+    "role": "img",
+    "prefersReducedMotionStrategy": "static-fallback"
+  }
+}
