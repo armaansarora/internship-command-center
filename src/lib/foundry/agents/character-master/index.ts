@@ -4,11 +4,11 @@ import { loadFoundryCanon } from "@/lib/foundry/canon";
 import type { FoundryCharacterCanon } from "@/lib/foundry/canon";
 import type { FoundryImageProvider } from "@/lib/foundry/providers/types";
 import type { CreatedFoundryAssetPack } from "@/lib/foundry/asset-pack";
-import { backdropSubtractToRgba } from "@/lib/artlab/runners/cutout-primitives";
+import { backdropSubtractToRgba, classifyAlpha } from "@/lib/artlab/runners/cutout-primitives";
 import { runConceptBoardStage, type ConceptLane } from "./stages/concept-board";
 import { runAnchorLockStage } from "./stages/anchor-lock";
 import { runVariantFanOutStage } from "./stages/variant-fan-out";
-import { runCutoutAndFeatherStage } from "./stages/cutout-and-feather";
+import { runCutoutAndFeatherStage, type ProcessedSprite } from "./stages/cutout-and-feather";
 import { runCompositeJudgeStage } from "./stages/composite-judge";
 import { runManifestBuildStage } from "./stages/manifest-build";
 import {
@@ -155,6 +155,52 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
         continue;
       }
       if (stage === "cutout-and-feather") {
+        // Two cases:
+        //   1. We just arrived here from variant-fan-out, which already ran
+        //      the cutout stage inline. `sprites` is non-null; we just emit a
+        //      no-op completion for the gate event.
+        //   2. We RESUMED at cutout-and-feather. `sprites` is null and the
+        //      orchestrator must reconstruct the ProcessedSprite[] from the
+        //      PNGs written by the previous run, otherwise composite-judge
+        //      will throw "missing sprites/anchor".
+        if (sprites === null) {
+          if (!anchor) {
+            await loadResumeAnchor();
+            if (!anchor) {
+              throw new Error("cutout-and-feather: no anchor available for resume");
+            }
+          }
+          const resumeStart = performance.now();
+          const reconstructed: ProcessedSprite[] = [];
+          for (const outfit of character.outfitVariants) {
+            for (const pose of character.poseStates) {
+              const pngPath = join(runWorkspace, `${outfit}__${pose}.png`);
+              if (!(await fileExists(pngPath))) {
+                throw new Error(
+                  `cutout-and-feather: resume cannot find sprite "${outfit}__${pose}.png" — expected at ${pngPath}`,
+                );
+              }
+              const bytes = await readFile(pngPath);
+              const alphaSamples = await classifyAlpha(bytes);
+              reconstructed.push({
+                characterId: character.header.id,
+                outfit,
+                pose,
+                pngPath,
+                alphaSamples,
+                noisyBackdropWarning: false,
+              });
+            }
+          }
+          sprites = reconstructed;
+          emit({
+            kind: "stage-completed",
+            stage,
+            durationMs: Math.round(performance.now() - resumeStart),
+            at: nowIso(),
+          });
+          continue;
+        }
         emit({ kind: "stage-completed", stage, durationMs: 0, at: nowIso() });
         continue;
       }

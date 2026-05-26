@@ -167,6 +167,95 @@ describe("runCharacterMaster", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("resumes from cutout-and-feather end-to-end and produces a valid pack", async () => {
+    // Bootstrap a complete cutout-stage workspace: anchor + 21 sprite PNGs
+    // already on disk, then resume from `cutout-and-feather`. The orchestrator
+    // must reconstruct the sprite list from disk so composite-judge has
+    // something to compare against — without this it would throw
+    // "composite-judge: missing sprites/anchor".
+    const runWorkspace = join(workspaceRoot, "runs", "sol-navarro");
+    mkdirSync(runWorkspace, { recursive: true });
+    const anchorPng = await sharp({
+      create: { width: 64, height: 64, channels: 4, background: { r: 240, g: 235, b: 220, alpha: 1 } },
+    })
+      .composite([
+        {
+          input: await sharp({
+            create: { width: 24, height: 24, channels: 4, background: { r: 30, g: 30, b: 60, alpha: 1 } },
+          }).png().toBuffer(),
+          top: 20,
+          left: 20,
+        },
+      ])
+      .png()
+      .toBuffer();
+    writeFileSync(join(runWorkspace, "anchor.png"), anchorPng);
+    writeFileSync(join(runWorkspace, "anchor-meta.json"), JSON.stringify({
+      anchorLaneIndex: 3,
+      anchorPrompt: "previous anchor",
+      anchorCharacterId: "sol-navarro",
+      anchorWidthPx: 64,
+      anchorHeightPx: 64,
+    }));
+    for (const outfit of ["regular", "summer-light", "winter-layered"]) {
+      for (const pose of ["idle", "greeting", "listening", "thinking", "talking", "alert", "working"]) {
+        const sprite = await sharp({
+          create: { width: 64, height: 64, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+        })
+          .composite([
+            {
+              input: await sharp({
+                create: { width: 24, height: 24, channels: 4, background: { r: 30, g: 30, b: 60, alpha: 1 } },
+              }).png().toBuffer(),
+              top: 20,
+              left: 20,
+            },
+          ])
+          .png()
+          .toBuffer();
+        writeFileSync(join(runWorkspace, `${outfit}__${pose}.png`), sprite);
+      }
+    }
+    const events: string[] = [];
+    const result = await runCharacterMaster({
+      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "cutout-and-feather", seed: 42 },
+      provider: createPngFoundryImageProvider(),
+      emit: (e) => events.push(e.kind),
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(events.filter((e) => e === "stage-completed").length).toBeGreaterThanOrEqual(3);
+      expect(events).toContain("pack-emitted");
+      expect(result.pack.manifest.payload.files.length).toBe(21);
+    }
+  });
+
+  it("returns an actionable error if a sprite PNG is missing when resuming at cutout-and-feather", async () => {
+    const runWorkspace = join(workspaceRoot, "runs", "sol-navarro");
+    mkdirSync(runWorkspace, { recursive: true });
+    const anchorPng = await sharp({
+      create: { width: 64, height: 64, channels: 4, background: { r: 240, g: 235, b: 220, alpha: 1 } },
+    }).png().toBuffer();
+    writeFileSync(join(runWorkspace, "anchor.png"), anchorPng);
+    writeFileSync(join(runWorkspace, "anchor-meta.json"), JSON.stringify({
+      anchorLaneIndex: 3,
+      anchorPrompt: "previous anchor",
+      anchorCharacterId: "sol-navarro",
+      anchorWidthPx: 64,
+      anchorHeightPx: 64,
+    }));
+    const result = await runCharacterMaster({
+      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "cutout-and-feather", seed: 42 },
+      provider: createPngFoundryImageProvider(),
+      emit: () => {},
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.failure.stage).toBe("cutout-and-feather");
+      expect(result.failure.reason).toMatch(/regular__idle\.png/);
+    }
+  });
+
   it("skips concept-board + anchor-lock when resumeFromStage is variant-fan-out", async () => {
     const events: string[] = [];
     const runWorkspace = join(workspaceRoot, "runs", "sol-navarro");
