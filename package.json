@@ -10,7 +10,7 @@
     "dev:preview": "tsx scripts/dev-preview.ts",
     "build": "next build",
     "start": "next start",
-"artlab": "tsx scripts/artlab.ts",
+    "artlab": "tsx scripts/artlab.ts",
     "artlab:produce": "tsx scripts/artlab.ts produce",
     "artlab:status": "tsx scripts/artlab.ts status",
     "artlab:queue": "tsx scripts/artlab.ts queue",
@@ -58,6 +58,7 @@
     "resend": "^6.12.2",
     "stripe": "^20.4.1",
     "xstate": "^5.28.0",
+    "yaml": "^2.9.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
