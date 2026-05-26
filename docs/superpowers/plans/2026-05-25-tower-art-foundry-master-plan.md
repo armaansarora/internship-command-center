@@ -10002,7 +10002,7 @@ The new public entry point added in this phase is `runFoundryUiTexture(input, pr
 - Create: `src/lib/foundry/agents/ui-texture/types.ts`
 - Test: `src/lib/foundry/agents/ui-texture/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/types.test.ts
@@ -10076,12 +10076,12 @@ describe("foundry ui-texture types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/types.test.ts`
 Expected: FAIL — "Cannot find module './types'"
 
-- [ ] **Step 3: Implement schemas**
+- [x] **Step 3: Implement schemas**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/types.ts
@@ -10150,12 +10150,12 @@ export type FoundryUiTextureManifest = z.infer<
 >;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/types.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/types.ts src/lib/foundry/agents/ui-texture/types.test.ts
@@ -10173,10 +10173,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Discriminated union rejects an icon-input lacking `ariaLabel`.
-- [ ] Icon manifest schema enforces `viewBox` regex.
-- [ ] Texture manifest schema enforces `tileMode` enum.
-- [ ] Both manifest schemas enforce `name` regex (no path-traversal).
+- [x] Discriminated union rejects an icon-input lacking `ariaLabel`.
+- [x] Icon manifest schema enforces `viewBox` regex.
+- [x] Texture manifest schema enforces `tileMode` enum.
+- [x] Both manifest schemas enforce `name` regex (no path-traversal).
 
 ### Task 4.2: Iconography-rules adapter
 
@@ -10184,7 +10184,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/icon-rules.ts`
 - Test: `src/lib/foundry/agents/ui-texture/icon-rules.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/icon-rules.test.ts
@@ -10222,12 +10222,12 @@ describe("loadFoundryIconRulesAdapter", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/icon-rules.test.ts`
 Expected: FAIL — "Cannot find module './icon-rules'"
 
-- [ ] **Step 3: Implement adapter**
+- [x] **Step 3: Implement adapter**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/icon-rules.ts
@@ -10260,12 +10260,12 @@ export async function loadFoundryIconRulesAdapter(): Promise<FoundryIconRules> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/icon-rules.test.ts`
 Expected: PASS — 2 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/icon-rules.ts src/lib/foundry/agents/ui-texture/icon-rules.test.ts
@@ -10282,9 +10282,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns canon rules with `strokeWidthTolerancePx` derived as a positive fraction of `strokeWidthPx`.
-- [ ] Throws when canon returns no icon-rules entry.
-- [ ] Palette is copied (caller cannot mutate canon).
+- [x] Returns canon rules with `strokeWidthTolerancePx` derived as a positive fraction of `strokeWidthPx`.
+- [x] Throws when canon returns no icon-rules entry.
+- [x] Palette is copied (caller cannot mutate canon).
 
 ### Task 4.3: Texture-rules adapter
 
@@ -10292,7 +10292,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/texture-rules.ts`
 - Test: `src/lib/foundry/agents/ui-texture/texture-rules.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/texture-rules.test.ts
@@ -10340,12 +10340,12 @@ describe("loadFoundryTextureRulesAdapter", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/texture-rules.test.ts`
 Expected: FAIL — "Cannot find module './texture-rules'"
 
-- [ ] **Step 3: Implement adapter**
+- [x] **Step 3: Implement adapter**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/texture-rules.ts
@@ -10375,12 +10375,12 @@ export async function loadFoundryTextureRulesAdapter(): Promise<FoundryTextureRu
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/texture-rules.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/texture-rules.ts src/lib/foundry/agents/ui-texture/texture-rules.test.ts
@@ -10397,9 +10397,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns canon-derived rules with the three normalised numeric fields.
-- [ ] Throws when canon returns null.
-- [ ] Throws when `normalMapStrength` is outside [0, 1].
+- [x] Returns canon-derived rules with the three normalised numeric fields.
+- [x] Throws when canon returns null.
+- [x] Throws when `normalMapStrength` is outside [0, 1].
 
 ### Task 4.4: Mock SVG-emitting LLM provider for icon tests
 
@@ -10407,7 +10407,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts`
 - Test: `src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts
@@ -10462,12 +10462,12 @@ describe("createFoundryIconMockLlmProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-llm-provider'"
 
-- [ ] **Step 3: Implement mock LLM provider**
+- [x] **Step 3: Implement mock LLM provider**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts
@@ -10495,12 +10495,12 @@ export function createFoundryIconMockLlmProvider(): FoundryIconLlmProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts
@@ -10518,10 +10518,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Mock emits a string containing `<svg` and `</svg>`.
-- [ ] Emitted SVG embeds the requested `stroke-width`, `viewBox`, and `aria-label`.
-- [ ] Same seed yields byte-identical output (deterministic).
-- [ ] `mode === "mock"` and `costCents === 0`.
+- [x] Mock emits a string containing `<svg` and `</svg>`.
+- [x] Emitted SVG embeds the requested `stroke-width`, `viewBox`, and `aria-label`.
+- [x] Same seed yields byte-identical output (deterministic).
+- [x] `mode === "mock"` and `costCents === 0`.
 
 ### Task 4.5: Icon LLM provider interface
 
@@ -10529,7 +10529,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/llm-provider.ts`
 - Test: `src/lib/foundry/agents/ui-texture/llm-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/llm-provider.test.ts
@@ -10576,12 +10576,12 @@ describe("foundry icon LLM provider contract", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/llm-provider.test.ts`
 Expected: FAIL — "Cannot find module './llm-provider'"
 
-- [ ] **Step 3: Implement provider contract**
+- [x] **Step 3: Implement provider contract**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/llm-provider.ts
@@ -10613,12 +10613,12 @@ export interface FoundryIconLlmProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/llm-provider.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/llm-provider.ts src/lib/foundry/agents/ui-texture/llm-provider.test.ts
@@ -10636,10 +10636,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input schema requires `name`, `ariaLabel`, `strokeWidthPx`, `viewBox`.
-- [ ] Result schema requires `svg`, `mode in {real, mock}`, integer `costCents`, integer `durationMs`.
-- [ ] Provider interface declares a single method `emitSvg`.
-- [ ] Mode enum rejects any value other than `real` or `mock`.
+- [x] Input schema requires `name`, `ariaLabel`, `strokeWidthPx`, `viewBox`.
+- [x] Result schema requires `svg`, `mode in {real, mock}`, integer `costCents`, integer `durationMs`.
+- [x] Provider interface declares a single method `emitSvg`.
+- [x] Mode enum rejects any value other than `real` or `mock`.
 
 ### Task 4.6: SVG stroke-width QA gate
 
@@ -10647,7 +10647,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.ts`
 - Test: `src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts
@@ -10697,12 +10697,12 @@ describe("evaluateFoundrySvgStrokeWidth", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts`
 Expected: FAIL — "Cannot find module './svg-stroke-width'"
 
-- [ ] **Step 3: Implement SVG stroke-width QA**
+- [x] **Step 3: Implement SVG stroke-width QA**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.ts
@@ -10764,12 +10764,12 @@ export function evaluateFoundrySvgStrokeWidth(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.ts src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts
@@ -10787,10 +10787,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Captures stroke-width declared on the `<svg>` root and inherited by children.
-- [ ] Captures stroke-width declared on individual paths.
-- [ ] Returns `passed: false` and a reason when no stroke-width is declared anywhere.
-- [ ] Outlier list contains every value outside `[target - tol, target + tol]`.
+- [x] Captures stroke-width declared on the `<svg>` root and inherited by children.
+- [x] Captures stroke-width declared on individual paths.
+- [x] Returns `passed: false` and a reason when no stroke-width is declared anywhere.
+- [x] Outlier list contains every value outside `[target - tol, target + tol]`.
 
 ### Task 4.7: SVG aria-label QA gate
 
@@ -10798,7 +10798,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/qa/svg-aria-label.ts`
 - Test: `src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts
@@ -10835,12 +10835,12 @@ describe("evaluateFoundrySvgAriaLabel", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts`
 Expected: FAIL — "Cannot find module './svg-aria-label'"
 
-- [ ] **Step 3: Implement aria-label QA**
+- [x] **Step 3: Implement aria-label QA**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-aria-label.ts
@@ -10873,12 +10873,12 @@ export function evaluateFoundrySvgAriaLabel(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/qa/svg-aria-label.ts src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts
@@ -10895,10 +10895,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: false` when the `<svg>` root has no `aria-label`.
-- [ ] Returns `passed: false` when `aria-label` differs from expected (case-sensitive).
-- [ ] Returns the observed label in the report so the caller can quote it.
-- [ ] Throws on no `<svg>` open tag (programmer-error class).
+- [x] Returns `passed: false` when the `<svg>` root has no `aria-label`.
+- [x] Returns `passed: false` when `aria-label` differs from expected (case-sensitive).
+- [x] Returns the observed label in the report so the caller can quote it.
+- [x] Throws on no `<svg>` open tag (programmer-error class).
 
 ### Task 4.8: Tile-edge continuity QA gate (textures)
 
@@ -10906,7 +10906,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/qa/tile-continuity.ts`
 - Test: `src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts
@@ -10974,12 +10974,12 @@ describe("evaluateFoundryTileContinuity", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts`
 Expected: FAIL — "Cannot find module './tile-continuity'"
 
-- [ ] **Step 3: Implement tile-continuity QA**
+- [x] **Step 3: Implement tile-continuity QA**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/tile-continuity.ts
@@ -11095,12 +11095,12 @@ export async function evaluateFoundryTileContinuity(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/qa/tile-continuity.ts src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts
@@ -11118,10 +11118,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: true` for a uniform image (edges trivially identical).
-- [ ] Returns `passed: false` for an image whose left and right halves differ sharply.
-- [ ] Reports `horizontalDeltaE` and `verticalDeltaE` separately so the caller can blame the failing axis.
-- [ ] `maxDeltaE` equals the larger of the two axis values.
+- [x] Returns `passed: true` for a uniform image (edges trivially identical).
+- [x] Returns `passed: false` for an image whose left and right halves differ sharply.
+- [x] Reports `horizontalDeltaE` and `verticalDeltaE` separately so the caller can blame the failing axis.
+- [x] `maxDeltaE` equals the larger of the two axis values.
 
 ### Task 4.9: Normal-map extraction
 
@@ -11129,7 +11129,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/stages/normal-map.ts`
 - Test: `src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts
@@ -11173,12 +11173,12 @@ describe("extractFoundryNormalMap", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts`
 Expected: FAIL — "Cannot find module './normal-map'"
 
-- [ ] **Step 3: Implement normal-map extraction**
+- [x] **Step 3: Implement normal-map extraction**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/stages/normal-map.ts
@@ -11232,12 +11232,12 @@ export async function extractFoundryNormalMap(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/stages/normal-map.ts src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts
@@ -11255,10 +11255,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Produces a PNG with the same dimensions as the source.
-- [ ] Produces bytes different from the source.
-- [ ] Throws when `strength` is outside [0, 1].
-- [ ] Flat areas of the source map approximately to `(128, 128, 255)`.
+- [x] Produces a PNG with the same dimensions as the source.
+- [x] Produces bytes different from the source.
+- [x] Throws when `strength` is outside [0, 1].
+- [x] Flat areas of the source map approximately to `(128, 128, 255)`.
 
 ### Task 4.10: Pack writer (icons + textures)
 
@@ -11266,7 +11266,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/pack-writer.ts`
 - Test: `src/lib/foundry/agents/ui-texture/pack-writer.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/pack-writer.test.ts
@@ -11356,12 +11356,12 @@ describe("writeFoundryUiTexturePack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/pack-writer.test.ts`
 Expected: FAIL — "Cannot find module './pack-writer'"
 
-- [ ] **Step 3: Implement pack writer**
+- [x] **Step 3: Implement pack writer**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/pack-writer.ts
@@ -11425,12 +11425,12 @@ export async function writeFoundryUiTexturePack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/pack-writer.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/pack-writer.ts src/lib/foundry/agents/ui-texture/pack-writer.test.ts
@@ -11448,10 +11448,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Icon writer produces one `<name>.svg` file.
-- [ ] Texture writer produces both `<name>.png` and `<name>.normal.png`.
-- [ ] No `.tmp.*` artefacts remain.
-- [ ] Both writers return relative paths in their result.
+- [x] Icon writer produces one `<name>.svg` file.
+- [x] Texture writer produces both `<name>.png` and `<name>.normal.png`.
+- [x] No `.tmp.*` artefacts remain.
+- [x] Both writers return relative paths in their result.
 
 ### Task 4.11: Integration-snippet generator (icon + texture)
 
@@ -11459,7 +11459,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/integration.ts`
 - Test: `src/lib/foundry/agents/ui-texture/integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/integration.test.ts
@@ -11532,12 +11532,12 @@ describe("renderFoundryTextureIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/integration.test.ts`
 Expected: FAIL — "Cannot find module './integration'"
 
-- [ ] **Step 3: Implement integration**
+- [x] **Step 3: Implement integration**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/integration.ts
@@ -11589,12 +11589,12 @@ export function renderFoundryTextureIntegrationSnippet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/integration.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/integration.ts src/lib/foundry/agents/ui-texture/integration.test.ts
@@ -11612,10 +11612,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Icon snippet imports a `<PascalCasedName>Icon` from `@/components/foundry/icons/<name>`.
-- [ ] Texture snippet contains a Tailwind `bg-[url('...')]` reference.
-- [ ] Texture snippet declares the `--foundry-normal-map` CSS variable.
-- [ ] Both snippets are deterministic for identical inputs.
+- [x] Icon snippet imports a `<PascalCasedName>Icon` from `@/components/foundry/icons/<name>`.
+- [x] Texture snippet contains a Tailwind `bg-[url('...')]` reference.
+- [x] Texture snippet declares the `--foundry-normal-map` CSS variable.
+- [x] Both snippets are deterministic for identical inputs.
 
 ### Task 4.12: Agent entry point (kind-discriminated)
 
@@ -11623,7 +11623,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/index.ts`
 - Test: `src/lib/foundry/agents/ui-texture/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/index.test.ts
@@ -11745,12 +11745,12 @@ describe("runFoundryUiTexture", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/index.test.ts`
 Expected: FAIL — "Cannot find module './index'"
 
-- [ ] **Step 3: Implement agent entry point**
+- [x] **Step 3: Implement agent entry point**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/index.ts
@@ -11895,12 +11895,12 @@ export async function runFoundryUiTexture(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/index.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/index.ts src/lib/foundry/agents/ui-texture/index.test.ts
@@ -11920,10 +11920,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Icon kind produces an Asset Pack with `assetKind === "ui-icon"`.
-- [ ] Texture kind produces an Asset Pack with `assetKind === "ui-texture"`.
-- [ ] Throws with `gates=` listing failing icon QA gates.
-- [ ] Throws with `maxDeltaE=` when texture tile-continuity fails.
+- [x] Icon kind produces an Asset Pack with `assetKind === "ui-icon"`.
+- [x] Texture kind produces an Asset Pack with `assetKind === "ui-texture"`.
+- [x] Throws with `gates=` listing failing icon QA gates.
+- [x] Throws with `maxDeltaE=` when texture tile-continuity fails.
 
 ### Task 4.13: CLI subcommand + golden icon and texture fixtures
 
@@ -11933,7 +11933,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/__tests__/golden-etched-gold-texture.test.ts`
 - Modify: `scripts/foundry.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/__tests__/golden-elevator-icon.test.ts
@@ -12057,7 +12057,7 @@ describe("golden etched-gold texture", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run:
 ```
@@ -12066,7 +12066,7 @@ npx vitest run src/lib/foundry/agents/ui-texture/__tests__/golden-elevator-icon.
 ```
 Expected: FAIL — "Cannot find module '../cli'"
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/cli.ts
@@ -12163,7 +12163,7 @@ export async function runFoundryUiTextureCli(
 }
 ```
 
-- [ ] **Step 4: Modify `scripts/foundry.ts` to route `texture` subcommand**
+- [x] **Step 4: Modify `scripts/foundry.ts` to route `texture` subcommand**
 
 ```ts
 // scripts/foundry.ts — add the `texture` case to the switch.
@@ -12193,7 +12193,7 @@ export async function runFoundryUiTextureCli(
 // }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run:
 ```
@@ -12202,7 +12202,7 @@ npx vitest run src/lib/foundry/agents/ui-texture/__tests__/golden-elevator-icon.
 ```
 Expected: PASS — all 3 assertions pass
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/cli.ts \
@@ -12223,10 +12223,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Golden icon fixture writes exactly one `.svg` carrying the requested stroke-width and aria-label.
-- [ ] Golden texture fixture writes exactly one `<name>.png` plus one `<name>.normal.png`.
-- [ ] `--dry-run` prints `validated` for both kinds.
-- [ ] CLI throws on `--kind` value other than `icon|texture`.
+- [x] Golden icon fixture writes exactly one `.svg` carrying the requested stroke-width and aria-label.
+- [x] Golden texture fixture writes exactly one `<name>.png` plus one `<name>.normal.png`.
+- [x] `--dry-run` prints `validated` for both kinds.
+- [x] CLI throws on `--kind` value other than `icon|texture`.
 
 ### Phase 4 completion criteria
 
