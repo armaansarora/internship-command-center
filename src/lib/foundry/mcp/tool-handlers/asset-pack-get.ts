@@ -5,6 +5,7 @@ import {
   FoundryAssetPackGetOutputSchema,
   type FoundryAssetPackGetOutput,
 } from "../tools";
+import { PackIdSchema, resolvePackDir } from "../lib/path-safety";
 import type { FoundryAssetPackListContext } from "./asset-pack-list";
 
 interface ManifestFile {
@@ -21,10 +22,13 @@ export async function handleFoundryAssetPackGet(
   ctx: FoundryAssetPackListContext,
 ): Promise<FoundryAssetPackGetOutput> {
   const input = FoundryAssetPackGetInputSchema.parse(rawInput);
-  const packDir = join(ctx.packsRoot, input.packId);
+  // Defense in depth: validate packId charset/encoding before any path join,
+  // then re-confirm the resolved directory stays inside packsRoot.
+  const safePackId = PackIdSchema.parse(input.packId);
+  const packDir = resolvePackDir(ctx.packsRoot, safePackId);
   const manifestPath = join(packDir, "manifest.json");
   if (!existsSync(manifestPath)) {
-    throw new Error(`asset pack not found: ${input.packId}`);
+    throw new Error(`asset pack not found: ${safePackId}`);
   }
   const manifestRaw = readFileSync(manifestPath, "utf8");
   let manifest: MinimalManifest & Record<string, unknown>;
@@ -34,19 +38,29 @@ export async function handleFoundryAssetPackGet(
     throw new Error(`asset pack manifest malformed at ${manifestPath}: ${String(err)}`);
   }
   if (!Array.isArray(manifest.files)) {
-    throw new Error(`asset pack manifest missing 'files' array: ${input.packId}`);
+    throw new Error(`asset pack manifest missing 'files' array: ${safePackId}`);
   }
   const files: FoundryAssetPackGetOutput["files"] = [];
   for (const f of manifest.files) {
-    const abs = join(packDir, f.path);
+    // Manifest-author-controlled paths are also confined to packDir so a
+    // poisoned manifest cannot read outside its own asset pack.
+    const abs = resolveWithinPack(packDir, f.path);
     if (!existsSync(abs)) {
       throw new Error(`asset pack file missing on disk: ${abs}`);
     }
     files.push({ path: abs, role: f.role, bytes: statSync(abs).size });
   }
   return FoundryAssetPackGetOutputSchema.parse({
-    packId: input.packId,
+    packId: safePackId,
     manifest: manifest as Record<string, unknown>,
     files,
   });
+}
+
+/** Resolve a relative manifest entry inside `packDir`, refusing escapes. */
+function resolveWithinPack(packDir: string, relPath: string): string {
+  if (relPath.includes("..") || relPath.startsWith("/") || relPath.startsWith("~")) {
+    throw new Error(`manifest file path '${relPath}' is not safe`);
+  }
+  return join(packDir, relPath);
 }

@@ -83,4 +83,28 @@ describe("handleFoundryAssetPackIntegration", () => {
       ),
     ).rejects.toThrow(/integration metadata missing/i);
   });
+
+  describe("path-traversal attack vectors (security)", () => {
+    it.each([
+      ["plain traversal", "../../../etc/passwd"],
+      ["URL-encoded traversal", "..%2f..%2fpasswd"],
+      ["uppercase encoded traversal", "..%2F..%2Fpasswd"],
+      ["encoded dot-dot", "%2e%2e/passwd"],
+      ["mid-string traversal", "pack/../escape"],
+      ["absolute path", "/absolute"],
+      ["home expansion", "~/home"],
+      ["empty string", ""],
+      ["very long string (>256)", "a".repeat(257)],
+      ["backslash traversal", "..\\..\\Windows"],
+      ["hidden dotfile", ".ssh"],
+      ["bare dot", "."],
+    ])("rejects %s with a validation/safety error", async (_label, evil) => {
+      await expect(
+        handleFoundryAssetPackIntegration(
+          { packId: evil, targetFramework: "next-app-router" },
+          { packsRoot },
+        ),
+      ).rejects.toThrow(/(packId|outside packsRoot|empty|256|may not|encoded|must match|invalid)/i);
+    });
+  });
 });

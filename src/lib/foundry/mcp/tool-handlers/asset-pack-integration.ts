@@ -7,6 +7,7 @@ import {
   type FoundryAssetPackIntegrationOutput,
   type FoundryAssetKind,
 } from "../tools";
+import { PackIdSchema, resolvePackDir } from "../lib/path-safety";
 import type { FoundryAssetPackListContext } from "./asset-pack-list";
 
 interface ManifestForIntegration {
@@ -122,17 +123,21 @@ export async function handleFoundryAssetPackIntegration(
   ctx: FoundryAssetPackListContext,
 ): Promise<FoundryAssetPackIntegrationOutput> {
   const input = FoundryAssetPackIntegrationInputSchema.parse(rawInput);
-  const manifestPath = join(ctx.packsRoot, input.packId, "manifest.json");
+  // Defense in depth: validate packId charset/encoding before any path join,
+  // then re-confirm the resolved directory stays inside packsRoot.
+  const safePackId = PackIdSchema.parse(input.packId);
+  const packDir = resolvePackDir(ctx.packsRoot, safePackId);
+  const manifestPath = join(packDir, "manifest.json");
   if (!existsSync(manifestPath)) {
-    throw new Error(`asset pack not found: ${input.packId}`);
+    throw new Error(`asset pack not found: ${safePackId}`);
   }
   const m = JSON.parse(readFileSync(manifestPath, "utf8")) as ManifestForIntegration;
   if (!m.integration) {
-    throw new Error(`asset pack integration metadata missing on manifest: ${input.packId}`);
+    throw new Error(`asset pack integration metadata missing on manifest: ${safePackId}`);
   }
   const built = snippetFor(m, input.targetFramework);
   return FoundryAssetPackIntegrationOutputSchema.parse({
-    packId: input.packId,
+    packId: safePackId,
     importStatement: built.importStatement,
     snippet: built.snippet,
     notes: [`framework: ${input.targetFramework}`, `kind: ${m.kind}`],
