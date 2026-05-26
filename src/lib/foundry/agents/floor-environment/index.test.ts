@@ -51,7 +51,7 @@ describe("runFoundryFloorEnvironment", () => {
     ]);
   });
 
-  it("writes 3 layer PNGs per variant to disk", async () => {
+  it("writes a single composite PNG per variant to disk (honest spec)", async () => {
     const provider = createFoundryFloorMockProvider();
     await runFoundryFloorEnvironment(
       {
@@ -64,8 +64,31 @@ describe("runFoundryFloorEnvironment", () => {
       provider,
       { runDir: dir, reportedElements: ["wall-mounted-boards"] },
     );
-    for (const layer of ["background", "midground", "ambient"]) {
-      expect(existsSync(join(dir, "pack", "dawn", `${layer}.png`))).toBe(true);
+    expect(existsSync(join(dir, "pack", "dawn", `composite.png`))).toBe(true);
+  });
+
+  it("manifest declares compositeKind=single-composite", async () => {
+    const provider = createFoundryFloorMockProvider();
+    const result = await runFoundryFloorEnvironment(
+      {
+        runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
+        floorSlug: "war-room",
+        requestedBy: "agent",
+        timeStates: ["dawn"],
+        seed: 5,
+      },
+      provider,
+      { runDir: dir, reportedElements: ["wall-mounted-boards"] },
+    );
+    const manifest = result.manifest as {
+      compositeKind: string;
+      variants: Array<{ kind: string; layers: Array<{ name: string }> }>;
+    };
+    expect(manifest.compositeKind).toBe("single-composite");
+    for (const v of manifest.variants) {
+      expect(v.kind).toBe("single-composite");
+      expect(v.layers).toHaveLength(1);
+      expect(v.layers[0]?.name).toBe("composite");
     }
   });
 

@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   FOUNDRY_FLOOR_TIME_STATES,
   FOUNDRY_FLOOR_LAYER_NAMES,
+  FOUNDRY_FLOOR_COMPOSITE_KINDS,
   FoundryFloorEnvironmentInputSchema,
   FoundryFloorLayerManifestSchema,
+  FoundryFloorVariantManifestSchema,
 } from "./types";
 
 describe("foundry floor-environment types", () => {
@@ -19,12 +21,12 @@ describe("foundry floor-environment types", () => {
     ]);
   });
 
-  it("declares the 3 layer names in z-order", () => {
-    expect(FOUNDRY_FLOOR_LAYER_NAMES).toEqual([
-      "background",
-      "midground",
-      "ambient",
-    ]);
+  it("declares a single composite layer (honest spec)", () => {
+    expect(FOUNDRY_FLOOR_LAYER_NAMES).toEqual(["composite"]);
+  });
+
+  it("only supports single-composite kind today", () => {
+    expect(FOUNDRY_FLOOR_COMPOSITE_KINDS).toEqual(["single-composite"]);
   });
 
   it("accepts a minimal valid input", () => {
@@ -49,11 +51,53 @@ describe("foundry floor-environment types", () => {
 
   it("layer manifest carries zIndex and alpha flag", () => {
     const parsed = FoundryFloorLayerManifestSchema.parse({
-      name: "background",
-      path: "background.png",
+      name: "composite",
+      path: "composite.png",
       zIndex: 0,
       hasAlpha: false,
     });
     expect(parsed.zIndex).toBe(0);
+  });
+
+  it("variant manifest requires kind discriminator and exactly one layer", () => {
+    const parsed = FoundryFloorVariantManifestSchema.parse({
+      timeState: "dawn",
+      kind: "single-composite",
+      layers: [
+        {
+          name: "composite",
+          path: "dawn/composite.png",
+          zIndex: 0,
+          hasAlpha: false,
+        },
+      ],
+      perceptualHash: "0123456789abcdef",
+    });
+    expect(parsed.kind).toBe("single-composite");
+    expect(parsed.layers).toHaveLength(1);
+  });
+
+  it("variant manifest rejects more than one layer", () => {
+    expect(() =>
+      FoundryFloorVariantManifestSchema.parse({
+        timeState: "dawn",
+        kind: "single-composite",
+        layers: [
+          {
+            name: "composite",
+            path: "dawn/composite.png",
+            zIndex: 0,
+            hasAlpha: false,
+          },
+          {
+            name: "composite",
+            path: "dawn/composite-2.png",
+            zIndex: 1,
+            hasAlpha: true,
+          },
+        ],
+        perceptualHash: "0123456789abcdef",
+      }),
+    ).toThrow();
   });
 });

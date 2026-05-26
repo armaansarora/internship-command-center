@@ -33,7 +33,7 @@ describe("golden war-room run", () => {
     dir = mkdtempSync(join(tmpdir(), "foundry-floor-golden-"));
   });
 
-  it("produces 21 PNGs (7 time-states × 3 layers) + manifest.json", async () => {
+  it("produces 7 PNGs (7 time-states × 1 composite layer) + manifest.json", async () => {
     await runFoundryFloorCli({
       floorSlug: "war-room",
       runDir: dir,
@@ -51,11 +51,11 @@ describe("golden war-room run", () => {
       const files = readdirSync(join(packDir, ts));
       pngCount += files.filter((f) => f.endsWith(".png")).length;
     }
-    expect(pngCount).toBe(21);
+    expect(pngCount).toBe(7);
     expect(existsSync(join(dir, "manifest.json"))).toBe(true);
   });
 
-  it("manifest names every variant and every layer", async () => {
+  it("manifest names every variant with its single composite layer", async () => {
     await runFoundryFloorCli({
       floorSlug: "war-room",
       runDir: dir,
@@ -66,11 +66,14 @@ describe("golden war-room run", () => {
     const manifest = JSON.parse(
       readFileSync(join(dir, "manifest.json"), "utf8"),
     ) as {
+      compositeKind: string;
       variants: Array<{
         timeState: string;
+        kind: string;
         layers: Array<{ name: string; path: string }>;
       }>;
     };
+    expect(manifest.compositeKind).toBe("single-composite");
     expect(manifest.variants.map((v) => v.timeState).sort()).toEqual([
       "afternoon",
       "dawn",
@@ -81,10 +84,9 @@ describe("golden war-room run", () => {
       "night",
     ]);
     for (const variant of manifest.variants) {
+      expect(variant.kind).toBe("single-composite");
       const names = variant.layers.map((l) => l.name);
-      expect(names).toContain("background");
-      expect(names).toContain("midground");
-      expect(names).toContain("ambient");
+      expect(names).toEqual(["composite"]);
     }
   });
 

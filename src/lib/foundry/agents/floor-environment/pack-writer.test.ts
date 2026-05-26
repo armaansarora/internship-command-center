@@ -13,13 +13,13 @@ async function solid(c: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("writeFoundryFloorPack", () => {
+describe("writeFoundryFloorPack (single-composite)", () => {
   let dir: string;
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), "foundry-floor-pack-"));
   });
 
-  it("writes layer PNGs into per-time-state subdirs", async () => {
+  it("writes the composite PNG into per-time-state subdirs", async () => {
     const bytes = await solid(40);
     await writeFoundryFloorPack({
       runDir: dir,
@@ -27,17 +27,14 @@ describe("writeFoundryFloorPack", () => {
       variants: [
         {
           timeState: "morning",
+          kind: "single-composite",
           layers: [
-            { name: "background", zIndex: 0, hasAlpha: false, bytes },
-            { name: "midground", zIndex: 1, hasAlpha: true, bytes },
-            { name: "ambient", zIndex: 2, hasAlpha: true, bytes },
+            { name: "composite", zIndex: 0, hasAlpha: false, bytes },
           ],
         },
       ],
     });
-    expect(existsSync(join(dir, "pack", "morning", "background.png"))).toBe(true);
-    expect(existsSync(join(dir, "pack", "morning", "midground.png"))).toBe(true);
-    expect(existsSync(join(dir, "pack", "morning", "ambient.png"))).toBe(true);
+    expect(existsSync(join(dir, "pack", "morning", "composite.png"))).toBe(true);
   });
 
   it("writes no .tmp files after success", async () => {
@@ -48,11 +45,8 @@ describe("writeFoundryFloorPack", () => {
       variants: [
         {
           timeState: "morning",
-          layers: [
-            { name: "background", zIndex: 0, hasAlpha: false, bytes },
-            { name: "midground", zIndex: 1, hasAlpha: true, bytes },
-            { name: "ambient", zIndex: 2, hasAlpha: true, bytes },
-          ],
+          kind: "single-composite",
+          layers: [{ name: "composite", zIndex: 0, hasAlpha: false, bytes }],
         },
       ],
     });
@@ -60,7 +54,7 @@ describe("writeFoundryFloorPack", () => {
     expect(all.filter((f) => f.includes(".tmp"))).toEqual([]);
   });
 
-  it("returns variantManifests carrying relative paths and hashes", async () => {
+  it("returns variantManifests carrying kind, relative path, and hash", async () => {
     const bytes = await solid(40);
     const result = await writeFoundryFloorPack({
       runDir: dir,
@@ -68,17 +62,15 @@ describe("writeFoundryFloorPack", () => {
       variants: [
         {
           timeState: "dusk",
-          layers: [
-            { name: "background", zIndex: 0, hasAlpha: false, bytes },
-            { name: "midground", zIndex: 1, hasAlpha: true, bytes },
-            { name: "ambient", zIndex: 2, hasAlpha: true, bytes },
-          ],
+          kind: "single-composite",
+          layers: [{ name: "composite", zIndex: 0, hasAlpha: false, bytes }],
         },
       ],
     });
     expect(result.variantManifests).toHaveLength(1);
+    expect(result.variantManifests[0]?.kind).toBe("single-composite");
     expect(result.variantManifests[0]?.layers[0]?.path).toBe(
-      "dusk/background.png",
+      "dusk/composite.png",
     );
     expect(result.variantManifests[0]?.perceptualHash).toMatch(/^[0-9a-f]{16}$/);
   });
@@ -91,15 +83,32 @@ describe("writeFoundryFloorPack", () => {
       variants: [
         {
           timeState: "night",
-          layers: [
-            { name: "background", zIndex: 0, hasAlpha: false, bytes },
-            { name: "midground", zIndex: 1, hasAlpha: true, bytes },
-            { name: "ambient", zIndex: 2, hasAlpha: true, bytes },
-          ],
+          kind: "single-composite",
+          layers: [{ name: "composite", zIndex: 0, hasAlpha: false, bytes }],
         },
       ],
     });
-    const written = readFileSync(join(dir, "pack", "night", "background.png"));
+    const written = readFileSync(join(dir, "pack", "night", "composite.png"));
     expect(written.equals(bytes)).toBe(true);
+  });
+
+  it("rejects a variant with more than one layer (honest spec is single)", async () => {
+    const bytes = await solid(40);
+    await expect(
+      writeFoundryFloorPack({
+        runDir: dir,
+        floorSlug: "war-room",
+        variants: [
+          {
+            timeState: "morning",
+            kind: "single-composite",
+            layers: [
+              { name: "composite", zIndex: 0, hasAlpha: false, bytes },
+              { name: "composite", zIndex: 0, hasAlpha: false, bytes },
+            ],
+          },
+        ],
+      }),
+    ).rejects.toThrow(/expected 1/);
   });
 });

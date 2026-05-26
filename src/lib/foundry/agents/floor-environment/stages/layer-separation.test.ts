@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { separateFoundryFloorLayers } from "./layer-separation";
+import { buildFoundryFloorComposite } from "./layer-separation";
 
 async function makePng(width: number, height: number): Promise<Buffer> {
   return sharp({
@@ -15,50 +15,48 @@ async function makePng(width: number, height: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("separateFoundryFloorLayers", () => {
-  it("returns 3 layers in canonical z-order", async () => {
+// Critical 1 + Critical 4 fix: the previous implementation derived
+// "background", "midground", and "ambient" from one composite via sharp
+// filters (blur, threshold, greyscale+gamma+threshold). They overlapped
+// heavily and could not be recomposed to reconstruct the original — pseudo
+// layers. The honest spec is a single composite per variant; the 4th
+// "lighting" layer was likewise aspirational and is not produced.
+describe("buildFoundryFloorComposite (single-composite, honest)", () => {
+  it("returns exactly one composite layer flagged kind=single-composite", async () => {
     const composite = await makePng(64, 36);
-    const layers = await separateFoundryFloorLayers(composite);
-    expect(layers.map((l) => l.name)).toEqual([
-      "background",
-      "midground",
-      "ambient",
-    ]);
-    expect(layers.map((l) => l.zIndex)).toEqual([0, 1, 2]);
+    const result = await buildFoundryFloorComposite(composite);
+    expect(result.kind).toBe("single-composite");
+    expect(result.layers).toHaveLength(1);
+    expect(result.layers[0]?.name).toBe("composite");
   });
 
-  it("background is fully opaque (no alpha)", async () => {
+  it("the composite layer is at z-index 0 and fully opaque", async () => {
     const composite = await makePng(64, 36);
-    const layers = await separateFoundryFloorLayers(composite);
-    const bg = layers.find((l) => l.name === "background");
-    expect(bg?.hasAlpha).toBe(false);
+    const result = await buildFoundryFloorComposite(composite);
+    const only = result.layers[0]!;
+    expect(only.zIndex).toBe(0);
+    expect(only.hasAlpha).toBe(false);
   });
 
-  it("midground and ambient carry alpha", async () => {
+  it("ships the source bytes verbatim (no transform pipeline)", async () => {
     const composite = await makePng(64, 36);
-    const layers = await separateFoundryFloorLayers(composite);
-    const mid = layers.find((l) => l.name === "midground");
-    const amb = layers.find((l) => l.name === "ambient");
-    expect(mid?.hasAlpha).toBe(true);
-    expect(amb?.hasAlpha).toBe(true);
+    const result = await buildFoundryFloorComposite(composite);
+    const only = result.layers[0]!;
+    expect(only.bytes.equals(composite)).toBe(true);
   });
 
-  it("every emitted buffer is a valid PNG", async () => {
+  it("emitted buffer is a valid PNG with source dimensions", async () => {
     const composite = await makePng(64, 36);
-    const layers = await separateFoundryFloorLayers(composite);
-    for (const layer of layers) {
-      const meta = await sharp(layer.bytes).metadata();
-      expect(meta.format).toBe("png");
-    }
+    const result = await buildFoundryFloorComposite(composite);
+    const meta = await sharp(result.layers[0]!.bytes).metadata();
+    expect(meta.format).toBe("png");
+    expect(meta.width).toBe(64);
+    expect(meta.height).toBe(36);
   });
 
-  it("preserves the source aspect ratio for all layers", async () => {
-    const composite = await makePng(64, 36);
-    const layers = await separateFoundryFloorLayers(composite);
-    for (const layer of layers) {
-      const meta = await sharp(layer.bytes).metadata();
-      expect(meta.width).toBe(64);
-      expect(meta.height).toBe(36);
-    }
+  it("rejects a composite with no dimensions", async () => {
+    await expect(
+      buildFoundryFloorComposite(Buffer.from([])),
+    ).rejects.toThrow();
   });
 });

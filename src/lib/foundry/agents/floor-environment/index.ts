@@ -1,7 +1,7 @@
 import { buildFoundryAssetPack } from "@/lib/foundry/asset-pack";
 import { loadFoundryFloorCanonEntry } from "./floor-canon";
 import { fanOutFoundryFloorVariants } from "./stages/variant-fanout";
-import { separateFoundryFloorLayers } from "./stages/layer-separation";
+import { buildFoundryFloorComposite } from "./stages/layer-separation";
 import { runFoundryFloorQa } from "./qa";
 import { writeFoundryFloorPack } from "./pack-writer";
 import { renderFoundryFloorIntegrationSnippet } from "./integration";
@@ -36,8 +36,13 @@ export async function runFoundryFloorEnvironment(
         aspectRatio: job.aspectRatio,
         seed: input.seed,
       });
-      const layers = await separateFoundryFloorLayers(result.bytes);
-      return { timeState: job.timeState, composite: result.bytes, layers };
+      const composite = await buildFoundryFloorComposite(result.bytes);
+      return {
+        timeState: job.timeState,
+        compositeBytes: result.bytes,
+        kind: composite.kind,
+        layers: composite.layers,
+      };
     }),
   );
   const qa = await runFoundryFloorQa({
@@ -46,7 +51,7 @@ export async function runFoundryFloorEnvironment(
     reportedElements: context.reportedElements,
     variants: variants.map((v) => ({
       timeState: v.timeState,
-      bytes: v.composite,
+      bytes: v.compositeBytes,
     })),
   });
   if (!qa.passed) {
@@ -59,6 +64,7 @@ export async function runFoundryFloorEnvironment(
     floorSlug: input.floorSlug,
     variants: variants.map((v) => ({
       timeState: v.timeState,
+      kind: v.kind,
       layers: v.layers,
     })),
   });
@@ -72,6 +78,7 @@ export async function runFoundryFloorEnvironment(
     floor: input.floorSlug,
     aspectRatio: canon.aspectRatio,
     timeStates: input.timeStates,
+    compositeKind: "single-composite" as const,
     variants: persisted.variantManifests,
     palette: canon.palette,
     requiredElements: canon.requiredElements,

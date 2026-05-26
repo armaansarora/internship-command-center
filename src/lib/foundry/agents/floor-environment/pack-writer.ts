@@ -1,8 +1,9 @@
 import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import type { FoundryFloorLayerBuffer } from "./stages/layer-separation";
+import type { FoundryFloorCompositeLayerBuffer } from "./stages/layer-separation";
 import {
+  type FoundryFloorCompositeKind,
   type FoundryFloorTimeState,
   type FoundryFloorVariantManifest,
 } from "./types";
@@ -12,7 +13,8 @@ export interface FoundryFloorPackWriteInput {
   floorSlug: string;
   variants: ReadonlyArray<{
     timeState: FoundryFloorTimeState;
-    layers: ReadonlyArray<FoundryFloorLayerBuffer>;
+    kind: FoundryFloorCompositeKind;
+    layers: ReadonlyArray<FoundryFloorCompositeLayerBuffer>;
   }>;
 }
 
@@ -34,34 +36,33 @@ export async function writeFoundryFloorPack(
   mkdirSync(packRoot, { recursive: true });
   const variantManifests: FoundryFloorVariantManifest[] = [];
   for (const variant of input.variants) {
+    if (variant.kind !== "single-composite") {
+      throw new Error(
+        `foundry/floor: variant ${variant.timeState} declares unknown kind ${variant.kind}`,
+      );
+    }
+    if (variant.layers.length !== 1) {
+      throw new Error(
+        `foundry/floor: variant ${variant.timeState} produced ${variant.layers.length} layers (expected 1 for single-composite)`,
+      );
+    }
     const variantDir = join(packRoot, variant.timeState);
     mkdirSync(variantDir, { recursive: true });
-    const layerManifests = variant.layers
-      .map((layer) => {
-        const layerPath = join(variantDir, `${layer.name}.png`);
-        atomicWrite(layerPath, layer.bytes);
-        return {
-          name: layer.name,
-          path: `${variant.timeState}/${layer.name}.png`,
-          zIndex: layer.zIndex,
-          hasAlpha: layer.hasAlpha,
-        };
-      })
-      .sort((a, b) => a.zIndex - b.zIndex);
-    if (layerManifests.length !== 3) {
-      throw new Error(
-        `foundry/floor: variant ${variant.timeState} produced ${layerManifests.length} layers (expected 3)`,
-      );
-    }
-    const anchorLayer = variant.layers.find((l) => l.name === "background");
-    if (!anchorLayer) {
-      throw new Error(
-        `foundry/floor: variant ${variant.timeState} missing background layer`,
-      );
-    }
+    const layerManifests = variant.layers.map((layer) => {
+      const layerPath = join(variantDir, `${layer.name}.png`);
+      atomicWrite(layerPath, layer.bytes);
+      return {
+        name: layer.name,
+        path: `${variant.timeState}/${layer.name}.png`,
+        zIndex: layer.zIndex,
+        hasAlpha: layer.hasAlpha,
+      };
+    });
+    const anchorLayer = variant.layers[0]!;
     const perceptualHash = await computePerceptualHash(anchorLayer.bytes);
     variantManifests.push({
       timeState: variant.timeState,
+      kind: variant.kind,
       layers: layerManifests as FoundryFloorVariantManifest["layers"],
       perceptualHash,
     });
