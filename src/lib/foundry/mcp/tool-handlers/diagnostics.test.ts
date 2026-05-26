@@ -74,6 +74,30 @@ describe("handleFoundryDiagnostics", () => {
   });
 
   it("reports daemonUp=true when heartbeat is fresh (< 60s)", async () => {
+    // Field name MUST match the canonical writer in
+    // src/lib/artlab/daemon/entry.ts → `writeHeartbeat`, which emits `at`.
+    // (Critical regression fix — see diagnostics.heartbeat-contract.integration.test.ts.)
+    writeFileSync(
+      join(workspaceRoot, "daemon-heartbeat.json"),
+      JSON.stringify({
+        at: new Date().toISOString(),
+      }),
+    );
+    const result = await handleFoundryDiagnostics(
+      {},
+      {
+        workspaceRoot,
+        providerProbes: {},
+      },
+    );
+    expect(result.daemonUp).toBe(true);
+  });
+
+  it("reports daemonUp=false when heartbeat carries the legacy `writtenAt` field only", async () => {
+    // Guard against accidental re-introduction of the legacy field name.
+    // If a future commit reverts to reading `writtenAt`, this test will
+    // pass — and the production contract assertion in
+    // diagnostics.heartbeat-contract.integration.test.ts will fail.
     writeFileSync(
       join(workspaceRoot, "daemon-heartbeat.json"),
       JSON.stringify({
@@ -87,6 +111,6 @@ describe("handleFoundryDiagnostics", () => {
         providerProbes: {},
       },
     );
-    expect(result.daemonUp).toBe(true);
+    expect(result.daemonUp).toBe(false);
   });
 });

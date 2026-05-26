@@ -21,14 +21,27 @@ interface RunStateLite {
 
 const HEARTBEAT_STALE_MS = 60_000;
 
-function readHeartbeat(workspaceRoot: string): { writtenAt: string } | null {
+/**
+ * Read the daemon heartbeat file.
+ *
+ * The canonical field name is `at` — see `writeHeartbeat` in
+ * src/lib/artlab/daemon/entry.ts. A previous version of this reader looked
+ * for `writtenAt`, which silently made `daemonUp` evaluate to `false` for
+ * every fresh heartbeat (`new Date(undefined).getTime()` is `NaN`). The
+ * writer has never emitted `writtenAt`, so there is no legacy file to
+ * support — we only honour `at`.
+ */
+function readHeartbeat(workspaceRoot: string): { at: string } | null {
   const path = join(workspaceRoot, "daemon-heartbeat.json");
   if (!existsSync(path)) return null;
+  let raw: { at?: unknown };
   try {
-    return JSON.parse(readFileSync(path, "utf8")) as { writtenAt: string };
+    raw = JSON.parse(readFileSync(path, "utf8")) as { at?: unknown };
   } catch (err) {
     throw new Error(`malformed daemon heartbeat at ${path}: ${String(err)}`);
   }
+  if (typeof raw.at !== "string") return null;
+  return { at: raw.at };
 }
 
 function recentRuns(
@@ -79,7 +92,7 @@ export async function handleFoundryDiagnostics(
   FoundryDiagnosticsInputSchema.parse(rawInput);
   const heartbeat = readHeartbeat(ctx.workspaceRoot);
   const daemonUp = heartbeat
-    ? Date.now() - new Date(heartbeat.writtenAt).getTime() < HEARTBEAT_STALE_MS
+    ? Date.now() - new Date(heartbeat.at).getTime() < HEARTBEAT_STALE_MS
     : false;
   const inboxDir = join(ctx.workspaceRoot, "inbox", "foundry");
   const backlogDepth = existsSync(inboxDir)
