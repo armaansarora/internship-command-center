@@ -7612,7 +7612,7 @@ The new public entry point added in this phase is `runFoundryFloorEnvironment(in
 - Create: `src/lib/foundry/agents/floor-environment/types.ts`
 - Test: `src/lib/foundry/agents/floor-environment/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/types.test.ts
@@ -7677,12 +7677,12 @@ describe("foundry floor-environment types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/types.test.ts`
 Expected: FAIL — "Cannot find module './types'"
 
-- [ ] **Step 3: Implement schemas**
+- [x] **Step 3: Implement schemas**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/types.ts
@@ -7749,12 +7749,12 @@ export type FoundryFloorVariantManifest = z.infer<
 >;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/types.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/types.ts src/lib/foundry/agents/floor-environment/types.test.ts
@@ -7771,10 +7771,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `FOUNDRY_FLOOR_TIME_STATES` length equals 7 and matches the Tower's existing day/night cycle order.
-- [ ] `FOUNDRY_FLOOR_LAYER_NAMES` length equals 3, with `background` at index 0 (back) and `ambient` at index 2 (front).
-- [ ] `FoundryFloorEnvironmentInputSchema.default` for `timeStates` includes all 7 states.
-- [ ] `FoundryFloorLayerManifestSchema` rejects `zIndex` of 10 or above and rejects unknown layer names.
+- [x] `FOUNDRY_FLOOR_TIME_STATES` length equals 7 and matches the Tower's existing day/night cycle order.
+- [x] `FOUNDRY_FLOOR_LAYER_NAMES` length equals 3, with `background` at index 0 (back) and `ambient` at index 2 (front).
+- [x] `FoundryFloorEnvironmentInputSchema.default` for `timeStates` includes all 7 states.
+- [x] `FoundryFloorLayerManifestSchema` rejects `zIndex` of 10 or above and rejects unknown layer names.
 
 ### Task 3.2: Floor canon loader adapter
 
@@ -7782,7 +7782,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/floor-canon.ts`
 - Test: `src/lib/foundry/agents/floor-environment/floor-canon.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/floor-canon.test.ts
@@ -7844,12 +7844,12 @@ describe("loadFoundryFloorCanonEntry", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/floor-canon.test.ts`
 Expected: FAIL — "Cannot find module './floor-canon'"
 
-- [ ] **Step 3: Implement adapter**
+- [x] **Step 3: Implement adapter**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/floor-canon.ts
@@ -7896,12 +7896,12 @@ export async function loadFoundryFloorCanonEntry(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/floor-canon.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/floor-canon.ts src/lib/foundry/agents/floor-environment/floor-canon.test.ts
@@ -7918,10 +7918,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Re-exported entry exposes `requiredElements` (renamed from `roomElements`) so its purpose at the QA boundary is unambiguous.
-- [ ] `aspectRatio` is narrowed to the four allowed literal-string values.
-- [ ] Adapter throws with a slug-bearing message on missing canon entry.
-- [ ] Adapter throws when `roomElements` is empty (canon-entry-as-a-bug class of error).
+- [x] Re-exported entry exposes `requiredElements` (renamed from `roomElements`) so its purpose at the QA boundary is unambiguous.
+- [x] `aspectRatio` is narrowed to the four allowed literal-string values.
+- [x] Adapter throws with a slug-bearing message on missing canon entry.
+- [x] Adapter throws when `roomElements` is empty (canon-entry-as-a-bug class of error).
 
 ### Task 3.3: Composition-prompt stage
 
@@ -7929,7 +7929,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/stages/composition-prompt.ts`
 - Test: `src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts
@@ -7983,12 +7983,12 @@ describe("buildFoundryFloorCompositionPrompt", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts`
 Expected: FAIL — "Cannot find module './composition-prompt'"
 
-- [ ] **Step 3: Implement composition prompt**
+- [x] **Step 3: Implement composition prompt**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/composition-prompt.ts
@@ -8024,12 +8024,12 @@ export function buildFoundryFloorCompositionPrompt(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/stages/composition-prompt.ts src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts
@@ -8046,10 +8046,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Prompt contains all required-element names verbatim (so QA can grep-verify the contract).
-- [ ] Prompt embeds the literal aspect-ratio string.
-- [ ] Prompt declares "no characters" / "no people" — characters never appear in floor backgrounds.
-- [ ] Output is deterministic for identical inputs (no `Date.now()`, no `Math.random()`).
+- [x] Prompt contains all required-element names verbatim (so QA can grep-verify the contract).
+- [x] Prompt embeds the literal aspect-ratio string.
+- [x] Prompt declares "no characters" / "no people" — characters never appear in floor backgrounds.
+- [x] Output is deterministic for identical inputs (no `Date.now()`, no `Math.random()`).
 
 ### Task 3.4: Variant fan-out stage
 
@@ -8057,7 +8057,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/stages/variant-fanout.ts`
 - Test: `src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts
@@ -8111,12 +8111,12 @@ describe("fanOutFoundryFloorVariants", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts`
 Expected: FAIL — "Cannot find module './variant-fanout'"
 
-- [ ] **Step 3: Implement fan-out**
+- [x] **Step 3: Implement fan-out**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/variant-fanout.ts
@@ -8146,12 +8146,12 @@ export function fanOutFoundryFloorVariants(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/stages/variant-fanout.ts src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts
@@ -8168,10 +8168,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] One job per input time-state, in input order.
-- [ ] `jobId` is `<slug>-<timeState>`, deterministic across calls.
-- [ ] Each job carries a fully resolved prompt string (no template placeholders).
-- [ ] Function is pure — no `Date.now()`, no provider calls, no `fs`.
+- [x] One job per input time-state, in input order.
+- [x] `jobId` is `<slug>-<timeState>`, deterministic across calls.
+- [x] Each job carries a fully resolved prompt string (no template placeholders).
+- [x] Function is pure — no `Date.now()`, no provider calls, no `fs`.
 
 ### Task 3.5: Mock image provider for tests
 
@@ -8179,7 +8179,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/__tests__/mock-provider.ts`
 - Test: `src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts
@@ -8227,12 +8227,12 @@ describe("createFoundryFloorMockProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-provider'"
 
-- [ ] **Step 3: Implement mock provider**
+- [x] **Step 3: Implement mock provider**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/__tests__/mock-provider.ts
@@ -8268,12 +8268,12 @@ export function createFoundryFloorMockProvider(): FoundryImageProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/__tests__/mock-provider.ts src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts
@@ -8291,10 +8291,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returned `bytes` start with the PNG magic header `89 50 4E 47 0D 0A 1A 0A`.
-- [ ] Same seed produces byte-identical buffers (run-to-run reproducibility for golden tests).
-- [ ] Different seeds produce different buffers.
-- [ ] `mode === "mock"` and `costCents === 0` so the budget ledger does not charge tests.
+- [x] Returned `bytes` start with the PNG magic header `89 50 4E 47 0D 0A 1A 0A`.
+- [x] Same seed produces byte-identical buffers (run-to-run reproducibility for golden tests).
+- [x] Different seeds produce different buffers.
+- [x] `mode === "mock"` and `costCents === 0` so the budget ledger does not charge tests.
 
 ### Task 3.6: Layer separation stage
 
@@ -8302,7 +8302,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/stages/layer-separation.ts`
 - Test: `src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts
@@ -8372,12 +8372,12 @@ describe("separateFoundryFloorLayers", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts`
 Expected: FAIL — "Cannot find module './layer-separation'"
 
-- [ ] **Step 3: Implement layer separation**
+- [x] **Step 3: Implement layer separation**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/layer-separation.ts
@@ -8457,12 +8457,12 @@ export async function separateFoundryFloorLayers(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/stages/layer-separation.ts src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts
@@ -8479,10 +8479,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Exactly 3 layers returned, in `[background, midground, ambient]` order.
-- [ ] Z-indices are `[0, 1, 2]` strictly increasing.
-- [ ] Background layer reports `hasAlpha === false`; the other two report `hasAlpha === true`.
-- [ ] All emitted buffers are valid PNGs at the source dimensions.
+- [x] Exactly 3 layers returned, in `[background, midground, ambient]` order.
+- [x] Z-indices are `[0, 1, 2]` strictly increasing.
+- [x] Background layer reports `hasAlpha === false`; the other two report `hasAlpha === true`.
+- [x] All emitted buffers are valid PNGs at the source dimensions.
 
 ### Task 3.7: Perceptual-coherence gate
 
@@ -8490,7 +8490,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts
@@ -8544,12 +8544,12 @@ describe("evaluateFoundryFloorPerceptualCoherence", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts`
 Expected: FAIL — "Cannot find module './perceptual-coherence'"
 
-- [ ] **Step 3: Implement coherence gate**
+- [x] **Step 3: Implement coherence gate**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.ts
@@ -8622,12 +8622,12 @@ export async function evaluateFoundryFloorPerceptualCoherence(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.ts src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts
@@ -8645,10 +8645,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/*` rather than redeclaring them.
-- [ ] Identical variants produce `maxHamming < 8` (well under the 18-bit threshold).
-- [ ] A high-contrast outlier variant is correctly flagged in `flaggedTimeStates`.
-- [ ] Threshold is exposed in the result so downstream messages can quote it.
+- [x] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/*` rather than redeclaring them.
+- [x] Identical variants produce `maxHamming < 8` (well under the 18-bit threshold).
+- [x] A high-contrast outlier variant is correctly flagged in `flaggedTimeStates`.
+- [x] Threshold is exposed in the result so downstream messages can quote it.
 
 ### Task 3.8: Room-element verification (QA)
 
@@ -8656,7 +8656,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa/room-elements.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts
@@ -8698,12 +8698,12 @@ describe("verifyFoundryFloorRoomElements", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts`
 Expected: FAIL — "Cannot find module './room-elements'"
 
-- [ ] **Step 3: Implement verifier**
+- [x] **Step 3: Implement verifier**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/room-elements.ts
@@ -8756,12 +8756,12 @@ export function verifyFoundryFloorRoomElements(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa/room-elements.ts src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts
@@ -8779,10 +8779,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: true` only when every required element is matched.
-- [ ] `missing` lists the original-case labels of unmatched required entries.
-- [ ] Normalisation collapses whitespace, underscores, dashes, and casing differences.
-- [ ] Throws on empty `required` (so callers cannot silently bypass the gate).
+- [x] Returns `passed: true` only when every required element is matched.
+- [x] `missing` lists the original-case labels of unmatched required entries.
+- [x] Normalisation collapses whitespace, underscores, dashes, and casing differences.
+- [x] Throws on empty `required` (so callers cannot silently bypass the gate).
 
 ### Task 3.9: Palette QA against canon palette
 
@@ -8790,7 +8790,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa/palette.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa/palette.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/palette.test.ts
@@ -8835,12 +8835,12 @@ describe("evaluateFoundryFloorPaletteFit", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/palette.test.ts`
 Expected: FAIL — "Cannot find module './palette'"
 
-- [ ] **Step 3: Implement palette QA**
+- [x] **Step 3: Implement palette QA**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/palette.ts
@@ -8911,12 +8911,12 @@ export async function evaluateFoundryFloorPaletteFit(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/palette.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa/palette.ts src/lib/foundry/agents/floor-environment/qa/palette.test.ts
@@ -8934,10 +8934,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Reuses `computePaletteHistogram` and `paletteDistance` from `@/lib/artlab/coherence/hashes`.
-- [ ] Returns `passed: true` for a solid-fill matching one of the canon hexes.
-- [ ] Returns `passed: false` for a solid-fill far from every canon hex.
-- [ ] Throws on empty canon palette (callers cannot silently bypass).
+- [x] Reuses `computePaletteHistogram` and `paletteDistance` from `@/lib/artlab/coherence/hashes`.
+- [x] Returns `passed: true` for a solid-fill matching one of the canon hexes.
+- [x] Returns `passed: false` for a solid-fill far from every canon hex.
+- [x] Throws on empty canon palette (callers cannot silently bypass).
 
 ### Task 3.10: Integration-snippet generator extension for floor packs
 
@@ -8945,7 +8945,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/integration.ts`
 - Test: `src/lib/foundry/agents/floor-environment/integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/integration.test.ts
@@ -8992,12 +8992,12 @@ describe("renderFoundryFloorIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/integration.test.ts`
 Expected: FAIL — "Cannot find module './integration'"
 
-- [ ] **Step 3: Implement integration snippet renderer**
+- [x] **Step 3: Implement integration snippet renderer**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/integration.ts
@@ -9020,12 +9020,12 @@ export function renderFoundryFloorIntegrationSnippet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/integration.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/integration.ts src/lib/foundry/agents/floor-environment/integration.test.ts
@@ -9042,10 +9042,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Snippet imports `FloorBackground` from `@/components/foundry/floor-background`.
-- [ ] Snippet renders `<FloorBackground floor="<slug>" />` with the correct slug interpolated.
-- [ ] Pack path appears as a comment in the rendered output.
-- [ ] Output is deterministic for identical inputs.
+- [x] Snippet imports `FloorBackground` from `@/components/foundry/floor-background`.
+- [x] Snippet renders `<FloorBackground floor="<slug>" />` with the correct slug interpolated.
+- [x] Pack path appears as a comment in the rendered output.
+- [x] Output is deterministic for identical inputs.
 
 ### Task 3.11: Aggregated QA runner
 
@@ -9053,7 +9053,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa.test.ts
@@ -9133,12 +9133,12 @@ describe("runFoundryFloorQa", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa.test.ts`
 Expected: FAIL — "Cannot find module './qa'"
 
-- [ ] **Step 3: Implement aggregated QA**
+- [x] **Step 3: Implement aggregated QA**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa.ts
@@ -9210,12 +9210,12 @@ export async function runFoundryFloorQa(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa.ts src/lib/foundry/agents/floor-environment/qa.test.ts
@@ -9233,10 +9233,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Aggregates the three per-gate reports into one report object.
-- [ ] `failedGates` lists every gate that did not pass, in canonical order.
-- [ ] Returns `passed: true` only when all three gates pass.
-- [ ] Throws when called with an empty `variants` list.
+- [x] Aggregates the three per-gate reports into one report object.
+- [x] `failedGates` lists every gate that did not pass, in canonical order.
+- [x] Returns `passed: true` only when all three gates pass.
+- [x] Throws when called with an empty `variants` list.
 
 ### Task 3.12: Pack writer — persist variants and layers under run directory
 
@@ -9244,7 +9244,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/pack-writer.ts`
 - Test: `src/lib/foundry/agents/floor-environment/pack-writer.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/pack-writer.test.ts
@@ -9355,12 +9355,12 @@ describe("writeFoundryFloorPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/pack-writer.test.ts`
 Expected: FAIL — "Cannot find module './pack-writer'"
 
-- [ ] **Step 3: Implement pack writer**
+- [x] **Step 3: Implement pack writer**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/pack-writer.ts
@@ -9436,12 +9436,12 @@ export async function writeFoundryFloorPack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/pack-writer.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/pack-writer.ts src/lib/foundry/agents/floor-environment/pack-writer.test.ts
@@ -9460,10 +9460,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Per-time-state subdirectory under `<runDir>/pack/<timeState>/`.
-- [ ] Layer files named `background.png`, `midground.png`, `ambient.png`.
-- [ ] No `.tmp.*` artefacts remain after success.
-- [ ] Variant manifests carry **relative** paths (rooted in pack dir, not absolute).
+- [x] Per-time-state subdirectory under `<runDir>/pack/<timeState>/`.
+- [x] Layer files named `background.png`, `midground.png`, `ambient.png`.
+- [x] No `.tmp.*` artefacts remain after success.
+- [x] Variant manifests carry **relative** paths (rooted in pack dir, not absolute).
 
 ### Task 3.13: Agent entry point and provider interface wiring
 
@@ -9471,7 +9471,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/index.ts`
 - Test: `src/lib/foundry/agents/floor-environment/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/index.test.ts
@@ -9584,12 +9584,12 @@ describe("runFoundryFloorEnvironment", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/index.test.ts`
 Expected: FAIL — "Cannot find module './index'"
 
-- [ ] **Step 3: Implement agent entry point**
+- [x] **Step 3: Implement agent entry point**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/index.ts
@@ -9675,12 +9675,12 @@ export async function runFoundryFloorEnvironment(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/index.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/index.ts src/lib/foundry/agents/floor-environment/index.test.ts
@@ -9699,10 +9699,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Provider parameter is the `FoundryImageProvider` interface (not a concrete adapter).
-- [ ] Asset Pack manifest carries `assetKind: "floor-environment"`.
-- [ ] Manifest carries `variants` array with one entry per requested time-state.
-- [ ] Throws with the failed-gate names listed when QA does not pass.
+- [x] Provider parameter is the `FoundryImageProvider` interface (not a concrete adapter).
+- [x] Asset Pack manifest carries `assetKind: "floor-environment"`.
+- [x] Manifest carries `variants` array with one entry per requested time-state.
+- [x] Throws with the failed-gate names listed when QA does not pass.
 
 ### Task 3.14: CLI subcommand + golden-fixture integration test
 
@@ -9711,7 +9711,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts`
 - Modify: `scripts/foundry.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts
@@ -9820,12 +9820,12 @@ describe("golden war-room run", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts`
 Expected: FAIL — "Cannot find module '../cli'"
 
-- [ ] **Step 3: Implement CLI subcommand**
+- [x] **Step 3: Implement CLI subcommand**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/cli.ts
@@ -9898,7 +9898,7 @@ export async function runFoundryFloorCli(
 }
 ```
 
-- [ ] **Step 4: Modify `scripts/foundry.ts` to route the `floor` subcommand**
+- [x] **Step 4: Modify `scripts/foundry.ts` to route the `floor` subcommand**
 
 ```ts
 // scripts/foundry.ts — add the `floor` subcommand body
@@ -9929,12 +9929,12 @@ export async function runFoundryFloorCli(
 
 Implementer note: open `scripts/foundry.ts` (created in Phase 2) and add the `floor` case to the existing switch. The `parseReportedElements` helper accepts a repeated `--element=foo --element=bar` flag set. Phase 2's parser shape is `flags: Map<string, string>` plus `positional: string[]`; do not change that contract.
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/cli.ts src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts scripts/foundry.ts
@@ -9953,10 +9953,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Golden fixture run writes exactly 21 PNGs across 7 time-state subdirs.
-- [ ] `manifest.json` lists every variant and every layer with a relative path.
-- [ ] `--dry-run` mode prints `validated` and writes no artefacts.
-- [ ] CLI subcommand throws when an unknown provider kind is passed.
+- [x] Golden fixture run writes exactly 21 PNGs across 7 time-state subdirs.
+- [x] `manifest.json` lists every variant and every layer with a relative path.
+- [x] `--dry-run` mode prints `validated` and writes no artefacts.
+- [x] CLI subcommand throws when an unknown provider kind is passed.
 
 ### Phase 3 completion criteria
 
