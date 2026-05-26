@@ -1,0 +1,92 @@
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { handleFoundryDiagnostics } from "./diagnostics";
+
+let workspaceRoot: string;
+
+beforeEach(() => {
+  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-diag-"));
+  mkdirSync(join(workspaceRoot, "runs"), { recursive: true });
+  mkdirSync(join(workspaceRoot, "inbox", "foundry"), { recursive: true });
+});
+
+function seedRun(runId: string, phase: string, updatedAt: string): void {
+  const dir = join(workspaceRoot, "runs", runId);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    join(dir, "run-state.json"),
+    JSON.stringify({
+      runId,
+      phase,
+      blocker: null,
+      createdAt: updatedAt,
+      updatedAt,
+    }),
+  );
+}
+
+describe("handleFoundryDiagnostics", () => {
+  it("returns at most 5 recent runs sorted by updatedAt descending", async () => {
+    for (let i = 0; i < 7; i++) {
+      seedRun(
+        `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaa${i.toString().padStart(3, "0")}`,
+        "production",
+        `2026-05-${10 + i}T12:00:00.000Z`,
+      );
+    }
+    const result = await handleFoundryDiagnostics(
+      {},
+      {
+        workspaceRoot,
+        providerProbes: { gemini: async () => true, openai: async () => false },
+      },
+    );
+    expect(result.recentRuns.length).toBeLessThanOrEqual(5);
+    const updatedAts = result.recentRuns.map((r) => r.updatedAt);
+    const sorted = [...updatedAts].sort().reverse();
+    expect(updatedAts).toEqual(sorted);
+  });
+
+  it("reports backlog depth from the foundry inbox directory", async () => {
+    writeFileSync(join(workspaceRoot, "inbox", "foundry", "generate-1.json"), "{}");
+    writeFileSync(join(workspaceRoot, "inbox", "foundry", "generate-2.json"), "{}");
+    const result = await handleFoundryDiagnostics(
+      {},
+      {
+        workspaceRoot,
+        providerProbes: {},
+      },
+    );
+    expect(result.backlogDepth).toBe(2);
+  });
+
+  it("reports daemonUp=false when heartbeat is missing or stale > 60s", async () => {
+    const result = await handleFoundryDiagnostics(
+      {},
+      {
+        workspaceRoot,
+        providerProbes: {},
+      },
+    );
+    expect(result.daemonUp).toBe(false);
+  });
+
+  it("reports daemonUp=true when heartbeat is fresh (< 60s)", async () => {
+    writeFileSync(
+      join(workspaceRoot, "daemon-heartbeat.json"),
+      JSON.stringify({
+        writtenAt: new Date().toISOString(),
+      }),
+    );
+    const result = await handleFoundryDiagnostics(
+      {},
+      {
+        workspaceRoot,
+        providerProbes: {},
+      },
+    );
+    expect(result.daemonUp).toBe(true);
+  });
+});
