@@ -1,0 +1,167 @@
+import { mkdir, writeFile, readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { loadFoundryCanon } from "@/lib/foundry/canon";
+import type { FoundryCharacterCanon } from "@/lib/foundry/canon";
+import type { FoundryImageProvider } from "@/lib/foundry/providers/types";
+import type { CreatedFoundryAssetPack } from "@/lib/foundry/asset-pack";
+import { runConceptBoardStage, type ConceptLane } from "./stages/concept-board";
+import { runAnchorLockStage } from "./stages/anchor-lock";
+import { runVariantFanOutStage } from "./stages/variant-fan-out";
+import { runCutoutAndFeatherStage } from "./stages/cutout-and-feather";
+import { runCompositeJudgeStage } from "./stages/composite-judge";
+import { runManifestBuildStage } from "./stages/manifest-build";
+import {
+  CHARACTER_MASTER_STAGES,
+  type CharacterMasterEvent,
+  type CharacterMasterInput,
+  type CharacterMasterStage,
+} from "./types";
+
+export interface RunCharacterMasterArgs {
+  input: CharacterMasterInput;
+  provider: FoundryImageProvider;
+  emit: (event: CharacterMasterEvent) => void;
+}
+
+export type RunCharacterMasterResult =
+  | { ok: true; pack: CreatedFoundryAssetPack; runWorkspace: string }
+  | { ok: false; failure: { stage: CharacterMasterStage; reason: string; offendingPath?: string }; runWorkspace: string };
+
+function stagesFrom(stage: CharacterMasterStage | null): readonly CharacterMasterStage[] {
+  if (stage === null) return CHARACTER_MASTER_STAGES;
+  const idx = CHARACTER_MASTER_STAGES.indexOf(stage);
+  if (idx < 0) throw new Error(`runCharacterMaster: unknown resumeFromStage "${stage}"`);
+  return CHARACTER_MASTER_STAGES.slice(idx);
+}
+
+function findCharacter(canonChars: readonly FoundryCharacterCanon[], id: string): FoundryCharacterCanon {
+  const found = canonChars.find((c) => c.header.id === id);
+  if (!found) throw new Error(`runCharacterMaster: no canon for character "${id}"`);
+  return found;
+}
+
+export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<RunCharacterMasterResult> {
+  const { input, provider, emit } = args;
+  const runWorkspace = join(input.workspaceRoot, "runs", input.characterId);
+  await mkdir(runWorkspace, { recursive: true });
+
+  let canon;
+  try {
+    canon = await loadFoundryCanon({ canonRoot: input.canonRoot });
+  } catch (err) {
+    return { ok: false, failure: { stage: "concept-board", reason: `canon load failed: ${(err as Error).message}` }, runWorkspace };
+  }
+  let character: FoundryCharacterCanon;
+  try {
+    character = findCharacter(canon.characters, input.characterId);
+  } catch (err) {
+    return { ok: false, failure: { stage: "concept-board", reason: (err as Error).message }, runWorkspace };
+  }
+  const paletteTokens = canon.palettes.find((p) => p.header.id === character.paletteRef)?.tokens ?? {};
+  const stages = stagesFrom(input.resumeFromStage);
+
+  let conceptLanes: readonly ConceptLane[] | null = null;
+  let anchor: ConceptLane | null = null;
+  let anchorPath = "";
+  let sprites: Awaited<ReturnType<typeof runCutoutAndFeatherStage>>["processedSprites"] | null = null;
+
+  const nowIso = (): string => new Date().toISOString();
+
+  async function loadResumeAnchor(): Promise<void> {
+    const metaPath = join(runWorkspace, "anchor-meta.json");
+    const pngPath = join(runWorkspace, "anchor.png");
+    const meta = JSON.parse(await readFile(metaPath, "utf8"));
+    const bytes = await readFile(pngPath);
+    anchor = {
+      laneIndex: meta.anchorLaneIndex,
+      characterId: meta.anchorCharacterId,
+      variationAxis: "resume-axis",
+      prompt: meta.anchorPrompt,
+      bytes,
+      widthPx: meta.anchorWidthPx,
+      heightPx: meta.anchorHeightPx,
+    };
+    anchorPath = pngPath;
+  }
+
+  for (const stage of stages) {
+    emit({ kind: "stage-started", stage, at: nowIso() });
+    try {
+      if (stage === "concept-board") {
+        const r = await runConceptBoardStage({ character, provider, seed: input.seed });
+        conceptLanes = r.lanes;
+        emit({ kind: "stage-completed", stage, durationMs: r.durationMs, at: nowIso() });
+        continue;
+      }
+      if (stage === "anchor-lock") {
+        if (!conceptLanes) throw new Error("anchor-lock: missing concept lanes");
+        const r = await runAnchorLockStage({ lanes: conceptLanes, suggestedAnchorLane: 3 });
+        anchor = r.anchor;
+        anchorPath = join(runWorkspace, "anchor.png");
+        await writeFile(anchorPath, anchor.bytes);
+        await writeFile(join(runWorkspace, "anchor-meta.json"), JSON.stringify({
+          anchorLaneIndex: anchor.laneIndex,
+          anchorPrompt: anchor.prompt,
+          anchorCharacterId: anchor.characterId,
+          anchorWidthPx: anchor.widthPx,
+          anchorHeightPx: anchor.heightPx,
+        }, null, 2));
+        emit({ kind: "stage-completed", stage, durationMs: r.durationMs, at: nowIso() });
+        continue;
+      }
+      if (stage === "variant-fan-out") {
+        if (!anchor) {
+          await loadResumeAnchor();
+          if (!anchor) throw new Error("variant-fan-out: no anchor available (concept-board not run and no resume state)");
+        }
+        const r = await runVariantFanOutStage({
+          anchor,
+          characterId: character.header.id,
+          provider,
+          outfits: character.outfitVariants,
+          poses: character.poseStates,
+          seed: input.seed,
+        });
+        const cut = await runCutoutAndFeatherStage({ sprites: r.sprites, workDir: runWorkspace });
+        sprites = cut.processedSprites;
+        emit({ kind: "stage-completed", stage, durationMs: r.durationMs + cut.durationMs, at: nowIso() });
+        continue;
+      }
+      if (stage === "cutout-and-feather") {
+        emit({ kind: "stage-completed", stage, durationMs: 0, at: nowIso() });
+        continue;
+      }
+      if (stage === "composite-judge") {
+        if (!sprites || !anchorPath) throw new Error("composite-judge: missing sprites/anchor");
+        const r = await runCompositeJudgeStage({ anchorPath, sprites });
+        if (!r.ok) {
+          emit({ kind: "qa-failure", stage, reason: r.failure.reason, offendingPath: r.failure.offendingPath ?? undefined, at: nowIso() });
+          return { ok: false, failure: { stage, reason: r.failure.reason, offendingPath: r.failure.offendingPath ?? undefined }, runWorkspace };
+        }
+        emit({ kind: "stage-completed", stage, durationMs: r.durationMs, at: nowIso() });
+        continue;
+      }
+      if (stage === "manifest-build") {
+        if (!sprites) throw new Error("manifest-build: missing sprites");
+        const r = await runManifestBuildStage({
+          character,
+          sprites,
+          packDir: join(runWorkspace, "pack"),
+          anchorLaneIndex: anchor?.laneIndex ?? 3,
+          providerId: provider.id,
+          modelId: provider.id,
+          generatedAt: nowIso(),
+          seed: input.seed ?? 0,
+        });
+        emit({ kind: "stage-completed", stage, durationMs: r.durationMs, at: nowIso() });
+        emit({ kind: "pack-emitted", packDir: r.pack.packDir, packId: r.pack.manifest.packId, at: nowIso() });
+        void paletteTokens;
+        return { ok: true, pack: r.pack, runWorkspace };
+      }
+    } catch (err) {
+      return { ok: false, failure: { stage, reason: (err as Error).message }, runWorkspace };
+    }
+  }
+
+  return { ok: false, failure: { stage: stages.at(-1) ?? "manifest-build", reason: "no stages produced a pack" }, runWorkspace };
+}
