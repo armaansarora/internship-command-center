@@ -4,6 +4,32 @@ export interface RenderFoundryIntegrationSnippetOptions {
   format?: "tsx";
 }
 
+/**
+ * Code-injection defence for fields interpolated into generated TSX.
+ *
+ * `m.accessibility.altText`, `gsapCues[].targetSelector`, and
+ * `gsapCues[].easing` arrive as `z.string().min(1)` from the manifest
+ * schema (no character allow-list), so an attacker who controls a
+ * manifest could otherwise supply `altText: 'x" onerror="alert(1)'` or
+ * `easing: '); evil(); ('` and have those bytes spliced straight into
+ * the JSX as attribute breakers / expression breakers.
+ *
+ * `JSON.stringify` on a string always produces a single, properly-escaped
+ * double-quoted JS string literal: any embedded `"` becomes `\"`, any
+ * `\n` becomes `\\n`, etc. So `alt={JSON.stringify(value)}` is safe in
+ * JSX attribute position, `fromTo(${JSON.stringify(value)}, ...)` is
+ * safe in JS argument position, and the output for benign strings
+ * (`"Otis the concierge, idle pose"`) is byte-identical to the previous
+ * bare-quote form, so existing golden snapshots stay stable.
+ *
+ * Identifiers (`component`, `cueId`) are validated as
+ * `^[a-zA-Z_$][a-zA-Z0-9_$]*$` in the schema, so this renderer can
+ * splice them in raw without re-validating.
+ */
+function quote(value: string): string {
+  return JSON.stringify(value);
+}
+
 function publicSrcFor(appPath: string): string {
   if (!appPath.startsWith("public/")) {
     throw new Error(`renderFoundryIntegrationSnippet: appPath outside public/: ${appPath}`);
@@ -20,9 +46,9 @@ function characterSpriteImg(m: FoundryAssetPackManifest): string {
     `export function ${component}(): JSX.Element {`,
     `  return (`,
     `    <img`,
-    `      src="${publicSrcFor(m.intendedSlot.appPath)}"`,
-    `      alt="${m.accessibility.altText}"`,
-    `      role="${m.accessibility.role}"`,
+    `      src=${quote(publicSrcFor(m.intendedSlot.appPath))}`,
+    `      alt=${quote(m.accessibility.altText)}`,
+    `      role=${quote(m.accessibility.role)}`,
     `      width={${m.dimensions.displayWidthPx}}`,
     `      height={${m.dimensions.displayHeightPx}}`,
     `      loading="lazy"`,
@@ -38,7 +64,7 @@ function characterSpriteGsap(m: FoundryAssetPackManifest): string {
   const cueLines = m.gsapCues
     .map(
       (c) =>
-        `      const tl_${c.cueId} = gsap.timeline(); tl_${c.cueId}.fromTo("${c.targetSelector}", {opacity:0}, {opacity:1, duration: ${c.durationMs / 1000}, ease: "${c.easing}"}); timelines.push(tl_${c.cueId});`,
+        `      const tl_${c.cueId} = gsap.timeline(); tl_${c.cueId}.fromTo(${quote(c.targetSelector)}, {opacity:0}, {opacity:1, duration: ${c.durationMs / 1000}, ease: ${quote(c.easing)}}); timelines.push(tl_${c.cueId});`,
     )
     .join("\n");
   return [
@@ -59,9 +85,9 @@ function characterSpriteGsap(m: FoundryAssetPackManifest): string {
     `    <img`,
     `      ref={ref}`,
     `      data-otis`,
-    `      src="${publicSrcFor(m.intendedSlot.appPath)}"`,
-    `      alt="${m.accessibility.altText}"`,
-    `      role="${m.accessibility.role}"`,
+    `      src=${quote(publicSrcFor(m.intendedSlot.appPath))}`,
+    `      alt=${quote(m.accessibility.altText)}`,
+    `      role=${quote(m.accessibility.role)}`,
     `      width={${m.dimensions.displayWidthPx}}`,
     `      height={${m.dimensions.displayHeightPx}}`,
     `      loading="lazy"`,
