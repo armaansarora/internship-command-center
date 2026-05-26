@@ -14977,7 +14977,7 @@ The front-door MCP server. A Claude Code session (or Antigravity, or any MCP cli
 - Modify: `package.json` (dependencies block)
 - Modify: `package-lock.json` (auto by `npm install`)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/sdk-import.test.ts
@@ -14996,24 +14996,24 @@ describe("MCP SDK availability", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/sdk-import.test.ts`
 Expected: FAIL — "Cannot find module '@modelcontextprotocol/sdk/server/index.js'"
 
-- [ ] **Step 3: Install the SDK**
+- [x] **Step 3: Install the SDK**
 
 ```bash
 cd "/Users/armaanarora/Documents/The Tower"
 npm install --save @modelcontextprotocol/sdk@^1.20.0
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/sdk-import.test.ts`
 Expected: PASS — both imports resolve.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add package.json package-lock.json src/lib/foundry/mcp/sdk-import.test.ts
@@ -15030,9 +15030,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `package.json` lists `@modelcontextprotocol/sdk` under `dependencies` at a satisfying version.
-- [ ] `package-lock.json` is updated and committed in the same commit.
-- [ ] `src/lib/foundry/mcp/sdk-import.test.ts` passes against the installed SDK.
+- [x] `package.json` lists `@modelcontextprotocol/sdk` under `dependencies` at a satisfying version.
+- [x] `package-lock.json` is updated and committed in the same commit.
+- [x] `src/lib/foundry/mcp/sdk-import.test.ts` passes against the installed SDK.
 
 ### Task 6.2: Define FoundryMcpTool registry + shared Zod schemas
 
@@ -15040,7 +15040,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tools.ts`
 - Test: `src/lib/foundry/mcp/tools.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tools.test.ts
@@ -15120,12 +15120,12 @@ describe("FOUNDRY_MCP_TOOL_NAMES registry", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tools.test.ts`
 Expected: FAIL — "Cannot find module './tools'"
 
-- [ ] **Step 3: Implement the tool registry**
+- [x] **Step 3: Implement the tool registry**
 
 ```ts
 // src/lib/foundry/mcp/tools.ts
@@ -15385,12 +15385,12 @@ export interface FoundryMcpToolDef<I, O> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tools.test.ts`
 Expected: PASS — 8 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tools.ts src/lib/foundry/mcp/tools.test.ts
@@ -15407,9 +15407,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `FOUNDRY_MCP_TOOL_NAMES` lists exactly 9 strings in canonical order.
-- [ ] Every input schema is `.strict()` and rejects unknown keys (verified by at least one negative-case test).
-- [ ] `FoundryGenerateOutputSchema.runId` enforces a UUID v4 regex.
+- [x] `FOUNDRY_MCP_TOOL_NAMES` lists exactly 9 strings in canonical order.
+- [x] Every input schema is `.strict()` and rejects unknown keys (verified by at least one negative-case test).
+- [x] `FoundryGenerateOutputSchema.runId` enforces a UUID v4 regex.
 
 ### Task 6.3: Tool handler — canon_list
 
@@ -15417,7 +15417,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/canon-list.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/canon-list.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-list.test.ts
@@ -15464,12 +15464,12 @@ describe("handleFoundryCanonList", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-list.test.ts`
 Expected: FAIL — "Cannot find module './canon-list'"
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-list.ts
@@ -15542,12 +15542,12 @@ export async function handleFoundryCanonList(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-list.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/canon-list.ts src/lib/foundry/mcp/tool-handlers/canon-list.test.ts
@@ -15564,9 +15564,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Handler returns entries sorted-by-source-order; unknown kinds yield an empty list, not an error.
-- [ ] Files missing `id` or `displayName` headers are skipped (not crashed on).
-- [ ] Output passes `FoundryCanonListOutputSchema.parse` (verified by reusing the schema in the handler).
+- [x] Handler returns entries sorted-by-source-order; unknown kinds yield an empty list, not an error.
+- [x] Files missing `id` or `displayName` headers are skipped (not crashed on).
+- [x] Output passes `FoundryCanonListOutputSchema.parse` (verified by reusing the schema in the handler).
 
 ### Task 6.4: Tool handler — canon_get
 
@@ -15574,7 +15574,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/canon-get.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/canon-get.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-get.test.ts
@@ -15623,12 +15623,12 @@ describe("handleFoundryCanonGet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-get.test.ts`
 Expected: FAIL — "Cannot find module './canon-get'"
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-get.ts
@@ -15720,12 +15720,12 @@ export async function handleFoundryCanonGet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-get.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/canon-get.ts src/lib/foundry/mcp/tool-handlers/canon-get.test.ts
@@ -15742,9 +15742,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Handler scans every kind directory for the matching `id` header (not just one kind).
-- [ ] Unknown id throws an Error whose message contains the canonical phrase `canon entry not found`.
-- [ ] Returned payload includes the absolute `sourcePath` for downstream auditing.
+- [x] Handler scans every kind directory for the matching `id` header (not just one kind).
+- [x] Unknown id throws an Error whose message contains the canonical phrase `canon entry not found`.
+- [x] Returned payload includes the absolute `sourcePath` for downstream auditing.
 
 ### Task 6.5: Tool handler — asset_pack_list
 
@@ -15752,7 +15752,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/asset-pack-list.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts
@@ -15814,12 +15814,12 @@ describe("handleFoundryAssetPackList", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-list.ts
@@ -15887,12 +15887,12 @@ export async function handleFoundryAssetPackList(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/asset-pack-list.ts src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts
@@ -15909,9 +15909,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Manifests that fail Zod validation throw with the path interpolated into the error.
-- [ ] Empty `packsRoot` returns `{ packs: [] }` (not crash).
-- [ ] Filters combine via AND (all supplied filters must match).
+- [x] Manifests that fail Zod validation throw with the path interpolated into the error.
+- [x] Empty `packsRoot` returns `{ packs: [] }` (not crash).
+- [x] Filters combine via AND (all supplied filters must match).
 
 ### Task 6.6: Tool handler — asset_pack_get
 
@@ -15919,7 +15919,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/asset-pack-get.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts
@@ -15983,12 +15983,12 @@ describe("handleFoundryAssetPackGet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-get.ts
@@ -16040,12 +16040,12 @@ export async function handleFoundryAssetPackGet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/asset-pack-get.ts src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts
@@ -16062,9 +16062,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Unknown packId throws an Error whose message contains `asset pack not found`.
-- [ ] A manifest-vs-disk mismatch (file in manifest, missing on disk) throws with `asset pack file missing`.
-- [ ] Output paths are absolute (joinable from caller's cwd-agnostic context).
+- [x] Unknown packId throws an Error whose message contains `asset pack not found`.
+- [x] A manifest-vs-disk mismatch (file in manifest, missing on disk) throws with `asset pack file missing`.
+- [x] Output paths are absolute (joinable from caller's cwd-agnostic context).
 
 ### Task 6.7: Tool handler — asset_pack_integration
 
@@ -16072,7 +16072,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/asset-pack-integration.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts
@@ -16155,12 +16155,12 @@ describe("handleFoundryAssetPackIntegration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-integration.ts
@@ -16287,12 +16287,12 @@ export async function handleFoundryAssetPackIntegration(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/asset-pack-integration.ts src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts
@@ -16310,9 +16310,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Every one of the 6 asset kinds emits a distinct snippet body.
-- [ ] Missing `integration` metadata on the manifest throws `integration metadata missing`.
-- [ ] `targetFramework=raw` always returns the CSS-var form regardless of asset kind.
+- [x] Every one of the 6 asset kinds emits a distinct snippet body.
+- [x] Missing `integration` metadata on the manifest throws `integration metadata missing`.
+- [x] `targetFramework=raw` always returns the CSS-var form regardless of asset kind.
 
 ### Task 6.8: Tool handler — slot_audit
 
@@ -16320,7 +16320,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/slot-audit.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts
@@ -16389,12 +16389,12 @@ describe("handleFoundrySlotAudit", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/slot-audit.ts
@@ -16475,12 +16475,12 @@ export async function handleFoundrySlotAudit(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/slot-audit.ts src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts
@@ -16497,9 +16497,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `totalCount` reflects the scoped slot list (after filters), not the global registry.
-- [ ] A slot whose `slotId` matches any promoted pack's `slotId` is counted as covered.
-- [ ] Missing slot-registry file throws `slot registry missing at <path>` (not silent).
+- [x] `totalCount` reflects the scoped slot list (after filters), not the global registry.
+- [x] A slot whose `slotId` matches any promoted pack's `slotId` is counted as covered.
+- [x] Missing slot-registry file throws `slot registry missing at <path>` (not silent).
 
 ### Task 6.9: Tool handler — generate (queue-only, no work)
 
@@ -16507,7 +16507,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/generate.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate.test.ts
@@ -16569,12 +16569,12 @@ describe("handleFoundryGenerate", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate.ts
@@ -16618,12 +16618,12 @@ export async function handleFoundryGenerate(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/generate.ts src/lib/foundry/mcp/tool-handlers/generate.test.ts
@@ -16641,9 +16641,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Handler writes exactly one file under `inbox/foundry/` per call, atomically.
-- [ ] `runId` returned matches the `runId` field inside the inbox payload.
-- [ ] Description shorter than 8 chars is rejected at the schema layer.
+- [x] Handler writes exactly one file under `inbox/foundry/` per call, atomically.
+- [x] `runId` returned matches the `runId` field inside the inbox payload.
+- [x] Description shorter than 8 chars is rejected at the schema layer.
 
 ### Task 6.10: Tool handler — generate_status
 
@@ -16651,7 +16651,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/generate-status.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/generate-status.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate-status.test.ts
@@ -16730,12 +16730,12 @@ describe("handleFoundryGenerateStatus", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate-status.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate-status.ts
@@ -16810,12 +16810,12 @@ export async function handleFoundryGenerateStatus(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate-status.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/generate-status.ts src/lib/foundry/mcp/tool-handlers/generate-status.test.ts
@@ -16832,9 +16832,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] phase=closed always maps to status=promoted with percentComplete=100.
-- [ ] Any non-null blocker maps to status=blocked and surfaces in `blockers`.
-- [ ] Unknown runId throws `run not found: <id>`.
+- [x] phase=closed always maps to status=promoted with percentComplete=100.
+- [x] Any non-null blocker maps to status=blocked and surfaces in `blockers`.
+- [x] Unknown runId throws `run not found: <id>`.
 
 ### Task 6.11: Tool handler — diagnostics
 
@@ -16842,7 +16842,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/diagnostics.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts
@@ -16918,12 +16918,12 @@ describe("handleFoundryDiagnostics", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/diagnostics.ts
@@ -17015,12 +17015,12 @@ export async function handleFoundryDiagnostics(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/diagnostics.ts src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts
@@ -17038,9 +17038,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Heartbeat older than 60s flips `daemonUp` to false.
-- [ ] `recentRuns` is capped at 5 entries in descending `updatedAt` order.
-- [ ] `providersReachable` returns `false` for any probe that throws, with the error propagated as a typed Error (no silent catch).
+- [x] Heartbeat older than 60s flips `daemonUp` to false.
+- [x] `recentRuns` is capped at 5 entries in descending `updatedAt` order.
+- [x] `providersReachable` returns `false` for any probe that throws, with the error propagated as a typed Error (no silent catch).
 
 ### Task 6.12: FoundryMcpServer factory — assemble + register tools
 
@@ -17048,7 +17048,7 @@ EOF
 - Create: `src/lib/foundry/mcp/server.ts`
 - Test: `src/lib/foundry/mcp/server.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/server.test.ts
@@ -17114,12 +17114,12 @@ describe("createFoundryMcpServer", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the server factory**
+- [x] **Step 3: Implement the server factory**
 
 ```ts
 // src/lib/foundry/mcp/server.ts
@@ -17208,12 +17208,12 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/server.ts src/lib/foundry/mcp/server.test.ts
@@ -17231,9 +17231,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Server identity reports `tower-art-foundry` and the caller-supplied version.
-- [ ] `registeredTools` is exactly the 9 canonical names (no extras, none missing).
-- [ ] `invokeForTest("foundry/bogus", ...)` throws `unknown tool: foundry/bogus`.
+- [x] Server identity reports `tower-art-foundry` and the caller-supplied version.
+- [x] `registeredTools` is exactly the 9 canonical names (no extras, none missing).
+- [x] `invokeForTest("foundry/bogus", ...)` throws `unknown tool: foundry/bogus`.
 
 ### Task 6.13: scripts/foundry-mcp.ts — stdio bootstrap
 
@@ -17242,7 +17242,7 @@ EOF
 - Test: `scripts/foundry-mcp.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-mcp.test.ts
@@ -17283,12 +17283,12 @@ describe("scripts/foundry-mcp.ts", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-mcp.test.ts`
 Expected: FAIL — "Cannot find module 'scripts/foundry-mcp.ts'" or spawn ENOENT.
 
-- [ ] **Step 3: Implement the bootstrap**
+- [x] **Step 3: Implement the bootstrap**
 
 ```ts
 // scripts/foundry-mcp.ts
@@ -17357,7 +17357,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script wiring**
+- [x] **Step 4: Add npm script wiring**
 
 Edit `package.json` `scripts` block to add:
 
@@ -17367,12 +17367,12 @@ Edit `package.json` `scripts` block to add:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-mcp.test.ts`
 Expected: PASS — both `--help` and `--version` exit 0.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-mcp.ts scripts/foundry-mcp.test.ts package.json
@@ -17390,9 +17390,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `--help` exits 0 and mentions `tower-art-foundry`.
-- [ ] `--version` exits 0 with a semver line read from `package.json`.
-- [ ] `npm run foundry:mcp -- --help` resolves and prints help.
+- [x] `--help` exits 0 and mentions `tower-art-foundry`.
+- [x] `--version` exits 0 with a semver line read from `package.json`.
+- [x] `npm run foundry:mcp -- --help` resolves and prints help.
 
 ### Task 6.14: manifest.json — MCP client discovery descriptor
 
@@ -17400,7 +17400,7 @@ EOF
 - Create: `src/lib/foundry/mcp/manifest.json`
 - Test: `src/lib/foundry/mcp/manifest.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/manifest.test.ts
@@ -17444,12 +17444,12 @@ describe("manifest.json", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/manifest.test.ts`
 Expected: FAIL — `manifest.json` does not exist.
 
-- [ ] **Step 3: Implement the manifest**
+- [x] **Step 3: Implement the manifest**
 
 ```json
 {
@@ -17473,12 +17473,12 @@ Expected: FAIL — `manifest.json` does not exist.
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/manifest.test.ts`
 Expected: PASS — schema validates and tool names match.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/manifest.json src/lib/foundry/mcp/manifest.test.ts
@@ -17495,9 +17495,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] manifest tool list length equals `FOUNDRY_MCP_TOOL_NAMES.length`.
-- [ ] manifest `command` + `args` point at `scripts/foundry-mcp.ts`.
-- [ ] `transport` is the string `"stdio"`.
+- [x] manifest tool list length equals `FOUNDRY_MCP_TOOL_NAMES.length`.
+- [x] manifest `command` + `args` point at `scripts/foundry-mcp.ts`.
+- [x] `transport` is the string `"stdio"`.
 
 ### Task 6.15: install-mcp script (interactive Claude Code settings writer)
 
@@ -17506,7 +17506,7 @@ EOF
 - Test: `scripts/foundry-install-mcp.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-install-mcp.test.ts
@@ -17570,12 +17570,12 @@ describe("foundry-install-mcp", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-install-mcp.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the install script**
+- [x] **Step 3: Implement the install script**
 
 ```ts
 // scripts/foundry-install-mcp.ts
@@ -17663,7 +17663,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script**
+- [x] **Step 4: Add npm script**
 
 Edit `package.json` `scripts` block:
 
@@ -17673,12 +17673,12 @@ Edit `package.json` `scripts` block:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-install-mcp.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-install-mcp.ts scripts/foundry-install-mcp.test.ts package.json
@@ -17696,16 +17696,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] The script ALWAYS prompts for confirmation unless `FOUNDRY_INSTALL_YES=1` is set.
-- [ ] Existing `mcpServers` entries are preserved on merge.
-- [ ] Writes are atomic (tmp + rename), and the absolute path is logged before the prompt.
+- [x] The script ALWAYS prompts for confirmation unless `FOUNDRY_INSTALL_YES=1` is set.
+- [x] Existing `mcpServers` entries are preserved on merge.
+- [x] Writes are atomic (tmp + rename), and the absolute path is logged before the prompt.
 
 ### Task 6.16: End-to-end MCP round-trip — SDK client against the real server
 
 **Files:**
 - Create: `src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts
@@ -17773,24 +17773,24 @@ describe("e2e MCP round-trip", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts`
 Expected: FAIL — initial run will likely fail with `StdioClientTransport` import or because the bootstrap doesn't yet wire StdioServerTransport correctly under the test env. Confirm the actual failure mode before fixing.
 
-- [ ] **Step 3: Implement (already implemented across 6.1–6.15). If failure is real, harden `scripts/foundry-mcp.ts`**
+- [x] **Step 3: Implement (already implemented across 6.1–6.15). If failure is real, harden `scripts/foundry-mcp.ts`**
 
 The test should pass given Tasks 6.1–6.15 are complete. If it fails, the implementation gap is most likely in `scripts/foundry-mcp.ts` — verify:
 1. `StdioServerTransport` is connected to the server before any tool call.
 2. The `tools/call` request handler is correctly registered (server.setRequestHandler must accept the SDK's `CallToolRequestSchema`, not a string literal — adjust as needed using the real SDK schema export).
 3. Env-driven roots are read before `createFoundryMcpServer` is called.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts`
 Expected: PASS — client connects, lists canon, queues a generate run, sees the queued JSON on disk.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts
@@ -17808,9 +17808,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Test runs via the actual MCP SDK stdio client + server (no in-process shortcut).
-- [ ] After `foundry/generate`, the inbox file exists on disk at the path the server reports.
-- [ ] Test completes within 30 seconds on a baseline laptop.
+- [x] Test runs via the actual MCP SDK stdio client + server (no in-process shortcut).
+- [x] After `foundry/generate`, the inbox file exists on disk at the path the server reports.
+- [x] Test completes within 30 seconds on a baseline laptop.
 
 ### Phase 6 completion criteria
 
