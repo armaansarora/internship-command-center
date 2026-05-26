@@ -11,6 +11,12 @@ Usage:
   foundry floor <slug>             run the floor-environment agent (Phase 3)
                                      flags: --dry-run, --seed <n>,
                                             --reported <csv>, --run-dir <path>
+  foundry texture <name>           run the ui-texture agent (Phase 4)
+                                     flags: --kind <icon|texture>,
+                                            --aria-label <label>,
+                                            --tile-mode <repeat|repeat-x|repeat-y|no-repeat>,
+                                            --provider <mock|claude|gemini>,
+                                            --dry-run, --run-dir <path>, --seed <n>
   foundry help                     print this help
 `;
 
@@ -119,6 +125,170 @@ async function main(argv: readonly string[]): Promise<number> {
     } catch (err) {
       process.stderr.write(
         `foundry floor: failed — ${(err as Error).message}\n`,
+      );
+      return 1;
+    }
+  }
+  if (subcommand === "texture") {
+    if (!sub2) {
+      process.stderr.write(
+        `foundry texture: missing <name> — e.g. foundry texture elevator-door --kind=icon\n`,
+      );
+      return 2;
+    }
+    const textureArgs = [...rest];
+    let kindFlag: "icon" | "texture" = "texture";
+    let ariaLabel: string | undefined;
+    let tileMode:
+      | "repeat"
+      | "repeat-x"
+      | "repeat-y"
+      | "no-repeat"
+      | undefined;
+    let providerKind: "mock" | "claude" | "gemini" = "mock";
+    let dryRun = false;
+    let runDir: string | undefined;
+    let seed: number | undefined;
+    for (let i = 0; i < textureArgs.length; i += 1) {
+      const arg = textureArgs[i];
+      if (arg === "--kind") {
+        const next = textureArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry texture: --kind requires a value\n`);
+          return 2;
+        }
+        if (next !== "icon" && next !== "texture") {
+          process.stderr.write(
+            `foundry texture: --kind must be icon|texture (got "${next}")\n`,
+          );
+          return 2;
+        }
+        kindFlag = next;
+        i += 1;
+      } else if (arg?.startsWith("--kind=")) {
+        const next = arg.slice("--kind=".length);
+        if (next !== "icon" && next !== "texture") {
+          process.stderr.write(
+            `foundry texture: --kind must be icon|texture (got "${next}")\n`,
+          );
+          return 2;
+        }
+        kindFlag = next;
+      } else if (arg === "--aria-label") {
+        const next = textureArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry texture: --aria-label requires a value\n`);
+          return 2;
+        }
+        ariaLabel = next;
+        i += 1;
+      } else if (arg?.startsWith("--aria-label=")) {
+        ariaLabel = arg.slice("--aria-label=".length);
+      } else if (arg === "--tile-mode") {
+        const next = textureArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry texture: --tile-mode requires a value\n`);
+          return 2;
+        }
+        if (
+          next !== "repeat" &&
+          next !== "repeat-x" &&
+          next !== "repeat-y" &&
+          next !== "no-repeat"
+        ) {
+          process.stderr.write(
+            `foundry texture: --tile-mode must be repeat|repeat-x|repeat-y|no-repeat\n`,
+          );
+          return 2;
+        }
+        tileMode = next;
+        i += 1;
+      } else if (arg?.startsWith("--tile-mode=")) {
+        const next = arg.slice("--tile-mode=".length);
+        if (
+          next !== "repeat" &&
+          next !== "repeat-x" &&
+          next !== "repeat-y" &&
+          next !== "no-repeat"
+        ) {
+          process.stderr.write(
+            `foundry texture: --tile-mode must be repeat|repeat-x|repeat-y|no-repeat\n`,
+          );
+          return 2;
+        }
+        tileMode = next;
+      } else if (arg === "--provider") {
+        const next = textureArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry texture: --provider requires a value\n`);
+          return 2;
+        }
+        if (next !== "mock" && next !== "claude" && next !== "gemini") {
+          process.stderr.write(
+            `foundry texture: --provider must be mock|claude|gemini\n`,
+          );
+          return 2;
+        }
+        providerKind = next;
+        i += 1;
+      } else if (arg?.startsWith("--provider=")) {
+        const next = arg.slice("--provider=".length);
+        if (next !== "mock" && next !== "claude" && next !== "gemini") {
+          process.stderr.write(
+            `foundry texture: --provider must be mock|claude|gemini\n`,
+          );
+          return 2;
+        }
+        providerKind = next;
+      } else if (arg === "--dry-run") {
+        dryRun = true;
+      } else if (arg === "--run-dir") {
+        const next = textureArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry texture: --run-dir requires a value\n`);
+          return 2;
+        }
+        runDir = next;
+        i += 1;
+      } else if (arg?.startsWith("--run-dir=")) {
+        runDir = arg.slice("--run-dir=".length);
+      } else if (arg === "--seed") {
+        const next = textureArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry texture: --seed requires a value\n`);
+          return 2;
+        }
+        seed = Number(next);
+        i += 1;
+      } else if (arg?.startsWith("--seed=")) {
+        seed = Number(arg.slice("--seed=".length));
+      } else {
+        process.stderr.write(`foundry texture: unknown flag "${arg}"\n`);
+        return 2;
+      }
+    }
+    try {
+      const { runFoundryUiTextureCli } = await import(
+        "@/lib/foundry/agents/ui-texture/cli"
+      );
+      const out = await runFoundryUiTextureCli({
+        name: sub2,
+        kind: kindFlag,
+        ariaLabel,
+        tileMode,
+        providerKind,
+        dryRun,
+        runDir,
+        seed,
+      });
+      process.stdout.write(`${out.summary}\n`);
+      if (out.packId) {
+        process.stdout.write(`packId: ${out.packId}\n`);
+      }
+      return 0;
+    } catch (err) {
+      process.stderr.write(
+        `foundry texture: failed — ${(err as Error).message}\n`,
       );
       return 1;
     }
