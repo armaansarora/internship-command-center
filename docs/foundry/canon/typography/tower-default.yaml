@@ -1,0 +1,20 @@
+header:
+  kind: typography
+  schemaVersion: "1.0.0"
+  id: tower-default
+  revisedAt: "2026-05-25T00:00:00.000Z"
+families:
+  heading: "Playfair Display"
+  body: "Satoshi"
+  mono: "JetBrains Mono"
+ramp:
+  - { token: display, sizePx: 96, weight: 600, lineHeight: 1.02 }
+  - { token: h1, sizePx: 72, weight: 600, lineHeight: 1.05 }
+  - { token: h2, sizePx: 48, weight: 500, lineHeight: 1.1 }
+  - { token: h3, sizePx: 32, weight: 500, lineHeight: 1.2 }
+  - { token: h4, sizePx: 24, weight: 500, lineHeight: 1.3 }
+  - { token: body-lg, sizePx: 18, weight: 400, lineHeight: 1.55 }
+  - { token: body, sizePx: 16, weight: 400, lineHeight: 1.5 }
+  - { token: body-sm, sizePx: 14, weight: 400, lineHeight: 1.45 }
+  - { token: caption, sizePx: 12, weight: 500, lineHeight: 1.35 }
+  - { token: mono-data, sizePx: 14, weight: 400, lineHeight: 1.5 }
