@@ -14,7 +14,15 @@ import { loadFoundryFloorCanonEntry } from "./floor-canon";
 export interface FoundryFloorCliInput {
   floorSlug: string;
   runDir?: string;
-  reportedElements: ReadonlyArray<string>;
+  /**
+   * Critical 2 (theatrical QA): `reportedElements` was a free-text input
+   * that drove a string-comparison "room elements" gate. It never
+   * verified the image. The field is preserved as an OPTIONAL no-op for
+   * CLI backward compatibility but the orchestrator no longer reads it.
+   * It will be removed once external callers (telegram bot, scripts)
+   * stop sending it.
+   */
+  reportedElements?: ReadonlyArray<string>;
   seed?: number;
   providerKind: "mock" | "gemini";
   dryRun?: boolean;
@@ -57,7 +65,6 @@ export async function runFoundryFloorCli(
   const provider = pickProvider(input.providerKind);
   const result = await runFoundryFloorEnvironment(parsed, provider, {
     runDir,
-    reportedElements: input.reportedElements,
   });
   return {
     summary: `floor ${parsed.floorSlug} pack ${result.packId} validated, ${parsed.timeStates.length} variants written`,

@@ -12,6 +12,37 @@ export type CharacterMasterStage = (typeof CHARACTER_MASTER_STAGES)[number];
 
 export const CharacterMasterStageSchema = z.enum(CHARACTER_MASTER_STAGES);
 
+/**
+ * Identifiers for the per-stage QA gates the orchestrator can fail at. Used
+ * in `qa-failure` events so downstream consumers (the Telegram bot, the
+ * daemon UI, structured logs) can branch on which gate fired and surface
+ * the right operator-actionable copy.
+ */
+export const CHARACTER_MASTER_GATES = [
+  "composite-judge",
+  "palette-match",
+  "silhouette-diversity",
+] as const;
+export type CharacterMasterGateName = (typeof CHARACTER_MASTER_GATES)[number];
+
+/**
+ * Optional QA tunables. The defaults are intentionally loose enough that the
+ * mock-provider images used in tests + dry-runs pass — production callers
+ * tighten them via the runtime config.
+ */
+export const CharacterMasterQaConfigSchema = z
+  .object({
+    /** Maximum Lab-approximation distance between a sprite's dominant color
+     * and the nearest canon palette token. Default 120 (loose). */
+    paletteToleranceLab: z.number().nonnegative().optional(),
+    /** Minimum required pairwise Hamming distance across sprite perceptual
+     * hashes. 0 disables the gate; defaults to 0 so production callers must
+     * explicitly opt in. */
+    minPairwiseSilhouetteHamming: z.number().int().nonnegative().optional(),
+  })
+  .strict();
+export type CharacterMasterQaConfig = z.infer<typeof CharacterMasterQaConfigSchema>;
+
 export const CharacterMasterInputSchema = z
   .object({
     characterId: z.string().min(1),
@@ -20,6 +51,7 @@ export const CharacterMasterInputSchema = z
     providerId: z.string().min(1),
     resumeFromStage: CharacterMasterStageSchema.nullable(),
     seed: z.number().int().optional(),
+    qa: CharacterMasterQaConfigSchema.optional(),
   })
   .strict();
 export type CharacterMasterInput = z.infer<typeof CharacterMasterInputSchema>;
@@ -33,5 +65,13 @@ export interface CharacterMasterStageResult<T> {
 export type CharacterMasterEvent =
   | { kind: "stage-started"; stage: CharacterMasterStage; at: string }
   | { kind: "stage-completed"; stage: CharacterMasterStage; durationMs: number; at: string }
-  | { kind: "qa-failure"; stage: CharacterMasterStage; reason: string; offendingPath?: string; at: string }
+  | {
+      kind: "qa-failure";
+      stage: CharacterMasterStage;
+      /** Which named QA gate failed. */
+      gateName: CharacterMasterGateName;
+      reason: string;
+      offendingPath?: string;
+      at: string;
+    }
   | { kind: "pack-emitted"; packDir: string; packId: string; at: string };

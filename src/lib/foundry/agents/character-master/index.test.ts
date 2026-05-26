@@ -256,6 +256,61 @@ describe("runCharacterMaster", () => {
     }
   });
 
+  it("fails the run with a palette-match qa-failure when canon tolerance is impossible", async () => {
+    // Force the palette gate to fail by demanding a near-zero Lab tolerance —
+    // the mock sprite's dominant color cannot possibly land that close to the
+    // single canon token, so the orchestrator must abort with an actionable
+    // gateName="palette-match" reason rather than emit a pack.
+    const events: Array<{ kind: string; gateName?: string; reason?: string }> = [];
+    const result = await runCharacterMaster({
+      input: {
+        characterId: "sol-navarro",
+        canonRoot,
+        workspaceRoot,
+        providerId: "mock-foundry-image",
+        resumeFromStage: null,
+        seed: 42,
+        qa: { paletteToleranceLab: 0.001, minPairwiseSilhouetteHamming: 0 },
+      },
+      provider: createPngFoundryImageProvider(),
+      emit: (e) => events.push(e as { kind: string; gateName?: string; reason?: string }),
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.failure.reason.toLowerCase()).toMatch(/palette/);
+    }
+    const qaFailures = events.filter((e) => e.kind === "qa-failure");
+    expect(qaFailures.some((e) => e.gateName === "palette-match")).toBe(true);
+    expect(qaFailures.some((e) => (e.reason ?? "").toLowerCase().includes("palette"))).toBe(true);
+  });
+
+  it("fails the run with a silhouette-diversity qa-failure when sprites are too similar", async () => {
+    // Force the silhouette gate to fail by demanding an impossibly high
+    // pairwise Hamming threshold. The mock provider seeds bytes per prompt
+    // but the 21 sprites' perceptual hashes cannot all be > 60 bits apart on
+    // a 64-bit hash space.
+    const events: Array<{ kind: string; gateName?: string; reason?: string }> = [];
+    const result = await runCharacterMaster({
+      input: {
+        characterId: "sol-navarro",
+        canonRoot,
+        workspaceRoot,
+        providerId: "mock-foundry-image",
+        resumeFromStage: null,
+        seed: 42,
+        qa: { paletteToleranceLab: 250, minPairwiseSilhouetteHamming: 60 },
+      },
+      provider: createPngFoundryImageProvider(),
+      emit: (e) => events.push(e as { kind: string; gateName?: string; reason?: string }),
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.failure.reason.toLowerCase()).toMatch(/silhouette|diversity|hamming/);
+    }
+    const qaFailures = events.filter((e) => e.kind === "qa-failure");
+    expect(qaFailures.some((e) => e.gateName === "silhouette-diversity")).toBe(true);
+  });
+
   it("skips concept-board + anchor-lock when resumeFromStage is variant-fan-out", async () => {
     const events: string[] = [];
     const runWorkspace = join(workspaceRoot, "runs", "sol-navarro");

@@ -37,7 +37,6 @@ describe("golden war-room run", () => {
     await runFoundryFloorCli({
       floorSlug: "war-room",
       runDir: dir,
-      reportedElements: ["wall-mounted-boards", "leather-chairs", "globe"],
       seed: 1,
       providerKind: "mock",
     });
@@ -59,7 +58,6 @@ describe("golden war-room run", () => {
     await runFoundryFloorCli({
       floorSlug: "war-room",
       runDir: dir,
-      reportedElements: ["wall-mounted-boards", "leather-chairs", "globe"],
       seed: 1,
       providerKind: "mock",
     });
@@ -90,11 +88,23 @@ describe("golden war-room run", () => {
     }
   });
 
+  // Critical 2: CLI now ignores `reportedElements` even if passed. We
+  // pass it here to prove backwards compat without theatrical gating.
+  it("ignores legacy reportedElements input (no theatrical gate)", async () => {
+    const out = await runFoundryFloorCli({
+      floorSlug: "war-room",
+      runDir: dir,
+      reportedElements: [], // intentionally empty: would have failed the old gate
+      seed: 1,
+      providerKind: "mock",
+    });
+    expect(out.summary).toContain("validated");
+  });
+
   it("dry-run mode prints `validated` without writing artefacts", async () => {
     const out = await runFoundryFloorCli({
       floorSlug: "war-room",
       runDir: dir,
-      reportedElements: ["wall-mounted-boards", "leather-chairs", "globe"],
       seed: 1,
       providerKind: "mock",
       dryRun: true,

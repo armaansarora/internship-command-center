@@ -11,12 +11,21 @@ import { runVariantFanOutStage } from "./stages/variant-fan-out";
 import { runCutoutAndFeatherStage, type ProcessedSprite } from "./stages/cutout-and-feather";
 import { runCompositeJudgeStage } from "./stages/composite-judge";
 import { runManifestBuildStage } from "./stages/manifest-build";
+import { runPaletteMatchGate, runSilhouetteDiversityGate } from "./qa";
 import {
   CHARACTER_MASTER_STAGES,
   type CharacterMasterEvent,
   type CharacterMasterInput,
   type CharacterMasterStage,
 } from "./types";
+
+/** Default Lab-approximation tolerance for the palette-match gate. Loose
+ * enough to pass the mock-provider gamut used in tests; production callers
+ * can tighten via `input.qa.paletteToleranceLab`. */
+const DEFAULT_PALETTE_TOLERANCE_LAB = 120;
+/** Default minimum pairwise Hamming distance for the silhouette-diversity
+ * gate. Zero disables the gate; production callers opt in explicitly. */
+const DEFAULT_MIN_PAIRWISE_SILHOUETTE_HAMMING = 0;
 
 export interface RunCharacterMasterArgs {
   input: CharacterMasterInput;
@@ -213,8 +222,74 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
         const judgeAnchor = (await fileExists(anchorCutoutPath)) ? anchorCutoutPath : anchorPath;
         const r = await runCompositeJudgeStage({ anchorPath: judgeAnchor, sprites });
         if (!r.ok) {
-          emit({ kind: "qa-failure", stage, reason: r.failure.reason, offendingPath: r.failure.offendingPath ?? undefined, at: nowIso() });
+          emit({
+            kind: "qa-failure",
+            stage,
+            gateName: "composite-judge",
+            reason: r.failure.reason,
+            offendingPath: r.failure.offendingPath ?? undefined,
+            at: nowIso(),
+          });
           return { ok: false, failure: { stage, reason: r.failure.reason, offendingPath: r.failure.offendingPath ?? undefined }, runWorkspace };
+        }
+        // Run the remaining QA gates announced by the agent: palette match
+        // (every sprite's dominant color must land within Lab tolerance of a
+        // canon token) and silhouette diversity (sprites must be perceptually
+        // distinguishable). Both fail the run with an actionable qa-failure
+        // event carrying the gate name.
+        const paletteTolerance = input.qa?.paletteToleranceLab ?? DEFAULT_PALETTE_TOLERANCE_LAB;
+        for (const sprite of sprites) {
+          const paletteResult = await runPaletteMatchGate({
+            pngPath: sprite.pngPath,
+            canonTokens: paletteTokens,
+            toleranceLab: paletteTolerance,
+          });
+          if (!paletteResult.ok) {
+            const composedReason = `palette-match gate failed for ${sprite.outfit}/${sprite.pose}: ${paletteResult.reason}`;
+            emit({
+              kind: "qa-failure",
+              stage,
+              gateName: "palette-match",
+              reason: composedReason,
+              offendingPath: sprite.pngPath,
+              at: nowIso(),
+            });
+            return {
+              ok: false,
+              failure: {
+                stage,
+                reason: composedReason,
+                offendingPath: sprite.pngPath,
+              },
+              runWorkspace,
+            };
+          }
+        }
+        const minHamming = input.qa?.minPairwiseSilhouetteHamming ?? DEFAULT_MIN_PAIRWISE_SILHOUETTE_HAMMING;
+        if (minHamming > 0) {
+          const silhouetteResult = await runSilhouetteDiversityGate({
+            pngPaths: sprites.map((s) => s.pngPath),
+            minPairwiseHamming: minHamming,
+          });
+          if (!silhouetteResult.ok) {
+            emit({
+              kind: "qa-failure",
+              stage,
+              gateName: "silhouette-diversity",
+              reason: silhouetteResult.reason,
+              offendingPath: silhouetteResult.offendingPair[0],
+              at: nowIso(),
+            });
+            return {
+              ok: false,
+              failure: {
+                stage,
+                reason: silhouetteResult.reason,
+                offendingPath: silhouetteResult.offendingPair[0],
+              },
+              runWorkspace,
+            };
+          }
         }
         emit({ kind: "stage-completed", stage, durationMs: r.durationMs, at: nowIso() });
         continue;

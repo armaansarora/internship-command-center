@@ -13,7 +13,6 @@ import type { FoundryImageProvider } from "@/lib/foundry/agents/provider-interfa
 
 export interface FoundryFloorAgentContext {
   runDir: string;
-  reportedElements: ReadonlyArray<string>;
 }
 
 export interface FoundryFloorAgentResult {
@@ -48,7 +47,6 @@ export async function runFoundryFloorEnvironment(
   const qa = await runFoundryFloorQa({
     canonPalette: canon.palette,
     requiredElements: canon.requiredElements,
-    reportedElements: context.reportedElements,
     variants: variants.map((v) => ({
       timeState: v.timeState,
       bytes: v.compositeBytes,

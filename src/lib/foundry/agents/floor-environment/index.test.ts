@@ -41,7 +41,7 @@ describe("runFoundryFloorEnvironment", () => {
         seed: 1,
       },
       provider,
-      { runDir: dir, reportedElements: ["wall-mounted-boards"] },
+      { runDir: dir },
     );
     const manifest = result.manifest as { variants: Array<{ timeState: string }> };
     expect(manifest.variants.map((v) => v.timeState)).toEqual([
@@ -62,7 +62,7 @@ describe("runFoundryFloorEnvironment", () => {
         seed: 2,
       },
       provider,
-      { runDir: dir, reportedElements: ["wall-mounted-boards"] },
+      { runDir: dir },
     );
     expect(existsSync(join(dir, "pack", "dawn", `composite.png`))).toBe(true);
   });
@@ -78,7 +78,7 @@ describe("runFoundryFloorEnvironment", () => {
         seed: 5,
       },
       provider,
-      { runDir: dir, reportedElements: ["wall-mounted-boards"] },
+      { runDir: dir },
     );
     const manifest = result.manifest as {
       compositeKind: string;
@@ -103,7 +103,7 @@ describe("runFoundryFloorEnvironment", () => {
         seed: 3,
       },
       provider,
-      { runDir: dir, reportedElements: ["wall-mounted-boards"] },
+      { runDir: dir },
     );
     const manifest = result.manifest as { integrationSnippet: string };
     expect(manifest.integrationSnippet).toContain(
@@ -111,20 +111,36 @@ describe("runFoundryFloorEnvironment", () => {
     );
   });
 
-  it("throws when QA fails (room-elements missing)", async () => {
+  // Critical 2: the "reportedElements => qa fails" path is gone because
+  // the room-elements gate is gone. The honest report carries a
+  // roomElementsCheck.status=todo-post-launch entry that consumers can
+  // read directly. We assert that path here instead of expecting a throw.
+  it("manifest qa.roomElementsCheck declares the post-launch TODO with canon list", async () => {
     const provider = createFoundryFloorMockProvider();
-    await expect(
-      runFoundryFloorEnvironment(
-        {
-          runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
-          floorSlug: "war-room",
-          requestedBy: "agent",
-          timeStates: ["dawn"],
-          seed: 4,
-        },
-        provider,
-        { runDir: dir, reportedElements: [] },
-      ),
-    ).rejects.toThrow(/qa/i);
+    const result = await runFoundryFloorEnvironment(
+      {
+        runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
+        floorSlug: "war-room",
+        requestedBy: "agent",
+        timeStates: ["dawn"],
+        seed: 4,
+      },
+      provider,
+      { runDir: dir },
+    );
+    const manifest = result.manifest as {
+      qa: {
+        roomElementsCheck: {
+          status: string;
+          declaredRequired: ReadonlyArray<string>;
+        };
+        failedGates: ReadonlyArray<string>;
+      };
+    };
+    expect(manifest.qa.roomElementsCheck.status).toBe("todo-post-launch");
+    expect(manifest.qa.roomElementsCheck.declaredRequired).toEqual([
+      "wall-mounted-boards",
+    ]);
+    expect(manifest.qa.failedGates).not.toContain("room-elements");
   });
 });
