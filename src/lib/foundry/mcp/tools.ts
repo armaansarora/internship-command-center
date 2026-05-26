@@ -1,4 +1,87 @@
 import { z } from "zod";
+import { PackIdSchema } from "./lib/path-safety";
+
+/**
+ * Maximum length of a `foundry/generate` `description`. Caps the largest
+ * single MCP payload so a single call cannot enqueue megabytes of prompt
+ * text (cheap DoS surface). 4000 chars comfortably fits a rich character
+ * brief; honest prompts in production sit well under 1500.
+ */
+export const FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS = 4000;
+
+/**
+ * Allow-list of hostnames whose images may be passed as `referenceImageUrl`
+ * to `foundry/generate`. Anything off this list is rejected as a potential
+ * SSRF vector — the daemon eventually fetches this URL server-side, so an
+ * unrestricted accept lets a caller probe internal endpoints
+ * (169.254.169.254 cloud metadata, 127.0.0.1 admin panels, etc.).
+ *
+ * Production additions land here, not in ad-hoc bypasses inside handlers.
+ */
+export const FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST = [
+  // Supabase public storage — production-pinned art and CMS-driven references.
+  "jzrsrruugcajohvvmevg.supabase.co",
+  // GitHub raw user content — design system references checked into git.
+  "raw.githubusercontent.com",
+  // The Tower production domain — when a reference is itself hosted on us.
+  "interntower.com",
+  "www.interntower.com",
+] as const;
+
+/**
+ * Hosts the referenceImageUrl validator must reject outright, independent of
+ * the allow-list. These cover SSRF-target ranges that should never reach a
+ * fetch from inside Vercel/local dev (cloud metadata, loopback, RFC1918).
+ */
+const SSRF_FORBIDDEN_HOSTNAMES = new Set<string>([
+  "localhost",
+  "127.0.0.1",
+  "0.0.0.0",
+  "::1",
+  "169.254.169.254",
+  "metadata.google.internal",
+]);
+
+/** RFC1918 + link-local + loopback IPv4 ranges. */
+function isPrivateOrLoopbackIPv4(hostname: string): boolean {
+  const m = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!m) return false;
+  const [, a, b] = m.map(Number);
+  // 127.0.0.0/8 — loopback
+  if (a === 127) return true;
+  // 10.0.0.0/8
+  if (a === 10) return true;
+  // 172.16.0.0/12
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  // 192.168.0.0/16
+  if (a === 192 && b === 168) return true;
+  // 169.254.0.0/16 — link-local (covers AWS IMDS at 169.254.169.254)
+  if (a === 169 && b === 254) return true;
+  // 0.0.0.0/8 — "this network"
+  if (a === 0) return true;
+  return false;
+}
+
+/**
+ * Reference-image URL validator: HTTPS-only, host on the explicit allow-list,
+ * never an SSRF-prone target. Returns the original URL string on success.
+ */
+const ReferenceImageUrlSchema = z
+  .string()
+  .url("referenceImageUrl must be a valid URL")
+  .refine((raw) => {
+    let url: URL;
+    try {
+      url = new URL(raw);
+    } catch {
+      return false;
+    }
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    if (SSRF_FORBIDDEN_HOSTNAMES.has(host)) return false;
+    if (isPrivateOrLoopbackIPv4(host)) return false;
+    return (FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST as readonly string[]).includes(host);
+  }, "referenceImageUrl must be HTTPS and on the Foundry host allow-list");
 
 /**
  * Canonical, ordered list of every MCP tool exposed by the
@@ -188,9 +271,23 @@ export type FoundrySlotAuditOutput = z.infer<typeof FoundrySlotAuditOutputSchema
 export const FoundryGenerateInputSchema = z
   .object({
     kind: z.enum(FOUNDRY_ASSET_KINDS),
-    description: z.string().min(8),
-    referenceImageUrl: z.string().url().optional(),
-    anchorPackId: z.string().min(1).optional(),
+    // Capped at FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS (~4000) to prevent a
+    // single MCP call from enqueuing megabytes of prompt text.
+    description: z
+      .string()
+      .min(8, "description must be at least 8 chars")
+      .max(
+        FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS,
+        `description must be ${FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS} chars or fewer`,
+      ),
+    // HTTPS-only + host allow-list to close the SSRF surface — see
+    // ReferenceImageUrlSchema and FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST.
+    referenceImageUrl: ReferenceImageUrlSchema.optional(),
+    // anchorPackId flows into path.join(packsRoot, …) inside asset_pack
+    // handlers, so it must use the same strict PackIdSchema (charset,
+    // length cap, encoded-traversal rejection) as those tools — not a
+    // plain z.string().min(1) which would let `../../../etc/passwd` through.
+    anchorPackId: PackIdSchema.optional(),
     priority: z.enum(["low", "normal", "high"]).default("normal"),
     requesterAgent: z.string().min(1).optional(),
   })
