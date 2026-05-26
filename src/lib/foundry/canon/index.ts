@@ -8,3 +8,4 @@ export * from "./space-tokens-schema";
 export * from "./iconography-rules-schema";
 export * from "./loader";
 export * from "./load-canon";
+export * from "./validate";
