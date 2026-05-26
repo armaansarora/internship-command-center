@@ -2,7 +2,7 @@ import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createFoundryMcpServer } from "../src/lib/foundry/mcp/server";
+import { createFoundryMcpServer } from "../src/lib/artlab/sdk/mcp/server";
 
 const HELP = `tower-art-foundry - MCP stdio server
 

@@ -9,7 +9,7 @@ const config: Config = {
     // string literals (e.g. `bg-[url('${pngPath}')]`), not Tailwind
     // class consumption. Scanning them generates broken arbitrary-value
     // classes that fail Turbopack module resolution.
-    "!./src/lib/foundry/agents/**/integration.ts",
+    "!./src/lib/artlab/sdk/agents/**/integration.ts",
   ],
   theme: {
     extend: {

@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import FoundryDemoPage from "./page";
-import { FOUNDRY_DEMO_PACKS } from "@/lib/foundry/integration/demo-fixtures";
+import { FOUNDRY_DEMO_PACKS } from "@/lib/artlab/sdk/integration/demo-fixtures";
 
 describe("FoundryDemoPage", () => {
   it("renders the real publicPath of every non-pending demo modality", () => {

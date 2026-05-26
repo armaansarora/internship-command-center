@@ -1,7 +1,7 @@
 // scripts/foundry.ts
-import { runCanonValidateSubcommand } from "@/lib/foundry/cli/canon-validate";
-import { runCharacterSubcommand } from "@/lib/foundry/cli/character";
-import { runFoundryFloorCli } from "@/lib/foundry/agents/floor-environment/cli";
+import { runCanonValidateSubcommand } from "@/lib/artlab/sdk/cli/canon-validate";
+import { runCharacterSubcommand } from "@/lib/artlab/sdk/cli/character";
+import { runFoundryFloorCli } from "@/lib/artlab/sdk/agents/floor-environment/cli";
 import { join } from "node:path";
 
 const HELP = `foundry — Tower Art Foundry CLI
@@ -274,7 +274,7 @@ async function main(argv: readonly string[]): Promise<number> {
     }
     try {
       const { runFoundryUiTextureCli } = await import(
-        "@/lib/foundry/agents/ui-texture/cli"
+        "@/lib/artlab/sdk/agents/ui-texture/cli"
       );
       const out = await runFoundryUiTextureCli({
         name: sub2,
@@ -432,7 +432,7 @@ async function main(argv: readonly string[]): Promise<number> {
     }
     try {
       const { runFoundrySpriteAnimatorCli } = await import(
-        "@/lib/foundry/agents/sprite-animator/cli"
+        "@/lib/artlab/sdk/agents/sprite-animator/cli"
       );
       const out = await runFoundrySpriteAnimatorCli({
         sourcePackId: sub2,

@@ -22,7 +22,7 @@ import { processCancelIntents } from "@/lib/artlab/daemon/cancel-flow";
 import { reconcileCrashedRuns } from "@/lib/artlab/daemon/crash-recovery";
 import { createSleepGuard } from "@/lib/artlab/daemon/sleep-guard";
 import { createCliInboxBridge } from "@/lib/artlab/daemon/cli-inbox-bridge";
-import { createFoundryPoller } from "@/lib/artlab/daemon/foundry-poller";
+import { createFoundryPoller } from "@/lib/artlab/daemon/sdk-poller";
 import { DaemonAlreadyRunningError, acquireDaemonLock, type DaemonLockHandle } from "@/lib/artlab/daemon/daemon-lock";
 import { dispatchInboundMessage } from "@/lib/artlab/bot/bot-dispatcher";
 import { createTelegramClient, type TelegramClient } from "@/lib/artlab/bot/telegram-client";

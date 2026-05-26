@@ -27,14 +27,14 @@ function walk(dir: string): string[] {
 // never inlined into the React tree).
 const ALLOWED_SVG_FILES = new Set<string>([
   "src/lib/artlab/speed/placeholder-images.ts",
-  "src/lib/foundry/agents/ui-texture/qa/svg-aria-label.ts",
-  "src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts",
-  "src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.ts",
-  "src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts",
-  "src/lib/foundry/agents/ui-texture/llm-provider.test.ts",
-  "src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts",
-  "src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts",
-  "src/lib/foundry/agents/ui-texture/pack-writer.test.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/qa/svg-aria-label.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/qa/svg-aria-label.test.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/qa/svg-stroke-width.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/qa/svg-stroke-width.test.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/llm-provider.test.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/__tests__/mock-llm-provider.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/__tests__/mock-llm-provider.test.ts",
+  "src/lib/artlab/sdk/agents/ui-texture/pack-writer.test.ts",
 ]);
 
 describe("handwritten SVG retirement", () => {

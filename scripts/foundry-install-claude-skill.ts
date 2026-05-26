@@ -3,7 +3,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { renderFoundryClaudeSkill } from "../src/lib/foundry/integration/claude-skill-template";
+import { renderFoundryClaudeSkill } from "../src/lib/artlab/sdk/integration/claude-skill-template";
 
 export interface InstallFoundryClaudeSkillOpts {
   claudeHome: string;

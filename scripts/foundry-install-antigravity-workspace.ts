@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, renameSync, writeFileSync, copyFileSync } from "
 import { dirname, join } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { renderFoundryAntigravityWorkspace } from "../src/lib/foundry/integration/antigravity-workspace-template";
+import { renderFoundryAntigravityWorkspace } from "../src/lib/artlab/sdk/integration/antigravity-workspace-template";
 
 export interface InstallFoundryAntigravityWorkspaceOpts {
   repoRoot: string;

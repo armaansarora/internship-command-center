@@ -8,7 +8,7 @@ import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
-import { handleFoundryTelegramCommand } from "@/lib/foundry/integration/telegram-commands";
+import { handleFoundryTelegramCommand } from "@/lib/artlab/sdk/integration/telegram-commands";
 import {
   askAnswerTemplate,
   cancelAck,
