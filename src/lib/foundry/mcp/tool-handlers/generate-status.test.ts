@@ -85,4 +85,32 @@ describe("handleFoundryGenerateStatus", () => {
       handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot }),
     ).rejects.toThrow(/run not found/i);
   });
+
+  it("returns status=queued when only the foundry inbox file exists (no run-state yet)", async () => {
+    const inboxDir = join(workspaceRoot, "inbox", "foundry");
+    mkdirSync(inboxDir, { recursive: true });
+    writeFileSync(
+      join(inboxDir, `generate-${RUN_ID}.json`),
+      JSON.stringify({ runId: RUN_ID, queuedAt: "2026-05-25T00:00:00.000Z", source: "foundry-mcp" }),
+    );
+    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    expect(result.status).toBe("queued");
+    expect(result.phase).toBe("queued");
+    expect(result.percentComplete).toBe(0);
+    expect(result.blockers).toEqual([]);
+    expect(result.updatedAt).toBeTruthy();
+  });
+
+  it("error message hints at the processed-but-missing case when applicable", async () => {
+    // Inbox file was archived by the poller but run-state.json was lost.
+    const processed = join(workspaceRoot, "inbox", "foundry", ".processed");
+    mkdirSync(processed, { recursive: true });
+    writeFileSync(
+      join(processed, `${RUN_ID}.json`),
+      JSON.stringify({ runId: RUN_ID }),
+    );
+    await expect(
+      handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot }),
+    ).rejects.toThrow(/run-state\.json missing/);
+  });
 });
