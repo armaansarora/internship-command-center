@@ -5,9 +5,9 @@ export function createFoundryFloorMockProvider(): FoundryImageProvider {
   return {
     async generateImage(input) {
       const seed = input.seed ?? 0;
-      const r = (seed * 37) & 0xff;
-      const g = (seed * 71) & 0xff;
-      const b = (seed * 113) & 0xff;
+      const r = 20 + ((seed * 37) & 0x1f);
+      const g = 20 + ((seed * 71) & 0x1f);
+      const b = 35 + ((seed * 113) & 0x1f);
       const png = await sharp({
         create: {
           width: 64,
