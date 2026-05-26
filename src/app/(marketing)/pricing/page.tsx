@@ -132,7 +132,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
 
       {/* Campus lane sits ABOVE the consumer tiers — it's the institutional
           path and shouldn't compete with the individual cards visually. */}
-      <CampusBanner />
+      <CampusBanner betaGated={betaGated} />
 
       {/* Tier cards. When Season Pass is on, three cards: Free, Season Pass
           (centered, prominent), Pro. When off, two cards: Free, Pro. */}
@@ -569,7 +569,10 @@ function ProCard({
 
 /* ─────────────────────── Campus banner ─────────────────────── */
 
-function CampusBanner() {
+function CampusBanner({ betaGated }: { betaGated: boolean }) {
+  const ctaHref = betaGated ? "/waitlist" : "/campus";
+  const ctaLabel = betaGated ? "Request team access" : "Talk to us →";
+
   return (
     <aside
       className="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl border p-6 md:flex-row md:items-center md:gap-6 md:p-7"
@@ -618,7 +621,7 @@ function CampusBanner() {
         </p>
       </div>
       <Link
-        href="/campus"
+        href={ctaHref}
         className="shrink-0 rounded-lg px-5 py-3 transition-all"
         style={{
           fontFamily: "'Satoshi', sans-serif",
@@ -632,7 +635,7 @@ function CampusBanner() {
           alignItems: "center",
         }}
       >
-        Talk to us →
+        {ctaLabel}
       </Link>
     </aside>
   );
