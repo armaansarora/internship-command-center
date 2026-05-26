@@ -1,0 +1,79 @@
+import { describe, expect, it, beforeEach } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { handleFoundryTelegramCommand } from "./telegram-commands";
+
+let workspaceRoot: string;
+let canonRoot: string;
+let packsRoot: string;
+let slotRegistryPath: string;
+
+beforeEach(() => {
+  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-tg-"));
+  canonRoot = mkdtempSync(join(tmpdir(), "foundry-tg-canon-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "foundry-tg-packs-"));
+  mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
+  slotRegistryPath = join(workspaceRoot, "slots", "registry.json");
+  writeFileSync(slotRegistryPath, JSON.stringify({ slots: [] }));
+});
+
+describe("handleFoundryTelegramCommand", () => {
+  it("/foundry without a subcommand prints help", async () => {
+    const result = await handleFoundryTelegramCommand({
+      args: [],
+      workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
+    });
+    expect(result.text).toMatch(/foundry status/i);
+    expect(result.text).toMatch(/foundry list/i);
+    expect(result.text).toMatch(/foundry generate/i);
+    expect(result.text).toMatch(/foundry preview/i);
+  });
+
+  it("/foundry status returns a diagnostics-formatted text", async () => {
+    const result = await handleFoundryTelegramCommand({
+      args: ["status"],
+      workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
+    });
+    expect(result.text).toMatch(/daemon/i);
+    expect(result.text).toMatch(/backlog/i);
+  });
+
+  it("/foundry list character returns a list of canon characters", async () => {
+    mkdirSync(join(canonRoot, "characters"), { recursive: true });
+    writeFileSync(join(canonRoot, "characters", "rafe.yaml"), "id: rafe-calder\ndisplayName: Rafe Calder\nsummary: CRO\n");
+    const result = await handleFoundryTelegramCommand({
+      args: ["list", "character"],
+      workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
+    });
+    expect(result.text).toMatch(/Rafe Calder/);
+  });
+
+  it("/foundry generate queues a run and reports the runId", async () => {
+    const result = await handleFoundryTelegramCommand({
+      args: ["generate", "character", "Rafe", "in", "a", "new", "jacket"],
+      workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
+    });
+    expect(result.text).toMatch(/queued/i);
+    expect(result.text).toMatch(/[0-9a-f-]{36}/i);
+  });
+
+  it("/foundry preview <packId> returns a photo payload when the pack exists", async () => {
+    mkdirSync(join(packsRoot, "rafe-v1"), { recursive: true });
+    writeFileSync(
+      join(packsRoot, "rafe-v1", "manifest.json"),
+      JSON.stringify({
+        packId: "rafe-v1", kind: "character", slotId: "rafe.idle",
+        promotedAt: "2026-05-25T12:00:00.000Z",
+        files: [{ path: "rafe.png", role: "primary" }],
+      }),
+    );
+    writeFileSync(join(packsRoot, "rafe-v1", "rafe.png"), Buffer.from("PNGDATA"));
+    const result = await handleFoundryTelegramCommand({
+      args: ["preview", "rafe-v1"],
+      workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
+    });
+    expect(result.photo).toBeDefined();
+    expect(result.photo?.path).toMatch(/rafe\.png$/);
+  });
+});
