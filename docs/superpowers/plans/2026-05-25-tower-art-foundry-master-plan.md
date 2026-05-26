@@ -2545,7 +2545,7 @@ Phase 0 delivered: canon YAMLs, loaders, validators. Phase 1 builds on top — p
 - Create: `src/lib/foundry/asset-pack/constants.ts`
 - Test: `src/lib/foundry/asset-pack/constants.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/constants.test.ts
@@ -2590,12 +2590,12 @@ describe("asset pack constants", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/constants.test.ts`
 Expected: FAIL — "Cannot find module './constants'".
 
-- [ ] **Step 3: Implement constants**
+- [x] **Step 3: Implement constants**
 
 ```ts
 // src/lib/foundry/asset-pack/constants.ts
@@ -2631,12 +2631,12 @@ export const FOUNDRY_PACK_FILENAME = "manifest.json" as const;
 export const FOUNDRY_PACK_PAYLOAD_DIR = "payload" as const;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/constants.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/constants.ts src/lib/foundry/asset-pack/constants.test.ts
@@ -2654,9 +2654,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] 9 asset kinds and 8 agent kinds declared and exported
-- [ ] `FOUNDRY_ASSET_PACK_VERSION === "1.0.0"`
-- [ ] `FOUNDRY_PACK_FILENAME === "manifest.json"` (the on-disk name)
+- [x] 9 asset kinds and 8 agent kinds declared and exported
+- [x] `FOUNDRY_ASSET_PACK_VERSION === "1.0.0"`
+- [x] `FOUNDRY_PACK_FILENAME === "manifest.json"` (the on-disk name)
 
 ### Task 1.2: Define FoundryAssetPackManifest Zod schema
 
@@ -2664,7 +2664,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/manifest.schema.ts`
 - Test: `src/lib/foundry/asset-pack/manifest.schema.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest.schema.test.ts
@@ -2772,12 +2772,12 @@ describe("FoundryAssetPackManifestSchema", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest.schema.test.ts`
 Expected: FAIL — "Cannot find module './manifest.schema'".
 
-- [ ] **Step 3: Implement the manifest schema**
+- [x] **Step 3: Implement the manifest schema**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest.schema.ts
@@ -2900,12 +2900,12 @@ export const FoundryAssetPackManifestSchema = z
 export type FoundryAssetPackManifest = z.infer<typeof FoundryAssetPackManifestSchema>;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest.schema.test.ts`
 Expected: PASS — all 6 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/manifest.schema.ts src/lib/foundry/asset-pack/manifest.schema.test.ts
@@ -2923,10 +2923,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Manifest schema enforces sha256 format (64 lowercase hex)
-- [ ] `intendedSlot.appPath` rejects `..` and paths outside `public/`, `src/components/`, `src/lib/visual-assets/`
-- [ ] Manifest must reference at least one canon record (cannot be all-null)
-- [ ] `payload.primaryFileRelPath` must point at a real entry in `payload.files`
+- [x] Manifest schema enforces sha256 format (64 lowercase hex)
+- [x] `intendedSlot.appPath` rejects `..` and paths outside `public/`, `src/components/`, `src/lib/visual-assets/`
+- [x] Manifest must reference at least one canon record (cannot be all-null)
+- [x] `payload.primaryFileRelPath` must point at a real entry in `payload.files`
 
 ### Task 1.3: Implement sha256 hashing helper for payload bytes
 
@@ -2934,7 +2934,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/hashing.ts`
 - Test: `src/lib/foundry/asset-pack/hashing.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/hashing.test.ts
@@ -2974,12 +2974,12 @@ describe("sha256 helpers", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/hashing.test.ts`
 Expected: FAIL — "Cannot find module './hashing'".
 
-- [ ] **Step 3: Implement hashing helpers**
+- [x] **Step 3: Implement hashing helpers**
 
 ```ts
 // src/lib/foundry/asset-pack/hashing.ts
@@ -2996,12 +2996,12 @@ export async function sha256OfFile(absPath: string): Promise<string> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/hashing.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/hashing.ts src/lib/foundry/asset-pack/hashing.test.ts
@@ -3018,9 +3018,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Both helpers return 64-char lowercase hex
-- [ ] `sha256OfBytes(empty)` matches the canonical empty-input digest
-- [ ] `sha256OfFile` reads bytes and delegates to `sha256OfBytes`
+- [x] Both helpers return 64-char lowercase hex
+- [x] `sha256OfBytes(empty)` matches the canonical empty-input digest
+- [x] `sha256OfFile` reads bytes and delegates to `sha256OfBytes`
 
 ### Task 1.4: Implement createFoundryAssetPack
 
@@ -3028,7 +3028,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/pack.ts`
 - Test: `src/lib/foundry/asset-pack/pack.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/pack.test.ts
@@ -3098,12 +3098,12 @@ describe("createFoundryAssetPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/pack.test.ts`
 Expected: FAIL — "Cannot find module './pack'".
 
-- [ ] **Step 3: Implement createFoundryAssetPack**
+- [x] **Step 3: Implement createFoundryAssetPack**
 
 ```ts
 // src/lib/foundry/asset-pack/pack.ts
@@ -3193,12 +3193,12 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/pack.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/pack.ts src/lib/foundry/asset-pack/pack.test.ts
@@ -3216,10 +3216,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Pack directory contains `manifest.json` and `payload/<relPath>` files after creation
-- [ ] Manifest passes schema validation (any invalid input throws before write)
-- [ ] Atomic write — no partial file on disk if process is killed mid-write
-- [ ] Each payload file's sha256 in the manifest matches the file's actual bytes
+- [x] Pack directory contains `manifest.json` and `payload/<relPath>` files after creation
+- [x] Manifest passes schema validation (any invalid input throws before write)
+- [x] Atomic write — no partial file on disk if process is killed mid-write
+- [x] Each payload file's sha256 in the manifest matches the file's actual bytes
 
 ### Task 1.5: Implement readFoundryAssetPack with payload sha256 verification
 
@@ -3227,7 +3227,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/read.ts`
 - Test: `src/lib/foundry/asset-pack/read.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/read.test.ts
@@ -3288,12 +3288,12 @@ describe("readFoundryAssetPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/read.test.ts`
 Expected: FAIL — "Cannot find module './read'".
 
-- [ ] **Step 3: Implement readFoundryAssetPack**
+- [x] **Step 3: Implement readFoundryAssetPack**
 
 ```ts
 // src/lib/foundry/asset-pack/read.ts
@@ -3350,12 +3350,12 @@ export async function readFoundryAssetPack(packDir: string): Promise<ReadFoundry
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/read.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/read.ts src/lib/foundry/asset-pack/read.test.ts
@@ -3372,9 +3372,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `readFoundryAssetPack` returns `{ ok: true, ... }` for a freshly-created pack
-- [ ] Four distinct error codes for the four distinct failure modes
-- [ ] Tampered payload bytes are caught via sha256 mismatch
+- [x] `readFoundryAssetPack` returns `{ ok: true, ... }` for a freshly-created pack
+- [x] Four distinct error codes for the four distinct failure modes
+- [x] Tampered payload bytes are caught via sha256 mismatch
 
 ### Task 1.6: Define FOUNDRY_SLOT_REGISTRY and slot validation
 
@@ -3382,7 +3382,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/slot-registry.ts`
 - Test: `src/lib/foundry/asset-pack/slot-registry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/slot-registry.test.ts
@@ -3444,12 +3444,12 @@ describe("FOUNDRY_SLOT_REGISTRY", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/slot-registry.test.ts`
 Expected: FAIL — "Cannot find module './slot-registry'".
 
-- [ ] **Step 3: Implement the slot registry**
+- [x] **Step 3: Implement the slot registry**
 
 ```ts
 // src/lib/foundry/asset-pack/slot-registry.ts
@@ -3516,12 +3516,12 @@ export function registerFoundrySlot(record: FoundrySlotRecord): void {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/slot-registry.test.ts`
 Expected: PASS — 7 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/slot-registry.ts src/lib/foundry/asset-pack/slot-registry.test.ts
@@ -3539,10 +3539,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Built-in slot registry contains ≥ 42 character-sprite slots
-- [ ] `isFoundrySlotRegistered` is deterministic for any string input
-- [ ] `registerFoundrySlot` rejects duplicate slotIds and invalid formats
-- [ ] Slot id format constrained to `^[a-z0-9/_-]+$`
+- [x] Built-in slot registry contains ≥ 42 character-sprite slots
+- [x] `isFoundrySlotRegistered` is deterministic for any string input
+- [x] `registerFoundrySlot` rejects duplicate slotIds and invalid formats
+- [x] Slot id format constrained to `^[a-z0-9/_-]+$`
 
 ### Task 1.7: Cross-validate manifest.intendedSlot against the slot registry
 
@@ -3550,7 +3550,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/manifest-slot-check.ts`
 - Test: `src/lib/foundry/asset-pack/manifest-slot-check.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest-slot-check.test.ts
@@ -3609,12 +3609,12 @@ describe("validateFoundryManifestAgainstSlots", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest-slot-check.test.ts`
 Expected: FAIL — "Cannot find module './manifest-slot-check'".
 
-- [ ] **Step 3: Implement validateFoundryManifestAgainstSlots**
+- [x] **Step 3: Implement validateFoundryManifestAgainstSlots**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest-slot-check.ts
@@ -3652,12 +3652,12 @@ export function validateFoundryManifestAgainstSlots(manifest: FoundryAssetPackMa
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest-slot-check.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/manifest-slot-check.ts src/lib/foundry/asset-pack/manifest-slot-check.test.ts
@@ -3675,9 +3675,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Three distinct failure codes
-- [ ] A manifest that passes both Zod schema AND slot check is guaranteed to target a real registered slot
-- [ ] Test covers each failure code independently
+- [x] Three distinct failure codes
+- [x] A manifest that passes both Zod schema AND slot check is guaranteed to target a real registered slot
+- [x] Test covers each failure code independently
 
 ### Task 1.8: Implement integration snippet generator with golden fixture
 
@@ -3686,7 +3686,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/__fixtures__/golden-character-sprite-snippet.tsx`
 - Test: `src/lib/foundry/asset-pack/integration-snippet.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/integration-snippet.test.ts
@@ -3745,12 +3745,12 @@ describe("renderFoundryIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/integration-snippet.test.ts`
 Expected: FAIL — modules / fixture missing.
 
-- [ ] **Step 3: Create the golden fixture and implement the renderer**
+- [x] **Step 3: Create the golden fixture and implement the renderer**
 
 ```tsx
 // src/lib/foundry/asset-pack/__fixtures__/golden-character-sprite-snippet.tsx
@@ -3869,12 +3869,12 @@ export function renderFoundryIntegrationSnippet(
 export const FOUNDRY_INTEGRATION_SNIPPET_TEMPLATES = Object.keys(TEMPLATE_RENDERERS);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/integration-snippet.test.ts`
 Expected: PASS — all 3 assertions pass (the golden fixture matches byte-for-byte modulo trim).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/integration-snippet.ts src/lib/foundry/asset-pack/integration-snippet.test.ts src/lib/foundry/asset-pack/__fixtures__/golden-character-sprite-snippet.tsx
@@ -3892,10 +3892,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Golden fixture matches generated output byte-for-byte (after trim)
-- [ ] GSAP template includes `useEffect`, `@/lib/gsap-init` import, and cleanup return
-- [ ] Unknown template throws with a descriptive error
-- [ ] No template references appPath outside `public/` (snippet uses `/art/...` URL form)
+- [x] Golden fixture matches generated output byte-for-byte (after trim)
+- [x] GSAP template includes `useEffect`, `@/lib/gsap-init` import, and cleanup return
+- [x] Unknown template throws with a descriptive error
+- [x] No template references appPath outside `public/` (snippet uses `/art/...` URL form)
 
 ### Task 1.9: Implement back-compat shim that lifts ArtLab promotion receipts into v1 Asset Packs
 
@@ -3903,7 +3903,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/legacy-shim.ts`
 - Test: `src/lib/foundry/asset-pack/legacy-shim.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/legacy-shim.test.ts
@@ -3983,12 +3983,12 @@ describe("liftLegacyArtLabAssetToFoundryPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/legacy-shim.test.ts`
 Expected: FAIL — "Cannot find module './legacy-shim'".
 
-- [ ] **Step 3: Implement the legacy shim**
+- [x] **Step 3: Implement the legacy shim**
 
 ```ts
 // src/lib/foundry/asset-pack/legacy-shim.ts
@@ -4089,12 +4089,12 @@ export async function liftLegacyArtLabAssetToFoundryPack(input: LiftLegacyAssetI
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/legacy-shim.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/legacy-shim.ts src/lib/foundry/asset-pack/legacy-shim.test.ts
@@ -4112,17 +4112,17 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Otis legacy assets lift cleanly into valid v1 manifests
-- [ ] Unknown character ids throw with a descriptive error
-- [ ] Read-only: shim does not write to disk
-- [ ] Manifest produced passes both schema validation and slot validation
+- [x] Otis legacy assets lift cleanly into valid v1 manifests
+- [x] Unknown character ids throw with a descriptive error
+- [x] Read-only: shim does not write to disk
+- [x] Manifest produced passes both schema validation and slot validation
 
 ### Task 1.10: Round-trip pack/unpack byte-stability test on a multi-file pack
 
 **Files:**
 - Test: `src/lib/foundry/asset-pack/round-trip.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/round-trip.test.ts
@@ -4209,12 +4209,12 @@ describe("asset pack round-trip byte stability", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/round-trip.test.ts`
 Expected: PASS — both assertions pass (test depends only on existing pack/read code from Tasks 1.4 + 1.5).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/round-trip.test.ts
@@ -4232,9 +4232,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Test creates a 21-payload pack and verifies all 21 files survive write-read round-trip
-- [ ] Re-read manifest deep-equals in-memory manifest
-- [ ] All payload sha256 values match after read
+- [x] Test creates a 21-payload pack and verifies all 21 files survive write-read round-trip
+- [x] Re-read manifest deep-equals in-memory manifest
+- [x] All payload sha256 values match after read
 
 ### Task 1.11: Export public asset-pack surface from `src/lib/foundry/asset-pack/index.ts`
 
@@ -4242,7 +4242,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/index.ts`
 - Test: `src/lib/foundry/asset-pack/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/index.test.ts
@@ -4285,12 +4285,12 @@ describe("asset-pack public surface", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/index.test.ts`
 Expected: FAIL — "Cannot find module './index'".
 
-- [ ] **Step 3: Implement the index re-export**
+- [x] **Step 3: Implement the index re-export**
 
 ```ts
 // src/lib/foundry/asset-pack/index.ts
@@ -4305,12 +4305,12 @@ export * from "./integration-snippet";
 export * from "./legacy-shim";
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/index.test.ts`
 Expected: PASS — all assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/index.ts src/lib/foundry/asset-pack/index.test.ts
@@ -4328,16 +4328,16 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `@/lib/foundry/asset-pack` exports every public symbol from the module
-- [ ] Surface test fails if a future commit removes an exported function
-- [ ] No internal-only symbols (e.g. atomicWriteFile) leak through
+- [x] `@/lib/foundry/asset-pack` exports every public symbol from the module
+- [x] Surface test fails if a future commit removes an exported function
+- [x] No internal-only symbols (e.g. atomicWriteFile) leak through
 
 ### Task 1.12: Property-based test — schema round-trip survives arbitrary valid inputs
 
 **Files:**
 - Test: `src/lib/foundry/asset-pack/manifest.property.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest.property.test.ts
@@ -4413,20 +4413,20 @@ describe("manifest schema property — parse(stringify(parse(m))) === parse(m)",
 });
 ```
 
-- [ ] **Step 2: Verify `fast-check` is installed**
+- [x] **Step 2: Verify `fast-check` is installed**
 
 ```bash
 grep -q '"fast-check"' package.json || npm install --save-dev fast-check@^4.3.0
 ```
 
-- [ ] **Step 3: Run test to verify it passes**
+- [x] **Step 3: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest.property.test.ts`
 Expected: PASS — 200 random valid manifests all round-trip through JSON.
 
 If failures occur, the manifest schema has a subtle drift between parse → stringify → parse; investigate the failing seed reported by fast-check.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/manifest.property.test.ts package.json package-lock.json
@@ -4444,16 +4444,16 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] 200 random valid manifests all round-trip through JSON.stringify → parse
-- [ ] `fast-check` is a dev dependency (pinned to ^4.x)
-- [ ] On a failure, fast-check reports the seed so the failure is reproducible
+- [x] 200 random valid manifests all round-trip through JSON.stringify → parse
+- [x] `fast-check` is a dev dependency (pinned to ^4.x)
+- [x] On a failure, fast-check reports the seed so the failure is reproducible
 
 ### Task 1.13: Phase 1 completion gates (CLI smoke + final verification)
 
 **Files:**
 - Create: `src/lib/foundry/asset-pack/phase-1-smoke.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/phase-1-smoke.test.ts
@@ -4509,12 +4509,12 @@ describe("Phase 1 smoke — create → read → validate → snippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/phase-1-smoke.test.ts`
 Expected: PASS — end-to-end pipeline works on a happy-path input.
 
-- [ ] **Step 3: Run full Phase 1 verification**
+- [x] **Step 3: Run full Phase 1 verification**
 
 ```bash
 npx vitest run src/lib/foundry/asset-pack
@@ -4524,7 +4524,7 @@ npx eslint src/lib/foundry/asset-pack
 
 All must exit 0.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/phase-1-smoke.test.ts
@@ -4541,9 +4541,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Smoke test exercises createFoundryAssetPack + readFoundryAssetPack + validateFoundryManifestAgainstSlots + renderFoundryIntegrationSnippet in sequence
-- [ ] Pack creates on disk, reads back, validates against slot registry, and emits a TSX snippet
-- [ ] No console output, no leaked temp dirs
+- [x] Smoke test exercises createFoundryAssetPack + readFoundryAssetPack + validateFoundryManifestAgainstSlots + renderFoundryIntegrationSnippet in sequence
+- [x] Pack creates on disk, reads back, validates against slot registry, and emits a TSX snippet
+- [x] No console output, no leaked temp dirs
 
 ### Phase 1 completion criteria
 
