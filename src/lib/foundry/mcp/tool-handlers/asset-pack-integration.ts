@@ -7,7 +7,11 @@ import {
   type FoundryAssetPackIntegrationOutput,
   type FoundryAssetKind,
 } from "../tools";
-import { PackIdSchema, resolvePackDir } from "../lib/path-safety";
+import {
+  PackIdSchema,
+  resolvePackDir,
+  assertUrlPathSafeAgainstTraversal,
+} from "../lib/path-safety";
 import type { FoundryAssetPackListContext } from "./asset-pack-list";
 
 interface ManifestForIntegration {
@@ -135,6 +139,17 @@ export async function handleFoundryAssetPackIntegration(
   if (!m.integration) {
     throw new Error(`asset pack integration metadata missing on manifest: ${safePackId}`);
   }
+  // Defense in depth: a poisoned manifest could publish a `publicPath` that
+  // contains traversal or encoded payloads, and the snippets below
+  // interpolate that value straight into `src=` / `url(...)`. We don't try
+  // to confine it to the asset-pack URL space (publicPath is an absolute
+  // app-route by convention so a leading `/` is allowed), but we DO reject
+  // `..` traversal, encoded equivalents, backslash, NUL, tilde, and
+  // dangerous URL schemes — vectors the prior schema let through.
+  if (typeof m.publicPath !== "string") {
+    throw new Error(`asset pack publicPath missing on manifest: ${safePackId}`);
+  }
+  assertUrlPathSafeAgainstTraversal(m.publicPath, "manifest publicPath");
   const built = snippetFor(m, input.targetFramework);
   return FoundryAssetPackIntegrationOutputSchema.parse({
     packId: safePackId,

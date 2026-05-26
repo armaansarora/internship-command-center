@@ -1,10 +1,11 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { runManifestBuildStage } from "./manifest-build";
 import { registerFoundrySlot } from "@/lib/foundry/asset-pack";
+import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
 import type { ProcessedSprite } from "./cutout-and-feather";
 import type { FoundryCharacterCanon } from "@/lib/foundry/canon";
 
@@ -61,7 +62,7 @@ describe("manifest-build stage", () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("builds a character-spritesheet pack covering all 21 sprites", async () => {
+  async function buildSpriteSet(): Promise<ProcessedSprite[]> {
     const sprites: ProcessedSprite[] = [];
     for (const outfit of SOL.outfitVariants) {
       for (const pose of SOL.poseStates) {
@@ -80,6 +81,11 @@ describe("manifest-build stage", () => {
         });
       }
     }
+    return sprites;
+  }
+
+  it("builds a character-spritesheet pack covering all 21 sprites", async () => {
+    const sprites = await buildSpriteSet();
     const result = await runManifestBuildStage({
       character: SOL,
       sprites,
@@ -93,5 +99,44 @@ describe("manifest-build stage", () => {
     expect(result.pack.manifest.kind).toBe("character-spritesheet");
     expect(result.pack.manifest.payload.files.length).toBe(21);
     expect(result.pack.manifest.canonRefs.characterId).toBe("sol-navarro");
+  });
+
+  it("emits anchorImageRelPath pointing at the primary sprite (regular/idle)", async () => {
+    const sprites = await buildSpriteSet();
+    const result = await runManifestBuildStage({
+      character: SOL,
+      sprites,
+      packDir: join(tmpDir, "pack"),
+      anchorLaneIndex: 3,
+      providerId: "mock-foundry-image",
+      modelId: "mock",
+      generatedAt: "2026-05-25T00:00:00.000Z",
+      seed: 42,
+    });
+    expect(result.pack.manifest.anchorImageRelPath).toBe("regular/idle.webp");
+    expect(
+      result.pack.manifest.payload.files.some(
+        (f) => f.relPath === result.pack.manifest.anchorImageRelPath,
+      ),
+    ).toBe(true);
+  });
+
+  it("emits anchorPerceptualHash that matches the perceptual hash of the anchor sprite bytes", async () => {
+    const sprites = await buildSpriteSet();
+    const anchorSprite =
+      sprites.find((s) => s.outfit === "regular" && s.pose === "idle") ?? sprites[0]!;
+    const result = await runManifestBuildStage({
+      character: SOL,
+      sprites,
+      packDir: join(tmpDir, "pack"),
+      anchorLaneIndex: 3,
+      providerId: "mock-foundry-image",
+      modelId: "mock",
+      generatedAt: "2026-05-25T00:00:00.000Z",
+      seed: 42,
+    });
+    expect(result.pack.manifest.anchorPerceptualHash).toMatch(/^[0-9a-f]{16}$/);
+    const expected = await computePerceptualHash(readFileSync(anchorSprite.pngPath));
+    expect(result.pack.manifest.anchorPerceptualHash).toBe(expected);
   });
 });

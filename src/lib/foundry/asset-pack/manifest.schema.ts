@@ -159,6 +159,30 @@ export const FoundryGenerationMetadataSchema = z
   })
   .strict();
 
+/**
+ * Critical 1 alignment: `character-spritesheet` packs are the source pack
+ * for `sprite-animator` and must carry an anchor reference so the Lottie
+ * identity gate can compare the source character's perceptual hash to the
+ * embedded image of any downstream animation pack. We make these top-level
+ * fields (optional in the schema) and refine the manifest so they are
+ * REQUIRED whenever `kind === "character-spritesheet"`. This keeps the
+ * strict on-disk shape singular while letting non-character kinds (ui-icon,
+ * floor-environment, …) ignore the anchor entirely.
+ */
+const AnchorImageRelPath = z
+  .string()
+  .refine(
+    (p) => isPathSafeAgainstTraversal(p, null),
+    "anchorImageRelPath must be a canonical relative path (no traversal, no encoding, no backslash, no leading slash)",
+  );
+
+const AnchorPerceptualHash16 = z
+  .string()
+  .regex(
+    /^[0-9a-f]{16}$/,
+    "anchorPerceptualHash must be 16 lowercase hex chars (8×8 perceptual hash, 64 bits)",
+  );
+
 export const FoundryAssetPackManifestSchema = z
   .object({
     manifestVersion: z.literal(FOUNDRY_ASSET_PACK_VERSION),
@@ -174,6 +198,37 @@ export const FoundryAssetPackManifestSchema = z
     integrationSnippetTemplate: z.string().min(1),
     payload: FoundryAssetPackPayloadSchema,
     generation: FoundryGenerationMetadataSchema,
+    anchorImageRelPath: AnchorImageRelPath.optional(),
+    anchorPerceptualHash: AnchorPerceptualHash16.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((manifest, ctx) => {
+    if (manifest.kind !== "character-spritesheet") return;
+    if (!manifest.anchorImageRelPath) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "character-spritesheet manifests must declare anchorImageRelPath — sprite-animator reads this to load the character's anchor sprite for identity verification",
+        path: ["anchorImageRelPath"],
+      });
+    } else if (
+      !manifest.payload.files.some(
+        (f) => f.relPath === manifest.anchorImageRelPath,
+      )
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: `anchorImageRelPath "${manifest.anchorImageRelPath}" must reference one of the payload.files relPath values`,
+        path: ["anchorImageRelPath"],
+      });
+    }
+    if (!manifest.anchorPerceptualHash) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "character-spritesheet manifests must declare anchorPerceptualHash — sprite-animator's Lottie identity gate compares embedded images against this hash",
+        path: ["anchorPerceptualHash"],
+      });
+    }
+  });
 export type FoundryAssetPackManifest = z.infer<typeof FoundryAssetPackManifestSchema>;

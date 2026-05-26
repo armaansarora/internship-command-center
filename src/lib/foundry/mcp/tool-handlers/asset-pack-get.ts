@@ -1,11 +1,15 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve, sep } from "node:path";
 import {
   FoundryAssetPackGetInputSchema,
   FoundryAssetPackGetOutputSchema,
   type FoundryAssetPackGetOutput,
 } from "../tools";
-import { PackIdSchema, resolvePackDir } from "../lib/path-safety";
+import {
+  PackIdSchema,
+  resolvePackDir,
+  assertPathSafeAgainstTraversal,
+} from "../lib/path-safety";
 import type { FoundryAssetPackListContext } from "./asset-pack-list";
 
 interface ManifestFile {
@@ -57,10 +61,29 @@ export async function handleFoundryAssetPackGet(
   });
 }
 
-/** Resolve a relative manifest entry inside `packDir`, refusing escapes. */
+/**
+ * Resolve a relative manifest entry inside `packDir`, refusing escapes.
+ *
+ * The hand-rolled check this replaced missed encoded traversal (`..%2f`),
+ * backslashes, NUL bytes, and tilde — vectors that `PackIdSchema` already
+ * rejects at the packId layer but had no equivalent inside the manifest.
+ * `assertPathSafeAgainstTraversal` is the shared helper used everywhere a
+ * relative path arrives from an untrusted manifest.
+ *
+ * After the helper passes we also belt-and-suspenders re-confirm the
+ * resolved absolute path stays under `packDir` (handles edge cases like a
+ * filesystem that follows symlinks or a future feature that swaps the
+ * helper for a softer rule).
+ */
 function resolveWithinPack(packDir: string, relPath: string): string {
-  if (relPath.includes("..") || relPath.startsWith("/") || relPath.startsWith("~")) {
-    throw new Error(`manifest file path '${relPath}' is not safe`);
+  assertPathSafeAgainstTraversal(relPath, "manifest files[].path");
+  const candidate = resolve(packDir, relPath);
+  const packDirAbs = resolve(packDir);
+  const withSep = packDirAbs.endsWith(sep) ? packDirAbs : `${packDirAbs}${sep}`;
+  if (candidate !== packDirAbs && !candidate.startsWith(withSep)) {
+    throw new Error(
+      `manifest files[].path '${relPath}' resolves outside packDir (${candidate} not under ${packDirAbs})`,
+    );
   }
-  return join(packDir, relPath);
+  return candidate;
 }

@@ -24,6 +24,20 @@ export interface CreateFoundryAssetPackInput {
   primaryFileRelPath: string;
   generation: FoundryAssetPackManifest["generation"];
   packId?: string;
+  /**
+   * Critical 1 alignment: REQUIRED when `kind === "character-spritesheet"`.
+   * Points at the payload relPath of the anchor sprite. Downstream
+   * sprite-animator reads this to load the character's anchor bytes for
+   * Lottie identity verification. Optional for non-character kinds.
+   */
+  anchorImageRelPath?: FoundryAssetPackManifest["anchorImageRelPath"];
+  /**
+   * Critical 1 alignment: REQUIRED when `kind === "character-spritesheet"`.
+   * 16-hex perceptual hash of the anchor sprite bytes (8×8 greyscale dHash).
+   * Compared bit-for-bit against embedded image hashes by the Lottie
+   * identity gate.
+   */
+  anchorPerceptualHash?: FoundryAssetPackManifest["anchorPerceptualHash"];
 }
 
 export interface CreatedFoundryAssetPack {
@@ -88,7 +102,7 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
     throw new Error(`createFoundryAssetPack: primaryFileRelPath "${input.primaryFileRelPath}" not in payloadFiles`);
   }
 
-  const manifest: FoundryAssetPackManifest = FoundryAssetPackManifestSchema.parse({
+  const manifestInput: Record<string, unknown> = {
     manifestVersion: FOUNDRY_ASSET_PACK_VERSION,
     packId: input.packId ?? randomUUID(),
     kind: input.kind,
@@ -102,7 +116,14 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
     integrationSnippetTemplate: input.integrationSnippetTemplate,
     payload: { files, primaryFileRelPath: input.primaryFileRelPath },
     generation: input.generation,
-  });
+  };
+  if (input.anchorImageRelPath !== undefined) {
+    manifestInput.anchorImageRelPath = input.anchorImageRelPath;
+  }
+  if (input.anchorPerceptualHash !== undefined) {
+    manifestInput.anchorPerceptualHash = input.anchorPerceptualHash;
+  }
+  const manifest: FoundryAssetPackManifest = FoundryAssetPackManifestSchema.parse(manifestInput);
 
   await atomicWriteFile(join(input.packDir, FOUNDRY_PACK_FILENAME), JSON.stringify(manifest, null, 2));
 

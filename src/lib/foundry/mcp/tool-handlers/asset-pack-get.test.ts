@@ -95,7 +95,36 @@ describe("handleFoundryAssetPackGet", () => {
       );
       await expect(
         handleFoundryAssetPackGet({ packId: "rafe-v3" }, { packsRoot }),
-      ).rejects.toThrow(/not safe|may not/i);
+      ).rejects.toThrow(/not safe|may not|outside/i);
+    });
+
+    // Defense-in-depth: a manifest file path may also carry encoded
+    // traversal, backslashes, NUL, absolute paths, or tilde — the hand-rolled
+    // check used to miss them. These should all be rejected uniformly via
+    // the shared `assertPathSafeAgainstTraversal` helper.
+    it.each([
+      ["URL-encoded traversal", "..%2f..%2fpasswd"],
+      ["uppercase encoded traversal", "..%2F..%2Fetc%2Fpasswd"],
+      ["encoded dot-dot only", "%2e%2e/passwd"],
+      ["backslash traversal", "..\\..\\Windows"],
+      ["NUL byte", "evil\0.png"],
+      ["leading slash (absolute)", "/etc/passwd"],
+      ["leading tilde (home)", "~/.ssh/id_rsa"],
+      ["mid-string traversal", "frames/../../escape.png"],
+    ])("rejects manifest path with %s", async (_label, evilPath) => {
+      writeFileSync(
+        join(packsRoot, "rafe-v3", "manifest.json"),
+        JSON.stringify({
+          packId: "rafe-v3",
+          kind: "character",
+          slotId: "rafe.idle",
+          promotedAt: "2026-05-25T12:00:00.000Z",
+          files: [{ path: evilPath, role: "primary" }],
+        }),
+      );
+      await expect(
+        handleFoundryAssetPackGet({ packId: "rafe-v3" }, { packsRoot }),
+      ).rejects.toThrow(/(not safe|may not|encoded|outside|traversal|NUL|backslash)/i);
     });
   });
 });

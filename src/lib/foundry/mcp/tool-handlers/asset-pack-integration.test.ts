@@ -106,5 +106,41 @@ describe("handleFoundryAssetPackIntegration", () => {
         ),
       ).rejects.toThrow(/(packId|outside packsRoot|empty|256|may not|encoded|must match|invalid)/i);
     });
+
+    // Defense-in-depth on the manifest-controlled `publicPath`. The packId
+    // can be safe yet a poisoned manifest could publish a snippet whose
+    // src/href escapes the asset-pack URL space. The integration handler
+    // now runs publicPath through `assertPathSafeAgainstTraversal` before
+    // emitting it into a snippet.
+    it.each([
+      ["plain traversal", "../../../etc/passwd"],
+      ["URL-encoded traversal", "..%2f..%2fpasswd"],
+      ["uppercase encoded traversal", "..%2F..%2Fetc%2Fpasswd"],
+      ["encoded dot-dot", "%2e%2e/passwd"],
+      ["mid-string traversal", "/art/../../private/secret.png"],
+      ["backslash traversal", "..\\..\\Windows"],
+      ["NUL byte", "evil\0.png"],
+      ["leading tilde", "~/home"],
+      ["empty string", ""],
+    ])("rejects manifest publicPath: %s", async (_label, evilPublicPath) => {
+      mkdirSync(join(packsRoot, "rafe-v3"), { recursive: true });
+      writeFileSync(
+        join(packsRoot, "rafe-v3", "manifest.json"),
+        JSON.stringify({
+          packId: "rafe-v3",
+          kind: "character",
+          slotId: "rafe.idle",
+          promotedAt: "2026-05-25T12:00:00.000Z",
+          publicPath: evilPublicPath,
+          integration: { width: 100, height: 100, alt: "x" },
+        }),
+      );
+      await expect(
+        handleFoundryAssetPackIntegration(
+          { packId: "rafe-v3", targetFramework: "next-app-router" },
+          { packsRoot },
+        ),
+      ).rejects.toThrow(/(publicPath|not safe|may not|encoded|empty|NUL|traversal)/i);
+    });
   });
 });

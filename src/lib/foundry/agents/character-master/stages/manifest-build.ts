@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { createFoundryAssetPack, resolveFoundrySlot, type CreatedFoundryAssetPack } from "@/lib/foundry/asset-pack";
+import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
 import type { FoundryCharacterCanon } from "@/lib/foundry/canon";
 import type { ProcessedSprite } from "./cutout-and-feather";
 
@@ -43,6 +44,18 @@ export async function runManifestBuildStage(input: ManifestBuildStageInput): Pro
     })),
   );
 
+  // Critical 1: the on-disk manifest now carries the anchor sprite's relPath
+  // + perceptual hash so the sprite-animator source-pack resolver can
+  // honestly load a real character pack and feed its anchor bytes into the
+  // Lottie identity gate. We hash the BYTES we are about to write (the
+  // same buffer that ends up at <packDir>/payload/<primaryRelPath>) so the
+  // recorded hash is bit-for-bit consistent with the persisted pack.
+  const anchorPayload = payloadFiles.find((f) => f.relPath === primaryRelPath);
+  if (!anchorPayload) {
+    throw new Error(`manifest-build: anchor payload "${primaryRelPath}" not found among prepared payload files`);
+  }
+  const anchorPerceptualHash = await computePerceptualHash(anchorPayload.bytes);
+
   const pack = await createFoundryAssetPack({
     packDir: input.packDir,
     kind: "character-spritesheet",
@@ -76,6 +89,8 @@ export async function runManifestBuildStage(input: ManifestBuildStageInput): Pro
     integrationSnippetTemplate: "character-sprite-img",
     payloadFiles,
     primaryFileRelPath: primaryRelPath,
+    anchorImageRelPath: primaryRelPath,
+    anchorPerceptualHash,
     generation: {
       agentName: "character-master",
       provider: input.providerId,

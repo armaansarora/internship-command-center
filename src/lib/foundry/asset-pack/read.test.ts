@@ -1,9 +1,9 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createFoundryAssetPack } from "./pack";
-import { readFoundryAssetPack } from "./read";
+import { readFoundryAssetPack, loadFoundryAssetPack } from "./read";
 
 const VALID_INPUT = (packDir: string) => ({
   packDir,
@@ -51,5 +51,72 @@ describe("readFoundryAssetPack", () => {
     const result = await readFoundryAssetPack(tmpDir);
     if (result.ok === true) throw new Error("expected ok=false");
     expect(result.code).toBe("payload-sha256-mismatch");
+  });
+});
+
+describe("loadFoundryAssetPack", () => {
+  let packsRoot: string;
+
+  beforeEach(() => {
+    packsRoot = mkdtempSync(join(tmpdir(), "foundry-packs-root-"));
+  });
+
+  afterEach(() => {
+    rmSync(packsRoot, { recursive: true, force: true });
+  });
+
+  it("loads a real pack written by createFoundryAssetPack and returns parsed manifest + packDir", async () => {
+    const packDir = join(packsRoot, "char-sol-v1");
+    mkdirSync(packDir, { recursive: true });
+    await createFoundryAssetPack(VALID_INPUT(packDir));
+    const loaded = await loadFoundryAssetPack(packsRoot, "char-sol-v1");
+    expect(loaded).not.toBeNull();
+    if (!loaded) return;
+    expect(loaded.packId).toBe("char-sol-v1");
+    expect(loaded.packDir).toBe(packDir);
+    expect(loaded.manifest.kind).toBe("character-sprite");
+    expect(loaded.manifest.canonRefs.characterId).toBe("sol-navarro");
+  });
+
+  it("returns null when the pack directory does not exist", async () => {
+    const loaded = await loadFoundryAssetPack(packsRoot, "does-not-exist");
+    expect(loaded).toBeNull();
+  });
+
+  it("throws an actionable error when manifest.json is missing", async () => {
+    const packDir = join(packsRoot, "no-manifest");
+    mkdirSync(packDir, { recursive: true });
+    await expect(loadFoundryAssetPack(packsRoot, "no-manifest")).rejects.toThrow(
+      /manifest\.json/,
+    );
+  });
+
+  it("throws an actionable error when manifest.json is malformed JSON", async () => {
+    const packDir = join(packsRoot, "bad-json");
+    mkdirSync(packDir, { recursive: true });
+    writeFileSync(join(packDir, "manifest.json"), "{not valid json");
+    await expect(loadFoundryAssetPack(packsRoot, "bad-json")).rejects.toThrow(
+      /manifest.*JSON/i,
+    );
+  });
+
+  it("throws an actionable error when manifest fails strict schema validation", async () => {
+    const packDir = join(packsRoot, "bad-schema");
+    mkdirSync(packDir, { recursive: true });
+    writeFileSync(
+      join(packDir, "manifest.json"),
+      JSON.stringify({ packId: "bad-schema", but: "not the schema" }),
+    );
+    await expect(loadFoundryAssetPack(packsRoot, "bad-schema")).rejects.toThrow(
+      /manifest/i,
+    );
+  });
+
+  it("refuses pack ids that would escape packsRoot via traversal", async () => {
+    await expect(loadFoundryAssetPack(packsRoot, "../escape")).rejects.toThrow(
+      /pack id/i,
+    );
+    await expect(loadFoundryAssetPack(packsRoot, "")).rejects.toThrow(/pack id/i);
+    await expect(loadFoundryAssetPack(packsRoot, "/abs")).rejects.toThrow(/pack id/i);
   });
 });

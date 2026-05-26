@@ -41,6 +41,8 @@ describe("asset pack round-trip byte stability", () => {
       integrationSnippetTemplate: "character-sprite-img",
       payloadFiles,
       primaryFileRelPath: "regular/idle.webp",
+      anchorImageRelPath: "regular/idle.webp",
+      anchorPerceptualHash: "0123456789abcdef",
       generation: { agentName: "character-master", provider: "x", modelId: "x", seed: 0, costCents: 0, durationMs: 0, generatedAt: "2026-05-25T00:00:00.000Z" },
     });
 
