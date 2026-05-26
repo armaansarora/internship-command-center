@@ -1,12 +1,16 @@
 // scripts/foundry.ts
 import { runCanonValidateSubcommand } from "@/lib/foundry/cli/canon-validate";
 import { runCharacterSubcommand } from "@/lib/foundry/cli/character";
+import { runFoundryFloorCli } from "@/lib/foundry/agents/floor-environment/cli";
 import { join } from "node:path";
 
 const HELP = `foundry — Tower Art Foundry CLI
 Usage:
   foundry canon validate           validate every YAML canon file against its schema
   foundry character <name>         run the character-master agent (Phase 2)
+  foundry floor <slug>             run the floor-environment agent (Phase 3)
+                                     flags: --dry-run, --seed <n>,
+                                            --reported <csv>, --run-dir <path>
   foundry help                     print this help
 `;
 
@@ -51,6 +55,73 @@ async function main(argv: readonly string[]): Promise<number> {
       stdout: (s) => process.stdout.write(`${s}\n`),
       stderr: (s) => process.stderr.write(`${s}\n`),
     });
+  }
+  if (subcommand === "floor") {
+    if (!sub2) {
+      process.stderr.write(
+        `foundry floor: missing <slug> — e.g. foundry floor "war-room"\n`,
+      );
+      return 2;
+    }
+    const floorArgs = [...rest];
+    let dryRun = false;
+    let seed: number | undefined;
+    let reported: string[] = [];
+    let runDir: string | undefined;
+    for (let i = 0; i < floorArgs.length; i += 1) {
+      const arg = floorArgs[i];
+      if (arg === "--dry-run") {
+        dryRun = true;
+      } else if (arg === "--seed") {
+        const next = floorArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry floor: --seed requires a value\n`);
+          return 2;
+        }
+        seed = Number(next);
+        i += 1;
+      } else if (arg === "--reported") {
+        const next = floorArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry floor: --reported requires a CSV value\n`);
+          return 2;
+        }
+        reported = next.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+        i += 1;
+      } else if (arg === "--run-dir") {
+        const next = floorArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry floor: --run-dir requires a value\n`);
+          return 2;
+        }
+        runDir = next;
+        i += 1;
+      } else {
+        process.stderr.write(`foundry floor: unknown flag "${arg}"\n`);
+        return 2;
+      }
+    }
+    try {
+      const result = await runFoundryFloorCli({
+        floorSlug: sub2,
+        runDir,
+        reportedElements: reported,
+        seed,
+        providerKind: resolveProviderMode(),
+        dryRun,
+      });
+      process.stdout.write(`${result.summary}\n`);
+      process.stdout.write(`runDir: ${result.runDir}\n`);
+      if (result.packId) {
+        process.stdout.write(`packId: ${result.packId}\n`);
+      }
+      return 0;
+    } catch (err) {
+      process.stderr.write(
+        `foundry floor: failed — ${(err as Error).message}\n`,
+      );
+      return 1;
+    }
   }
   process.stderr.write(`foundry: subcommand "${subcommand}" not yet implemented\n`);
   return 2;
