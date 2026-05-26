@@ -52,6 +52,7 @@ describe("composite-judge stage", () => {
         pose,
         pngPath: p,
         alphaSamples: { totalOpaquePx: 4096, totalSemiTransparentPx: 0, totalTransparentPx: 0, edgeFeatherAvgAlpha: 255 },
+        noisyBackdropWarning: false,
       });
     }
     const result = await runCompositeJudgeStage({ anchorPath, sprites });
@@ -72,6 +73,7 @@ describe("composite-judge stage", () => {
         pose: "alert",
         pngPath: p,
         alphaSamples: { totalOpaquePx: 4096, totalSemiTransparentPx: 0, totalTransparentPx: 0, edgeFeatherAvgAlpha: 255 },
+        noisyBackdropWarning: false,
       },
     ];
     const result = await runCompositeJudgeStage({ anchorPath, sprites });

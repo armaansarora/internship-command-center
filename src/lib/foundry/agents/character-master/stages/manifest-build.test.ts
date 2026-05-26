@@ -76,6 +76,7 @@ describe("manifest-build stage", () => {
           pose,
           pngPath: p,
           alphaSamples: { totalOpaquePx: 1024, totalSemiTransparentPx: 0, totalTransparentPx: 0, edgeFeatherAvgAlpha: 255 },
+          noisyBackdropWarning: false,
         });
       }
     }
