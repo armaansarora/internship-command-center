@@ -87,6 +87,22 @@ ArtLab replaces the legacy CPE. Telegram-driven, two human gates (`approve direc
 
 Legacy CPE docs moved to `docs/legacy/`.
 
+## Tower Art Foundry SDK
+
+The Tower Art Foundry is the **agent-native SDK** layered over the ArtLab engine. AI agents (Claude Code, Antigravity, the Telegram bot) call into it to acquire, generate, preview, and integrate Tower art across every modality (characters, floors, UI textures, icons, sprite animations, Lottie).
+
+**MCP server:** `tower-art-foundry` (stdio). Start with `npm run foundry:mcp`. Install Claude Code skill with `npm run foundry:install-claude-skill`. Install Antigravity workspace with `npm run foundry:install-antigravity-workspace`.
+
+**Tools:** 9 typed MCP tools — `foundry/canon_list`, `foundry/canon_get`, `foundry/asset_pack_list`, `foundry/asset_pack_get`, `foundry/asset_pack_integration`, `foundry/slot_audit`, `foundry/generate`, `foundry/generate_status`, `foundry/diagnostics`.
+
+**Telegram fallback:** `/foundry status`, `/foundry list <kind>`, `/foundry generate <kind> <description>`, `/foundry preview <packId>`.
+
+**Demo page:** `/foundry-demo` — one of each modality, sourced from `FOUNDRY_DEMO_PACKS`.
+
+**Docs:** `docs/foundry/README.md`, `docs/foundry/MCP-TOOLS.md`, `docs/foundry/BRAIN-ARCHITECTURE.md`.
+
+Internally the foundry SDK and ArtLab engine are layers of one system. Externally, the SDK name is the public surface.
+
 ## Critical Technical Gotchas
 1. **DB Access from Vercel Serverless:** NEVER use Drizzle ORM's `db` object in server components or API routes deployed to Vercel. The Supabase DB is IPv6-only at `db.jzrsrruugcajohvvmevg.supabase.co:5432` and the pooler returns "Tenant not found." ALL server-side data access MUST use the Supabase REST client: `supabase.from('table').select('*')`. Drizzle is only used for schema definition and migrations (`drizzle-kit push`).
 2. **React 19 + Next.js 16:** JSX namespace must be explicitly imported: `import type { JSX } from "react"`

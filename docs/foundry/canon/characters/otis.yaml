@@ -1,0 +1,43 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: otis
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Otis"
+shortLabel: "Otis"
+title: "Lobby Concierge"
+floorId: lobby
+floorLabel: "L — The Lobby"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "warm-soft-rounded-concierge"
+silhouette: "soft-shoulders, controlled-hair-volume, concierge-stance"
+wardrobe: "deep-navy-uniform-blazer, soft-collared-shirt, gold-trim"
+props:
+  - polished-counter
+  - guest-ledger
+mobileRead: "warm-eyes-first, hands-second, posture-third"
+negativeDNA: "no-stiff-formality, no-snobbery, no-fake-grin"
+accent: "gold-uniform-trim"
+doctrine: "every-guest-deserves-a-warm-arrival"
+flaw: "absorbs-too-much-of-everyone's-day"
+secretStrength: "remembers-every-face-that-walked-through-the-door"
+wound: "lost-a-resident-they-couldn't-help"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: promoted
+paletteRef: tower-default
+motionProfile: concierge-calm
+artDirectionNotes: |
+  Otis must stay soft, human, slightly rounded, and warmly readable at the
+  Lobby desk. Byte-protected by .github/workflows/artlab-byte-diff.yml at
+  public/art/lobby/otis/. Never regenerate without explicit migration plan.

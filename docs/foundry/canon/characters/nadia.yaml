@@ -1,0 +1,42 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: nadia
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Nadia Flint"
+shortLabel: "Nadia"
+title: "Red Team Counsel"
+floorId: red-team-review
+floorLabel: "Red Team Review"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "hostile-read-counsel-whose-adversarial-instinct-is-care"
+silhouette: "sharp-angular-posture, composed-profile, expressive-eyebrow"
+wardrobe: "black-oxblood-and-white-legal-review-layers"
+props:
+  - closed-folder
+  - verdict-card
+  - legal-pad
+  - redline-tab
+mobileRead: "oxblood-angular-silhouette-plus-verdict-card-prop"
+negativeDNA: "no-villain-lawyer, no-detective-trench-coat, no-courtroom-costume, no-horror-lighting, no-fake-legal-text"
+accent: "oxblood-red-team-A3343F"
+doctrine: "the-hostile-read-protects-the-client"
+flaw: "comes-across-cold"
+secretStrength: "finds-the-weakness-first"
+wound: "watched-a-defense-collapse"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: red-team-controlled
+artDirectionNotes: "Nadia should feel calm and consequential, angular without becoming villain-coded."

@@ -22,6 +22,8 @@ import { processCancelIntents } from "@/lib/artlab/daemon/cancel-flow";
 import { reconcileCrashedRuns } from "@/lib/artlab/daemon/crash-recovery";
 import { createSleepGuard } from "@/lib/artlab/daemon/sleep-guard";
 import { createCliInboxBridge } from "@/lib/artlab/daemon/cli-inbox-bridge";
+import { createFoundryPoller } from "@/lib/artlab/daemon/foundry-poller";
+import { DaemonAlreadyRunningError, acquireDaemonLock, type DaemonLockHandle } from "@/lib/artlab/daemon/daemon-lock";
 import { dispatchInboundMessage } from "@/lib/artlab/bot/bot-dispatcher";
 import { createTelegramClient, type TelegramClient } from "@/lib/artlab/bot/telegram-client";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "@/lib/artlab/orchestrator/llm-brain";
@@ -193,6 +195,7 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
     crashRecovery: { reconcile: () => reconcileCrashedRuns({ workspaceRoot }) },
     sleepGuard: createSleepGuard({}),
     cliInboxBridge: createCliInboxBridge({ workspaceRoot }),
+    foundryPoller: createFoundryPoller({ workspaceRoot }),
     supervisor,
   });
 }
@@ -204,6 +207,35 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
   const { box } = await import("./ui/box");
   const { kvList } = await import("./ui/widgets");
   const { gold, muted } = await import("./ui/widgets");
+
+  // Codex round-2 review: launchd respawn can race two daemons against the
+  // same `.artlab/engine/inbox/foundry/` directory. The lock file refuses a
+  // second instance unless the prior holder's PID is no longer alive.
+  if (!existsSync(input.workspaceRoot)) mkdirSync(input.workspaceRoot, { recursive: true });
+  let lock: DaemonLockHandle;
+  try {
+    lock = acquireDaemonLock({ workspaceRoot: input.workspaceRoot });
+  } catch (err) {
+    if (err instanceof DaemonAlreadyRunningError) {
+      input.log(`artlab daemon: another instance is running (pid ${err.holderPid}) — refusing to start`);
+      input.log(`lockfile: ${err.lockPath}`);
+      return 1;
+    }
+    recordDaemonError(input.workspaceRoot, "daemon-lock-acquire", err);
+    input.log(`artlab daemon: failed to acquire single-instance lock — see ${join(input.workspaceRoot, "daemon-errors.jsonl")}`);
+    return 1;
+  }
+
+  const releaseLock = (): void => {
+    try { lock.release(); } catch { /* ignore — lock may have been cleared by signal handler */ }
+  };
+  // Release the lock on graceful shutdown. The Node process default exits on
+  // SIGTERM/SIGINT before our `await loop(ctx)` resolves, so register an
+  // `exit` listener that unconditionally cleans up the lock file.
+  process.once("exit", releaseLock);
+  process.once("SIGTERM", () => { releaseLock(); process.exit(0); });
+  process.once("SIGINT", () => { releaseLock(); process.exit(0); });
+
   try {
     const ctx = await build({ workspaceRoot: input.workspaceRoot });
     const telegramTokenPresent = !!(await resolveTelegramToken());
@@ -237,5 +269,7 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
     recordDaemonError(input.workspaceRoot, "daemon-run-bootstrap", err);
     input.log(`artlab daemon: bootstrap failed — see ${join(input.workspaceRoot, "daemon-errors.jsonl")}`);
     return 1;
+  } finally {
+    releaseLock();
   }
 }

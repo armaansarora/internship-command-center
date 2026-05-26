@@ -1,0 +1,23 @@
+header:
+  kind: motion-language
+  schemaVersion: "1.0.0"
+  id: tower-default
+  revisedAt: "2026-05-25T00:00:00.000Z"
+easings:
+  primary: "power3.out"
+  entrance: "expo.out"
+  exit: "power2.in"
+  emphasis: "back.out(1.5)"
+  drift: "sine.inOut"
+durations:
+  instant: 80
+  fast: 180
+  base: 320
+  slow: 520
+  ambient: 9000
+principles:
+  - respect-prefers-reduced-motion
+  - no-motion-sickness
+  - autonomous-ken-burns-drift
+  - slow-organic-barely-perceptible
+  - no-mouse-driven-parallax

@@ -242,7 +242,7 @@ Establish the single source of truth. **No image generation yet — just data + 
 - Create: `scripts/foundry.ts` (minimal stub that prints help and exits 0)
 - Test: `src/lib/foundry/scaffold.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/scaffold.test.ts
@@ -282,12 +282,12 @@ describe("foundry scaffold", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/scaffold.test.ts`
 Expected: FAIL — "directory exists: src/lib/foundry/canon" assertions fail (paths do not exist yet).
 
-- [ ] **Step 3: Create directories and CLI stub**
+- [x] **Step 3: Create directories and CLI stub**
 
 ```bash
 cd "/Users/armaanarora/Documents/The Tower"
@@ -337,12 +337,12 @@ Update `package.json` scripts (insert near existing `artlab` scripts):
     "foundry:canon-validate": "tsx scripts/foundry.ts canon validate",
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/scaffold.test.ts`
 Expected: PASS — all 13 directory assertions + CLI script assertion pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry docs/foundry .artlab/foundry scripts/foundry.ts package.json
@@ -359,10 +359,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `find src/lib/foundry -type d | wc -l` ≥ 6 (root + 5 subdirs)
-- [ ] `find docs/foundry -type d | wc -l` ≥ 7 (root + 6 subdirs)
-- [ ] `npm run foundry -- help` prints help text and exits 0
-- [ ] `npm run foundry -- bogus` exits 2
+- [x] `find src/lib/foundry -type d | wc -l` ≥ 6 (root + 5 subdirs)
+- [x] `find docs/foundry -type d | wc -l` ≥ 7 (root + 6 subdirs)
+- [x] `npm run foundry -- help` prints help text and exits 0
+- [x] `npm run foundry -- bogus` exits 2
 
 ### Task 0.2: Define FoundryCanon shared types and version constants
 
@@ -370,7 +370,7 @@ EOF
 - Create: `src/lib/foundry/canon/types.ts`
 - Test: `src/lib/foundry/canon/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/types.test.ts
@@ -427,12 +427,12 @@ describe("foundry canon shared types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/types.test.ts`
 Expected: FAIL — "Cannot find module './types'".
 
-- [ ] **Step 3: Implement shared canon types**
+- [x] **Step 3: Implement shared canon types**
 
 ```ts
 // src/lib/foundry/canon/types.ts
@@ -472,12 +472,12 @@ export interface FoundryCanonLoadResult<T> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/types.test.ts`
 Expected: PASS — all 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/types.ts src/lib/foundry/canon/types.test.ts
@@ -494,10 +494,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `FOUNDRY_CANON_VERSION === "1.0.0"` (semver, will bump on breaking schema changes)
-- [ ] `FOUNDRY_CANON_KINDS` has exactly 6 entries
-- [ ] `FoundryCanonHeaderSchema` rejects non-kebab-case IDs
-- [ ] `FoundryCanonHeaderSchema` rejects mismatched `schemaVersion`
+- [x] `FOUNDRY_CANON_VERSION === "1.0.0"` (semver, will bump on breaking schema changes)
+- [x] `FOUNDRY_CANON_KINDS` has exactly 6 entries
+- [x] `FoundryCanonHeaderSchema` rejects non-kebab-case IDs
+- [x] `FoundryCanonHeaderSchema` rejects mismatched `schemaVersion`
 
 ### Task 0.3: Define the FoundryCharacterCanon Zod schema
 
@@ -505,7 +505,7 @@ EOF
 - Create: `src/lib/foundry/canon/character-schema.ts`
 - Test: `src/lib/foundry/canon/character-schema.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/character-schema.test.ts
@@ -578,12 +578,12 @@ describe("FoundryCharacterCanonSchema", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/character-schema.test.ts`
 Expected: FAIL — "Cannot find module './character-schema'".
 
-- [ ] **Step 3: Implement FoundryCharacterCanonSchema**
+- [x] **Step 3: Implement FoundryCharacterCanonSchema**
 
 ```ts
 // src/lib/foundry/canon/character-schema.ts
@@ -658,12 +658,12 @@ export type FoundryCharacterCanon = z.infer<typeof FoundryCharacterCanonSchema>;
 export const FOUNDRY_CHARACTER_KIND: z.infer<typeof FoundryCanonKindSchema> = "character";
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/character-schema.test.ts`
 Expected: PASS — all 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/character-schema.ts src/lib/foundry/canon/character-schema.test.ts
@@ -680,10 +680,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Schema enforces all 7 canonical pose states
-- [ ] Schema enforces at least one outfit variant, no duplicates
-- [ ] `header.kind` is required to be the literal `"character"`
-- [ ] `styleEnvelope` is required to be the literal `"tower-flat-plus-depth-v1"`
+- [x] Schema enforces all 7 canonical pose states
+- [x] Schema enforces at least one outfit variant, no duplicates
+- [x] `header.kind` is required to be the literal `"character"`
+- [x] `styleEnvelope` is required to be the literal `"tower-flat-plus-depth-v1"`
 
 ### Task 0.4: Add yaml dev-dependency and implement loadFoundryCanonFile
 
@@ -692,7 +692,7 @@ EOF
 - Create: `src/lib/foundry/canon/loader.ts`
 - Test: `src/lib/foundry/canon/loader.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/loader.test.ts
@@ -784,12 +784,12 @@ describe("loadFoundryCanonFile", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/loader.test.ts`
 Expected: FAIL — "Cannot find module './loader'".
 
-- [ ] **Step 3: Add `yaml` dependency and implement loader**
+- [x] **Step 3: Add `yaml` dependency and implement loader**
 
 ```bash
 npm install yaml@^2.7.0 --save
@@ -858,12 +858,12 @@ export async function loadFoundryCanonFile(absPath: string): Promise<FoundryCano
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/loader.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add package.json package-lock.json src/lib/foundry/canon/loader.ts src/lib/foundry/canon/loader.test.ts
@@ -881,10 +881,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `loadFoundryCanonFile` throws `LoadFoundryCanonError` with a typed `code` for every failure
-- [ ] `loadDurationMs` is recorded for every successful load
-- [ ] Empty / non-object YAML files fail with `header-missing`
-- [ ] `yaml` dep version pin documented in package.json
+- [x] `loadFoundryCanonFile` throws `LoadFoundryCanonError` with a typed `code` for every failure
+- [x] `loadDurationMs` is recorded for every successful load
+- [x] Empty / non-object YAML files fail with `header-missing`
+- [x] `yaml` dep version pin documented in package.json
 
 ### Task 0.5: Define palette, typography, motion-language, space-tokens, iconography-rules schemas
 
@@ -896,7 +896,7 @@ EOF
 - Create: `src/lib/foundry/canon/iconography-rules-schema.ts`
 - Test: `src/lib/foundry/canon/non-character-schemas.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/non-character-schemas.test.ts
@@ -1049,12 +1049,12 @@ describe("FoundryIconographyRulesCanonSchema", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/non-character-schemas.test.ts`
 Expected: FAIL — modules not found.
 
-- [ ] **Step 3: Implement the five non-character schemas**
+- [x] **Step 3: Implement the five non-character schemas**
 
 ```ts
 // src/lib/foundry/canon/palette-schema.ts
@@ -1170,12 +1170,12 @@ export const FoundryIconographyRulesCanonSchema = z
 export type FoundryIconographyRulesCanon = z.infer<typeof FoundryIconographyRulesCanonSchema>;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/non-character-schemas.test.ts`
 Expected: PASS — 10 assertions across 5 describe blocks pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/palette-schema.ts src/lib/foundry/canon/typography-schema.ts src/lib/foundry/canon/motion-language-schema.ts src/lib/foundry/canon/space-tokens-schema.ts src/lib/foundry/canon/iconography-rules-schema.ts src/lib/foundry/canon/non-character-schemas.test.ts
@@ -1193,9 +1193,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Five new strict Zod schemas exported from `src/lib/foundry/canon/`
-- [ ] All five reject unknown `kind` discriminator values
-- [ ] Numeric bounds enforced (no negative durations, opacity in [0,1])
+- [x] Five new strict Zod schemas exported from `src/lib/foundry/canon/`
+- [x] All five reject unknown `kind` discriminator values
+- [x] Numeric bounds enforced (no negative durations, opacity in [0,1])
 
 ### Task 0.6: Implement loadFoundryCanon (whole-tree loader)
 
@@ -1204,7 +1204,7 @@ EOF
 - Create: `src/lib/foundry/canon/index.ts`
 - Test: `src/lib/foundry/canon/load-canon.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/load-canon.test.ts
@@ -1317,12 +1317,12 @@ tokens:
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/load-canon.test.ts`
 Expected: FAIL — "Cannot find module './load-canon'".
 
-- [ ] **Step 3: Implement loadFoundryCanon**
+- [x] **Step 3: Implement loadFoundryCanon**
 
 ```ts
 // src/lib/foundry/canon/load-canon.ts
@@ -1462,12 +1462,12 @@ export * from "./loader";
 export * from "./load-canon";
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/load-canon.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/load-canon.ts src/lib/foundry/canon/load-canon.test.ts src/lib/foundry/canon/index.ts
@@ -1485,10 +1485,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `loadFoundryCanon` returns a `FoundryCanon` with all 6 kind arrays
-- [ ] Duplicate ids within a kind throw a descriptive error
-- [ ] Load duration recorded; for a small canon (≤10 files) stays under 50 ms
-- [ ] `src/lib/foundry/canon/index.ts` re-exports the public surface
+- [x] `loadFoundryCanon` returns a `FoundryCanon` with all 6 kind arrays
+- [x] Duplicate ids within a kind throw a descriptive error
+- [x] Load duration recorded; for a small canon (≤10 files) stays under 50 ms
+- [x] `src/lib/foundry/canon/index.ts` re-exports the public surface
 
 ### Task 0.7: Migrate Tower master palette + typography + motion-language + space-tokens + iconography-rules YAML
 
@@ -1500,7 +1500,7 @@ EOF
 - Create: `docs/foundry/canon/iconography-rules/tower-default.yaml`
 - Test: `src/lib/foundry/canon/migration-non-character.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/migration-non-character.test.ts
@@ -1552,12 +1552,12 @@ describe("non-character canon migration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-non-character.test.ts`
 Expected: FAIL — palette/typography/etc. records not yet found.
 
-- [ ] **Step 3: Create the 5 tower-default YAML files**
+- [x] **Step 3: Create the 5 tower-default YAML files**
 
 ```yaml
 # docs/foundry/canon/palettes/tower-default.yaml
@@ -1670,12 +1670,12 @@ forbiddenStyles:
   - photographic
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-non-character.test.ts`
 Expected: PASS — all 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/foundry/canon/palettes/tower-default.yaml docs/foundry/canon/typography/tower-default.yaml docs/foundry/canon/motion-language/tower-default.yaml docs/foundry/canon/space-tokens/tower-default.yaml docs/foundry/canon/iconography-rules/tower-default.yaml src/lib/foundry/canon/migration-non-character.test.ts
@@ -1693,11 +1693,11 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] All 5 tower-default YAML files exist under `docs/foundry/canon/`
-- [ ] Palette tokens match `tailwind.config.js` (primaryDark `#1A1A2E`, goldAccent `#C9A84C`)
-- [ ] Typography families match VISION-SPEC (Playfair / Satoshi / JetBrains Mono)
-- [ ] Motion principles declare `respect-prefers-reduced-motion` and `no-motion-sickness`
-- [ ] Space tokens declare glass blur 16 px and opacity in [0.85, 0.92]
+- [x] All 5 tower-default YAML files exist under `docs/foundry/canon/`
+- [x] Palette tokens match `tailwind.config.js` (primaryDark `#1A1A2E`, goldAccent `#C9A84C`)
+- [x] Typography families match VISION-SPEC (Playfair / Satoshi / JetBrains Mono)
+- [x] Motion principles declare `respect-prefers-reduced-motion` and `no-motion-sickness`
+- [x] Space tokens declare glass blur 16 px and opacity in [0.85, 0.92]
 
 ### Task 0.8: Migrate existing promoted characters (Otis + Mara/CEO) into canon YAML
 
@@ -1706,7 +1706,7 @@ EOF
 - Create: `docs/foundry/canon/characters/mara-voss.yaml`
 - Test: `src/lib/foundry/canon/migration-promoted-characters.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/migration-promoted-characters.test.ts
@@ -1746,12 +1746,12 @@ describe("promoted character migration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-promoted-characters.test.ts`
 Expected: FAIL — character records not present.
 
-- [ ] **Step 3: Create otis.yaml + mara-voss.yaml**
+- [x] **Step 3: Create otis.yaml + mara-voss.yaml**
 
 ```yaml
 # docs/foundry/canon/characters/otis.yaml
@@ -1847,12 +1847,12 @@ artDirectionNotes: |
   public/art/penthouse/ceo/. Never regenerate without explicit migration plan.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-promoted-characters.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/foundry/canon/characters/otis.yaml docs/foundry/canon/characters/mara-voss.yaml src/lib/foundry/canon/migration-promoted-characters.test.ts
@@ -1871,9 +1871,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Otis + Mara YAML records exist and both pass `FoundryCharacterCanonSchema`
-- [ ] Both declare `promotionStatus: promoted`
-- [ ] `artDirectionNotes` for both references the byte-protection CI workflow
+- [x] Otis + Mara YAML records exist and both pass `FoundryCharacterCanonSchema`
+- [x] Both declare `promotionStatus: promoted`
+- [x] `artDirectionNotes` for both references the byte-protection CI workflow
 
 ### Task 0.9: Migrate remaining 10 cast members (queued status) into canon YAML
 
@@ -1890,7 +1890,7 @@ EOF
 - Create: `docs/foundry/canon/characters/nadia.yaml`
 - Test: `src/lib/foundry/canon/migration-queued-cast.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/migration-queued-cast.test.ts
@@ -1945,12 +1945,12 @@ describe("queued cast migration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-queued-cast.test.ts`
 Expected: FAIL — queued cast records missing.
 
-- [ ] **Step 3: Create 10 queued character YAML files**
+- [x] **Step 3: Create 10 queued character YAML files**
 
 Each file follows the same structure as `sol-navarro.yaml` shown below. Values are lifted from `docs/CHARACTER-BIBLE.md`, `src/lib/visual-assets/characters.ts` (`CHARACTER_RENDERING_METADATA`), and `docs/CHAIN-OF-COMMAND.md`. Floors per `docs/artlab/CHARACTER-PIPELINE.md` roster table.
 
@@ -1990,12 +1990,12 @@ artDirectionNotes: "Sol should feel socially open and precise; contact-card warm
 
 Repeat the same shape for `rafe-calder.yaml` (Floor 7 War Room CRO; `war-room-kinetic` motion profile; red-edit prop accent), `priya.yaml` (Floor 7 War Room CRO secondary; `analytical-precise`; tablet-ledger prop), `dylan.yaml` (Floor 4 Situation Room COO; `operations-brisk`; watch/clipboard), `vera.yaml` (Floor 5 Writing Room CMO; `editorial-poised`; expressive-hand-edits), `inez.yaml` (Floor 3 Briefing Room CPO), `mina.yaml` (Floor 2 Observatory CFO), `etta.yaml` (Floor 6 Rolodex CIO), `rowan.yaml` (Floor 4 secondary ops support), `nadia.yaml` (Floor 3 secondary interview prep). Pull `motionProfile`, `silhouette`, `wardrobe`, `mobileRead`, `negativeDNA`, `artDirectionNotes` verbatim from `src/lib/visual-assets/characters.ts` `CHARACTER_RENDERING_METADATA` entries — these are the canonical values already in use.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-queued-cast.test.ts`
 Expected: PASS — all 4 assertions pass; total character count = 12.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/foundry/canon/characters/ src/lib/foundry/canon/migration-queued-cast.test.ts
@@ -2013,10 +2013,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] All 10 queued cast YAML files exist and parse
-- [ ] Each declares `promotionStatus: queued` (or `in-flight` if Rafe Calder is already mid-promotion)
-- [ ] Total character canon count = 12
-- [ ] All reference `paletteRef: tower-default`
+- [x] All 10 queued cast YAML files exist and parse
+- [x] Each declares `promotionStatus: queued` (or `in-flight` if Rafe Calder is already mid-promotion)
+- [x] Total character canon count = 12
+- [x] All reference `paletteRef: tower-default`
 
 ### Task 0.10: Implement validateFoundryCanon (cross-record integrity checks)
 
@@ -2024,7 +2024,7 @@ EOF
 - Create: `src/lib/foundry/canon/validate.ts`
 - Test: `src/lib/foundry/canon/validate.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/validate.test.ts
@@ -2109,12 +2109,12 @@ describe("validateFoundryCanon", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/validate.test.ts`
 Expected: FAIL — "Cannot find module './validate'".
 
-- [ ] **Step 3: Implement validateFoundryCanon**
+- [x] **Step 3: Implement validateFoundryCanon**
 
 ```ts
 // src/lib/foundry/canon/validate.ts
@@ -2205,12 +2205,12 @@ export function validateFoundryCanon(canon: FoundryCanon): FoundryCanonValidatio
 
 Update `src/lib/foundry/canon/index.ts` to add `export * from "./validate";`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/validate.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/validate.ts src/lib/foundry/canon/validate.test.ts src/lib/foundry/canon/index.ts
@@ -2228,9 +2228,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `validateFoundryCanon` returns `ok: true` on the real on-disk canon (after Tasks 0.7-0.9 land)
-- [ ] Five distinct issue codes are emitted for the five distinct failure modes
-- [ ] Unresolved paletteRef is flagged with the offending recordId
+- [x] `validateFoundryCanon` returns `ok: true` on the real on-disk canon (after Tasks 0.7-0.9 land)
+- [x] Five distinct issue codes are emitted for the five distinct failure modes
+- [x] Unresolved paletteRef is flagged with the offending recordId
 
 ### Task 0.11: Wire `foundry canon validate` CLI subcommand
 
@@ -2239,7 +2239,7 @@ EOF
 - Modify: `scripts/foundry.ts` (wire the subcommand)
 - Test: `src/lib/foundry/cli/canon-validate.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/cli/canon-validate.test.ts
@@ -2272,12 +2272,12 @@ describe("foundry canon validate CLI", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/cli/canon-validate.test.ts`
 Expected: FAIL — "Cannot find module './canon-validate'".
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/cli/canon-validate.ts
@@ -2348,7 +2348,7 @@ async function main(argv: readonly string[]): Promise<number> {
 void main(process.argv.slice(2)).then((code) => process.exit(code));
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/cli/canon-validate.test.ts`
 Expected: PASS — both assertions pass; the on-disk canon validates.
@@ -2357,7 +2357,7 @@ Additionally verify the CLI end-to-end:
 Run: `npm run foundry -- canon validate`
 Expected: Exit 0; last stdout line is `canon ok`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/cli/canon-validate.ts src/lib/foundry/cli/canon-validate.test.ts scripts/foundry.ts
@@ -2375,9 +2375,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `npm run foundry -- canon validate` exits 0 and prints `canon ok` as the last line
-- [ ] Invoking with a non-existent canon root exits 1 with a useful error
-- [ ] Stdout summary line includes record counts and load duration
+- [x] `npm run foundry -- canon validate` exits 0 and prints `canon ok` as the last line
+- [x] Invoking with a non-existent canon root exits 1 with a useful error
+- [x] Stdout summary line includes record counts and load duration
 
 ### Task 0.12: Add canon round-trip stability test and Phase 0 completion gates
 
@@ -2386,7 +2386,7 @@ EOF
 - Create: `src/lib/foundry/canon/load-performance.test.ts`
 - Modify: `package.json` (add `foundry:canon-validate` script if not already present)
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/canon/round-trip.test.ts
@@ -2448,14 +2448,14 @@ describe("canon load performance", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail or pass**
+- [x] **Step 2: Run tests to verify they fail or pass**
 
 Run: `npx vitest run src/lib/foundry/canon/round-trip.test.ts src/lib/foundry/canon/load-performance.test.ts`
 Expected: PASS — both tests rely on existing code from Tasks 0.4–0.9; if either fails, fix the source data (no implementation change needed in this task).
 
 If the performance test fails on slower machines, document the actual measured time in the commit body but the gate stays at 50 ms — that is the architectural target. The CI matrix only uses the 50 ms gate when running on the macOS hosted runner.
 
-- [ ] **Step 3: Verify package.json has the foundry:canon-validate script**
+- [x] **Step 3: Verify package.json has the foundry:canon-validate script**
 
 ```bash
 grep -q '"foundry:canon-validate"' package.json || (echo "missing foundry:canon-validate script"; exit 1)
@@ -2463,7 +2463,7 @@ grep -q '"foundry:canon-validate"' package.json || (echo "missing foundry:canon-
 
 If missing, add it as documented in Task 0.1.
 
-- [ ] **Step 4: Final Phase 0 verification**
+- [x] **Step 4: Final Phase 0 verification**
 
 Run all Phase 0 tests:
 ```bash
@@ -2475,7 +2475,7 @@ npm run foundry -- canon validate
 
 All must exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/round-trip.test.ts src/lib/foundry/canon/load-performance.test.ts package.json
@@ -2493,9 +2493,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Round-trip YAML test passes — parse(stringify(parse(file))) === parse(file) for every canon YAML
-- [ ] `loadDurationMs` < 50 for the full canon (~12 characters + 5 non-character records)
-- [ ] `foundry:canon-validate` npm script exists and executes the validate path
+- [x] Round-trip YAML test passes — parse(stringify(parse(file))) === parse(file) for every canon YAML
+- [x] `loadDurationMs` < 50 for the full canon (~12 characters + 5 non-character records)
+- [x] `foundry:canon-validate` npm script exists and executes the validate path
 
 ### Phase 0 completion criteria
 
@@ -2545,7 +2545,7 @@ Phase 0 delivered: canon YAMLs, loaders, validators. Phase 1 builds on top — p
 - Create: `src/lib/foundry/asset-pack/constants.ts`
 - Test: `src/lib/foundry/asset-pack/constants.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/constants.test.ts
@@ -2590,12 +2590,12 @@ describe("asset pack constants", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/constants.test.ts`
 Expected: FAIL — "Cannot find module './constants'".
 
-- [ ] **Step 3: Implement constants**
+- [x] **Step 3: Implement constants**
 
 ```ts
 // src/lib/foundry/asset-pack/constants.ts
@@ -2631,12 +2631,12 @@ export const FOUNDRY_PACK_FILENAME = "manifest.json" as const;
 export const FOUNDRY_PACK_PAYLOAD_DIR = "payload" as const;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/constants.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/constants.ts src/lib/foundry/asset-pack/constants.test.ts
@@ -2654,9 +2654,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] 9 asset kinds and 8 agent kinds declared and exported
-- [ ] `FOUNDRY_ASSET_PACK_VERSION === "1.0.0"`
-- [ ] `FOUNDRY_PACK_FILENAME === "manifest.json"` (the on-disk name)
+- [x] 9 asset kinds and 8 agent kinds declared and exported
+- [x] `FOUNDRY_ASSET_PACK_VERSION === "1.0.0"`
+- [x] `FOUNDRY_PACK_FILENAME === "manifest.json"` (the on-disk name)
 
 ### Task 1.2: Define FoundryAssetPackManifest Zod schema
 
@@ -2664,7 +2664,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/manifest.schema.ts`
 - Test: `src/lib/foundry/asset-pack/manifest.schema.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest.schema.test.ts
@@ -2772,12 +2772,12 @@ describe("FoundryAssetPackManifestSchema", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest.schema.test.ts`
 Expected: FAIL — "Cannot find module './manifest.schema'".
 
-- [ ] **Step 3: Implement the manifest schema**
+- [x] **Step 3: Implement the manifest schema**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest.schema.ts
@@ -2900,12 +2900,12 @@ export const FoundryAssetPackManifestSchema = z
 export type FoundryAssetPackManifest = z.infer<typeof FoundryAssetPackManifestSchema>;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest.schema.test.ts`
 Expected: PASS — all 6 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/manifest.schema.ts src/lib/foundry/asset-pack/manifest.schema.test.ts
@@ -2923,10 +2923,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Manifest schema enforces sha256 format (64 lowercase hex)
-- [ ] `intendedSlot.appPath` rejects `..` and paths outside `public/`, `src/components/`, `src/lib/visual-assets/`
-- [ ] Manifest must reference at least one canon record (cannot be all-null)
-- [ ] `payload.primaryFileRelPath` must point at a real entry in `payload.files`
+- [x] Manifest schema enforces sha256 format (64 lowercase hex)
+- [x] `intendedSlot.appPath` rejects `..` and paths outside `public/`, `src/components/`, `src/lib/visual-assets/`
+- [x] Manifest must reference at least one canon record (cannot be all-null)
+- [x] `payload.primaryFileRelPath` must point at a real entry in `payload.files`
 
 ### Task 1.3: Implement sha256 hashing helper for payload bytes
 
@@ -2934,7 +2934,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/hashing.ts`
 - Test: `src/lib/foundry/asset-pack/hashing.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/hashing.test.ts
@@ -2974,12 +2974,12 @@ describe("sha256 helpers", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/hashing.test.ts`
 Expected: FAIL — "Cannot find module './hashing'".
 
-- [ ] **Step 3: Implement hashing helpers**
+- [x] **Step 3: Implement hashing helpers**
 
 ```ts
 // src/lib/foundry/asset-pack/hashing.ts
@@ -2996,12 +2996,12 @@ export async function sha256OfFile(absPath: string): Promise<string> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/hashing.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/hashing.ts src/lib/foundry/asset-pack/hashing.test.ts
@@ -3018,9 +3018,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Both helpers return 64-char lowercase hex
-- [ ] `sha256OfBytes(empty)` matches the canonical empty-input digest
-- [ ] `sha256OfFile` reads bytes and delegates to `sha256OfBytes`
+- [x] Both helpers return 64-char lowercase hex
+- [x] `sha256OfBytes(empty)` matches the canonical empty-input digest
+- [x] `sha256OfFile` reads bytes and delegates to `sha256OfBytes`
 
 ### Task 1.4: Implement createFoundryAssetPack
 
@@ -3028,7 +3028,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/pack.ts`
 - Test: `src/lib/foundry/asset-pack/pack.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/pack.test.ts
@@ -3098,12 +3098,12 @@ describe("createFoundryAssetPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/pack.test.ts`
 Expected: FAIL — "Cannot find module './pack'".
 
-- [ ] **Step 3: Implement createFoundryAssetPack**
+- [x] **Step 3: Implement createFoundryAssetPack**
 
 ```ts
 // src/lib/foundry/asset-pack/pack.ts
@@ -3193,12 +3193,12 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/pack.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/pack.ts src/lib/foundry/asset-pack/pack.test.ts
@@ -3216,10 +3216,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Pack directory contains `manifest.json` and `payload/<relPath>` files after creation
-- [ ] Manifest passes schema validation (any invalid input throws before write)
-- [ ] Atomic write — no partial file on disk if process is killed mid-write
-- [ ] Each payload file's sha256 in the manifest matches the file's actual bytes
+- [x] Pack directory contains `manifest.json` and `payload/<relPath>` files after creation
+- [x] Manifest passes schema validation (any invalid input throws before write)
+- [x] Atomic write — no partial file on disk if process is killed mid-write
+- [x] Each payload file's sha256 in the manifest matches the file's actual bytes
 
 ### Task 1.5: Implement readFoundryAssetPack with payload sha256 verification
 
@@ -3227,7 +3227,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/read.ts`
 - Test: `src/lib/foundry/asset-pack/read.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/read.test.ts
@@ -3288,12 +3288,12 @@ describe("readFoundryAssetPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/read.test.ts`
 Expected: FAIL — "Cannot find module './read'".
 
-- [ ] **Step 3: Implement readFoundryAssetPack**
+- [x] **Step 3: Implement readFoundryAssetPack**
 
 ```ts
 // src/lib/foundry/asset-pack/read.ts
@@ -3350,12 +3350,12 @@ export async function readFoundryAssetPack(packDir: string): Promise<ReadFoundry
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/read.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/read.ts src/lib/foundry/asset-pack/read.test.ts
@@ -3372,9 +3372,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `readFoundryAssetPack` returns `{ ok: true, ... }` for a freshly-created pack
-- [ ] Four distinct error codes for the four distinct failure modes
-- [ ] Tampered payload bytes are caught via sha256 mismatch
+- [x] `readFoundryAssetPack` returns `{ ok: true, ... }` for a freshly-created pack
+- [x] Four distinct error codes for the four distinct failure modes
+- [x] Tampered payload bytes are caught via sha256 mismatch
 
 ### Task 1.6: Define FOUNDRY_SLOT_REGISTRY and slot validation
 
@@ -3382,7 +3382,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/slot-registry.ts`
 - Test: `src/lib/foundry/asset-pack/slot-registry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/slot-registry.test.ts
@@ -3444,12 +3444,12 @@ describe("FOUNDRY_SLOT_REGISTRY", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/slot-registry.test.ts`
 Expected: FAIL — "Cannot find module './slot-registry'".
 
-- [ ] **Step 3: Implement the slot registry**
+- [x] **Step 3: Implement the slot registry**
 
 ```ts
 // src/lib/foundry/asset-pack/slot-registry.ts
@@ -3516,12 +3516,12 @@ export function registerFoundrySlot(record: FoundrySlotRecord): void {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/slot-registry.test.ts`
 Expected: PASS — 7 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/slot-registry.ts src/lib/foundry/asset-pack/slot-registry.test.ts
@@ -3539,10 +3539,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Built-in slot registry contains ≥ 42 character-sprite slots
-- [ ] `isFoundrySlotRegistered` is deterministic for any string input
-- [ ] `registerFoundrySlot` rejects duplicate slotIds and invalid formats
-- [ ] Slot id format constrained to `^[a-z0-9/_-]+$`
+- [x] Built-in slot registry contains ≥ 42 character-sprite slots
+- [x] `isFoundrySlotRegistered` is deterministic for any string input
+- [x] `registerFoundrySlot` rejects duplicate slotIds and invalid formats
+- [x] Slot id format constrained to `^[a-z0-9/_-]+$`
 
 ### Task 1.7: Cross-validate manifest.intendedSlot against the slot registry
 
@@ -3550,7 +3550,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/manifest-slot-check.ts`
 - Test: `src/lib/foundry/asset-pack/manifest-slot-check.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest-slot-check.test.ts
@@ -3609,12 +3609,12 @@ describe("validateFoundryManifestAgainstSlots", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest-slot-check.test.ts`
 Expected: FAIL — "Cannot find module './manifest-slot-check'".
 
-- [ ] **Step 3: Implement validateFoundryManifestAgainstSlots**
+- [x] **Step 3: Implement validateFoundryManifestAgainstSlots**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest-slot-check.ts
@@ -3652,12 +3652,12 @@ export function validateFoundryManifestAgainstSlots(manifest: FoundryAssetPackMa
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest-slot-check.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/manifest-slot-check.ts src/lib/foundry/asset-pack/manifest-slot-check.test.ts
@@ -3675,9 +3675,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Three distinct failure codes
-- [ ] A manifest that passes both Zod schema AND slot check is guaranteed to target a real registered slot
-- [ ] Test covers each failure code independently
+- [x] Three distinct failure codes
+- [x] A manifest that passes both Zod schema AND slot check is guaranteed to target a real registered slot
+- [x] Test covers each failure code independently
 
 ### Task 1.8: Implement integration snippet generator with golden fixture
 
@@ -3686,7 +3686,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/__fixtures__/golden-character-sprite-snippet.tsx`
 - Test: `src/lib/foundry/asset-pack/integration-snippet.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/integration-snippet.test.ts
@@ -3745,12 +3745,12 @@ describe("renderFoundryIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/integration-snippet.test.ts`
 Expected: FAIL — modules / fixture missing.
 
-- [ ] **Step 3: Create the golden fixture and implement the renderer**
+- [x] **Step 3: Create the golden fixture and implement the renderer**
 
 ```tsx
 // src/lib/foundry/asset-pack/__fixtures__/golden-character-sprite-snippet.tsx
@@ -3869,12 +3869,12 @@ export function renderFoundryIntegrationSnippet(
 export const FOUNDRY_INTEGRATION_SNIPPET_TEMPLATES = Object.keys(TEMPLATE_RENDERERS);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/integration-snippet.test.ts`
 Expected: PASS — all 3 assertions pass (the golden fixture matches byte-for-byte modulo trim).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/integration-snippet.ts src/lib/foundry/asset-pack/integration-snippet.test.ts src/lib/foundry/asset-pack/__fixtures__/golden-character-sprite-snippet.tsx
@@ -3892,10 +3892,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Golden fixture matches generated output byte-for-byte (after trim)
-- [ ] GSAP template includes `useEffect`, `@/lib/gsap-init` import, and cleanup return
-- [ ] Unknown template throws with a descriptive error
-- [ ] No template references appPath outside `public/` (snippet uses `/art/...` URL form)
+- [x] Golden fixture matches generated output byte-for-byte (after trim)
+- [x] GSAP template includes `useEffect`, `@/lib/gsap-init` import, and cleanup return
+- [x] Unknown template throws with a descriptive error
+- [x] No template references appPath outside `public/` (snippet uses `/art/...` URL form)
 
 ### Task 1.9: Implement back-compat shim that lifts ArtLab promotion receipts into v1 Asset Packs
 
@@ -3903,7 +3903,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/legacy-shim.ts`
 - Test: `src/lib/foundry/asset-pack/legacy-shim.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/legacy-shim.test.ts
@@ -3983,12 +3983,12 @@ describe("liftLegacyArtLabAssetToFoundryPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/legacy-shim.test.ts`
 Expected: FAIL — "Cannot find module './legacy-shim'".
 
-- [ ] **Step 3: Implement the legacy shim**
+- [x] **Step 3: Implement the legacy shim**
 
 ```ts
 // src/lib/foundry/asset-pack/legacy-shim.ts
@@ -4089,12 +4089,12 @@ export async function liftLegacyArtLabAssetToFoundryPack(input: LiftLegacyAssetI
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/legacy-shim.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/legacy-shim.ts src/lib/foundry/asset-pack/legacy-shim.test.ts
@@ -4112,17 +4112,17 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Otis legacy assets lift cleanly into valid v1 manifests
-- [ ] Unknown character ids throw with a descriptive error
-- [ ] Read-only: shim does not write to disk
-- [ ] Manifest produced passes both schema validation and slot validation
+- [x] Otis legacy assets lift cleanly into valid v1 manifests
+- [x] Unknown character ids throw with a descriptive error
+- [x] Read-only: shim does not write to disk
+- [x] Manifest produced passes both schema validation and slot validation
 
 ### Task 1.10: Round-trip pack/unpack byte-stability test on a multi-file pack
 
 **Files:**
 - Test: `src/lib/foundry/asset-pack/round-trip.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/round-trip.test.ts
@@ -4209,12 +4209,12 @@ describe("asset pack round-trip byte stability", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/round-trip.test.ts`
 Expected: PASS — both assertions pass (test depends only on existing pack/read code from Tasks 1.4 + 1.5).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/round-trip.test.ts
@@ -4232,9 +4232,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Test creates a 21-payload pack and verifies all 21 files survive write-read round-trip
-- [ ] Re-read manifest deep-equals in-memory manifest
-- [ ] All payload sha256 values match after read
+- [x] Test creates a 21-payload pack and verifies all 21 files survive write-read round-trip
+- [x] Re-read manifest deep-equals in-memory manifest
+- [x] All payload sha256 values match after read
 
 ### Task 1.11: Export public asset-pack surface from `src/lib/foundry/asset-pack/index.ts`
 
@@ -4242,7 +4242,7 @@ EOF
 - Create: `src/lib/foundry/asset-pack/index.ts`
 - Test: `src/lib/foundry/asset-pack/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/index.test.ts
@@ -4285,12 +4285,12 @@ describe("asset-pack public surface", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/index.test.ts`
 Expected: FAIL — "Cannot find module './index'".
 
-- [ ] **Step 3: Implement the index re-export**
+- [x] **Step 3: Implement the index re-export**
 
 ```ts
 // src/lib/foundry/asset-pack/index.ts
@@ -4305,12 +4305,12 @@ export * from "./integration-snippet";
 export * from "./legacy-shim";
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/index.test.ts`
 Expected: PASS — all assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/index.ts src/lib/foundry/asset-pack/index.test.ts
@@ -4328,16 +4328,16 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `@/lib/foundry/asset-pack` exports every public symbol from the module
-- [ ] Surface test fails if a future commit removes an exported function
-- [ ] No internal-only symbols (e.g. atomicWriteFile) leak through
+- [x] `@/lib/foundry/asset-pack` exports every public symbol from the module
+- [x] Surface test fails if a future commit removes an exported function
+- [x] No internal-only symbols (e.g. atomicWriteFile) leak through
 
 ### Task 1.12: Property-based test — schema round-trip survives arbitrary valid inputs
 
 **Files:**
 - Test: `src/lib/foundry/asset-pack/manifest.property.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/manifest.property.test.ts
@@ -4413,20 +4413,20 @@ describe("manifest schema property — parse(stringify(parse(m))) === parse(m)",
 });
 ```
 
-- [ ] **Step 2: Verify `fast-check` is installed**
+- [x] **Step 2: Verify `fast-check` is installed**
 
 ```bash
 grep -q '"fast-check"' package.json || npm install --save-dev fast-check@^4.3.0
 ```
 
-- [ ] **Step 3: Run test to verify it passes**
+- [x] **Step 3: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/manifest.property.test.ts`
 Expected: PASS — 200 random valid manifests all round-trip through JSON.
 
 If failures occur, the manifest schema has a subtle drift between parse → stringify → parse; investigate the failing seed reported by fast-check.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/manifest.property.test.ts package.json package-lock.json
@@ -4444,16 +4444,16 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] 200 random valid manifests all round-trip through JSON.stringify → parse
-- [ ] `fast-check` is a dev dependency (pinned to ^4.x)
-- [ ] On a failure, fast-check reports the seed so the failure is reproducible
+- [x] 200 random valid manifests all round-trip through JSON.stringify → parse
+- [x] `fast-check` is a dev dependency (pinned to ^4.x)
+- [x] On a failure, fast-check reports the seed so the failure is reproducible
 
 ### Task 1.13: Phase 1 completion gates (CLI smoke + final verification)
 
 **Files:**
 - Create: `src/lib/foundry/asset-pack/phase-1-smoke.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/asset-pack/phase-1-smoke.test.ts
@@ -4509,12 +4509,12 @@ describe("Phase 1 smoke — create → read → validate → snippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/asset-pack/phase-1-smoke.test.ts`
 Expected: PASS — end-to-end pipeline works on a happy-path input.
 
-- [ ] **Step 3: Run full Phase 1 verification**
+- [x] **Step 3: Run full Phase 1 verification**
 
 ```bash
 npx vitest run src/lib/foundry/asset-pack
@@ -4524,7 +4524,7 @@ npx eslint src/lib/foundry/asset-pack
 
 All must exit 0.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/foundry/asset-pack/phase-1-smoke.test.ts
@@ -4541,9 +4541,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Smoke test exercises createFoundryAssetPack + readFoundryAssetPack + validateFoundryManifestAgainstSlots + renderFoundryIntegrationSnippet in sequence
-- [ ] Pack creates on disk, reads back, validates against slot registry, and emits a TSX snippet
-- [ ] No console output, no leaked temp dirs
+- [x] Smoke test exercises createFoundryAssetPack + readFoundryAssetPack + validateFoundryManifestAgainstSlots + renderFoundryIntegrationSnippet in sequence
+- [x] Pack creates on disk, reads back, validates against slot registry, and emits a TSX snippet
+- [x] No console output, no leaked temp dirs
 
 ### Phase 1 completion criteria
 
@@ -4592,7 +4592,7 @@ Phase 2 lands with one canonical test subject — Sol Navarro — including gold
 - Create: `src/lib/foundry/providers/types.ts`
 - Test: `src/lib/foundry/providers/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/providers/types.test.ts
@@ -4627,12 +4627,12 @@ describe("FoundryImageProvider types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/providers/types.test.ts`
 Expected: FAIL — "Cannot find module './types'".
 
-- [ ] **Step 3: Implement provider types**
+- [x] **Step 3: Implement provider types**
 
 ```ts
 // src/lib/foundry/providers/types.ts
@@ -4673,12 +4673,12 @@ export interface FoundryImageProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/providers/types.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/providers/types.ts src/lib/foundry/providers/types.test.ts
@@ -4696,9 +4696,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `FoundryImageProvider` interface has `id` and `generate(input)` only
-- [ ] Result schema accepts `mock` and `placeholder` modes for tests
-- [ ] No reference to "gemini" in the public interface
+- [x] `FoundryImageProvider` interface has `id` and `generate(input)` only
+- [x] Result schema accepts `mock` and `placeholder` modes for tests
+- [x] No reference to "gemini" in the public interface
 
 ### Task 2.2: Implement createMockFoundryImageProvider for tests
 
@@ -4706,7 +4706,7 @@ EOF
 - Create: `src/lib/foundry/providers/mock-provider.ts`
 - Test: `src/lib/foundry/providers/mock-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/providers/mock-provider.test.ts
@@ -4753,12 +4753,12 @@ describe("mock foundry image provider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/providers/mock-provider.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement createMockFoundryImageProvider**
+- [x] **Step 3: Implement createMockFoundryImageProvider**
 
 ```ts
 // src/lib/foundry/providers/mock-provider.ts
@@ -4814,12 +4814,12 @@ export function createMockFoundryImageProvider(opts: CreateMockFoundryImageProvi
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/providers/mock-provider.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/providers/mock-provider.ts src/lib/foundry/providers/mock-provider.test.ts
@@ -4837,10 +4837,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Deterministic: same input → same output bytes
-- [ ] Distinct lane indices produce distinct bytes
-- [ ] PNG signature present in first 4 bytes
-- [ ] Configurable failure hook works as documented
+- [x] Deterministic: same input → same output bytes
+- [x] Distinct lane indices produce distinct bytes
+- [x] PNG signature present in first 4 bytes
+- [x] Configurable failure hook works as documented
 
 ### Task 2.3: Wrap existing Gemini adapter as a FoundryImageProvider
 
@@ -4848,7 +4848,7 @@ EOF
 - Create: `src/lib/foundry/providers/gemini-foundry-provider.ts`
 - Test: `src/lib/foundry/providers/gemini-foundry-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/providers/gemini-foundry-provider.test.ts
@@ -4888,12 +4888,12 @@ describe("createGeminiFoundryProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/providers/gemini-foundry-provider.test.ts`
 Expected: FAIL — "Cannot find module './gemini-foundry-provider'".
 
-- [ ] **Step 3: Implement the wrapper**
+- [x] **Step 3: Implement the wrapper**
 
 ```ts
 // src/lib/foundry/providers/gemini-foundry-provider.ts
@@ -4953,12 +4953,12 @@ export function createGeminiFoundryProvider(options: CreateGeminiFoundryProvider
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/providers/gemini-foundry-provider.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/providers/gemini-foundry-provider.ts src/lib/foundry/providers/gemini-foundry-provider.test.ts
@@ -4975,10 +4975,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Wrapper id is `gemini-foundry`
-- [ ] Mock mode honored via `ARTLAB_GEMINI_MODE=mock`
-- [ ] No edits to `src/lib/artlab/providers/gemini-adapter.ts`
-- [ ] 4:3 and 3:4 aspect ratios degrade gracefully to closest Gemini-supported ratio
+- [x] Wrapper id is `gemini-foundry`
+- [x] Mock mode honored via `ARTLAB_GEMINI_MODE=mock`
+- [x] No edits to `src/lib/artlab/providers/gemini-adapter.ts`
+- [x] 4:3 and 3:4 aspect ratios degrade gracefully to closest Gemini-supported ratio
 
 ### Task 2.4: Define CharacterMasterStage enum + agent input/output types
 
@@ -4986,7 +4986,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/types.ts`
 - Test: `src/lib/foundry/agents/character-master/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/types.test.ts
@@ -5035,12 +5035,12 @@ describe("character-master types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/types.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the types**
+- [x] **Step 3: Implement the types**
 
 ```ts
 // src/lib/foundry/agents/character-master/types.ts
@@ -5083,12 +5083,12 @@ export type CharacterMasterEvent =
   | { kind: "pack-emitted"; packDir: string; packId: string; at: string };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/types.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/types.ts src/lib/foundry/agents/character-master/types.test.ts
@@ -5105,9 +5105,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] 6-stage enum declared in canonical order
-- [ ] Input schema accepts `resumeFromStage: null` for full run
-- [ ] Event type covers stage lifecycle + qa-failure + pack-emitted
+- [x] 6-stage enum declared in canonical order
+- [x] Input schema accepts `resumeFromStage: null` for full run
+- [x] Event type covers stage lifecycle + qa-failure + pack-emitted
 
 ### Task 2.5: Implement concept-board stage (5-lane prompt fan-out)
 
@@ -5115,7 +5115,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/concept-board.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/concept-board.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/concept-board.test.ts
@@ -5182,12 +5182,12 @@ describe("concept-board stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/concept-board.test.ts`
 Expected: FAIL — "Cannot find module './concept-board'".
 
-- [ ] **Step 3: Implement concept-board stage**
+- [x] **Step 3: Implement concept-board stage**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/concept-board.ts
@@ -5267,12 +5267,12 @@ export async function runConceptBoardStage(input: ConceptBoardStageInput): Promi
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/concept-board.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/concept-board.ts src/lib/foundry/agents/character-master/stages/concept-board.test.ts
@@ -5290,10 +5290,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Exactly 5 lanes returned, sorted by laneIndex
-- [ ] All 5 lanes have distinct variation axes
-- [ ] Each lane carries the prompt and the generated bytes
-- [ ] Stage runs lanes in parallel (visible in test runtime under sequential threshold)
+- [x] Exactly 5 lanes returned, sorted by laneIndex
+- [x] All 5 lanes have distinct variation axes
+- [x] Each lane carries the prompt and the generated bytes
+- [x] Stage runs lanes in parallel (visible in test runtime under sequential threshold)
 
 ### Task 2.6: Implement anchor-lock stage (uniqueness gate)
 
@@ -5301,7 +5301,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/anchor-lock.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts
@@ -5352,12 +5352,12 @@ describe("anchor-lock stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement anchor-lock stage**
+- [x] **Step 3: Implement anchor-lock stage**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/anchor-lock.ts
@@ -5404,12 +5404,12 @@ export async function runAnchorLockStage(input: AnchorLockStageInput): Promise<A
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/anchor-lock.ts src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts
@@ -5427,9 +5427,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Anchor lane is the one whose laneIndex matches `suggestedAnchorLane`
-- [ ] Uniqueness report covers every non-anchor lane
-- [ ] Unknown anchor lane throws with a descriptive error
+- [x] Anchor lane is the one whose laneIndex matches `suggestedAnchorLane`
+- [x] Uniqueness report covers every non-anchor lane
+- [x] Unknown anchor lane throws with a descriptive error
 
 ### Task 2.7: Implement variant-fan-out stage (21 sprites = 3 outfits × 7 poses)
 
@@ -5437,7 +5437,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/variant-fan-out.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts
@@ -5508,12 +5508,12 @@ describe("variant-fan-out stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement variant-fan-out stage**
+- [x] **Step 3: Implement variant-fan-out stage**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/variant-fan-out.ts
@@ -5603,12 +5603,12 @@ export async function runVariantFanOutStage(input: VariantFanOutStageInput): Pro
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/variant-fan-out.ts src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts
@@ -5626,10 +5626,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Sprite count = `outfits.length × poses.length`
-- [ ] Each sprite carries its (outfit, pose) labels
-- [ ] Anchor bytes are passed as `referenceImageBytes` to every provider call
-- [ ] Concurrency limited to 5 in-flight provider calls
+- [x] Sprite count = `outfits.length × poses.length`
+- [x] Each sprite carries its (outfit, pose) labels
+- [x] Anchor bytes are passed as `referenceImageBytes` to every provider call
+- [x] Concurrency limited to 5 in-flight provider calls
 
 ### Task 2.8: Implement cutout-and-feather stage (reuse cutout-runner, do not rewrite)
 
@@ -5637,7 +5637,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/cutout-and-feather.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts
@@ -5703,12 +5703,12 @@ describe("cutout-and-feather stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement cutout-and-feather (reuses legacy cutout logic without copying it)**
+- [x] **Step 3: Implement cutout-and-feather (reuses legacy cutout logic without copying it)**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/cutout-and-feather.ts
@@ -5817,12 +5817,12 @@ export async function runCutoutAndFeatherStage(input: CutoutAndFeatherStageInput
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/cutout-and-feather.ts src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts
@@ -5842,10 +5842,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Every processed PNG has an alpha channel (sharp metadata reports hasAlpha)
-- [ ] Alpha histogram is reported with non-zero opaque count for foreground sprites
-- [ ] Output files written to the provided workDir, named `<outfit>__<pose>.png`
-- [ ] Stage does not modify `src/lib/artlab/runners/cutout-runner.ts`
+- [x] Every processed PNG has an alpha channel (sharp metadata reports hasAlpha)
+- [x] Alpha histogram is reported with non-zero opaque count for foreground sprites
+- [x] Output files written to the provided workDir, named `<outfit>__<pose>.png`
+- [x] Stage does not modify `src/lib/artlab/runners/cutout-runner.ts`
 
 ### Task 2.9: Implement composite-judge stage (perceptual hash drift gate against anchor)
 
@@ -5853,7 +5853,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/composite-judge.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/composite-judge.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/composite-judge.test.ts
@@ -5930,12 +5930,12 @@ describe("composite-judge stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/composite-judge.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement composite-judge — reuse identity-drift module**
+- [x] **Step 3: Implement composite-judge — reuse identity-drift module**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/composite-judge.ts
@@ -6004,12 +6004,12 @@ export async function runCompositeJudgeStage(input: CompositeJudgeStageInput): P
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/composite-judge.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/composite-judge.ts src/lib/foundry/agents/character-master/stages/composite-judge.test.ts
@@ -6027,10 +6027,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Passes when sprites visually match the anchor
-- [ ] Fails with actionable reason when any sprite exceeds 24-bit drift
-- [ ] Failure carries the offending outfit/pose pair and absolute path
-- [ ] Reuses `measureIdentityDrift` without re-implementing pHash
+- [x] Passes when sprites visually match the anchor
+- [x] Fails with actionable reason when any sprite exceeds 24-bit drift
+- [x] Failure carries the offending outfit/pose pair and absolute path
+- [x] Reuses `measureIdentityDrift` without re-implementing pHash
 
 ### Task 2.10: Implement palette extraction + diversity QA gates
 
@@ -6038,7 +6038,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/qa.ts`
 - Test: `src/lib/foundry/agents/character-master/qa.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/qa.test.ts
@@ -6110,12 +6110,12 @@ describe("foundry character-master qa", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/qa.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement qa.ts**
+- [x] **Step 3: Implement qa.ts**
 
 ```ts
 // src/lib/foundry/agents/character-master/qa.ts
@@ -6242,12 +6242,12 @@ export async function runSilhouetteDiversityGate(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/qa.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/qa.ts src/lib/foundry/agents/character-master/qa.test.ts
@@ -6266,10 +6266,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Palette extraction returns dominant swatches within ±10 RGB units of a known solid input
-- [ ] Palette match gate emits an actionable failure string when dominant color is far from canon
-- [ ] Silhouette diversity gate fails when two identical sprites are compared
-- [ ] Reuses `computePerceptualHash` and `hammingDistanceHex` from `src/lib/artlab/coherence/`
+- [x] Palette extraction returns dominant swatches within ±10 RGB units of a known solid input
+- [x] Palette match gate emits an actionable failure string when dominant color is far from canon
+- [x] Silhouette diversity gate fails when two identical sprites are compared
+- [x] Reuses `computePerceptualHash` and `hammingDistanceHex` from `src/lib/artlab/coherence/`
 
 ### Task 2.11: Implement manifest-build stage
 
@@ -6277,7 +6277,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/manifest-build.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/manifest-build.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/manifest-build.test.ts
@@ -6380,12 +6380,12 @@ describe("manifest-build stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/manifest-build.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement manifest-build**
+- [x] **Step 3: Implement manifest-build**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/manifest-build.ts
@@ -6482,12 +6482,12 @@ export async function runManifestBuildStage(input: ManifestBuildStageInput): Pro
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/manifest-build.test.ts`
 Expected: PASS — 1 assertion passes (all 21 payload files round-trip).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/manifest-build.ts src/lib/foundry/agents/character-master/stages/manifest-build.test.ts
@@ -6505,10 +6505,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Emits a pack of kind `character-spritesheet`
-- [ ] Payload files cover every sprite (count == outfits × poses)
-- [ ] `canonRefs.characterId` and `canonRefs.paletteRef` populated
-- [ ] Pack passes the same schema validation as Phase 1
+- [x] Emits a pack of kind `character-spritesheet`
+- [x] Payload files cover every sprite (count == outfits × poses)
+- [x] `canonRefs.characterId` and `canonRefs.paletteRef` populated
+- [x] Pack passes the same schema validation as Phase 1
 
 ### Task 2.12: Implement runCharacterMaster entry point + stage orchestration
 
@@ -6516,7 +6516,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/index.ts`
 - Test: `src/lib/foundry/agents/character-master/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/index.test.ts
@@ -6667,12 +6667,12 @@ describe("runCharacterMaster", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/index.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement runCharacterMaster**
+- [x] **Step 3: Implement runCharacterMaster**
 
 ```ts
 // src/lib/foundry/agents/character-master/index.ts
@@ -6848,12 +6848,12 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/index.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/index.ts src/lib/foundry/agents/character-master/index.test.ts
@@ -6871,10 +6871,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] End-to-end run with mock provider produces a 21-file Asset Pack
-- [ ] `resumeFromStage: "variant-fan-out"` skips concept-board and anchor-lock
-- [ ] QA failures surface with the offending sprite reference
-- [ ] Six `stage-completed` events emitted on the happy path
+- [x] End-to-end run with mock provider produces a 21-file Asset Pack
+- [x] `resumeFromStage: "variant-fan-out"` skips concept-board and anchor-lock
+- [x] QA failures surface with the offending sprite reference
+- [x] Six `stage-completed` events emitted on the happy path
 
 ### Task 2.13: Wire `foundry character <name>` CLI subcommand
 
@@ -6883,7 +6883,7 @@ EOF
 - Modify: `scripts/foundry.ts`
 - Test: `src/lib/foundry/cli/character.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/cli/character.test.ts
@@ -6984,12 +6984,12 @@ describe("foundry character CLI", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/cli/character.test.ts`
 Expected: FAIL — "Cannot find module './character'".
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/cli/character.ts
@@ -7090,7 +7090,7 @@ if (subcommand === "character") {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/cli/character.test.ts`
 Expected: PASS — both assertions pass.
@@ -7101,7 +7101,7 @@ FOUNDRY_PROVIDER_MODE=mock FOUNDRY_WORKSPACE_ROOT=/tmp/foundry-cli-test npm run 
 ```
 Expected: Exit 0; stdout reports `ok pack=...`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/cli/character.ts src/lib/foundry/cli/character.test.ts scripts/foundry.ts
@@ -7119,10 +7119,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `foundry character "Sol Navarro"` (mock) produces a pack at `<workspace>/runs/sol-navarro/pack/`
-- [ ] `--resume-from variant-fan-out` is parsed and forwarded to the agent
-- [ ] Missing name argument prints usage and exits 2
-- [ ] Failure exit code is 1 with the offending sprite path on stderr
+- [x] `foundry character "Sol Navarro"` (mock) produces a pack at `<workspace>/runs/sol-navarro/pack/`
+- [x] `--resume-from variant-fan-out` is parsed and forwarded to the agent
+- [x] Missing name argument prints usage and exits 2
+- [x] Failure exit code is 1 with the offending sprite path on stderr
 
 ### Task 2.14: Add Sol Navarro golden fixtures (pre-cutout sprite + alpha histogram + manifest skeleton)
 
@@ -7132,7 +7132,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/__fixtures__/sol-navarro/expected-manifest-skeleton.json`
 - Test: `src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts
@@ -7186,12 +7186,12 @@ describe("Sol Navarro golden fixtures", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts`
 Expected: FAIL — fixture files missing.
 
-- [ ] **Step 3: Create fixtures**
+- [x] **Step 3: Create fixtures**
 
 Generate a `pre-cutout-idle.png` synthetic fixture (since we don't have Sol's real promoted asset yet, use sharp to produce a stable 256×256 sprite — neutral background with a darker silhouette). Save as a binary PNG under the fixtures directory.
 
@@ -7246,12 +7246,12 @@ const sharp = require("sharp");
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/__fixtures__ src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts
@@ -7269,16 +7269,16 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Three fixture files present and parseable
-- [ ] Post-cutout alpha histogram exceeds the lower-bound envelope
-- [ ] Manifest skeleton declares the canonical Sol slot
+- [x] Three fixture files present and parseable
+- [x] Post-cutout alpha histogram exceeds the lower-bound envelope
+- [x] Manifest skeleton declares the canonical Sol slot
 
 ### Task 2.15: Integration test — full Sol Navarro run + resume + qa-failure
 
 **Files:**
 - Test: `src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts
@@ -7433,12 +7433,12 @@ describe("Sol Navarro full integration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts`
 Expected: PASS — 4 assertions pass. If the third assertion (QA failure) is brittle because the mock-provider failure occurs before composite-judge, accept any non-ok result with a non-empty reason — the goal is "an actionable diagnostic appears", not a specific stage.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts
@@ -7455,10 +7455,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Full Sol Navarro run produces a 21-file pack with a valid manifest that re-reads cleanly
-- [ ] Resume-from-stage skips earlier stages
-- [ ] A failing provider produces a non-ok result with a non-empty `reason`
-- [ ] Manifest on disk deep-equals in-memory manifest
+- [x] Full Sol Navarro run produces a 21-file pack with a valid manifest that re-reads cleanly
+- [x] Resume-from-stage skips earlier stages
+- [x] A failing provider produces a non-ok result with a non-empty `reason`
+- [x] Manifest on disk deep-equals in-memory manifest
 
 ### Task 2.16: Phase 2 completion gates and public agents re-export
 
@@ -7467,7 +7467,7 @@ EOF
 - Test: `src/lib/foundry/agents/index.test.ts`
 - Test: `src/lib/foundry/phase-2-acceptance.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/agents/index.test.ts
@@ -7513,12 +7513,12 @@ describe("Phase 2 acceptance", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify failures**
+- [x] **Step 2: Run tests to verify failures**
 
 Run: `npx vitest run src/lib/foundry/agents/index.test.ts src/lib/foundry/phase-2-acceptance.test.ts`
 Expected: FAIL — `./index` module missing.
 
-- [ ] **Step 3: Implement agents/index.ts**
+- [x] **Step 3: Implement agents/index.ts**
 
 ```ts
 // src/lib/foundry/agents/index.ts
@@ -7526,7 +7526,7 @@ export * from "./character-master";
 export * from "./character-master/types";
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/lib/foundry/agents src/lib/foundry/phase-2-acceptance.test.ts`
 Expected: PASS — all assertions pass.
@@ -7543,7 +7543,7 @@ FOUNDRY_PROVIDER_MODE=mock FOUNDRY_WORKSPACE_ROOT=/tmp/foundry-p2-final npm run 
 
 All must exit 0. The last command must produce a pack under `/tmp/foundry-p2-final/runs/sol-navarro/pack/manifest.json`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/index.ts src/lib/foundry/agents/index.test.ts src/lib/foundry/phase-2-acceptance.test.ts
@@ -7560,9 +7560,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `@/lib/foundry/agents` exports `runCharacterMaster` and the stage enum
-- [ ] Phase 2 acceptance test runs npm run foundry under the hood and exits 0
-- [ ] Three module surfaces (canon, asset-pack, agents) all expose their public APIs
+- [x] `@/lib/foundry/agents` exports `runCharacterMaster` and the stage enum
+- [x] Phase 2 acceptance test runs npm run foundry under the hood and exits 0
+- [x] Three module surfaces (canon, asset-pack, agents) all expose their public APIs
 
 ### Phase 2 completion criteria
 
@@ -7612,7 +7612,7 @@ The new public entry point added in this phase is `runFoundryFloorEnvironment(in
 - Create: `src/lib/foundry/agents/floor-environment/types.ts`
 - Test: `src/lib/foundry/agents/floor-environment/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/types.test.ts
@@ -7677,12 +7677,12 @@ describe("foundry floor-environment types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/types.test.ts`
 Expected: FAIL — "Cannot find module './types'"
 
-- [ ] **Step 3: Implement schemas**
+- [x] **Step 3: Implement schemas**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/types.ts
@@ -7749,12 +7749,12 @@ export type FoundryFloorVariantManifest = z.infer<
 >;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/types.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/types.ts src/lib/foundry/agents/floor-environment/types.test.ts
@@ -7771,10 +7771,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `FOUNDRY_FLOOR_TIME_STATES` length equals 7 and matches the Tower's existing day/night cycle order.
-- [ ] `FOUNDRY_FLOOR_LAYER_NAMES` length equals 3, with `background` at index 0 (back) and `ambient` at index 2 (front).
-- [ ] `FoundryFloorEnvironmentInputSchema.default` for `timeStates` includes all 7 states.
-- [ ] `FoundryFloorLayerManifestSchema` rejects `zIndex` of 10 or above and rejects unknown layer names.
+- [x] `FOUNDRY_FLOOR_TIME_STATES` length equals 7 and matches the Tower's existing day/night cycle order.
+- [x] `FOUNDRY_FLOOR_LAYER_NAMES` length equals 3, with `background` at index 0 (back) and `ambient` at index 2 (front).
+- [x] `FoundryFloorEnvironmentInputSchema.default` for `timeStates` includes all 7 states.
+- [x] `FoundryFloorLayerManifestSchema` rejects `zIndex` of 10 or above and rejects unknown layer names.
 
 ### Task 3.2: Floor canon loader adapter
 
@@ -7782,7 +7782,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/floor-canon.ts`
 - Test: `src/lib/foundry/agents/floor-environment/floor-canon.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/floor-canon.test.ts
@@ -7844,12 +7844,12 @@ describe("loadFoundryFloorCanonEntry", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/floor-canon.test.ts`
 Expected: FAIL — "Cannot find module './floor-canon'"
 
-- [ ] **Step 3: Implement adapter**
+- [x] **Step 3: Implement adapter**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/floor-canon.ts
@@ -7896,12 +7896,12 @@ export async function loadFoundryFloorCanonEntry(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/floor-canon.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/floor-canon.ts src/lib/foundry/agents/floor-environment/floor-canon.test.ts
@@ -7918,10 +7918,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Re-exported entry exposes `requiredElements` (renamed from `roomElements`) so its purpose at the QA boundary is unambiguous.
-- [ ] `aspectRatio` is narrowed to the four allowed literal-string values.
-- [ ] Adapter throws with a slug-bearing message on missing canon entry.
-- [ ] Adapter throws when `roomElements` is empty (canon-entry-as-a-bug class of error).
+- [x] Re-exported entry exposes `requiredElements` (renamed from `roomElements`) so its purpose at the QA boundary is unambiguous.
+- [x] `aspectRatio` is narrowed to the four allowed literal-string values.
+- [x] Adapter throws with a slug-bearing message on missing canon entry.
+- [x] Adapter throws when `roomElements` is empty (canon-entry-as-a-bug class of error).
 
 ### Task 3.3: Composition-prompt stage
 
@@ -7929,7 +7929,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/stages/composition-prompt.ts`
 - Test: `src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts
@@ -7983,12 +7983,12 @@ describe("buildFoundryFloorCompositionPrompt", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts`
 Expected: FAIL — "Cannot find module './composition-prompt'"
 
-- [ ] **Step 3: Implement composition prompt**
+- [x] **Step 3: Implement composition prompt**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/composition-prompt.ts
@@ -8024,12 +8024,12 @@ export function buildFoundryFloorCompositionPrompt(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/stages/composition-prompt.ts src/lib/foundry/agents/floor-environment/stages/composition-prompt.test.ts
@@ -8046,10 +8046,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Prompt contains all required-element names verbatim (so QA can grep-verify the contract).
-- [ ] Prompt embeds the literal aspect-ratio string.
-- [ ] Prompt declares "no characters" / "no people" — characters never appear in floor backgrounds.
-- [ ] Output is deterministic for identical inputs (no `Date.now()`, no `Math.random()`).
+- [x] Prompt contains all required-element names verbatim (so QA can grep-verify the contract).
+- [x] Prompt embeds the literal aspect-ratio string.
+- [x] Prompt declares "no characters" / "no people" — characters never appear in floor backgrounds.
+- [x] Output is deterministic for identical inputs (no `Date.now()`, no `Math.random()`).
 
 ### Task 3.4: Variant fan-out stage
 
@@ -8057,7 +8057,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/stages/variant-fanout.ts`
 - Test: `src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts
@@ -8111,12 +8111,12 @@ describe("fanOutFoundryFloorVariants", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts`
 Expected: FAIL — "Cannot find module './variant-fanout'"
 
-- [ ] **Step 3: Implement fan-out**
+- [x] **Step 3: Implement fan-out**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/variant-fanout.ts
@@ -8146,12 +8146,12 @@ export function fanOutFoundryFloorVariants(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/stages/variant-fanout.ts src/lib/foundry/agents/floor-environment/stages/variant-fanout.test.ts
@@ -8168,10 +8168,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] One job per input time-state, in input order.
-- [ ] `jobId` is `<slug>-<timeState>`, deterministic across calls.
-- [ ] Each job carries a fully resolved prompt string (no template placeholders).
-- [ ] Function is pure — no `Date.now()`, no provider calls, no `fs`.
+- [x] One job per input time-state, in input order.
+- [x] `jobId` is `<slug>-<timeState>`, deterministic across calls.
+- [x] Each job carries a fully resolved prompt string (no template placeholders).
+- [x] Function is pure — no `Date.now()`, no provider calls, no `fs`.
 
 ### Task 3.5: Mock image provider for tests
 
@@ -8179,7 +8179,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/__tests__/mock-provider.ts`
 - Test: `src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts
@@ -8227,12 +8227,12 @@ describe("createFoundryFloorMockProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-provider'"
 
-- [ ] **Step 3: Implement mock provider**
+- [x] **Step 3: Implement mock provider**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/__tests__/mock-provider.ts
@@ -8268,12 +8268,12 @@ export function createFoundryFloorMockProvider(): FoundryImageProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/__tests__/mock-provider.ts src/lib/foundry/agents/floor-environment/__tests__/mock-provider.test.ts
@@ -8291,10 +8291,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returned `bytes` start with the PNG magic header `89 50 4E 47 0D 0A 1A 0A`.
-- [ ] Same seed produces byte-identical buffers (run-to-run reproducibility for golden tests).
-- [ ] Different seeds produce different buffers.
-- [ ] `mode === "mock"` and `costCents === 0` so the budget ledger does not charge tests.
+- [x] Returned `bytes` start with the PNG magic header `89 50 4E 47 0D 0A 1A 0A`.
+- [x] Same seed produces byte-identical buffers (run-to-run reproducibility for golden tests).
+- [x] Different seeds produce different buffers.
+- [x] `mode === "mock"` and `costCents === 0` so the budget ledger does not charge tests.
 
 ### Task 3.6: Layer separation stage
 
@@ -8302,7 +8302,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/stages/layer-separation.ts`
 - Test: `src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts
@@ -8372,12 +8372,12 @@ describe("separateFoundryFloorLayers", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts`
 Expected: FAIL — "Cannot find module './layer-separation'"
 
-- [ ] **Step 3: Implement layer separation**
+- [x] **Step 3: Implement layer separation**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/stages/layer-separation.ts
@@ -8457,12 +8457,12 @@ export async function separateFoundryFloorLayers(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/stages/layer-separation.ts src/lib/foundry/agents/floor-environment/stages/layer-separation.test.ts
@@ -8479,10 +8479,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Exactly 3 layers returned, in `[background, midground, ambient]` order.
-- [ ] Z-indices are `[0, 1, 2]` strictly increasing.
-- [ ] Background layer reports `hasAlpha === false`; the other two report `hasAlpha === true`.
-- [ ] All emitted buffers are valid PNGs at the source dimensions.
+- [x] Exactly 3 layers returned, in `[background, midground, ambient]` order.
+- [x] Z-indices are `[0, 1, 2]` strictly increasing.
+- [x] Background layer reports `hasAlpha === false`; the other two report `hasAlpha === true`.
+- [x] All emitted buffers are valid PNGs at the source dimensions.
 
 ### Task 3.7: Perceptual-coherence gate
 
@@ -8490,7 +8490,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts
@@ -8544,12 +8544,12 @@ describe("evaluateFoundryFloorPerceptualCoherence", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts`
 Expected: FAIL — "Cannot find module './perceptual-coherence'"
 
-- [ ] **Step 3: Implement coherence gate**
+- [x] **Step 3: Implement coherence gate**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.ts
@@ -8622,12 +8622,12 @@ export async function evaluateFoundryFloorPerceptualCoherence(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.ts src/lib/foundry/agents/floor-environment/qa/perceptual-coherence.test.ts
@@ -8645,10 +8645,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/*` rather than redeclaring them.
-- [ ] Identical variants produce `maxHamming < 8` (well under the 18-bit threshold).
-- [ ] A high-contrast outlier variant is correctly flagged in `flaggedTimeStates`.
-- [ ] Threshold is exposed in the result so downstream messages can quote it.
+- [x] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/*` rather than redeclaring them.
+- [x] Identical variants produce `maxHamming < 8` (well under the 18-bit threshold).
+- [x] A high-contrast outlier variant is correctly flagged in `flaggedTimeStates`.
+- [x] Threshold is exposed in the result so downstream messages can quote it.
 
 ### Task 3.8: Room-element verification (QA)
 
@@ -8656,7 +8656,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa/room-elements.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts
@@ -8698,12 +8698,12 @@ describe("verifyFoundryFloorRoomElements", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts`
 Expected: FAIL — "Cannot find module './room-elements'"
 
-- [ ] **Step 3: Implement verifier**
+- [x] **Step 3: Implement verifier**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/room-elements.ts
@@ -8756,12 +8756,12 @@ export function verifyFoundryFloorRoomElements(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa/room-elements.ts src/lib/foundry/agents/floor-environment/qa/room-elements.test.ts
@@ -8779,10 +8779,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: true` only when every required element is matched.
-- [ ] `missing` lists the original-case labels of unmatched required entries.
-- [ ] Normalisation collapses whitespace, underscores, dashes, and casing differences.
-- [ ] Throws on empty `required` (so callers cannot silently bypass the gate).
+- [x] Returns `passed: true` only when every required element is matched.
+- [x] `missing` lists the original-case labels of unmatched required entries.
+- [x] Normalisation collapses whitespace, underscores, dashes, and casing differences.
+- [x] Throws on empty `required` (so callers cannot silently bypass the gate).
 
 ### Task 3.9: Palette QA against canon palette
 
@@ -8790,7 +8790,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa/palette.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa/palette.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/palette.test.ts
@@ -8835,12 +8835,12 @@ describe("evaluateFoundryFloorPaletteFit", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/palette.test.ts`
 Expected: FAIL — "Cannot find module './palette'"
 
-- [ ] **Step 3: Implement palette QA**
+- [x] **Step 3: Implement palette QA**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa/palette.ts
@@ -8911,12 +8911,12 @@ export async function evaluateFoundryFloorPaletteFit(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa/palette.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa/palette.ts src/lib/foundry/agents/floor-environment/qa/palette.test.ts
@@ -8934,10 +8934,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Reuses `computePaletteHistogram` and `paletteDistance` from `@/lib/artlab/coherence/hashes`.
-- [ ] Returns `passed: true` for a solid-fill matching one of the canon hexes.
-- [ ] Returns `passed: false` for a solid-fill far from every canon hex.
-- [ ] Throws on empty canon palette (callers cannot silently bypass).
+- [x] Reuses `computePaletteHistogram` and `paletteDistance` from `@/lib/artlab/coherence/hashes`.
+- [x] Returns `passed: true` for a solid-fill matching one of the canon hexes.
+- [x] Returns `passed: false` for a solid-fill far from every canon hex.
+- [x] Throws on empty canon palette (callers cannot silently bypass).
 
 ### Task 3.10: Integration-snippet generator extension for floor packs
 
@@ -8945,7 +8945,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/integration.ts`
 - Test: `src/lib/foundry/agents/floor-environment/integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/integration.test.ts
@@ -8992,12 +8992,12 @@ describe("renderFoundryFloorIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/integration.test.ts`
 Expected: FAIL — "Cannot find module './integration'"
 
-- [ ] **Step 3: Implement integration snippet renderer**
+- [x] **Step 3: Implement integration snippet renderer**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/integration.ts
@@ -9020,12 +9020,12 @@ export function renderFoundryFloorIntegrationSnippet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/integration.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/integration.ts src/lib/foundry/agents/floor-environment/integration.test.ts
@@ -9042,10 +9042,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Snippet imports `FloorBackground` from `@/components/foundry/floor-background`.
-- [ ] Snippet renders `<FloorBackground floor="<slug>" />` with the correct slug interpolated.
-- [ ] Pack path appears as a comment in the rendered output.
-- [ ] Output is deterministic for identical inputs.
+- [x] Snippet imports `FloorBackground` from `@/components/foundry/floor-background`.
+- [x] Snippet renders `<FloorBackground floor="<slug>" />` with the correct slug interpolated.
+- [x] Pack path appears as a comment in the rendered output.
+- [x] Output is deterministic for identical inputs.
 
 ### Task 3.11: Aggregated QA runner
 
@@ -9053,7 +9053,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/qa.ts`
 - Test: `src/lib/foundry/agents/floor-environment/qa.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa.test.ts
@@ -9133,12 +9133,12 @@ describe("runFoundryFloorQa", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa.test.ts`
 Expected: FAIL — "Cannot find module './qa'"
 
-- [ ] **Step 3: Implement aggregated QA**
+- [x] **Step 3: Implement aggregated QA**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/qa.ts
@@ -9210,12 +9210,12 @@ export async function runFoundryFloorQa(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/qa.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/qa.ts src/lib/foundry/agents/floor-environment/qa.test.ts
@@ -9233,10 +9233,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Aggregates the three per-gate reports into one report object.
-- [ ] `failedGates` lists every gate that did not pass, in canonical order.
-- [ ] Returns `passed: true` only when all three gates pass.
-- [ ] Throws when called with an empty `variants` list.
+- [x] Aggregates the three per-gate reports into one report object.
+- [x] `failedGates` lists every gate that did not pass, in canonical order.
+- [x] Returns `passed: true` only when all three gates pass.
+- [x] Throws when called with an empty `variants` list.
 
 ### Task 3.12: Pack writer — persist variants and layers under run directory
 
@@ -9244,7 +9244,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/pack-writer.ts`
 - Test: `src/lib/foundry/agents/floor-environment/pack-writer.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/pack-writer.test.ts
@@ -9355,12 +9355,12 @@ describe("writeFoundryFloorPack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/pack-writer.test.ts`
 Expected: FAIL — "Cannot find module './pack-writer'"
 
-- [ ] **Step 3: Implement pack writer**
+- [x] **Step 3: Implement pack writer**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/pack-writer.ts
@@ -9436,12 +9436,12 @@ export async function writeFoundryFloorPack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/pack-writer.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/pack-writer.ts src/lib/foundry/agents/floor-environment/pack-writer.test.ts
@@ -9460,10 +9460,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Per-time-state subdirectory under `<runDir>/pack/<timeState>/`.
-- [ ] Layer files named `background.png`, `midground.png`, `ambient.png`.
-- [ ] No `.tmp.*` artefacts remain after success.
-- [ ] Variant manifests carry **relative** paths (rooted in pack dir, not absolute).
+- [x] Per-time-state subdirectory under `<runDir>/pack/<timeState>/`.
+- [x] Layer files named `background.png`, `midground.png`, `ambient.png`.
+- [x] No `.tmp.*` artefacts remain after success.
+- [x] Variant manifests carry **relative** paths (rooted in pack dir, not absolute).
 
 ### Task 3.13: Agent entry point and provider interface wiring
 
@@ -9471,7 +9471,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/index.ts`
 - Test: `src/lib/foundry/agents/floor-environment/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/index.test.ts
@@ -9584,12 +9584,12 @@ describe("runFoundryFloorEnvironment", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/index.test.ts`
 Expected: FAIL — "Cannot find module './index'"
 
-- [ ] **Step 3: Implement agent entry point**
+- [x] **Step 3: Implement agent entry point**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/index.ts
@@ -9675,12 +9675,12 @@ export async function runFoundryFloorEnvironment(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/index.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/index.ts src/lib/foundry/agents/floor-environment/index.test.ts
@@ -9699,10 +9699,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Provider parameter is the `FoundryImageProvider` interface (not a concrete adapter).
-- [ ] Asset Pack manifest carries `assetKind: "floor-environment"`.
-- [ ] Manifest carries `variants` array with one entry per requested time-state.
-- [ ] Throws with the failed-gate names listed when QA does not pass.
+- [x] Provider parameter is the `FoundryImageProvider` interface (not a concrete adapter).
+- [x] Asset Pack manifest carries `assetKind: "floor-environment"`.
+- [x] Manifest carries `variants` array with one entry per requested time-state.
+- [x] Throws with the failed-gate names listed when QA does not pass.
 
 ### Task 3.14: CLI subcommand + golden-fixture integration test
 
@@ -9711,7 +9711,7 @@ EOF
 - Create: `src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts`
 - Modify: `scripts/foundry.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts
@@ -9820,12 +9820,12 @@ describe("golden war-room run", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts`
 Expected: FAIL — "Cannot find module '../cli'"
 
-- [ ] **Step 3: Implement CLI subcommand**
+- [x] **Step 3: Implement CLI subcommand**
 
 ```ts
 // src/lib/foundry/agents/floor-environment/cli.ts
@@ -9898,7 +9898,7 @@ export async function runFoundryFloorCli(
 }
 ```
 
-- [ ] **Step 4: Modify `scripts/foundry.ts` to route the `floor` subcommand**
+- [x] **Step 4: Modify `scripts/foundry.ts` to route the `floor` subcommand**
 
 ```ts
 // scripts/foundry.ts — add the `floor` subcommand body
@@ -9929,12 +9929,12 @@ export async function runFoundryFloorCli(
 
 Implementer note: open `scripts/foundry.ts` (created in Phase 2) and add the `floor` case to the existing switch. The `parseReportedElements` helper accepts a repeated `--element=foo --element=bar` flag set. Phase 2's parser shape is `flags: Map<string, string>` plus `positional: string[]`; do not change that contract.
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/foundry/agents/floor-environment/cli.ts src/lib/foundry/agents/floor-environment/__tests__/golden-war-room.test.ts scripts/foundry.ts
@@ -9953,10 +9953,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Golden fixture run writes exactly 21 PNGs across 7 time-state subdirs.
-- [ ] `manifest.json` lists every variant and every layer with a relative path.
-- [ ] `--dry-run` mode prints `validated` and writes no artefacts.
-- [ ] CLI subcommand throws when an unknown provider kind is passed.
+- [x] Golden fixture run writes exactly 21 PNGs across 7 time-state subdirs.
+- [x] `manifest.json` lists every variant and every layer with a relative path.
+- [x] `--dry-run` mode prints `validated` and writes no artefacts.
+- [x] CLI subcommand throws when an unknown provider kind is passed.
 
 ### Phase 3 completion criteria
 
@@ -10002,7 +10002,7 @@ The new public entry point added in this phase is `runFoundryUiTexture(input, pr
 - Create: `src/lib/foundry/agents/ui-texture/types.ts`
 - Test: `src/lib/foundry/agents/ui-texture/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/types.test.ts
@@ -10076,12 +10076,12 @@ describe("foundry ui-texture types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/types.test.ts`
 Expected: FAIL — "Cannot find module './types'"
 
-- [ ] **Step 3: Implement schemas**
+- [x] **Step 3: Implement schemas**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/types.ts
@@ -10150,12 +10150,12 @@ export type FoundryUiTextureManifest = z.infer<
 >;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/types.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/types.ts src/lib/foundry/agents/ui-texture/types.test.ts
@@ -10173,10 +10173,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Discriminated union rejects an icon-input lacking `ariaLabel`.
-- [ ] Icon manifest schema enforces `viewBox` regex.
-- [ ] Texture manifest schema enforces `tileMode` enum.
-- [ ] Both manifest schemas enforce `name` regex (no path-traversal).
+- [x] Discriminated union rejects an icon-input lacking `ariaLabel`.
+- [x] Icon manifest schema enforces `viewBox` regex.
+- [x] Texture manifest schema enforces `tileMode` enum.
+- [x] Both manifest schemas enforce `name` regex (no path-traversal).
 
 ### Task 4.2: Iconography-rules adapter
 
@@ -10184,7 +10184,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/icon-rules.ts`
 - Test: `src/lib/foundry/agents/ui-texture/icon-rules.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/icon-rules.test.ts
@@ -10222,12 +10222,12 @@ describe("loadFoundryIconRulesAdapter", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/icon-rules.test.ts`
 Expected: FAIL — "Cannot find module './icon-rules'"
 
-- [ ] **Step 3: Implement adapter**
+- [x] **Step 3: Implement adapter**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/icon-rules.ts
@@ -10260,12 +10260,12 @@ export async function loadFoundryIconRulesAdapter(): Promise<FoundryIconRules> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/icon-rules.test.ts`
 Expected: PASS — 2 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/icon-rules.ts src/lib/foundry/agents/ui-texture/icon-rules.test.ts
@@ -10282,9 +10282,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns canon rules with `strokeWidthTolerancePx` derived as a positive fraction of `strokeWidthPx`.
-- [ ] Throws when canon returns no icon-rules entry.
-- [ ] Palette is copied (caller cannot mutate canon).
+- [x] Returns canon rules with `strokeWidthTolerancePx` derived as a positive fraction of `strokeWidthPx`.
+- [x] Throws when canon returns no icon-rules entry.
+- [x] Palette is copied (caller cannot mutate canon).
 
 ### Task 4.3: Texture-rules adapter
 
@@ -10292,7 +10292,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/texture-rules.ts`
 - Test: `src/lib/foundry/agents/ui-texture/texture-rules.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/texture-rules.test.ts
@@ -10340,12 +10340,12 @@ describe("loadFoundryTextureRulesAdapter", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/texture-rules.test.ts`
 Expected: FAIL — "Cannot find module './texture-rules'"
 
-- [ ] **Step 3: Implement adapter**
+- [x] **Step 3: Implement adapter**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/texture-rules.ts
@@ -10375,12 +10375,12 @@ export async function loadFoundryTextureRulesAdapter(): Promise<FoundryTextureRu
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/texture-rules.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/texture-rules.ts src/lib/foundry/agents/ui-texture/texture-rules.test.ts
@@ -10397,9 +10397,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns canon-derived rules with the three normalised numeric fields.
-- [ ] Throws when canon returns null.
-- [ ] Throws when `normalMapStrength` is outside [0, 1].
+- [x] Returns canon-derived rules with the three normalised numeric fields.
+- [x] Throws when canon returns null.
+- [x] Throws when `normalMapStrength` is outside [0, 1].
 
 ### Task 4.4: Mock SVG-emitting LLM provider for icon tests
 
@@ -10407,7 +10407,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts`
 - Test: `src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts
@@ -10462,12 +10462,12 @@ describe("createFoundryIconMockLlmProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-llm-provider'"
 
-- [ ] **Step 3: Implement mock LLM provider**
+- [x] **Step 3: Implement mock LLM provider**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts
@@ -10495,12 +10495,12 @@ export function createFoundryIconMockLlmProvider(): FoundryIconLlmProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts
@@ -10518,10 +10518,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Mock emits a string containing `<svg` and `</svg>`.
-- [ ] Emitted SVG embeds the requested `stroke-width`, `viewBox`, and `aria-label`.
-- [ ] Same seed yields byte-identical output (deterministic).
-- [ ] `mode === "mock"` and `costCents === 0`.
+- [x] Mock emits a string containing `<svg` and `</svg>`.
+- [x] Emitted SVG embeds the requested `stroke-width`, `viewBox`, and `aria-label`.
+- [x] Same seed yields byte-identical output (deterministic).
+- [x] `mode === "mock"` and `costCents === 0`.
 
 ### Task 4.5: Icon LLM provider interface
 
@@ -10529,7 +10529,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/llm-provider.ts`
 - Test: `src/lib/foundry/agents/ui-texture/llm-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/llm-provider.test.ts
@@ -10576,12 +10576,12 @@ describe("foundry icon LLM provider contract", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/llm-provider.test.ts`
 Expected: FAIL — "Cannot find module './llm-provider'"
 
-- [ ] **Step 3: Implement provider contract**
+- [x] **Step 3: Implement provider contract**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/llm-provider.ts
@@ -10613,12 +10613,12 @@ export interface FoundryIconLlmProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/llm-provider.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/llm-provider.ts src/lib/foundry/agents/ui-texture/llm-provider.test.ts
@@ -10636,10 +10636,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input schema requires `name`, `ariaLabel`, `strokeWidthPx`, `viewBox`.
-- [ ] Result schema requires `svg`, `mode in {real, mock}`, integer `costCents`, integer `durationMs`.
-- [ ] Provider interface declares a single method `emitSvg`.
-- [ ] Mode enum rejects any value other than `real` or `mock`.
+- [x] Input schema requires `name`, `ariaLabel`, `strokeWidthPx`, `viewBox`.
+- [x] Result schema requires `svg`, `mode in {real, mock}`, integer `costCents`, integer `durationMs`.
+- [x] Provider interface declares a single method `emitSvg`.
+- [x] Mode enum rejects any value other than `real` or `mock`.
 
 ### Task 4.6: SVG stroke-width QA gate
 
@@ -10647,7 +10647,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.ts`
 - Test: `src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts
@@ -10697,12 +10697,12 @@ describe("evaluateFoundrySvgStrokeWidth", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts`
 Expected: FAIL — "Cannot find module './svg-stroke-width'"
 
-- [ ] **Step 3: Implement SVG stroke-width QA**
+- [x] **Step 3: Implement SVG stroke-width QA**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.ts
@@ -10764,12 +10764,12 @@ export function evaluateFoundrySvgStrokeWidth(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.ts src/lib/foundry/agents/ui-texture/qa/svg-stroke-width.test.ts
@@ -10787,10 +10787,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Captures stroke-width declared on the `<svg>` root and inherited by children.
-- [ ] Captures stroke-width declared on individual paths.
-- [ ] Returns `passed: false` and a reason when no stroke-width is declared anywhere.
-- [ ] Outlier list contains every value outside `[target - tol, target + tol]`.
+- [x] Captures stroke-width declared on the `<svg>` root and inherited by children.
+- [x] Captures stroke-width declared on individual paths.
+- [x] Returns `passed: false` and a reason when no stroke-width is declared anywhere.
+- [x] Outlier list contains every value outside `[target - tol, target + tol]`.
 
 ### Task 4.7: SVG aria-label QA gate
 
@@ -10798,7 +10798,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/qa/svg-aria-label.ts`
 - Test: `src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts
@@ -10835,12 +10835,12 @@ describe("evaluateFoundrySvgAriaLabel", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts`
 Expected: FAIL — "Cannot find module './svg-aria-label'"
 
-- [ ] **Step 3: Implement aria-label QA**
+- [x] **Step 3: Implement aria-label QA**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/svg-aria-label.ts
@@ -10873,12 +10873,12 @@ export function evaluateFoundrySvgAriaLabel(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/qa/svg-aria-label.ts src/lib/foundry/agents/ui-texture/qa/svg-aria-label.test.ts
@@ -10895,10 +10895,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: false` when the `<svg>` root has no `aria-label`.
-- [ ] Returns `passed: false` when `aria-label` differs from expected (case-sensitive).
-- [ ] Returns the observed label in the report so the caller can quote it.
-- [ ] Throws on no `<svg>` open tag (programmer-error class).
+- [x] Returns `passed: false` when the `<svg>` root has no `aria-label`.
+- [x] Returns `passed: false` when `aria-label` differs from expected (case-sensitive).
+- [x] Returns the observed label in the report so the caller can quote it.
+- [x] Throws on no `<svg>` open tag (programmer-error class).
 
 ### Task 4.8: Tile-edge continuity QA gate (textures)
 
@@ -10906,7 +10906,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/qa/tile-continuity.ts`
 - Test: `src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts
@@ -10974,12 +10974,12 @@ describe("evaluateFoundryTileContinuity", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts`
 Expected: FAIL — "Cannot find module './tile-continuity'"
 
-- [ ] **Step 3: Implement tile-continuity QA**
+- [x] **Step 3: Implement tile-continuity QA**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/qa/tile-continuity.ts
@@ -11095,12 +11095,12 @@ export async function evaluateFoundryTileContinuity(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/qa/tile-continuity.ts src/lib/foundry/agents/ui-texture/qa/tile-continuity.test.ts
@@ -11118,10 +11118,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: true` for a uniform image (edges trivially identical).
-- [ ] Returns `passed: false` for an image whose left and right halves differ sharply.
-- [ ] Reports `horizontalDeltaE` and `verticalDeltaE` separately so the caller can blame the failing axis.
-- [ ] `maxDeltaE` equals the larger of the two axis values.
+- [x] Returns `passed: true` for a uniform image (edges trivially identical).
+- [x] Returns `passed: false` for an image whose left and right halves differ sharply.
+- [x] Reports `horizontalDeltaE` and `verticalDeltaE` separately so the caller can blame the failing axis.
+- [x] `maxDeltaE` equals the larger of the two axis values.
 
 ### Task 4.9: Normal-map extraction
 
@@ -11129,7 +11129,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/stages/normal-map.ts`
 - Test: `src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts
@@ -11173,12 +11173,12 @@ describe("extractFoundryNormalMap", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts`
 Expected: FAIL — "Cannot find module './normal-map'"
 
-- [ ] **Step 3: Implement normal-map extraction**
+- [x] **Step 3: Implement normal-map extraction**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/stages/normal-map.ts
@@ -11232,12 +11232,12 @@ export async function extractFoundryNormalMap(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/stages/normal-map.ts src/lib/foundry/agents/ui-texture/stages/normal-map.test.ts
@@ -11255,10 +11255,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Produces a PNG with the same dimensions as the source.
-- [ ] Produces bytes different from the source.
-- [ ] Throws when `strength` is outside [0, 1].
-- [ ] Flat areas of the source map approximately to `(128, 128, 255)`.
+- [x] Produces a PNG with the same dimensions as the source.
+- [x] Produces bytes different from the source.
+- [x] Throws when `strength` is outside [0, 1].
+- [x] Flat areas of the source map approximately to `(128, 128, 255)`.
 
 ### Task 4.10: Pack writer (icons + textures)
 
@@ -11266,7 +11266,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/pack-writer.ts`
 - Test: `src/lib/foundry/agents/ui-texture/pack-writer.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/pack-writer.test.ts
@@ -11356,12 +11356,12 @@ describe("writeFoundryUiTexturePack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/pack-writer.test.ts`
 Expected: FAIL — "Cannot find module './pack-writer'"
 
-- [ ] **Step 3: Implement pack writer**
+- [x] **Step 3: Implement pack writer**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/pack-writer.ts
@@ -11425,12 +11425,12 @@ export async function writeFoundryUiTexturePack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/pack-writer.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/pack-writer.ts src/lib/foundry/agents/ui-texture/pack-writer.test.ts
@@ -11448,10 +11448,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Icon writer produces one `<name>.svg` file.
-- [ ] Texture writer produces both `<name>.png` and `<name>.normal.png`.
-- [ ] No `.tmp.*` artefacts remain.
-- [ ] Both writers return relative paths in their result.
+- [x] Icon writer produces one `<name>.svg` file.
+- [x] Texture writer produces both `<name>.png` and `<name>.normal.png`.
+- [x] No `.tmp.*` artefacts remain.
+- [x] Both writers return relative paths in their result.
 
 ### Task 4.11: Integration-snippet generator (icon + texture)
 
@@ -11459,7 +11459,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/integration.ts`
 - Test: `src/lib/foundry/agents/ui-texture/integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/integration.test.ts
@@ -11532,12 +11532,12 @@ describe("renderFoundryTextureIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/integration.test.ts`
 Expected: FAIL — "Cannot find module './integration'"
 
-- [ ] **Step 3: Implement integration**
+- [x] **Step 3: Implement integration**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/integration.ts
@@ -11589,12 +11589,12 @@ export function renderFoundryTextureIntegrationSnippet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/integration.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/integration.ts src/lib/foundry/agents/ui-texture/integration.test.ts
@@ -11612,10 +11612,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Icon snippet imports a `<PascalCasedName>Icon` from `@/components/foundry/icons/<name>`.
-- [ ] Texture snippet contains a Tailwind `bg-[url('...')]` reference.
-- [ ] Texture snippet declares the `--foundry-normal-map` CSS variable.
-- [ ] Both snippets are deterministic for identical inputs.
+- [x] Icon snippet imports a `<PascalCasedName>Icon` from `@/components/foundry/icons/<name>`.
+- [x] Texture snippet contains a Tailwind `bg-[url('...')]` reference.
+- [x] Texture snippet declares the `--foundry-normal-map` CSS variable.
+- [x] Both snippets are deterministic for identical inputs.
 
 ### Task 4.12: Agent entry point (kind-discriminated)
 
@@ -11623,7 +11623,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/index.ts`
 - Test: `src/lib/foundry/agents/ui-texture/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/index.test.ts
@@ -11745,12 +11745,12 @@ describe("runFoundryUiTexture", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/index.test.ts`
 Expected: FAIL — "Cannot find module './index'"
 
-- [ ] **Step 3: Implement agent entry point**
+- [x] **Step 3: Implement agent entry point**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/index.ts
@@ -11895,12 +11895,12 @@ export async function runFoundryUiTexture(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/ui-texture/index.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/index.ts src/lib/foundry/agents/ui-texture/index.test.ts
@@ -11920,10 +11920,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Icon kind produces an Asset Pack with `assetKind === "ui-icon"`.
-- [ ] Texture kind produces an Asset Pack with `assetKind === "ui-texture"`.
-- [ ] Throws with `gates=` listing failing icon QA gates.
-- [ ] Throws with `maxDeltaE=` when texture tile-continuity fails.
+- [x] Icon kind produces an Asset Pack with `assetKind === "ui-icon"`.
+- [x] Texture kind produces an Asset Pack with `assetKind === "ui-texture"`.
+- [x] Throws with `gates=` listing failing icon QA gates.
+- [x] Throws with `maxDeltaE=` when texture tile-continuity fails.
 
 ### Task 4.13: CLI subcommand + golden icon and texture fixtures
 
@@ -11933,7 +11933,7 @@ EOF
 - Create: `src/lib/foundry/agents/ui-texture/__tests__/golden-etched-gold-texture.test.ts`
 - Modify: `scripts/foundry.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/__tests__/golden-elevator-icon.test.ts
@@ -12057,7 +12057,7 @@ describe("golden etched-gold texture", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run:
 ```
@@ -12066,7 +12066,7 @@ npx vitest run src/lib/foundry/agents/ui-texture/__tests__/golden-elevator-icon.
 ```
 Expected: FAIL — "Cannot find module '../cli'"
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/agents/ui-texture/cli.ts
@@ -12163,7 +12163,7 @@ export async function runFoundryUiTextureCli(
 }
 ```
 
-- [ ] **Step 4: Modify `scripts/foundry.ts` to route `texture` subcommand**
+- [x] **Step 4: Modify `scripts/foundry.ts` to route `texture` subcommand**
 
 ```ts
 // scripts/foundry.ts — add the `texture` case to the switch.
@@ -12193,7 +12193,7 @@ export async function runFoundryUiTextureCli(
 // }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run:
 ```
@@ -12202,7 +12202,7 @@ npx vitest run src/lib/foundry/agents/ui-texture/__tests__/golden-elevator-icon.
 ```
 Expected: PASS — all 3 assertions pass
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/foundry/agents/ui-texture/cli.ts \
@@ -12223,10 +12223,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Golden icon fixture writes exactly one `.svg` carrying the requested stroke-width and aria-label.
-- [ ] Golden texture fixture writes exactly one `<name>.png` plus one `<name>.normal.png`.
-- [ ] `--dry-run` prints `validated` for both kinds.
-- [ ] CLI throws on `--kind` value other than `icon|texture`.
+- [x] Golden icon fixture writes exactly one `.svg` carrying the requested stroke-width and aria-label.
+- [x] Golden texture fixture writes exactly one `<name>.png` plus one `<name>.normal.png`.
+- [x] `--dry-run` prints `validated` for both kinds.
+- [x] CLI throws on `--kind` value other than `icon|texture`.
 
 ### Phase 4 completion criteria
 
@@ -12272,7 +12272,7 @@ The new public entry point added in this phase is `runFoundrySpriteAnimator(inpu
 - Create: `src/lib/foundry/agents/sprite-animator/types.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/types.test.ts
@@ -12350,12 +12350,12 @@ describe("foundry sprite-animator types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/types.test.ts`
 Expected: FAIL — "Cannot find module './types'"
 
-- [ ] **Step 3: Implement schemas**
+- [x] **Step 3: Implement schemas**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/types.ts
@@ -12437,12 +12437,12 @@ export type FoundryLottieAnimationManifest = z.infer<
 >;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/types.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/types.ts src/lib/foundry/agents/sprite-animator/types.test.ts
@@ -12460,10 +12460,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input schema enforces `frameCount` in [8, 24] (idle loops need a minimum body of frames).
-- [ ] Input schema enforces `fps` in [8, 30].
-- [ ] Sprite manifest schema requires non-empty `frames` array.
-- [ ] Lottie manifest schema requires `durationMs >= 1`.
+- [x] Input schema enforces `frameCount` in [8, 24] (idle loops need a minimum body of frames).
+- [x] Input schema enforces `fps` in [8, 30].
+- [x] Sprite manifest schema requires non-empty `frames` array.
+- [x] Lottie manifest schema requires `durationMs >= 1`.
 
 ### Task 5.2: Source-pack resolver
 
@@ -12471,7 +12471,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/source-pack.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/source-pack.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/source-pack.test.ts
@@ -12527,12 +12527,12 @@ describe("resolveFoundrySpriteSourcePack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/source-pack.test.ts`
 Expected: FAIL — "Cannot find module './source-pack'"
 
-- [ ] **Step 3: Implement resolver**
+- [x] **Step 3: Implement resolver**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/source-pack.ts
@@ -12588,12 +12588,12 @@ export async function resolveFoundrySpriteSourcePack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/source-pack.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/source-pack.ts src/lib/foundry/agents/sprite-animator/source-pack.test.ts
@@ -12611,10 +12611,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns anchor path and 16-hex perceptual hash for a character pack.
-- [ ] Throws when the source pack is any other `assetKind`.
-- [ ] Throws when the character pack manifest is missing `anchorImagePath` or `anchorPerceptualHash`.
-- [ ] Throws when `anchorPerceptualHash` does not match `/^[0-9a-f]{16}$/`.
+- [x] Returns anchor path and 16-hex perceptual hash for a character pack.
+- [x] Throws when the source pack is any other `assetKind`.
+- [x] Throws when the character pack manifest is missing `anchorImagePath` or `anchorPerceptualHash`.
+- [x] Throws when `anchorPerceptualHash` does not match `/^[0-9a-f]{16}$/`.
 
 ### Task 5.3: Video provider interface
 
@@ -12622,7 +12622,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/video-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/video-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/video-provider.test.ts
@@ -12681,12 +12681,12 @@ describe("foundry video provider contract", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/video-provider.test.ts`
 Expected: FAIL — "Cannot find module './video-provider'"
 
-- [ ] **Step 3: Implement provider contract**
+- [x] **Step 3: Implement provider contract**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/video-provider.ts
@@ -12725,12 +12725,12 @@ export interface FoundryVideoProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/video-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/video-provider.ts src/lib/foundry/agents/sprite-animator/video-provider.test.ts
@@ -12748,10 +12748,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input requires `prompt`, `frameCount`, `fps`.
-- [ ] Input accepts optional `referenceImageBytes` typed as `Buffer`.
-- [ ] Result requires at least one frame.
-- [ ] Result rejects unknown `mode` values.
+- [x] Input requires `prompt`, `frameCount`, `fps`.
+- [x] Input accepts optional `referenceImageBytes` typed as `Buffer`.
+- [x] Result requires at least one frame.
+- [x] Result rejects unknown `mode` values.
 
 ### Task 5.4: Mock video provider (frame-sequence generator)
 
@@ -12759,7 +12759,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts
@@ -12801,12 +12801,12 @@ describe("createFoundrySpriteMockVideoProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-video-provider'"
 
-- [ ] **Step 3: Implement mock video provider**
+- [x] **Step 3: Implement mock video provider**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.ts
@@ -12850,12 +12850,12 @@ export function createFoundrySpriteMockVideoProvider(): FoundryVideoProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.ts src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts
@@ -12873,10 +12873,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns exactly `frameCount` frames.
-- [ ] Every frame is a valid PNG.
-- [ ] Adjacent frames are different (motion present).
-- [ ] Same seed yields identical sequence (reproducibility for golden tests).
+- [x] Returns exactly `frameCount` frames.
+- [x] Every frame is a valid PNG.
+- [x] Adjacent frames are different (motion present).
+- [x] Same seed yields identical sequence (reproducibility for golden tests).
 
 ### Task 5.5: Lottie LLM provider interface
 
@@ -12884,7 +12884,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/lottie-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts
@@ -12934,12 +12934,12 @@ describe("foundry lottie provider contract", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts`
 Expected: FAIL — "Cannot find module './lottie-provider'"
 
-- [ ] **Step 3: Implement Lottie provider contract**
+- [x] **Step 3: Implement Lottie provider contract**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/lottie-provider.ts
@@ -12977,12 +12977,12 @@ export interface FoundryLottieProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/lottie-provider.ts src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts
@@ -12999,10 +12999,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input requires `motionCurve`, `durationMs`, `action`.
-- [ ] Result returns `lottieJson` as a string.
-- [ ] Mode enum rejects values other than `real|mock`.
-- [ ] `durationMs >= 1` enforced on input.
+- [x] Input requires `motionCurve`, `durationMs`, `action`.
+- [x] Result returns `lottieJson` as a string.
+- [x] Mode enum rejects values other than `real|mock`.
+- [x] `durationMs >= 1` enforced on input.
 
 ### Task 5.6: Mock Lottie provider
 
@@ -13010,7 +13010,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts
@@ -13061,12 +13061,12 @@ describe("createFoundrySpriteMockLottieProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-lottie-provider'"
 
-- [ ] **Step 3: Implement mock Lottie provider**
+- [x] **Step 3: Implement mock Lottie provider**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.ts
@@ -13118,12 +13118,12 @@ export function createFoundrySpriteMockLottieProvider(): FoundryLottieProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.ts src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts
@@ -13141,10 +13141,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Mock returns parseable JSON.
-- [ ] `op / fr` corresponds (within rounding) to the requested `durationMs / 1000`.
-- [ ] At least one layer with `ind > 0`.
-- [ ] Same seed yields identical output.
+- [x] Mock returns parseable JSON.
+- [x] `op / fr` corresponds (within rounding) to the requested `durationMs / 1000`.
+- [x] At least one layer with `ind > 0`.
+- [x] Same seed yields identical output.
 
 ### Task 5.7: Identity-drift gate (per frame vs source anchor)
 
@@ -13152,7 +13152,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa/identity-drift.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts
@@ -13211,12 +13211,12 @@ describe("evaluateFoundrySpriteIdentityDrift", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts`
 Expected: FAIL — "Cannot find module './identity-drift'"
 
-- [ ] **Step 3: Implement identity-drift gate**
+- [x] **Step 3: Implement identity-drift gate**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/identity-drift.ts
@@ -13271,12 +13271,12 @@ export async function evaluateFoundrySpriteIdentityDrift(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa/identity-drift.ts src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts
@@ -13294,10 +13294,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/hashes`.
-- [ ] Returns `passed: false` when any frame's Hamming distance from anchor exceeds 14 bits.
-- [ ] Throws when called with empty `frames` array.
-- [ ] Reports `avgHamming`, `maxHamming`, and the indices of flagged frames.
+- [x] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/hashes`.
+- [x] Returns `passed: false` when any frame's Hamming distance from anchor exceeds 14 bits.
+- [x] Throws when called with empty `frames` array.
+- [x] Reports `avgHamming`, `maxHamming`, and the indices of flagged frames.
 
 ### Task 5.8: Motion-smoothness gate
 
@@ -13305,7 +13305,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts
@@ -13345,12 +13345,12 @@ describe("evaluateFoundrySpriteMotionSmoothness", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts`
 Expected: FAIL — "Cannot find module './motion-smoothness'"
 
-- [ ] **Step 3: Implement motion-smoothness gate**
+- [x] **Step 3: Implement motion-smoothness gate**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.ts
@@ -13399,12 +13399,12 @@ export async function evaluateFoundrySpriteMotionSmoothness(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.ts src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts
@@ -13422,10 +13422,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: true` for a slow drift sequence.
-- [ ] Returns `passed: false` when any adjacent pair exceeds 8 bits.
-- [ ] Reports flagged transitions as `{from, to, hamming}` tuples.
-- [ ] Throws when called with fewer than two frames.
+- [x] Returns `passed: true` for a slow drift sequence.
+- [x] Returns `passed: false` when any adjacent pair exceeds 8 bits.
+- [x] Reports flagged transitions as `{from, to, hamming}` tuples.
+- [x] Throws when called with fewer than two frames.
 
 ### Task 5.9: Lottie validity gate (bodymovin schema)
 
@@ -13433,7 +13433,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa/lottie-validity.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts
@@ -13516,12 +13516,12 @@ describe("evaluateFoundryLottieValidity", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts`
 Expected: FAIL — "Cannot find module './lottie-validity'"
 
-- [ ] **Step 3: Implement Lottie validity gate**
+- [x] **Step 3: Implement Lottie validity gate**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/lottie-validity.ts
@@ -13609,12 +13609,12 @@ export function evaluateFoundryLottieValidity(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa/lottie-validity.ts src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts
@@ -13633,10 +13633,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] JSON-parse failure produces `passed: false` and a reason mentioning `parse`.
-- [ ] Empty `layers` produces `passed: false` and reason mentioning `layers`.
-- [ ] Duration mismatch beyond tolerance produces `passed: false` and reason mentioning `duration`.
-- [ ] Dangling parent layer reference produces `passed: false` and reason mentioning `layer`.
+- [x] JSON-parse failure produces `passed: false` and a reason mentioning `parse`.
+- [x] Empty `layers` produces `passed: false` and reason mentioning `layers`.
+- [x] Duration mismatch beyond tolerance produces `passed: false` and reason mentioning `duration`.
+- [x] Dangling parent layer reference produces `passed: false` and reason mentioning `layer`.
 
 ### Task 5.10: Aggregated QA runner (sprite + lottie format-aware)
 
@@ -13644,7 +13644,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa.test.ts
@@ -13727,12 +13727,12 @@ describe("runFoundrySpriteQa", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa.test.ts`
 Expected: FAIL — "Cannot find module './qa'"
 
-- [ ] **Step 3: Implement aggregated QA**
+- [x] **Step 3: Implement aggregated QA**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa.ts
@@ -13792,12 +13792,12 @@ export async function runFoundrySpriteQa(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa.ts src/lib/foundry/agents/sprite-animator/qa.test.ts
@@ -13815,10 +13815,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite-kind input runs both identity-drift and motion-smoothness gates.
-- [ ] Lottie-kind input runs the bodymovin validity gate.
-- [ ] Returns `passed: true` only when every relevant gate passes.
-- [ ] `failedGates` lists each failed gate by canonical name.
+- [x] Sprite-kind input runs both identity-drift and motion-smoothness gates.
+- [x] Lottie-kind input runs the bodymovin validity gate.
+- [x] Returns `passed: true` only when every relevant gate passes.
+- [x] `failedGates` lists each failed gate by canonical name.
 
 ### Task 5.11: Pack writer (sprite frames + Lottie JSON)
 
@@ -13826,7 +13826,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/pack-writer.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/pack-writer.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/pack-writer.test.ts
@@ -13914,12 +13914,12 @@ describe("writeFoundryLottiePack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/pack-writer.test.ts`
 Expected: FAIL — "Cannot find module './pack-writer'"
 
-- [ ] **Step 3: Implement pack writer**
+- [x] **Step 3: Implement pack writer**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/pack-writer.ts
@@ -13995,12 +13995,12 @@ export async function writeFoundryLottiePack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/pack-writer.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/pack-writer.ts src/lib/foundry/agents/sprite-animator/pack-writer.test.ts
@@ -14019,10 +14019,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite writer produces `frame-NNN.png` filenames zero-padded to 3 digits.
-- [ ] Frame manifests carry `index`, relative `path`, and `perceptualHash`.
-- [ ] Lottie writer produces exactly one `lottie.json`.
-- [ ] No `.tmp.*` artefacts remain after success.
+- [x] Sprite writer produces `frame-NNN.png` filenames zero-padded to 3 digits.
+- [x] Frame manifests carry `index`, relative `path`, and `perceptualHash`.
+- [x] Lottie writer produces exactly one `lottie.json`.
+- [x] No `.tmp.*` artefacts remain after success.
 
 ### Task 5.12: Integration-snippet generator (sprite + Lottie)
 
@@ -14030,7 +14030,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/integration.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/integration.test.ts
@@ -14103,12 +14103,12 @@ describe("renderFoundryLottieIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/integration.test.ts`
 Expected: FAIL — "Cannot find module './integration'"
 
-- [ ] **Step 3: Implement integration generator**
+- [x] **Step 3: Implement integration generator**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/integration.ts
@@ -14156,12 +14156,12 @@ export function renderFoundryLottieIntegrationSnippet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/integration.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/integration.ts src/lib/foundry/agents/sprite-animator/integration.test.ts
@@ -14180,10 +14180,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite snippet contains an `<AnimatedSprite pack="<char>-<action>" />` JSX block.
-- [ ] Sprite snippet imports from `@/components/foundry/animated-sprite`.
-- [ ] Lottie snippet imports from `@/components/foundry/lottie-animation`.
-- [ ] Lottie snippet quotes the `durationMs` in a comment.
+- [x] Sprite snippet contains an `<AnimatedSprite pack="<char>-<action>" />` JSX block.
+- [x] Sprite snippet imports from `@/components/foundry/animated-sprite`.
+- [x] Lottie snippet imports from `@/components/foundry/lottie-animation`.
+- [x] Lottie snippet quotes the `durationMs` in a comment.
 
 ### Task 5.13: Agent entry point (sprite + lottie dispatch)
 
@@ -14191,7 +14191,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/index.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/index.test.ts
@@ -14329,12 +14329,12 @@ describe("runFoundrySpriteAnimator", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/index.test.ts`
 Expected: FAIL — "Cannot find module './index'"
 
-- [ ] **Step 3: Implement agent entry point**
+- [x] **Step 3: Implement agent entry point**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/index.ts
@@ -14505,12 +14505,12 @@ export async function runFoundrySpriteAnimator(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/index.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/index.ts src/lib/foundry/agents/sprite-animator/index.test.ts
@@ -14530,10 +14530,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite format produces an Asset Pack with `assetKind === "character-sprite-animation"`.
-- [ ] Lottie format produces an Asset Pack with `assetKind === "character-lottie-animation"`.
-- [ ] Sprite manifest carries `fps`, `loops`, `frame_count`, `total_duration_ms`, `transitions`, and `frames` array.
-- [ ] Throws with `gates=` listing failing QA gates.
+- [x] Sprite format produces an Asset Pack with `assetKind === "character-sprite-animation"`.
+- [x] Lottie format produces an Asset Pack with `assetKind === "character-lottie-animation"`.
+- [x] Sprite manifest carries `fps`, `loops`, `frame_count`, `total_duration_ms`, `transitions`, and `frames` array.
+- [x] Throws with `gates=` listing failing QA gates.
 
 ### Task 5.14: CLI subcommand + golden Otis idle and Lottie pulse fixtures
 
@@ -14543,7 +14543,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/golden-lottie-pulse.test.ts`
 - Modify: `scripts/foundry.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/golden-otis-idle.test.ts
@@ -14687,7 +14687,7 @@ describe("golden lottie pulse", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run:
 ```
@@ -14696,7 +14696,7 @@ npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/golden-otis-idle
 ```
 Expected: FAIL — "Cannot find module '../cli'"
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/cli.ts
@@ -14768,7 +14768,7 @@ export async function runFoundrySpriteAnimatorCli(
 }
 ```
 
-- [ ] **Step 4: Modify `scripts/foundry.ts` to route `animate` subcommand**
+- [x] **Step 4: Modify `scripts/foundry.ts` to route `animate` subcommand**
 
 ```ts
 // scripts/foundry.ts — add the `animate` case to the switch.
@@ -14795,7 +14795,7 @@ export async function runFoundrySpriteAnimatorCli(
 // }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run:
 ```
@@ -14804,7 +14804,7 @@ npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/golden-otis-idle
 ```
 Expected: PASS — all assertions pass
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/cli.ts \
@@ -14825,17 +14825,17 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Otis-idle golden writes exactly 12 frame PNGs.
-- [ ] Otis-idle manifest reports `frame_count: 12` and `fps: 12`.
-- [ ] Lottie-pulse golden writes exactly one `lottie.json` parseable as JSON.
-- [ ] Lottie-pulse JSON's `v` field is `"5.7.0"` and `layers.length > 0`.
+- [x] Otis-idle golden writes exactly 12 frame PNGs.
+- [x] Otis-idle manifest reports `frame_count: 12` and `fps: 12`.
+- [x] Lottie-pulse golden writes exactly one `lottie.json` parseable as JSON.
+- [x] Lottie-pulse JSON's `v` field is `"5.7.0"` and `layers.length > 0`.
 
 ### Task 5.15: Cross-format integration test — single character, both formats
 
 **Files:**
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts
@@ -14905,23 +14905,23 @@ describe("sprite-animator both formats for the same character", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts`
 Expected: FAIL — assertion fails because no prior fixture has produced both formats in a single run.
 
 (Test failure is on the assertion comparing pack IDs; the agent code from Task 5.13/5.14 already supports both formats, so when Step 3 runs there is nothing to implement — Step 3 is to confirm both formats are independently runnable on the same source pack.)
 
-- [ ] **Step 3: Confirm no source change is required**
+- [x] **Step 3: Confirm no source change is required**
 
 This task is a regression-guarding integration test against the agent we already built. If the test fails, the failure points at a real production-blocking bug (one format producing artefacts under the other's run dir, format dispatch ignoring `input.format`, or pack IDs colliding across formats). No implementation diff is required here — only the new test file.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts`
 Expected: PASS — 1 assertion pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts
@@ -14940,10 +14940,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Same source pack ID drives two complete agent runs to completion.
-- [ ] Sprite run produces `frame-NNN.png` artefacts; Lottie run produces `lottie.json`.
-- [ ] Pack IDs returned for the two runs differ.
-- [ ] Test passes without any change to the agent implementation (regression-only).
+- [x] Same source pack ID drives two complete agent runs to completion.
+- [x] Sprite run produces `frame-NNN.png` artefacts; Lottie run produces `lottie.json`.
+- [x] Pack IDs returned for the two runs differ.
+- [x] Test passes without any change to the agent implementation (regression-only).
 
 ### Phase 5 completion criteria
 
@@ -14977,7 +14977,7 @@ The front-door MCP server. A Claude Code session (or Antigravity, or any MCP cli
 - Modify: `package.json` (dependencies block)
 - Modify: `package-lock.json` (auto by `npm install`)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/sdk-import.test.ts
@@ -14996,24 +14996,24 @@ describe("MCP SDK availability", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/sdk-import.test.ts`
 Expected: FAIL — "Cannot find module '@modelcontextprotocol/sdk/server/index.js'"
 
-- [ ] **Step 3: Install the SDK**
+- [x] **Step 3: Install the SDK**
 
 ```bash
 cd "/Users/armaanarora/Documents/The Tower"
 npm install --save @modelcontextprotocol/sdk@^1.20.0
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/sdk-import.test.ts`
 Expected: PASS — both imports resolve.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add package.json package-lock.json src/lib/foundry/mcp/sdk-import.test.ts
@@ -15030,9 +15030,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `package.json` lists `@modelcontextprotocol/sdk` under `dependencies` at a satisfying version.
-- [ ] `package-lock.json` is updated and committed in the same commit.
-- [ ] `src/lib/foundry/mcp/sdk-import.test.ts` passes against the installed SDK.
+- [x] `package.json` lists `@modelcontextprotocol/sdk` under `dependencies` at a satisfying version.
+- [x] `package-lock.json` is updated and committed in the same commit.
+- [x] `src/lib/foundry/mcp/sdk-import.test.ts` passes against the installed SDK.
 
 ### Task 6.2: Define FoundryMcpTool registry + shared Zod schemas
 
@@ -15040,7 +15040,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tools.ts`
 - Test: `src/lib/foundry/mcp/tools.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tools.test.ts
@@ -15120,12 +15120,12 @@ describe("FOUNDRY_MCP_TOOL_NAMES registry", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tools.test.ts`
 Expected: FAIL — "Cannot find module './tools'"
 
-- [ ] **Step 3: Implement the tool registry**
+- [x] **Step 3: Implement the tool registry**
 
 ```ts
 // src/lib/foundry/mcp/tools.ts
@@ -15385,12 +15385,12 @@ export interface FoundryMcpToolDef<I, O> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tools.test.ts`
 Expected: PASS — 8 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tools.ts src/lib/foundry/mcp/tools.test.ts
@@ -15407,9 +15407,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `FOUNDRY_MCP_TOOL_NAMES` lists exactly 9 strings in canonical order.
-- [ ] Every input schema is `.strict()` and rejects unknown keys (verified by at least one negative-case test).
-- [ ] `FoundryGenerateOutputSchema.runId` enforces a UUID v4 regex.
+- [x] `FOUNDRY_MCP_TOOL_NAMES` lists exactly 9 strings in canonical order.
+- [x] Every input schema is `.strict()` and rejects unknown keys (verified by at least one negative-case test).
+- [x] `FoundryGenerateOutputSchema.runId` enforces a UUID v4 regex.
 
 ### Task 6.3: Tool handler — canon_list
 
@@ -15417,7 +15417,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/canon-list.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/canon-list.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-list.test.ts
@@ -15464,12 +15464,12 @@ describe("handleFoundryCanonList", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-list.test.ts`
 Expected: FAIL — "Cannot find module './canon-list'"
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-list.ts
@@ -15542,12 +15542,12 @@ export async function handleFoundryCanonList(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-list.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/canon-list.ts src/lib/foundry/mcp/tool-handlers/canon-list.test.ts
@@ -15564,9 +15564,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Handler returns entries sorted-by-source-order; unknown kinds yield an empty list, not an error.
-- [ ] Files missing `id` or `displayName` headers are skipped (not crashed on).
-- [ ] Output passes `FoundryCanonListOutputSchema.parse` (verified by reusing the schema in the handler).
+- [x] Handler returns entries sorted-by-source-order; unknown kinds yield an empty list, not an error.
+- [x] Files missing `id` or `displayName` headers are skipped (not crashed on).
+- [x] Output passes `FoundryCanonListOutputSchema.parse` (verified by reusing the schema in the handler).
 
 ### Task 6.4: Tool handler — canon_get
 
@@ -15574,7 +15574,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/canon-get.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/canon-get.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-get.test.ts
@@ -15623,12 +15623,12 @@ describe("handleFoundryCanonGet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-get.test.ts`
 Expected: FAIL — "Cannot find module './canon-get'"
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/canon-get.ts
@@ -15720,12 +15720,12 @@ export async function handleFoundryCanonGet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/canon-get.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/canon-get.ts src/lib/foundry/mcp/tool-handlers/canon-get.test.ts
@@ -15742,9 +15742,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Handler scans every kind directory for the matching `id` header (not just one kind).
-- [ ] Unknown id throws an Error whose message contains the canonical phrase `canon entry not found`.
-- [ ] Returned payload includes the absolute `sourcePath` for downstream auditing.
+- [x] Handler scans every kind directory for the matching `id` header (not just one kind).
+- [x] Unknown id throws an Error whose message contains the canonical phrase `canon entry not found`.
+- [x] Returned payload includes the absolute `sourcePath` for downstream auditing.
 
 ### Task 6.5: Tool handler — asset_pack_list
 
@@ -15752,7 +15752,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/asset-pack-list.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts
@@ -15814,12 +15814,12 @@ describe("handleFoundryAssetPackList", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-list.ts
@@ -15887,12 +15887,12 @@ export async function handleFoundryAssetPackList(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/asset-pack-list.ts src/lib/foundry/mcp/tool-handlers/asset-pack-list.test.ts
@@ -15909,9 +15909,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Manifests that fail Zod validation throw with the path interpolated into the error.
-- [ ] Empty `packsRoot` returns `{ packs: [] }` (not crash).
-- [ ] Filters combine via AND (all supplied filters must match).
+- [x] Manifests that fail Zod validation throw with the path interpolated into the error.
+- [x] Empty `packsRoot` returns `{ packs: [] }` (not crash).
+- [x] Filters combine via AND (all supplied filters must match).
 
 ### Task 6.6: Tool handler — asset_pack_get
 
@@ -15919,7 +15919,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/asset-pack-get.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts
@@ -15983,12 +15983,12 @@ describe("handleFoundryAssetPackGet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-get.ts
@@ -16040,12 +16040,12 @@ export async function handleFoundryAssetPackGet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/asset-pack-get.ts src/lib/foundry/mcp/tool-handlers/asset-pack-get.test.ts
@@ -16062,9 +16062,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Unknown packId throws an Error whose message contains `asset pack not found`.
-- [ ] A manifest-vs-disk mismatch (file in manifest, missing on disk) throws with `asset pack file missing`.
-- [ ] Output paths are absolute (joinable from caller's cwd-agnostic context).
+- [x] Unknown packId throws an Error whose message contains `asset pack not found`.
+- [x] A manifest-vs-disk mismatch (file in manifest, missing on disk) throws with `asset pack file missing`.
+- [x] Output paths are absolute (joinable from caller's cwd-agnostic context).
 
 ### Task 6.7: Tool handler — asset_pack_integration
 
@@ -16072,7 +16072,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/asset-pack-integration.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts
@@ -16155,12 +16155,12 @@ describe("handleFoundryAssetPackIntegration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/asset-pack-integration.ts
@@ -16287,12 +16287,12 @@ export async function handleFoundryAssetPackIntegration(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/asset-pack-integration.ts src/lib/foundry/mcp/tool-handlers/asset-pack-integration.test.ts
@@ -16310,9 +16310,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Every one of the 6 asset kinds emits a distinct snippet body.
-- [ ] Missing `integration` metadata on the manifest throws `integration metadata missing`.
-- [ ] `targetFramework=raw` always returns the CSS-var form regardless of asset kind.
+- [x] Every one of the 6 asset kinds emits a distinct snippet body.
+- [x] Missing `integration` metadata on the manifest throws `integration metadata missing`.
+- [x] `targetFramework=raw` always returns the CSS-var form regardless of asset kind.
 
 ### Task 6.8: Tool handler — slot_audit
 
@@ -16320,7 +16320,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/slot-audit.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts
@@ -16389,12 +16389,12 @@ describe("handleFoundrySlotAudit", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/slot-audit.ts
@@ -16475,12 +16475,12 @@ export async function handleFoundrySlotAudit(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/slot-audit.ts src/lib/foundry/mcp/tool-handlers/slot-audit.test.ts
@@ -16497,9 +16497,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `totalCount` reflects the scoped slot list (after filters), not the global registry.
-- [ ] A slot whose `slotId` matches any promoted pack's `slotId` is counted as covered.
-- [ ] Missing slot-registry file throws `slot registry missing at <path>` (not silent).
+- [x] `totalCount` reflects the scoped slot list (after filters), not the global registry.
+- [x] A slot whose `slotId` matches any promoted pack's `slotId` is counted as covered.
+- [x] Missing slot-registry file throws `slot registry missing at <path>` (not silent).
 
 ### Task 6.9: Tool handler — generate (queue-only, no work)
 
@@ -16507,7 +16507,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/generate.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate.test.ts
@@ -16569,12 +16569,12 @@ describe("handleFoundryGenerate", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate.ts
@@ -16618,12 +16618,12 @@ export async function handleFoundryGenerate(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/generate.ts src/lib/foundry/mcp/tool-handlers/generate.test.ts
@@ -16641,9 +16641,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Handler writes exactly one file under `inbox/foundry/` per call, atomically.
-- [ ] `runId` returned matches the `runId` field inside the inbox payload.
-- [ ] Description shorter than 8 chars is rejected at the schema layer.
+- [x] Handler writes exactly one file under `inbox/foundry/` per call, atomically.
+- [x] `runId` returned matches the `runId` field inside the inbox payload.
+- [x] Description shorter than 8 chars is rejected at the schema layer.
 
 ### Task 6.10: Tool handler — generate_status
 
@@ -16651,7 +16651,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/generate-status.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/generate-status.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate-status.test.ts
@@ -16730,12 +16730,12 @@ describe("handleFoundryGenerateStatus", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate-status.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate-status.ts
@@ -16810,12 +16810,12 @@ export async function handleFoundryGenerateStatus(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate-status.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/generate-status.ts src/lib/foundry/mcp/tool-handlers/generate-status.test.ts
@@ -16832,9 +16832,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] phase=closed always maps to status=promoted with percentComplete=100.
-- [ ] Any non-null blocker maps to status=blocked and surfaces in `blockers`.
-- [ ] Unknown runId throws `run not found: <id>`.
+- [x] phase=closed always maps to status=promoted with percentComplete=100.
+- [x] Any non-null blocker maps to status=blocked and surfaces in `blockers`.
+- [x] Unknown runId throws `run not found: <id>`.
 
 ### Task 6.11: Tool handler — diagnostics
 
@@ -16842,7 +16842,7 @@ EOF
 - Create: `src/lib/foundry/mcp/tool-handlers/diagnostics.ts`
 - Test: `src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts
@@ -16918,12 +16918,12 @@ describe("handleFoundryDiagnostics", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the handler**
+- [x] **Step 3: Implement the handler**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/diagnostics.ts
@@ -17015,12 +17015,12 @@ export async function handleFoundryDiagnostics(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/diagnostics.ts src/lib/foundry/mcp/tool-handlers/diagnostics.test.ts
@@ -17038,9 +17038,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Heartbeat older than 60s flips `daemonUp` to false.
-- [ ] `recentRuns` is capped at 5 entries in descending `updatedAt` order.
-- [ ] `providersReachable` returns `false` for any probe that throws, with the error propagated as a typed Error (no silent catch).
+- [x] Heartbeat older than 60s flips `daemonUp` to false.
+- [x] `recentRuns` is capped at 5 entries in descending `updatedAt` order.
+- [x] `providersReachable` returns `false` for any probe that throws, with the error propagated as a typed Error (no silent catch).
 
 ### Task 6.12: FoundryMcpServer factory — assemble + register tools
 
@@ -17048,7 +17048,7 @@ EOF
 - Create: `src/lib/foundry/mcp/server.ts`
 - Test: `src/lib/foundry/mcp/server.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/server.test.ts
@@ -17114,12 +17114,12 @@ describe("createFoundryMcpServer", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the server factory**
+- [x] **Step 3: Implement the server factory**
 
 ```ts
 // src/lib/foundry/mcp/server.ts
@@ -17208,12 +17208,12 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/server.ts src/lib/foundry/mcp/server.test.ts
@@ -17231,9 +17231,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Server identity reports `tower-art-foundry` and the caller-supplied version.
-- [ ] `registeredTools` is exactly the 9 canonical names (no extras, none missing).
-- [ ] `invokeForTest("foundry/bogus", ...)` throws `unknown tool: foundry/bogus`.
+- [x] Server identity reports `tower-art-foundry` and the caller-supplied version.
+- [x] `registeredTools` is exactly the 9 canonical names (no extras, none missing).
+- [x] `invokeForTest("foundry/bogus", ...)` throws `unknown tool: foundry/bogus`.
 
 ### Task 6.13: scripts/foundry-mcp.ts — stdio bootstrap
 
@@ -17242,7 +17242,7 @@ EOF
 - Test: `scripts/foundry-mcp.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-mcp.test.ts
@@ -17283,12 +17283,12 @@ describe("scripts/foundry-mcp.ts", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-mcp.test.ts`
 Expected: FAIL — "Cannot find module 'scripts/foundry-mcp.ts'" or spawn ENOENT.
 
-- [ ] **Step 3: Implement the bootstrap**
+- [x] **Step 3: Implement the bootstrap**
 
 ```ts
 // scripts/foundry-mcp.ts
@@ -17357,7 +17357,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script wiring**
+- [x] **Step 4: Add npm script wiring**
 
 Edit `package.json` `scripts` block to add:
 
@@ -17367,12 +17367,12 @@ Edit `package.json` `scripts` block to add:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-mcp.test.ts`
 Expected: PASS — both `--help` and `--version` exit 0.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-mcp.ts scripts/foundry-mcp.test.ts package.json
@@ -17390,9 +17390,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `--help` exits 0 and mentions `tower-art-foundry`.
-- [ ] `--version` exits 0 with a semver line read from `package.json`.
-- [ ] `npm run foundry:mcp -- --help` resolves and prints help.
+- [x] `--help` exits 0 and mentions `tower-art-foundry`.
+- [x] `--version` exits 0 with a semver line read from `package.json`.
+- [x] `npm run foundry:mcp -- --help` resolves and prints help.
 
 ### Task 6.14: manifest.json — MCP client discovery descriptor
 
@@ -17400,7 +17400,7 @@ EOF
 - Create: `src/lib/foundry/mcp/manifest.json`
 - Test: `src/lib/foundry/mcp/manifest.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/manifest.test.ts
@@ -17444,12 +17444,12 @@ describe("manifest.json", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/manifest.test.ts`
 Expected: FAIL — `manifest.json` does not exist.
 
-- [ ] **Step 3: Implement the manifest**
+- [x] **Step 3: Implement the manifest**
 
 ```json
 {
@@ -17473,12 +17473,12 @@ Expected: FAIL — `manifest.json` does not exist.
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/manifest.test.ts`
 Expected: PASS — schema validates and tool names match.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/manifest.json src/lib/foundry/mcp/manifest.test.ts
@@ -17495,9 +17495,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] manifest tool list length equals `FOUNDRY_MCP_TOOL_NAMES.length`.
-- [ ] manifest `command` + `args` point at `scripts/foundry-mcp.ts`.
-- [ ] `transport` is the string `"stdio"`.
+- [x] manifest tool list length equals `FOUNDRY_MCP_TOOL_NAMES.length`.
+- [x] manifest `command` + `args` point at `scripts/foundry-mcp.ts`.
+- [x] `transport` is the string `"stdio"`.
 
 ### Task 6.15: install-mcp script (interactive Claude Code settings writer)
 
@@ -17506,7 +17506,7 @@ EOF
 - Test: `scripts/foundry-install-mcp.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-install-mcp.test.ts
@@ -17570,12 +17570,12 @@ describe("foundry-install-mcp", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-install-mcp.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the install script**
+- [x] **Step 3: Implement the install script**
 
 ```ts
 // scripts/foundry-install-mcp.ts
@@ -17663,7 +17663,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script**
+- [x] **Step 4: Add npm script**
 
 Edit `package.json` `scripts` block:
 
@@ -17673,12 +17673,12 @@ Edit `package.json` `scripts` block:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-install-mcp.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-install-mcp.ts scripts/foundry-install-mcp.test.ts package.json
@@ -17696,16 +17696,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] The script ALWAYS prompts for confirmation unless `FOUNDRY_INSTALL_YES=1` is set.
-- [ ] Existing `mcpServers` entries are preserved on merge.
-- [ ] Writes are atomic (tmp + rename), and the absolute path is logged before the prompt.
+- [x] The script ALWAYS prompts for confirmation unless `FOUNDRY_INSTALL_YES=1` is set.
+- [x] Existing `mcpServers` entries are preserved on merge.
+- [x] Writes are atomic (tmp + rename), and the absolute path is logged before the prompt.
 
 ### Task 6.16: End-to-end MCP round-trip — SDK client against the real server
 
 **Files:**
 - Create: `src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts
@@ -17773,24 +17773,24 @@ describe("e2e MCP round-trip", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts`
 Expected: FAIL — initial run will likely fail with `StdioClientTransport` import or because the bootstrap doesn't yet wire StdioServerTransport correctly under the test env. Confirm the actual failure mode before fixing.
 
-- [ ] **Step 3: Implement (already implemented across 6.1–6.15). If failure is real, harden `scripts/foundry-mcp.ts`**
+- [x] **Step 3: Implement (already implemented across 6.1–6.15). If failure is real, harden `scripts/foundry-mcp.ts`**
 
 The test should pass given Tasks 6.1–6.15 are complete. If it fails, the implementation gap is most likely in `scripts/foundry-mcp.ts` — verify:
 1. `StdioServerTransport` is connected to the server before any tool call.
 2. The `tools/call` request handler is correctly registered (server.setRequestHandler must accept the SDK's `CallToolRequestSchema`, not a string literal — adjust as needed using the real SDK schema export).
 3. Env-driven roots are read before `createFoundryMcpServer` is called.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts`
 Expected: PASS — client connects, lists canon, queues a generate run, sees the queued JSON on disk.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/e2e-roundtrip.integration.test.ts
@@ -17808,9 +17808,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Test runs via the actual MCP SDK stdio client + server (no in-process shortcut).
-- [ ] After `foundry/generate`, the inbox file exists on disk at the path the server reports.
-- [ ] Test completes within 30 seconds on a baseline laptop.
+- [x] Test runs via the actual MCP SDK stdio client + server (no in-process shortcut).
+- [x] After `foundry/generate`, the inbox file exists on disk at the path the server reports.
+- [x] Test completes within 30 seconds on a baseline laptop.
 
 ### Phase 6 completion criteria
 
@@ -17863,7 +17863,7 @@ The existing `src/lib/artlab/orchestrator/llm-brain.ts` is a single `decide(req)
 - Create: `src/lib/foundry/brain/types.ts`
 - Test: `src/lib/foundry/brain/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/types.test.ts
@@ -17913,12 +17913,12 @@ describe("foundry brain shared types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/types.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the shared types**
+- [x] **Step 3: Implement the shared types**
 
 ```ts
 // src/lib/foundry/brain/types.ts
@@ -17977,12 +17977,12 @@ export interface FoundryAgentBrain<Input, Output> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/types.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/types.ts src/lib/foundry/brain/types.test.ts
@@ -18000,9 +18000,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `FOUNDRY_AGENT_KINDS` lists exactly the four specialists in canonical order.
-- [ ] `FoundryMetaIntentSchema.confidence` is clamped to `[0, 1]`.
-- [ ] `FoundryAgentBrainResultSchema` requires `agent`, `output`, `model`, `durationMs`, and token counters.
+- [x] `FOUNDRY_AGENT_KINDS` lists exactly the four specialists in canonical order.
+- [x] `FoundryMetaIntentSchema.confidence` is clamped to `[0, 1]`.
+- [x] `FoundryAgentBrainResultSchema` requires `agent`, `output`, `model`, `durationMs`, and token counters.
 
 ### Task 7.2: Per-kind memory feedback scoping
 
@@ -18010,7 +18010,7 @@ EOF
 - Create: `src/lib/foundry/brain/memory-scope.ts`
 - Test: `src/lib/foundry/brain/memory-scope.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/memory-scope.test.ts
@@ -18073,12 +18073,12 @@ describe("loadFoundryMemoryScope", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-scope.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the scoped loader**
+- [x] **Step 3: Implement the scoped loader**
 
 ```ts
 // src/lib/foundry/brain/memory-scope.ts
@@ -18117,12 +18117,12 @@ export function loadFoundryMemoryScope(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-scope.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/memory-scope.ts src/lib/foundry/brain/memory-scope.test.ts
@@ -18140,9 +18140,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] No cross-agent feedback leakage (verified by the negative test).
-- [ ] Missing ledger files return `{ recentWins: [], recentRejections: [] }`, not throw.
-- [ ] `topN: 0` returns empty arrays.
+- [x] No cross-agent feedback leakage (verified by the negative test).
+- [x] Missing ledger files return `{ recentWins: [], recentRejections: [] }`, not throw.
+- [x] `topN: 0` returns empty arrays.
 
 ### Task 7.3: Anthropic client wrapper with prompt caching
 
@@ -18150,7 +18150,7 @@ EOF
 - Create: `src/lib/foundry/brain/anthropic-client.ts`
 - Test: `src/lib/foundry/brain/anthropic-client.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/anthropic-client.test.ts
@@ -18205,12 +18205,12 @@ describe("callFoundryAnthropic", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/anthropic-client.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the wrapper**
+- [x] **Step 3: Implement the wrapper**
 
 ```ts
 // src/lib/foundry/brain/anthropic-client.ts
@@ -18270,12 +18270,12 @@ export async function callFoundryAnthropic(call: FoundryAnthropicCall): Promise<
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/anthropic-client.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/anthropic-client.ts src/lib/foundry/brain/anthropic-client.test.ts
@@ -18293,9 +18293,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] System message carries `providerOptions.anthropic.cacheControl.type === "ephemeral"`.
-- [ ] Dry-run mode never reaches the network and returns the canonical `{ dryRun: true }` shape.
-- [ ] `durationMs` is set on the response when generateText returns.
+- [x] System message carries `providerOptions.anthropic.cacheControl.type === "ephemeral"`.
+- [x] Dry-run mode never reaches the network and returns the canonical `{ dryRun: true }` shape.
+- [x] `durationMs` is set on the response when generateText returns.
 
 ### Task 7.4: character-master brain
 
@@ -18303,7 +18303,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/character-master-brain.ts`
 - Test: `src/lib/foundry/brain/agents/character-master-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/character-master-brain.test.ts
@@ -18359,12 +18359,12 @@ describe("character-master brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/character-master-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/character-master-brain.ts
@@ -18455,12 +18455,12 @@ export function createCharacterMasterBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/character-master-brain.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/character-master-brain.ts src/lib/foundry/brain/agents/character-master-brain.test.ts
@@ -18477,9 +18477,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `brain.agent === "character-master"`.
-- [ ] `brain.systemPrompt.length <= 2400` (proxy for ≤500 tokens).
-- [ ] Input missing `characterId` is rejected at the Zod schema layer.
+- [x] `brain.agent === "character-master"`.
+- [x] `brain.systemPrompt.length <= 2400` (proxy for ≤500 tokens).
+- [x] Input missing `characterId` is rejected at the Zod schema layer.
 
 ### Task 7.5: floor-environment brain
 
@@ -18487,7 +18487,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/floor-environment-brain.ts`
 - Test: `src/lib/foundry/brain/agents/floor-environment-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/floor-environment-brain.test.ts
@@ -18535,12 +18535,12 @@ describe("floor-environment brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/floor-environment-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/floor-environment-brain.ts
@@ -18642,12 +18642,12 @@ export function createFloorEnvironmentBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/floor-environment-brain.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/floor-environment-brain.ts src/lib/foundry/brain/agents/floor-environment-brain.test.ts
@@ -18664,9 +18664,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `space` enum restricted to the 9 canonical Tower floors.
-- [ ] System prompt explicitly mentions time-state variants.
-- [ ] Output schema's `timeStatePromptVariants` is a record (one prompt per time state) when present.
+- [x] `space` enum restricted to the 9 canonical Tower floors.
+- [x] System prompt explicitly mentions time-state variants.
+- [x] Output schema's `timeStatePromptVariants` is a record (one prompt per time state) when present.
 
 ### Task 7.6: ui-texture brain
 
@@ -18674,7 +18674,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/ui-texture-brain.ts`
 - Test: `src/lib/foundry/brain/agents/ui-texture-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/ui-texture-brain.test.ts
@@ -18717,12 +18717,12 @@ describe("ui-texture brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/ui-texture-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/ui-texture-brain.ts
@@ -18812,12 +18812,12 @@ export function createUiTextureBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/ui-texture-brain.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/ui-texture-brain.ts src/lib/foundry/brain/agents/ui-texture-brain.test.ts
@@ -18834,9 +18834,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Palette hints validated as hex with the `#RRGGBB` regex.
-- [ ] System prompt forces tileable→seamless-edges wording (verified by string match in test).
-- [ ] Output `cssVarName` validated by Zod as min-length string.
+- [x] Palette hints validated as hex with the `#RRGGBB` regex.
+- [x] System prompt forces tileable→seamless-edges wording (verified by string match in test).
+- [x] Output `cssVarName` validated by Zod as min-length string.
 
 ### Task 7.7: sprite-animator brain
 
@@ -18844,7 +18844,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/sprite-animator-brain.ts`
 - Test: `src/lib/foundry/brain/agents/sprite-animator-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/sprite-animator-brain.test.ts
@@ -18894,12 +18894,12 @@ describe("sprite-animator brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/sprite-animator-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/sprite-animator-brain.ts
@@ -18989,12 +18989,12 @@ export function createSpriteAnimatorBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/sprite-animator-brain.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/sprite-animator-brain.ts src/lib/foundry/brain/agents/sprite-animator-brain.test.ts
@@ -19011,9 +19011,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `targetFormat` enum is exactly `sprite-sheet | lottie`.
-- [ ] frameBudget min=2, max=120 (rejects 0 and 121).
-- [ ] System prompt mentions both `frame` and `easing` (verified by regex).
+- [x] `targetFormat` enum is exactly `sprite-sheet | lottie`.
+- [x] frameBudget min=2, max=120 (rejects 0 and 121).
+- [x] System prompt mentions both `frame` and `easing` (verified by regex).
 
 ### Task 7.8: Per-agent provider override registry
 
@@ -19021,7 +19021,7 @@ EOF
 - Create: `src/lib/foundry/brain/provider-registry.ts`
 - Test: `src/lib/foundry/brain/provider-registry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/provider-registry.test.ts
@@ -19070,12 +19070,12 @@ describe("resolveFoundryAgentProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/provider-registry.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the registry**
+- [x] **Step 3: Implement the registry**
 
 ```ts
 // src/lib/foundry/brain/provider-registry.ts
@@ -19115,12 +19115,12 @@ export function resolveFoundryAgentProvider(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/provider-registry.test.ts`
 Expected: PASS — 6 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/provider-registry.ts src/lib/foundry/brain/provider-registry.test.ts
@@ -19138,9 +19138,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Default model resolves to `claude-opus-4-7` when no env override is set.
-- [ ] Per-agent env beats global env.
-- [ ] Missing `ANTHROPIC_API_KEY` flips `dryRun` to true automatically.
+- [x] Default model resolves to `claude-opus-4-7` when no env override is set.
+- [x] Per-agent env beats global env.
+- [x] Missing `ANTHROPIC_API_KEY` flips `dryRun` to true automatically.
 
 ### Task 7.9: Meta-orchestrator intent resolver
 
@@ -19148,7 +19148,7 @@ EOF
 - Create: `src/lib/foundry/brain/meta-orchestrator.ts`
 - Test: `src/lib/foundry/brain/meta-orchestrator.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/meta-orchestrator.test.ts
@@ -19211,12 +19211,12 @@ describe("resolveFoundryIntent", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/meta-orchestrator.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the meta-orchestrator**
+- [x] **Step 3: Implement the meta-orchestrator**
 
 ```ts
 // src/lib/foundry/brain/meta-orchestrator.ts
@@ -19292,12 +19292,12 @@ export async function resolveFoundryIntent(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/meta-orchestrator.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/meta-orchestrator.ts src/lib/foundry/brain/meta-orchestrator.test.ts
@@ -19315,16 +19315,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Threshold is exactly `0.7` (verified by a 0.69 vs 0.70 boundary test if needed).
-- [ ] Non-JSON brain output throws `meta-orchestrator returned non-JSON`.
-- [ ] Unknown agent string from the brain is rejected by Zod (not silently passed through).
+- [x] Threshold is exactly `0.7` (verified by a 0.69 vs 0.70 boundary test if needed).
+- [x] Non-JSON brain output throws `meta-orchestrator returned non-JSON`.
+- [x] Unknown agent string from the brain is rejected by Zod (not silently passed through).
 
 ### Task 7.10: Golden routing table (15 sample requests)
 
 **Files:**
 - Create: `src/lib/foundry/brain/golden-routing.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/golden-routing.test.ts
@@ -19383,21 +19383,21 @@ describe("golden routing table", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/golden-routing.test.ts`
 Expected: FAIL initially — should pass on the first attempt once Task 7.9 is committed. If a case fails, the bug is in the meta-orchestrator (most likely confidence-threshold off-by-one).
 
-- [ ] **Step 3: Implementation already done in 7.9 — verify**
+- [x] **Step 3: Implementation already done in 7.9 — verify**
 
 No new module to create. If a case fails, trace through `resolveFoundryIntent` step-by-step.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/golden-routing.test.ts`
 Expected: PASS — all 15 cases.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/golden-routing.test.ts
@@ -19415,9 +19415,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All 15 cases pass.
-- [ ] At least 2 cases hit the clarification branch.
-- [ ] Every one of the 4 agents appears at least once as a positive expected outcome.
+- [x] All 15 cases pass.
+- [x] At least 2 cases hit the clarification branch.
+- [x] Every one of the 4 agents appears at least once as a positive expected outcome.
 
 ### Task 7.11: Brain factory — assemble specialists by name
 
@@ -19425,7 +19425,7 @@ EOF
 - Create: `src/lib/foundry/brain/factory.ts`
 - Test: `src/lib/foundry/brain/factory.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/factory.test.ts
@@ -19471,12 +19471,12 @@ describe("createFoundryBrainFor", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/factory.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the factory**
+- [x] **Step 3: Implement the factory**
 
 ```ts
 // src/lib/foundry/brain/factory.ts
@@ -19513,12 +19513,12 @@ export function createFoundryBrainFor(
 
 > NOTE: this is the **only** place an `any` appears in the foundry SDK. The factory returns a union of specialist types and TypeScript's structural-types cannot express that union cleanly without massive verbosity. The `eslint-disable-next-line` is scoped to one line and the runtime contract (every returned brain has `agent`, `inputSchema`, `outputSchema`, `decide`) is enforced by the shared `FoundryAgentBrain<I, O>` interface. Reviewers: keep this exception. If a future TypeScript narrows discriminated-union returns, drop the disable.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/factory.test.ts`
 Expected: PASS — 6 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/factory.ts src/lib/foundry/brain/factory.test.ts
@@ -19535,9 +19535,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Factory returns the right `agent` for every one of the 4 kinds.
-- [ ] Unknown kind throws via the exhaustiveness check.
-- [ ] No `any` outside the single eslint-disabled return type (verified by `grep -c "any" src/lib/foundry/brain/factory.ts` ≤ 1 in source).
+- [x] Factory returns the right `agent` for every one of the 4 kinds.
+- [x] Unknown kind throws via the exhaustiveness check.
+- [x] No `any` outside the single eslint-disabled return type (verified by `grep -c "any" src/lib/foundry/brain/factory.ts` ≤ 1 in source).
 
 ### Task 7.12: routeFoundryRequest — meta + dispatch glue
 
@@ -19545,7 +19545,7 @@ EOF
 - Create: `src/lib/foundry/brain/route-request.ts`
 - Test: `src/lib/foundry/brain/route-request.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/route-request.test.ts
@@ -19590,12 +19590,12 @@ describe("routeFoundryRequest", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/route-request.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the glue**
+- [x] **Step 3: Implement the glue**
 
 ```ts
 // src/lib/foundry/brain/route-request.ts
@@ -19635,12 +19635,12 @@ export async function routeFoundryRequest(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/route-request.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/route-request.ts src/lib/foundry/brain/route-request.test.ts
@@ -19658,9 +19658,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Clarification result is returned untouched (no brain dispatch).
-- [ ] parsedArgs are validated by the brain's schema before dispatch (mismatch throws Zod error).
-- [ ] Non-JSON meta output propagates as a typed Error.
+- [x] Clarification result is returned untouched (no brain dispatch).
+- [x] parsedArgs are validated by the brain's schema before dispatch (mismatch throws Zod error).
+- [x] Non-JSON meta output propagates as a typed Error.
 
 ### Task 7.13: Wire MCP generate handler into per-agent brain via routeFoundryRequest
 
@@ -19668,7 +19668,7 @@ EOF
 - Modify: `src/lib/foundry/mcp/tool-handlers/generate.ts`
 - Create: `src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts
@@ -19713,12 +19713,12 @@ describe("generate handler — brain enrichment", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts`
 Expected: FAIL — current `handleFoundryGenerate` does not accept a `brainEnrich` option.
 
-- [ ] **Step 3: Modify the generate handler**
+- [x] **Step 3: Modify the generate handler**
 
 Edit `src/lib/foundry/mcp/tool-handlers/generate.ts` to accept an optional `brainEnrich` callback and to include its return value as `brainHint` in the inbox payload:
 
@@ -19773,12 +19773,12 @@ export async function handleFoundryGenerate(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 Expected: PASS — both new and pre-existing tests pass (the existing test continues to work because `brainEnrich` is optional).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/generate.ts src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts
@@ -19796,9 +19796,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `brainEnrich` is opt-in (handler still passes its existing tests with no callback).
-- [ ] When supplied, the callback's return value is written under `payload.brainHint`.
-- [ ] Atomic write semantics preserved (tmp + rename).
+- [x] `brainEnrich` is opt-in (handler still passes its existing tests with no callback).
+- [x] When supplied, the callback's return value is written under `payload.brainHint`.
+- [x] Atomic write semantics preserved (tmp + rename).
 
 ### Task 7.14: Brain-aware server config wiring
 
@@ -19806,7 +19806,7 @@ EOF
 - Modify: `src/lib/foundry/mcp/server.ts`
 - Create: `src/lib/foundry/mcp/server.brain-config.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/server.brain-config.test.ts
@@ -19863,12 +19863,12 @@ describe("server brain wiring", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.brain-config.test.ts`
 Expected: FAIL — `createFoundryMcpServer` does not yet accept `env` or `brainCallOverride`.
 
-- [ ] **Step 3: Modify the server factory**
+- [x] **Step 3: Modify the server factory**
 
 Augment `createFoundryMcpServer` config:
 
@@ -19909,12 +19909,12 @@ const ctxRun: FoundryGenerateContext = {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.brain-config.test.ts`
 Expected: PASS — 2 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/server.ts src/lib/foundry/mcp/server.brain-config.test.ts
@@ -19932,9 +19932,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `env` and `brainCallOverride` are optional config knobs.
-- [ ] No-key path still produces a queued run (no regression in Task 6.9 tests).
-- [ ] `brainEnrich` is invoked exactly once per `foundry/generate` call when configured.
+- [x] `env` and `brainCallOverride` are optional config knobs.
+- [x] No-key path still produces a queued run (no regression in Task 6.9 tests).
+- [x] `brainEnrich` is invoked exactly once per `foundry/generate` call when configured.
 
 ### Task 7.15: Deprecate legacy llm-brain.ts with @deprecated JSDoc
 
@@ -19942,7 +19942,7 @@ EOF
 - Modify: `src/lib/artlab/orchestrator/llm-brain.ts`
 - Create: `src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts
@@ -19968,12 +19968,12 @@ describe("llm-brain.ts deprecation", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts`
 Expected: FAIL — no `@deprecated` annotation yet.
 
-- [ ] **Step 3: Add the @deprecated JSDoc**
+- [x] **Step 3: Add the @deprecated JSDoc**
 
 Open `src/lib/artlab/orchestrator/llm-brain.ts` and add above `export interface ArtLabLlmBrain`:
 
@@ -19991,12 +19991,12 @@ Open `src/lib/artlab/orchestrator/llm-brain.ts` and add above `export interface 
 
 No code change beyond the comment.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/artlab/orchestrator/llm-brain.ts src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts
@@ -20013,16 +20013,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] JSDoc `@deprecated` appears before the `ArtLabLlmBrain` declaration.
-- [ ] Existing `claude-brain.ts`, `gemini-brain.ts`, `logged-brain.ts` continue to compile.
-- [ ] `decideWithMockBrain` remains exported for back-compat.
+- [x] JSDoc `@deprecated` appears before the `ArtLabLlmBrain` declaration.
+- [x] Existing `claude-brain.ts`, `gemini-brain.ts`, `logged-brain.ts` continue to compile.
+- [x] `decideWithMockBrain` remains exported for back-compat.
 
 ### Task 7.16: Memory feedback scoping integration test
 
 **Files:**
 - Create: `src/lib/foundry/brain/memory-feedback.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/memory-feedback.integration.test.ts
@@ -20094,21 +20094,21 @@ describe("memory feedback scoping — end to end", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-feedback.integration.test.ts`
 Expected: PASS or FAIL — should PASS if 7.2 + 7.4 + 7.5 are landed; if it FAILS, the bug is in 7.2 (scope filter not honoring `source`).
 
-- [ ] **Step 3: No implementation — purely an acceptance gate**
+- [x] **Step 3: No implementation — purely an acceptance gate**
 
 If the test passes, move to commit. If it fails, fix the underlying scope/brain bug.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-feedback.integration.test.ts`
 Expected: PASS — 3 assertions.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/memory-feedback.integration.test.ts
@@ -20125,9 +20125,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All three integration cases pass.
-- [ ] Character brain receives `char-trick` win and `WARDROBE` rejection (and not the floor ones).
-- [ ] Floor brain receives `floor-trick` win and `LIGHT` rejection (and not the character ones).
+- [x] All three integration cases pass.
+- [x] Character brain receives `char-trick` win and `WARDROBE` rejection (and not the floor ones).
+- [x] Floor brain receives `floor-trick` win and `LIGHT` rejection (and not the character ones).
 
 ### Phase 7 completion criteria
 
@@ -20173,7 +20173,7 @@ This phase ships the actual on-ramp. The MCP server (Phase 6) and per-agent brai
 - Create: `src/lib/foundry/integration/claude-skill-template.ts`
 - Test: `src/lib/foundry/integration/claude-skill-template.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/claude-skill-template.test.ts
@@ -20212,12 +20212,12 @@ describe("renderFoundryClaudeSkill", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/claude-skill-template.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the template renderer**
+- [x] **Step 3: Implement the template renderer**
 
 ```ts
 // src/lib/foundry/integration/claude-skill-template.ts
@@ -20301,12 +20301,12 @@ const status = await mcp.callTool({ name: "foundry/generate_status", arguments: 
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/claude-skill-template.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/claude-skill-template.ts src/lib/foundry/integration/claude-skill-template.test.ts
@@ -20324,9 +20324,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All 9 tool names appear in the rendered markdown.
-- [ ] YAML frontmatter starts with `---` and names the skill `tower-art-foundry`.
-- [ ] Renderer interpolates `opts.repoRoot` into canon path mentions.
+- [x] All 9 tool names appear in the rendered markdown.
+- [x] YAML frontmatter starts with `---` and names the skill `tower-art-foundry`.
+- [x] Renderer interpolates `opts.repoRoot` into canon path mentions.
 
 ### Task 8.2: install-claude-skill script
 
@@ -20335,7 +20335,7 @@ EOF
 - Test: `scripts/foundry-install-claude-skill.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-install-claude-skill.test.ts
@@ -20390,12 +20390,12 @@ describe("installFoundryClaudeSkill", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-install-claude-skill.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the install script**
+- [x] **Step 3: Implement the install script**
 
 ```ts
 // scripts/foundry-install-claude-skill.ts
@@ -20459,7 +20459,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script**
+- [x] **Step 4: Add npm script**
 
 Edit `package.json` `scripts` block:
 
@@ -20469,12 +20469,12 @@ Edit `package.json` `scripts` block:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-install-claude-skill.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-install-claude-skill.ts scripts/foundry-install-claude-skill.test.ts package.json
@@ -20491,9 +20491,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Confirmation prompt is mandatory unless `FOUNDRY_INSTALL_YES=1`.
-- [ ] Existing SKILL.md backed up to `SKILL.md.bak` before overwrite.
-- [ ] Atomic write (tmp + rename).
+- [x] Confirmation prompt is mandatory unless `FOUNDRY_INSTALL_YES=1`.
+- [x] Existing SKILL.md backed up to `SKILL.md.bak` before overwrite.
+- [x] Atomic write (tmp + rename).
 
 ### Task 8.3: Antigravity workspace template renderer
 
@@ -20501,7 +20501,7 @@ EOF
 - Create: `src/lib/foundry/integration/antigravity-workspace-template.ts`
 - Test: `src/lib/foundry/integration/antigravity-workspace-template.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/antigravity-workspace-template.test.ts
@@ -20533,12 +20533,12 @@ describe("renderFoundryAntigravityWorkspace", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/antigravity-workspace-template.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the template**
+- [x] **Step 3: Implement the template**
 
 ```ts
 // src/lib/foundry/integration/antigravity-workspace-template.ts
@@ -20597,12 +20597,12 @@ primary-actions:
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/antigravity-workspace-template.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/antigravity-workspace-template.ts src/lib/foundry/integration/antigravity-workspace-template.test.ts
@@ -20619,9 +20619,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Workspace slug is exactly `tower-art-foundry`.
-- [ ] Byte-protected list includes `.artlab/engine/promoted`, `public/art/lobby/otis`, `public/art/penthouse/ceo`, `public/lobby`.
-- [ ] All 9 primary-actions match the canonical MCP tool names.
+- [x] Workspace slug is exactly `tower-art-foundry`.
+- [x] Byte-protected list includes `.artlab/engine/promoted`, `public/art/lobby/otis`, `public/art/penthouse/ceo`, `public/lobby`.
+- [x] All 9 primary-actions match the canonical MCP tool names.
 
 ### Task 8.4: install-antigravity-workspace script
 
@@ -20630,7 +20630,7 @@ EOF
 - Test: `scripts/foundry-install-antigravity-workspace.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-install-antigravity-workspace.test.ts
@@ -20668,12 +20668,12 @@ describe("installFoundryAntigravityWorkspace", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-install-antigravity-workspace.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the install script**
+- [x] **Step 3: Implement the install script**
 
 ```ts
 // scripts/foundry-install-antigravity-workspace.ts
@@ -20727,7 +20727,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script**
+- [x] **Step 4: Add npm script**
 
 Edit `package.json`:
 
@@ -20737,12 +20737,12 @@ Edit `package.json`:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-install-antigravity-workspace.test.ts`
 Expected: PASS — 2 assertions pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-install-antigravity-workspace.ts scripts/foundry-install-antigravity-workspace.test.ts package.json
@@ -20759,9 +20759,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Workspace written under `.antigravity/workspaces/tower-art-foundry/`.
-- [ ] Confirm-gated like the other installers.
-- [ ] Existing workspace backed up to `workspace.yaml.bak` before overwrite.
+- [x] Workspace written under `.antigravity/workspaces/tower-art-foundry/`.
+- [x] Confirm-gated like the other installers.
+- [x] Existing workspace backed up to `workspace.yaml.bak` before overwrite.
 
 ### Task 8.5: Telegram /foundry command handler
 
@@ -20769,7 +20769,7 @@ EOF
 - Create: `src/lib/foundry/integration/telegram-commands.ts`
 - Test: `src/lib/foundry/integration/telegram-commands.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/telegram-commands.test.ts
@@ -20854,12 +20854,12 @@ describe("handleFoundryTelegramCommand", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/telegram-commands.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the command handler**
+- [x] **Step 3: Implement the command handler**
 
 ```ts
 // src/lib/foundry/integration/telegram-commands.ts
@@ -20964,12 +20964,12 @@ export async function handleFoundryTelegramCommand(input: FoundryTelegramArgs): 
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/telegram-commands.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/telegram-commands.ts src/lib/foundry/integration/telegram-commands.test.ts
@@ -20987,9 +20987,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Bare `/foundry` returns help mentioning all four subcommands.
-- [ ] `/foundry generate` rejects descriptions shorter than 8 chars with a usage hint.
-- [ ] `/foundry preview` returns a `photo` payload pointing at the absolute pack path.
+- [x] Bare `/foundry` returns help mentioning all four subcommands.
+- [x] `/foundry generate` rejects descriptions shorter than 8 chars with a usage hint.
+- [x] `/foundry preview` returns a `photo` payload pointing at the absolute pack path.
 
 ### Task 8.6: Wire /foundry into the existing bot dispatcher
 
@@ -20997,7 +20997,7 @@ EOF
 - Modify: `src/lib/artlab/bot/commands.ts`
 - Create: `src/lib/artlab/bot/commands.foundry-wire.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/artlab/bot/commands.foundry-wire.test.ts
@@ -21036,12 +21036,12 @@ describe("bot /foundry routing", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/artlab/bot/commands.foundry-wire.test.ts`
 Expected: FAIL — `commands.ts` does not yet route the `foundry` command.
 
-- [ ] **Step 3: Modify commands.ts**
+- [x] **Step 3: Modify commands.ts**
 
 Add `"foundry"` to the `KNOWN` tuple and add a switch arm:
 
@@ -21070,12 +21070,12 @@ case "foundry": {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/artlab/bot/commands.foundry-wire.test.ts src/lib/artlab/bot/commands.test.ts`
 Expected: PASS — new test + pre-existing tests both green.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/artlab/bot/commands.ts src/lib/artlab/bot/commands.foundry-wire.test.ts
@@ -21093,9 +21093,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `KNOWN` now includes `"foundry"`.
-- [ ] No regression: every other bot command test continues to pass.
-- [ ] HTML-escaping happens before `<pre>` wrap to avoid Telegram parser errors.
+- [x] `KNOWN` now includes `"foundry"`.
+- [x] No regression: every other bot command test continues to pass.
+- [x] HTML-escaping happens before `<pre>` wrap to avoid Telegram parser errors.
 
 ### Task 8.7: Demo page fixture — promoted Asset Pack samples
 
@@ -21103,7 +21103,7 @@ EOF
 - Create: `src/lib/foundry/integration/demo-fixtures.ts`
 - Test: `src/lib/foundry/integration/demo-fixtures.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/demo-fixtures.test.ts
@@ -21138,12 +21138,12 @@ describe("FOUNDRY_DEMO_PACKS", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/demo-fixtures.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the fixture**
+- [x] **Step 3: Implement the fixture**
 
 ```ts
 // src/lib/foundry/integration/demo-fixtures.ts
@@ -21208,12 +21208,12 @@ export const FOUNDRY_DEMO_PACKS: readonly FoundryDemoPack[] = [
 ];
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/demo-fixtures.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/demo-fixtures.ts src/lib/foundry/integration/demo-fixtures.test.ts
@@ -21231,9 +21231,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Fixture lists exactly 4 packs, one per the 4 demo modalities.
-- [ ] Every `publicPath` is under `/art/`.
-- [ ] Every entry carries an `alt` (a11y baseline).
+- [x] Fixture lists exactly 4 packs, one per the 4 demo modalities.
+- [x] Every `publicPath` is under `/art/`.
+- [x] Every entry carries an `alt` (a11y baseline).
 
 ### Task 8.8: SpriteSheetPlayer client component (used by demo + integration snippet)
 
@@ -21241,7 +21241,7 @@ EOF
 - Create: `src/components/foundry/sprite-sheet-player.tsx`
 - Test: `src/components/foundry/sprite-sheet-player.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // src/components/foundry/sprite-sheet-player.test.tsx
@@ -21267,12 +21267,12 @@ describe("SpriteSheetPlayer", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/foundry/sprite-sheet-player.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the component**
+- [x] **Step 3: Implement the component**
 
 ```tsx
 // src/components/foundry/sprite-sheet-player.tsx
@@ -21334,12 +21334,12 @@ export function SpriteSheetPlayer(props: SpriteSheetPlayerProps): JSX.Element {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/foundry/sprite-sheet-player.test.tsx`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/foundry/sprite-sheet-player.tsx src/components/foundry/sprite-sheet-player.test.tsx
@@ -21357,9 +21357,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Component has the `"use client"` directive (browser-only hook).
-- [ ] Respects `prefers-reduced-motion` by skipping the interval.
-- [ ] Emits `role="img"` and supports an aria-label prop.
+- [x] Component has the `"use client"` directive (browser-only hook).
+- [x] Respects `prefers-reduced-motion` by skipping the interval.
+- [x] Emits `role="img"` and supports an aria-label prop.
 
 ### Task 8.9: foundry-demo page (one of each modality)
 
@@ -21367,7 +21367,7 @@ EOF
 - Create: `src/app/foundry-demo/page.tsx`
 - Test: `src/app/foundry-demo/page.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // src/app/foundry-demo/page.test.tsx
@@ -21399,12 +21399,12 @@ describe("FoundryDemoPage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/app/foundry-demo/page.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the page**
+- [x] **Step 3: Implement the page**
 
 ```tsx
 // src/app/foundry-demo/page.tsx
@@ -21469,12 +21469,12 @@ export default function FoundryDemoPage(): JSX.Element {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/app/foundry-demo/page.test.tsx`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/app/foundry-demo/page.tsx src/app/foundry-demo/page.test.tsx
@@ -21492,16 +21492,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All 4 demo modalities render in the static markup.
-- [ ] Each section carries an `aria-label` or heading.
-- [ ] Page title mentions "Tower Art Foundry".
+- [x] All 4 demo modalities render in the static markup.
+- [x] Each section carries an `aria-label` or heading.
+- [x] Page title mentions "Tower Art Foundry".
 
 ### Task 8.10: Integration test — Next build passes with foundry-demo page
 
 **Files:**
 - Create: `src/app/foundry-demo/build.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/app/foundry-demo/build.integration.test.ts
@@ -21533,12 +21533,12 @@ describe("foundry-demo page builds", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/app/foundry-demo/build.integration.test.ts`
 Expected: PASS (if 8.7–8.9 are clean) or FAIL with a compilation error in the demo page. Diagnose if FAIL.
 
-- [ ] **Step 3: Implementation already done in 8.7–8.9 — verify and tighten**
+- [x] **Step 3: Implementation already done in 8.7–8.9 — verify and tighten**
 
 If the test fails, the build error is the source of truth. Common issues:
 1. Missing `"use client"` on a hook-using component (already handled by SpriteSheetPlayer).
@@ -21547,12 +21547,12 @@ If the test fails, the build error is the source of truth. Common issues:
 
 Acceptable fallback if real promoted files are missing: replace each `<Image>` with a small placeholder div that has the correct `aria-label` so the build still passes and the test assertion `result.code === 0` is satisfied.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/app/foundry-demo/build.integration.test.ts`
 Expected: PASS — `next build` exits 0 and emits the `foundry-demo` route name in its output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/app/foundry-demo/build.integration.test.ts
@@ -21569,16 +21569,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `next build` exits 0.
-- [ ] Build output includes the route name `foundry-demo`.
-- [ ] Test completes within 240 seconds.
+- [x] `next build` exits 0.
+- [x] Build output includes the route name `foundry-demo`.
+- [x] Test completes within 240 seconds.
 
 ### Task 8.11: End-to-end agent loop acceptance gate
 
 **Files:**
 - Create: `src/lib/foundry/integration/agent-loop.acceptance.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/agent-loop.acceptance.test.ts
@@ -21686,12 +21686,12 @@ describe("agent loop acceptance gate", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/agent-loop.acceptance.test.ts`
 Expected: PASS if all prior tasks are clean; FAIL otherwise (and the failure mode is the source of truth for what to fix).
 
-- [ ] **Step 3: Implementation — verify the surrounding stack**
+- [x] **Step 3: Implementation — verify the surrounding stack**
 
 If the test fails, walk through the chain in order:
 1. MCP server starts (Task 6.13 problem).
@@ -21700,12 +21700,12 @@ If the test fails, walk through the chain in order:
 4. `foundry/generate_status` reads `closed` → maps to `promoted` (Task 6.10).
 5. `foundry/asset_pack_integration` emits the SpriteSheetPlayer snippet (Task 6.7).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/agent-loop.acceptance.test.ts`
 Expected: PASS — full loop closes.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/agent-loop.acceptance.test.ts
@@ -21723,9 +21723,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Test exercises the full chain: generate → fake promote → poll → integration.
-- [ ] Final snippet body contains `SpriteSheetPlayer` (the expected sprite-animation integration).
-- [ ] Completes within 60 seconds.
+- [x] Test exercises the full chain: generate → fake promote → poll → integration.
+- [x] Final snippet body contains `SpriteSheetPlayer` (the expected sprite-animation integration).
+- [x] Completes within 60 seconds.
 
 ### Task 8.12: Update CLAUDE.md with Foundry SDK pointer
 
@@ -21733,7 +21733,7 @@ EOF
 - Modify: `CLAUDE.md`
 - Create: `tests/codebase/claude-md.foundry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // tests/codebase/claude-md.foundry.test.ts
@@ -21763,12 +21763,12 @@ describe("CLAUDE.md mentions the Tower Art Foundry SDK", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/codebase/claude-md.foundry.test.ts`
 Expected: FAIL — CLAUDE.md doesn't yet mention Tower Art Foundry, and docs/foundry/ doesn't exist.
 
-- [ ] **Step 3: Update CLAUDE.md and create docs/foundry/**
+- [x] **Step 3: Update CLAUDE.md and create docs/foundry/**
 
 Add a new section to `CLAUDE.md` right after the existing **ArtLab — Tower creative engine** block:
 
@@ -21799,12 +21799,12 @@ Agent-native SDK layered over the ArtLab engine. See CLAUDE.md for the high-leve
 entry points. Detailed tool reference: MCP-TOOLS.md.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/codebase/claude-md.foundry.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add CLAUDE.md docs/foundry/ tests/codebase/claude-md.foundry.test.ts
@@ -21821,9 +21821,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] CLAUDE.md contains the phrase "Tower Art Foundry".
-- [ ] `docs/foundry/` directory exists with at least a README.md.
-- [ ] Existing "ArtLab" mention preserved (engine + SDK coexist).
+- [x] CLAUDE.md contains the phrase "Tower Art Foundry".
+- [x] `docs/foundry/` directory exists with at least a README.md.
+- [x] Existing "ArtLab" mention preserved (engine + SDK coexist).
 
 ### Task 8.13: Update STRUCTURE.md with foundry section
 
@@ -21831,7 +21831,7 @@ EOF
 - Modify: `STRUCTURE.md`
 - Create: `tests/codebase/structure-md.foundry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // tests/codebase/structure-md.foundry.test.ts
@@ -21860,12 +21860,12 @@ describe("STRUCTURE.md mentions the foundry tree", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/codebase/structure-md.foundry.test.ts`
 Expected: FAIL — STRUCTURE.md does not yet mention the foundry tree.
 
-- [ ] **Step 3: Append a foundry section to STRUCTURE.md**
+- [x] **Step 3: Append a foundry section to STRUCTURE.md**
 
 Append at an appropriate place (near the existing ArtLab section or in the file-map table):
 
@@ -21892,12 +21892,12 @@ Append at an appropriate place (near the existing ArtLab section or in the file-
 | `scripts/foundry-install-antigravity-workspace.ts` | Writes .antigravity/workspaces/tower-art-foundry/workspace.yaml |
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/codebase/structure-md.foundry.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add STRUCTURE.md tests/codebase/structure-md.foundry.test.ts
@@ -21914,9 +21914,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] STRUCTURE.md contains the heading "Tower Art Foundry SDK".
-- [ ] Table entries cover both `mcp/` and `brain/` subtrees.
-- [ ] `scripts/foundry-mcp.ts` is mentioned by name.
+- [x] STRUCTURE.md contains the heading "Tower Art Foundry SDK".
+- [x] Table entries cover both `mcp/` and `brain/` subtrees.
+- [x] `scripts/foundry-mcp.ts` is mentioned by name.
 
 ### Task 8.14: Final phase tag + acceptance walkthrough
 
@@ -21924,7 +21924,7 @@ EOF
 - Create: `docs/foundry/PHASE-8-ACCEPTANCE.md`
 - Create: `tests/codebase/foundry-acceptance.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // tests/codebase/foundry-acceptance.test.ts
@@ -21967,12 +21967,12 @@ describe("Foundry phase-8 acceptance walkthrough", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/codebase/foundry-acceptance.test.ts`
 Expected: FAIL — `PHASE-8-ACCEPTANCE.md` does not exist.
 
-- [ ] **Step 3: Write the acceptance walkthrough**
+- [x] **Step 3: Write the acceptance walkthrough**
 
 ```markdown
 # Tower Art Foundry SDK — Phase 8 acceptance walkthrough
@@ -22043,12 +22043,12 @@ engine layer remains **ArtLab** in internal code paths and developer docs —
 the two are layers of one system, never marketed as separate products.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/codebase/foundry-acceptance.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Final tag + commit**
+- [x] **Step 5: Final tag + commit**
 
 ```bash
 git add docs/foundry/PHASE-8-ACCEPTANCE.md tests/codebase/foundry-acceptance.test.ts
@@ -22067,9 +22067,9 @@ git tag foundry-phase-8-complete
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] PHASE-8-ACCEPTANCE.md mentions all 4 install scripts.
-- [ ] PHASE-8-ACCEPTANCE.md references both the agent-loop and next-build tests.
-- [ ] All 9 MCP tool names appear in the walkthrough.
+- [x] PHASE-8-ACCEPTANCE.md mentions all 4 install scripts.
+- [x] PHASE-8-ACCEPTANCE.md references both the agent-loop and next-build tests.
+- [x] All 9 MCP tool names appear in the walkthrough.
 
 ### Phase 8 completion criteria
 

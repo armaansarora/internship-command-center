@@ -1,0 +1,42 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: dylan
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Dylan Shorts"
+shortLabel: "Dylan"
+title: "Chief Operating Officer"
+floorId: situation-room
+floorLabel: "Floor 4 — The Situation Room"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "calendar-tyrant-with-chief-of-staff-urgency"
+silhouette: "boxy-confident-stance, clipped-gestures, watch-check-rhythm"
+wardrobe: "utility-blazer, crisp-layers, operations-ready-shoes"
+props:
+  - tablet
+  - clipboard
+  - calendar-card
+  - timer
+mobileRead: "orange-ops-accent-with-clipboard-watch-gesture"
+negativeDNA: "no-bland-project-manager-stock-art, no-panic-sweat, no-military-costume, no-intern-styling"
+accent: "orange-ops-DC7C28"
+doctrine: "time-is-the-only-resource"
+flaw: "no-slack-in-the-schedule"
+secretStrength: "anticipates-every-bottleneck"
+wound: "shipped-something-broken-once"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: operations-brisk
+artDirectionNotes: "Dylan should feel clipped and operational, not panicked; the watch or clipboard carries the rhythm."

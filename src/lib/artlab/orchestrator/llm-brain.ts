@@ -63,6 +63,15 @@ export interface ArtLabLlmDecisionResult {
   durationMs?: number;
 }
 
+/**
+ * @deprecated Replaced in Phase 7 by per-agent brains. New callers should
+ * use {@link createFoundryBrainFor} from `@/lib/foundry/brain/factory` or
+ * {@link routeFoundryRequest} from `@/lib/foundry/brain/route-request`.
+ *
+ * This monolithic decide() interface remains exported for back-compat with
+ * existing ArtLab call sites (intake/, runners/, bot/) during the transition.
+ * Once those sites migrate, this file will be removed.
+ */
 export interface ArtLabLlmBrain {
   decide(req: ArtLabLlmDecisionRequest): Promise<ArtLabLlmDecisionResult>;
 }

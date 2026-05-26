@@ -27,6 +27,10 @@ export interface DaemonCliInboxBridge {
   drain(): Promise<unknown>;
 }
 
+export interface DaemonFoundryPoller {
+  tick(): Promise<unknown>;
+}
+
 export interface DaemonSupervisorView {
   activeChildren(): readonly unknown[];
 }
@@ -36,6 +40,7 @@ export interface DaemonContextInput {
   telegramPoller: DaemonTicker;
   queueProcessor: DaemonTicker;
   cliInboxBridge?: DaemonCliInboxBridge;
+  foundryPoller?: DaemonFoundryPoller;
   cancelDrain?: DaemonCancelDrain;
   crashRecovery?: DaemonCrashRecovery;
   crashRecoveryIntervalMs?: number;
@@ -49,6 +54,7 @@ export interface DaemonContext {
   telegramPoller: DaemonTicker;
   queueProcessor: DaemonTicker;
   cliInboxBridge?: DaemonCliInboxBridge;
+  foundryPoller?: DaemonFoundryPoller;
   cancelDrain?: DaemonCancelDrain;
   crashRecovery?: DaemonCrashRecovery;
   crashRecoveryIntervalMs: number;
@@ -68,6 +74,7 @@ export function createDaemonContext(input: DaemonContextInput): DaemonContext {
     telegramPoller: input.telegramPoller,
     queueProcessor: input.queueProcessor,
     cliInboxBridge: input.cliInboxBridge,
+    foundryPoller: input.foundryPoller,
     cancelDrain: input.cancelDrain,
     crashRecovery: input.crashRecovery,
     crashRecoveryIntervalMs: input.crashRecoveryIntervalMs ?? 60_000,
@@ -156,6 +163,13 @@ export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
 
   if (ctx.cliInboxBridge) {
     await runStep(ctx.workspaceRoot, "cli-inbox-bridge", () => ctx.cliInboxBridge!.drain());
+  }
+
+  // Foundry MCP inbox → ArtLab queue. Must drain BEFORE the queue processor
+  // ticks so newly arrived `foundry/generate` jobs spawn workers on the
+  // same tick (mirrors the cli-inbox-bridge → queue-processor ordering).
+  if (ctx.foundryPoller) {
+    await runStep(ctx.workspaceRoot, "foundry-poller", () => ctx.foundryPoller!.tick());
   }
 
   if (ctx.crashRecovery) {

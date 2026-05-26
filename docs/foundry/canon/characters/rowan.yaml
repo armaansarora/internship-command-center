@@ -1,0 +1,43 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: rowan
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Rowan Vale"
+shortLabel: "Rowan"
+title: "Archivist"
+floorId: archive
+floorLabel: "The Archive"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "restless-memory-keeper-with-archive-and-elevator-access"
+silhouette: "asymmetrical-lean, half-turned-posture, kinetic-hands"
+wardrobe: "structured-coat-or-cardigan, rolled-sleeves, brass-rail-detail"
+props:
+  - pencil
+  - tablet
+  - tool-ring
+  - index-card
+  - elevator-keycard
+mobileRead: "asymmetrical-archive-lean-with-green-index-card-accent"
+negativeDNA: "no-dusty-wizard-archivist, no-sepia-nostalgia, no-inventor-goggles, no-magical-librarian-costume"
+accent: "archive-green-6E8F5E"
+doctrine: "every-record-matters"
+flaw: "loses-track-of-time"
+secretStrength: "remembers-where-everything-lives"
+wound: "lost-a-record-once"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: archive-kinetic
+artDirectionNotes: "Rowan should carry motion in an asymmetrical lean and tool-card energy, not fantasy archivist cues."

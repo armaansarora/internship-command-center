@@ -1,0 +1,15 @@
+header:
+  kind: iconography-rules
+  schemaVersion: "1.0.0"
+  id: tower-default
+  revisedAt: "2026-05-25T00:00:00.000Z"
+strokeWidthPx: 1.5
+cornerRadiusPx: 2
+weight: regular
+gridSizePx: 24
+forbiddenStyles:
+  - bicolor
+  - gradient-fill
+  - skeuomorphic
+  - emoji-style
+  - photographic

@@ -1,0 +1,41 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: rafe-calder
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Rafe Calder"
+shortLabel: "Rafe"
+title: "Chief Revenue Officer"
+floorId: war-room
+floorLabel: "Floor 7 — The War Room"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "competitive-application-demolition-expert-with-restless-pressure"
+silhouette: "forward-lean, athletic-tension, expressive-brows, active-hands"
+wardrobe: "rolled-sleeves, loosened-tie-or-tactical-jacket, loud-shoes"
+props:
+  - red-pen
+  - stylus
+  - pipeline-board-marker
+mobileRead: "forward-lean-plus-red-edit-prop-reads-even-at-small-size"
+negativeDNA: "no-finance-bro-stock-pose, no-superhero-stance, no-luxury-flex, no-generic-salesman-grin"
+accent: "blue-edit-prop-2D7DD2"
+doctrine: "every-deal-can-be-closed"
+flaw: "burns-out-the-room"
+secretStrength: "knows-the-pipeline-cold"
+wound: "lost-the-biggest-deal"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: war-room-kinetic
+artDirectionNotes: "Rafe should read as restless pressure through lean, brows, sleeves, and red edit prop."

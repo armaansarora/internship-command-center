@@ -104,9 +104,7 @@ export default function WaitlistPage() {
             lineHeight: 1.6,
           }}
         >
-          {GATE_CONFIG.brand.tagline} We&apos;re letting people in slowly so the
-          building stays well-staffed. Drop your email and we&apos;ll send a key
-          when a floor opens.
+          {`${GATE_CONFIG.brand.tagline} We're letting people in slowly so the building stays well-staffed. Drop your email and we'll send a key when a floor opens.`}
         </p>
 
         <div className="mx-auto mt-10 w-full max-w-md">

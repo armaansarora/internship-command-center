@@ -116,7 +116,11 @@ test.describe("season pass — Stripe checkout init contract", () => {
     });
 
     // Static HTML that mirrors the ActivatePassButton flow. Inlined so the
-    // test is independent of any dev-server flag state.
+    // test is independent of any dev-server flag state. The fetch URL is
+    // absolute because page.setContent runs at about:blank — a relative URL
+    // would have no origin to resolve against and throw before reaching the
+    // route handler. The page.route pattern below ("**\/api\/stripe\/checkout")
+    // matches any origin, so the synthetic host is fine.
     await page.setContent(
       `
       <!doctype html>
@@ -126,7 +130,7 @@ test.describe("season pass — Stripe checkout init contract", () => {
           <script>
             const btn = document.getElementById("activate");
             btn.addEventListener("click", async () => {
-              const res = await fetch("/api/stripe/checkout", {
+              const res = await fetch("http://stripe-checkout.test/api/stripe/checkout", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ tier: "seasonPass" }),

@@ -8,6 +8,7 @@ import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
+import { handleFoundryTelegramCommand } from "@/lib/foundry/integration/telegram-commands";
 import {
   askAnswerTemplate,
   cancelAck,
@@ -33,7 +34,7 @@ export interface BotCommandResult {
   message: TelegramOutboundMessage;
 }
 
-const KNOWN = ["status", "queue", "cancel", "health", "help", "decisions", "ask"] as const;
+const KNOWN = ["status", "queue", "cancel", "health", "help", "decisions", "ask", "foundry"] as const;
 
 async function handleStatus(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
   const runsDir = join(workspaceRoot, "runs");
@@ -232,6 +233,23 @@ function buildAskBrain(workspaceRoot: string): ArtLabLlmBrain {
   return createLoggedBrain({ inner: raw, workspaceRoot });
 }
 
+async function handleFoundry(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
+  const canonRoot = join(workspaceRoot, "..", "canon");
+  const packsRoot = join(workspaceRoot, "promoted");
+  const slotRegistryPath = join(workspaceRoot, "slots", "registry.json");
+  const reply = await handleFoundryTelegramCommand({
+    args,
+    workspaceRoot,
+    canonRoot,
+    packsRoot,
+    slotRegistryPath,
+  });
+  // Telegram message templates expect HTML — wrap in <pre> for monospace.
+  // Escape & first so the subsequent < replacement doesn't corrupt entities.
+  const escaped = reply.text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  return { text: `<pre>${escaped}</pre>`, parseMode: "HTML" };
+}
+
 async function handleAsk(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
   const question = args.join(" ").trim();
   if (!question) {
@@ -307,5 +325,6 @@ export async function handleBotCommand(input: BotCommandInput): Promise<BotComma
     case "help": return { kind: "text", message: helpTemplate() };
     case "decisions": return { kind: "text", message: handleDecisions(input.workspaceRoot, input.args) };
     case "ask": return { kind: "text", message: await handleAsk(input.workspaceRoot, input.args) };
+    case "foundry": return { kind: "text", message: await handleFoundry(input.workspaceRoot, input.args) };
   }
 }

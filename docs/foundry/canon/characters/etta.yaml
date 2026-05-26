@@ -1,0 +1,42 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: etta
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Etta Knox"
+shortLabel: "Etta"
+title: "Chief Trust Officer"
+floorId: vault
+floorLabel: "The Vault"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "governance-authority-whose-strictness-is-protective-care"
+silhouette: "squared-stance, tiny-smile, composed-veto-posture"
+wardrobe: "tailored-graphite-and-cream, oxblood-trust-accent"
+props:
+  - permission-stamp
+  - clipped-tablet
+  - redline-card
+  - audit-seal
+mobileRead: "squared-graphite-shape-plus-oxblood-stamp-accent"
+negativeDNA: "no-police-uniform, no-villain-bureaucrat, no-courtroom-cosplay, no-cute-lock-mascot"
+accent: "oxblood-trust-9E3F4F"
+doctrine: "trust-is-built-in-the-veto"
+flaw: "withholds-permission"
+secretStrength: "reads-the-fine-print-instantly"
+wound: "approved-something-she-shouldn't-have"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: trust-still
+artDirectionNotes: "Etta should feel protective through restraint: squared stance, tiny smile, and permission-stamp gravity."

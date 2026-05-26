@@ -5,6 +5,11 @@ const config: Config = {
   darkMode: ["class"],
   content: [
     "./src/**/*.{ts,tsx}",
+    // Exclude foundry agent integration templates — they emit code as
+    // string literals (e.g. `bg-[url('${pngPath}')]`), not Tailwind
+    // class consumption. Scanning them generates broken arbitrary-value
+    // classes that fail Turbopack module resolution.
+    "!./src/lib/foundry/agents/**/integration.ts",
   ],
   theme: {
     extend: {

@@ -42,7 +42,10 @@ describe("PricingPage tier display", () => {
     expect(html).toContain("Pro");
     expect(html).toContain("Flexibility for off-season usage");
     expect(html).toContain("Campus");
-    expect(html).toContain("Talk to us");
+    // Beta-gated default → CampusBanner CTA routes to /waitlist as
+    // "Request team access". When beta.mode === "open" it becomes
+    // "Talk to us → /campus". Assert on the testid to stay copy-agnostic.
+    expect(html).toContain("data-testid=\"campus-banner\"");
 
     // Season Pass surfaces are absent.
     expect(html).not.toContain("data-tier=\"season-pass\"");
@@ -66,9 +69,10 @@ describe("PricingPage tier display", () => {
     const { PRICING_CONFIG } = await import("@/lib/config/pricing-config");
     expect(html).toContain(`$${PRICING_CONFIG.tiers.seasonPass.price}`);
 
-    // Campus banner remains a separate horizontal lane.
+    // Campus banner remains a separate horizontal lane. Copy varies with
+    // beta.mode (gated → "Request team access"; open → "Talk to us"); the
+    // testid is the stable handle.
     expect(html).toContain("data-testid=\"campus-banner\"");
-    expect(html).toContain("Talk to us");
   });
 
   it("flag ON: emits a Schema.org Product structured-data block for the Season Pass", async () => {

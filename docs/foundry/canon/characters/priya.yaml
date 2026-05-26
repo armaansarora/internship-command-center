@@ -1,0 +1,41 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: priya
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Priya Sen"
+shortLabel: "Priya"
+title: "Chief Financial Officer"
+floorId: observatory
+floorLabel: "Floor 2 — The Observatory"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "precise-portfolio-analyst-with-visible-conscience"
+silhouette: "compact, composed, mathematical-stillness, practical-posture"
+wardrobe: "tailored-functional-layers, cool-observatory-tones"
+props:
+  - tablet-ledger
+  - annotated-chart-card
+  - precise-stylus
+mobileRead: "cool-compact-shape-plus-tablet-ledger-prop"
+negativeDNA: "no-robot-accountant, no-banker-stock-suit, no-abacus-gimmick, no-chart-clutter-baked-into-sprite"
+accent: "cool-observatory-64B4FF"
+doctrine: "the-math-tells-the-truth"
+flaw: "doubts-her-instincts"
+secretStrength: "spots-anomalies-instantly"
+wound: "missed-the-warning-signs"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: analytical-precise
+artDirectionNotes: "Priya should stay compact, exact, and humane, with the tablet-ledger read never overwhelming her face."

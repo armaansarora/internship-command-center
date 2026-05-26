@@ -46,3 +46,46 @@ export function readProgressSnapshot(runDir: string): ArtLabProgressSnapshot | n
   if (!existsSync(path)) return null;
   return ArtLabProgressSnapshotSchema.parse(JSON.parse(readFileSync(path, "utf8")));
 }
+
+export interface BrainHintMerge {
+  status: "ready" | "failed";
+  hint?: Record<string, unknown>;
+  error?: string;
+  completedAt: string;
+}
+
+/**
+ * Merge a brain-enrichment result into an existing `runs/<runId>/run-state.json`.
+ *
+ * Used by the Foundry MCP `generate` handler's sidecar emitter when the
+ * poller archived the trigger file BEFORE brain enrichment resolved (slow
+ * LLM vs fast drain). The merge updates the canonical run-state so the
+ * run-worker and `generate_status` can read the brain hint just as if the
+ * sidecar had reached the queue spec via the normal poller path.
+ *
+ * Returns `true` when the merge landed; `false` when no run-state exists
+ * yet (the poller hasn't seeded it). The caller can fall back to writing
+ * a `.processed/` sidecar for audit/recovery.
+ *
+ * `updatedAt` is bumped so consumers using mtime-style polling see motion.
+ * The merge is atomic (temp+rename) and schema-validated via
+ * `writeRunStateSnapshot` so a malformed merge fails loudly instead of
+ * silently corrupting state.
+ */
+export function mergeBrainHintIntoRunState(
+  runDir: string,
+  merge: BrainHintMerge,
+): boolean {
+  const existing = readRunStateSnapshot(runDir);
+  if (!existing) return false;
+  const next: ArtLabRunState = {
+    ...existing,
+    brainHintStatus: merge.status,
+    brainHint: merge.hint,
+    brainHintError: merge.error,
+    brainHintCompletedAt: merge.completedAt,
+    updatedAt: new Date().toISOString(),
+  };
+  writeRunStateSnapshot(runDir, next);
+  return true;
+}

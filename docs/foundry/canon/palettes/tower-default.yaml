@@ -1,0 +1,19 @@
+header:
+  kind: palette
+  schemaVersion: "1.0.0"
+  id: tower-default
+  revisedAt: "2026-05-25T00:00:00.000Z"
+scope: global
+tokens:
+  primaryDark: "#1A1A2E"
+  goldAccent: "#C9A84C"
+  glassFill: "rgba(255,255,255,0.04)"
+  glassBorder: "rgba(255,255,255,0.10)"
+  textPrimary: "#F1F1F1"
+  textMuted: "rgba(241,241,241,0.65)"
+  errorRed: "#E64242"
+  warnAmber: "#E8A23A"
+  successJade: "#1F8A6B"
+notes: |
+  Tower master palette. Imported from docs/VISION-SPEC.md and tailwind.config.js.
+  Source of truth for all surface colors unless a floor-scoped variant overrides.

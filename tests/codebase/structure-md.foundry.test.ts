@@ -1,0 +1,23 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const STRUCTURE = readFileSync(join(process.cwd(), "STRUCTURE.md"), "utf8");
+
+describe("STRUCTURE.md mentions the foundry tree", () => {
+  it("contains a 'Tower Art Foundry SDK' heading", () => {
+    expect(STRUCTURE).toMatch(/Tower Art Foundry SDK/);
+  });
+
+  it("documents src/lib/foundry/mcp/", () => {
+    expect(STRUCTURE).toMatch(/src\/lib\/foundry\/mcp/);
+  });
+
+  it("documents src/lib/foundry/brain/", () => {
+    expect(STRUCTURE).toMatch(/src\/lib\/foundry\/brain/);
+  });
+
+  it("documents scripts/foundry-mcp.ts", () => {
+    expect(STRUCTURE).toMatch(/scripts\/foundry-mcp\.ts/);
+  });
+});
