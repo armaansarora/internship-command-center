@@ -4592,7 +4592,7 @@ Phase 2 lands with one canonical test subject — Sol Navarro — including gold
 - Create: `src/lib/foundry/providers/types.ts`
 - Test: `src/lib/foundry/providers/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/providers/types.test.ts
@@ -4627,12 +4627,12 @@ describe("FoundryImageProvider types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/providers/types.test.ts`
 Expected: FAIL — "Cannot find module './types'".
 
-- [ ] **Step 3: Implement provider types**
+- [x] **Step 3: Implement provider types**
 
 ```ts
 // src/lib/foundry/providers/types.ts
@@ -4673,12 +4673,12 @@ export interface FoundryImageProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/providers/types.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/providers/types.ts src/lib/foundry/providers/types.test.ts
@@ -4696,9 +4696,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `FoundryImageProvider` interface has `id` and `generate(input)` only
-- [ ] Result schema accepts `mock` and `placeholder` modes for tests
-- [ ] No reference to "gemini" in the public interface
+- [x] `FoundryImageProvider` interface has `id` and `generate(input)` only
+- [x] Result schema accepts `mock` and `placeholder` modes for tests
+- [x] No reference to "gemini" in the public interface
 
 ### Task 2.2: Implement createMockFoundryImageProvider for tests
 
@@ -4706,7 +4706,7 @@ EOF
 - Create: `src/lib/foundry/providers/mock-provider.ts`
 - Test: `src/lib/foundry/providers/mock-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/providers/mock-provider.test.ts
@@ -4753,12 +4753,12 @@ describe("mock foundry image provider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/providers/mock-provider.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement createMockFoundryImageProvider**
+- [x] **Step 3: Implement createMockFoundryImageProvider**
 
 ```ts
 // src/lib/foundry/providers/mock-provider.ts
@@ -4814,12 +4814,12 @@ export function createMockFoundryImageProvider(opts: CreateMockFoundryImageProvi
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/providers/mock-provider.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/providers/mock-provider.ts src/lib/foundry/providers/mock-provider.test.ts
@@ -4837,10 +4837,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Deterministic: same input → same output bytes
-- [ ] Distinct lane indices produce distinct bytes
-- [ ] PNG signature present in first 4 bytes
-- [ ] Configurable failure hook works as documented
+- [x] Deterministic: same input → same output bytes
+- [x] Distinct lane indices produce distinct bytes
+- [x] PNG signature present in first 4 bytes
+- [x] Configurable failure hook works as documented
 
 ### Task 2.3: Wrap existing Gemini adapter as a FoundryImageProvider
 
@@ -4848,7 +4848,7 @@ EOF
 - Create: `src/lib/foundry/providers/gemini-foundry-provider.ts`
 - Test: `src/lib/foundry/providers/gemini-foundry-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/providers/gemini-foundry-provider.test.ts
@@ -4888,12 +4888,12 @@ describe("createGeminiFoundryProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/providers/gemini-foundry-provider.test.ts`
 Expected: FAIL — "Cannot find module './gemini-foundry-provider'".
 
-- [ ] **Step 3: Implement the wrapper**
+- [x] **Step 3: Implement the wrapper**
 
 ```ts
 // src/lib/foundry/providers/gemini-foundry-provider.ts
@@ -4953,12 +4953,12 @@ export function createGeminiFoundryProvider(options: CreateGeminiFoundryProvider
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/providers/gemini-foundry-provider.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/providers/gemini-foundry-provider.ts src/lib/foundry/providers/gemini-foundry-provider.test.ts
@@ -4975,10 +4975,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Wrapper id is `gemini-foundry`
-- [ ] Mock mode honored via `ARTLAB_GEMINI_MODE=mock`
-- [ ] No edits to `src/lib/artlab/providers/gemini-adapter.ts`
-- [ ] 4:3 and 3:4 aspect ratios degrade gracefully to closest Gemini-supported ratio
+- [x] Wrapper id is `gemini-foundry`
+- [x] Mock mode honored via `ARTLAB_GEMINI_MODE=mock`
+- [x] No edits to `src/lib/artlab/providers/gemini-adapter.ts`
+- [x] 4:3 and 3:4 aspect ratios degrade gracefully to closest Gemini-supported ratio
 
 ### Task 2.4: Define CharacterMasterStage enum + agent input/output types
 
@@ -4986,7 +4986,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/types.ts`
 - Test: `src/lib/foundry/agents/character-master/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/types.test.ts
@@ -5035,12 +5035,12 @@ describe("character-master types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/types.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the types**
+- [x] **Step 3: Implement the types**
 
 ```ts
 // src/lib/foundry/agents/character-master/types.ts
@@ -5083,12 +5083,12 @@ export type CharacterMasterEvent =
   | { kind: "pack-emitted"; packDir: string; packId: string; at: string };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/types.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/types.ts src/lib/foundry/agents/character-master/types.test.ts
@@ -5105,9 +5105,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] 6-stage enum declared in canonical order
-- [ ] Input schema accepts `resumeFromStage: null` for full run
-- [ ] Event type covers stage lifecycle + qa-failure + pack-emitted
+- [x] 6-stage enum declared in canonical order
+- [x] Input schema accepts `resumeFromStage: null` for full run
+- [x] Event type covers stage lifecycle + qa-failure + pack-emitted
 
 ### Task 2.5: Implement concept-board stage (5-lane prompt fan-out)
 
@@ -5115,7 +5115,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/concept-board.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/concept-board.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/concept-board.test.ts
@@ -5182,12 +5182,12 @@ describe("concept-board stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/concept-board.test.ts`
 Expected: FAIL — "Cannot find module './concept-board'".
 
-- [ ] **Step 3: Implement concept-board stage**
+- [x] **Step 3: Implement concept-board stage**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/concept-board.ts
@@ -5267,12 +5267,12 @@ export async function runConceptBoardStage(input: ConceptBoardStageInput): Promi
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/concept-board.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/concept-board.ts src/lib/foundry/agents/character-master/stages/concept-board.test.ts
@@ -5290,10 +5290,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Exactly 5 lanes returned, sorted by laneIndex
-- [ ] All 5 lanes have distinct variation axes
-- [ ] Each lane carries the prompt and the generated bytes
-- [ ] Stage runs lanes in parallel (visible in test runtime under sequential threshold)
+- [x] Exactly 5 lanes returned, sorted by laneIndex
+- [x] All 5 lanes have distinct variation axes
+- [x] Each lane carries the prompt and the generated bytes
+- [x] Stage runs lanes in parallel (visible in test runtime under sequential threshold)
 
 ### Task 2.6: Implement anchor-lock stage (uniqueness gate)
 
@@ -5301,7 +5301,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/anchor-lock.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts
@@ -5352,12 +5352,12 @@ describe("anchor-lock stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement anchor-lock stage**
+- [x] **Step 3: Implement anchor-lock stage**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/anchor-lock.ts
@@ -5404,12 +5404,12 @@ export async function runAnchorLockStage(input: AnchorLockStageInput): Promise<A
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/anchor-lock.ts src/lib/foundry/agents/character-master/stages/anchor-lock.test.ts
@@ -5427,9 +5427,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Anchor lane is the one whose laneIndex matches `suggestedAnchorLane`
-- [ ] Uniqueness report covers every non-anchor lane
-- [ ] Unknown anchor lane throws with a descriptive error
+- [x] Anchor lane is the one whose laneIndex matches `suggestedAnchorLane`
+- [x] Uniqueness report covers every non-anchor lane
+- [x] Unknown anchor lane throws with a descriptive error
 
 ### Task 2.7: Implement variant-fan-out stage (21 sprites = 3 outfits × 7 poses)
 
@@ -5437,7 +5437,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/variant-fan-out.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts
@@ -5508,12 +5508,12 @@ describe("variant-fan-out stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement variant-fan-out stage**
+- [x] **Step 3: Implement variant-fan-out stage**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/variant-fan-out.ts
@@ -5603,12 +5603,12 @@ export async function runVariantFanOutStage(input: VariantFanOutStageInput): Pro
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/variant-fan-out.ts src/lib/foundry/agents/character-master/stages/variant-fan-out.test.ts
@@ -5626,10 +5626,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Sprite count = `outfits.length × poses.length`
-- [ ] Each sprite carries its (outfit, pose) labels
-- [ ] Anchor bytes are passed as `referenceImageBytes` to every provider call
-- [ ] Concurrency limited to 5 in-flight provider calls
+- [x] Sprite count = `outfits.length × poses.length`
+- [x] Each sprite carries its (outfit, pose) labels
+- [x] Anchor bytes are passed as `referenceImageBytes` to every provider call
+- [x] Concurrency limited to 5 in-flight provider calls
 
 ### Task 2.8: Implement cutout-and-feather stage (reuse cutout-runner, do not rewrite)
 
@@ -5637,7 +5637,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/cutout-and-feather.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts
@@ -5703,12 +5703,12 @@ describe("cutout-and-feather stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement cutout-and-feather (reuses legacy cutout logic without copying it)**
+- [x] **Step 3: Implement cutout-and-feather (reuses legacy cutout logic without copying it)**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/cutout-and-feather.ts
@@ -5817,12 +5817,12 @@ export async function runCutoutAndFeatherStage(input: CutoutAndFeatherStageInput
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/cutout-and-feather.ts src/lib/foundry/agents/character-master/stages/cutout-and-feather.test.ts
@@ -5842,10 +5842,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Every processed PNG has an alpha channel (sharp metadata reports hasAlpha)
-- [ ] Alpha histogram is reported with non-zero opaque count for foreground sprites
-- [ ] Output files written to the provided workDir, named `<outfit>__<pose>.png`
-- [ ] Stage does not modify `src/lib/artlab/runners/cutout-runner.ts`
+- [x] Every processed PNG has an alpha channel (sharp metadata reports hasAlpha)
+- [x] Alpha histogram is reported with non-zero opaque count for foreground sprites
+- [x] Output files written to the provided workDir, named `<outfit>__<pose>.png`
+- [x] Stage does not modify `src/lib/artlab/runners/cutout-runner.ts`
 
 ### Task 2.9: Implement composite-judge stage (perceptual hash drift gate against anchor)
 
@@ -5853,7 +5853,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/composite-judge.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/composite-judge.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/composite-judge.test.ts
@@ -5930,12 +5930,12 @@ describe("composite-judge stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/composite-judge.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement composite-judge — reuse identity-drift module**
+- [x] **Step 3: Implement composite-judge — reuse identity-drift module**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/composite-judge.ts
@@ -6004,12 +6004,12 @@ export async function runCompositeJudgeStage(input: CompositeJudgeStageInput): P
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/composite-judge.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/composite-judge.ts src/lib/foundry/agents/character-master/stages/composite-judge.test.ts
@@ -6027,10 +6027,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Passes when sprites visually match the anchor
-- [ ] Fails with actionable reason when any sprite exceeds 24-bit drift
-- [ ] Failure carries the offending outfit/pose pair and absolute path
-- [ ] Reuses `measureIdentityDrift` without re-implementing pHash
+- [x] Passes when sprites visually match the anchor
+- [x] Fails with actionable reason when any sprite exceeds 24-bit drift
+- [x] Failure carries the offending outfit/pose pair and absolute path
+- [x] Reuses `measureIdentityDrift` without re-implementing pHash
 
 ### Task 2.10: Implement palette extraction + diversity QA gates
 
@@ -6038,7 +6038,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/qa.ts`
 - Test: `src/lib/foundry/agents/character-master/qa.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/qa.test.ts
@@ -6110,12 +6110,12 @@ describe("foundry character-master qa", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/qa.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement qa.ts**
+- [x] **Step 3: Implement qa.ts**
 
 ```ts
 // src/lib/foundry/agents/character-master/qa.ts
@@ -6242,12 +6242,12 @@ export async function runSilhouetteDiversityGate(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/qa.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/qa.ts src/lib/foundry/agents/character-master/qa.test.ts
@@ -6266,10 +6266,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Palette extraction returns dominant swatches within ±10 RGB units of a known solid input
-- [ ] Palette match gate emits an actionable failure string when dominant color is far from canon
-- [ ] Silhouette diversity gate fails when two identical sprites are compared
-- [ ] Reuses `computePerceptualHash` and `hammingDistanceHex` from `src/lib/artlab/coherence/`
+- [x] Palette extraction returns dominant swatches within ±10 RGB units of a known solid input
+- [x] Palette match gate emits an actionable failure string when dominant color is far from canon
+- [x] Silhouette diversity gate fails when two identical sprites are compared
+- [x] Reuses `computePerceptualHash` and `hammingDistanceHex` from `src/lib/artlab/coherence/`
 
 ### Task 2.11: Implement manifest-build stage
 
@@ -6277,7 +6277,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/stages/manifest-build.ts`
 - Test: `src/lib/foundry/agents/character-master/stages/manifest-build.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/manifest-build.test.ts
@@ -6380,12 +6380,12 @@ describe("manifest-build stage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/manifest-build.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement manifest-build**
+- [x] **Step 3: Implement manifest-build**
 
 ```ts
 // src/lib/foundry/agents/character-master/stages/manifest-build.ts
@@ -6482,12 +6482,12 @@ export async function runManifestBuildStage(input: ManifestBuildStageInput): Pro
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/stages/manifest-build.test.ts`
 Expected: PASS — 1 assertion passes (all 21 payload files round-trip).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/stages/manifest-build.ts src/lib/foundry/agents/character-master/stages/manifest-build.test.ts
@@ -6505,10 +6505,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Emits a pack of kind `character-spritesheet`
-- [ ] Payload files cover every sprite (count == outfits × poses)
-- [ ] `canonRefs.characterId` and `canonRefs.paletteRef` populated
-- [ ] Pack passes the same schema validation as Phase 1
+- [x] Emits a pack of kind `character-spritesheet`
+- [x] Payload files cover every sprite (count == outfits × poses)
+- [x] `canonRefs.characterId` and `canonRefs.paletteRef` populated
+- [x] Pack passes the same schema validation as Phase 1
 
 ### Task 2.12: Implement runCharacterMaster entry point + stage orchestration
 
@@ -6516,7 +6516,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/index.ts`
 - Test: `src/lib/foundry/agents/character-master/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/index.test.ts
@@ -6667,12 +6667,12 @@ describe("runCharacterMaster", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/index.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement runCharacterMaster**
+- [x] **Step 3: Implement runCharacterMaster**
 
 ```ts
 // src/lib/foundry/agents/character-master/index.ts
@@ -6848,12 +6848,12 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/index.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/index.ts src/lib/foundry/agents/character-master/index.test.ts
@@ -6871,10 +6871,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] End-to-end run with mock provider produces a 21-file Asset Pack
-- [ ] `resumeFromStage: "variant-fan-out"` skips concept-board and anchor-lock
-- [ ] QA failures surface with the offending sprite reference
-- [ ] Six `stage-completed` events emitted on the happy path
+- [x] End-to-end run with mock provider produces a 21-file Asset Pack
+- [x] `resumeFromStage: "variant-fan-out"` skips concept-board and anchor-lock
+- [x] QA failures surface with the offending sprite reference
+- [x] Six `stage-completed` events emitted on the happy path
 
 ### Task 2.13: Wire `foundry character <name>` CLI subcommand
 
@@ -6883,7 +6883,7 @@ EOF
 - Modify: `scripts/foundry.ts`
 - Test: `src/lib/foundry/cli/character.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/cli/character.test.ts
@@ -6984,12 +6984,12 @@ describe("foundry character CLI", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/cli/character.test.ts`
 Expected: FAIL — "Cannot find module './character'".
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/cli/character.ts
@@ -7090,7 +7090,7 @@ if (subcommand === "character") {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/cli/character.test.ts`
 Expected: PASS — both assertions pass.
@@ -7101,7 +7101,7 @@ FOUNDRY_PROVIDER_MODE=mock FOUNDRY_WORKSPACE_ROOT=/tmp/foundry-cli-test npm run 
 ```
 Expected: Exit 0; stdout reports `ok pack=...`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/cli/character.ts src/lib/foundry/cli/character.test.ts scripts/foundry.ts
@@ -7119,10 +7119,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `foundry character "Sol Navarro"` (mock) produces a pack at `<workspace>/runs/sol-navarro/pack/`
-- [ ] `--resume-from variant-fan-out` is parsed and forwarded to the agent
-- [ ] Missing name argument prints usage and exits 2
-- [ ] Failure exit code is 1 with the offending sprite path on stderr
+- [x] `foundry character "Sol Navarro"` (mock) produces a pack at `<workspace>/runs/sol-navarro/pack/`
+- [x] `--resume-from variant-fan-out` is parsed and forwarded to the agent
+- [x] Missing name argument prints usage and exits 2
+- [x] Failure exit code is 1 with the offending sprite path on stderr
 
 ### Task 2.14: Add Sol Navarro golden fixtures (pre-cutout sprite + alpha histogram + manifest skeleton)
 
@@ -7132,7 +7132,7 @@ EOF
 - Create: `src/lib/foundry/agents/character-master/__fixtures__/sol-navarro/expected-manifest-skeleton.json`
 - Test: `src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts
@@ -7186,12 +7186,12 @@ describe("Sol Navarro golden fixtures", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts`
 Expected: FAIL — fixture files missing.
 
-- [ ] **Step 3: Create fixtures**
+- [x] **Step 3: Create fixtures**
 
 Generate a `pre-cutout-idle.png` synthetic fixture (since we don't have Sol's real promoted asset yet, use sharp to produce a stable 256×256 sprite — neutral background with a darker silhouette). Save as a binary PNG under the fixtures directory.
 
@@ -7246,12 +7246,12 @@ const sharp = require("sharp");
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts`
 Expected: PASS — both assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/__fixtures__ src/lib/foundry/agents/character-master/golden-sol-navarro.test.ts
@@ -7269,16 +7269,16 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Three fixture files present and parseable
-- [ ] Post-cutout alpha histogram exceeds the lower-bound envelope
-- [ ] Manifest skeleton declares the canonical Sol slot
+- [x] Three fixture files present and parseable
+- [x] Post-cutout alpha histogram exceeds the lower-bound envelope
+- [x] Manifest skeleton declares the canonical Sol slot
 
 ### Task 2.15: Integration test — full Sol Navarro run + resume + qa-failure
 
 **Files:**
 - Test: `src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts
@@ -7433,12 +7433,12 @@ describe("Sol Navarro full integration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts`
 Expected: PASS — 4 assertions pass. If the third assertion (QA failure) is brittle because the mock-provider failure occurs before composite-judge, accept any non-ok result with a non-empty reason — the goal is "an actionable diagnostic appears", not a specific stage.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/foundry/agents/character-master/sol-navarro.integration.test.ts
@@ -7455,10 +7455,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Full Sol Navarro run produces a 21-file pack with a valid manifest that re-reads cleanly
-- [ ] Resume-from-stage skips earlier stages
-- [ ] A failing provider produces a non-ok result with a non-empty `reason`
-- [ ] Manifest on disk deep-equals in-memory manifest
+- [x] Full Sol Navarro run produces a 21-file pack with a valid manifest that re-reads cleanly
+- [x] Resume-from-stage skips earlier stages
+- [x] A failing provider produces a non-ok result with a non-empty `reason`
+- [x] Manifest on disk deep-equals in-memory manifest
 
 ### Task 2.16: Phase 2 completion gates and public agents re-export
 
@@ -7467,7 +7467,7 @@ EOF
 - Test: `src/lib/foundry/agents/index.test.ts`
 - Test: `src/lib/foundry/phase-2-acceptance.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/agents/index.test.ts
@@ -7513,12 +7513,12 @@ describe("Phase 2 acceptance", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify failures**
+- [x] **Step 2: Run tests to verify failures**
 
 Run: `npx vitest run src/lib/foundry/agents/index.test.ts src/lib/foundry/phase-2-acceptance.test.ts`
 Expected: FAIL — `./index` module missing.
 
-- [ ] **Step 3: Implement agents/index.ts**
+- [x] **Step 3: Implement agents/index.ts**
 
 ```ts
 // src/lib/foundry/agents/index.ts
@@ -7526,7 +7526,7 @@ export * from "./character-master";
 export * from "./character-master/types";
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/lib/foundry/agents src/lib/foundry/phase-2-acceptance.test.ts`
 Expected: PASS — all assertions pass.
@@ -7543,7 +7543,7 @@ FOUNDRY_PROVIDER_MODE=mock FOUNDRY_WORKSPACE_ROOT=/tmp/foundry-p2-final npm run 
 
 All must exit 0. The last command must produce a pack under `/tmp/foundry-p2-final/runs/sol-navarro/pack/manifest.json`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/index.ts src/lib/foundry/agents/index.test.ts src/lib/foundry/phase-2-acceptance.test.ts
@@ -7560,9 +7560,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `@/lib/foundry/agents` exports `runCharacterMaster` and the stage enum
-- [ ] Phase 2 acceptance test runs npm run foundry under the hood and exits 0
-- [ ] Three module surfaces (canon, asset-pack, agents) all expose their public APIs
+- [x] `@/lib/foundry/agents` exports `runCharacterMaster` and the stage enum
+- [x] Phase 2 acceptance test runs npm run foundry under the hood and exits 0
+- [x] Three module surfaces (canon, asset-pack, agents) all expose their public APIs
 
 ### Phase 2 completion criteria
 
