@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { readRunStateSnapshot } from "@/lib/artlab/state/snapshots";
+import { readRunStateSnapshot, writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
 import { join, resolve } from "node:path";
 import {
   evaluateCreativePromotionFirewall,
@@ -238,6 +238,29 @@ export const promotionRunner: ArtLabRunner = {
       receiptPath: join(input.runDir, "promotion-receipt.json"),
     });
 
+    // Critical Finding 2 — write `promotedPackId` onto run-state.json so the
+    // Foundry `generate_status` MCP handler returns a non-undefined value
+    // when callers poll for status=promoted. The packId is derived
+    // deterministically from assetType + the first 8 hex chars of the runId
+    // so the same run always resolves to the same packId across replays
+    // (and operators can grep logs for it).
+    //
+    // Best-effort: a write failure here must NOT roll back the actual
+    // promotion (cutouts have already been copied + manifests written).
+    // We surface the failure via daemon-errors.jsonl indirectly when the
+    // worker re-reads run-state and sees the missing field.
+    const promotedPackId = derivePromotedPackId(input.assetType, input.runId);
+    try {
+      const current = readRunStateSnapshot(input.runDir);
+      if (current) {
+        writeRunStateSnapshot(input.runDir, {
+          ...current,
+          promotedPackId,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    } catch { /* never let a state-snapshot rewrite fail a promotion */ }
+
     if (input.assetType === "character" && input.characterId) {
       const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
       if (workspaceRoot) {
@@ -316,6 +339,10 @@ export const promotionRunner: ArtLabRunner = {
         promotedPaths: result.promotedPaths,
         receipt: result.receipt,
         gitResult,
+        // Surface the same packId that landed on run-state.json so
+        // downstream observers (phase-notifier, status MCP) don't have to
+        // re-derive it from the runId.
+        promotedPackId,
         // Promote-time push status flag — phase-notifier reads this to warn
         // the user when commit succeeded but push failed (so "Live now" link
         // won't actually deploy until manual push).
@@ -325,6 +352,16 @@ export const promotionRunner: ArtLabRunner = {
     };
   },
 };
+
+/**
+ * Deterministic packId derivation. The 8-char runId prefix is enough to
+ * disambiguate runs in human-facing surfaces while staying short enough to
+ * read. Keep this stable — both run-state.json and the runner's `artifacts`
+ * payload depend on the same value.
+ */
+export function derivePromotedPackId(assetType: string, runId: string): string {
+  return `${assetType}-${runId.slice(0, 8)}`;
+}
 
 function pushFailed(gitResult: ReturnType<typeof autoCommitPromotion> | null): boolean {
   if (!gitResult) return false;

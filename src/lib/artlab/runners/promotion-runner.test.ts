@@ -3,6 +3,10 @@ import { mkdtempSync, existsSync, writeFileSync, mkdirSync, readdirSync, readFil
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promotionRunner } from "./promotion-runner";
+import {
+  readRunStateSnapshot,
+  writeRunStateSnapshot,
+} from "@/lib/artlab/state/snapshots";
 
 function seedPassingRun(runDir: string, runId: string): void {
   mkdirSync(join(runDir, "cutouts"), { recursive: true });
@@ -85,5 +89,96 @@ describe("promotion runner — delegates to the real firewall", () => {
     const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
     expect(receipt.approvalPhrase).toBe("approved for app");
     expect(receipt.runId).toBe("r1");
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // promotedPackId contract — see Critical Finding 2.
+  //
+  // The Foundry `generate_status` MCP handler reads `promotedPackId` off
+  // run-state.json when phase=closed. Before this fix, promotion-runner
+  // never wrote that field — the acceptance test hand-injected it on a
+  // raw JSON rewrite, masking that production code didn't honour the
+  // contract. Now promotion-runner derives a deterministic packId and
+  // writes it onto the run-state via the canonical snapshot writer (so
+  // the value goes through ArtLabRunStateSchema validation).
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("promotedPackId — written onto run-state.json on successful promotion", () => {
+    it("seeds run-state.json with the promoted pack id when promotion succeeds", async () => {
+      // The runner reads run-state.json to look up spend, so it must exist
+      // before promotion runs. Use the canonical writer so we hit the same
+      // schema gate the runner does.
+      const runId = "11111111-1111-4111-8111-111111111111";
+      writeRunStateSnapshot(runDir, {
+        runId,
+        assetType: "character",
+        characterId: "cro",
+        phase: "promoting",
+        createdAt: "2026-05-25T00:00:00.000Z",
+        updatedAt: "2026-05-25T00:00:00.000Z",
+        request: "test promotion run",
+      });
+      seedPassingRun(runDir, runId);
+      process.env.ARTLAB_PUBLIC_ART_ROOT = publicArtRoot;
+      const result = await promotionRunner.run({
+        runId, runDir, assetType: "character", characterId: "cro", providerId: "local-mock",
+      });
+      delete process.env.ARTLAB_PUBLIC_ART_ROOT;
+      expect(result.status).toBe("ok");
+      // The runner's artifacts surface the same packId for downstream
+      // observers (phase-notifier, foundry status MCP).
+      expect(result.artifacts.promotedPackId).toBe(`character-${runId.slice(0, 8)}`);
+      // run-state.json was rewritten with the same value — this is what
+      // the Foundry status handler reads.
+      const state = readRunStateSnapshot(runDir);
+      expect(state).not.toBeNull();
+      expect(state!.promotedPackId).toBe(`character-${runId.slice(0, 8)}`);
+    });
+
+    it("does NOT touch run-state.promotedPackId when promotion is blocked", async () => {
+      const runId = "22222222-2222-4222-8222-222222222222";
+      writeRunStateSnapshot(runDir, {
+        runId,
+        assetType: "character",
+        characterId: "cro",
+        phase: "promoting",
+        createdAt: "2026-05-25T00:00:00.000Z",
+        updatedAt: "2026-05-25T00:00:00.000Z",
+        request: "test promotion run",
+      });
+      seedPassingRun(runDir, runId);
+      // Wrong phrase — firewall blocks; runner never advances.
+      writeFileSync(
+        join(runDir, "approval.json"),
+        JSON.stringify({ phrase: "approve for app" }),
+      );
+      const result = await promotionRunner.run({
+        runId, runDir, assetType: "character", characterId: "cro", providerId: "local-mock",
+      });
+      expect(result.status).toBe("failed");
+      const state = readRunStateSnapshot(runDir);
+      expect(state!.promotedPackId).toBeUndefined();
+    });
+
+    it("derives packId from assetType + runId for non-character assets too", async () => {
+      const runId = "33333333-3333-4333-8333-333333333333";
+      writeRunStateSnapshot(runDir, {
+        runId,
+        assetType: "ui-texture",
+        phase: "promoting",
+        createdAt: "2026-05-25T00:00:00.000Z",
+        updatedAt: "2026-05-25T00:00:00.000Z",
+        request: "ui-texture promotion run",
+      });
+      seedPassingRun(runDir, runId);
+      process.env.ARTLAB_PUBLIC_ART_ROOT = publicArtRoot;
+      const result = await promotionRunner.run({
+        runId, runDir, assetType: "ui-texture", providerId: "local-mock",
+      });
+      delete process.env.ARTLAB_PUBLIC_ART_ROOT;
+      expect(result.status).toBe("ok");
+      expect(result.artifacts.promotedPackId).toBe(`ui-texture-${runId.slice(0, 8)}`);
+      const state = readRunStateSnapshot(runDir);
+      expect(state!.promotedPackId).toBe(`ui-texture-${runId.slice(0, 8)}`);
+    });
   });
 });

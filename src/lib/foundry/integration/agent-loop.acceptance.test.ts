@@ -25,7 +25,7 @@
 // `createFoundryPoller` from `src/lib/artlab/daemon/foundry-poller.ts`.
 
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -128,24 +128,19 @@ async function runMockPipelineUntilEmpty(input: {
     // The Foundry status contract only cares about the terminal `closed`
     // + promotedPackId combination so the shortcut is faithful to the
     // observable behaviour.
+    //
+    // `promotedPackId` is now a first-class field on `ArtLabRunStateSchema`
+    // — written by `promotion-runner.run()` in production (see Critical
+    // Finding 2). The mock pipeline writes it through the same canonical
+    // snapshot writer so the schema gate runs, matching what production
+    // does. No more raw JSON rewrite that masked production drift.
     const closed: ArtLabRunState = {
       ...current,
       phase: "closed",
+      promotedPackId: packId,
       updatedAt: new Date().toISOString(),
     };
     writeRunStateSnapshot(runDir, closed);
-    // promotedPackId is read by handleFoundryGenerateStatus directly from
-    // run-state.json's parsed shape. The schema permits it as an extra
-    // field through ArtLabRunStateLite (the status handler uses a relaxed
-    // structural type), so we hand-write the field onto the just-saved
-    // file. This mirrors what `promotion-runner` does in production.
-    const path = join(runDir, "run-state.json");
-    const stateWithPromoted = {
-      ...JSON.parse(readFileSync(path, "utf8")),
-      promotedPackId: packId,
-      blocker: null,
-    };
-    writeFileSync(path, JSON.stringify(stateWithPromoted, null, 2));
     promoted.push(packId);
   }
   return promoted;

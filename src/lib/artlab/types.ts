@@ -80,6 +80,13 @@ export const ArtLabRunStateSchema = z
     approvedConcept: ArtLabApprovedConceptSchema.optional(),
     referenceImagePaths: z.array(z.string()).optional(),
     sourceSurface: z.enum(["telegram", "cli", "daemon-resume", "migration"]).optional(),
+    // Populated by `promotionRunner` once a run successfully promotes
+    // assets into `public/art/`. The Foundry `generate_status` MCP handler
+    // surfaces this value to callers so agents can immediately follow up
+    // with `asset_pack_integration` instead of polling indefinitely.
+    // Derived as `${assetType}-${runId.slice(0,8)}` — stable across replays
+    // and human-recognisable in logs.
+    promotedPackId: z.string().min(1).optional(),
   })
   .strict();
 export type ArtLabRunState = z.infer<typeof ArtLabRunStateSchema>;
