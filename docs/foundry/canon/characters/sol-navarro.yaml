@@ -1,0 +1,42 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: sol-navarro
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Sol Navarro"
+shortLabel: "Sol"
+title: "Chief Networking Officer"
+floorId: rolodex-lounge
+floorLabel: "Floor 6 — The Rolodex Lounge"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "warm-relationship-strategist-with-socially-precise-ease"
+silhouette: "open-shoulders, relaxed-lounge-posture, approachable-polish"
+wardrobe: "soft-tailored-jacket, brass-green-accents, lived-in-refinement"
+props:
+  - contact-cards
+  - phone
+  - coffee-note
+  - intro-card
+mobileRead: "open-stance-plus-contact-card-prop-and-green-accent"
+negativeDNA: "no-manipulative-grin, no-spammy-sales-posture, no-party-promoter-outfit, no-heart-motif"
+accent: "brass-green-5DAA78"
+doctrine: "every-relationship-deserves-attention"
+flaw: "over-commits-emotionally"
+secretStrength: "remembers-everything"
+wound: "betrayed-by-a-mentor"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: networking-warm
+artDirectionNotes: "Sol should feel socially open and precise, with contact-card warmth instead of sales energy."

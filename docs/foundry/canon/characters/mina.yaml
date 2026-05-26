@@ -1,0 +1,42 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: mina
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Mina Rook"
+shortLabel: "Mina"
+title: "Chief Intelligence Officer"
+floorId: research
+floorLabel: "Research"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "nocturnal-pattern-hunter-with-evidence-first-restraint"
+silhouette: "sharp-compact-posture, watchful-side-eye, contained-energy"
+wardrobe: "dark-utility-layers, one-bright-warning-accent"
+props:
+  - source-cards
+  - glasses-reflection
+  - dossier-tab
+  - research-tablet
+mobileRead: "purple-research-glow-plus-glasses-source-card-shape"
+negativeDNA: "no-hacker-hoodie, no-spy-trench-coat, no-cyberpunk-visor, no-conspiracy-wall-chaos"
+accent: "purple-research-7C6CE6"
+doctrine: "the-evidence-decides"
+flaw: "won't-act-without-the-source"
+secretStrength: "spots-the-pattern-first"
+wound: "trusted-the-wrong-source-once"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: research-watchful
+artDirectionNotes: "Mina should feel difficult to surprise, sharp and compact, with evidence props kept clean."

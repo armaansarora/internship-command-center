@@ -1,0 +1,42 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: inez
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Dr. Inez Park"
+shortLabel: "Inez"
+title: "Chief Preparation Officer"
+floorId: briefing-room
+floorLabel: "Floor 3 — The Briefing Room"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "behavioral-scientist-of-ambition-with-rigorous-care"
+silhouette: "precise-stance, focused-eyebrow, clean-teaching-posture"
+wardrobe: "structured-coat, soft-sneakers, prep-lab-layers"
+props:
+  - dossier
+  - timer
+  - whiteboard-marker
+  - laser-pointer
+mobileRead: "blue-prep-lab-accent-with-dossier-timer-prop"
+negativeDNA: "no-lab-coat-caricature, no-stern-schoolteacher, no-medical-costume, no-therapy-couch-cue"
+accent: "blue-prep-lab-4A9EDB"
+doctrine: "preparation-removes-fear"
+flaw: "over-prepares-others"
+secretStrength: "sees-the-tell-before-the-question"
+wound: "froze-once-in-the-room"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: prep-focused
+artDirectionNotes: "Inez should feel rigorous and supportive, using teacherly focus without stern schoolroom caricature."

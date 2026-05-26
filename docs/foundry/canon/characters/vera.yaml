@@ -1,0 +1,42 @@
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: vera
+  revisedAt: "2026-05-25T00:00:00.000Z"
+displayName: "Vera Bloom"
+shortLabel: "Vera"
+title: "Chief Marketing Officer"
+floorId: writing-room
+floorLabel: "Floor 5 — The Writing Room"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: "elegant-narrative-strategist-with-editorial-precision"
+silhouette: "expressive-hands, poised-torso, controlled-creative-asymmetry"
+wardrobe: "editorial-layers, intentional-warm-accent, polished-restraint"
+props:
+  - red-pencil
+  - paper-stack
+  - fountain-pen
+  - margin-notes
+mobileRead: "warm-writing-room-accent-and-red-pencil-read-first"
+negativeDNA: "no-beret-stereotype, no-chaotic-artist-costume, no-glamour-pose, no-fake-text-pages"
+accent: "warm-writing-room-E8A020"
+doctrine: "every-word-must-earn-its-place"
+flaw: "rewrites-forever"
+secretStrength: "hears-the-customer-voice"
+wound: "wrote-something-she-regretted"
+outfitVariants:
+  - regular
+  - summer-light
+  - winter-layered
+poseStates:
+  - idle
+  - greeting
+  - listening
+  - thinking
+  - talking
+  - alert
+  - working
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: editorial-poised
+artDirectionNotes: "Vera should move through expressive hands and poised edits, never artist-chaos costume language."
