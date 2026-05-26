@@ -3,9 +3,11 @@ import {
   FOUNDRY_FLOOR_TIME_STATES,
   FOUNDRY_FLOOR_LAYER_NAMES,
   FOUNDRY_FLOOR_COMPOSITE_KINDS,
+  FOUNDRY_FLOOR_GAP_STATUSES,
   FoundryFloorEnvironmentInputSchema,
   FoundryFloorLayerManifestSchema,
   FoundryFloorVariantManifestSchema,
+  FoundryFloorManifestGapsSchema,
 } from "./types";
 
 describe("foundry floor-environment types", () => {
@@ -97,6 +99,46 @@ describe("foundry floor-environment types", () => {
           },
         ],
         perceptualHash: "0123456789abcdef",
+      }),
+    ).toThrow();
+  });
+
+  // Critical 2 followup: schema for manifest gaps surfaced at root.
+  it("declares the two known manifest-gap statuses", () => {
+    expect(FOUNDRY_FLOOR_GAP_STATUSES).toEqual([
+      "todo-post-launch",
+      "out-of-scope-for-sdk-launch",
+    ]);
+  });
+
+  it("manifest-gaps schema requires both known gaps with status + reason", () => {
+    const parsed = FoundryFloorManifestGapsSchema.parse({
+      roomElementsPixelVerification: {
+        status: "todo-post-launch",
+        reason: "no vision-LLM call yet",
+      },
+      perLayerRenders: {
+        status: "out-of-scope-for-sdk-launch",
+        reason: "single composite per variant",
+      },
+    });
+    expect(parsed.roomElementsPixelVerification.status).toBe(
+      "todo-post-launch",
+    );
+    expect(parsed.perLayerRenders.status).toBe("out-of-scope-for-sdk-launch");
+  });
+
+  it("manifest-gaps schema rejects unknown status values", () => {
+    expect(() =>
+      FoundryFloorManifestGapsSchema.parse({
+        roomElementsPixelVerification: {
+          status: "all-good-trust-us",
+          reason: "x",
+        },
+        perLayerRenders: {
+          status: "out-of-scope-for-sdk-launch",
+          reason: "x",
+        },
       }),
     ).toThrow();
   });

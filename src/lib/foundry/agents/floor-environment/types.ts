@@ -69,3 +69,43 @@ export const FoundryFloorVariantManifestSchema = z
 export type FoundryFloorVariantManifest = z.infer<
   typeof FoundryFloorVariantManifestSchema
 >;
+
+/**
+ * Critical 2 followup: known SDK-level gaps surfaced at the manifest
+ * root so downstream consumers can branch on them without parsing the
+ * deeper `qa` block.
+ *
+ * Be HONEST in the manifest:
+ * - `roomElementsPixelVerification` — `todo-post-launch`: the prior
+ *   string-comparison gate was theatrical and has been removed. A real
+ *   vision-LLM check against canon.requiredElements is future work.
+ * - `perLayerRenders` — `out-of-scope-for-sdk-launch`: today every
+ *   variant ships as a single composite (Critical 1 + Critical 4).
+ *   Independent per-layer renders remain a future option.
+ */
+export const FOUNDRY_FLOOR_GAP_STATUSES = [
+  "todo-post-launch",
+  "out-of-scope-for-sdk-launch",
+] as const;
+export type FoundryFloorGapStatus =
+  (typeof FOUNDRY_FLOOR_GAP_STATUSES)[number];
+
+export const FoundryFloorManifestGapSchema = z
+  .object({
+    status: z.enum(FOUNDRY_FLOOR_GAP_STATUSES),
+    reason: z.string().min(1),
+  })
+  .strict();
+export type FoundryFloorManifestGap = z.infer<
+  typeof FoundryFloorManifestGapSchema
+>;
+
+export const FoundryFloorManifestGapsSchema = z
+  .object({
+    roomElementsPixelVerification: FoundryFloorManifestGapSchema,
+    perLayerRenders: FoundryFloorManifestGapSchema,
+  })
+  .strict();
+export type FoundryFloorManifestGaps = z.infer<
+  typeof FoundryFloorManifestGapsSchema
+>;

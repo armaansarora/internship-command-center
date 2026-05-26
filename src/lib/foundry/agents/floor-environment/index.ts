@@ -8,6 +8,7 @@ import { renderFoundryFloorIntegrationSnippet } from "./integration";
 import {
   FoundryFloorEnvironmentInputSchema,
   type FoundryFloorEnvironmentInput,
+  type FoundryFloorManifestGaps,
 } from "./types";
 import type { FoundryImageProvider } from "@/lib/foundry/agents/provider-interface";
 
@@ -70,6 +71,24 @@ export async function runFoundryFloorEnvironment(
     floorSlug: input.floorSlug,
     packPath: persisted.packRoot,
   });
+  // Critical 2 followup: surface known SDK-level gaps at the manifest
+  // root so downstream consumers (telegram bot, daemon UI, structured
+  // logs) can branch on them without having to dig into the qa block.
+  // Two gaps are documented:
+  //  - room-element pixel verification (no vision-LLM call yet)
+  //  - per-layer renders (currently single composite; see Critical 1+4)
+  const manifestGaps: FoundryFloorManifestGaps = {
+    roomElementsPixelVerification: {
+      status: "todo-post-launch",
+      reason:
+        "no vision-LLM call yet — required elements declared in canon are not verified against pixels",
+    },
+    perLayerRenders: {
+      status: "out-of-scope-for-sdk-launch",
+      reason:
+        "single composite per variant; independent per-layer renders are a future option (see Critical 1+4 commit)",
+    },
+  };
   const manifest = {
     __packDir: context.runDir,
     assetKind: "floor-environment" as const,
@@ -80,6 +99,7 @@ export async function runFoundryFloorEnvironment(
     variants: persisted.variantManifests,
     palette: canon.palette,
     requiredElements: canon.requiredElements,
+    manifestGaps,
     integrationSnippet,
     qa,
   };
