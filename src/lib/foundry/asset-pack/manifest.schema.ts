@@ -120,18 +120,38 @@ export const FoundryAssetPackDimensionsSchema = z
   })
   .strict();
 
+/**
+ * Defence-in-depth: `intendedSlot.component` and `gsapCues[].cueId` are
+ * interpolated as raw JS identifiers inside generated TSX
+ * (renderFoundryIntegrationSnippet). The previous `z.string().min(1)`
+ * accepted strings like `"Foo; doEvil(); function Bar"` or
+ * `"inj); evil(); //"`, which the renderer would splice straight into the
+ * generated component — a code-injection vector. We refine these fields
+ * to the standard JS-identifier shape so the renderer can never produce
+ * non-parseable or attacker-controlled tokens. String slots that arrive
+ * in JSX text/attribute position (altText, targetSelector, easing, …)
+ * are escaped at render time via `JSON.stringify`.
+ */
+const JS_IDENTIFIER_RE = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+const JsIdentifier = z
+  .string()
+  .regex(
+    JS_IDENTIFIER_RE,
+    "must be a valid JS identifier ([a-zA-Z_$][a-zA-Z0-9_$]*) — this value is interpolated as code in generated TSX",
+  );
+
 export const FoundryAssetPackIntendedSlotSchema = z
   .object({
     slotId: z.string().min(1).regex(/^[a-z0-9/_-]+$/, "slotId must be kebab/path style lowercase"),
     appPath: AppPath,
-    component: z.string().min(1).nullable(),
+    component: JsIdentifier.nullable(),
     requiresGsap: z.boolean(),
   })
   .strict();
 
 export const FoundryGsapCueSchema = z
   .object({
-    cueId: z.string().min(1),
+    cueId: JsIdentifier,
     targetSelector: z.string().min(1),
     timeline: z.string().min(1),
     durationMs: z.number().int().nonnegative(),
