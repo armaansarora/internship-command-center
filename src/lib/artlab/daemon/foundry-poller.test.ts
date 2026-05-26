@@ -5,6 +5,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -174,5 +175,90 @@ describe("foundry-poller", () => {
     const poller = createFoundryPoller({ workspaceRoot });
     const out = await poller.tick();
     expect(out.enqueuedRunIds).toEqual(ids);
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Brain-hint sidecar handling — see `generate.ts` and Critical Finding 1.
+  //
+  // The MCP `generate` handler writes brain enrichment to a sidecar file
+  // (`generate-<runId>.brain-hint.json`) instead of rewriting the trigger
+  // file. The poller is responsible for:
+  //   - Merging the sidecar into the job payload before validation.
+  //   - Treating sidecars as auxiliary — they are NEVER trigger files.
+  //   - Archiving the sidecar alongside the trigger file on success.
+  //   - Ignoring orphan sidecars (trigger archived before enrichment).
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("brain-hint sidecar handling", () => {
+    it("merges a brain-hint sidecar into the queued job spec", async () => {
+      const runId = "00000000-0000-4000-8000-00000000aaaa";
+      writeInboxJob({ runId, brainHintStatus: "pending" });
+      // Write the sidecar with a "ready" result.
+      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      writeFileSync(
+        join(inboxDir, `generate-${runId}.brain-hint.json`),
+        JSON.stringify({
+          runId,
+          brainHintStatus: "ready",
+          brainHint: { targetStyle: "satin-lapel" },
+          brainHintCompletedAt: new Date().toISOString(),
+        }),
+      );
+      const poller = createFoundryPoller({ workspaceRoot });
+      const out = await poller.tick();
+      expect(out.enqueuedRunIds).toEqual([runId]);
+      const queued = listQueuedRuns(workspaceRoot);
+      expect(queued[0]!.spec.brainHintStatus).toBe("ready");
+      expect(queued[0]!.spec.brainHint).toEqual({ targetStyle: "satin-lapel" });
+      // Sidecar archived alongside the trigger file.
+      const processed = join(inboxDir, ".processed");
+      expect(existsSync(join(processed, `${runId}.json`))).toBe(true);
+      expect(existsSync(join(processed, `${runId}.brain-hint.json`))).toBe(true);
+    });
+
+    it("never treats a sidecar as a trigger file (orphan sidecars are ignored)", async () => {
+      // Simulate the race: trigger file already archived (so this tick has
+      // only a leftover sidecar in the live inbox). The poller must NOT
+      // process the sidecar as a new job.
+      const orphanRunId = "00000000-0000-4000-8000-00000000bbbb";
+      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      mkdirSync(inboxDir, { recursive: true });
+      writeFileSync(
+        join(inboxDir, `generate-${orphanRunId}.brain-hint.json`),
+        JSON.stringify({
+          runId: orphanRunId,
+          brainHintStatus: "ready",
+          brainHint: { targetStyle: "anything" },
+          brainHintCompletedAt: new Date().toISOString(),
+        }),
+      );
+      const poller = createFoundryPoller({ workspaceRoot });
+      const out = await poller.tick();
+      expect(out.enqueuedRunIds).toEqual([]);
+      expect(out.failedFiles).toEqual([]);
+      // Orphan sidecar still in place, untouched.
+      expect(
+        existsSync(join(inboxDir, `generate-${orphanRunId}.brain-hint.json`)),
+      ).toBe(true);
+      // No queue / run-state side effects.
+      expect(listQueuedRuns(workspaceRoot)).toHaveLength(0);
+      expect(existsSync(join(workspaceRoot, "runs", orphanRunId))).toBe(false);
+    });
+
+    it("survives a malformed sidecar — falls back to the trigger file as source of truth", async () => {
+      const runId = "00000000-0000-4000-8000-00000000cccc";
+      writeInboxJob({ runId });
+      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      writeFileSync(
+        join(inboxDir, `generate-${runId}.brain-hint.json`),
+        "{not valid",
+      );
+      const poller = createFoundryPoller({ workspaceRoot });
+      const out = await poller.tick();
+      // Trigger still processed (sidecar parse failure logged, not fatal).
+      expect(out.enqueuedRunIds).toEqual([runId]);
+      // daemon-errors.jsonl records the sidecar failure for /health.
+      const errs = readFileSync(join(workspaceRoot, "daemon-errors.jsonl"), "utf8");
+      expect(errs).toMatch(/foundry-poller:sidecar/);
+    });
   });
 });

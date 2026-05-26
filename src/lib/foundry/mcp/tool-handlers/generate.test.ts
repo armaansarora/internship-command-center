@@ -1,5 +1,12 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, existsSync, readFileSync, readdirSync } from "node:fs";
+import {
+  mkdtempSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleFoundryGenerate } from "./generate";
@@ -63,5 +70,124 @@ describe("handleFoundryGenerate", () => {
     await expect(
       handleFoundryGenerate({ kind: "icon", description: "hi" }, { workspaceRoot }),
     ).rejects.toThrow();
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Brain-enrichment race regression — see Critical Finding 1.
+  //
+  // The previous design rewrote the MAIN inbox file post-enrichment using
+  // temp+rename without `wx`. If the daemon poller archived the file into
+  // `.processed/` between the initial write and the post-enrichment rewrite,
+  // the rename RECREATED `generate-<runId>.json` in the live inbox — the
+  // next poll tick re-seeded a duplicate run and re-enqueued (the queue's
+  // `wx` guard then surfaced as a daemon-errors EEXIST).
+  //
+  // Resolution (option c): write the brain hint to a SIDECAR file
+  // `generate-<runId>.brain-hint.json`. The main inbox file is written once
+  // up-front and never touched again. Even if the sidecar lands after the
+  // poller archives the inbox file, it cannot resurrect the trigger file —
+  // the orphan sidecar is filtered out by the poller's filename predicate.
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("brain enrichment sidecar (race-safe)", () => {
+    function inboxFilesFor(runId: string): string[] {
+      const dir = join(workspaceRoot, "inbox", "foundry");
+      if (!existsSync(dir)) return [];
+      return readdirSync(dir).filter((f) => f.includes(runId));
+    }
+
+    it("never rewrites the main inbox file — brain hint lands on a sidecar", async () => {
+      let resolveEnrich!: (v: Record<string, unknown>) => void;
+      const enrichPromise = new Promise<Record<string, unknown>>((res) => {
+        resolveEnrich = res;
+      });
+      const result = await handleFoundryGenerate(
+        { kind: "character", description: "Rafe needs a charcoal wool jacket pass" },
+        {
+          workspaceRoot,
+          brainEnrich: () => enrichPromise,
+        },
+      );
+      // Main inbox file written with brainHintStatus=pending.
+      const main = JSON.parse(readFileSync(result.inboxPath!, "utf8")) as Record<string, unknown>;
+      expect(main.brainHintStatus).toBe("pending");
+      // Sidecar does not yet exist (enrichment not resolved).
+      const sidecar = result.inboxPath!.replace(/\.json$/, ".brain-hint.json");
+      expect(existsSync(sidecar)).toBe(false);
+      // Resolve enrichment and wait for the sidecar to land.
+      resolveEnrich({ targetStyle: "wool-luxe" });
+      for (let i = 0; i < 50; i += 1) {
+        if (existsSync(sidecar)) break;
+        await new Promise((r) => setTimeout(r, 10));
+      }
+      expect(existsSync(sidecar)).toBe(true);
+      const hint = JSON.parse(readFileSync(sidecar, "utf8")) as Record<string, unknown>;
+      expect(hint.brainHintStatus).toBe("ready");
+      expect(hint.brainHint).toEqual({ targetStyle: "wool-luxe" });
+      // CRITICAL: main inbox file content was NEVER mutated post-write.
+      const mainAfter = JSON.parse(readFileSync(result.inboxPath!, "utf8")) as Record<string, unknown>;
+      expect(mainAfter.brainHintStatus).toBe("pending");
+      expect(mainAfter.brainHint).toBeUndefined();
+    });
+
+    it("does NOT resurrect the inbox file when enrichment completes after poller archives it", async () => {
+      // Race simulation: poller archives the inbox file BEFORE enrichment
+      // resolves. The post-enrichment write must NOT recreate the trigger
+      // file at the inbox path.
+      let resolveEnrich!: (v: Record<string, unknown>) => void;
+      const enrichPromise = new Promise<Record<string, unknown>>((res) => {
+        resolveEnrich = res;
+      });
+      const result = await handleFoundryGenerate(
+        { kind: "character", description: "Mara silk lapel update" },
+        {
+          workspaceRoot,
+          brainEnrich: () => enrichPromise,
+        },
+      );
+      // Simulate the poller archiving the inbox file mid-enrichment.
+      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      const processed = join(inboxDir, ".processed");
+      mkdirSync(processed, { recursive: true });
+      renameSync(result.inboxPath!, join(processed, `${result.runId}.json`));
+      expect(existsSync(result.inboxPath!)).toBe(false);
+      // Now finish enrichment and wait for the sidecar to land.
+      resolveEnrich({ targetStyle: "silk" });
+      const sidecar = result.inboxPath!.replace(/\.json$/, ".brain-hint.json");
+      for (let i = 0; i < 50; i += 1) {
+        if (existsSync(sidecar)) break;
+        await new Promise((r) => setTimeout(r, 10));
+      }
+      // CRITICAL: the main inbox trigger file must NOT have been recreated.
+      expect(existsSync(result.inboxPath!)).toBe(false);
+      // The trigger-file glob the poller uses must find no live files.
+      const triggerFiles = inboxFilesFor(result.runId).filter(
+        (f) => f.startsWith("generate-") && f.endsWith(".json") && !f.includes(".brain-hint"),
+      );
+      expect(triggerFiles).toEqual([]);
+    });
+
+    it("records enrichment failure on the sidecar without touching the main file", async () => {
+      const result = await handleFoundryGenerate(
+        { kind: "ui-texture", description: "Failing brain enrichment regression" },
+        {
+          workspaceRoot,
+          brainEnrich: async () => {
+            throw new Error("provider down");
+          },
+        },
+      );
+      const sidecar = result.inboxPath!.replace(/\.json$/, ".brain-hint.json");
+      for (let i = 0; i < 50; i += 1) {
+        if (existsSync(sidecar)) break;
+        await new Promise((r) => setTimeout(r, 10));
+      }
+      expect(existsSync(sidecar)).toBe(true);
+      const hint = JSON.parse(readFileSync(sidecar, "utf8")) as Record<string, unknown>;
+      expect(hint.brainHintStatus).toBe("failed");
+      expect(String(hint.brainHintError)).toMatch(/provider down/);
+      // Main file unchanged.
+      const main = JSON.parse(readFileSync(result.inboxPath!, "utf8")) as Record<string, unknown>;
+      expect(main.brainHintStatus).toBe("pending");
+    });
   });
 });

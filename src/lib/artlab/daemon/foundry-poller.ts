@@ -203,8 +203,83 @@ function enqueueFoundryRun(
 }
 
 /**
+ * Sidecar file written by `handleFoundryGenerate` once brain enrichment
+ * resolves. Lives next to the inbox trigger file at
+ * `generate-<runId>.brain-hint.json`. Optional — older inbox files (and
+ * jobs queued without a brainEnrich callback) won't have one.
+ *
+ * The sidecar exists specifically so the MCP handler never has to rewrite
+ * the inbox trigger file — see the brain-enrich-race comment in
+ * `src/lib/foundry/mcp/tool-handlers/generate.ts`.
+ */
+const BrainHintSidecarSchema = z
+  .object({
+    runId: z.string().min(1),
+    brainHintStatus: z.enum(["pending", "ready", "failed"]),
+    brainHint: z.record(z.string(), z.unknown()).optional(),
+    brainHintError: z.string().optional(),
+    brainHintCompletedAt: z.string().datetime({ offset: true }),
+  })
+  .strict();
+
+function sidecarPathFor(srcPath: string): string {
+  return srcPath.replace(/\.json$/, ".brain-hint.json");
+}
+
+/**
+ * Merge a sidecar (if present) into the job payload. We do this BEFORE
+ * schema validation so the merged record satisfies `FoundryGenerateJobSchema`
+ * with its brain-hint fields populated. Sidecar parse failures are logged
+ * but do not fail the job — the underlying trigger file is the source of
+ * truth; the sidecar is best-effort enrichment.
+ */
+function mergeSidecarIfPresent(
+  workspaceRoot: string,
+  srcPath: string,
+  raw: Record<string, unknown>,
+): Record<string, unknown> {
+  const sidecar = sidecarPathFor(srcPath);
+  if (!existsSync(sidecar)) return raw;
+  try {
+    const parsed = BrainHintSidecarSchema.parse(JSON.parse(readFileSync(sidecar, "utf8")));
+    return {
+      ...raw,
+      brainHintStatus: parsed.brainHintStatus,
+      brainHint: parsed.brainHint,
+      brainHintError: parsed.brainHintError,
+      brainHintCompletedAt: parsed.brainHintCompletedAt,
+    };
+  } catch (err) {
+    recordDaemonError(workspaceRoot, "foundry-poller:sidecar", err);
+    return raw;
+  }
+}
+
+/**
+ * Archive the sidecar (if present) alongside the trigger file. Safe to call
+ * when the sidecar doesn't exist. Errors are logged but never thrown — the
+ * trigger file has already been archived by the caller; orphaning a sidecar
+ * in the inbox is harmless because the poller filters them out.
+ */
+function archiveSidecarIfPresent(
+  workspaceRoot: string,
+  srcPath: string,
+  runId: string,
+): void {
+  const sidecar = sidecarPathFor(srcPath);
+  if (!existsSync(sidecar)) return;
+  try {
+    const archive = processedDir(workspaceRoot);
+    if (!existsSync(archive)) mkdirSync(archive, { recursive: true });
+    moveFile(sidecar, join(archive, `${runId}.brain-hint.json`));
+  } catch (err) {
+    recordDaemonError(workspaceRoot, "foundry-poller:archive-sidecar", err);
+  }
+}
+
+/**
  * Process a single inbox file:
- *   parse → seed run-state → enqueue → archive into .processed.
+ *   parse → merge sidecar → seed run-state → enqueue → archive into .processed.
  *
  * Any step that throws causes the file to be quarantined into .bad and an
  * error recorded via `recordDaemonError`. We never delete a malformed file
@@ -216,17 +291,18 @@ function processOne(
   now: () => Date,
 ): { runId: string | null; error: unknown | null } {
   const srcPath = join(foundryInboxDir(workspaceRoot), filename);
-  let raw: unknown;
+  let raw: Record<string, unknown>;
   try {
-    raw = JSON.parse(readFileSync(srcPath, "utf8"));
+    raw = JSON.parse(readFileSync(srcPath, "utf8")) as Record<string, unknown>;
   } catch (err) {
     recordDaemonError(workspaceRoot, "foundry-poller:parse", err);
     quarantine(workspaceRoot, srcPath, filename);
     return { runId: null, error: err };
   }
+  const merged = mergeSidecarIfPresent(workspaceRoot, srcPath, raw);
   let job: FoundryGenerateJob;
   try {
-    job = FoundryGenerateJobSchema.parse(raw);
+    job = FoundryGenerateJobSchema.parse(merged);
   } catch (err) {
     recordDaemonError(workspaceRoot, "foundry-poller:schema", err);
     quarantine(workspaceRoot, srcPath, filename);
@@ -238,6 +314,7 @@ function processOne(
     const archive = processedDir(workspaceRoot);
     if (!existsSync(archive)) mkdirSync(archive, { recursive: true });
     moveFile(srcPath, join(archive, `${job.runId}.json`));
+    archiveSidecarIfPresent(workspaceRoot, srcPath, job.runId);
     return { runId: job.runId, error: null };
   } catch (err) {
     recordDaemonError(workspaceRoot, "foundry-poller:submit", err);
@@ -261,8 +338,18 @@ export function createFoundryPoller(input: FoundryPollerInput): FoundryPoller {
       }
       // Atomically written `<path>.tmp.<pid>.<ts>` files are visible during
       // `readdirSync` — skip them so we never half-read a partial payload.
+      // Sidecars (`generate-<runId>.brain-hint.json`) are NOT trigger files
+      // — they're merged into the trigger payload by `processOne`. An
+      // orphan sidecar (one whose trigger was archived before enrichment
+      // resolved) is harmless and silently ignored.
       const filenames = readdirSync(dir)
-        .filter((f) => f.startsWith("generate-") && f.endsWith(".json") && !f.includes(".tmp."))
+        .filter(
+          (f) =>
+            f.startsWith("generate-") &&
+            f.endsWith(".json") &&
+            !f.endsWith(".brain-hint.json") &&
+            !f.includes(".tmp."),
+        )
         .sort();
       const enqueuedRunIds: string[] = [];
       const failedFiles: string[] = [];

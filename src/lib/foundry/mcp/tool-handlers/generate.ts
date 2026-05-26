@@ -18,10 +18,10 @@ export interface FoundryGenerateContext {
    *
    * IMPORTANT: this callback is intentionally *not* awaited inline. The MCP
    * `generate` response must return the runId in <200ms so callers can
-   * immediately poll `generate_status`. The brain hint is appended to the
-   * inbox file (atomic rewrite) once enrichment completes; daemon pollers
-   * may either wait for `brainHintStatus === 'ready'` or proceed with the
-   * un-enriched job and rebuild the prompt from the raw description.
+   * immediately poll `generate_status`. The brain hint is written to a
+   * SIDECAR file (`generate-<runId>.brain-hint.json`) once enrichment
+   * completes — the main inbox trigger file is written once at queue-time
+   * and is never rewritten. See the brain-enrich-race comment below.
    */
   brainEnrich?: (input: FoundryGenerateInput) => Promise<Record<string, unknown>>;
 }
@@ -33,16 +33,30 @@ interface InboxPayload {
   queuedAt: string;
   source: "foundry-mcp";
   brainHintStatus?: BrainHintStatus;
+  [k: string]: unknown;
+}
+
+interface BrainHintSidecar {
+  runId: string;
+  brainHintStatus: BrainHintStatus;
   brainHint?: Record<string, unknown>;
   brainHintError?: string;
-  brainHintCompletedAt?: string;
-  [k: string]: unknown;
+  brainHintCompletedAt: string;
 }
 
 function atomicWriteJson(path: string, payload: unknown): void {
   const tmp = `${path}.tmp.${process.pid}.${Date.now()}`;
   writeFileSync(tmp, JSON.stringify(payload, null, 2), { encoding: "utf8" });
   renameSync(tmp, path);
+}
+
+/**
+ * Sidecar path for a given inbox trigger path. The sidecar carries the brain
+ * enrichment result so the main inbox file is never rewritten — that avoids
+ * the post-archive resurrection race described in the handler below.
+ */
+function sidecarPathFor(inboxPath: string): string {
+  return inboxPath.replace(/\.json$/, ".brain-hint.json");
 }
 
 /**
@@ -79,39 +93,57 @@ export async function handleFoundryGenerate(
 
   // Step 1 — write the queued inbox payload synchronously so callers can poll
   // immediately. If a brainEnrich is wired, the payload carries
-  // `brainHintStatus: 'pending'` so daemon consumers know to expect an
-  // update.
+  // `brainHintStatus: 'pending'` so daemon consumers know a sidecar may
+  // arrive later. The main inbox file is WRITE-ONCE — every subsequent
+  // update goes to the sidecar.
   const initial: InboxPayload = { runId, queuedAt, source: "foundry-mcp", ...input };
   if (ctx.brainEnrich) initial.brainHintStatus = "pending";
   atomicWriteJson(inboxPath, initial);
 
   // Step 2 — fire brain enrichment in the background, without blocking the
-  // MCP response. When it completes (success or failure) we atomically
-  // rewrite the inbox file with the result so daemons can observe it. The
-  // `void` discards the promise; we never let it reject unhandled.
+  // MCP response. The result is written to a SIDECAR file next to the
+  // inbox file instead of rewriting the inbox file itself.
+  //
+  // Why sidecar instead of rewriting the inbox file:
+  //   The daemon poller (src/lib/artlab/daemon/foundry-poller.ts) archives
+  //   processed inbox files into `.processed/` via rename. If enrichment
+  //   resolved AFTER that rename and we used temp+rename on the original
+  //   path, we'd RESURRECT `generate-<runId>.json` in the live inbox — the
+  //   next tick would re-seed `phase=routed` and re-enqueue (then the
+  //   queue's `wx` flag would throw EEXIST into daemon-errors.jsonl).
+  //
+  //   By writing only to the sidecar:
+  //   - the trigger file glob in the poller (`generate-*.json` minus
+  //     `.brain-hint`) never picks up a sidecar
+  //   - the poller reads the sidecar (if present) and merges it into the
+  //     job payload before archival, archiving both files together
+  //   - if the sidecar lands AFTER the inbox file is archived, it becomes
+  //     an orphan in the inbox dir and is ignored by the next tick — no
+  //     resurrection, no duplicated work.
   if (ctx.brainEnrich) {
     const enrich = ctx.brainEnrich;
+    const sidecarPath = sidecarPathFor(inboxPath);
     void (async (): Promise<void> => {
       try {
         const brainHint = await enrich(input);
-        const updated: InboxPayload = {
-          ...initial,
+        const sidecar: BrainHintSidecar = {
+          runId,
           brainHintStatus: "ready",
           brainHint,
           brainHintCompletedAt: new Date().toISOString(),
         };
-        atomicWriteJson(inboxPath, updated);
+        atomicWriteJson(sidecarPath, sidecar);
       } catch (err) {
-        const updated: InboxPayload = {
-          ...initial,
+        const sidecar: BrainHintSidecar = {
+          runId,
           brainHintStatus: "failed",
           brainHintError: (err instanceof Error ? err.message : String(err)).slice(0, 500),
           brainHintCompletedAt: new Date().toISOString(),
         };
         try {
-          atomicWriteJson(inboxPath, updated);
+          atomicWriteJson(sidecarPath, sidecar);
         } catch {
-          /* even if the inbox rewrite fails, the daemon-errors log below
+          /* even if the sidecar write fails, the daemon-errors log below
              still captures the original brain failure. */
         }
         recordEnrichError(ctx.workspaceRoot, runId, err);

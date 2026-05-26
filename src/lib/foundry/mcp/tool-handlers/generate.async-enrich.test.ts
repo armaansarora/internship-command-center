@@ -49,26 +49,35 @@ describe("generate handler — async brain enrichment (performance contract)", (
     expect(initial.brainHintStatus).toBe("pending");
     expect(initial.brainHint).toBeUndefined();
 
-    // Now let the brain "respond" and verify the inbox is updated.
+    // Now let the brain "respond" and verify the SIDECAR is written.
+    // The main inbox file is write-once — enrichment lands on a sidecar
+    // (see brain-enrich-race comment in generate.ts).
     enrichResolve({ agent: "character-master", plan: "after-the-fact" });
-    // Poll the inbox file briefly until the enrichment lands.
+    const sidecarPath = result.inboxPath!.replace(/\.json$/, ".brain-hint.json");
     for (let i = 0; i < 50; i += 1) {
-      const payload = JSON.parse(readFileSync(result.inboxPath!, "utf8")) as Record<
-        string,
-        unknown
-      >;
-      if (payload.brainHintStatus === "ready") {
-        expect((payload.brainHint as Record<string, unknown>).agent).toBe(
-          "character-master",
-        );
-        return;
+      if (existsSync(sidecarPath)) {
+        const payload = JSON.parse(readFileSync(sidecarPath, "utf8")) as Record<
+          string,
+          unknown
+        >;
+        if (payload.brainHintStatus === "ready") {
+          expect((payload.brainHint as Record<string, unknown>).agent).toBe(
+            "character-master",
+          );
+          // Main inbox file unchanged.
+          const mainAfter = JSON.parse(
+            readFileSync(result.inboxPath!, "utf8"),
+          ) as Record<string, unknown>;
+          expect(mainAfter.brainHintStatus).toBe("pending");
+          return;
+        }
       }
       await new Promise((r) => setTimeout(r, 20));
     }
-    throw new Error("brainHint never landed in the inbox file");
+    throw new Error("brainHint sidecar never landed");
   });
 
-  it("when brainEnrich rejects, the inbox file records the failure but the run still queues", async () => {
+  it("when brainEnrich rejects, the sidecar file records the failure but the run still queues", async () => {
     const failingEnrich = async (): Promise<Record<string, unknown>> => {
       throw new Error("anthropic 429 backoff exhausted");
     };
@@ -78,19 +87,22 @@ describe("generate handler — async brain enrichment (performance contract)", (
       { workspaceRoot, brainEnrich: failingEnrich },
     );
     expect(result.status).toBe("queued");
-    // Wait for the async error path to update the inbox.
+    // Wait for the async error path to write the sidecar.
+    const sidecarPath = result.inboxPath!.replace(/\.json$/, ".brain-hint.json");
     for (let i = 0; i < 50; i += 1) {
-      const payload = JSON.parse(readFileSync(result.inboxPath!, "utf8")) as Record<
-        string,
-        unknown
-      >;
-      if (payload.brainHintStatus === "failed") {
-        expect(payload.brainHintError).toMatch(/anthropic 429/);
-        return;
+      if (existsSync(sidecarPath)) {
+        const payload = JSON.parse(readFileSync(sidecarPath, "utf8")) as Record<
+          string,
+          unknown
+        >;
+        if (payload.brainHintStatus === "failed") {
+          expect(payload.brainHintError).toMatch(/anthropic 429/);
+          return;
+        }
       }
       await new Promise((r) => setTimeout(r, 20));
     }
-    throw new Error("failed brainHint never recorded in the inbox file");
+    throw new Error("failed brainHint sidecar never recorded");
   });
 
   it("when no brainEnrich is supplied, no brainHintStatus appears (back-compat)", async () => {
