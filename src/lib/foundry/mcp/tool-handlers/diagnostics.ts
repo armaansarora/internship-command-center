@@ -70,16 +70,19 @@ function recentRuns(
 
 async function probeProviders(
   probes: Record<string, () => Promise<boolean>>,
+  onProbeError?: (name: string, err: unknown) => void,
 ): Promise<Record<string, boolean>> {
   const out: Record<string, boolean> = {};
   for (const [name, probe] of Object.entries(probes)) {
     try {
       out[name] = await probe();
     } catch (err) {
+      // Round-2 review: diagnostics must ALWAYS report — a single failing
+      // probe should not propagate into a whole-handler crash. Record the
+      // probe as false and surface the error via the optional callback so
+      // operators can still see WHY it failed (events emitter / log file).
       out[name] = false;
-      // Surface in event log via the events module — not console.
-      // (consumer wires the events sink at server bootstrap)
-      throw new Error(`provider probe '${name}' threw: ${String(err)}`);
+      if (onProbeError) onProbeError(name, err);
     }
   }
   return out;

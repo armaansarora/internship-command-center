@@ -61,9 +61,22 @@ async function main(): Promise<number> {
   const settingsPath =
     process.env.FOUNDRY_CLAUDE_SETTINGS ?? join(homedir(), ".claude", "settings.json");
   const snippet = computeFoundryClaudeSnippet({ repoRoot });
-  const existing: Record<string, unknown> = existsSync(settingsPath)
-    ? (JSON.parse(readFileSync(settingsPath, "utf8")) as Record<string, unknown>)
-    : {};
+  let existing: Record<string, unknown> = {};
+  if (existsSync(settingsPath)) {
+    try {
+      existing = JSON.parse(readFileSync(settingsPath, "utf8")) as Record<string, unknown>;
+    } catch (err) {
+      // Round-2 review: a raw SyntaxError stack is the worst possible UX
+      // here — the user's settings.json is now likely sacred and we MUST
+      // NOT silently overwrite it. Bail with a clear message naming the
+      // path so they can fix or move it themselves.
+      process.stderr.write(
+        `Refusing to proceed: ${settingsPath} is not valid JSON — fix or move it before re-running this script.\n` +
+          `(parse error: ${String((err as Error).message ?? err)})\n`,
+      );
+      return 1;
+    }
+  }
   const merged = mergeFoundryClaudeSnippet(existing, snippet);
 
   process.stdout.write(`About to write the following snippet to ${settingsPath}:\n\n`);
