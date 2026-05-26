@@ -4,6 +4,7 @@ import { loadFoundryCanon } from "@/lib/foundry/canon";
 import type { FoundryCharacterCanon } from "@/lib/foundry/canon";
 import type { FoundryImageProvider } from "@/lib/foundry/providers/types";
 import type { CreatedFoundryAssetPack } from "@/lib/foundry/asset-pack";
+import { backdropSubtractToRgba } from "@/lib/artlab/runners/cutout-primitives";
 import { runConceptBoardStage, type ConceptLane } from "./stages/concept-board";
 import { runAnchorLockStage } from "./stages/anchor-lock";
 import { runVariantFanOutStage } from "./stages/variant-fan-out";
@@ -32,6 +33,15 @@ function stagesFrom(stage: CharacterMasterStage | null): readonly CharacterMaste
   const idx = CHARACTER_MASTER_STAGES.indexOf(stage);
   if (idx < 0) throw new Error(`runCharacterMaster: unknown resumeFromStage "${stage}"`);
   return CHARACTER_MASTER_STAGES.slice(idx);
+}
+
+async function fileExists(p: string): Promise<boolean> {
+  try {
+    await readFile(p);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function findCharacter(canonChars: readonly FoundryCharacterCanon[], id: string): FoundryCharacterCanon {
@@ -82,6 +92,15 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
       heightPx: meta.anchorHeightPx,
     };
     anchorPath = pngPath;
+    // Materialize the cutout-anchor sidecar if the previous run didn't
+    // create one (older workspaces, or resume after a process crash before
+    // anchor-cutout.png was written). This keeps composite-judge's
+    // apples-to-apples comparison stable across resumes.
+    const cutoutPath = join(runWorkspace, "anchor-cutout.png");
+    if (!(await fileExists(cutoutPath))) {
+      const cut = await backdropSubtractToRgba(bytes);
+      await writeFile(cutoutPath, cut.bytes);
+    }
   }
 
   for (const stage of stages) {
@@ -97,8 +116,16 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
         if (!conceptLanes) throw new Error("anchor-lock: missing concept lanes");
         const r = await runAnchorLockStage({ lanes: conceptLanes, suggestedAnchorLane: 3 });
         anchor = r.anchor;
+        // Persist BOTH the raw anchor (for downstream variant conditioning)
+        // and a cutout version (for composite-judge / perceptual-hash drift).
+        // The drift comparison must compare apples to apples: variants go
+        // through the shared backdrop-subtract primitive, so the anchor must
+        // too — otherwise every variant looks "drifted" purely because its
+        // backdrop is transparent and the anchor's is solid.
         anchorPath = join(runWorkspace, "anchor.png");
         await writeFile(anchorPath, anchor.bytes);
+        const anchorCut = await backdropSubtractToRgba(anchor.bytes);
+        await writeFile(join(runWorkspace, "anchor-cutout.png"), anchorCut.bytes);
         await writeFile(join(runWorkspace, "anchor-meta.json"), JSON.stringify({
           anchorLaneIndex: anchor.laneIndex,
           anchorPrompt: anchor.prompt,
@@ -133,7 +160,12 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
       }
       if (stage === "composite-judge") {
         if (!sprites || !anchorPath) throw new Error("composite-judge: missing sprites/anchor");
-        const r = await runCompositeJudgeStage({ anchorPath, sprites });
+        // Prefer the cutout-anchor for drift comparison (apples-to-apples
+        // against post-cutout variants). Fall back to the raw anchor if the
+        // cutout sidecar is missing (older workspaces).
+        const anchorCutoutPath = join(runWorkspace, "anchor-cutout.png");
+        const judgeAnchor = (await fileExists(anchorCutoutPath)) ? anchorCutoutPath : anchorPath;
+        const r = await runCompositeJudgeStage({ anchorPath: judgeAnchor, sprites });
         if (!r.ok) {
           emit({ kind: "qa-failure", stage, reason: r.failure.reason, offendingPath: r.failure.offendingPath ?? undefined, at: nowIso() });
           return { ok: false, failure: { stage, reason: r.failure.reason, offendingPath: r.failure.offendingPath ?? undefined }, runWorkspace };
