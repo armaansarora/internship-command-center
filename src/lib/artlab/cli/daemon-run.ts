@@ -22,6 +22,7 @@ import { processCancelIntents } from "@/lib/artlab/daemon/cancel-flow";
 import { reconcileCrashedRuns } from "@/lib/artlab/daemon/crash-recovery";
 import { createSleepGuard } from "@/lib/artlab/daemon/sleep-guard";
 import { createCliInboxBridge } from "@/lib/artlab/daemon/cli-inbox-bridge";
+import { createFoundryPoller } from "@/lib/artlab/daemon/foundry-poller";
 import { dispatchInboundMessage } from "@/lib/artlab/bot/bot-dispatcher";
 import { createTelegramClient, type TelegramClient } from "@/lib/artlab/bot/telegram-client";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "@/lib/artlab/orchestrator/llm-brain";
@@ -193,6 +194,7 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
     crashRecovery: { reconcile: () => reconcileCrashedRuns({ workspaceRoot }) },
     sleepGuard: createSleepGuard({}),
     cliInboxBridge: createCliInboxBridge({ workspaceRoot }),
+    foundryPoller: createFoundryPoller({ workspaceRoot }),
     supervisor,
   });
 }
