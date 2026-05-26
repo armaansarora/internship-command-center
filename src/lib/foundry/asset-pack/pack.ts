@@ -1,10 +1,11 @@
 import { mkdir, writeFile, rename } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { randomUUID } from "node:crypto";
 import { sha256OfBytes } from "./hashing";
 import { FOUNDRY_ASSET_PACK_VERSION, FOUNDRY_PACK_FILENAME, FOUNDRY_PACK_PAYLOAD_DIR } from "./constants";
 import {
   FoundryAssetPackManifestSchema,
+  isPathSafeAgainstTraversal,
   type FoundryAssetPackManifest,
 } from "./manifest.schema";
 
@@ -44,12 +45,37 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
   await mkdir(input.packDir, { recursive: true });
   const payloadDir = join(input.packDir, FOUNDRY_PACK_PAYLOAD_DIR);
   await mkdir(payloadDir, { recursive: true });
+  // Resolve once so the containment guard compares canonical absolute paths.
+  // The trailing separator is required so a sibling dir whose name shares a
+  // prefix (e.g. `payloadX/`) cannot satisfy `startsWith`.
+  const payloadDirResolved = resolve(payloadDir);
+  const payloadDirPrefix = payloadDirResolved + sep;
 
   const files: FoundryAssetPackManifest["payload"]["files"] = [];
   for (const f of input.payloadFiles) {
-    if (f.relPath.includes("..")) throw new Error(`createFoundryAssetPack: payload relPath may not contain '..': ${f.relPath}`);
+    // Reviewer Critical 2 — the prior literal `includes("..")` check was
+    // bypassed by absolute paths, backslashes, NUL bytes, and percent-
+    // encoding. Route every relPath through the same defence-in-depth
+    // helper the schema uses for manifest-resident relPaths so the writer
+    // enforces the identical allow-list before touching the filesystem.
+    if (!isPathSafeAgainstTraversal(f.relPath, null)) {
+      throw new Error(
+        `createFoundryAssetPack: payload relPath must be a canonical relative path (no traversal, no encoding, no backslash, no leading slash, no NUL): ${JSON.stringify(f.relPath)}`,
+      );
+    }
     const abs = join(payloadDir, f.relPath);
-    await mkdir(join(abs, "..").replace(/\/\.$/, ""), { recursive: true });
+    const absResolved = resolve(abs);
+    // Belt-and-braces containment guard. Even if the validator above ever
+    // regresses, the join+resolve result MUST land inside payloadDir.
+    if (!(absResolved === payloadDirResolved || absResolved.startsWith(payloadDirPrefix))) {
+      throw new Error(
+        `createFoundryAssetPack: payload relPath resolved outside payloadDir: ${JSON.stringify(f.relPath)}`,
+      );
+    }
+    // Replace the prior fragile `join(abs, "..").replace(/\/\.$/, "")` parent
+    // math with `path.dirname`, which handles trailing-slash and "." segments
+    // correctly across platforms.
+    await mkdir(dirname(abs), { recursive: true });
     await atomicWriteFile(abs, f.bytes);
     files.push({
       relPath: f.relPath,
