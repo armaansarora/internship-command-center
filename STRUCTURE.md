@@ -367,6 +367,29 @@ may merge, promote, clean, or integrate.
 
 ---
 
+### Tower Art Foundry SDK
+
+| Path | Purpose |
+|---|---|
+| `src/lib/foundry/mcp/` | MCP server (`tower-art-foundry`) — 9 typed tools over stdio |
+| `src/lib/foundry/mcp/tools.ts` | FOUNDRY_MCP_TOOL_NAMES registry + Zod input/output schemas |
+| `src/lib/foundry/mcp/server.ts` | createFoundryMcpServer factory |
+| `src/lib/foundry/mcp/tool-handlers/` | One file per tool (canon-list, canon-get, …) |
+| `src/lib/foundry/brain/` | Per-agent brains + meta-orchestrator |
+| `src/lib/foundry/brain/types.ts` | FOUNDRY_AGENT_KINDS + brain contract |
+| `src/lib/foundry/brain/meta-orchestrator.ts` | resolveFoundryIntent — confidence-gated routing |
+| `src/lib/foundry/brain/agents/` | character-master-brain, floor-environment-brain, ui-texture-brain, sprite-animator-brain |
+| `src/lib/foundry/brain/factory.ts` | createFoundryBrainFor(kind, env) |
+| `src/lib/foundry/integration/` | Claude skill template, Antigravity workspace template, Telegram commands, demo fixtures |
+| `src/components/foundry/sprite-sheet-player.tsx` | SpriteSheetPlayer client component (target of asset_pack_integration snippet for sprite-animation kind) |
+| `src/app/foundry-demo/page.tsx` | Demo page rendering one of each modality |
+| `scripts/foundry-mcp.ts` | MCP server stdio bootstrap |
+| `scripts/foundry-install-mcp.ts` | Interactive Claude Code settings.json installer |
+| `scripts/foundry-install-claude-skill.ts` | Writes ~/.claude/skills/tower-art-foundry/SKILL.md |
+| `scripts/foundry-install-antigravity-workspace.ts` | Writes .antigravity/workspaces/tower-art-foundry/workspace.yaml |
+
+---
+
 ## sentry/
 
 ```
