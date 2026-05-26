@@ -20173,7 +20173,7 @@ This phase ships the actual on-ramp. The MCP server (Phase 6) and per-agent brai
 - Create: `src/lib/foundry/integration/claude-skill-template.ts`
 - Test: `src/lib/foundry/integration/claude-skill-template.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/claude-skill-template.test.ts
@@ -20212,12 +20212,12 @@ describe("renderFoundryClaudeSkill", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/claude-skill-template.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the template renderer**
+- [x] **Step 3: Implement the template renderer**
 
 ```ts
 // src/lib/foundry/integration/claude-skill-template.ts
@@ -20301,12 +20301,12 @@ const status = await mcp.callTool({ name: "foundry/generate_status", arguments: 
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/claude-skill-template.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/claude-skill-template.ts src/lib/foundry/integration/claude-skill-template.test.ts
@@ -20324,9 +20324,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All 9 tool names appear in the rendered markdown.
-- [ ] YAML frontmatter starts with `---` and names the skill `tower-art-foundry`.
-- [ ] Renderer interpolates `opts.repoRoot` into canon path mentions.
+- [x] All 9 tool names appear in the rendered markdown.
+- [x] YAML frontmatter starts with `---` and names the skill `tower-art-foundry`.
+- [x] Renderer interpolates `opts.repoRoot` into canon path mentions.
 
 ### Task 8.2: install-claude-skill script
 
@@ -20335,7 +20335,7 @@ EOF
 - Test: `scripts/foundry-install-claude-skill.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-install-claude-skill.test.ts
@@ -20390,12 +20390,12 @@ describe("installFoundryClaudeSkill", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-install-claude-skill.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the install script**
+- [x] **Step 3: Implement the install script**
 
 ```ts
 // scripts/foundry-install-claude-skill.ts
@@ -20459,7 +20459,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script**
+- [x] **Step 4: Add npm script**
 
 Edit `package.json` `scripts` block:
 
@@ -20469,12 +20469,12 @@ Edit `package.json` `scripts` block:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-install-claude-skill.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-install-claude-skill.ts scripts/foundry-install-claude-skill.test.ts package.json
@@ -20491,9 +20491,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Confirmation prompt is mandatory unless `FOUNDRY_INSTALL_YES=1`.
-- [ ] Existing SKILL.md backed up to `SKILL.md.bak` before overwrite.
-- [ ] Atomic write (tmp + rename).
+- [x] Confirmation prompt is mandatory unless `FOUNDRY_INSTALL_YES=1`.
+- [x] Existing SKILL.md backed up to `SKILL.md.bak` before overwrite.
+- [x] Atomic write (tmp + rename).
 
 ### Task 8.3: Antigravity workspace template renderer
 
@@ -20501,7 +20501,7 @@ EOF
 - Create: `src/lib/foundry/integration/antigravity-workspace-template.ts`
 - Test: `src/lib/foundry/integration/antigravity-workspace-template.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/antigravity-workspace-template.test.ts
@@ -20533,12 +20533,12 @@ describe("renderFoundryAntigravityWorkspace", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/antigravity-workspace-template.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the template**
+- [x] **Step 3: Implement the template**
 
 ```ts
 // src/lib/foundry/integration/antigravity-workspace-template.ts
@@ -20597,12 +20597,12 @@ primary-actions:
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/antigravity-workspace-template.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/antigravity-workspace-template.ts src/lib/foundry/integration/antigravity-workspace-template.test.ts
@@ -20619,9 +20619,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Workspace slug is exactly `tower-art-foundry`.
-- [ ] Byte-protected list includes `.artlab/engine/promoted`, `public/art/lobby/otis`, `public/art/penthouse/ceo`, `public/lobby`.
-- [ ] All 9 primary-actions match the canonical MCP tool names.
+- [x] Workspace slug is exactly `tower-art-foundry`.
+- [x] Byte-protected list includes `.artlab/engine/promoted`, `public/art/lobby/otis`, `public/art/penthouse/ceo`, `public/lobby`.
+- [x] All 9 primary-actions match the canonical MCP tool names.
 
 ### Task 8.4: install-antigravity-workspace script
 
@@ -20630,7 +20630,7 @@ EOF
 - Test: `scripts/foundry-install-antigravity-workspace.test.ts`
 - Modify: `package.json` (scripts block)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // scripts/foundry-install-antigravity-workspace.test.ts
@@ -20668,12 +20668,12 @@ describe("installFoundryAntigravityWorkspace", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run scripts/foundry-install-antigravity-workspace.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the install script**
+- [x] **Step 3: Implement the install script**
 
 ```ts
 // scripts/foundry-install-antigravity-workspace.ts
@@ -20727,7 +20727,7 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
 }
 ```
 
-- [ ] **Step 4: Add npm script**
+- [x] **Step 4: Add npm script**
 
 Edit `package.json`:
 
@@ -20737,12 +20737,12 @@ Edit `package.json`:
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run scripts/foundry-install-antigravity-workspace.test.ts`
 Expected: PASS — 2 assertions pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/foundry-install-antigravity-workspace.ts scripts/foundry-install-antigravity-workspace.test.ts package.json
@@ -20759,9 +20759,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Workspace written under `.antigravity/workspaces/tower-art-foundry/`.
-- [ ] Confirm-gated like the other installers.
-- [ ] Existing workspace backed up to `workspace.yaml.bak` before overwrite.
+- [x] Workspace written under `.antigravity/workspaces/tower-art-foundry/`.
+- [x] Confirm-gated like the other installers.
+- [x] Existing workspace backed up to `workspace.yaml.bak` before overwrite.
 
 ### Task 8.5: Telegram /foundry command handler
 
@@ -20769,7 +20769,7 @@ EOF
 - Create: `src/lib/foundry/integration/telegram-commands.ts`
 - Test: `src/lib/foundry/integration/telegram-commands.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/telegram-commands.test.ts
@@ -20854,12 +20854,12 @@ describe("handleFoundryTelegramCommand", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/telegram-commands.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the command handler**
+- [x] **Step 3: Implement the command handler**
 
 ```ts
 // src/lib/foundry/integration/telegram-commands.ts
@@ -20964,12 +20964,12 @@ export async function handleFoundryTelegramCommand(input: FoundryTelegramArgs): 
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/telegram-commands.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/telegram-commands.ts src/lib/foundry/integration/telegram-commands.test.ts
@@ -20987,9 +20987,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Bare `/foundry` returns help mentioning all four subcommands.
-- [ ] `/foundry generate` rejects descriptions shorter than 8 chars with a usage hint.
-- [ ] `/foundry preview` returns a `photo` payload pointing at the absolute pack path.
+- [x] Bare `/foundry` returns help mentioning all four subcommands.
+- [x] `/foundry generate` rejects descriptions shorter than 8 chars with a usage hint.
+- [x] `/foundry preview` returns a `photo` payload pointing at the absolute pack path.
 
 ### Task 8.6: Wire /foundry into the existing bot dispatcher
 
@@ -20997,7 +20997,7 @@ EOF
 - Modify: `src/lib/artlab/bot/commands.ts`
 - Create: `src/lib/artlab/bot/commands.foundry-wire.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/artlab/bot/commands.foundry-wire.test.ts
@@ -21036,12 +21036,12 @@ describe("bot /foundry routing", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/artlab/bot/commands.foundry-wire.test.ts`
 Expected: FAIL — `commands.ts` does not yet route the `foundry` command.
 
-- [ ] **Step 3: Modify commands.ts**
+- [x] **Step 3: Modify commands.ts**
 
 Add `"foundry"` to the `KNOWN` tuple and add a switch arm:
 
@@ -21070,12 +21070,12 @@ case "foundry": {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/artlab/bot/commands.foundry-wire.test.ts src/lib/artlab/bot/commands.test.ts`
 Expected: PASS — new test + pre-existing tests both green.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/artlab/bot/commands.ts src/lib/artlab/bot/commands.foundry-wire.test.ts
@@ -21093,9 +21093,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `KNOWN` now includes `"foundry"`.
-- [ ] No regression: every other bot command test continues to pass.
-- [ ] HTML-escaping happens before `<pre>` wrap to avoid Telegram parser errors.
+- [x] `KNOWN` now includes `"foundry"`.
+- [x] No regression: every other bot command test continues to pass.
+- [x] HTML-escaping happens before `<pre>` wrap to avoid Telegram parser errors.
 
 ### Task 8.7: Demo page fixture — promoted Asset Pack samples
 
@@ -21103,7 +21103,7 @@ EOF
 - Create: `src/lib/foundry/integration/demo-fixtures.ts`
 - Test: `src/lib/foundry/integration/demo-fixtures.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/demo-fixtures.test.ts
@@ -21138,12 +21138,12 @@ describe("FOUNDRY_DEMO_PACKS", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/demo-fixtures.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the fixture**
+- [x] **Step 3: Implement the fixture**
 
 ```ts
 // src/lib/foundry/integration/demo-fixtures.ts
@@ -21208,12 +21208,12 @@ export const FOUNDRY_DEMO_PACKS: readonly FoundryDemoPack[] = [
 ];
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/demo-fixtures.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/demo-fixtures.ts src/lib/foundry/integration/demo-fixtures.test.ts
@@ -21231,9 +21231,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Fixture lists exactly 4 packs, one per the 4 demo modalities.
-- [ ] Every `publicPath` is under `/art/`.
-- [ ] Every entry carries an `alt` (a11y baseline).
+- [x] Fixture lists exactly 4 packs, one per the 4 demo modalities.
+- [x] Every `publicPath` is under `/art/`.
+- [x] Every entry carries an `alt` (a11y baseline).
 
 ### Task 8.8: SpriteSheetPlayer client component (used by demo + integration snippet)
 
@@ -21241,7 +21241,7 @@ EOF
 - Create: `src/components/foundry/sprite-sheet-player.tsx`
 - Test: `src/components/foundry/sprite-sheet-player.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // src/components/foundry/sprite-sheet-player.test.tsx
@@ -21267,12 +21267,12 @@ describe("SpriteSheetPlayer", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/components/foundry/sprite-sheet-player.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the component**
+- [x] **Step 3: Implement the component**
 
 ```tsx
 // src/components/foundry/sprite-sheet-player.tsx
@@ -21334,12 +21334,12 @@ export function SpriteSheetPlayer(props: SpriteSheetPlayerProps): JSX.Element {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/components/foundry/sprite-sheet-player.test.tsx`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/components/foundry/sprite-sheet-player.tsx src/components/foundry/sprite-sheet-player.test.tsx
@@ -21357,9 +21357,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Component has the `"use client"` directive (browser-only hook).
-- [ ] Respects `prefers-reduced-motion` by skipping the interval.
-- [ ] Emits `role="img"` and supports an aria-label prop.
+- [x] Component has the `"use client"` directive (browser-only hook).
+- [x] Respects `prefers-reduced-motion` by skipping the interval.
+- [x] Emits `role="img"` and supports an aria-label prop.
 
 ### Task 8.9: foundry-demo page (one of each modality)
 
@@ -21367,7 +21367,7 @@ EOF
 - Create: `src/app/foundry-demo/page.tsx`
 - Test: `src/app/foundry-demo/page.test.tsx`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```tsx
 // src/app/foundry-demo/page.test.tsx
@@ -21399,12 +21399,12 @@ describe("FoundryDemoPage", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/app/foundry-demo/page.test.tsx`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the page**
+- [x] **Step 3: Implement the page**
 
 ```tsx
 // src/app/foundry-demo/page.tsx
@@ -21469,12 +21469,12 @@ export default function FoundryDemoPage(): JSX.Element {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/app/foundry-demo/page.test.tsx`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/app/foundry-demo/page.tsx src/app/foundry-demo/page.test.tsx
@@ -21492,16 +21492,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All 4 demo modalities render in the static markup.
-- [ ] Each section carries an `aria-label` or heading.
-- [ ] Page title mentions "Tower Art Foundry".
+- [x] All 4 demo modalities render in the static markup.
+- [x] Each section carries an `aria-label` or heading.
+- [x] Page title mentions "Tower Art Foundry".
 
 ### Task 8.10: Integration test — Next build passes with foundry-demo page
 
 **Files:**
 - Create: `src/app/foundry-demo/build.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/app/foundry-demo/build.integration.test.ts
@@ -21533,12 +21533,12 @@ describe("foundry-demo page builds", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/app/foundry-demo/build.integration.test.ts`
 Expected: PASS (if 8.7–8.9 are clean) or FAIL with a compilation error in the demo page. Diagnose if FAIL.
 
-- [ ] **Step 3: Implementation already done in 8.7–8.9 — verify and tighten**
+- [x] **Step 3: Implementation already done in 8.7–8.9 — verify and tighten**
 
 If the test fails, the build error is the source of truth. Common issues:
 1. Missing `"use client"` on a hook-using component (already handled by SpriteSheetPlayer).
@@ -21547,12 +21547,12 @@ If the test fails, the build error is the source of truth. Common issues:
 
 Acceptable fallback if real promoted files are missing: replace each `<Image>` with a small placeholder div that has the correct `aria-label` so the build still passes and the test assertion `result.code === 0` is satisfied.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/app/foundry-demo/build.integration.test.ts`
 Expected: PASS — `next build` exits 0 and emits the `foundry-demo` route name in its output.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/app/foundry-demo/build.integration.test.ts
@@ -21569,16 +21569,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `next build` exits 0.
-- [ ] Build output includes the route name `foundry-demo`.
-- [ ] Test completes within 240 seconds.
+- [x] `next build` exits 0.
+- [x] Build output includes the route name `foundry-demo`.
+- [x] Test completes within 240 seconds.
 
 ### Task 8.11: End-to-end agent loop acceptance gate
 
 **Files:**
 - Create: `src/lib/foundry/integration/agent-loop.acceptance.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/integration/agent-loop.acceptance.test.ts
@@ -21686,12 +21686,12 @@ describe("agent loop acceptance gate", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/integration/agent-loop.acceptance.test.ts`
 Expected: PASS if all prior tasks are clean; FAIL otherwise (and the failure mode is the source of truth for what to fix).
 
-- [ ] **Step 3: Implementation — verify the surrounding stack**
+- [x] **Step 3: Implementation — verify the surrounding stack**
 
 If the test fails, walk through the chain in order:
 1. MCP server starts (Task 6.13 problem).
@@ -21700,12 +21700,12 @@ If the test fails, walk through the chain in order:
 4. `foundry/generate_status` reads `closed` → maps to `promoted` (Task 6.10).
 5. `foundry/asset_pack_integration` emits the SpriteSheetPlayer snippet (Task 6.7).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/integration/agent-loop.acceptance.test.ts`
 Expected: PASS — full loop closes.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/integration/agent-loop.acceptance.test.ts
@@ -21723,9 +21723,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Test exercises the full chain: generate → fake promote → poll → integration.
-- [ ] Final snippet body contains `SpriteSheetPlayer` (the expected sprite-animation integration).
-- [ ] Completes within 60 seconds.
+- [x] Test exercises the full chain: generate → fake promote → poll → integration.
+- [x] Final snippet body contains `SpriteSheetPlayer` (the expected sprite-animation integration).
+- [x] Completes within 60 seconds.
 
 ### Task 8.12: Update CLAUDE.md with Foundry SDK pointer
 
@@ -21733,7 +21733,7 @@ EOF
 - Modify: `CLAUDE.md`
 - Create: `tests/codebase/claude-md.foundry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // tests/codebase/claude-md.foundry.test.ts
@@ -21763,12 +21763,12 @@ describe("CLAUDE.md mentions the Tower Art Foundry SDK", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/codebase/claude-md.foundry.test.ts`
 Expected: FAIL — CLAUDE.md doesn't yet mention Tower Art Foundry, and docs/foundry/ doesn't exist.
 
-- [ ] **Step 3: Update CLAUDE.md and create docs/foundry/**
+- [x] **Step 3: Update CLAUDE.md and create docs/foundry/**
 
 Add a new section to `CLAUDE.md` right after the existing **ArtLab — Tower creative engine** block:
 
@@ -21799,12 +21799,12 @@ Agent-native SDK layered over the ArtLab engine. See CLAUDE.md for the high-leve
 entry points. Detailed tool reference: MCP-TOOLS.md.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/codebase/claude-md.foundry.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add CLAUDE.md docs/foundry/ tests/codebase/claude-md.foundry.test.ts
@@ -21821,9 +21821,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] CLAUDE.md contains the phrase "Tower Art Foundry".
-- [ ] `docs/foundry/` directory exists with at least a README.md.
-- [ ] Existing "ArtLab" mention preserved (engine + SDK coexist).
+- [x] CLAUDE.md contains the phrase "Tower Art Foundry".
+- [x] `docs/foundry/` directory exists with at least a README.md.
+- [x] Existing "ArtLab" mention preserved (engine + SDK coexist).
 
 ### Task 8.13: Update STRUCTURE.md with foundry section
 
@@ -21831,7 +21831,7 @@ EOF
 - Modify: `STRUCTURE.md`
 - Create: `tests/codebase/structure-md.foundry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // tests/codebase/structure-md.foundry.test.ts
@@ -21860,12 +21860,12 @@ describe("STRUCTURE.md mentions the foundry tree", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/codebase/structure-md.foundry.test.ts`
 Expected: FAIL — STRUCTURE.md does not yet mention the foundry tree.
 
-- [ ] **Step 3: Append a foundry section to STRUCTURE.md**
+- [x] **Step 3: Append a foundry section to STRUCTURE.md**
 
 Append at an appropriate place (near the existing ArtLab section or in the file-map table):
 
@@ -21892,12 +21892,12 @@ Append at an appropriate place (near the existing ArtLab section or in the file-
 | `scripts/foundry-install-antigravity-workspace.ts` | Writes .antigravity/workspaces/tower-art-foundry/workspace.yaml |
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/codebase/structure-md.foundry.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add STRUCTURE.md tests/codebase/structure-md.foundry.test.ts
@@ -21914,9 +21914,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] STRUCTURE.md contains the heading "Tower Art Foundry SDK".
-- [ ] Table entries cover both `mcp/` and `brain/` subtrees.
-- [ ] `scripts/foundry-mcp.ts` is mentioned by name.
+- [x] STRUCTURE.md contains the heading "Tower Art Foundry SDK".
+- [x] Table entries cover both `mcp/` and `brain/` subtrees.
+- [x] `scripts/foundry-mcp.ts` is mentioned by name.
 
 ### Task 8.14: Final phase tag + acceptance walkthrough
 
@@ -21924,7 +21924,7 @@ EOF
 - Create: `docs/foundry/PHASE-8-ACCEPTANCE.md`
 - Create: `tests/codebase/foundry-acceptance.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // tests/codebase/foundry-acceptance.test.ts
@@ -21967,12 +21967,12 @@ describe("Foundry phase-8 acceptance walkthrough", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run tests/codebase/foundry-acceptance.test.ts`
 Expected: FAIL — `PHASE-8-ACCEPTANCE.md` does not exist.
 
-- [ ] **Step 3: Write the acceptance walkthrough**
+- [x] **Step 3: Write the acceptance walkthrough**
 
 ```markdown
 # Tower Art Foundry SDK — Phase 8 acceptance walkthrough
@@ -22043,12 +22043,12 @@ engine layer remains **ArtLab** in internal code paths and developer docs —
 the two are layers of one system, never marketed as separate products.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run tests/codebase/foundry-acceptance.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Final tag + commit**
+- [x] **Step 5: Final tag + commit**
 
 ```bash
 git add docs/foundry/PHASE-8-ACCEPTANCE.md tests/codebase/foundry-acceptance.test.ts
@@ -22067,9 +22067,9 @@ git tag foundry-phase-8-complete
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] PHASE-8-ACCEPTANCE.md mentions all 4 install scripts.
-- [ ] PHASE-8-ACCEPTANCE.md references both the agent-loop and next-build tests.
-- [ ] All 9 MCP tool names appear in the walkthrough.
+- [x] PHASE-8-ACCEPTANCE.md mentions all 4 install scripts.
+- [x] PHASE-8-ACCEPTANCE.md references both the agent-loop and next-build tests.
+- [x] All 9 MCP tool names appear in the walkthrough.
 
 ### Phase 8 completion criteria
 
