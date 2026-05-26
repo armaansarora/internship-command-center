@@ -242,7 +242,7 @@ Establish the single source of truth. **No image generation yet — just data + 
 - Create: `scripts/foundry.ts` (minimal stub that prints help and exits 0)
 - Test: `src/lib/foundry/scaffold.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/scaffold.test.ts
@@ -282,12 +282,12 @@ describe("foundry scaffold", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/scaffold.test.ts`
 Expected: FAIL — "directory exists: src/lib/foundry/canon" assertions fail (paths do not exist yet).
 
-- [ ] **Step 3: Create directories and CLI stub**
+- [x] **Step 3: Create directories and CLI stub**
 
 ```bash
 cd "/Users/armaanarora/Documents/The Tower"
@@ -337,12 +337,12 @@ Update `package.json` scripts (insert near existing `artlab` scripts):
     "foundry:canon-validate": "tsx scripts/foundry.ts canon validate",
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/scaffold.test.ts`
 Expected: PASS — all 13 directory assertions + CLI script assertion pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry docs/foundry .artlab/foundry scripts/foundry.ts package.json
@@ -359,10 +359,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `find src/lib/foundry -type d | wc -l` ≥ 6 (root + 5 subdirs)
-- [ ] `find docs/foundry -type d | wc -l` ≥ 7 (root + 6 subdirs)
-- [ ] `npm run foundry -- help` prints help text and exits 0
-- [ ] `npm run foundry -- bogus` exits 2
+- [x] `find src/lib/foundry -type d | wc -l` ≥ 6 (root + 5 subdirs)
+- [x] `find docs/foundry -type d | wc -l` ≥ 7 (root + 6 subdirs)
+- [x] `npm run foundry -- help` prints help text and exits 0
+- [x] `npm run foundry -- bogus` exits 2
 
 ### Task 0.2: Define FoundryCanon shared types and version constants
 
@@ -370,7 +370,7 @@ EOF
 - Create: `src/lib/foundry/canon/types.ts`
 - Test: `src/lib/foundry/canon/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/types.test.ts
@@ -427,12 +427,12 @@ describe("foundry canon shared types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/types.test.ts`
 Expected: FAIL — "Cannot find module './types'".
 
-- [ ] **Step 3: Implement shared canon types**
+- [x] **Step 3: Implement shared canon types**
 
 ```ts
 // src/lib/foundry/canon/types.ts
@@ -472,12 +472,12 @@ export interface FoundryCanonLoadResult<T> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/types.test.ts`
 Expected: PASS — all 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/types.ts src/lib/foundry/canon/types.test.ts
@@ -494,10 +494,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `FOUNDRY_CANON_VERSION === "1.0.0"` (semver, will bump on breaking schema changes)
-- [ ] `FOUNDRY_CANON_KINDS` has exactly 6 entries
-- [ ] `FoundryCanonHeaderSchema` rejects non-kebab-case IDs
-- [ ] `FoundryCanonHeaderSchema` rejects mismatched `schemaVersion`
+- [x] `FOUNDRY_CANON_VERSION === "1.0.0"` (semver, will bump on breaking schema changes)
+- [x] `FOUNDRY_CANON_KINDS` has exactly 6 entries
+- [x] `FoundryCanonHeaderSchema` rejects non-kebab-case IDs
+- [x] `FoundryCanonHeaderSchema` rejects mismatched `schemaVersion`
 
 ### Task 0.3: Define the FoundryCharacterCanon Zod schema
 
@@ -505,7 +505,7 @@ EOF
 - Create: `src/lib/foundry/canon/character-schema.ts`
 - Test: `src/lib/foundry/canon/character-schema.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/character-schema.test.ts
@@ -578,12 +578,12 @@ describe("FoundryCharacterCanonSchema", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/character-schema.test.ts`
 Expected: FAIL — "Cannot find module './character-schema'".
 
-- [ ] **Step 3: Implement FoundryCharacterCanonSchema**
+- [x] **Step 3: Implement FoundryCharacterCanonSchema**
 
 ```ts
 // src/lib/foundry/canon/character-schema.ts
@@ -658,12 +658,12 @@ export type FoundryCharacterCanon = z.infer<typeof FoundryCharacterCanonSchema>;
 export const FOUNDRY_CHARACTER_KIND: z.infer<typeof FoundryCanonKindSchema> = "character";
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/character-schema.test.ts`
 Expected: PASS — all 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/character-schema.ts src/lib/foundry/canon/character-schema.test.ts
@@ -680,10 +680,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Schema enforces all 7 canonical pose states
-- [ ] Schema enforces at least one outfit variant, no duplicates
-- [ ] `header.kind` is required to be the literal `"character"`
-- [ ] `styleEnvelope` is required to be the literal `"tower-flat-plus-depth-v1"`
+- [x] Schema enforces all 7 canonical pose states
+- [x] Schema enforces at least one outfit variant, no duplicates
+- [x] `header.kind` is required to be the literal `"character"`
+- [x] `styleEnvelope` is required to be the literal `"tower-flat-plus-depth-v1"`
 
 ### Task 0.4: Add yaml dev-dependency and implement loadFoundryCanonFile
 
@@ -692,7 +692,7 @@ EOF
 - Create: `src/lib/foundry/canon/loader.ts`
 - Test: `src/lib/foundry/canon/loader.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/loader.test.ts
@@ -784,12 +784,12 @@ describe("loadFoundryCanonFile", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/loader.test.ts`
 Expected: FAIL — "Cannot find module './loader'".
 
-- [ ] **Step 3: Add `yaml` dependency and implement loader**
+- [x] **Step 3: Add `yaml` dependency and implement loader**
 
 ```bash
 npm install yaml@^2.7.0 --save
@@ -858,12 +858,12 @@ export async function loadFoundryCanonFile(absPath: string): Promise<FoundryCano
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/loader.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add package.json package-lock.json src/lib/foundry/canon/loader.ts src/lib/foundry/canon/loader.test.ts
@@ -881,10 +881,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `loadFoundryCanonFile` throws `LoadFoundryCanonError` with a typed `code` for every failure
-- [ ] `loadDurationMs` is recorded for every successful load
-- [ ] Empty / non-object YAML files fail with `header-missing`
-- [ ] `yaml` dep version pin documented in package.json
+- [x] `loadFoundryCanonFile` throws `LoadFoundryCanonError` with a typed `code` for every failure
+- [x] `loadDurationMs` is recorded for every successful load
+- [x] Empty / non-object YAML files fail with `header-missing`
+- [x] `yaml` dep version pin documented in package.json
 
 ### Task 0.5: Define palette, typography, motion-language, space-tokens, iconography-rules schemas
 
@@ -896,7 +896,7 @@ EOF
 - Create: `src/lib/foundry/canon/iconography-rules-schema.ts`
 - Test: `src/lib/foundry/canon/non-character-schemas.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/non-character-schemas.test.ts
@@ -1049,12 +1049,12 @@ describe("FoundryIconographyRulesCanonSchema", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/non-character-schemas.test.ts`
 Expected: FAIL — modules not found.
 
-- [ ] **Step 3: Implement the five non-character schemas**
+- [x] **Step 3: Implement the five non-character schemas**
 
 ```ts
 // src/lib/foundry/canon/palette-schema.ts
@@ -1170,12 +1170,12 @@ export const FoundryIconographyRulesCanonSchema = z
 export type FoundryIconographyRulesCanon = z.infer<typeof FoundryIconographyRulesCanonSchema>;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/non-character-schemas.test.ts`
 Expected: PASS — 10 assertions across 5 describe blocks pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/palette-schema.ts src/lib/foundry/canon/typography-schema.ts src/lib/foundry/canon/motion-language-schema.ts src/lib/foundry/canon/space-tokens-schema.ts src/lib/foundry/canon/iconography-rules-schema.ts src/lib/foundry/canon/non-character-schemas.test.ts
@@ -1193,9 +1193,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Five new strict Zod schemas exported from `src/lib/foundry/canon/`
-- [ ] All five reject unknown `kind` discriminator values
-- [ ] Numeric bounds enforced (no negative durations, opacity in [0,1])
+- [x] Five new strict Zod schemas exported from `src/lib/foundry/canon/`
+- [x] All five reject unknown `kind` discriminator values
+- [x] Numeric bounds enforced (no negative durations, opacity in [0,1])
 
 ### Task 0.6: Implement loadFoundryCanon (whole-tree loader)
 
@@ -1204,7 +1204,7 @@ EOF
 - Create: `src/lib/foundry/canon/index.ts`
 - Test: `src/lib/foundry/canon/load-canon.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/load-canon.test.ts
@@ -1317,12 +1317,12 @@ tokens:
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/load-canon.test.ts`
 Expected: FAIL — "Cannot find module './load-canon'".
 
-- [ ] **Step 3: Implement loadFoundryCanon**
+- [x] **Step 3: Implement loadFoundryCanon**
 
 ```ts
 // src/lib/foundry/canon/load-canon.ts
@@ -1462,12 +1462,12 @@ export * from "./loader";
 export * from "./load-canon";
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/load-canon.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/load-canon.ts src/lib/foundry/canon/load-canon.test.ts src/lib/foundry/canon/index.ts
@@ -1485,10 +1485,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `loadFoundryCanon` returns a `FoundryCanon` with all 6 kind arrays
-- [ ] Duplicate ids within a kind throw a descriptive error
-- [ ] Load duration recorded; for a small canon (≤10 files) stays under 50 ms
-- [ ] `src/lib/foundry/canon/index.ts` re-exports the public surface
+- [x] `loadFoundryCanon` returns a `FoundryCanon` with all 6 kind arrays
+- [x] Duplicate ids within a kind throw a descriptive error
+- [x] Load duration recorded; for a small canon (≤10 files) stays under 50 ms
+- [x] `src/lib/foundry/canon/index.ts` re-exports the public surface
 
 ### Task 0.7: Migrate Tower master palette + typography + motion-language + space-tokens + iconography-rules YAML
 
@@ -1500,7 +1500,7 @@ EOF
 - Create: `docs/foundry/canon/iconography-rules/tower-default.yaml`
 - Test: `src/lib/foundry/canon/migration-non-character.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/migration-non-character.test.ts
@@ -1552,12 +1552,12 @@ describe("non-character canon migration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-non-character.test.ts`
 Expected: FAIL — palette/typography/etc. records not yet found.
 
-- [ ] **Step 3: Create the 5 tower-default YAML files**
+- [x] **Step 3: Create the 5 tower-default YAML files**
 
 ```yaml
 # docs/foundry/canon/palettes/tower-default.yaml
@@ -1670,12 +1670,12 @@ forbiddenStyles:
   - photographic
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-non-character.test.ts`
 Expected: PASS — all 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/foundry/canon/palettes/tower-default.yaml docs/foundry/canon/typography/tower-default.yaml docs/foundry/canon/motion-language/tower-default.yaml docs/foundry/canon/space-tokens/tower-default.yaml docs/foundry/canon/iconography-rules/tower-default.yaml src/lib/foundry/canon/migration-non-character.test.ts
@@ -1693,11 +1693,11 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] All 5 tower-default YAML files exist under `docs/foundry/canon/`
-- [ ] Palette tokens match `tailwind.config.js` (primaryDark `#1A1A2E`, goldAccent `#C9A84C`)
-- [ ] Typography families match VISION-SPEC (Playfair / Satoshi / JetBrains Mono)
-- [ ] Motion principles declare `respect-prefers-reduced-motion` and `no-motion-sickness`
-- [ ] Space tokens declare glass blur 16 px and opacity in [0.85, 0.92]
+- [x] All 5 tower-default YAML files exist under `docs/foundry/canon/`
+- [x] Palette tokens match `tailwind.config.js` (primaryDark `#1A1A2E`, goldAccent `#C9A84C`)
+- [x] Typography families match VISION-SPEC (Playfair / Satoshi / JetBrains Mono)
+- [x] Motion principles declare `respect-prefers-reduced-motion` and `no-motion-sickness`
+- [x] Space tokens declare glass blur 16 px and opacity in [0.85, 0.92]
 
 ### Task 0.8: Migrate existing promoted characters (Otis + Mara/CEO) into canon YAML
 
@@ -1706,7 +1706,7 @@ EOF
 - Create: `docs/foundry/canon/characters/mara-voss.yaml`
 - Test: `src/lib/foundry/canon/migration-promoted-characters.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/migration-promoted-characters.test.ts
@@ -1746,12 +1746,12 @@ describe("promoted character migration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-promoted-characters.test.ts`
 Expected: FAIL — character records not present.
 
-- [ ] **Step 3: Create otis.yaml + mara-voss.yaml**
+- [x] **Step 3: Create otis.yaml + mara-voss.yaml**
 
 ```yaml
 # docs/foundry/canon/characters/otis.yaml
@@ -1847,12 +1847,12 @@ artDirectionNotes: |
   public/art/penthouse/ceo/. Never regenerate without explicit migration plan.
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-promoted-characters.test.ts`
 Expected: PASS — all 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/foundry/canon/characters/otis.yaml docs/foundry/canon/characters/mara-voss.yaml src/lib/foundry/canon/migration-promoted-characters.test.ts
@@ -1871,9 +1871,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Otis + Mara YAML records exist and both pass `FoundryCharacterCanonSchema`
-- [ ] Both declare `promotionStatus: promoted`
-- [ ] `artDirectionNotes` for both references the byte-protection CI workflow
+- [x] Otis + Mara YAML records exist and both pass `FoundryCharacterCanonSchema`
+- [x] Both declare `promotionStatus: promoted`
+- [x] `artDirectionNotes` for both references the byte-protection CI workflow
 
 ### Task 0.9: Migrate remaining 10 cast members (queued status) into canon YAML
 
@@ -1890,7 +1890,7 @@ EOF
 - Create: `docs/foundry/canon/characters/nadia.yaml`
 - Test: `src/lib/foundry/canon/migration-queued-cast.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/migration-queued-cast.test.ts
@@ -1945,12 +1945,12 @@ describe("queued cast migration", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-queued-cast.test.ts`
 Expected: FAIL — queued cast records missing.
 
-- [ ] **Step 3: Create 10 queued character YAML files**
+- [x] **Step 3: Create 10 queued character YAML files**
 
 Each file follows the same structure as `sol-navarro.yaml` shown below. Values are lifted from `docs/CHARACTER-BIBLE.md`, `src/lib/visual-assets/characters.ts` (`CHARACTER_RENDERING_METADATA`), and `docs/CHAIN-OF-COMMAND.md`. Floors per `docs/artlab/CHARACTER-PIPELINE.md` roster table.
 
@@ -1990,12 +1990,12 @@ artDirectionNotes: "Sol should feel socially open and precise; contact-card warm
 
 Repeat the same shape for `rafe-calder.yaml` (Floor 7 War Room CRO; `war-room-kinetic` motion profile; red-edit prop accent), `priya.yaml` (Floor 7 War Room CRO secondary; `analytical-precise`; tablet-ledger prop), `dylan.yaml` (Floor 4 Situation Room COO; `operations-brisk`; watch/clipboard), `vera.yaml` (Floor 5 Writing Room CMO; `editorial-poised`; expressive-hand-edits), `inez.yaml` (Floor 3 Briefing Room CPO), `mina.yaml` (Floor 2 Observatory CFO), `etta.yaml` (Floor 6 Rolodex CIO), `rowan.yaml` (Floor 4 secondary ops support), `nadia.yaml` (Floor 3 secondary interview prep). Pull `motionProfile`, `silhouette`, `wardrobe`, `mobileRead`, `negativeDNA`, `artDirectionNotes` verbatim from `src/lib/visual-assets/characters.ts` `CHARACTER_RENDERING_METADATA` entries — these are the canonical values already in use.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/migration-queued-cast.test.ts`
 Expected: PASS — all 4 assertions pass; total character count = 12.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/foundry/canon/characters/ src/lib/foundry/canon/migration-queued-cast.test.ts
@@ -2013,10 +2013,10 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] All 10 queued cast YAML files exist and parse
-- [ ] Each declares `promotionStatus: queued` (or `in-flight` if Rafe Calder is already mid-promotion)
-- [ ] Total character canon count = 12
-- [ ] All reference `paletteRef: tower-default`
+- [x] All 10 queued cast YAML files exist and parse
+- [x] Each declares `promotionStatus: queued` (or `in-flight` if Rafe Calder is already mid-promotion)
+- [x] Total character canon count = 12
+- [x] All reference `paletteRef: tower-default`
 
 ### Task 0.10: Implement validateFoundryCanon (cross-record integrity checks)
 
@@ -2024,7 +2024,7 @@ EOF
 - Create: `src/lib/foundry/canon/validate.ts`
 - Test: `src/lib/foundry/canon/validate.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/canon/validate.test.ts
@@ -2109,12 +2109,12 @@ describe("validateFoundryCanon", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/canon/validate.test.ts`
 Expected: FAIL — "Cannot find module './validate'".
 
-- [ ] **Step 3: Implement validateFoundryCanon**
+- [x] **Step 3: Implement validateFoundryCanon**
 
 ```ts
 // src/lib/foundry/canon/validate.ts
@@ -2205,12 +2205,12 @@ export function validateFoundryCanon(canon: FoundryCanon): FoundryCanonValidatio
 
 Update `src/lib/foundry/canon/index.ts` to add `export * from "./validate";`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/canon/validate.test.ts`
 Expected: PASS — all 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/validate.ts src/lib/foundry/canon/validate.test.ts src/lib/foundry/canon/index.ts
@@ -2228,9 +2228,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `validateFoundryCanon` returns `ok: true` on the real on-disk canon (after Tasks 0.7-0.9 land)
-- [ ] Five distinct issue codes are emitted for the five distinct failure modes
-- [ ] Unresolved paletteRef is flagged with the offending recordId
+- [x] `validateFoundryCanon` returns `ok: true` on the real on-disk canon (after Tasks 0.7-0.9 land)
+- [x] Five distinct issue codes are emitted for the five distinct failure modes
+- [x] Unresolved paletteRef is flagged with the offending recordId
 
 ### Task 0.11: Wire `foundry canon validate` CLI subcommand
 
@@ -2239,7 +2239,7 @@ EOF
 - Modify: `scripts/foundry.ts` (wire the subcommand)
 - Test: `src/lib/foundry/cli/canon-validate.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/cli/canon-validate.test.ts
@@ -2272,12 +2272,12 @@ describe("foundry canon validate CLI", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/cli/canon-validate.test.ts`
 Expected: FAIL — "Cannot find module './canon-validate'".
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/cli/canon-validate.ts
@@ -2348,7 +2348,7 @@ async function main(argv: readonly string[]): Promise<number> {
 void main(process.argv.slice(2)).then((code) => process.exit(code));
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/cli/canon-validate.test.ts`
 Expected: PASS — both assertions pass; the on-disk canon validates.
@@ -2357,7 +2357,7 @@ Additionally verify the CLI end-to-end:
 Run: `npm run foundry -- canon validate`
 Expected: Exit 0; last stdout line is `canon ok`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/cli/canon-validate.ts src/lib/foundry/cli/canon-validate.test.ts scripts/foundry.ts
@@ -2375,9 +2375,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] `npm run foundry -- canon validate` exits 0 and prints `canon ok` as the last line
-- [ ] Invoking with a non-existent canon root exits 1 with a useful error
-- [ ] Stdout summary line includes record counts and load duration
+- [x] `npm run foundry -- canon validate` exits 0 and prints `canon ok` as the last line
+- [x] Invoking with a non-existent canon root exits 1 with a useful error
+- [x] Stdout summary line includes record counts and load duration
 
 ### Task 0.12: Add canon round-trip stability test and Phase 0 completion gates
 
@@ -2386,7 +2386,7 @@ EOF
 - Create: `src/lib/foundry/canon/load-performance.test.ts`
 - Modify: `package.json` (add `foundry:canon-validate` script if not already present)
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/canon/round-trip.test.ts
@@ -2448,14 +2448,14 @@ describe("canon load performance", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail or pass**
+- [x] **Step 2: Run tests to verify they fail or pass**
 
 Run: `npx vitest run src/lib/foundry/canon/round-trip.test.ts src/lib/foundry/canon/load-performance.test.ts`
 Expected: PASS — both tests rely on existing code from Tasks 0.4–0.9; if either fails, fix the source data (no implementation change needed in this task).
 
 If the performance test fails on slower machines, document the actual measured time in the commit body but the gate stays at 50 ms — that is the architectural target. The CI matrix only uses the 50 ms gate when running on the macOS hosted runner.
 
-- [ ] **Step 3: Verify package.json has the foundry:canon-validate script**
+- [x] **Step 3: Verify package.json has the foundry:canon-validate script**
 
 ```bash
 grep -q '"foundry:canon-validate"' package.json || (echo "missing foundry:canon-validate script"; exit 1)
@@ -2463,7 +2463,7 @@ grep -q '"foundry:canon-validate"' package.json || (echo "missing foundry:canon-
 
 If missing, add it as documented in Task 0.1.
 
-- [ ] **Step 4: Final Phase 0 verification**
+- [x] **Step 4: Final Phase 0 verification**
 
 Run all Phase 0 tests:
 ```bash
@@ -2475,7 +2475,7 @@ npm run foundry -- canon validate
 
 All must exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/canon/round-trip.test.ts src/lib/foundry/canon/load-performance.test.ts package.json
@@ -2493,9 +2493,9 @@ EOF
 ```
 
 **Acceptance criteria:**
-- [ ] Round-trip YAML test passes — parse(stringify(parse(file))) === parse(file) for every canon YAML
-- [ ] `loadDurationMs` < 50 for the full canon (~12 characters + 5 non-character records)
-- [ ] `foundry:canon-validate` npm script exists and executes the validate path
+- [x] Round-trip YAML test passes — parse(stringify(parse(file))) === parse(file) for every canon YAML
+- [x] `loadDurationMs` < 50 for the full canon (~12 characters + 5 non-character records)
+- [x] `foundry:canon-validate` npm script exists and executes the validate path
 
 ### Phase 0 completion criteria
 
