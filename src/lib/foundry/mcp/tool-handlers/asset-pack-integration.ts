@@ -21,6 +21,42 @@ interface ManifestForIntegration {
   integration?: Record<string, unknown>;
 }
 
+// Round-4 Codex review surfaced that integration.{alt,cssVar,...} flowed into
+// generated TSX/CSS via bare template strings. The sister file
+// integration-snippet.ts was hardened with JSON.stringify quoting; this file
+// was overlooked because no production producer writes `integration: {...}`
+// to manifest.json today (only test fixtures populate it). Apply the same
+// quote() helper before any caller starts writing that field through the
+// MCP SDK surface and the round-3 fix gets bypassed.
+function quote(s: string): string {
+  return JSON.stringify(s);
+}
+
+// CSS custom property identifier — must match the CSS grammar. Rejects
+// anything that could break out of the declaration (newlines, semicolons,
+// braces, comments, etc.).
+const CSS_VAR_RE = /^--[a-zA-Z_][a-zA-Z0-9_-]*$/;
+function assertCssVarName(s: string, source: string): string {
+  if (!CSS_VAR_RE.test(s)) {
+    throw new Error(
+      `${source}: invalid CSS custom property name '${s}' — must match /^--[a-zA-Z_][a-zA-Z0-9_-]*$/`,
+    );
+  }
+  return s;
+}
+
+// JS-identifier validator — matches the JsIdentifier refinement on the
+// manifest schema. Used for the icon snippet's `import <Ident> from ...`
+// where the symbol name is derived from packId (already validated by
+// PackIdSchema, but we re-assert post-camelize for defence in depth).
+const JS_IDENT_RE = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+function assertJsIdentifier(s: string, source: string): string {
+  if (!JS_IDENT_RE.test(s)) {
+    throw new Error(`${source}: '${s}' is not a valid JS identifier`);
+  }
+  return s;
+}
+
 function snippetForCharacter(m: ManifestForIntegration): {
   importStatement: string;
   snippet: string;
@@ -30,7 +66,7 @@ function snippetForCharacter(m: ManifestForIntegration): {
   const alt = String(m.integration?.alt ?? m.packId);
   return {
     importStatement: 'import Image from "next/image";',
-    snippet: `<Image src="${m.publicPath}" width={${width}} height={${height}} alt="${alt}" priority />`,
+    snippet: `<Image src=${quote(m.publicPath)} width={${width}} height={${height}} alt=${quote(alt)} priority />`,
   };
 }
 
@@ -41,7 +77,7 @@ function snippetForFloor(m: ManifestForIntegration): {
   const alt = String(m.integration?.alt ?? `${m.packId} floor background`);
   return {
     importStatement: 'import Image from "next/image";',
-    snippet: `<Image src="${m.publicPath}" fill alt="${alt}" priority sizes="100vw" />`,
+    snippet: `<Image src=${quote(m.publicPath)} fill alt=${quote(alt)} priority sizes="100vw" />`,
   };
 }
 
@@ -49,10 +85,13 @@ function snippetForUiTexture(m: ManifestForIntegration): {
   importStatement: string;
   snippet: string;
 } {
-  const cssVar = String(m.integration?.cssVar ?? `--${m.packId}-bg`);
+  const cssVar = assertCssVarName(
+    String(m.integration?.cssVar ?? `--${m.packId}-bg`),
+    "integration.cssVar",
+  );
   return {
     importStatement: "// CSS var — no JS import",
-    snippet: `:root { ${cssVar}: url("${m.publicPath}"); }`,
+    snippet: `:root { ${cssVar}: url(${quote(m.publicPath)}); }`,
   };
 }
 
@@ -67,9 +106,10 @@ function snippetForIcon(m: ManifestForIntegration): {
   importStatement: string;
   snippet: string;
 } {
+  const symbol = assertJsIdentifier(camelize(m.packId), "icon import symbol");
   return {
-    importStatement: `import ${camelize(m.packId)} from "${m.publicPath}";`,
-    snippet: `<img src={${camelize(m.packId)}} alt="${m.packId}" aria-hidden="true" />`,
+    importStatement: `import ${symbol} from ${quote(m.publicPath)};`,
+    snippet: `<img src={${symbol}} alt=${quote(m.packId)} aria-hidden="true" />`,
   };
 }
 
@@ -81,7 +121,7 @@ function snippetForSpriteAnimation(m: ManifestForIntegration): {
   return {
     importStatement:
       'import { SpriteSheetPlayer } from "@/components/foundry/sprite-sheet-player";',
-    snippet: `<SpriteSheetPlayer sheet="${m.publicPath}" fps={${fps}} loop />`,
+    snippet: `<SpriteSheetPlayer sheet=${quote(m.publicPath)} fps={${fps}} loop />`,
   };
 }
 
@@ -95,7 +135,7 @@ function snippetForLottie(m: ManifestForIntegration): {
   const autoplay = m.integration?.autoplay !== false;
   return {
     importStatement: 'import { DotLottieReact } from "@lottiefiles/dotlottie-react";',
-    snippet: `<DotLottieReact src="${m.publicPath}" style={{ width: ${width}, height: ${height} }} loop={${loop}} autoplay={${autoplay}} />`,
+    snippet: `<DotLottieReact src=${quote(m.publicPath)} style={{ width: ${width}, height: ${height} }} loop={${loop}} autoplay={${autoplay}} />`,
   };
 }
 

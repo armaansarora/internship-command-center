@@ -143,4 +143,132 @@ describe("handleFoundryAssetPackIntegration", () => {
       ).rejects.toThrow(/(publicPath|not safe|may not|encoded|empty|NUL|traversal)/i);
     });
   });
+
+  // Round-4 follow-up to Codex's MEDIUM finding: a poisoned manifest's
+  // `integration.*` fields (alt, cssVar, fps, etc.) flowed into generated
+  // TSX/CSS via bare template strings, mirroring the bug round-3 fixed in
+  // the sister file `src/lib/foundry/asset-pack/integration-snippet.ts`.
+  // Now all string slots go through `JSON.stringify` and identifier fields
+  // through strict character-class validators. These regressions prove the
+  // bypass is closed at this surface too.
+  describe("integration-field injection vectors (security)", () => {
+    it("escapes a malicious integration.alt as a JSON string literal (no JSX attribute injection)", async () => {
+      const malicious = 'x" onerror="alert(1)';
+      writePack("char-alt-attack", {
+        packId: "char-alt-attack",
+        kind: "character",
+        slotId: "x",
+        promotedAt: "2026-05-25T12:00:00.000Z",
+        publicPath: "/art/x.png",
+        integration: { width: 100, height: 100, alt: malicious },
+      });
+      const result = await handleFoundryAssetPackIntegration(
+        { packId: "char-alt-attack", targetFramework: "next-app-router" },
+        { packsRoot },
+      );
+      // The exact JSON-stringified payload must appear verbatim — the inner
+      // `"` becomes `\"`, so the malicious content stays bound to a single
+      // string literal and cannot break out into a sibling JSX attribute.
+      expect(result.snippet).toContain(`alt=${JSON.stringify(malicious)}`);
+      // The raw, attribute-breaking form must not appear.
+      expect(result.snippet).not.toContain(`alt="${malicious}"`);
+    });
+
+    it("escapes a malicious integration.alt on floor packs as well", async () => {
+      const malicious = 'floor" onclick="bad()';
+      writePack("floor-alt-attack", {
+        packId: "floor-alt-attack",
+        kind: "floor",
+        slotId: "war-room.bg",
+        promotedAt: "2026-05-25T12:00:00.000Z",
+        publicPath: "/art/floors/war-room.webp",
+        integration: { alt: malicious },
+      });
+      const result = await handleFoundryAssetPackIntegration(
+        { packId: "floor-alt-attack", targetFramework: "next-app-router" },
+        { packsRoot },
+      );
+      expect(result.snippet).toContain(`alt=${JSON.stringify(malicious)}`);
+      expect(result.snippet).not.toContain(`alt="${malicious}"`);
+    });
+
+    it("escapes a malicious publicPath inside the Image src attribute (defense-in-depth even after URL-safety check)", async () => {
+      // assertUrlPathSafeAgainstTraversal rejects backslash/quote/NUL/etc.,
+      // so this path never reaches the snippet. The defense-in-depth here
+      // is the JSON.stringify on src= which would survive even if a future
+      // URL-safety rule loosened.
+      writePack("benign-src", {
+        packId: "benign-src",
+        kind: "character",
+        slotId: "x",
+        promotedAt: "2026-05-25T12:00:00.000Z",
+        publicPath: "/art/characters/safe.png",
+        integration: { width: 100, height: 100, alt: "ok" },
+      });
+      const result = await handleFoundryAssetPackIntegration(
+        { packId: "benign-src", targetFramework: "next-app-router" },
+        { packsRoot },
+      );
+      // src must be a JSON-quoted literal, not a bare `src="..."` (which
+      // is byte-identical for benign input but the format guarantees the
+      // hostile-input case stays escaped).
+      expect(result.snippet).toContain(`src=${JSON.stringify("/art/characters/safe.png")}`);
+    });
+
+    it("rejects an invalid CSS custom-property name in integration.cssVar", async () => {
+      // A poisoned cssVar like `--foo; } body { background: red` would
+      // break out of the `:root { ... }` block and inject arbitrary CSS.
+      // The CSS_VAR_RE validator refuses anything outside `--[ident]`.
+      writePack("ui-css-attack", {
+        packId: "ui-css-attack",
+        kind: "ui-texture",
+        slotId: "tower.button.bg",
+        promotedAt: "2026-05-25T12:00:00.000Z",
+        publicPath: "/art/textures/btn.webp",
+        integration: { cssVar: "--foo; } body { background: red; --x" },
+      });
+      await expect(
+        handleFoundryAssetPackIntegration(
+          { packId: "ui-css-attack", targetFramework: "raw" },
+          { packsRoot },
+        ),
+      ).rejects.toThrow(/invalid CSS custom property name/i);
+    });
+
+    it("rejects a cssVar missing the leading -- (must be a custom property)", async () => {
+      writePack("ui-css-bare", {
+        packId: "ui-css-bare",
+        kind: "ui-texture",
+        slotId: "tower.button.bg",
+        promotedAt: "2026-05-25T12:00:00.000Z",
+        publicPath: "/art/textures/btn.webp",
+        integration: { cssVar: "color" },
+      });
+      await expect(
+        handleFoundryAssetPackIntegration(
+          { packId: "ui-css-bare", targetFramework: "raw" },
+          { packsRoot },
+        ),
+      ).rejects.toThrow(/invalid CSS custom property name/i);
+    });
+
+    it("escapes the publicPath inside CSS url() function via JSON.stringify", async () => {
+      writePack("ui-css-safe", {
+        packId: "ui-css-safe",
+        kind: "ui-texture",
+        slotId: "tower.button.bg",
+        promotedAt: "2026-05-25T12:00:00.000Z",
+        publicPath: "/art/textures/btn.webp",
+        integration: { cssVar: "--btn-bg" },
+      });
+      const result = await handleFoundryAssetPackIntegration(
+        { packId: "ui-css-safe", targetFramework: "raw" },
+        { packsRoot },
+      );
+      // CSS url() argument is JSON-quoted so any future loosening of the
+      // URL-safety check still can't break out of the function call.
+      expect(result.snippet).toContain(`url(${JSON.stringify("/art/textures/btn.webp")})`);
+      expect(result.snippet).toContain(`--btn-bg`);
+    });
+  });
 });
