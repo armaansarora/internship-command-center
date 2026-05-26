@@ -4,7 +4,7 @@ import { FOUNDRY_ASSET_KINDS, FOUNDRY_AGENT_KINDS, FOUNDRY_ASSET_PACK_VERSION } 
 
 const Sha256Hex = z.string().regex(/^[a-f0-9]{64}$/, "sha256 must be 64 hex chars (lowercase)");
 
-const APP_PATH_PREFIXES = ["public/", "src/components/", "src/lib/visual-assets/"] as const;
+export const APP_PATH_PREFIXES = ["public/", "src/components/", "src/lib/visual-assets/"] as const;
 
 function hasPercentEncoding(s: string): boolean {
   return /%[0-9a-fA-F]{2}/.test(s);
@@ -22,6 +22,8 @@ function decodeForInspection(s: string): string {
 
 /**
  * Defence-in-depth path-safety check used by `appPath` and payload `relPath`.
+ * Also exported so the slot registry and the pack writer can apply the
+ * identical attack-vector rejections (no duplicate, drifted copies).
  *
  * Rejects:
  *   - empty strings
@@ -34,7 +36,7 @@ function decodeForInspection(s: string): string {
  *   - paths whose normalised form differs from the input (double slash,
  *     `./` segments, trailing `/`) — forces a canonical representation
  */
-function isPathSafeAgainstTraversal(
+export function isPathSafeAgainstTraversal(
   input: string,
   prefixes: ReadonlyArray<string> | null,
 ): boolean {

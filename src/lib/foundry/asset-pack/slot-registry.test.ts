@@ -4,6 +4,7 @@ import {
   isFoundrySlotRegistered,
   resolveFoundrySlot,
   registerFoundrySlot,
+  type FoundrySlotRecord,
 } from "./slot-registry";
 
 describe("FOUNDRY_SLOT_REGISTRY", () => {
@@ -51,5 +52,59 @@ describe("FOUNDRY_SLOT_REGISTRY", () => {
         requiresGsap: false,
       }),
     ).toThrow();
+  });
+
+  describe("registerFoundrySlot appPath path-traversal hardening", () => {
+    // Reviewer Critical 1 — slot-registry previously trusted the appPath
+    // verbatim, so a rogue registration could later satisfy
+    // `validateFoundryManifestAgainstSlots` for a manifest pointing at
+    // `../../etc/passwd`. Same attack vectors used by manifest.schema.test.ts.
+    const cases: ReadonlyArray<readonly [string, string]> = [
+      ["literal traversal", "../../etc/passwd"],
+      ["url-encoded ..", "public/..%2fetc/passwd"],
+      ["url-encoded dots inside a segment", "public/foo/%2e%2e/bar"],
+      ["fully encoded ..", "public/%2e%2e/etc/passwd"],
+      ["leading double slash", "public//etc/passwd"],
+      ["backslash separator", "public\\..\\etc\\passwd"],
+      ["mixed slash + backslash", "public/foo\\..\\bar"],
+      ["NUL byte injection", "public/idle.webp\0.png"],
+      ["leading slash (absolute path)", "/etc/passwd"],
+      ["tilde (home expansion)", "~/secret"],
+      ["windows drive prefix", "C:/Windows/System32"],
+      ["normalises outside allow-list", "public/../src/secret"],
+      ["dot segment that escapes via current dir", "public/./../../etc/passwd"],
+      ["empty path", ""],
+      ["unlisted prefix (top-level dir)", "etc/passwd"],
+      ["unlisted prefix (src not in allow-list)", "src/server/secret.ts"],
+    ];
+
+    for (const [label, appPath] of cases) {
+      it(`rejects slot registration with appPath: ${label}`, () => {
+        expect(() =>
+          registerFoundrySlot({
+            slotId: `dynamic/test/${label.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`,
+            appPath,
+            kind: "ui-icon",
+            component: null,
+            requiresGsap: false,
+          }),
+        ).toThrow(/appPath/);
+      });
+    }
+  });
+
+  describe("registerFoundrySlot kind enum hardening", () => {
+    it("rejects a slot whose kind is not in FOUNDRY_ASSET_KINDS", () => {
+      expect(() =>
+        registerFoundrySlot({
+          slotId: "dynamic/test/bad-kind",
+          appPath: "public/art/dynamic/bad-kind.webp",
+          // Deliberately invalid kind smuggled past the structural type via cast.
+          kind: "rootkit" as unknown as FoundrySlotRecord["kind"],
+          component: null,
+          requiresGsap: false,
+        }),
+      ).toThrow(/kind/);
+    });
   });
 });
