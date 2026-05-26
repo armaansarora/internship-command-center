@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { evaluateFoundryFloorPerceptualCoherence } from "./perceptual-coherence";
+import { evaluateArtLabFloorPerceptualCoherence } from "./perceptual-coherence";
 
 async function colourPng(r: number, g: number, b: number): Promise<Buffer> {
   return sharp({
@@ -34,7 +34,7 @@ async function patternPng(): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("evaluateFoundryFloorPerceptualCoherence", () => {
+describe("evaluateArtLabFloorPerceptualCoherence", () => {
   it("passes when all variants share a near-identical layout", async () => {
     const base = await colourPng(60, 80, 100);
     const variants = await Promise.all([
@@ -42,7 +42,7 @@ describe("evaluateFoundryFloorPerceptualCoherence", () => {
       { timeState: "midday" as const, bytes: base },
       { timeState: "evening" as const, bytes: base },
     ]);
-    const result = await evaluateFoundryFloorPerceptualCoherence(variants);
+    const result = await evaluateArtLabFloorPerceptualCoherence(variants);
     expect(result.passed).toBe(true);
     expect(result.maxHamming).toBeLessThan(8);
   });
@@ -51,7 +51,7 @@ describe("evaluateFoundryFloorPerceptualCoherence", () => {
     const a = await colourPng(60, 80, 100);
     const b = await colourPng(60, 80, 100);
     const c = await patternPng();
-    const result = await evaluateFoundryFloorPerceptualCoherence([
+    const result = await evaluateArtLabFloorPerceptualCoherence([
       { timeState: "morning", bytes: a },
       { timeState: "midday", bytes: b },
       { timeState: "evening", bytes: c },
@@ -62,7 +62,7 @@ describe("evaluateFoundryFloorPerceptualCoherence", () => {
 
   it("reports the threshold used in the result for transparency", async () => {
     const base = await colourPng(60, 80, 100);
-    const result = await evaluateFoundryFloorPerceptualCoherence([
+    const result = await evaluateArtLabFloorPerceptualCoherence([
       { timeState: "morning", bytes: base },
       { timeState: "midday", bytes: base },
     ]);

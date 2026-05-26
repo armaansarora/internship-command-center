@@ -1,7 +1,7 @@
-// src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.ts
-import type { FoundryIconLlmProvider } from "../llm-provider";
+// src/lib/artlab/sdk/agents/ui-texture/__tests__/mock-llm-provider.ts
+import type { ArtLabIconLlmProvider } from "../llm-provider";
 
-export function createFoundryIconMockLlmProvider(): FoundryIconLlmProvider {
+export function createArtLabIconMockLlmProvider(): ArtLabIconLlmProvider {
   return {
     async emitSvg(input) {
       const seed = input.seed ?? 0;

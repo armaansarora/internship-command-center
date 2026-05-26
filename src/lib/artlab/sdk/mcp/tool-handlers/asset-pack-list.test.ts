@@ -2,12 +2,12 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryAssetPackList } from "./asset-pack-list";
+import { handleArtLabAssetPackList } from "./asset-pack-list";
 
 let packsRoot: string;
 
 beforeEach(() => {
-  packsRoot = mkdtempSync(join(tmpdir(), "foundry-packs-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "artlab-packs-"));
   mkdirSync(join(packsRoot, "rafe-character-v3"), { recursive: true });
   writeFileSync(
     join(packsRoot, "rafe-character-v3", "manifest.json"),
@@ -32,19 +32,19 @@ beforeEach(() => {
   );
 });
 
-describe("handleFoundryAssetPackList", () => {
+describe("handleArtLabAssetPackList", () => {
   it("returns every promoted pack when no filter is passed", async () => {
-    const result = await handleFoundryAssetPackList({}, { packsRoot });
+    const result = await handleArtLabAssetPackList({}, { packsRoot });
     expect(result.packs).toHaveLength(2);
   });
 
   it("filters by kind", async () => {
-    const result = await handleFoundryAssetPackList({ kind: "floor" }, { packsRoot });
+    const result = await handleArtLabAssetPackList({ kind: "floor" }, { packsRoot });
     expect(result.packs.map((p) => p.packId)).toEqual(["war-room-bg-v1"]);
   });
 
   it("filters by characterId (only character-kind packs may match)", async () => {
-    const result = await handleFoundryAssetPackList(
+    const result = await handleArtLabAssetPackList(
       { characterId: "rafe-calder" },
       { packsRoot },
     );
@@ -53,7 +53,7 @@ describe("handleFoundryAssetPackList", () => {
   });
 
   it("returns empty list for an unknown filter", async () => {
-    const result = await handleFoundryAssetPackList({ space: "penthouse" }, { packsRoot });
+    const result = await handleArtLabAssetPackList({ space: "penthouse" }, { packsRoot });
     expect(result.packs).toEqual([]);
   });
 });

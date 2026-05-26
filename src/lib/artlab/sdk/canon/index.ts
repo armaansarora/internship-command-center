@@ -1,4 +1,4 @@
-// src/lib/foundry/canon/index.ts
+// src/lib/artlab/sdk/canon/index.ts
 export * from "./types";
 export * from "./character-schema";
 export * from "./palette-schema";

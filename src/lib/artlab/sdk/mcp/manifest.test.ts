@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { FOUNDRY_MCP_TOOL_NAMES } from "./tools";
+import { ARTLAB_MCP_TOOL_NAMES } from "./tools";
 
 const ManifestSchema = z
   .object({
@@ -18,7 +18,7 @@ const ManifestSchema = z
           })
           .strict(),
       )
-      .length(FOUNDRY_MCP_TOOL_NAMES.length),
+      .length(ARTLAB_MCP_TOOL_NAMES.length),
     transport: z.literal("stdio"),
     command: z.string().min(1),
     args: z.array(z.string()),
@@ -29,7 +29,7 @@ describe("manifest.json", () => {
   it("matches the MCP descriptor schema", () => {
     const raw = readFileSync(join(__dirname, "manifest.json"), "utf8");
     const parsed = ManifestSchema.parse(JSON.parse(raw));
-    expect(parsed.tools.map((t) => t.name).sort()).toEqual([...FOUNDRY_MCP_TOOL_NAMES].sort());
+    expect(parsed.tools.map((t) => t.name).sort()).toEqual([...ARTLAB_MCP_TOOL_NAMES].sort());
   });
 
   it("uses the canonical bootstrap script in command/args", () => {

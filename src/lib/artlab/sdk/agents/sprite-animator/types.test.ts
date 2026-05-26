@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDRY_SPRITE_ACTIONS,
-  FOUNDRY_SPRITE_FORMATS,
-  FoundrySpriteAnimatorInputSchema,
-  FoundrySpriteSequenceManifestSchema,
-  FoundryLottieAnimationManifestSchema,
+  ARTLAB_SPRITE_ACTIONS,
+  ARTLAB_SPRITE_FORMATS,
+  ArtLabSpriteAnimatorInputSchema,
+  ArtLabSpriteSequenceManifestSchema,
+  ArtLabLottieAnimationManifestSchema,
 } from "./types";
 
-describe("foundry sprite-animator types", () => {
+describe("artlab sdk sprite-animator types", () => {
   it("declares the 4 action kinds", () => {
-    expect(FOUNDRY_SPRITE_ACTIONS).toEqual([
+    expect(ARTLAB_SPRITE_ACTIONS).toEqual([
       "idle",
       "wave",
       "nod",
@@ -18,11 +18,11 @@ describe("foundry sprite-animator types", () => {
   });
 
   it("declares the 2 format kinds", () => {
-    expect(FOUNDRY_SPRITE_FORMATS).toEqual(["sprite", "lottie"]);
+    expect(ARTLAB_SPRITE_FORMATS).toEqual(["sprite", "lottie"]);
   });
 
   it("accepts a sprite input", () => {
-    const parsed = FoundrySpriteAnimatorInputSchema.parse({
+    const parsed = ArtLabSpriteAnimatorInputSchema.parse({
       runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
       sourcePackId: "char-otis-v3",
       action: "idle",
@@ -35,7 +35,7 @@ describe("foundry sprite-animator types", () => {
 
   it("rejects a sprite input with frameCount=0", () => {
     expect(() =>
-      FoundrySpriteAnimatorInputSchema.parse({
+      ArtLabSpriteAnimatorInputSchema.parse({
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         sourcePackId: "char-otis-v3",
         action: "idle",
@@ -47,7 +47,7 @@ describe("foundry sprite-animator types", () => {
   });
 
   it("sprite manifest carries fps + total_duration_ms + frames array", () => {
-    const parsed = FoundrySpriteSequenceManifestSchema.parse({
+    const parsed = ArtLabSpriteSequenceManifestSchema.parse({
       frames: [
         { index: 0, path: "frame-00.png", perceptualHash: "0123456789abcdef" },
       ],
@@ -61,7 +61,7 @@ describe("foundry sprite-animator types", () => {
   });
 
   it("lottie manifest carries durationMs + version", () => {
-    const parsed = FoundryLottieAnimationManifestSchema.parse({
+    const parsed = ArtLabLottieAnimationManifestSchema.parse({
       lottiePath: "anim.json",
       version: "5.7.0",
       durationMs: 1000,

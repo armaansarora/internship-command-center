@@ -8,7 +8,7 @@ import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
-import { handleFoundryTelegramCommand } from "@/lib/artlab/sdk/integration/telegram-commands";
+import { handleArtLabTelegramCommand } from "@/lib/artlab/sdk/integration/telegram-commands";
 import {
   askAnswerTemplate,
   cancelAck,
@@ -233,11 +233,11 @@ function buildAskBrain(workspaceRoot: string): ArtLabLlmBrain {
   return createLoggedBrain({ inner: raw, workspaceRoot });
 }
 
-async function handleFoundry(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
+async function handleArtLab(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
   const canonRoot = join(workspaceRoot, "..", "canon");
   const packsRoot = join(workspaceRoot, "promoted");
   const slotRegistryPath = join(workspaceRoot, "slots", "registry.json");
-  const reply = await handleFoundryTelegramCommand({
+  const reply = await handleArtLabTelegramCommand({
     args,
     workspaceRoot,
     canonRoot,
@@ -325,6 +325,6 @@ export async function handleBotCommand(input: BotCommandInput): Promise<BotComma
     case "help": return { kind: "text", message: helpTemplate() };
     case "decisions": return { kind: "text", message: handleDecisions(input.workspaceRoot, input.args) };
     case "ask": return { kind: "text", message: await handleAsk(input.workspaceRoot, input.args) };
-    case "foundry": return { kind: "text", message: await handleFoundry(input.workspaceRoot, input.args) };
+    case "foundry": return { kind: "text", message: await handleArtLab(input.workspaceRoot, input.args) };
   }
 }

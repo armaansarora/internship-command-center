@@ -1,15 +1,15 @@
-// src/lib/foundry/agents/ui-texture/cli.ts
+// src/lib/artlab/sdk/agents/ui-texture/cli.ts
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
-import { runFoundryUiTexture } from "./index";
-import { createFoundryIconMockLlmProvider } from "./__tests__/mock-llm-provider";
-import { FoundryUiTextureInputSchema } from "./types";
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
+import { runArtLabUiTexture } from "./index";
+import { createArtLabIconMockLlmProvider } from "./__tests__/mock-llm-provider";
+import { ArtLabUiTextureInputSchema } from "./types";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
 
-function makeMockImageProvider(): FoundryImageProvider {
+function makeMockImageProvider(): ArtLabImageProvider {
   return {
     async generateImage(input) {
       const seed = input.seed ?? 0;
@@ -24,7 +24,7 @@ function makeMockImageProvider(): FoundryImageProvider {
   };
 }
 
-export interface FoundryUiTextureCliInput {
+export interface ArtLabUiTextureCliInput {
   name: string;
   kind: "icon" | "texture";
   ariaLabel?: string;
@@ -35,18 +35,18 @@ export interface FoundryUiTextureCliInput {
   dryRun?: boolean;
 }
 
-export interface FoundryUiTextureCliResult {
+export interface ArtLabUiTextureCliResult {
   summary: string;
   runDir: string;
   packId?: string;
 }
 
-export async function runFoundryUiTextureCli(
-  input: FoundryUiTextureCliInput,
-): Promise<FoundryUiTextureCliResult> {
+export async function runArtLabUiTextureCli(
+  input: ArtLabUiTextureCliInput,
+): Promise<ArtLabUiTextureCliResult> {
   const runDir =
-    input.runDir ?? mkdtempSync(join(tmpdir(), "foundry-ui-run-"));
-  const parsed = FoundryUiTextureInputSchema.parse(
+    input.runDir ?? mkdtempSync(join(tmpdir(), "artlab-ui-run-"));
+  const parsed = ArtLabUiTextureInputSchema.parse(
     input.kind === "icon"
       ? {
           runId: randomUUID(),
@@ -73,13 +73,13 @@ export async function runFoundryUiTextureCli(
   }
   if (input.providerKind !== "mock") {
     throw new Error(
-      `foundry/ui-texture cli: provider kind ${input.providerKind} not yet wired`,
+      `artlab/ui-texture cli: provider kind ${input.providerKind} not yet wired`,
     );
   }
-  const result = await runFoundryUiTexture(
+  const result = await runArtLabUiTexture(
     parsed,
     {
-      iconLlm: createFoundryIconMockLlmProvider(),
+      iconLlm: createArtLabIconMockLlmProvider(),
       image: makeMockImageProvider(),
     },
     { runDir },

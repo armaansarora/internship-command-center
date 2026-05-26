@@ -1,33 +1,33 @@
-// src/lib/foundry/agents/ui-texture/icon-rules.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/icon-rules.test.ts
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { loadFoundryIconRulesAdapter } from "./icon-rules";
+import { loadArtLabIconRulesAdapter } from "./icon-rules";
 
 vi.mock("@/lib/artlab/sdk/canon", () => ({
-  loadFoundryIconographyRules: vi.fn(),
+  loadArtLabIconographyRules: vi.fn(),
 }));
 
-import { loadFoundryIconographyRules } from "@/lib/artlab/sdk/canon";
+import { loadArtLabIconographyRules } from "@/lib/artlab/sdk/canon";
 
-describe("loadFoundryIconRulesAdapter", () => {
+describe("loadArtLabIconRulesAdapter", () => {
   beforeEach(() => {
-    vi.mocked(loadFoundryIconographyRules).mockReset();
+    vi.mocked(loadArtLabIconographyRules).mockReset();
   });
 
   it("returns the rules with strokeWidthTolerance defaulted", async () => {
-    vi.mocked(loadFoundryIconographyRules).mockResolvedValue({
+    vi.mocked(loadArtLabIconographyRules).mockResolvedValue({
       strokeWidthPx: 1.5,
       cornerRadiusPx: 2,
       palette: ["#C9A84C", "#1A1A2E"],
       viewBox: "0 0 24 24",
     });
-    const out = await loadFoundryIconRulesAdapter();
+    const out = await loadArtLabIconRulesAdapter();
     expect(out.strokeWidthPx).toBe(1.5);
     expect(out.strokeWidthTolerancePx).toBeGreaterThan(0);
     expect(out.viewBox).toBe("0 0 24 24");
   });
 
   it("throws when canon returns null", async () => {
-    vi.mocked(loadFoundryIconographyRules).mockResolvedValue(null);
-    await expect(loadFoundryIconRulesAdapter()).rejects.toThrow(/icon/i);
+    vi.mocked(loadArtLabIconographyRules).mockResolvedValue(null);
+    await expect(loadArtLabIconRulesAdapter()).rejects.toThrow(/icon/i);
   });
 });

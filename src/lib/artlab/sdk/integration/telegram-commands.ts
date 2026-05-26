@@ -1,11 +1,11 @@
-import { handleFoundryDiagnostics } from "@/lib/artlab/sdk/mcp/tool-handlers/diagnostics";
-import { handleFoundryCanonList } from "@/lib/artlab/sdk/mcp/tool-handlers/canon-list";
-import { handleFoundryAssetPackList } from "@/lib/artlab/sdk/mcp/tool-handlers/asset-pack-list";
-import { handleFoundryAssetPackGet } from "@/lib/artlab/sdk/mcp/tool-handlers/asset-pack-get";
-import { handleFoundryGenerate } from "@/lib/artlab/sdk/mcp/tool-handlers/generate";
-import type { FoundryAssetKind } from "@/lib/artlab/sdk/mcp/tools";
+import { handleArtLabDiagnostics } from "@/lib/artlab/sdk/mcp/tool-handlers/diagnostics";
+import { handleArtLabCanonList } from "@/lib/artlab/sdk/mcp/tool-handlers/canon-list";
+import { handleArtLabAssetPackList } from "@/lib/artlab/sdk/mcp/tool-handlers/asset-pack-list";
+import { handleArtLabAssetPackGet } from "@/lib/artlab/sdk/mcp/tool-handlers/asset-pack-get";
+import { handleArtLabGenerate } from "@/lib/artlab/sdk/mcp/tool-handlers/generate";
+import type { ArtLabAssetKind } from "@/lib/artlab/sdk/mcp/tools";
 
-export interface FoundryTelegramArgs {
+export interface ArtLabTelegramArgs {
   args: string[];
   workspaceRoot: string;
   canonRoot: string;
@@ -13,21 +13,21 @@ export interface FoundryTelegramArgs {
   slotRegistryPath: string;
 }
 
-export interface FoundryTelegramReply {
+export interface ArtLabTelegramReply {
   text: string;
   photo?: { path: string; caption?: string };
 }
 
 const HELP = [
-  "Foundry — available commands:",
+  "ArtLab — available commands:",
   " - /foundry status        — daemon health + backlog",
   " - /foundry list <kind>   — list packs (kinds: character/floor/ui-texture/icon/sprite-animation/lottie) or 'character' canon",
   " - /foundry generate <kind> <description...> — queue a new run",
   " - /foundry preview <packId> — send the promoted image",
 ].join("\n");
 
-async function statusReply(input: FoundryTelegramArgs): Promise<FoundryTelegramReply> {
-  const diag = await handleFoundryDiagnostics({}, {
+async function statusReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramReply> {
+  const diag = await handleArtLabDiagnostics({}, {
     workspaceRoot: input.workspaceRoot,
     providerProbes: {},
   });
@@ -39,16 +39,16 @@ async function statusReply(input: FoundryTelegramArgs): Promise<FoundryTelegramR
   return { text: lines.join("\n") };
 }
 
-async function listReply(input: FoundryTelegramArgs): Promise<FoundryTelegramReply> {
+async function listReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramReply> {
   const kind = (input.args[1] ?? "").trim();
   if (kind === "character") {
-    const canon = await handleFoundryCanonList({ kind: "character" }, { canonRoot: input.canonRoot });
+    const canon = await handleArtLabCanonList({ kind: "character" }, { canonRoot: input.canonRoot });
     if (canon.entries.length === 0) return { text: "No canon characters defined." };
     const lines = canon.entries.map((e) => `- ${e.displayName} (${e.id})`);
     return { text: lines.join("\n") };
   }
-  const packs = await handleFoundryAssetPackList(
-    kind ? { kind: kind as FoundryAssetKind } : {},
+  const packs = await handleArtLabAssetPackList(
+    kind ? { kind: kind as ArtLabAssetKind } : {},
     { packsRoot: input.packsRoot },
   );
   if (packs.packs.length === 0) return { text: "No promoted packs match." };
@@ -56,20 +56,20 @@ async function listReply(input: FoundryTelegramArgs): Promise<FoundryTelegramRep
   return { text: lines.join("\n") };
 }
 
-async function generateReply(input: FoundryTelegramArgs): Promise<FoundryTelegramReply> {
-  const kind = (input.args[1] ?? "") as FoundryAssetKind;
+async function generateReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramReply> {
+  const kind = (input.args[1] ?? "") as ArtLabAssetKind;
   const description = input.args.slice(2).join(" ").trim();
   if (!description || description.length < 8) {
     return { text: "Usage: /foundry generate <kind> <description (>= 8 chars)>" };
   }
-  const run = await handleFoundryGenerate({ kind, description }, { workspaceRoot: input.workspaceRoot });
+  const run = await handleArtLabGenerate({ kind, description }, { workspaceRoot: input.workspaceRoot });
   return { text: `Queued ${kind} run ${run.runId} (status=${run.status}).` };
 }
 
-async function previewReply(input: FoundryTelegramArgs): Promise<FoundryTelegramReply> {
+async function previewReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramReply> {
   const packId = input.args[1];
   if (!packId) return { text: "Usage: /foundry preview <packId>" };
-  const pack = await handleFoundryAssetPackGet({ packId }, { packsRoot: input.packsRoot });
+  const pack = await handleArtLabAssetPackGet({ packId }, { packsRoot: input.packsRoot });
   const primary = pack.files.find((f) => f.role === "primary") ?? pack.files[0];
   if (!primary) return { text: `Pack ${packId} has no files to preview.` };
   return {
@@ -78,7 +78,7 @@ async function previewReply(input: FoundryTelegramArgs): Promise<FoundryTelegram
   };
 }
 
-export async function handleFoundryTelegramCommand(input: FoundryTelegramArgs): Promise<FoundryTelegramReply> {
+export async function handleArtLabTelegramCommand(input: ArtLabTelegramArgs): Promise<ArtLabTelegramReply> {
   const sub = input.args[0]?.toLowerCase();
   switch (sub) {
     case undefined:

@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { routeFoundryRequest } from "./route-request";
+import { routeArtLabRequest } from "./route-request";
 
-describe("routeFoundryRequest", () => {
+describe("routeArtLabRequest", () => {
   it("returns a clarifying question when meta confidence is low", async () => {
-    const result = await routeFoundryRequest("do the thing", {
+    const result = await routeArtLabRequest("do the thing", {
       env: { ANTHROPIC_API_KEY: undefined },
       metaCallOverride: async () => ({
         text: JSON.stringify({ agent: "character-master", parsedArgs: {}, confidence: 0.4 }),
@@ -17,7 +17,7 @@ describe("routeFoundryRequest", () => {
   });
 
   it("dispatches to the named brain with parsedArgs when confidence is high", async () => {
-    const result = await routeFoundryRequest("make a War Room dusk", {
+    const result = await routeArtLabRequest("make a War Room dusk", {
       env: { ANTHROPIC_API_KEY: undefined },
       metaCallOverride: async () => ({
         text: JSON.stringify({
@@ -33,7 +33,7 @@ describe("routeFoundryRequest", () => {
 
   it("propagates meta-orchestrator errors (non-JSON) as typed Error", async () => {
     await expect(
-      routeFoundryRequest("x", {
+      routeArtLabRequest("x", {
         env: {},
         metaCallOverride: async () => ({ text: "not json", tokensIn: 0, tokensOut: 0, durationMs: 0 }),
       }),
@@ -55,7 +55,7 @@ describe("routeFoundryRequest", () => {
   // ───────────────────────────────────────────────────────────────────────
   describe("schema-gap regression — feedback signal hydration", () => {
     it("succeeds when meta omits recentWins/recentRejections and no memoryDir is supplied", async () => {
-      const result = await routeFoundryRequest("Rafe jacket update", {
+      const result = await routeArtLabRequest("Rafe jacket update", {
         env: { ANTHROPIC_API_KEY: undefined }, // dryRun
         metaCallOverride: async () => ({
           text: JSON.stringify({
@@ -70,7 +70,7 @@ describe("routeFoundryRequest", () => {
     });
 
     it("hydrates recentWins/recentRejections from memoryDir when supplied", async () => {
-      const memoryDir = mkdtempSync(join(tmpdir(), "foundry-route-mem-"));
+      const memoryDir = mkdtempSync(join(tmpdir(), "artlab-route-mem-"));
       writeFileSync(
         join(memoryDir, "style-wins.jsonl"),
         JSON.stringify({
@@ -95,7 +95,7 @@ describe("routeFoundryRequest", () => {
           source: "character",
         }) + "\n",
       );
-      const result = await routeFoundryRequest("Rafe jacket update", {
+      const result = await routeArtLabRequest("Rafe jacket update", {
         env: { ANTHROPIC_API_KEY: undefined }, // dryRun — echo back the parsed input
         memoryDir,
         metaCallOverride: async () => ({
@@ -116,7 +116,7 @@ describe("routeFoundryRequest", () => {
     });
 
     it("prefers explicit parsedArgs.recentWins/Rejections over hydrated defaults", async () => {
-      const memoryDir = mkdtempSync(join(tmpdir(), "foundry-route-mem-explicit-"));
+      const memoryDir = mkdtempSync(join(tmpdir(), "artlab-route-mem-explicit-"));
       writeFileSync(
         join(memoryDir, "style-wins.jsonl"),
         JSON.stringify({
@@ -129,7 +129,7 @@ describe("routeFoundryRequest", () => {
         }) + "\n",
       );
       const explicitWins = [{ at: "2026-05-26T00:00:00.000Z", techniques: "explicit-from-caller" }];
-      const result = await routeFoundryRequest("Rafe jacket update", {
+      const result = await routeArtLabRequest("Rafe jacket update", {
         env: { ANTHROPIC_API_KEY: undefined },
         memoryDir,
         metaCallOverride: async () => ({

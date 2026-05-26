@@ -4,8 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import {
-  writeFoundrySpritePack,
-  writeFoundryLottiePack,
+  writeArtLabSpritePack,
+  writeArtLabLottiePack,
 } from "./pack-writer";
 
 async function solid(c: number): Promise<Buffer> {
@@ -16,15 +16,15 @@ async function solid(c: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("writeFoundrySpritePack", () => {
+describe("writeArtLabSpritePack", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-sprite-pack-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-sprite-pack-"));
   });
 
   it("writes a zero-padded PNG per frame", async () => {
     const frames = await Promise.all([solid(50), solid(60), solid(70)]);
-    const result = await writeFoundrySpritePack({
+    const result = await writeArtLabSpritePack({
       runDir: dir,
       characterId: "otis",
       action: "idle",
@@ -38,7 +38,7 @@ describe("writeFoundrySpritePack", () => {
 
   it("frame manifests carry index + relative path + perceptualHash", async () => {
     const frames = await Promise.all([solid(50), solid(60)]);
-    const result = await writeFoundrySpritePack({
+    const result = await writeArtLabSpritePack({
       runDir: dir,
       characterId: "otis",
       action: "idle",
@@ -51,7 +51,7 @@ describe("writeFoundrySpritePack", () => {
 
   it("no .tmp files remain after success", async () => {
     const frames = await Promise.all([solid(50), solid(60)]);
-    await writeFoundrySpritePack({
+    await writeArtLabSpritePack({
       runDir: dir,
       characterId: "otis",
       action: "idle",
@@ -61,15 +61,15 @@ describe("writeFoundrySpritePack", () => {
   });
 });
 
-describe("writeFoundryLottiePack", () => {
+describe("writeArtLabLottiePack", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-lottie-pack-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-lottie-pack-"));
   });
 
   it("writes a single lottie.json", async () => {
     const lottieJson = JSON.stringify({ v: "5.7.0" });
-    const result = await writeFoundryLottiePack({
+    const result = await writeArtLabLottiePack({
       runDir: dir,
       characterId: "otis",
       action: "idle",

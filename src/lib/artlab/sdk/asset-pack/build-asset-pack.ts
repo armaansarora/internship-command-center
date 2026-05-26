@@ -1,25 +1,25 @@
 import {
-  FoundryAssetPackManifestSchema,
-  type FoundryAssetPackManifest,
+  ArtLabAssetPackManifestSchema,
+  type ArtLabAssetPackManifest,
 } from "./manifest.schema";
 
-export interface BuiltFoundryAssetPack {
+export interface BuiltArtLabAssetPack {
   packId: string;
-  manifest: FoundryAssetPackManifest;
+  manifest: ArtLabAssetPackManifest;
 }
 
 /**
- * Build a Foundry asset pack envelope from a manifest object.
+ * Build a ArtLab asset pack envelope from a manifest object.
  *
  * SECURITY: This is a public, re-exported entry point. We MUST validate the
- * input through `FoundryAssetPackManifestSchema` to refuse manifests with bad
+ * input through `ArtLabAssetPackManifestSchema` to refuse manifests with bad
  * sha256 hashes, path-traversal `appPath` values, missing canon refs, or any
  * extra/unknown properties (`.strict()`). Downstream consumers (`read.ts`,
  * `pack.ts`) trust the typed result.
  */
-export async function buildFoundryAssetPack(
+export async function buildArtLabAssetPack(
   manifest: Record<string, unknown>,
-): Promise<BuiltFoundryAssetPack> {
-  const parsed = FoundryAssetPackManifestSchema.parse(manifest);
+): Promise<BuiltArtLabAssetPack> {
+  const parsed = ArtLabAssetPackManifestSchema.parse(manifest);
   return { packId: parsed.packId, manifest: parsed };
 }

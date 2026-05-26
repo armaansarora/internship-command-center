@@ -3,11 +3,11 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from "node:
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runCharacterMaster } from "./index";
-import { createMockFoundryImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
-import { readFoundryAssetPack, registerFoundrySlot } from "@/lib/artlab/sdk/asset-pack";
+import { createMockArtLabImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
+import { readArtLabAssetPack, registerArtLabSlot } from "@/lib/artlab/sdk/asset-pack";
 
 function setupWorkspaceAndCanon(): { workspaceRoot: string; canonRoot: string; cleanup: () => void } {
-  const tmpDir = mkdtempSync(join(tmpdir(), "foundry-sol-int-"));
+  const tmpDir = mkdtempSync(join(tmpdir(), "artlab-sol-int-"));
   const canonRoot = join(tmpDir, "canon");
   const workspaceRoot = join(tmpDir, "ws");
   mkdirSync(join(canonRoot, "characters"), { recursive: true });
@@ -57,7 +57,7 @@ tokens:
   for (const outfit of ["regular", "summer-light", "winter-layered"]) {
     for (const pose of ["idle", "greeting", "listening", "thinking", "talking", "alert", "working"]) {
       try {
-        registerFoundrySlot({
+        registerArtLabSlot({
           slotId: `rolodex-lounge/sol-navarro/${outfit}/${pose}`,
           appPath: `public/art/rolodex-lounge/sol-navarro/${outfit}/${pose}.webp`,
           kind: "character-sprite",
@@ -85,13 +85,13 @@ describe("Sol Navarro full integration", () => {
     cleanup = env.cleanup;
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
-      provider: createMockFoundryImageProvider(),
+      provider: createMockArtLabImageProvider(),
       emit: () => {},
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.pack.manifest.payload.files.length).toBe(21);
-    const reread = await readFoundryAssetPack(result.pack.packDir);
+    const reread = await readArtLabAssetPack(result.pack.packDir);
     expect(reread.ok).toBe(true);
   });
 
@@ -100,13 +100,13 @@ describe("Sol Navarro full integration", () => {
     cleanup = env.cleanup;
     await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
-      provider: createMockFoundryImageProvider(),
+      provider: createMockArtLabImageProvider(),
       emit: () => {},
     });
     const stages: string[] = [];
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "variant-fan-out", seed: 100 },
-      provider: createMockFoundryImageProvider(),
+      provider: createMockArtLabImageProvider(),
       emit: (e) => { if (e.kind === "stage-started") stages.push(e.stage); },
     });
     expect(result.ok).toBe(true);
@@ -120,7 +120,7 @@ describe("Sol Navarro full integration", () => {
     // Trigger failure on a prompt fragment that the agent emits in every lane
     // so the provider fails the run deterministically and the orchestrator
     // surfaces an actionable failure reason.
-    const provider = createMockFoundryImageProvider({ failOnPromptContains: "Tower flat-plus-depth-v1" });
+    const provider = createMockArtLabImageProvider({ failOnPromptContains: "Tower flat-plus-depth-v1" });
     const events: string[] = [];
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
@@ -138,12 +138,12 @@ describe("Sol Navarro full integration", () => {
     cleanup = env.cleanup;
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
-      provider: createMockFoundryImageProvider(),
+      provider: createMockArtLabImageProvider(),
       emit: () => {},
     });
     if (!result.ok) throw new Error("expected ok");
     expect(existsSync(join(result.pack.packDir, "manifest.json"))).toBe(true);
-    const reread = await readFoundryAssetPack(result.pack.packDir);
+    const reread = await readArtLabAssetPack(result.pack.packDir);
     if (!reread.ok) throw new Error("re-read failed");
     expect(reread.manifest).toEqual(result.pack.manifest);
   });

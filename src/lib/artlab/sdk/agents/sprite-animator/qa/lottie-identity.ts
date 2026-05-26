@@ -1,5 +1,5 @@
 // Critical 3 fix: the Lottie QA path had NO character-identity gate.
-// For PNG sprite format it's enforced via evaluateFoundrySpriteIdentityDrift;
+// For PNG sprite format it's enforced via evaluateArtLabSpriteIdentityDrift;
 // for Lottie the source pack was resolved and its anchorPerceptualHash
 // fetched yet never checked. A Lottie could ship arbitrary character art
 // (or no character art at all) and pass the validity gate.
@@ -35,12 +35,12 @@ const LottieIdentityDocumentSchema = z
   })
   .passthrough();
 
-export interface FoundryLottieIdentityInput {
+export interface ArtLabLottieIdentityInput {
   lottieJson: string;
   anchorPerceptualHash: string;
 }
 
-export interface FoundryLottieIdentityReport {
+export interface ArtLabLottieIdentityReport {
   passed: boolean;
   reason?: string;
   /** Number of image assets that were considered (after filtering decodeable). */
@@ -65,12 +65,12 @@ function decodeBase64Png(dataUrlOrPath: string): Buffer | null {
   }
 }
 
-export async function evaluateFoundryLottieIdentity(
-  input: FoundryLottieIdentityInput,
-): Promise<FoundryLottieIdentityReport> {
+export async function evaluateArtLabLottieIdentity(
+  input: ArtLabLottieIdentityInput,
+): Promise<ArtLabLottieIdentityReport> {
   if (!/^[0-9a-f]{16}$/.test(input.anchorPerceptualHash)) {
     throw new Error(
-      `foundry/sprite-animator: anchorPerceptualHash must be 16 hex chars (got ${input.anchorPerceptualHash.length})`,
+      `artlab/sprite-animator: anchorPerceptualHash must be 16 hex chars (got ${input.anchorPerceptualHash.length})`,
     );
   }
   let parsed: unknown;

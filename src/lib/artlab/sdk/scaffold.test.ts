@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 const REPO_ROOT = process.cwd();
 
-const FOUNDRY_SUBDIRS = [
+const ARTLAB_SUBDIRS = [
   "src/lib/artlab/sdk/canon",
   "src/lib/artlab/sdk/asset-pack",
   "src/lib/artlab/sdk/agents",
@@ -20,8 +20,8 @@ const FOUNDRY_SUBDIRS = [
   ".artlab/sdk",
 ];
 
-describe("foundry scaffold", () => {
-  for (const dir of FOUNDRY_SUBDIRS) {
+describe("artlab sdk scaffold", () => {
+  for (const dir of ARTLAB_SUBDIRS) {
     it(`directory exists: ${dir}`, () => {
       const full = join(REPO_ROOT, dir);
       expect(existsSync(full)).toBe(true);
@@ -29,7 +29,7 @@ describe("foundry scaffold", () => {
     });
   }
 
-  it("foundry CLI script exists", () => {
+  it("artlab sdk CLI script exists", () => {
     expect(existsSync(join(REPO_ROOT, "scripts/foundry.ts"))).toBe(true);
   });
 });

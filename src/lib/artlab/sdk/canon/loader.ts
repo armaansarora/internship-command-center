@@ -1,21 +1,21 @@
-// src/lib/foundry/canon/loader.ts
+// src/lib/artlab/sdk/canon/loader.ts
 import { readFile } from "node:fs/promises";
 import { parse as parseYaml } from "yaml";
-import { FoundryCanonHeaderSchema, type FoundryCanonLoadResult } from "./types";
+import { ArtLabCanonHeaderSchema, type ArtLabCanonLoadResult } from "./types";
 
-export interface LoadFoundryCanonError extends Error {
+export interface LoadArtLabCanonError extends Error {
   code: "yaml-parse" | "header-missing" | "file-missing" | "validation-failed";
   sourcePath: string;
 }
 
-function makeError(code: LoadFoundryCanonError["code"], message: string, sourcePath: string): LoadFoundryCanonError {
-  const err = new Error(message) as LoadFoundryCanonError;
+function makeError(code: LoadArtLabCanonError["code"], message: string, sourcePath: string): LoadArtLabCanonError {
+  const err = new Error(message) as LoadArtLabCanonError;
   err.code = code;
   err.sourcePath = sourcePath;
   return err;
 }
 
-export async function loadFoundryCanonFile(absPath: string): Promise<FoundryCanonLoadResult<unknown>> {
+export async function loadArtLabCanonFile(absPath: string): Promise<ArtLabCanonLoadResult<unknown>> {
   const start = performance.now();
   let raw: string;
   try {
@@ -42,7 +42,7 @@ export async function loadFoundryCanonFile(absPath: string): Promise<FoundryCano
     throw makeError("header-missing", `canon header missing in ${absPath}`, absPath);
   }
 
-  const headerResult = FoundryCanonHeaderSchema.safeParse((parsed as { header: unknown }).header);
+  const headerResult = ArtLabCanonHeaderSchema.safeParse((parsed as { header: unknown }).header);
   if (!headerResult.success) {
     throw makeError(
       "validation-failed",

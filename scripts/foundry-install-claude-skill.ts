@@ -3,15 +3,15 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { renderFoundryClaudeSkill } from "../src/lib/artlab/sdk/integration/claude-skill-template";
+import { renderArtLabClaudeSkill } from "../src/lib/artlab/sdk/integration/claude-skill-template";
 
-export interface InstallFoundryClaudeSkillOpts {
+export interface InstallArtLabClaudeSkillOpts {
   claudeHome: string;
   repoRoot: string;
   confirm: () => Promise<boolean>;
 }
 
-export function computeFoundryClaudeSkillTarget(opts: { claudeHome: string }): string {
+export function computeArtLabClaudeSkillTarget(opts: { claudeHome: string }): string {
   return join(opts.claudeHome, "skills", "tower-art-foundry", "SKILL.md");
 }
 
@@ -21,10 +21,10 @@ function atomicWriteText(path: string, body: string): void {
   renameSync(tmp, path);
 }
 
-export async function installFoundryClaudeSkill(opts: InstallFoundryClaudeSkillOpts): Promise<void> {
-  const target = computeFoundryClaudeSkillTarget({ claudeHome: opts.claudeHome });
-  const body = renderFoundryClaudeSkill({ repoRoot: opts.repoRoot });
-  process.stdout.write(`About to write the Tower Art Foundry skill to:\n  ${target}\n\n`);
+export async function installArtLabClaudeSkill(opts: InstallArtLabClaudeSkillOpts): Promise<void> {
+  const target = computeArtLabClaudeSkillTarget({ claudeHome: opts.claudeHome });
+  const body = renderArtLabClaudeSkill({ repoRoot: opts.repoRoot });
+  process.stdout.write(`About to write the Tower Art ArtLab skill to:\n  ${target}\n\n`);
   const ok = await opts.confirm();
   if (!ok) {
     process.stdout.write("Aborted. No changes made.\n");
@@ -39,7 +39,7 @@ export async function installFoundryClaudeSkill(opts: InstallFoundryClaudeSkillO
 }
 
 async function defaultConfirm(): Promise<boolean> {
-  if (process.env.FOUNDRY_INSTALL_YES === "1") return true;
+  if (process.env.ARTLAB_INSTALL_YES === "1") return true;
   const rl = createInterface({ input: stdin, output: stdout });
   const answer = (await rl.question("Proceed? [y/N]: ")).trim().toLowerCase();
   rl.close();
@@ -47,9 +47,9 @@ async function defaultConfirm(): Promise<boolean> {
 }
 
 async function main(): Promise<number> {
-  const claudeHome = process.env.FOUNDRY_CLAUDE_HOME ?? join(homedir(), ".claude");
+  const claudeHome = process.env.ARTLAB_CLAUDE_HOME ?? join(homedir(), ".claude");
   const repoRoot = process.cwd();
-  await installFoundryClaudeSkill({ claudeHome, repoRoot, confirm: defaultConfirm });
+  await installArtLabClaudeSkill({ claudeHome, repoRoot, confirm: defaultConfirm });
   return 0;
 }
 

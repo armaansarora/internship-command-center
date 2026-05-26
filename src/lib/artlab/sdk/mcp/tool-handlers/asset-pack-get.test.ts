@@ -2,12 +2,12 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryAssetPackGet } from "./asset-pack-get";
+import { handleArtLabAssetPackGet } from "./asset-pack-get";
 
 let packsRoot: string;
 
 beforeEach(() => {
-  packsRoot = mkdtempSync(join(tmpdir(), "foundry-pack-get-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "artlab-pack-get-"));
   mkdirSync(join(packsRoot, "rafe-v3", "frames"), { recursive: true });
   writeFileSync(
     join(packsRoot, "rafe-v3", "manifest.json"),
@@ -26,16 +26,16 @@ beforeEach(() => {
   writeFileSync(join(packsRoot, "rafe-v3", "frames", "rafe-0.png"), Buffer.from("PNGDATA-FRAME"));
 });
 
-describe("handleFoundryAssetPackGet", () => {
+describe("handleArtLabAssetPackGet", () => {
   it("returns manifest + every file listed with byte size", async () => {
-    const result = await handleFoundryAssetPackGet({ packId: "rafe-v3" }, { packsRoot });
+    const result = await handleArtLabAssetPackGet({ packId: "rafe-v3" }, { packsRoot });
     expect(result.packId).toBe("rafe-v3");
     expect(result.files).toHaveLength(2);
     expect(result.files.find((f) => f.role === "primary")?.bytes).toBeGreaterThan(0);
   });
 
   it("throws when packId is unknown", async () => {
-    await expect(handleFoundryAssetPackGet({ packId: "ghost" }, { packsRoot })).rejects.toThrow(
+    await expect(handleArtLabAssetPackGet({ packId: "ghost" }, { packsRoot })).rejects.toThrow(
       /asset pack not found/i,
     );
   });
@@ -51,7 +51,7 @@ describe("handleFoundryAssetPackGet", () => {
         files: [{ path: "missing.png", role: "primary" }],
       }),
     );
-    await expect(handleFoundryAssetPackGet({ packId: "rafe-v3" }, { packsRoot })).rejects.toThrow(
+    await expect(handleArtLabAssetPackGet({ packId: "rafe-v3" }, { packsRoot })).rejects.toThrow(
       /asset pack file missing/i,
     );
   });
@@ -75,7 +75,7 @@ describe("handleFoundryAssetPackGet", () => {
       // generic "asset pack not found" — that distinction matters because
       // the latter would mean the path was attempted on disk.
       await expect(
-        handleFoundryAssetPackGet({ packId: evil }, { packsRoot }),
+        handleArtLabAssetPackGet({ packId: evil }, { packsRoot }),
       ).rejects.toThrow(/(packId|outside packsRoot|empty|256|may not|encoded|must match|invalid)/i);
     });
 
@@ -94,7 +94,7 @@ describe("handleFoundryAssetPackGet", () => {
         }),
       );
       await expect(
-        handleFoundryAssetPackGet({ packId: "rafe-v3" }, { packsRoot }),
+        handleArtLabAssetPackGet({ packId: "rafe-v3" }, { packsRoot }),
       ).rejects.toThrow(/not safe|may not|outside/i);
     });
 
@@ -123,7 +123,7 @@ describe("handleFoundryAssetPackGet", () => {
         }),
       );
       await expect(
-        handleFoundryAssetPackGet({ packId: "rafe-v3" }, { packsRoot }),
+        handleArtLabAssetPackGet({ packId: "rafe-v3" }, { packsRoot }),
       ).rejects.toThrow(/(not safe|may not|encoded|outside|traversal|NUL|backslash)/i);
     });
   });

@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { callFoundryAnthropic } from "../anthropic-client";
-import type { FoundryAgentBrain } from "../types";
+import { callArtLabAnthropic } from "../anthropic-client";
+import type { ArtLabAgentBrain } from "../types";
 
-export const FOUNDRY_TOWER_SPACES = [
+export const ARTLAB_TOWER_SPACES = [
   "penthouse",
   "war-room",
   "rolodex-lounge",
@@ -13,11 +13,11 @@ export const FOUNDRY_TOWER_SPACES = [
   "ceo-office",
   "lobby",
 ] as const;
-export type FoundryTowerSpace = (typeof FOUNDRY_TOWER_SPACES)[number];
+export type ArtLabTowerSpace = (typeof ARTLAB_TOWER_SPACES)[number];
 
 export const FloorEnvironmentInputSchema = z
   .object({
-    space: z.enum(FOUNDRY_TOWER_SPACES),
+    space: z.enum(ARTLAB_TOWER_SPACES),
     directive: z.string().min(4),
     timeStates: z.array(z.enum(["dawn", "morning", "midday", "afternoon", "dusk", "evening", "night"])),
     recentWins: z.array(z.object({ at: z.string(), techniques: z.string() }).strict()),
@@ -39,7 +39,7 @@ export const FloorEnvironmentOutputSchema = z
   .strict();
 export type FloorEnvironmentOutput = z.infer<typeof FloorEnvironmentOutputSchema>;
 
-const SYSTEM = `You are the Floor & Environment agent in the Tower Art Foundry.
+const SYSTEM = `You are the Floor & Environment agent in the Tower Art ArtLab.
 You receive a Tower space slug, a directive, and the set of time states (dawn..night) the consumer wants.
 Your job: emit a background-only generation plan with prompt variants keyed by time state.
 
@@ -61,7 +61,7 @@ export function createFloorEnvironmentBrain(opts: {
   apiKey: string;
   model: string;
   dryRun?: boolean;
-}): FoundryAgentBrain<FloorEnvironmentInput, FloorEnvironmentOutput> {
+}): ArtLabAgentBrain<FloorEnvironmentInput, FloorEnvironmentOutput> {
   return {
     agent: "floor-environment",
     systemPrompt: SYSTEM,
@@ -69,7 +69,7 @@ export function createFloorEnvironmentBrain(opts: {
     outputSchema: FloorEnvironmentOutputSchema,
     async decide(input) {
       const parsed = FloorEnvironmentInputSchema.parse(input);
-      const resp = await callFoundryAnthropic({
+      const resp = await callArtLabAnthropic({
         systemPrompt: SYSTEM,
         userJson: parsed,
         model: opts.model,

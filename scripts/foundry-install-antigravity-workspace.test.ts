@@ -2,17 +2,17 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { installFoundryAntigravityWorkspace } from "./foundry-install-antigravity-workspace";
+import { installArtLabAntigravityWorkspace } from "./foundry-install-antigravity-workspace";
 
 let repoRoot: string;
 
 beforeEach(() => {
-  repoRoot = mkdtempSync(join(tmpdir(), "foundry-ag-"));
+  repoRoot = mkdtempSync(join(tmpdir(), "artlab-ag-"));
 });
 
-describe("installFoundryAntigravityWorkspace", () => {
+describe("installArtLabAntigravityWorkspace", () => {
   it("writes .antigravity/workspaces/tower-art-foundry/workspace.yaml on confirm", async () => {
-    await installFoundryAntigravityWorkspace({
+    await installArtLabAntigravityWorkspace({
       repoRoot,
       confirm: () => Promise.resolve(true),
     });
@@ -22,7 +22,7 @@ describe("installFoundryAntigravityWorkspace", () => {
   });
 
   it("aborts when user declines", async () => {
-    await installFoundryAntigravityWorkspace({
+    await installArtLabAntigravityWorkspace({
       repoRoot,
       confirm: () => Promise.resolve(false),
     });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveFoundryIntent } from "./meta-orchestrator";
+import { resolveArtLabIntent } from "./meta-orchestrator";
 
 const fakeIntentBrain = (canned: Record<string, unknown>) => async () => ({
   text: JSON.stringify(canned),
@@ -8,9 +8,9 @@ const fakeIntentBrain = (canned: Record<string, unknown>) => async () => ({
   durationMs: 10,
 });
 
-describe("resolveFoundryIntent", () => {
+describe("resolveArtLabIntent", () => {
   it("returns a typed intent when the brain reply is well-formed and confidence >= 0.7", async () => {
-    const result = await resolveFoundryIntent("make a new war-room dusk background", {
+    const result = await resolveArtLabIntent("make a new war-room dusk background", {
       apiKey: "sk-fake",
       model: "test",
       callOverride: fakeIntentBrain({
@@ -23,7 +23,7 @@ describe("resolveFoundryIntent", () => {
   });
 
   it("returns a clarifying question when confidence < 0.7", async () => {
-    const result = await resolveFoundryIntent("do the thing", {
+    const result = await resolveArtLabIntent("do the thing", {
       apiKey: "sk-fake",
       model: "test",
       callOverride: fakeIntentBrain({
@@ -37,7 +37,7 @@ describe("resolveFoundryIntent", () => {
 
   it("returns a typed error when the brain returns non-JSON", async () => {
     await expect(
-      resolveFoundryIntent("x", {
+      resolveArtLabIntent("x", {
         apiKey: "sk-fake",
         model: "test",
         callOverride: async () => ({ text: "not json", tokensIn: 0, tokensOut: 0, durationMs: 0 }),
@@ -47,7 +47,7 @@ describe("resolveFoundryIntent", () => {
 
   it("routes 'icon for the elevator chevron' → ui-texture or character-master is acceptable; rejects ghost agent strings", async () => {
     await expect(
-      resolveFoundryIntent("anything", {
+      resolveArtLabIntent("anything", {
         apiKey: "sk-fake",
         model: "test",
         callOverride: fakeIntentBrain({ agent: "phantom", parsedArgs: {}, confidence: 0.9 }),

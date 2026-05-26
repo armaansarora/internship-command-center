@@ -2,7 +2,7 @@ import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createFoundryMcpServer } from "../src/lib/artlab/sdk/mcp/server";
+import { createArtLabMcpServer } from "../src/lib/artlab/sdk/mcp/server";
 
 const HELP = `tower-art-foundry - MCP stdio server
 
@@ -12,11 +12,11 @@ Usage:
   npx tsx scripts/foundry-mcp.ts --version Print server version and exit 0.
 
 Environment:
-  FOUNDRY_WORKSPACE_ROOT    Path to ArtLab workspace (default: .artlab/engine)
-  FOUNDRY_CANON_ROOT        Path to canon root      (default: .artlab/canon)
-  FOUNDRY_PACKS_ROOT        Path to promoted packs  (default: .artlab/engine/promoted)
-  FOUNDRY_SLOT_REGISTRY     Path to slot registry   (default: .artlab/engine/slots/registry.json)
-  FOUNDRY_MEMORY_DIR        Path to memory ledger   (default: .artlab/engine/memory)
+  ARTLAB_WORKSPACE_ROOT    Path to ArtLab workspace (default: .artlab/engine)
+  ARTLAB_CANON_ROOT        Path to canon root      (default: .artlab/canon)
+  ARTLAB_PACKS_ROOT        Path to promoted packs  (default: .artlab/engine/promoted)
+  ARTLAB_SLOT_REGISTRY     Path to slot registry   (default: .artlab/engine/slots/registry.json)
+  ARTLAB_MEMORY_DIR        Path to memory ledger   (default: .artlab/engine/memory)
 `;
 
 function readVersion(): string {
@@ -37,15 +37,15 @@ async function main(argv: string[]): Promise<number> {
   }
 
   const cwd = process.cwd();
-  const workspaceRoot = process.env.FOUNDRY_WORKSPACE_ROOT ?? join(cwd, ".artlab", "engine");
-  const canonRoot = process.env.FOUNDRY_CANON_ROOT ?? join(cwd, ".artlab", "canon");
-  const packsRoot = process.env.FOUNDRY_PACKS_ROOT ?? join(workspaceRoot, "promoted");
+  const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? join(cwd, ".artlab", "engine");
+  const canonRoot = process.env.ARTLAB_CANON_ROOT ?? join(cwd, ".artlab", "canon");
+  const packsRoot = process.env.ARTLAB_PACKS_ROOT ?? join(workspaceRoot, "promoted");
   const slotRegistryPath =
-    process.env.FOUNDRY_SLOT_REGISTRY ?? join(workspaceRoot, "slots", "registry.json");
-  const memoryDir = process.env.FOUNDRY_MEMORY_DIR ?? join(workspaceRoot, "memory");
+    process.env.ARTLAB_SLOT_REGISTRY ?? join(workspaceRoot, "slots", "registry.json");
+  const memoryDir = process.env.ARTLAB_MEMORY_DIR ?? join(workspaceRoot, "memory");
 
   if (!existsSync(workspaceRoot)) {
-    if (process.env.FOUNDRY_AUTOCREATE_WORKSPACE === "1") {
+    if (process.env.ARTLAB_AUTOCREATE_WORKSPACE === "1") {
       mkdirSync(workspaceRoot, { recursive: true });
     } else {
       process.stderr.write(`foundry: workspace not found at ${workspaceRoot}\n`);
@@ -53,7 +53,7 @@ async function main(argv: string[]): Promise<number> {
     }
   }
 
-  const built = createFoundryMcpServer({
+  const built = createArtLabMcpServer({
     workspaceRoot,
     canonRoot,
     packsRoot,

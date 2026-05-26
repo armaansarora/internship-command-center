@@ -1,6 +1,6 @@
 import path from "node:path";
 import { z } from "zod";
-import { FOUNDRY_ASSET_KINDS, FOUNDRY_AGENT_KINDS, FOUNDRY_ASSET_PACK_VERSION } from "./constants";
+import { ARTLAB_ASSET_KINDS, ARTLAB_AGENT_KINDS, ARTLAB_ASSET_PACK_VERSION } from "./constants";
 
 const Sha256Hex = z.string().regex(/^[a-f0-9]{64}$/, "sha256 must be 64 hex chars (lowercase)");
 
@@ -72,7 +72,7 @@ const AppPath = z
     "appPath must be a canonical, allow-listed path (no traversal, no encoding, no backslash, no absolute or drive prefix)",
   );
 
-export const FoundryAssetPackPayloadFileSchema = z
+export const ArtLabAssetPackPayloadFileSchema = z
   .object({
     relPath: z
       .string()
@@ -85,9 +85,9 @@ export const FoundryAssetPackPayloadFileSchema = z
   })
   .strict();
 
-export const FoundryAssetPackPayloadSchema = z
+export const ArtLabAssetPackPayloadSchema = z
   .object({
-    files: z.array(FoundryAssetPackPayloadFileSchema).min(1),
+    files: z.array(ArtLabAssetPackPayloadFileSchema).min(1),
     primaryFileRelPath: z.string().min(1),
   })
   .strict()
@@ -96,7 +96,7 @@ export const FoundryAssetPackPayloadSchema = z
     "primaryFileRelPath must reference one of the payload files",
   );
 
-export const FoundryAssetPackCanonRefsSchema = z
+export const ArtLabAssetPackCanonRefsSchema = z
   .object({
     characterId: z.string().min(1).nullable(),
     paletteRef: z.string().min(1).nullable(),
@@ -110,7 +110,7 @@ export const FoundryAssetPackCanonRefsSchema = z
     "manifest must reference at least one canon record",
   );
 
-export const FoundryAssetPackDimensionsSchema = z
+export const ArtLabAssetPackDimensionsSchema = z
   .object({
     sourceWidthPx: z.number().int().positive(),
     sourceHeightPx: z.number().int().positive(),
@@ -123,7 +123,7 @@ export const FoundryAssetPackDimensionsSchema = z
 /**
  * Defence-in-depth: `intendedSlot.component` and `gsapCues[].cueId` are
  * interpolated as raw JS identifiers inside generated TSX
- * (renderFoundryIntegrationSnippet). The previous `z.string().min(1)`
+ * (renderArtLabIntegrationSnippet). The previous `z.string().min(1)`
  * accepted strings like `"Foo; doEvil(); function Bar"` or
  * `"inj); evil(); //"`, which the renderer would splice straight into the
  * generated component — a code-injection vector. We refine these fields
@@ -140,7 +140,7 @@ const JsIdentifier = z
     "must be a valid JS identifier ([a-zA-Z_$][a-zA-Z0-9_$]*) — this value is interpolated as code in generated TSX",
   );
 
-export const FoundryAssetPackIntendedSlotSchema = z
+export const ArtLabAssetPackIntendedSlotSchema = z
   .object({
     slotId: z.string().min(1).regex(/^[a-z0-9/_-]+$/, "slotId must be kebab/path style lowercase"),
     appPath: AppPath,
@@ -149,7 +149,7 @@ export const FoundryAssetPackIntendedSlotSchema = z
   })
   .strict();
 
-export const FoundryGsapCueSchema = z
+export const ArtLabGsapCueSchema = z
   .object({
     cueId: JsIdentifier,
     targetSelector: z.string().min(1),
@@ -159,7 +159,7 @@ export const FoundryGsapCueSchema = z
   })
   .strict();
 
-export const FoundryAccessibilitySchema = z
+export const ArtLabAccessibilitySchema = z
   .object({
     altText: z.string().min(1),
     role: z.enum(["img", "presentation", "button", "link", "none"]),
@@ -167,9 +167,9 @@ export const FoundryAccessibilitySchema = z
   })
   .strict();
 
-export const FoundryGenerationMetadataSchema = z
+export const ArtLabGenerationMetadataSchema = z
   .object({
-    agentName: z.enum(FOUNDRY_AGENT_KINDS),
+    agentName: z.enum(ARTLAB_AGENT_KINDS),
     provider: z.string().min(1),
     modelId: z.string().min(1),
     seed: z.number().int(),
@@ -203,21 +203,21 @@ const AnchorPerceptualHash16 = z
     "anchorPerceptualHash must be 16 lowercase hex chars (8×8 perceptual hash, 64 bits)",
   );
 
-export const FoundryAssetPackManifestSchema = z
+export const ArtLabAssetPackManifestSchema = z
   .object({
-    manifestVersion: z.literal(FOUNDRY_ASSET_PACK_VERSION),
+    manifestVersion: z.literal(ARTLAB_ASSET_PACK_VERSION),
     packId: z.string().min(1),
-    kind: z.enum(FOUNDRY_ASSET_KINDS),
-    agent: z.enum(FOUNDRY_AGENT_KINDS),
-    canonRefs: FoundryAssetPackCanonRefsSchema,
-    dimensions: FoundryAssetPackDimensionsSchema,
+    kind: z.enum(ARTLAB_ASSET_KINDS),
+    agent: z.enum(ARTLAB_AGENT_KINDS),
+    canonRefs: ArtLabAssetPackCanonRefsSchema,
+    dimensions: ArtLabAssetPackDimensionsSchema,
     colorTokensUsed: z.array(z.string().min(1)),
-    intendedSlot: FoundryAssetPackIntendedSlotSchema,
-    gsapCues: z.array(FoundryGsapCueSchema),
-    accessibility: FoundryAccessibilitySchema,
+    intendedSlot: ArtLabAssetPackIntendedSlotSchema,
+    gsapCues: z.array(ArtLabGsapCueSchema),
+    accessibility: ArtLabAccessibilitySchema,
     integrationSnippetTemplate: z.string().min(1),
-    payload: FoundryAssetPackPayloadSchema,
-    generation: FoundryGenerationMetadataSchema,
+    payload: ArtLabAssetPackPayloadSchema,
+    generation: ArtLabGenerationMetadataSchema,
     anchorImageRelPath: AnchorImageRelPath.optional(),
     anchorPerceptualHash: AnchorPerceptualHash16.optional(),
   })
@@ -251,4 +251,4 @@ export const FoundryAssetPackManifestSchema = z
       });
     }
   });
-export type FoundryAssetPackManifest = z.infer<typeof FoundryAssetPackManifestSchema>;
+export type ArtLabAssetPackManifest = z.infer<typeof ArtLabAssetPackManifestSchema>;

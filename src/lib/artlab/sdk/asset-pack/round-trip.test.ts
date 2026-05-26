@@ -2,15 +2,15 @@ import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createFoundryAssetPack } from "./pack";
-import { readFoundryAssetPack } from "./read";
+import { createArtLabAssetPack } from "./pack";
+import { readArtLabAssetPack } from "./read";
 import { sha256OfBytes } from "./hashing";
 
 describe("asset pack round-trip byte stability", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-rt-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-rt-"));
   });
 
   afterEach(() => {
@@ -28,7 +28,7 @@ describe("asset pack round-trip byte stability", () => {
     }
     expect(payloadFiles.length).toBe(21);
 
-    const { manifest } = await createFoundryAssetPack({
+    const { manifest } = await createArtLabAssetPack({
       packDir: tmpDir,
       kind: "character-spritesheet",
       agent: "character-master",
@@ -46,7 +46,7 @@ describe("asset pack round-trip byte stability", () => {
       generation: { agentName: "character-master", provider: "x", modelId: "x", seed: 0, costCents: 0, durationMs: 0, generatedAt: "2026-05-25T00:00:00.000Z" },
     });
 
-    const result = await readFoundryAssetPack(tmpDir);
+    const result = await readArtLabAssetPack(tmpDir);
     if (result.ok !== true) throw new Error("expected ok=true");
 
     const onDisk = readFileSync(join(tmpDir, "manifest.json"), "utf8");
@@ -59,7 +59,7 @@ describe("asset pack round-trip byte stability", () => {
   });
 
   it("re-reading a pack produces a manifest that deep-equals the in-memory manifest", async () => {
-    const { manifest } = await createFoundryAssetPack({
+    const { manifest } = await createArtLabAssetPack({
       packDir: tmpDir,
       kind: "character-sprite",
       agent: "character-master",
@@ -74,7 +74,7 @@ describe("asset pack round-trip byte stability", () => {
       primaryFileRelPath: "x.webp",
       generation: { agentName: "character-master", provider: "x", modelId: "x", seed: 0, costCents: 0, durationMs: 0, generatedAt: "2026-05-25T00:00:00.000Z" },
     });
-    const result = await readFoundryAssetPack(tmpDir);
+    const result = await readArtLabAssetPack(tmpDir);
     if (result.ok !== true) throw new Error("expected ok=true");
     expect(result.manifest).toEqual(manifest);
   });

@@ -1,16 +1,16 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import {
-  FoundryAssetPackGetInputSchema,
-  FoundryAssetPackGetOutputSchema,
-  type FoundryAssetPackGetOutput,
+  ArtLabAssetPackGetInputSchema,
+  ArtLabAssetPackGetOutputSchema,
+  type ArtLabAssetPackGetOutput,
 } from "../tools";
 import {
   PackIdSchema,
   resolvePackDir,
   assertPathSafeAgainstTraversal,
 } from "../lib/path-safety";
-import type { FoundryAssetPackListContext } from "./asset-pack-list";
+import type { ArtLabAssetPackListContext } from "./asset-pack-list";
 
 interface ManifestFile {
   path: string;
@@ -21,11 +21,11 @@ interface MinimalManifest {
   files: ManifestFile[];
 }
 
-export async function handleFoundryAssetPackGet(
+export async function handleArtLabAssetPackGet(
   rawInput: unknown,
-  ctx: FoundryAssetPackListContext,
-): Promise<FoundryAssetPackGetOutput> {
-  const input = FoundryAssetPackGetInputSchema.parse(rawInput);
+  ctx: ArtLabAssetPackListContext,
+): Promise<ArtLabAssetPackGetOutput> {
+  const input = ArtLabAssetPackGetInputSchema.parse(rawInput);
   // Defense in depth: validate packId charset/encoding before any path join,
   // then re-confirm the resolved directory stays inside packsRoot.
   const safePackId = PackIdSchema.parse(input.packId);
@@ -44,7 +44,7 @@ export async function handleFoundryAssetPackGet(
   if (!Array.isArray(manifest.files)) {
     throw new Error(`asset pack manifest missing 'files' array: ${safePackId}`);
   }
-  const files: FoundryAssetPackGetOutput["files"] = [];
+  const files: ArtLabAssetPackGetOutput["files"] = [];
   for (const f of manifest.files) {
     // Manifest-author-controlled paths are also confined to packDir so a
     // poisoned manifest cannot read outside its own asset pack.
@@ -54,7 +54,7 @@ export async function handleFoundryAssetPackGet(
     }
     files.push({ path: abs, role: f.role, bytes: statSync(abs).size });
   }
-  return FoundryAssetPackGetOutputSchema.parse({
+  return ArtLabAssetPackGetOutputSchema.parse({
     packId: safePackId,
     manifest: manifest as Record<string, unknown>,
     files,

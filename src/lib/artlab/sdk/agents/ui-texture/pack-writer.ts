@@ -1,4 +1,4 @@
-// src/lib/foundry/agents/ui-texture/pack-writer.ts
+// src/lib/artlab/sdk/agents/ui-texture/pack-writer.ts
 import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -12,20 +12,20 @@ function atomicWrite(path: string, bytes: Buffer | string): void {
   renameSync(tmp, path);
 }
 
-export interface FoundryUiIconPackInput {
+export interface ArtLabUiIconPackInput {
   runDir: string;
   name: string;
   svg: string;
 }
 
-export interface FoundryUiIconPackResult {
+export interface ArtLabUiIconPackResult {
   packRoot: string;
   svgPath: string;
 }
 
-export async function writeFoundryUiIconPack(
-  input: FoundryUiIconPackInput,
-): Promise<FoundryUiIconPackResult> {
+export async function writeArtLabUiIconPack(
+  input: ArtLabUiIconPackInput,
+): Promise<ArtLabUiIconPackResult> {
   const packRoot = join(input.runDir, "pack");
   mkdirSync(packRoot, { recursive: true });
   const filename = `${input.name}.svg`;
@@ -33,22 +33,22 @@ export async function writeFoundryUiIconPack(
   return { packRoot, svgPath: filename };
 }
 
-export interface FoundryUiTexturePackInput {
+export interface ArtLabUiTexturePackInput {
   runDir: string;
   name: string;
   pngBytes: Buffer;
   normalMapBytes: Buffer;
 }
 
-export interface FoundryUiTexturePackResult {
+export interface ArtLabUiTexturePackResult {
   packRoot: string;
   pngPath: string;
   normalMapPath: string;
 }
 
-export async function writeFoundryUiTexturePack(
-  input: FoundryUiTexturePackInput,
-): Promise<FoundryUiTexturePackResult> {
+export async function writeArtLabUiTexturePack(
+  input: ArtLabUiTexturePackInput,
+): Promise<ArtLabUiTexturePackResult> {
   const packRoot = join(input.runDir, "pack");
   mkdirSync(packRoot, { recursive: true });
   const png = `${input.name}.png`;

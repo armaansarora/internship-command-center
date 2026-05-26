@@ -1,8 +1,8 @@
-import type { FoundryAssetKind } from "@/lib/artlab/sdk/mcp/tools";
+import type { ArtLabAssetKind } from "@/lib/artlab/sdk/mcp/tools";
 
-export interface FoundryDemoPack {
+export interface ArtLabDemoPack {
   packId: string;
-  kind: FoundryAssetKind;
+  kind: ArtLabAssetKind;
   slotId: string;
   promotedAt: string;
   /**
@@ -25,7 +25,7 @@ export interface FoundryDemoPack {
  * exist on disk under public/. The demo page renders one of each kind so
  * the integration loop is visually verifiable end-to-end.
  *
- * For modalities the Foundry has not yet shipped a real Asset Pack for
+ * For modalities the ArtLab has not yet shipped a real Asset Pack for
  * (currently `sprite-animation`), the entry is marked `pending: true`
  * with a `pendingReason` the demo surfaces as an honest placeholder —
  * never a broken image.
@@ -36,7 +36,7 @@ export interface FoundryDemoPack {
  * contain. The matching test in `demo-fixtures.test.ts` asserts every
  * non-pending `publicPath` resolves to a real file under `public/`.
  */
-export const FOUNDRY_DEMO_PACKS: readonly FoundryDemoPack[] = [
+export const ARTLAB_DEMO_PACKS: readonly ArtLabDemoPack[] = [
   {
     packId: "otis-regular-idle-demo",
     kind: "character",
@@ -74,7 +74,7 @@ export const FOUNDRY_DEMO_PACKS: readonly FoundryDemoPack[] = [
     alt: "Sprite animation — pending real Asset Pack",
     pending: true,
     pendingReason:
-      "No sprite-animation Asset Pack has been promoted by the Foundry yet. " +
+      "No sprite-animation Asset Pack has been promoted by the ArtLab yet. " +
       "When one lands under public/art/sprites/, swap this entry and the demo " +
       "will render it via SpriteSheetPlayer automatically.",
   },

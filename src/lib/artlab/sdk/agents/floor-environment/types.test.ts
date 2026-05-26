@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDRY_FLOOR_TIME_STATES,
-  FOUNDRY_FLOOR_LAYER_NAMES,
-  FOUNDRY_FLOOR_COMPOSITE_KINDS,
-  FOUNDRY_FLOOR_GAP_STATUSES,
-  FoundryFloorEnvironmentInputSchema,
-  FoundryFloorLayerManifestSchema,
-  FoundryFloorVariantManifestSchema,
-  FoundryFloorManifestGapsSchema,
+  ARTLAB_FLOOR_TIME_STATES,
+  ARTLAB_FLOOR_LAYER_NAMES,
+  ARTLAB_FLOOR_COMPOSITE_KINDS,
+  ARTLAB_FLOOR_GAP_STATUSES,
+  ArtLabFloorEnvironmentInputSchema,
+  ArtLabFloorLayerManifestSchema,
+  ArtLabFloorVariantManifestSchema,
+  ArtLabFloorManifestGapsSchema,
 } from "./types";
 
-describe("foundry floor-environment types", () => {
+describe("artlab sdk floor-environment types", () => {
   it("declares the 7 time states in canonical order", () => {
-    expect(FOUNDRY_FLOOR_TIME_STATES).toEqual([
+    expect(ARTLAB_FLOOR_TIME_STATES).toEqual([
       "dawn",
       "morning",
       "midday",
@@ -24,26 +24,26 @@ describe("foundry floor-environment types", () => {
   });
 
   it("declares a single composite layer (honest spec)", () => {
-    expect(FOUNDRY_FLOOR_LAYER_NAMES).toEqual(["composite"]);
+    expect(ARTLAB_FLOOR_LAYER_NAMES).toEqual(["composite"]);
   });
 
   it("only supports single-composite kind today", () => {
-    expect(FOUNDRY_FLOOR_COMPOSITE_KINDS).toEqual(["single-composite"]);
+    expect(ARTLAB_FLOOR_COMPOSITE_KINDS).toEqual(["single-composite"]);
   });
 
   it("accepts a minimal valid input", () => {
-    const parsed = FoundryFloorEnvironmentInputSchema.parse({
+    const parsed = ArtLabFloorEnvironmentInputSchema.parse({
       runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
       floorSlug: "war-room",
       requestedBy: "agent",
     });
     expect(parsed.floorSlug).toBe("war-room");
-    expect(parsed.timeStates).toEqual(FOUNDRY_FLOOR_TIME_STATES);
+    expect(parsed.timeStates).toEqual(ARTLAB_FLOOR_TIME_STATES);
   });
 
   it("rejects unknown floorSlug shape", () => {
     expect(() =>
-      FoundryFloorEnvironmentInputSchema.parse({
+      ArtLabFloorEnvironmentInputSchema.parse({
         runId: "x",
         floorSlug: "Bad Slug",
         requestedBy: "agent",
@@ -52,7 +52,7 @@ describe("foundry floor-environment types", () => {
   });
 
   it("layer manifest carries zIndex and alpha flag", () => {
-    const parsed = FoundryFloorLayerManifestSchema.parse({
+    const parsed = ArtLabFloorLayerManifestSchema.parse({
       name: "composite",
       path: "composite.png",
       zIndex: 0,
@@ -62,7 +62,7 @@ describe("foundry floor-environment types", () => {
   });
 
   it("variant manifest requires kind discriminator and exactly one layer", () => {
-    const parsed = FoundryFloorVariantManifestSchema.parse({
+    const parsed = ArtLabFloorVariantManifestSchema.parse({
       timeState: "dawn",
       kind: "single-composite",
       layers: [
@@ -81,7 +81,7 @@ describe("foundry floor-environment types", () => {
 
   it("variant manifest rejects more than one layer", () => {
     expect(() =>
-      FoundryFloorVariantManifestSchema.parse({
+      ArtLabFloorVariantManifestSchema.parse({
         timeState: "dawn",
         kind: "single-composite",
         layers: [
@@ -105,14 +105,14 @@ describe("foundry floor-environment types", () => {
 
   // Critical 2 followup: schema for manifest gaps surfaced at root.
   it("declares the two known manifest-gap statuses", () => {
-    expect(FOUNDRY_FLOOR_GAP_STATUSES).toEqual([
+    expect(ARTLAB_FLOOR_GAP_STATUSES).toEqual([
       "todo-post-launch",
       "out-of-scope-for-sdk-launch",
     ]);
   });
 
   it("manifest-gaps schema requires both known gaps with status + reason", () => {
-    const parsed = FoundryFloorManifestGapsSchema.parse({
+    const parsed = ArtLabFloorManifestGapsSchema.parse({
       roomElementsPixelVerification: {
         status: "todo-post-launch",
         reason: "no vision-LLM call yet",
@@ -130,7 +130,7 @@ describe("foundry floor-environment types", () => {
 
   it("manifest-gaps schema rejects unknown status values", () => {
     expect(() =>
-      FoundryFloorManifestGapsSchema.parse({
+      ArtLabFloorManifestGapsSchema.parse({
         roomElementsPixelVerification: {
           status: "all-good-trust-us",
           reason: "x",

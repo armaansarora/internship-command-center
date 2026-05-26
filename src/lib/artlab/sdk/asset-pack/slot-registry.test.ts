@@ -1,50 +1,50 @@
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDRY_SLOT_REGISTRY,
-  isFoundrySlotRegistered,
-  resolveFoundrySlot,
-  registerFoundrySlot,
-  type FoundrySlotRecord,
+  ARTLAB_SLOT_REGISTRY,
+  isArtLabSlotRegistered,
+  resolveArtLabSlot,
+  registerArtLabSlot,
+  type ArtLabSlotRecord,
 } from "./slot-registry";
 
-describe("FOUNDRY_SLOT_REGISTRY", () => {
+describe("ARTLAB_SLOT_REGISTRY", () => {
   it("contains the Otis lobby slot", () => {
-    expect(FOUNDRY_SLOT_REGISTRY.some((s) => s.slotId === "lobby/otis/regular/idle")).toBe(true);
+    expect(ARTLAB_SLOT_REGISTRY.some((s) => s.slotId === "lobby/otis/regular/idle")).toBe(true);
   });
 
   it("contains a slot pattern for every promoted character outfit+pose", () => {
-    const characterSlots = FOUNDRY_SLOT_REGISTRY.filter((s) => s.kind === "character-sprite");
+    const characterSlots = ARTLAB_SLOT_REGISTRY.filter((s) => s.kind === "character-sprite");
     expect(characterSlots.length).toBeGreaterThanOrEqual(42);
   });
 
-  it("isFoundrySlotRegistered returns true for a known slot", () => {
-    expect(isFoundrySlotRegistered("lobby/otis/regular/idle")).toBe(true);
+  it("isArtLabSlotRegistered returns true for a known slot", () => {
+    expect(isArtLabSlotRegistered("lobby/otis/regular/idle")).toBe(true);
   });
 
-  it("isFoundrySlotRegistered returns false for a rogue slot", () => {
-    expect(isFoundrySlotRegistered("lobby/intruder/rogue")).toBe(false);
+  it("isArtLabSlotRegistered returns false for a rogue slot", () => {
+    expect(isArtLabSlotRegistered("lobby/intruder/rogue")).toBe(false);
   });
 
-  it("resolveFoundrySlot returns the slot record", () => {
-    const slot = resolveFoundrySlot("lobby/otis/regular/idle");
+  it("resolveArtLabSlot returns the slot record", () => {
+    const slot = resolveArtLabSlot("lobby/otis/regular/idle");
     expect(slot?.appPath).toBe("public/art/lobby/otis/regular/idle.webp");
     expect(slot?.kind).toBe("character-sprite");
   });
 
-  it("registerFoundrySlot adds a new dynamic slot", () => {
-    registerFoundrySlot({
+  it("registerArtLabSlot adds a new dynamic slot", () => {
+    registerArtLabSlot({
       slotId: "floors/7/background/main",
       appPath: "public/floors/7/background/main.webp",
       kind: "floor-environment",
       component: "WarRoomBackground",
       requiresGsap: true,
     });
-    expect(isFoundrySlotRegistered("floors/7/background/main")).toBe(true);
+    expect(isArtLabSlotRegistered("floors/7/background/main")).toBe(true);
   });
 
-  it("registerFoundrySlot rejects a duplicate slot id", () => {
+  it("registerArtLabSlot rejects a duplicate slot id", () => {
     expect(() =>
-      registerFoundrySlot({
+      registerArtLabSlot({
         slotId: "lobby/otis/regular/idle",
         appPath: "public/art/lobby/otis/regular/idle.webp",
         kind: "character-sprite",
@@ -54,10 +54,10 @@ describe("FOUNDRY_SLOT_REGISTRY", () => {
     ).toThrow();
   });
 
-  describe("registerFoundrySlot appPath path-traversal hardening", () => {
+  describe("registerArtLabSlot appPath path-traversal hardening", () => {
     // Reviewer Critical 1 — slot-registry previously trusted the appPath
     // verbatim, so a rogue registration could later satisfy
-    // `validateFoundryManifestAgainstSlots` for a manifest pointing at
+    // `validateArtLabManifestAgainstSlots` for a manifest pointing at
     // `../../etc/passwd`. Same attack vectors used by manifest.schema.test.ts.
     const cases: ReadonlyArray<readonly [string, string]> = [
       ["literal traversal", "../../etc/passwd"],
@@ -81,7 +81,7 @@ describe("FOUNDRY_SLOT_REGISTRY", () => {
     for (const [label, appPath] of cases) {
       it(`rejects slot registration with appPath: ${label}`, () => {
         expect(() =>
-          registerFoundrySlot({
+          registerArtLabSlot({
             slotId: `dynamic/test/${label.replace(/[^a-z0-9]/gi, "-").toLowerCase()}`,
             appPath,
             kind: "ui-icon",
@@ -93,14 +93,14 @@ describe("FOUNDRY_SLOT_REGISTRY", () => {
     }
   });
 
-  describe("registerFoundrySlot kind enum hardening", () => {
-    it("rejects a slot whose kind is not in FOUNDRY_ASSET_KINDS", () => {
+  describe("registerArtLabSlot kind enum hardening", () => {
+    it("rejects a slot whose kind is not in ARTLAB_ASSET_KINDS", () => {
       expect(() =>
-        registerFoundrySlot({
+        registerArtLabSlot({
           slotId: "dynamic/test/bad-kind",
           appPath: "public/art/dynamic/bad-kind.webp",
           // Deliberately invalid kind smuggled past the structural type via cast.
-          kind: "rootkit" as unknown as FoundrySlotRecord["kind"],
+          kind: "rootkit" as unknown as ArtLabSlotRecord["kind"],
           component: null,
           requiresGsap: false,
         }),

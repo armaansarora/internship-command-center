@@ -94,7 +94,7 @@ describe("promotion runner — delegates to the real firewall", () => {
   // ─────────────────────────────────────────────────────────────────────────
   // promotedPackId contract — see Critical Finding 2.
   //
-  // The Foundry `generate_status` MCP handler reads `promotedPackId` off
+  // The ArtLab `generate_status` MCP handler reads `promotedPackId` off
   // run-state.json when phase=closed. Before this fix, promotion-runner
   // never wrote that field — the acceptance test hand-injected it on a
   // raw JSON rewrite, masking that production code didn't honour the
@@ -125,10 +125,10 @@ describe("promotion runner — delegates to the real firewall", () => {
       delete process.env.ARTLAB_PUBLIC_ART_ROOT;
       expect(result.status).toBe("ok");
       // The runner's artifacts surface the same packId for downstream
-      // observers (phase-notifier, foundry status MCP).
+      // observers (phase-notifier, ArtLab SDK status MCP).
       expect(result.artifacts.promotedPackId).toBe(`character-${runId.slice(0, 8)}`);
       // run-state.json was rewritten with the same value — this is what
-      // the Foundry status handler reads.
+      // the ArtLab status handler reads.
       const state = readRunStateSnapshot(runDir);
       expect(state).not.toBeNull();
       expect(state!.promotedPackId).toBe(`character-${runId.slice(0, 8)}`);

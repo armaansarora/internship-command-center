@@ -11,7 +11,7 @@ describe("Sol Navarro golden fixtures", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-golden-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-golden-"));
   });
 
   afterEach(() => {

@@ -2,12 +2,12 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadFoundryMemoryScope } from "./memory-scope";
+import { loadArtLabMemoryScope } from "./memory-scope";
 
 let memoryDir: string;
 
 beforeEach(() => {
-  memoryDir = mkdtempSync(join(tmpdir(), "foundry-memscope-"));
+  memoryDir = mkdtempSync(join(tmpdir(), "artlab-memscope-"));
   mkdirSync(memoryDir, { recursive: true });
   writeFileSync(
     join(memoryDir, "style-wins.jsonl"),
@@ -26,30 +26,30 @@ beforeEach(() => {
   );
 });
 
-describe("loadFoundryMemoryScope", () => {
+describe("loadArtLabMemoryScope", () => {
   it("filters wins to the requested agent kind only", () => {
-    const scope = loadFoundryMemoryScope(memoryDir, "floor-environment", { topN: 3 });
+    const scope = loadArtLabMemoryScope(memoryDir, "floor-environment", { topN: 3 });
     expect(scope.recentWins.map((w) => w.techniques)).toEqual(["amber-grade"]);
   });
 
   it("filters rejections to the requested agent kind only", () => {
-    const scope = loadFoundryMemoryScope(memoryDir, "character-master", { topN: 3 });
+    const scope = loadArtLabMemoryScope(memoryDir, "character-master", { topN: 3 });
     expect(scope.recentRejections.map((r) => r.codes)).toEqual(["WARDROBE"]);
   });
 
   it("returns empty arrays when no entries match the requested kind", () => {
-    const scope = loadFoundryMemoryScope(memoryDir, "sprite-animator", { topN: 3 });
+    const scope = loadArtLabMemoryScope(memoryDir, "sprite-animator", { topN: 3 });
     expect(scope.recentWins).toEqual([]);
     expect(scope.recentRejections).toEqual([]);
   });
 
   it("honors topN cap", () => {
-    const scope = loadFoundryMemoryScope(memoryDir, "character-master", { topN: 0 });
+    const scope = loadArtLabMemoryScope(memoryDir, "character-master", { topN: 0 });
     expect(scope.recentWins).toEqual([]);
   });
 
   it("agent-kind filtering does NOT cross-contaminate (floor sees no character feedback)", () => {
-    const floor = loadFoundryMemoryScope(memoryDir, "floor-environment", { topN: 5 });
+    const floor = loadArtLabMemoryScope(memoryDir, "floor-environment", { topN: 5 });
     for (const w of floor.recentWins) {
       expect(w.techniques).not.toContain("shadow-pass");
     }

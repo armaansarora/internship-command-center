@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { validateFoundryCanon, type FoundryCanonValidationReport } from "./validate";
-import type { FoundryCanon } from "./load-canon";
-import type { FoundryCharacterCanon } from "./character-schema";
-import type { FoundryPaletteCanon } from "./palette-schema";
+import { validateArtLabCanon, type ArtLabCanonValidationReport } from "./validate";
+import type { ArtLabCanon } from "./load-canon";
+import type { ArtLabCharacterCanon } from "./character-schema";
+import type { ArtLabPaletteCanon } from "./palette-schema";
 
-const FAKE_CHAR = (id: string, paletteRef = "tower-default"): FoundryCharacterCanon =>
+const FAKE_CHAR = (id: string, paletteRef = "tower-default"): ArtLabCharacterCanon =>
   ({
     header: { kind: "character", schemaVersion: "1.0.0", id, revisedAt: "2026-05-25T00:00:00.000Z" },
     displayName: "X",
@@ -30,16 +30,16 @@ const FAKE_CHAR = (id: string, paletteRef = "tower-default"): FoundryCharacterCa
     paletteRef,
     motionProfile: "x",
     artDirectionNotes: "x",
-  }) as FoundryCharacterCanon;
+  }) as ArtLabCharacterCanon;
 
-const FAKE_PALETTE = (id: string): FoundryPaletteCanon =>
+const FAKE_PALETTE = (id: string): ArtLabPaletteCanon =>
   ({
     header: { kind: "palette", schemaVersion: "1.0.0", id, revisedAt: "2026-05-25T00:00:00.000Z" },
     scope: "global",
     tokens: { primaryDark: "#1A1A2E" },
-  }) as FoundryPaletteCanon;
+  }) as ArtLabPaletteCanon;
 
-const FAKE_CANON = (chars: FoundryCharacterCanon[], palettes: FoundryPaletteCanon[]): FoundryCanon =>
+const FAKE_CANON = (chars: ArtLabCharacterCanon[], palettes: ArtLabPaletteCanon[]): ArtLabCanon =>
   ({
     characters: chars,
     palettes,
@@ -49,11 +49,11 @@ const FAKE_CANON = (chars: FoundryCharacterCanon[], palettes: FoundryPaletteCano
     iconographyRules: [],
     loadDurationMs: 0,
     sourceFiles: [],
-  }) as FoundryCanon;
+  }) as ArtLabCanon;
 
-describe("validateFoundryCanon", () => {
+describe("validateArtLabCanon", () => {
   it("returns ok=true when every paletteRef resolves", () => {
-    const report: FoundryCanonValidationReport = validateFoundryCanon(
+    const report: ArtLabCanonValidationReport = validateArtLabCanon(
       FAKE_CANON([FAKE_CHAR("c1")], [FAKE_PALETTE("tower-default")]),
     );
     expect(report.ok).toBe(true);
@@ -61,21 +61,21 @@ describe("validateFoundryCanon", () => {
   });
 
   it("flags unresolved paletteRef", () => {
-    const report = validateFoundryCanon(FAKE_CANON([FAKE_CHAR("c1", "missing-palette")], []));
+    const report = validateArtLabCanon(FAKE_CANON([FAKE_CHAR("c1", "missing-palette")], []));
     expect(report.ok).toBe(false);
     expect(report.issues.some((i) => i.code === "palette-ref-unresolved")).toBe(true);
   });
 
   it("flags zero characters in canon", () => {
-    const report = validateFoundryCanon(FAKE_CANON([], [FAKE_PALETTE("tower-default")]));
+    const report = validateArtLabCanon(FAKE_CANON([], [FAKE_PALETTE("tower-default")]));
     expect(report.ok).toBe(false);
     expect(report.issues.some((i) => i.code === "canon-empty-character-set")).toBe(true);
   });
 
   it("returns ok=true on real disk canon", async () => {
-    const { loadFoundryCanon } = await import("./load-canon");
-    const canon = await loadFoundryCanon({ canonRoot: `${process.cwd()}/docs/foundry/canon` });
-    const report = validateFoundryCanon(canon);
+    const { loadArtLabCanon } = await import("./load-canon");
+    const canon = await loadArtLabCanon({ canonRoot: `${process.cwd()}/docs/foundry/canon` });
+    const report = validateArtLabCanon(canon);
     expect(report.ok).toBe(true);
   });
 });

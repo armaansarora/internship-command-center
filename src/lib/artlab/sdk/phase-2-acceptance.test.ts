@@ -12,13 +12,13 @@ describe("Phase 2 acceptance", () => {
     expect(typeof m.runCharacterMaster).toBe("function");
   });
 
-  it("asset-pack public surface re-exports createFoundryAssetPack", async () => {
+  it("asset-pack public surface re-exports createArtLabAssetPack", async () => {
     const m = await import("./asset-pack/index");
-    expect(typeof m.createFoundryAssetPack).toBe("function");
+    expect(typeof m.createArtLabAssetPack).toBe("function");
   });
 
-  it("canon public surface re-exports loadFoundryCanon", async () => {
+  it("canon public surface re-exports loadArtLabCanon", async () => {
     const m = await import("./canon/index");
-    expect(typeof m.loadFoundryCanon).toBe("function");
+    expect(typeof m.loadArtLabCanon).toBe("function");
   });
 });

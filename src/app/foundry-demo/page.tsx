@@ -1,12 +1,12 @@
 import type { JSX } from "react";
 import { SpriteSheetPlayer } from "@/components/artlab/sprite-sheet-player";
-import { FOUNDRY_DEMO_PACKS, type FoundryDemoPack } from "@/lib/artlab/sdk/integration/demo-fixtures";
+import { ARTLAB_DEMO_PACKS, type ArtLabDemoPack } from "@/lib/artlab/sdk/integration/demo-fixtures";
 
-function findDemo(kind: FoundryDemoPack["kind"]): FoundryDemoPack | undefined {
-  return FOUNDRY_DEMO_PACKS.find((p) => p.kind === kind);
+function findDemo(kind: ArtLabDemoPack["kind"]): ArtLabDemoPack | undefined {
+  return ARTLAB_DEMO_PACKS.find((p) => p.kind === kind);
 }
 
-function PendingPlaceholder({ pack }: { pack: FoundryDemoPack }): JSX.Element {
+function PendingPlaceholder({ pack }: { pack: ArtLabDemoPack }): JSX.Element {
   return (
     <div
       role="status"
@@ -35,24 +35,24 @@ function PendingPlaceholder({ pack }: { pack: FoundryDemoPack }): JSX.Element {
 }
 
 /**
- * Foundry modality demo page.
+ * ArtLab modality demo page.
  *
  * Uses raw `<img>` tags rather than `next/image` so the literal
  * `/art/...` (and `/lobby/...`) paths appear unchanged in the rendered
  * HTML — the page test asserts on those exact strings, and `next/image`
  * rewrites src to `/_next/image?url=%2Fart%2F...` which would obscure
  * them. The production integration snippet emitted by
- * `foundry/asset_pack_integration` continues to recommend `next/image`
+ * `artlab/asset_pack_integration` continues to recommend `next/image`
  * for downstream callers; this demo trades optimization for literal
  * paths because its purpose is a visual sanity check, not a perf bake.
  *
- * For any modality the Foundry has not yet shipped a real Asset Pack
+ * For any modality the ArtLab has not yet shipped a real Asset Pack
  * for, the page renders a clearly-labelled placeholder block — never a
  * broken image. The placeholder is the honest signal that the
  * integration loop is whole for shipped modalities but not yet
  * fabricated for the rest.
  */
-export default function FoundryDemoPage(): JSX.Element {
+export default function ArtLabDemoPage(): JSX.Element {
   const character = findDemo("character");
   const floor = findDemo("floor");
   const icon = findDemo("icon");
@@ -60,7 +60,7 @@ export default function FoundryDemoPage(): JSX.Element {
 
   return (
     <main style={{ padding: "32px", color: "#1A1A2E", background: "#F5F2EB", minHeight: "100vh" }}>
-      <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: 36 }}>Tower Art Foundry — modality demo</h1>
+      <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: 36 }}>Tower Art ArtLab — modality demo</h1>
       <p style={{ maxWidth: 720, marginBottom: 32 }}>
         Each block below renders one promoted Asset Pack via the integration
         snippet that <code>foundry/asset_pack_integration</code> emits. Shipped

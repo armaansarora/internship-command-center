@@ -1,12 +1,12 @@
-// src/lib/foundry/integration/agent-loop.acceptance.test.ts
+// src/lib/artlab/sdk/integration/agent-loop.acceptance.test.ts
 //
-// End-to-end acceptance gate for the Foundry agent loop:
+// End-to-end acceptance gate for the ArtLab agent loop:
 //
-//   agent ─MCP/stdio─▶ foundry/generate
+//   agent ─MCP/stdio─▶ artlab/generate
 //                       │
 //                       ▼  writes  inbox/foundry/generate-<runId>.json
 //
-//   daemon (in-process foundry-poller, real code from src/lib/artlab/daemon)
+//   daemon (in-process sdk-poller, real code from src/lib/artlab/daemon)
 //                       │
 //                       ▼  reads inbox, writes runs/<runId>/run-state.json
 //                          (phase=routed), enqueues, moves inbox → .processed
@@ -17,12 +17,12 @@
 //                          using a deterministic mock image provider, sets
 //                          run-state phase=closed + promotedPackId
 //
-//   agent ─MCP/stdio─▶ foundry/generate_status → "promoted" + promotedPackId
-//   agent ─MCP/stdio─▶ foundry/asset_pack_integration → snippet
+//   agent ─MCP/stdio─▶ artlab/generate_status → "promoted" + promotedPackId
+//   agent ─MCP/stdio─▶ artlab/asset_pack_integration → snippet
 //
 // CRITICAL: NO `fakeDaemonPromote` shortcut. NO hand-written run-state.json
 // in the inbox→queue handoff. The handoff itself is exercised by the real
-// `createFoundryPoller` from `src/lib/artlab/daemon/foundry-poller.ts`.
+// `createArtLabPoller` from `src/lib/artlab/daemon/sdk-poller.ts`.
 
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
@@ -30,10 +30,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { createFoundryPoller } from "@/lib/artlab/daemon/sdk-poller";
+import { createArtLabPoller } from "@/lib/artlab/daemon/sdk-poller";
 import { dequeueNextRun } from "@/lib/artlab/queue/queue";
 import { readRunStateSnapshot, writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
-import { createMockFoundryImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
+import { createMockArtLabImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
 import type { ArtLabRunState } from "@/lib/artlab/types";
 
 let workspaceRoot: string;
@@ -42,9 +42,9 @@ let packsRoot: string;
 let slotRegistryPath: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-acc-ws-"));
-  canonRoot = mkdtempSync(join(tmpdir(), "foundry-acc-canon-"));
-  packsRoot = mkdtempSync(join(tmpdir(), "foundry-acc-packs-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-acc-ws-"));
+  canonRoot = mkdtempSync(join(tmpdir(), "artlab-acc-canon-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "artlab-acc-packs-"));
   slotRegistryPath = join(workspaceRoot, "slots", "registry.json");
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
   mkdirSync(join(workspaceRoot, "inbox", "foundry"), { recursive: true });
@@ -68,7 +68,7 @@ function inheritedEnv(): Record<string, string> {
 /**
  * Test-only minimal pipeline: replaces the run-worker subprocess. Drains
  * every queued run, generates bytes via the MOCK image provider, writes a
- * real foundry Asset Pack manifest under packsRoot, and finalises the run
+ * real ArtLab SDK Asset Pack manifest under packsRoot, and finalises the run
  * by flipping run-state to phase=closed with promotedPackId.
  *
  * This is the only thing the production daemon does that we substitute —
@@ -79,7 +79,7 @@ async function runMockPipelineUntilEmpty(input: {
   workspaceRoot: string;
   packsRoot: string;
 }): Promise<string[]> {
-  const provider = createMockFoundryImageProvider({ id: "mock-acceptance" });
+  const provider = createMockArtLabImageProvider({ id: "mock-acceptance" });
   const promoted: string[] = [];
   for (;;) {
     const entry = dequeueNextRun(input.workspaceRoot);
@@ -125,7 +125,7 @@ async function runMockPipelineUntilEmpty(input: {
     }
     // The mock pipeline jumps straight from `routed` → `closed`; in the
     // real daemon the state machine walks through brief/concept/production.
-    // The Foundry status contract only cares about the terminal `closed`
+    // The ArtLab status contract only cares about the terminal `closed`
     // + promotedPackId combination so the shortcut is faithful to the
     // observable behaviour.
     //
@@ -148,7 +148,7 @@ async function runMockPipelineUntilEmpty(input: {
 
 describe("agent loop acceptance gate", () => {
   it(
-    "agent ─MCP─▶ generate → real foundry-poller → mock-pipeline closes run → status=promoted → integration snippet",
+    "agent ─MCP─▶ generate → real sdk-poller → mock-pipeline closes run → status=promoted → integration snippet",
     async () => {
       const repoRoot = process.cwd();
       const transport = new StdioClientTransport({
@@ -156,10 +156,10 @@ describe("agent loop acceptance gate", () => {
         args: ["tsx", join(repoRoot, "scripts", "foundry-mcp.ts")],
         env: {
           ...inheritedEnv(),
-          FOUNDRY_WORKSPACE_ROOT: workspaceRoot,
-          FOUNDRY_CANON_ROOT: canonRoot,
-          FOUNDRY_PACKS_ROOT: packsRoot,
-          FOUNDRY_SLOT_REGISTRY: slotRegistryPath,
+          ARTLAB_WORKSPACE_ROOT: workspaceRoot,
+          ARTLAB_CANON_ROOT: canonRoot,
+          ARTLAB_PACKS_ROOT: packsRoot,
+          ARTLAB_SLOT_REGISTRY: slotRegistryPath,
         },
       });
       const client = new Client({ name: "test-client", version: "1.0.0" }, { capabilities: {} });
@@ -168,7 +168,7 @@ describe("agent loop acceptance gate", () => {
       try {
         // ──── Step 1: agent asks for a new Sol Navarro idle animation ────
         const gen = await client.callTool({
-          name: "foundry/generate",
+          name: "artlab/generate",
           arguments: {
             kind: "sprite-animation",
             description: "Sol Navarro idle breathe loop 1.2s ease-in-out",
@@ -182,7 +182,7 @@ describe("agent loop acceptance gate", () => {
 
         // ──── Step 2: while only the inbox file exists, status=queued ────
         const queuedStatus = await client.callTool({
-          name: "foundry/generate_status",
+          name: "artlab/generate_status",
           arguments: { runId: generated.runId },
         });
         const queuedPayload = JSON.parse(
@@ -191,10 +191,10 @@ describe("agent loop acceptance gate", () => {
         expect(queuedPayload.status).toBe("queued");
         expect(queuedPayload.phase).toBe("queued");
 
-        // ──── Step 3: in-process REAL foundry poller drains the inbox ────
+        // ──── Step 3: in-process REAL ArtLab SDK poller drains the inbox ────
         // No fakes, no shortcuts. This is the exact code path the daemon
         // exercises in production.
-        const poller = createFoundryPoller({ workspaceRoot });
+        const poller = createArtLabPoller({ workspaceRoot });
         const pollerOut = await poller.tick();
         expect(pollerOut.enqueuedRunIds).toContain(generated.runId);
         expect(pollerOut.failedFiles).toEqual([]);
@@ -206,7 +206,7 @@ describe("agent loop acceptance gate", () => {
         // Status should now flip to `running` because run-state.json exists
         // and is non-terminal.
         const runningStatus = await client.callTool({
-          name: "foundry/generate_status",
+          name: "artlab/generate_status",
           arguments: { runId: generated.runId },
         });
         const runningPayload = JSON.parse(
@@ -222,7 +222,7 @@ describe("agent loop acceptance gate", () => {
 
         // ──── Step 5: agent polls — sees status=promoted with packId ────
         const promotedStatus = await client.callTool({
-          name: "foundry/generate_status",
+          name: "artlab/generate_status",
           arguments: { runId: generated.runId },
         });
         const promotedPayload = JSON.parse(
@@ -234,7 +234,7 @@ describe("agent loop acceptance gate", () => {
 
         // ──── Step 6: agent fetches the integration snippet ────
         const integration = await client.callTool({
-          name: "foundry/asset_pack_integration",
+          name: "artlab/asset_pack_integration",
           arguments: { packId: promotedPackId, targetFramework: "next-app-router" },
         });
         const snippet = JSON.parse(

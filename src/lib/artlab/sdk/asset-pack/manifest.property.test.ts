@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import fc from "fast-check";
-import { FoundryAssetPackManifestSchema, type FoundryAssetPackManifest } from "./manifest.schema";
+import { ArtLabAssetPackManifestSchema, type ArtLabAssetPackManifest } from "./manifest.schema";
 
-function arbManifest(): fc.Arbitrary<FoundryAssetPackManifest> {
+function arbManifest(): fc.Arbitrary<ArtLabAssetPackManifest> {
   const hex64 = fc.stringMatching(/^[a-f0-9]{64}$/) ?? fc.constant("0".repeat(64));
   const hex16 = fc.stringMatching(/^[a-f0-9]{16}$/) ?? fc.constant("0".repeat(16));
   return fc
@@ -67,9 +67,9 @@ function arbManifest(): fc.Arbitrary<FoundryAssetPackManifest> {
           ...rest,
           anchorImageRelPath: "idle.webp",
           anchorPerceptualHash: anchorHash,
-        } as unknown as FoundryAssetPackManifest;
+        } as unknown as ArtLabAssetPackManifest;
       }
-      return rest as unknown as FoundryAssetPackManifest;
+      return rest as unknown as ArtLabAssetPackManifest;
     });
 }
 
@@ -77,8 +77,8 @@ describe("manifest schema property — parse(stringify(parse(m))) === parse(m)",
   it("survives JSON round-trip for arbitrary valid manifests", () => {
     fc.assert(
       fc.property(arbManifest(), (m) => {
-        const once = FoundryAssetPackManifestSchema.parse(m);
-        const twice = FoundryAssetPackManifestSchema.parse(JSON.parse(JSON.stringify(once)));
+        const once = ArtLabAssetPackManifestSchema.parse(m);
+        const twice = ArtLabAssetPackManifestSchema.parse(JSON.parse(JSON.stringify(once)));
         expect(twice).toEqual(once);
       }),
       { numRuns: 200 },

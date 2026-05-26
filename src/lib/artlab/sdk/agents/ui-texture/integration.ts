@@ -1,4 +1,4 @@
-// src/lib/foundry/agents/ui-texture/integration.ts
+// src/lib/artlab/sdk/agents/ui-texture/integration.ts
 function toPascal(name: string): string {
   return name
     .split("-")
@@ -7,17 +7,17 @@ function toPascal(name: string): string {
     .join("");
 }
 
-export interface FoundryIconIntegrationInput {
+export interface ArtLabIconIntegrationInput {
   name: string;
   packPath: string;
 }
 
-export function renderFoundryIconIntegrationSnippet(
-  input: FoundryIconIntegrationInput,
+export function renderArtLabIconIntegrationSnippet(
+  input: ArtLabIconIntegrationInput,
 ): string {
   const component = `${toPascal(input.name)}Icon`;
   return [
-    `// Foundry asset pack: ${input.packPath}`,
+    `// ArtLab asset pack: ${input.packPath}`,
     `// Building-metaphor icon — drop directly into JSX.`,
     `import { ${component} } from "@/components/artlab/icons/${input.name}";`,
     ``,
@@ -25,23 +25,23 @@ export function renderFoundryIconIntegrationSnippet(
   ].join("\n");
 }
 
-export interface FoundryTextureIntegrationInput {
+export interface ArtLabTextureIntegrationInput {
   name: string;
   pngPath: string;
   normalMapPath: string;
   tileMode: "repeat" | "repeat-x" | "repeat-y" | "no-repeat";
 }
 
-export function renderFoundryTextureIntegrationSnippet(
-  input: FoundryTextureIntegrationInput,
+export function renderArtLabTextureIntegrationSnippet(
+  input: ArtLabTextureIntegrationInput,
 ): string {
   return [
-    `// Foundry texture: ${input.name} (tile-mode: ${input.tileMode})`,
+    `// ArtLab texture: ${input.name} (tile-mode: ${input.tileMode})`,
     `// Tailwind utility class — drop on the target element.`,
     `// CSS variable carries the normal map for any custom shader stage.`,
     `<div`,
     `  className="bg-[url('${input.pngPath}')] bg-${input.tileMode}"`,
-    `  style={{ ['--foundry-normal-map' as string]: \`url('${input.normalMapPath}')\` }}`,
+    `  style={{ ['--artlab-normal-map' as string]: \`url('${input.normalMapPath}')\` }}`,
     `/>`,
   ].join("\n");
 }

@@ -1,7 +1,7 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateText, type ModelMessage } from "ai";
 
-export interface FoundryAnthropicCall {
+export interface ArtLabAnthropicCall {
   systemPrompt: string;
   userJson: Record<string, unknown>;
   model: string;
@@ -15,7 +15,7 @@ export interface FoundryAnthropicCall {
   }) => Promise<{ text: string; usage: { inputTokens: number; outputTokens: number } }>;
 }
 
-export interface FoundryAnthropicResponse {
+export interface ArtLabAnthropicResponse {
   text: string;
   tokensIn: number;
   tokensOut: number;
@@ -23,7 +23,7 @@ export interface FoundryAnthropicResponse {
   dryRun?: boolean;
 }
 
-export async function callFoundryAnthropic(call: FoundryAnthropicCall): Promise<FoundryAnthropicResponse> {
+export async function callArtLabAnthropic(call: ArtLabAnthropicCall): Promise<ArtLabAnthropicResponse> {
   if (call.dryRun) {
     return {
       text: JSON.stringify({ dryRun: true, echoedInput: call.userJson }),

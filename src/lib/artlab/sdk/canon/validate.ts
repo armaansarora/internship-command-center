@@ -1,7 +1,7 @@
-// src/lib/foundry/canon/validate.ts
-import type { FoundryCanon } from "./load-canon";
+// src/lib/artlab/sdk/canon/validate.ts
+import type { ArtLabCanon } from "./load-canon";
 
-export interface FoundryCanonValidationIssue {
+export interface ArtLabCanonValidationIssue {
   code:
     | "palette-ref-unresolved"
     | "canon-empty-character-set"
@@ -13,14 +13,14 @@ export interface FoundryCanonValidationIssue {
   recordId?: string;
 }
 
-export interface FoundryCanonValidationReport {
+export interface ArtLabCanonValidationReport {
   ok: boolean;
-  issues: readonly FoundryCanonValidationIssue[];
+  issues: readonly ArtLabCanonValidationIssue[];
   recordCount: number;
 }
 
-export function validateFoundryCanon(canon: FoundryCanon): FoundryCanonValidationReport {
-  const issues: FoundryCanonValidationIssue[] = [];
+export function validateArtLabCanon(canon: ArtLabCanon): ArtLabCanonValidationReport {
+  const issues: ArtLabCanonValidationIssue[] = [];
   const paletteIds = new Set(canon.palettes.map((p) => p.header.id));
 
   if (canon.characters.length === 0) {

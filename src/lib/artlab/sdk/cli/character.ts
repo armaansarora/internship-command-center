@@ -1,8 +1,8 @@
 import { runCharacterMaster } from "@/lib/artlab/sdk/agents/character-master";
-import { createMockFoundryImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
-import { createGeminiFoundryProvider } from "@/lib/artlab/sdk/providers/gemini-provider";
-import { registerFoundrySlot, isFoundrySlotRegistered } from "@/lib/artlab/sdk/asset-pack";
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/providers/types";
+import { createMockArtLabImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
+import { createGeminiArtLabProvider } from "@/lib/artlab/sdk/providers/gemini-provider";
+import { registerArtLabSlot, isArtLabSlotRegistered } from "@/lib/artlab/sdk/asset-pack";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/providers/types";
 import type { CharacterMasterStage } from "@/lib/artlab/sdk/agents/character-master/types";
 
 export interface RunCharacterSubcommandInput {
@@ -41,9 +41,9 @@ function parseArgs(argv: readonly string[]): { name: string | null; resumeFrom: 
   return { name, resumeFrom, seed };
 }
 
-function pickProvider(mode: "mock" | "gemini"): FoundryImageProvider {
-  if (mode === "mock") return createMockFoundryImageProvider();
-  return createGeminiFoundryProvider({ apiKey: process.env.GEMINI_API_KEY ?? "" });
+function pickProvider(mode: "mock" | "gemini"): ArtLabImageProvider {
+  if (mode === "mock") return createMockArtLabImageProvider();
+  return createGeminiArtLabProvider({ apiKey: process.env.GEMINI_API_KEY ?? "" });
 }
 
 function ensureCharacterSlots(characterId: string, floorId: string): void {
@@ -53,9 +53,9 @@ function ensureCharacterSlots(characterId: string, floorId: string): void {
   for (const outfit of OUTFITS) {
     for (const pose of POSES) {
       const slotId = `${floorId}/${characterId}/${outfit}/${pose}`;
-      if (isFoundrySlotRegistered(slotId)) continue;
+      if (isArtLabSlotRegistered(slotId)) continue;
       try {
-        registerFoundrySlot({
+        registerArtLabSlot({
           slotId,
           appPath: `public/art/${floorId}/${characterId}/${outfit}/${pose}.webp`,
           kind: "character-sprite",

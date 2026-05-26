@@ -1,10 +1,10 @@
-// src/lib/foundry/mcp/tool-handlers/diagnostics.heartbeat-contract.integration.test.ts
+// src/lib/artlab/sdk/mcp/tool-handlers/diagnostics.heartbeat-contract.integration.test.ts
 //
 // Integration regression — heartbeat field-name contract.
 //
 // In production the ArtLab daemon (src/lib/artlab/daemon/entry.ts) writes
 // `{ at: <ISO timestamp> }` into `daemon-heartbeat.json` on every tick.
-// The Foundry MCP diagnostics handler previously read the field as
+// The ArtLab MCP diagnostics handler previously read the field as
 // `writtenAt`. Because the two were misaligned, `new Date(undefined)`
 // returned NaN and `daemonUp` evaluated to `false` for every fresh heartbeat
 // — the operator-facing health probe lied about a running daemon.
@@ -18,11 +18,11 @@ import { mkdtempSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createDaemonContext, runDaemonOnce } from "@/lib/artlab/daemon/entry";
-import { handleFoundryDiagnostics } from "./diagnostics";
+import { handleArtLabDiagnostics } from "./diagnostics";
 
 describe("diagnostics ↔ daemon heartbeat contract", () => {
   it("daemonUp=true when the production daemon wrote a fresh heartbeat", async () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-diag-heartbeat-"));
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-diag-heartbeat-"));
     const ctx = createDaemonContext({
       workspaceRoot,
       telegramPoller: { tick: vi.fn().mockResolvedValue(undefined) },
@@ -36,7 +36,7 @@ describe("diagnostics ↔ daemon heartbeat contract", () => {
     const written = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
     expect(typeof written.at).toBe("string");
 
-    const result = await handleFoundryDiagnostics(
+    const result = await handleArtLabDiagnostics(
       {},
       { workspaceRoot, providerProbes: {} },
     );
@@ -44,8 +44,8 @@ describe("diagnostics ↔ daemon heartbeat contract", () => {
   });
 
   it("daemonUp=false when the heartbeat file is missing", async () => {
-    const workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-diag-heartbeat-missing-"));
-    const result = await handleFoundryDiagnostics(
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-diag-heartbeat-missing-"));
+    const result = await handleArtLabDiagnostics(
       {},
       { workspaceRoot, providerProbes: {} },
     );

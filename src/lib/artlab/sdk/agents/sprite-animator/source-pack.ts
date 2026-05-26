@@ -1,10 +1,10 @@
 import { join } from "node:path";
 import {
-  FOUNDRY_PACK_PAYLOAD_DIR,
-  loadFoundryAssetPack,
+  ARTLAB_PACK_PAYLOAD_DIR,
+  loadArtLabAssetPack,
 } from "@/lib/artlab/sdk/asset-pack";
 
-export interface FoundrySpriteSource {
+export interface ArtLabSpriteSource {
   packId: string;
   characterId: string;
   /** Absolute path to the anchor sprite inside the pack's payload directory. */
@@ -12,12 +12,12 @@ export interface FoundrySpriteSource {
   anchorPerceptualHash: string;
 }
 
-export interface ResolveFoundrySpriteSourcePackContext {
+export interface ResolveArtLabSpriteSourcePackContext {
   /**
    * Root directory under which promoted character packs live (one
-   * subdirectory per packId). `loadFoundryAssetPack` joins this with the
+   * subdirectory per packId). `loadArtLabAssetPack` joins this with the
    * pack id, reads `<packDir>/manifest.json`, and validates via the strict
-   * Foundry asset pack schema.
+   * ArtLab asset pack schema.
    */
   packsRoot: string;
 }
@@ -27,7 +27,7 @@ export interface ResolveFoundrySpriteSourcePackContext {
  * fields the sprite-animator agent feeds to its video/Lottie providers and
  * its identity QA gates. The resolver:
  *
- *   1. loads the pack via the strict `loadFoundryAssetPack` reader (no
+ *   1. loads the pack via the strict `loadArtLabAssetPack` reader (no
  *      manifest shape adaptation — both sides honour the schema);
  *   2. asserts the pack's `kind` is `character-spritesheet` (the only
  *      sprite-animator-compatible source kind today);
@@ -41,26 +41,26 @@ export interface ResolveFoundrySpriteSourcePackContext {
  * by `character-master` now flows through cleanly — no more fixture-only
  * mocking required to satisfy the contract.
  */
-export async function resolveFoundrySpriteSourcePack(
+export async function resolveArtLabSpriteSourcePack(
   packId: string,
-  context: ResolveFoundrySpriteSourcePackContext,
-): Promise<FoundrySpriteSource> {
-  const pack = await loadFoundryAssetPack(context.packsRoot, packId);
+  context: ResolveArtLabSpriteSourcePackContext,
+): Promise<ArtLabSpriteSource> {
+  const pack = await loadArtLabAssetPack(context.packsRoot, packId);
   if (!pack) {
     throw new Error(
-      `foundry/sprite-animator: source pack ${packId} not found under ${context.packsRoot}`,
+      `artlab/sprite-animator: source pack ${packId} not found under ${context.packsRoot}`,
     );
   }
   const { manifest, packDir } = pack;
   if (manifest.kind !== "character-spritesheet") {
     throw new Error(
-      `foundry/sprite-animator: source pack ${packId} must be a character-spritesheet (got kind=${manifest.kind})`,
+      `artlab/sprite-animator: source pack ${packId} must be a character-spritesheet (got kind=${manifest.kind})`,
     );
   }
   const characterId = manifest.canonRefs.characterId;
   if (typeof characterId !== "string" || characterId.length === 0) {
     throw new Error(
-      `foundry/sprite-animator: source pack ${packId} character-spritesheet must declare canonRefs.characterId`,
+      `artlab/sprite-animator: source pack ${packId} character-spritesheet must declare canonRefs.characterId`,
     );
   }
   // Schema refinement guarantees these are present + well-formed for
@@ -70,7 +70,7 @@ export async function resolveFoundrySpriteSourcePack(
   const anchorPerceptualHash = manifest.anchorPerceptualHash;
   if (typeof anchorRelPath !== "string" || anchorRelPath.length === 0) {
     throw new Error(
-      `foundry/sprite-animator: source pack ${packId} missing anchorImageRelPath`,
+      `artlab/sprite-animator: source pack ${packId} missing anchorImageRelPath`,
     );
   }
   if (
@@ -78,13 +78,13 @@ export async function resolveFoundrySpriteSourcePack(
     !/^[0-9a-f]{16}$/.test(anchorPerceptualHash)
   ) {
     throw new Error(
-      `foundry/sprite-animator: source pack ${packId} missing or malformed anchorPerceptualHash`,
+      `artlab/sprite-animator: source pack ${packId} missing or malformed anchorPerceptualHash`,
     );
   }
   return {
     packId,
     characterId,
-    anchorImagePath: join(packDir, FOUNDRY_PACK_PAYLOAD_DIR, anchorRelPath),
+    anchorImagePath: join(packDir, ARTLAB_PACK_PAYLOAD_DIR, anchorRelPath),
     anchorPerceptualHash,
   };
 }

@@ -1,10 +1,10 @@
-export interface FoundryImageProviderInput {
+export interface ArtLabImageProviderInput {
   prompt: string;
   aspectRatio: "9:16" | "16:9" | "1:1" | "4:3" | "3:4" | "21:9";
   seed?: number;
 }
 
-export interface FoundryImageProviderResult {
+export interface ArtLabImageProviderResult {
   mode: "mock" | "real" | "placeholder";
   bytes: Buffer;
   contentType: "image/png" | "image/webp" | "image/jpeg";
@@ -12,6 +12,6 @@ export interface FoundryImageProviderResult {
   durationMs: number;
 }
 
-export interface FoundryImageProvider {
-  generateImage(input: FoundryImageProviderInput): Promise<FoundryImageProviderResult>;
+export interface ArtLabImageProvider {
+  generateImage(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult>;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { createFoundrySpriteMockLottieProvider } from "./mock-lottie-provider";
+import { createArtLabSpriteMockLottieProvider } from "./mock-lottie-provider";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -10,9 +10,9 @@ async function solid(c: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("createFoundrySpriteMockLottieProvider", () => {
+describe("createArtLabSpriteMockLottieProvider", () => {
   it("authorLottie returns parseable JSON", async () => {
-    const p = createFoundrySpriteMockLottieProvider();
+    const p = createArtLabSpriteMockLottieProvider();
     const out = await p.authorLottie({
       motionCurve: "breathing-12fps",
       durationMs: 1000,
@@ -23,7 +23,7 @@ describe("createFoundrySpriteMockLottieProvider", () => {
   });
 
   it("authored Lottie has matching op-frame for given duration", async () => {
-    const p = createFoundrySpriteMockLottieProvider();
+    const p = createArtLabSpriteMockLottieProvider();
     const out = await p.authorLottie({
       motionCurve: "breathing-12fps",
       durationMs: 1000,
@@ -34,7 +34,7 @@ describe("createFoundrySpriteMockLottieProvider", () => {
   });
 
   it("authored Lottie has at least one layer with valid index", async () => {
-    const p = createFoundrySpriteMockLottieProvider();
+    const p = createArtLabSpriteMockLottieProvider();
     const out = await p.authorLottie({
       motionCurve: "breathing-12fps",
       durationMs: 500,
@@ -46,7 +46,7 @@ describe("createFoundrySpriteMockLottieProvider", () => {
   });
 
   it("same seed produces same JSON", async () => {
-    const p = createFoundrySpriteMockLottieProvider();
+    const p = createArtLabSpriteMockLottieProvider();
     const a = await p.authorLottie({
       motionCurve: "x",
       durationMs: 1000,
@@ -65,7 +65,7 @@ describe("createFoundrySpriteMockLottieProvider", () => {
   // Critical 3: when referenceImageBytes is provided, the mock must
   // embed it as a base64 asset so the lottie-identity gate can verify.
   it("embeds referenceImageBytes as a base64 asset when provided", async () => {
-    const p = createFoundrySpriteMockLottieProvider();
+    const p = createArtLabSpriteMockLottieProvider();
     const bytes = await solid(50);
     const out = await p.authorLottie({
       motionCurve: "breathing-12fps",
@@ -82,7 +82,7 @@ describe("createFoundrySpriteMockLottieProvider", () => {
   });
 
   it("omits assets when no referenceImageBytes is provided", async () => {
-    const p = createFoundrySpriteMockLottieProvider();
+    const p = createArtLabSpriteMockLottieProvider();
     const out = await p.authorLottie({
       motionCurve: "breathing-12fps",
       durationMs: 1000,

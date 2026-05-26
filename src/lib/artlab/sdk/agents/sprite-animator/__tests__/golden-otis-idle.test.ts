@@ -3,7 +3,7 @@ import { mkdtempSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
-import { runFoundrySpriteAnimatorCli } from "../cli";
+import { runArtLabSpriteAnimatorCli } from "../cli";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -13,10 +13,10 @@ async function solid(c: number): Promise<Buffer> {
     .toBuffer();
 }
 
-// Foundry-SDK Critical-1 fix: `buildFoundryAssetPack` is no longer mocked;
+// ArtLab-SDK Critical-1 fix: `buildArtLabAssetPack` is no longer mocked;
 // the real strict-schema builder runs. The golden assertions now read the
 // canonical on-disk artefacts (`pack/manifest.json` + `pack/payload/…`)
-// that `createFoundryAssetPack` writes — same shape the production daemon
+// that `createArtLabAssetPack` writes — same shape the production daemon
 // publishes.
 vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   const actual = await vi.importActual<typeof import("@/lib/artlab/sdk/asset-pack")>(
@@ -24,9 +24,9 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   );
   return {
     ...actual,
-    loadFoundryAssetPack: vi.fn(async () => ({
+    loadArtLabAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
-      packDir: "/tmp/foundry-test/char-otis-v3",
+      packDir: "/tmp/artlab-test/char-otis-v3",
       manifest: {
         manifestVersion: "1.0.0",
         packId: "char-otis-v3",
@@ -51,12 +51,12 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
 describe("golden otis idle", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-anim-golden-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-anim-golden-"));
   });
 
   it("produces 12 frame PNGs + manifest with sprite-animation shape", async () => {
     const anchorBytes = await solid(50);
-    await runFoundrySpriteAnimatorCli({
+    await runArtLabSpriteAnimatorCli({
       sourcePackId: "char-otis-v3",
       action: "idle",
       format: "sprite",
@@ -100,7 +100,7 @@ describe("golden otis idle", () => {
   });
 
   it("dry-run prints validated without writing artefacts", async () => {
-    const out = await runFoundrySpriteAnimatorCli({
+    const out = await runArtLabSpriteAnimatorCli({
       sourcePackId: "char-otis-v3",
       action: "idle",
       format: "sprite",

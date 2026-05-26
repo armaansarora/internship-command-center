@@ -2,12 +2,12 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryDiagnostics } from "./diagnostics";
+import { handleArtLabDiagnostics } from "./diagnostics";
 
 let workspaceRoot: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-diag-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-diag-"));
   mkdirSync(join(workspaceRoot, "runs"), { recursive: true });
   mkdirSync(join(workspaceRoot, "inbox", "foundry"), { recursive: true });
 });
@@ -27,7 +27,7 @@ function seedRun(runId: string, phase: string, updatedAt: string): void {
   );
 }
 
-describe("handleFoundryDiagnostics", () => {
+describe("handleArtLabDiagnostics", () => {
   it("returns at most 5 recent runs sorted by updatedAt descending", async () => {
     for (let i = 0; i < 7; i++) {
       seedRun(
@@ -36,7 +36,7 @@ describe("handleFoundryDiagnostics", () => {
         `2026-05-${10 + i}T12:00:00.000Z`,
       );
     }
-    const result = await handleFoundryDiagnostics(
+    const result = await handleArtLabDiagnostics(
       {},
       {
         workspaceRoot,
@@ -49,10 +49,10 @@ describe("handleFoundryDiagnostics", () => {
     expect(updatedAts).toEqual(sorted);
   });
 
-  it("reports backlog depth from the foundry inbox directory", async () => {
+  it("reports backlog depth from the artlab inbox directory", async () => {
     writeFileSync(join(workspaceRoot, "inbox", "foundry", "generate-1.json"), "{}");
     writeFileSync(join(workspaceRoot, "inbox", "foundry", "generate-2.json"), "{}");
-    const result = await handleFoundryDiagnostics(
+    const result = await handleArtLabDiagnostics(
       {},
       {
         workspaceRoot,
@@ -63,7 +63,7 @@ describe("handleFoundryDiagnostics", () => {
   });
 
   it("reports daemonUp=false when heartbeat is missing or stale > 60s", async () => {
-    const result = await handleFoundryDiagnostics(
+    const result = await handleArtLabDiagnostics(
       {},
       {
         workspaceRoot,
@@ -83,7 +83,7 @@ describe("handleFoundryDiagnostics", () => {
         at: new Date().toISOString(),
       }),
     );
-    const result = await handleFoundryDiagnostics(
+    const result = await handleArtLabDiagnostics(
       {},
       {
         workspaceRoot,
@@ -104,7 +104,7 @@ describe("handleFoundryDiagnostics", () => {
         writtenAt: new Date().toISOString(),
       }),
     );
-    const result = await handleFoundryDiagnostics(
+    const result = await handleArtLabDiagnostics(
       {},
       {
         workspaceRoot,

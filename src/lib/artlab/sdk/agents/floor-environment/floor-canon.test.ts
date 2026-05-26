@@ -1,19 +1,19 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { loadFoundryFloorCanonEntry } from "./floor-canon";
+import { loadArtLabFloorCanonEntry } from "./floor-canon";
 
 vi.mock("@/lib/artlab/sdk/canon", () => ({
-  loadFoundryFloorCanon: vi.fn(),
+  loadArtLabFloorCanon: vi.fn(),
 }));
 
-import { loadFoundryFloorCanon } from "@/lib/artlab/sdk/canon";
+import { loadArtLabFloorCanon } from "@/lib/artlab/sdk/canon";
 
-describe("loadFoundryFloorCanonEntry", () => {
+describe("loadArtLabFloorCanonEntry", () => {
   beforeEach(() => {
-    vi.mocked(loadFoundryFloorCanon).mockReset();
+    vi.mocked(loadArtLabFloorCanon).mockReset();
   });
 
   it("returns the canon entry normalised to the agent's shape", async () => {
-    vi.mocked(loadFoundryFloorCanon).mockResolvedValue({
+    vi.mocked(loadArtLabFloorCanon).mockResolvedValue({
       slug: "war-room",
       displayName: "The War Room",
       mood: "tactical-luxury",
@@ -22,7 +22,7 @@ describe("loadFoundryFloorCanonEntry", () => {
       aspectRatio: "16:9",
       typography: "playfair-display",
     });
-    const result = await loadFoundryFloorCanonEntry("war-room");
+    const result = await loadArtLabFloorCanonEntry("war-room");
     expect(result.slug).toBe("war-room");
     expect(result.requiredElements).toEqual([
       "wall-mounted-boards",
@@ -33,14 +33,14 @@ describe("loadFoundryFloorCanonEntry", () => {
   });
 
   it("throws when canon module returns null", async () => {
-    vi.mocked(loadFoundryFloorCanon).mockResolvedValue(null);
-    await expect(loadFoundryFloorCanonEntry("ghost-floor")).rejects.toThrow(
+    vi.mocked(loadArtLabFloorCanon).mockResolvedValue(null);
+    await expect(loadArtLabFloorCanonEntry("ghost-floor")).rejects.toThrow(
       /no canon entry/i,
     );
   });
 
   it("throws when roomElements is empty", async () => {
-    vi.mocked(loadFoundryFloorCanon).mockResolvedValue({
+    vi.mocked(loadArtLabFloorCanon).mockResolvedValue({
       slug: "war-room",
       displayName: "War Room",
       mood: "x",
@@ -49,7 +49,7 @@ describe("loadFoundryFloorCanonEntry", () => {
       aspectRatio: "16:9",
       typography: "x",
     });
-    await expect(loadFoundryFloorCanonEntry("war-room")).rejects.toThrow(
+    await expect(loadArtLabFloorCanonEntry("war-room")).rejects.toThrow(
       /roomElements/,
     );
   });

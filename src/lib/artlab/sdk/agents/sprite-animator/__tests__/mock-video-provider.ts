@@ -1,7 +1,7 @@
 import sharp from "sharp";
-import type { FoundryVideoProvider } from "../video-provider";
+import type { ArtLabVideoProvider } from "../video-provider";
 
-export function createFoundrySpriteMockVideoProvider(): FoundryVideoProvider {
+export function createArtLabSpriteMockVideoProvider(): ArtLabVideoProvider {
   return {
     async generateFrames(input) {
       const seed = input.seed ?? 0;

@@ -1,12 +1,12 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import {
-  FoundryGenerateStatusInputSchema,
-  FoundryGenerateStatusOutputSchema,
-  type FoundryGenerateStatusOutput,
-  type FoundryRunStatus,
+  ArtLabGenerateStatusInputSchema,
+  ArtLabGenerateStatusOutputSchema,
+  type ArtLabGenerateStatusOutput,
+  type ArtLabRunStatus,
 } from "../tools";
-import type { FoundryGenerateContext } from "./generate";
+import type { ArtLabGenerateContext } from "./generate";
 
 interface ArtLabRunStateLite {
   runId: string;
@@ -24,7 +24,7 @@ interface ArtLabRunStateLite {
 }
 
 /**
- * Map an ArtLab run-state `(phase, blocker)` pair onto the Foundry MCP run
+ * Map an ArtLab run-state `(phase, blocker)` pair onto the ArtLab MCP run
  * status enum.
  *
  * Order matters. In production, terminal lifecycle events surface as
@@ -44,7 +44,7 @@ interface ArtLabRunStateLite {
  * The literal string `"null"` is treated as no-blocker because some JSON
  * writers stringify null as the four-character literal.
  */
-function mapStatus(phase: string, blocker: string | null): FoundryRunStatus {
+function mapStatus(phase: string, blocker: string | null): ArtLabRunStatus {
   if (blocker && blocker !== "null") {
     if (blocker === "cancelled") return "cancelled";
     if (blocker === "failed") return "failed";
@@ -71,11 +71,11 @@ function computeEta(state: ArtLabRunStateLite): number | undefined {
 }
 
 /**
- * Lifecycle of a `foundry/generate` runId, from the status tool's POV:
+ * Lifecycle of a `artlab/generate` runId, from the status tool's POV:
  *
  *   1. MCP `generate` writes `inbox/foundry/generate-<runId>.json`.
  *      → status returns `queued`, percent=0, phase="queued".
- *   2. Daemon's `foundry-poller` drains the inbox, writes
+ *   2. Daemon's `sdk-poller` drains the inbox, writes
  *      `runs/<runId>/run-state.json` with phase=routed, enqueues the run, and
  *      moves the inbox file into `inbox/foundry/.processed/<runId>.json`.
  *      → status returns `running`, mapped from the run-state phase.
@@ -101,10 +101,10 @@ function inboxPathFor(workspaceRoot: string, runId: string): string {
 function queuedPayload(
   workspaceRoot: string,
   runId: string,
-): FoundryGenerateStatusOutput {
+): ArtLabGenerateStatusOutput {
   const inboxPath = inboxPathFor(workspaceRoot, runId);
   const mtime = statSync(inboxPath).mtime.toISOString();
-  return FoundryGenerateStatusOutputSchema.parse({
+  return ArtLabGenerateStatusOutputSchema.parse({
     runId,
     status: "queued",
     phase: "queued",
@@ -132,11 +132,11 @@ function inboxFileEverSeen(workspaceRoot: string, runId: string): boolean {
   }
 }
 
-export async function handleFoundryGenerateStatus(
+export async function handleArtLabGenerateStatus(
   rawInput: unknown,
-  ctx: FoundryGenerateContext,
-): Promise<FoundryGenerateStatusOutput> {
-  const input = FoundryGenerateStatusInputSchema.parse(rawInput);
+  ctx: ArtLabGenerateContext,
+): Promise<ArtLabGenerateStatusOutput> {
+  const input = ArtLabGenerateStatusInputSchema.parse(rawInput);
   const statePath = join(ctx.workspaceRoot, "runs", input.runId, "run-state.json");
 
   // Stage 1: poller hasn't picked it up yet — return queued.
@@ -158,7 +158,7 @@ export async function handleFoundryGenerateStatus(
   // Stage 2+: read the canonical state.
   const state = JSON.parse(readFileSync(statePath, "utf8")) as ArtLabRunStateLite;
   const status = mapStatus(state.phase, state.blocker);
-  return FoundryGenerateStatusOutputSchema.parse({
+  return ArtLabGenerateStatusOutputSchema.parse({
     runId: input.runId,
     status,
     phase: state.phase,

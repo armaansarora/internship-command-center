@@ -1,6 +1,6 @@
-import { loadFoundryFloorCanon } from "@/lib/artlab/sdk/canon";
+import { loadArtLabFloorCanon } from "@/lib/artlab/sdk/canon";
 
-export interface FoundryFloorCanonEntry {
+export interface ArtLabFloorCanonEntry {
   slug: string;
   displayName: string;
   mood: string;
@@ -12,23 +12,23 @@ export interface FoundryFloorCanonEntry {
 
 const ALLOWED_ASPECTS = new Set(["16:9", "21:9", "9:16", "1:1"]);
 
-export async function loadFoundryFloorCanonEntry(
+export async function loadArtLabFloorCanonEntry(
   floorSlug: string,
-): Promise<FoundryFloorCanonEntry> {
-  const raw = await loadFoundryFloorCanon(floorSlug);
+): Promise<ArtLabFloorCanonEntry> {
+  const raw = await loadArtLabFloorCanon(floorSlug);
   if (!raw) {
     throw new Error(
-      `foundry/floor-environment: no canon entry for ${floorSlug}`,
+      `artlab/floor-environment: no canon entry for ${floorSlug}`,
     );
   }
   if (!Array.isArray(raw.roomElements) || raw.roomElements.length === 0) {
     throw new Error(
-      `foundry/floor-environment: roomElements required for ${floorSlug}`,
+      `artlab/floor-environment: roomElements required for ${floorSlug}`,
     );
   }
   if (!ALLOWED_ASPECTS.has(raw.aspectRatio)) {
     throw new Error(
-      `foundry/floor-environment: bad aspectRatio ${raw.aspectRatio}`,
+      `artlab/floor-environment: bad aspectRatio ${raw.aspectRatio}`,
     );
   }
   return {
@@ -37,7 +37,7 @@ export async function loadFoundryFloorCanonEntry(
     mood: raw.mood,
     palette: [...raw.palette],
     requiredElements: [...raw.roomElements],
-    aspectRatio: raw.aspectRatio as FoundryFloorCanonEntry["aspectRatio"],
+    aspectRatio: raw.aspectRatio as ArtLabFloorCanonEntry["aspectRatio"],
     typography: raw.typography,
   };
 }

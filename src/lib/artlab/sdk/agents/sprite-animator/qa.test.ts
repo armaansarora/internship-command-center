@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import { runFoundrySpriteQa } from "./qa";
+import { runArtLabSpriteQa } from "./qa";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -60,11 +60,11 @@ function lottieJsonWithAsset(b64?: string): string {
   });
 }
 
-describe("runFoundrySpriteQa", () => {
+describe("runArtLabSpriteQa", () => {
   it("sprite kind aggregates pass when both gates pass", async () => {
     const anchor = await solid(50);
     const frames = await Promise.all([solid(50), solid(52), solid(54)]);
-    const result = await runFoundrySpriteQa({
+    const result = await runArtLabSpriteQa({
       kind: "sprite",
       anchorBytes: anchor,
       frames,
@@ -75,7 +75,7 @@ describe("runFoundrySpriteQa", () => {
   it("sprite kind fails when identity-drift fails", async () => {
     const anchor = await solid(50);
     const frames = await Promise.all([solid(50), half(10, 240), solid(50)]);
-    const result = await runFoundrySpriteQa({
+    const result = await runArtLabSpriteQa({
       kind: "sprite",
       anchorBytes: anchor,
       frames,
@@ -87,7 +87,7 @@ describe("runFoundrySpriteQa", () => {
   it("sprite kind fails when motion-smoothness fails", async () => {
     const anchor = await solid(50);
     const frames = await Promise.all([solid(50), solid(50), half(10, 240)]);
-    const result = await runFoundrySpriteQa({
+    const result = await runArtLabSpriteQa({
       kind: "sprite",
       anchorBytes: anchor,
       frames,
@@ -100,7 +100,7 @@ describe("runFoundrySpriteQa", () => {
     const anchorBytes = await solid(50);
     const anchorHash = await computePerceptualHash(anchorBytes);
     const lottie = lottieJsonWithAsset(anchorBytes.toString("base64"));
-    const result = await runFoundrySpriteQa({
+    const result = await runArtLabSpriteQa({
       kind: "lottie",
       lottieJson: lottie,
       expectedDurationMs: 1000,
@@ -111,7 +111,7 @@ describe("runFoundrySpriteQa", () => {
   });
 
   it("lottie kind fails on malformed JSON (both gates surface)", async () => {
-    const result = await runFoundrySpriteQa({
+    const result = await runArtLabSpriteQa({
       kind: "lottie",
       lottieJson: "{",
       expectedDurationMs: 1000,
@@ -126,7 +126,7 @@ describe("runFoundrySpriteQa", () => {
     const anchorHash = await computePerceptualHash(anchorBytes);
     const driftedBytes = await half(10, 240);
     const lottie = lottieJsonWithAsset(driftedBytes.toString("base64"));
-    const result = await runFoundrySpriteQa({
+    const result = await runArtLabSpriteQa({
       kind: "lottie",
       lottieJson: lottie,
       expectedDurationMs: 1000,
@@ -140,7 +140,7 @@ describe("runFoundrySpriteQa", () => {
     const anchorBytes = await solid(50);
     const anchorHash = await computePerceptualHash(anchorBytes);
     const lottie = lottieJsonWithAsset();
-    const result = await runFoundrySpriteQa({
+    const result = await runArtLabSpriteQa({
       kind: "lottie",
       lottieJson: lottie,
       expectedDurationMs: 1000,

@@ -1,9 +1,9 @@
-// src/lib/foundry/canon/loader.test.ts
+// src/lib/artlab/sdk/canon/loader.test.ts
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadFoundryCanonFile } from "./loader";
+import { loadArtLabCanonFile } from "./loader";
 
 const VALID_YAML = `
 header:
@@ -48,11 +48,11 @@ motionProfile: networking-warm
 artDirectionNotes: "Sol should feel socially open and precise."
 `;
 
-describe("loadFoundryCanonFile", () => {
+describe("loadArtLabCanonFile", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-canon-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-canon-"));
   });
 
   afterEach(() => {
@@ -62,7 +62,7 @@ describe("loadFoundryCanonFile", () => {
   it("loads a valid character YAML file", async () => {
     const path = join(tmpDir, "sol-navarro.yaml");
     writeFileSync(path, VALID_YAML, "utf8");
-    const result = await loadFoundryCanonFile(path);
+    const result = await loadArtLabCanonFile(path);
     expect(result.header.id).toBe("sol-navarro");
     expect(result.header.kind).toBe("character");
     expect(result.sourcePath).toBe(path);
@@ -72,16 +72,16 @@ describe("loadFoundryCanonFile", () => {
   it("throws a typed error when the YAML is malformed", async () => {
     const path = join(tmpDir, "broken.yaml");
     writeFileSync(path, "not: [valid\n  yaml", "utf8");
-    await expect(loadFoundryCanonFile(path)).rejects.toThrow(/yaml parse/i);
+    await expect(loadArtLabCanonFile(path)).rejects.toThrow(/yaml parse/i);
   });
 
   it("throws a typed error when the header is missing", async () => {
     const path = join(tmpDir, "no-header.yaml");
     writeFileSync(path, "displayName: x\n", "utf8");
-    await expect(loadFoundryCanonFile(path)).rejects.toThrow(/header/i);
+    await expect(loadArtLabCanonFile(path)).rejects.toThrow(/header/i);
   });
 
   it("throws a typed error when the file is missing", async () => {
-    await expect(loadFoundryCanonFile(join(tmpDir, "missing.yaml"))).rejects.toThrow(/not found|ENOENT/i);
+    await expect(loadArtLabCanonFile(join(tmpDir, "missing.yaml"))).rejects.toThrow(/not found|ENOENT/i);
   });
 });

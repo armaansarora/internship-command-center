@@ -1,5 +1,5 @@
-import type { FoundryCharacterCanon } from "@/lib/artlab/sdk/canon";
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/providers/types";
+import type { ArtLabCharacterCanon } from "@/lib/artlab/sdk/canon";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/providers/types";
 
 export interface ConceptLane {
   laneIndex: number;
@@ -12,8 +12,8 @@ export interface ConceptLane {
 }
 
 export interface ConceptBoardStageInput {
-  character: FoundryCharacterCanon;
-  provider: FoundryImageProvider;
+  character: ArtLabCharacterCanon;
+  provider: ArtLabImageProvider;
   seed?: number;
 }
 
@@ -30,7 +30,7 @@ const VARIATION_AXES = [
   "accessory-emphasis",
 ] as const;
 
-function buildLanePrompt(character: FoundryCharacterCanon, axis: string): string {
+function buildLanePrompt(character: ArtLabCharacterCanon, axis: string): string {
   return [
     `Tower flat-plus-depth-v1 style.`,
     `Character: ${character.displayName} (${character.title}).`,

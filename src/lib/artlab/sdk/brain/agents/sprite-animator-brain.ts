@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { callFoundryAnthropic } from "../anthropic-client";
-import type { FoundryAgentBrain } from "../types";
+import { callArtLabAnthropic } from "../anthropic-client";
+import type { ArtLabAgentBrain } from "../types";
 
 export const SpriteAnimatorInputSchema = z
   .object({
@@ -27,7 +27,7 @@ export const SpriteAnimatorOutputSchema = z
   .strict();
 export type SpriteAnimatorOutput = z.infer<typeof SpriteAnimatorOutputSchema>;
 
-const SYSTEM = `You are the Sprite Animator agent in the Tower Art Foundry.
+const SYSTEM = `You are the Sprite Animator agent in the Tower Art ArtLab.
 You receive a characterId, a directive (e.g. "idle breathe loop, 1.2s, ease-in-out"), a target format ("sprite-sheet" or "lottie"), and a frame budget.
 Your job: emit a per-frame prompt list, an easing recommendation, duration, and loop mode.
 
@@ -49,7 +49,7 @@ export function createSpriteAnimatorBrain(opts: {
   apiKey: string;
   model: string;
   dryRun?: boolean;
-}): FoundryAgentBrain<SpriteAnimatorInput, SpriteAnimatorOutput> {
+}): ArtLabAgentBrain<SpriteAnimatorInput, SpriteAnimatorOutput> {
   return {
     agent: "sprite-animator",
     systemPrompt: SYSTEM,
@@ -57,7 +57,7 @@ export function createSpriteAnimatorBrain(opts: {
     outputSchema: SpriteAnimatorOutputSchema,
     async decide(input) {
       const parsed = SpriteAnimatorInputSchema.parse(input);
-      const resp = await callFoundryAnthropic({
+      const resp = await callArtLabAnthropic({
         systemPrompt: SYSTEM,
         userJson: parsed,
         model: opts.model,

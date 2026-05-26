@@ -1,45 +1,45 @@
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDRY_MCP_TOOL_NAMES,
-  FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS,
-  FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST,
-  FoundryGenerateInputSchema,
-  FoundryGenerateOutputSchema,
-  FoundryCanonListInputSchema,
-  FoundrySlotAuditInputSchema,
-  FoundryAssetPackGetInputSchema,
+  ARTLAB_MCP_TOOL_NAMES,
+  ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS,
+  ARTLAB_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST,
+  ArtLabGenerateInputSchema,
+  ArtLabGenerateOutputSchema,
+  ArtLabCanonListInputSchema,
+  ArtLabSlotAuditInputSchema,
+  ArtLabAssetPackGetInputSchema,
 } from "./tools";
 
-describe("FOUNDRY_MCP_TOOL_NAMES registry", () => {
+describe("ARTLAB_MCP_TOOL_NAMES registry", () => {
   it("declares all 9 tools in canonical order", () => {
-    expect(FOUNDRY_MCP_TOOL_NAMES).toEqual([
-      "foundry/canon_list",
-      "foundry/canon_get",
-      "foundry/asset_pack_list",
-      "foundry/asset_pack_get",
-      "foundry/asset_pack_integration",
-      "foundry/slot_audit",
-      "foundry/generate",
-      "foundry/generate_status",
-      "foundry/diagnostics",
+    expect(ARTLAB_MCP_TOOL_NAMES).toEqual([
+      "artlab/canon_list",
+      "artlab/canon_get",
+      "artlab/asset_pack_list",
+      "artlab/asset_pack_get",
+      "artlab/asset_pack_integration",
+      "artlab/slot_audit",
+      "artlab/generate",
+      "artlab/generate_status",
+      "artlab/diagnostics",
     ]);
   });
 
-  it("each tool name is namespaced with the foundry/ prefix", () => {
-    for (const name of FOUNDRY_MCP_TOOL_NAMES) {
-      expect(name.startsWith("foundry/")).toBe(true);
+  it("each tool name is namespaced with the artlab/ prefix", () => {
+    for (const name of ARTLAB_MCP_TOOL_NAMES) {
+      expect(name.startsWith("artlab/")).toBe(true);
     }
   });
 
-  it("FoundryGenerateInputSchema rejects unknown kinds", () => {
+  it("ArtLabGenerateInputSchema rejects unknown kinds", () => {
     expect(() =>
-      FoundryGenerateInputSchema.parse({ kind: "smoke-signal", description: "x" }),
+      ArtLabGenerateInputSchema.parse({ kind: "smoke-signal", description: "x" }),
     ).toThrow();
   });
 
-  it("FoundryGenerateInputSchema accepts the 6 canonical kinds", () => {
+  it("ArtLabGenerateInputSchema accepts the 6 canonical kinds", () => {
     const ok = (kind: string) =>
-      FoundryGenerateInputSchema.parse({ kind, description: "a war room background" });
+      ArtLabGenerateInputSchema.parse({ kind, description: "a war room background" });
     expect(ok("character").kind).toBe("character");
     expect(ok("floor").kind).toBe("floor");
     expect(ok("ui-texture").kind).toBe("ui-texture");
@@ -48,54 +48,54 @@ describe("FOUNDRY_MCP_TOOL_NAMES registry", () => {
     expect(ok("lottie").kind).toBe("lottie");
   });
 
-  it("FoundryGenerateOutputSchema requires runId UUID and status enum", () => {
+  it("ArtLabGenerateOutputSchema requires runId UUID and status enum", () => {
     expect(() =>
-      FoundryGenerateOutputSchema.parse({ runId: "not-a-uuid", status: "queued" }),
+      ArtLabGenerateOutputSchema.parse({ runId: "not-a-uuid", status: "queued" }),
     ).toThrow();
-    const ok = FoundryGenerateOutputSchema.parse({
+    const ok = ArtLabGenerateOutputSchema.parse({
       runId: "11111111-1111-4111-8111-111111111111",
       status: "queued",
     });
     expect(ok.status).toBe("queued");
   });
 
-  it("FoundryCanonListInputSchema accepts optional kind filter", () => {
-    expect(FoundryCanonListInputSchema.parse({}).kind).toBeUndefined();
-    expect(FoundryCanonListInputSchema.parse({ kind: "character" }).kind).toBe("character");
+  it("ArtLabCanonListInputSchema accepts optional kind filter", () => {
+    expect(ArtLabCanonListInputSchema.parse({}).kind).toBeUndefined();
+    expect(ArtLabCanonListInputSchema.parse({ kind: "character" }).kind).toBe("character");
   });
 
-  it("FoundrySlotAuditInputSchema accepts optional space filter", () => {
-    expect(FoundrySlotAuditInputSchema.parse({}).space).toBeUndefined();
+  it("ArtLabSlotAuditInputSchema accepts optional space filter", () => {
+    expect(ArtLabSlotAuditInputSchema.parse({}).space).toBeUndefined();
   });
 
-  it("FoundryAssetPackGetInputSchema requires a packId", () => {
-    expect(() => FoundryAssetPackGetInputSchema.parse({})).toThrow();
-    expect(FoundryAssetPackGetInputSchema.parse({ packId: "rafe-character-v3" }).packId)
+  it("ArtLabAssetPackGetInputSchema requires a packId", () => {
+    expect(() => ArtLabAssetPackGetInputSchema.parse({})).toThrow();
+    expect(ArtLabAssetPackGetInputSchema.parse({ packId: "rafe-character-v3" }).packId)
       .toBe("rafe-character-v3");
   });
 });
 
-describe("FoundryGenerateInputSchema — abuse-prevention limits", () => {
+describe("ArtLabGenerateInputSchema — abuse-prevention limits", () => {
   const baseValid = { kind: "character" as const, description: "a war room background" };
 
   it("exports a documented description length cap (~4000 chars)", () => {
     // The cap is published so other layers (CLI, web UI, batch jobs) honour
     // the same ceiling without redefining it.
-    expect(FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS).toBe(4000);
+    expect(ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS).toBe(4000);
   });
 
   it("accepts a description right at the documented length cap", () => {
-    const at = "a".repeat(FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS);
-    const parsed = FoundryGenerateInputSchema.parse({ ...baseValid, description: at });
-    expect(parsed.description.length).toBe(FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS);
+    const at = "a".repeat(ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS);
+    const parsed = ArtLabGenerateInputSchema.parse({ ...baseValid, description: at });
+    expect(parsed.description.length).toBe(ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS);
   });
 
   it("rejects an overlong description (one char above the cap)", () => {
     // No cap previously meant a single MCP call could be megabytes of prompt
     // text — easy DoS surface. The cap rejects abuse without truncating
     // honest prompts (rich character briefs sit well under 4000 chars).
-    const tooLong = "a".repeat(FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS + 1);
-    expect(() => FoundryGenerateInputSchema.parse({ ...baseValid, description: tooLong })).toThrow(
+    const tooLong = "a".repeat(ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS + 1);
+    expect(() => ArtLabGenerateInputSchema.parse({ ...baseValid, description: tooLong })).toThrow(
       /description/i,
     );
   });
@@ -103,28 +103,28 @@ describe("FoundryGenerateInputSchema — abuse-prevention limits", () => {
   it("exposes a documented HTTPS host allow-list for referenceImageUrl", () => {
     // Surfacing the allow-list as a constant lets ops adjust it without
     // grepping the schema and lets tests assert membership.
-    expect(Array.isArray(FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST)).toBe(true);
-    expect(FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST.length).toBeGreaterThan(0);
+    expect(Array.isArray(ARTLAB_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST)).toBe(true);
+    expect(ARTLAB_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST.length).toBeGreaterThan(0);
   });
 
   it("accepts an HTTPS referenceImageUrl on an allow-listed host", () => {
-    const host = FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST[0];
+    const host = ARTLAB_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST[0];
     const url = `https://${host}/path/to/asset.png`;
     expect(
-      FoundryGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: url }).referenceImageUrl,
+      ArtLabGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: url }).referenceImageUrl,
     ).toBe(url);
   });
 
   it("rejects a non-HTTPS referenceImageUrl (http://, file://, javascript:)", () => {
     // Plaintext http and non-fetchable schemes are obvious SSRF/exfil vectors.
     expect(() =>
-      FoundryGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: "http://example.com/x.png" }),
+      ArtLabGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: "http://example.com/x.png" }),
     ).toThrow();
     expect(() =>
-      FoundryGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: "file:///etc/passwd" }),
+      ArtLabGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: "file:///etc/passwd" }),
     ).toThrow();
     expect(() =>
-      FoundryGenerateInputSchema.parse({
+      ArtLabGenerateInputSchema.parse({
         ...baseValid,
         referenceImageUrl: "javascript:alert(1)",
       }),
@@ -143,7 +143,7 @@ describe("FoundryGenerateInputSchema — abuse-prevention limits", () => {
     "rejects SSRF target: %s",
     (_label, url) => {
       expect(() =>
-        FoundryGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: url }),
+        ArtLabGenerateInputSchema.parse({ ...baseValid, referenceImageUrl: url }),
       ).toThrow();
     },
   );
@@ -163,12 +163,12 @@ describe("FoundryGenerateInputSchema — abuse-prevention limits", () => {
     // every path-traversal vector through. It now flows through PackIdSchema
     // (same strict validator the asset_pack tools use).
     expect(() =>
-      FoundryGenerateInputSchema.parse({ ...baseValid, anchorPackId: evil }),
+      ArtLabGenerateInputSchema.parse({ ...baseValid, anchorPackId: evil }),
     ).toThrow();
   });
 
   it("accepts a normal anchorPackId via the PackIdSchema validator", () => {
-    const parsed = FoundryGenerateInputSchema.parse({
+    const parsed = ArtLabGenerateInputSchema.parse({
       ...baseValid,
       anchorPackId: "rafe-character-v3",
     });

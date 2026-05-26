@@ -1,13 +1,13 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
-  FoundryDiagnosticsInputSchema,
-  FoundryDiagnosticsOutputSchema,
-  type FoundryDiagnosticsOutput,
-  type FoundryRunStatus,
+  ArtLabDiagnosticsInputSchema,
+  ArtLabDiagnosticsOutputSchema,
+  type ArtLabDiagnosticsOutput,
+  type ArtLabRunStatus,
 } from "../tools";
 
-export interface FoundryDiagnosticsContext {
+export interface ArtLabDiagnosticsContext {
   workspaceRoot: string;
   providerProbes: Record<string, () => Promise<boolean>>;
 }
@@ -47,7 +47,7 @@ function readHeartbeat(workspaceRoot: string): { at: string } | null {
 function recentRuns(
   workspaceRoot: string,
   limit: number,
-): Array<{ runId: string; status: FoundryRunStatus; updatedAt: string }> {
+): Array<{ runId: string; status: ArtLabRunStatus; updatedAt: string }> {
   const runsDir = join(workspaceRoot, "runs");
   if (!existsSync(runsDir)) return [];
   const states: RunStateLite[] = [];
@@ -88,11 +88,11 @@ async function probeProviders(
   return out;
 }
 
-export async function handleFoundryDiagnostics(
+export async function handleArtLabDiagnostics(
   rawInput: unknown,
-  ctx: FoundryDiagnosticsContext,
-): Promise<FoundryDiagnosticsOutput> {
-  FoundryDiagnosticsInputSchema.parse(rawInput);
+  ctx: ArtLabDiagnosticsContext,
+): Promise<ArtLabDiagnosticsOutput> {
+  ArtLabDiagnosticsInputSchema.parse(rawInput);
   const heartbeat = readHeartbeat(ctx.workspaceRoot);
   const daemonUp = heartbeat
     ? Date.now() - new Date(heartbeat.at).getTime() < HEARTBEAT_STALE_MS
@@ -102,7 +102,7 @@ export async function handleFoundryDiagnostics(
     ? readdirSync(inboxDir).filter((f) => f.endsWith(".json")).length
     : 0;
   const providersReachable = await probeProviders(ctx.providerProbes);
-  return FoundryDiagnosticsOutputSchema.parse({
+  return ArtLabDiagnosticsOutputSchema.parse({
     daemonUp,
     providersReachable,
     recentRuns: recentRuns(ctx.workspaceRoot, 5),

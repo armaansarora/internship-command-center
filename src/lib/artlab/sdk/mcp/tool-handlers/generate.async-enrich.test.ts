@@ -2,12 +2,12 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryGenerate } from "./generate";
+import { handleArtLabGenerate } from "./generate";
 
 let workspaceRoot: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-async-enrich-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-async-enrich-"));
 });
 
 describe("generate handler — async brain enrichment (performance contract)", () => {
@@ -24,7 +24,7 @@ describe("generate handler — async brain enrichment (performance contract)", (
     };
 
     const start = Date.now();
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       { kind: "character", description: "Rafe with a charcoal jacket update" },
       { workspaceRoot, brainEnrich: slowEnrich },
     );
@@ -82,7 +82,7 @@ describe("generate handler — async brain enrichment (performance contract)", (
       throw new Error("anthropic 429 backoff exhausted");
     };
 
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       { kind: "character", description: "Rafe needs a haircut update" },
       { workspaceRoot, brainEnrich: failingEnrich },
     );
@@ -106,7 +106,7 @@ describe("generate handler — async brain enrichment (performance contract)", (
   });
 
   it("when no brainEnrich is supplied, no brainHintStatus appears (back-compat)", async () => {
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       { kind: "icon", description: "elevator chevron indicator update" },
       { workspaceRoot },
     );

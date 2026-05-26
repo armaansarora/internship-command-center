@@ -1,42 +1,42 @@
-// src/lib/foundry/agents/ui-texture/texture-rules.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/texture-rules.test.ts
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { loadFoundryTextureRulesAdapter } from "./texture-rules";
+import { loadArtLabTextureRulesAdapter } from "./texture-rules";
 
 vi.mock("@/lib/artlab/sdk/canon", () => ({
-  loadFoundryTextureRules: vi.fn(),
+  loadArtLabTextureRules: vi.fn(),
 }));
 
-import { loadFoundryTextureRules } from "@/lib/artlab/sdk/canon";
+import { loadArtLabTextureRules } from "@/lib/artlab/sdk/canon";
 
-describe("loadFoundryTextureRulesAdapter", () => {
+describe("loadArtLabTextureRulesAdapter", () => {
   beforeEach(() => {
-    vi.mocked(loadFoundryTextureRules).mockReset();
+    vi.mocked(loadArtLabTextureRules).mockReset();
   });
 
   it("returns normalised rules", async () => {
-    vi.mocked(loadFoundryTextureRules).mockResolvedValue({
+    vi.mocked(loadArtLabTextureRules).mockResolvedValue({
       tileToleranceDeltaE: 6,
       targetResolutionPx: 1024,
       normalMapStrength: 0.7,
     });
-    const out = await loadFoundryTextureRulesAdapter();
+    const out = await loadArtLabTextureRulesAdapter();
     expect(out.tileToleranceDeltaE).toBe(6);
     expect(out.targetResolutionPx).toBe(1024);
     expect(out.normalMapStrength).toBeCloseTo(0.7);
   });
 
   it("throws on missing rules", async () => {
-    vi.mocked(loadFoundryTextureRules).mockResolvedValue(null);
-    await expect(loadFoundryTextureRulesAdapter()).rejects.toThrow(/texture/i);
+    vi.mocked(loadArtLabTextureRules).mockResolvedValue(null);
+    await expect(loadArtLabTextureRulesAdapter()).rejects.toThrow(/texture/i);
   });
 
   it("rejects negative normalMapStrength", async () => {
-    vi.mocked(loadFoundryTextureRules).mockResolvedValue({
+    vi.mocked(loadArtLabTextureRules).mockResolvedValue({
       tileToleranceDeltaE: 6,
       targetResolutionPx: 1024,
       normalMapStrength: -0.1,
     });
-    await expect(loadFoundryTextureRulesAdapter()).rejects.toThrow(
+    await expect(loadArtLabTextureRulesAdapter()).rejects.toThrow(
       /normalMapStrength/,
     );
   });

@@ -1,7 +1,7 @@
-// src/lib/foundry/canon/migration-queued-cast.test.ts
+// src/lib/artlab/sdk/canon/migration-queued-cast.test.ts
 import { describe, expect, it } from "vitest";
 import { join } from "node:path";
-import { loadFoundryCanon } from "./load-canon";
+import { loadArtLabCanon } from "./load-canon";
 
 const CANON_ROOT = join(process.cwd(), "docs/foundry/canon");
 
@@ -20,7 +20,7 @@ const QUEUED_IDS = [
 
 describe("queued cast migration", () => {
   it("every queued cast member is recorded", async () => {
-    const canon = await loadFoundryCanon({ canonRoot: CANON_ROOT });
+    const canon = await loadArtLabCanon({ canonRoot: CANON_ROOT });
     const present = new Set(canon.characters.map((c) => c.header.id));
     for (const id of QUEUED_IDS) {
       expect(present.has(id), `missing canon for ${id}`).toBe(true);
@@ -28,7 +28,7 @@ describe("queued cast migration", () => {
   });
 
   it("every queued cast member declares promotionStatus queued or in-flight", async () => {
-    const canon = await loadFoundryCanon({ canonRoot: CANON_ROOT });
+    const canon = await loadArtLabCanon({ canonRoot: CANON_ROOT });
     for (const id of QUEUED_IDS) {
       const c = canon.characters.find((x) => x.header.id === id);
       expect(["queued", "in-flight"]).toContain(c?.promotionStatus);
@@ -36,7 +36,7 @@ describe("queued cast migration", () => {
   });
 
   it("every queued cast member references tower-default palette", async () => {
-    const canon = await loadFoundryCanon({ canonRoot: CANON_ROOT });
+    const canon = await loadArtLabCanon({ canonRoot: CANON_ROOT });
     for (const id of QUEUED_IDS) {
       const c = canon.characters.find((x) => x.header.id === id);
       expect(c?.paletteRef).toBe("tower-default");
@@ -44,7 +44,7 @@ describe("queued cast migration", () => {
   });
 
   it("total character count is 12 (2 promoted + 10 queued)", async () => {
-    const canon = await loadFoundryCanon({ canonRoot: CANON_ROOT });
+    const canon = await loadArtLabCanon({ canonRoot: CANON_ROOT });
     expect(canon.characters.length).toBe(12);
   });
 });

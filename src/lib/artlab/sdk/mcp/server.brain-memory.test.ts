@@ -1,22 +1,22 @@
-// src/lib/foundry/mcp/server.brain-memory.test.ts
+// src/lib/artlab/sdk/mcp/server.brain-memory.test.ts
 //
-// Integration regression — `loadFoundryMemoryScope` wired through `server.ts`.
+// Integration regression — `loadArtLabMemoryScope` wired through `server.ts`.
 //
-// Previously, `loadFoundryMemoryScope` was exported and unit-tested but never
+// Previously, `loadArtLabMemoryScope` was exported and unit-tested but never
 // called from production code (`route-request.ts`, `factory.ts`, `server.ts`,
 // or `scripts/foundry-mcp.ts`). The "kind-scoped memory" requirement was
 // half-built — character feedback could leak into floor brains, and floor
 // feedback into character brains, the moment a real LLM call ran.
 //
 // This test pins the wiring contract: server config carries `memoryDir`,
-// passes it into `routeFoundryRequest`, which calls `loadFoundryMemoryScope`,
+// passes it into `routeArtLabRequest`, which calls `loadArtLabMemoryScope`,
 // filters to the resolved agent kind, and merges the hydrated arrays into
 // `parsedArgs` before parsing. The brain receives ONLY its kind's feedback.
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createFoundryMcpServer } from "./server";
+import { createArtLabMcpServer } from "./server";
 
 let workspaceRoot: string;
 let canonRoot: string;
@@ -25,10 +25,10 @@ let memoryDir: string;
 let slotRegistryPath: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-srv-brainmem-"));
-  canonRoot = mkdtempSync(join(tmpdir(), "foundry-srv-brainmem-canon-"));
-  packsRoot = mkdtempSync(join(tmpdir(), "foundry-srv-brainmem-packs-"));
-  memoryDir = mkdtempSync(join(tmpdir(), "foundry-srv-brainmem-mem-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-srv-brainmem-"));
+  canonRoot = mkdtempSync(join(tmpdir(), "artlab-srv-brainmem-canon-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "artlab-srv-brainmem-packs-"));
+  memoryDir = mkdtempSync(join(tmpdir(), "artlab-srv-brainmem-mem-"));
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
   slotRegistryPath = join(workspaceRoot, "slots", "registry.json");
   writeFileSync(slotRegistryPath, JSON.stringify({ slots: [] }));
@@ -58,9 +58,9 @@ beforeEach(() => {
   );
 });
 
-describe("server → routeFoundryRequest → loadFoundryMemoryScope wiring", () => {
+describe("server → routeArtLabRequest → loadArtLabMemoryScope wiring", () => {
   it("hydrates character-master brain with character-scoped wins only", async () => {
-    const built = createFoundryMcpServer({
+    const built = createArtLabMcpServer({
       workspaceRoot,
       canonRoot,
       packsRoot,
@@ -79,7 +79,7 @@ describe("server → routeFoundryRequest → loadFoundryMemoryScope wiring", () 
         tokensIn: 1, tokensOut: 1, durationMs: 0,
       }),
     });
-    const result = (await built.invokeForTest("foundry/generate", {
+    const result = (await built.invokeForTest("artlab/generate", {
       kind: "character",
       description: "Rafe Calder jacket swap to wool",
     })) as { runId: string; inboxPath: string };
@@ -105,7 +105,7 @@ describe("server → routeFoundryRequest → loadFoundryMemoryScope wiring", () 
   });
 
   it("when memoryDir is omitted, enrichment still succeeds with empty feedback", async () => {
-    const built = createFoundryMcpServer({
+    const built = createArtLabMcpServer({
       workspaceRoot,
       canonRoot,
       packsRoot,
@@ -123,7 +123,7 @@ describe("server → routeFoundryRequest → loadFoundryMemoryScope wiring", () 
         tokensIn: 1, tokensOut: 1, durationMs: 0,
       }),
     });
-    const result = (await built.invokeForTest("foundry/generate", {
+    const result = (await built.invokeForTest("artlab/generate", {
       kind: "character",
       description: "Rafe Calder smoke test",
     })) as { runId: string; inboxPath: string };

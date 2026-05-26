@@ -13,16 +13,16 @@ describe("sha256 helpers", () => {
   });
 
   it("returns the same digest for the same input", () => {
-    const buf = Buffer.from("hello foundry");
+    const buf = Buffer.from("hello artlab");
     expect(sha256OfBytes(buf)).toBe(sha256OfBytes(buf));
   });
 
   it("hashes a file from disk", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "foundry-sha-"));
+    const dir = mkdtempSync(join(tmpdir(), "artlab-sha-"));
     const f = join(dir, "blob.bin");
-    writeFileSync(f, Buffer.from("hello foundry"));
+    writeFileSync(f, Buffer.from("hello artlab"));
     try {
-      expect(await sha256OfFile(f)).toBe(sha256OfBytes(Buffer.from("hello foundry")));
+      expect(await sha256OfFile(f)).toBe(sha256OfBytes(Buffer.from("hello artlab")));
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

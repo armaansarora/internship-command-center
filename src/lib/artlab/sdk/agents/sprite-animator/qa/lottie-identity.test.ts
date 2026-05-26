@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import { evaluateFoundryLottieIdentity } from "./lottie-identity";
+import { evaluateArtLabLottieIdentity } from "./lottie-identity";
 
 async function solidPng(c: number): Promise<Buffer> {
   return sharp({
@@ -52,7 +52,7 @@ function lottieWithAssets(
   });
 }
 
-describe("evaluateFoundryLottieIdentity", () => {
+describe("evaluateArtLabLottieIdentity", () => {
   it("passes when an embedded asset's hash matches the anchor within tolerance", async () => {
     const anchorBytes = await solidPng(50);
     const anchorHash = await computePerceptualHash(anchorBytes);
@@ -65,7 +65,7 @@ describe("evaluateFoundryLottieIdentity", () => {
         e: 1,
       },
     ]);
-    const report = await evaluateFoundryLottieIdentity({
+    const report = await evaluateArtLabLottieIdentity({
       lottieJson,
       anchorPerceptualHash: anchorHash,
     });
@@ -87,7 +87,7 @@ describe("evaluateFoundryLottieIdentity", () => {
         e: 1,
       },
     ]);
-    const report = await evaluateFoundryLottieIdentity({
+    const report = await evaluateArtLabLottieIdentity({
       lottieJson,
       anchorPerceptualHash: anchorHash,
     });
@@ -112,7 +112,7 @@ describe("evaluateFoundryLottieIdentity", () => {
         { ind: 1, ty: 4, nm: "circle", ip: 0, op: 30, st: 0, ks: {}, sr: 1, bm: 0 },
       ],
     });
-    const report = await evaluateFoundryLottieIdentity({
+    const report = await evaluateArtLabLottieIdentity({
       lottieJson,
       anchorPerceptualHash: anchorHash,
     });
@@ -128,7 +128,7 @@ describe("evaluateFoundryLottieIdentity", () => {
     const lottieJson = lottieWithAssets([
       { id: "external_image", p: "image_0.png", w: 32, h: 32, e: 0 },
     ]);
-    const report = await evaluateFoundryLottieIdentity({
+    const report = await evaluateArtLabLottieIdentity({
       lottieJson,
       anchorPerceptualHash: anchorHash,
     });
@@ -145,7 +145,7 @@ describe("evaluateFoundryLottieIdentity", () => {
       { id: "drift_one", p: `data:image/png;base64,${driftedBytes.toString("base64")}`, w: 32, h: 32, e: 1 },
       { id: "match", p: `data:image/png;base64,${anchorBytes.toString("base64")}`, w: 32, h: 32, e: 1 },
     ]);
-    const report = await evaluateFoundryLottieIdentity({
+    const report = await evaluateArtLabLottieIdentity({
       lottieJson,
       anchorPerceptualHash: anchorHash,
     });
@@ -154,7 +154,7 @@ describe("evaluateFoundryLottieIdentity", () => {
   });
 
   it("fails with parse error when given malformed JSON", async () => {
-    const report = await evaluateFoundryLottieIdentity({
+    const report = await evaluateArtLabLottieIdentity({
       lottieJson: "{ broken",
       anchorPerceptualHash: "0123456789abcdef",
     });
@@ -164,7 +164,7 @@ describe("evaluateFoundryLottieIdentity", () => {
 
   it("throws when the anchor hash is malformed (caller bug)", async () => {
     await expect(
-      evaluateFoundryLottieIdentity({
+      evaluateArtLabLottieIdentity({
         lottieJson: lottieWithAssets([]),
         anchorPerceptualHash: "not-a-hash",
       }),

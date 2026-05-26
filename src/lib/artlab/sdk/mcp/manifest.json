@@ -6,14 +6,14 @@
   "command": "npx",
   "args": ["tsx", "scripts/foundry-mcp.ts"],
   "tools": [
-    { "name": "foundry/canon_list", "summary": "List canonical characters/floors/palettes/style-envelopes." },
-    { "name": "foundry/canon_get", "summary": "Fetch one canon entry by id (returns YAML-as-JSON)." },
-    { "name": "foundry/asset_pack_list", "summary": "List promoted Asset Packs filtered by kind/character/space." },
-    { "name": "foundry/asset_pack_get", "summary": "Fetch one Asset Pack manifest + file paths." },
-    { "name": "foundry/asset_pack_integration", "summary": "Get a copy-paste TSX integration snippet for one pack." },
-    { "name": "foundry/slot_audit", "summary": "List registered slots that lack a promoted Asset Pack." },
-    { "name": "foundry/generate", "summary": "Queue a new generation run; returns a runId in `queued` status." },
-    { "name": "foundry/generate_status", "summary": "Poll a runId; returns phase, percent, blockers, ETA, promoted packId." },
-    { "name": "foundry/diagnostics", "summary": "Daemon health + provider reachability + last 5 runs + backlog depth." }
+    { "name": "artlab/canon_list", "summary": "List canonical characters/floors/palettes/style-envelopes." },
+    { "name": "artlab/canon_get", "summary": "Fetch one canon entry by id (returns YAML-as-JSON)." },
+    { "name": "artlab/asset_pack_list", "summary": "List promoted Asset Packs filtered by kind/character/space." },
+    { "name": "artlab/asset_pack_get", "summary": "Fetch one Asset Pack manifest + file paths." },
+    { "name": "artlab/asset_pack_integration", "summary": "Get a copy-paste TSX integration snippet for one pack." },
+    { "name": "artlab/slot_audit", "summary": "List registered slots that lack a promoted Asset Pack." },
+    { "name": "artlab/generate", "summary": "Queue a new generation run; returns a runId in `queued` status." },
+    { "name": "artlab/generate_status", "summary": "Poll a runId; returns phase, percent, blockers, ETA, promoted packId." },
+    { "name": "artlab/diagnostics", "summary": "Daemon health + provider reachability + last 5 runs + backlog depth." }
   ]
 }

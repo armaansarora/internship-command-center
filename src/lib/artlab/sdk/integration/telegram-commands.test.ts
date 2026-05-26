@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryTelegramCommand } from "./telegram-commands";
+import { handleArtLabTelegramCommand } from "./telegram-commands";
 
 let workspaceRoot: string;
 let canonRoot: string;
@@ -10,17 +10,17 @@ let packsRoot: string;
 let slotRegistryPath: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-tg-"));
-  canonRoot = mkdtempSync(join(tmpdir(), "foundry-tg-canon-"));
-  packsRoot = mkdtempSync(join(tmpdir(), "foundry-tg-packs-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-tg-"));
+  canonRoot = mkdtempSync(join(tmpdir(), "artlab-tg-canon-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "artlab-tg-packs-"));
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
   slotRegistryPath = join(workspaceRoot, "slots", "registry.json");
   writeFileSync(slotRegistryPath, JSON.stringify({ slots: [] }));
 });
 
-describe("handleFoundryTelegramCommand", () => {
+describe("handleArtLabTelegramCommand", () => {
   it("/foundry without a subcommand prints help", async () => {
-    const result = await handleFoundryTelegramCommand({
+    const result = await handleArtLabTelegramCommand({
       args: [],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
     });
@@ -31,7 +31,7 @@ describe("handleFoundryTelegramCommand", () => {
   });
 
   it("/foundry status returns a diagnostics-formatted text", async () => {
-    const result = await handleFoundryTelegramCommand({
+    const result = await handleArtLabTelegramCommand({
       args: ["status"],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
     });
@@ -42,7 +42,7 @@ describe("handleFoundryTelegramCommand", () => {
   it("/foundry list character returns a list of canon characters", async () => {
     mkdirSync(join(canonRoot, "characters"), { recursive: true });
     writeFileSync(join(canonRoot, "characters", "rafe.yaml"), "id: rafe-calder\ndisplayName: Rafe Calder\nsummary: CRO\n");
-    const result = await handleFoundryTelegramCommand({
+    const result = await handleArtLabTelegramCommand({
       args: ["list", "character"],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
     });
@@ -50,7 +50,7 @@ describe("handleFoundryTelegramCommand", () => {
   });
 
   it("/foundry generate queues a run and reports the runId", async () => {
-    const result = await handleFoundryTelegramCommand({
+    const result = await handleArtLabTelegramCommand({
       args: ["generate", "character", "Rafe", "in", "a", "new", "jacket"],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
     });
@@ -69,7 +69,7 @@ describe("handleFoundryTelegramCommand", () => {
       }),
     );
     writeFileSync(join(packsRoot, "rafe-v1", "rafe.png"), Buffer.from("PNGDATA"));
-    const result = await handleFoundryTelegramCommand({
+    const result = await handleArtLabTelegramCommand({
       args: ["preview", "rafe-v1"],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
     });

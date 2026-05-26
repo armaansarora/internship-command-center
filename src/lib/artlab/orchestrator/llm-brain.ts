@@ -65,8 +65,8 @@ export interface ArtLabLlmDecisionResult {
 
 /**
  * @deprecated Replaced in Phase 7 by per-agent brains. New callers should
- * use {@link createFoundryBrainFor} from `@/lib/artlab/sdk/brain/factory` or
- * {@link routeFoundryRequest} from `@/lib/artlab/sdk/brain/route-request`.
+ * use {@link createArtLabBrainFor} from `@/lib/artlab/sdk/brain/factory` or
+ * {@link routeArtLabRequest} from `@/lib/artlab/sdk/brain/route-request`.
  *
  * This monolithic decide() interface remains exported for back-compat with
  * existing ArtLab call sites (intake/, runners/, bot/) during the transition.

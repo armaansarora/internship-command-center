@@ -3,7 +3,7 @@ import { hammingDistanceHex } from "@/lib/artlab/coherence/identity-drift";
 
 const ADJACENT_BIT_THRESHOLD = 8;
 
-export interface FoundrySpriteMotionSmoothnessReport {
+export interface ArtLabSpriteMotionSmoothnessReport {
   passed: boolean;
   maxAdjacentHamming: number;
   flaggedTransitions: ReadonlyArray<{
@@ -14,12 +14,12 @@ export interface FoundrySpriteMotionSmoothnessReport {
   thresholdBits: number;
 }
 
-export async function evaluateFoundrySpriteMotionSmoothness(
+export async function evaluateArtLabSpriteMotionSmoothness(
   frames: ReadonlyArray<Buffer>,
-): Promise<FoundrySpriteMotionSmoothnessReport> {
+): Promise<ArtLabSpriteMotionSmoothnessReport> {
   if (frames.length < 2) {
     throw new Error(
-      "foundry/sprite: motion-smoothness requires at least two frames",
+      "artlab/sprite: motion-smoothness requires at least two frames",
     );
   }
   const hashes = await Promise.all(

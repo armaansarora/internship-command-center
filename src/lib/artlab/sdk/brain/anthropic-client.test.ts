@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { callFoundryAnthropic } from "./anthropic-client";
+import { callArtLabAnthropic } from "./anthropic-client";
 
-describe("callFoundryAnthropic", () => {
+describe("callArtLabAnthropic", () => {
   it("dry-run mode short-circuits without a real key", async () => {
-    const result = await callFoundryAnthropic({
+    const result = await callArtLabAnthropic({
       systemPrompt: "you are an oracle",
       userJson: { question: "x" },
       model: "claude-opus-4-7",
@@ -22,7 +22,7 @@ describe("callFoundryAnthropic", () => {
       text: '{"plan": "ok"}',
       usage: { inputTokens: 1, outputTokens: 1 },
     });
-    const result = await callFoundryAnthropic({
+    const result = await callArtLabAnthropic({
       systemPrompt: "you are an oracle",
       userJson: { x: 1 },
       model: "claude-opus-4-7",
@@ -37,7 +37,7 @@ describe("callFoundryAnthropic", () => {
   });
 
   it("populates durationMs on the response", async () => {
-    const result = await callFoundryAnthropic({
+    const result = await callArtLabAnthropic({
       systemPrompt: "x",
       userJson: {},
       model: "claude-opus-4-7",

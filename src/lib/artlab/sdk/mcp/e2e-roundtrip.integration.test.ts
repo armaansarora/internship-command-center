@@ -10,9 +10,9 @@ let canonRoot: string;
 let packsRoot: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-e2e-ws-"));
-  canonRoot = mkdtempSync(join(tmpdir(), "foundry-e2e-canon-"));
-  packsRoot = mkdtempSync(join(tmpdir(), "foundry-e2e-packs-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-e2e-ws-"));
+  canonRoot = mkdtempSync(join(tmpdir(), "artlab-e2e-canon-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "artlab-e2e-packs-"));
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
   mkdirSync(join(workspaceRoot, "inbox", "foundry"), { recursive: true });
   mkdirSync(join(workspaceRoot, "runs"), { recursive: true });
@@ -40,23 +40,23 @@ describe("e2e MCP round-trip", () => {
       args: ["tsx", join(repoRoot, "scripts", "foundry-mcp.ts")],
       env: {
         ...inheritedEnv(),
-        FOUNDRY_WORKSPACE_ROOT: workspaceRoot,
-        FOUNDRY_CANON_ROOT: canonRoot,
-        FOUNDRY_PACKS_ROOT: packsRoot,
-        FOUNDRY_SLOT_REGISTRY: join(workspaceRoot, "slots", "registry.json"),
+        ARTLAB_WORKSPACE_ROOT: workspaceRoot,
+        ARTLAB_CANON_ROOT: canonRoot,
+        ARTLAB_PACKS_ROOT: packsRoot,
+        ARTLAB_SLOT_REGISTRY: join(workspaceRoot, "slots", "registry.json"),
       },
     });
     const client = new Client({ name: "test-client", version: "1.0.0" }, { capabilities: {} });
     await client.connect(transport);
 
     const canonResult = await client.callTool({
-      name: "foundry/canon_list",
+      name: "artlab/canon_list",
       arguments: { kind: "character" },
     });
     expect(canonResult).toBeDefined();
 
     const generateResult = await client.callTool({
-      name: "foundry/generate",
+      name: "artlab/generate",
       arguments: {
         kind: "character",
         description: "A new Rafe idle sprite",

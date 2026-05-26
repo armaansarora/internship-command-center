@@ -1,7 +1,7 @@
 import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import type { FoundrySpriteAction } from "./types";
+import type { ArtLabSpriteAction } from "./types";
 
 function atomicWrite(path: string, bytes: Buffer | string): void {
   const tmp = `${path}.tmp.${process.pid}.${Date.now()}`;
@@ -13,38 +13,38 @@ function atomicWrite(path: string, bytes: Buffer | string): void {
   renameSync(tmp, path);
 }
 
-export interface FoundrySpritePackInput {
+export interface ArtLabSpritePackInput {
   runDir: string;
   characterId: string;
-  action: FoundrySpriteAction;
+  action: ArtLabSpriteAction;
   frames: ReadonlyArray<Buffer>;
 }
 
-export interface FoundrySpritePackFrameManifest {
+export interface ArtLabSpritePackFrameManifest {
   index: number;
   path: string;
   perceptualHash: string;
 }
 
-export interface FoundrySpritePackResult {
+export interface ArtLabSpritePackResult {
   packRoot: string;
-  frameManifests: ReadonlyArray<FoundrySpritePackFrameManifest>;
+  frameManifests: ReadonlyArray<ArtLabSpritePackFrameManifest>;
   /**
    * Original PNG bytes for each frame, indexed by frame index. Callers
    * (notably the manifest builder in `index.ts`) hand these to
-   * `createFoundryAssetPack` so the canonical pack's `payload/<frame>.png`
+   * `createArtLabAssetPack` so the canonical pack's `payload/<frame>.png`
    * files round-trip the exact same bytes as the looser
    * `<packRoot>/<frame>.png` references emitted here.
    */
   frameBytes: ReadonlyArray<Buffer>;
 }
 
-export async function writeFoundrySpritePack(
-  input: FoundrySpritePackInput,
-): Promise<FoundrySpritePackResult> {
+export async function writeArtLabSpritePack(
+  input: ArtLabSpritePackInput,
+): Promise<ArtLabSpritePackResult> {
   const packRoot = join(input.runDir, "pack");
   mkdirSync(packRoot, { recursive: true });
-  const manifests: FoundrySpritePackFrameManifest[] = [];
+  const manifests: ArtLabSpritePackFrameManifest[] = [];
   const frameBytes: Buffer[] = [];
   for (let i = 0; i < input.frames.length; i += 1) {
     const padded = String(i).padStart(3, "0");
@@ -57,21 +57,21 @@ export async function writeFoundrySpritePack(
   return { packRoot, frameManifests: manifests, frameBytes };
 }
 
-export interface FoundryLottiePackInput {
+export interface ArtLabLottiePackInput {
   runDir: string;
   characterId: string;
-  action: FoundrySpriteAction;
+  action: ArtLabSpriteAction;
   lottieJson: string;
 }
 
-export interface FoundryLottiePackResult {
+export interface ArtLabLottiePackResult {
   packRoot: string;
   lottiePath: string;
 }
 
-export async function writeFoundryLottiePack(
-  input: FoundryLottiePackInput,
-): Promise<FoundryLottiePackResult> {
+export async function writeArtLabLottiePack(
+  input: ArtLabLottiePackInput,
+): Promise<ArtLabLottiePackResult> {
   const packRoot = join(input.runDir, "pack");
   mkdirSync(packRoot, { recursive: true });
   const filename = "lottie.json";

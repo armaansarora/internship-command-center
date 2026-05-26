@@ -2,22 +2,22 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { runFoundrySpriteAnimator } from "./index";
-import { createFoundrySpriteMockVideoProvider } from "./__tests__/mock-video-provider";
-import { createFoundrySpriteMockLottieProvider } from "./__tests__/mock-lottie-provider";
-import { FoundrySpriteAnimatorInputSchema } from "./types";
-import type { FoundrySpriteAction, FoundrySpriteFormat } from "./types";
+import { runArtLabSpriteAnimator } from "./index";
+import { createArtLabSpriteMockVideoProvider } from "./__tests__/mock-video-provider";
+import { createArtLabSpriteMockLottieProvider } from "./__tests__/mock-lottie-provider";
+import { ArtLabSpriteAnimatorInputSchema } from "./types";
+import type { ArtLabSpriteAction, ArtLabSpriteFormat } from "./types";
 
-export interface FoundrySpriteAnimatorCliInput {
+export interface ArtLabSpriteAnimatorCliInput {
   sourcePackId: string;
-  action: FoundrySpriteAction;
-  format: FoundrySpriteFormat;
+  action: ArtLabSpriteAction;
+  format: ArtLabSpriteFormat;
   runDir?: string;
   /**
    * Root directory containing promoted character packs. Defaults to the
-   * `FOUNDRY_PACKS_ROOT` env var so the CLI works against the production
+   * `ARTLAB_PACKS_ROOT` env var so the CLI works against the production
    * pack registry without explicit wiring; tests pass an explicit value
-   * (often a tmp dir) and rely on the `loadFoundryAssetPack` mock.
+   * (often a tmp dir) and rely on the `loadArtLabAssetPack` mock.
    */
   packsRoot?: string;
   providerKind: "mock" | "sora" | "runway" | "claude";
@@ -27,18 +27,18 @@ export interface FoundrySpriteAnimatorCliInput {
   anchorBytesOverride?: Buffer;
 }
 
-export interface FoundrySpriteAnimatorCliResult {
+export interface ArtLabSpriteAnimatorCliResult {
   summary: string;
   runDir: string;
   packId?: string;
 }
 
-export async function runFoundrySpriteAnimatorCli(
-  input: FoundrySpriteAnimatorCliInput,
-): Promise<FoundrySpriteAnimatorCliResult> {
+export async function runArtLabSpriteAnimatorCli(
+  input: ArtLabSpriteAnimatorCliInput,
+): Promise<ArtLabSpriteAnimatorCliResult> {
   const runDir =
-    input.runDir ?? mkdtempSync(join(tmpdir(), "foundry-anim-run-"));
-  const parsed = FoundrySpriteAnimatorInputSchema.parse({
+    input.runDir ?? mkdtempSync(join(tmpdir(), "artlab-anim-run-"));
+  const parsed = ArtLabSpriteAnimatorInputSchema.parse({
     runId: randomUUID(),
     sourcePackId: input.sourcePackId,
     action: input.action,
@@ -54,15 +54,15 @@ export async function runFoundrySpriteAnimatorCli(
   }
   if (input.providerKind !== "mock") {
     throw new Error(
-      `foundry/sprite-animator cli: provider kind ${input.providerKind} not yet wired`,
+      `artlab/sprite-animator cli: provider kind ${input.providerKind} not yet wired`,
     );
   }
-  const packsRoot = input.packsRoot ?? process.env.FOUNDRY_PACKS_ROOT ?? join(tmpdir(), "foundry-cli-packs");
-  const result = await runFoundrySpriteAnimator(
+  const packsRoot = input.packsRoot ?? process.env.ARTLAB_PACKS_ROOT ?? join(tmpdir(), "artlab-cli-packs");
+  const result = await runArtLabSpriteAnimator(
     parsed,
     {
-      video: createFoundrySpriteMockVideoProvider(),
-      lottie: createFoundrySpriteMockLottieProvider(),
+      video: createArtLabSpriteMockVideoProvider(),
+      lottie: createArtLabSpriteMockLottieProvider(),
     },
     { runDir, packsRoot, anchorBytesOverride: input.anchorBytesOverride },
   );

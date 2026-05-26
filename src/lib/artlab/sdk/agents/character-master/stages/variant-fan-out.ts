@@ -1,4 +1,4 @@
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/providers/types";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/providers/types";
 import type { ConceptLane } from "./concept-board";
 
 export interface CharacterVariantSprite {
@@ -14,7 +14,7 @@ export interface CharacterVariantSprite {
 export interface VariantFanOutStageInput {
   anchor: ConceptLane;
   characterId: string;
-  provider: FoundryImageProvider;
+  provider: ArtLabImageProvider;
   outfits: readonly string[];
   poses: readonly string[];
   seed?: number;

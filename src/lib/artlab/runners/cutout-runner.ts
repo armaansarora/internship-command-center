@@ -7,7 +7,7 @@
 // + single-pass edge feather). This module is the orchestration layer:
 // per-asset-type gating, batched cutout pool, warning sidecar emission,
 // and the runner contract. The primitives are shared with the Tower Art
-// Foundry's `character-master` agent so both pipelines reuse the same
+// ArtLab's `character-master` agent so both pipelines reuse the same
 // mature implementation.
 //
 // Falls back to copying the source if sharp is unavailable or the source

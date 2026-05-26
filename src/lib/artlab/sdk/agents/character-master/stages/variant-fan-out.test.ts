@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runVariantFanOutStage } from "./variant-fan-out";
-import { createMockFoundryImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
+import { createMockArtLabImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
 import type { ConceptLane } from "./concept-board";
 
 const FAKE_ANCHOR: ConceptLane = {
@@ -15,7 +15,7 @@ const FAKE_ANCHOR: ConceptLane = {
 
 describe("variant-fan-out stage", () => {
   it("produces exactly 21 variants (3 outfits × 7 poses)", async () => {
-    const provider = createMockFoundryImageProvider();
+    const provider = createMockArtLabImageProvider();
     const result = await runVariantFanOutStage({
       anchor: FAKE_ANCHOR,
       characterId: "sol-navarro",
@@ -28,7 +28,7 @@ describe("variant-fan-out stage", () => {
   });
 
   it("each sprite carries its outfit + pose identity", async () => {
-    const provider = createMockFoundryImageProvider();
+    const provider = createMockArtLabImageProvider();
     const result = await runVariantFanOutStage({
       anchor: FAKE_ANCHOR,
       characterId: "sol-navarro",

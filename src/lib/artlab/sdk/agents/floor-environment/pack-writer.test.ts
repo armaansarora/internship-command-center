@@ -3,7 +3,7 @@ import sharp from "sharp";
 import { mkdtempSync, readFileSync, existsSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeFoundryFloorPack } from "./pack-writer";
+import { writeArtLabFloorPack } from "./pack-writer";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -13,15 +13,15 @@ async function solid(c: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("writeFoundryFloorPack (single-composite)", () => {
+describe("writeArtLabFloorPack (single-composite)", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-floor-pack-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-floor-pack-"));
   });
 
   it("writes the composite PNG into per-time-state subdirs", async () => {
     const bytes = await solid(40);
-    await writeFoundryFloorPack({
+    await writeArtLabFloorPack({
       runDir: dir,
       floorSlug: "war-room",
       variants: [
@@ -39,7 +39,7 @@ describe("writeFoundryFloorPack (single-composite)", () => {
 
   it("writes no .tmp files after success", async () => {
     const bytes = await solid(40);
-    await writeFoundryFloorPack({
+    await writeArtLabFloorPack({
       runDir: dir,
       floorSlug: "war-room",
       variants: [
@@ -56,7 +56,7 @@ describe("writeFoundryFloorPack (single-composite)", () => {
 
   it("returns variantManifests carrying kind, relative path, and hash", async () => {
     const bytes = await solid(40);
-    const result = await writeFoundryFloorPack({
+    const result = await writeArtLabFloorPack({
       runDir: dir,
       floorSlug: "war-room",
       variants: [
@@ -77,7 +77,7 @@ describe("writeFoundryFloorPack (single-composite)", () => {
 
   it("preserves PNG bytes through the write", async () => {
     const bytes = await solid(123);
-    await writeFoundryFloorPack({
+    await writeArtLabFloorPack({
       runDir: dir,
       floorSlug: "war-room",
       variants: [
@@ -95,7 +95,7 @@ describe("writeFoundryFloorPack (single-composite)", () => {
   it("rejects a variant with more than one layer (honest spec is single)", async () => {
     const bytes = await solid(40);
     await expect(
-      writeFoundryFloorPack({
+      writeArtLabFloorPack({
         runDir: dir,
         floorSlug: "war-room",
         variants: [

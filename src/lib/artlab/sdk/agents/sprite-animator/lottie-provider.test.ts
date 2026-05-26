@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
-  FoundryLottieProviderInputSchema,
-  FoundryLottieProviderResultSchema,
+  ArtLabLottieProviderInputSchema,
+  ArtLabLottieProviderResultSchema,
 } from "./lottie-provider";
 
-describe("foundry lottie provider contract", () => {
+describe("artlab sdk lottie provider contract", () => {
   it("input requires motion-curve name and duration", () => {
-    const ok = FoundryLottieProviderInputSchema.parse({
+    const ok = ArtLabLottieProviderInputSchema.parse({
       motionCurve: "breathing-12fps",
       durationMs: 1000,
       action: "idle",
     });
     expect(ok.durationMs).toBe(1000);
     expect(() =>
-      FoundryLottieProviderInputSchema.parse({
+      ArtLabLottieProviderInputSchema.parse({
         motionCurve: "x",
         durationMs: 0,
         action: "idle",
@@ -23,7 +23,7 @@ describe("foundry lottie provider contract", () => {
 
   it("input accepts an optional referenceImageBytes Buffer (Critical 3)", () => {
     const buf = Buffer.from([1, 2, 3, 4]);
-    const ok = FoundryLottieProviderInputSchema.parse({
+    const ok = ArtLabLottieProviderInputSchema.parse({
       motionCurve: "breathing-12fps",
       durationMs: 1000,
       action: "idle",
@@ -33,7 +33,7 @@ describe("foundry lottie provider contract", () => {
   });
 
   it("result requires lottie JSON string + mode + cost", () => {
-    const ok = FoundryLottieProviderResultSchema.parse({
+    const ok = ArtLabLottieProviderResultSchema.parse({
       lottieJson: '{"v":"5.7.0","ip":0,"op":12,"layers":[]}',
       mode: "mock",
       costCents: 0,
@@ -44,7 +44,7 @@ describe("foundry lottie provider contract", () => {
 
   it("result rejects unknown mode", () => {
     expect(() =>
-      FoundryLottieProviderResultSchema.parse({
+      ArtLabLottieProviderResultSchema.parse({
         lottieJson: "{}",
         mode: "wat",
         costCents: 0,

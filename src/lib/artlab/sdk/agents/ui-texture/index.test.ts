@@ -1,20 +1,20 @@
-// src/lib/foundry/agents/ui-texture/index.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/index.test.ts
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { mkdtempSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
-import { runFoundryUiTexture } from "./index";
-import { createFoundryIconMockLlmProvider } from "./__tests__/mock-llm-provider";
+import { runArtLabUiTexture } from "./index";
+import { createArtLabIconMockLlmProvider } from "./__tests__/mock-llm-provider";
 
 vi.mock("@/lib/artlab/sdk/canon", () => ({
-  loadFoundryIconographyRules: vi.fn().mockResolvedValue({
+  loadArtLabIconographyRules: vi.fn().mockResolvedValue({
     strokeWidthPx: 1.5,
     cornerRadiusPx: 2,
     palette: ["#C9A84C"],
     viewBox: "0 0 24 24",
   }),
-  loadFoundryTextureRules: vi.fn().mockResolvedValue({
+  loadArtLabTextureRules: vi.fn().mockResolvedValue({
     tileToleranceDeltaE: 5,
     targetResolutionPx: 64,
     normalMapStrength: 0.7,
@@ -22,7 +22,7 @@ vi.mock("@/lib/artlab/sdk/canon", () => ({
 }));
 
 vi.mock("@/lib/artlab/sdk/asset-pack", () => ({
-  buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
+  buildArtLabAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
     packId: "ui-pack-1",
     manifest,
   })),
@@ -39,14 +39,14 @@ const mockImageProvider = {
   },
 };
 
-describe("runFoundryUiTexture", () => {
+describe("runArtLabUiTexture", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-ui-agent-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-ui-agent-"));
   });
 
   it("icon kind produces a pack with assetKind=ui-icon", async () => {
-    const result = await runFoundryUiTexture(
+    const result = await runArtLabUiTexture(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         name: "elevator-door",
@@ -54,7 +54,7 @@ describe("runFoundryUiTexture", () => {
         requestedBy: "agent",
         ariaLabel: "Elevator door icon",
       },
-      { iconLlm: createFoundryIconMockLlmProvider(), image: mockImageProvider },
+      { iconLlm: createArtLabIconMockLlmProvider(), image: mockImageProvider },
       { runDir: dir },
     );
     const manifest = result.manifest as { assetKind: string };
@@ -63,7 +63,7 @@ describe("runFoundryUiTexture", () => {
   });
 
   it("texture kind produces a pack with assetKind=ui-texture", async () => {
-    const result = await runFoundryUiTexture(
+    const result = await runArtLabUiTexture(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         name: "etched-gold",
@@ -71,7 +71,7 @@ describe("runFoundryUiTexture", () => {
         requestedBy: "agent",
         tileMode: "repeat",
       },
-      { iconLlm: createFoundryIconMockLlmProvider(), image: mockImageProvider },
+      { iconLlm: createArtLabIconMockLlmProvider(), image: mockImageProvider },
       { runDir: dir },
     );
     const manifest = result.manifest as { assetKind: string };
@@ -81,7 +81,7 @@ describe("runFoundryUiTexture", () => {
   });
 
   it("icon kind manifest carries strokeWidthPx", async () => {
-    const result = await runFoundryUiTexture(
+    const result = await runArtLabUiTexture(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         name: "x",
@@ -89,7 +89,7 @@ describe("runFoundryUiTexture", () => {
         requestedBy: "agent",
         ariaLabel: "X icon",
       },
-      { iconLlm: createFoundryIconMockLlmProvider(), image: mockImageProvider },
+      { iconLlm: createArtLabIconMockLlmProvider(), image: mockImageProvider },
       { runDir: dir },
     );
     const manifest = result.manifest as { icon: { strokeWidthPx: number } };
@@ -97,7 +97,7 @@ describe("runFoundryUiTexture", () => {
   });
 
   it("texture kind manifest carries tileMode and normalMapPath", async () => {
-    const result = await runFoundryUiTexture(
+    const result = await runArtLabUiTexture(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         name: "y",
@@ -105,7 +105,7 @@ describe("runFoundryUiTexture", () => {
         requestedBy: "agent",
         tileMode: "repeat-x",
       },
-      { iconLlm: createFoundryIconMockLlmProvider(), image: mockImageProvider },
+      { iconLlm: createArtLabIconMockLlmProvider(), image: mockImageProvider },
       { runDir: dir },
     );
     const manifest = result.manifest as {

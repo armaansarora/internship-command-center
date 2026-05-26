@@ -1,11 +1,11 @@
-// src/lib/foundry/canon/character-schema.ts
+// src/lib/artlab/sdk/canon/character-schema.ts
 import { z } from "zod";
-import { FoundryCanonHeaderSchema, FoundryCanonKindSchema } from "./types";
+import { ArtLabCanonHeaderSchema, ArtLabCanonKindSchema } from "./types";
 
-export const FOUNDRY_CHARACTER_OUTFIT_VARIANTS = ["regular", "summer-light", "winter-layered"] as const;
-export type FoundryCharacterOutfitVariant = (typeof FOUNDRY_CHARACTER_OUTFIT_VARIANTS)[number];
+export const ARTLAB_CHARACTER_OUTFIT_VARIANTS = ["regular", "summer-light", "winter-layered"] as const;
+export type ArtLabCharacterOutfitVariant = (typeof ARTLAB_CHARACTER_OUTFIT_VARIANTS)[number];
 
-export const FOUNDRY_CHARACTER_POSE_STATES = [
+export const ARTLAB_CHARACTER_POSE_STATES = [
   "idle",
   "greeting",
   "listening",
@@ -14,21 +14,21 @@ export const FOUNDRY_CHARACTER_POSE_STATES = [
   "alert",
   "working",
 ] as const;
-export type FoundryCharacterPoseState = (typeof FOUNDRY_CHARACTER_POSE_STATES)[number];
+export type ArtLabCharacterPoseState = (typeof ARTLAB_CHARACTER_POSE_STATES)[number];
 
-export const FOUNDRY_CHARACTER_PROMOTION_STATUSES = [
+export const ARTLAB_CHARACTER_PROMOTION_STATUSES = [
   "queued",
   "in-flight",
   "promoted",
   "blocked",
 ] as const;
-export type FoundryCharacterPromotionStatus = (typeof FOUNDRY_CHARACTER_PROMOTION_STATUSES)[number];
+export type ArtLabCharacterPromotionStatus = (typeof ARTLAB_CHARACTER_PROMOTION_STATUSES)[number];
 
-const CharacterHeaderSchema = FoundryCanonHeaderSchema.extend({
+const CharacterHeaderSchema = ArtLabCanonHeaderSchema.extend({
   kind: z.literal("character"),
 });
 
-export const FoundryCharacterCanonSchema = z
+export const ArtLabCharacterCanonSchema = z
   .object({
     header: CharacterHeaderSchema,
     displayName: z.string().min(1),
@@ -49,22 +49,22 @@ export const FoundryCharacterCanonSchema = z
     secretStrength: z.string().min(1),
     wound: z.string().min(1),
     outfitVariants: z
-      .array(z.enum(FOUNDRY_CHARACTER_OUTFIT_VARIANTS))
+      .array(z.enum(ARTLAB_CHARACTER_OUTFIT_VARIANTS))
       .min(1)
       .refine((arr) => new Set(arr).size === arr.length, { message: "outfitVariants must be unique" }),
     poseStates: z
-      .array(z.enum(FOUNDRY_CHARACTER_POSE_STATES))
-      .length(FOUNDRY_CHARACTER_POSE_STATES.length)
+      .array(z.enum(ARTLAB_CHARACTER_POSE_STATES))
+      .length(ARTLAB_CHARACTER_POSE_STATES.length)
       .refine(
-        (arr) => FOUNDRY_CHARACTER_POSE_STATES.every((p) => arr.includes(p)),
+        (arr) => ARTLAB_CHARACTER_POSE_STATES.every((p) => arr.includes(p)),
         { message: "poseStates must include all 7 canonical states" },
       ),
-    promotionStatus: z.enum(FOUNDRY_CHARACTER_PROMOTION_STATUSES),
+    promotionStatus: z.enum(ARTLAB_CHARACTER_PROMOTION_STATUSES),
     paletteRef: z.string().min(1),
     motionProfile: z.string().min(1),
     artDirectionNotes: z.string().min(1),
   })
   .strict();
-export type FoundryCharacterCanon = z.infer<typeof FoundryCharacterCanonSchema>;
+export type ArtLabCharacterCanon = z.infer<typeof ArtLabCharacterCanonSchema>;
 
-export const FOUNDRY_CHARACTER_KIND: z.infer<typeof FoundryCanonKindSchema> = "character";
+export const ARTLAB_CHARACTER_KIND: z.infer<typeof ArtLabCanonKindSchema> = "character";

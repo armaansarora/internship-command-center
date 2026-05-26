@@ -2,16 +2,16 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { runFoundryFloorEnvironment } from "./index";
-import { createFoundryFloorMockProvider } from "./__tests__/mock-provider";
+import { runArtLabFloorEnvironment } from "./index";
+import { createArtLabFloorMockProvider } from "./__tests__/mock-provider";
 import {
-  FoundryFloorEnvironmentInputSchema,
-  FOUNDRY_FLOOR_TIME_STATES,
+  ArtLabFloorEnvironmentInputSchema,
+  ARTLAB_FLOOR_TIME_STATES,
 } from "./types";
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
-import { loadFoundryFloorCanonEntry } from "./floor-canon";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
+import { loadArtLabFloorCanonEntry } from "./floor-canon";
 
-export interface FoundryFloorCliInput {
+export interface ArtLabFloorCliInput {
   floorSlug: string;
   runDir?: string;
   /**
@@ -28,42 +28,42 @@ export interface FoundryFloorCliInput {
   dryRun?: boolean;
 }
 
-export interface FoundryFloorCliResult {
+export interface ArtLabFloorCliResult {
   summary: string;
   runDir: string;
   packId?: string;
 }
 
 function pickProvider(
-  kind: FoundryFloorCliInput["providerKind"],
-): FoundryImageProvider {
-  if (kind === "mock") return createFoundryFloorMockProvider();
+  kind: ArtLabFloorCliInput["providerKind"],
+): ArtLabImageProvider {
+  if (kind === "mock") return createArtLabFloorMockProvider();
   throw new Error(
-    `foundry/floor cli: provider kind ${kind} not yet wired — use mock until a real adapter is registered`,
+    `artlab/floor cli: provider kind ${kind} not yet wired — use mock until a real adapter is registered`,
   );
 }
 
-export async function runFoundryFloorCli(
-  input: FoundryFloorCliInput,
-): Promise<FoundryFloorCliResult> {
+export async function runArtLabFloorCli(
+  input: ArtLabFloorCliInput,
+): Promise<ArtLabFloorCliResult> {
   const runDir =
-    input.runDir ?? mkdtempSync(join(tmpdir(), "foundry-floor-run-"));
-  const parsed = FoundryFloorEnvironmentInputSchema.parse({
+    input.runDir ?? mkdtempSync(join(tmpdir(), "artlab-floor-run-"));
+  const parsed = ArtLabFloorEnvironmentInputSchema.parse({
     runId: randomUUID(),
     floorSlug: input.floorSlug,
     requestedBy: "cli",
-    timeStates: [...FOUNDRY_FLOOR_TIME_STATES],
+    timeStates: [...ARTLAB_FLOOR_TIME_STATES],
     seed: input.seed,
   });
   if (input.dryRun) {
-    const canon = await loadFoundryFloorCanonEntry(parsed.floorSlug);
+    const canon = await loadArtLabFloorCanonEntry(parsed.floorSlug);
     return {
       summary: `floor ${parsed.floorSlug} validated (${canon.requiredElements.length} required elements, ${parsed.timeStates.length} time-states)`,
       runDir,
     };
   }
   const provider = pickProvider(input.providerKind);
-  const result = await runFoundryFloorEnvironment(parsed, provider, {
+  const result = await runArtLabFloorEnvironment(parsed, provider, {
     runDir,
   });
   return {

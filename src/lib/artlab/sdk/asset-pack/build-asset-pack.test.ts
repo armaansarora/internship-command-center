@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildFoundryAssetPack } from "./build-asset-pack";
+import { buildArtLabAssetPack } from "./build-asset-pack";
 
 const VALID_MANIFEST = {
   manifestVersion: "1.0.0",
@@ -48,9 +48,9 @@ const VALID_MANIFEST = {
   },
 } as const;
 
-describe("buildFoundryAssetPack", () => {
+describe("buildArtLabAssetPack", () => {
   it("returns a packId + validated manifest for a fully conformant input", async () => {
-    const built = await buildFoundryAssetPack(structuredClone(VALID_MANIFEST));
+    const built = await buildArtLabAssetPack(structuredClone(VALID_MANIFEST));
     expect(typeof built.packId).toBe("string");
     expect(built.packId.length).toBeGreaterThan(0);
     expect(built.manifest.kind).toBe("character-sprite");
@@ -64,7 +64,7 @@ describe("buildFoundryAssetPack", () => {
         primaryFileRelPath: "idle.webp",
       },
     };
-    await expect(buildFoundryAssetPack(bogus)).rejects.toThrow();
+    await expect(buildArtLabAssetPack(bogus)).rejects.toThrow();
   });
 
   it("rejects a manifest whose intendedSlot.appPath escapes the allow-listed prefixes", async () => {
@@ -75,7 +75,7 @@ describe("buildFoundryAssetPack", () => {
         appPath: "../../etc/passwd",
       },
     };
-    await expect(buildFoundryAssetPack(traversal)).rejects.toThrow();
+    await expect(buildArtLabAssetPack(traversal)).rejects.toThrow();
   });
 
   it("rejects a manifest missing all canon refs", async () => {
@@ -88,7 +88,7 @@ describe("buildFoundryAssetPack", () => {
         motionLanguageRef: null,
       },
     };
-    await expect(buildFoundryAssetPack(noRefs)).rejects.toThrow();
+    await expect(buildArtLabAssetPack(noRefs)).rejects.toThrow();
   });
 
   it("rejects a manifest with an unknown extra property (strict mode)", async () => {
@@ -96,6 +96,6 @@ describe("buildFoundryAssetPack", () => {
       ...VALID_MANIFEST,
       __packDir: "/tmp/some-attacker-controlled-dir",
     };
-    await expect(buildFoundryAssetPack(extra)).rejects.toThrow();
+    await expect(buildArtLabAssetPack(extra)).rejects.toThrow();
   });
 });

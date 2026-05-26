@@ -1,38 +1,38 @@
 import { z } from "zod";
 
-export const FOUNDRY_AGENT_KINDS = [
+export const ARTLAB_AGENT_KINDS = [
   "character-master",
   "floor-environment",
   "ui-texture",
   "sprite-animator",
 ] as const;
-export type FoundryAgentKind = (typeof FOUNDRY_AGENT_KINDS)[number];
+export type ArtLabAgentKind = (typeof ARTLAB_AGENT_KINDS)[number];
 
 /** Output shape of the meta-orchestrator's intent resolver. */
-export const FoundryMetaIntentSchema = z
+export const ArtLabMetaIntentSchema = z
   .object({
-    agent: z.enum(FOUNDRY_AGENT_KINDS),
+    agent: z.enum(ARTLAB_AGENT_KINDS),
     parsedArgs: z.record(z.string(), z.unknown()),
     confidence: z.number().min(0).max(1),
     rationale: z.string().min(1).optional(),
   })
   .strict();
-export type FoundryMetaIntent = z.infer<typeof FoundryMetaIntentSchema>;
+export type ArtLabMetaIntent = z.infer<typeof ArtLabMetaIntentSchema>;
 
-export const FoundryClarifyingQuestionSchema = z
+export const ArtLabClarifyingQuestionSchema = z
   .object({
     needsClarification: z.literal(true),
     question: z.string().min(8),
-    candidates: z.array(z.enum(FOUNDRY_AGENT_KINDS)).min(1),
+    candidates: z.array(z.enum(ARTLAB_AGENT_KINDS)).min(1),
     confidence: z.number().min(0).max(1),
   })
   .strict();
-export type FoundryClarifyingQuestion = z.infer<typeof FoundryClarifyingQuestionSchema>;
+export type ArtLabClarifyingQuestion = z.infer<typeof ArtLabClarifyingQuestionSchema>;
 
 /** Result of one specialist brain invocation. */
-export const FoundryAgentBrainResultSchema = z
+export const ArtLabAgentBrainResultSchema = z
   .object({
-    agent: z.enum(FOUNDRY_AGENT_KINDS),
+    agent: z.enum(ARTLAB_AGENT_KINDS),
     output: z.record(z.string(), z.unknown()),
     tokensIn: z.number().int().min(0),
     tokensOut: z.number().int().min(0),
@@ -41,13 +41,13 @@ export const FoundryAgentBrainResultSchema = z
     cacheHit: z.boolean().optional(),
   })
   .strict();
-export type FoundryAgentBrainResult = z.infer<typeof FoundryAgentBrainResultSchema>;
+export type ArtLabAgentBrainResult = z.infer<typeof ArtLabAgentBrainResultSchema>;
 
 /** Generic shape every per-agent brain conforms to. */
-export interface FoundryAgentBrain<Input, Output> {
-  agent: FoundryAgentKind;
+export interface ArtLabAgentBrain<Input, Output> {
+  agent: ArtLabAgentKind;
   systemPrompt: string;
   inputSchema: z.ZodType<Input>;
   outputSchema: z.ZodType<Output>;
-  decide(input: Input): Promise<FoundryAgentBrainResult & { output: Output }>;
+  decide(input: Input): Promise<ArtLabAgentBrainResult & { output: Output }>;
 }

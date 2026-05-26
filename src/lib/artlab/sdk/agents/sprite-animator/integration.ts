@@ -1,19 +1,19 @@
-import type { FoundrySpriteAction } from "./types";
+import type { ArtLabSpriteAction } from "./types";
 
-export interface FoundrySpriteIntegrationInput {
+export interface ArtLabSpriteIntegrationInput {
   characterId: string;
-  action: FoundrySpriteAction;
+  action: ArtLabSpriteAction;
   packPath: string;
   fps: number;
   loops: boolean;
 }
 
-export function renderFoundrySpriteIntegrationSnippet(
-  input: FoundrySpriteIntegrationInput,
+export function renderArtLabSpriteIntegrationSnippet(
+  input: ArtLabSpriteIntegrationInput,
 ): string {
   const packTag = `${input.characterId}-${input.action}`;
   return [
-    `// Foundry sprite pack: ${input.packPath}`,
+    `// ArtLab sprite pack: ${input.packPath}`,
     `// fps=${input.fps} loops=${input.loops}`,
     `import { AnimatedSprite } from "@/components/artlab/animated-sprite";`,
     ``,
@@ -21,19 +21,19 @@ export function renderFoundrySpriteIntegrationSnippet(
   ].join("\n");
 }
 
-export interface FoundryLottieIntegrationInput {
+export interface ArtLabLottieIntegrationInput {
   characterId: string;
-  action: FoundrySpriteAction;
+  action: ArtLabSpriteAction;
   packPath: string;
   lottiePath: string;
   durationMs: number;
 }
 
-export function renderFoundryLottieIntegrationSnippet(
-  input: FoundryLottieIntegrationInput,
+export function renderArtLabLottieIntegrationSnippet(
+  input: ArtLabLottieIntegrationInput,
 ): string {
   return [
-    `// Foundry Lottie pack: ${input.packPath}`,
+    `// ArtLab Lottie pack: ${input.packPath}`,
     `// GSAP timeline duration: ${input.durationMs}ms`,
     `import { LottieAnimation } from "@/components/artlab/lottie-animation";`,
     ``,

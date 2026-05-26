@@ -57,7 +57,7 @@ export interface BrainHintMerge {
 /**
  * Merge a brain-enrichment result into an existing `runs/<runId>/run-state.json`.
  *
- * Used by the Foundry MCP `generate` handler's sidecar emitter when the
+ * Used by the ArtLab MCP `generate` handler's sidecar emitter when the
  * poller archived the trigger file BEFORE brain enrichment resolved (slow
  * LLM vs fast drain). The merge updates the canonical run-state so the
  * run-worker and `generate_status` can read the brain hint just as if the

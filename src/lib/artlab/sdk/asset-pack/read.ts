@@ -1,14 +1,14 @@
 import { readFile, stat } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
 import { sha256OfBytes } from "./hashing";
-import { FOUNDRY_PACK_FILENAME, FOUNDRY_PACK_PAYLOAD_DIR } from "./constants";
-import { FoundryAssetPackManifestSchema, type FoundryAssetPackManifest } from "./manifest.schema";
+import { ARTLAB_PACK_FILENAME, ARTLAB_PACK_PAYLOAD_DIR } from "./constants";
+import { ArtLabAssetPackManifestSchema, type ArtLabAssetPackManifest } from "./manifest.schema";
 
-export interface LoadedFoundryAssetPack {
+export interface LoadedArtLabAssetPack {
   packId: string;
   /** Absolute path to the pack directory (containing `manifest.json` + `payload/`). */
   packDir: string;
-  manifest: FoundryAssetPackManifest;
+  manifest: ArtLabAssetPackManifest;
 }
 
 /**
@@ -22,32 +22,32 @@ export interface LoadedFoundryAssetPack {
  */
 function assertSafePackId(packId: string): void {
   if (packId.length === 0) {
-    throw new Error("loadFoundryAssetPack: pack id must not be empty");
+    throw new Error("loadArtLabAssetPack: pack id must not be empty");
   }
   if (packId.includes("\0")) {
-    throw new Error(`loadFoundryAssetPack: pack id contains NUL byte: ${JSON.stringify(packId)}`);
+    throw new Error(`loadArtLabAssetPack: pack id contains NUL byte: ${JSON.stringify(packId)}`);
   }
   if (packId.includes("\\")) {
-    throw new Error(`loadFoundryAssetPack: pack id must not contain backslash: ${JSON.stringify(packId)}`);
+    throw new Error(`loadArtLabAssetPack: pack id must not contain backslash: ${JSON.stringify(packId)}`);
   }
   if (/%[0-9a-fA-F]{2}/.test(packId)) {
-    throw new Error(`loadFoundryAssetPack: pack id must not contain percent-encoded sequences: ${JSON.stringify(packId)}`);
+    throw new Error(`loadArtLabAssetPack: pack id must not contain percent-encoded sequences: ${JSON.stringify(packId)}`);
   }
   if (packId.startsWith("/") || packId.startsWith("~") || /^[a-zA-Z]:/.test(packId)) {
-    throw new Error(`loadFoundryAssetPack: pack id must be a relative directory name (got ${JSON.stringify(packId)})`);
+    throw new Error(`loadArtLabAssetPack: pack id must be a relative directory name (got ${JSON.stringify(packId)})`);
   }
   if (packId.split(/[\\/]/).some((segment) => segment === "..")) {
-    throw new Error(`loadFoundryAssetPack: pack id may not contain '..' segments: ${JSON.stringify(packId)}`);
+    throw new Error(`loadArtLabAssetPack: pack id may not contain '..' segments: ${JSON.stringify(packId)}`);
   }
 }
 
 /**
- * Load a promoted foundry asset pack by id.
+ * Load a promoted ArtLab SDK asset pack by id.
  *
  * Reads `<packsRoot>/<packId>/manifest.json`, validates it against the
- * strict `FoundryAssetPackManifestSchema`, and returns the parsed manifest
+ * strict `ArtLabAssetPackManifestSchema`, and returns the parsed manifest
  * together with the absolute pack directory. Consumers (notably
- * `resolveFoundrySpriteSourcePack`) resolve payload-relative paths against
+ * `resolveArtLabSpriteSourcePack`) resolve payload-relative paths against
  * `packDir`.
  *
  * Behaviour:
@@ -58,10 +58,10 @@ function assertSafePackId(packId: string): void {
  *
  * Critical 2 fix: replaces the prior `return null` stub.
  */
-export async function loadFoundryAssetPack(
+export async function loadArtLabAssetPack(
   packsRoot: string,
   packId: string,
-): Promise<LoadedFoundryAssetPack | null> {
+): Promise<LoadedArtLabAssetPack | null> {
   assertSafePackId(packId);
   // Defence-in-depth: even though assertSafePackId rejects the obvious
   // attack vectors, verify that the joined path is rooted under packsRoot.
@@ -70,7 +70,7 @@ export async function loadFoundryAssetPack(
   const packsRootPrefix = packsRootResolved + sep;
   if (!(packDir === packsRootResolved || packDir.startsWith(packsRootPrefix))) {
     throw new Error(
-      `loadFoundryAssetPack: pack id ${JSON.stringify(packId)} resolved outside packsRoot ${JSON.stringify(packsRoot)}`,
+      `loadArtLabAssetPack: pack id ${JSON.stringify(packId)} resolved outside packsRoot ${JSON.stringify(packsRoot)}`,
     );
   }
   let packStat;
@@ -83,16 +83,16 @@ export async function loadFoundryAssetPack(
     throw err;
   }
   if (!packStat.isDirectory()) {
-    throw new Error(`loadFoundryAssetPack: pack path is not a directory: ${packDir}`);
+    throw new Error(`loadArtLabAssetPack: pack path is not a directory: ${packDir}`);
   }
-  const manifestPath = join(packDir, FOUNDRY_PACK_FILENAME);
+  const manifestPath = join(packDir, ARTLAB_PACK_FILENAME);
   let raw: string;
   try {
     raw = await readFile(manifestPath, "utf8");
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") {
       throw new Error(
-        `loadFoundryAssetPack: manifest.json missing at ${manifestPath} (pack id ${JSON.stringify(packId)})`,
+        `loadArtLabAssetPack: manifest.json missing at ${manifestPath} (pack id ${JSON.stringify(packId)})`,
       );
     }
     throw err;
@@ -102,24 +102,24 @@ export async function loadFoundryAssetPack(
     parsedJson = JSON.parse(raw);
   } catch (err) {
     throw new Error(
-      `loadFoundryAssetPack: manifest.json at ${manifestPath} is not valid JSON: ${(err as Error).message}`,
+      `loadArtLabAssetPack: manifest.json at ${manifestPath} is not valid JSON: ${(err as Error).message}`,
     );
   }
-  const parsed = FoundryAssetPackManifestSchema.safeParse(parsedJson);
+  const parsed = ArtLabAssetPackManifestSchema.safeParse(parsedJson);
   if (!parsed.success) {
     throw new Error(
-      `loadFoundryAssetPack: manifest at ${manifestPath} failed strict schema validation: ${parsed.error.message}`,
+      `loadArtLabAssetPack: manifest at ${manifestPath} failed strict schema validation: ${parsed.error.message}`,
     );
   }
   return { packId, packDir, manifest: parsed.data };
 }
 
-export type ReadFoundryAssetPackResult =
-  | { ok: true; manifest: FoundryAssetPackManifest; payloadBytes: Record<string, Buffer>; packDir: string }
+export type ReadArtLabAssetPackResult =
+  | { ok: true; manifest: ArtLabAssetPackManifest; payloadBytes: Record<string, Buffer>; packDir: string }
   | { ok: false; code: "manifest-missing" | "manifest-invalid" | "payload-missing" | "payload-sha256-mismatch"; message: string; packDir: string };
 
-export async function readFoundryAssetPack(packDir: string): Promise<ReadFoundryAssetPackResult> {
-  const manifestPath = join(packDir, FOUNDRY_PACK_FILENAME);
+export async function readArtLabAssetPack(packDir: string): Promise<ReadArtLabAssetPackResult> {
+  const manifestPath = join(packDir, ARTLAB_PACK_FILENAME);
   let raw: string;
   try {
     raw = await readFile(manifestPath, "utf8");
@@ -132,14 +132,14 @@ export async function readFoundryAssetPack(packDir: string): Promise<ReadFoundry
   } catch (err) {
     return { ok: false, code: "manifest-invalid", message: `manifest.json is not valid JSON: ${(err as Error).message}`, packDir };
   }
-  const parsed = FoundryAssetPackManifestSchema.safeParse(parsedJson);
+  const parsed = ArtLabAssetPackManifestSchema.safeParse(parsedJson);
   if (!parsed.success) {
     return { ok: false, code: "manifest-invalid", message: parsed.error.message, packDir };
   }
   const manifest = parsed.data;
   const payloadBytes: Record<string, Buffer> = {};
   for (const f of manifest.payload.files) {
-    const abs = join(packDir, FOUNDRY_PACK_PAYLOAD_DIR, f.relPath);
+    const abs = join(packDir, ARTLAB_PACK_PAYLOAD_DIR, f.relPath);
     let bytes: Buffer;
     try {
       bytes = await readFile(abs);

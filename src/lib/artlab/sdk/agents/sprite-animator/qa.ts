@@ -1,15 +1,15 @@
-import { evaluateFoundrySpriteIdentityDrift } from "./qa/identity-drift";
-import { evaluateFoundrySpriteMotionSmoothness } from "./qa/motion-smoothness";
-import { evaluateFoundryLottieValidity } from "./qa/lottie-validity";
-import { evaluateFoundryLottieIdentity } from "./qa/lottie-identity";
+import { evaluateArtLabSpriteIdentityDrift } from "./qa/identity-drift";
+import { evaluateArtLabSpriteMotionSmoothness } from "./qa/motion-smoothness";
+import { evaluateArtLabLottieValidity } from "./qa/lottie-validity";
+import { evaluateArtLabLottieIdentity } from "./qa/lottie-identity";
 
-export type FoundrySpriteQaGate =
+export type ArtLabSpriteQaGate =
   | "identity-drift"
   | "motion-smoothness"
   | "lottie-validity"
   | "lottie-identity";
 
-export type FoundrySpriteQaInput =
+export type ArtLabSpriteQaInput =
   | {
       kind: "sprite";
       anchorBytes: Buffer;
@@ -27,22 +27,22 @@ export type FoundrySpriteQaInput =
       anchorPerceptualHash: string;
     };
 
-export interface FoundrySpriteQaReport {
+export interface ArtLabSpriteQaReport {
   passed: boolean;
-  failedGates: ReadonlyArray<FoundrySpriteQaGate>;
+  failedGates: ReadonlyArray<ArtLabSpriteQaGate>;
   details: Record<string, unknown>;
 }
 
-export async function runFoundrySpriteQa(
-  input: FoundrySpriteQaInput,
-): Promise<FoundrySpriteQaReport> {
+export async function runArtLabSpriteQa(
+  input: ArtLabSpriteQaInput,
+): Promise<ArtLabSpriteQaReport> {
   if (input.kind === "sprite") {
-    const identity = await evaluateFoundrySpriteIdentityDrift({
+    const identity = await evaluateArtLabSpriteIdentityDrift({
       anchorBytes: input.anchorBytes,
       frames: input.frames,
     });
-    const motion = await evaluateFoundrySpriteMotionSmoothness(input.frames);
-    const failedGates: FoundrySpriteQaGate[] = [];
+    const motion = await evaluateArtLabSpriteMotionSmoothness(input.frames);
+    const failedGates: ArtLabSpriteQaGate[] = [];
     if (!identity.passed) failedGates.push("identity-drift");
     if (!motion.passed) failedGates.push("motion-smoothness");
     return {
@@ -51,14 +51,14 @@ export async function runFoundrySpriteQa(
       details: { identity, motion },
     };
   }
-  const validity = evaluateFoundryLottieValidity(input.lottieJson, {
+  const validity = evaluateArtLabLottieValidity(input.lottieJson, {
     expectedDurationMs: input.expectedDurationMs,
   });
-  const identity = await evaluateFoundryLottieIdentity({
+  const identity = await evaluateArtLabLottieIdentity({
     lottieJson: input.lottieJson,
     anchorPerceptualHash: input.anchorPerceptualHash,
   });
-  const failedGates: FoundrySpriteQaGate[] = [];
+  const failedGates: ArtLabSpriteQaGate[] = [];
   if (!validity.passed) failedGates.push("lottie-validity");
   if (!identity.passed) failedGates.push("lottie-identity");
   return {

@@ -2,11 +2,11 @@ import { describe, expect, it, beforeEach, vi } from "vitest";
 import { mkdtempSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runFoundryFloorEnvironment } from "./index";
-import { createFoundryFloorMockProvider } from "./__tests__/mock-provider";
+import { runArtLabFloorEnvironment } from "./index";
+import { createArtLabFloorMockProvider } from "./__tests__/mock-provider";
 
 vi.mock("@/lib/artlab/sdk/canon", () => ({
-  loadFoundryFloorCanon: vi.fn().mockResolvedValue({
+  loadArtLabFloorCanon: vi.fn().mockResolvedValue({
     slug: "war-room",
     displayName: "The War Room",
     mood: "tactical-luxury",
@@ -18,21 +18,21 @@ vi.mock("@/lib/artlab/sdk/canon", () => ({
 }));
 
 vi.mock("@/lib/artlab/sdk/asset-pack", () => ({
-  buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
+  buildArtLabAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
     packId: "pack-1",
     manifest,
   })),
 }));
 
-describe("runFoundryFloorEnvironment", () => {
+describe("runArtLabFloorEnvironment", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-floor-agent-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-floor-agent-"));
   });
 
   it("produces one Asset Pack covering every requested time-state", async () => {
-    const provider = createFoundryFloorMockProvider();
-    const result = await runFoundryFloorEnvironment(
+    const provider = createArtLabFloorMockProvider();
+    const result = await runArtLabFloorEnvironment(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         floorSlug: "war-room",
@@ -52,8 +52,8 @@ describe("runFoundryFloorEnvironment", () => {
   });
 
   it("writes a single composite PNG per variant to disk (honest spec)", async () => {
-    const provider = createFoundryFloorMockProvider();
-    await runFoundryFloorEnvironment(
+    const provider = createArtLabFloorMockProvider();
+    await runArtLabFloorEnvironment(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         floorSlug: "war-room",
@@ -68,8 +68,8 @@ describe("runFoundryFloorEnvironment", () => {
   });
 
   it("manifest declares compositeKind=single-composite", async () => {
-    const provider = createFoundryFloorMockProvider();
-    const result = await runFoundryFloorEnvironment(
+    const provider = createArtLabFloorMockProvider();
+    const result = await runArtLabFloorEnvironment(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         floorSlug: "war-room",
@@ -93,8 +93,8 @@ describe("runFoundryFloorEnvironment", () => {
   });
 
   it("includes integration snippet text in the manifest", async () => {
-    const provider = createFoundryFloorMockProvider();
-    const result = await runFoundryFloorEnvironment(
+    const provider = createArtLabFloorMockProvider();
+    const result = await runArtLabFloorEnvironment(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         floorSlug: "war-room",
@@ -116,8 +116,8 @@ describe("runFoundryFloorEnvironment", () => {
   // roomElementsCheck.status=todo-post-launch entry that consumers can
   // read directly. We assert that path here instead of expecting a throw.
   it("manifest qa.roomElementsCheck declares the post-launch TODO with canon list", async () => {
-    const provider = createFoundryFloorMockProvider();
-    const result = await runFoundryFloorEnvironment(
+    const provider = createArtLabFloorMockProvider();
+    const result = await runArtLabFloorEnvironment(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         floorSlug: "war-room",
@@ -149,8 +149,8 @@ describe("runFoundryFloorEnvironment", () => {
   // the room-element verification TODO and the per-layer-render
   // out-of-scope status (the latter is the Critical 1+4 promise).
   it("manifest exposes manifestGaps at the root with both known gaps", async () => {
-    const provider = createFoundryFloorMockProvider();
-    const result = await runFoundryFloorEnvironment(
+    const provider = createArtLabFloorMockProvider();
+    const result = await runArtLabFloorEnvironment(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         floorSlug: "war-room",

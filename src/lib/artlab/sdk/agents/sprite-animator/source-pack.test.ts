@@ -1,10 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { join } from "node:path";
-import { resolveFoundrySpriteSourcePack } from "./source-pack";
+import { resolveArtLabSpriteSourcePack } from "./source-pack";
 import {
-  FOUNDRY_PACK_PAYLOAD_DIR,
-  type FoundryAssetPackManifest,
-  type LoadedFoundryAssetPack,
+  ARTLAB_PACK_PAYLOAD_DIR,
+  type ArtLabAssetPackManifest,
+  type LoadedArtLabAssetPack,
 } from "@/lib/artlab/sdk/asset-pack";
 
 vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
@@ -13,18 +13,18 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   );
   return {
     ...actual,
-    loadFoundryAssetPack: vi.fn(),
+    loadArtLabAssetPack: vi.fn(),
   };
 });
 
-import { loadFoundryAssetPack } from "@/lib/artlab/sdk/asset-pack";
+import { loadArtLabAssetPack } from "@/lib/artlab/sdk/asset-pack";
 
 // A baseline strict-schema-conformant character-spritesheet manifest. Tests
 // override individual fields to exercise specific guard paths so the rest
 // of the manifest remains valid and the failure reason is unambiguous.
-function baselineCharacterPack(): LoadedFoundryAssetPack {
-  const packDir = "/tmp/foundry-test/char-otis-v3";
-  const manifest: FoundryAssetPackManifest = {
+function baselineCharacterPack(): LoadedArtLabAssetPack {
+  const packDir = "/tmp/artlab-test/char-otis-v3";
+  const manifest: ArtLabAssetPackManifest = {
     manifestVersion: "1.0.0",
     packId: "char-otis-v3",
     kind: "character-spritesheet",
@@ -47,22 +47,22 @@ function baselineCharacterPack(): LoadedFoundryAssetPack {
   return { packId: "char-otis-v3", packDir, manifest };
 }
 
-describe("resolveFoundrySpriteSourcePack", () => {
+describe("resolveArtLabSpriteSourcePack", () => {
   beforeEach(() => {
-    vi.mocked(loadFoundryAssetPack).mockReset();
+    vi.mocked(loadArtLabAssetPack).mockReset();
   });
 
   it("returns the resolved anchor PNG path and perceptual hash from a real character pack manifest", async () => {
     const pack = baselineCharacterPack();
-    vi.mocked(loadFoundryAssetPack).mockResolvedValue(pack);
-    const out = await resolveFoundrySpriteSourcePack("char-otis-v3", {
-      packsRoot: "/tmp/foundry-test",
+    vi.mocked(loadArtLabAssetPack).mockResolvedValue(pack);
+    const out = await resolveArtLabSpriteSourcePack("char-otis-v3", {
+      packsRoot: "/tmp/artlab-test",
     });
     expect(out.characterId).toBe("otis");
     // The resolver joins packDir + payload dir + anchorImageRelPath so
     // consumers get an absolute filesystem path they can readFile() on.
     expect(out.anchorImagePath).toBe(
-      join(pack.packDir, FOUNDRY_PACK_PAYLOAD_DIR, "regular/idle.webp"),
+      join(pack.packDir, ARTLAB_PACK_PAYLOAD_DIR, "regular/idle.webp"),
     );
     expect(out.anchorPerceptualHash).toBe("0123456789abcdef");
   });
@@ -70,9 +70,9 @@ describe("resolveFoundrySpriteSourcePack", () => {
   it("throws when source pack is not a character-spritesheet", async () => {
     const pack = baselineCharacterPack();
     const manifest = { ...pack.manifest, kind: "ui-icon" as const, agent: "ui-icon" as const };
-    vi.mocked(loadFoundryAssetPack).mockResolvedValue({ ...pack, manifest });
+    vi.mocked(loadArtLabAssetPack).mockResolvedValue({ ...pack, manifest });
     await expect(
-      resolveFoundrySpriteSourcePack("p1", { packsRoot: "/tmp/foundry-test" }),
+      resolveArtLabSpriteSourcePack("p1", { packsRoot: "/tmp/artlab-test" }),
     ).rejects.toThrow(/character-spritesheet/i);
   });
 
@@ -82,16 +82,16 @@ describe("resolveFoundrySpriteSourcePack", () => {
       ...pack.manifest,
       canonRefs: { ...pack.manifest.canonRefs, characterId: null },
     };
-    vi.mocked(loadFoundryAssetPack).mockResolvedValue({ ...pack, manifest });
+    vi.mocked(loadArtLabAssetPack).mockResolvedValue({ ...pack, manifest });
     await expect(
-      resolveFoundrySpriteSourcePack("p1", { packsRoot: "/tmp/foundry-test" }),
+      resolveArtLabSpriteSourcePack("p1", { packsRoot: "/tmp/artlab-test" }),
     ).rejects.toThrow(/characterId/i);
   });
 
   it("throws when the source pack cannot be located", async () => {
-    vi.mocked(loadFoundryAssetPack).mockResolvedValue(null);
+    vi.mocked(loadArtLabAssetPack).mockResolvedValue(null);
     await expect(
-      resolveFoundrySpriteSourcePack("missing", { packsRoot: "/tmp/foundry-test" }),
+      resolveArtLabSpriteSourcePack("missing", { packsRoot: "/tmp/artlab-test" }),
     ).rejects.toThrow(/not found/i);
   });
 });

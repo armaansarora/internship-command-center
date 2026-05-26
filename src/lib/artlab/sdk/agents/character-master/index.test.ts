@@ -4,11 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { runCharacterMaster } from "./index";
-import { registerFoundrySlot } from "@/lib/artlab/sdk/asset-pack";
+import { registerArtLabSlot } from "@/lib/artlab/sdk/asset-pack";
 import type {
-  FoundryImageProvider,
-  FoundryImageProviderInput,
-  FoundryImageProviderResult,
+  ArtLabImageProvider,
+  ArtLabImageProviderInput,
+  ArtLabImageProviderResult,
 } from "@/lib/artlab/sdk/providers/types";
 
 const CHARACTER_YAML = (id: string) => `
@@ -66,7 +66,7 @@ function ensureSlotsRegistered(): void {
   for (const outfit of OUTFITS) {
     for (const pose of POSES) {
       try {
-        registerFoundrySlot({
+        registerArtLabSlot({
           slotId: `rolodex-lounge/sol-navarro/${outfit}/${pose}`,
           appPath: `public/art/rolodex-lounge/sol-navarro/${outfit}/${pose}.webp`,
           kind: "character-sprite",
@@ -80,7 +80,7 @@ function ensureSlotsRegistered(): void {
   }
 }
 
-function dimensionsFor(aspect: FoundryImageProviderInput["aspectRatio"]): { widthPx: number; heightPx: number } {
+function dimensionsFor(aspect: ArtLabImageProviderInput["aspectRatio"]): { widthPx: number; heightPx: number } {
   switch (aspect) {
     case "9:16": return { widthPx: 1024, heightPx: 1792 };
     case "16:9": return { widthPx: 1792, heightPx: 1024 };
@@ -90,11 +90,11 @@ function dimensionsFor(aspect: FoundryImageProviderInput["aspectRatio"]): { widt
   }
 }
 
-function createPngFoundryImageProvider(): FoundryImageProvider {
+function createPngArtLabImageProvider(): ArtLabImageProvider {
   const id = "mock-foundry-image";
   return {
     id,
-    async generate(input: FoundryImageProviderInput): Promise<FoundryImageProviderResult> {
+    async generate(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult> {
       const dims = dimensionsFor(input.aspectRatio);
       const bytes = await sharp({
         create: { width: 64, height: 64, channels: 4, background: { r: 30, g: 30, b: 50, alpha: 1 } },
@@ -131,7 +131,7 @@ describe("runCharacterMaster", () => {
   let workspaceRoot: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-cm-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-cm-"));
     canonRoot = join(tmpDir, "canon");
     workspaceRoot = join(tmpDir, "ws");
     setupCanon(canonRoot);
@@ -147,7 +147,7 @@ describe("runCharacterMaster", () => {
     const events: string[] = [];
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 42 },
-      provider: createPngFoundryImageProvider(),
+      provider: createPngArtLabImageProvider(),
       emit: (e) => events.push(e.kind),
     });
     expect(result.ok).toBe(true);
@@ -161,7 +161,7 @@ describe("runCharacterMaster", () => {
   it("returns a QA-failure result when the provider deliberately fails composite-judge", async () => {
     const result = await runCharacterMaster({
       input: { characterId: "missing-character", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 42 },
-      provider: createPngFoundryImageProvider(),
+      provider: createPngArtLabImageProvider(),
       emit: () => {},
     });
     expect(result.ok).toBe(false);
@@ -219,7 +219,7 @@ describe("runCharacterMaster", () => {
     const events: string[] = [];
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "cutout-and-feather", seed: 42 },
-      provider: createPngFoundryImageProvider(),
+      provider: createPngArtLabImageProvider(),
       emit: (e) => events.push(e.kind),
     });
     expect(result.ok).toBe(true);
@@ -246,7 +246,7 @@ describe("runCharacterMaster", () => {
     }));
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "cutout-and-feather", seed: 42 },
-      provider: createPngFoundryImageProvider(),
+      provider: createPngArtLabImageProvider(),
       emit: () => {},
     });
     expect(result.ok).toBe(false);
@@ -272,7 +272,7 @@ describe("runCharacterMaster", () => {
         seed: 42,
         qa: { paletteToleranceLab: 0.001, minPairwiseSilhouetteHamming: 0 },
       },
-      provider: createPngFoundryImageProvider(),
+      provider: createPngArtLabImageProvider(),
       emit: (e) => events.push(e as { kind: string; gateName?: string; reason?: string }),
     });
     expect(result.ok).toBe(false);
@@ -300,7 +300,7 @@ describe("runCharacterMaster", () => {
         seed: 42,
         qa: { paletteToleranceLab: 250, minPairwiseSilhouetteHamming: 60 },
       },
-      provider: createPngFoundryImageProvider(),
+      provider: createPngArtLabImageProvider(),
       emit: (e) => events.push(e as { kind: string; gateName?: string; reason?: string }),
     });
     expect(result.ok).toBe(false);
@@ -339,7 +339,7 @@ describe("runCharacterMaster", () => {
     }));
     const result = await runCharacterMaster({
       input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "variant-fan-out", seed: 42 },
-      provider: createPngFoundryImageProvider(),
+      provider: createPngArtLabImageProvider(),
       emit: (e) => { if (e.kind === "stage-started") events.push(e.stage); },
     });
     expect(result.ok).toBe(true);

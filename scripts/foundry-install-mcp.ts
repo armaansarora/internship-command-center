@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 
-export interface FoundryClaudeSnippet {
+export interface ArtLabClaudeSnippet {
   mcpServers: {
     "tower-art-foundry": {
       command: "npx";
@@ -14,24 +14,24 @@ export interface FoundryClaudeSnippet {
   };
 }
 
-export function computeFoundryClaudeSnippet(opts: { repoRoot: string }): FoundryClaudeSnippet {
+export function computeArtLabClaudeSnippet(opts: { repoRoot: string }): ArtLabClaudeSnippet {
   return {
     mcpServers: {
       "tower-art-foundry": {
         command: "npx",
         args: ["tsx", join(opts.repoRoot, "scripts", "foundry-mcp.ts")],
         env: {
-          FOUNDRY_WORKSPACE_ROOT: join(opts.repoRoot, ".artlab", "engine"),
-          FOUNDRY_CANON_ROOT: join(opts.repoRoot, ".artlab", "canon"),
+          ARTLAB_WORKSPACE_ROOT: join(opts.repoRoot, ".artlab", "engine"),
+          ARTLAB_CANON_ROOT: join(opts.repoRoot, ".artlab", "canon"),
         },
       },
     },
   };
 }
 
-export function mergeFoundryClaudeSnippet(
+export function mergeArtLabClaudeSnippet(
   existing: Record<string, unknown>,
-  snippet: FoundryClaudeSnippet,
+  snippet: ArtLabClaudeSnippet,
 ): Record<string, unknown> {
   const merged = { ...existing };
   const existingServers = (existing.mcpServers as Record<string, unknown> | undefined) ?? {};
@@ -49,7 +49,7 @@ function atomicWriteJson(path: string, payload: unknown): void {
 }
 
 async function confirm(prompt: string): Promise<boolean> {
-  if (process.env.FOUNDRY_INSTALL_YES === "1") return true;
+  if (process.env.ARTLAB_INSTALL_YES === "1") return true;
   const rl = createInterface({ input: stdin, output: stdout });
   const answer = (await rl.question(`${prompt} [y/N]: `)).trim().toLowerCase();
   rl.close();
@@ -59,8 +59,8 @@ async function confirm(prompt: string): Promise<boolean> {
 async function main(): Promise<number> {
   const repoRoot = process.cwd();
   const settingsPath =
-    process.env.FOUNDRY_CLAUDE_SETTINGS ?? join(homedir(), ".claude", "settings.json");
-  const snippet = computeFoundryClaudeSnippet({ repoRoot });
+    process.env.ARTLAB_CLAUDE_SETTINGS ?? join(homedir(), ".claude", "settings.json");
+  const snippet = computeArtLabClaudeSnippet({ repoRoot });
   let existing: Record<string, unknown> = {};
   if (existsSync(settingsPath)) {
     try {
@@ -77,7 +77,7 @@ async function main(): Promise<number> {
       return 1;
     }
   }
-  const merged = mergeFoundryClaudeSnippet(existing, snippet);
+  const merged = mergeArtLabClaudeSnippet(existing, snippet);
 
   process.stdout.write(`About to write the following snippet to ${settingsPath}:\n\n`);
   process.stdout.write(`${JSON.stringify(snippet, null, 2)}\n\n`);

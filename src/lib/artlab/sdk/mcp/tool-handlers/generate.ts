@@ -2,19 +2,19 @@ import { randomUUID } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
-  FoundryGenerateInputSchema,
-  FoundryGenerateOutputSchema,
-  type FoundryGenerateInput,
-  type FoundryGenerateOutput,
+  ArtLabGenerateInputSchema,
+  ArtLabGenerateOutputSchema,
+  type ArtLabGenerateInput,
+  type ArtLabGenerateOutput,
 } from "../tools";
 import { mergeBrainHintIntoRunState } from "@/lib/artlab/state/snapshots";
 
-export interface FoundryGenerateContext {
+export interface ArtLabGenerateContext {
   /** ArtLab workspace root (typically `.artlab/engine`). */
   workspaceRoot: string;
   /**
    * Optional brain enrichment callback. The MCP server wires this to
-   * `routeFoundryRequest`. When unset the handler stays purely deterministic
+   * `routeArtLabRequest`. When unset the handler stays purely deterministic
    * (no LLM calls) and just enqueues the raw input.
    *
    * IMPORTANT: this callback is intentionally *not* awaited inline. The MCP
@@ -24,7 +24,7 @@ export interface FoundryGenerateContext {
    * completes — the main inbox trigger file is written once at queue-time
    * and is never rewritten. See the brain-enrich-race comment below.
    */
-  brainEnrich?: (input: FoundryGenerateInput) => Promise<Record<string, unknown>>;
+  brainEnrich?: (input: ArtLabGenerateInput) => Promise<Record<string, unknown>>;
 }
 
 type BrainHintStatus = "pending" | "ready" | "failed";
@@ -81,11 +81,11 @@ function recordEnrichError(workspaceRoot: string, runId: string, err: unknown): 
   }
 }
 
-export async function handleFoundryGenerate(
+export async function handleArtLabGenerate(
   rawInput: unknown,
-  ctx: FoundryGenerateContext,
-): Promise<FoundryGenerateOutput> {
-  const input = FoundryGenerateInputSchema.parse(rawInput);
+  ctx: ArtLabGenerateContext,
+): Promise<ArtLabGenerateOutput> {
+  const input = ArtLabGenerateInputSchema.parse(rawInput);
   const runId = randomUUID();
   const queuedAt = new Date().toISOString();
   const inboxDir = join(ctx.workspaceRoot, "inbox", "foundry");
@@ -106,7 +106,7 @@ export async function handleFoundryGenerate(
   // inbox file instead of rewriting the inbox file itself.
   //
   // Why sidecar instead of rewriting the inbox file:
-  //   The daemon poller (src/lib/artlab/daemon/foundry-poller.ts) archives
+  //   The daemon poller (src/lib/artlab/daemon/sdk-poller.ts) archives
   //   processed inbox files into `.processed/` via rename. If enrichment
   //   resolved AFTER that rename and we used temp+rename on the original
   //   path, we'd RESURRECT `generate-<runId>.json` in the live inbox — the
@@ -200,7 +200,7 @@ export async function handleFoundryGenerate(
     })();
   }
 
-  return FoundryGenerateOutputSchema.parse({
+  return ArtLabGenerateOutputSchema.parse({
     runId,
     status: "queued",
     queuedAt,

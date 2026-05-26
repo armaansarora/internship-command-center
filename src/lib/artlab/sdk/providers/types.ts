@@ -1,14 +1,14 @@
 import { z } from "zod";
 
-export const FOUNDRY_IMAGE_ASPECT_RATIOS = ["9:16", "16:9", "1:1", "4:3", "3:4"] as const;
-export type FoundryImageAspectRatio = (typeof FOUNDRY_IMAGE_ASPECT_RATIOS)[number];
+export const ARTLAB_IMAGE_ASPECT_RATIOS = ["9:16", "16:9", "1:1", "4:3", "3:4"] as const;
+export type ArtLabImageAspectRatio = (typeof ARTLAB_IMAGE_ASPECT_RATIOS)[number];
 
-export const FOUNDRY_IMAGE_PROVIDER_MODES = ["real", "mock", "placeholder"] as const;
-export type FoundryImageProviderMode = (typeof FOUNDRY_IMAGE_PROVIDER_MODES)[number];
+export const ARTLAB_IMAGE_PROVIDER_MODES = ["real", "mock", "placeholder"] as const;
+export type ArtLabImageProviderMode = (typeof ARTLAB_IMAGE_PROVIDER_MODES)[number];
 
-export const FoundryImageProviderResultSchema = z
+export const ArtLabImageProviderResultSchema = z
   .object({
-    mode: z.enum(FOUNDRY_IMAGE_PROVIDER_MODES),
+    mode: z.enum(ARTLAB_IMAGE_PROVIDER_MODES),
     bytes: z.instanceof(Buffer),
     contentType: z.enum(["image/png", "image/webp", "image/jpeg"]),
     widthPx: z.number().int().positive(),
@@ -19,17 +19,17 @@ export const FoundryImageProviderResultSchema = z
     seed: z.number().int().optional(),
   })
   .strict();
-export type FoundryImageProviderResult = z.infer<typeof FoundryImageProviderResultSchema>;
+export type ArtLabImageProviderResult = z.infer<typeof ArtLabImageProviderResultSchema>;
 
-export interface FoundryImageProviderInput {
+export interface ArtLabImageProviderInput {
   prompt: string;
-  aspectRatio: FoundryImageAspectRatio;
+  aspectRatio: ArtLabImageAspectRatio;
   laneIndex: number;
   referenceImageBytes?: Buffer;
   seed?: number;
 }
 
-export interface FoundryImageProvider {
+export interface ArtLabImageProvider {
   readonly id: string;
-  generate(input: FoundryImageProviderInput): Promise<FoundryImageProviderResult>;
+  generate(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult>;
 }

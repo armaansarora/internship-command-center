@@ -1,9 +1,9 @@
-// src/lib/foundry/canon/load-canon.test.ts
+// src/lib/artlab/sdk/canon/load-canon.test.ts
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadFoundryCanon } from "./load-canon";
+import { loadArtLabCanon } from "./load-canon";
 
 function setupCanonDir(root: string): void {
   for (const sub of ["characters", "palettes", "typography", "motion-language", "space-tokens", "iconography-rules"]) {
@@ -59,11 +59,11 @@ tokens:
   );
 }
 
-describe("loadFoundryCanon", () => {
+describe("loadArtLabCanon", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-canon-tree-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-canon-tree-"));
   });
 
   afterEach(() => {
@@ -72,7 +72,7 @@ describe("loadFoundryCanon", () => {
 
   it("loads every YAML file under the canon root", async () => {
     setupCanonDir(tmpDir);
-    const canon = await loadFoundryCanon({ canonRoot: tmpDir });
+    const canon = await loadArtLabCanon({ canonRoot: tmpDir });
     expect(canon.characters.length).toBe(1);
     expect(canon.characters[0]!.header.id).toBe("sol-navarro");
     expect(canon.palettes.length).toBe(1);
@@ -82,7 +82,7 @@ describe("loadFoundryCanon", () => {
   it("completes in under 50 ms for a small canon", async () => {
     setupCanonDir(tmpDir);
     const start = performance.now();
-    await loadFoundryCanon({ canonRoot: tmpDir });
+    await loadArtLabCanon({ canonRoot: tmpDir });
     const elapsed = performance.now() - start;
     expect(elapsed).toBeLessThan(50);
   });
@@ -103,6 +103,6 @@ tokens:
 `,
       "utf8",
     );
-    await expect(loadFoundryCanon({ canonRoot: tmpDir })).rejects.toThrow(/duplicate.*tower-default/i);
+    await expect(loadArtLabCanon({ canonRoot: tmpDir })).rejects.toThrow(/duplicate.*tower-default/i);
   });
 });

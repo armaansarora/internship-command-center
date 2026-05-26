@@ -1,20 +1,20 @@
-// src/lib/foundry/agents/ui-texture/texture-rules.ts
-import { loadFoundryTextureRules } from "@/lib/artlab/sdk/canon";
+// src/lib/artlab/sdk/agents/ui-texture/texture-rules.ts
+import { loadArtLabTextureRules } from "@/lib/artlab/sdk/canon";
 
-export interface FoundryTextureRules {
+export interface ArtLabTextureRules {
   tileToleranceDeltaE: number;
   targetResolutionPx: number;
   normalMapStrength: number;
 }
 
-export async function loadFoundryTextureRulesAdapter(): Promise<FoundryTextureRules> {
-  const raw = await loadFoundryTextureRules();
+export async function loadArtLabTextureRulesAdapter(): Promise<ArtLabTextureRules> {
+  const raw = await loadArtLabTextureRules();
   if (!raw) {
-    throw new Error("foundry/ui-texture: no texture rules in canon");
+    throw new Error("artlab/ui-texture: no texture rules in canon");
   }
   if (raw.normalMapStrength < 0 || raw.normalMapStrength > 1) {
     throw new Error(
-      `foundry/ui-texture: normalMapStrength out of [0,1]: ${raw.normalMapStrength}`,
+      `artlab/ui-texture: normalMapStrength out of [0,1]: ${raw.normalMapStrength}`,
     );
   }
   return {

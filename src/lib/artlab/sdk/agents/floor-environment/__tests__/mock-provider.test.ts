@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { createFoundryFloorMockProvider } from "./mock-provider";
+import { createArtLabFloorMockProvider } from "./mock-provider";
 
-describe("createFoundryFloorMockProvider", () => {
+describe("createArtLabFloorMockProvider", () => {
   it("returns a provider object with generateImage", () => {
-    const p = createFoundryFloorMockProvider();
+    const p = createArtLabFloorMockProvider();
     expect(typeof p.generateImage).toBe("function");
   });
 
   it("generateImage returns a valid PNG buffer", async () => {
-    const p = createFoundryFloorMockProvider();
+    const p = createArtLabFloorMockProvider();
     const result = await p.generateImage({
       prompt: "anything",
       aspectRatio: "16:9",
@@ -20,21 +20,21 @@ describe("createFoundryFloorMockProvider", () => {
   });
 
   it("deterministic per seed — same seed produces same bytes", async () => {
-    const p = createFoundryFloorMockProvider();
+    const p = createArtLabFloorMockProvider();
     const a = await p.generateImage({ prompt: "x", aspectRatio: "16:9", seed: 7 });
     const b = await p.generateImage({ prompt: "x", aspectRatio: "16:9", seed: 7 });
     expect(a.bytes.equals(b.bytes)).toBe(true);
   });
 
   it("different seed produces different bytes", async () => {
-    const p = createFoundryFloorMockProvider();
+    const p = createArtLabFloorMockProvider();
     const a = await p.generateImage({ prompt: "x", aspectRatio: "16:9", seed: 1 });
     const b = await p.generateImage({ prompt: "x", aspectRatio: "16:9", seed: 2 });
     expect(a.bytes.equals(b.bytes)).toBe(false);
   });
 
   it("reports mode=mock and costCents=0", async () => {
-    const p = createFoundryFloorMockProvider();
+    const p = createArtLabFloorMockProvider();
     const result = await p.generateImage({ prompt: "x", aspectRatio: "16:9", seed: 1 });
     expect(result.mode).toBe("mock");
     expect(result.costCents).toBe(0);

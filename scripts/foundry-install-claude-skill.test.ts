@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, readFileSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { computeFoundryClaudeSkillTarget, installFoundryClaudeSkill } from "./foundry-install-claude-skill";
+import { computeArtLabClaudeSkillTarget, installArtLabClaudeSkill } from "./foundry-install-claude-skill";
 
 let claudeHome: string;
 
@@ -10,14 +10,14 @@ beforeEach(() => {
   claudeHome = mkdtempSync(join(tmpdir(), "claude-skill-"));
 });
 
-describe("installFoundryClaudeSkill", () => {
-  it("computeFoundryClaudeSkillTarget returns ~/.claude/skills/tower-art-foundry/SKILL.md by default", () => {
-    const target = computeFoundryClaudeSkillTarget({ claudeHome });
+describe("installArtLabClaudeSkill", () => {
+  it("computeArtLabClaudeSkillTarget returns ~/.claude/skills/tower-art-foundry/SKILL.md by default", () => {
+    const target = computeArtLabClaudeSkillTarget({ claudeHome });
     expect(target).toBe(join(claudeHome, "skills", "tower-art-foundry", "SKILL.md"));
   });
 
-  it("installFoundryClaudeSkill writes the SKILL.md when confirmed", async () => {
-    await installFoundryClaudeSkill({
+  it("installArtLabClaudeSkill writes the SKILL.md when confirmed", async () => {
+    await installArtLabClaudeSkill({
       claudeHome,
       repoRoot: "/r",
       confirm: () => Promise.resolve(true),
@@ -26,8 +26,8 @@ describe("installFoundryClaudeSkill", () => {
     expect(written).toMatch(/^---\nname: tower-art-foundry/);
   });
 
-  it("installFoundryClaudeSkill aborts when user declines", async () => {
-    await installFoundryClaudeSkill({
+  it("installArtLabClaudeSkill aborts when user declines", async () => {
+    await installArtLabClaudeSkill({
       claudeHome,
       repoRoot: "/r",
       confirm: () => Promise.resolve(false),
@@ -39,7 +39,7 @@ describe("installFoundryClaudeSkill", () => {
     const target = join(claudeHome, "skills", "tower-art-foundry", "SKILL.md");
     mkdirSync(join(claudeHome, "skills", "tower-art-foundry"), { recursive: true });
     writeFileSync(target, "PREVIOUS");
-    await installFoundryClaudeSkill({
+    await installArtLabClaudeSkill({
       claudeHome,
       repoRoot: "/r",
       confirm: () => Promise.resolve(true),

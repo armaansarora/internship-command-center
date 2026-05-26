@@ -27,7 +27,7 @@ describe("cutout-and-feather stage", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-cutout-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-cutout-"));
   });
 
   afterEach(() => {

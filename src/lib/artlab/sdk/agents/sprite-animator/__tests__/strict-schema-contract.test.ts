@@ -4,15 +4,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import { runFoundrySpriteAnimator } from "../index";
-import { FoundryAssetPackManifestSchema } from "@/lib/artlab/sdk/asset-pack";
-import { createFoundrySpriteMockVideoProvider } from "./mock-video-provider";
-import { createFoundrySpriteMockLottieProvider } from "./mock-lottie-provider";
+import { runArtLabSpriteAnimator } from "../index";
+import { ArtLabAssetPackManifestSchema } from "@/lib/artlab/sdk/asset-pack";
+import { createArtLabSpriteMockVideoProvider } from "./mock-video-provider";
+import { createArtLabSpriteMockLottieProvider } from "./mock-lottie-provider";
 
 /**
  * Contract regression test for Critical 1: the manifest produced by
- * runFoundrySpriteAnimator MUST be acceptable to the strict
- * FoundryAssetPackManifestSchema. We DO NOT mock buildFoundryAssetPack here
+ * runArtLabSpriteAnimator MUST be acceptable to the strict
+ * ArtLabAssetPackManifestSchema. We DO NOT mock buildArtLabAssetPack here
  * — the real builder runs and validates the manifest. If the agent ever
  * emits the legacy flat shape (assetKind, sprite/lottie, qa,
  * integrationSnippet, __packDir), this test fails loudly.
@@ -39,9 +39,9 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   );
   return {
     ...actual,
-    loadFoundryAssetPack: vi.fn(async () => ({
+    loadArtLabAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
-      packDir: "/tmp/foundry-strict-schema-test/char-otis-v3",
+      packDir: "/tmp/artlab-strict-schema-test/char-otis-v3",
       manifest: {
         manifestVersion: "1.0.0",
         packId: "char-otis-v3",
@@ -66,13 +66,13 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
 describe("sprite-animator strict-schema contract", () => {
   let dir: string;
   beforeEach(async () => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-strict-schema-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-strict-schema-"));
     ANCHOR_FIXTURE.bytes = await solid(50);
     ANCHOR_FIXTURE.hash = await computePerceptualHash(ANCHOR_FIXTURE.bytes);
   });
 
-  it("sprite-format manifest passes FoundryAssetPackManifestSchema.parse", async () => {
-    const result = await runFoundrySpriteAnimator(
+  it("sprite-format manifest passes ArtLabAssetPackManifestSchema.parse", async () => {
+    const result = await runArtLabSpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         sourcePackId: "char-otis-v3",
@@ -85,22 +85,22 @@ describe("sprite-animator strict-schema contract", () => {
         loops: true,
       },
       {
-        video: createFoundrySpriteMockVideoProvider(),
-        lottie: createFoundrySpriteMockLottieProvider(),
+        video: createArtLabSpriteMockVideoProvider(),
+        lottie: createArtLabSpriteMockLottieProvider(),
       },
-      { runDir: dir, packsRoot: "/tmp/foundry-strict-schema-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/artlab-strict-schema-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
     // The result.manifest must already satisfy the strict schema — it was
-    // built by the real buildFoundryAssetPack, so a second parse is a
+    // built by the real buildArtLabAssetPack, so a second parse is a
     // defence-in-depth assertion that the contract holds.
-    const reparsed = FoundryAssetPackManifestSchema.parse(result.manifest);
+    const reparsed = ArtLabAssetPackManifestSchema.parse(result.manifest);
     expect(reparsed.kind).toBe("sprite-animation");
     expect(reparsed.agent).toBe("sprite-animator");
     expect(reparsed.canonRefs.characterId).toBe("otis");
   });
 
-  it("lottie-format manifest passes FoundryAssetPackManifestSchema.parse", async () => {
-    const result = await runFoundrySpriteAnimator(
+  it("lottie-format manifest passes ArtLabAssetPackManifestSchema.parse", async () => {
+    const result = await runArtLabSpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         sourcePackId: "char-otis-v3",
@@ -113,12 +113,12 @@ describe("sprite-animator strict-schema contract", () => {
         loops: true,
       },
       {
-        video: createFoundrySpriteMockVideoProvider(),
-        lottie: createFoundrySpriteMockLottieProvider(),
+        video: createArtLabSpriteMockVideoProvider(),
+        lottie: createArtLabSpriteMockLottieProvider(),
       },
-      { runDir: dir, packsRoot: "/tmp/foundry-strict-schema-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/artlab-strict-schema-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
-    const reparsed = FoundryAssetPackManifestSchema.parse(result.manifest);
+    const reparsed = ArtLabAssetPackManifestSchema.parse(result.manifest);
     expect(reparsed.kind).toBe("sprite-animation");
     expect(reparsed.agent).toBe("sprite-animator");
     expect(reparsed.payload.files.some((f) => f.relPath === "lottie.json")).toBe(true);

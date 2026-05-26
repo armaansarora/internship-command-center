@@ -2,17 +2,17 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryGenerate } from "./generate";
+import { handleArtLabGenerate } from "./generate";
 
 let workspaceRoot: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-wire-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-wire-"));
 });
 
 describe("generate handler — brain enrichment", () => {
   it("when ANTHROPIC_API_KEY is unset, the inbox payload has no `brainHint` (no enrichment)", async () => {
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       { kind: "character", description: "Rafe with a charcoal jacket update" },
       { workspaceRoot },
     );
@@ -24,7 +24,7 @@ describe("generate handler — brain enrichment", () => {
   });
 
   it("when ANTHROPIC_API_KEY is set + brainEnrich callback supplied, the sidecar carries `brainHint`", async () => {
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       { kind: "character", description: "Rafe with a charcoal jacket update" },
       {
         workspaceRoot,

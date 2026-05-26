@@ -2,10 +2,10 @@ import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync, existsSync, readFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createFoundryAssetPack, type CreateFoundryAssetPackInput } from "./pack";
+import { createArtLabAssetPack, type CreateArtLabAssetPackInput } from "./pack";
 import { sha256OfBytes } from "./hashing";
 
-function baseInput(packDir: string): Omit<CreateFoundryAssetPackInput, "payloadFiles" | "primaryFileRelPath"> {
+function baseInput(packDir: string): Omit<CreateArtLabAssetPackInput, "payloadFiles" | "primaryFileRelPath"> {
   return {
     packDir,
     kind: "character-sprite",
@@ -45,11 +45,11 @@ function baseInput(packDir: string): Omit<CreateFoundryAssetPackInput, "payloadF
   };
 }
 
-describe("createFoundryAssetPack", () => {
+describe("createArtLabAssetPack", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-pack-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-pack-"));
   });
 
   afterEach(() => {
@@ -59,7 +59,7 @@ describe("createFoundryAssetPack", () => {
   it("writes a manifest.json + payload files atomically", async () => {
     const bytes = Buffer.from("fake-png-bytes");
     const expectedHash = sha256OfBytes(bytes);
-    const pack = await createFoundryAssetPack({
+    const pack = await createArtLabAssetPack({
       packDir: tmpDir,
       kind: "character-sprite",
       agent: "character-master",
@@ -84,7 +84,7 @@ describe("createFoundryAssetPack", () => {
 
   it("rejects when payloadFiles is empty", async () => {
     await expect(
-      createFoundryAssetPack({
+      createArtLabAssetPack({
         packDir: tmpDir,
         kind: "character-sprite",
         agent: "character-master",
@@ -125,7 +125,7 @@ describe("createFoundryAssetPack", () => {
     for (const [label, relPath] of cases) {
       it(`rejects payload relPath: ${label}`, async () => {
         await expect(
-          createFoundryAssetPack({
+          createArtLabAssetPack({
             ...baseInput(tmpDir),
             payloadFiles: [{ relPath, bytes: Buffer.from("x") }],
             primaryFileRelPath: relPath,
@@ -140,7 +140,7 @@ describe("createFoundryAssetPack", () => {
       // written outside the pack directory.
       const escapeProbe = join(tmpDir, "..", "ESCAPE_PROBE_SHOULD_NOT_EXIST");
       await expect(
-        createFoundryAssetPack({
+        createArtLabAssetPack({
           ...baseInput(tmpDir),
           payloadFiles: [{ relPath: "../ESCAPE_PROBE_SHOULD_NOT_EXIST", bytes: Buffer.from("pwned") }],
           primaryFileRelPath: "../ESCAPE_PROBE_SHOULD_NOT_EXIST",
@@ -158,7 +158,7 @@ describe("createFoundryAssetPack", () => {
       // nested-relPath writes correct.
       const bytes = Buffer.from("nested-bytes");
       const input = baseInput(tmpDir);
-      const result = await createFoundryAssetPack({
+      const result = await createArtLabAssetPack({
         ...input,
         payloadFiles: [{ relPath: "frames/idle/01.webp", bytes }],
         primaryFileRelPath: "frames/idle/01.webp",
@@ -176,7 +176,7 @@ describe("createFoundryAssetPack", () => {
       // post-join guard rather than the upfront validator.
       mkdirSync(join(tmpDir, "sibling"), { recursive: true });
       await expect(
-        createFoundryAssetPack({
+        createArtLabAssetPack({
           ...baseInput(tmpDir),
           payloadFiles: [{ relPath: "../sibling/escape.webp", bytes: Buffer.from("x") }],
           primaryFileRelPath: "../sibling/escape.webp",

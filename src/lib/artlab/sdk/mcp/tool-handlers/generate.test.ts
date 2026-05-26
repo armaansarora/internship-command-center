@@ -9,17 +9,17 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryGenerate } from "./generate";
+import { handleArtLabGenerate } from "./generate";
 
 let workspaceRoot: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-generate-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-generate-"));
 });
 
-describe("handleFoundryGenerate", () => {
+describe("handleArtLabGenerate", () => {
   it("writes a queue entry and returns a UUID v4 runId in queued status", async () => {
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       { kind: "floor", description: "A new war room background at dusk", priority: "normal" },
       { workspaceRoot },
     );
@@ -33,7 +33,7 @@ describe("handleFoundryGenerate", () => {
   });
 
   it("the queued JSON payload contains the parsed input + a kind field", async () => {
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       {
         kind: "icon",
         description: "Tower elevator floor indicator chevron",
@@ -56,7 +56,7 @@ describe("handleFoundryGenerate", () => {
   });
 
   it("inbox path uses the runId in the filename for traceability", async () => {
-    const result = await handleFoundryGenerate(
+    const result = await handleArtLabGenerate(
       { kind: "ui-texture", description: "Soft brass gradient for primary buttons" },
       { workspaceRoot },
     );
@@ -68,7 +68,7 @@ describe("handleFoundryGenerate", () => {
 
   it("rejects descriptions shorter than 8 chars", async () => {
     await expect(
-      handleFoundryGenerate({ kind: "icon", description: "hi" }, { workspaceRoot }),
+      handleArtLabGenerate({ kind: "icon", description: "hi" }, { workspaceRoot }),
     ).rejects.toThrow();
   });
 
@@ -100,7 +100,7 @@ describe("handleFoundryGenerate", () => {
       const enrichPromise = new Promise<Record<string, unknown>>((res) => {
         resolveEnrich = res;
       });
-      const result = await handleFoundryGenerate(
+      const result = await handleArtLabGenerate(
         { kind: "character", description: "Rafe needs a charcoal wool jacket pass" },
         {
           workspaceRoot,
@@ -139,7 +139,7 @@ describe("handleFoundryGenerate", () => {
       const enrichPromise = new Promise<Record<string, unknown>>((res) => {
         resolveEnrich = res;
       });
-      const result = await handleFoundryGenerate(
+      const result = await handleArtLabGenerate(
         { kind: "character", description: "Mara silk lapel update" },
         {
           workspaceRoot,
@@ -167,7 +167,7 @@ describe("handleFoundryGenerate", () => {
       );
       expect(triggerFiles).toEqual([]);
       // The sidecar lands in `.processed/` so the brain hint isn't lost on
-      // the floor — see the foundry-poller race regression for the
+      // the floor — see the sdk-poller race regression for the
       // run-state merge path that completes the picture.
       expect(existsSync(archivedSidecar)).toBe(true);
       const hint = JSON.parse(readFileSync(archivedSidecar, "utf8")) as Record<string, unknown>;
@@ -180,7 +180,7 @@ describe("handleFoundryGenerate", () => {
     });
 
     it("records enrichment failure on the sidecar without touching the main file", async () => {
-      const result = await handleFoundryGenerate(
+      const result = await handleArtLabGenerate(
         { kind: "ui-texture", description: "Failing brain enrichment regression" },
         {
           workspaceRoot,

@@ -1,6 +1,6 @@
-// src/lib/foundry/cli/canon-validate.ts
-import { loadFoundryCanon } from "@/lib/artlab/sdk/canon/load-canon";
-import { validateFoundryCanon } from "@/lib/artlab/sdk/canon/validate";
+// src/lib/artlab/sdk/cli/canon-validate.ts
+import { loadArtLabCanon } from "@/lib/artlab/sdk/canon/load-canon";
+import { validateArtLabCanon } from "@/lib/artlab/sdk/canon/validate";
 
 export interface RunCanonValidateInput {
   canonRoot: string;
@@ -9,11 +9,11 @@ export interface RunCanonValidateInput {
 }
 
 export async function runCanonValidateSubcommand(input: RunCanonValidateInput): Promise<number> {
-  const canon = await loadFoundryCanon({ canonRoot: input.canonRoot });
+  const canon = await loadArtLabCanon({ canonRoot: input.canonRoot });
   input.stdout(
     `canon loaded: ${canon.characters.length} characters, ${canon.palettes.length} palettes, ${canon.typography.length} typography, ${canon.motionLanguage.length} motion-language, ${canon.spaceTokens.length} space-tokens, ${canon.iconographyRules.length} iconography-rules (${canon.loadDurationMs} ms)`,
   );
-  const report = validateFoundryCanon(canon);
+  const report = validateArtLabCanon(canon);
   if (!report.ok) {
     for (const issue of report.issues) {
       input.stderr(`issue [${issue.code}] ${issue.recordId ? `record=${issue.recordId} ` : ""}${issue.message}`);

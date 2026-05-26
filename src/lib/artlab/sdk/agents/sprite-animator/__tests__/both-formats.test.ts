@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import { runFoundrySpriteAnimatorCli } from "../cli";
+import { runArtLabSpriteAnimatorCli } from "../cli";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -21,9 +21,9 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
   hash: "0000000000000000",
 };
 
-// Foundry-SDK Critical-1 fix: `buildFoundryAssetPack` is no longer mocked;
+// ArtLab-SDK Critical-1 fix: `buildArtLabAssetPack` is no longer mocked;
 // the real strict-schema builder runs and would reject any drift from the
-// canonical envelope. Only `loadFoundryAssetPack` is stubbed because it
+// canonical envelope. Only `loadArtLabAssetPack` is stubbed because it
 // reads disk.
 vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   const actual = await vi.importActual<typeof import("@/lib/artlab/sdk/asset-pack")>(
@@ -31,9 +31,9 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   );
   return {
     ...actual,
-    loadFoundryAssetPack: vi.fn(async () => ({
+    loadArtLabAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
-      packDir: "/tmp/foundry-test/char-otis-v3",
+      packDir: "/tmp/artlab-test/char-otis-v3",
       manifest: {
         manifestVersion: "1.0.0",
         packId: "char-otis-v3",
@@ -59,14 +59,14 @@ describe("sprite-animator both formats for the same character", () => {
   let spriteDir: string;
   let lottieDir: string;
   beforeEach(async () => {
-    spriteDir = mkdtempSync(join(tmpdir(), "foundry-anim-sprite-"));
-    lottieDir = mkdtempSync(join(tmpdir(), "foundry-anim-lottie-"));
+    spriteDir = mkdtempSync(join(tmpdir(), "artlab-anim-sprite-"));
+    lottieDir = mkdtempSync(join(tmpdir(), "artlab-anim-lottie-"));
     ANCHOR_FIXTURE.bytes = await solid(50);
     ANCHOR_FIXTURE.hash = await computePerceptualHash(ANCHOR_FIXTURE.bytes);
   });
 
   it("produces two different packs with the same sourcePackId", async () => {
-    const spriteResult = await runFoundrySpriteAnimatorCli({
+    const spriteResult = await runArtLabSpriteAnimatorCli({
       sourcePackId: "char-otis-v3",
       action: "idle",
       format: "sprite",
@@ -75,7 +75,7 @@ describe("sprite-animator both formats for the same character", () => {
       seed: 1,
       anchorBytesOverride: ANCHOR_FIXTURE.bytes,
     });
-    const lottieResult = await runFoundrySpriteAnimatorCli({
+    const lottieResult = await runArtLabSpriteAnimatorCli({
       sourcePackId: "char-otis-v3",
       action: "idle",
       format: "lottie",

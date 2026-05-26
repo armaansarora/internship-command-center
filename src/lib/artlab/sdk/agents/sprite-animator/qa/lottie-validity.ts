@@ -26,19 +26,19 @@ const LottieDocumentSchema = z
   })
   .passthrough();
 
-export interface FoundryLottieValidityInput {
+export interface ArtLabLottieValidityInput {
   expectedDurationMs: number;
 }
 
-export interface FoundryLottieValidityReport {
+export interface ArtLabLottieValidityReport {
   passed: boolean;
   reason?: string;
 }
 
-export function evaluateFoundryLottieValidity(
+export function evaluateArtLabLottieValidity(
   rawJson: string,
-  input: FoundryLottieValidityInput,
-): FoundryLottieValidityReport {
+  input: ArtLabLottieValidityInput,
+): ArtLabLottieValidityReport {
   let parsed: unknown;
   try {
     parsed = JSON.parse(rawJson);

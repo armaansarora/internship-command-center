@@ -27,7 +27,7 @@ export interface DaemonCliInboxBridge {
   drain(): Promise<unknown>;
 }
 
-export interface DaemonFoundryPoller {
+export interface DaemonArtLabPoller {
   tick(): Promise<unknown>;
 }
 
@@ -40,7 +40,7 @@ export interface DaemonContextInput {
   telegramPoller: DaemonTicker;
   queueProcessor: DaemonTicker;
   cliInboxBridge?: DaemonCliInboxBridge;
-  foundryPoller?: DaemonFoundryPoller;
+  artLabPoller?: DaemonArtLabPoller;
   cancelDrain?: DaemonCancelDrain;
   crashRecovery?: DaemonCrashRecovery;
   crashRecoveryIntervalMs?: number;
@@ -54,7 +54,7 @@ export interface DaemonContext {
   telegramPoller: DaemonTicker;
   queueProcessor: DaemonTicker;
   cliInboxBridge?: DaemonCliInboxBridge;
-  foundryPoller?: DaemonFoundryPoller;
+  artLabPoller?: DaemonArtLabPoller;
   cancelDrain?: DaemonCancelDrain;
   crashRecovery?: DaemonCrashRecovery;
   crashRecoveryIntervalMs: number;
@@ -74,7 +74,7 @@ export function createDaemonContext(input: DaemonContextInput): DaemonContext {
     telegramPoller: input.telegramPoller,
     queueProcessor: input.queueProcessor,
     cliInboxBridge: input.cliInboxBridge,
-    foundryPoller: input.foundryPoller,
+    artLabPoller: input.artLabPoller,
     cancelDrain: input.cancelDrain,
     crashRecovery: input.crashRecovery,
     crashRecoveryIntervalMs: input.crashRecoveryIntervalMs ?? 60_000,
@@ -165,11 +165,11 @@ export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
     await runStep(ctx.workspaceRoot, "cli-inbox-bridge", () => ctx.cliInboxBridge!.drain());
   }
 
-  // Foundry MCP inbox → ArtLab queue. Must drain BEFORE the queue processor
-  // ticks so newly arrived `foundry/generate` jobs spawn workers on the
+  // ArtLab MCP inbox → ArtLab queue. Must drain BEFORE the queue processor
+  // ticks so newly arrived `artlab/generate` jobs spawn workers on the
   // same tick (mirrors the cli-inbox-bridge → queue-processor ordering).
-  if (ctx.foundryPoller) {
-    await runStep(ctx.workspaceRoot, "foundry-poller", () => ctx.foundryPoller!.tick());
+  if (ctx.artLabPoller) {
+    await runStep(ctx.workspaceRoot, "sdk-poller", () => ctx.artLabPoller!.tick());
   }
 
   if (ctx.crashRecovery) {

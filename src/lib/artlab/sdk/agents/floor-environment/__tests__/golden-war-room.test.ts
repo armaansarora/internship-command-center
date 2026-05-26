@@ -2,10 +2,10 @@ import { describe, expect, it, beforeEach, vi } from "vitest";
 import { mkdtempSync, readFileSync, readdirSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runFoundryFloorCli } from "../cli";
+import { runArtLabFloorCli } from "../cli";
 
 vi.mock("@/lib/artlab/sdk/canon", () => ({
-  loadFoundryFloorCanon: vi.fn().mockResolvedValue({
+  loadArtLabFloorCanon: vi.fn().mockResolvedValue({
     slug: "war-room",
     displayName: "The War Room",
     mood: "tactical-luxury",
@@ -17,7 +17,7 @@ vi.mock("@/lib/artlab/sdk/canon", () => ({
 }));
 
 vi.mock("@/lib/artlab/sdk/asset-pack", () => ({
-  buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => {
+  buildArtLabAssetPack: vi.fn(async (manifest: Record<string, unknown>) => {
     const { writeFileSync, mkdirSync } = await import("node:fs");
     const { join: pathJoin } = await import("node:path");
     const dir = (manifest as { __packDir?: string }).__packDir ?? "/tmp";
@@ -30,11 +30,11 @@ vi.mock("@/lib/artlab/sdk/asset-pack", () => ({
 describe("golden war-room run", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-floor-golden-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-floor-golden-"));
   });
 
   it("produces 7 PNGs (7 time-states × 1 composite layer) + manifest.json", async () => {
-    await runFoundryFloorCli({
+    await runArtLabFloorCli({
       floorSlug: "war-room",
       runDir: dir,
       seed: 1,
@@ -55,7 +55,7 @@ describe("golden war-room run", () => {
   });
 
   it("manifest names every variant with its single composite layer", async () => {
-    await runFoundryFloorCli({
+    await runArtLabFloorCli({
       floorSlug: "war-room",
       runDir: dir,
       seed: 1,
@@ -91,7 +91,7 @@ describe("golden war-room run", () => {
   // Critical 2: CLI now ignores `reportedElements` even if passed. We
   // pass it here to prove backwards compat without theatrical gating.
   it("ignores legacy reportedElements input (no theatrical gate)", async () => {
-    const out = await runFoundryFloorCli({
+    const out = await runArtLabFloorCli({
       floorSlug: "war-room",
       runDir: dir,
       reportedElements: [], // intentionally empty: would have failed the old gate
@@ -102,7 +102,7 @@ describe("golden war-room run", () => {
   });
 
   it("dry-run mode prints `validated` without writing artefacts", async () => {
-    const out = await runFoundryFloorCli({
+    const out = await runArtLabFloorCli({
       floorSlug: "war-room",
       runDir: dir,
       seed: 1,

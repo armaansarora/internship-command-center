@@ -2,12 +2,12 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryAssetPackIntegration } from "./asset-pack-integration";
+import { handleArtLabAssetPackIntegration } from "./asset-pack-integration";
 
 let packsRoot: string;
 
 beforeEach(() => {
-  packsRoot = mkdtempSync(join(tmpdir(), "foundry-integration-"));
+  packsRoot = mkdtempSync(join(tmpdir(), "artlab-integration-"));
 });
 
 function writePack(packId: string, manifest: Record<string, unknown>): void {
@@ -15,7 +15,7 @@ function writePack(packId: string, manifest: Record<string, unknown>): void {
   writeFileSync(join(packsRoot, packId, "manifest.json"), JSON.stringify(manifest));
 }
 
-describe("handleFoundryAssetPackIntegration", () => {
+describe("handleArtLabAssetPackIntegration", () => {
   it("emits a Next App Router snippet for a character pack by default", async () => {
     writePack("rafe-v3", {
       packId: "rafe-v3",
@@ -25,7 +25,7 @@ describe("handleFoundryAssetPackIntegration", () => {
       publicPath: "/art/characters/rafe.png",
       integration: { width: 512, height: 768, alt: "Rafe Calder" },
     });
-    const result = await handleFoundryAssetPackIntegration(
+    const result = await handleArtLabAssetPackIntegration(
       { packId: "rafe-v3", targetFramework: "next-app-router" },
       { packsRoot },
     );
@@ -43,7 +43,7 @@ describe("handleFoundryAssetPackIntegration", () => {
       publicPath: "/art/lottie/rafe-idle.json",
       integration: { width: 240, height: 240, loop: true, autoplay: true },
     });
-    const result = await handleFoundryAssetPackIntegration(
+    const result = await handleArtLabAssetPackIntegration(
       { packId: "rafe-idle-lottie", targetFramework: "next-app-router" },
       { packsRoot },
     );
@@ -60,7 +60,7 @@ describe("handleFoundryAssetPackIntegration", () => {
       publicPath: "/art/textures/btn.webp",
       integration: { cssVar: "--btn-bg" },
     });
-    const result = await handleFoundryAssetPackIntegration(
+    const result = await handleArtLabAssetPackIntegration(
       { packId: "ui-button-tex", targetFramework: "raw" },
       { packsRoot },
     );
@@ -77,7 +77,7 @@ describe("handleFoundryAssetPackIntegration", () => {
       publicPath: "/art/x.png",
     });
     await expect(
-      handleFoundryAssetPackIntegration(
+      handleArtLabAssetPackIntegration(
         { packId: "incomplete", targetFramework: "next-app-router" },
         { packsRoot },
       ),
@@ -100,7 +100,7 @@ describe("handleFoundryAssetPackIntegration", () => {
       ["bare dot", "."],
     ])("rejects %s with a validation/safety error", async (_label, evil) => {
       await expect(
-        handleFoundryAssetPackIntegration(
+        handleArtLabAssetPackIntegration(
           { packId: evil, targetFramework: "next-app-router" },
           { packsRoot },
         ),
@@ -136,7 +136,7 @@ describe("handleFoundryAssetPackIntegration", () => {
         }),
       );
       await expect(
-        handleFoundryAssetPackIntegration(
+        handleArtLabAssetPackIntegration(
           { packId: "rafe-v3", targetFramework: "next-app-router" },
           { packsRoot },
         ),
@@ -147,7 +147,7 @@ describe("handleFoundryAssetPackIntegration", () => {
   // Round-4 follow-up to Codex's MEDIUM finding: a poisoned manifest's
   // `integration.*` fields (alt, cssVar, fps, etc.) flowed into generated
   // TSX/CSS via bare template strings, mirroring the bug round-3 fixed in
-  // the sister file `src/lib/foundry/asset-pack/integration-snippet.ts`.
+  // the sister file `src/lib/artlab/sdk/asset-pack/integration-snippet.ts`.
   // Now all string slots go through `JSON.stringify` and identifier fields
   // through strict character-class validators. These regressions prove the
   // bypass is closed at this surface too.
@@ -162,7 +162,7 @@ describe("handleFoundryAssetPackIntegration", () => {
         publicPath: "/art/x.png",
         integration: { width: 100, height: 100, alt: malicious },
       });
-      const result = await handleFoundryAssetPackIntegration(
+      const result = await handleArtLabAssetPackIntegration(
         { packId: "char-alt-attack", targetFramework: "next-app-router" },
         { packsRoot },
       );
@@ -184,7 +184,7 @@ describe("handleFoundryAssetPackIntegration", () => {
         publicPath: "/art/floors/war-room.webp",
         integration: { alt: malicious },
       });
-      const result = await handleFoundryAssetPackIntegration(
+      const result = await handleArtLabAssetPackIntegration(
         { packId: "floor-alt-attack", targetFramework: "next-app-router" },
         { packsRoot },
       );
@@ -205,7 +205,7 @@ describe("handleFoundryAssetPackIntegration", () => {
         publicPath: "/art/characters/safe.png",
         integration: { width: 100, height: 100, alt: "ok" },
       });
-      const result = await handleFoundryAssetPackIntegration(
+      const result = await handleArtLabAssetPackIntegration(
         { packId: "benign-src", targetFramework: "next-app-router" },
         { packsRoot },
       );
@@ -228,7 +228,7 @@ describe("handleFoundryAssetPackIntegration", () => {
         integration: { cssVar: "--foo; } body { background: red; --x" },
       });
       await expect(
-        handleFoundryAssetPackIntegration(
+        handleArtLabAssetPackIntegration(
           { packId: "ui-css-attack", targetFramework: "raw" },
           { packsRoot },
         ),
@@ -245,7 +245,7 @@ describe("handleFoundryAssetPackIntegration", () => {
         integration: { cssVar: "color" },
       });
       await expect(
-        handleFoundryAssetPackIntegration(
+        handleArtLabAssetPackIntegration(
           { packId: "ui-css-bare", targetFramework: "raw" },
           { packsRoot },
         ),
@@ -261,7 +261,7 @@ describe("handleFoundryAssetPackIntegration", () => {
         publicPath: "/art/textures/btn.webp",
         integration: { cssVar: "--btn-bg" },
       });
-      const result = await handleFoundryAssetPackIntegration(
+      const result = await handleArtLabAssetPackIntegration(
         { packId: "ui-css-safe", targetFramework: "raw" },
         { packsRoot },
       );

@@ -2,27 +2,27 @@ import { mkdir, writeFile, rename } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 import { randomUUID } from "node:crypto";
 import { sha256OfBytes } from "./hashing";
-import { FOUNDRY_ASSET_PACK_VERSION, FOUNDRY_PACK_FILENAME, FOUNDRY_PACK_PAYLOAD_DIR } from "./constants";
+import { ARTLAB_ASSET_PACK_VERSION, ARTLAB_PACK_FILENAME, ARTLAB_PACK_PAYLOAD_DIR } from "./constants";
 import {
-  FoundryAssetPackManifestSchema,
+  ArtLabAssetPackManifestSchema,
   isPathSafeAgainstTraversal,
-  type FoundryAssetPackManifest,
+  type ArtLabAssetPackManifest,
 } from "./manifest.schema";
 
-export interface CreateFoundryAssetPackInput {
+export interface CreateArtLabAssetPackInput {
   packDir: string;
-  kind: FoundryAssetPackManifest["kind"];
-  agent: FoundryAssetPackManifest["agent"];
-  canonRefs: FoundryAssetPackManifest["canonRefs"];
-  dimensions: FoundryAssetPackManifest["dimensions"];
-  colorTokensUsed: FoundryAssetPackManifest["colorTokensUsed"];
-  intendedSlot: FoundryAssetPackManifest["intendedSlot"];
-  gsapCues: FoundryAssetPackManifest["gsapCues"];
-  accessibility: FoundryAssetPackManifest["accessibility"];
-  integrationSnippetTemplate: FoundryAssetPackManifest["integrationSnippetTemplate"];
+  kind: ArtLabAssetPackManifest["kind"];
+  agent: ArtLabAssetPackManifest["agent"];
+  canonRefs: ArtLabAssetPackManifest["canonRefs"];
+  dimensions: ArtLabAssetPackManifest["dimensions"];
+  colorTokensUsed: ArtLabAssetPackManifest["colorTokensUsed"];
+  intendedSlot: ArtLabAssetPackManifest["intendedSlot"];
+  gsapCues: ArtLabAssetPackManifest["gsapCues"];
+  accessibility: ArtLabAssetPackManifest["accessibility"];
+  integrationSnippetTemplate: ArtLabAssetPackManifest["integrationSnippetTemplate"];
   payloadFiles: ReadonlyArray<{ relPath: string; bytes: Buffer }>;
   primaryFileRelPath: string;
-  generation: FoundryAssetPackManifest["generation"];
+  generation: ArtLabAssetPackManifest["generation"];
   packId?: string;
   /**
    * Critical 1 alignment: REQUIRED when `kind === "character-spritesheet"`.
@@ -30,19 +30,19 @@ export interface CreateFoundryAssetPackInput {
    * sprite-animator reads this to load the character's anchor bytes for
    * Lottie identity verification. Optional for non-character kinds.
    */
-  anchorImageRelPath?: FoundryAssetPackManifest["anchorImageRelPath"];
+  anchorImageRelPath?: ArtLabAssetPackManifest["anchorImageRelPath"];
   /**
    * Critical 1 alignment: REQUIRED when `kind === "character-spritesheet"`.
    * 16-hex perceptual hash of the anchor sprite bytes (8×8 greyscale dHash).
    * Compared bit-for-bit against embedded image hashes by the Lottie
    * identity gate.
    */
-  anchorPerceptualHash?: FoundryAssetPackManifest["anchorPerceptualHash"];
+  anchorPerceptualHash?: ArtLabAssetPackManifest["anchorPerceptualHash"];
 }
 
-export interface CreatedFoundryAssetPack {
+export interface CreatedArtLabAssetPack {
   packDir: string;
-  manifest: FoundryAssetPackManifest;
+  manifest: ArtLabAssetPackManifest;
 }
 
 async function atomicWriteFile(path: string, bytes: Buffer | string): Promise<void> {
@@ -51,13 +51,13 @@ async function atomicWriteFile(path: string, bytes: Buffer | string): Promise<vo
   await rename(tmp, path);
 }
 
-export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput): Promise<CreatedFoundryAssetPack> {
+export async function createArtLabAssetPack(input: CreateArtLabAssetPackInput): Promise<CreatedArtLabAssetPack> {
   if (input.payloadFiles.length === 0) {
-    throw new Error("createFoundryAssetPack: payloadFiles must not be empty");
+    throw new Error("createArtLabAssetPack: payloadFiles must not be empty");
   }
 
   await mkdir(input.packDir, { recursive: true });
-  const payloadDir = join(input.packDir, FOUNDRY_PACK_PAYLOAD_DIR);
+  const payloadDir = join(input.packDir, ARTLAB_PACK_PAYLOAD_DIR);
   await mkdir(payloadDir, { recursive: true });
   // Resolve once so the containment guard compares canonical absolute paths.
   // The trailing separator is required so a sibling dir whose name shares a
@@ -65,7 +65,7 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
   const payloadDirResolved = resolve(payloadDir);
   const payloadDirPrefix = payloadDirResolved + sep;
 
-  const files: FoundryAssetPackManifest["payload"]["files"] = [];
+  const files: ArtLabAssetPackManifest["payload"]["files"] = [];
   for (const f of input.payloadFiles) {
     // Reviewer Critical 2 — the prior literal `includes("..")` check was
     // bypassed by absolute paths, backslashes, NUL bytes, and percent-
@@ -74,7 +74,7 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
     // enforces the identical allow-list before touching the filesystem.
     if (!isPathSafeAgainstTraversal(f.relPath, null)) {
       throw new Error(
-        `createFoundryAssetPack: payload relPath must be a canonical relative path (no traversal, no encoding, no backslash, no leading slash, no NUL): ${JSON.stringify(f.relPath)}`,
+        `createArtLabAssetPack: payload relPath must be a canonical relative path (no traversal, no encoding, no backslash, no leading slash, no NUL): ${JSON.stringify(f.relPath)}`,
       );
     }
     const abs = join(payloadDir, f.relPath);
@@ -83,7 +83,7 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
     // regresses, the join+resolve result MUST land inside payloadDir.
     if (!(absResolved === payloadDirResolved || absResolved.startsWith(payloadDirPrefix))) {
       throw new Error(
-        `createFoundryAssetPack: payload relPath resolved outside payloadDir: ${JSON.stringify(f.relPath)}`,
+        `createArtLabAssetPack: payload relPath resolved outside payloadDir: ${JSON.stringify(f.relPath)}`,
       );
     }
     // Replace the prior fragile `join(abs, "..").replace(/\/\.$/, "")` parent
@@ -99,11 +99,11 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
   }
 
   if (!files.some((f) => f.relPath === input.primaryFileRelPath)) {
-    throw new Error(`createFoundryAssetPack: primaryFileRelPath "${input.primaryFileRelPath}" not in payloadFiles`);
+    throw new Error(`createArtLabAssetPack: primaryFileRelPath "${input.primaryFileRelPath}" not in payloadFiles`);
   }
 
   const manifestInput: Record<string, unknown> = {
-    manifestVersion: FOUNDRY_ASSET_PACK_VERSION,
+    manifestVersion: ARTLAB_ASSET_PACK_VERSION,
     packId: input.packId ?? randomUUID(),
     kind: input.kind,
     agent: input.agent,
@@ -123,9 +123,9 @@ export async function createFoundryAssetPack(input: CreateFoundryAssetPackInput)
   if (input.anchorPerceptualHash !== undefined) {
     manifestInput.anchorPerceptualHash = input.anchorPerceptualHash;
   }
-  const manifest: FoundryAssetPackManifest = FoundryAssetPackManifestSchema.parse(manifestInput);
+  const manifest: ArtLabAssetPackManifest = ArtLabAssetPackManifestSchema.parse(manifestInput);
 
-  await atomicWriteFile(join(input.packDir, FOUNDRY_PACK_FILENAME), JSON.stringify(manifest, null, 2));
+  await atomicWriteFile(join(input.packDir, ARTLAB_PACK_FILENAME), JSON.stringify(manifest, null, 2));
 
   return { packDir: input.packDir, manifest };
 }

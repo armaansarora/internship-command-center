@@ -1,21 +1,21 @@
 import { createGeminiProvider, type GeminiProvider } from "@/lib/artlab/providers/gemini-adapter";
 import type {
-  FoundryImageProvider,
-  FoundryImageProviderInput,
-  FoundryImageProviderResult,
+  ArtLabImageProvider,
+  ArtLabImageProviderInput,
+  ArtLabImageProviderResult,
 } from "./types";
 
-export interface CreateGeminiFoundryProviderOptions {
+export interface CreateGeminiArtLabProviderOptions {
   apiKey: string;
   modelId?: string;
 }
 
-function aspectToGemini(aspect: FoundryImageProviderInput["aspectRatio"]): "9:16" | "16:9" | "1:1" {
+function aspectToGemini(aspect: ArtLabImageProviderInput["aspectRatio"]): "9:16" | "16:9" | "1:1" {
   if (aspect === "9:16" || aspect === "16:9" || aspect === "1:1") return aspect;
   return "1:1";
 }
 
-function dimensionsForAspect(aspect: FoundryImageProviderInput["aspectRatio"]): { widthPx: number; heightPx: number } {
+function dimensionsForAspect(aspect: ArtLabImageProviderInput["aspectRatio"]): { widthPx: number; heightPx: number } {
   switch (aspect) {
     case "9:16": return { widthPx: 1152, heightPx: 2048 };
     case "16:9": return { widthPx: 2048, heightPx: 1152 };
@@ -25,11 +25,11 @@ function dimensionsForAspect(aspect: FoundryImageProviderInput["aspectRatio"]): 
   }
 }
 
-export function createGeminiFoundryProvider(options: CreateGeminiFoundryProviderOptions): FoundryImageProvider {
+export function createGeminiArtLabProvider(options: CreateGeminiArtLabProviderOptions): ArtLabImageProvider {
   const inner: GeminiProvider = createGeminiProvider({ apiKey: options.apiKey, modelId: options.modelId });
   return {
     id: "gemini-foundry",
-    async generate(input: FoundryImageProviderInput): Promise<FoundryImageProviderResult> {
+    async generate(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult> {
       const result = await inner.generateImage({
         prompt: input.prompt,
         aspectRatio: aspectToGemini(input.aspectRatio),

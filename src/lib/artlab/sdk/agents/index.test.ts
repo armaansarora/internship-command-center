@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as agents from "./index";
 
-describe("foundry agents public surface", () => {
+describe("artlab sdk agents public surface", () => {
   it("exports runCharacterMaster", () => {
     expect(typeof agents.runCharacterMaster).toBe("function");
   });

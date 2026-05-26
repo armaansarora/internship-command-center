@@ -1,16 +1,16 @@
-// src/lib/foundry/agents/ui-texture/llm-provider.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/llm-provider.test.ts
 import { describe, expect, it } from "vitest";
 import {
-  FoundryIconLlmInputSchema,
-  FoundryIconLlmResultSchema,
+  ArtLabIconLlmInputSchema,
+  ArtLabIconLlmResultSchema,
 } from "./llm-provider";
 
-describe("foundry icon LLM provider contract", () => {
+describe("artlab sdk icon LLM provider contract", () => {
   it("input schema enforces the four required fields", () => {
     expect(() =>
-      FoundryIconLlmInputSchema.parse({ name: "x", ariaLabel: "x" }),
+      ArtLabIconLlmInputSchema.parse({ name: "x", ariaLabel: "x" }),
     ).toThrow();
-    const ok = FoundryIconLlmInputSchema.parse({
+    const ok = ArtLabIconLlmInputSchema.parse({
       name: "x",
       ariaLabel: "x",
       strokeWidthPx: 1.5,
@@ -20,7 +20,7 @@ describe("foundry icon LLM provider contract", () => {
   });
 
   it("result schema enforces SVG string + mode + cost + duration", () => {
-    const ok = FoundryIconLlmResultSchema.parse({
+    const ok = ArtLabIconLlmResultSchema.parse({
       svg: "<svg/>",
       mode: "real",
       costCents: 3,
@@ -31,7 +31,7 @@ describe("foundry icon LLM provider contract", () => {
 
   it("result schema rejects unknown mode", () => {
     expect(() =>
-      FoundryIconLlmResultSchema.parse({
+      ArtLabIconLlmResultSchema.parse({
         svg: "<svg/>",
         mode: "wat",
         costCents: 3,

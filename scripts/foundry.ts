@@ -1,10 +1,10 @@
 // scripts/foundry.ts
 import { runCanonValidateSubcommand } from "@/lib/artlab/sdk/cli/canon-validate";
 import { runCharacterSubcommand } from "@/lib/artlab/sdk/cli/character";
-import { runFoundryFloorCli } from "@/lib/artlab/sdk/agents/floor-environment/cli";
+import { runArtLabFloorCli } from "@/lib/artlab/sdk/agents/floor-environment/cli";
 import { join } from "node:path";
 
-const HELP = `foundry — Tower Art Foundry CLI
+const HELP = `foundry — Tower Art ArtLab CLI
 Usage:
   foundry canon validate           validate every YAML canon file against its schema
   foundry character <name>         run the character-master agent (Phase 2)
@@ -28,11 +28,11 @@ Usage:
 const DEFAULT_CANON_ROOT = join(process.cwd(), "docs/foundry/canon");
 
 function resolveWorkspaceRoot(): string {
-  return process.env.FOUNDRY_WORKSPACE_ROOT ?? join(process.cwd(), ".foundry-workspace");
+  return process.env.ARTLAB_WORKSPACE_ROOT ?? join(process.cwd(), ".foundry-workspace");
 }
 
 function resolveProviderMode(): "mock" | "gemini" {
-  const mode = process.env.FOUNDRY_PROVIDER_MODE ?? "mock";
+  const mode = process.env.ARTLAB_PROVIDER_MODE ?? "mock";
   if (mode === "gemini") return "gemini";
   return "mock";
 }
@@ -113,7 +113,7 @@ async function main(argv: readonly string[]): Promise<number> {
       }
     }
     try {
-      const result = await runFoundryFloorCli({
+      const result = await runArtLabFloorCli({
         floorSlug: sub2,
         runDir,
         reportedElements: reported,
@@ -273,10 +273,10 @@ async function main(argv: readonly string[]): Promise<number> {
       }
     }
     try {
-      const { runFoundryUiTextureCli } = await import(
+      const { runArtLabUiTextureCli } = await import(
         "@/lib/artlab/sdk/agents/ui-texture/cli"
       );
-      const out = await runFoundryUiTextureCli({
+      const out = await runArtLabUiTextureCli({
         name: sub2,
         kind: kindFlag,
         ariaLabel,
@@ -431,10 +431,10 @@ async function main(argv: readonly string[]): Promise<number> {
       }
     }
     try {
-      const { runFoundrySpriteAnimatorCli } = await import(
+      const { runArtLabSpriteAnimatorCli } = await import(
         "@/lib/artlab/sdk/agents/sprite-animator/cli"
       );
-      const out = await runFoundrySpriteAnimatorCli({
+      const out = await runArtLabSpriteAnimatorCli({
         sourcePackId: sub2,
         action,
         format,

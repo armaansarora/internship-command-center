@@ -1,6 +1,6 @@
-// src/lib/foundry/canon/character-schema.test.ts
+// src/lib/artlab/sdk/canon/character-schema.test.ts
 import { describe, expect, it } from "vitest";
-import { FoundryCharacterCanonSchema } from "./character-schema";
+import { ArtLabCharacterCanonSchema } from "./character-schema";
 
 const VALID_CHARACTER = {
   header: {
@@ -34,32 +34,32 @@ const VALID_CHARACTER = {
   artDirectionNotes: "Sol should feel socially open and precise, with contact-card warmth instead of sales energy.",
 };
 
-describe("FoundryCharacterCanonSchema", () => {
+describe("ArtLabCharacterCanonSchema", () => {
   it("accepts a valid character record", () => {
-    expect(() => FoundryCharacterCanonSchema.parse(VALID_CHARACTER)).not.toThrow();
+    expect(() => ArtLabCharacterCanonSchema.parse(VALID_CHARACTER)).not.toThrow();
   });
 
   it("rejects when outfitVariants is empty", () => {
     expect(() =>
-      FoundryCharacterCanonSchema.parse({ ...VALID_CHARACTER, outfitVariants: [] }),
+      ArtLabCharacterCanonSchema.parse({ ...VALID_CHARACTER, outfitVariants: [] }),
     ).toThrow();
   });
 
   it("rejects when poseStates is missing the canonical 7", () => {
     expect(() =>
-      FoundryCharacterCanonSchema.parse({ ...VALID_CHARACTER, poseStates: ["idle"] }),
+      ArtLabCharacterCanonSchema.parse({ ...VALID_CHARACTER, poseStates: ["idle"] }),
     ).toThrow();
   });
 
   it("rejects unknown promotionStatus", () => {
     expect(() =>
-      FoundryCharacterCanonSchema.parse({ ...VALID_CHARACTER, promotionStatus: "rogue" }),
+      ArtLabCharacterCanonSchema.parse({ ...VALID_CHARACTER, promotionStatus: "rogue" }),
     ).toThrow();
   });
 
   it("rejects when header.kind is not 'character'", () => {
     expect(() =>
-      FoundryCharacterCanonSchema.parse({
+      ArtLabCharacterCanonSchema.parse({
         ...VALID_CHARACTER,
         header: { ...VALID_CHARACTER.header, kind: "palette" },
       }),

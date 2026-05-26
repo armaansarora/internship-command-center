@@ -9,7 +9,7 @@ describe("acquireDaemonLock", () => {
   let workspaceRoot: string;
 
   beforeEach(() => {
-    workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-daemon-lock-"));
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-daemon-lock-"));
   });
 
   afterEach(() => {

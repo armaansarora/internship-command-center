@@ -2,13 +2,13 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import {
-  FoundryAssetPackListInputSchema,
-  FoundryAssetPackListOutputSchema,
-  FOUNDRY_ASSET_KINDS,
-  type FoundryAssetPackListOutput,
+  ArtLabAssetPackListInputSchema,
+  ArtLabAssetPackListOutputSchema,
+  ARTLAB_ASSET_KINDS,
+  type ArtLabAssetPackListOutput,
 } from "../tools";
 
-export interface FoundryAssetPackListContext {
+export interface ArtLabAssetPackListContext {
   /** Root directory containing one subdirectory per promoted Asset Pack. */
   packsRoot: string;
 }
@@ -16,7 +16,7 @@ export interface FoundryAssetPackListContext {
 const ManifestSchema = z
   .object({
     packId: z.string().min(1),
-    kind: z.enum(FOUNDRY_ASSET_KINDS),
+    kind: z.enum(ARTLAB_ASSET_KINDS),
     slotId: z.string().min(1),
     promotedAt: z.string().datetime({ offset: true }),
     characterId: z.string().min(1).optional(),
@@ -24,16 +24,16 @@ const ManifestSchema = z
   })
   .strict();
 
-export async function handleFoundryAssetPackList(
+export async function handleArtLabAssetPackList(
   rawInput: unknown,
-  ctx: FoundryAssetPackListContext,
-): Promise<FoundryAssetPackListOutput> {
-  const input = FoundryAssetPackListInputSchema.parse(rawInput);
+  ctx: ArtLabAssetPackListContext,
+): Promise<ArtLabAssetPackListOutput> {
+  const input = ArtLabAssetPackListInputSchema.parse(rawInput);
   if (!existsSync(ctx.packsRoot)) {
-    return FoundryAssetPackListOutputSchema.parse({ packs: [] });
+    return ArtLabAssetPackListOutputSchema.parse({ packs: [] });
   }
 
-  const packs: FoundryAssetPackListOutput["packs"] = [];
+  const packs: ArtLabAssetPackListOutput["packs"] = [];
   for (const dir of readdirSync(ctx.packsRoot)) {
     const manifestPath = join(ctx.packsRoot, dir, "manifest.json");
     if (!existsSync(manifestPath)) continue;
@@ -58,5 +58,5 @@ export async function handleFoundryAssetPackList(
 
   // Stable order: by promotedAt ascending so latest is at the bottom.
   packs.sort((a, b) => a.promotedAt.localeCompare(b.promotedAt));
-  return FoundryAssetPackListOutputSchema.parse({ packs });
+  return ArtLabAssetPackListOutputSchema.parse({ packs });
 }

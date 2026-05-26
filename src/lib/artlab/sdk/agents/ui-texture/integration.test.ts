@@ -1,13 +1,13 @@
-// src/lib/foundry/agents/ui-texture/integration.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/integration.test.ts
 import { describe, expect, it } from "vitest";
 import {
-  renderFoundryIconIntegrationSnippet,
-  renderFoundryTextureIntegrationSnippet,
+  renderArtLabIconIntegrationSnippet,
+  renderArtLabTextureIntegrationSnippet,
 } from "./integration";
 
-describe("renderFoundryIconIntegrationSnippet", () => {
+describe("renderArtLabIconIntegrationSnippet", () => {
   it("emits a React-style component import for the icon", () => {
-    const out = renderFoundryIconIntegrationSnippet({
+    const out = renderArtLabIconIntegrationSnippet({
       name: "elevator-door",
       packPath: ".foundry/packs/icon-elevator-door",
     });
@@ -17,7 +17,7 @@ describe("renderFoundryIconIntegrationSnippet", () => {
   });
 
   it("includes the pack path as a comment", () => {
-    const out = renderFoundryIconIntegrationSnippet({
+    const out = renderArtLabIconIntegrationSnippet({
       name: "elevator-door",
       packPath: ".foundry/packs/icon-elevator-door",
     });
@@ -25,7 +25,7 @@ describe("renderFoundryIconIntegrationSnippet", () => {
   });
 
   it("converts dashed names to PascalCase component names", () => {
-    const out = renderFoundryIconIntegrationSnippet({
+    const out = renderArtLabIconIntegrationSnippet({
       name: "elevator-door",
       packPath: "x",
     });
@@ -33,9 +33,9 @@ describe("renderFoundryIconIntegrationSnippet", () => {
   });
 });
 
-describe("renderFoundryTextureIntegrationSnippet", () => {
+describe("renderArtLabTextureIntegrationSnippet", () => {
   it("emits a Tailwind background-image block referencing the PNG", () => {
-    const out = renderFoundryTextureIntegrationSnippet({
+    const out = renderArtLabTextureIntegrationSnippet({
       name: "etched-gold-border",
       pngPath: "etched-gold-border.png",
       normalMapPath: "etched-gold-border.normal.png",
@@ -46,18 +46,18 @@ describe("renderFoundryTextureIntegrationSnippet", () => {
   });
 
   it("emits a CSS variable for the normal map", () => {
-    const out = renderFoundryTextureIntegrationSnippet({
+    const out = renderArtLabTextureIntegrationSnippet({
       name: "etched-gold-border",
       pngPath: "etched-gold-border.png",
       normalMapPath: "etched-gold-border.normal.png",
       tileMode: "repeat",
     });
-    expect(out).toContain("--foundry-normal-map");
+    expect(out).toContain("--artlab-normal-map");
     expect(out).toContain("etched-gold-border.normal.png");
   });
 
   it("documents the tile mode in a comment", () => {
-    const out = renderFoundryTextureIntegrationSnippet({
+    const out = renderArtLabTextureIntegrationSnippet({
       name: "x",
       pngPath: "x.png",
       normalMapPath: "x.normal.png",

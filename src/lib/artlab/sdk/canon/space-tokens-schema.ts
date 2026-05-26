@@ -1,10 +1,10 @@
-// src/lib/foundry/canon/space-tokens-schema.ts
+// src/lib/artlab/sdk/canon/space-tokens-schema.ts
 import { z } from "zod";
-import { FoundryCanonHeaderSchema } from "./types";
+import { ArtLabCanonHeaderSchema } from "./types";
 
-const SpaceHeaderSchema = FoundryCanonHeaderSchema.extend({ kind: z.literal("space-tokens") });
+const SpaceHeaderSchema = ArtLabCanonHeaderSchema.extend({ kind: z.literal("space-tokens") });
 
-export const FoundrySpaceTokensCanonSchema = z
+export const ArtLabSpaceTokensCanonSchema = z
   .object({
     header: SpaceHeaderSchema,
     gutterPx: z.number().int().positive(),
@@ -13,4 +13,4 @@ export const FoundrySpaceTokensCanonSchema = z
     glassOpacity: z.number().min(0).max(1),
   })
   .strict();
-export type FoundrySpaceTokensCanon = z.infer<typeof FoundrySpaceTokensCanonSchema>;
+export type ArtLabSpaceTokensCanon = z.infer<typeof ArtLabSpaceTokensCanonSchema>;

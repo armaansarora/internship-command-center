@@ -10,7 +10,7 @@ import sharp from "sharp";
 
 const PALETTE_DISTANCE_THRESHOLD = 80;
 
-export interface FoundryFloorPaletteReport {
+export interface ArtLabFloorPaletteReport {
   passed: boolean;
   distance: number;
   thresholdDistance: number;
@@ -21,7 +21,7 @@ function hexToHistogram(hexes: ReadonlyArray<string>): PaletteHistogram {
     topColors: hexes.map((hex) => {
       const clean = hex.startsWith("#") ? hex.slice(1) : hex;
       if (clean.length !== 6) {
-        throw new Error(`foundry/floor: bad palette hex ${hex}`);
+        throw new Error(`artlab/floor: bad palette hex ${hex}`);
       }
       const r = parseInt(clean.slice(0, 2), 16);
       const g = parseInt(clean.slice(2, 4), 16);
@@ -32,7 +32,7 @@ function hexToHistogram(hexes: ReadonlyArray<string>): PaletteHistogram {
 }
 
 async function pngToHistogram(bytes: Buffer): Promise<PaletteHistogram> {
-  const dir = mkdtempSync(join(tmpdir(), "foundry-floor-palette-"));
+  const dir = mkdtempSync(join(tmpdir(), "artlab-floor-palette-"));
   const tmpPath = join(dir, "image.png");
   await sharp(bytes).toFile(tmpPath);
   try {
@@ -46,12 +46,12 @@ async function pngToHistogram(bytes: Buffer): Promise<PaletteHistogram> {
   }
 }
 
-export async function evaluateFoundryFloorPaletteFit(
+export async function evaluateArtLabFloorPaletteFit(
   imageBytes: Buffer,
   canonPalette: ReadonlyArray<string>,
-): Promise<FoundryFloorPaletteReport> {
+): Promise<ArtLabFloorPaletteReport> {
   if (canonPalette.length === 0) {
-    throw new Error("foundry/floor: canon palette must be non-empty");
+    throw new Error("artlab/floor: canon palette must be non-empty");
   }
   const canonHist = hexToHistogram(canonPalette);
   const imageHist = await pngToHistogram(imageBytes);

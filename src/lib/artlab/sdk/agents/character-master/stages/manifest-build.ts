@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
-import { createFoundryAssetPack, resolveFoundrySlot, type CreatedFoundryAssetPack } from "@/lib/artlab/sdk/asset-pack";
+import { createArtLabAssetPack, resolveArtLabSlot, type CreatedArtLabAssetPack } from "@/lib/artlab/sdk/asset-pack";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import type { FoundryCharacterCanon } from "@/lib/artlab/sdk/canon";
+import type { ArtLabCharacterCanon } from "@/lib/artlab/sdk/canon";
 import type { ProcessedSprite } from "./cutout-and-feather";
 
 export interface ManifestBuildStageInput {
-  character: FoundryCharacterCanon;
+  character: ArtLabCharacterCanon;
   sprites: readonly ProcessedSprite[];
   packDir: string;
   anchorLaneIndex: number;
@@ -16,11 +16,11 @@ export interface ManifestBuildStageInput {
 }
 
 export interface ManifestBuildStageResult {
-  pack: CreatedFoundryAssetPack;
+  pack: CreatedArtLabAssetPack;
   durationMs: number;
 }
 
-function inferDirPart(character: FoundryCharacterCanon): string {
+function inferDirPart(character: ArtLabCharacterCanon): string {
   return `${character.floorId}/${character.header.id}`;
 }
 
@@ -32,7 +32,7 @@ export async function runManifestBuildStage(input: ManifestBuildStageInput): Pro
 
   const primaryRelPath = `${primary.outfit}/${primary.pose}.webp`;
   const slotId = `${dirPart}/${primary.outfit}/${primary.pose}`;
-  const slot = resolveFoundrySlot(slotId);
+  const slot = resolveArtLabSlot(slotId);
   if (!slot) {
     throw new Error(`manifest-build: slot not registered: ${slotId}`);
   }
@@ -56,7 +56,7 @@ export async function runManifestBuildStage(input: ManifestBuildStageInput): Pro
   }
   const anchorPerceptualHash = await computePerceptualHash(anchorPayload.bytes);
 
-  const pack = await createFoundryAssetPack({
+  const pack = await createArtLabAssetPack({
     packDir: input.packDir,
     kind: "character-spritesheet",
     agent: "character-master",

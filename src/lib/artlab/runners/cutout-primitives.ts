@@ -3,7 +3,7 @@
 // Shared cutout primitives: flood-fill backdrop knockout, single-pass edge
 // feather, perimeter color sampling with stddev, RGBA composition, and an
 // alpha-histogram classifier. Extracted from the original `cutout-runner`
-// module so the Tower Art Foundry's `character-master` agent can reuse the
+// module so the Tower Art ArtLab's `character-master` agent can reuse the
 // same mature implementation instead of reimplementing per-pixel
 // thresholding from scratch. Behavior is unchanged for the artlab runner —
 // this is a pure code-motion refactor.
@@ -69,7 +69,7 @@ export interface BackdropSubtractResult {
 
 /**
  * Per-pixel alpha histogram + perimeter-edge feather report. Used by the
- * foundry character-master stage to surface per-sprite alpha health.
+ * ArtLab SDK character-master stage to surface per-sprite alpha health.
  */
 export interface AlphaSampleReport {
   totalOpaquePx: number;
@@ -253,7 +253,7 @@ export async function backdropSubtractToRgba(sourceBytes: Buffer): Promise<Backd
 /**
  * Classify the alpha channel of an RGBA PNG into opaque (>=250), transparent
  * (<=5), and semi-transparent (anything else) buckets, plus the perimeter
- * edge-feather mean alpha. Used by the foundry character-master stage to
+ * edge-feather mean alpha. Used by the ArtLab SDK character-master stage to
  * surface per-sprite alpha health alongside each PNG.
  */
 export async function classifyAlpha(buf: Buffer): Promise<AlphaSampleReport> {

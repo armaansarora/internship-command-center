@@ -1,22 +1,22 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
-  FoundryAssetPackIntegrationInputSchema,
-  FoundryAssetPackIntegrationOutputSchema,
-  type FoundryAssetPackIntegrationInput,
-  type FoundryAssetPackIntegrationOutput,
-  type FoundryAssetKind,
+  ArtLabAssetPackIntegrationInputSchema,
+  ArtLabAssetPackIntegrationOutputSchema,
+  type ArtLabAssetPackIntegrationInput,
+  type ArtLabAssetPackIntegrationOutput,
+  type ArtLabAssetKind,
 } from "../tools";
 import {
   PackIdSchema,
   resolvePackDir,
   assertUrlPathSafeAgainstTraversal,
 } from "../lib/path-safety";
-import type { FoundryAssetPackListContext } from "./asset-pack-list";
+import type { ArtLabAssetPackListContext } from "./asset-pack-list";
 
 interface ManifestForIntegration {
   packId: string;
-  kind: FoundryAssetKind;
+  kind: ArtLabAssetKind;
   publicPath: string;
   integration?: Record<string, unknown>;
 }
@@ -141,7 +141,7 @@ function snippetForLottie(m: ManifestForIntegration): {
 
 function snippetFor(
   m: ManifestForIntegration,
-  framework: FoundryAssetPackIntegrationInput["targetFramework"],
+  framework: ArtLabAssetPackIntegrationInput["targetFramework"],
 ): { importStatement: string; snippet: string } {
   if (framework === "raw") {
     return snippetForUiTexture(m);
@@ -162,11 +162,11 @@ function snippetFor(
   }
 }
 
-export async function handleFoundryAssetPackIntegration(
+export async function handleArtLabAssetPackIntegration(
   rawInput: unknown,
-  ctx: FoundryAssetPackListContext,
-): Promise<FoundryAssetPackIntegrationOutput> {
-  const input = FoundryAssetPackIntegrationInputSchema.parse(rawInput);
+  ctx: ArtLabAssetPackListContext,
+): Promise<ArtLabAssetPackIntegrationOutput> {
+  const input = ArtLabAssetPackIntegrationInputSchema.parse(rawInput);
   // Defense in depth: validate packId charset/encoding before any path join,
   // then re-confirm the resolved directory stays inside packsRoot.
   const safePackId = PackIdSchema.parse(input.packId);
@@ -191,7 +191,7 @@ export async function handleFoundryAssetPackIntegration(
   }
   assertUrlPathSafeAgainstTraversal(m.publicPath, "manifest publicPath");
   const built = snippetFor(m, input.targetFramework);
-  return FoundryAssetPackIntegrationOutputSchema.parse({
+  return ArtLabAssetPackIntegrationOutputSchema.parse({
     packId: safePackId,
     importStatement: built.importStatement,
     snippet: built.snippet,

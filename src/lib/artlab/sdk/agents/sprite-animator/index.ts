@@ -2,39 +2,39 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve as resolvePath } from "node:path";
 import sharp from "sharp";
 import {
-  buildFoundryAssetPack,
-  createFoundryAssetPack,
-  resolveFoundrySlot,
-  type FoundryAssetPackManifest,
+  buildArtLabAssetPack,
+  createArtLabAssetPack,
+  resolveArtLabSlot,
+  type ArtLabAssetPackManifest,
 } from "@/lib/artlab/sdk/asset-pack";
-import { resolveFoundrySpriteSourcePack } from "./source-pack";
-import { runFoundrySpriteQa, type FoundrySpriteQaReport } from "./qa";
-import { writeFoundrySpritePack, writeFoundryLottiePack } from "./pack-writer";
+import { resolveArtLabSpriteSourcePack } from "./source-pack";
+import { runArtLabSpriteQa, type ArtLabSpriteQaReport } from "./qa";
+import { writeArtLabSpritePack, writeArtLabLottiePack } from "./pack-writer";
 import {
-  renderFoundrySpriteIntegrationSnippet,
-  renderFoundryLottieIntegrationSnippet,
+  renderArtLabSpriteIntegrationSnippet,
+  renderArtLabLottieIntegrationSnippet,
 } from "./integration";
 import {
-  FoundrySpriteAnimatorInputSchema,
-  type FoundrySpriteAnimatorInput,
-  type FoundrySpriteAction,
-  type FoundrySpriteFormat,
+  ArtLabSpriteAnimatorInputSchema,
+  type ArtLabSpriteAnimatorInput,
+  type ArtLabSpriteAction,
+  type ArtLabSpriteFormat,
 } from "./types";
-import type { FoundryVideoProvider } from "./video-provider";
-import type { FoundryLottieProvider } from "./lottie-provider";
+import type { ArtLabVideoProvider } from "./video-provider";
+import type { ArtLabLottieProvider } from "./lottie-provider";
 
-export interface FoundrySpriteAnimatorProviders {
-  video: FoundryVideoProvider;
-  lottie: FoundryLottieProvider;
+export interface ArtLabSpriteAnimatorProviders {
+  video: ArtLabVideoProvider;
+  lottie: ArtLabLottieProvider;
 }
 
-export interface FoundrySpriteAnimatorContext {
+export interface ArtLabSpriteAnimatorContext {
   runDir: string;
   /**
-   * Root directory holding promoted character packs. `resolveFoundrySpriteSourcePack`
+   * Root directory holding promoted character packs. `resolveArtLabSpriteSourcePack`
    * joins this with the `sourcePackId` to locate the pack on disk. Tests
-   * may pass any prefix and rely on the `loadFoundryAssetPack` mock; the
-   * production daemon wires this from `FOUNDRY_PACKS_ROOT`.
+   * may pass any prefix and rely on the `loadArtLabAssetPack` mock; the
+   * production daemon wires this from `ARTLAB_PACKS_ROOT`.
    */
   packsRoot: string;
   /**
@@ -44,13 +44,13 @@ export interface FoundrySpriteAnimatorContext {
   anchorBytesOverride?: Buffer;
 }
 
-export interface FoundrySpriteAnimatorResult {
+export interface ArtLabSpriteAnimatorResult {
   packId: string;
-  manifest: FoundryAssetPackManifest;
+  manifest: ArtLabAssetPackManifest;
 }
 
 const VALID_ASPECT_RATIOS = ["9:16", "16:9", "1:1", "4:3", "3:4"] as const;
-type FoundryAspectRatio = (typeof VALID_ASPECT_RATIOS)[number];
+type ArtLabAspectRatio = (typeof VALID_ASPECT_RATIOS)[number];
 
 /**
  * Snap (width, height) to the manifest schema's allowed aspect-ratio enum.
@@ -59,9 +59,9 @@ type FoundryAspectRatio = (typeof VALID_ASPECT_RATIOS)[number];
  * coerce an off-grid ratio into the manifest. We accept a small tolerance
  * because providers occasionally return frames off by one pixel.
  */
-function pickAspectRatio(width: number, height: number): FoundryAspectRatio | null {
+function pickAspectRatio(width: number, height: number): ArtLabAspectRatio | null {
   const actual = width / height;
-  let best: { value: FoundryAspectRatio; err: number } | null = null;
+  let best: { value: ArtLabAspectRatio; err: number } | null = null;
   for (const candidate of VALID_ASPECT_RATIOS) {
     const [a, b] = candidate.split(":").map(Number) as [number, number];
     const target = a / b;
@@ -76,7 +76,7 @@ function pickAspectRatio(width: number, height: number): FoundryAspectRatio | nu
 
 function loadAnchorBytes(
   source: { anchorImagePath: string },
-  context: FoundrySpriteAnimatorContext,
+  context: ArtLabSpriteAnimatorContext,
 ): Buffer {
   if (context.anchorBytesOverride) {
     return context.anchorBytesOverride;
@@ -84,7 +84,7 @@ function loadAnchorBytes(
   const path = resolvePath(source.anchorImagePath);
   if (!existsSync(path)) {
     throw new Error(
-      `foundry/sprite-animator: anchor image not found at ${path}`,
+      `artlab/sprite-animator: anchor image not found at ${path}`,
     );
   }
   return readFileSync(path);
@@ -92,8 +92,8 @@ function loadAnchorBytes(
 
 function buildPackId(
   sourcePackId: string,
-  action: FoundrySpriteAction,
-  format: FoundrySpriteFormat,
+  action: ArtLabSpriteAction,
+  format: ArtLabSpriteFormat,
   runId: string,
 ): string {
   // packId carries the source character pack, action, format, and a runId
@@ -104,14 +104,14 @@ function buildPackId(
 
 function buildIntendedSlot(
   characterId: string,
-  action: FoundrySpriteAction,
-  format: FoundrySpriteFormat,
-): FoundryAssetPackManifest["intendedSlot"] {
+  action: ArtLabSpriteAction,
+  format: ArtLabSpriteFormat,
+): ArtLabAssetPackManifest["intendedSlot"] {
   const slotId = `animations/${characterId}/${action}/${format}`;
-  const slot = resolveFoundrySlot(slotId);
+  const slot = resolveArtLabSlot(slotId);
   if (!slot) {
     throw new Error(
-      `foundry/sprite-animator: slot ${slotId} is not registered — register it under FOUNDRY_SLOT_REGISTRY before generating animations for ${characterId}/${action}/${format}`,
+      `artlab/sprite-animator: slot ${slotId} is not registered — register it under ARTLAB_SLOT_REGISTRY before generating animations for ${characterId}/${action}/${format}`,
     );
   }
   return {
@@ -123,10 +123,10 @@ function buildIntendedSlot(
 }
 
 function buildGsapCues(
-  action: FoundrySpriteAction,
+  action: ArtLabSpriteAction,
   durationMs: number,
   motionCurve: string,
-): FoundryAssetPackManifest["gsapCues"] {
+): ArtLabAssetPackManifest["gsapCues"] {
   // A single cue per pack — drives the integration snippet's GSAP timeline.
   // Sprite/Lottie consumers can extend with secondary cues without breaking
   // the manifest contract. cueId is constrained to /^[a-zA-Z_$][a-zA-Z0-9_$]*$/
@@ -137,7 +137,7 @@ function buildGsapCues(
   return [
     {
       cueId: `cue${safeAction}Main`,
-      targetSelector: `[data-foundry-animation="${action}"]`,
+      targetSelector: `[data-artlab-animation="${action}"]`,
       timeline: "main",
       durationMs,
       easing: motionCurve,
@@ -147,8 +147,8 @@ function buildGsapCues(
 
 function buildAccessibility(
   characterId: string,
-  action: FoundrySpriteAction,
-): FoundryAssetPackManifest["accessibility"] {
+  action: ArtLabSpriteAction,
+): ArtLabAssetPackManifest["accessibility"] {
   return {
     altText: `${characterId} ${action} animation`,
     role: "img",
@@ -160,13 +160,13 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-export async function runFoundrySpriteAnimator(
-  rawInput: FoundrySpriteAnimatorInput,
-  providers: FoundrySpriteAnimatorProviders,
-  context: FoundrySpriteAnimatorContext,
-): Promise<FoundrySpriteAnimatorResult> {
-  const input = FoundrySpriteAnimatorInputSchema.parse(rawInput);
-  const source = await resolveFoundrySpriteSourcePack(input.sourcePackId, {
+export async function runArtLabSpriteAnimator(
+  rawInput: ArtLabSpriteAnimatorInput,
+  providers: ArtLabSpriteAnimatorProviders,
+  context: ArtLabSpriteAnimatorContext,
+): Promise<ArtLabSpriteAnimatorResult> {
+  const input = ArtLabSpriteAnimatorInputSchema.parse(rawInput);
+  const source = await resolveArtLabSpriteSourcePack(input.sourcePackId, {
     packsRoot: context.packsRoot,
   });
   const anchorBytes = loadAnchorBytes(source, context);
@@ -181,17 +181,17 @@ export async function runFoundrySpriteAnimator(
     });
     if (video.frames.length !== input.frameCount) {
       throw new Error(
-        `foundry/sprite-animator: video provider returned ${video.frames.length} frames (expected ${input.frameCount})`,
+        `artlab/sprite-animator: video provider returned ${video.frames.length} frames (expected ${input.frameCount})`,
       );
     }
-    const qa = await runFoundrySpriteQa({
+    const qa = await runArtLabSpriteQa({
       kind: "sprite",
       anchorBytes,
       frames: video.frames,
     });
     if (!qa.passed) {
       throw new Error(
-        `foundry/sprite-animator: qa failed for ${source.characterId}/${input.action}/sprite — gates=${qa.failedGates.join(",")}`,
+        `artlab/sprite-animator: qa failed for ${source.characterId}/${input.action}/sprite — gates=${qa.failedGates.join(",")}`,
       );
     }
     return await buildSpriteManifest({
@@ -216,7 +216,7 @@ export async function runFoundrySpriteAnimator(
     seed: input.seed,
     referenceImageBytes: anchorBytes,
   });
-  const qa = await runFoundrySpriteQa({
+  const qa = await runArtLabSpriteQa({
     kind: "lottie",
     lottieJson: lottie.lottieJson,
     expectedDurationMs,
@@ -224,7 +224,7 @@ export async function runFoundrySpriteAnimator(
   });
   if (!qa.passed) {
     throw new Error(
-      `foundry/sprite-animator: qa failed for ${source.characterId}/${input.action}/lottie — gates=${qa.failedGates.join(",")}`,
+      `artlab/sprite-animator: qa failed for ${source.characterId}/${input.action}/lottie — gates=${qa.failedGates.join(",")}`,
     );
   }
   return await buildLottieManifest({
@@ -239,20 +239,20 @@ export async function runFoundrySpriteAnimator(
 }
 
 interface BuildSpriteManifestInput {
-  input: FoundrySpriteAnimatorInput;
-  context: FoundrySpriteAnimatorContext;
+  input: ArtLabSpriteAnimatorInput;
+  context: ArtLabSpriteAnimatorContext;
   source: { characterId: string; packId: string };
-  qa: FoundrySpriteQaReport;
+  qa: ArtLabSpriteQaReport;
   frames: ReadonlyArray<Buffer>;
   generation: { startedAt: number; costCents: number; mode: "real" | "mock" };
 }
 
 async function buildSpriteManifest(
   args: BuildSpriteManifestInput,
-): Promise<FoundrySpriteAnimatorResult> {
+): Promise<ArtLabSpriteAnimatorResult> {
   const { input, context, source, qa, frames, generation } = args;
   const totalDurationMs = Math.round((input.frameCount / input.fps) * 1000);
-  const written = await writeFoundrySpritePack({
+  const written = await writeArtLabSpritePack({
     runDir: context.runDir,
     characterId: source.characterId,
     action: input.action,
@@ -270,7 +270,7 @@ async function buildSpriteManifest(
     transitions: [] as ReadonlyArray<unknown>,
     frames: written.frameManifests,
   };
-  const integrationSnippet = renderFoundrySpriteIntegrationSnippet({
+  const integrationSnippet = renderArtLabSpriteIntegrationSnippet({
     characterId: source.characterId,
     action: input.action,
     packPath: written.packRoot,
@@ -298,7 +298,7 @@ async function buildSpriteManifest(
   const aspectRatio = pickAspectRatio(dims.width, dims.height);
   if (!aspectRatio) {
     throw new Error(
-      `foundry/sprite-animator: sprite dimensions ${dims.width}×${dims.height} do not snap to a supported aspect ratio`,
+      `artlab/sprite-animator: sprite dimensions ${dims.width}×${dims.height} do not snap to a supported aspect ratio`,
     );
   }
   const generationMs = Math.round(performance.now() - generation.startedAt);
@@ -309,7 +309,7 @@ async function buildSpriteManifest(
     input.runId,
   );
 
-  const created = await createFoundryAssetPack({
+  const created = await createArtLabAssetPack({
     packDir: written.packRoot,
     packId,
     kind: "sprite-animation",
@@ -349,18 +349,18 @@ async function buildSpriteManifest(
     },
   });
 
-  // Defence-in-depth: route the persisted manifest through buildFoundryAssetPack
+  // Defence-in-depth: route the persisted manifest through buildArtLabAssetPack
   // so external callers see exactly the same validated envelope they would if
   // they called the entry point directly.
-  const built = await buildFoundryAssetPack(created.manifest);
+  const built = await buildArtLabAssetPack(created.manifest);
   return { packId: built.packId, manifest: built.manifest };
 }
 
 interface BuildLottieManifestInput {
-  input: FoundrySpriteAnimatorInput;
-  context: FoundrySpriteAnimatorContext;
+  input: ArtLabSpriteAnimatorInput;
+  context: ArtLabSpriteAnimatorContext;
   source: { characterId: string; packId: string };
-  qa: FoundrySpriteQaReport;
+  qa: ArtLabSpriteQaReport;
   lottieJson: string;
   expectedDurationMs: number;
   generation: { startedAt: number; costCents: number; mode: "real" | "mock" };
@@ -368,15 +368,15 @@ interface BuildLottieManifestInput {
 
 async function buildLottieManifest(
   args: BuildLottieManifestInput,
-): Promise<FoundrySpriteAnimatorResult> {
+): Promise<ArtLabSpriteAnimatorResult> {
   const { input, context, source, qa, lottieJson, expectedDurationMs, generation } = args;
-  const written = await writeFoundryLottiePack({
+  const written = await writeArtLabLottiePack({
     runDir: context.runDir,
     characterId: source.characterId,
     action: input.action,
     lottieJson,
   });
-  const integrationSnippet = renderFoundryLottieIntegrationSnippet({
+  const integrationSnippet = renderArtLabLottieIntegrationSnippet({
     characterId: source.characterId,
     action: input.action,
     packPath: written.packRoot,
@@ -387,7 +387,7 @@ async function buildLottieManifest(
   const aspectRatio = pickAspectRatio(dims.width, dims.height);
   if (!aspectRatio) {
     throw new Error(
-      `foundry/sprite-animator: lottie dimensions ${dims.width}×${dims.height} do not snap to a supported aspect ratio`,
+      `artlab/sprite-animator: lottie dimensions ${dims.width}×${dims.height} do not snap to a supported aspect ratio`,
     );
   }
   const lottieMetaPayload = {
@@ -410,7 +410,7 @@ async function buildLottieManifest(
     input.runId,
   );
 
-  const created = await createFoundryAssetPack({
+  const created = await createArtLabAssetPack({
     packDir: written.packRoot,
     packId,
     kind: "sprite-animation",
@@ -450,7 +450,7 @@ async function buildLottieManifest(
     },
   });
 
-  const built = await buildFoundryAssetPack(created.manifest);
+  const built = await buildArtLabAssetPack(created.manifest);
   return { packId: built.packId, manifest: built.manifest };
 }
 
@@ -459,7 +459,7 @@ async function readSpriteDimensions(
 ): Promise<{ width: number; height: number }> {
   const meta = await sharp(png).metadata();
   if (!meta.width || !meta.height) {
-    throw new Error("foundry/sprite-animator: could not read PNG dimensions from frame");
+    throw new Error("artlab/sprite-animator: could not read PNG dimensions from frame");
   }
   return { width: meta.width, height: meta.height };
 }
@@ -468,12 +468,12 @@ function readLottieDimensions(lottieJson: string): { width: number; height: numb
   const parsed = JSON.parse(lottieJson) as { w?: unknown; h?: unknown };
   if (typeof parsed.w !== "number" || typeof parsed.h !== "number") {
     throw new Error(
-      "foundry/sprite-animator: lottie JSON missing numeric `w`/`h` dimensions",
+      "artlab/sprite-animator: lottie JSON missing numeric `w`/`h` dimensions",
     );
   }
   if (parsed.w <= 0 || parsed.h <= 0) {
     throw new Error(
-      `foundry/sprite-animator: lottie JSON has non-positive dimensions w=${parsed.w} h=${parsed.h}`,
+      `artlab/sprite-animator: lottie JSON has non-positive dimensions w=${parsed.w} h=${parsed.h}`,
     );
   }
   return { width: parsed.w, height: parsed.h };

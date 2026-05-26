@@ -5,34 +5,34 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import {
-  FOUNDRY_MCP_TOOL_NAMES,
-  FoundryAssetPackGetInputSchema,
-  FoundryAssetPackIntegrationInputSchema,
-  FoundryAssetPackListInputSchema,
-  FoundryCanonGetInputSchema,
-  FoundryCanonListInputSchema,
-  FoundryDiagnosticsInputSchema,
-  FoundryGenerateInputSchema,
-  FoundryGenerateStatusInputSchema,
-  FoundrySlotAuditInputSchema,
-  type FoundryMcpToolName,
+  ARTLAB_MCP_TOOL_NAMES,
+  ArtLabAssetPackGetInputSchema,
+  ArtLabAssetPackIntegrationInputSchema,
+  ArtLabAssetPackListInputSchema,
+  ArtLabCanonGetInputSchema,
+  ArtLabCanonListInputSchema,
+  ArtLabDiagnosticsInputSchema,
+  ArtLabGenerateInputSchema,
+  ArtLabGenerateStatusInputSchema,
+  ArtLabSlotAuditInputSchema,
+  type ArtLabMcpToolName,
 } from "./tools";
-import { handleFoundryCanonList } from "./tool-handlers/canon-list";
-import { handleFoundryCanonGet } from "./tool-handlers/canon-get";
-import { handleFoundryAssetPackList } from "./tool-handlers/asset-pack-list";
-import { handleFoundryAssetPackGet } from "./tool-handlers/asset-pack-get";
-import { handleFoundryAssetPackIntegration } from "./tool-handlers/asset-pack-integration";
-import { handleFoundrySlotAudit } from "./tool-handlers/slot-audit";
+import { handleArtLabCanonList } from "./tool-handlers/canon-list";
+import { handleArtLabCanonGet } from "./tool-handlers/canon-get";
+import { handleArtLabAssetPackList } from "./tool-handlers/asset-pack-list";
+import { handleArtLabAssetPackGet } from "./tool-handlers/asset-pack-get";
+import { handleArtLabAssetPackIntegration } from "./tool-handlers/asset-pack-integration";
+import { handleArtLabSlotAudit } from "./tool-handlers/slot-audit";
 import {
-  handleFoundryGenerate,
-  type FoundryGenerateContext,
+  handleArtLabGenerate,
+  type ArtLabGenerateContext,
 } from "./tool-handlers/generate";
-import { handleFoundryGenerateStatus } from "./tool-handlers/generate-status";
-import { handleFoundryDiagnostics } from "./tool-handlers/diagnostics";
-import { routeFoundryRequest } from "../brain/route-request";
+import { handleArtLabGenerateStatus } from "./tool-handlers/generate-status";
+import { handleArtLabDiagnostics } from "./tool-handlers/diagnostics";
+import { routeArtLabRequest } from "../brain/route-request";
 import type {
-  FoundryAnthropicCall,
-  FoundryAnthropicResponse,
+  ArtLabAnthropicCall,
+  ArtLabAnthropicResponse,
 } from "../brain/anthropic-client";
 
 /**
@@ -43,21 +43,21 @@ import type {
  * clients (Claude Code, Cursor, etc.) now see the same shape the runtime
  * validator enforces.
  */
-const TOOL_INPUT_SCHEMAS: Record<FoundryMcpToolName, z.ZodTypeAny> = {
-  "foundry/canon_list": FoundryCanonListInputSchema,
-  "foundry/canon_get": FoundryCanonGetInputSchema,
-  "foundry/asset_pack_list": FoundryAssetPackListInputSchema,
-  "foundry/asset_pack_get": FoundryAssetPackGetInputSchema,
-  "foundry/asset_pack_integration": FoundryAssetPackIntegrationInputSchema,
-  "foundry/slot_audit": FoundrySlotAuditInputSchema,
-  "foundry/generate": FoundryGenerateInputSchema,
-  "foundry/generate_status": FoundryGenerateStatusInputSchema,
-  "foundry/diagnostics": FoundryDiagnosticsInputSchema,
+const TOOL_INPUT_SCHEMAS: Record<ArtLabMcpToolName, z.ZodTypeAny> = {
+  "artlab/canon_list": ArtLabCanonListInputSchema,
+  "artlab/canon_get": ArtLabCanonGetInputSchema,
+  "artlab/asset_pack_list": ArtLabAssetPackListInputSchema,
+  "artlab/asset_pack_get": ArtLabAssetPackGetInputSchema,
+  "artlab/asset_pack_integration": ArtLabAssetPackIntegrationInputSchema,
+  "artlab/slot_audit": ArtLabSlotAuditInputSchema,
+  "artlab/generate": ArtLabGenerateInputSchema,
+  "artlab/generate_status": ArtLabGenerateStatusInputSchema,
+  "artlab/diagnostics": ArtLabDiagnosticsInputSchema,
 };
 
 /** Shape every MCP client expects in the `ListTools` response. */
-export interface FoundryMcpToolDescriptor {
-  name: FoundryMcpToolName;
+export interface ArtLabMcpToolDescriptor {
+  name: ArtLabMcpToolName;
   description: string;
   inputSchema: {
     type: "object";
@@ -68,8 +68,8 @@ export interface FoundryMcpToolDescriptor {
   };
 }
 
-function buildToolDescriptors(): FoundryMcpToolDescriptor[] {
-  return FOUNDRY_MCP_TOOL_NAMES.map((name) => {
+function buildToolDescriptors(): ArtLabMcpToolDescriptor[] {
+  return ARTLAB_MCP_TOOL_NAMES.map((name) => {
     // `z.toJSONSchema` is a first-party Zod v4 API (returns a JSON Schema
     // 2020-12 document). MCP only needs the schema body — strip the
     // top-level `$schema` URL because some clients reject unknown keys.
@@ -77,19 +77,19 @@ function buildToolDescriptors(): FoundryMcpToolDescriptor[] {
     delete raw.$schema;
     if (raw.type !== "object") {
       throw new Error(
-        `foundry tool '${name}' has a non-object input schema (got '${String(raw.type)}'); ` +
+        `artlab tool '${name}' has a non-object input schema (got '${String(raw.type)}'); ` +
           `MCP requires object-shaped inputs.`,
       );
     }
     return {
       name,
       description: TOOL_SUMMARIES[name],
-      inputSchema: raw as FoundryMcpToolDescriptor["inputSchema"],
+      inputSchema: raw as ArtLabMcpToolDescriptor["inputSchema"],
     };
   });
 }
 
-export interface FoundryMcpServerConfig {
+export interface ArtLabMcpServerConfig {
   workspaceRoot: string;
   canonRoot: string;
   packsRoot: string;
@@ -111,36 +111,36 @@ export interface FoundryMcpServerConfig {
   /** Optional env map for per-agent brain wiring. If unset, brain enrichment is skipped. */
   env?: Record<string, string | undefined>;
   /** Test seam — replaces all Anthropic calls inside the brain pipeline. */
-  brainCallOverride?: (call: FoundryAnthropicCall) => Promise<FoundryAnthropicResponse>;
+  brainCallOverride?: (call: ArtLabAnthropicCall) => Promise<ArtLabAnthropicResponse>;
 }
 
-export interface FoundryMcpServer {
+export interface ArtLabMcpServer {
   identity: { name: "tower-art-foundry"; version: string };
-  registeredTools: FoundryMcpToolName[];
+  registeredTools: ArtLabMcpToolName[];
   server: Server;
-  invokeForTest(tool: FoundryMcpToolName | string, rawInput: unknown): Promise<unknown>;
+  invokeForTest(tool: ArtLabMcpToolName | string, rawInput: unknown): Promise<unknown>;
   /**
    * Test seam — returns the same tool descriptors the server emits via the
    * `ListTools` MCP request. Pinned in `server.tool-schema.test.ts`.
    */
-  listToolsForTest(): FoundryMcpToolDescriptor[];
+  listToolsForTest(): ArtLabMcpToolDescriptor[];
 }
 
 type HandlerFn = (rawInput: unknown) => Promise<unknown>;
 
-const TOOL_SUMMARIES: Record<FoundryMcpToolName, string> = {
-  "foundry/canon_list": "List canonical characters/floors/palettes/style-envelopes.",
-  "foundry/canon_get": "Fetch one canon entry by id (returns YAML-as-JSON).",
-  "foundry/asset_pack_list": "List promoted Asset Packs filtered by kind/character/space.",
-  "foundry/asset_pack_get": "Fetch one Asset Pack manifest + file paths.",
-  "foundry/asset_pack_integration": "Get a copy-paste TSX integration snippet for one pack.",
-  "foundry/slot_audit": "List registered slots that lack a promoted Asset Pack.",
-  "foundry/generate": "Queue a new generation run; returns a runId in `queued` status.",
-  "foundry/generate_status": "Poll a runId; returns phase, percent, blockers, ETA, promoted packId.",
-  "foundry/diagnostics": "Daemon health + provider reachability + last 5 runs + backlog depth.",
+const TOOL_SUMMARIES: Record<ArtLabMcpToolName, string> = {
+  "artlab/canon_list": "List canonical characters/floors/palettes/style-envelopes.",
+  "artlab/canon_get": "Fetch one canon entry by id (returns YAML-as-JSON).",
+  "artlab/asset_pack_list": "List promoted Asset Packs filtered by kind/character/space.",
+  "artlab/asset_pack_get": "Fetch one Asset Pack manifest + file paths.",
+  "artlab/asset_pack_integration": "Get a copy-paste TSX integration snippet for one pack.",
+  "artlab/slot_audit": "List registered slots that lack a promoted Asset Pack.",
+  "artlab/generate": "Queue a new generation run; returns a runId in `queued` status.",
+  "artlab/generate_status": "Poll a runId; returns phase, percent, blockers, ETA, promoted packId.",
+  "artlab/diagnostics": "Daemon health + provider reachability + last 5 runs + backlog depth.",
 };
 
-export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryMcpServer {
+export function createArtLabMcpServer(config: ArtLabMcpServerConfig): ArtLabMcpServer {
   const server = new Server(
     { name: "tower-art-foundry", version: config.version },
     { capabilities: { tools: {} } },
@@ -151,16 +151,16 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
   const ctxSlot = { slotRegistryPath: config.slotRegistryPath, packsRoot: config.packsRoot };
   const enrichmentReady =
     (config.env?.ANTHROPIC_API_KEY ?? "") !== "" || config.brainCallOverride !== undefined;
-  const ctxRun: FoundryGenerateContext = {
+  const ctxRun: ArtLabGenerateContext = {
     workspaceRoot: config.workspaceRoot,
-    // `handleFoundryGenerate` runs this callback in the background and
+    // `handleArtLabGenerate` runs this callback in the background and
     // records the result (or failure) into the inbox file +
     // `daemon-errors.jsonl`. We intentionally let exceptions propagate so
     // the handler captures the real error instead of a synthesized
     // "successful" hint that would mask outages.
     brainEnrich: enrichmentReady
       ? async (input) => {
-          const result = await routeFoundryRequest(input.description, {
+          const result = await routeArtLabRequest(input.description, {
             env: config.env ?? {},
             memoryDir: config.memoryDir,
             metaCallOverride: config.brainCallOverride,
@@ -171,16 +171,16 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
   };
   const ctxDiag = { workspaceRoot: config.workspaceRoot, providerProbes: config.providerProbes };
 
-  const handlers: Record<FoundryMcpToolName, HandlerFn> = {
-    "foundry/canon_list": (i) => handleFoundryCanonList(i, ctxCanon),
-    "foundry/canon_get": (i) => handleFoundryCanonGet(i, ctxCanon),
-    "foundry/asset_pack_list": (i) => handleFoundryAssetPackList(i, ctxPacks),
-    "foundry/asset_pack_get": (i) => handleFoundryAssetPackGet(i, ctxPacks),
-    "foundry/asset_pack_integration": (i) => handleFoundryAssetPackIntegration(i, ctxPacks),
-    "foundry/slot_audit": (i) => handleFoundrySlotAudit(i, ctxSlot),
-    "foundry/generate": (i) => handleFoundryGenerate(i, ctxRun),
-    "foundry/generate_status": (i) => handleFoundryGenerateStatus(i, ctxRun),
-    "foundry/diagnostics": (i) => handleFoundryDiagnostics(i, ctxDiag),
+  const handlers: Record<ArtLabMcpToolName, HandlerFn> = {
+    "artlab/canon_list": (i) => handleArtLabCanonList(i, ctxCanon),
+    "artlab/canon_get": (i) => handleArtLabCanonGet(i, ctxCanon),
+    "artlab/asset_pack_list": (i) => handleArtLabAssetPackList(i, ctxPacks),
+    "artlab/asset_pack_get": (i) => handleArtLabAssetPackGet(i, ctxPacks),
+    "artlab/asset_pack_integration": (i) => handleArtLabAssetPackIntegration(i, ctxPacks),
+    "artlab/slot_audit": (i) => handleArtLabSlotAudit(i, ctxSlot),
+    "artlab/generate": (i) => handleArtLabGenerate(i, ctxRun),
+    "artlab/generate_status": (i) => handleArtLabGenerateStatus(i, ctxRun),
+    "artlab/diagnostics": (i) => handleArtLabDiagnostics(i, ctxDiag),
   };
 
   const toolDescriptors = buildToolDescriptors();
@@ -194,20 +194,20 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
     if (!(tool in handlers)) {
       throw new Error(`unknown tool: ${tool}`);
     }
-    const fn = handlers[tool as FoundryMcpToolName];
+    const fn = handlers[tool as ArtLabMcpToolName];
     const result = await fn(req.params.arguments ?? {});
     return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
   });
 
   return {
     identity: { name: "tower-art-foundry", version: config.version },
-    registeredTools: [...FOUNDRY_MCP_TOOL_NAMES],
+    registeredTools: [...ARTLAB_MCP_TOOL_NAMES],
     server,
     async invokeForTest(tool: string, rawInput: unknown): Promise<unknown> {
       if (!(tool in handlers)) throw new Error(`unknown tool: ${tool}`);
-      return handlers[tool as FoundryMcpToolName](rawInput);
+      return handlers[tool as ArtLabMcpToolName](rawInput);
     },
-    listToolsForTest(): FoundryMcpToolDescriptor[] {
+    listToolsForTest(): ArtLabMcpToolDescriptor[] {
       return toolDescriptors;
     },
   };

@@ -1,13 +1,13 @@
-import { callFoundryAnthropic, type FoundryAnthropicCall, type FoundryAnthropicResponse } from "./anthropic-client";
+import { callArtLabAnthropic, type ArtLabAnthropicCall, type ArtLabAnthropicResponse } from "./anthropic-client";
 import {
-  FoundryMetaIntentSchema,
-  FoundryClarifyingQuestionSchema,
-  type FoundryMetaIntent,
-  type FoundryClarifyingQuestion,
-  FOUNDRY_AGENT_KINDS,
+  ArtLabMetaIntentSchema,
+  ArtLabClarifyingQuestionSchema,
+  type ArtLabMetaIntent,
+  type ArtLabClarifyingQuestion,
+  ARTLAB_AGENT_KINDS,
 } from "./types";
 
-const META_SYSTEM = `You are the Tower Art Foundry meta-orchestrator.
+const META_SYSTEM = `You are the Tower Art ArtLab meta-orchestrator.
 You receive a raw user/agent request and must resolve it to one of these specialist agents:
 - character-master
 - floor-environment
@@ -30,36 +30,36 @@ const CLARIFYING_QUESTIONS_BY_AGENT: Record<string, string> = {
   "sprite-animator": "Which character + what loop duration and frame budget?",
 };
 
-export interface ResolveFoundryIntentOpts {
+export interface ResolveArtLabIntentOpts {
   apiKey: string;
   model: string;
   dryRun?: boolean;
-  callOverride?: (call: FoundryAnthropicCall) => Promise<FoundryAnthropicResponse>;
+  callOverride?: (call: ArtLabAnthropicCall) => Promise<ArtLabAnthropicResponse>;
 }
 
-export type ResolveFoundryIntentResult = FoundryMetaIntent | FoundryClarifyingQuestion;
+export type ResolveArtLabIntentResult = ArtLabMetaIntent | ArtLabClarifyingQuestion;
 
-export async function resolveFoundryIntent(
+export async function resolveArtLabIntent(
   rawRequest: string,
-  opts: ResolveFoundryIntentOpts,
-): Promise<ResolveFoundryIntentResult> {
-  const call: FoundryAnthropicCall = {
+  opts: ResolveArtLabIntentOpts,
+): Promise<ResolveArtLabIntentResult> {
+  const call: ArtLabAnthropicCall = {
     systemPrompt: META_SYSTEM,
-    userJson: { request: rawRequest, validAgents: [...FOUNDRY_AGENT_KINDS] },
+    userJson: { request: rawRequest, validAgents: [...ARTLAB_AGENT_KINDS] },
     model: opts.model,
     apiKey: opts.apiKey,
     dryRun: opts.dryRun,
   };
-  const resp = opts.callOverride ? await opts.callOverride(call) : await callFoundryAnthropic(call);
+  const resp = opts.callOverride ? await opts.callOverride(call) : await callArtLabAnthropic(call);
   let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(resp.text) as Record<string, unknown>;
   } catch (err) {
     throw new Error(`meta-orchestrator returned non-JSON: ${String(err).slice(0, 160)}`);
   }
-  const intent = FoundryMetaIntentSchema.parse(parsed);
+  const intent = ArtLabMetaIntentSchema.parse(parsed);
   if (intent.confidence < CONFIDENCE_THRESHOLD) {
-    return FoundryClarifyingQuestionSchema.parse({
+    return ArtLabClarifyingQuestionSchema.parse({
       needsClarification: true,
       question: CLARIFYING_QUESTIONS_BY_AGENT[intent.agent] ?? "Could you clarify which agent should handle this and with what parameters?",
       candidates: [intent.agent],

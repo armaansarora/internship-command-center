@@ -2,27 +2,27 @@ import {
   computePerceptualHash,
 } from "@/lib/artlab/coherence/hashes";
 import { hammingDistanceHex } from "@/lib/artlab/coherence/identity-drift";
-import type { FoundryFloorTimeState } from "../types";
+import type { ArtLabFloorTimeState } from "../types";
 
 const COHERENCE_BIT_THRESHOLD = 18;
 
-export interface FoundryFloorVariantBytes {
-  timeState: FoundryFloorTimeState;
+export interface ArtLabFloorVariantBytes {
+  timeState: ArtLabFloorTimeState;
   bytes: Buffer;
 }
 
-export interface FoundryFloorCoherenceReport {
+export interface ArtLabFloorCoherenceReport {
   passed: boolean;
   totalCount: number;
   maxHamming: number;
   avgHamming: number;
-  flaggedTimeStates: ReadonlyArray<FoundryFloorTimeState>;
+  flaggedTimeStates: ReadonlyArray<ArtLabFloorTimeState>;
   thresholdBits: number;
 }
 
-export async function evaluateFoundryFloorPerceptualCoherence(
-  variants: ReadonlyArray<FoundryFloorVariantBytes>,
-): Promise<FoundryFloorCoherenceReport> {
+export async function evaluateArtLabFloorPerceptualCoherence(
+  variants: ReadonlyArray<ArtLabFloorVariantBytes>,
+): Promise<ArtLabFloorCoherenceReport> {
   if (variants.length < 2) {
     return {
       passed: true,

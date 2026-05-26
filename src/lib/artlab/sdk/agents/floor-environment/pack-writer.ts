@@ -1,26 +1,26 @@
 import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import type { FoundryFloorCompositeLayerBuffer } from "./stages/layer-separation";
+import type { ArtLabFloorCompositeLayerBuffer } from "./stages/layer-separation";
 import {
-  type FoundryFloorCompositeKind,
-  type FoundryFloorTimeState,
-  type FoundryFloorVariantManifest,
+  type ArtLabFloorCompositeKind,
+  type ArtLabFloorTimeState,
+  type ArtLabFloorVariantManifest,
 } from "./types";
 
-export interface FoundryFloorPackWriteInput {
+export interface ArtLabFloorPackWriteInput {
   runDir: string;
   floorSlug: string;
   variants: ReadonlyArray<{
-    timeState: FoundryFloorTimeState;
-    kind: FoundryFloorCompositeKind;
-    layers: ReadonlyArray<FoundryFloorCompositeLayerBuffer>;
+    timeState: ArtLabFloorTimeState;
+    kind: ArtLabFloorCompositeKind;
+    layers: ReadonlyArray<ArtLabFloorCompositeLayerBuffer>;
   }>;
 }
 
-export interface FoundryFloorPackWriteResult {
+export interface ArtLabFloorPackWriteResult {
   packRoot: string;
-  variantManifests: ReadonlyArray<FoundryFloorVariantManifest>;
+  variantManifests: ReadonlyArray<ArtLabFloorVariantManifest>;
 }
 
 function atomicWrite(path: string, bytes: Buffer): void {
@@ -29,21 +29,21 @@ function atomicWrite(path: string, bytes: Buffer): void {
   renameSync(tmp, path);
 }
 
-export async function writeFoundryFloorPack(
-  input: FoundryFloorPackWriteInput,
-): Promise<FoundryFloorPackWriteResult> {
+export async function writeArtLabFloorPack(
+  input: ArtLabFloorPackWriteInput,
+): Promise<ArtLabFloorPackWriteResult> {
   const packRoot = join(input.runDir, "pack");
   mkdirSync(packRoot, { recursive: true });
-  const variantManifests: FoundryFloorVariantManifest[] = [];
+  const variantManifests: ArtLabFloorVariantManifest[] = [];
   for (const variant of input.variants) {
     if (variant.kind !== "single-composite") {
       throw new Error(
-        `foundry/floor: variant ${variant.timeState} declares unknown kind ${variant.kind}`,
+        `artlab/floor: variant ${variant.timeState} declares unknown kind ${variant.kind}`,
       );
     }
     if (variant.layers.length !== 1) {
       throw new Error(
-        `foundry/floor: variant ${variant.timeState} produced ${variant.layers.length} layers (expected 1 for single-composite)`,
+        `artlab/floor: variant ${variant.timeState} produced ${variant.layers.length} layers (expected 1 for single-composite)`,
       );
     }
     const variantDir = join(packRoot, variant.timeState);
@@ -63,7 +63,7 @@ export async function writeFoundryFloorPack(
     variantManifests.push({
       timeState: variant.timeState,
       kind: variant.kind,
-      layers: layerManifests as FoundryFloorVariantManifest["layers"],
+      layers: layerManifests as ArtLabFloorVariantManifest["layers"],
       perceptualHash,
     });
   }

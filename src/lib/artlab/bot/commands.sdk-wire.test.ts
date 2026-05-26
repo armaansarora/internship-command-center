@@ -7,7 +7,7 @@ import { handleBotCommand } from "./commands";
 let workspaceRoot: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "bot-foundry-wire-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "bot-artlab-wire-"));
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
   writeFileSync(join(workspaceRoot, "slots", "registry.json"), JSON.stringify({ slots: [] }));
 });

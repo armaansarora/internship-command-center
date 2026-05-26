@@ -1,7 +1,7 @@
-import type { FoundryFloorCanonEntry } from "../floor-canon";
-import type { FoundryFloorTimeState } from "../types";
+import type { ArtLabFloorCanonEntry } from "../floor-canon";
+import type { ArtLabFloorTimeState } from "../types";
 
-const TIME_STATE_CUES: Record<FoundryFloorTimeState, string> = {
+const TIME_STATE_CUES: Record<ArtLabFloorTimeState, string> = {
   dawn: "pre-sunrise blue-hour ambient light, cool low-saturation, lights mostly off",
   morning: "soft golden morning light through windows, warm but restrained",
   midday: "bright neutral midday light, full saturation, crisp shadows",
@@ -11,9 +11,9 @@ const TIME_STATE_CUES: Record<FoundryFloorTimeState, string> = {
   night: "deep night, interior lamps as the only light source, rich blacks",
 };
 
-export function buildFoundryFloorCompositionPrompt(
-  canon: FoundryFloorCanonEntry,
-  timeState: FoundryFloorTimeState,
+export function buildArtLabFloorCompositionPrompt(
+  canon: ArtLabFloorCanonEntry,
+  timeState: ArtLabFloorTimeState,
 ): string {
   const palette = canon.palette.join(", ");
   const elements = canon.requiredElements.map((e) => `- ${e}`).join("\n");

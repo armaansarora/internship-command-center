@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { callFoundryAnthropic } from "../anthropic-client";
-import type { FoundryAgentBrain } from "../types";
+import { callArtLabAnthropic } from "../anthropic-client";
+import type { ArtLabAgentBrain } from "../types";
 
 export const CharacterMasterInputSchema = z
   .object({
@@ -27,7 +27,7 @@ export const CharacterMasterOutputSchema = z
   .strict();
 export type CharacterMasterOutput = z.infer<typeof CharacterMasterOutputSchema>;
 
-const SYSTEM = `You are the Character Master agent in the Tower Art Foundry.
+const SYSTEM = `You are the Character Master agent in the Tower Art ArtLab.
 You receive a characterId, a directive (plain-English request), and optional anchor pack + recent feedback signals.
 Your job: produce a concrete, executable plan to generate or refine that character's sprite/keyframes.
 
@@ -50,7 +50,7 @@ export function createCharacterMasterBrain(opts: {
   apiKey: string;
   model: string;
   dryRun?: boolean;
-}): FoundryAgentBrain<CharacterMasterInput, CharacterMasterOutput> {
+}): ArtLabAgentBrain<CharacterMasterInput, CharacterMasterOutput> {
   return {
     agent: "character-master",
     systemPrompt: SYSTEM,
@@ -58,7 +58,7 @@ export function createCharacterMasterBrain(opts: {
     outputSchema: CharacterMasterOutputSchema,
     async decide(input) {
       const parsed = CharacterMasterInputSchema.parse(input);
-      const resp = await callFoundryAnthropic({
+      const resp = await callArtLabAnthropic({
         systemPrompt: SYSTEM,
         userJson: parsed,
         model: opts.model,

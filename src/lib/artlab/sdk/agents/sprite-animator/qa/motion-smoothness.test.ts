@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { evaluateFoundrySpriteMotionSmoothness } from "./motion-smoothness";
+import { evaluateArtLabSpriteMotionSmoothness } from "./motion-smoothness";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -34,10 +34,10 @@ async function half(left: number, right: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("evaluateFoundrySpriteMotionSmoothness", () => {
+describe("evaluateArtLabSpriteMotionSmoothness", () => {
   it("passes when adjacent frames stay close", async () => {
     const frames = await Promise.all([solid(50), solid(52), solid(54)]);
-    const result = await evaluateFoundrySpriteMotionSmoothness(frames);
+    const result = await evaluateArtLabSpriteMotionSmoothness(frames);
     expect(result.passed).toBe(true);
   });
 
@@ -46,7 +46,7 @@ describe("evaluateFoundrySpriteMotionSmoothness", () => {
     // half-split as the third frame to provoke a real Hamming spike across
     // the 1→2 transition.
     const frames = await Promise.all([solid(50), solid(50), half(10, 240)]);
-    const result = await evaluateFoundrySpriteMotionSmoothness(frames);
+    const result = await evaluateArtLabSpriteMotionSmoothness(frames);
     expect(result.passed).toBe(false);
     expect(result.maxAdjacentHamming).toBeGreaterThan(0);
     expect(result.flaggedTransitions).toEqual([
@@ -57,7 +57,7 @@ describe("evaluateFoundrySpriteMotionSmoothness", () => {
   it("requires at least two frames", async () => {
     const frames = await Promise.all([solid(50)]);
     await expect(
-      evaluateFoundrySpriteMotionSmoothness(frames),
+      evaluateArtLabSpriteMotionSmoothness(frames),
     ).rejects.toThrow(/two frames/i);
   });
 });

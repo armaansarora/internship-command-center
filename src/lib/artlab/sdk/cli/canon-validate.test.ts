@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { runCanonValidateSubcommand } from "./canon-validate";
 import { join } from "node:path";
 
-describe("foundry canon validate CLI", () => {
+describe("artlab sdk canon validate CLI", () => {
   it("exits 0 with 'canon ok' on the real canon root", async () => {
     const lines: string[] = [];
     const code = await runCanonValidateSubcommand({
@@ -17,7 +17,7 @@ describe("foundry canon validate CLI", () => {
   it("exits 1 and prints issues on a broken canon root", async () => {
     const lines: string[] = [];
     const code = await runCanonValidateSubcommand({
-      canonRoot: "/tmp/foundry-canon-nonexistent-9999",
+      canonRoot: "/tmp/artlab-canon-nonexistent-9999",
       stdout: (s) => lines.push(s),
       stderr: (s) => lines.push(s),
     });

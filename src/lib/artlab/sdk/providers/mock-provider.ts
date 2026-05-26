@@ -1,17 +1,17 @@
 import { createHash } from "node:crypto";
 import sharp from "sharp";
 import type {
-  FoundryImageProvider,
-  FoundryImageProviderInput,
-  FoundryImageProviderResult,
+  ArtLabImageProvider,
+  ArtLabImageProviderInput,
+  ArtLabImageProviderResult,
 } from "./types";
 
-export interface CreateMockFoundryImageProviderOptions {
+export interface CreateMockArtLabImageProviderOptions {
   failOnPromptContains?: string;
   id?: string;
 }
 
-function dimensionsFor(aspect: FoundryImageProviderInput["aspectRatio"]): { widthPx: number; heightPx: number } {
+function dimensionsFor(aspect: ArtLabImageProviderInput["aspectRatio"]): { widthPx: number; heightPx: number } {
   switch (aspect) {
     case "9:16": return { widthPx: 1024, heightPx: 1792 };
     case "16:9": return { widthPx: 1792, heightPx: 1024 };
@@ -43,11 +43,11 @@ async function buildMockPng(seedKey: string): Promise<Buffer> {
     .toBuffer();
 }
 
-export function createMockFoundryImageProvider(opts: CreateMockFoundryImageProviderOptions = {}): FoundryImageProvider {
+export function createMockArtLabImageProvider(opts: CreateMockArtLabImageProviderOptions = {}): ArtLabImageProvider {
   const id = opts.id ?? "mock-foundry-image";
   return {
     id,
-    async generate(input: FoundryImageProviderInput): Promise<FoundryImageProviderResult> {
+    async generate(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult> {
       if (opts.failOnPromptContains && input.prompt.includes(opts.failOnPromptContains)) {
         throw new Error(`mock provider: prompt contained "${opts.failOnPromptContains}"`);
       }

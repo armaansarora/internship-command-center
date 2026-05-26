@@ -1,12 +1,12 @@
 import { readFile, stat } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { sha256OfBytes } from "./hashing";
-import { resolveFoundrySlot } from "./slot-registry";
+import { resolveArtLabSlot } from "./slot-registry";
 import {
-  FoundryAssetPackManifestSchema,
-  type FoundryAssetPackManifest,
+  ArtLabAssetPackManifestSchema,
+  type ArtLabAssetPackManifest,
 } from "./manifest.schema";
-import { FOUNDRY_ASSET_PACK_VERSION } from "./constants";
+import { ARTLAB_ASSET_PACK_VERSION } from "./constants";
 
 export interface LiftLegacyAssetInput {
   characterId: string;
@@ -21,8 +21,8 @@ export interface LiftLegacyAssetInput {
   durationMs?: number;
 }
 
-export interface LiftedFoundryAssetPack {
-  manifest: FoundryAssetPackManifest;
+export interface LiftedSdkAssetPack {
+  manifest: ArtLabAssetPackManifest;
   payloadBytes: Buffer;
   primaryFileRelPath: string;
 }
@@ -33,10 +33,10 @@ function dirPartForCharacter(characterId: string): string {
   throw new Error(`legacy-shim: no dir mapping for character "${characterId}"`);
 }
 
-export async function liftLegacyArtLabAssetToFoundryPack(input: LiftLegacyAssetInput): Promise<LiftedFoundryAssetPack> {
+export async function liftLegacyArtLabAssetToSdkPack(input: LiftLegacyAssetInput): Promise<LiftedSdkAssetPack> {
   const dirPart = dirPartForCharacter(input.characterId);
   const slotId = `${dirPart}/${input.outfit}/${input.pose}`;
-  const slot = resolveFoundrySlot(slotId);
+  const slot = resolveArtLabSlot(slotId);
   if (!slot) {
     throw new Error(`legacy-shim: no registered slot for ${slotId}`);
   }
@@ -44,8 +44,8 @@ export async function liftLegacyArtLabAssetToFoundryPack(input: LiftLegacyAssetI
   const fileStat = await stat(input.payloadAbsPath);
   const primaryFileRelPath = `${input.pose}.webp`;
 
-  const manifest = FoundryAssetPackManifestSchema.parse({
-    manifestVersion: FOUNDRY_ASSET_PACK_VERSION,
+  const manifest = ArtLabAssetPackManifestSchema.parse({
+    manifestVersion: ARTLAB_ASSET_PACK_VERSION,
     packId: randomUUID(),
     kind: "character-sprite",
     agent: "character-master",

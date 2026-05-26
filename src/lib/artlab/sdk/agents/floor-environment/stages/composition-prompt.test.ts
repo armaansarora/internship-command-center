@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildFoundryFloorCompositionPrompt } from "./composition-prompt";
-import type { FoundryFloorCanonEntry } from "../floor-canon";
+import { buildArtLabFloorCompositionPrompt } from "./composition-prompt";
+import type { ArtLabFloorCanonEntry } from "../floor-canon";
 
-const canon: FoundryFloorCanonEntry = {
+const canon: ArtLabFloorCanonEntry = {
   slug: "war-room",
   displayName: "The War Room",
   mood: "tactical-luxury",
@@ -12,37 +12,37 @@ const canon: FoundryFloorCanonEntry = {
   typography: "playfair-display",
 };
 
-describe("buildFoundryFloorCompositionPrompt", () => {
+describe("buildArtLabFloorCompositionPrompt", () => {
   it("includes the floor display name", () => {
-    const prompt = buildFoundryFloorCompositionPrompt(canon, "midday");
+    const prompt = buildArtLabFloorCompositionPrompt(canon, "midday");
     expect(prompt).toContain("The War Room");
   });
 
   it("includes every required element", () => {
-    const prompt = buildFoundryFloorCompositionPrompt(canon, "midday");
+    const prompt = buildArtLabFloorCompositionPrompt(canon, "midday");
     for (const el of canon.requiredElements) {
       expect(prompt).toContain(el);
     }
   });
 
   it("includes the time-state cue", () => {
-    const prompt = buildFoundryFloorCompositionPrompt(canon, "dusk");
+    const prompt = buildArtLabFloorCompositionPrompt(canon, "dusk");
     expect(prompt.toLowerCase()).toContain("dusk");
   });
 
   it("declares the no-characters rule (background art only)", () => {
-    const prompt = buildFoundryFloorCompositionPrompt(canon, "night");
+    const prompt = buildArtLabFloorCompositionPrompt(canon, "night");
     expect(prompt.toLowerCase()).toContain("no characters");
   });
 
   it("declares the aspect ratio", () => {
-    const prompt = buildFoundryFloorCompositionPrompt(canon, "morning");
+    const prompt = buildArtLabFloorCompositionPrompt(canon, "morning");
     expect(prompt).toContain("16:9");
   });
 
   it("is deterministic for the same inputs", () => {
-    const a = buildFoundryFloorCompositionPrompt(canon, "morning");
-    const b = buildFoundryFloorCompositionPrompt(canon, "morning");
+    const a = buildArtLabFloorCompositionPrompt(canon, "morning");
+    const b = buildArtLabFloorCompositionPrompt(canon, "morning");
     expect(a).toBe(b);
   });
 });

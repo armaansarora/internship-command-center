@@ -1,16 +1,16 @@
 import sharp from "sharp";
 
-export interface FoundryNormalMapOptions {
+export interface ArtLabNormalMapOptions {
   strength: number;
 }
 
-export async function extractFoundryNormalMap(
+export async function extractArtLabNormalMap(
   source: Buffer,
-  options: FoundryNormalMapOptions,
+  options: ArtLabNormalMapOptions,
 ): Promise<Buffer> {
   if (options.strength < 0 || options.strength > 1) {
     throw new Error(
-      `foundry/ui-texture: strength out of [0,1]: ${options.strength}`,
+      `artlab/ui-texture: strength out of [0,1]: ${options.strength}`,
     );
   }
   // Approximate a tangent-space normal map: derive height from greyscale,

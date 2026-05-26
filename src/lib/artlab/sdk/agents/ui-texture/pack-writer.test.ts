@@ -1,12 +1,12 @@
-// src/lib/foundry/agents/ui-texture/pack-writer.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/pack-writer.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import {
-  writeFoundryUiIconPack,
-  writeFoundryUiTexturePack,
+  writeArtLabUiIconPack,
+  writeArtLabUiTexturePack,
 } from "./pack-writer";
 
 async function solid(c: number): Promise<Buffer> {
@@ -17,14 +17,14 @@ async function solid(c: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("writeFoundryUiIconPack", () => {
+describe("writeArtLabUiIconPack", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-ui-icon-pack-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-ui-icon-pack-"));
   });
 
   it("writes the SVG and returns a relative manifest path", async () => {
-    const result = await writeFoundryUiIconPack({
+    const result = await writeArtLabUiIconPack({
       runDir: dir,
       name: "elevator-door",
       svg: "<svg/>",
@@ -34,7 +34,7 @@ describe("writeFoundryUiIconPack", () => {
   });
 
   it("writes no .tmp leftovers", async () => {
-    await writeFoundryUiIconPack({
+    await writeArtLabUiIconPack({
       runDir: dir,
       name: "elevator-door",
       svg: "<svg/>",
@@ -45,16 +45,16 @@ describe("writeFoundryUiIconPack", () => {
   });
 });
 
-describe("writeFoundryUiTexturePack", () => {
+describe("writeArtLabUiTexturePack", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-ui-texture-pack-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-ui-texture-pack-"));
   });
 
   it("writes both the source PNG and the normal-map PNG", async () => {
     const png = await solid(120);
     const normal = await solid(128);
-    const result = await writeFoundryUiTexturePack({
+    const result = await writeArtLabUiTexturePack({
       runDir: dir,
       name: "etched-gold-border",
       pngBytes: png,
@@ -71,7 +71,7 @@ describe("writeFoundryUiTexturePack", () => {
   it("preserves byte contents through the write", async () => {
     const png = await solid(80);
     const normal = await solid(120);
-    await writeFoundryUiTexturePack({
+    await writeArtLabUiTexturePack({
       runDir: dir,
       name: "x",
       pngBytes: png,

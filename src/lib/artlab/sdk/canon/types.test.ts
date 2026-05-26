@@ -1,19 +1,19 @@
-// src/lib/foundry/canon/types.test.ts
+// src/lib/artlab/sdk/canon/types.test.ts
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDRY_CANON_VERSION,
-  FOUNDRY_CANON_KINDS,
-  FoundryCanonKindSchema,
-  FoundryCanonHeaderSchema,
+  ARTLAB_CANON_VERSION,
+  ARTLAB_CANON_KINDS,
+  ArtLabCanonKindSchema,
+  ArtLabCanonHeaderSchema,
 } from "./types";
 
-describe("foundry canon shared types", () => {
+describe("artlab sdk canon shared types", () => {
   it("declares the canon schema version", () => {
-    expect(FOUNDRY_CANON_VERSION).toBe("1.0.0");
+    expect(ARTLAB_CANON_VERSION).toBe("1.0.0");
   });
 
   it("enumerates all canon kinds", () => {
-    expect(FOUNDRY_CANON_KINDS).toEqual([
+    expect(ARTLAB_CANON_KINDS).toEqual([
       "character",
       "palette",
       "typography",
@@ -24,12 +24,12 @@ describe("foundry canon shared types", () => {
   });
 
   it("validates a canon kind via the schema", () => {
-    expect(() => FoundryCanonKindSchema.parse("character")).not.toThrow();
-    expect(() => FoundryCanonKindSchema.parse("rogue")).toThrow();
+    expect(() => ArtLabCanonKindSchema.parse("character")).not.toThrow();
+    expect(() => ArtLabCanonKindSchema.parse("rogue")).toThrow();
   });
 
   it("parses a valid canon header", () => {
-    const header = FoundryCanonHeaderSchema.parse({
+    const header = ArtLabCanonHeaderSchema.parse({
       kind: "character",
       schemaVersion: "1.0.0",
       id: "sol-navarro",
@@ -41,7 +41,7 @@ describe("foundry canon shared types", () => {
 
   it("rejects a header with the wrong schema version", () => {
     expect(() =>
-      FoundryCanonHeaderSchema.parse({
+      ArtLabCanonHeaderSchema.parse({
         kind: "character",
         schemaVersion: "0.9.0",
         id: "sol-navarro",

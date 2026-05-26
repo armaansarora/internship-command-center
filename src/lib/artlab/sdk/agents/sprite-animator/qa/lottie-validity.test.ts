@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { evaluateFoundryLottieValidity } from "./lottie-validity";
+import { evaluateArtLabLottieValidity } from "./lottie-validity";
 
-describe("evaluateFoundryLottieValidity", () => {
+describe("evaluateArtLabLottieValidity", () => {
   it("passes on a minimal but valid Lottie JSON", () => {
     const lottie = JSON.stringify({
       v: "5.7.0",
@@ -14,14 +14,14 @@ describe("evaluateFoundryLottieValidity", () => {
         { ind: 1, ty: 4, nm: "x", ip: 0, op: 30, st: 0, ks: {}, sr: 1, bm: 0 },
       ],
     });
-    const result = evaluateFoundryLottieValidity(lottie, {
+    const result = evaluateArtLabLottieValidity(lottie, {
       expectedDurationMs: 1000,
     });
     expect(result.passed).toBe(true);
   });
 
   it("fails on malformed JSON", () => {
-    const result = evaluateFoundryLottieValidity("{ not json", {
+    const result = evaluateArtLabLottieValidity("{ not json", {
       expectedDurationMs: 1000,
     });
     expect(result.passed).toBe(false);
@@ -30,7 +30,7 @@ describe("evaluateFoundryLottieValidity", () => {
 
   it("fails when required fields missing", () => {
     const lottie = JSON.stringify({ v: "5.7.0", layers: [] });
-    const result = evaluateFoundryLottieValidity(lottie, {
+    const result = evaluateArtLabLottieValidity(lottie, {
       expectedDurationMs: 1000,
     });
     expect(result.passed).toBe(false);
@@ -46,7 +46,7 @@ describe("evaluateFoundryLottieValidity", () => {
       h: 100,
       layers: [],
     });
-    const result = evaluateFoundryLottieValidity(lottie, {
+    const result = evaluateArtLabLottieValidity(lottie, {
       expectedDurationMs: 1000,
     });
     expect(result.passed).toBe(false);
@@ -65,7 +65,7 @@ describe("evaluateFoundryLottieValidity", () => {
         { ind: 1, ty: 4, nm: "x", ip: 0, op: 30, st: 0, ks: {}, sr: 1, bm: 0 },
       ],
     });
-    const result = evaluateFoundryLottieValidity(lottie, {
+    const result = evaluateArtLabLottieValidity(lottie, {
       expectedDurationMs: 5000,
     });
     expect(result.passed).toBe(false);
@@ -95,7 +95,7 @@ describe("evaluateFoundryLottieValidity", () => {
         },
       ],
     });
-    const result = evaluateFoundryLottieValidity(lottie, {
+    const result = evaluateArtLabLottieValidity(lottie, {
       expectedDurationMs: 1000,
     });
     expect(result.passed).toBe(false);

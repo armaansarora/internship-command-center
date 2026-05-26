@@ -3,17 +3,17 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  createFoundryAssetPack,
-  readFoundryAssetPack,
-  validateFoundryManifestAgainstSlots,
-  renderFoundryIntegrationSnippet,
+  createArtLabAssetPack,
+  readArtLabAssetPack,
+  validateArtLabManifestAgainstSlots,
+  renderArtLabIntegrationSnippet,
 } from "./index";
 
 describe("Phase 1 smoke — create → read → validate → snippet", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-p1-smoke-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-p1-smoke-"));
   });
 
   afterEach(() => {
@@ -21,7 +21,7 @@ describe("Phase 1 smoke — create → read → validate → snippet", () => {
   });
 
   it("end-to-end happy path for a character-sprite pack", async () => {
-    const { manifest } = await createFoundryAssetPack({
+    const { manifest } = await createArtLabAssetPack({
       packDir: tmpDir,
       kind: "character-sprite",
       agent: "character-master",
@@ -37,13 +37,13 @@ describe("Phase 1 smoke — create → read → validate → snippet", () => {
       generation: { agentName: "character-master", provider: "gemini", modelId: "gemini-2.5-flash-image", seed: 1, costCents: 4, durationMs: 18000, generatedAt: "2026-05-25T00:00:00.000Z" },
     });
 
-    const readResult = await readFoundryAssetPack(tmpDir);
+    const readResult = await readArtLabAssetPack(tmpDir);
     if (readResult.ok !== true) throw new Error("expected ok=true on read");
 
-    const slotCheck = validateFoundryManifestAgainstSlots(manifest);
+    const slotCheck = validateArtLabManifestAgainstSlots(manifest);
     expect(slotCheck.ok).toBe(true);
 
-    const snippet = renderFoundryIntegrationSnippet(manifest);
+    const snippet = renderArtLabIntegrationSnippet(manifest);
     expect(snippet).toContain("OtisCharacter");
     expect(snippet).toContain("/art/lobby/otis/regular/idle.webp");
   });

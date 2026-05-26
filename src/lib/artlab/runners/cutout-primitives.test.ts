@@ -1,8 +1,8 @@
 // src/lib/artlab/runners/cutout-primitives.test.ts
 //
 // Validates the shared cutout-primitives module that BOTH the artlab
-// `cutout-runner` and the foundry `cutout-and-feather` stage consume.
-// Extracted from the original cutout-runner module so the foundry agent
+// `cutout-runner` and the ArtLab SDK `cutout-and-feather` stage consume.
+// Extracted from the original cutout-runner module so the ArtLab SDK agent
 // can reuse the mature flood-fill + edge-feather + backdrop-sampling logic
 // instead of reimplementing per-pixel thresholding from scratch.
 

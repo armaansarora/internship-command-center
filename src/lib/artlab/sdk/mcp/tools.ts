@@ -2,23 +2,23 @@ import { z } from "zod";
 import { PackIdSchema } from "./lib/path-safety";
 
 /**
- * Maximum length of a `foundry/generate` `description`. Caps the largest
+ * Maximum length of a `artlab/generate` `description`. Caps the largest
  * single MCP payload so a single call cannot enqueue megabytes of prompt
  * text (cheap DoS surface). 4000 chars comfortably fits a rich character
  * brief; honest prompts in production sit well under 1500.
  */
-export const FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS = 4000;
+export const ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS = 4000;
 
 /**
  * Allow-list of hostnames whose images may be passed as `referenceImageUrl`
- * to `foundry/generate`. Anything off this list is rejected as a potential
+ * to `artlab/generate`. Anything off this list is rejected as a potential
  * SSRF vector — the daemon eventually fetches this URL server-side, so an
  * unrestricted accept lets a caller probe internal endpoints
  * (169.254.169.254 cloud metadata, 127.0.0.1 admin panels, etc.).
  *
  * Production additions land here, not in ad-hoc bypasses inside handlers.
  */
-export const FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST = [
+export const ARTLAB_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST = [
   // Supabase public storage — production-pinned art and CMS-driven references.
   "jzrsrruugcajohvvmevg.supabase.co",
   // GitHub raw user content — design system references checked into git.
@@ -80,31 +80,31 @@ const ReferenceImageUrlSchema = z
     const host = url.hostname.toLowerCase();
     if (SSRF_FORBIDDEN_HOSTNAMES.has(host)) return false;
     if (isPrivateOrLoopbackIPv4(host)) return false;
-    return (FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST as readonly string[]).includes(host);
-  }, "referenceImageUrl must be HTTPS and on the Foundry host allow-list");
+    return (ARTLAB_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST as readonly string[]).includes(host);
+  }, "referenceImageUrl must be HTTPS and on the ArtLab host allow-list");
 
 /**
  * Canonical, ordered list of every MCP tool exposed by the
- * Tower Art Foundry server. Order matters because the MCP
+ * Tower Art ArtLab server. Order matters because the MCP
  * manifest emits them in this order to the client.
  */
-export const FOUNDRY_MCP_TOOL_NAMES = [
-  "foundry/canon_list",
-  "foundry/canon_get",
-  "foundry/asset_pack_list",
-  "foundry/asset_pack_get",
-  "foundry/asset_pack_integration",
-  "foundry/slot_audit",
-  "foundry/generate",
-  "foundry/generate_status",
-  "foundry/diagnostics",
+export const ARTLAB_MCP_TOOL_NAMES = [
+  "artlab/canon_list",
+  "artlab/canon_get",
+  "artlab/asset_pack_list",
+  "artlab/asset_pack_get",
+  "artlab/asset_pack_integration",
+  "artlab/slot_audit",
+  "artlab/generate",
+  "artlab/generate_status",
+  "artlab/diagnostics",
 ] as const;
-export type FoundryMcpToolName = (typeof FOUNDRY_MCP_TOOL_NAMES)[number];
+export type ArtLabMcpToolName = (typeof ARTLAB_MCP_TOOL_NAMES)[number];
 
-export const FOUNDRY_CANON_KINDS = ["character", "floor", "palette", "style-envelope"] as const;
-export type FoundryCanonKind = (typeof FOUNDRY_CANON_KINDS)[number];
+export const ARTLAB_CANON_KINDS = ["character", "floor", "palette", "style-envelope"] as const;
+export type ArtLabCanonKind = (typeof ARTLAB_CANON_KINDS)[number];
 
-export const FOUNDRY_ASSET_KINDS = [
+export const ARTLAB_ASSET_KINDS = [
   "character",
   "floor",
   "ui-texture",
@@ -112,9 +112,9 @@ export const FOUNDRY_ASSET_KINDS = [
   "sprite-animation",
   "lottie",
 ] as const;
-export type FoundryAssetKind = (typeof FOUNDRY_ASSET_KINDS)[number];
+export type ArtLabAssetKind = (typeof ARTLAB_ASSET_KINDS)[number];
 
-export const FOUNDRY_RUN_STATUSES = [
+export const ARTLAB_RUN_STATUSES = [
   "queued",
   "running",
   "blocked",
@@ -122,7 +122,7 @@ export const FOUNDRY_RUN_STATUSES = [
   "cancelled",
   "failed",
 ] as const;
-export type FoundryRunStatus = (typeof FOUNDRY_RUN_STATUSES)[number];
+export type ArtLabRunStatus = (typeof ARTLAB_RUN_STATUSES)[number];
 
 const UuidV4 = z
   .string()
@@ -132,59 +132,59 @@ const UuidV4 = z
   );
 
 // ---- canon_list ----------------------------------------------------------
-export const FoundryCanonListInputSchema = z
+export const ArtLabCanonListInputSchema = z
   .object({
-    kind: z.enum(FOUNDRY_CANON_KINDS).optional(),
+    kind: z.enum(ARTLAB_CANON_KINDS).optional(),
   })
   .strict();
-export type FoundryCanonListInput = z.infer<typeof FoundryCanonListInputSchema>;
+export type ArtLabCanonListInput = z.infer<typeof ArtLabCanonListInputSchema>;
 
-export const FoundryCanonListOutputSchema = z
+export const ArtLabCanonListOutputSchema = z
   .object({
     entries: z.array(
       z.object({
         id: z.string().min(1),
-        kind: z.enum(FOUNDRY_CANON_KINDS),
+        kind: z.enum(ARTLAB_CANON_KINDS),
         displayName: z.string().min(1),
         summary: z.string().min(1),
       }).strict(),
     ),
   })
   .strict();
-export type FoundryCanonListOutput = z.infer<typeof FoundryCanonListOutputSchema>;
+export type ArtLabCanonListOutput = z.infer<typeof ArtLabCanonListOutputSchema>;
 
 // ---- canon_get -----------------------------------------------------------
-export const FoundryCanonGetInputSchema = z
+export const ArtLabCanonGetInputSchema = z
   .object({ id: z.string().min(1) })
   .strict();
-export type FoundryCanonGetInput = z.infer<typeof FoundryCanonGetInputSchema>;
+export type ArtLabCanonGetInput = z.infer<typeof ArtLabCanonGetInputSchema>;
 
-export const FoundryCanonGetOutputSchema = z
+export const ArtLabCanonGetOutputSchema = z
   .object({
     id: z.string().min(1),
-    kind: z.enum(FOUNDRY_CANON_KINDS),
+    kind: z.enum(ARTLAB_CANON_KINDS),
     yamlAsJson: z.record(z.string(), z.unknown()),
     sourcePath: z.string().min(1),
   })
   .strict();
-export type FoundryCanonGetOutput = z.infer<typeof FoundryCanonGetOutputSchema>;
+export type ArtLabCanonGetOutput = z.infer<typeof ArtLabCanonGetOutputSchema>;
 
 // ---- asset_pack_list -----------------------------------------------------
-export const FoundryAssetPackListInputSchema = z
+export const ArtLabAssetPackListInputSchema = z
   .object({
-    kind: z.enum(FOUNDRY_ASSET_KINDS).optional(),
+    kind: z.enum(ARTLAB_ASSET_KINDS).optional(),
     characterId: z.string().min(1).optional(),
     space: z.string().min(1).optional(),
   })
   .strict();
-export type FoundryAssetPackListInput = z.infer<typeof FoundryAssetPackListInputSchema>;
+export type ArtLabAssetPackListInput = z.infer<typeof ArtLabAssetPackListInputSchema>;
 
-export const FoundryAssetPackListOutputSchema = z
+export const ArtLabAssetPackListOutputSchema = z
   .object({
     packs: z.array(
       z.object({
         packId: z.string().min(1),
-        kind: z.enum(FOUNDRY_ASSET_KINDS),
+        kind: z.enum(ARTLAB_ASSET_KINDS),
         slotId: z.string().min(1),
         promotedAt: z.string().datetime({ offset: true }),
         characterId: z.string().min(1).optional(),
@@ -193,15 +193,15 @@ export const FoundryAssetPackListOutputSchema = z
     ),
   })
   .strict();
-export type FoundryAssetPackListOutput = z.infer<typeof FoundryAssetPackListOutputSchema>;
+export type ArtLabAssetPackListOutput = z.infer<typeof ArtLabAssetPackListOutputSchema>;
 
 // ---- asset_pack_get ------------------------------------------------------
-export const FoundryAssetPackGetInputSchema = z
+export const ArtLabAssetPackGetInputSchema = z
   .object({ packId: z.string().min(1) })
   .strict();
-export type FoundryAssetPackGetInput = z.infer<typeof FoundryAssetPackGetInputSchema>;
+export type ArtLabAssetPackGetInput = z.infer<typeof ArtLabAssetPackGetInputSchema>;
 
-export const FoundryAssetPackGetOutputSchema = z
+export const ArtLabAssetPackGetOutputSchema = z
   .object({
     packId: z.string().min(1),
     manifest: z.record(z.string(), z.unknown()),
@@ -214,10 +214,10 @@ export const FoundryAssetPackGetOutputSchema = z
     ),
   })
   .strict();
-export type FoundryAssetPackGetOutput = z.infer<typeof FoundryAssetPackGetOutputSchema>;
+export type ArtLabAssetPackGetOutput = z.infer<typeof ArtLabAssetPackGetOutputSchema>;
 
 // ---- asset_pack_integration ---------------------------------------------
-export const FoundryAssetPackIntegrationInputSchema = z
+export const ArtLabAssetPackIntegrationInputSchema = z
   .object({
     packId: z.string().min(1),
     targetFramework: z
@@ -225,11 +225,11 @@ export const FoundryAssetPackIntegrationInputSchema = z
       .default("next-app-router"),
   })
   .strict();
-export type FoundryAssetPackIntegrationInput = z.infer<
-  typeof FoundryAssetPackIntegrationInputSchema
+export type ArtLabAssetPackIntegrationInput = z.infer<
+  typeof ArtLabAssetPackIntegrationInputSchema
 >;
 
-export const FoundryAssetPackIntegrationOutputSchema = z
+export const ArtLabAssetPackIntegrationOutputSchema = z
   .object({
     packId: z.string().min(1),
     importStatement: z.string().min(1),
@@ -237,25 +237,25 @@ export const FoundryAssetPackIntegrationOutputSchema = z
     notes: z.array(z.string()).optional(),
   })
   .strict();
-export type FoundryAssetPackIntegrationOutput = z.infer<
-  typeof FoundryAssetPackIntegrationOutputSchema
+export type ArtLabAssetPackIntegrationOutput = z.infer<
+  typeof ArtLabAssetPackIntegrationOutputSchema
 >;
 
 // ---- slot_audit ----------------------------------------------------------
-export const FoundrySlotAuditInputSchema = z
+export const ArtLabSlotAuditInputSchema = z
   .object({
-    kind: z.enum(FOUNDRY_ASSET_KINDS).optional(),
+    kind: z.enum(ARTLAB_ASSET_KINDS).optional(),
     space: z.string().min(1).optional(),
   })
   .strict();
-export type FoundrySlotAuditInput = z.infer<typeof FoundrySlotAuditInputSchema>;
+export type ArtLabSlotAuditInput = z.infer<typeof ArtLabSlotAuditInputSchema>;
 
-export const FoundrySlotAuditOutputSchema = z
+export const ArtLabSlotAuditOutputSchema = z
   .object({
     missing: z.array(
       z.object({
         slotId: z.string().min(1),
-        kind: z.enum(FOUNDRY_ASSET_KINDS),
+        kind: z.enum(ARTLAB_ASSET_KINDS),
         space: z.string().min(1).optional(),
         characterId: z.string().min(1).optional(),
         description: z.string().min(1),
@@ -265,23 +265,23 @@ export const FoundrySlotAuditOutputSchema = z
     totalCount: z.number().int().min(0),
   })
   .strict();
-export type FoundrySlotAuditOutput = z.infer<typeof FoundrySlotAuditOutputSchema>;
+export type ArtLabSlotAuditOutput = z.infer<typeof ArtLabSlotAuditOutputSchema>;
 
 // ---- generate ------------------------------------------------------------
-export const FoundryGenerateInputSchema = z
+export const ArtLabGenerateInputSchema = z
   .object({
-    kind: z.enum(FOUNDRY_ASSET_KINDS),
-    // Capped at FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS (~4000) to prevent a
+    kind: z.enum(ARTLAB_ASSET_KINDS),
+    // Capped at ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS (~4000) to prevent a
     // single MCP call from enqueuing megabytes of prompt text.
     description: z
       .string()
       .min(8, "description must be at least 8 chars")
       .max(
-        FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS,
-        `description must be ${FOUNDRY_GENERATE_DESCRIPTION_MAX_CHARS} chars or fewer`,
+        ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS,
+        `description must be ${ARTLAB_GENERATE_DESCRIPTION_MAX_CHARS} chars or fewer`,
       ),
     // HTTPS-only + host allow-list to close the SSRF surface — see
-    // ReferenceImageUrlSchema and FOUNDRY_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST.
+    // ReferenceImageUrlSchema and ARTLAB_GENERATE_REFERENCE_IMAGE_HOST_ALLOWLIST.
     referenceImageUrl: ReferenceImageUrlSchema.optional(),
     // anchorPackId flows into path.join(packsRoot, …) inside asset_pack
     // handlers, so it must use the same strict PackIdSchema (charset,
@@ -292,28 +292,28 @@ export const FoundryGenerateInputSchema = z
     requesterAgent: z.string().min(1).optional(),
   })
   .strict();
-export type FoundryGenerateInput = z.infer<typeof FoundryGenerateInputSchema>;
+export type ArtLabGenerateInput = z.infer<typeof ArtLabGenerateInputSchema>;
 
-export const FoundryGenerateOutputSchema = z
+export const ArtLabGenerateOutputSchema = z
   .object({
     runId: UuidV4,
-    status: z.enum(FOUNDRY_RUN_STATUSES),
+    status: z.enum(ARTLAB_RUN_STATUSES),
     queuedAt: z.string().datetime({ offset: true }).optional(),
     inboxPath: z.string().min(1).optional(),
   })
   .strict();
-export type FoundryGenerateOutput = z.infer<typeof FoundryGenerateOutputSchema>;
+export type ArtLabGenerateOutput = z.infer<typeof ArtLabGenerateOutputSchema>;
 
 // ---- generate_status -----------------------------------------------------
-export const FoundryGenerateStatusInputSchema = z
+export const ArtLabGenerateStatusInputSchema = z
   .object({ runId: UuidV4 })
   .strict();
-export type FoundryGenerateStatusInput = z.infer<typeof FoundryGenerateStatusInputSchema>;
+export type ArtLabGenerateStatusInput = z.infer<typeof ArtLabGenerateStatusInputSchema>;
 
-export const FoundryGenerateStatusOutputSchema = z
+export const ArtLabGenerateStatusOutputSchema = z
   .object({
     runId: UuidV4,
-    status: z.enum(FOUNDRY_RUN_STATUSES),
+    status: z.enum(ARTLAB_RUN_STATUSES),
     phase: z.string().min(1),
     percentComplete: z.number().min(0).max(100),
     blockers: z.array(z.string()),
@@ -322,13 +322,13 @@ export const FoundryGenerateStatusOutputSchema = z
     updatedAt: z.string().datetime({ offset: true }),
   })
   .strict();
-export type FoundryGenerateStatusOutput = z.infer<typeof FoundryGenerateStatusOutputSchema>;
+export type ArtLabGenerateStatusOutput = z.infer<typeof ArtLabGenerateStatusOutputSchema>;
 
 // ---- diagnostics ---------------------------------------------------------
-export const FoundryDiagnosticsInputSchema = z.object({}).strict();
-export type FoundryDiagnosticsInput = z.infer<typeof FoundryDiagnosticsInputSchema>;
+export const ArtLabDiagnosticsInputSchema = z.object({}).strict();
+export type ArtLabDiagnosticsInput = z.infer<typeof ArtLabDiagnosticsInputSchema>;
 
-export const FoundryDiagnosticsOutputSchema = z
+export const ArtLabDiagnosticsOutputSchema = z
   .object({
     daemonUp: z.boolean(),
     providersReachable: z.record(z.string(), z.boolean()),
@@ -336,7 +336,7 @@ export const FoundryDiagnosticsOutputSchema = z
       .array(
         z.object({
           runId: UuidV4,
-          status: z.enum(FOUNDRY_RUN_STATUSES),
+          status: z.enum(ARTLAB_RUN_STATUSES),
           updatedAt: z.string().datetime({ offset: true }),
         }).strict(),
       )
@@ -345,14 +345,14 @@ export const FoundryDiagnosticsOutputSchema = z
     collectedAt: z.string().datetime({ offset: true }),
   })
   .strict();
-export type FoundryDiagnosticsOutput = z.infer<typeof FoundryDiagnosticsOutputSchema>;
+export type ArtLabDiagnosticsOutput = z.infer<typeof ArtLabDiagnosticsOutputSchema>;
 
 /**
  * Compact registry record used by `server.ts` when calling
  * `server.tool(name, schema, handler)`.
  */
-export interface FoundryMcpToolDef<I, O> {
-  name: FoundryMcpToolName;
+export interface ArtLabMcpToolDef<I, O> {
+  name: ArtLabMcpToolName;
   description: string;
   inputSchema: z.ZodType<I>;
   outputSchema: z.ZodType<O>;

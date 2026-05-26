@@ -4,9 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import { runFoundrySpriteAnimator } from "./index";
-import { createFoundrySpriteMockVideoProvider } from "./__tests__/mock-video-provider";
-import { createFoundrySpriteMockLottieProvider } from "./__tests__/mock-lottie-provider";
+import { runArtLabSpriteAnimator } from "./index";
+import { createArtLabSpriteMockVideoProvider } from "./__tests__/mock-video-provider";
+import { createArtLabSpriteMockLottieProvider } from "./__tests__/mock-lottie-provider";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -24,15 +24,15 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
   hash: "0000000000000000",
 };
 
-const MOCK_PACK_DIR = "/tmp/foundry-anim-test/char-otis-v3";
+const MOCK_PACK_DIR = "/tmp/artlab-anim-test/char-otis-v3";
 
-// Foundry-SDK Critical-1 fix: the `buildFoundryAssetPack` mock has been
+// ArtLab-SDK Critical-1 fix: the `buildArtLabAssetPack` mock has been
 // REMOVED. The real strict-schema builder now runs against the manifest
 // the sprite-animator produces, so any drift between the agent's emitted
 // shape and the canonical envelope (Critical-1 contract bug) fails this
 // suite immediately rather than only blowing up in production.
 //
-// We continue to mock `loadFoundryAssetPack` because it touches disk; it
+// We continue to mock `loadArtLabAssetPack` because it touches disk; it
 // returns the same strict on-disk character-spritesheet manifest shape
 // that `character-master` writes.
 vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
@@ -41,7 +41,7 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   );
   return {
     ...actual,
-    loadFoundryAssetPack: vi.fn(async () => ({
+    loadArtLabAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
       packDir: MOCK_PACK_DIR,
       manifest: {
@@ -65,16 +65,16 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   };
 });
 
-describe("runFoundrySpriteAnimator", () => {
+describe("runArtLabSpriteAnimator", () => {
   let dir: string;
   beforeEach(async () => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-anim-agent-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-anim-agent-"));
     ANCHOR_FIXTURE.bytes = await solid(50);
     ANCHOR_FIXTURE.hash = await computePerceptualHash(ANCHOR_FIXTURE.bytes);
   });
 
   it("sprite format writes frames and returns sprite-animation manifest", async () => {
-    const result = await runFoundrySpriteAnimator(
+    const result = await runArtLabSpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         sourcePackId: "char-otis-v3",
@@ -87,10 +87,10 @@ describe("runFoundrySpriteAnimator", () => {
         loops: true,
       },
       {
-        video: createFoundrySpriteMockVideoProvider(),
-        lottie: createFoundrySpriteMockLottieProvider(),
+        video: createArtLabSpriteMockVideoProvider(),
+        lottie: createArtLabSpriteMockLottieProvider(),
       },
-      { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/artlab-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
     // Canonical manifest carries all sprite frames as payload files. The
     // sequence metadata (fps, loops, frame_count, …) is persisted as
@@ -118,7 +118,7 @@ describe("runFoundrySpriteAnimator", () => {
   });
 
   it("lottie format writes lottie.json and returns sprite-animation manifest", async () => {
-    const result = await runFoundrySpriteAnimator(
+    const result = await runArtLabSpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         sourcePackId: "char-otis-v3",
@@ -131,10 +131,10 @@ describe("runFoundrySpriteAnimator", () => {
         loops: true,
       },
       {
-        video: createFoundrySpriteMockVideoProvider(),
-        lottie: createFoundrySpriteMockLottieProvider(),
+        video: createArtLabSpriteMockVideoProvider(),
+        lottie: createArtLabSpriteMockLottieProvider(),
       },
-      { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/artlab-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
     expect(result.manifest.kind).toBe("sprite-animation");
     expect(result.manifest.payload.primaryFileRelPath).toBe("lottie.json");
@@ -149,7 +149,7 @@ describe("runFoundrySpriteAnimator", () => {
   });
 
   it("integration.tsx payload carries the integration snippet text", async () => {
-    await runFoundrySpriteAnimator(
+    await runArtLabSpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         sourcePackId: "char-otis-v3",
@@ -162,10 +162,10 @@ describe("runFoundrySpriteAnimator", () => {
         loops: true,
       },
       {
-        video: createFoundrySpriteMockVideoProvider(),
-        lottie: createFoundrySpriteMockLottieProvider(),
+        video: createArtLabSpriteMockVideoProvider(),
+        lottie: createArtLabSpriteMockLottieProvider(),
       },
-      { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+      { runDir: dir, packsRoot: "/tmp/artlab-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
     const snippet = readFileSync(join(dir, "pack", "payload", "integration.tsx"), "utf8");
     expect(snippet).toContain("<AnimatedSprite");
@@ -174,10 +174,10 @@ describe("runFoundrySpriteAnimator", () => {
   // Critical 3: the lottie path now FAILS when the embedded character art
   // diverges from the source pack's anchor — actionable error message.
   it("lottie format fails QA when the source pack's anchor hash does not match the lottie's embedded character art", async () => {
-    // Override the loadFoundryAssetPack mock to return an anchor hash
+    // Override the loadArtLabAssetPack mock to return an anchor hash
     // that cannot match the embedded image (which is solid(50)).
-    const { loadFoundryAssetPack } = await import("@/lib/artlab/sdk/asset-pack");
-    vi.mocked(loadFoundryAssetPack).mockImplementationOnce(async () => ({
+    const { loadArtLabAssetPack } = await import("@/lib/artlab/sdk/asset-pack");
+    vi.mocked(loadArtLabAssetPack).mockImplementationOnce(async () => ({
       packId: "char-otis-v3",
       packDir: MOCK_PACK_DIR,
       manifest: {
@@ -199,7 +199,7 @@ describe("runFoundrySpriteAnimator", () => {
       },
     }));
     await expect(
-      runFoundrySpriteAnimator(
+      runArtLabSpriteAnimator(
         {
           runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
           sourcePackId: "char-otis-v3",
@@ -212,10 +212,10 @@ describe("runFoundrySpriteAnimator", () => {
           loops: true,
         },
         {
-          video: createFoundrySpriteMockVideoProvider(),
-          lottie: createFoundrySpriteMockLottieProvider(),
+          video: createArtLabSpriteMockVideoProvider(),
+          lottie: createArtLabSpriteMockLottieProvider(),
         },
-        { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
+        { runDir: dir, packsRoot: "/tmp/artlab-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
       ),
     ).rejects.toThrow(/lottie-identity/);
   });

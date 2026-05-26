@@ -1,10 +1,10 @@
-// src/lib/foundry/agents/ui-texture/__tests__/mock-llm-provider.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/__tests__/mock-llm-provider.test.ts
 import { describe, expect, it } from "vitest";
-import { createFoundryIconMockLlmProvider } from "./mock-llm-provider";
+import { createArtLabIconMockLlmProvider } from "./mock-llm-provider";
 
-describe("createFoundryIconMockLlmProvider", () => {
+describe("createArtLabIconMockLlmProvider", () => {
   it("emitSvg returns a deterministic, parseable SVG string", async () => {
-    const p = createFoundryIconMockLlmProvider();
+    const p = createArtLabIconMockLlmProvider();
     const a = await p.emitSvg({ name: "x", ariaLabel: "x", strokeWidthPx: 1.5, viewBox: "0 0 24 24", seed: 1 });
     const b = await p.emitSvg({ name: "x", ariaLabel: "x", strokeWidthPx: 1.5, viewBox: "0 0 24 24", seed: 1 });
     expect(a.svg).toBe(b.svg);
@@ -13,7 +13,7 @@ describe("createFoundryIconMockLlmProvider", () => {
   });
 
   it("emitted SVG declares the requested strokeWidth", async () => {
-    const p = createFoundryIconMockLlmProvider();
+    const p = createArtLabIconMockLlmProvider();
     const out = await p.emitSvg({
       name: "x",
       ariaLabel: "x",
@@ -25,7 +25,7 @@ describe("createFoundryIconMockLlmProvider", () => {
   });
 
   it("emitted SVG declares the requested viewBox", async () => {
-    const p = createFoundryIconMockLlmProvider();
+    const p = createArtLabIconMockLlmProvider();
     const out = await p.emitSvg({
       name: "x",
       ariaLabel: "x",
@@ -37,7 +37,7 @@ describe("createFoundryIconMockLlmProvider", () => {
   });
 
   it("emitted SVG declares the aria-label", async () => {
-    const p = createFoundryIconMockLlmProvider();
+    const p = createArtLabIconMockLlmProvider();
     const out = await p.emitSvg({
       name: "x",
       ariaLabel: "Test icon",

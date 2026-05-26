@@ -1,13 +1,13 @@
-// src/lib/foundry/canon/typography-schema.ts
+// src/lib/artlab/sdk/canon/typography-schema.ts
 import { z } from "zod";
-import { FoundryCanonHeaderSchema } from "./types";
+import { ArtLabCanonHeaderSchema } from "./types";
 
-const TypographyHeaderSchema = FoundryCanonHeaderSchema.extend({ kind: z.literal("typography") });
+const TypographyHeaderSchema = ArtLabCanonHeaderSchema.extend({ kind: z.literal("typography") });
 
-export const FOUNDRY_TYPOGRAPHY_FAMILY_ROLES = ["heading", "body", "mono"] as const;
-export type FoundryTypographyFamilyRole = (typeof FOUNDRY_TYPOGRAPHY_FAMILY_ROLES)[number];
+export const ARTLAB_TYPOGRAPHY_FAMILY_ROLES = ["heading", "body", "mono"] as const;
+export type ArtLabTypographyFamilyRole = (typeof ARTLAB_TYPOGRAPHY_FAMILY_ROLES)[number];
 
-export const FoundryTypographyCanonSchema = z
+export const ArtLabTypographyCanonSchema = z
   .object({
     header: TypographyHeaderSchema,
     families: z.object({
@@ -29,4 +29,4 @@ export const FoundryTypographyCanonSchema = z
       .min(1),
   })
   .strict();
-export type FoundryTypographyCanon = z.infer<typeof FoundryTypographyCanonSchema>;
+export type ArtLabTypographyCanon = z.infer<typeof ArtLabTypographyCanonSchema>;

@@ -3,12 +3,12 @@ import { hammingDistanceHex } from "@/lib/artlab/coherence/identity-drift";
 
 const IDENTITY_BIT_THRESHOLD = 14;
 
-export interface FoundrySpriteIdentityDriftInput {
+export interface ArtLabSpriteIdentityDriftInput {
   anchorBytes: Buffer;
   frames: ReadonlyArray<Buffer>;
 }
 
-export interface FoundrySpriteIdentityDriftReport {
+export interface ArtLabSpriteIdentityDriftReport {
   passed: boolean;
   totalFrames: number;
   avgHamming: number;
@@ -17,12 +17,12 @@ export interface FoundrySpriteIdentityDriftReport {
   thresholdBits: number;
 }
 
-export async function evaluateFoundrySpriteIdentityDrift(
-  input: FoundrySpriteIdentityDriftInput,
-): Promise<FoundrySpriteIdentityDriftReport> {
+export async function evaluateArtLabSpriteIdentityDrift(
+  input: ArtLabSpriteIdentityDriftInput,
+): Promise<ArtLabSpriteIdentityDriftReport> {
   if (input.frames.length === 0) {
     throw new Error(
-      "foundry/sprite: identity-drift requires at least one frame",
+      "artlab/sprite: identity-drift requires at least one frame",
     );
   }
   const anchorHash = await computePerceptualHash(input.anchorBytes);

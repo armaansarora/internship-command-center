@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const FoundryVideoProviderInputSchema = z
+export const ArtLabVideoProviderInputSchema = z
   .object({
     prompt: z.string().min(1),
     frameCount: z.number().int().min(2).max(120),
@@ -9,11 +9,11 @@ export const FoundryVideoProviderInputSchema = z
     seed: z.number().int().min(0).optional(),
   })
   .strict();
-export type FoundryVideoProviderInput = z.infer<
-  typeof FoundryVideoProviderInputSchema
+export type ArtLabVideoProviderInput = z.infer<
+  typeof ArtLabVideoProviderInputSchema
 >;
 
-export const FoundryVideoProviderResultSchema = z
+export const ArtLabVideoProviderResultSchema = z
   .object({
     frames: z.array(z.instanceof(Buffer)).min(1),
     contentType: z.literal("image/png"),
@@ -22,12 +22,12 @@ export const FoundryVideoProviderResultSchema = z
     durationMs: z.number().int().min(0),
   })
   .strict();
-export type FoundryVideoProviderResult = z.infer<
-  typeof FoundryVideoProviderResultSchema
+export type ArtLabVideoProviderResult = z.infer<
+  typeof ArtLabVideoProviderResultSchema
 >;
 
-export interface FoundryVideoProvider {
+export interface ArtLabVideoProvider {
   generateFrames(
-    input: FoundryVideoProviderInput,
-  ): Promise<FoundryVideoProviderResult>;
+    input: ArtLabVideoProviderInput,
+  ): Promise<ArtLabVideoProviderResult>;
 }

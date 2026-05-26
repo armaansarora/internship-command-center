@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { callFoundryAnthropic } from "../anthropic-client";
-import type { FoundryAgentBrain } from "../types";
+import { callArtLabAnthropic } from "../anthropic-client";
+import type { ArtLabAgentBrain } from "../types";
 
 export const UiTextureInputSchema = z
   .object({
@@ -27,7 +27,7 @@ export const UiTextureOutputSchema = z
   .strict();
 export type UiTextureOutput = z.infer<typeof UiTextureOutputSchema>;
 
-const SYSTEM = `You are the UI Texture & Icon agent in the Tower Art Foundry.
+const SYSTEM = `You are the UI Texture & Icon agent in the Tower Art ArtLab.
 You receive a slotId (e.g. tower.button.bg), a directive, a tileable flag, and palette hints (hex).
 Your job: produce a texture plan with a copy-paste prompt, an explicit CSS variable name, and a fallback color for non-image clients.
 
@@ -49,7 +49,7 @@ export function createUiTextureBrain(opts: {
   apiKey: string;
   model: string;
   dryRun?: boolean;
-}): FoundryAgentBrain<UiTextureInput, UiTextureOutput> {
+}): ArtLabAgentBrain<UiTextureInput, UiTextureOutput> {
   return {
     agent: "ui-texture",
     systemPrompt: SYSTEM,
@@ -57,7 +57,7 @@ export function createUiTextureBrain(opts: {
     outputSchema: UiTextureOutputSchema,
     async decide(input) {
       const parsed = UiTextureInputSchema.parse(input);
-      const resp = await callFoundryAnthropic({
+      const resp = await callArtLabAnthropic({
         systemPrompt: SYSTEM,
         userJson: parsed,
         model: opts.model,

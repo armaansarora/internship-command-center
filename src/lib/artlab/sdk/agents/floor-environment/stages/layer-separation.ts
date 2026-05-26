@@ -17,36 +17,36 @@ import sharp from "sharp";
  * will be independent provider calls, each authored from its own prompt.
  */
 
-export type FoundryFloorCompositeKind = "single-composite";
+export type ArtLabFloorCompositeKind = "single-composite";
 
-export const FOUNDRY_FLOOR_COMPOSITE_LAYER_NAME = "composite" as const;
-export type FoundryFloorCompositeLayerName =
-  typeof FOUNDRY_FLOOR_COMPOSITE_LAYER_NAME;
+export const ARTLAB_FLOOR_COMPOSITE_LAYER_NAME = "composite" as const;
+export type ArtLabFloorCompositeLayerName =
+  typeof ARTLAB_FLOOR_COMPOSITE_LAYER_NAME;
 
-export interface FoundryFloorCompositeLayerBuffer {
-  name: FoundryFloorCompositeLayerName;
+export interface ArtLabFloorCompositeLayerBuffer {
+  name: ArtLabFloorCompositeLayerName;
   zIndex: 0;
   hasAlpha: boolean;
   bytes: Buffer;
 }
 
-export interface FoundryFloorCompositeResult {
-  kind: FoundryFloorCompositeKind;
-  layers: ReadonlyArray<FoundryFloorCompositeLayerBuffer>;
+export interface ArtLabFloorCompositeResult {
+  kind: ArtLabFloorCompositeKind;
+  layers: ReadonlyArray<ArtLabFloorCompositeLayerBuffer>;
 }
 
-export async function buildFoundryFloorComposite(
+export async function buildArtLabFloorComposite(
   composite: Buffer,
-): Promise<FoundryFloorCompositeResult> {
+): Promise<ArtLabFloorCompositeResult> {
   const meta = await sharp(composite).metadata();
   if (!meta.width || !meta.height) {
-    throw new Error("foundry/floor: composite has no dimensions");
+    throw new Error("artlab/floor: composite has no dimensions");
   }
   return {
     kind: "single-composite",
     layers: [
       {
-        name: FOUNDRY_FLOOR_COMPOSITE_LAYER_NAME,
+        name: ARTLAB_FLOOR_COMPOSITE_LAYER_NAME,
         zIndex: 0,
         hasAlpha: false,
         bytes: composite,

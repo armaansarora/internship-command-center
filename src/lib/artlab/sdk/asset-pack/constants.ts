@@ -1,7 +1,7 @@
-export const FOUNDRY_ASSET_PACK_VERSION = "1.0.0" as const;
-export type FoundryAssetPackVersion = typeof FOUNDRY_ASSET_PACK_VERSION;
+export const ARTLAB_ASSET_PACK_VERSION = "1.0.0" as const;
+export type ArtLabAssetPackVersion = typeof ARTLAB_ASSET_PACK_VERSION;
 
-export const FOUNDRY_ASSET_KINDS = [
+export const ARTLAB_ASSET_KINDS = [
   "character-sprite",
   "character-spritesheet",
   "floor-environment",
@@ -12,9 +12,9 @@ export const FOUNDRY_ASSET_KINDS = [
   "video",
   "sound",
 ] as const;
-export type FoundryAssetKind = (typeof FOUNDRY_ASSET_KINDS)[number];
+export type ArtLabAssetKind = (typeof ARTLAB_ASSET_KINDS)[number];
 
-export const FOUNDRY_AGENT_KINDS = [
+export const ARTLAB_AGENT_KINDS = [
   "character-master",
   "floor-environment",
   "ui-texture",
@@ -24,7 +24,7 @@ export const FOUNDRY_AGENT_KINDS = [
   "video-director",
   "sound-designer",
 ] as const;
-export type FoundryAgentKind = (typeof FOUNDRY_AGENT_KINDS)[number];
+export type ArtLabAgentKind = (typeof ARTLAB_AGENT_KINDS)[number];
 
-export const FOUNDRY_PACK_FILENAME = "manifest.json" as const;
-export const FOUNDRY_PACK_PAYLOAD_DIR = "payload" as const;
+export const ARTLAB_PACK_FILENAME = "manifest.json" as const;
+export const ARTLAB_PACK_PAYLOAD_DIR = "payload" as const;

@@ -1,10 +1,10 @@
-import { FOUNDRY_ASSET_KINDS, type FoundryAssetKind } from "./constants";
+import { ARTLAB_ASSET_KINDS, type ArtLabAssetKind } from "./constants";
 import { APP_PATH_PREFIXES, isPathSafeAgainstTraversal } from "./manifest.schema";
 
-export interface FoundrySlotRecord {
+export interface ArtLabSlotRecord {
   slotId: string;
   appPath: string;
-  kind: FoundryAssetKind;
+  kind: ArtLabAssetKind;
   component: string | null;
   requiresGsap: boolean;
 }
@@ -15,8 +15,8 @@ const POSE_STATES = ["idle", "greeting", "listening", "thinking", "talking", "al
 const ANIMATION_ACTIONS = ["idle", "wave", "nod", "celebrate"] as const;
 const ANIMATION_FORMATS = ["sprite", "lottie"] as const;
 
-function buildCharacterSlots(characterId: string, dirPart: string, component: string): FoundrySlotRecord[] {
-  const slots: FoundrySlotRecord[] = [];
+function buildCharacterSlots(characterId: string, dirPart: string, component: string): ArtLabSlotRecord[] {
+  const slots: ArtLabSlotRecord[] = [];
   for (const outfit of OUTFIT_VARIANTS) {
     for (const pose of POSE_STATES) {
       slots.push({
@@ -39,11 +39,11 @@ function buildCharacterSlots(characterId: string, dirPart: string, component: st
  * `public/animations/<characterId>/<action>/lottie.json`. These slots are
  * registered statically so any character-master-promoted pack id can flow
  * into the sprite-animator and back out into a canonical
- * `FoundryAssetPackManifestSchema`-strict manifest without runtime slot
+ * `ArtLabAssetPackManifestSchema`-strict manifest without runtime slot
  * registration churn.
  */
-function buildAnimationSlots(characterId: string): FoundrySlotRecord[] {
-  const slots: FoundrySlotRecord[] = [];
+function buildAnimationSlots(characterId: string): ArtLabSlotRecord[] {
+  const slots: ArtLabSlotRecord[] = [];
   for (const action of ANIMATION_ACTIONS) {
     for (const format of ANIMATION_FORMATS) {
       const dirPart = `animations/${characterId}/${action}`;
@@ -62,54 +62,54 @@ function buildAnimationSlots(characterId: string): FoundrySlotRecord[] {
   return slots;
 }
 
-const BUILTIN_SLOTS: readonly FoundrySlotRecord[] = [
+const BUILTIN_SLOTS: readonly ArtLabSlotRecord[] = [
   ...buildCharacterSlots("otis", "lobby/otis", "OtisCharacter"),
   ...buildCharacterSlots("mara-voss", "penthouse/ceo", "CeoCharacter"),
   ...buildAnimationSlots("otis"),
   ...buildAnimationSlots("mara-voss"),
 ];
 
-const dynamicSlots: FoundrySlotRecord[] = [];
+const dynamicSlots: ArtLabSlotRecord[] = [];
 
-export const FOUNDRY_SLOT_REGISTRY: readonly FoundrySlotRecord[] = new Proxy([], {
+export const ARTLAB_SLOT_REGISTRY: readonly ArtLabSlotRecord[] = new Proxy([], {
   get(_target, prop) {
-    const merged: readonly FoundrySlotRecord[] = [...BUILTIN_SLOTS, ...dynamicSlots];
+    const merged: readonly ArtLabSlotRecord[] = [...BUILTIN_SLOTS, ...dynamicSlots];
     const value = (merged as unknown as Record<PropertyKey, unknown>)[prop];
     return typeof value === "function" ? value.bind(merged) : value;
   },
-}) as unknown as readonly FoundrySlotRecord[];
+}) as unknown as readonly ArtLabSlotRecord[];
 
-export function isFoundrySlotRegistered(slotId: string): boolean {
+export function isArtLabSlotRegistered(slotId: string): boolean {
   return BUILTIN_SLOTS.some((s) => s.slotId === slotId) || dynamicSlots.some((s) => s.slotId === slotId);
 }
 
-export function resolveFoundrySlot(slotId: string): FoundrySlotRecord | undefined {
+export function resolveArtLabSlot(slotId: string): ArtLabSlotRecord | undefined {
   return BUILTIN_SLOTS.find((s) => s.slotId === slotId) ?? dynamicSlots.find((s) => s.slotId === slotId);
 }
 
-export function registerFoundrySlot(record: FoundrySlotRecord): void {
-  if (isFoundrySlotRegistered(record.slotId)) {
-    throw new Error(`registerFoundrySlot: slotId already registered: ${record.slotId}`);
+export function registerArtLabSlot(record: ArtLabSlotRecord): void {
+  if (isArtLabSlotRegistered(record.slotId)) {
+    throw new Error(`registerArtLabSlot: slotId already registered: ${record.slotId}`);
   }
   if (!/^[a-z0-9/_-]+$/.test(record.slotId)) {
-    throw new Error(`registerFoundrySlot: invalid slotId format: ${record.slotId}`);
+    throw new Error(`registerArtLabSlot: invalid slotId format: ${record.slotId}`);
   }
   // Defence-in-depth — the slot registry is the trust anchor for
-  // `validateFoundryManifestAgainstSlots`. If we let a caller register a slot
+  // `validateArtLabManifestAgainstSlots`. If we let a caller register a slot
   // whose appPath escapes the allow-list, a matching malicious manifest
   // would then sail through `slot-appath-disagrees` because the registry and
   // manifest agree on the rogue path.
   if (!isPathSafeAgainstTraversal(record.appPath, APP_PATH_PREFIXES)) {
     throw new Error(
-      `registerFoundrySlot: appPath must be a canonical, allow-listed path (no traversal, no encoding, no backslash, no absolute or drive prefix): ${record.appPath}`,
+      `registerArtLabSlot: appPath must be a canonical, allow-listed path (no traversal, no encoding, no backslash, no absolute or drive prefix): ${record.appPath}`,
     );
   }
-  // Reject smuggled kinds — `FoundryAssetKind` is structurally enforced at
+  // Reject smuggled kinds — `ArtLabAssetKind` is structurally enforced at
   // compile time, but a caller using `as unknown` or coming from untyped JSON
   // can punch a hole through it. Guard at runtime.
-  if (!(FOUNDRY_ASSET_KINDS as readonly string[]).includes(record.kind)) {
+  if (!(ARTLAB_ASSET_KINDS as readonly string[]).includes(record.kind)) {
     throw new Error(
-      `registerFoundrySlot: invalid kind ${JSON.stringify(record.kind)} — must be one of ${FOUNDRY_ASSET_KINDS.join(", ")}`,
+      `registerArtLabSlot: invalid kind ${JSON.stringify(record.kind)} — must be one of ${ARTLAB_ASSET_KINDS.join(", ")}`,
     );
   }
   dynamicSlots.push(record);

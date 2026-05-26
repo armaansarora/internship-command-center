@@ -1,4 +1,4 @@
-export interface FoundryFloorCanonRaw {
+export interface ArtLabFloorCanonRaw {
   slug: string;
   displayName: string;
   mood: string;
@@ -8,7 +8,7 @@ export interface FoundryFloorCanonRaw {
   typography: string;
 }
 
-const FLOOR_ENTRIES: Record<string, FoundryFloorCanonRaw> = {
+const FLOOR_ENTRIES: Record<string, ArtLabFloorCanonRaw> = {
   penthouse: {
     slug: "penthouse",
     displayName: "The Penthouse",
@@ -104,12 +104,12 @@ const FLOOR_ENTRIES: Record<string, FoundryFloorCanonRaw> = {
   },
 };
 
-export async function loadFoundryFloorCanon(
+export async function loadArtLabFloorCanon(
   slug: string,
-): Promise<FoundryFloorCanonRaw | null> {
+): Promise<ArtLabFloorCanonRaw | null> {
   return FLOOR_ENTRIES[slug] ?? null;
 }
 
-export const FOUNDRY_FLOOR_CANON_SLUGS = Object.freeze(
+export const ARTLAB_FLOOR_CANON_SLUGS = Object.freeze(
   Object.keys(FLOOR_ENTRIES),
 );

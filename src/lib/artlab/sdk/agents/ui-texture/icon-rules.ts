@@ -1,7 +1,7 @@
-// src/lib/foundry/agents/ui-texture/icon-rules.ts
-import { loadFoundryIconographyRules } from "@/lib/artlab/sdk/canon";
+// src/lib/artlab/sdk/agents/ui-texture/icon-rules.ts
+import { loadArtLabIconographyRules } from "@/lib/artlab/sdk/canon";
 
-export interface FoundryIconRules {
+export interface ArtLabIconRules {
   strokeWidthPx: number;
   strokeWidthTolerancePx: number;
   cornerRadiusPx: number;
@@ -11,10 +11,10 @@ export interface FoundryIconRules {
 
 const STROKE_TOLERANCE_FRACTION = 0.25;
 
-export async function loadFoundryIconRulesAdapter(): Promise<FoundryIconRules> {
-  const raw = await loadFoundryIconographyRules();
+export async function loadArtLabIconRulesAdapter(): Promise<ArtLabIconRules> {
+  const raw = await loadArtLabIconographyRules();
   if (!raw) {
-    throw new Error("foundry/ui-texture: no icon rules in canon");
+    throw new Error("artlab/ui-texture: no icon rules in canon");
   }
   return {
     strokeWidthPx: raw.strokeWidthPx,

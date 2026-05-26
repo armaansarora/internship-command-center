@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { runFoundryFloorQa } from "./qa";
+import { runArtLabFloorQa } from "./qa";
 
 async function solid(r: number, g: number, b: number): Promise<Buffer> {
   return sharp({
@@ -17,10 +17,10 @@ async function patternPng(): Promise<Buffer> {
     .png().toBuffer();
 }
 
-describe("runFoundryFloorQa", () => {
+describe("runArtLabFloorQa", () => {
   it("aggregates pass when every sub-gate passes", async () => {
     const base = await solid(26, 26, 46);
-    const result = await runFoundryFloorQa({
+    const result = await runArtLabFloorQa({
       canonPalette: ["#1A1A2E"],
       requiredElements: ["board"],
       variants: [
@@ -34,7 +34,7 @@ describe("runFoundryFloorQa", () => {
 
   it("aggregates fail when palette gate fails", async () => {
     const base = await solid(255, 0, 0);
-    const result = await runFoundryFloorQa({
+    const result = await runArtLabFloorQa({
       canonPalette: ["#1A1A2E"],
       requiredElements: ["board"],
       variants: [
@@ -49,7 +49,7 @@ describe("runFoundryFloorQa", () => {
   it("aggregates fail when coherence gate fails", async () => {
     const same = await solid(26, 26, 46);
     const drifted = await patternPng();
-    const result = await runFoundryFloorQa({
+    const result = await runArtLabFloorQa({
       canonPalette: ["#1A1A2E", "#C9A84C", "#3F3F4E"],
       requiredElements: ["board"],
       variants: [
@@ -69,7 +69,7 @@ describe("runFoundryFloorQa", () => {
   // so downstream consumers can see the gap explicitly.
   it("does not expose a room-elements gate (honestly TODO post-launch)", async () => {
     const base = await solid(26, 26, 46);
-    const result = await runFoundryFloorQa({
+    const result = await runArtLabFloorQa({
       canonPalette: ["#1A1A2E"],
       requiredElements: ["board", "globe"],
       variants: [{ timeState: "morning", bytes: base }],
@@ -82,7 +82,7 @@ describe("runFoundryFloorQa", () => {
 
   it("does not accept reportedElements (theatrical input gone)", async () => {
     const base = await solid(26, 26, 46);
-    await runFoundryFloorQa({
+    await runArtLabFloorQa({
       canonPalette: ["#1A1A2E"],
       requiredElements: ["board"],
       // @ts-expect-error reportedElements field has been removed (Critical 2)

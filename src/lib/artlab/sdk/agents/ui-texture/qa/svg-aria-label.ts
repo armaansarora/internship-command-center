@@ -1,16 +1,16 @@
 const SVG_OPEN_RE = /<svg\b[^>]*>/;
 const ARIA_RE = /aria-label\s*=\s*"([^"]+)"/;
 
-export interface FoundrySvgAriaLabelReport {
+export interface ArtLabSvgAriaLabelReport {
   passed: boolean;
   observed?: string;
   reason?: string;
 }
 
-export function evaluateFoundrySvgAriaLabel(
+export function evaluateArtLabSvgAriaLabel(
   svg: string,
   expected: string,
-): FoundrySvgAriaLabelReport {
+): ArtLabSvgAriaLabelReport {
   const open = SVG_OPEN_RE.exec(svg);
   if (!open) {
     return { passed: false, reason: "no <svg> root element" };

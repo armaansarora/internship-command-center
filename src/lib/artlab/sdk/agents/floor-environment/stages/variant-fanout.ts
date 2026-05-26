@@ -1,24 +1,24 @@
-import { buildFoundryFloorCompositionPrompt } from "./composition-prompt";
-import type { FoundryFloorCanonEntry } from "../floor-canon";
-import type { FoundryFloorTimeState } from "../types";
+import { buildArtLabFloorCompositionPrompt } from "./composition-prompt";
+import type { ArtLabFloorCanonEntry } from "../floor-canon";
+import type { ArtLabFloorTimeState } from "../types";
 
-export interface FoundryFloorVariantJob {
+export interface ArtLabFloorVariantJob {
   jobId: string;
   floorSlug: string;
-  timeState: FoundryFloorTimeState;
+  timeState: ArtLabFloorTimeState;
   prompt: string;
-  aspectRatio: FoundryFloorCanonEntry["aspectRatio"];
+  aspectRatio: ArtLabFloorCanonEntry["aspectRatio"];
 }
 
-export function fanOutFoundryFloorVariants(
-  canon: FoundryFloorCanonEntry,
-  timeStates: ReadonlyArray<FoundryFloorTimeState>,
-): FoundryFloorVariantJob[] {
+export function fanOutArtLabFloorVariants(
+  canon: ArtLabFloorCanonEntry,
+  timeStates: ReadonlyArray<ArtLabFloorTimeState>,
+): ArtLabFloorVariantJob[] {
   return timeStates.map((timeState) => ({
     jobId: `${canon.slug}-${timeState}`,
     floorSlug: canon.slug,
     timeState,
-    prompt: buildFoundryFloorCompositionPrompt(canon, timeState),
+    prompt: buildArtLabFloorCompositionPrompt(canon, timeState),
     aspectRatio: canon.aspectRatio,
   }));
 }

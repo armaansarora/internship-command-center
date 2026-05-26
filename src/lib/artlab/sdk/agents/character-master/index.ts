@@ -1,9 +1,9 @@
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { loadFoundryCanon } from "@/lib/artlab/sdk/canon";
-import type { FoundryCharacterCanon } from "@/lib/artlab/sdk/canon";
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/providers/types";
-import type { CreatedFoundryAssetPack } from "@/lib/artlab/sdk/asset-pack";
+import { loadArtLabCanon } from "@/lib/artlab/sdk/canon";
+import type { ArtLabCharacterCanon } from "@/lib/artlab/sdk/canon";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/providers/types";
+import type { CreatedArtLabAssetPack } from "@/lib/artlab/sdk/asset-pack";
 import { backdropSubtractToRgba, classifyAlpha } from "@/lib/artlab/runners/cutout-primitives";
 import { runConceptBoardStage, type ConceptLane } from "./stages/concept-board";
 import { runAnchorLockStage } from "./stages/anchor-lock";
@@ -29,12 +29,12 @@ const DEFAULT_MIN_PAIRWISE_SILHOUETTE_HAMMING = 0;
 
 export interface RunCharacterMasterArgs {
   input: CharacterMasterInput;
-  provider: FoundryImageProvider;
+  provider: ArtLabImageProvider;
   emit: (event: CharacterMasterEvent) => void;
 }
 
 export type RunCharacterMasterResult =
-  | { ok: true; pack: CreatedFoundryAssetPack; runWorkspace: string }
+  | { ok: true; pack: CreatedArtLabAssetPack; runWorkspace: string }
   | { ok: false; failure: { stage: CharacterMasterStage; reason: string; offendingPath?: string }; runWorkspace: string };
 
 function stagesFrom(stage: CharacterMasterStage | null): readonly CharacterMasterStage[] {
@@ -53,7 +53,7 @@ async function fileExists(p: string): Promise<boolean> {
   }
 }
 
-function findCharacter(canonChars: readonly FoundryCharacterCanon[], id: string): FoundryCharacterCanon {
+function findCharacter(canonChars: readonly ArtLabCharacterCanon[], id: string): ArtLabCharacterCanon {
   const found = canonChars.find((c) => c.header.id === id);
   if (!found) throw new Error(`runCharacterMaster: no canon for character "${id}"`);
   return found;
@@ -66,11 +66,11 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
 
   let canon;
   try {
-    canon = await loadFoundryCanon({ canonRoot: input.canonRoot });
+    canon = await loadArtLabCanon({ canonRoot: input.canonRoot });
   } catch (err) {
     return { ok: false, failure: { stage: "concept-board", reason: `canon load failed: ${(err as Error).message}` }, runWorkspace };
   }
-  let character: FoundryCharacterCanon;
+  let character: ArtLabCharacterCanon;
   try {
     character = findCharacter(canon.characters, input.characterId);
   } catch (err) {

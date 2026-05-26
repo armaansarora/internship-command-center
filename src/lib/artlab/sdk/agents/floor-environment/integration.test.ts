@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { renderFoundryFloorIntegrationSnippet } from "./integration";
+import { renderArtLabFloorIntegrationSnippet } from "./integration";
 
-describe("renderFoundryFloorIntegrationSnippet", () => {
+describe("renderArtLabFloorIntegrationSnippet", () => {
   it("renders an import line for the FloorBackground component", () => {
-    const out = renderFoundryFloorIntegrationSnippet({
+    const out = renderArtLabFloorIntegrationSnippet({
       floorSlug: "war-room",
       packPath: ".foundry/packs/floor-war-room",
     });
@@ -12,7 +12,7 @@ describe("renderFoundryFloorIntegrationSnippet", () => {
   });
 
   it("renders the JSX block with the floor prop", () => {
-    const out = renderFoundryFloorIntegrationSnippet({
+    const out = renderArtLabFloorIntegrationSnippet({
       floorSlug: "war-room",
       packPath: ".foundry/packs/floor-war-room",
     });
@@ -20,7 +20,7 @@ describe("renderFoundryFloorIntegrationSnippet", () => {
   });
 
   it("includes the pack path as a comment for the wiring agent", () => {
-    const out = renderFoundryFloorIntegrationSnippet({
+    const out = renderArtLabFloorIntegrationSnippet({
       floorSlug: "war-room",
       packPath: ".foundry/packs/floor-war-room",
     });
@@ -28,11 +28,11 @@ describe("renderFoundryFloorIntegrationSnippet", () => {
   });
 
   it("renders deterministically for identical inputs", () => {
-    const a = renderFoundryFloorIntegrationSnippet({
+    const a = renderArtLabFloorIntegrationSnippet({
       floorSlug: "rolodex-lounge",
       packPath: ".foundry/packs/floor-rolodex-lounge",
     });
-    const b = renderFoundryFloorIntegrationSnippet({
+    const b = renderArtLabFloorIntegrationSnippet({
       floorSlug: "rolodex-lounge",
       packPath: ".foundry/packs/floor-rolodex-lounge",
     });

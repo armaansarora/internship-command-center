@@ -2,14 +2,14 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadFoundryMemoryScope } from "./memory-scope";
+import { loadArtLabMemoryScope } from "./memory-scope";
 import { createCharacterMasterBrain } from "./agents/character-master-brain";
 import { createFloorEnvironmentBrain } from "./agents/floor-environment-brain";
 
 let memoryDir: string;
 
 beforeEach(() => {
-  memoryDir = mkdtempSync(join(tmpdir(), "foundry-mem-int-"));
+  memoryDir = mkdtempSync(join(tmpdir(), "artlab-mem-int-"));
   writeFileSync(
     join(memoryDir, "style-wins.jsonl"),
     [
@@ -28,7 +28,7 @@ beforeEach(() => {
 
 describe("memory feedback scoping — end to end", () => {
   it("character brain receives only character feedback", async () => {
-    const scope = loadFoundryMemoryScope(memoryDir, "character-master", { topN: 3 });
+    const scope = loadArtLabMemoryScope(memoryDir, "character-master", { topN: 3 });
     const brain = createCharacterMasterBrain({ apiKey: "", model: "test", dryRun: true });
     const result = await brain.decide({
       characterId: "rafe-calder",
@@ -42,7 +42,7 @@ describe("memory feedback scoping — end to end", () => {
   });
 
   it("floor brain receives only floor feedback", async () => {
-    const scope = loadFoundryMemoryScope(memoryDir, "floor-environment", { topN: 3 });
+    const scope = loadArtLabMemoryScope(memoryDir, "floor-environment", { topN: 3 });
     const brain = createFloorEnvironmentBrain({ apiKey: "", model: "test", dryRun: true });
     const result = await brain.decide({
       space: "war-room",
@@ -57,8 +57,8 @@ describe("memory feedback scoping — end to end", () => {
   });
 
   it("the two scopes never share a single technique", () => {
-    const charScope = loadFoundryMemoryScope(memoryDir, "character-master", { topN: 5 });
-    const floorScope = loadFoundryMemoryScope(memoryDir, "floor-environment", { topN: 5 });
+    const charScope = loadArtLabMemoryScope(memoryDir, "character-master", { topN: 5 });
+    const floorScope = loadArtLabMemoryScope(memoryDir, "floor-environment", { topN: 5 });
     const charTechs = new Set(charScope.recentWins.map((w) => w.techniques));
     const floorTechs = new Set(floorScope.recentWins.map((w) => w.techniques));
     for (const t of charTechs) expect(floorTechs.has(t)).toBe(false);

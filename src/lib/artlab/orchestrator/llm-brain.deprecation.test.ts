@@ -10,7 +10,7 @@ describe("llm-brain.ts deprecation", () => {
   });
 
   it("@deprecated comment references Phase 7 brain factory", () => {
-    expect(SOURCE).toMatch(/createFoundryBrainFor|@\/lib\/foundry\/brain/);
+    expect(SOURCE).toMatch(/createArtLabBrainFor|@\/lib\/foundry\/brain/);
   });
 
   it("ArtLabLlmBrain is still exported (back-compat)", async () => {

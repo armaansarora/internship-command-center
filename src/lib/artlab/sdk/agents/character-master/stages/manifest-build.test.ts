@@ -4,12 +4,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { runManifestBuildStage } from "./manifest-build";
-import { registerFoundrySlot } from "@/lib/artlab/sdk/asset-pack";
+import { registerArtLabSlot } from "@/lib/artlab/sdk/asset-pack";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
 import type { ProcessedSprite } from "./cutout-and-feather";
-import type { FoundryCharacterCanon } from "@/lib/artlab/sdk/canon";
+import type { ArtLabCharacterCanon } from "@/lib/artlab/sdk/canon";
 
-const SOL: FoundryCharacterCanon = {
+const SOL: ArtLabCharacterCanon = {
   header: { kind: "character", schemaVersion: "1.0.0", id: "sol-navarro", revisedAt: "2026-05-25T00:00:00.000Z" },
   displayName: "Sol Navarro",
   shortLabel: "Sol",
@@ -40,11 +40,11 @@ describe("manifest-build stage", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-mfb-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-mfb-"));
     for (const outfit of SOL.outfitVariants) {
       for (const pose of SOL.poseStates) {
         try {
-          registerFoundrySlot({
+          registerArtLabSlot({
             slotId: `rolodex-lounge/sol-navarro/${outfit}/${pose}`,
             appPath: `public/art/rolodex-lounge/sol-navarro/${outfit}/${pose}.webp`,
             kind: "character-sprite",

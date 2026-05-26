@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createGeminiFoundryProvider } from "./gemini-provider";
+import { createGeminiArtLabProvider } from "./gemini-provider";
 
-describe("createGeminiFoundryProvider", () => {
+describe("createGeminiArtLabProvider", () => {
   it("returns a provider with stable id 'gemini-foundry'", () => {
-    const p = createGeminiFoundryProvider({ apiKey: "k" });
+    const p = createGeminiArtLabProvider({ apiKey: "k" });
     expect(p.id).toBe("gemini-foundry");
   });
 
@@ -11,7 +11,7 @@ describe("createGeminiFoundryProvider", () => {
     const previous = process.env.ARTLAB_GEMINI_MODE;
     process.env.ARTLAB_GEMINI_MODE = "mock";
     try {
-      const p = createGeminiFoundryProvider({ apiKey: "k" });
+      const p = createGeminiArtLabProvider({ apiKey: "k" });
       const r = await p.generate({ prompt: "x", aspectRatio: "9:16", laneIndex: 1 });
       expect(r.mode).toBe("mock");
       expect(r.contentType).toBe("image/png");
@@ -25,7 +25,7 @@ describe("createGeminiFoundryProvider", () => {
     const previous = process.env.ARTLAB_GEMINI_MODE;
     delete process.env.ARTLAB_GEMINI_MODE;
     try {
-      const p = createGeminiFoundryProvider({ apiKey: "" });
+      const p = createGeminiArtLabProvider({ apiKey: "" });
       await expect(p.generate({ prompt: "x", aspectRatio: "9:16", laneIndex: 1 })).rejects.toThrow(/api key/i);
     } finally {
       if (previous !== undefined) process.env.ARTLAB_GEMINI_MODE = previous;

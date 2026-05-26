@@ -1,10 +1,10 @@
 import sharp from "sharp";
 
-export interface FoundryTileContinuityRules {
+export interface ArtLabTileContinuityRules {
   tileToleranceDeltaE: number;
 }
 
-export interface FoundryTileContinuityReport {
+export interface ArtLabTileContinuityReport {
   passed: boolean;
   horizontalDeltaE: number;
   verticalDeltaE: number;
@@ -72,10 +72,10 @@ async function columnLab(
   return out;
 }
 
-export async function evaluateFoundryTileContinuity(
+export async function evaluateArtLabTileContinuity(
   bytes: Buffer,
-  rules: FoundryTileContinuityRules,
-): Promise<FoundryTileContinuityReport> {
+  rules: ArtLabTileContinuityRules,
+): Promise<ArtLabTileContinuityReport> {
   const { data, info } = await sharp(bytes)
     .removeAlpha()
     .raw()

@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { FOUNDRY_SPRITE_ACTIONS } from "./types";
+import { ARTLAB_SPRITE_ACTIONS } from "./types";
 
-export const FoundryLottieProviderInputSchema = z
+export const ArtLabLottieProviderInputSchema = z
   .object({
     motionCurve: z.string().min(1),
     durationMs: z.number().int().min(1),
-    action: z.enum(FOUNDRY_SPRITE_ACTIONS),
+    action: z.enum(ARTLAB_SPRITE_ACTIONS),
     seed: z.number().int().min(0).optional(),
     /**
      * Critical 3: anchor PNG bytes so the provider can embed (or
@@ -18,11 +18,11 @@ export const FoundryLottieProviderInputSchema = z
     referenceImageBytes: z.instanceof(Buffer).optional(),
   })
   .strict();
-export type FoundryLottieProviderInput = z.infer<
-  typeof FoundryLottieProviderInputSchema
+export type ArtLabLottieProviderInput = z.infer<
+  typeof ArtLabLottieProviderInputSchema
 >;
 
-export const FoundryLottieProviderResultSchema = z
+export const ArtLabLottieProviderResultSchema = z
   .object({
     lottieJson: z.string().min(2),
     mode: z.enum(["real", "mock"]),
@@ -30,12 +30,12 @@ export const FoundryLottieProviderResultSchema = z
     durationMs: z.number().int().min(0),
   })
   .strict();
-export type FoundryLottieProviderResult = z.infer<
-  typeof FoundryLottieProviderResultSchema
+export type ArtLabLottieProviderResult = z.infer<
+  typeof ArtLabLottieProviderResultSchema
 >;
 
-export interface FoundryLottieProvider {
+export interface ArtLabLottieProvider {
   authorLottie(
-    input: FoundryLottieProviderInput,
-  ): Promise<FoundryLottieProviderResult>;
+    input: ArtLabLottieProviderInput,
+  ): Promise<ArtLabLottieProviderResult>;
 }

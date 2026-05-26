@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { evaluateFoundrySpriteIdentityDrift } from "./identity-drift";
+import { evaluateArtLabSpriteIdentityDrift } from "./identity-drift";
 
 async function solid(r: number, g: number, b: number): Promise<Buffer> {
   return sharp({
@@ -34,7 +34,7 @@ async function half(left: number, right: number): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("evaluateFoundrySpriteIdentityDrift", () => {
+describe("evaluateArtLabSpriteIdentityDrift", () => {
   it("passes when frames remain close to anchor", async () => {
     const anchor = await solid(50, 60, 70);
     const frames = await Promise.all([
@@ -42,7 +42,7 @@ describe("evaluateFoundrySpriteIdentityDrift", () => {
       solid(52, 60, 70),
       solid(50, 62, 70),
     ]);
-    const result = await evaluateFoundrySpriteIdentityDrift({
+    const result = await evaluateArtLabSpriteIdentityDrift({
       anchorBytes: anchor,
       frames,
     });
@@ -58,7 +58,7 @@ describe("evaluateFoundrySpriteIdentityDrift", () => {
       half(10, 240),
       solid(50, 60, 70),
     ]);
-    const result = await evaluateFoundrySpriteIdentityDrift({
+    const result = await evaluateArtLabSpriteIdentityDrift({
       anchorBytes: anchor,
       frames,
     });
@@ -69,7 +69,7 @@ describe("evaluateFoundrySpriteIdentityDrift", () => {
   it("reports avg and max Hamming distance", async () => {
     const anchor = await solid(50, 60, 70);
     const frames = await Promise.all([solid(50, 60, 70), solid(60, 60, 70)]);
-    const result = await evaluateFoundrySpriteIdentityDrift({
+    const result = await evaluateArtLabSpriteIdentityDrift({
       anchorBytes: anchor,
       frames,
     });
@@ -80,7 +80,7 @@ describe("evaluateFoundrySpriteIdentityDrift", () => {
   it("throws when called with empty frames array", async () => {
     const anchor = await solid(50, 60, 70);
     await expect(
-      evaluateFoundrySpriteIdentityDrift({ anchorBytes: anchor, frames: [] }),
+      evaluateArtLabSpriteIdentityDrift({ anchorBytes: anchor, frames: [] }),
     ).rejects.toThrow(/at least one frame/i);
   });
 });

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { runConceptBoardStage } from "./concept-board";
-import { createMockFoundryImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
-import type { FoundryCharacterCanon } from "@/lib/artlab/sdk/canon";
+import { createMockArtLabImageProvider } from "@/lib/artlab/sdk/providers/mock-provider";
+import type { ArtLabCharacterCanon } from "@/lib/artlab/sdk/canon";
 
-const SOL: FoundryCharacterCanon = {
+const SOL: ArtLabCharacterCanon = {
   header: { kind: "character", schemaVersion: "1.0.0", id: "sol-navarro", revisedAt: "2026-05-25T00:00:00.000Z" },
   displayName: "Sol Navarro",
   shortLabel: "Sol",
@@ -32,20 +32,20 @@ const SOL: FoundryCharacterCanon = {
 
 describe("concept-board stage", () => {
   it("emits exactly 5 concept lanes", async () => {
-    const provider = createMockFoundryImageProvider();
+    const provider = createMockArtLabImageProvider();
     const result = await runConceptBoardStage({ character: SOL, provider, seed: 42 });
     expect(result.lanes.length).toBe(5);
   });
 
   it("each lane has a distinct variation axis", async () => {
-    const provider = createMockFoundryImageProvider();
+    const provider = createMockArtLabImageProvider();
     const result = await runConceptBoardStage({ character: SOL, provider });
     const axes = new Set(result.lanes.map((l) => l.variationAxis));
     expect(axes.size).toBe(5);
   });
 
   it("each lane references the canonical character id", async () => {
-    const provider = createMockFoundryImageProvider();
+    const provider = createMockArtLabImageProvider();
     const result = await runConceptBoardStage({ character: SOL, provider });
     for (const lane of result.lanes) {
       expect(lane.characterId).toBe("sol-navarro");
@@ -54,7 +54,7 @@ describe("concept-board stage", () => {
   });
 
   it("returns a stage duration", async () => {
-    const provider = createMockFoundryImageProvider();
+    const provider = createMockArtLabImageProvider();
     const result = await runConceptBoardStage({ character: SOL, provider });
     expect(result.durationMs).toBeGreaterThanOrEqual(0);
   });

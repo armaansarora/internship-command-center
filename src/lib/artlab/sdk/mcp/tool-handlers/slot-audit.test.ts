@@ -2,12 +2,12 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundrySlotAudit } from "./slot-audit";
+import { handleArtLabSlotAudit } from "./slot-audit";
 
 let workspaceRoot: string;
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-slot-audit-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-slot-audit-"));
   // Slot registry under workspaceRoot/slots/registry.json
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
   writeFileSync(
@@ -48,9 +48,9 @@ beforeEach(() => {
   );
 });
 
-describe("handleFoundrySlotAudit", () => {
+describe("handleArtLabSlotAudit", () => {
   it("returns slots without a matching promoted pack", async () => {
-    const result = await handleFoundrySlotAudit(
+    const result = await handleArtLabSlotAudit(
       {},
       {
         slotRegistryPath: join(workspaceRoot, "slots", "registry.json"),
@@ -66,7 +66,7 @@ describe("handleFoundrySlotAudit", () => {
   });
 
   it("respects kind filter", async () => {
-    const result = await handleFoundrySlotAudit(
+    const result = await handleArtLabSlotAudit(
       { kind: "floor" },
       {
         slotRegistryPath: join(workspaceRoot, "slots", "registry.json"),
@@ -78,7 +78,7 @@ describe("handleFoundrySlotAudit", () => {
   });
 
   it("respects space filter", async () => {
-    const result = await handleFoundrySlotAudit(
+    const result = await handleArtLabSlotAudit(
       { space: "war-room" },
       {
         slotRegistryPath: join(workspaceRoot, "slots", "registry.json"),

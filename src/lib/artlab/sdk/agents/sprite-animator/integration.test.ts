@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-  renderFoundrySpriteIntegrationSnippet,
-  renderFoundryLottieIntegrationSnippet,
+  renderArtLabSpriteIntegrationSnippet,
+  renderArtLabLottieIntegrationSnippet,
 } from "./integration";
 
-describe("renderFoundrySpriteIntegrationSnippet", () => {
+describe("renderArtLabSpriteIntegrationSnippet", () => {
   it("emits an <AnimatedSprite> component reference", () => {
-    const out = renderFoundrySpriteIntegrationSnippet({
+    const out = renderArtLabSpriteIntegrationSnippet({
       characterId: "otis",
       action: "idle",
       packPath: ".foundry/packs/sprite-otis-idle",
@@ -17,8 +17,8 @@ describe("renderFoundrySpriteIntegrationSnippet", () => {
     expect(out).toContain('pack="otis-idle"');
   });
 
-  it("emits the import from the foundry components root", () => {
-    const out = renderFoundrySpriteIntegrationSnippet({
+  it("emits the import from the ArtLab SDK components root", () => {
+    const out = renderArtLabSpriteIntegrationSnippet({
       characterId: "otis",
       action: "idle",
       packPath: "x",
@@ -29,7 +29,7 @@ describe("renderFoundrySpriteIntegrationSnippet", () => {
   });
 
   it("documents fps and loops as comments", () => {
-    const out = renderFoundrySpriteIntegrationSnippet({
+    const out = renderArtLabSpriteIntegrationSnippet({
       characterId: "otis",
       action: "wave",
       packPath: "x",
@@ -41,9 +41,9 @@ describe("renderFoundrySpriteIntegrationSnippet", () => {
   });
 });
 
-describe("renderFoundryLottieIntegrationSnippet", () => {
+describe("renderArtLabLottieIntegrationSnippet", () => {
   it("emits a <LottieAnimation> component import + JSX", () => {
-    const out = renderFoundryLottieIntegrationSnippet({
+    const out = renderArtLabLottieIntegrationSnippet({
       characterId: "otis",
       action: "idle",
       packPath: ".foundry/packs/lottie-otis-idle",
@@ -55,7 +55,7 @@ describe("renderFoundryLottieIntegrationSnippet", () => {
   });
 
   it("declares the GSAP timeline duration as a comment", () => {
-    const out = renderFoundryLottieIntegrationSnippet({
+    const out = renderArtLabLottieIntegrationSnippet({
       characterId: "otis",
       action: "idle",
       packPath: "x",

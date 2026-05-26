@@ -1,18 +1,18 @@
-// src/lib/foundry/agents/ui-texture/__tests__/golden-etched-gold-texture.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/__tests__/golden-etched-gold-texture.test.ts
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { mkdtempSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runFoundryUiTextureCli } from "../cli";
+import { runArtLabUiTextureCli } from "../cli";
 
 vi.mock("@/lib/artlab/sdk/canon", () => ({
-  loadFoundryIconographyRules: vi.fn().mockResolvedValue({
+  loadArtLabIconographyRules: vi.fn().mockResolvedValue({
     strokeWidthPx: 1.5,
     cornerRadiusPx: 2,
     palette: ["#C9A84C"],
     viewBox: "0 0 24 24",
   }),
-  loadFoundryTextureRules: vi.fn().mockResolvedValue({
+  loadArtLabTextureRules: vi.fn().mockResolvedValue({
     tileToleranceDeltaE: 50,
     targetResolutionPx: 64,
     normalMapStrength: 0.5,
@@ -20,7 +20,7 @@ vi.mock("@/lib/artlab/sdk/canon", () => ({
 }));
 
 vi.mock("@/lib/artlab/sdk/asset-pack", () => ({
-  buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
+  buildArtLabAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
     packId: "tex-golden",
     manifest,
   })),
@@ -29,11 +29,11 @@ vi.mock("@/lib/artlab/sdk/asset-pack", () => ({
 describe("golden etched-gold texture", () => {
   let dir: string;
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-ui-texture-golden-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-ui-texture-golden-"));
   });
 
   it("produces a PNG and a normal-map PNG", async () => {
-    await runFoundryUiTextureCli({
+    await runArtLabUiTextureCli({
       name: "etched-gold-border",
       kind: "texture",
       tileMode: "repeat",

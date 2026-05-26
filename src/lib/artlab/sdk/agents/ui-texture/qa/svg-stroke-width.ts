@@ -1,9 +1,9 @@
-export interface FoundrySvgStrokeWidthRules {
+export interface ArtLabSvgStrokeWidthRules {
   strokeWidthPx: number;
   strokeWidthTolerancePx: number;
 }
 
-export interface FoundrySvgStrokeWidthReport {
+export interface ArtLabSvgStrokeWidthReport {
   passed: boolean;
   observed: ReadonlyArray<number>;
   outliers: ReadonlyArray<number>;
@@ -21,10 +21,10 @@ function parentStrokeWidth(svg: string): number | undefined {
   return m ? Number(m[1]) : undefined;
 }
 
-export function evaluateFoundrySvgStrokeWidth(
+export function evaluateArtLabSvgStrokeWidth(
   svg: string,
-  rules: FoundrySvgStrokeWidthRules,
-): FoundrySvgStrokeWidthReport {
+  rules: ArtLabSvgStrokeWidthRules,
+): ArtLabSvgStrokeWidthReport {
   const observed: number[] = [];
   const parent = parentStrokeWidth(svg);
   if (parent !== undefined) observed.push(parent);

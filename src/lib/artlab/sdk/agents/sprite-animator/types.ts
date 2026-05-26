@@ -1,22 +1,22 @@
 import { z } from "zod";
 
-export const FOUNDRY_SPRITE_ACTIONS = [
+export const ARTLAB_SPRITE_ACTIONS = [
   "idle",
   "wave",
   "nod",
   "celebrate",
 ] as const;
-export type FoundrySpriteAction = (typeof FOUNDRY_SPRITE_ACTIONS)[number];
+export type ArtLabSpriteAction = (typeof ARTLAB_SPRITE_ACTIONS)[number];
 
-export const FOUNDRY_SPRITE_FORMATS = ["sprite", "lottie"] as const;
-export type FoundrySpriteFormat = (typeof FOUNDRY_SPRITE_FORMATS)[number];
+export const ARTLAB_SPRITE_FORMATS = ["sprite", "lottie"] as const;
+export type ArtLabSpriteFormat = (typeof ARTLAB_SPRITE_FORMATS)[number];
 
-export const FoundrySpriteAnimatorInputSchema = z
+export const ArtLabSpriteAnimatorInputSchema = z
   .object({
     runId: z.string().uuid(),
     sourcePackId: z.string().min(1),
-    action: z.enum(FOUNDRY_SPRITE_ACTIONS),
-    format: z.enum(FOUNDRY_SPRITE_FORMATS),
+    action: z.enum(ARTLAB_SPRITE_ACTIONS),
+    format: z.enum(ARTLAB_SPRITE_FORMATS),
     requestedBy: z.enum(["agent", "human", "telegram", "cli"]),
     frameCount: z.number().int().min(8).max(24).default(12),
     fps: z.number().int().min(8).max(30).default(12),
@@ -25,45 +25,45 @@ export const FoundrySpriteAnimatorInputSchema = z
     seed: z.number().int().min(0).optional(),
   })
   .strict();
-export type FoundrySpriteAnimatorInput = z.infer<
-  typeof FoundrySpriteAnimatorInputSchema
+export type ArtLabSpriteAnimatorInput = z.infer<
+  typeof ArtLabSpriteAnimatorInputSchema
 >;
 
-export const FoundrySpriteFrameManifestSchema = z
+export const ArtLabSpriteFrameManifestSchema = z
   .object({
     index: z.number().int().min(0),
     path: z.string().min(1),
     perceptualHash: z.string().regex(/^[0-9a-f]{16}$/),
   })
   .strict();
-export type FoundrySpriteFrameManifest = z.infer<
-  typeof FoundrySpriteFrameManifestSchema
+export type ArtLabSpriteFrameManifest = z.infer<
+  typeof ArtLabSpriteFrameManifestSchema
 >;
 
-export const FoundrySpriteTransitionSchema = z
+export const ArtLabSpriteTransitionSchema = z
   .object({
     fromFrame: z.number().int().min(0),
     toFrame: z.number().int().min(0),
     easing: z.string().min(1),
   })
   .strict();
-export type FoundrySpriteTransition = z.infer<typeof FoundrySpriteTransitionSchema>;
+export type ArtLabSpriteTransition = z.infer<typeof ArtLabSpriteTransitionSchema>;
 
-export const FoundrySpriteSequenceManifestSchema = z
+export const ArtLabSpriteSequenceManifestSchema = z
   .object({
-    frames: z.array(FoundrySpriteFrameManifestSchema).min(1),
+    frames: z.array(ArtLabSpriteFrameManifestSchema).min(1),
     fps: z.number().int().min(1),
     loops: z.boolean(),
     frame_count: z.number().int().min(1),
     total_duration_ms: z.number().int().min(1),
-    transitions: z.array(FoundrySpriteTransitionSchema),
+    transitions: z.array(ArtLabSpriteTransitionSchema),
   })
   .strict();
-export type FoundrySpriteSequenceManifest = z.infer<
-  typeof FoundrySpriteSequenceManifestSchema
+export type ArtLabSpriteSequenceManifest = z.infer<
+  typeof ArtLabSpriteSequenceManifestSchema
 >;
 
-export const FoundryLottieAnimationManifestSchema = z
+export const ArtLabLottieAnimationManifestSchema = z
   .object({
     lottiePath: z.string().min(1),
     version: z.string().min(1),
@@ -71,6 +71,6 @@ export const FoundryLottieAnimationManifestSchema = z
     motionCurve: z.string().min(1),
   })
   .strict();
-export type FoundryLottieAnimationManifest = z.infer<
-  typeof FoundryLottieAnimationManifestSchema
+export type ArtLabLottieAnimationManifest = z.infer<
+  typeof ArtLabLottieAnimationManifestSchema
 >;

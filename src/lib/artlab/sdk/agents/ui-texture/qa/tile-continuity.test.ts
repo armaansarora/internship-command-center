@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
-import { evaluateFoundryTileContinuity } from "./tile-continuity";
+import { evaluateArtLabTileContinuity } from "./tile-continuity";
 
 async function uniform(c: number, w = 64, h = 64): Promise<Buffer> {
   return sharp({
@@ -32,10 +32,10 @@ async function leftRightSplit(): Promise<Buffer> {
     .toBuffer();
 }
 
-describe("evaluateFoundryTileContinuity", () => {
+describe("evaluateArtLabTileContinuity", () => {
   it("passes on a uniform image (edges identical)", async () => {
     const bytes = await uniform(120);
-    const out = await evaluateFoundryTileContinuity(bytes, {
+    const out = await evaluateArtLabTileContinuity(bytes, {
       tileToleranceDeltaE: 5,
     });
     expect(out.passed).toBe(true);
@@ -44,7 +44,7 @@ describe("evaluateFoundryTileContinuity", () => {
 
   it("fails on an image whose left edge differs from right edge", async () => {
     const bytes = await leftRightSplit();
-    const out = await evaluateFoundryTileContinuity(bytes, {
+    const out = await evaluateArtLabTileContinuity(bytes, {
       tileToleranceDeltaE: 5,
     });
     expect(out.passed).toBe(false);
@@ -53,7 +53,7 @@ describe("evaluateFoundryTileContinuity", () => {
 
   it("reports per-axis distances for transparency", async () => {
     const bytes = await uniform(80);
-    const out = await evaluateFoundryTileContinuity(bytes, {
+    const out = await evaluateArtLabTileContinuity(bytes, {
       tileToleranceDeltaE: 5,
     });
     expect(typeof out.horizontalDeltaE).toBe("number");

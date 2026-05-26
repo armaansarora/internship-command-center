@@ -1,14 +1,14 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
-  FoundryCanonGetInputSchema,
-  FoundryCanonGetOutputSchema,
-  type FoundryCanonGetOutput,
-  type FoundryCanonKind,
+  ArtLabCanonGetInputSchema,
+  ArtLabCanonGetOutputSchema,
+  type ArtLabCanonGetOutput,
+  type ArtLabCanonKind,
 } from "../tools";
-import type { FoundryCanonListContext } from "./canon-list";
+import type { ArtLabCanonListContext } from "./canon-list";
 
-const KIND_DIRS: Record<FoundryCanonKind, string> = {
+const KIND_DIRS: Record<ArtLabCanonKind, string> = {
   character: "characters",
   floor: "floors",
   palette: "palettes",
@@ -52,8 +52,8 @@ function parseSimpleYaml(text: string): Record<string, unknown> {
 function locate(
   canonRoot: string,
   id: string,
-): { kind: FoundryCanonKind; path: string } | null {
-  for (const kind of Object.keys(KIND_DIRS) as FoundryCanonKind[]) {
+): { kind: ArtLabCanonKind; path: string } | null {
+  for (const kind of Object.keys(KIND_DIRS) as ArtLabCanonKind[]) {
     const dir = join(canonRoot, KIND_DIRS[kind]);
     if (!existsSync(dir)) continue;
     for (const file of readdirSync(dir)) {
@@ -67,18 +67,18 @@ function locate(
   return null;
 }
 
-export async function handleFoundryCanonGet(
+export async function handleArtLabCanonGet(
   rawInput: unknown,
-  ctx: FoundryCanonListContext,
-): Promise<FoundryCanonGetOutput> {
-  const input = FoundryCanonGetInputSchema.parse(rawInput);
+  ctx: ArtLabCanonListContext,
+): Promise<ArtLabCanonGetOutput> {
+  const input = ArtLabCanonGetInputSchema.parse(rawInput);
   const located = locate(ctx.canonRoot, input.id);
   if (!located) {
     throw new Error(`canon entry not found: ${input.id}`);
   }
   const text = readFileSync(located.path, "utf8");
   const yamlAsJson = parseSimpleYaml(text);
-  return FoundryCanonGetOutputSchema.parse({
+  return ArtLabCanonGetOutputSchema.parse({
     id: input.id,
     kind: located.kind,
     yamlAsJson,

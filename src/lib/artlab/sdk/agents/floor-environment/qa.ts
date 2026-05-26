@@ -1,6 +1,6 @@
-import { evaluateFoundryFloorPerceptualCoherence } from "./qa/perceptual-coherence";
-import { evaluateFoundryFloorPaletteFit } from "./qa/palette";
-import type { FoundryFloorTimeState } from "./types";
+import { evaluateArtLabFloorPerceptualCoherence } from "./qa/perceptual-coherence";
+import { evaluateArtLabFloorPaletteFit } from "./qa/palette";
+import type { ArtLabFloorTimeState } from "./types";
 
 /**
  * Critical 2 fix: the previous "room-elements" gate compared
@@ -16,50 +16,50 @@ import type { FoundryFloorTimeState } from "./types";
  * instead of trusting a placeholder pass. A vision-LLM-backed check is
  * left as future work and tracked at the manifest level.
  */
-export type FoundryFloorQaGate = "palette" | "coherence";
+export type ArtLabFloorQaGate = "palette" | "coherence";
 
-export interface FoundryFloorQaInput {
+export interface ArtLabFloorQaInput {
   canonPalette: ReadonlyArray<string>;
   requiredElements: ReadonlyArray<string>;
   variants: ReadonlyArray<{
-    timeState: FoundryFloorTimeState;
+    timeState: ArtLabFloorTimeState;
     bytes: Buffer;
   }>;
 }
 
-export interface FoundryFloorRoomElementsCheck {
+export interface ArtLabFloorRoomElementsCheck {
   status: "todo-post-launch";
   declaredRequired: ReadonlyArray<string>;
   reason: string;
 }
 
-export interface FoundryFloorQaReport {
+export interface ArtLabFloorQaReport {
   passed: boolean;
-  failedGates: ReadonlyArray<FoundryFloorQaGate>;
+  failedGates: ReadonlyArray<ArtLabFloorQaGate>;
   palette: { passed: boolean; distance: number };
-  roomElementsCheck: FoundryFloorRoomElementsCheck;
+  roomElementsCheck: ArtLabFloorRoomElementsCheck;
   coherence: {
     passed: boolean;
     maxHamming: number;
-    flaggedTimeStates: ReadonlyArray<FoundryFloorTimeState>;
+    flaggedTimeStates: ReadonlyArray<ArtLabFloorTimeState>;
   };
 }
 
-export async function runFoundryFloorQa(
-  input: FoundryFloorQaInput,
-): Promise<FoundryFloorQaReport> {
+export async function runArtLabFloorQa(
+  input: ArtLabFloorQaInput,
+): Promise<ArtLabFloorQaReport> {
   const anchor = input.variants[0]?.bytes;
   if (!anchor) {
-    throw new Error("foundry/floor: qa requires at least one variant");
+    throw new Error("artlab/floor: qa requires at least one variant");
   }
-  const palette = await evaluateFoundryFloorPaletteFit(
+  const palette = await evaluateArtLabFloorPaletteFit(
     anchor,
     input.canonPalette,
   );
-  const coherence = await evaluateFoundryFloorPerceptualCoherence(
+  const coherence = await evaluateArtLabFloorPerceptualCoherence(
     input.variants,
   );
-  const failedGates: FoundryFloorQaGate[] = [];
+  const failedGates: ArtLabFloorQaGate[] = [];
   if (!palette.passed) failedGates.push("palette");
   if (!coherence.passed) failedGates.push("coherence");
   return {

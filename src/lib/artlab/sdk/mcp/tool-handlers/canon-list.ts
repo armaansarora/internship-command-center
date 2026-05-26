@@ -1,19 +1,19 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
-  FoundryCanonListInputSchema,
-  FoundryCanonListOutputSchema,
-  type FoundryCanonListInput,
-  type FoundryCanonListOutput,
-  type FoundryCanonKind,
+  ArtLabCanonListInputSchema,
+  ArtLabCanonListOutputSchema,
+  type ArtLabCanonListInput,
+  type ArtLabCanonListOutput,
+  type ArtLabCanonKind,
 } from "../tools";
 
-export interface FoundryCanonListContext {
+export interface ArtLabCanonListContext {
   /** Root directory containing per-kind subdirectories of YAML canon files. */
   canonRoot: string;
 }
 
-const KIND_DIRS: Record<FoundryCanonKind, string> = {
+const KIND_DIRS: Record<ArtLabCanonKind, string> = {
   character: "characters",
   floor: "floors",
   palette: "palettes",
@@ -42,16 +42,16 @@ function parseHeader(text: string): {
   return out;
 }
 
-export async function handleFoundryCanonList(
+export async function handleArtLabCanonList(
   rawInput: unknown,
-  ctx: FoundryCanonListContext,
-): Promise<FoundryCanonListOutput> {
-  const input: FoundryCanonListInput = FoundryCanonListInputSchema.parse(rawInput);
+  ctx: ArtLabCanonListContext,
+): Promise<ArtLabCanonListOutput> {
+  const input: ArtLabCanonListInput = ArtLabCanonListInputSchema.parse(rawInput);
   const kinds = input.kind
-    ? ([input.kind] as FoundryCanonKind[])
-    : (Object.keys(KIND_DIRS) as FoundryCanonKind[]);
+    ? ([input.kind] as ArtLabCanonKind[])
+    : (Object.keys(KIND_DIRS) as ArtLabCanonKind[]);
 
-  const entries: FoundryCanonListOutput["entries"] = [];
+  const entries: ArtLabCanonListOutput["entries"] = [];
   for (const kind of kinds) {
     const dir = join(ctx.canonRoot, KIND_DIRS[kind]);
     for (const file of listYamlFilesIn(dir)) {
@@ -67,5 +67,5 @@ export async function handleFoundryCanonList(
     }
   }
 
-  return FoundryCanonListOutputSchema.parse({ entries });
+  return ArtLabCanonListOutputSchema.parse({ entries });
 }

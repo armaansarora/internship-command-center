@@ -1,17 +1,17 @@
-import { resolveFoundrySlot } from "./slot-registry";
-import type { FoundryAssetPackManifest } from "./manifest.schema";
+import { resolveArtLabSlot } from "./slot-registry";
+import type { ArtLabAssetPackManifest } from "./manifest.schema";
 
 export type ManifestSlotCheckResult =
   | { ok: true }
   | { ok: false; code: "slot-not-registered" | "slot-appath-disagrees" | "slot-kind-mismatch"; message: string };
 
-export function validateFoundryManifestAgainstSlots(manifest: FoundryAssetPackManifest): ManifestSlotCheckResult {
-  const slot = resolveFoundrySlot(manifest.intendedSlot.slotId);
+export function validateArtLabManifestAgainstSlots(manifest: ArtLabAssetPackManifest): ManifestSlotCheckResult {
+  const slot = resolveArtLabSlot(manifest.intendedSlot.slotId);
   if (!slot) {
     return {
       ok: false,
       code: "slot-not-registered",
-      message: `slot "${manifest.intendedSlot.slotId}" is not in FOUNDRY_SLOT_REGISTRY`,
+      message: `slot "${manifest.intendedSlot.slotId}" is not in ARTLAB_SLOT_REGISTRY`,
     };
   }
   if (slot.appPath !== manifest.intendedSlot.appPath) {

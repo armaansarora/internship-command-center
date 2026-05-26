@@ -1,26 +1,26 @@
-// src/lib/foundry/canon/load-canon.ts
+// src/lib/artlab/sdk/canon/load-canon.ts
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { loadFoundryCanonFile } from "./loader";
-import { FoundryCharacterCanonSchema, type FoundryCharacterCanon } from "./character-schema";
-import { FoundryPaletteCanonSchema, type FoundryPaletteCanon } from "./palette-schema";
-import { FoundryTypographyCanonSchema, type FoundryTypographyCanon } from "./typography-schema";
-import { FoundryMotionLanguageCanonSchema, type FoundryMotionLanguageCanon } from "./motion-language-schema";
-import { FoundrySpaceTokensCanonSchema, type FoundrySpaceTokensCanon } from "./space-tokens-schema";
-import { FoundryIconographyRulesCanonSchema, type FoundryIconographyRulesCanon } from "./iconography-rules-schema";
+import { loadArtLabCanonFile } from "./loader";
+import { ArtLabCharacterCanonSchema, type ArtLabCharacterCanon } from "./character-schema";
+import { ArtLabPaletteCanonSchema, type ArtLabPaletteCanon } from "./palette-schema";
+import { ArtLabTypographyCanonSchema, type ArtLabTypographyCanon } from "./typography-schema";
+import { ArtLabMotionLanguageCanonSchema, type ArtLabMotionLanguageCanon } from "./motion-language-schema";
+import { ArtLabSpaceTokensCanonSchema, type ArtLabSpaceTokensCanon } from "./space-tokens-schema";
+import { ArtLabIconographyRulesCanonSchema, type ArtLabIconographyRulesCanon } from "./iconography-rules-schema";
 
-export interface FoundryCanon {
-  characters: readonly FoundryCharacterCanon[];
-  palettes: readonly FoundryPaletteCanon[];
-  typography: readonly FoundryTypographyCanon[];
-  motionLanguage: readonly FoundryMotionLanguageCanon[];
-  spaceTokens: readonly FoundrySpaceTokensCanon[];
-  iconographyRules: readonly FoundryIconographyRulesCanon[];
+export interface ArtLabCanon {
+  characters: readonly ArtLabCharacterCanon[];
+  palettes: readonly ArtLabPaletteCanon[];
+  typography: readonly ArtLabTypographyCanon[];
+  motionLanguage: readonly ArtLabMotionLanguageCanon[];
+  spaceTokens: readonly ArtLabSpaceTokensCanon[];
+  iconographyRules: readonly ArtLabIconographyRulesCanon[];
   loadDurationMs: number;
   sourceFiles: readonly string[];
 }
 
-export interface LoadFoundryCanonInput {
+export interface LoadArtLabCanonInput {
   canonRoot: string;
 }
 
@@ -58,7 +58,7 @@ function checkDuplicates<T extends { header: { id: string } }>(
   }
 }
 
-export async function loadFoundryCanon(input: LoadFoundryCanonInput): Promise<FoundryCanon> {
+export async function loadArtLabCanon(input: LoadArtLabCanonInput): Promise<ArtLabCanon> {
   const start = performance.now();
   const sources: string[] = [];
 
@@ -71,35 +71,35 @@ export async function loadFoundryCanon(input: LoadFoundryCanonInput): Promise<Fo
 
   sources.push(...characterFiles, ...paletteFiles, ...typographyFiles, ...motionFiles, ...spaceFiles, ...iconoFiles);
 
-  const characters: FoundryCharacterCanon[] = [];
+  const characters: ArtLabCharacterCanon[] = [];
   for (const f of characterFiles) {
-    const raw = await loadFoundryCanonFile(f);
-    characters.push(FoundryCharacterCanonSchema.parse(raw.data));
+    const raw = await loadArtLabCanonFile(f);
+    characters.push(ArtLabCharacterCanonSchema.parse(raw.data));
   }
-  const palettes: FoundryPaletteCanon[] = [];
+  const palettes: ArtLabPaletteCanon[] = [];
   for (const f of paletteFiles) {
-    const raw = await loadFoundryCanonFile(f);
-    palettes.push(FoundryPaletteCanonSchema.parse(raw.data));
+    const raw = await loadArtLabCanonFile(f);
+    palettes.push(ArtLabPaletteCanonSchema.parse(raw.data));
   }
-  const typography: FoundryTypographyCanon[] = [];
+  const typography: ArtLabTypographyCanon[] = [];
   for (const f of typographyFiles) {
-    const raw = await loadFoundryCanonFile(f);
-    typography.push(FoundryTypographyCanonSchema.parse(raw.data));
+    const raw = await loadArtLabCanonFile(f);
+    typography.push(ArtLabTypographyCanonSchema.parse(raw.data));
   }
-  const motion: FoundryMotionLanguageCanon[] = [];
+  const motion: ArtLabMotionLanguageCanon[] = [];
   for (const f of motionFiles) {
-    const raw = await loadFoundryCanonFile(f);
-    motion.push(FoundryMotionLanguageCanonSchema.parse(raw.data));
+    const raw = await loadArtLabCanonFile(f);
+    motion.push(ArtLabMotionLanguageCanonSchema.parse(raw.data));
   }
-  const space: FoundrySpaceTokensCanon[] = [];
+  const space: ArtLabSpaceTokensCanon[] = [];
   for (const f of spaceFiles) {
-    const raw = await loadFoundryCanonFile(f);
-    space.push(FoundrySpaceTokensCanonSchema.parse(raw.data));
+    const raw = await loadArtLabCanonFile(f);
+    space.push(ArtLabSpaceTokensCanonSchema.parse(raw.data));
   }
-  const icono: FoundryIconographyRulesCanon[] = [];
+  const icono: ArtLabIconographyRulesCanon[] = [];
   for (const f of iconoFiles) {
-    const raw = await loadFoundryCanonFile(f);
-    icono.push(FoundryIconographyRulesCanonSchema.parse(raw.data));
+    const raw = await loadArtLabCanonFile(f);
+    icono.push(ArtLabIconographyRulesCanonSchema.parse(raw.data));
   }
 
   checkDuplicates(characters, "character");

@@ -1,6 +1,6 @@
-import type { FoundryLottieProvider } from "../lottie-provider";
+import type { ArtLabLottieProvider } from "../lottie-provider";
 
-export function createFoundrySpriteMockLottieProvider(): FoundryLottieProvider {
+export function createArtLabSpriteMockLottieProvider(): ArtLabLottieProvider {
   return {
     async authorLottie(input) {
       const fr = 30;

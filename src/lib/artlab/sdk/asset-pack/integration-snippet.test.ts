@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { renderFoundryIntegrationSnippet } from "./integration-snippet";
-import type { FoundryAssetPackManifest } from "./manifest.schema";
+import { renderArtLabIntegrationSnippet } from "./integration-snippet";
+import type { ArtLabAssetPackManifest } from "./manifest.schema";
 
-const OTIS_MANIFEST: FoundryAssetPackManifest = {
+const OTIS_MANIFEST: ArtLabAssetPackManifest = {
   manifestVersion: "1.0.0",
   packId: "01970000-0000-7000-8000-000000000001",
   kind: "character-sprite",
@@ -23,15 +23,15 @@ const OTIS_MANIFEST: FoundryAssetPackManifest = {
   generation: { agentName: "character-master", provider: "gemini-2.5-flash-image", modelId: "gemini-2.5-flash-image", seed: 1, costCents: 4, durationMs: 18000, generatedAt: "2026-05-25T00:00:00.000Z" },
 };
 
-describe("renderFoundryIntegrationSnippet", () => {
+describe("renderArtLabIntegrationSnippet", () => {
   it("renders the golden character-sprite snippet", () => {
     const golden = readFileSync(join(__dirname, "__fixtures__", "golden-character-sprite-snippet.tsx"), "utf8");
-    const rendered = renderFoundryIntegrationSnippet(OTIS_MANIFEST);
+    const rendered = renderArtLabIntegrationSnippet(OTIS_MANIFEST);
     expect(rendered.trim()).toBe(golden.trim());
   });
 
   it("emits a GSAP block when requiresGsap is true", () => {
-    const m: FoundryAssetPackManifest = {
+    const m: ArtLabAssetPackManifest = {
       ...OTIS_MANIFEST,
       intendedSlot: { ...OTIS_MANIFEST.intendedSlot, requiresGsap: true },
       gsapCues: [
@@ -39,7 +39,7 @@ describe("renderFoundryIntegrationSnippet", () => {
       ],
       integrationSnippetTemplate: "character-sprite-gsap",
     };
-    const rendered = renderFoundryIntegrationSnippet(m);
+    const rendered = renderArtLabIntegrationSnippet(m);
     expect(rendered).toMatch(/useEffect/);
     expect(rendered).toMatch(/gsap-init/);
     expect(rendered).toMatch(/return\s*\(\s*\)\s*=>/);
@@ -47,7 +47,7 @@ describe("renderFoundryIntegrationSnippet", () => {
 
   it("throws on unknown integrationSnippetTemplate", () => {
     expect(() =>
-      renderFoundryIntegrationSnippet({ ...OTIS_MANIFEST, integrationSnippetTemplate: "rogue-template" }),
+      renderArtLabIntegrationSnippet({ ...OTIS_MANIFEST, integrationSnippetTemplate: "rogue-template" }),
     ).toThrow();
   });
 
@@ -63,7 +63,7 @@ describe("renderFoundryIntegrationSnippet", () => {
 
     it("quotes altText as a JSON string literal (no attribute injection)", () => {
       const malicious = 'x" onerror="alert(1)';
-      const rendered = renderFoundryIntegrationSnippet({
+      const rendered = renderArtLabIntegrationSnippet({
         ...OTIS_MANIFEST,
         accessibility: { ...OTIS_MANIFEST.accessibility, altText: malicious },
       });
@@ -79,7 +79,7 @@ describe("renderFoundryIntegrationSnippet", () => {
 
     it("quotes altText for the GSAP template too", () => {
       const malicious = 'x" onerror="alert(2)';
-      const rendered = renderFoundryIntegrationSnippet({
+      const rendered = renderArtLabIntegrationSnippet({
         ...OTIS_MANIFEST,
         intendedSlot: { ...OTIS_MANIFEST.intendedSlot, requiresGsap: true },
         gsapCues: [
@@ -95,7 +95,7 @@ describe("renderFoundryIntegrationSnippet", () => {
 
     it("quotes targetSelector so it cannot break the gsap.fromTo call", () => {
       const maliciousSelector = '" onload="alert(1)';
-      const rendered = renderFoundryIntegrationSnippet({
+      const rendered = renderArtLabIntegrationSnippet({
         ...OTIS_MANIFEST,
         intendedSlot: { ...OTIS_MANIFEST.intendedSlot, requiresGsap: true },
         gsapCues: [
@@ -121,7 +121,7 @@ describe("renderFoundryIntegrationSnippet", () => {
       // old code would close prematurely. With JSON.stringify, the `"`
       // is escaped to `\"`, keeping the whole payload inside one string.
       const maliciousEasing = '")); evil(); gsap.timeline(); //';
-      const rendered = renderFoundryIntegrationSnippet({
+      const rendered = renderArtLabIntegrationSnippet({
         ...OTIS_MANIFEST,
         intendedSlot: { ...OTIS_MANIFEST.intendedSlot, requiresGsap: true },
         gsapCues: [
@@ -154,7 +154,7 @@ describe("renderFoundryIntegrationSnippet", () => {
         join(__dirname, "__fixtures__", "golden-character-sprite-snippet.tsx"),
         "utf8",
       );
-      const rendered = renderFoundryIntegrationSnippet(OTIS_MANIFEST);
+      const rendered = renderArtLabIntegrationSnippet(OTIS_MANIFEST);
       expect(rendered.trim()).toBe(golden.trim());
     });
   });

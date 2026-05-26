@@ -11,15 +11,15 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { createFoundryPoller, FoundryGenerateJobSchema } from "./sdk-poller";
+import { createArtLabPoller, ArtLabGenerateJobSchema } from "./sdk-poller";
 import { listQueuedRuns } from "@/lib/artlab/queue/queue";
 import { readRunStateSnapshot } from "@/lib/artlab/state/snapshots";
-import { handleFoundryGenerate } from "@/lib/artlab/sdk/mcp/tool-handlers/generate";
+import { handleArtLabGenerate } from "@/lib/artlab/sdk/mcp/tool-handlers/generate";
 
-describe("foundry-poller", () => {
+describe("sdk-poller", () => {
   let workspaceRoot: string;
   beforeEach(() => {
-    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-foundry-poller-"));
+    workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-sdk-poller-"));
   });
 
   function writeInboxJob(payload: Record<string, unknown>): string {
@@ -43,7 +43,7 @@ describe("foundry-poller", () => {
 
   it("schema rejects unknown extra fields (strict mode)", () => {
     expect(() =>
-      FoundryGenerateJobSchema.parse({
+      ArtLabGenerateJobSchema.parse({
         runId: "11111111-1111-4111-8111-111111111111",
         queuedAt: "2026-05-25T00:00:00.000Z",
         source: "foundry-mcp",
@@ -55,15 +55,15 @@ describe("foundry-poller", () => {
   });
 
   it("returns no work and creates the inbox dir when missing", async () => {
-    const poller = createFoundryPoller({ workspaceRoot });
+    const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
     expect(out.enqueuedRunIds).toEqual([]);
     expect(existsSync(join(workspaceRoot, "inbox", "foundry"))).toBe(true);
   });
 
-  it("drains a foundry inbox job into the queue and archives the file", async () => {
+  it("drains an artlab inbox job into the queue and archives the file", async () => {
     const runId = writeInboxJob({});
-    const poller = createFoundryPoller({ workspaceRoot });
+    const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
 
     expect(out.enqueuedRunIds).toEqual([runId]);
@@ -90,16 +90,16 @@ describe("foundry-poller", () => {
     expect(existsSync(join(inboxDir, ".processed", `${runId}.json`))).toBe(true);
   });
 
-  it("maps high-priority foundry jobs onto the human-flagged queue lane", async () => {
+  it("maps high-priority artlab jobs onto the human-flagged queue lane", async () => {
     const runId = writeInboxJob({ priority: "high" });
-    const poller = createFoundryPoller({ workspaceRoot });
+    const poller = createArtLabPoller({ workspaceRoot });
     await poller.tick();
     const queued = listQueuedRuns(workspaceRoot);
     expect(queued[0]!.runId).toBe(runId);
     expect(queued[0]!.priority).toBe("human-flagged");
   });
 
-  it("maps every FoundryAssetKind onto a valid ArtLabAssetType", async () => {
+  it("maps every ArtLabAssetKind onto a valid ArtLabAssetType", async () => {
     const cases: Array<{ kind: string; expected: string }> = [
       { kind: "character", expected: "character" },
       { kind: "floor", expected: "environment" },
@@ -110,7 +110,7 @@ describe("foundry-poller", () => {
     ];
     for (const c of cases) {
       const runId = writeInboxJob({ kind: c.kind });
-      const poller = createFoundryPoller({ workspaceRoot });
+      const poller = createArtLabPoller({ workspaceRoot });
       await poller.tick();
       const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
       expect(state!.assetType).toBe(c.expected);
@@ -121,7 +121,7 @@ describe("foundry-poller", () => {
     const inboxDir = join(workspaceRoot, "inbox", "foundry");
     mkdirSync(inboxDir, { recursive: true });
     writeFileSync(join(inboxDir, "generate-bad.json"), "{not valid json");
-    const poller = createFoundryPoller({ workspaceRoot });
+    const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
     expect(out.enqueuedRunIds).toEqual([]);
     expect(out.failedFiles).toContain("generate-bad.json");
@@ -142,7 +142,7 @@ describe("foundry-poller", () => {
       join(inboxDir, "generate-incomplete.json"),
       JSON.stringify({ source: "foundry-mcp" }),
     );
-    const poller = createFoundryPoller({ workspaceRoot });
+    const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
     expect(out.failedFiles).toContain("generate-incomplete.json");
     expect(readdirSync(join(inboxDir, ".bad"))).toHaveLength(1);
@@ -156,7 +156,7 @@ describe("foundry-poller", () => {
       join(inboxDir, `generate-${runId}.json.tmp.${process.pid}.${Date.now()}`),
       JSON.stringify({ partial: "still-writing" }),
     );
-    const poller = createFoundryPoller({ workspaceRoot });
+    const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
     expect(out.enqueuedRunIds).toEqual([]);
     expect(out.failedFiles).toEqual([]);
@@ -173,7 +173,7 @@ describe("foundry-poller", () => {
       "00000000-0000-4000-8000-000000000003",
     ];
     for (const id of ids) writeInboxJob({ runId: id });
-    const poller = createFoundryPoller({ workspaceRoot });
+    const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
     expect(out.enqueuedRunIds).toEqual(ids);
   });
@@ -204,7 +204,7 @@ describe("foundry-poller", () => {
           brainHintCompletedAt: new Date().toISOString(),
         }),
       );
-      const poller = createFoundryPoller({ workspaceRoot });
+      const poller = createArtLabPoller({ workspaceRoot });
       const out = await poller.tick();
       expect(out.enqueuedRunIds).toEqual([runId]);
       const queued = listQueuedRuns(workspaceRoot);
@@ -232,7 +232,7 @@ describe("foundry-poller", () => {
           brainHintCompletedAt: new Date().toISOString(),
         }),
       );
-      const poller = createFoundryPoller({ workspaceRoot });
+      const poller = createArtLabPoller({ workspaceRoot });
       const out = await poller.tick();
       expect(out.enqueuedRunIds).toEqual([]);
       expect(out.failedFiles).toEqual([]);
@@ -253,13 +253,13 @@ describe("foundry-poller", () => {
         join(inboxDir, `generate-${runId}.brain-hint.json`),
         "{not valid",
       );
-      const poller = createFoundryPoller({ workspaceRoot });
+      const poller = createArtLabPoller({ workspaceRoot });
       const out = await poller.tick();
       // Trigger still processed (sidecar parse failure logged, not fatal).
       expect(out.enqueuedRunIds).toEqual([runId]);
       // daemon-errors.jsonl records the sidecar failure for /health.
       const errs = readFileSync(join(workspaceRoot, "daemon-errors.jsonl"), "utf8");
-      expect(errs).toMatch(/foundry-poller:sidecar/);
+      expect(errs).toMatch(/sdk-poller:sidecar/);
     });
   });
 
@@ -285,7 +285,7 @@ describe("foundry-poller", () => {
       const enrichPromise = new Promise<Record<string, unknown>>((res) => {
         resolveEnrich = res;
       });
-      const result = await handleFoundryGenerate(
+      const result = await handleArtLabGenerate(
         { kind: "character", description: "Rafe charcoal jacket post-archive enrichment" },
         {
           workspaceRoot,
@@ -294,7 +294,7 @@ describe("foundry-poller", () => {
       );
       // 2. Immediately drain the poller — the trigger file gets archived
       //    while enrichment is still pending.
-      const poller = createFoundryPoller({ workspaceRoot });
+      const poller = createArtLabPoller({ workspaceRoot });
       const drain = await poller.tick();
       expect(drain.enqueuedRunIds).toEqual([result.runId]);
       const inboxDir = join(workspaceRoot, "inbox", "foundry");

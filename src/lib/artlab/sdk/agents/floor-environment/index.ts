@@ -1,34 +1,34 @@
-import { buildFoundryAssetPack } from "@/lib/artlab/sdk/asset-pack";
-import { loadFoundryFloorCanonEntry } from "./floor-canon";
-import { fanOutFoundryFloorVariants } from "./stages/variant-fanout";
-import { buildFoundryFloorComposite } from "./stages/layer-separation";
-import { runFoundryFloorQa } from "./qa";
-import { writeFoundryFloorPack } from "./pack-writer";
-import { renderFoundryFloorIntegrationSnippet } from "./integration";
+import { buildArtLabAssetPack } from "@/lib/artlab/sdk/asset-pack";
+import { loadArtLabFloorCanonEntry } from "./floor-canon";
+import { fanOutArtLabFloorVariants } from "./stages/variant-fanout";
+import { buildArtLabFloorComposite } from "./stages/layer-separation";
+import { runArtLabFloorQa } from "./qa";
+import { writeArtLabFloorPack } from "./pack-writer";
+import { renderArtLabFloorIntegrationSnippet } from "./integration";
 import {
-  FoundryFloorEnvironmentInputSchema,
-  type FoundryFloorEnvironmentInput,
-  type FoundryFloorManifestGaps,
+  ArtLabFloorEnvironmentInputSchema,
+  type ArtLabFloorEnvironmentInput,
+  type ArtLabFloorManifestGaps,
 } from "./types";
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
 
-export interface FoundryFloorAgentContext {
+export interface ArtLabFloorAgentContext {
   runDir: string;
 }
 
-export interface FoundryFloorAgentResult {
+export interface ArtLabFloorAgentResult {
   packId: string;
   manifest: Record<string, unknown>;
 }
 
-export async function runFoundryFloorEnvironment(
-  rawInput: FoundryFloorEnvironmentInput,
-  provider: FoundryImageProvider,
-  context: FoundryFloorAgentContext,
-): Promise<FoundryFloorAgentResult> {
-  const input = FoundryFloorEnvironmentInputSchema.parse(rawInput);
-  const canon = await loadFoundryFloorCanonEntry(input.floorSlug);
-  const jobs = fanOutFoundryFloorVariants(canon, input.timeStates);
+export async function runArtLabFloorEnvironment(
+  rawInput: ArtLabFloorEnvironmentInput,
+  provider: ArtLabImageProvider,
+  context: ArtLabFloorAgentContext,
+): Promise<ArtLabFloorAgentResult> {
+  const input = ArtLabFloorEnvironmentInputSchema.parse(rawInput);
+  const canon = await loadArtLabFloorCanonEntry(input.floorSlug);
+  const jobs = fanOutArtLabFloorVariants(canon, input.timeStates);
   const variants = await Promise.all(
     jobs.map(async (job) => {
       const result = await provider.generateImage({
@@ -36,7 +36,7 @@ export async function runFoundryFloorEnvironment(
         aspectRatio: job.aspectRatio,
         seed: input.seed,
       });
-      const composite = await buildFoundryFloorComposite(result.bytes);
+      const composite = await buildArtLabFloorComposite(result.bytes);
       return {
         timeState: job.timeState,
         compositeBytes: result.bytes,
@@ -45,7 +45,7 @@ export async function runFoundryFloorEnvironment(
       };
     }),
   );
-  const qa = await runFoundryFloorQa({
+  const qa = await runArtLabFloorQa({
     canonPalette: canon.palette,
     requiredElements: canon.requiredElements,
     variants: variants.map((v) => ({
@@ -55,10 +55,10 @@ export async function runFoundryFloorEnvironment(
   });
   if (!qa.passed) {
     throw new Error(
-      `foundry/floor: qa failed for ${input.floorSlug} — gates=${qa.failedGates.join(",")}`,
+      `artlab/floor: qa failed for ${input.floorSlug} — gates=${qa.failedGates.join(",")}`,
     );
   }
-  const persisted = await writeFoundryFloorPack({
+  const persisted = await writeArtLabFloorPack({
     runDir: context.runDir,
     floorSlug: input.floorSlug,
     variants: variants.map((v) => ({
@@ -67,7 +67,7 @@ export async function runFoundryFloorEnvironment(
       layers: v.layers,
     })),
   });
-  const integrationSnippet = renderFoundryFloorIntegrationSnippet({
+  const integrationSnippet = renderArtLabFloorIntegrationSnippet({
     floorSlug: input.floorSlug,
     packPath: persisted.packRoot,
   });
@@ -77,7 +77,7 @@ export async function runFoundryFloorEnvironment(
   // Two gaps are documented:
   //  - room-element pixel verification (no vision-LLM call yet)
   //  - per-layer renders (currently single composite; see Critical 1+4)
-  const manifestGaps: FoundryFloorManifestGaps = {
+  const manifestGaps: ArtLabFloorManifestGaps = {
     roomElementsPixelVerification: {
       status: "todo-post-launch",
       reason:
@@ -103,5 +103,5 @@ export async function runFoundryFloorEnvironment(
     integrationSnippet,
     qa,
   };
-  return buildFoundryAssetPack(manifest);
+  return buildArtLabAssetPack(manifest);
 }

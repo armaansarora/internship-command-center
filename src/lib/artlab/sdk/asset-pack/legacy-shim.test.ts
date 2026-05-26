@@ -2,14 +2,14 @@ import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { liftLegacyArtLabAssetToFoundryPack } from "./legacy-shim";
-import { FoundryAssetPackManifestSchema } from "./manifest.schema";
+import { liftLegacyArtLabAssetToSdkPack } from "./legacy-shim";
+import { ArtLabAssetPackManifestSchema } from "./manifest.schema";
 
-describe("liftLegacyArtLabAssetToFoundryPack", () => {
+describe("liftLegacyArtLabAssetToSdkPack", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-legacy-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-legacy-"));
   });
 
   afterEach(() => {
@@ -21,7 +21,7 @@ describe("liftLegacyArtLabAssetToFoundryPack", () => {
     const pngPath = join(tmpDir, "idle.webp");
     writeFileSync(pngPath, fakeBytes);
 
-    const pack = await liftLegacyArtLabAssetToFoundryPack({
+    const pack = await liftLegacyArtLabAssetToSdkPack({
       characterId: "otis",
       outfit: "regular",
       pose: "idle",
@@ -31,7 +31,7 @@ describe("liftLegacyArtLabAssetToFoundryPack", () => {
       generatedAt: "2026-05-25T00:00:00.000Z",
     });
 
-    expect(() => FoundryAssetPackManifestSchema.parse(pack.manifest)).not.toThrow();
+    expect(() => ArtLabAssetPackManifestSchema.parse(pack.manifest)).not.toThrow();
     expect(pack.manifest.kind).toBe("character-sprite");
     expect(pack.manifest.canonRefs.characterId).toBe("otis");
     expect(pack.manifest.intendedSlot.slotId).toBe("lobby/otis/regular/idle");
@@ -40,7 +40,7 @@ describe("liftLegacyArtLabAssetToFoundryPack", () => {
 
   it("rejects when the legacy combination has no registered slot", async () => {
     await expect(
-      liftLegacyArtLabAssetToFoundryPack({
+      liftLegacyArtLabAssetToSdkPack({
         characterId: "rogue",
         outfit: "regular",
         pose: "idle",
@@ -56,9 +56,9 @@ describe("liftLegacyArtLabAssetToFoundryPack", () => {
     const fakeBytes = Buffer.from("x");
     const pngPath = join(tmpDir, "idle.webp");
     writeFileSync(pngPath, fakeBytes);
-    const before = mkdtempSync(join(tmpdir(), "foundry-legacy-check-"));
+    const before = mkdtempSync(join(tmpdir(), "artlab-legacy-check-"));
     mkdirSync(before, { recursive: true });
-    await liftLegacyArtLabAssetToFoundryPack({
+    await liftLegacyArtLabAssetToSdkPack({
       characterId: "otis",
       outfit: "regular",
       pose: "idle",

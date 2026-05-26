@@ -1,19 +1,19 @@
-// src/lib/foundry/agents/ui-texture/types.test.ts
+// src/lib/artlab/sdk/agents/ui-texture/types.test.ts
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDRY_UI_TEXTURE_KINDS,
-  FoundryUiTextureInputSchema,
-  FoundryUiIconManifestSchema,
-  FoundryUiTextureManifestSchema,
+  ARTLAB_UI_TEXTURE_KINDS,
+  ArtLabUiTextureInputSchema,
+  ArtLabUiIconManifestSchema,
+  ArtLabUiTextureManifestSchema,
 } from "./types";
 
-describe("foundry ui-texture types", () => {
+describe("artlab sdk ui-texture types", () => {
   it("declares the two artifact kinds", () => {
-    expect(FOUNDRY_UI_TEXTURE_KINDS).toEqual(["icon", "texture"]);
+    expect(ARTLAB_UI_TEXTURE_KINDS).toEqual(["icon", "texture"]);
   });
 
   it("accepts an icon input", () => {
-    const parsed = FoundryUiTextureInputSchema.parse({
+    const parsed = ArtLabUiTextureInputSchema.parse({
       runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
       name: "elevator-door",
       kind: "icon",
@@ -24,7 +24,7 @@ describe("foundry ui-texture types", () => {
   });
 
   it("accepts a texture input", () => {
-    const parsed = FoundryUiTextureInputSchema.parse({
+    const parsed = ArtLabUiTextureInputSchema.parse({
       runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
       name: "etched-gold-border",
       kind: "texture",
@@ -36,7 +36,7 @@ describe("foundry ui-texture types", () => {
 
   it("rejects an icon input missing ariaLabel", () => {
     expect(() =>
-      FoundryUiTextureInputSchema.parse({
+      ArtLabUiTextureInputSchema.parse({
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         name: "elevator-door",
         kind: "icon",
@@ -46,7 +46,7 @@ describe("foundry ui-texture types", () => {
   });
 
   it("icon manifest carries strokeWidthPx", () => {
-    const parsed = FoundryUiIconManifestSchema.parse({
+    const parsed = ArtLabUiIconManifestSchema.parse({
       name: "elevator-door",
       svgPath: "elevator-door.svg",
       ariaLabel: "Elevator door icon",
@@ -57,7 +57,7 @@ describe("foundry ui-texture types", () => {
   });
 
   it("texture manifest carries normalMapPath and tile mode", () => {
-    const parsed = FoundryUiTextureManifestSchema.parse({
+    const parsed = ArtLabUiTextureManifestSchema.parse({
       name: "etched-gold-border",
       pngPath: "etched-gold-border.png",
       normalMapPath: "etched-gold-border.normal.png",

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { resolveFoundryIntent } from "./meta-orchestrator";
-import type { FoundryAgentKind } from "./types";
+import { resolveArtLabIntent } from "./meta-orchestrator";
+import type { ArtLabAgentKind } from "./types";
 
-type ExpectedAgent = FoundryAgentKind | "clarify";
+type ExpectedAgent = ArtLabAgentKind | "clarify";
 
 interface Case {
   request: string;
   expected: ExpectedAgent;
-  cannedAgent: FoundryAgentKind;
+  cannedAgent: ArtLabAgentKind;
   cannedConfidence: number;
   cannedArgs: Record<string, unknown>;
 }
@@ -38,7 +38,7 @@ const cannedCall = (c: Case) => async () => ({
 describe("golden routing table", () => {
   for (const c of GOLDEN) {
     it(`routes [${c.request}] -> ${c.expected}`, async () => {
-      const result = await resolveFoundryIntent(c.request, {
+      const result = await resolveArtLabIntent(c.request, {
         apiKey: "sk-fake",
         model: "test",
         callOverride: cannedCall(c),

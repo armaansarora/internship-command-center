@@ -239,7 +239,7 @@ export const promotionRunner: ArtLabRunner = {
     });
 
     // Critical Finding 2 — write `promotedPackId` onto run-state.json so the
-    // Foundry `generate_status` MCP handler returns a non-undefined value
+    // ArtLab `generate_status` MCP handler returns a non-undefined value
     // when callers poll for status=promoted. The packId is derived
     // deterministically from assetType + the first 8 hex chars of the runId
     // so the same run always resolves to the same packId across replays

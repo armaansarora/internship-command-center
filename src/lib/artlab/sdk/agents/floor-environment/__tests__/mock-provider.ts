@@ -1,7 +1,7 @@
 import sharp from "sharp";
-import type { FoundryImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
+import type { ArtLabImageProvider } from "@/lib/artlab/sdk/agents/provider-interface";
 
-export function createFoundryFloorMockProvider(): FoundryImageProvider {
+export function createArtLabFloorMockProvider(): ArtLabImageProvider {
   return {
     async generateImage(input) {
       const seed = input.seed ?? 0;

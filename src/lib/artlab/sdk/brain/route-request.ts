@@ -1,14 +1,14 @@
-import { resolveFoundryIntent, type ResolveFoundryIntentResult } from "./meta-orchestrator";
-import { resolveFoundryAgentProvider } from "./provider-registry";
-import { createFoundryBrainFor } from "./factory";
-import { loadFoundryMemoryScope } from "./memory-scope";
+import { resolveArtLabIntent, type ResolveArtLabIntentResult } from "./meta-orchestrator";
+import { resolveArtLabAgentProvider } from "./provider-registry";
+import { createArtLabBrainFor } from "./factory";
+import { loadArtLabMemoryScope } from "./memory-scope";
 import type {
-  FoundryAgentBrainResult,
-  FoundryClarifyingQuestion,
-  FoundryAgentKind,
+  ArtLabAgentBrainResult,
+  ArtLabClarifyingQuestion,
+  ArtLabAgentKind,
 } from "./types";
 
-export interface RouteFoundryRequestOpts {
+export interface RouteArtLabRequestOpts {
   env: Record<string, string | undefined>;
   /**
    * Path to the ArtLab memory ledger directory (typically
@@ -22,7 +22,7 @@ export interface RouteFoundryRequestOpts {
    * This wiring closes two gaps at once:
    *   - the meta-orchestrator never emits `recentWins`/`recentRejections`,
    *     so the per-agent strict schemas would otherwise always reject;
-   *   - `loadFoundryMemoryScope` was previously dead code (unit-tested but
+   *   - `loadArtLabMemoryScope` was previously dead code (unit-tested but
    *     never called in production).
    */
   memoryDir?: string;
@@ -32,19 +32,19 @@ export interface RouteFoundryRequestOpts {
    */
   memoryTopN?: number;
   /** Test seam. */
-  metaCallOverride?: Parameters<typeof resolveFoundryIntent>[1]["callOverride"];
+  metaCallOverride?: Parameters<typeof resolveArtLabIntent>[1]["callOverride"];
 }
 
-export type RouteFoundryRequestResult = FoundryAgentBrainResult | FoundryClarifyingQuestion;
+export type RouteArtLabRequestResult = ArtLabAgentBrainResult | ArtLabClarifyingQuestion;
 
 const DEFAULT_MEMORY_TOP_N = 3;
 
-export async function routeFoundryRequest(
+export async function routeArtLabRequest(
   rawRequest: string,
-  opts: RouteFoundryRequestOpts,
-): Promise<RouteFoundryRequestResult> {
-  const metaProvider = resolveFoundryAgentProvider({ agent: "character-master" }, opts.env);
-  const intent: ResolveFoundryIntentResult = await resolveFoundryIntent(rawRequest, {
+  opts: RouteArtLabRequestOpts,
+): Promise<RouteArtLabRequestResult> {
+  const metaProvider = resolveArtLabAgentProvider({ agent: "character-master" }, opts.env);
+  const intent: ResolveArtLabIntentResult = await resolveArtLabIntent(rawRequest, {
     apiKey: metaProvider.apiKey,
     model: metaProvider.model,
     dryRun: metaProvider.dryRun,
@@ -59,7 +59,7 @@ export async function routeFoundryRequest(
   // (and tests) retain full control.
   const topN = opts.memoryTopN ?? DEFAULT_MEMORY_TOP_N;
   const scope = opts.memoryDir
-    ? loadFoundryMemoryScope(opts.memoryDir, intent.agent as FoundryAgentKind, { topN })
+    ? loadArtLabMemoryScope(opts.memoryDir, intent.agent as ArtLabAgentKind, { topN })
     : { recentWins: [], recentRejections: [], winsCount: 0, rejectionsCount: 0 };
   const hydrated: Record<string, unknown> = {
     recentWins: scope.recentWins,
@@ -67,7 +67,7 @@ export async function routeFoundryRequest(
     ...intent.parsedArgs,
   };
 
-  const brain = createFoundryBrainFor(intent.agent as FoundryAgentKind, opts.env);
+  const brain = createArtLabBrainFor(intent.agent as ArtLabAgentKind, opts.env);
   const parsedInput = brain.inputSchema.parse(hydrated);
   return brain.decide(parsedInput);
 }

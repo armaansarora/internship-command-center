@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { validateFoundryManifestAgainstSlots } from "./manifest-slot-check";
-import type { FoundryAssetPackManifest } from "./manifest.schema";
+import { validateArtLabManifestAgainstSlots } from "./manifest-slot-check";
+import type { ArtLabAssetPackManifest } from "./manifest.schema";
 
-const MANIFEST_BASE: FoundryAssetPackManifest = {
+const MANIFEST_BASE: ArtLabAssetPackManifest = {
   manifestVersion: "1.0.0",
   packId: "p1",
   kind: "character-sprite",
@@ -18,14 +18,14 @@ const MANIFEST_BASE: FoundryAssetPackManifest = {
   generation: { agentName: "character-master", provider: "x", modelId: "x", seed: 0, costCents: 0, durationMs: 0, generatedAt: "2026-05-25T00:00:00.000Z" },
 };
 
-describe("validateFoundryManifestAgainstSlots", () => {
+describe("validateArtLabManifestAgainstSlots", () => {
   it("accepts a manifest whose intendedSlot is registered", () => {
-    const result = validateFoundryManifestAgainstSlots(MANIFEST_BASE);
+    const result = validateArtLabManifestAgainstSlots(MANIFEST_BASE);
     expect(result.ok).toBe(true);
   });
 
   it("rejects a manifest whose intendedSlot is not registered", () => {
-    const result = validateFoundryManifestAgainstSlots({
+    const result = validateArtLabManifestAgainstSlots({
       ...MANIFEST_BASE,
       intendedSlot: { ...MANIFEST_BASE.intendedSlot, slotId: "lobby/intruder/rogue" },
     });
@@ -34,7 +34,7 @@ describe("validateFoundryManifestAgainstSlots", () => {
   });
 
   it("rejects when slotId is registered but appPath disagrees", () => {
-    const result = validateFoundryManifestAgainstSlots({
+    const result = validateArtLabManifestAgainstSlots({
       ...MANIFEST_BASE,
       intendedSlot: { ...MANIFEST_BASE.intendedSlot, appPath: "public/art/lobby/otis/regular/WRONG.webp" },
     });
@@ -43,7 +43,7 @@ describe("validateFoundryManifestAgainstSlots", () => {
   });
 
   it("rejects when slot kind disagrees with manifest kind", () => {
-    const result = validateFoundryManifestAgainstSlots({
+    const result = validateArtLabManifestAgainstSlots({
       ...MANIFEST_BASE,
       kind: "ui-icon",
     });

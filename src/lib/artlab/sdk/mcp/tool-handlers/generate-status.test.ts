@@ -2,13 +2,13 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { handleFoundryGenerateStatus } from "./generate-status";
+import { handleArtLabGenerateStatus } from "./generate-status";
 
 let workspaceRoot: string;
 const RUN_ID = "11111111-1111-4111-8111-111111111111";
 
 beforeEach(() => {
-  workspaceRoot = mkdtempSync(join(tmpdir(), "foundry-status-"));
+  workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-status-"));
 });
 
 function seedRun(state: Record<string, unknown>): void {
@@ -17,8 +17,8 @@ function seedRun(state: Record<string, unknown>): void {
   writeFileSync(join(dir, "run-state.json"), JSON.stringify(state));
 }
 
-describe("handleFoundryGenerateStatus", () => {
-  it("translates ArtLab run state into a Foundry status payload", async () => {
+describe("handleArtLabGenerateStatus", () => {
+  it("translates ArtLab run state into a ArtLab status payload", async () => {
     seedRun({
       runId: RUN_ID,
       phase: "production",
@@ -32,7 +32,7 @@ describe("handleFoundryGenerateStatus", () => {
         renderedSlotCount: 2,
       },
     });
-    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.runId).toBe(RUN_ID);
     expect(result.status).toBe("running");
     expect(result.phase).toBe("production");
@@ -55,7 +55,7 @@ describe("handleFoundryGenerateStatus", () => {
       },
       promotedPackId: "rafe-v4",
     });
-    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.status).toBe("promoted");
     expect(result.percentComplete).toBe(100);
     expect(result.promotedPackId).toBe("rafe-v4");
@@ -75,7 +75,7 @@ describe("handleFoundryGenerateStatus", () => {
         renderedSlotCount: 1,
       },
     });
-    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.status).toBe("blocked");
     expect(result.blockers).toEqual(["needs-human"]);
   });
@@ -93,7 +93,7 @@ describe("handleFoundryGenerateStatus", () => {
       updatedAt: "2026-05-25T12:20:00.000Z",
       progress: { expectedSlotCount: 4, renderedSlotCount: 1 },
     });
-    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.status).toBe("cancelled");
     expect(result.blockers).toEqual(["cancelled"]);
   });
@@ -108,7 +108,7 @@ describe("handleFoundryGenerateStatus", () => {
       createdAt: "2026-05-25T12:00:00.000Z",
       updatedAt: "2026-05-25T12:21:00.000Z",
     });
-    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.status).toBe("cancelled");
     expect(result.blockers).toEqual([]);
   });
@@ -123,25 +123,25 @@ describe("handleFoundryGenerateStatus", () => {
       createdAt: "2026-05-25T12:00:00.000Z",
       updatedAt: "2026-05-25T12:22:00.000Z",
     });
-    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.status).toBe("failed");
     expect(result.blockers).toEqual(["failed"]);
   });
 
   it("throws if runId is unknown", async () => {
     await expect(
-      handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot }),
+      handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot }),
     ).rejects.toThrow(/run not found/i);
   });
 
-  it("returns status=queued when only the foundry inbox file exists (no run-state yet)", async () => {
+  it("returns status=queued when only the artlab inbox file exists (no run-state yet)", async () => {
     const inboxDir = join(workspaceRoot, "inbox", "foundry");
     mkdirSync(inboxDir, { recursive: true });
     writeFileSync(
       join(inboxDir, `generate-${RUN_ID}.json`),
       JSON.stringify({ runId: RUN_ID, queuedAt: "2026-05-25T00:00:00.000Z", source: "foundry-mcp" }),
     );
-    const result = await handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
+    const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.status).toBe("queued");
     expect(result.phase).toBe("queued");
     expect(result.percentComplete).toBe(0);
@@ -158,7 +158,7 @@ describe("handleFoundryGenerateStatus", () => {
       JSON.stringify({ runId: RUN_ID }),
     );
     await expect(
-      handleFoundryGenerateStatus({ runId: RUN_ID }, { workspaceRoot }),
+      handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot }),
     ).rejects.toThrow(/run-state\.json missing/);
   });
 });

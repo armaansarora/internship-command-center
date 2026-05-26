@@ -15,11 +15,11 @@ async function solidImg(color: { r: number; g: number; b: number }): Promise<Buf
   }).png().toBuffer();
 }
 
-describe("foundry character-master qa", () => {
+describe("artlab sdk character-master qa", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-qa-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-qa-"));
   });
 
   afterEach(() => {

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
 import { computePerceptualHash } from "@/lib/artlab/coherence/hashes";
-import { runFoundrySpriteAnimatorCli } from "../cli";
+import { runArtLabSpriteAnimatorCli } from "../cli";
 
 async function solid(c: number): Promise<Buffer> {
   return sharp({
@@ -21,7 +21,7 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
   hash: "0000000000000000",
 };
 
-// Foundry-SDK Critical-1 fix: `buildFoundryAssetPack` is no longer mocked;
+// ArtLab-SDK Critical-1 fix: `buildArtLabAssetPack` is no longer mocked;
 // the real strict-schema builder validates the manifest the agent emits.
 vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   const actual = await vi.importActual<typeof import("@/lib/artlab/sdk/asset-pack")>(
@@ -29,9 +29,9 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
   );
   return {
     ...actual,
-    loadFoundryAssetPack: vi.fn(async () => ({
+    loadArtLabAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
-      packDir: "/tmp/foundry-test/char-otis-v3",
+      packDir: "/tmp/artlab-test/char-otis-v3",
       manifest: {
         manifestVersion: "1.0.0",
         packId: "char-otis-v3",
@@ -56,13 +56,13 @@ vi.mock("@/lib/artlab/sdk/asset-pack", async () => {
 describe("golden lottie pulse", () => {
   let dir: string;
   beforeEach(async () => {
-    dir = mkdtempSync(join(tmpdir(), "foundry-lottie-golden-"));
+    dir = mkdtempSync(join(tmpdir(), "artlab-lottie-golden-"));
     ANCHOR_FIXTURE.bytes = await solid(50);
     ANCHOR_FIXTURE.hash = await computePerceptualHash(ANCHOR_FIXTURE.bytes);
   });
 
   it("produces a parseable lottie.json with embedded identity asset", async () => {
-    await runFoundrySpriteAnimatorCli({
+    await runArtLabSpriteAnimatorCli({
       sourcePackId: "char-otis-v3",
       action: "idle",
       format: "lottie",
@@ -86,7 +86,7 @@ describe("golden lottie pulse", () => {
     expect(parsed.assets[0]?.p).toContain("data:image/png;base64,");
     // The canonical pack also writes lottie.json under payload/, so the
     // schema-validated manifest references real bytes round-tripped via
-    // createFoundryAssetPack.
+    // createArtLabAssetPack.
     expect(existsSync(join(dir, "pack", "payload", "lottie.json"))).toBe(true);
   });
 });

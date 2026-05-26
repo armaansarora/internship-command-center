@@ -1,24 +1,24 @@
 import { describe, expect, it } from "vitest";
 import {
-  FoundryVideoProviderInputSchema,
-  FoundryVideoProviderResultSchema,
+  ArtLabVideoProviderInputSchema,
+  ArtLabVideoProviderResultSchema,
 } from "./video-provider";
 
-describe("foundry video provider contract", () => {
+describe("artlab sdk video provider contract", () => {
   it("input requires prompt, frameCount, fps", () => {
-    const ok = FoundryVideoProviderInputSchema.parse({
+    const ok = ArtLabVideoProviderInputSchema.parse({
       prompt: "Otis breathing idle loop",
       frameCount: 12,
       fps: 12,
     });
     expect(ok.frameCount).toBe(12);
     expect(() =>
-      FoundryVideoProviderInputSchema.parse({ prompt: "x", fps: 12 }),
+      ArtLabVideoProviderInputSchema.parse({ prompt: "x", fps: 12 }),
     ).toThrow();
   });
 
   it("input accepts optional reference image bytes", () => {
-    const ok = FoundryVideoProviderInputSchema.parse({
+    const ok = ArtLabVideoProviderInputSchema.parse({
       prompt: "x",
       frameCount: 12,
       fps: 12,
@@ -29,7 +29,7 @@ describe("foundry video provider contract", () => {
 
   it("result requires frames buffers + costCents + durationMs + mode", () => {
     const png = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
-    const ok = FoundryVideoProviderResultSchema.parse({
+    const ok = ArtLabVideoProviderResultSchema.parse({
       frames: [png, png],
       contentType: "image/png",
       mode: "mock",
@@ -41,7 +41,7 @@ describe("foundry video provider contract", () => {
 
   it("result rejects empty frames array", () => {
     expect(() =>
-      FoundryVideoProviderResultSchema.parse({
+      ArtLabVideoProviderResultSchema.parse({
         frames: [],
         contentType: "image/png",
         mode: "real",

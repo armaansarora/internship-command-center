@@ -46,11 +46,11 @@ tokens:
   primaryDark: "#1A1A2E"
 `;
 
-describe("foundry character CLI", () => {
+describe("artlab sdk character CLI", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-cli-char-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-cli-char-"));
     const canon = join(tmpDir, "canon");
     mkdirSync(join(canon, "characters"), { recursive: true });
     mkdirSync(join(canon, "palettes"), { recursive: true });

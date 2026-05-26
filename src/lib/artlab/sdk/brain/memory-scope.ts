@@ -3,9 +3,9 @@ import { join } from "node:path";
 import { summariseFeedbackForBrain, type BrainFeedbackSignal } from "@/lib/artlab/memory/feedback-summary";
 import type { StyleWinEntry } from "@/lib/artlab/memory/style-ledger";
 import type { RejectionEntry } from "@/lib/artlab/memory/rejection-ledger";
-import type { FoundryAgentKind } from "./types";
+import type { ArtLabAgentKind } from "./types";
 
-const AGENT_TO_SOURCE: Record<FoundryAgentKind, string> = {
+const AGENT_TO_SOURCE: Record<ArtLabAgentKind, string> = {
   "character-master": "character",
   "floor-environment": "floor",
   "ui-texture": "ui-texture",
@@ -19,9 +19,9 @@ function readJsonl<T>(path: string): T[] {
   return raw.split("\n").map((line) => JSON.parse(line) as T);
 }
 
-export function loadFoundryMemoryScope(
+export function loadArtLabMemoryScope(
   memoryDir: string,
-  agent: FoundryAgentKind,
+  agent: ArtLabAgentKind,
   opts: { topN: number },
 ): BrainFeedbackSignal {
   const winSource = AGENT_TO_SOURCE[agent];

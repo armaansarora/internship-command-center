@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
-  FOUNDRY_AGENT_KINDS,
-  FoundryAgentBrainResultSchema,
-  FoundryMetaIntentSchema,
+  ARTLAB_AGENT_KINDS,
+  ArtLabAgentBrainResultSchema,
+  ArtLabMetaIntentSchema,
 } from "./types";
 
-describe("foundry brain shared types", () => {
-  it("FOUNDRY_AGENT_KINDS lists every specialist agent", () => {
-    expect(FOUNDRY_AGENT_KINDS).toEqual([
+describe("artlab sdk brain shared types", () => {
+  it("ARTLAB_AGENT_KINDS lists every specialist agent", () => {
+    expect(ARTLAB_AGENT_KINDS).toEqual([
       "character-master",
       "floor-environment",
       "ui-texture",
@@ -15,23 +15,23 @@ describe("foundry brain shared types", () => {
     ]);
   });
 
-  it("FoundryMetaIntentSchema rejects unknown agent strings", () => {
+  it("ArtLabMetaIntentSchema rejects unknown agent strings", () => {
     expect(() =>
-      FoundryMetaIntentSchema.parse({ agent: "phantom", parsedArgs: {}, confidence: 0.9 }),
+      ArtLabMetaIntentSchema.parse({ agent: "phantom", parsedArgs: {}, confidence: 0.9 }),
     ).toThrow();
   });
 
-  it("FoundryMetaIntentSchema enforces confidence in [0, 1]", () => {
+  it("ArtLabMetaIntentSchema enforces confidence in [0, 1]", () => {
     expect(() =>
-      FoundryMetaIntentSchema.parse({ agent: "character-master", parsedArgs: {}, confidence: 1.4 }),
+      ArtLabMetaIntentSchema.parse({ agent: "character-master", parsedArgs: {}, confidence: 1.4 }),
     ).toThrow();
     expect(() =>
-      FoundryMetaIntentSchema.parse({ agent: "character-master", parsedArgs: {}, confidence: -0.1 }),
+      ArtLabMetaIntentSchema.parse({ agent: "character-master", parsedArgs: {}, confidence: -0.1 }),
     ).toThrow();
   });
 
-  it("FoundryAgentBrainResult requires durationMs and tokens", () => {
-    const ok = FoundryAgentBrainResultSchema.parse({
+  it("ArtLabAgentBrainResult requires durationMs and tokens", () => {
+    const ok = ArtLabAgentBrainResultSchema.parse({
       agent: "floor-environment",
       output: { plan: "x" },
       tokensIn: 100,

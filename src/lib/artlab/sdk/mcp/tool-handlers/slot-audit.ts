@@ -2,16 +2,16 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import {
-  FoundrySlotAuditInputSchema,
-  FoundrySlotAuditOutputSchema,
-  FOUNDRY_ASSET_KINDS,
-  type FoundrySlotAuditOutput,
+  ArtLabSlotAuditInputSchema,
+  ArtLabSlotAuditOutputSchema,
+  ARTLAB_ASSET_KINDS,
+  type ArtLabSlotAuditOutput,
 } from "../tools";
 
 const SlotEntrySchema = z
   .object({
     slotId: z.string().min(1),
-    kind: z.enum(FOUNDRY_ASSET_KINDS),
+    kind: z.enum(ARTLAB_ASSET_KINDS),
     space: z.string().min(1).optional(),
     characterId: z.string().min(1).optional(),
     description: z.string().min(1),
@@ -20,7 +20,7 @@ const SlotEntrySchema = z
 
 const SlotRegistrySchema = z.object({ slots: z.array(SlotEntrySchema) }).strict();
 
-export interface FoundrySlotAuditContext {
+export interface ArtLabSlotAuditContext {
   slotRegistryPath: string;
   packsRoot: string;
 }
@@ -41,11 +41,11 @@ function loadCoveredSlotIds(packsRoot: string): Set<string> {
   return covered;
 }
 
-export async function handleFoundrySlotAudit(
+export async function handleArtLabSlotAudit(
   rawInput: unknown,
-  ctx: FoundrySlotAuditContext,
-): Promise<FoundrySlotAuditOutput> {
-  const input = FoundrySlotAuditInputSchema.parse(rawInput);
+  ctx: ArtLabSlotAuditContext,
+): Promise<ArtLabSlotAuditOutput> {
+  const input = ArtLabSlotAuditInputSchema.parse(rawInput);
   if (!existsSync(ctx.slotRegistryPath)) {
     throw new Error(`slot registry missing at ${ctx.slotRegistryPath}`);
   }
@@ -61,7 +61,7 @@ export async function handleFoundrySlotAudit(
   const missing = scoped.filter((s) => !covered.has(s.slotId));
   const coveredInScope = scoped.length - missing.length;
 
-  return FoundrySlotAuditOutputSchema.parse({
+  return ArtLabSlotAuditOutputSchema.parse({
     missing: missing.map((s) => ({
       slotId: s.slotId,
       kind: s.kind,

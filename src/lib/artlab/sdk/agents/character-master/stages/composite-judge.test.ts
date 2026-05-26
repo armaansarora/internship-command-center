@@ -30,7 +30,7 @@ describe("composite-judge stage", () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(join(tmpdir(), "foundry-judge-"));
+    tmpDir = mkdtempSync(join(tmpdir(), "artlab-judge-"));
   });
 
   afterEach(() => {
