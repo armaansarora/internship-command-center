@@ -13,23 +13,17 @@ async function solid(c: number): Promise<Buffer> {
     .toBuffer();
 }
 
+// Foundry-SDK Critical-1 fix: `buildFoundryAssetPack` is no longer mocked;
+// the real strict-schema builder runs. The golden assertions now read the
+// canonical on-disk artefacts (`pack/manifest.json` + `pack/payload/…`)
+// that `createFoundryAssetPack` writes — same shape the production daemon
+// publishes.
 vi.mock("@/lib/foundry/asset-pack", async () => {
   const actual = await vi.importActual<typeof import("@/lib/foundry/asset-pack")>(
     "@/lib/foundry/asset-pack",
   );
   return {
     ...actual,
-    buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => {
-      const { writeFileSync, mkdirSync } = await import("node:fs");
-      const { join: pathJoin } = await import("node:path");
-      const dir = (manifest as { __packDir?: string }).__packDir ?? "/tmp";
-      mkdirSync(dir, { recursive: true });
-      writeFileSync(pathJoin(dir, "manifest.json"), JSON.stringify(manifest));
-      return { packId: "anim-golden", manifest };
-    }),
-    // Critical 1 alignment: strict on-disk manifest shape (was a flat
-    // assetKind/anchorImagePath/anchorPerceptualHash mock that the strict
-    // schema would have rejected).
     loadFoundryAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
       packDir: "/tmp/foundry-test/char-otis-v3",
@@ -60,7 +54,7 @@ describe("golden otis idle", () => {
     dir = mkdtempSync(join(tmpdir(), "foundry-anim-golden-"));
   });
 
-  it("produces 12 frame PNGs + manifest with sprite shape", async () => {
+  it("produces 12 frame PNGs + manifest with sprite-animation shape", async () => {
     const anchorBytes = await solid(50);
     await runFoundrySpriteAnimatorCli({
       sourcePackId: "char-otis-v3",
@@ -71,15 +65,38 @@ describe("golden otis idle", () => {
       seed: 1,
       anchorBytesOverride: anchorBytes,
     });
-    const files = readdirSync(join(dir, "pack")).filter((f) =>
-      f.endsWith(".png"),
+    // Loose frame artefacts (written by the agent's pack-writer) remain
+    // under `<runDir>/pack/frame-NNN.png`. The canonical, schema-validated
+    // pack lives next to them at `<runDir>/pack/manifest.json` with
+    // payload files under `<runDir>/pack/payload/…`.
+    const looseFrames = readdirSync(join(dir, "pack")).filter((f) =>
+      /^frame-\d{3}\.png$/.test(f),
     );
-    expect(files).toHaveLength(12);
+    expect(looseFrames).toHaveLength(12);
+    const payloadFrames = readdirSync(join(dir, "pack", "payload")).filter((f) =>
+      /^frame-\d{3}\.png$/.test(f),
+    );
+    expect(payloadFrames).toHaveLength(12);
     const manifest = JSON.parse(
       readFileSync(join(dir, "pack", "manifest.json"), "utf8"),
-    ) as { sprite: { frame_count: number; fps: number } };
-    expect(manifest.sprite.frame_count).toBe(12);
-    expect(manifest.sprite.fps).toBe(12);
+    ) as {
+      kind: string;
+      agent: string;
+      payload: { files: Array<{ relPath: string }> };
+    };
+    expect(manifest.kind).toBe("sprite-animation");
+    expect(manifest.agent).toBe("sprite-animator");
+    expect(
+      manifest.payload.files.filter((f) => /^frame-\d{3}\.png$/.test(f.relPath)),
+    ).toHaveLength(12);
+    // sequence.json carries the legacy fps/frame_count/loops/transitions
+    // metadata that used to live on `manifest.sprite.*` — same data,
+    // same source of truth, schema-respecting location.
+    const sequence = JSON.parse(
+      readFileSync(join(dir, "pack", "payload", "sequence.json"), "utf8"),
+    ) as { frame_count: number; fps: number };
+    expect(sequence.frame_count).toBe(12);
+    expect(sequence.fps).toBe(12);
   });
 
   it("dry-run prints validated without writing artefacts", async () => {

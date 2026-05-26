@@ -21,16 +21,14 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
   hash: "0000000000000000",
 };
 
+// Foundry-SDK Critical-1 fix: `buildFoundryAssetPack` is no longer mocked;
+// the real strict-schema builder validates the manifest the agent emits.
 vi.mock("@/lib/foundry/asset-pack", async () => {
   const actual = await vi.importActual<typeof import("@/lib/foundry/asset-pack")>(
     "@/lib/foundry/asset-pack",
   );
   return {
     ...actual,
-    buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
-      packId: "lottie-golden",
-      manifest,
-    })),
     loadFoundryAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
       packDir: "/tmp/foundry-test/char-otis-v3",
@@ -86,5 +84,9 @@ describe("golden lottie pulse", () => {
     // to have something to verify against the source pack anchor.
     expect(parsed.assets.length).toBeGreaterThan(0);
     expect(parsed.assets[0]?.p).toContain("data:image/png;base64,");
+    // The canonical pack also writes lottie.json under payload/, so the
+    // schema-validated manifest references real bytes round-tripped via
+    // createFoundryAssetPack.
+    expect(existsSync(join(dir, "pack", "payload", "lottie.json"))).toBe(true);
   });
 });

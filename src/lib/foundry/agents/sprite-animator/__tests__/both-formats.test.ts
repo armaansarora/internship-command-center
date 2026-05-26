@@ -21,20 +21,16 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
   hash: "0000000000000000",
 };
 
-// Critical 1 alignment: the mock loadFoundryAssetPack returns a strict
-// on-disk character-spritesheet manifest. Both tests downstream still get
-// the anchor hash they need, but the shape now matches what character-master
-// actually writes (single source of truth for the contract).
+// Foundry-SDK Critical-1 fix: `buildFoundryAssetPack` is no longer mocked;
+// the real strict-schema builder runs and would reject any drift from the
+// canonical envelope. Only `loadFoundryAssetPack` is stubbed because it
+// reads disk.
 vi.mock("@/lib/foundry/asset-pack", async () => {
   const actual = await vi.importActual<typeof import("@/lib/foundry/asset-pack")>(
     "@/lib/foundry/asset-pack",
   );
   return {
     ...actual,
-    buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
-      packId: `pack-${(manifest as { assetKind: string }).assetKind}`,
-      manifest,
-    })),
     loadFoundryAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
       packDir: "/tmp/foundry-test/char-otis-v3",

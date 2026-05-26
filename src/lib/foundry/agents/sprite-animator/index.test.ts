@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
-import { mkdtempSync, existsSync } from "node:fs";
+import { mkdtempSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import sharp from "sharp";
@@ -26,21 +26,21 @@ const ANCHOR_FIXTURE: { bytes: Buffer; hash: string } = {
 
 const MOCK_PACK_DIR = "/tmp/foundry-anim-test/char-otis-v3";
 
-// Critical 1 alignment: the mocked loadFoundryAssetPack now returns the
-// strict on-disk manifest shape (the same shape `character-master` writes
-// and the strict schema validates), not the legacy fixture-only flat
-// shape. resolveFoundrySpriteSourcePack reads characterId from canonRefs
-// and resolves the anchor relPath under the pack dir.
+// Foundry-SDK Critical-1 fix: the `buildFoundryAssetPack` mock has been
+// REMOVED. The real strict-schema builder now runs against the manifest
+// the sprite-animator produces, so any drift between the agent's emitted
+// shape and the canonical envelope (Critical-1 contract bug) fails this
+// suite immediately rather than only blowing up in production.
+//
+// We continue to mock `loadFoundryAssetPack` because it touches disk; it
+// returns the same strict on-disk character-spritesheet manifest shape
+// that `character-master` writes.
 vi.mock("@/lib/foundry/asset-pack", async () => {
   const actual = await vi.importActual<typeof import("@/lib/foundry/asset-pack")>(
     "@/lib/foundry/asset-pack",
   );
   return {
     ...actual,
-    buildFoundryAssetPack: vi.fn(async (manifest: Record<string, unknown>) => ({
-      packId: "anim-pack-1",
-      manifest,
-    })),
     loadFoundryAssetPack: vi.fn(async () => ({
       packId: "char-otis-v3",
       packDir: MOCK_PACK_DIR,
@@ -73,7 +73,7 @@ describe("runFoundrySpriteAnimator", () => {
     ANCHOR_FIXTURE.hash = await computePerceptualHash(ANCHOR_FIXTURE.bytes);
   });
 
-  it("sprite format writes frames and returns sprite manifest", async () => {
+  it("sprite format writes frames and returns sprite-animation manifest", async () => {
     const result = await runFoundrySpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
@@ -92,13 +92,32 @@ describe("runFoundrySpriteAnimator", () => {
       },
       { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
-    const manifest = result.manifest as { sprite: { frames: unknown[]; fps: number } };
-    expect(manifest.sprite.frames).toHaveLength(12);
-    expect(manifest.sprite.fps).toBe(12);
+    // Canonical manifest carries all sprite frames as payload files. The
+    // sequence metadata (fps, loops, frame_count, …) is persisted as
+    // `sequence.json` inside the payload so it round-trips through the
+    // strict schema without smuggling extra top-level fields.
+    expect(result.manifest.kind).toBe("sprite-animation");
+    expect(result.manifest.agent).toBe("sprite-animator");
+    expect(result.manifest.canonRefs.characterId).toBe("otis");
+    expect(
+      result.manifest.payload.files.filter((f) => /^frame-\d{3}\.png$/.test(f.relPath)).length,
+    ).toBe(12);
+    expect(
+      result.manifest.payload.files.some((f) => f.relPath === "sequence.json"),
+    ).toBe(true);
+    const sequencePath = join(dir, "pack", "payload", "sequence.json");
+    const sequence = JSON.parse(readFileSync(sequencePath, "utf8")) as {
+      frames: unknown[];
+      fps: number;
+      frame_count: number;
+    };
+    expect(sequence.frames).toHaveLength(12);
+    expect(sequence.fps).toBe(12);
+    expect(sequence.frame_count).toBe(12);
     expect(existsSync(join(dir, "pack", "frame-000.png"))).toBe(true);
   });
 
-  it("lottie format writes lottie.json and returns lottie manifest", async () => {
+  it("lottie format writes lottie.json and returns sprite-animation manifest", async () => {
     const result = await runFoundrySpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
@@ -117,16 +136,20 @@ describe("runFoundrySpriteAnimator", () => {
       },
       { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
-    const manifest = result.manifest as { lottie: { durationMs: number }; qa: { failedGates: ReadonlyArray<string> } };
-    expect(manifest.lottie.durationMs).toBeGreaterThan(0);
+    expect(result.manifest.kind).toBe("sprite-animation");
+    expect(result.manifest.payload.primaryFileRelPath).toBe("lottie.json");
     expect(existsSync(join(dir, "pack", "lottie.json"))).toBe(true);
+    const qaPath = join(dir, "pack", "payload", "qa.json");
+    const qa = JSON.parse(readFileSync(qaPath, "utf8")) as {
+      failedGates: string[];
+    };
     // Critical 3: lottie-identity is now enforced; with matching anchor
     // bytes embedded by the mock the gate must pass.
-    expect(manifest.qa.failedGates).not.toContain("lottie-identity");
+    expect(qa.failedGates).not.toContain("lottie-identity");
   });
 
-  it("manifest carries integration snippet text", async () => {
-    const result = await runFoundrySpriteAnimator(
+  it("integration.tsx payload carries the integration snippet text", async () => {
+    await runFoundrySpriteAnimator(
       {
         runId: "9d3a3c52-1c5d-4f5b-a3a9-7b1e4c2f9d11",
         sourcePackId: "char-otis-v3",
@@ -144,8 +167,8 @@ describe("runFoundrySpriteAnimator", () => {
       },
       { runDir: dir, packsRoot: "/tmp/foundry-anim-test", anchorBytesOverride: ANCHOR_FIXTURE.bytes },
     );
-    const manifest = result.manifest as { integrationSnippet: string };
-    expect(manifest.integrationSnippet).toContain("<AnimatedSprite");
+    const snippet = readFileSync(join(dir, "pack", "payload", "integration.tsx"), "utf8");
+    expect(snippet).toContain("<AnimatedSprite");
   });
 
   // Critical 3: the lottie path now FAILS when the embedded character art

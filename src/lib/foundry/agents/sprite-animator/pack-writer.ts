@@ -29,6 +29,14 @@ export interface FoundrySpritePackFrameManifest {
 export interface FoundrySpritePackResult {
   packRoot: string;
   frameManifests: ReadonlyArray<FoundrySpritePackFrameManifest>;
+  /**
+   * Original PNG bytes for each frame, indexed by frame index. Callers
+   * (notably the manifest builder in `index.ts`) hand these to
+   * `createFoundryAssetPack` so the canonical pack's `payload/<frame>.png`
+   * files round-trip the exact same bytes as the looser
+   * `<packRoot>/<frame>.png` references emitted here.
+   */
+  frameBytes: ReadonlyArray<Buffer>;
 }
 
 export async function writeFoundrySpritePack(
@@ -37,14 +45,16 @@ export async function writeFoundrySpritePack(
   const packRoot = join(input.runDir, "pack");
   mkdirSync(packRoot, { recursive: true });
   const manifests: FoundrySpritePackFrameManifest[] = [];
+  const frameBytes: Buffer[] = [];
   for (let i = 0; i < input.frames.length; i += 1) {
     const padded = String(i).padStart(3, "0");
     const filename = `frame-${padded}.png`;
     atomicWrite(join(packRoot, filename), input.frames[i]!);
     const hash = await computePerceptualHash(input.frames[i]!);
     manifests.push({ index: i, path: filename, perceptualHash: hash });
+    frameBytes.push(input.frames[i]!);
   }
-  return { packRoot, frameManifests: manifests };
+  return { packRoot, frameManifests: manifests, frameBytes };
 }
 
 export interface FoundryLottiePackInput {

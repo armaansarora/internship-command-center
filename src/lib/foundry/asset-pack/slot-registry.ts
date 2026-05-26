@@ -12,6 +12,9 @@ export interface FoundrySlotRecord {
 const OUTFIT_VARIANTS = ["regular", "summer-light", "winter-layered"] as const;
 const POSE_STATES = ["idle", "greeting", "listening", "thinking", "talking", "alert", "working"] as const;
 
+const ANIMATION_ACTIONS = ["idle", "wave", "nod", "celebrate"] as const;
+const ANIMATION_FORMATS = ["sprite", "lottie"] as const;
+
 function buildCharacterSlots(characterId: string, dirPart: string, component: string): FoundrySlotRecord[] {
   const slots: FoundrySlotRecord[] = [];
   for (const outfit of OUTFIT_VARIANTS) {
@@ -28,9 +31,42 @@ function buildCharacterSlots(characterId: string, dirPart: string, component: st
   return slots;
 }
 
+/**
+ * Sprite-animator slots: one per (character, action, format). The primary
+ * file inside the pack is referenced by the manifest's `intendedSlot.appPath`
+ * — sprite frames live under `public/animations/<characterId>/<action>/sprite/`
+ * (frame-000.png is the primary), and Lottie packs publish a single
+ * `public/animations/<characterId>/<action>/lottie.json`. These slots are
+ * registered statically so any character-master-promoted pack id can flow
+ * into the sprite-animator and back out into a canonical
+ * `FoundryAssetPackManifestSchema`-strict manifest without runtime slot
+ * registration churn.
+ */
+function buildAnimationSlots(characterId: string): FoundrySlotRecord[] {
+  const slots: FoundrySlotRecord[] = [];
+  for (const action of ANIMATION_ACTIONS) {
+    for (const format of ANIMATION_FORMATS) {
+      const dirPart = `animations/${characterId}/${action}`;
+      slots.push({
+        slotId: `${dirPart}/${format}`,
+        appPath:
+          format === "sprite"
+            ? `public/${dirPart}/sprite/frame-000.png`
+            : `public/${dirPart}/lottie.json`,
+        kind: "sprite-animation",
+        component: null,
+        requiresGsap: format === "sprite",
+      });
+    }
+  }
+  return slots;
+}
+
 const BUILTIN_SLOTS: readonly FoundrySlotRecord[] = [
   ...buildCharacterSlots("otis", "lobby/otis", "OtisCharacter"),
   ...buildCharacterSlots("mara-voss", "penthouse/ceo", "CeoCharacter"),
+  ...buildAnimationSlots("otis"),
+  ...buildAnimationSlots("mara-voss"),
 ];
 
 const dynamicSlots: FoundrySlotRecord[] = [];
