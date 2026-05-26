@@ -8,6 +8,7 @@ export default defineConfig({
       "src/**/*.test.ts",
       "src/**/*.test.tsx",
       "scripts/**/*.test.ts",
+      "tests/codebase/**/*.test.ts",
       "tests/e2e/helpers/**/*.unit.test.ts",
     ],
     exclude: ["node_modules", ".next", "dist", "tests/e2e/**/*.spec.ts"],
