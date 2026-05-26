@@ -69,20 +69,18 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
     (config.env?.ANTHROPIC_API_KEY ?? "") !== "" || config.brainCallOverride !== undefined;
   const ctxRun: FoundryGenerateContext = {
     workspaceRoot: config.workspaceRoot,
+    // `handleFoundryGenerate` runs this callback in the background and
+    // records the result (or failure) into the inbox file +
+    // `daemon-errors.jsonl`. We intentionally let exceptions propagate so
+    // the handler captures the real error instead of a synthesized
+    // "successful" hint that would mask outages.
     brainEnrich: enrichmentReady
       ? async (input) => {
-          try {
-            const result = await routeFoundryRequest(input.description, {
-              env: config.env ?? {},
-              metaCallOverride: config.brainCallOverride,
-            });
-            return result as Record<string, unknown>;
-          } catch (err) {
-            // Brain enrichment is best-effort. If the meta-orchestrator or
-            // specialist brain rejects, the run still queues — the daemon
-            // will rebuild the prompt from scratch using the raw description.
-            return { brainHintError: String(err).slice(0, 200) };
-          }
+          const result = await routeFoundryRequest(input.description, {
+            env: config.env ?? {},
+            metaCallOverride: config.brainCallOverride,
+          });
+          return result as Record<string, unknown>;
         }
       : undefined,
   };
