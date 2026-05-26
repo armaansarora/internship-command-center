@@ -5,9 +5,19 @@ export interface FoundryDemoPack {
   kind: FoundryAssetKind;
   slotId: string;
   promotedAt: string;
-  publicPath: string;
+  /**
+   * Path under `public/` that resolves to a real shipped asset, OR
+   * `null` when the modality is `pending` (no real asset shipped yet).
+   * The demo page renders a clearly-labelled placeholder for pending
+   * entries rather than emitting a broken `<img>` tag.
+   */
+  publicPath: string | null;
   integration: Record<string, unknown>;
   alt: string;
+  /** True when no real Asset Pack of this modality is on disk yet. */
+  pending?: boolean;
+  /** Human-readable reason shown in the demo UI when `pending` is true. */
+  pendingReason?: string;
 }
 
 /**
@@ -15,28 +25,35 @@ export interface FoundryDemoPack {
  * exist on disk under public/. The demo page renders one of each kind so
  * the integration loop is visually verifiable end-to-end.
  *
+ * For modalities the Foundry has not yet shipped a real Asset Pack for
+ * (currently `sprite-animation`), the entry is marked `pending: true`
+ * with a `pendingReason` the demo surfaces as an honest placeholder —
+ * never a broken image.
+ *
  * Adding new modalities here is the lightest possible way to extend the
- * demo — keep these in sync with what `.artlab/engine/promoted/` actually
- * contains.
+ * demo — keep these in sync with what `.artlab/engine/promoted/` (or the
+ * curated assets under `public/art/` and `public/lobby/`) actually
+ * contain. The matching test in `demo-fixtures.test.ts` asserts every
+ * non-pending `publicPath` resolves to a real file under `public/`.
  */
 export const FOUNDRY_DEMO_PACKS: readonly FoundryDemoPack[] = [
   {
-    packId: "rafe-calder-character-demo",
+    packId: "otis-regular-idle-demo",
     kind: "character",
-    slotId: "rafe.idle",
+    slotId: "otis.idle",
     promotedAt: "2026-05-25T12:00:00.000Z",
-    publicPath: "/art/characters/rafe-calder.png",
+    publicPath: "/art/lobby/otis/regular/idle.webp",
     integration: { width: 512, height: 768 },
-    alt: "Rafe Calder — Chief Revenue Officer",
+    alt: "Otis — Lobby concierge, idle pose",
   },
   {
-    packId: "war-room-floor-demo",
+    packId: "lobby-backdrop-1-demo",
     kind: "floor",
-    slotId: "war-room.background",
+    slotId: "lobby.background",
     promotedAt: "2026-05-25T12:00:00.000Z",
-    publicPath: "/art/floors/war-room-dusk.webp",
-    integration: { alt: "War Room at dusk" },
-    alt: "War Room — Floor 7",
+    publicPath: "/lobby/bg-1.jpg",
+    integration: { alt: "Lobby backdrop — variant 1" },
+    alt: "Lobby — protected backdrop variant 1",
   },
   {
     packId: "elevator-chevron-icon-demo",
@@ -48,12 +65,17 @@ export const FOUNDRY_DEMO_PACKS: readonly FoundryDemoPack[] = [
     alt: "Elevator chevron",
   },
   {
-    packId: "sol-navarro-idle-demo",
+    packId: "sprite-animation-pending-demo",
     kind: "sprite-animation",
-    slotId: "sol.idle",
+    slotId: "sprite.pending",
     promotedAt: "2026-05-25T12:00:00.000Z",
-    publicPath: "/art/sprites/sol-navarro-idle.png",
+    publicPath: null,
     integration: { fps: 24 },
-    alt: "Sol Navarro — idle breathe",
+    alt: "Sprite animation — pending real Asset Pack",
+    pending: true,
+    pendingReason:
+      "No sprite-animation Asset Pack has been promoted by the Foundry yet. " +
+      "When one lands under public/art/sprites/, swap this entry and the demo " +
+      "will render it via SpriteSheetPlayer automatically.",
   },
 ];
