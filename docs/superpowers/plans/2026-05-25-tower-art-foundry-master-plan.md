@@ -12272,7 +12272,7 @@ The new public entry point added in this phase is `runFoundrySpriteAnimator(inpu
 - Create: `src/lib/foundry/agents/sprite-animator/types.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/types.test.ts
@@ -12350,12 +12350,12 @@ describe("foundry sprite-animator types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/types.test.ts`
 Expected: FAIL — "Cannot find module './types'"
 
-- [ ] **Step 3: Implement schemas**
+- [x] **Step 3: Implement schemas**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/types.ts
@@ -12437,12 +12437,12 @@ export type FoundryLottieAnimationManifest = z.infer<
 >;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/types.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/types.ts src/lib/foundry/agents/sprite-animator/types.test.ts
@@ -12460,10 +12460,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input schema enforces `frameCount` in [8, 24] (idle loops need a minimum body of frames).
-- [ ] Input schema enforces `fps` in [8, 30].
-- [ ] Sprite manifest schema requires non-empty `frames` array.
-- [ ] Lottie manifest schema requires `durationMs >= 1`.
+- [x] Input schema enforces `frameCount` in [8, 24] (idle loops need a minimum body of frames).
+- [x] Input schema enforces `fps` in [8, 30].
+- [x] Sprite manifest schema requires non-empty `frames` array.
+- [x] Lottie manifest schema requires `durationMs >= 1`.
 
 ### Task 5.2: Source-pack resolver
 
@@ -12471,7 +12471,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/source-pack.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/source-pack.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/source-pack.test.ts
@@ -12527,12 +12527,12 @@ describe("resolveFoundrySpriteSourcePack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/source-pack.test.ts`
 Expected: FAIL — "Cannot find module './source-pack'"
 
-- [ ] **Step 3: Implement resolver**
+- [x] **Step 3: Implement resolver**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/source-pack.ts
@@ -12588,12 +12588,12 @@ export async function resolveFoundrySpriteSourcePack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/source-pack.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/source-pack.ts src/lib/foundry/agents/sprite-animator/source-pack.test.ts
@@ -12611,10 +12611,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns anchor path and 16-hex perceptual hash for a character pack.
-- [ ] Throws when the source pack is any other `assetKind`.
-- [ ] Throws when the character pack manifest is missing `anchorImagePath` or `anchorPerceptualHash`.
-- [ ] Throws when `anchorPerceptualHash` does not match `/^[0-9a-f]{16}$/`.
+- [x] Returns anchor path and 16-hex perceptual hash for a character pack.
+- [x] Throws when the source pack is any other `assetKind`.
+- [x] Throws when the character pack manifest is missing `anchorImagePath` or `anchorPerceptualHash`.
+- [x] Throws when `anchorPerceptualHash` does not match `/^[0-9a-f]{16}$/`.
 
 ### Task 5.3: Video provider interface
 
@@ -12622,7 +12622,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/video-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/video-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/video-provider.test.ts
@@ -12681,12 +12681,12 @@ describe("foundry video provider contract", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/video-provider.test.ts`
 Expected: FAIL — "Cannot find module './video-provider'"
 
-- [ ] **Step 3: Implement provider contract**
+- [x] **Step 3: Implement provider contract**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/video-provider.ts
@@ -12725,12 +12725,12 @@ export interface FoundryVideoProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/video-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/video-provider.ts src/lib/foundry/agents/sprite-animator/video-provider.test.ts
@@ -12748,10 +12748,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input requires `prompt`, `frameCount`, `fps`.
-- [ ] Input accepts optional `referenceImageBytes` typed as `Buffer`.
-- [ ] Result requires at least one frame.
-- [ ] Result rejects unknown `mode` values.
+- [x] Input requires `prompt`, `frameCount`, `fps`.
+- [x] Input accepts optional `referenceImageBytes` typed as `Buffer`.
+- [x] Result requires at least one frame.
+- [x] Result rejects unknown `mode` values.
 
 ### Task 5.4: Mock video provider (frame-sequence generator)
 
@@ -12759,7 +12759,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts
@@ -12801,12 +12801,12 @@ describe("createFoundrySpriteMockVideoProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-video-provider'"
 
-- [ ] **Step 3: Implement mock video provider**
+- [x] **Step 3: Implement mock video provider**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.ts
@@ -12850,12 +12850,12 @@ export function createFoundrySpriteMockVideoProvider(): FoundryVideoProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.ts src/lib/foundry/agents/sprite-animator/__tests__/mock-video-provider.test.ts
@@ -12873,10 +12873,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns exactly `frameCount` frames.
-- [ ] Every frame is a valid PNG.
-- [ ] Adjacent frames are different (motion present).
-- [ ] Same seed yields identical sequence (reproducibility for golden tests).
+- [x] Returns exactly `frameCount` frames.
+- [x] Every frame is a valid PNG.
+- [x] Adjacent frames are different (motion present).
+- [x] Same seed yields identical sequence (reproducibility for golden tests).
 
 ### Task 5.5: Lottie LLM provider interface
 
@@ -12884,7 +12884,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/lottie-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts
@@ -12934,12 +12934,12 @@ describe("foundry lottie provider contract", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts`
 Expected: FAIL — "Cannot find module './lottie-provider'"
 
-- [ ] **Step 3: Implement Lottie provider contract**
+- [x] **Step 3: Implement Lottie provider contract**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/lottie-provider.ts
@@ -12977,12 +12977,12 @@ export interface FoundryLottieProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/lottie-provider.ts src/lib/foundry/agents/sprite-animator/lottie-provider.test.ts
@@ -12999,10 +12999,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Input requires `motionCurve`, `durationMs`, `action`.
-- [ ] Result returns `lottieJson` as a string.
-- [ ] Mode enum rejects values other than `real|mock`.
-- [ ] `durationMs >= 1` enforced on input.
+- [x] Input requires `motionCurve`, `durationMs`, `action`.
+- [x] Result returns `lottieJson` as a string.
+- [x] Mode enum rejects values other than `real|mock`.
+- [x] `durationMs >= 1` enforced on input.
 
 ### Task 5.6: Mock Lottie provider
 
@@ -13010,7 +13010,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts
@@ -13061,12 +13061,12 @@ describe("createFoundrySpriteMockLottieProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts`
 Expected: FAIL — "Cannot find module './mock-lottie-provider'"
 
-- [ ] **Step 3: Implement mock Lottie provider**
+- [x] **Step 3: Implement mock Lottie provider**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.ts
@@ -13118,12 +13118,12 @@ export function createFoundrySpriteMockLottieProvider(): FoundryLottieProvider {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.ts src/lib/foundry/agents/sprite-animator/__tests__/mock-lottie-provider.test.ts
@@ -13141,10 +13141,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Mock returns parseable JSON.
-- [ ] `op / fr` corresponds (within rounding) to the requested `durationMs / 1000`.
-- [ ] At least one layer with `ind > 0`.
-- [ ] Same seed yields identical output.
+- [x] Mock returns parseable JSON.
+- [x] `op / fr` corresponds (within rounding) to the requested `durationMs / 1000`.
+- [x] At least one layer with `ind > 0`.
+- [x] Same seed yields identical output.
 
 ### Task 5.7: Identity-drift gate (per frame vs source anchor)
 
@@ -13152,7 +13152,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa/identity-drift.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts
@@ -13211,12 +13211,12 @@ describe("evaluateFoundrySpriteIdentityDrift", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts`
 Expected: FAIL — "Cannot find module './identity-drift'"
 
-- [ ] **Step 3: Implement identity-drift gate**
+- [x] **Step 3: Implement identity-drift gate**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/identity-drift.ts
@@ -13271,12 +13271,12 @@ export async function evaluateFoundrySpriteIdentityDrift(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa/identity-drift.ts src/lib/foundry/agents/sprite-animator/qa/identity-drift.test.ts
@@ -13294,10 +13294,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/hashes`.
-- [ ] Returns `passed: false` when any frame's Hamming distance from anchor exceeds 14 bits.
-- [ ] Throws when called with empty `frames` array.
-- [ ] Reports `avgHamming`, `maxHamming`, and the indices of flagged frames.
+- [x] Reuses `computePerceptualHash` and `hammingDistanceHex` from `@/lib/artlab/coherence/hashes`.
+- [x] Returns `passed: false` when any frame's Hamming distance from anchor exceeds 14 bits.
+- [x] Throws when called with empty `frames` array.
+- [x] Reports `avgHamming`, `maxHamming`, and the indices of flagged frames.
 
 ### Task 5.8: Motion-smoothness gate
 
@@ -13305,7 +13305,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts
@@ -13345,12 +13345,12 @@ describe("evaluateFoundrySpriteMotionSmoothness", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts`
 Expected: FAIL — "Cannot find module './motion-smoothness'"
 
-- [ ] **Step 3: Implement motion-smoothness gate**
+- [x] **Step 3: Implement motion-smoothness gate**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.ts
@@ -13399,12 +13399,12 @@ export async function evaluateFoundrySpriteMotionSmoothness(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.ts src/lib/foundry/agents/sprite-animator/qa/motion-smoothness.test.ts
@@ -13422,10 +13422,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Returns `passed: true` for a slow drift sequence.
-- [ ] Returns `passed: false` when any adjacent pair exceeds 8 bits.
-- [ ] Reports flagged transitions as `{from, to, hamming}` tuples.
-- [ ] Throws when called with fewer than two frames.
+- [x] Returns `passed: true` for a slow drift sequence.
+- [x] Returns `passed: false` when any adjacent pair exceeds 8 bits.
+- [x] Reports flagged transitions as `{from, to, hamming}` tuples.
+- [x] Throws when called with fewer than two frames.
 
 ### Task 5.9: Lottie validity gate (bodymovin schema)
 
@@ -13433,7 +13433,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa/lottie-validity.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts
@@ -13516,12 +13516,12 @@ describe("evaluateFoundryLottieValidity", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts`
 Expected: FAIL — "Cannot find module './lottie-validity'"
 
-- [ ] **Step 3: Implement Lottie validity gate**
+- [x] **Step 3: Implement Lottie validity gate**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa/lottie-validity.ts
@@ -13609,12 +13609,12 @@ export function evaluateFoundryLottieValidity(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts`
 Expected: PASS — 6 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa/lottie-validity.ts src/lib/foundry/agents/sprite-animator/qa/lottie-validity.test.ts
@@ -13633,10 +13633,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] JSON-parse failure produces `passed: false` and a reason mentioning `parse`.
-- [ ] Empty `layers` produces `passed: false` and reason mentioning `layers`.
-- [ ] Duration mismatch beyond tolerance produces `passed: false` and reason mentioning `duration`.
-- [ ] Dangling parent layer reference produces `passed: false` and reason mentioning `layer`.
+- [x] JSON-parse failure produces `passed: false` and a reason mentioning `parse`.
+- [x] Empty `layers` produces `passed: false` and reason mentioning `layers`.
+- [x] Duration mismatch beyond tolerance produces `passed: false` and reason mentioning `duration`.
+- [x] Dangling parent layer reference produces `passed: false` and reason mentioning `layer`.
 
 ### Task 5.10: Aggregated QA runner (sprite + lottie format-aware)
 
@@ -13644,7 +13644,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/qa.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/qa.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa.test.ts
@@ -13727,12 +13727,12 @@ describe("runFoundrySpriteQa", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa.test.ts`
 Expected: FAIL — "Cannot find module './qa'"
 
-- [ ] **Step 3: Implement aggregated QA**
+- [x] **Step 3: Implement aggregated QA**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/qa.ts
@@ -13792,12 +13792,12 @@ export async function runFoundrySpriteQa(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/qa.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/qa.ts src/lib/foundry/agents/sprite-animator/qa.test.ts
@@ -13815,10 +13815,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite-kind input runs both identity-drift and motion-smoothness gates.
-- [ ] Lottie-kind input runs the bodymovin validity gate.
-- [ ] Returns `passed: true` only when every relevant gate passes.
-- [ ] `failedGates` lists each failed gate by canonical name.
+- [x] Sprite-kind input runs both identity-drift and motion-smoothness gates.
+- [x] Lottie-kind input runs the bodymovin validity gate.
+- [x] Returns `passed: true` only when every relevant gate passes.
+- [x] `failedGates` lists each failed gate by canonical name.
 
 ### Task 5.11: Pack writer (sprite frames + Lottie JSON)
 
@@ -13826,7 +13826,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/pack-writer.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/pack-writer.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/pack-writer.test.ts
@@ -13914,12 +13914,12 @@ describe("writeFoundryLottiePack", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/pack-writer.test.ts`
 Expected: FAIL — "Cannot find module './pack-writer'"
 
-- [ ] **Step 3: Implement pack writer**
+- [x] **Step 3: Implement pack writer**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/pack-writer.ts
@@ -13995,12 +13995,12 @@ export async function writeFoundryLottiePack(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/pack-writer.test.ts`
 Expected: PASS — 4 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/pack-writer.ts src/lib/foundry/agents/sprite-animator/pack-writer.test.ts
@@ -14019,10 +14019,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite writer produces `frame-NNN.png` filenames zero-padded to 3 digits.
-- [ ] Frame manifests carry `index`, relative `path`, and `perceptualHash`.
-- [ ] Lottie writer produces exactly one `lottie.json`.
-- [ ] No `.tmp.*` artefacts remain after success.
+- [x] Sprite writer produces `frame-NNN.png` filenames zero-padded to 3 digits.
+- [x] Frame manifests carry `index`, relative `path`, and `perceptualHash`.
+- [x] Lottie writer produces exactly one `lottie.json`.
+- [x] No `.tmp.*` artefacts remain after success.
 
 ### Task 5.12: Integration-snippet generator (sprite + Lottie)
 
@@ -14030,7 +14030,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/integration.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/integration.test.ts
@@ -14103,12 +14103,12 @@ describe("renderFoundryLottieIntegrationSnippet", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/integration.test.ts`
 Expected: FAIL — "Cannot find module './integration'"
 
-- [ ] **Step 3: Implement integration generator**
+- [x] **Step 3: Implement integration generator**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/integration.ts
@@ -14156,12 +14156,12 @@ export function renderFoundryLottieIntegrationSnippet(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/integration.test.ts`
 Expected: PASS — 5 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/integration.ts src/lib/foundry/agents/sprite-animator/integration.test.ts
@@ -14180,10 +14180,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite snippet contains an `<AnimatedSprite pack="<char>-<action>" />` JSX block.
-- [ ] Sprite snippet imports from `@/components/foundry/animated-sprite`.
-- [ ] Lottie snippet imports from `@/components/foundry/lottie-animation`.
-- [ ] Lottie snippet quotes the `durationMs` in a comment.
+- [x] Sprite snippet contains an `<AnimatedSprite pack="<char>-<action>" />` JSX block.
+- [x] Sprite snippet imports from `@/components/foundry/animated-sprite`.
+- [x] Lottie snippet imports from `@/components/foundry/lottie-animation`.
+- [x] Lottie snippet quotes the `durationMs` in a comment.
 
 ### Task 5.13: Agent entry point (sprite + lottie dispatch)
 
@@ -14191,7 +14191,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/index.ts`
 - Test: `src/lib/foundry/agents/sprite-animator/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/index.test.ts
@@ -14329,12 +14329,12 @@ describe("runFoundrySpriteAnimator", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/index.test.ts`
 Expected: FAIL — "Cannot find module './index'"
 
-- [ ] **Step 3: Implement agent entry point**
+- [x] **Step 3: Implement agent entry point**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/index.ts
@@ -14505,12 +14505,12 @@ export async function runFoundrySpriteAnimator(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/index.test.ts`
 Expected: PASS — 3 assertions pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/index.ts src/lib/foundry/agents/sprite-animator/index.test.ts
@@ -14530,10 +14530,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Sprite format produces an Asset Pack with `assetKind === "character-sprite-animation"`.
-- [ ] Lottie format produces an Asset Pack with `assetKind === "character-lottie-animation"`.
-- [ ] Sprite manifest carries `fps`, `loops`, `frame_count`, `total_duration_ms`, `transitions`, and `frames` array.
-- [ ] Throws with `gates=` listing failing QA gates.
+- [x] Sprite format produces an Asset Pack with `assetKind === "character-sprite-animation"`.
+- [x] Lottie format produces an Asset Pack with `assetKind === "character-lottie-animation"`.
+- [x] Sprite manifest carries `fps`, `loops`, `frame_count`, `total_duration_ms`, `transitions`, and `frames` array.
+- [x] Throws with `gates=` listing failing QA gates.
 
 ### Task 5.14: CLI subcommand + golden Otis idle and Lottie pulse fixtures
 
@@ -14543,7 +14543,7 @@ EOF
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/golden-lottie-pulse.test.ts`
 - Modify: `scripts/foundry.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/golden-otis-idle.test.ts
@@ -14687,7 +14687,7 @@ describe("golden lottie pulse", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run:
 ```
@@ -14696,7 +14696,7 @@ npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/golden-otis-idle
 ```
 Expected: FAIL — "Cannot find module '../cli'"
 
-- [ ] **Step 3: Implement the CLI subcommand**
+- [x] **Step 3: Implement the CLI subcommand**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/cli.ts
@@ -14768,7 +14768,7 @@ export async function runFoundrySpriteAnimatorCli(
 }
 ```
 
-- [ ] **Step 4: Modify `scripts/foundry.ts` to route `animate` subcommand**
+- [x] **Step 4: Modify `scripts/foundry.ts` to route `animate` subcommand**
 
 ```ts
 // scripts/foundry.ts — add the `animate` case to the switch.
@@ -14795,7 +14795,7 @@ export async function runFoundrySpriteAnimatorCli(
 // }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run:
 ```
@@ -14804,7 +14804,7 @@ npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/golden-otis-idle
 ```
 Expected: PASS — all assertions pass
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/cli.ts \
@@ -14825,17 +14825,17 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Otis-idle golden writes exactly 12 frame PNGs.
-- [ ] Otis-idle manifest reports `frame_count: 12` and `fps: 12`.
-- [ ] Lottie-pulse golden writes exactly one `lottie.json` parseable as JSON.
-- [ ] Lottie-pulse JSON's `v` field is `"5.7.0"` and `layers.length > 0`.
+- [x] Otis-idle golden writes exactly 12 frame PNGs.
+- [x] Otis-idle manifest reports `frame_count: 12` and `fps: 12`.
+- [x] Lottie-pulse golden writes exactly one `lottie.json` parseable as JSON.
+- [x] Lottie-pulse JSON's `v` field is `"5.7.0"` and `layers.length > 0`.
 
 ### Task 5.15: Cross-format integration test — single character, both formats
 
 **Files:**
 - Create: `src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts
@@ -14905,23 +14905,23 @@ describe("sprite-animator both formats for the same character", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts`
 Expected: FAIL — assertion fails because no prior fixture has produced both formats in a single run.
 
 (Test failure is on the assertion comparing pack IDs; the agent code from Task 5.13/5.14 already supports both formats, so when Step 3 runs there is nothing to implement — Step 3 is to confirm both formats are independently runnable on the same source pack.)
 
-- [ ] **Step 3: Confirm no source change is required**
+- [x] **Step 3: Confirm no source change is required**
 
 This task is a regression-guarding integration test against the agent we already built. If the test fails, the failure points at a real production-blocking bug (one format producing artefacts under the other's run dir, format dispatch ignoring `input.format`, or pack IDs colliding across formats). No implementation diff is required here — only the new test file.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts`
 Expected: PASS — 1 assertion pass
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/agents/sprite-animator/__tests__/both-formats.test.ts
@@ -14940,10 +14940,10 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Same source pack ID drives two complete agent runs to completion.
-- [ ] Sprite run produces `frame-NNN.png` artefacts; Lottie run produces `lottie.json`.
-- [ ] Pack IDs returned for the two runs differ.
-- [ ] Test passes without any change to the agent implementation (regression-only).
+- [x] Same source pack ID drives two complete agent runs to completion.
+- [x] Sprite run produces `frame-NNN.png` artefacts; Lottie run produces `lottie.json`.
+- [x] Pack IDs returned for the two runs differ.
+- [x] Test passes without any change to the agent implementation (regression-only).
 
 ### Phase 5 completion criteria
 
