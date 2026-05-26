@@ -4,6 +4,24 @@ import { sha256OfBytes } from "./hashing";
 import { FOUNDRY_PACK_FILENAME, FOUNDRY_PACK_PAYLOAD_DIR } from "./constants";
 import { FoundryAssetPackManifestSchema, type FoundryAssetPackManifest } from "./manifest.schema";
 
+export interface LoadedFoundryAssetPack {
+  packId: string;
+  manifest: FoundryAssetPackManifest | Record<string, unknown>;
+}
+
+/**
+ * Load a registered foundry asset pack by id.
+ *
+ * This is a stub for sprite-animator and other consumers that need to
+ * resolve a previously emitted pack by id (e.g. `char-otis-v3`). A real
+ * implementation will live in a registry module; tests mock this symbol.
+ */
+export async function loadFoundryAssetPack(
+  _packId: string,
+): Promise<LoadedFoundryAssetPack | null> {
+  return null;
+}
+
 export type ReadFoundryAssetPackResult =
   | { ok: true; manifest: FoundryAssetPackManifest; payloadBytes: Record<string, Buffer>; packDir: string }
   | { ok: false; code: "manifest-missing" | "manifest-invalid" | "payload-missing" | "payload-sha256-mismatch"; message: string; packDir: string };
