@@ -23,6 +23,7 @@
     "foundry:canon-validate": "tsx scripts/foundry.ts canon validate",
     "foundry:mcp": "tsx scripts/foundry-mcp.ts",
     "foundry:install-mcp": "tsx scripts/foundry-install-mcp.ts",
+    "foundry:install-claude-skill": "tsx scripts/foundry-install-claude-skill.ts",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
