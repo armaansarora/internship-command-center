@@ -17863,7 +17863,7 @@ The existing `src/lib/artlab/orchestrator/llm-brain.ts` is a single `decide(req)
 - Create: `src/lib/foundry/brain/types.ts`
 - Test: `src/lib/foundry/brain/types.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/types.test.ts
@@ -17913,12 +17913,12 @@ describe("foundry brain shared types", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/types.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the shared types**
+- [x] **Step 3: Implement the shared types**
 
 ```ts
 // src/lib/foundry/brain/types.ts
@@ -17977,12 +17977,12 @@ export interface FoundryAgentBrain<Input, Output> {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/types.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/types.ts src/lib/foundry/brain/types.test.ts
@@ -18000,9 +18000,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `FOUNDRY_AGENT_KINDS` lists exactly the four specialists in canonical order.
-- [ ] `FoundryMetaIntentSchema.confidence` is clamped to `[0, 1]`.
-- [ ] `FoundryAgentBrainResultSchema` requires `agent`, `output`, `model`, `durationMs`, and token counters.
+- [x] `FOUNDRY_AGENT_KINDS` lists exactly the four specialists in canonical order.
+- [x] `FoundryMetaIntentSchema.confidence` is clamped to `[0, 1]`.
+- [x] `FoundryAgentBrainResultSchema` requires `agent`, `output`, `model`, `durationMs`, and token counters.
 
 ### Task 7.2: Per-kind memory feedback scoping
 
@@ -18010,7 +18010,7 @@ EOF
 - Create: `src/lib/foundry/brain/memory-scope.ts`
 - Test: `src/lib/foundry/brain/memory-scope.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/memory-scope.test.ts
@@ -18073,12 +18073,12 @@ describe("loadFoundryMemoryScope", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-scope.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the scoped loader**
+- [x] **Step 3: Implement the scoped loader**
 
 ```ts
 // src/lib/foundry/brain/memory-scope.ts
@@ -18117,12 +18117,12 @@ export function loadFoundryMemoryScope(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-scope.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/memory-scope.ts src/lib/foundry/brain/memory-scope.test.ts
@@ -18140,9 +18140,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] No cross-agent feedback leakage (verified by the negative test).
-- [ ] Missing ledger files return `{ recentWins: [], recentRejections: [] }`, not throw.
-- [ ] `topN: 0` returns empty arrays.
+- [x] No cross-agent feedback leakage (verified by the negative test).
+- [x] Missing ledger files return `{ recentWins: [], recentRejections: [] }`, not throw.
+- [x] `topN: 0` returns empty arrays.
 
 ### Task 7.3: Anthropic client wrapper with prompt caching
 
@@ -18150,7 +18150,7 @@ EOF
 - Create: `src/lib/foundry/brain/anthropic-client.ts`
 - Test: `src/lib/foundry/brain/anthropic-client.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/anthropic-client.test.ts
@@ -18205,12 +18205,12 @@ describe("callFoundryAnthropic", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/anthropic-client.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the wrapper**
+- [x] **Step 3: Implement the wrapper**
 
 ```ts
 // src/lib/foundry/brain/anthropic-client.ts
@@ -18270,12 +18270,12 @@ export async function callFoundryAnthropic(call: FoundryAnthropicCall): Promise<
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/anthropic-client.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/anthropic-client.ts src/lib/foundry/brain/anthropic-client.test.ts
@@ -18293,9 +18293,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] System message carries `providerOptions.anthropic.cacheControl.type === "ephemeral"`.
-- [ ] Dry-run mode never reaches the network and returns the canonical `{ dryRun: true }` shape.
-- [ ] `durationMs` is set on the response when generateText returns.
+- [x] System message carries `providerOptions.anthropic.cacheControl.type === "ephemeral"`.
+- [x] Dry-run mode never reaches the network and returns the canonical `{ dryRun: true }` shape.
+- [x] `durationMs` is set on the response when generateText returns.
 
 ### Task 7.4: character-master brain
 
@@ -18303,7 +18303,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/character-master-brain.ts`
 - Test: `src/lib/foundry/brain/agents/character-master-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/character-master-brain.test.ts
@@ -18359,12 +18359,12 @@ describe("character-master brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/character-master-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/character-master-brain.ts
@@ -18455,12 +18455,12 @@ export function createCharacterMasterBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/character-master-brain.test.ts`
 Expected: PASS — 5 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/character-master-brain.ts src/lib/foundry/brain/agents/character-master-brain.test.ts
@@ -18477,9 +18477,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `brain.agent === "character-master"`.
-- [ ] `brain.systemPrompt.length <= 2400` (proxy for ≤500 tokens).
-- [ ] Input missing `characterId` is rejected at the Zod schema layer.
+- [x] `brain.agent === "character-master"`.
+- [x] `brain.systemPrompt.length <= 2400` (proxy for ≤500 tokens).
+- [x] Input missing `characterId` is rejected at the Zod schema layer.
 
 ### Task 7.5: floor-environment brain
 
@@ -18487,7 +18487,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/floor-environment-brain.ts`
 - Test: `src/lib/foundry/brain/agents/floor-environment-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/floor-environment-brain.test.ts
@@ -18535,12 +18535,12 @@ describe("floor-environment brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/floor-environment-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/floor-environment-brain.ts
@@ -18642,12 +18642,12 @@ export function createFloorEnvironmentBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/floor-environment-brain.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/floor-environment-brain.ts src/lib/foundry/brain/agents/floor-environment-brain.test.ts
@@ -18664,9 +18664,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `space` enum restricted to the 9 canonical Tower floors.
-- [ ] System prompt explicitly mentions time-state variants.
-- [ ] Output schema's `timeStatePromptVariants` is a record (one prompt per time state) when present.
+- [x] `space` enum restricted to the 9 canonical Tower floors.
+- [x] System prompt explicitly mentions time-state variants.
+- [x] Output schema's `timeStatePromptVariants` is a record (one prompt per time state) when present.
 
 ### Task 7.6: ui-texture brain
 
@@ -18674,7 +18674,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/ui-texture-brain.ts`
 - Test: `src/lib/foundry/brain/agents/ui-texture-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/ui-texture-brain.test.ts
@@ -18717,12 +18717,12 @@ describe("ui-texture brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/ui-texture-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/ui-texture-brain.ts
@@ -18812,12 +18812,12 @@ export function createUiTextureBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/ui-texture-brain.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/ui-texture-brain.ts src/lib/foundry/brain/agents/ui-texture-brain.test.ts
@@ -18834,9 +18834,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Palette hints validated as hex with the `#RRGGBB` regex.
-- [ ] System prompt forces tileable→seamless-edges wording (verified by string match in test).
-- [ ] Output `cssVarName` validated by Zod as min-length string.
+- [x] Palette hints validated as hex with the `#RRGGBB` regex.
+- [x] System prompt forces tileable→seamless-edges wording (verified by string match in test).
+- [x] Output `cssVarName` validated by Zod as min-length string.
 
 ### Task 7.7: sprite-animator brain
 
@@ -18844,7 +18844,7 @@ EOF
 - Create: `src/lib/foundry/brain/agents/sprite-animator-brain.ts`
 - Test: `src/lib/foundry/brain/agents/sprite-animator-brain.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/agents/sprite-animator-brain.test.ts
@@ -18894,12 +18894,12 @@ describe("sprite-animator brain", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/sprite-animator-brain.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the brain**
+- [x] **Step 3: Implement the brain**
 
 ```ts
 // src/lib/foundry/brain/agents/sprite-animator-brain.ts
@@ -18989,12 +18989,12 @@ export function createSpriteAnimatorBrain(opts: {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/agents/sprite-animator-brain.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/agents/sprite-animator-brain.ts src/lib/foundry/brain/agents/sprite-animator-brain.test.ts
@@ -19011,9 +19011,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `targetFormat` enum is exactly `sprite-sheet | lottie`.
-- [ ] frameBudget min=2, max=120 (rejects 0 and 121).
-- [ ] System prompt mentions both `frame` and `easing` (verified by regex).
+- [x] `targetFormat` enum is exactly `sprite-sheet | lottie`.
+- [x] frameBudget min=2, max=120 (rejects 0 and 121).
+- [x] System prompt mentions both `frame` and `easing` (verified by regex).
 
 ### Task 7.8: Per-agent provider override registry
 
@@ -19021,7 +19021,7 @@ EOF
 - Create: `src/lib/foundry/brain/provider-registry.ts`
 - Test: `src/lib/foundry/brain/provider-registry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/provider-registry.test.ts
@@ -19070,12 +19070,12 @@ describe("resolveFoundryAgentProvider", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/provider-registry.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the registry**
+- [x] **Step 3: Implement the registry**
 
 ```ts
 // src/lib/foundry/brain/provider-registry.ts
@@ -19115,12 +19115,12 @@ export function resolveFoundryAgentProvider(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/provider-registry.test.ts`
 Expected: PASS — 6 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/provider-registry.ts src/lib/foundry/brain/provider-registry.test.ts
@@ -19138,9 +19138,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Default model resolves to `claude-opus-4-7` when no env override is set.
-- [ ] Per-agent env beats global env.
-- [ ] Missing `ANTHROPIC_API_KEY` flips `dryRun` to true automatically.
+- [x] Default model resolves to `claude-opus-4-7` when no env override is set.
+- [x] Per-agent env beats global env.
+- [x] Missing `ANTHROPIC_API_KEY` flips `dryRun` to true automatically.
 
 ### Task 7.9: Meta-orchestrator intent resolver
 
@@ -19148,7 +19148,7 @@ EOF
 - Create: `src/lib/foundry/brain/meta-orchestrator.ts`
 - Test: `src/lib/foundry/brain/meta-orchestrator.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/meta-orchestrator.test.ts
@@ -19211,12 +19211,12 @@ describe("resolveFoundryIntent", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/meta-orchestrator.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the meta-orchestrator**
+- [x] **Step 3: Implement the meta-orchestrator**
 
 ```ts
 // src/lib/foundry/brain/meta-orchestrator.ts
@@ -19292,12 +19292,12 @@ export async function resolveFoundryIntent(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/meta-orchestrator.test.ts`
 Expected: PASS — 4 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/meta-orchestrator.ts src/lib/foundry/brain/meta-orchestrator.test.ts
@@ -19315,16 +19315,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Threshold is exactly `0.7` (verified by a 0.69 vs 0.70 boundary test if needed).
-- [ ] Non-JSON brain output throws `meta-orchestrator returned non-JSON`.
-- [ ] Unknown agent string from the brain is rejected by Zod (not silently passed through).
+- [x] Threshold is exactly `0.7` (verified by a 0.69 vs 0.70 boundary test if needed).
+- [x] Non-JSON brain output throws `meta-orchestrator returned non-JSON`.
+- [x] Unknown agent string from the brain is rejected by Zod (not silently passed through).
 
 ### Task 7.10: Golden routing table (15 sample requests)
 
 **Files:**
 - Create: `src/lib/foundry/brain/golden-routing.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/golden-routing.test.ts
@@ -19383,21 +19383,21 @@ describe("golden routing table", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/golden-routing.test.ts`
 Expected: FAIL initially — should pass on the first attempt once Task 7.9 is committed. If a case fails, the bug is in the meta-orchestrator (most likely confidence-threshold off-by-one).
 
-- [ ] **Step 3: Implementation already done in 7.9 — verify**
+- [x] **Step 3: Implementation already done in 7.9 — verify**
 
 No new module to create. If a case fails, trace through `resolveFoundryIntent` step-by-step.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/golden-routing.test.ts`
 Expected: PASS — all 15 cases.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/golden-routing.test.ts
@@ -19415,9 +19415,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All 15 cases pass.
-- [ ] At least 2 cases hit the clarification branch.
-- [ ] Every one of the 4 agents appears at least once as a positive expected outcome.
+- [x] All 15 cases pass.
+- [x] At least 2 cases hit the clarification branch.
+- [x] Every one of the 4 agents appears at least once as a positive expected outcome.
 
 ### Task 7.11: Brain factory — assemble specialists by name
 
@@ -19425,7 +19425,7 @@ EOF
 - Create: `src/lib/foundry/brain/factory.ts`
 - Test: `src/lib/foundry/brain/factory.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/factory.test.ts
@@ -19471,12 +19471,12 @@ describe("createFoundryBrainFor", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/factory.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the factory**
+- [x] **Step 3: Implement the factory**
 
 ```ts
 // src/lib/foundry/brain/factory.ts
@@ -19513,12 +19513,12 @@ export function createFoundryBrainFor(
 
 > NOTE: this is the **only** place an `any` appears in the foundry SDK. The factory returns a union of specialist types and TypeScript's structural-types cannot express that union cleanly without massive verbosity. The `eslint-disable-next-line` is scoped to one line and the runtime contract (every returned brain has `agent`, `inputSchema`, `outputSchema`, `decide`) is enforced by the shared `FoundryAgentBrain<I, O>` interface. Reviewers: keep this exception. If a future TypeScript narrows discriminated-union returns, drop the disable.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/factory.test.ts`
 Expected: PASS — 6 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/factory.ts src/lib/foundry/brain/factory.test.ts
@@ -19535,9 +19535,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Factory returns the right `agent` for every one of the 4 kinds.
-- [ ] Unknown kind throws via the exhaustiveness check.
-- [ ] No `any` outside the single eslint-disabled return type (verified by `grep -c "any" src/lib/foundry/brain/factory.ts` ≤ 1 in source).
+- [x] Factory returns the right `agent` for every one of the 4 kinds.
+- [x] Unknown kind throws via the exhaustiveness check.
+- [x] No `any` outside the single eslint-disabled return type (verified by `grep -c "any" src/lib/foundry/brain/factory.ts` ≤ 1 in source).
 
 ### Task 7.12: routeFoundryRequest — meta + dispatch glue
 
@@ -19545,7 +19545,7 @@ EOF
 - Create: `src/lib/foundry/brain/route-request.ts`
 - Test: `src/lib/foundry/brain/route-request.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/route-request.test.ts
@@ -19590,12 +19590,12 @@ describe("routeFoundryRequest", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/route-request.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Implement the glue**
+- [x] **Step 3: Implement the glue**
 
 ```ts
 // src/lib/foundry/brain/route-request.ts
@@ -19635,12 +19635,12 @@ export async function routeFoundryRequest(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/route-request.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/route-request.ts src/lib/foundry/brain/route-request.test.ts
@@ -19658,9 +19658,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] Clarification result is returned untouched (no brain dispatch).
-- [ ] parsedArgs are validated by the brain's schema before dispatch (mismatch throws Zod error).
-- [ ] Non-JSON meta output propagates as a typed Error.
+- [x] Clarification result is returned untouched (no brain dispatch).
+- [x] parsedArgs are validated by the brain's schema before dispatch (mismatch throws Zod error).
+- [x] Non-JSON meta output propagates as a typed Error.
 
 ### Task 7.13: Wire MCP generate handler into per-agent brain via routeFoundryRequest
 
@@ -19668,7 +19668,7 @@ EOF
 - Modify: `src/lib/foundry/mcp/tool-handlers/generate.ts`
 - Create: `src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts
@@ -19713,12 +19713,12 @@ describe("generate handler — brain enrichment", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts`
 Expected: FAIL — current `handleFoundryGenerate` does not accept a `brainEnrich` option.
 
-- [ ] **Step 3: Modify the generate handler**
+- [x] **Step 3: Modify the generate handler**
 
 Edit `src/lib/foundry/mcp/tool-handlers/generate.ts` to accept an optional `brainEnrich` callback and to include its return value as `brainHint` in the inbox payload:
 
@@ -19773,12 +19773,12 @@ export async function handleFoundryGenerate(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts src/lib/foundry/mcp/tool-handlers/generate.test.ts`
 Expected: PASS — both new and pre-existing tests pass (the existing test continues to work because `brainEnrich` is optional).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/tool-handlers/generate.ts src/lib/foundry/mcp/tool-handlers/generate.brain-wire.test.ts
@@ -19796,9 +19796,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `brainEnrich` is opt-in (handler still passes its existing tests with no callback).
-- [ ] When supplied, the callback's return value is written under `payload.brainHint`.
-- [ ] Atomic write semantics preserved (tmp + rename).
+- [x] `brainEnrich` is opt-in (handler still passes its existing tests with no callback).
+- [x] When supplied, the callback's return value is written under `payload.brainHint`.
+- [x] Atomic write semantics preserved (tmp + rename).
 
 ### Task 7.14: Brain-aware server config wiring
 
@@ -19806,7 +19806,7 @@ EOF
 - Modify: `src/lib/foundry/mcp/server.ts`
 - Create: `src/lib/foundry/mcp/server.brain-config.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/mcp/server.brain-config.test.ts
@@ -19863,12 +19863,12 @@ describe("server brain wiring", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.brain-config.test.ts`
 Expected: FAIL — `createFoundryMcpServer` does not yet accept `env` or `brainCallOverride`.
 
-- [ ] **Step 3: Modify the server factory**
+- [x] **Step 3: Modify the server factory**
 
 Augment `createFoundryMcpServer` config:
 
@@ -19909,12 +19909,12 @@ const ctxRun: FoundryGenerateContext = {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/mcp/server.brain-config.test.ts`
 Expected: PASS — 2 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/mcp/server.ts src/lib/foundry/mcp/server.brain-config.test.ts
@@ -19932,9 +19932,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] `env` and `brainCallOverride` are optional config knobs.
-- [ ] No-key path still produces a queued run (no regression in Task 6.9 tests).
-- [ ] `brainEnrich` is invoked exactly once per `foundry/generate` call when configured.
+- [x] `env` and `brainCallOverride` are optional config knobs.
+- [x] No-key path still produces a queued run (no regression in Task 6.9 tests).
+- [x] `brainEnrich` is invoked exactly once per `foundry/generate` call when configured.
 
 ### Task 7.15: Deprecate legacy llm-brain.ts with @deprecated JSDoc
 
@@ -19942,7 +19942,7 @@ EOF
 - Modify: `src/lib/artlab/orchestrator/llm-brain.ts`
 - Create: `src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts
@@ -19968,12 +19968,12 @@ describe("llm-brain.ts deprecation", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts`
 Expected: FAIL — no `@deprecated` annotation yet.
 
-- [ ] **Step 3: Add the @deprecated JSDoc**
+- [x] **Step 3: Add the @deprecated JSDoc**
 
 Open `src/lib/artlab/orchestrator/llm-brain.ts` and add above `export interface ArtLabLlmBrain`:
 
@@ -19991,12 +19991,12 @@ Open `src/lib/artlab/orchestrator/llm-brain.ts` and add above `export interface 
 
 No code change beyond the comment.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts`
 Expected: PASS — 3 assertions pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/artlab/orchestrator/llm-brain.ts src/lib/artlab/orchestrator/llm-brain.deprecation.test.ts
@@ -20013,16 +20013,16 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] JSDoc `@deprecated` appears before the `ArtLabLlmBrain` declaration.
-- [ ] Existing `claude-brain.ts`, `gemini-brain.ts`, `logged-brain.ts` continue to compile.
-- [ ] `decideWithMockBrain` remains exported for back-compat.
+- [x] JSDoc `@deprecated` appears before the `ArtLabLlmBrain` declaration.
+- [x] Existing `claude-brain.ts`, `gemini-brain.ts`, `logged-brain.ts` continue to compile.
+- [x] `decideWithMockBrain` remains exported for back-compat.
 
 ### Task 7.16: Memory feedback scoping integration test
 
 **Files:**
 - Create: `src/lib/foundry/brain/memory-feedback.integration.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/foundry/brain/memory-feedback.integration.test.ts
@@ -20094,21 +20094,21 @@ describe("memory feedback scoping — end to end", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-feedback.integration.test.ts`
 Expected: PASS or FAIL — should PASS if 7.2 + 7.4 + 7.5 are landed; if it FAILS, the bug is in 7.2 (scope filter not honoring `source`).
 
-- [ ] **Step 3: No implementation — purely an acceptance gate**
+- [x] **Step 3: No implementation — purely an acceptance gate**
 
 If the test passes, move to commit. If it fails, fix the underlying scope/brain bug.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/foundry/brain/memory-feedback.integration.test.ts`
 Expected: PASS — 3 assertions.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/foundry/brain/memory-feedback.integration.test.ts
@@ -20125,9 +20125,9 @@ EOF
 ```
 
 **Acceptance criteria (per-task, in addition to Universal):**
-- [ ] All three integration cases pass.
-- [ ] Character brain receives `char-trick` win and `WARDROBE` rejection (and not the floor ones).
-- [ ] Floor brain receives `floor-trick` win and `LIGHT` rejection (and not the character ones).
+- [x] All three integration cases pass.
+- [x] Character brain receives `char-trick` win and `WARDROBE` rejection (and not the floor ones).
+- [x] Floor brain receives `floor-trick` win and `LIGHT` rejection (and not the character ones).
 
 ### Phase 7 completion criteria
 
