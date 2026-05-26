@@ -17,6 +17,11 @@ Usage:
                                             --tile-mode <repeat|repeat-x|repeat-y|no-repeat>,
                                             --provider <mock|claude|gemini>,
                                             --dry-run, --run-dir <path>, --seed <n>
+  foundry animate <sourcePackId>   run the sprite-animator agent (Phase 5)
+                                     flags: --action <idle|wave|nod|celebrate>,
+                                            --format <sprite|lottie>,
+                                            --provider <mock|sora|runway|claude>,
+                                            --dry-run, --run-dir <path>, --seed <n>
   foundry help                     print this help
 `;
 
@@ -289,6 +294,164 @@ async function main(argv: readonly string[]): Promise<number> {
     } catch (err) {
       process.stderr.write(
         `foundry texture: failed — ${(err as Error).message}\n`,
+      );
+      return 1;
+    }
+  }
+  if (subcommand === "animate") {
+    if (!sub2) {
+      process.stderr.write(
+        `foundry animate: missing <sourcePackId> — e.g. foundry animate char-otis-v3 --action=idle --format=sprite\n`,
+      );
+      return 2;
+    }
+    const animArgs = [...rest];
+    let action: "idle" | "wave" | "nod" | "celebrate" = "idle";
+    let format: "sprite" | "lottie" = "sprite";
+    let providerKind: "mock" | "sora" | "runway" | "claude" = "mock";
+    let dryRun = false;
+    let runDir: string | undefined;
+    let seed: number | undefined;
+    for (let i = 0; i < animArgs.length; i += 1) {
+      const arg = animArgs[i];
+      if (arg === "--action") {
+        const next = animArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry animate: --action requires a value\n`);
+          return 2;
+        }
+        if (
+          next !== "idle" &&
+          next !== "wave" &&
+          next !== "nod" &&
+          next !== "celebrate"
+        ) {
+          process.stderr.write(
+            `foundry animate: --action must be idle|wave|nod|celebrate\n`,
+          );
+          return 2;
+        }
+        action = next;
+        i += 1;
+      } else if (arg?.startsWith("--action=")) {
+        const next = arg.slice("--action=".length);
+        if (
+          next !== "idle" &&
+          next !== "wave" &&
+          next !== "nod" &&
+          next !== "celebrate"
+        ) {
+          process.stderr.write(
+            `foundry animate: --action must be idle|wave|nod|celebrate\n`,
+          );
+          return 2;
+        }
+        action = next;
+      } else if (arg === "--format") {
+        const next = animArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry animate: --format requires a value\n`);
+          return 2;
+        }
+        if (next !== "sprite" && next !== "lottie") {
+          process.stderr.write(
+            `foundry animate: --format must be sprite|lottie\n`,
+          );
+          return 2;
+        }
+        format = next;
+        i += 1;
+      } else if (arg?.startsWith("--format=")) {
+        const next = arg.slice("--format=".length);
+        if (next !== "sprite" && next !== "lottie") {
+          process.stderr.write(
+            `foundry animate: --format must be sprite|lottie\n`,
+          );
+          return 2;
+        }
+        format = next;
+      } else if (arg === "--provider") {
+        const next = animArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry animate: --provider requires a value\n`);
+          return 2;
+        }
+        if (
+          next !== "mock" &&
+          next !== "sora" &&
+          next !== "runway" &&
+          next !== "claude"
+        ) {
+          process.stderr.write(
+            `foundry animate: --provider must be mock|sora|runway|claude\n`,
+          );
+          return 2;
+        }
+        providerKind = next;
+        i += 1;
+      } else if (arg?.startsWith("--provider=")) {
+        const next = arg.slice("--provider=".length);
+        if (
+          next !== "mock" &&
+          next !== "sora" &&
+          next !== "runway" &&
+          next !== "claude"
+        ) {
+          process.stderr.write(
+            `foundry animate: --provider must be mock|sora|runway|claude\n`,
+          );
+          return 2;
+        }
+        providerKind = next;
+      } else if (arg === "--dry-run") {
+        dryRun = true;
+      } else if (arg === "--run-dir") {
+        const next = animArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry animate: --run-dir requires a value\n`);
+          return 2;
+        }
+        runDir = next;
+        i += 1;
+      } else if (arg?.startsWith("--run-dir=")) {
+        runDir = arg.slice("--run-dir=".length);
+      } else if (arg === "--seed") {
+        const next = animArgs[i + 1];
+        if (next === undefined) {
+          process.stderr.write(`foundry animate: --seed requires a value\n`);
+          return 2;
+        }
+        seed = Number(next);
+        i += 1;
+      } else if (arg?.startsWith("--seed=")) {
+        seed = Number(arg.slice("--seed=".length));
+      } else {
+        process.stderr.write(`foundry animate: unknown flag "${arg}"\n`);
+        return 2;
+      }
+    }
+    try {
+      const { runFoundrySpriteAnimatorCli } = await import(
+        "@/lib/foundry/agents/sprite-animator/cli"
+      );
+      const out = await runFoundrySpriteAnimatorCli({
+        sourcePackId: sub2,
+        action,
+        format,
+        providerKind,
+        dryRun,
+        runDir,
+        seed,
+      });
+      process.stdout.write(`${out.summary}\n`);
+      process.stdout.write(`runDir: ${out.runDir}\n`);
+      if (out.packId) {
+        process.stdout.write(`packId: ${out.packId}\n`);
+      }
+      return 0;
+    } catch (err) {
+      process.stderr.write(
+        `foundry animate: failed — ${(err as Error).message}\n`,
       );
       return 1;
     }

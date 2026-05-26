@@ -113,6 +113,7 @@ export async function runFoundrySpriteAnimator(
       },
       integrationSnippet,
       qa,
+      __packDir: pack.packRoot,
     };
     return buildFoundryAssetPack(manifest);
   }
@@ -160,6 +161,7 @@ export async function runFoundrySpriteAnimator(
     },
     integrationSnippet,
     qa,
+    __packDir: pack.packRoot,
   };
   return buildFoundryAssetPack(manifest);
 }
