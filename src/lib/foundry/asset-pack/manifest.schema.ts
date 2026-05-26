@@ -1,23 +1,83 @@
+import path from "node:path";
 import { z } from "zod";
 import { FOUNDRY_ASSET_KINDS, FOUNDRY_AGENT_KINDS, FOUNDRY_ASSET_PACK_VERSION } from "./constants";
 
 const Sha256Hex = z.string().regex(/^[a-f0-9]{64}$/, "sha256 must be 64 hex chars (lowercase)");
 
+const APP_PATH_PREFIXES = ["public/", "src/components/", "src/lib/visual-assets/"] as const;
+
+function hasPercentEncoding(s: string): boolean {
+  return /%[0-9a-fA-F]{2}/.test(s);
+}
+
+function decodeForInspection(s: string): string {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    // Malformed encoding is itself suspicious; treat as the raw string so the
+    // downstream `..`, backslash, and normalisation checks still trip.
+    return s;
+  }
+}
+
+/**
+ * Defence-in-depth path-safety check used by `appPath` and payload `relPath`.
+ *
+ * Rejects:
+ *   - empty strings
+ *   - NUL bytes (filesystem boundary truncation)
+ *   - backslashes (Windows separator + traversal smuggling)
+ *   - any percent-encoded sequence (no `%2e`, `%2f`, `%5c`, …)
+ *   - leading `/` (absolute path), `~` (home expansion), `C:` (drive prefix)
+ *   - any literal `..` segment after `path.posix.normalize` round-trip
+ *   - paths that re-resolve outside the allow-listed prefix
+ *   - paths whose normalised form differs from the input (double slash,
+ *     `./` segments, trailing `/`) — forces a canonical representation
+ */
+function isPathSafeAgainstTraversal(
+  input: string,
+  prefixes: ReadonlyArray<string> | null,
+): boolean {
+  if (input.length === 0) return false;
+  if (input.includes("\0")) return false;
+  if (input.includes("\\")) return false;
+  if (hasPercentEncoding(input)) return false;
+  // Decoded form must also be clean — defence against double-decoding upstream.
+  const decoded = decodeForInspection(input);
+  if (decoded !== input) return false;
+  if (input.startsWith("/")) return false;
+  if (input.startsWith("~")) return false;
+  if (/^[a-zA-Z]:/.test(input)) return false;
+
+  const normalised = path.posix.normalize(input);
+  // Normalisation must be a no-op — rejects `public//evil`, `./foo`, `foo/.`,
+  // and any input where the canonical form differs from what the caller wrote.
+  if (normalised !== input) return false;
+  // Belt-and-braces: a normalised path that still contains `..` segments has
+  // escaped its root.
+  if (normalised.split("/").includes("..")) return false;
+
+  if (prefixes !== null) {
+    return prefixes.some((prefix) => normalised.startsWith(prefix));
+  }
+  return true;
+}
+
 const AppPath = z
   .string()
-  .min(1)
-  .refine((p) => !p.includes(".."), "appPath may not contain '..'")
   .refine(
-    (p) =>
-      p.startsWith("public/") ||
-      p.startsWith("src/components/") ||
-      p.startsWith("src/lib/visual-assets/"),
-    "appPath must start with public/, src/components/, or src/lib/visual-assets/",
+    (p) => isPathSafeAgainstTraversal(p, APP_PATH_PREFIXES),
+    "appPath must be a canonical, allow-listed path (no traversal, no encoding, no backslash, no absolute or drive prefix)",
   );
 
 export const FoundryAssetPackPayloadFileSchema = z
   .object({
-    relPath: z.string().min(1).refine((p) => !p.includes(".."), "relPath may not contain '..'"),
+    relPath: z
+      .string()
+      .refine(
+        (p) => isPathSafeAgainstTraversal(p, null),
+        "relPath must be a canonical relative path (no traversal, no encoding, no backslash, no leading slash)",
+      ),
     sha256: Sha256Hex,
     bytes: z.number().int().nonnegative(),
   })
