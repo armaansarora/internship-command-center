@@ -21,6 +21,17 @@ describe("foundry lottie provider contract", () => {
     ).toThrow();
   });
 
+  it("input accepts an optional referenceImageBytes Buffer (Critical 3)", () => {
+    const buf = Buffer.from([1, 2, 3, 4]);
+    const ok = FoundryLottieProviderInputSchema.parse({
+      motionCurve: "breathing-12fps",
+      durationMs: 1000,
+      action: "idle",
+      referenceImageBytes: buf,
+    });
+    expect(ok.referenceImageBytes?.equals(buf)).toBe(true);
+  });
+
   it("result requires lottie JSON string + mode + cost", () => {
     const ok = FoundryLottieProviderResultSchema.parse({
       lottieJson: '{"v":"5.7.0","ip":0,"op":12,"layers":[]}',

@@ -119,16 +119,22 @@ export async function runFoundrySpriteAnimator(
   }
   // lottie format
   const expectedDurationMs = Math.round((input.frameCount / input.fps) * 1000);
+  // Critical 3: pass the anchor PNG to the Lottie provider so the
+  // authored Lottie can embed (or reference) the source character art.
+  // The lottie-identity QA gate then verifies the embedded asset's
+  // perceptual hash lands within tolerance of the source pack anchor.
   const lottie = await providers.lottie.authorLottie({
     motionCurve: input.motionCurve,
     durationMs: expectedDurationMs,
     action: input.action,
     seed: input.seed,
+    referenceImageBytes: anchorBytes,
   });
   const qa = await runFoundrySpriteQa({
     kind: "lottie",
     lottieJson: lottie.lottieJson,
     expectedDurationMs,
+    anchorPerceptualHash: source.anchorPerceptualHash,
   });
   if (!qa.passed) {
     throw new Error(

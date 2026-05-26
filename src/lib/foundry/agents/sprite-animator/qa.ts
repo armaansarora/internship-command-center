@@ -1,11 +1,13 @@
 import { evaluateFoundrySpriteIdentityDrift } from "./qa/identity-drift";
 import { evaluateFoundrySpriteMotionSmoothness } from "./qa/motion-smoothness";
 import { evaluateFoundryLottieValidity } from "./qa/lottie-validity";
+import { evaluateFoundryLottieIdentity } from "./qa/lottie-identity";
 
 export type FoundrySpriteQaGate =
   | "identity-drift"
   | "motion-smoothness"
-  | "lottie-validity";
+  | "lottie-validity"
+  | "lottie-identity";
 
 export type FoundrySpriteQaInput =
   | {
@@ -17,6 +19,12 @@ export type FoundrySpriteQaInput =
       kind: "lottie";
       lottieJson: string;
       expectedDurationMs: number;
+      /**
+       * Critical 3 fix: anchor hash from the source character pack.
+       * The lottie identity gate compares embedded image assets against
+       * this hash and fails when none land within tolerance. Mandatory.
+       */
+      anchorPerceptualHash: string;
     };
 
 export interface FoundrySpriteQaReport {
@@ -43,12 +51,19 @@ export async function runFoundrySpriteQa(
       details: { identity, motion },
     };
   }
-  const lottie = evaluateFoundryLottieValidity(input.lottieJson, {
+  const validity = evaluateFoundryLottieValidity(input.lottieJson, {
     expectedDurationMs: input.expectedDurationMs,
   });
+  const identity = await evaluateFoundryLottieIdentity({
+    lottieJson: input.lottieJson,
+    anchorPerceptualHash: input.anchorPerceptualHash,
+  });
+  const failedGates: FoundrySpriteQaGate[] = [];
+  if (!validity.passed) failedGates.push("lottie-validity");
+  if (!identity.passed) failedGates.push("lottie-identity");
   return {
-    passed: lottie.passed,
-    failedGates: lottie.passed ? [] : ["lottie-validity"],
-    details: { lottie },
+    passed: failedGates.length === 0,
+    failedGates,
+    details: { validity, identity },
   };
 }
