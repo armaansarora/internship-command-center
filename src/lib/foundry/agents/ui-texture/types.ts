@@ -4,7 +4,7 @@ import { z } from "zod";
 export const FOUNDRY_UI_TEXTURE_KINDS = ["icon", "texture"] as const;
 export type FoundryUiTextureKind = (typeof FOUNDRY_UI_TEXTURE_KINDS)[number];
 
-const NAME_RE = /^[a-z][a-z0-9-]{1,60}$/;
+const NAME_RE = /^[a-z][a-z0-9-]{0,60}$/;
 
 const IconInputSchema = z
   .object({
@@ -37,7 +37,10 @@ export const FoundryUiTextureInputSchema = z.discriminatedUnion("kind", [
   IconInputSchema,
   TextureInputSchema,
 ]);
-export type FoundryUiTextureInput = z.infer<typeof FoundryUiTextureInputSchema>;
+export type FoundryUiTextureInput = z.input<typeof FoundryUiTextureInputSchema>;
+export type ParsedFoundryUiTextureInput = z.infer<
+  typeof FoundryUiTextureInputSchema
+>;
 
 export const FoundryUiIconManifestSchema = z
   .object({
