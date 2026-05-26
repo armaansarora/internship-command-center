@@ -10,9 +10,17 @@ import { handleFoundryAssetPackList } from "./tool-handlers/asset-pack-list";
 import { handleFoundryAssetPackGet } from "./tool-handlers/asset-pack-get";
 import { handleFoundryAssetPackIntegration } from "./tool-handlers/asset-pack-integration";
 import { handleFoundrySlotAudit } from "./tool-handlers/slot-audit";
-import { handleFoundryGenerate } from "./tool-handlers/generate";
+import {
+  handleFoundryGenerate,
+  type FoundryGenerateContext,
+} from "./tool-handlers/generate";
 import { handleFoundryGenerateStatus } from "./tool-handlers/generate-status";
 import { handleFoundryDiagnostics } from "./tool-handlers/diagnostics";
+import { routeFoundryRequest } from "../brain/route-request";
+import type {
+  FoundryAnthropicCall,
+  FoundryAnthropicResponse,
+} from "../brain/anthropic-client";
 
 export interface FoundryMcpServerConfig {
   workspaceRoot: string;
@@ -21,6 +29,10 @@ export interface FoundryMcpServerConfig {
   slotRegistryPath: string;
   providerProbes: Record<string, () => Promise<boolean>>;
   version: string;
+  /** Optional env map for per-agent brain wiring. If unset, brain enrichment is skipped. */
+  env?: Record<string, string | undefined>;
+  /** Test seam — replaces all Anthropic calls inside the brain pipeline. */
+  brainCallOverride?: (call: FoundryAnthropicCall) => Promise<FoundryAnthropicResponse>;
 }
 
 export interface FoundryMcpServer {
@@ -53,7 +65,27 @@ export function createFoundryMcpServer(config: FoundryMcpServerConfig): FoundryM
   const ctxCanon = { canonRoot: config.canonRoot };
   const ctxPacks = { packsRoot: config.packsRoot };
   const ctxSlot = { slotRegistryPath: config.slotRegistryPath, packsRoot: config.packsRoot };
-  const ctxRun = { workspaceRoot: config.workspaceRoot };
+  const enrichmentReady =
+    (config.env?.ANTHROPIC_API_KEY ?? "") !== "" || config.brainCallOverride !== undefined;
+  const ctxRun: FoundryGenerateContext = {
+    workspaceRoot: config.workspaceRoot,
+    brainEnrich: enrichmentReady
+      ? async (input) => {
+          try {
+            const result = await routeFoundryRequest(input.description, {
+              env: config.env ?? {},
+              metaCallOverride: config.brainCallOverride,
+            });
+            return result as Record<string, unknown>;
+          } catch (err) {
+            // Brain enrichment is best-effort. If the meta-orchestrator or
+            // specialist brain rejects, the run still queues — the daemon
+            // will rebuild the prompt from scratch using the raw description.
+            return { brainHintError: String(err).slice(0, 200) };
+          }
+        }
+      : undefined,
+  };
   const ctxDiag = { workspaceRoot: config.workspaceRoot, providerProbes: config.providerProbes };
 
   const handlers: Record<FoundryMcpToolName, HandlerFn> = {
