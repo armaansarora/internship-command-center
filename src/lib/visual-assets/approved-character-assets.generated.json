@@ -3904,5 +3904,131 @@
     },
     "qaStatus": "passed",
     "promotionDate": "2026-05-20T18:11:09.350Z"
+  },
+  {
+    "slotId": "slot-1",
+    "src": "/art/lobby/cno/regular-alert.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/regular-alert.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-2",
+    "src": "/art/lobby/cno/regular-greeting.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/regular-greeting.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-3",
+    "src": "/art/lobby/cno/regular-idle.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/regular-idle.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-4",
+    "src": "/art/lobby/cno/regular-listening.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/regular-listening.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-5",
+    "src": "/art/lobby/cno/regular-talking.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/regular-talking.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-6",
+    "src": "/art/lobby/cno/regular-thinking.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/regular-thinking.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-7",
+    "src": "/art/lobby/cno/regular-working.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/regular-working.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-8",
+    "src": "/art/lobby/cno/summer-light-alert.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/summer-light-alert.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-9",
+    "src": "/art/lobby/cno/summer-light-greeting.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/summer-light-greeting.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-10",
+    "src": "/art/lobby/cno/summer-light-idle.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/summer-light-idle.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-11",
+    "src": "/art/lobby/cno/summer-light-listening.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/summer-light-listening.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-12",
+    "src": "/art/lobby/cno/summer-light-talking.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/summer-light-talking.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-13",
+    "src": "/art/lobby/cno/summer-light-thinking.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/summer-light-thinking.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-14",
+    "src": "/art/lobby/cno/summer-light-working.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/summer-light-working.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-15",
+    "src": "/art/lobby/cno/winter-layered-alert.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/winter-layered-alert.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-16",
+    "src": "/art/lobby/cno/winter-layered-greeting.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/winter-layered-greeting.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-17",
+    "src": "/art/lobby/cno/winter-layered-idle.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/winter-layered-idle.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-18",
+    "src": "/art/lobby/cno/winter-layered-listening.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/winter-layered-listening.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-19",
+    "src": "/art/lobby/cno/winter-layered-talking.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/winter-layered-talking.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-20",
+    "src": "/art/lobby/cno/winter-layered-thinking.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/winter-layered-thinking.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
+  },
+  {
+    "slotId": "slot-21",
+    "src": "/art/lobby/cno/winter-layered-working.png",
+    "sourcePath": "/Users/armaanarora/Documents/The Tower/.artlab/engine/runs/fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf/cutouts/winter-layered-working.png",
+    "runId": "fa299b80-fdd2-4e4d-a06f-6f5c839ebaaf"
   }
 ]

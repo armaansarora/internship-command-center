@@ -12,7 +12,7 @@
 
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 
 export interface AutoCommitInput {
   projectRoot: string;
@@ -44,8 +44,28 @@ function isAllowed(relPath: string): boolean {
   );
 }
 
+// Husky hooks (./.husky/pre-commit) run shell scripts that often call `npm`
+// or `node`. When the daemon runs via launchd it inherits a minimal PATH
+// (typically `/usr/bin:/bin:/usr/sbin:/sbin`) that doesn't include the fnm /
+// asdf / nvm node bin dir, so those hooks fail with "npm: command not
+// found". Augment PATH with the directory of the currently-executing node
+// binary (process.argv[0]) plus standard user bin dirs so the hooks see
+// what an interactive shell would see.
+function gitSpawnEnv(): NodeJS.ProcessEnv {
+  const nodeBinDir = dirname(process.execPath);
+  const extras = [
+    nodeBinDir,
+    `${process.env.HOME ?? ""}/.local/bin`,
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+  ];
+  const existing = process.env.PATH ?? "";
+  const merged = [...extras, existing].filter(Boolean).join(":");
+  return { ...process.env, PATH: merged };
+}
+
 function exec(projectRoot: string, args: string[]): { stdout: string; stderr: string; code: number } {
-  const r = spawnSync("git", args, { cwd: projectRoot, encoding: "utf8" });
+  const r = spawnSync("git", args, { cwd: projectRoot, encoding: "utf8", env: gitSpawnEnv() });
   return {
     stdout: r.stdout ?? "",
     stderr: r.stderr ?? "",

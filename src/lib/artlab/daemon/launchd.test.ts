@@ -37,6 +37,19 @@ describe("launchd plist generator", () => {
     expect(xml).not.toMatch(/ & /);
   });
 
+  it("sets PATH including the node binary's dir so spawned hooks find npm", () => {
+    const xml = renderLaunchdPlist({
+      nodeBinary: "/Users/me/.local/share/fnm/node-versions/v22.22.1/installation/bin/node",
+      daemonEntry: "/x/scripts/artlab.ts",
+      workspaceRoot: "/x/.artlab/engine",
+      logRoot: "/x/logs",
+    });
+    expect(xml).toContain("<key>PATH</key>");
+    expect(xml).toContain("/Users/me/.local/share/fnm/node-versions/v22.22.1/installation/bin");
+    expect(xml).toContain("/usr/local/bin");
+    expect(xml).toContain("/opt/homebrew/bin");
+  });
+
   it("inserts tsxLoaderPath before daemonEntry so node can load TypeScript", () => {
     const xml = renderLaunchdPlist({
       nodeBinary: "/usr/local/bin/node",

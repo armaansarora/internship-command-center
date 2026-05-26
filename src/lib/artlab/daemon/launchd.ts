@@ -33,6 +33,21 @@ export function renderLaunchdPlist(input: LaunchdPlistInput): string {
     ? [input.nodeBinary, input.tsxLoaderPath, input.daemonEntry, "daemon", "run"]
     : [input.nodeBinary, input.daemonEntry, "daemon", "run"];
   const argsXml = args.map((a) => `      <string>${escapeXml(a)}</string>`).join("\n");
+  // launchd's default PATH (~/usr/bin:/bin:/usr/sbin:/sbin) doesn't include
+  // the node bin dir, so spawned scripts (notably husky hooks invoking
+  // `npm`) fail with "command not found". Inject the node binary's dir +
+  // common user dirs into PATH so subprocesses see what an interactive
+  // shell would see.
+  const nodeBinDir = input.nodeBinary.substring(0, input.nodeBinary.lastIndexOf("/"));
+  const pathValue = [
+    nodeBinDir,
+    "/opt/homebrew/bin",
+    "/usr/local/bin",
+    "/usr/bin",
+    "/bin",
+    "/usr/sbin",
+    "/sbin",
+  ].filter(Boolean).join(":");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -61,6 +76,8 @@ ${argsXml}
     <string>${escapeXml(input.workspaceRoot)}</string>
     <key>NODE_ENV</key>
     <string>production</string>
+    <key>PATH</key>
+    <string>${escapeXml(pathValue)}</string>
   </dict>
   <key>ProcessType</key>
   <string>Background</string>
