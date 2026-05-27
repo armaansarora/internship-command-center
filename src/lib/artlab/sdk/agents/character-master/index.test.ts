@@ -91,7 +91,7 @@ function dimensionsFor(aspect: ArtLabImageProviderInput["aspectRatio"]): { width
 }
 
 function createPngArtLabImageProvider(): ArtLabImageProvider {
-  const id = "mock-foundry-image";
+  const id = "mock-artlab-image";
   return {
     id,
     async generate(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult> {
@@ -146,7 +146,7 @@ describe("runCharacterMaster", () => {
   it("runs all 6 stages end-to-end with a mock provider and returns a valid pack", async () => {
     const events: string[] = [];
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 42 },
+      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: null, seed: 42 },
       provider: createPngArtLabImageProvider(),
       emit: (e) => events.push(e.kind),
     });
@@ -160,7 +160,7 @@ describe("runCharacterMaster", () => {
 
   it("returns a QA-failure result when the provider deliberately fails composite-judge", async () => {
     const result = await runCharacterMaster({
-      input: { characterId: "missing-character", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 42 },
+      input: { characterId: "missing-character", canonRoot, workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: null, seed: 42 },
       provider: createPngArtLabImageProvider(),
       emit: () => {},
     });
@@ -218,7 +218,7 @@ describe("runCharacterMaster", () => {
     }
     const events: string[] = [];
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "cutout-and-feather", seed: 42 },
+      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: "cutout-and-feather", seed: 42 },
       provider: createPngArtLabImageProvider(),
       emit: (e) => events.push(e.kind),
     });
@@ -245,7 +245,7 @@ describe("runCharacterMaster", () => {
       anchorHeightPx: 64,
     }));
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "cutout-and-feather", seed: 42 },
+      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: "cutout-and-feather", seed: 42 },
       provider: createPngArtLabImageProvider(),
       emit: () => {},
     });
@@ -267,7 +267,7 @@ describe("runCharacterMaster", () => {
         characterId: "sol-navarro",
         canonRoot,
         workspaceRoot,
-        providerId: "mock-foundry-image",
+        providerId: "mock-artlab-image",
         resumeFromStage: null,
         seed: 42,
         qa: { paletteToleranceLab: 0.001, minPairwiseSilhouetteHamming: 0 },
@@ -295,7 +295,7 @@ describe("runCharacterMaster", () => {
         characterId: "sol-navarro",
         canonRoot,
         workspaceRoot,
-        providerId: "mock-foundry-image",
+        providerId: "mock-artlab-image",
         resumeFromStage: null,
         seed: 42,
         qa: { paletteToleranceLab: 250, minPairwiseSilhouetteHamming: 60 },
@@ -338,7 +338,7 @@ describe("runCharacterMaster", () => {
       anchorHeightPx: 1792,
     }));
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "variant-fan-out", seed: 42 },
+      input: { characterId: "sol-navarro", canonRoot, workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: "variant-fan-out", seed: 42 },
       provider: createPngArtLabImageProvider(),
       emit: (e) => { if (e.kind === "stage-started") events.push(e.stage); },
     });

@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 const ROOT = process.cwd();
 
-describe("Foundry phase-8 acceptance walkthrough", () => {
+describe("ArtLab SDK phase-8 acceptance walkthrough", () => {
   it("PHASE-8-ACCEPTANCE.md exists and lists the 4 install scripts", () => {
     const path = join(ROOT, "docs", "foundry", "PHASE-8-ACCEPTANCE.md");
     expect(existsSync(path)).toBe(true);

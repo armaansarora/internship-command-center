@@ -23,7 +23,7 @@ describe("sdk-poller", () => {
   });
 
   function writeInboxJob(payload: Record<string, unknown>): string {
-    const dir = join(workspaceRoot, "inbox", "foundry");
+    const dir = join(workspaceRoot, "inbox", "sdk");
     mkdirSync(dir, { recursive: true });
     const runId = (payload.runId as string | undefined) ?? randomUUID();
     const filename = `generate-${runId}.json`;
@@ -32,7 +32,7 @@ describe("sdk-poller", () => {
       JSON.stringify({
         runId,
         queuedAt: new Date().toISOString(),
-        source: "foundry-mcp",
+        source: "artlab-mcp",
         kind: "character",
         description: "Rafe with a charcoal wool jacket update",
         ...payload,
@@ -46,7 +46,7 @@ describe("sdk-poller", () => {
       ArtLabGenerateJobSchema.parse({
         runId: "11111111-1111-4111-8111-111111111111",
         queuedAt: "2026-05-25T00:00:00.000Z",
-        source: "foundry-mcp",
+        source: "artlab-mcp",
         kind: "character",
         description: "a long enough description",
         unexpectedField: true,
@@ -58,7 +58,7 @@ describe("sdk-poller", () => {
     const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
     expect(out.enqueuedRunIds).toEqual([]);
-    expect(existsSync(join(workspaceRoot, "inbox", "foundry"))).toBe(true);
+    expect(existsSync(join(workspaceRoot, "inbox", "sdk"))).toBe(true);
   });
 
   it("drains an artlab inbox job into the queue and archives the file", async () => {
@@ -73,8 +73,8 @@ describe("sdk-poller", () => {
     expect(queued).toHaveLength(1);
     expect(queued[0]!.runId).toBe(runId);
     expect(queued[0]!.priority).toBe("default");
-    expect(queued[0]!.spec.sourceSurface).toBe("foundry-mcp");
-    expect(queued[0]!.spec.intent).toBe("foundry-generate");
+    expect(queued[0]!.spec.sourceSurface).toBe("artlab-mcp");
+    expect(queued[0]!.spec.intent).toBe("artlab-generate");
 
     // run-state.json seeded with phase=routed.
     const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
@@ -84,7 +84,7 @@ describe("sdk-poller", () => {
     expect(state!.request).toMatch(/charcoal wool jacket/);
 
     // Inbox file moved into .processed.
-    const inboxDir = join(workspaceRoot, "inbox", "foundry");
+    const inboxDir = join(workspaceRoot, "inbox", "sdk");
     const remaining = readdirSync(inboxDir).filter((f) => f.startsWith("generate-"));
     expect(remaining).toHaveLength(0);
     expect(existsSync(join(inboxDir, ".processed", `${runId}.json`))).toBe(true);
@@ -118,7 +118,7 @@ describe("sdk-poller", () => {
   });
 
   it("quarantines malformed JSON files into .bad without crashing", async () => {
-    const inboxDir = join(workspaceRoot, "inbox", "foundry");
+    const inboxDir = join(workspaceRoot, "inbox", "sdk");
     mkdirSync(inboxDir, { recursive: true });
     writeFileSync(join(inboxDir, "generate-bad.json"), "{not valid json");
     const poller = createArtLabPoller({ workspaceRoot });
@@ -136,11 +136,11 @@ describe("sdk-poller", () => {
   });
 
   it("quarantines schema-invalid payloads (e.g. missing required fields)", async () => {
-    const inboxDir = join(workspaceRoot, "inbox", "foundry");
+    const inboxDir = join(workspaceRoot, "inbox", "sdk");
     mkdirSync(inboxDir, { recursive: true });
     writeFileSync(
       join(inboxDir, "generate-incomplete.json"),
-      JSON.stringify({ source: "foundry-mcp" }),
+      JSON.stringify({ source: "artlab-mcp" }),
     );
     const poller = createArtLabPoller({ workspaceRoot });
     const out = await poller.tick();
@@ -149,7 +149,7 @@ describe("sdk-poller", () => {
   });
 
   it("ignores .tmp.<pid>.<ts> half-written files", async () => {
-    const inboxDir = join(workspaceRoot, "inbox", "foundry");
+    const inboxDir = join(workspaceRoot, "inbox", "sdk");
     mkdirSync(inboxDir, { recursive: true });
     const runId = randomUUID();
     writeFileSync(
@@ -194,7 +194,7 @@ describe("sdk-poller", () => {
       const runId = "00000000-0000-4000-8000-00000000aaaa";
       writeInboxJob({ runId, brainHintStatus: "pending" });
       // Write the sidecar with a "ready" result.
-      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      const inboxDir = join(workspaceRoot, "inbox", "sdk");
       writeFileSync(
         join(inboxDir, `generate-${runId}.brain-hint.json`),
         JSON.stringify({
@@ -221,7 +221,7 @@ describe("sdk-poller", () => {
       // only a leftover sidecar in the live inbox). The poller must NOT
       // process the sidecar as a new job.
       const orphanRunId = "00000000-0000-4000-8000-00000000bbbb";
-      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      const inboxDir = join(workspaceRoot, "inbox", "sdk");
       mkdirSync(inboxDir, { recursive: true });
       writeFileSync(
         join(inboxDir, `generate-${orphanRunId}.brain-hint.json`),
@@ -248,7 +248,7 @@ describe("sdk-poller", () => {
     it("survives a malformed sidecar — falls back to the trigger file as source of truth", async () => {
       const runId = "00000000-0000-4000-8000-00000000cccc";
       writeInboxJob({ runId });
-      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      const inboxDir = join(workspaceRoot, "inbox", "sdk");
       writeFileSync(
         join(inboxDir, `generate-${runId}.brain-hint.json`),
         "{not valid",
@@ -297,7 +297,7 @@ describe("sdk-poller", () => {
       const poller = createArtLabPoller({ workspaceRoot });
       const drain = await poller.tick();
       expect(drain.enqueuedRunIds).toEqual([result.runId]);
-      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      const inboxDir = join(workspaceRoot, "inbox", "sdk");
       expect(existsSync(result.inboxPath!)).toBe(false);
       expect(existsSync(join(inboxDir, ".processed", `${result.runId}.json`))).toBe(true);
       // 3. Now resolve the brain enrichment promise — simulating the slow

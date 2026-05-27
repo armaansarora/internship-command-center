@@ -19,18 +19,18 @@ beforeEach(() => {
 });
 
 describe("handleArtLabTelegramCommand", () => {
-  it("/foundry without a subcommand prints help", async () => {
+  it("/sdk without a subcommand prints help", async () => {
     const result = await handleArtLabTelegramCommand({
       args: [],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
     });
-    expect(result.text).toMatch(/foundry status/i);
-    expect(result.text).toMatch(/foundry list/i);
-    expect(result.text).toMatch(/foundry generate/i);
-    expect(result.text).toMatch(/foundry preview/i);
+    expect(result.text).toMatch(/sdk status/i);
+    expect(result.text).toMatch(/sdk list/i);
+    expect(result.text).toMatch(/sdk generate/i);
+    expect(result.text).toMatch(/sdk preview/i);
   });
 
-  it("/foundry status returns a diagnostics-formatted text", async () => {
+  it("/sdk status returns a diagnostics-formatted text", async () => {
     const result = await handleArtLabTelegramCommand({
       args: ["status"],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
@@ -39,7 +39,7 @@ describe("handleArtLabTelegramCommand", () => {
     expect(result.text).toMatch(/backlog/i);
   });
 
-  it("/foundry list character returns a list of canon characters", async () => {
+  it("/sdk list character returns a list of canon characters", async () => {
     mkdirSync(join(canonRoot, "characters"), { recursive: true });
     writeFileSync(join(canonRoot, "characters", "rafe.yaml"), "id: rafe-calder\ndisplayName: Rafe Calder\nsummary: CRO\n");
     const result = await handleArtLabTelegramCommand({
@@ -49,7 +49,7 @@ describe("handleArtLabTelegramCommand", () => {
     expect(result.text).toMatch(/Rafe Calder/);
   });
 
-  it("/foundry generate queues a run and reports the runId", async () => {
+  it("/sdk generate queues a run and reports the runId", async () => {
     const result = await handleArtLabTelegramCommand({
       args: ["generate", "character", "Rafe", "in", "a", "new", "jacket"],
       workspaceRoot, canonRoot, packsRoot, slotRegistryPath,
@@ -58,7 +58,7 @@ describe("handleArtLabTelegramCommand", () => {
     expect(result.text).toMatch(/[0-9a-f-]{36}/i);
   });
 
-  it("/foundry preview <packId> returns a photo payload when the pack exists", async () => {
+  it("/sdk preview <packId> returns a photo payload when the pack exists", async () => {
     mkdirSync(join(packsRoot, "rafe-v1"), { recursive: true });
     writeFileSync(
       join(packsRoot, "rafe-v1", "manifest.json"),

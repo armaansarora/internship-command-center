@@ -3,24 +3,24 @@
 // Daemon-side bridge for the ArtLab MCP server.
 //
 // The MCP `artlab/generate` handler writes a job file to
-// `.artlab/engine/inbox/foundry/generate-<runId>.json` and returns a runId
+// `.artlab/engine/inbox/sdk/generate-<runId>.json` and returns a runId
 // immediately. Before this poller existed, nothing read those files — the
 // advertised contract (agent calls `generate` → daemon renders → poll
 // `generate_status` for promotion) was dead.
 //
 // This poller closes the loop:
-//   1. Drain every `generate-*.json` from the foundry inbox.
+//   1. Drain every `generate-*.json` from the sdk inbox.
 //   2. Validate each via ArtLabGenerateJobSchema (z.strict — no silent drift).
 //   3. Atomically write `runs/<runId>/run-state.json` with phase=routed so
 //      `artlab/generate_status` flips from `queued` → `running` the moment
 //      the daemon picks the job up.
 //   4. Enqueue the run via the existing `enqueueRun` so the queue processor
 //      can spawn a worker — no parallel queue logic, no second runner.
-//   5. Move the inbox file into `inbox/foundry/.processed/<runId>.json` so the
+//   5. Move the inbox file into `inbox/sdk/.processed/<runId>.json` so the
 //      operator can still inspect what landed without re-processing.
 //
 // Errors per-file are recorded via `recordDaemonError` (no silent catches);
-// poisoned files are moved into `inbox/foundry/.bad/<ts>-<name>` so the
+// poisoned files are moved into `inbox/sdk/.bad/<ts>-<name>` so the
 // poller doesn't trip over them on the next tick.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync } from "node:fs";
@@ -36,7 +36,7 @@ import {
 } from "@/lib/artlab/types";
 
 /**
- * Shape of a job written by `handleArtLabGenerate` into the foundry inbox.
+ * Shape of a job written by `handleArtLabGenerate` into the sdk inbox.
  * Mirrors the MCP `ArtLabGenerateInputSchema` plus the bookkeeping fields
  * the handler injects (runId, queuedAt, source, optional brainHint).
  */
@@ -49,7 +49,7 @@ export const ArtLabGenerateJobSchema = z
         "must be a UUID v4",
       ),
     queuedAt: z.string().datetime({ offset: true }),
-    source: z.literal("foundry-mcp"),
+    source: z.literal("artlab-mcp"),
     kind: z.enum(["character", "floor", "ui-texture", "icon", "sprite-animation", "lottie"]),
     description: z.string().min(8),
     referenceImageUrl: z.string().url().optional(),
@@ -105,7 +105,7 @@ export interface ArtLabPoller {
 }
 
 function artLabInboxDir(workspaceRoot: string): string {
-  return join(workspaceRoot, "inbox", "foundry");
+  return join(workspaceRoot, "inbox", "sdk");
 }
 
 function processedDir(workspaceRoot: string): string {
@@ -188,8 +188,8 @@ function enqueueArtLabRun(
     priority: mapPriority(job.priority),
     enqueuedAt: now().toISOString(),
     spec: {
-      sourceSurface: "foundry-mcp",
-      intent: "foundry-generate",
+      sourceSurface: "artlab-mcp",
+      intent: "artlab-generate",
       kind: job.kind,
       request: job.description,
       requesterAgent: job.requesterAgent ?? null,

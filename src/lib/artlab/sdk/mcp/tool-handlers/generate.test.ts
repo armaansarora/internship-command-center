@@ -60,7 +60,7 @@ describe("handleArtLabGenerate", () => {
       { kind: "ui-texture", description: "Soft brass gradient for primary buttons" },
       { workspaceRoot },
     );
-    const inboxDir = join(workspaceRoot, "inbox", "foundry");
+    const inboxDir = join(workspaceRoot, "inbox", "sdk");
     const files = readdirSync(inboxDir);
     expect(files.length).toBe(1);
     expect(files[0]).toContain(result.runId);
@@ -90,7 +90,7 @@ describe("handleArtLabGenerate", () => {
   // ─────────────────────────────────────────────────────────────────────────
   describe("brain enrichment sidecar (race-safe)", () => {
     function inboxFilesFor(runId: string): string[] {
-      const dir = join(workspaceRoot, "inbox", "foundry");
+      const dir = join(workspaceRoot, "inbox", "sdk");
       if (!existsSync(dir)) return [];
       return readdirSync(dir).filter((f) => f.includes(runId));
     }
@@ -147,7 +147,7 @@ describe("handleArtLabGenerate", () => {
         },
       );
       // Simulate the poller archiving the inbox file mid-enrichment.
-      const inboxDir = join(workspaceRoot, "inbox", "foundry");
+      const inboxDir = join(workspaceRoot, "inbox", "sdk");
       const processed = join(inboxDir, ".processed");
       mkdirSync(processed, { recursive: true });
       renameSync(result.inboxPath!, join(processed, `${result.runId}.json`));

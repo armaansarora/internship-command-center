@@ -9,7 +9,7 @@ describe("renderArtLabIconIntegrationSnippet", () => {
   it("emits a React-style component import for the icon", () => {
     const out = renderArtLabIconIntegrationSnippet({
       name: "elevator-door",
-      packPath: ".foundry/packs/icon-elevator-door",
+      packPath: ".artlab/sdk/packs/icon-elevator-door",
     });
     expect(out).toContain(
       'import { ElevatorDoorIcon } from "@/components/artlab/icons/elevator-door";',
@@ -19,9 +19,9 @@ describe("renderArtLabIconIntegrationSnippet", () => {
   it("includes the pack path as a comment", () => {
     const out = renderArtLabIconIntegrationSnippet({
       name: "elevator-door",
-      packPath: ".foundry/packs/icon-elevator-door",
+      packPath: ".artlab/sdk/packs/icon-elevator-door",
     });
-    expect(out).toContain(".foundry/packs/icon-elevator-door");
+    expect(out).toContain(".artlab/sdk/packs/icon-elevator-door");
   });
 
   it("converts dashed names to PascalCase component names", () => {

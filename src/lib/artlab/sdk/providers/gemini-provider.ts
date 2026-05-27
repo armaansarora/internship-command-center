@@ -28,7 +28,7 @@ function dimensionsForAspect(aspect: ArtLabImageProviderInput["aspectRatio"]): {
 export function createGeminiArtLabProvider(options: CreateGeminiArtLabProviderOptions): ArtLabImageProvider {
   const inner: GeminiProvider = createGeminiProvider({ apiKey: options.apiKey, modelId: options.modelId });
   return {
-    id: "gemini-foundry",
+    id: "gemini-artlab",
     async generate(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult> {
       const result = await inner.generateImage({
         prompt: input.prompt,
@@ -45,7 +45,7 @@ export function createGeminiArtLabProvider(options: CreateGeminiArtLabProviderOp
         heightPx: dims.heightPx,
         costCents: result.costCents,
         durationMs: result.durationMs,
-        providerId: "gemini-foundry",
+        providerId: "gemini-artlab",
         seed: input.seed,
       };
     },

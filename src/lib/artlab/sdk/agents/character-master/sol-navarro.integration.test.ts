@@ -84,7 +84,7 @@ describe("Sol Navarro full integration", () => {
     const env = setupWorkspaceAndCanon();
     cleanup = env.cleanup;
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
+      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: null, seed: 100 },
       provider: createMockArtLabImageProvider(),
       emit: () => {},
     });
@@ -99,13 +99,13 @@ describe("Sol Navarro full integration", () => {
     const env = setupWorkspaceAndCanon();
     cleanup = env.cleanup;
     await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
+      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: null, seed: 100 },
       provider: createMockArtLabImageProvider(),
       emit: () => {},
     });
     const stages: string[] = [];
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: "variant-fan-out", seed: 100 },
+      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: "variant-fan-out", seed: 100 },
       provider: createMockArtLabImageProvider(),
       emit: (e) => { if (e.kind === "stage-started") stages.push(e.stage); },
     });
@@ -123,7 +123,7 @@ describe("Sol Navarro full integration", () => {
     const provider = createMockArtLabImageProvider({ failOnPromptContains: "Tower flat-plus-depth-v1" });
     const events: string[] = [];
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
+      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: null, seed: 100 },
       provider,
       emit: (e) => events.push(e.kind),
     });
@@ -137,7 +137,7 @@ describe("Sol Navarro full integration", () => {
     const env = setupWorkspaceAndCanon();
     cleanup = env.cleanup;
     const result = await runCharacterMaster({
-      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-foundry-image", resumeFromStage: null, seed: 100 },
+      input: { characterId: "sol-navarro", canonRoot: env.canonRoot, workspaceRoot: env.workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: null, seed: 100 },
       provider: createMockArtLabImageProvider(),
       emit: () => {},
     });

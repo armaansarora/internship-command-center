@@ -135,11 +135,11 @@ describe("handleArtLabGenerateStatus", () => {
   });
 
   it("returns status=queued when only the artlab inbox file exists (no run-state yet)", async () => {
-    const inboxDir = join(workspaceRoot, "inbox", "foundry");
+    const inboxDir = join(workspaceRoot, "inbox", "sdk");
     mkdirSync(inboxDir, { recursive: true });
     writeFileSync(
       join(inboxDir, `generate-${RUN_ID}.json`),
-      JSON.stringify({ runId: RUN_ID, queuedAt: "2026-05-25T00:00:00.000Z", source: "foundry-mcp" }),
+      JSON.stringify({ runId: RUN_ID, queuedAt: "2026-05-25T00:00:00.000Z", source: "artlab-mcp" }),
     );
     const result = await handleArtLabGenerateStatus({ runId: RUN_ID }, { workspaceRoot });
     expect(result.status).toBe("queued");
@@ -151,7 +151,7 @@ describe("handleArtLabGenerateStatus", () => {
 
   it("error message hints at the processed-but-missing case when applicable", async () => {
     // Inbox file was archived by the poller but run-state.json was lost.
-    const processed = join(workspaceRoot, "inbox", "foundry", ".processed");
+    const processed = join(workspaceRoot, "inbox", "sdk", ".processed");
     mkdirSync(processed, { recursive: true });
     writeFileSync(
       join(processed, `${RUN_ID}.json`),

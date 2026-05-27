@@ -4,7 +4,7 @@
 //
 //   agent ─MCP/stdio─▶ artlab/generate
 //                       │
-//                       ▼  writes  inbox/foundry/generate-<runId>.json
+//                       ▼  writes  inbox/sdk/generate-<runId>.json
 //
 //   daemon (in-process sdk-poller, real code from src/lib/artlab/daemon)
 //                       │
@@ -47,7 +47,7 @@ beforeEach(() => {
   packsRoot = mkdtempSync(join(tmpdir(), "artlab-acc-packs-"));
   slotRegistryPath = join(workspaceRoot, "slots", "registry.json");
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
-  mkdirSync(join(workspaceRoot, "inbox", "foundry"), { recursive: true });
+  mkdirSync(join(workspaceRoot, "inbox", "sdk"), { recursive: true });
   mkdirSync(join(workspaceRoot, "runs"), { recursive: true });
   writeFileSync(slotRegistryPath, JSON.stringify({ slots: [] }));
   mkdirSync(join(canonRoot, "characters"), { recursive: true });
@@ -112,7 +112,7 @@ async function runMockPipelineUntilEmpty(input: {
         kind,
         slotId: `${kind}.acceptance`,
         promotedAt: new Date().toISOString(),
-        publicPath: `/art/foundry/${packId}.png`,
+        publicPath: `/art/artlab/${packId}.png`,
         integration: { fps: 24, width: result.widthPx, height: result.heightPx, alt: packId },
         files: [{ path: primaryFile, role: "primary" }],
       }),

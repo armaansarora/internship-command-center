@@ -32,7 +32,7 @@ type BrainHintStatus = "pending" | "ready" | "failed";
 interface InboxPayload {
   runId: string;
   queuedAt: string;
-  source: "foundry-mcp";
+  source: "artlab-mcp";
   brainHintStatus?: BrainHintStatus;
   [k: string]: unknown;
 }
@@ -70,7 +70,7 @@ function recordEnrichError(workspaceRoot: string, runId: string, err: unknown): 
     if (!existsSync(workspaceRoot)) mkdirSync(workspaceRoot, { recursive: true });
     const line = JSON.stringify({
       at: new Date().toISOString(),
-      source: "foundry-mcp:brain-enrich",
+      source: "artlab-mcp:brain-enrich",
       runId,
       message: err instanceof Error ? err.message : String(err),
       stack: err instanceof Error ? err.stack : undefined,
@@ -88,7 +88,7 @@ export async function handleArtLabGenerate(
   const input = ArtLabGenerateInputSchema.parse(rawInput);
   const runId = randomUUID();
   const queuedAt = new Date().toISOString();
-  const inboxDir = join(ctx.workspaceRoot, "inbox", "foundry");
+  const inboxDir = join(ctx.workspaceRoot, "inbox", "sdk");
   if (!existsSync(inboxDir)) mkdirSync(inboxDir, { recursive: true });
   const inboxPath = join(inboxDir, `generate-${runId}.json`);
 
@@ -97,7 +97,7 @@ export async function handleArtLabGenerate(
   // `brainHintStatus: 'pending'` so daemon consumers know a sidecar may
   // arrive later. The main inbox file is WRITE-ONCE — every subsequent
   // update goes to the sidecar.
-  const initial: InboxPayload = { runId, queuedAt, source: "foundry-mcp", ...input };
+  const initial: InboxPayload = { runId, queuedAt, source: "artlab-mcp", ...input };
   if (ctx.brainEnrich) initial.brainHintStatus = "pending";
   atomicWriteJson(inboxPath, initial);
 
@@ -142,7 +142,7 @@ export async function handleArtLabGenerate(
           atomicWriteJson(inboxSidecarPath, sidecar);
           return;
         }
-        const processed = join(ctx.workspaceRoot, "inbox", "foundry", ".processed");
+        const processed = join(ctx.workspaceRoot, "inbox", "sdk", ".processed");
         if (!existsSync(processed)) mkdirSync(processed, { recursive: true });
         atomicWriteJson(join(processed, `${runId}.brain-hint.json`), sidecar);
         // Best-effort direct merge into run-state.json. If the poller

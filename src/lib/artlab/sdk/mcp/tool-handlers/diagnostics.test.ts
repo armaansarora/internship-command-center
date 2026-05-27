@@ -9,7 +9,7 @@ let workspaceRoot: string;
 beforeEach(() => {
   workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-diag-"));
   mkdirSync(join(workspaceRoot, "runs"), { recursive: true });
-  mkdirSync(join(workspaceRoot, "inbox", "foundry"), { recursive: true });
+  mkdirSync(join(workspaceRoot, "inbox", "sdk"), { recursive: true });
 });
 
 function seedRun(runId: string, phase: string, updatedAt: string): void {
@@ -50,8 +50,8 @@ describe("handleArtLabDiagnostics", () => {
   });
 
   it("reports backlog depth from the artlab inbox directory", async () => {
-    writeFileSync(join(workspaceRoot, "inbox", "foundry", "generate-1.json"), "{}");
-    writeFileSync(join(workspaceRoot, "inbox", "foundry", "generate-2.json"), "{}");
+    writeFileSync(join(workspaceRoot, "inbox", "sdk", "generate-1.json"), "{}");
+    writeFileSync(join(workspaceRoot, "inbox", "sdk", "generate-2.json"), "{}");
     const result = await handleArtLabDiagnostics(
       {},
       {

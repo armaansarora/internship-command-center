@@ -23,7 +23,7 @@ describe("character-master types", () => {
         characterId: "sol-navarro",
         canonRoot: "/abs/path/to/docs/foundry/canon",
         workspaceRoot: "/abs/path/to/.artlab/engine",
-        providerId: "mock-foundry-image",
+        providerId: "mock-artlab-image",
         resumeFromStage: null,
       }),
     ).not.toThrow();
@@ -35,7 +35,7 @@ describe("character-master types", () => {
         characterId: "x",
         canonRoot: "/x",
         workspaceRoot: "/x",
-        providerId: "mock-foundry-image",
+        providerId: "mock-artlab-image",
         resumeFromStage: "rogue",
       }),
     ).toThrow();

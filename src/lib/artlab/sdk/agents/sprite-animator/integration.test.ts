@@ -9,7 +9,7 @@ describe("renderArtLabSpriteIntegrationSnippet", () => {
     const out = renderArtLabSpriteIntegrationSnippet({
       characterId: "otis",
       action: "idle",
-      packPath: ".foundry/packs/sprite-otis-idle",
+      packPath: ".artlab/sdk/packs/sprite-otis-idle",
       fps: 12,
       loops: true,
     });
@@ -46,7 +46,7 @@ describe("renderArtLabLottieIntegrationSnippet", () => {
     const out = renderArtLabLottieIntegrationSnippet({
       characterId: "otis",
       action: "idle",
-      packPath: ".foundry/packs/lottie-otis-idle",
+      packPath: ".artlab/sdk/packs/lottie-otis-idle",
       lottiePath: "lottie.json",
       durationMs: 1000,
     });

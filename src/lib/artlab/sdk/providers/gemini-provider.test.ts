@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { createGeminiArtLabProvider } from "./gemini-provider";
 
 describe("createGeminiArtLabProvider", () => {
-  it("returns a provider with stable id 'gemini-foundry'", () => {
+  it("returns a provider with stable id 'gemini-artlab'", () => {
     const p = createGeminiArtLabProvider({ apiKey: "k" });
-    expect(p.id).toBe("gemini-foundry");
+    expect(p.id).toBe("gemini-artlab");
   });
 
   it("falls through to mock mode when ARTLAB_GEMINI_MODE=mock", async () => {

@@ -73,11 +73,11 @@ function computeEta(state: ArtLabRunStateLite): number | undefined {
 /**
  * Lifecycle of a `artlab/generate` runId, from the status tool's POV:
  *
- *   1. MCP `generate` writes `inbox/foundry/generate-<runId>.json`.
+ *   1. MCP `generate` writes `inbox/sdk/generate-<runId>.json`.
  *      → status returns `queued`, percent=0, phase="queued".
  *   2. Daemon's `sdk-poller` drains the inbox, writes
  *      `runs/<runId>/run-state.json` with phase=routed, enqueues the run, and
- *      moves the inbox file into `inbox/foundry/.processed/<runId>.json`.
+ *      moves the inbox file into `inbox/sdk/.processed/<runId>.json`.
  *      → status returns `running`, mapped from the run-state phase.
  *   3. Run-worker advances the run; eventually `phase=closed` with
  *      `promotedPackId` populated.
@@ -90,7 +90,7 @@ function computeEta(state: ArtLabRunStateLite): number | undefined {
  * runId was perfectly valid.
  */
 function inboxPathFor(workspaceRoot: string, runId: string): string {
-  return join(workspaceRoot, "inbox", "foundry", `generate-${runId}.json`);
+  return join(workspaceRoot, "inbox", "sdk", `generate-${runId}.json`);
 }
 
 /**
@@ -119,11 +119,11 @@ function queuedPayload(
  * that to flip back to `queued` (run-state.json now drives the picture), but
  * we expose it via this helper so callers can verify the poller actually
  * consumed the file. Returns true iff a `generate-<runId>.json` (live or
- * archived) ever landed in the foundry inbox.
+ * archived) ever landed in the sdk inbox.
  */
 function inboxFileEverSeen(workspaceRoot: string, runId: string): boolean {
   if (existsSync(inboxPathFor(workspaceRoot, runId))) return true;
-  const processed = join(workspaceRoot, "inbox", "foundry", ".processed");
+  const processed = join(workspaceRoot, "inbox", "sdk", ".processed");
   if (!existsSync(processed)) return false;
   try {
     return readdirSync(processed).includes(`${runId}.json`);

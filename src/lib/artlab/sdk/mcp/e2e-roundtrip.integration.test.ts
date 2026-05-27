@@ -14,7 +14,7 @@ beforeEach(() => {
   canonRoot = mkdtempSync(join(tmpdir(), "artlab-e2e-canon-"));
   packsRoot = mkdtempSync(join(tmpdir(), "artlab-e2e-packs-"));
   mkdirSync(join(workspaceRoot, "slots"), { recursive: true });
-  mkdirSync(join(workspaceRoot, "inbox", "foundry"), { recursive: true });
+  mkdirSync(join(workspaceRoot, "inbox", "sdk"), { recursive: true });
   mkdirSync(join(workspaceRoot, "runs"), { recursive: true });
   writeFileSync(join(workspaceRoot, "slots", "registry.json"), JSON.stringify({ slots: [] }));
   mkdirSync(join(canonRoot, "characters"), { recursive: true });

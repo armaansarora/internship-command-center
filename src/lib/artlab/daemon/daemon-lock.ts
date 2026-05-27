@@ -3,7 +3,7 @@
 // Single-instance lock for the ArtLab daemon. Codex's round-2 review surfaced
 // that launchd can respawn the daemon while the old process is still draining
 // (common during crash recovery), so two daemons end up racing on the same
-// `.artlab/engine/inbox/foundry/` directory. The poller's `wx`-mode queue
+// `.artlab/engine/inbox/sdk/` directory. The poller's `wx`-mode queue
 // writes catch the conflict but the symptom is silently duplicated work in
 // `daemon-errors.jsonl` rather than a clean refusal.
 //

@@ -44,7 +44,7 @@ async function buildMockPng(seedKey: string): Promise<Buffer> {
 }
 
 export function createMockArtLabImageProvider(opts: CreateMockArtLabImageProviderOptions = {}): ArtLabImageProvider {
-  const id = opts.id ?? "mock-foundry-image";
+  const id = opts.id ?? "mock-artlab-image";
   return {
     id,
     async generate(input: ArtLabImageProviderInput): Promise<ArtLabImageProviderResult> {

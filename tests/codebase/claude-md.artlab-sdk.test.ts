@@ -5,7 +5,7 @@ import { join } from "node:path";
 const ROOT = process.cwd();
 const CLAUDE = readFileSync(join(ROOT, "CLAUDE.md"), "utf8");
 
-describe("CLAUDE.md mentions the Tower Art Foundry SDK", () => {
+describe("CLAUDE.md mentions the ArtLab SDK", () => {
   it("contains a 'Tower Art Foundry' heading or paragraph", () => {
     expect(CLAUDE).toMatch(/Tower Art Foundry/);
   });

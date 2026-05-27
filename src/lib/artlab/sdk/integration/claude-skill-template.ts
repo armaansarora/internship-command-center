@@ -41,7 +41,7 @@ The **Tower Art ArtLab** is an MCP server (\`tower-art-foundry\`) that exposes t
 
 - Canon YAML lives in **\`${opts.repoRoot}/.artlab/canon/\`** — never edit promoted Asset Pack files directly; canon edits feed the next regeneration.
 - Promoted Asset Packs live in **\`${opts.repoRoot}/.artlab/engine/promoted/\`** — these are byte-protected by CI.
-- Inbox for new generation runs: **\`${opts.repoRoot}/.artlab/engine/inbox/foundry/\`** — written by \`artlab/generate\`, consumed by the ArtLab daemon.
+- Inbox for new generation runs: **\`${opts.repoRoot}/.artlab/engine/inbox/sdk/\`** — written by \`artlab/generate\`, consumed by the ArtLab daemon.
 
 ## Typical session flow
 

@@ -34,7 +34,7 @@ export interface BotCommandResult {
   message: TelegramOutboundMessage;
 }
 
-const KNOWN = ["status", "queue", "cancel", "health", "help", "decisions", "ask", "foundry"] as const;
+const KNOWN = ["status", "queue", "cancel", "health", "help", "decisions", "ask", "sdk"] as const;
 
 async function handleStatus(workspaceRoot: string, args: string[]): Promise<TelegramOutboundMessage> {
   const runsDir = join(workspaceRoot, "runs");
@@ -325,6 +325,6 @@ export async function handleBotCommand(input: BotCommandInput): Promise<BotComma
     case "help": return { kind: "text", message: helpTemplate() };
     case "decisions": return { kind: "text", message: handleDecisions(input.workspaceRoot, input.args) };
     case "ask": return { kind: "text", message: await handleAsk(input.workspaceRoot, input.args) };
-    case "foundry": return { kind: "text", message: await handleArtLab(input.workspaceRoot, input.args) };
+    case "sdk": return { kind: "text", message: await handleArtLab(input.workspaceRoot, input.args) };
   }
 }

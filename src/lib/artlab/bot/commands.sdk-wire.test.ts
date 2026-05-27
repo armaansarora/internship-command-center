@@ -12,20 +12,20 @@ beforeEach(() => {
   writeFileSync(join(workspaceRoot, "slots", "registry.json"), JSON.stringify({ slots: [] }));
 });
 
-describe("bot /foundry routing", () => {
-  it("/foundry without args returns help text", async () => {
+describe("bot /sdk routing", () => {
+  it("/sdk without args returns help text", async () => {
     const result = await handleBotCommand({
       workspaceRoot,
-      commandName: "foundry",
+      commandName: "sdk",
       args: [],
     });
-    expect(result.message.text).toMatch(/foundry status/i);
+    expect(result.message.text).toMatch(/sdk status/i);
   });
 
-  it("/foundry status returns the daemon snapshot", async () => {
+  it("/sdk status returns the daemon snapshot", async () => {
     const result = await handleBotCommand({
       workspaceRoot,
-      commandName: "foundry",
+      commandName: "sdk",
       args: ["status"],
     });
     expect(result.message.text).toMatch(/daemon/i);

@@ -97,7 +97,7 @@ export async function handleArtLabDiagnostics(
   const daemonUp = heartbeat
     ? Date.now() - new Date(heartbeat.at).getTime() < HEARTBEAT_STALE_MS
     : false;
-  const inboxDir = join(ctx.workspaceRoot, "inbox", "foundry");
+  const inboxDir = join(ctx.workspaceRoot, "inbox", "sdk");
   const backlogDepth = existsSync(inboxDir)
     ? readdirSync(inboxDir).filter((f) => f.endsWith(".json")).length
     : 0;

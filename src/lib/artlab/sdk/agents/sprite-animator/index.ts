@@ -340,8 +340,8 @@ async function buildSpriteManifest(
     primaryFileRelPath: written.frameManifests[0]!.path,
     generation: {
       agentName: "sprite-animator",
-      provider: generation.mode === "real" ? "foundry-sprite-real" : "foundry-sprite-mock",
-      modelId: generation.mode === "real" ? "foundry-sprite-v1" : "foundry-sprite-mock",
+      provider: generation.mode === "real" ? "artlab-sprite-real" : "artlab-sprite-mock",
+      modelId: generation.mode === "real" ? "artlab-sprite-v1" : "artlab-sprite-mock",
       seed: input.seed ?? 0,
       costCents: generation.costCents,
       durationMs: generationMs,
@@ -441,8 +441,8 @@ async function buildLottieManifest(
     primaryFileRelPath: written.lottiePath,
     generation: {
       agentName: "sprite-animator",
-      provider: generation.mode === "real" ? "foundry-lottie-real" : "foundry-lottie-mock",
-      modelId: generation.mode === "real" ? "foundry-lottie-v1" : "foundry-lottie-mock",
+      provider: generation.mode === "real" ? "artlab-lottie-real" : "artlab-lottie-mock",
+      modelId: generation.mode === "real" ? "artlab-lottie-v1" : "artlab-lottie-mock",
       seed: input.seed ?? 0,
       costCents: generation.costCents,
       durationMs: generationMs,

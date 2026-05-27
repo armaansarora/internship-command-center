@@ -20,10 +20,10 @@ export interface ArtLabTelegramReply {
 
 const HELP = [
   "ArtLab — available commands:",
-  " - /foundry status        — daemon health + backlog",
-  " - /foundry list <kind>   — list packs (kinds: character/floor/ui-texture/icon/sprite-animation/lottie) or 'character' canon",
-  " - /foundry generate <kind> <description...> — queue a new run",
-  " - /foundry preview <packId> — send the promoted image",
+  " - /sdk status        — daemon health + backlog",
+  " - /sdk list <kind>   — list packs (kinds: character/floor/ui-texture/icon/sprite-animation/lottie) or 'character' canon",
+  " - /sdk generate <kind> <description...> — queue a new run",
+  " - /sdk preview <packId> — send the promoted image",
 ].join("\n");
 
 async function statusReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramReply> {
@@ -60,7 +60,7 @@ async function generateReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramR
   const kind = (input.args[1] ?? "") as ArtLabAssetKind;
   const description = input.args.slice(2).join(" ").trim();
   if (!description || description.length < 8) {
-    return { text: "Usage: /foundry generate <kind> <description (>= 8 chars)>" };
+    return { text: "Usage: /sdk generate <kind> <description (>= 8 chars)>" };
   }
   const run = await handleArtLabGenerate({ kind, description }, { workspaceRoot: input.workspaceRoot });
   return { text: `Queued ${kind} run ${run.runId} (status=${run.status}).` };
@@ -68,7 +68,7 @@ async function generateReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramR
 
 async function previewReply(input: ArtLabTelegramArgs): Promise<ArtLabTelegramReply> {
   const packId = input.args[1];
-  if (!packId) return { text: "Usage: /foundry preview <packId>" };
+  if (!packId) return { text: "Usage: /sdk preview <packId>" };
   const pack = await handleArtLabAssetPackGet({ packId }, { packsRoot: input.packsRoot });
   const primary = pack.files.find((f) => f.role === "primary") ?? pack.files[0];
   if (!primary) return { text: `Pack ${packId} has no files to preview.` };
@@ -94,6 +94,6 @@ export async function handleArtLabTelegramCommand(input: ArtLabTelegramArgs): Pr
     case "preview":
       return previewReply(input);
     default:
-      return { text: `Unknown /foundry subcommand: ${sub}.\n\n${HELP}` };
+      return { text: `Unknown /sdk subcommand: ${sub}.\n\n${HELP}` };
   }
 }

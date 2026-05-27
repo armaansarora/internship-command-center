@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 const STRUCTURE = readFileSync(join(process.cwd(), "STRUCTURE.md"), "utf8");
 
-describe("STRUCTURE.md mentions the foundry tree", () => {
+describe("STRUCTURE.md mentions the ArtLab SDK tree", () => {
   it("contains a 'Tower Art Foundry SDK' heading", () => {
     expect(STRUCTURE).toMatch(/Tower Art Foundry SDK/);
   });

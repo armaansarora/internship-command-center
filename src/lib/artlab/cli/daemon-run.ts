@@ -209,7 +209,7 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
   const { gold, muted } = await import("./ui/widgets");
 
   // Codex round-2 review: launchd respawn can race two daemons against the
-  // same `.artlab/engine/inbox/foundry/` directory. The lock file refuses a
+  // same `.artlab/engine/inbox/sdk/` directory. The lock file refuses a
   // second instance unless the prior holder's PID is no longer alive.
   if (!existsSync(input.workspaceRoot)) mkdirSync(input.workspaceRoot, { recursive: true });
   let lock: DaemonLockHandle;

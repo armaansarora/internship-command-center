@@ -14,7 +14,7 @@ export interface RunCharacterSubcommandInput {
   stderr: (line: string) => void;
 }
 
-const USAGE = `Usage: foundry character "<Character Name>" [--resume-from <stage>] [--seed <n>]
+const USAGE = `Usage: artlab character "<Character Name>" [--resume-from <stage>] [--seed <n>]
   Stages: concept-board | anchor-lock | variant-fan-out | cutout-and-feather | composite-judge | manifest-build
 `;
 
@@ -94,13 +94,13 @@ export async function runCharacterSubcommand(input: RunCharacterSubcommandInput)
     ensureCharacterSlots(characterId, f);
   }
 
-  input.stdout(`foundry character: running ${characterId} (provider=${input.providerMode}, resumeFrom=${resumeFrom ?? "none"})`);
+  input.stdout(`artlab character: running ${characterId} (provider=${input.providerMode}, resumeFrom=${resumeFrom ?? "none"})`);
   const result = await runCharacterMaster({
     input: {
       characterId,
       canonRoot: input.canonRoot,
       workspaceRoot: input.workspaceRoot,
-      providerId: input.providerMode === "mock" ? "mock-foundry-image" : "gemini-foundry",
+      providerId: input.providerMode === "mock" ? "mock-artlab-image" : "gemini-artlab",
       resumeFromStage: resumeFrom,
       seed: seed ?? undefined,
     },
@@ -108,12 +108,12 @@ export async function runCharacterSubcommand(input: RunCharacterSubcommandInput)
     emit: (e) => input.stdout(`event ${e.kind}${"stage" in e ? ` stage=${e.stage}` : ""}`),
   });
   if (!result.ok) {
-    input.stderr(`foundry character: failed at stage=${result.failure.stage} reason=${result.failure.reason}`);
+    input.stderr(`artlab character: failed at stage=${result.failure.stage} reason=${result.failure.reason}`);
     if (result.failure.offendingPath) {
       input.stderr(`offending: ${result.failure.offendingPath}`);
     }
     return 1;
   }
-  input.stdout(`foundry character: ok pack=${result.pack.packDir} packId=${result.pack.manifest.packId}`);
+  input.stdout(`artlab character: ok pack=${result.pack.packDir} packId=${result.pack.manifest.packId}`);
   return 0;
 }
