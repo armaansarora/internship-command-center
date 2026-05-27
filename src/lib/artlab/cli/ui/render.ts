@@ -6,6 +6,7 @@
 import type { ArtLabQueueEntry } from "@/lib/artlab/queue/queue";
 import type { ArtLabHealthSnapshot } from "@/lib/artlab/health/snapshot";
 import type { ArtLabRunState } from "@/lib/artlab/types";
+import { formatDaemonBanner } from "@/lib/artlab/health/scanners/daemon-errors";
 import { box, table, type ColumnSpec } from "./box";
 import { bar, header, kvList, muted, statusDot, type KvRow } from "./widgets";
 import { towerCream, towerGoldBright, towerSlate } from "./ansi";
@@ -103,6 +104,10 @@ export function renderQueueView(queued: ArtLabQueueEntry[]): string {
 
 export function renderHealthView(snapshot: ArtLabHealthSnapshot): string {
   const out: string[] = [];
+  // First line: daemon liveness banner. Plain ASCII / Unicode glyphs, no ANSI
+  // escapes — must stay grep-able for fresh sessions that pipe `artlab health`
+  // through `head -1` to answer "is the daemon up?".
+  out.push(formatDaemonBanner(snapshot.daemon));
   out.push(header("Engine health", snapshot.workspaceRoot));
 
   const spendRows: KvRow[] = [

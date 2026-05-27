@@ -79,3 +79,26 @@ export function isHeartbeatStale(staleMs: number | undefined): boolean {
   if (typeof staleMs !== "number") return false;
   return staleMs > HEARTBEAT_STALE_THRESHOLD_MS;
 }
+
+/**
+ * One-line daemon liveness banner for the top of `artlab health`.
+ *
+ * Fresh sessions need to know "is the daemon up?" at a glance, without
+ * grepping the heartbeat file or running `ps`. Three cases:
+ *   - no heartbeat file        → ✗ Daemon down (no heartbeat)
+ *   - heartbeat present, stale → ✗ Daemon down (pid <PID> dead, heartbeat <N>s old)
+ *   - heartbeat present, fresh → ✓ Daemon alive (pid <PID>, heartbeat <N>s old)
+ *
+ * Staleness is computed via {@link isHeartbeatStale}. If the daemon isn't
+ * writing heartbeats, it's effectively down regardless of whether the OS
+ * still has the pid — so we don't bother with `process.kill(pid, 0)`.
+ */
+export function formatDaemonBanner(daemon: DaemonErrorsScanResult): string {
+  if (!daemon.heartbeat) return "✗ Daemon down (no heartbeat)";
+  const { pid, staleMs } = daemon.heartbeat;
+  const ageSeconds = Math.round(staleMs / 1000);
+  if (isHeartbeatStale(staleMs)) {
+    return `✗ Daemon down (pid ${pid} dead, heartbeat ${ageSeconds}s old)`;
+  }
+  return `✓ Daemon alive (pid ${pid}, heartbeat ${ageSeconds}s old)`;
+}
