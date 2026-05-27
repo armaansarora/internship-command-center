@@ -29,17 +29,25 @@ export function computeArtLabClaudeSnippet(opts: { repoRoot: string }): ArtLabCl
   };
 }
 
+export interface ArtLabClaudeMergeResult {
+  merged: Record<string, unknown>;
+  /** True iff a stale `mcpServers` entry was removed during the merge — the caller should announce it so the operator knows their settings.json mutated. */
+  purgedLegacy: boolean;
+}
+
 export function mergeArtLabClaudeSnippet(
   existing: Record<string, unknown>,
   snippet: ArtLabClaudeSnippet,
-): Record<string, unknown> {
+): ArtLabClaudeMergeResult {
   const merged = { ...existing };
   const existingServers = (existing.mcpServers as Record<string, unknown> | undefined) ?? {};
+  const { "tower-art-foundry": legacy, ...preservedServers } = existingServers;
+  const purgedLegacy = legacy !== undefined;
   merged.mcpServers = {
-    ...existingServers,
+    ...preservedServers,
     "artlab": snippet.mcpServers["artlab"],
   };
-  return merged;
+  return { merged, purgedLegacy };
 }
 
 function atomicWriteJson(path: string, payload: unknown): void {
@@ -77,7 +85,12 @@ async function main(): Promise<number> {
       return 1;
     }
   }
-  const merged = mergeArtLabClaudeSnippet(existing, snippet);
+  const { merged, purgedLegacy } = mergeArtLabClaudeSnippet(existing, snippet);
+  if (purgedLegacy) {
+    process.stderr.write(
+      `artlab-sdk: purged stale "tower-art-foundry" mcpServers entry from ${settingsPath}\n`,
+    );
+  }
 
   process.stdout.write(`About to write the following snippet to ${settingsPath}:\n\n`);
   process.stdout.write(`${JSON.stringify(snippet, null, 2)}\n\n`);

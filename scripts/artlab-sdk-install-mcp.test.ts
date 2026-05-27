@@ -29,7 +29,7 @@ describe("artlab-sdk-install-mcp", () => {
 
   it("mergeArtLabClaudeSnippet preserves existing settings keys", () => {
     const existing = { theme: "dark", mcpServers: { existing: { command: "echo" } } };
-    const merged = mergeArtLabClaudeSnippet(
+    const { merged } = mergeArtLabClaudeSnippet(
       existing,
       computeArtLabClaudeSnippet({ repoRoot: "/r" }),
     );
@@ -44,7 +44,7 @@ describe("artlab-sdk-install-mcp", () => {
         "artlab": { command: "STALE", args: [] },
       },
     };
-    const merged = mergeArtLabClaudeSnippet(
+    const { merged } = mergeArtLabClaudeSnippet(
       existing,
       computeArtLabClaudeSnippet({ repoRoot: "/r" }),
     );
@@ -60,7 +60,39 @@ describe("artlab-sdk-install-mcp", () => {
     const existing = JSON.parse(
       readFileSync(join(claudeHome, "settings.json"), "utf8"),
     ) as Record<string, unknown>;
-    const merged = mergeArtLabClaudeSnippet(existing, computed);
+    const { merged } = mergeArtLabClaudeSnippet(existing, computed);
     expect((merged.mcpServers as Record<string, unknown>)["artlab"]).toBeDefined();
+  });
+
+  it("mergeArtLabClaudeSnippet purges stale tower-art-foundry entry while preserving unrelated entries", () => {
+    const existing = {
+      theme: "dark",
+      mcpServers: {
+        "tower-art-foundry": { command: "STALE", args: ["legacy"] },
+        othertool: { command: "echo", args: ["hello"] },
+      },
+    };
+    const result = mergeArtLabClaudeSnippet(
+      existing,
+      computeArtLabClaudeSnippet({ repoRoot: "/r" }),
+    );
+    const servers = result.merged.mcpServers as Record<string, unknown>;
+    expect(servers["artlab"]).toBeDefined();
+    expect(servers.othertool).toBeDefined();
+    expect(servers["tower-art-foundry"]).toBeUndefined();
+    expect(result.purgedLegacy).toBe(true);
+    // unrelated top-level keys still preserved
+    expect(result.merged.theme).toBe("dark");
+  });
+
+  it("mergeArtLabClaudeSnippet reports purgedLegacy=false when no stale entry exists", () => {
+    const existing = { mcpServers: { othertool: { command: "echo" } } };
+    const result = mergeArtLabClaudeSnippet(
+      existing,
+      computeArtLabClaudeSnippet({ repoRoot: "/r" }),
+    );
+    expect(result.purgedLegacy).toBe(false);
+    expect((result.merged.mcpServers as Record<string, unknown>).othertool).toBeDefined();
+    expect((result.merged.mcpServers as Record<string, unknown>)["artlab"]).toBeDefined();
   });
 });
