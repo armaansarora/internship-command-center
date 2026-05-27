@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -310,6 +310,54 @@ describe("runCharacterMaster", () => {
     }
     const qaFailures = events.filter((e) => e.kind === "qa-failure");
     expect(qaFailures.some((e) => e.gateName === "silhouette-diversity")).toBe(true);
+  });
+
+  it("resolves canon via roleSlug fallback when characterId is the short slug ('cno'), logging the fallback once", async () => {
+    // Runtime callers identify characters by their short roleSlug (e.g. "cno")
+    // while canon records are keyed by header.id (e.g. "sol-navarro"). The
+    // orchestrator must fall back to roleSlug, emit a single INFO log, and
+    // proceed past the canon-lookup step (i.e. NOT return "no canon for
+    // character \"cno\""). We don't need a full run for that — we only need
+    // the first stage to start, which proves canon resolution succeeded.
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    const events: string[] = [];
+    let firstStartedStage: string | undefined;
+    const result = await runCharacterMaster({
+      input: { characterId: "cno", canonRoot, workspaceRoot, providerId: "mock-artlab-image", resumeFromStage: null, seed: 42 },
+      provider: createPngArtLabImageProvider(),
+      emit: (e) => {
+        events.push(e.kind);
+        if (e.kind === "stage-started" && firstStartedStage === undefined) {
+          firstStartedStage = e.stage;
+        }
+      },
+    });
+    // canon-lookup succeeded → at least one stage started, and if it failed
+    // the failure must NOT be the "no canon for character" message.
+    expect(firstStartedStage).toBe("concept-board");
+    if (!result.ok) {
+      expect(result.failure.reason).not.toMatch(/no canon for character/);
+    }
+    // The fallback log fired exactly once with the expected payload.
+    const fallbackCalls = infoSpy.mock.calls.filter((call) => {
+      if (typeof call[0] !== "string") return false;
+      try {
+        const parsed = JSON.parse(call[0]);
+        return parsed?.event === "canon-roleslug-fallback";
+      } catch {
+        return false;
+      }
+    });
+    expect(fallbackCalls.length).toBe(1);
+    const parsed = JSON.parse(fallbackCalls[0][0] as string);
+    expect(parsed).toEqual({
+      level: "info",
+      event: "canon-roleslug-fallback",
+      idOrRoleSlug: "cno",
+      resolvedHeaderId: "sol-navarro",
+      resolvedRoleSlug: "cno",
+    });
+    infoSpy.mockRestore();
   });
 
   it("skips concept-board + anchor-lock when resumeFromStage is variant-fan-out", async () => {

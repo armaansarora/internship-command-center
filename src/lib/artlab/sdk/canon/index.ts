@@ -10,4 +10,5 @@ export * from "./loader";
 export * from "./load-canon";
 export * from "./load-floor";
 export * from "./load-rules";
+export * from "./resolve-character";
 export * from "./validate";

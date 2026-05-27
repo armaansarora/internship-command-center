@@ -1,6 +1,6 @@
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { loadArtLabCanon } from "@/lib/artlab/sdk/canon";
+import { loadArtLabCanon, resolveCanonCharacter } from "@/lib/artlab/sdk/canon";
 import type { ArtLabCharacterCanon } from "@/lib/artlab/sdk/canon";
 import type { ArtLabImageProvider } from "@/lib/artlab/sdk/providers/types";
 import type { CreatedArtLabAssetPack } from "@/lib/artlab/sdk/asset-pack";
@@ -53,12 +53,6 @@ async function fileExists(p: string): Promise<boolean> {
   }
 }
 
-function findCharacter(canonChars: readonly ArtLabCharacterCanon[], id: string): ArtLabCharacterCanon {
-  const found = canonChars.find((c) => c.header.id === id);
-  if (!found) throw new Error(`runCharacterMaster: no canon for character "${id}"`);
-  return found;
-}
-
 export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<RunCharacterMasterResult> {
   const { input, provider, emit } = args;
   const runWorkspace = join(input.workspaceRoot, "runs", input.characterId);
@@ -70,12 +64,22 @@ export async function runCharacterMaster(args: RunCharacterMasterArgs): Promise<
   } catch (err) {
     return { ok: false, failure: { stage: "concept-board", reason: `canon load failed: ${(err as Error).message}` }, runWorkspace };
   }
-  let character: ArtLabCharacterCanon;
-  try {
-    character = findCharacter(canon.characters, input.characterId);
-  } catch (err) {
-    return { ok: false, failure: { stage: "concept-board", reason: (err as Error).message }, runWorkspace };
+  const resolved = resolveCanonCharacter(canon.characters, input.characterId, {
+    log: (entry) => {
+      console.info(JSON.stringify(entry));
+    },
+  });
+  if (!resolved) {
+    return {
+      ok: false,
+      failure: {
+        stage: "concept-board",
+        reason: `runCharacterMaster: no canon for character "${input.characterId}"`,
+      },
+      runWorkspace,
+    };
   }
+  const character: ArtLabCharacterCanon = resolved;
   const paletteTokens = canon.palettes.find((p) => p.header.id === character.paletteRef)?.tokens ?? {};
   const stages = stagesFrom(input.resumeFromStage);
 
