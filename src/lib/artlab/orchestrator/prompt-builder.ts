@@ -155,6 +155,8 @@ function canonicalFallbackPrompts(ctx: TowerCharacterContext): ConceptLanePrompt
     prompt: [
       base,
       ``,
+      `Match exact face/hair/skin/age/proportions/palette from canon. Vary ONLY styling/wardrobe/pose — never identity.`,
+      ``,
       `THIS LANE — ${axis.axis}: ${axis.clause}`,
       ``,
       `COMPOSITION:`,
@@ -200,6 +202,7 @@ function buildSingleImagePrompt(ctx: TowerCharacterContext): string {
   ];
   if (ctx.accent) lines.push(`  • Color accent (lead color in palette): ${ctx.accent}`);
   if (ctx.artDirectionNotes) lines.push(`  • Art direction notes: ${ctx.artDirectionNotes}`);
+  lines.push(`  • Match exact face/hair/skin/age/proportions/palette from canon. Vary ONLY styling/wardrobe/pose — never identity.`);
   return lines.join("\n");
 }
 

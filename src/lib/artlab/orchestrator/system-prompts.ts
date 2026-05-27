@@ -39,6 +39,7 @@ export const SYSTEM_PROMPTS_BY_KIND: Record<ArtLabLlmDecisionRequest["kind"], st
     "IDENTITY (every prompt must lock — derived from characterContext.bible):",
     "  • Visual archetype, silhouette, wardrobe, signature props, mobile read, accent color exactly per the bible.",
     "  • Embed all forbidden-trait language from negativePrompt verbatim.",
+    "  • Match exact face/hair/skin/age/proportions/palette from canon. Vary ONLY styling/wardrobe/pose — never identity.",
     "",
     "VARIATION across the 5 lanes — these must look like FIVE DIFFERENT design directions of the same role, not 5 stance-only variations of the same face. Vary multiple axes per lane:",
     "  • age impression — span early-30s through 50s across the 5 lanes (one lane younger, one mid-career, one senior with gray, etc.)",
