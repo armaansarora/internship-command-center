@@ -11,6 +11,7 @@ describe("artlab CLI shell", () => {
       "queue",
       "health",
       "doctor",
+      "show",
       "cancel",
       "daemon",
       "bot",
