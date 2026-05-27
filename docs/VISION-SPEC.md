@@ -8,7 +8,7 @@
 **Implementation alignment note (2026-04-17):**
 - Floor dialogue experiences now share common primitives while preserving floor-specific theme/personality wrappers.
 - Character interaction behavior remains machine-driven per floor, standardized by a shared machine factory.
-- Architecture details live in `docs/ARCHITECTURE-MAP.md`; this vision doc remains the UX canon.
+- This vision doc remains the UX canon for the spatial experience.
 
 ---
 

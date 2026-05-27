@@ -25,6 +25,7 @@
     "artlab:sdk-install-mcp": "tsx scripts/artlab-sdk-install-mcp.ts",
     "artlab:sdk-install-claude-skill": "tsx scripts/artlab-sdk-install-claude-skill.ts",
     "artlab:sdk-install-antigravity-workspace": "tsx scripts/artlab-sdk-install-antigravity-workspace.ts",
+    "check:links": "tsx scripts/check-dead-doc-links.ts",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",

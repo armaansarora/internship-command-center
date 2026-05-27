@@ -91,7 +91,7 @@ Answer from these sources, in this order:
 
 - `npm run art:status`
 - `.artlab/README.md`
-- `docs/CREATIVE-PRODUCTION-ENGINE.md`
+- `docs/legacy/CREATIVE-PRODUCTION-ENGINE.md`
 - `docs/CHARACTER-ART-PIPELINE.md`
 - `docs/CHARACTER-ASSET-HANDOFF.md`
 - `src/lib/visual-assets/approved-character-assets.generated.json`

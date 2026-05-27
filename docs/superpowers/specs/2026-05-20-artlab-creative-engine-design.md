@@ -2,7 +2,7 @@
 
 **Status:** Design approved, not yet implemented
 **Author:** Brainstormed with Claude (Opus 4.7) on 2026-05-20
-**Supersedes:** `docs/CREATIVE-PRODUCTION-ENGINE-V1-FINAL-PLAN.md`
+**Supersedes:** `docs/legacy/CREATIVE-PRODUCTION-ENGINE.md`
 **Implementation target:** `src/lib/artlab/` (new); legacy `src/lib/creative-production/` retires over 9-12 weeks
 **Migration approach:** Greenfield with compat bridge (legacy frozen, drained asset-type by asset-type)
 
@@ -669,7 +669,7 @@ These are invariants the engine must enforce. Tests prove each.
 
 All 12 existing docs move to `docs/legacy/`. SKILL.md slims from 220 lines → ~80 lines covering only the new CLI + Telegram surface + the two gates + safety rules.
 
-CLAUDE.md updates: replace "Creative Production Engine" section with the new ArtLab surface; legacy section moves to `docs/legacy/CLAUDE-LEGACY.md` for reference.
+CLAUDE.md updates: replace "Creative Production Engine" section with the new ArtLab surface.
 
 ---
 
