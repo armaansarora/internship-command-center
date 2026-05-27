@@ -17,10 +17,10 @@ function runNextBuild(timeoutMs = 240_000): Promise<{ code: number | null; stdou
   });
 }
 
-describe("foundry-demo page builds", () => {
-  it("next build exits 0 with the foundry-demo route present", async () => {
+describe("artlab-demo page builds", () => {
+  it("next build exits 0 with the artlab-demo route present", async () => {
     const result = await runNextBuild();
     expect(result.code).toBe(0);
-    expect(result.stdout + result.stderr).toMatch(/foundry-demo/);
+    expect(result.stdout + result.stderr).toMatch(/artlab-demo/);
   }, 240_000);
 });

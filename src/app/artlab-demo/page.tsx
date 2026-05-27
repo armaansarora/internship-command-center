@@ -63,7 +63,7 @@ export default function ArtLabDemoPage(): JSX.Element {
       <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: 36 }}>Tower Art ArtLab — modality demo</h1>
       <p style={{ maxWidth: 720, marginBottom: 32 }}>
         Each block below renders one promoted Asset Pack via the integration
-        snippet that <code>foundry/asset_pack_integration</code> emits. Shipped
+        snippet that <code>artlab/asset_pack_integration</code> emits. Shipped
         modalities render the real asset; modalities still awaiting a real
         promotion render a labelled placeholder rather than a broken image.
       </p>

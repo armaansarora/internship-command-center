@@ -94,6 +94,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/foundry-demo",
+        destination: "/artlab-demo",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 // Wrap with Sentry only when DSN is configured. Use dynamic require rather
