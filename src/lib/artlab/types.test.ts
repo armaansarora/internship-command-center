@@ -24,7 +24,7 @@ describe("artlab shared types", () => {
     ]);
   });
 
-  it("declares all 7 blockers", () => {
+  it("declares all 8 blockers", () => {
     expect(ARTLAB_BLOCKERS).toEqual([
       "needs-human",
       "budget-blocked",
@@ -33,6 +33,7 @@ describe("artlab shared types", () => {
       "style-failed",
       "upgrade-required",
       "cancelled",
+      "concept-critique-fallback",
     ]);
   });
 

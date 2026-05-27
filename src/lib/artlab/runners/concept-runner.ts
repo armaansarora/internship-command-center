@@ -29,6 +29,7 @@ import { loadTowerContext, pickCharacterContext } from "../context/tower-context
 import { recommendDirection } from "../orchestrator/recommend-direction";
 import { readConceptFeedback } from "../brainstorm/feedback-ledger";
 import { summariseFeedbackForBrain } from "../memory/feedback-summary";
+import { writeConceptCritiqueFallbackBlocker } from "./concept-critique-blocker";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const TARGET_LANES = 5;
@@ -229,6 +230,11 @@ export const conceptRunner: ArtLabRunner = {
 
     const laneIndexes = Array.from({ length: TARGET_LANES }, (_, i) => i + 1);
     const useReal = shouldUseRealGemini();
+    // Single source of truth for the workspace root — used both by brain
+    // construction below and by the concept-critique-fallback blocker
+    // writer further down. Mirrors what the rest of the runner already does
+    // (process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir).
+    const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
     let slotOutputs: ConceptSlotOutputs[];
     let promptsUsed: ConceptLanePrompt[] = [];
     let promptSource: "brain" | "canonical-fallback" | "skipped" = "skipped";
@@ -239,7 +245,6 @@ export const conceptRunner: ArtLabRunner = {
 
     if (useReal && input.characterId) {
       try {
-        const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
         const brain = buildBrain(workspaceRoot);
         recommendBrain = brain;
         const bundle = await loadTowerContext({ workspaceRoot });
@@ -367,11 +372,19 @@ export const conceptRunner: ArtLabRunner = {
       // grounded critique with per-lane notes + star ratings. This is the
       // brainstorm-mode killer feature: real visual critique, not just
       // "middle lane is the safe pick".
-      try {
-        const laneImages = slotOutputs
-          .filter((s) => s.mode === "gemini")  // only critique real images, not placeholders
-          .map((s) => ({ path: s.pngPath }));
-        if (laneImages.length === slotOutputs.length && laneImages.length === promptsUsed.length) {
+      //
+      // Two fallback paths surface as `concept-critique-fallback`:
+      //   • brain.decide throws (network / 401 / 5xx) → run still ok, but
+      //     no quality gate ran.
+      //   • laneImages count mismatch (not every lane has a real image) →
+      //     critique block is skipped silently.
+      // Both write a blocker into run-state + a daemon-error line so the
+      // operator gets a signal in /status and `artlab health`.
+      const laneImages = slotOutputs
+        .filter((s) => s.mode === "gemini")  // only critique real images, not placeholders
+        .map((s) => ({ path: s.pngPath }));
+      if (laneImages.length === slotOutputs.length && laneImages.length === promptsUsed.length) {
+        try {
           const critiqueResult = await recommendBrain.decide({
             kind: "critique-concept-board",
             input: {
@@ -403,9 +416,16 @@ export const conceptRunner: ArtLabRunner = {
           if (critiqueResult.outputJson && typeof critiqueResult.outputJson === "object") {
             writeFileSync(join(input.runDir, "concept-critique.json"), JSON.stringify(critiqueResult.outputJson, null, 2));
           }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          writeConceptCritiqueFallbackBlocker(workspaceRoot, input.runDir, `brain failed: ${message}`);
         }
-      } catch {
-        // swallow — critique is optional; phase-notifier falls back to deterministic caption
+      } else {
+        writeConceptCritiqueFallbackBlocker(
+          workspaceRoot,
+          input.runDir,
+          `laneImages mismatch (real=${laneImages.length} expected=${slotOutputs.length})`,
+        );
       }
     }
 

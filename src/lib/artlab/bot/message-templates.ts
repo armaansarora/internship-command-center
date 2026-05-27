@@ -262,6 +262,7 @@ const BLOCKER_HINTS: Record<string, string> = {
   "needs-human": "Engine paused for your input. Reply to the latest gate above.",
   "cancelled": "Already cancelled. No further action needed.",
   "upgrade-required": "Engine version mismatch — ask the operator to redeploy.",
+  "concept-critique-fallback": "Concept critique fell back (brain unavailable). Run still produced lanes; <code>/cancel</code> if you want a fresh attempt with brain logged.",
 };
 
 export function blockerNotice(input: BlockerNoticeInput): TelegramOutboundMessage {

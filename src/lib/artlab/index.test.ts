@@ -6,7 +6,7 @@ describe("artlab public surface", () => {
     expect(ARTLAB_PHASES.length).toBe(13);
   });
   it("re-exports blocker enum", () => {
-    expect(ARTLAB_BLOCKERS.length).toBe(7);
+    expect(ARTLAB_BLOCKERS.length).toBe(8);
   });
   it("exports workspace path constant", () => {
     expect(ARTLAB_WORKSPACE_RELATIVE).toBe(".artlab/engine");

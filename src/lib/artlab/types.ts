@@ -37,6 +37,7 @@ export const ARTLAB_BLOCKERS = [
   "style-failed",
   "upgrade-required",
   "cancelled",
+  "concept-critique-fallback",
 ] as const;
 export type ArtLabBlocker = (typeof ARTLAB_BLOCKERS)[number];
 
