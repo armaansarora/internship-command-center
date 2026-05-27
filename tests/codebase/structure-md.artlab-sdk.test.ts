@@ -6,18 +6,18 @@ const STRUCTURE = readFileSync(join(process.cwd(), "STRUCTURE.md"), "utf8");
 
 describe("STRUCTURE.md mentions the ArtLab SDK tree", () => {
   it("contains a 'ArtLab SDK' heading", () => {
-    expect(STRUCTURE).toMatch(/ArtLab SDK|Tower Art Foundry SDK/);
+    expect(STRUCTURE).toMatch(/ArtLab SDK/);
   });
 
-  it("documents src/lib/foundry/mcp/", () => {
-    expect(STRUCTURE).toMatch(/src\/lib\/foundry\/mcp/);
+  it("documents src/lib/artlab/sdk/mcp/", () => {
+    expect(STRUCTURE).toMatch(/src\/lib\/artlab\/sdk\/mcp/);
   });
 
-  it("documents src/lib/foundry/brain/", () => {
-    expect(STRUCTURE).toMatch(/src\/lib\/foundry\/brain/);
+  it("documents src/lib/artlab/sdk/brain/", () => {
+    expect(STRUCTURE).toMatch(/src\/lib\/artlab\/sdk\/brain/);
   });
 
   it("documents scripts/artlab-sdk-mcp.ts", () => {
-    expect(STRUCTURE).toMatch(/scripts\/foundry-mcp\.ts/);
+    expect(STRUCTURE).toMatch(/scripts\/artlab-sdk-mcp\.ts/);
   });
 });

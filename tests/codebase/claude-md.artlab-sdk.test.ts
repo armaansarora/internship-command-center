@@ -7,7 +7,7 @@ const CLAUDE = readFileSync(join(ROOT, "CLAUDE.md"), "utf8");
 
 describe("CLAUDE.md mentions the ArtLab SDK", () => {
   it("contains a 'ArtLab SDK' heading or paragraph", () => {
-    expect(CLAUDE).toMatch(/ArtLab SDK|Tower Art Foundry SDK/);
+    expect(CLAUDE).toMatch(/ArtLab SDK/);
   });
 
   it("references the MCP server identity", () => {

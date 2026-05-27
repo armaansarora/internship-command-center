@@ -1,4 +1,18 @@
-# Tower Art Foundry SDK — Master Implementation Plan
+# Tower Art Foundry SDK — Master Implementation Plan (LEGACY ARCHIVE)
+
+> **STATUS: HISTORICAL ARCHIVE — KEPT VERBATIM.** Phases 0–8 in this plan are
+> complete. The project subsequently rebranded the SDK to **ArtLab SDK** —
+> see `CLAUDE.md` for the current naming convention ("Single brand name:
+> ArtLab"). This document is preserved as written so its rationale, scope,
+> and acceptance criteria remain traceable. Every "Foundry" / "foundry"
+> reference below refers to the now-renamed surface: directory
+> `src/lib/foundry/` is now `src/lib/artlab/sdk/`, npm scripts `foundry:*`
+> are now `artlab:sdk-*`, MCP server `tower-art-foundry` is now `artlab`,
+> docs `docs/foundry/` are now `docs/artlab/sdk/`. Do **not** rewrite this
+> file or use it as a source of current naming.
+
+---
+
 
 > **For agentic workers — required execution skill stack (use ALL of these together):**
 > 1. **`superpowers:subagent-driven-development`** — fresh implementer subagent per task (recommended). Alternative: `superpowers:executing-plans` for batched in-session execution.
