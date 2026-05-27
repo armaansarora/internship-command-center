@@ -13,7 +13,7 @@ Usage:
 
 Environment:
   ARTLAB_WORKSPACE_ROOT    Path to ArtLab workspace (default: .artlab/engine)
-  ARTLAB_CANON_ROOT        Path to canon root      (default: .artlab/canon)
+  ARTLAB_CANON_ROOT        Path to canon root      (default: docs/artlab/sdk/canon)
   ARTLAB_PACKS_ROOT        Path to promoted packs  (default: .artlab/engine/promoted)
   ARTLAB_SLOT_REGISTRY     Path to slot registry   (default: .artlab/engine/slots/registry.json)
   ARTLAB_MEMORY_DIR        Path to memory ledger   (default: .artlab/engine/memory)
@@ -55,7 +55,7 @@ async function main(argv: string[]): Promise<number> {
 
   const cwd = process.cwd();
   const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? join(cwd, ".artlab", "engine");
-  const canonRoot = process.env.ARTLAB_CANON_ROOT ?? join(cwd, ".artlab", "canon");
+  const canonRoot = process.env.ARTLAB_CANON_ROOT ?? join(cwd, "docs", "artlab", "sdk", "canon");
   const packsRoot = process.env.ARTLAB_PACKS_ROOT ?? join(workspaceRoot, "promoted");
   const slotRegistryPath =
     process.env.ARTLAB_SLOT_REGISTRY ?? join(workspaceRoot, "slots", "registry.json");
