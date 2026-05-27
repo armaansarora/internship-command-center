@@ -17,7 +17,6 @@ const ARTLAB_SUBDIRS = [
   "docs/artlab/sdk/canon/motion-language",
   "docs/artlab/sdk/canon/space-tokens",
   "docs/artlab/sdk/canon/iconography-rules",
-  ".artlab/sdk",
 ];
 
 describe("artlab sdk scaffold", () => {
