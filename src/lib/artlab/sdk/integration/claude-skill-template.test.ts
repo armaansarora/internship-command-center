@@ -22,7 +22,7 @@ describe("renderArtLabClaudeSkill", () => {
 
   it("includes the canon path so the agent knows where YAML lives", () => {
     const md = renderArtLabClaudeSkill({ repoRoot: "/repo" });
-    expect(md).toMatch(/\/repo\/\.artlab\/canon/);
+    expect(md).toMatch(/\/repo\/docs\/artlab\/sdk\/canon/);
   });
 
   it("opens with a YAML frontmatter block (Claude Code skill format)", () => {

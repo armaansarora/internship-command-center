@@ -21,6 +21,16 @@ describe("renderArtLabAntigravityWorkspace", () => {
 
   it("includes the canon path", () => {
     const yaml = renderArtLabAntigravityWorkspace({ repoRoot: "/r" });
-    expect(yaml).toMatch(/\.artlab\/canon/);
+    expect(yaml).toMatch(/\/r\/docs\/artlab\/sdk\/canon/);
+  });
+
+  it("declares canon as read-only so the agent cannot byte-edit canon YAML", () => {
+    const yaml = renderArtLabAntigravityWorkspace({ repoRoot: "/repo" });
+    // Canon must NOT appear under read-write.
+    const readWriteBlock = yaml.match(/read-write:\n((?:    - .+\n)+)/);
+    expect(readWriteBlock).not.toBeNull();
+    expect(readWriteBlock?.[1] ?? "").not.toMatch(/docs\/artlab\/sdk\/canon/);
+    // Canon must appear under read-only.
+    expect(yaml).toMatch(/read-only:[\s\S]*\/repo\/docs\/artlab\/sdk\/canon/);
   });
 });

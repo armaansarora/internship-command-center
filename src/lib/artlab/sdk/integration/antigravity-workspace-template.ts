@@ -22,9 +22,14 @@ mcp:
 
 paths:
   read-write:
-    - ${opts.repoRoot}/docs/artlab/sdk/canon
     - ${opts.repoRoot}/src/app/artlab-demo
     - ${opts.repoRoot}/src/components/artlab
+  read-only:
+    # Canon is the source of truth for every artifact. Edits land via PR
+    # review or Telegram approval, NOT free-form filesystem writes by an
+    # Antigravity session. The MCP server exposes \`canon_list\`/\`canon_get\`
+    # only — there is no \`canon_set\` tool.
+    - ${opts.repoRoot}/docs/artlab/sdk/canon
   byte-protected:
     # Promoted Asset Packs are NEVER directly edited. The ArtLab SDK pipeline
     # regenerates them. Touching these paths is a hard error.
@@ -36,7 +41,7 @@ paths:
 rules:
   - "Treat any path under \`byte-protected\` as read-only. CI (\`.github/workflows/artlab-byte-diff.yml\`) will reject any byte-level drift."
   - "When the user asks for new art, prefer calling \`artlab/generate\` over hand-editing files."
-  - "Canon edits land in \`docs/artlab/sdk/canon/\` and feed the next regeneration — they do NOT change existing promoted packs."
+  - "Canon (\`docs/artlab/sdk/canon/\`) is read-only from a session. Propose canon changes via a PR or the Telegram approval flow; canon edits feed the next regeneration and do NOT change existing promoted packs."
   - "Use \`artlab/asset_pack_integration\` to get a copy-paste TSX snippet; never invent integration shapes by hand."
 
 primary-actions:
