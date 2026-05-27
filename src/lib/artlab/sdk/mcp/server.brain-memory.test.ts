@@ -4,7 +4,7 @@
 //
 // Previously, `loadArtLabMemoryScope` was exported and unit-tested but never
 // called from production code (`route-request.ts`, `factory.ts`, `server.ts`,
-// or `scripts/foundry-mcp.ts`). The "kind-scoped memory" requirement was
+// or `scripts/artlab-sdk-mcp.ts`). The "kind-scoped memory" requirement was
 // half-built — character feedback could leak into floor brains, and floor
 // feedback into character brains, the moment a real LLM call ran.
 //

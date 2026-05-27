@@ -30,6 +30,6 @@ describe("artlab sdk scaffold", () => {
   }
 
   it("artlab sdk CLI script exists", () => {
-    expect(existsSync(join(REPO_ROOT, "scripts/foundry.ts"))).toBe(true);
+    expect(existsSync(join(REPO_ROOT, "scripts/artlab-sdk.ts"))).toBe(true);
   });
 });

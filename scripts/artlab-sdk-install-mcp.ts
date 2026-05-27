@@ -19,7 +19,7 @@ export function computeArtLabClaudeSnippet(opts: { repoRoot: string }): ArtLabCl
     mcpServers: {
       "tower-art-foundry": {
         command: "npx",
-        args: ["tsx", join(opts.repoRoot, "scripts", "foundry-mcp.ts")],
+        args: ["tsx", join(opts.repoRoot, "scripts", "artlab-sdk-mcp.ts")],
         env: {
           ARTLAB_WORKSPACE_ROOT: join(opts.repoRoot, ".artlab", "engine"),
           ARTLAB_CANON_ROOT: join(opts.repoRoot, ".artlab", "canon"),
@@ -93,10 +93,10 @@ async function main(): Promise<number> {
 
 const invokedPath = process.argv[1] ?? "";
 const isDirectInvocation =
-  invokedPath.endsWith("/foundry-install-mcp.ts") ||
-  invokedPath.endsWith("\\foundry-install-mcp.ts") ||
-  invokedPath.endsWith("/foundry-install-mcp.js") ||
-  invokedPath.endsWith("\\foundry-install-mcp.js");
+  invokedPath.endsWith("/artlab-sdk-install-mcp.ts") ||
+  invokedPath.endsWith("\\artlab-sdk-install-mcp.ts") ||
+  invokedPath.endsWith("/artlab-sdk-install-mcp.js") ||
+  invokedPath.endsWith("\\artlab-sdk-install-mcp.js");
 
 if (isDirectInvocation) {
   void main().then((code) => process.exit(code));

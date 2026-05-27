@@ -55,10 +55,10 @@ async function main(): Promise<number> {
 
 const invokedPath = process.argv[1] ?? "";
 const isDirectInvocation =
-  invokedPath.endsWith("/foundry-install-claude-skill.ts") ||
-  invokedPath.endsWith("\\foundry-install-claude-skill.ts") ||
-  invokedPath.endsWith("/foundry-install-claude-skill.js") ||
-  invokedPath.endsWith("\\foundry-install-claude-skill.js");
+  invokedPath.endsWith("/artlab-sdk-install-claude-skill.ts") ||
+  invokedPath.endsWith("\\artlab-sdk-install-claude-skill.ts") ||
+  invokedPath.endsWith("/artlab-sdk-install-claude-skill.js") ||
+  invokedPath.endsWith("\\artlab-sdk-install-claude-skill.js");
 
 if (isDirectInvocation) {
   void main().then((code) => process.exit(code));

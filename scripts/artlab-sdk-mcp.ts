@@ -7,9 +7,9 @@ import { createArtLabMcpServer } from "../src/lib/artlab/sdk/mcp/server";
 const HELP = `tower-art-foundry - MCP stdio server
 
 Usage:
-  npx tsx scripts/foundry-mcp.ts           Start the server on stdio.
-  npx tsx scripts/foundry-mcp.ts --help    Print this help and exit 0.
-  npx tsx scripts/foundry-mcp.ts --version Print server version and exit 0.
+  npx tsx scripts/artlab-sdk-mcp.ts           Start the server on stdio.
+  npx tsx scripts/artlab-sdk-mcp.ts --help    Print this help and exit 0.
+  npx tsx scripts/artlab-sdk-mcp.ts --version Print server version and exit 0.
 
 Environment:
   ARTLAB_WORKSPACE_ROOT    Path to ArtLab workspace (default: .artlab/engine)
@@ -48,7 +48,7 @@ async function main(argv: string[]): Promise<number> {
     if (process.env.ARTLAB_AUTOCREATE_WORKSPACE === "1") {
       mkdirSync(workspaceRoot, { recursive: true });
     } else {
-      process.stderr.write(`foundry: workspace not found at ${workspaceRoot}\n`);
+      process.stderr.write(`artlab-sdk: workspace not found at ${workspaceRoot}\n`);
       return 2;
     }
   }
@@ -70,10 +70,10 @@ async function main(argv: string[]): Promise<number> {
 
 const invokedPath = process.argv[1] ?? "";
 const isDirectInvocation =
-  invokedPath.endsWith("/foundry-mcp.ts") ||
-  invokedPath.endsWith("\\foundry-mcp.ts") ||
-  invokedPath.endsWith("/foundry-mcp.js") ||
-  invokedPath.endsWith("\\foundry-mcp.js");
+  invokedPath.endsWith("/artlab-sdk-mcp.ts") ||
+  invokedPath.endsWith("\\artlab-sdk-mcp.ts") ||
+  invokedPath.endsWith("/artlab-sdk-mcp.js") ||
+  invokedPath.endsWith("\\artlab-sdk-mcp.js");
 
 if (isDirectInvocation) {
   void main(process.argv.slice(2)).then((code) => {

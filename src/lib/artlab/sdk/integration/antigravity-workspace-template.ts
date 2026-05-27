@@ -15,7 +15,7 @@ mcp:
     command: npx
     args:
       - tsx
-      - ${opts.repoRoot}/scripts/foundry-mcp.ts
+      - ${opts.repoRoot}/scripts/artlab-sdk-mcp.ts
     env:
       ARTLAB_WORKSPACE_ROOT: ${opts.repoRoot}/.artlab/engine
       ARTLAB_CANON_ROOT: ${opts.repoRoot}/.artlab/canon

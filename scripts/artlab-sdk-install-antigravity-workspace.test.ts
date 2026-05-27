@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { installArtLabAntigravityWorkspace } from "./foundry-install-antigravity-workspace";
+import { installArtLabAntigravityWorkspace } from "./artlab-sdk-install-antigravity-workspace";
 
 let repoRoot: string;
 

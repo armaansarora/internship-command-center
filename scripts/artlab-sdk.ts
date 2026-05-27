@@ -1,34 +1,34 @@
-// scripts/foundry.ts
+// scripts/artlab-sdk.ts
 import { runCanonValidateSubcommand } from "@/lib/artlab/sdk/cli/canon-validate";
 import { runCharacterSubcommand } from "@/lib/artlab/sdk/cli/character";
 import { runArtLabFloorCli } from "@/lib/artlab/sdk/agents/floor-environment/cli";
 import { join } from "node:path";
 
-const HELP = `foundry — Tower Art ArtLab CLI
+const HELP = `artlab-sdk — ArtLab SDK CLI
 Usage:
-  foundry canon validate           validate every YAML canon file against its schema
-  foundry character <name>         run the character-master agent (Phase 2)
-  foundry floor <slug>             run the floor-environment agent (Phase 3)
+  artlab-sdk canon validate           validate every YAML canon file against its schema
+  artlab-sdk character <name>         run the character-master agent (Phase 2)
+  artlab-sdk floor <slug>             run the floor-environment agent (Phase 3)
                                      flags: --dry-run, --seed <n>,
                                             --reported <csv>, --run-dir <path>
-  foundry texture <name>           run the ui-texture agent (Phase 4)
+  artlab-sdk texture <name>           run the ui-texture agent (Phase 4)
                                      flags: --kind <icon|texture>,
                                             --aria-label <label>,
                                             --tile-mode <repeat|repeat-x|repeat-y|no-repeat>,
                                             --provider <mock|claude|gemini>,
                                             --dry-run, --run-dir <path>, --seed <n>
-  foundry animate <sourcePackId>   run the sprite-animator agent (Phase 5)
+  artlab-sdk animate <sourcePackId>   run the sprite-animator agent (Phase 5)
                                      flags: --action <idle|wave|nod|celebrate>,
                                             --format <sprite|lottie>,
                                             --provider <mock|sora|runway|claude>,
                                             --dry-run, --run-dir <path>, --seed <n>
-  foundry help                     print this help
+  artlab-sdk help                     print this help
 `;
 
 const DEFAULT_CANON_ROOT = join(process.cwd(), "docs/foundry/canon");
 
 function resolveWorkspaceRoot(): string {
-  return process.env.ARTLAB_WORKSPACE_ROOT ?? join(process.cwd(), ".foundry-workspace");
+  return process.env.ARTLAB_WORKSPACE_ROOT ?? join(process.cwd(), ".artlab-sdk-workspace");
 }
 
 function resolveProviderMode(): "mock" | "gemini" {
@@ -51,7 +51,7 @@ async function main(argv: readonly string[]): Promise<number> {
         stderr: (s) => process.stderr.write(`${s}\n`),
       });
     }
-    process.stderr.write(`foundry canon: unknown subsubcommand "${sub2 ?? ""}"\n`);
+    process.stderr.write(`artlab-sdk canon: unknown subsubcommand "${sub2 ?? ""}"\n`);
     return 2;
   }
   if (subcommand === "character") {
@@ -70,7 +70,7 @@ async function main(argv: readonly string[]): Promise<number> {
   if (subcommand === "floor") {
     if (!sub2) {
       process.stderr.write(
-        `foundry floor: missing <slug> — e.g. foundry floor "war-room"\n`,
+        `artlab-sdk floor: missing <slug> — e.g. artlab-sdk floor "war-room"\n`,
       );
       return 2;
     }
@@ -86,7 +86,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--seed") {
         const next = floorArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry floor: --seed requires a value\n`);
+          process.stderr.write(`artlab-sdk floor: --seed requires a value\n`);
           return 2;
         }
         seed = Number(next);
@@ -94,7 +94,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--reported") {
         const next = floorArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry floor: --reported requires a CSV value\n`);
+          process.stderr.write(`artlab-sdk floor: --reported requires a CSV value\n`);
           return 2;
         }
         reported = next.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
@@ -102,13 +102,13 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--run-dir") {
         const next = floorArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry floor: --run-dir requires a value\n`);
+          process.stderr.write(`artlab-sdk floor: --run-dir requires a value\n`);
           return 2;
         }
         runDir = next;
         i += 1;
       } else {
-        process.stderr.write(`foundry floor: unknown flag "${arg}"\n`);
+        process.stderr.write(`artlab-sdk floor: unknown flag "${arg}"\n`);
         return 2;
       }
     }
@@ -129,7 +129,7 @@ async function main(argv: readonly string[]): Promise<number> {
       return 0;
     } catch (err) {
       process.stderr.write(
-        `foundry floor: failed — ${(err as Error).message}\n`,
+        `artlab-sdk floor: failed — ${(err as Error).message}\n`,
       );
       return 1;
     }
@@ -137,7 +137,7 @@ async function main(argv: readonly string[]): Promise<number> {
   if (subcommand === "texture") {
     if (!sub2) {
       process.stderr.write(
-        `foundry texture: missing <name> — e.g. foundry texture elevator-door --kind=icon\n`,
+        `artlab-sdk texture: missing <name> — e.g. artlab-sdk texture elevator-door --kind=icon\n`,
       );
       return 2;
     }
@@ -159,12 +159,12 @@ async function main(argv: readonly string[]): Promise<number> {
       if (arg === "--kind") {
         const next = textureArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry texture: --kind requires a value\n`);
+          process.stderr.write(`artlab-sdk texture: --kind requires a value\n`);
           return 2;
         }
         if (next !== "icon" && next !== "texture") {
           process.stderr.write(
-            `foundry texture: --kind must be icon|texture (got "${next}")\n`,
+            `artlab-sdk texture: --kind must be icon|texture (got "${next}")\n`,
           );
           return 2;
         }
@@ -174,7 +174,7 @@ async function main(argv: readonly string[]): Promise<number> {
         const next = arg.slice("--kind=".length);
         if (next !== "icon" && next !== "texture") {
           process.stderr.write(
-            `foundry texture: --kind must be icon|texture (got "${next}")\n`,
+            `artlab-sdk texture: --kind must be icon|texture (got "${next}")\n`,
           );
           return 2;
         }
@@ -182,7 +182,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--aria-label") {
         const next = textureArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry texture: --aria-label requires a value\n`);
+          process.stderr.write(`artlab-sdk texture: --aria-label requires a value\n`);
           return 2;
         }
         ariaLabel = next;
@@ -192,7 +192,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--tile-mode") {
         const next = textureArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry texture: --tile-mode requires a value\n`);
+          process.stderr.write(`artlab-sdk texture: --tile-mode requires a value\n`);
           return 2;
         }
         if (
@@ -202,7 +202,7 @@ async function main(argv: readonly string[]): Promise<number> {
           next !== "no-repeat"
         ) {
           process.stderr.write(
-            `foundry texture: --tile-mode must be repeat|repeat-x|repeat-y|no-repeat\n`,
+            `artlab-sdk texture: --tile-mode must be repeat|repeat-x|repeat-y|no-repeat\n`,
           );
           return 2;
         }
@@ -217,7 +217,7 @@ async function main(argv: readonly string[]): Promise<number> {
           next !== "no-repeat"
         ) {
           process.stderr.write(
-            `foundry texture: --tile-mode must be repeat|repeat-x|repeat-y|no-repeat\n`,
+            `artlab-sdk texture: --tile-mode must be repeat|repeat-x|repeat-y|no-repeat\n`,
           );
           return 2;
         }
@@ -225,12 +225,12 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--provider") {
         const next = textureArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry texture: --provider requires a value\n`);
+          process.stderr.write(`artlab-sdk texture: --provider requires a value\n`);
           return 2;
         }
         if (next !== "mock" && next !== "claude" && next !== "gemini") {
           process.stderr.write(
-            `foundry texture: --provider must be mock|claude|gemini\n`,
+            `artlab-sdk texture: --provider must be mock|claude|gemini\n`,
           );
           return 2;
         }
@@ -240,7 +240,7 @@ async function main(argv: readonly string[]): Promise<number> {
         const next = arg.slice("--provider=".length);
         if (next !== "mock" && next !== "claude" && next !== "gemini") {
           process.stderr.write(
-            `foundry texture: --provider must be mock|claude|gemini\n`,
+            `artlab-sdk texture: --provider must be mock|claude|gemini\n`,
           );
           return 2;
         }
@@ -250,7 +250,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--run-dir") {
         const next = textureArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry texture: --run-dir requires a value\n`);
+          process.stderr.write(`artlab-sdk texture: --run-dir requires a value\n`);
           return 2;
         }
         runDir = next;
@@ -260,7 +260,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--seed") {
         const next = textureArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry texture: --seed requires a value\n`);
+          process.stderr.write(`artlab-sdk texture: --seed requires a value\n`);
           return 2;
         }
         seed = Number(next);
@@ -268,7 +268,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg?.startsWith("--seed=")) {
         seed = Number(arg.slice("--seed=".length));
       } else {
-        process.stderr.write(`foundry texture: unknown flag "${arg}"\n`);
+        process.stderr.write(`artlab-sdk texture: unknown flag "${arg}"\n`);
         return 2;
       }
     }
@@ -293,7 +293,7 @@ async function main(argv: readonly string[]): Promise<number> {
       return 0;
     } catch (err) {
       process.stderr.write(
-        `foundry texture: failed — ${(err as Error).message}\n`,
+        `artlab-sdk texture: failed — ${(err as Error).message}\n`,
       );
       return 1;
     }
@@ -301,7 +301,7 @@ async function main(argv: readonly string[]): Promise<number> {
   if (subcommand === "animate") {
     if (!sub2) {
       process.stderr.write(
-        `foundry animate: missing <sourcePackId> — e.g. foundry animate char-otis-v3 --action=idle --format=sprite\n`,
+        `artlab-sdk animate: missing <sourcePackId> — e.g. artlab-sdk animate char-otis-v3 --action=idle --format=sprite\n`,
       );
       return 2;
     }
@@ -317,7 +317,7 @@ async function main(argv: readonly string[]): Promise<number> {
       if (arg === "--action") {
         const next = animArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry animate: --action requires a value\n`);
+          process.stderr.write(`artlab-sdk animate: --action requires a value\n`);
           return 2;
         }
         if (
@@ -327,7 +327,7 @@ async function main(argv: readonly string[]): Promise<number> {
           next !== "celebrate"
         ) {
           process.stderr.write(
-            `foundry animate: --action must be idle|wave|nod|celebrate\n`,
+            `artlab-sdk animate: --action must be idle|wave|nod|celebrate\n`,
           );
           return 2;
         }
@@ -342,7 +342,7 @@ async function main(argv: readonly string[]): Promise<number> {
           next !== "celebrate"
         ) {
           process.stderr.write(
-            `foundry animate: --action must be idle|wave|nod|celebrate\n`,
+            `artlab-sdk animate: --action must be idle|wave|nod|celebrate\n`,
           );
           return 2;
         }
@@ -350,12 +350,12 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--format") {
         const next = animArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry animate: --format requires a value\n`);
+          process.stderr.write(`artlab-sdk animate: --format requires a value\n`);
           return 2;
         }
         if (next !== "sprite" && next !== "lottie") {
           process.stderr.write(
-            `foundry animate: --format must be sprite|lottie\n`,
+            `artlab-sdk animate: --format must be sprite|lottie\n`,
           );
           return 2;
         }
@@ -365,7 +365,7 @@ async function main(argv: readonly string[]): Promise<number> {
         const next = arg.slice("--format=".length);
         if (next !== "sprite" && next !== "lottie") {
           process.stderr.write(
-            `foundry animate: --format must be sprite|lottie\n`,
+            `artlab-sdk animate: --format must be sprite|lottie\n`,
           );
           return 2;
         }
@@ -373,7 +373,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--provider") {
         const next = animArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry animate: --provider requires a value\n`);
+          process.stderr.write(`artlab-sdk animate: --provider requires a value\n`);
           return 2;
         }
         if (
@@ -383,7 +383,7 @@ async function main(argv: readonly string[]): Promise<number> {
           next !== "claude"
         ) {
           process.stderr.write(
-            `foundry animate: --provider must be mock|sora|runway|claude\n`,
+            `artlab-sdk animate: --provider must be mock|sora|runway|claude\n`,
           );
           return 2;
         }
@@ -398,7 +398,7 @@ async function main(argv: readonly string[]): Promise<number> {
           next !== "claude"
         ) {
           process.stderr.write(
-            `foundry animate: --provider must be mock|sora|runway|claude\n`,
+            `artlab-sdk animate: --provider must be mock|sora|runway|claude\n`,
           );
           return 2;
         }
@@ -408,7 +408,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--run-dir") {
         const next = animArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry animate: --run-dir requires a value\n`);
+          process.stderr.write(`artlab-sdk animate: --run-dir requires a value\n`);
           return 2;
         }
         runDir = next;
@@ -418,7 +418,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg === "--seed") {
         const next = animArgs[i + 1];
         if (next === undefined) {
-          process.stderr.write(`foundry animate: --seed requires a value\n`);
+          process.stderr.write(`artlab-sdk animate: --seed requires a value\n`);
           return 2;
         }
         seed = Number(next);
@@ -426,7 +426,7 @@ async function main(argv: readonly string[]): Promise<number> {
       } else if (arg?.startsWith("--seed=")) {
         seed = Number(arg.slice("--seed=".length));
       } else {
-        process.stderr.write(`foundry animate: unknown flag "${arg}"\n`);
+        process.stderr.write(`artlab-sdk animate: unknown flag "${arg}"\n`);
         return 2;
       }
     }
@@ -451,12 +451,12 @@ async function main(argv: readonly string[]): Promise<number> {
       return 0;
     } catch (err) {
       process.stderr.write(
-        `foundry animate: failed — ${(err as Error).message}\n`,
+        `artlab-sdk animate: failed — ${(err as Error).message}\n`,
       );
       return 1;
     }
   }
-  process.stderr.write(`foundry: subcommand "${subcommand}" not yet implemented\n`);
+  process.stderr.write(`artlab-sdk: subcommand "${subcommand}" not yet implemented\n`);
   return 2;
 }
 

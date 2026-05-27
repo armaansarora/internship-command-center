@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 
-const SCRIPT = join(__dirname, "foundry-mcp.ts");
+const SCRIPT = join(__dirname, "artlab-sdk-mcp.ts");
 
 function runBootstrap(
   args: string[],
@@ -33,7 +33,7 @@ function runBootstrap(
   });
 }
 
-describe("scripts/foundry-mcp.ts", () => {
+describe("scripts/artlab-sdk-mcp.ts", () => {
   it("prints --help info and exits 0 when invoked with --help", async () => {
     const result = await runBootstrap(["--help"]);
     expect(result.code).toBe(0);

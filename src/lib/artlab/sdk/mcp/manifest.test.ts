@@ -37,6 +37,6 @@ describe("manifest.json", () => {
     const parsed = JSON.parse(raw) as { command: string; args: string[] };
     expect(parsed.command).toBe("npx");
     expect(parsed.args).toContain("tsx");
-    expect(parsed.args.some((a) => a.endsWith("foundry-mcp.ts"))).toBe(true);
+    expect(parsed.args.some((a) => a.endsWith("artlab-sdk-mcp.ts"))).toBe(true);
   });
 });

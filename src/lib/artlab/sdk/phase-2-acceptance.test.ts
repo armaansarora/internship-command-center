@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { execSync } from "node:child_process";
 
 describe("Phase 2 acceptance", () => {
-  it("npm run foundry -- canon validate exits 0 (Phase 0 inheritance)", () => {
-    const out = execSync("npm run foundry --silent -- canon validate", { encoding: "utf8" });
+  it("npm run artlab:sdk-canon-validate exits 0 (Phase 0 inheritance)", () => {
+    const out = execSync("npm run artlab:sdk-canon-validate --silent", { encoding: "utf8" });
     expect(out.trim().endsWith("canon ok")).toBe(true);
   });
 

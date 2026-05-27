@@ -45,10 +45,10 @@ async function main(): Promise<number> {
 
 const invokedPath = process.argv[1] ?? "";
 const isDirectInvocation =
-  invokedPath.endsWith("/foundry-install-antigravity-workspace.ts") ||
-  invokedPath.endsWith("\\foundry-install-antigravity-workspace.ts") ||
-  invokedPath.endsWith("/foundry-install-antigravity-workspace.js") ||
-  invokedPath.endsWith("\\foundry-install-antigravity-workspace.js");
+  invokedPath.endsWith("/artlab-sdk-install-antigravity-workspace.ts") ||
+  invokedPath.endsWith("\\artlab-sdk-install-antigravity-workspace.ts") ||
+  invokedPath.endsWith("/artlab-sdk-install-antigravity-workspace.js") ||
+  invokedPath.endsWith("\\artlab-sdk-install-antigravity-workspace.js");
 
 if (isDirectInvocation) {
   void main().then((code) => process.exit(code));

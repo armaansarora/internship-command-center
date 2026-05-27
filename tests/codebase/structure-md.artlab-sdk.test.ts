@@ -17,7 +17,7 @@ describe("STRUCTURE.md mentions the ArtLab SDK tree", () => {
     expect(STRUCTURE).toMatch(/src\/lib\/foundry\/brain/);
   });
 
-  it("documents scripts/foundry-mcp.ts", () => {
+  it("documents scripts/artlab-sdk-mcp.ts", () => {
     expect(STRUCTURE).toMatch(/scripts\/foundry-mcp\.ts/);
   });
 });

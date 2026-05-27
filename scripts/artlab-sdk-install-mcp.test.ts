@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { computeArtLabClaudeSnippet, mergeArtLabClaudeSnippet } from "./foundry-install-mcp";
+import { computeArtLabClaudeSnippet, mergeArtLabClaudeSnippet } from "./artlab-sdk-install-mcp";
 
 let claudeHome: string;
 
@@ -10,14 +10,14 @@ beforeEach(() => {
   claudeHome = mkdtempSync(join(tmpdir(), "claude-home-"));
 });
 
-describe("foundry-install-mcp", () => {
+describe("artlab-sdk-install-mcp", () => {
   it("computeArtLabClaudeSnippet produces a tower-art-foundry mcpServers entry", () => {
     const snippet = computeArtLabClaudeSnippet({ repoRoot: "/tmp/repo" });
     expect(snippet).toEqual({
       mcpServers: {
         "tower-art-foundry": {
           command: "npx",
-          args: ["tsx", "/tmp/repo/scripts/foundry-mcp.ts"],
+          args: ["tsx", "/tmp/repo/scripts/artlab-sdk-mcp.ts"],
           env: {
             ARTLAB_WORKSPACE_ROOT: "/tmp/repo/.artlab/engine",
             ARTLAB_CANON_ROOT: "/tmp/repo/.artlab/canon",

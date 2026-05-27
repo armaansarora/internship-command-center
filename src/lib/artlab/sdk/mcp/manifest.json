@@ -4,7 +4,7 @@
   "homepage": "https://www.interntower.com",
   "transport": "stdio",
   "command": "npx",
-  "args": ["tsx", "scripts/foundry-mcp.ts"],
+  "args": ["tsx", "scripts/artlab-sdk-mcp.ts"],
   "tools": [
     { "name": "artlab/canon_list", "summary": "List canonical characters/floors/palettes/style-envelopes." },
     { "name": "artlab/canon_get", "summary": "Fetch one canon entry by id (returns YAML-as-JSON)." },

@@ -153,7 +153,7 @@ describe("agent loop acceptance gate", () => {
       const repoRoot = process.cwd();
       const transport = new StdioClientTransport({
         command: "npx",
-        args: ["tsx", join(repoRoot, "scripts", "foundry-mcp.ts")],
+        args: ["tsx", join(repoRoot, "scripts", "artlab-sdk-mcp.ts")],
         env: {
           ...inheritedEnv(),
           ARTLAB_WORKSPACE_ROOT: workspaceRoot,

@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach } from "vitest";
 import { mkdtempSync, mkdirSync, readFileSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { computeArtLabClaudeSkillTarget, installArtLabClaudeSkill } from "./foundry-install-claude-skill";
+import { computeArtLabClaudeSkillTarget, installArtLabClaudeSkill } from "./artlab-sdk-install-claude-skill";
 
 let claudeHome: string;
 
