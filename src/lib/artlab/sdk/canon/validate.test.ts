@@ -74,7 +74,7 @@ describe("validateArtLabCanon", () => {
 
   it("returns ok=true on real disk canon", async () => {
     const { loadArtLabCanon } = await import("./load-canon");
-    const canon = await loadArtLabCanon({ canonRoot: `${process.cwd()}/docs/foundry/canon` });
+    const canon = await loadArtLabCanon({ canonRoot: `${process.cwd()}/docs/artlab/sdk/canon` });
     const report = validateArtLabCanon(canon);
     expect(report.ok).toBe(true);
   });

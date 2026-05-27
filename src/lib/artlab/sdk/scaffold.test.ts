@@ -11,12 +11,12 @@ const ARTLAB_SUBDIRS = [
   "src/lib/artlab/sdk/agents",
   "src/lib/artlab/sdk/providers",
   "src/lib/artlab/sdk/cli",
-  "docs/foundry/canon/characters",
-  "docs/foundry/canon/palettes",
-  "docs/foundry/canon/typography",
-  "docs/foundry/canon/motion-language",
-  "docs/foundry/canon/space-tokens",
-  "docs/foundry/canon/iconography-rules",
+  "docs/artlab/sdk/canon/characters",
+  "docs/artlab/sdk/canon/palettes",
+  "docs/artlab/sdk/canon/typography",
+  "docs/artlab/sdk/canon/motion-language",
+  "docs/artlab/sdk/canon/space-tokens",
+  "docs/artlab/sdk/canon/iconography-rules",
   ".artlab/sdk",
 ];
 

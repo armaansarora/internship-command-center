@@ -27,7 +27,7 @@ const DEFAULT_ICON_VIEWBOX_TEMPLATE = (gridSizePx: number): string =>
 export async function loadArtLabIconographyRules(): Promise<ArtLabIconographyRulesAdapterShape | null> {
   try {
     const result = await loadArtLabCanonFile(
-      join(process.cwd(), "docs/foundry/canon/iconography-rules/tower-default.yaml"),
+      join(process.cwd(), "docs/artlab/sdk/canon/iconography-rules/tower-default.yaml"),
     );
     const parsed: ArtLabIconographyRulesCanon =
       ArtLabIconographyRulesCanonSchema.parse(result.data);

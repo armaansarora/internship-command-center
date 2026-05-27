@@ -25,7 +25,7 @@ Usage:
   artlab-sdk help                     print this help
 `;
 
-const DEFAULT_CANON_ROOT = join(process.cwd(), "docs/foundry/canon");
+const DEFAULT_CANON_ROOT = join(process.cwd(), "docs/artlab/sdk/canon");
 
 function resolveWorkspaceRoot(): string {
   return process.env.ARTLAB_WORKSPACE_ROOT ?? join(process.cwd(), ".artlab-sdk-workspace");

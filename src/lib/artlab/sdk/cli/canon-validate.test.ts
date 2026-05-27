@@ -6,7 +6,7 @@ describe("artlab sdk canon validate CLI", () => {
   it("exits 0 with 'canon ok' on the real canon root", async () => {
     const lines: string[] = [];
     const code = await runCanonValidateSubcommand({
-      canonRoot: join(process.cwd(), "docs/foundry/canon"),
+      canonRoot: join(process.cwd(), "docs/artlab/sdk/canon"),
       stdout: (s) => lines.push(s),
       stderr: (s) => lines.push(s),
     });

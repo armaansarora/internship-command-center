@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { join } from "node:path";
 import { loadArtLabCanon } from "./load-canon";
 
-const CANON_ROOT = join(process.cwd(), "docs/foundry/canon");
+const CANON_ROOT = join(process.cwd(), "docs/artlab/sdk/canon");
 
 describe("non-character canon migration", () => {
   it("tower-default palette declares primaryDark + goldAccent + glass tokens", async () => {

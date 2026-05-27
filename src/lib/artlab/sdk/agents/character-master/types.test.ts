@@ -21,7 +21,7 @@ describe("character-master types", () => {
     expect(() =>
       CharacterMasterInputSchema.parse({
         characterId: "sol-navarro",
-        canonRoot: "/abs/path/to/docs/foundry/canon",
+        canonRoot: "/abs/path/to/docs/artlab/sdk/canon",
         workspaceRoot: "/abs/path/to/.artlab/engine",
         providerId: "mock-artlab-image",
         resumeFromStage: null,

@@ -14,8 +14,8 @@ describe("CLAUDE.md mentions the ArtLab SDK", () => {
     expect(CLAUDE).toMatch(/artlab/);
   });
 
-  it("links to docs/foundry/ (folder exists)", () => {
-    expect(existsSync(join(ROOT, "docs", "foundry"))).toBe(true);
+  it("links to docs/artlab/sdk/ (folder exists)", () => {
+    expect(existsSync(join(ROOT, "docs", "artlab", "sdk"))).toBe(true);
   });
 
   it("retains the existing 'ArtLab' engine pointer (engine and SDK coexist)", () => {

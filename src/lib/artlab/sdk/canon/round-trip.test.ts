@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse as parseYaml, stringify as yamlStringify } from "yaml";
 
-const CANON_ROOT = join(process.cwd(), "docs/foundry/canon");
+const CANON_ROOT = join(process.cwd(), "docs/artlab/sdk/canon");
 
 function listAllYaml(root: string): string[] {
   const dirs = readdirSync(root, { withFileTypes: true });

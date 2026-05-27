@@ -23,7 +23,7 @@ mcp:
 paths:
   read-write:
     - ${opts.repoRoot}/.artlab/canon
-    - ${opts.repoRoot}/src/app/foundry-demo
+    - ${opts.repoRoot}/src/app/artlab-demo
     - ${opts.repoRoot}/src/components/artlab
   byte-protected:
     # Promoted Asset Packs are NEVER directly edited. The ArtLab SDK pipeline

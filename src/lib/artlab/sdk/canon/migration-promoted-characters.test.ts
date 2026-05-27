@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { join } from "node:path";
 import { loadArtLabCanon } from "./load-canon";
 
-const CANON_ROOT = join(process.cwd(), "docs/foundry/canon");
+const CANON_ROOT = join(process.cwd(), "docs/artlab/sdk/canon");
 
 describe("promoted character migration", () => {
   it("otis is recorded with promoted status", async () => {
