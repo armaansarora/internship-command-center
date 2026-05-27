@@ -14,7 +14,13 @@ export interface ProduceSubcommandResult {
   message?: string;
 }
 
+const PRODUCE_USAGE =
+  "artlab produce <request>            new run; LLM brain routes";
+
 export async function runProduceSubcommand(input: ProduceSubcommandInput): Promise<ProduceSubcommandResult> {
+  if (input.args.some((arg) => arg === "--help" || arg === "-h")) {
+    return { exitCode: 0, message: PRODUCE_USAGE };
+  }
   const request = input.args.join(" ").trim();
   if (request.length === 0) {
     return { exitCode: 2, message: "produce: expected <request> as positional args" };

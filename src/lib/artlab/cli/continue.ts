@@ -12,7 +12,13 @@ export interface ContinueSubcommandResult {
   message?: string;
 }
 
+const CONTINUE_USAGE =
+  "artlab continue <runId>             advance a continuable phase";
+
 export async function runContinueSubcommand(input: ContinueSubcommandInput): Promise<ContinueSubcommandResult> {
+  if (input.args.some((arg) => arg === "--help" || arg === "-h")) {
+    return { exitCode: 0, message: CONTINUE_USAGE };
+  }
   const runId = input.args[0];
   if (!runId) return { exitCode: 2, message: "continue: expected <runId>" };
   const runDir = join(input.workspaceRoot, "runs", runId);

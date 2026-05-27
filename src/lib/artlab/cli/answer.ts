@@ -12,7 +12,13 @@ export interface AnswerSubcommandResult {
   message?: string;
 }
 
+const ANSWER_USAGE =
+  "artlab answer <runId> \"<response>\"  record human response";
+
 export async function runAnswerSubcommand(input: AnswerSubcommandInput): Promise<AnswerSubcommandResult> {
+  if (input.args.some((arg) => arg === "--help" || arg === "-h")) {
+    return { exitCode: 0, message: ANSWER_USAGE };
+  }
   const [runId, ...answerParts] = input.args;
   if (!runId) return { exitCode: 2, message: "answer: expected <runId> \"<answer>\"" };
   const answer = answerParts.join(" ").trim();

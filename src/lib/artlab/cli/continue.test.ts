@@ -1,6 +1,6 @@
 // src/lib/artlab/cli/continue.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { runContinueSubcommand } from "./continue";
@@ -31,5 +31,28 @@ describe("artlab continue subcommand", () => {
   it("exits 1 when runId does not exist", async () => {
     const result = await runContinueSubcommand({ workspaceRoot, args: ["nope"] });
     expect(result.exitCode).toBe(1);
+  });
+
+  it.each([["--help"], ["-h"]])(
+    "prints usage and exits 0 when %s is passed, queueing nothing and bypassing the runDir check",
+    async (flag) => {
+      const result = await runContinueSubcommand({ workspaceRoot, args: [flag] });
+      expect(result.exitCode).toBe(0);
+      expect(result.message).toMatch(/continue/i);
+      expect(result.message).toMatch(/<runId>/);
+      const inboxPath = join(workspaceRoot, "inbox", "cli");
+      expect(existsSync(inboxPath) ? readdirSync(inboxPath) : []).toHaveLength(0);
+    },
+  );
+
+  it("treats --help anywhere in args as a help request even when args[0] is a uuid-shaped string", async () => {
+    const result = await runContinueSubcommand({
+      workspaceRoot,
+      args: ["00000000-0000-0000-0000-000000000000", "--help"],
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.message).toMatch(/<runId>/);
+    const inboxPath = join(workspaceRoot, "inbox", "cli");
+    expect(existsSync(inboxPath) ? readdirSync(inboxPath) : []).toHaveLength(0);
   });
 });
