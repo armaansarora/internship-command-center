@@ -5,6 +5,7 @@ export const ARTLAB_SUBCOMMANDS = [
   "status",
   "queue",
   "health",
+  "doctor",
   "cancel",
   "daemon",
   "bot",
@@ -29,6 +30,7 @@ Usage:
   artlab status [runId]               plain-English status
   artlab queue                        queued + active runs
   artlab health                       real engine health report
+  artlab doctor                       5-check session-readiness validation
   artlab cancel <runId>               cancel a run with refund
   artlab daemon <run|start|stop|restart|status|logs>
   artlab bot <setup>                  interactive bot setup
@@ -109,6 +111,15 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
       const snapshot = await buildArtLabHealthSnapshot({ workspaceRoot: defaultWorkspaceRoot() });
       io.stdout(renderHealthView(snapshot));
       return 0;
+    }
+    case "doctor": {
+      const { runDoctorSubcommand } = await import("@/lib/artlab/cli/doctor");
+      const result = await runDoctorSubcommand({
+        workspaceRoot: defaultWorkspaceRoot(),
+        repoRoot: process.cwd(),
+        log: (line) => io.stdout(line),
+      });
+      return result.exitCode;
     }
     case "cancel":
       return stub("cancel", rest, io);
