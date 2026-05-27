@@ -46,4 +46,20 @@ describe("scripts/artlab-sdk-mcp.ts", () => {
     expect(result.code).toBe(0);
     expect(result.stdout.trim()).toMatch(/^\d+\.\d+\.\d+/);
   }, 15_000);
+
+  it("refuses to start when FOUNDRY_WORKSPACE_ROOT is set and points operator to ARTLAB_WORKSPACE_ROOT", async () => {
+    const result = await runBootstrap([], { FOUNDRY_WORKSPACE_ROOT: "/tmp/x" });
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("deprecated");
+    expect(result.stderr).toContain("FOUNDRY_WORKSPACE_ROOT");
+    expect(result.stderr).toContain("ARTLAB_WORKSPACE_ROOT");
+  }, 15_000);
+
+  it("refuses to start when FOUNDRY_CANON_ROOT is set and points operator to ARTLAB_CANON_ROOT", async () => {
+    const result = await runBootstrap([], { FOUNDRY_CANON_ROOT: "/tmp/x" });
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("deprecated");
+    expect(result.stderr).toContain("FOUNDRY_CANON_ROOT");
+    expect(result.stderr).toContain("ARTLAB_CANON_ROOT");
+  }, 15_000);
 });

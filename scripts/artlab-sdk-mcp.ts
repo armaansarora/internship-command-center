@@ -26,6 +26,11 @@ function readVersion(): string {
   return pkg.version;
 }
 
+const LEGACY_ENV_VARS: ReadonlyArray<{ legacy: string; modern: string }> = [
+  { legacy: "FOUNDRY_WORKSPACE_ROOT", modern: "ARTLAB_WORKSPACE_ROOT" },
+  { legacy: "FOUNDRY_CANON_ROOT", modern: "ARTLAB_CANON_ROOT" },
+];
+
 async function main(argv: string[]): Promise<number> {
   if (argv.includes("--help") || argv.includes("-h")) {
     process.stdout.write(HELP);
@@ -34,6 +39,18 @@ async function main(argv: string[]): Promise<number> {
   if (argv.includes("--version") || argv.includes("-v")) {
     process.stdout.write(`${readVersion()}\n`);
     return 0;
+  }
+
+  const offending = LEGACY_ENV_VARS.filter(({ legacy }) => Boolean(process.env[legacy]));
+  if (offending.length > 0) {
+    const names = offending.map(({ legacy }) => legacy).join(", ");
+    process.stderr.write(
+      `artlab-sdk: refusing to start with deprecated env var(s) set: ${names}.\n`,
+    );
+    for (const { legacy, modern } of offending) {
+      process.stderr.write(`  Use ${modern} instead (and unset ${legacy}).\n`);
+    }
+    return 2;
   }
 
   const cwd = process.cwd();
