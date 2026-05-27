@@ -3,6 +3,7 @@ header:
   schemaVersion: "1.0.0"
   id: nadia
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: red-team
 displayName: "Nadia Flint"
 shortLabel: "Nadia"
 title: "Red Team Counsel"

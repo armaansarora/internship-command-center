@@ -3,6 +3,7 @@ header:
   schemaVersion: "1.0.0"
   id: inez
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: cpo
 displayName: "Dr. Inez Park"
 shortLabel: "Inez"
 title: "Chief Preparation Officer"

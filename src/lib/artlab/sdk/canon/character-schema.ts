@@ -31,6 +31,10 @@ const CharacterHeaderSchema = ArtLabCanonHeaderSchema.extend({
 export const ArtLabCharacterCanonSchema = z
   .object({
     header: CharacterHeaderSchema,
+    roleSlug: z
+      .string()
+      .min(1)
+      .regex(/^[a-z0-9-]+$/, { message: "roleSlug must be kebab-case lowercase" }),
     displayName: z.string().min(1),
     shortLabel: z.string().min(1),
     title: z.string().min(1),

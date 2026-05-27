@@ -3,6 +3,7 @@ header:
   schemaVersion: "1.0.0"
   id: etta
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: trust
 displayName: "Etta Knox"
 shortLabel: "Etta"
 title: "Chief Trust Officer"

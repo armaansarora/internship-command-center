@@ -3,6 +3,7 @@ header:
   schemaVersion: "1.0.0"
   id: mina
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: cio
 displayName: "Mina Rook"
 shortLabel: "Mina"
 title: "Chief Intelligence Officer"

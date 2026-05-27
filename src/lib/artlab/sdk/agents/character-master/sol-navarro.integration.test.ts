@@ -19,6 +19,7 @@ header:
   schemaVersion: "1.0.0"
   id: sol-navarro
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: cno
 displayName: "Sol Navarro"
 shortLabel: Sol
 title: "CNO"

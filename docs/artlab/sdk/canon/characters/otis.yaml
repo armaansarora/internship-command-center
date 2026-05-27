@@ -3,6 +3,7 @@ header:
   schemaVersion: "1.0.0"
   id: otis
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: otis
 displayName: "Otis"
 shortLabel: "Otis"
 title: "Lobby Concierge"

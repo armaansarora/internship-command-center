@@ -58,6 +58,19 @@ function checkDuplicates<T extends { header: { id: string } }>(
   }
 }
 
+function checkDuplicateRoleSlug(characters: readonly ArtLabCharacterCanon[]): void {
+  const seen = new Map<string, string>();
+  for (const c of characters) {
+    const firstOwnerId = seen.get(c.roleSlug);
+    if (firstOwnerId !== undefined) {
+      throw new Error(
+        `canon: duplicate character roleSlug "${c.roleSlug}" (used by "${firstOwnerId}" and "${c.header.id}")`,
+      );
+    }
+    seen.set(c.roleSlug, c.header.id);
+  }
+}
+
 export async function loadArtLabCanon(input: LoadArtLabCanonInput): Promise<ArtLabCanon> {
   const start = performance.now();
   const sources: string[] = [];
@@ -103,6 +116,7 @@ export async function loadArtLabCanon(input: LoadArtLabCanonInput): Promise<ArtL
   }
 
   checkDuplicates(characters, "character");
+  checkDuplicateRoleSlug(characters);
   checkDuplicates(palettes, "palette");
   checkDuplicates(typography, "typography");
   checkDuplicates(motion, "motion-language");

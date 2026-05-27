@@ -3,6 +3,7 @@ header:
   schemaVersion: "1.0.0"
   id: vera
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: cmo
 displayName: "Vera Bloom"
 shortLabel: "Vera"
 title: "Chief Marketing Officer"

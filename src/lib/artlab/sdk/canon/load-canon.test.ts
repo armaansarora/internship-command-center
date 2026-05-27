@@ -17,6 +17,7 @@ header:
   schemaVersion: "1.0.0"
   id: sol-navarro
   revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: cno
 displayName: Sol Navarro
 shortLabel: Sol
 title: Chief Networking Officer
@@ -104,5 +105,45 @@ tokens:
       "utf8",
     );
     await expect(loadArtLabCanon({ canonRoot: tmpDir })).rejects.toThrow(/duplicate.*tower-default/i);
+  });
+
+  it("rejects when two characters share the same roleSlug", async () => {
+    setupCanonDir(tmpDir);
+    writeFileSync(
+      join(tmpDir, "characters", "duplicate-role.yaml"),
+      `
+header:
+  kind: character
+  schemaVersion: "1.0.0"
+  id: sol-clone
+  revisedAt: "2026-05-25T00:00:00.000Z"
+roleSlug: cno
+displayName: Sol Clone
+shortLabel: Clone
+title: Chief Networking Officer
+floorId: rolodex-lounge
+floorLabel: "Floor 6"
+styleEnvelope: tower-flat-plus-depth-v1
+visualArchetype: warm
+silhouette: compact
+wardrobe: blazer
+props: [contact-card]
+mobileRead: warm-eyes-first
+negativeDNA: no-sales-energy
+accent: orange
+doctrine: every-relationship
+flaw: over-commits
+secretStrength: remembers
+wound: betrayed
+outfitVariants: [regular, summer-light, winter-layered]
+poseStates: [idle, greeting, listening, thinking, talking, alert, working]
+promotionStatus: queued
+paletteRef: tower-default
+motionProfile: networking-warm
+artDirectionNotes: x
+`,
+      "utf8",
+    );
+    await expect(loadArtLabCanon({ canonRoot: tmpDir })).rejects.toThrow(/duplicate character roleSlug "cno"/i);
   });
 });

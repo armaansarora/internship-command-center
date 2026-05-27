@@ -9,6 +9,7 @@ const VALID_CHARACTER = {
     id: "sol-navarro",
     revisedAt: "2026-05-25T00:00:00.000Z",
   },
+  roleSlug: "cno",
   displayName: "Sol Navarro",
   shortLabel: "Sol",
   title: "Chief Networking Officer",
@@ -63,6 +64,23 @@ describe("ArtLabCharacterCanonSchema", () => {
         ...VALID_CHARACTER,
         header: { ...VALID_CHARACTER.header, kind: "palette" },
       }),
+    ).toThrow();
+  });
+
+  it("rejects when roleSlug is missing", () => {
+    const { roleSlug: _roleSlug, ...withoutRoleSlug } = VALID_CHARACTER;
+    expect(() => ArtLabCharacterCanonSchema.parse(withoutRoleSlug)).toThrow();
+  });
+
+  it("rejects when roleSlug is not lowercase kebab-case", () => {
+    expect(() =>
+      ArtLabCharacterCanonSchema.parse({ ...VALID_CHARACTER, roleSlug: "CNO" }),
+    ).toThrow();
+    expect(() =>
+      ArtLabCharacterCanonSchema.parse({ ...VALID_CHARACTER, roleSlug: "cno_alt" }),
+    ).toThrow();
+    expect(() =>
+      ArtLabCharacterCanonSchema.parse({ ...VALID_CHARACTER, roleSlug: "cno test" }),
     ).toThrow();
   });
 });
