@@ -18,11 +18,11 @@ mcp:
       - ${opts.repoRoot}/scripts/artlab-sdk-mcp.ts
     env:
       ARTLAB_WORKSPACE_ROOT: ${opts.repoRoot}/.artlab/engine
-      ARTLAB_CANON_ROOT: ${opts.repoRoot}/.artlab/canon
+      ARTLAB_CANON_ROOT: ${opts.repoRoot}/docs/artlab/sdk/canon
 
 paths:
   read-write:
-    - ${opts.repoRoot}/.artlab/canon
+    - ${opts.repoRoot}/docs/artlab/sdk/canon
     - ${opts.repoRoot}/src/app/artlab-demo
     - ${opts.repoRoot}/src/components/artlab
   byte-protected:
@@ -36,7 +36,7 @@ paths:
 rules:
   - "Treat any path under \`byte-protected\` as read-only. CI (\`.github/workflows/artlab-byte-diff.yml\`) will reject any byte-level drift."
   - "When the user asks for new art, prefer calling \`artlab/generate\` over hand-editing files."
-  - "Canon edits land in \`.artlab/canon/\` and feed the next regeneration — they do NOT change existing promoted packs."
+  - "Canon edits land in \`docs/artlab/sdk/canon/\` and feed the next regeneration — they do NOT change existing promoted packs."
   - "Use \`artlab/asset_pack_integration\` to get a copy-paste TSX snippet; never invent integration shapes by hand."
 
 primary-actions:

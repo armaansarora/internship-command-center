@@ -20,7 +20,7 @@ describe("artlab-sdk-install-mcp", () => {
           args: ["tsx", "/tmp/repo/scripts/artlab-sdk-mcp.ts"],
           env: {
             ARTLAB_WORKSPACE_ROOT: "/tmp/repo/.artlab/engine",
-            ARTLAB_CANON_ROOT: "/tmp/repo/.artlab/canon",
+            ARTLAB_CANON_ROOT: "/tmp/repo/docs/artlab/sdk/canon",
           },
         },
       },

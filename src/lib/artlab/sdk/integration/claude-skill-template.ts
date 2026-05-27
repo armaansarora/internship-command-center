@@ -39,7 +39,7 @@ The **ArtLab SDK** is an MCP server (\`artlab\`) that exposes the Tower's multim
 
 ## Canonical paths
 
-- Canon YAML lives in **\`${opts.repoRoot}/.artlab/canon/\`** — never edit promoted Asset Pack files directly; canon edits feed the next regeneration.
+- Canon YAML lives in **\`${opts.repoRoot}/docs/artlab/sdk/canon/\`** — never edit promoted Asset Pack files directly; canon edits feed the next regeneration.
 - Promoted Asset Packs live in **\`${opts.repoRoot}/.artlab/engine/promoted/\`** — these are byte-protected by CI.
 - Inbox for new generation runs: **\`${opts.repoRoot}/.artlab/engine/inbox/sdk/\`** — written by \`artlab/generate\`, consumed by the ArtLab daemon.
 

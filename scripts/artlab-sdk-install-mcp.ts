@@ -22,7 +22,7 @@ export function computeArtLabClaudeSnippet(opts: { repoRoot: string }): ArtLabCl
         args: ["tsx", join(opts.repoRoot, "scripts", "artlab-sdk-mcp.ts")],
         env: {
           ARTLAB_WORKSPACE_ROOT: join(opts.repoRoot, ".artlab", "engine"),
-          ARTLAB_CANON_ROOT: join(opts.repoRoot, ".artlab", "canon"),
+          ARTLAB_CANON_ROOT: join(opts.repoRoot, "docs", "artlab", "sdk", "canon"),
         },
       },
     },
