@@ -30,6 +30,8 @@ import { recommendDirection } from "../orchestrator/recommend-direction";
 import { readConceptFeedback } from "../brainstorm/feedback-ledger";
 import { summariseFeedbackForBrain } from "../memory/feedback-summary";
 import { writeConceptCritiqueFallbackBlocker } from "./concept-critique-blocker";
+import { loadArtLabCanon } from "../sdk/canon/load-canon";
+import { resolveCanonCharacter } from "../sdk/canon/resolve-character";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const TARGET_LANES = 5;
@@ -235,6 +237,30 @@ export const conceptRunner: ArtLabRunner = {
     // writer further down. Mirrors what the rest of the runner already does
     // (process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir).
     const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
+
+    // Resolve the canon header.id for this character. Runtime callers pass in
+    // a runtime slug (e.g. "cro") but canon records are keyed by header.id
+    // (e.g. "rafe-calder"). The concept-board.json artifact must record the
+    // canonical id so it's greppable against canon. Resolver does header.id
+    // first, then roleSlug fallback. If canon can't be loaded (missing dir,
+    // unset env, etc.) we proceed with the runtime slug — the runner stays
+    // robust to canon errors.
+    const projectRoot = process.env.ARTLAB_PROJECT_ROOT ?? process.cwd();
+    const canonRoot = process.env.ARTLAB_CANON_ROOT ?? join(projectRoot, "docs/artlab/sdk/canon");
+    let resolvedCharacterId = input.characterId;
+    if (input.characterId) {
+      try {
+        const canon = await loadArtLabCanon({ canonRoot });
+        const canonChar = resolveCanonCharacter(canon.characters, input.characterId);
+        if (canonChar) resolvedCharacterId = canonChar.header.id;
+      } catch (err) {
+        console.info(JSON.stringify({
+          level: "info",
+          event: "canon-load-skipped",
+          err: (err as Error).message,
+        }));
+      }
+    }
     let slotOutputs: ConceptSlotOutputs[];
     let promptsUsed: ConceptLanePrompt[] = [];
     let promptSource: "brain" | "canonical" | "skipped" = "skipped";
@@ -320,7 +346,7 @@ export const conceptRunner: ArtLabRunner = {
       conceptBoardPath,
       JSON.stringify({
         runId: input.runId,
-        characterId: input.characterId,
+        characterId: resolvedCharacterId,
         promptSource,
         lanes: slotOutputs.map(({ jsonPath, pngPath, mode, errorMessage }, idx) => ({
           laneIndex: idx + 1,
