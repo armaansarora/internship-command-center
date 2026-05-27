@@ -24,7 +24,7 @@ export interface ConceptLanePrompt {
 
 export interface BuildConceptLanePromptsResult {
   prompts: ConceptLanePrompt[];
-  source: "brain" | "canonical-fallback";
+  source: "brain" | "canonical";
   characterContext: TowerCharacterContext;
 }
 
@@ -85,7 +85,7 @@ export async function buildConceptLanePrompts(input: BuildConceptLanePromptsInpu
   } catch {
     // brain unavailable — fall through to canonical fallback
   }
-  return { prompts: canonicalFallbackPrompts(ctx), source: "canonical-fallback", characterContext: ctx };
+  return { prompts: canonicalFallbackPrompts(ctx), source: "canonical", characterContext: ctx };
 }
 
 function parseLanePromptsOutput(json: unknown): ConceptLanePrompt[] | null {
@@ -327,7 +327,7 @@ export interface EnvironmentSlotPrompt {
   prompt: string;
 }
 
-export async function buildEnvironmentPrompts(input: BuildEnvironmentPromptsInput): Promise<{ prompts: EnvironmentSlotPrompt[]; source: "brain" | "canonical-fallback" }> {
+export async function buildEnvironmentPrompts(input: BuildEnvironmentPromptsInput): Promise<{ prompts: EnvironmentSlotPrompt[]; source: "brain" | "canonical" }> {
   const bundle = input.bundle ?? await loadTowerContext({ workspaceRoot: input.workspaceRoot });
   const floor = pickFloorContext(bundle, input.space);
   if (!floor) throw new Error(`prompt-builder: no floor context for "${input.space}"`);
@@ -360,7 +360,7 @@ export async function buildEnvironmentPrompts(input: BuildEnvironmentPromptsInpu
         `No characters in frame. 16:9 framing. No text, logos, signage, copyrighted skyline likenesses.`,
       ].join("\n"),
     })),
-    source: "canonical-fallback",
+    source: "canonical",
   };
 }
 

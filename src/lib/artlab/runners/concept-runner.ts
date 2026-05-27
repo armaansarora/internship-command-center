@@ -72,7 +72,7 @@ interface RefineFromFeedbackInput {
   feedback: ReturnType<typeof readConceptFeedback>;
 }
 
-async function refineConceptPromptsFromFeedback(input: RefineFromFeedbackInput): Promise<{ prompts: ConceptLanePrompt[]; source: "brain" | "canonical-fallback" } | null> {
+async function refineConceptPromptsFromFeedback(input: RefineFromFeedbackInput): Promise<{ prompts: ConceptLanePrompt[]; source: "brain" | "canonical" } | null> {
   const ctx = pickCharacterContext(input.bundle, input.characterId);
   if (!ctx) return null;
   try {
@@ -121,7 +121,7 @@ function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
   // Brain preference: Anthropic (if key present) > Gemini (reuses image key) > mock.
   // If Anthropic is configured but throws at runtime (invalid key / 401 / 5xx)
   // we transparently retry the same decision against the Gemini brain — that
-  // way a stale ANTHROPIC_API_KEY doesn't cascade into canonical-fallback
+  // way a stale ANTHROPIC_API_KEY doesn't cascade into the canonical path
   // when the user has a perfectly good Gemini key available.
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
@@ -237,7 +237,7 @@ export const conceptRunner: ArtLabRunner = {
     const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
     let slotOutputs: ConceptSlotOutputs[];
     let promptsUsed: ConceptLanePrompt[] = [];
-    let promptSource: "brain" | "canonical-fallback" | "skipped" = "skipped";
+    let promptSource: "brain" | "canonical" | "skipped" = "skipped";
 
     let towerCtx: ReturnType<typeof pickCharacterContext> = null;
     let towerBundle: Awaited<ReturnType<typeof loadTowerContext>> | null = null;
@@ -255,7 +255,7 @@ export const conceptRunner: ArtLabRunner = {
         // round, ask the brain to rewrite the 5 prompts incorporating feedback.
         // Otherwise compose fresh prompts via buildConceptLanePrompts.
         const feedback = readConceptFeedback(input.runDir);
-        let built: { prompts: ConceptLanePrompt[]; source: "brain" | "canonical-fallback" };
+        let built: { prompts: ConceptLanePrompt[]; source: "brain" | "canonical" };
         if (feedback.length > 0) {
           built = await refineConceptPromptsFromFeedback({
             workspaceRoot,

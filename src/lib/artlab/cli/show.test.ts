@@ -15,7 +15,7 @@ import { renderConceptBoardHtml, runShowSubcommand } from "./show";
 const FIXTURE = {
   runId: "11111111-2222-3333-4444-555555555555",
   characterId: "cno",
-  promptSource: "canonical-fallback",
+  promptSource: "canonical",
   lanes: [
     { laneIndex: 1, pngPath: "/abs/runs/x/concept-slots/lane-1.png" },
     { laneIndex: 2, pngPath: "/abs/runs/x/concept-slots/lane-2.png" },
@@ -52,7 +52,7 @@ describe("renderConceptBoardHtml", () => {
     const html = renderConceptBoardHtml(FIXTURE);
     expect(html).toContain(FIXTURE.runId);
     expect(html).toContain("cno");
-    expect(html).toContain("canonical-fallback");
+    expect(html).toContain("canonical");
     expect(html.toLowerCase()).toContain("<!doctype html>");
     expect(html).toContain('<meta charset="utf-8">');
   });

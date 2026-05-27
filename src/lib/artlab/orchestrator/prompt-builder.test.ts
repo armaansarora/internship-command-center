@@ -4,7 +4,7 @@
 // identity to an approved lane via the IDENTITY ANCHOR line. Concept-gen
 // runs BEFORE any lane is approved, so the anchor target is canon — and
 // the same anchor sentence must land in:
-//   • every canonical-fallback lane prompt
+//   • every canonical lane prompt
 //   • the underlying single-image prompt those lanes wrap
 // These tests pin the byte-identical anchor string so future edits can't
 // drift it.
@@ -70,7 +70,7 @@ function makeBundle(ctx: TowerCharacterContext): TowerContextBundle {
 }
 
 // A brain stub that always throws — forces buildConceptLanePrompts down the
-// canonical-fallback path. The fallback is the path actually shipped when the
+// canonical path. The canonical path is what actually ships when the
 // brain is unavailable, so testing it is the right canary.
 const throwingBrain: ArtLabLlmBrain = {
   async decide() {
@@ -78,7 +78,7 @@ const throwingBrain: ArtLabLlmBrain = {
   },
 };
 
-describe("buildConceptLanePrompts (canonical fallback) — identity anchor", () => {
+describe("buildConceptLanePrompts (canonical) — identity anchor", () => {
   it("includes the identity anchor on EVERY one of the 5 lanes", async () => {
     const ctx = makeSolContext();
     const bundle = makeBundle(ctx);
@@ -88,7 +88,7 @@ describe("buildConceptLanePrompts (canonical fallback) — identity anchor", () 
       brain: throwingBrain,
       bundle,
     });
-    expect(result.source).toBe("canonical-fallback");
+    expect(result.source).toBe("canonical");
     expect(result.prompts).toHaveLength(5);
     for (const lane of result.prompts) {
       expect(lane.prompt).toContain(IDENTITY_ANCHOR);
