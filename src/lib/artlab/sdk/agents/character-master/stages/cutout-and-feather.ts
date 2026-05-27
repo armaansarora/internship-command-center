@@ -1,6 +1,6 @@
 // src/lib/artlab/sdk/agents/character-master/stages/cutout-and-feather.ts
 //
-// Cutout + feather stage for the Tower Art ArtLab's character-master agent.
+// Cutout + feather stage for the ArtLab SDK's character-master agent.
 // Reuses the mature flood-fill + edge-feather + perimeter-sampling primitives
 // from `src/lib/artlab/runners/cutout-primitives.ts` — the same module the
 // ArtLab `cutout-runner` consumes. This satisfies the ArtLab SDK reuse rule:

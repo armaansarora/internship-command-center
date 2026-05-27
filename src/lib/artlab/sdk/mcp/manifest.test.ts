@@ -6,7 +6,7 @@ import { ARTLAB_MCP_TOOL_NAMES } from "./tools";
 
 const ManifestSchema = z
   .object({
-    name: z.literal("tower-art-foundry"),
+    name: z.literal("artlab"),
     description: z.string().min(20),
     homepage: z.string().url(),
     tools: z

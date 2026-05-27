@@ -27,7 +27,7 @@ export const SpriteAnimatorOutputSchema = z
   .strict();
 export type SpriteAnimatorOutput = z.infer<typeof SpriteAnimatorOutputSchema>;
 
-const SYSTEM = `You are the Sprite Animator agent in the Tower Art ArtLab.
+const SYSTEM = `You are the Sprite Animator agent in the ArtLab SDK.
 You receive a characterId, a directive (e.g. "idle breathe loop, 1.2s, ease-in-out"), a target format ("sprite-sheet" or "lottie"), and a frame budget.
 Your job: emit a per-frame prompt list, an easing recommendation, duration, and loop mode.
 

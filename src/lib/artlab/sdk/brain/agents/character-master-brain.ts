@@ -27,7 +27,7 @@ export const CharacterMasterOutputSchema = z
   .strict();
 export type CharacterMasterOutput = z.infer<typeof CharacterMasterOutputSchema>;
 
-const SYSTEM = `You are the Character Master agent in the Tower Art ArtLab.
+const SYSTEM = `You are the Character Master agent in the ArtLab SDK.
 You receive a characterId, a directive (plain-English request), and optional anchor pack + recent feedback signals.
 Your job: produce a concrete, executable plan to generate or refine that character's sprite/keyframes.
 

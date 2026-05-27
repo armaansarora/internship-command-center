@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createArtLabMcpServer } from "../src/lib/artlab/sdk/mcp/server";
 
-const HELP = `tower-art-foundry - MCP stdio server
+const HELP = `artlab - MCP stdio server
 
 Usage:
   npx tsx scripts/artlab-sdk-mcp.ts           Start the server on stdio.

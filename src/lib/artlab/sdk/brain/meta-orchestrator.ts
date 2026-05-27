@@ -7,7 +7,7 @@ import {
   ARTLAB_AGENT_KINDS,
 } from "./types";
 
-const META_SYSTEM = `You are the Tower Art ArtLab meta-orchestrator.
+const META_SYSTEM = `You are the ArtLab SDK meta-orchestrator.
 You receive a raw user/agent request and must resolve it to one of these specialist agents:
 - character-master
 - floor-environment

@@ -27,7 +27,7 @@ export const UiTextureOutputSchema = z
   .strict();
 export type UiTextureOutput = z.infer<typeof UiTextureOutputSchema>;
 
-const SYSTEM = `You are the UI Texture & Icon agent in the Tower Art ArtLab.
+const SYSTEM = `You are the UI Texture & Icon agent in the ArtLab SDK.
 You receive a slotId (e.g. tower.button.bg), a directive, a tileable flag, and palette hints (hex).
 Your job: produce a texture plan with a copy-paste prompt, an explicit CSS variable name, and a fallback color for non-image clients.
 

@@ -20,7 +20,7 @@ beforeEach(() => {
 });
 
 describe("createArtLabMcpServer", () => {
-  it("returns a server with identity tower-art-foundry and version from package.json", () => {
+  it("returns a server with identity artlab and version from package.json", () => {
     const built = createArtLabMcpServer({
       workspaceRoot,
       canonRoot,
@@ -29,7 +29,7 @@ describe("createArtLabMcpServer", () => {
       providerProbes: {},
       version: "9.9.9-test",
     });
-    expect(built.identity.name).toBe("tower-art-foundry");
+    expect(built.identity.name).toBe("artlab");
     expect(built.identity.version).toBe("9.9.9-test");
   });
 

@@ -11,11 +11,11 @@ beforeEach(() => {
 });
 
 describe("artlab-sdk-install-mcp", () => {
-  it("computeArtLabClaudeSnippet produces a tower-art-foundry mcpServers entry", () => {
+  it("computeArtLabClaudeSnippet produces a artlab mcpServers entry", () => {
     const snippet = computeArtLabClaudeSnippet({ repoRoot: "/tmp/repo" });
     expect(snippet).toEqual({
       mcpServers: {
-        "tower-art-foundry": {
+        "artlab": {
           command: "npx",
           args: ["tsx", "/tmp/repo/scripts/artlab-sdk-mcp.ts"],
           env: {
@@ -35,13 +35,13 @@ describe("artlab-sdk-install-mcp", () => {
     );
     expect(merged.theme).toBe("dark");
     expect((merged.mcpServers as Record<string, unknown>).existing).toBeDefined();
-    expect((merged.mcpServers as Record<string, unknown>)["tower-art-foundry"]).toBeDefined();
+    expect((merged.mcpServers as Record<string, unknown>)["artlab"]).toBeDefined();
   });
 
-  it("mergeArtLabClaudeSnippet overwrites a stale tower-art-foundry entry", () => {
+  it("mergeArtLabClaudeSnippet overwrites a stale artlab entry", () => {
     const existing = {
       mcpServers: {
-        "tower-art-foundry": { command: "STALE", args: [] },
+        "artlab": { command: "STALE", args: [] },
       },
     };
     const merged = mergeArtLabClaudeSnippet(
@@ -49,7 +49,7 @@ describe("artlab-sdk-install-mcp", () => {
       computeArtLabClaudeSnippet({ repoRoot: "/r" }),
     );
     expect(
-      (merged.mcpServers as Record<string, { command: string }>)["tower-art-foundry"]?.command,
+      (merged.mcpServers as Record<string, { command: string }>)["artlab"]?.command,
     ).toBe("npx");
   });
 
@@ -61,6 +61,6 @@ describe("artlab-sdk-install-mcp", () => {
       readFileSync(join(claudeHome, "settings.json"), "utf8"),
     ) as Record<string, unknown>;
     const merged = mergeArtLabClaudeSnippet(existing, computed);
-    expect((merged.mcpServers as Record<string, unknown>)["tower-art-foundry"]).toBeDefined();
+    expect((merged.mcpServers as Record<string, unknown>)["artlab"]).toBeDefined();
   });
 });

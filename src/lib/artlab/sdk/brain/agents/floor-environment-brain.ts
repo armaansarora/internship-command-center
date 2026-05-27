@@ -39,7 +39,7 @@ export const FloorEnvironmentOutputSchema = z
   .strict();
 export type FloorEnvironmentOutput = z.infer<typeof FloorEnvironmentOutputSchema>;
 
-const SYSTEM = `You are the Floor & Environment agent in the Tower Art ArtLab.
+const SYSTEM = `You are the Floor & Environment agent in the ArtLab SDK.
 You receive a Tower space slug, a directive, and the set of time states (dawn..night) the consumer wants.
 Your job: emit a background-only generation plan with prompt variants keyed by time state.
 

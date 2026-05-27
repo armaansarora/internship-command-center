@@ -11,14 +11,14 @@ beforeEach(() => {
 });
 
 describe("installArtLabAntigravityWorkspace", () => {
-  it("writes .antigravity/workspaces/tower-art-foundry/workspace.yaml on confirm", async () => {
+  it("writes .antigravity/workspaces/artlab/workspace.yaml on confirm", async () => {
     await installArtLabAntigravityWorkspace({
       repoRoot,
       confirm: () => Promise.resolve(true),
     });
-    const path = join(repoRoot, ".antigravity", "workspaces", "tower-art-foundry", "workspace.yaml");
+    const path = join(repoRoot, ".antigravity", "workspaces", "artlab", "workspace.yaml");
     expect(existsSync(path)).toBe(true);
-    expect(readFileSync(path, "utf8")).toMatch(/^workspace: tower-art-foundry/m);
+    expect(readFileSync(path, "utf8")).toMatch(/^workspace: artlab/m);
   });
 
   it("aborts when user declines", async () => {
@@ -26,7 +26,7 @@ describe("installArtLabAntigravityWorkspace", () => {
       repoRoot,
       confirm: () => Promise.resolve(false),
     });
-    const path = join(repoRoot, ".antigravity", "workspaces", "tower-art-foundry", "workspace.yaml");
+    const path = join(repoRoot, ".antigravity", "workspaces", "artlab", "workspace.yaml");
     expect(existsSync(path)).toBe(false);
   });
 });

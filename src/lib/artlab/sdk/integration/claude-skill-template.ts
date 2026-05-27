@@ -4,9 +4,9 @@ export interface RenderArtLabClaudeSkillOpts {
 
 export function renderArtLabClaudeSkill(opts: RenderArtLabClaudeSkillOpts): string {
   return `---
-name: tower-art-foundry
+name: artlab
 description: |
-  Tower Art ArtLab — the SDK that lets you list canon, fetch promoted
+  ArtLab SDK — the SDK that lets you list canon, fetch promoted
   Asset Packs, generate new modality artifacts (characters, floors,
   textures, icons, sprite animations, Lottie), preview them, and get a
   copy-paste TSX integration snippet for any pack. Use this skill when
@@ -17,11 +17,11 @@ description: |
   exists for the war room", anything about the Tower visual layer.
 ---
 
-# Tower Art ArtLab — SDK skill for Claude Code sessions
+# ArtLab SDK — SDK skill for Claude Code sessions
 
 ## What this is
 
-The **Tower Art ArtLab** is an MCP server (\`tower-art-foundry\`) that exposes the Tower's multimodal art system to AI agents. It speaks 9 typed tools over stdio. Every artifact is **self-describing** (manifest + integration metadata), so when you fetch one you get told exactly how to paste it into a Next.js page.
+The **ArtLab SDK** is an MCP server (\`artlab\`) that exposes the Tower's multimodal art system to AI agents. It speaks 9 typed tools over stdio. Every artifact is **self-describing** (manifest + integration metadata), so when you fetch one you get told exactly how to paste it into a Next.js page.
 
 ## When to use which tool
 
@@ -57,7 +57,7 @@ The **Tower Art ArtLab** is an MCP server (\`tower-art-foundry\`) that exposes t
 
 - **Never** byte-edit a promoted Asset Pack on disk. Treat \`promoted/\` as read-only.
 - **Never** invent a character or floor outside canon. If the user names something unknown, call \`artlab/canon_list\` first and surface that as an error.
-- **Never** describe the ArtLab SDK as the underlying generation engine in user-facing copy — internally they're layers of one system, externally the SDK is the **Tower Art ArtLab**.
+- **Never** describe the ArtLab SDK as the underlying generation engine in user-facing copy — internally they're layers of one system, externally the SDK is the **ArtLab SDK**.
 - **Never** call \`artlab/generate\` without a description >= 8 chars (the schema will reject it).
 
 ## Examples (paste-ready)

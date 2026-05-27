@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { renderArtLabAntigravityWorkspace } from "./antigravity-workspace-template";
 
 describe("renderArtLabAntigravityWorkspace", () => {
-  it("returns a workspace.yaml string with the foundry slug", () => {
+  it("returns a workspace.yaml string with the artlab slug", () => {
     const yaml = renderArtLabAntigravityWorkspace({ repoRoot: "/repo" });
-    expect(yaml).toMatch(/^workspace: tower-art-foundry/m);
+    expect(yaml).toMatch(/^workspace: artlab/m);
   });
 
   it("declares byte-protected paths so the agent doesn't touch promoted packs", () => {
@@ -15,8 +15,8 @@ describe("renderArtLabAntigravityWorkspace", () => {
 
   it("includes the MCP server reference", () => {
     const yaml = renderArtLabAntigravityWorkspace({ repoRoot: "/repo" });
-    expect(yaml).toMatch(/tower-art-foundry/);
-    expect(yaml).toMatch(/scripts\/foundry-mcp\.ts/);
+    expect(yaml).toMatch(/artlab/);
+    expect(yaml).toMatch(/scripts\/artlab-sdk-mcp\.ts/);
   });
 
   it("includes the canon path", () => {

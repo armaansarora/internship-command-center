@@ -115,7 +115,7 @@ export interface ArtLabMcpServerConfig {
 }
 
 export interface ArtLabMcpServer {
-  identity: { name: "tower-art-foundry"; version: string };
+  identity: { name: "artlab"; version: string };
   registeredTools: ArtLabMcpToolName[];
   server: Server;
   invokeForTest(tool: ArtLabMcpToolName | string, rawInput: unknown): Promise<unknown>;
@@ -142,7 +142,7 @@ const TOOL_SUMMARIES: Record<ArtLabMcpToolName, string> = {
 
 export function createArtLabMcpServer(config: ArtLabMcpServerConfig): ArtLabMcpServer {
   const server = new Server(
-    { name: "tower-art-foundry", version: config.version },
+    { name: "artlab", version: config.version },
     { capabilities: { tools: {} } },
   );
 
@@ -200,7 +200,7 @@ export function createArtLabMcpServer(config: ArtLabMcpServerConfig): ArtLabMcpS
   });
 
   return {
-    identity: { name: "tower-art-foundry", version: config.version },
+    identity: { name: "artlab", version: config.version },
     registeredTools: [...ARTLAB_MCP_TOOL_NAMES],
     server,
     async invokeForTest(tool: string, rawInput: unknown): Promise<unknown> {

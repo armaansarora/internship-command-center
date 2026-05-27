@@ -28,6 +28,6 @@ describe("renderArtLabClaudeSkill", () => {
   it("opens with a YAML frontmatter block (Claude Code skill format)", () => {
     const md = renderArtLabClaudeSkill({ repoRoot: "/r" });
     expect(md.startsWith("---\n")).toBe(true);
-    expect(md).toMatch(/^name: tower-art-foundry/m);
+    expect(md).toMatch(/^name: artlab/m);
   });
 });

@@ -16,7 +16,7 @@ function atomicWriteText(path: string, body: string): void {
 }
 
 export async function installArtLabAntigravityWorkspace(opts: InstallArtLabAntigravityWorkspaceOpts): Promise<void> {
-  const target = join(opts.repoRoot, ".antigravity", "workspaces", "tower-art-foundry", "workspace.yaml");
+  const target = join(opts.repoRoot, ".antigravity", "workspaces", "artlab", "workspace.yaml");
   const body = renderArtLabAntigravityWorkspace({ repoRoot: opts.repoRoot });
   process.stdout.write(`About to write the Antigravity workspace to:\n  ${target}\n\n`);
   const ok = await opts.confirm();

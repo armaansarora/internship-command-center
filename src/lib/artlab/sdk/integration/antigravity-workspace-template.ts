@@ -3,15 +3,15 @@ export interface RenderArtLabAntigravityWorkspaceOpts {
 }
 
 export function renderArtLabAntigravityWorkspace(opts: RenderArtLabAntigravityWorkspaceOpts): string {
-  return `workspace: tower-art-foundry
+  return `workspace: artlab
 description: |
-  Tower Art ArtLab workspace for Antigravity sessions. This workspace
+  ArtLab SDK workspace for Antigravity sessions. This workspace
   gives the session access to the ArtLab SDK MCP server and the canon
   source of truth. Use it when generating, integrating, or editing any
   visual artifact for The Tower app.
 
 mcp:
-  - name: tower-art-foundry
+  - name: artlab
     command: npx
     args:
       - tsx

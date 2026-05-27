@@ -11,9 +11,9 @@ beforeEach(() => {
 });
 
 describe("installArtLabClaudeSkill", () => {
-  it("computeArtLabClaudeSkillTarget returns ~/.claude/skills/tower-art-foundry/SKILL.md by default", () => {
+  it("computeArtLabClaudeSkillTarget returns ~/.claude/skills/artlab/SKILL.md by default", () => {
     const target = computeArtLabClaudeSkillTarget({ claudeHome });
-    expect(target).toBe(join(claudeHome, "skills", "tower-art-foundry", "SKILL.md"));
+    expect(target).toBe(join(claudeHome, "skills", "artlab", "SKILL.md"));
   });
 
   it("installArtLabClaudeSkill writes the SKILL.md when confirmed", async () => {
@@ -22,8 +22,8 @@ describe("installArtLabClaudeSkill", () => {
       repoRoot: "/r",
       confirm: () => Promise.resolve(true),
     });
-    const written = readFileSync(join(claudeHome, "skills", "tower-art-foundry", "SKILL.md"), "utf8");
-    expect(written).toMatch(/^---\nname: tower-art-foundry/);
+    const written = readFileSync(join(claudeHome, "skills", "artlab", "SKILL.md"), "utf8");
+    expect(written).toMatch(/^---\nname: artlab/);
   });
 
   it("installArtLabClaudeSkill aborts when user declines", async () => {
@@ -32,12 +32,12 @@ describe("installArtLabClaudeSkill", () => {
       repoRoot: "/r",
       confirm: () => Promise.resolve(false),
     });
-    expect(existsSync(join(claudeHome, "skills", "tower-art-foundry", "SKILL.md"))).toBe(false);
+    expect(existsSync(join(claudeHome, "skills", "artlab", "SKILL.md"))).toBe(false);
   });
 
   it("backs up an existing SKILL.md to SKILL.md.bak before overwriting", async () => {
-    const target = join(claudeHome, "skills", "tower-art-foundry", "SKILL.md");
-    mkdirSync(join(claudeHome, "skills", "tower-art-foundry"), { recursive: true });
+    const target = join(claudeHome, "skills", "artlab", "SKILL.md");
+    mkdirSync(join(claudeHome, "skills", "artlab"), { recursive: true });
     writeFileSync(target, "PREVIOUS");
     await installArtLabClaudeSkill({
       claudeHome,

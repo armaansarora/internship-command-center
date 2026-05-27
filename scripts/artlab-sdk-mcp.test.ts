@@ -37,7 +37,7 @@ describe("scripts/artlab-sdk-mcp.ts", () => {
   it("prints --help info and exits 0 when invoked with --help", async () => {
     const result = await runBootstrap(["--help"]);
     expect(result.code).toBe(0);
-    expect(result.stdout).toMatch(/tower-art-foundry/);
+    expect(result.stdout).toMatch(/artlab/);
     expect(result.stdout).toMatch(/MCP stdio server/);
   }, 15_000);
 

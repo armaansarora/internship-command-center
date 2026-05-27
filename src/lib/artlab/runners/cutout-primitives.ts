@@ -3,7 +3,7 @@
 // Shared cutout primitives: flood-fill backdrop knockout, single-pass edge
 // feather, perimeter color sampling with stddev, RGBA composition, and an
 // alpha-histogram classifier. Extracted from the original `cutout-runner`
-// module so the Tower Art ArtLab's `character-master` agent can reuse the
+// module so the ArtLab SDK's `character-master` agent can reuse the
 // same mature implementation instead of reimplementing per-pixel
 // thresholding from scratch. Behavior is unchanged for the artlab runner —
 // this is a pure code-motion refactor.

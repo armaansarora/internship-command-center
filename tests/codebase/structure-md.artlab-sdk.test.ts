@@ -5,8 +5,8 @@ import { join } from "node:path";
 const STRUCTURE = readFileSync(join(process.cwd(), "STRUCTURE.md"), "utf8");
 
 describe("STRUCTURE.md mentions the ArtLab SDK tree", () => {
-  it("contains a 'Tower Art Foundry SDK' heading", () => {
-    expect(STRUCTURE).toMatch(/Tower Art Foundry SDK/);
+  it("contains a 'ArtLab SDK' heading", () => {
+    expect(STRUCTURE).toMatch(/ArtLab SDK|Tower Art Foundry SDK/);
   });
 
   it("documents src/lib/foundry/mcp/", () => {

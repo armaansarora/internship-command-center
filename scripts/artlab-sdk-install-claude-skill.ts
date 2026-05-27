@@ -12,7 +12,7 @@ export interface InstallArtLabClaudeSkillOpts {
 }
 
 export function computeArtLabClaudeSkillTarget(opts: { claudeHome: string }): string {
-  return join(opts.claudeHome, "skills", "tower-art-foundry", "SKILL.md");
+  return join(opts.claudeHome, "skills", "artlab", "SKILL.md");
 }
 
 function atomicWriteText(path: string, body: string): void {
@@ -24,7 +24,7 @@ function atomicWriteText(path: string, body: string): void {
 export async function installArtLabClaudeSkill(opts: InstallArtLabClaudeSkillOpts): Promise<void> {
   const target = computeArtLabClaudeSkillTarget({ claudeHome: opts.claudeHome });
   const body = renderArtLabClaudeSkill({ repoRoot: opts.repoRoot });
-  process.stdout.write(`About to write the Tower Art ArtLab skill to:\n  ${target}\n\n`);
+  process.stdout.write(`About to write the ArtLab SDK skill to:\n  ${target}\n\n`);
   const ok = await opts.confirm();
   if (!ok) {
     process.stdout.write("Aborted. No changes made.\n");

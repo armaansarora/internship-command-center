@@ -6,7 +6,7 @@ import { stdin, stdout } from "node:process";
 
 export interface ArtLabClaudeSnippet {
   mcpServers: {
-    "tower-art-foundry": {
+    "artlab": {
       command: "npx";
       args: string[];
       env: Record<string, string>;
@@ -17,7 +17,7 @@ export interface ArtLabClaudeSnippet {
 export function computeArtLabClaudeSnippet(opts: { repoRoot: string }): ArtLabClaudeSnippet {
   return {
     mcpServers: {
-      "tower-art-foundry": {
+      "artlab": {
         command: "npx",
         args: ["tsx", join(opts.repoRoot, "scripts", "artlab-sdk-mcp.ts")],
         env: {
@@ -37,7 +37,7 @@ export function mergeArtLabClaudeSnippet(
   const existingServers = (existing.mcpServers as Record<string, unknown> | undefined) ?? {};
   merged.mcpServers = {
     ...existingServers,
-    "tower-art-foundry": snippet.mcpServers["tower-art-foundry"],
+    "artlab": snippet.mcpServers["artlab"],
   };
   return merged;
 }

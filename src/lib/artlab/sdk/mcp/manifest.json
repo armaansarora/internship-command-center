@@ -1,6 +1,6 @@
 {
-  "name": "tower-art-foundry",
-  "description": "MCP server for the Tower Art Foundry - list canon, fetch promoted Asset Packs, generate new modality artifacts, get copy-paste integration snippets.",
+  "name": "artlab",
+  "description": "MCP server for the ArtLab SDK - list canon, fetch promoted Asset Packs, generate new modality artifacts, get copy-paste integration snippets.",
   "homepage": "https://www.interntower.com",
   "transport": "stdio",
   "command": "npx",

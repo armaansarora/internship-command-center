@@ -85,7 +85,7 @@ const ReferenceImageUrlSchema = z
 
 /**
  * Canonical, ordered list of every MCP tool exposed by the
- * Tower Art ArtLab server. Order matters because the MCP
+ * ArtLab SDK server. Order matters because the MCP
  * manifest emits them in this order to the client.
  */
 export const ARTLAB_MCP_TOOL_NAMES = [
