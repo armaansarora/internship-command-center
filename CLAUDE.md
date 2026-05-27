@@ -100,7 +100,7 @@ The ArtLab SDK is the **agent-native** layer layered over the ArtLab engine. AI 
 
 **Demo page:** `/artlab-demo` — one of each modality, sourced from `ARTLAB_DEMO_PACKS`.
 
-**Docs:** `docs/artlab/sdk/README.md`, `docs/artlab/sdk/MCP-TOOLS.md`, `docs/artlab/sdk/BRAIN-ARCHITECTURE.md`.
+**Docs:** `docs/artlab/sdk/README.md`.
 
 The ArtLab SDK and ArtLab engine are layers of one system — never marketed or referred to as separate products.
 
