@@ -14,6 +14,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { TelegramClient } from "@/lib/artlab/bot/telegram-client";
 import { readRunStateSnapshot } from "@/lib/artlab/state/snapshots";
+import { recordDaemonError } from "./entry";
 import {
   buildConceptBoardAttachments,
   buildFinalBoardAttachments,
@@ -31,6 +32,7 @@ import {
   type TelegramOutboundMessage,
 } from "@/lib/artlab/bot/message-templates";
 import { DesignBriefSchema, type DesignBrief } from "@/lib/artlab/brainstorm/brief-schema";
+import { REQUIRED_PROMOTION_PHRASE } from "@/lib/artlab/promotion/constants";
 
 export interface PhaseNotifierInput {
   workspaceRoot: string;
@@ -122,7 +124,12 @@ function readRecommendation(runDir: string): { laneIndex: number; reasoning: str
     if (typeof parsed.laneIndex === "number" && typeof parsed.reasoning === "string") {
       return { laneIndex: parsed.laneIndex, reasoning: parsed.reasoning };
     }
-  } catch { /* fall through */ }
+  } catch (err) {
+    // Malformed `recommendation.json` (truncated write, JSON parse error)
+    // previously degraded silently to a board without the "💡 Recommended"
+    // line. Record so operators see corrupt run artifacts in /health.
+    recordPhaseNotifierFailure("phase-notifier-:125", err);
+  }
   return undefined;
 }
 
@@ -279,7 +286,12 @@ function readSpend(runStatePath: string): { actualCents: number; capCents: numbe
     if (typeof actual === "number" && typeof cap === "number") {
       return { actualCents: actual, capCents: cap };
     }
-  } catch { /* fall through */ }
+  } catch (err) {
+    // Malformed `run-state.json` (concurrent write race, partial commit)
+    // previously hid behind a silent fallthrough — operators only saw the
+    // missing $X/Y line on the celebration. Surface so /health can flag.
+    recordPhaseNotifierFailure("phase-notifier-:282", err);
+  }
   return undefined;
 }
 
@@ -338,12 +350,34 @@ function recordTelegramFailure(source: string, err: unknown): void {
   const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
   if (!workspaceRoot) return;
   try {
-    // Lazy-require to avoid circular imports.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { recordDaemonError } = require("./entry") as typeof import("./entry");
     recordDaemonError(workspaceRoot, source, err);
   } catch { /* never let logging crash the notifier */ }
 }
+
+/**
+ * Generic phase-notifier failure recorder. Used by the file-read helpers
+ * (`readRecommendation`, `readSpend`) so malformed run artifacts surface
+ * with a structured daemon-error rather than silently degrading the user
+ * caption. Mirrors `recordTelegramFailure` but is named for the call site
+ * to keep `source` strings legible in daemon-errors.jsonl.
+ */
+function recordPhaseNotifierFailure(source: string, err: unknown): void {
+  const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+  if (!workspaceRoot) return;
+  try {
+    recordDaemonError(workspaceRoot, source, err);
+  } catch { /* never let logging crash the notifier */ }
+}
+
+// Vitest-only access to the internal readers so the silent-catch
+// regression coverage in phase-notifier.test.ts can exercise the
+// malformed-JSON paths without spinning up a fake Telegram client +
+// run-state harness. The helpers themselves are private; this hatch is
+// intentionally narrow.
+export const __testing = {
+  readRecommendation,
+  readSpend,
+};
 
 function fallbackConceptCaption(runId: string, characterId: string, err: unknown): string {
   const display = displayFor(characterId);
@@ -368,6 +402,6 @@ function fallbackFinalCaption(runId: string, characterId: string, err: unknown):
     ``,
     `⚠️ Couldn't attach the composite: ${err instanceof Error ? err.message : String(err)}`,
     ``,
-    `Reply 'approved for app' to promote.`,
+    `Reply '${REQUIRED_PROMOTION_PHRASE}' to promote.`,
   ].join("\n");
 }

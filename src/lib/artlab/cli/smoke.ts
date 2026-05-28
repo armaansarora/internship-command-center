@@ -14,6 +14,7 @@ import { createCliInboxBridge } from "@/lib/artlab/daemon/cli-inbox-bridge";
 import { dequeueNextRun, listQueuedRuns } from "@/lib/artlab/queue/queue";
 import { runWorkerSubcommand } from "./run-worker";
 import { readRunStateSnapshot, writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
+import { REQUIRED_PROMOTION_PHRASE } from "@/lib/artlab/promotion/constants";
 import { banner, gold, header, highlight, kvList, muted, step, summaryFooter, type KvRow } from "./ui/widgets";
 import { box } from "./ui/box";
 
@@ -51,7 +52,7 @@ const STEPS = [
   "Queue processor dequeues; worker walks routed → concept-review",
   "Simulate Human Gate 1: 'approve direction 1' (concept-review → canary)",
   "Worker walks canary → final-review",
-  "Simulate Human Gate 2: 'approved for app' (final-review → promoting → closed)",
+  `Simulate Human Gate 2: '${REQUIRED_PROMOTION_PHRASE}' (final-review → promoting → closed)`,
 ];
 
 function emitStepDone(log: (line: string) => void, idx: number) {
@@ -162,7 +163,7 @@ export async function runSmokeSubcommand(input: SmokeInput): Promise<SmokeResult
 
     emitStepRunning(log, 6);
     if (afterSecondWalk?.phase === "final-review") {
-      writeFileSync(join(runDir, "approval.json"), JSON.stringify({ phrase: "approved for app" }));
+      writeFileSync(join(runDir, "approval.json"), JSON.stringify({ phrase: REQUIRED_PROMOTION_PHRASE }));
       writeRunStateSnapshot(runDir, {
         ...afterSecondWalk,
         phase: "promoting",

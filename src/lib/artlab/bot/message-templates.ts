@@ -20,6 +20,7 @@ import {
   type FeedbackOption,
 } from "./inline-keyboards";
 import type { DesignBrief } from "../brainstorm/brief-schema";
+import { REQUIRED_PROMOTION_PHRASE } from "../promotion/constants";
 
 export interface TelegramOutboundMessage {
   text: string;
@@ -189,7 +190,7 @@ export function finalBoardCaption(input: FinalBoardCaptionInput): TelegramOutbou
       `<b>${input.spriteCount}</b> sprite${input.spriteCount === 1 ? "" : "s"} composed · upload-ready · alpha verified`,
       ...previewLine,
       ``,
-      `Tap a button below — or reply <code>approved for app</code>.`,
+      `Tap a button below — or reply <code>${REQUIRED_PROMOTION_PHRASE}</code>.`,
     ]),
     parseMode: "HTML",
     replyMarkup: buildFinalInlineKeyboard(input.runId),
@@ -317,7 +318,7 @@ export function gateReplyNoMatch(input: {
 }): TelegramOutboundMessage {
   const heading = input.surface === "concept"
     ? `🤔 Heard "approve direction ${input.laneIndex}" — but no run is parked at the concept-review gate.`
-    : `🤔 Heard "approved for app" — but no run is parked at the final-review gate.`;
+    : `🤔 Heard "${REQUIRED_PROMOTION_PHRASE}" — but no run is parked at the final-review gate.`;
   return {
     text: block([
       heading,
@@ -351,11 +352,11 @@ export function helpTemplate(): TelegramOutboundMessage {
       `  2. Tap an adjustment or send free-text to refine`,
       `  3. Approve → 5 concept lanes`,
       `  4. Tap a lane <b>or</b> Refine to iterate with feedback`,
-      `  5. Final board → <code>approved for app</code> ships live`,
+      `  5. Final board → <code>${REQUIRED_PROMOTION_PHRASE}</code> ships live`,
       ``,
       `<b>Gates</b>`,
       `  <code>approve direction 1-5</code>  pick a concept lane`,
-      `  <code>approved for app</code>       promote final board`,
+      `  <code>${REQUIRED_PROMOTION_PHRASE}</code>       promote final board`,
       `  <code>revise: &lt;change&gt;</code>      request a revision`,
       `  <code>reject</code>                  abandon the run`,
       ``,

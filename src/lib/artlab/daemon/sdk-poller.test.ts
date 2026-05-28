@@ -329,4 +329,116 @@ describe("sdk-poller", () => {
       ).toBe(true);
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Canon identity contract — see Unit 5 of the 2026-05-27 system-fixes plan.
+  //
+  // The poller historically wrote `sourceSurface: "cli"` for MCP-originated
+  // jobs (schema lie — confused operators reading run-state to debug stuck
+  // runs) and never populated `characterId`. Now:
+  //   - run-state carries the actual surface (`artlab-mcp`).
+  //   - run-state + queue spec carry the canon `header.id` (not the legacy
+  //     roleSlug), resolved either from `job.characterId` or the description.
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("canon identity + sourceSurface contract", () => {
+    it("writes sourceSurface 'artlab-mcp' to run-state (not the legacy 'cli' lie)", async () => {
+      const runId = writeInboxJob({});
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state).not.toBeNull();
+      expect(state!.sourceSurface).toBe("artlab-mcp");
+    });
+
+    it("resolves explicit characterId roleSlug 'cno' to canon header.id 'sol-navarro' on run-state", async () => {
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "make a thing the description is intentionally generic",
+        characterId: "cno",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state).not.toBeNull();
+      expect(state!.characterId).toBe("sol-navarro");
+      const queued = listQueuedRuns(workspaceRoot);
+      expect(queued[0]!.spec.characterId).toBe("sol-navarro");
+    });
+
+    it("passes through canon header.id unchanged when caller already canonical", async () => {
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "make the character via canonical name",
+        characterId: "sol-navarro",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state!.characterId).toBe("sol-navarro");
+    });
+
+    it("resolves characterId from description when MCP caller omits it", async () => {
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "make Sol Navarro for the Tower",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state!.characterId).toBe("sol-navarro");
+    });
+
+    it("leaves characterId unset when description has no character match (router fallback)", async () => {
+      // The router returns no characterId for ambiguous-no-mention character
+      // requests. The poller writes state without it; the worker eventually
+      // fails with no-character-match (this is the loud failure the audit
+      // demanded — not a silent miscategorization).
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "a generic character with no canon match",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state!.characterId).toBeUndefined();
+    });
+
+    // Unit 5 follow-up Issue #5: an explicit `characterId` that doesn't
+    // resolve via canon used to flow through to run-state.json as a raw
+    // string (z.string().min(1) accepts anything). ArtLabRunStateSchema
+    // then preserved the corruption across the whole run, and every
+    // downstream consumer (brief, concept, promotion) had to handle a
+    // ghost identifier nobody could explain. We now fail fast at the
+    // poller boundary: quarantine the inbox file, record a deterministic
+    // telemetry error, never seed run-state.
+    it("quarantines inbox file when explicit characterId doesn't resolve via canon", async () => {
+      const runId = "00000000-0000-4000-8000-000000000fff";
+      writeInboxJob({
+        runId,
+        kind: "character",
+        description: "make the legacy ghost from a deleted canon",
+        characterId: "ghost-character-not-in-canon",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      const out = await poller.tick();
+      // The inbox file was rejected — not enqueued.
+      expect(out.enqueuedRunIds).toEqual([]);
+      expect(out.failedFiles).toContain(`generate-${runId}.json`);
+      // No run-state was written — the worker never sees the corrupt id.
+      expect(existsSync(join(workspaceRoot, "runs", runId, "run-state.json"))).toBe(false);
+      // No queue entry was written either.
+      expect(listQueuedRuns(workspaceRoot)).toHaveLength(0);
+      // Inbox file is in .bad/ for operator inspection.
+      const badDir = join(workspaceRoot, "inbox", "sdk", ".bad");
+      expect(existsSync(badDir)).toBe(true);
+      expect(readdirSync(badDir).some((f) => f.endsWith(`-generate-${runId}.json`))).toBe(
+        true,
+      );
+      // daemon-errors.jsonl carries the deterministic telemetry.
+      const errs = readFileSync(join(workspaceRoot, "daemon-errors.jsonl"), "utf8");
+      expect(errs).toMatch(/sdk-poller:unrecognized-character/);
+      expect(errs).toContain("ghost-character-not-in-canon");
+      expect(errs).toContain(runId);
+    });
+  });
 });

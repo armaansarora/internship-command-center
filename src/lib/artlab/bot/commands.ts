@@ -8,6 +8,7 @@ import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
+import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
 import { handleArtLabTelegramCommand } from "@/lib/artlab/sdk/integration/telegram-commands";
 import {
   askAnswerTemplate,
@@ -204,7 +205,7 @@ function handleDecisions(workspaceRoot: string, args: string[]): TelegramOutboun
 
 function buildAskBrain(workspaceRoot: string): ArtLabLlmBrain {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
   const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
     ? process.env.GEMINI_API_KEY
     : null;

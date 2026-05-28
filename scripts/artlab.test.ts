@@ -15,7 +15,6 @@ describe("artlab CLI shell", () => {
       "cancel",
       "daemon",
       "bot",
-      "migrate",
       "run-worker",
       "smoke",
       "help",
@@ -32,8 +31,34 @@ describe("artlab CLI shell", () => {
     expect(code).toBe(0);
   });
 
+  it.each([["--help"], ["-h"]])(
+    "entry returns exit-code 0 for %s (alias of help) with matching output",
+    async (flag) => {
+      const helpLines: string[] = [];
+      const helpCode = await artlabCliEntry({
+        argv: ["help"],
+        stdout: (s) => helpLines.push(s),
+        stderr: () => {},
+      });
+      expect(helpCode).toBe(0);
+      const aliasLines: string[] = [];
+      const aliasCode = await artlabCliEntry({
+        argv: [flag],
+        stdout: (s) => aliasLines.push(s),
+        stderr: () => {},
+      });
+      expect(aliasCode).toBe(0);
+      expect(aliasLines.join("\n")).toBe(helpLines.join("\n"));
+    },
+  );
+
   it("entry returns exit-code 2 for unknown subcommand", async () => {
     const code = await artlabCliEntry({ argv: ["dance"], stdout: () => {}, stderr: () => {} });
+    expect(code).toBe(2);
+  });
+
+  it("entry returns exit-code 2 for the (now-removed) migrate subcommand", async () => {
+    const code = await artlabCliEntry({ argv: ["migrate"], stdout: () => {}, stderr: () => {} });
     expect(code).toBe(2);
   });
 

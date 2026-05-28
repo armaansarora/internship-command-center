@@ -268,6 +268,21 @@ export const ArtLabSlotAuditOutputSchema = z
 export type ArtLabSlotAuditOutput = z.infer<typeof ArtLabSlotAuditOutputSchema>;
 
 // ---- generate ------------------------------------------------------------
+
+/**
+ * characterId for `artlab/generate`. Accepts either canon `header.id`
+ * (e.g. "sol-navarro") or legacy roleSlug (e.g. "cno") — the sdk-poller
+ * routes both forms through the intake router so the run-state seeded for
+ * the worker always carries the canonical header.id. Charset is the same
+ * kebab-case shape used by canon header IDs and roleSlugs, length-capped
+ * so a malformed MCP call can't enqueue a megabyte string.
+ */
+export const ArtLabGenerateCharacterIdSchema = z
+  .string()
+  .min(2, "characterId must be at least 2 chars")
+  .max(64, "characterId must be 64 chars or fewer")
+  .regex(/^[a-z][a-z0-9-]*$/, "characterId must be lowercase kebab-case");
+
 export const ArtLabGenerateInputSchema = z
   .object({
     kind: z.enum(ARTLAB_ASSET_KINDS),
@@ -288,6 +303,11 @@ export const ArtLabGenerateInputSchema = z
     // length cap, encoded-traversal rejection) as those tools — not a
     // plain z.string().min(1) which would let `../../../etc/passwd` through.
     anchorPackId: PackIdSchema.optional(),
+    // Explicit character identity (canon header.id or legacy roleSlug).
+    // When present, the daemon writes it straight to run-state without
+    // re-routing the description; absent, the daemon routes the
+    // description through the intake router as a natural-language fallback.
+    characterId: ArtLabGenerateCharacterIdSchema.optional(),
     priority: z.enum(["low", "normal", "high"]).default("normal"),
     requesterAgent: z.string().min(1).optional(),
   })

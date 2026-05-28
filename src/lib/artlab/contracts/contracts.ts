@@ -1,4 +1,8 @@
 import type { CreativeAssetType } from "../types";
+import {
+  REQUIRED_PROMOTION_PHRASE,
+  type RequiredPromotionPhrase,
+} from "../promotion/constants";
 
 export const CREATIVE_ASSET_CONTRACT_TYPES = [
   "character",
@@ -52,7 +56,7 @@ export interface CreativeAssetPromotionTarget {
   targetPath: string | null;
   manifestPath: string | null;
   writesPublicArt: boolean;
-  requiresExactApprovalPhrase: "approved for app";
+  requiresExactApprovalPhrase: RequiredPromotionPhrase;
 }
 
 export interface CreativeAssetContract {
@@ -101,7 +105,7 @@ function publicArtTarget(targetPath: string, manifestPath: string): CreativeAsse
     targetPath,
     manifestPath,
     writesPublicArt: true,
-    requiresExactApprovalPhrase: "approved for app",
+    requiresExactApprovalPhrase: REQUIRED_PROMOTION_PHRASE,
   };
 }
 
@@ -111,7 +115,7 @@ function runtimeTarget(targetPath: string, manifestPath: string): CreativeAssetP
     targetPath,
     manifestPath,
     writesPublicArt: false,
-    requiresExactApprovalPhrase: "approved for app",
+    requiresExactApprovalPhrase: REQUIRED_PROMOTION_PHRASE,
   };
 }
 
@@ -121,7 +125,7 @@ function reviewOnlyTarget(): CreativeAssetPromotionTarget {
     targetPath: null,
     manifestPath: null,
     writesPublicArt: false,
-    requiresExactApprovalPhrase: "approved for app",
+    requiresExactApprovalPhrase: REQUIRED_PROMOTION_PHRASE,
   };
 }
 

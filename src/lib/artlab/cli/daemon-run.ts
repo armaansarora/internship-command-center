@@ -22,6 +22,7 @@ import { processCancelIntents } from "@/lib/artlab/daemon/cancel-flow";
 import { reconcileCrashedRuns } from "@/lib/artlab/daemon/crash-recovery";
 import { createSleepGuard } from "@/lib/artlab/daemon/sleep-guard";
 import { createCliInboxBridge } from "@/lib/artlab/daemon/cli-inbox-bridge";
+import { createCliInboxConsumer } from "@/lib/artlab/daemon/cli-inbox-consumer";
 import { createArtLabPoller } from "@/lib/artlab/daemon/sdk-poller";
 import { DaemonAlreadyRunningError, acquireDaemonLock, type DaemonLockHandle } from "@/lib/artlab/daemon/daemon-lock";
 import { dispatchInboundMessage } from "@/lib/artlab/bot/bot-dispatcher";
@@ -195,6 +196,7 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
     crashRecovery: { reconcile: () => reconcileCrashedRuns({ workspaceRoot }) },
     sleepGuard: createSleepGuard({}),
     cliInboxBridge: createCliInboxBridge({ workspaceRoot }),
+    cliInboxConsumer: createCliInboxConsumer({ workspaceRoot }),
     artLabPoller: createArtLabPoller({ workspaceRoot }),
     supervisor,
   });

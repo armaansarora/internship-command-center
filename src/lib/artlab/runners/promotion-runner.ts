@@ -1,20 +1,41 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  linkSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { createHash } from "node:crypto";
 import { readRunStateSnapshot, writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
+import {
+  ArtLabPromotedPackManifestSchema,
+  type ArtLabPromotedPackManifest,
+} from "@/lib/artlab/sdk/asset-pack/promoted-manifest.schema";
+import type { ArtLabAssetType } from "@/lib/artlab/types";
+import type { ArtLabAssetKind } from "@/lib/artlab/sdk/mcp/tools";
 import {
   evaluateCreativePromotionFirewall,
   promoteCreativeAssetsTransactionally,
   type CreativePromotionActionManifestSummary,
   type CreativePromotionStagedAsset,
 } from "@/lib/artlab/promotion/promotion";
+import { REQUIRED_PROMOTION_PHRASE } from "@/lib/artlab/promotion/constants";
 import { appendStyleWin } from "@/lib/artlab/memory/style-ledger";
 import { autoCommitPromotion } from "@/lib/artlab/daemon/git-commit";
 import { displayFor } from "@/lib/artlab/intake/known-cast";
 import { loadTowerContext, pickCharacterContext } from "@/lib/artlab/context/tower-context";
+import { resolveCanonIdentity } from "@/lib/artlab/sdk/canon/canon-identity-map";
+import { recordDaemonError } from "@/lib/artlab/daemon/entry";
 import { createClaudeBrain } from "@/lib/artlab/orchestrator/claude-brain";
 import { createGeminiBrain } from "@/lib/artlab/orchestrator/gemini-brain";
 import { createLoggedBrain } from "@/lib/artlab/orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "@/lib/artlab/orchestrator/llm-brain";
+import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "@/lib/artlab/sdk/brain/provider-registry";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 async function composeAndPersistPromotionCelebration(input: {
@@ -59,7 +80,7 @@ async function composeAndPersistPromotionCelebration(input: {
 
 function buildBrainForPromotion(workspaceRoot: string): ArtLabLlmBrain {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
   const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
     ? process.env.GEMINI_API_KEY
     : null;
@@ -88,7 +109,10 @@ function buildBrainForPromotion(workspaceRoot: string): ArtLabLlmBrain {
   return createLoggedBrain({ inner: raw, workspaceRoot });
 }
 
-const REQUIRED_PHRASE = "approved for app";
+// Promotion-firewall phrase — kept as a local alias for readability; sourced
+// from the single canonical constant so it can never drift from the value
+// the firewall actually checks.
+const REQUIRED_PHRASE = REQUIRED_PROMOTION_PHRASE;
 const DEFAULT_CAP_CENTS = 350;
 
 function readSpendFromRunState(runDir: string): { actualCents: number; capCents: number } {
@@ -118,8 +142,221 @@ function publicArtRoot(): string {
   return process.env.ARTLAB_PUBLIC_ART_ROOT ?? "/Users/armaanarora/Documents/The Tower/public/art";
 }
 
+/**
+ * Resolve the directory under which we write `<packId>/manifest.json` so
+ * the MCP `asset_pack_list` + `asset_pack_get` handlers can discover
+ * promoted packs. Honours the explicit env override (used by tests + ops
+ * runbooks); otherwise derives from `ARTLAB_PROJECT_ROOT`. Returns null
+ * when neither env is set — promotion still completes, but the SDK
+ * manifest write is skipped with telemetry. We intentionally do NOT
+ * fall back to `process.cwd()` because the daemon's cwd in launchd is
+ * unrelated to the repo, and silently writing under cwd would leak
+ * `.artlab/engine/promoted/` directories into whoever's home dir
+ * launchd happens to drop us in.
+ */
+function promotedPacksRoot(): string | null {
+  if (process.env.ARTLAB_PROMOTED_PACKS_ROOT) {
+    return process.env.ARTLAB_PROMOTED_PACKS_ROOT;
+  }
+  if (process.env.ARTLAB_PROJECT_ROOT) {
+    return join(process.env.ARTLAB_PROJECT_ROOT, ".artlab", "engine", "promoted");
+  }
+  return null;
+}
+
+/**
+ * Map runner-side asset types to MCP-side asset kinds. The runner uses a
+ * production-shop taxonomy (character/environment/prop/ui-texture/animation/
+ * scene/icon-system/marketing-hero/shader) — the MCP enum is a slimmer
+ * agent-facing surface (character/floor/ui-texture/icon/sprite-animation/
+ * lottie). Map deterministically so the same runner output always lands
+ * on the same MCP kind.
+ *
+ * Returns null for runner types we don't yet ship an MCP kind for —
+ * promotion still completes, but the SDK manifest is skipped so an
+ * invalid `kind` cannot poison the MCP enum.
+ */
+function mapAssetTypeToMcpKind(assetType: ArtLabAssetType): ArtLabAssetKind | null {
+  switch (assetType) {
+    case "character":
+      return "character";
+    case "environment":
+    case "scene":
+      return "floor";
+    case "ui-texture":
+      return "ui-texture";
+    case "icon-system":
+      return "icon";
+    case "animation":
+      return "sprite-animation";
+    case "prop":
+    case "marketing-hero":
+    case "shader":
+      // Not yet mapped to an MCP kind — the strict enum has no slot for
+      // these. Skip the SDK manifest rather than fabricating a wrong kind.
+      return null;
+  }
+}
+
+function sha256OfFileBytes(bytes: Buffer): string {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+/**
+ * Atomic JSON write — write to `<path>.tmp`, then rename. POSIX rename is
+ * atomic on the same filesystem, so a concurrent reader either sees the
+ * old file or the new one but never a torn JSON document.
+ */
+function writeJsonAtomicSync(absPath: string, payload: unknown): void {
+  const tmp = `${absPath}.${process.pid}.${Date.now()}.tmp`;
+  writeFileSync(tmp, `${JSON.stringify(payload, null, 2)}\n`);
+  renameSync(tmp, absPath);
+}
+
+/**
+ * Hardlink `src` → `dest` for zero-copy promotion; fall back to copyFile
+ * when crossing filesystems (e.g., `/tmp` to repo root in CI). Either way,
+ * the bytes under `dest` are byte-identical to `src`.
+ */
+function hardlinkOrCopy(src: string, dest: string): void {
+  try {
+    if (existsSync(dest)) unlinkSync(dest);
+    linkSync(src, dest);
+  } catch {
+    copyFileSync(src, dest);
+  }
+}
+
+interface WrittenPackFile {
+  /** Path under packDir (relative POSIX form) — what the manifest stores. */
+  relPath: string;
+  /** sha256 of the bytes we wrote. */
+  sha256: string;
+  /** Bytes on disk after write. */
+  bytes: number;
+}
+
+/**
+ * Materialise an SDK Asset Pack at `<promotedPacksRoot>/<packId>/`.
+ *
+ * Layout:
+ *   <packId>/
+ *     manifest.json     ← ArtLabPromotedPackManifestSchema-validated
+ *     payload/<basename>… ← byte-identical to the public/art targets
+ *
+ * The manifest's `files[*].path` is `payload/<basename>` so asset-pack-get
+ * (which resolves against packDir) finds the bytes without leaking absolute
+ * paths into the on-disk manifest.
+ */
+function writeSdkAssetPack(args: {
+  packId: string;
+  kind: ArtLabAssetKind;
+  slotId: string;
+  promotedAt: string;
+  characterId?: string;
+  space?: string;
+  publicPath: string;
+  promotedAbsPaths: readonly string[];
+  sourceRunId: string;
+}): { packDir: string; manifest: ArtLabPromotedPackManifest } | null {
+  const packsRoot = promotedPacksRoot();
+  if (packsRoot === null) {
+    return null;
+  }
+  const packDir = join(packsRoot, args.packId);
+  const payloadDir = join(packDir, "payload");
+  mkdirSync(payloadDir, { recursive: true });
+
+  const written: WrittenPackFile[] = [];
+  for (const abs of args.promotedAbsPaths) {
+    if (!existsSync(abs)) continue;
+    const fileName = basename(abs);
+    const destAbs = join(payloadDir, fileName);
+    hardlinkOrCopy(abs, destAbs);
+    const bytes = readFileSync(destAbs);
+    written.push({
+      relPath: `payload/${fileName}`,
+      sha256: sha256OfFileBytes(bytes),
+      bytes: bytes.length,
+    });
+  }
+
+  if (written.length === 0) {
+    throw new Error(
+      `promotion-runner: refusing to write SDK Asset Pack for "${args.packId}" — no promoted files materialised on disk`,
+    );
+  }
+
+  const manifestObj = {
+    packId: args.packId,
+    kind: args.kind,
+    slotId: args.slotId,
+    promotedAt: args.promotedAt,
+    ...(args.characterId ? { characterId: args.characterId } : {}),
+    ...(args.space ? { space: args.space } : {}),
+    publicPath: args.publicPath,
+    files: written.map((w) => ({
+      path: w.relPath,
+      role: w === written[0] ? "primary" : "secondary",
+      sha256: w.sha256,
+      bytes: w.bytes,
+    })),
+    sourceRunId: args.sourceRunId,
+  };
+
+  const validated = ArtLabPromotedPackManifestSchema.safeParse(manifestObj);
+  if (!validated.success) {
+    throw new Error(
+      `promotion-runner: ArtLabPromotedPackManifestSchema validation failed for "${args.packId}": ${validated.error.message}`,
+    );
+  }
+
+  const manifestPath = join(packDir, "manifest.json");
+  writeJsonAtomicSync(manifestPath, validated.data);
+  return { packDir, manifest: validated.data };
+}
+
 function targetRelativeDir(input: ArtLabRunnerInput): string {
   if (input.assetType === "character" && input.characterId) {
+    // Resolve canon to land assets in their canonical floor — e.g. Sol's
+    // sprite goes to `public/art/rolodex-lounge/sol-navarro/`, NOT
+    // `public/art/lobby/cno/`. The hardcoded "lobby" fallback predates
+    // canon and was the root cause of the `ls public/art/lobby/` returning
+    // `cno otis` symptom called out by 4 auditors.
+    // Surface canon load failures (malformed YAML, missing dir) into
+    // daemon-errors.jsonl alongside the canon-not-found fallback so silent
+    // YAML drift can't reach this critical promotion path without operator
+    // visibility.
+    const workspaceRootForTelemetry = process.env.ARTLAB_WORKSPACE_ROOT;
+    const canon = resolveCanonIdentity(input.characterId, {
+      onError: workspaceRootForTelemetry
+        ? (err, file) =>
+            recordDaemonError(
+              workspaceRootForTelemetry,
+              "canon-identity-load-degraded",
+              new Error(`canon-identity ${file}: ${err.message}`),
+            )
+        : undefined,
+    });
+    if (canon) {
+      return join(canon.floorId, canon.headerId);
+    }
+    // Canon unreachable — record so we can debug the canon-load failure
+    // and fall back to the legacy `lobby/<id>` shape so the run still
+    // promotes rather than crashing on the missing dir.
+    try {
+      if (workspaceRootForTelemetry) {
+        recordDaemonError(
+          workspaceRootForTelemetry,
+          "promotion-runner:canon-fallback",
+          new Error(`canon identity not found for characterId="${input.characterId}" — promotion falling back to lobby/`),
+        );
+      }
+    } catch {
+      // recordDaemonError must never break promotion — at this point we
+      // already have approved assets staged and the user is waiting on
+      // the receipt.
+    }
     return join("lobby", input.characterId);
   }
   if (input.assetType === "environment") return join("backgrounds", input.runId);
@@ -250,16 +487,86 @@ export const promotionRunner: ArtLabRunner = {
     // We surface the failure via daemon-errors.jsonl indirectly when the
     // worker re-reads run-state and sees the missing field.
     const promotedPackId = derivePromotedPackId(input.assetType, input.runId);
-    try {
-      const current = readRunStateSnapshot(input.runDir);
-      if (current) {
-        writeRunStateSnapshot(input.runDir, {
-          ...current,
-          promotedPackId,
-          updatedAt: new Date().toISOString(),
+
+    // Unit 6 — materialise the SDK Asset Pack under .artlab/engine/promoted/
+    // BEFORE we stamp run-state with `promotedPackId`. Order matters: the
+    // MCP `generate_status` handler reads run-state and then `asset_pack_get`
+    // reads the manifest; if we wrote run-state first and the manifest write
+    // crashed, a caller could observe `phase=promoted, promotedPackId=…`
+    // pointing at a missing pack. Failing here BEFORE the run-state write
+    // keeps `promotedPackId` absent, which is the well-understood
+    // "promotion didn't finish recording" signal.
+    const mcpKind = mapAssetTypeToMcpKind(input.assetType);
+    let sdkManifestFailed = false;
+    if (mcpKind !== null) {
+      try {
+        const primaryAbs = result.promotedPaths[0];
+        const publicPath = primaryAbs
+          ? `/art/${primaryAbs.split("public/art/").pop()?.replaceAll("\\", "/") ?? primaryAbs}`
+          : `/art/${stagedAssets[0]?.targetRelativePath.replaceAll("\\", "/") ?? ""}`;
+        const slotId = input.characterId
+          ? `${input.characterId}.${mcpKind === "character" ? "idle" : mcpKind}`
+          : `${input.assetType}.${input.runId.slice(0, 8)}`;
+        const space = (() => {
+          if (input.assetType !== "character" || !input.characterId) return undefined;
+          const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+          const canon = resolveCanonIdentity(input.characterId, {
+            onError: workspaceRoot
+              ? (err, file) =>
+                  recordDaemonError(
+                    workspaceRoot,
+                    "canon-identity-load-degraded",
+                    new Error(`canon-identity ${file}: ${err.message}`),
+                  )
+              : undefined,
+          });
+          return canon?.floorId;
+        })();
+        // writeSdkAssetPack returns null when no packsRoot env is configured
+        // — that's a deployment state, not a failure, so we don't flip
+        // sdkManifestFailed in that branch.
+        writeSdkAssetPack({
+          packId: promotedPackId,
+          kind: mcpKind,
+          slotId,
+          promotedAt: result.receipt.promotedAt,
+          characterId: input.characterId,
+          space,
+          publicPath,
+          promotedAbsPaths: result.promotedPaths,
+          sourceRunId: input.runId,
         });
+      } catch (err) {
+        sdkManifestFailed = true;
+        // SDK manifest write failed — record + return without stamping
+        // run-state. The public/art files are already in place, so the
+        // visible site still shows the new asset; only the SDK discovery
+        // path is degraded until an operator re-runs promotion.
+        try {
+          const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+          if (workspaceRoot) {
+            recordDaemonError(
+              workspaceRoot,
+              "promotion-runner:sdk-manifest-write-failed",
+              err instanceof Error ? err : new Error(String(err)),
+            );
+          }
+        } catch { /* telemetry must never break promotion */ }
       }
-    } catch { /* never let a state-snapshot rewrite fail a promotion */ }
+    }
+
+    if (!sdkManifestFailed) {
+      try {
+        const current = readRunStateSnapshot(input.runDir);
+        if (current) {
+          writeRunStateSnapshot(input.runDir, {
+            ...current,
+            promotedPackId,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      } catch { /* never let a state-snapshot rewrite fail a promotion */ }
+    }
 
     if (input.assetType === "character" && input.characterId) {
       const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
@@ -273,6 +580,12 @@ export const promotionRunner: ArtLabRunner = {
             winningTechniques: ["artlab-pipeline"],
             promptHash: `run:${input.runId}`,
             totalCostCents: 0,
+            // Unit 4 — `memory-scope.ts` filters wins by `source` so the
+            // per-agent brain only sees feedback from its own kind. Without
+            // this field, every promotion win was invisible to scoped brain
+            // calls and only character-master + character/floor/etc.-targeted
+            // memory reads showed promotion data.
+            source: "artlab-promotion",
           });
         } catch { /* memory write failure must not break promotion */ }
 
@@ -304,13 +617,16 @@ export const promotionRunner: ArtLabRunner = {
       const promotedAbs = result.promotedPaths.map((p) => resolve(p));
       const manifestAbs = resolve(manifestPath(input));
       try {
+        // Unit 6 — auto-push is now OPT-IN inside autoCommitPromotion (gated
+        // on ARTLAB_AUTO_PUSH=on). We no longer pass `skipPush` from the
+        // runner so the env-derived default takes effect; without that the
+        // legacy `=== "off"` check would silently bypass the new gate.
         gitResult = autoCommitPromotion({
           projectRoot,
           runId: input.runId,
           displayName: input.characterId ? displayFor(input.characterId).displayName : undefined,
           promotedPaths: promotedAbs,
           manifestPath: manifestAbs,
-          skipPush: process.env.ARTLAB_AUTO_PUSH === "off",
         });
         writeFileSync(
           join(input.runDir, "git-commit-result.json"),

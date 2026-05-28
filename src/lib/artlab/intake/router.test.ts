@@ -2,9 +2,15 @@ import { describe, expect, it } from "vitest";
 import { routeRequest } from "./router";
 
 describe("intake router", () => {
-  it("routes 'make Sol Navarro' to cno", () => {
+  // The router resolves to the canon `header.id` (`sol-navarro`) rather
+  // than the legacy runtime roleSlug (`cno`). The roleSlug is still
+  // surfaced on the outcome for the few legacy callers that key on it
+  // (visual-assets bundle, SDK legacy-shim). See
+  // `canon-identity-contract.test.ts` for the full alias matrix.
+  it("routes 'make Sol Navarro' to canon header.id sol-navarro (roleSlug cno preserved)", () => {
     const result = routeRequest({ request: "make Sol Navarro" });
-    expect(result.characterId).toBe("cno");
+    expect(result.characterId).toBe("sol-navarro");
+    expect(result.roleSlug).toBe("cno");
     expect(result.assetType).toBe("character");
   });
 

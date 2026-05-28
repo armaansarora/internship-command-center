@@ -1,8 +1,16 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { mkdtempSync, writeFileSync, existsSync, readdirSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { enqueueRun, listQueuedRuns, dequeueNextRun, ARTLAB_MAX_PARALLELISM } from "./queue";
+import {
+  ARTLAB_MAX_PARALLELISM,
+  dequeueNextRun,
+  enqueueRun,
+  inflightCount,
+  listQueuedRuns,
+  releaseInflight,
+  requeueInflight,
+} from "./queue";
 
 describe("artlab queue", () => {
   let dir: string;
@@ -20,13 +28,53 @@ describe("artlab queue", () => {
     expect(list.map((q) => q.runId)).toEqual(["r2", "r3", "r1"]);
   });
 
-  it("dequeueNextRun returns highest priority and removes it", () => {
+  it("dequeueNextRun returns highest priority and moves it into inflight/", () => {
     enqueueRun(dir, { runId: "r1", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "a" } });
     enqueueRun(dir, { runId: "r2", priority: "human-flagged", enqueuedAt: "2026-05-20T00:00:01Z", spec: { request: "b" } });
     const first = dequeueNextRun(dir);
     expect(first?.runId).toBe("r2");
     const remaining = listQueuedRuns(dir);
     expect(remaining.map((q) => q.runId)).toEqual(["r1"]);
+    // The dequeued entry now lives in inflight/ until releaseInflight or
+    // requeueInflight resolves it.
+    expect(inflightCount(dir)).toBe(1);
+    expect(existsSync(join(dir, "queue", "inflight", "r2.json"))).toBe(true);
+    // The inflight entry must NOT show up in listQueuedRuns (it has been
+    // claimed by the supervisor, no longer schedulable).
+    expect(remaining.find((q) => q.runId === "r2")).toBeUndefined();
+  });
+
+  it("releaseInflight removes the inflight entry after a successful spawn", () => {
+    enqueueRun(dir, { runId: "r-claim", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "x" } });
+    const claimed = dequeueNextRun(dir);
+    expect(claimed?.runId).toBe("r-claim");
+    expect(inflightCount(dir)).toBe(1);
+    releaseInflight(dir, "r-claim");
+    expect(inflightCount(dir)).toBe(0);
+    expect(existsSync(join(dir, "queue", "inflight", "r-claim.json"))).toBe(false);
+  });
+
+  it("requeueInflight renames the entry back into the queue on spawn failure", () => {
+    enqueueRun(dir, { runId: "r-fail", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "x" } });
+    const claimed = dequeueNextRun(dir);
+    expect(claimed?.runId).toBe("r-fail");
+    expect(listQueuedRuns(dir)).toHaveLength(0);
+    const requeued = requeueInflight(dir, "r-fail");
+    expect(requeued).toBe(true);
+    expect(inflightCount(dir)).toBe(0);
+    expect(listQueuedRuns(dir).map((q) => q.runId)).toEqual(["r-fail"]);
+  });
+
+  it("listQueuedRuns ignores entries inside inflight/ and .bad/", () => {
+    enqueueRun(dir, { runId: "r-real", priority: "default", enqueuedAt: "2026-05-20T00:00:00Z", spec: { request: "x" } });
+    // Inflight should be invisible to listQueuedRuns.
+    mkdirSync(join(dir, "queue", "inflight"), { recursive: true });
+    writeFileSync(
+      join(dir, "queue", "inflight", "r-busy.json"),
+      JSON.stringify({ runId: "r-busy", priority: "default", enqueuedAt: "2026-05-20T00:00:01Z", spec: { request: "y" } }),
+    );
+    const list = listQueuedRuns(dir);
+    expect(list.map((q) => q.runId)).toEqual(["r-real"]);
   });
 
   it("quarantines corrupted queue entries into .bad/ instead of throwing", () => {

@@ -27,6 +27,10 @@ export interface DaemonCliInboxBridge {
   drain(): Promise<unknown>;
 }
 
+export interface DaemonCliInboxConsumer {
+  drain(): Promise<unknown>;
+}
+
 export interface DaemonArtLabPoller {
   tick(): Promise<unknown>;
 }
@@ -40,6 +44,7 @@ export interface DaemonContextInput {
   telegramPoller: DaemonTicker;
   queueProcessor: DaemonTicker;
   cliInboxBridge?: DaemonCliInboxBridge;
+  cliInboxConsumer?: DaemonCliInboxConsumer;
   artLabPoller?: DaemonArtLabPoller;
   cancelDrain?: DaemonCancelDrain;
   crashRecovery?: DaemonCrashRecovery;
@@ -54,6 +59,7 @@ export interface DaemonContext {
   telegramPoller: DaemonTicker;
   queueProcessor: DaemonTicker;
   cliInboxBridge?: DaemonCliInboxBridge;
+  cliInboxConsumer?: DaemonCliInboxConsumer;
   artLabPoller?: DaemonArtLabPoller;
   cancelDrain?: DaemonCancelDrain;
   crashRecovery?: DaemonCrashRecovery;
@@ -74,6 +80,7 @@ export function createDaemonContext(input: DaemonContextInput): DaemonContext {
     telegramPoller: input.telegramPoller,
     queueProcessor: input.queueProcessor,
     cliInboxBridge: input.cliInboxBridge,
+    cliInboxConsumer: input.cliInboxConsumer,
     artLabPoller: input.artLabPoller,
     cancelDrain: input.cancelDrain,
     crashRecovery: input.crashRecovery,
@@ -163,6 +170,15 @@ export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
 
   if (ctx.cliInboxBridge) {
     await runStep(ctx.workspaceRoot, "cli-inbox-bridge", () => ctx.cliInboxBridge!.drain());
+  }
+
+  // Drain per-run cli-inbox/ answers AFTER the bridge has landed continue/answer
+  // intents into runs/<runId>/cli-inbox/. Routing in the bridge is the
+  // demux; consumption here is the advance. Wrapped in runStep so any throw
+  // (filesystem race, advance-helper failure) lands in daemon-errors.jsonl
+  // instead of crashing the daemon loop.
+  if (ctx.cliInboxConsumer) {
+    await runStep(ctx.workspaceRoot, "cli-inbox-consumer", () => ctx.cliInboxConsumer!.drain());
   }
 
   // ArtLab MCP inbox → ArtLab queue. Must drain BEFORE the queue processor

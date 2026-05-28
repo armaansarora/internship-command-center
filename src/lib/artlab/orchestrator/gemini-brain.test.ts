@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { createGeminiBrain } from "./gemini-brain";
+import { DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL } from "../sdk/brain/provider-registry";
 
 describe("gemini-brain", () => {
   let fetchSpy: ReturnType<typeof vi.spyOn>;
@@ -30,7 +31,7 @@ describe("gemini-brain", () => {
     expect(result.outputJson.prompts).toBeDefined();
     expect(result.tokensIn).toBe(50);
     expect(result.tokensOut).toBe(100);
-    expect(result.model).toBe("gemini-3-pro-preview");
+    expect(result.model).toBe(DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL);
   });
 
   it("calls the configured Gemini text-completion endpoint with json response mime", async () => {
@@ -39,7 +40,7 @@ describe("gemini-brain", () => {
     await brain.decide({ kind: "recommend-direction", input: { lanes: [] } });
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [url, opts] = fetchSpy.mock.calls[0] as unknown as [string, { body: string }];
-    expect(url).toContain("gemini-3-pro-preview:generateContent");
+    expect(url).toContain(`${DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL}:generateContent`);
     expect(url).toContain("key=test-key");
     const body = JSON.parse(opts.body) as {
       systemInstruction?: { parts: { text: string }[] };
@@ -65,6 +66,29 @@ describe("gemini-brain", () => {
     await expect(
       brain.decide({ kind: "recommend-direction", input: {} }),
     ).rejects.toThrow(/HTTP 400.*API_KEY_INVALID/);
+  });
+
+  it("surfaces the model name in HTTP-404 errors so the stale-model failure is traceable", async () => {
+    // Regression: the previous hardcoded default `gemini-3-pro-preview` was
+    // retired by Google and every brain call 404'd silently. The error
+    // message must include the model name so the daemon-errors.jsonl entry
+    // (recorded by the catch-site wrapper in concept-runner, brief-runner,
+    // etc.) is grep-able for the offending model.
+    fetchSpy.mockResolvedValue(
+      new Response("model not found", { status: 404 }),
+    );
+    const brain = createGeminiBrain({ apiKey: "k", model: "gemini-retired-preview" });
+    await expect(brain.decide({ kind: "recommend-direction", input: {} }))
+      .rejects.toThrow(/gemini-retired-preview.*HTTP 404/);
+  });
+
+  it("uses the env-driven default (DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL) when no model is passed", async () => {
+    fetchSpy.mockResolvedValue(mockOkResponse(JSON.stringify({ ok: true })));
+    const brain = createGeminiBrain({ apiKey: "k" });
+    const result = await brain.decide({ kind: "recommend-direction", input: {} });
+    expect(result.model).toBe(DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL);
+    // Sanity: ensures we never silently reintroduce the retired default.
+    expect(result.model).not.toBe("gemini-3-pro-preview");
   });
 
   it("accepts an explicit model override", async () => {

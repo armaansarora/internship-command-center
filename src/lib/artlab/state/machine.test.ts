@@ -66,4 +66,15 @@ describe("artlab state machine", () => {
     expect(isLegalTransition("canary", "canary", "cancelled")).toBe(true);
     expect(isLegalTransition("closed", "closed", "cancelled")).toBe(false);
   });
+
+  it("treats concept-critique-fallback as a legal self-loop blocker on concept phases (Unit 3)", () => {
+    // The concept-runner returns this blocker when the multimodal critique
+    // brain throws or laneImages count mismatches. The orchestrator pins
+    // the run in its current phase with this blocker — `isLegalTransition`
+    // must return true so the state-machine-blessed write (and any future
+    // `findBlockerTransition` recovery path) recognises it.
+    expect(isLegalTransition("generating-concepts", "generating-concepts", "concept-critique-fallback")).toBe(true);
+    expect(isLegalTransition("concept-review", "concept-review", "concept-critique-fallback")).toBe(true);
+    expect(isLegalTransition("refining-concepts", "refining-concepts", "concept-critique-fallback")).toBe(true);
+  });
 });

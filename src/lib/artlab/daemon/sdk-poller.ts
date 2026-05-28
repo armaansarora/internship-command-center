@@ -28,6 +28,8 @@ import { join } from "node:path";
 import { z } from "zod";
 import { enqueueRun, ArtLabQueueEntrySchema, type ArtLabQueueEntry } from "@/lib/artlab/queue/queue";
 import { writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
+import { routeRequest } from "@/lib/artlab/intake/router";
+import { loadCanonIdentities } from "@/lib/artlab/sdk/canon/canon-identity-map";
 import { recordDaemonError } from "./entry";
 import {
   ARTLAB_ASSET_TYPES,
@@ -56,6 +58,12 @@ export const ArtLabGenerateJobSchema = z
     anchorPackId: z.string().min(1).optional(),
     priority: z.enum(["low", "normal", "high"]).optional(),
     requesterAgent: z.string().min(1).optional(),
+    // Optional canon `header.id` (or legacy roleSlug) — when the MCP
+    // caller knows the subject upfront, they pass it through and we skip
+    // the description-based route. Falls back to `routeRequest(description)`
+    // when absent so legacy callers (and the Claude/Antigravity skills)
+    // keep working without code changes.
+    characterId: z.string().min(1).optional(),
     brainHintStatus: z.enum(["pending", "ready", "failed"]).optional(),
     brainHint: z.record(z.string(), z.unknown()).optional(),
     brainHintError: z.string().optional(),
@@ -141,15 +149,70 @@ function quarantine(workspaceRoot: string, srcPath: string, filename: string): v
 }
 
 /**
+ * Outcome of resolving a job's character identity. Distinguishes the three
+ * possible terminal states so `processOne` can:
+ *   - "resolved": write the canon header.id everywhere downstream.
+ *   - "no-character": run the job without a characterId (non-character
+ *     kinds, or character kinds with no canon match in the description —
+ *     the worker will fail loudly downstream with no-character-match).
+ *   - "explicit-unresolved": the MCP caller asserted a `characterId` that
+ *     canon doesn't know about. `processOne` quarantines the inbox file
+ *     instead of seeding a run with a non-canon identifier that would
+ *     otherwise be preserved across the entire run (Unit 5 follow-up
+ *     Issue #5: fail-fast at the poller boundary).
+ */
+type CharacterIdResolution =
+  | { kind: "resolved"; characterId: string }
+  | { kind: "no-character" }
+  | { kind: "explicit-unresolved"; characterId: string };
+
+/**
+ * Resolve the character identity (canon header.id) for an MCP-originated
+ * job. Computed ONCE per inbox file at the top of `processOne` and threaded
+ * into both `seedRunState` and `enqueueArtLabRun` so the run-state and
+ * queue spec carry the same identity without re-routing.
+ *
+ * Order:
+ *   1. Explicit `job.characterId` (MCP caller knows the subject). Routed
+ *      through the canon-aware router so legacy roleSlugs ("cno") are
+ *      lifted to canon header.ids ("sol-navarro"). When the explicit id
+ *      doesn't resolve via canon, we return `explicit-unresolved` so the
+ *      caller can fail fast at the poller boundary — see Unit 5 #5.
+ *   2. `routeRequest(job.description)` — natural-language fallback that
+ *      mirrors the bot/CLI intake path. Non-character kinds and
+ *      description-routed runs with no character match both return
+ *      `no-character`.
+ */
+function resolveCharacterIdForJob(job: ArtLabGenerateJob): CharacterIdResolution {
+  if (job.kind !== "character") return { kind: "no-character" };
+  if (job.characterId) {
+    const outcome = routeRequest({ request: `make characterId: ${job.characterId}` });
+    if (outcome.characterId) return { kind: "resolved", characterId: outcome.characterId };
+    // Explicit id didn't resolve. Surface the raw id so the caller can
+    // quarantine the inbox file with a deterministic error message.
+    return { kind: "explicit-unresolved", characterId: job.characterId };
+  }
+  const outcome = routeRequest({ request: job.description });
+  if (outcome.characterId) return { kind: "resolved", characterId: outcome.characterId };
+  return { kind: "no-character" };
+}
+
+/**
  * Translate a validated ArtLab job into the canonical ArtLab run state
  * shape and atomically persist it under `runs/<runId>/run-state.json`. The
  * canonical `writeRunStateSnapshot` runs `ArtLabRunStateSchema.parse` so a
  * mapping bug fails loudly here rather than silently writing a corrupt
  * state file the worker will choke on later.
+ *
+ * `characterId` is computed by the caller (`processOne`) so we never
+ * re-resolve mid-flow — keeps the run-state and queue spec coherent and
+ * eliminates the divergence vector when intake heuristics evolve between
+ * the seed and enqueue calls.
  */
 function seedRunState(
   workspaceRoot: string,
   job: ArtLabGenerateJob,
+  characterId: string | undefined,
   now: () => Date,
 ): void {
   const runDir = join(workspaceRoot, "runs", job.runId);
@@ -168,7 +231,11 @@ function seedRunState(
     createdAt,
     updatedAt: createdAt,
     request: job.description,
-    sourceSurface: "cli",
+    // sourceSurface MUST agree with the actual surface. MCP-originated jobs
+    // are NOT CLI jobs — operators reading run-state to debug a stuck run
+    // would silently learn the wrong origin under the old "cli" lie.
+    sourceSurface: "artlab-mcp",
+    ...(characterId ? { characterId } : {}),
   };
   writeRunStateSnapshot(runDir, state);
 }
@@ -177,10 +244,18 @@ function seedRunState(
  * Enqueue the run through the same queue API the CLI bridge uses. The queue
  * processor pulls the next entry on the very next daemon tick and the
  * run-worker takes over from there.
+ *
+ * `characterId` is computed once by the caller and threaded through so the
+ * queue spec carries the same identity as run-state. The run-worker checks
+ * the queue entry when state is missing (lost crash recovery); without this
+ * shared identity it would re-route the description and could land on a
+ * different roleSlug if intake heuristics evolved between enqueue and
+ * dequeue.
  */
 function enqueueArtLabRun(
   workspaceRoot: string,
   job: ArtLabGenerateJob,
+  characterId: string | undefined,
   now: () => Date,
 ): void {
   const entry: ArtLabQueueEntry = ArtLabQueueEntrySchema.parse({
@@ -197,6 +272,7 @@ function enqueueArtLabRun(
       anchorPackId: job.anchorPackId ?? null,
       brainHintStatus: job.brainHintStatus ?? null,
       brainHint: job.brainHint ?? null,
+      ...(characterId ? { characterId } : {}),
     },
   });
   enqueueRun(workspaceRoot, entry);
@@ -308,9 +384,32 @@ function processOne(
     quarantine(workspaceRoot, srcPath, filename);
     return { runId: null, error: err };
   }
+
+  // Resolve the canon identity ONCE per inbox file. seedRunState and
+  // enqueueArtLabRun previously each called the resolver independently —
+  // gratuitous since the cache absorbs the cost, and a divergence vector
+  // because two independent resolutions could disagree if canon shifted
+  // mid-tick. Now both helpers receive the same characterId by parameter.
+  const resolution = resolveCharacterIdForJob(job);
+  if (resolution.kind === "explicit-unresolved") {
+    // The MCP caller asserted a characterId that doesn't resolve via canon.
+    // Fail fast: quarantine the inbox file and surface a deterministic
+    // error rather than seeding run-state with a non-canon id that
+    // `ArtLabRunStateSchema` would happily preserve (it only checks
+    // `z.string().min(1)`). The user gets a "your characterId isn't in
+    // canon" failure at submit time — Unit 5 follow-up Issue #5.
+    const err = new Error(
+      `sdk-poller: explicit characterId "${resolution.characterId}" does not resolve via canon (runId=${job.runId})`,
+    );
+    recordDaemonError(workspaceRoot, "sdk-poller:unrecognized-character", err);
+    quarantine(workspaceRoot, srcPath, filename);
+    return { runId: null, error: err };
+  }
+  const characterId = resolution.kind === "resolved" ? resolution.characterId : undefined;
+
   try {
-    seedRunState(workspaceRoot, job, now);
-    enqueueArtLabRun(workspaceRoot, job, now);
+    seedRunState(workspaceRoot, job, characterId, now);
+    enqueueArtLabRun(workspaceRoot, job, characterId, now);
     const archive = processedDir(workspaceRoot);
     if (!existsSync(archive)) mkdirSync(archive, { recursive: true });
     moveFile(srcPath, join(archive, `${job.runId}.json`));
@@ -330,6 +429,23 @@ export function createArtLabPoller(input: ArtLabPollerInput): ArtLabPoller {
   const now = input.now ?? (() => new Date());
   return {
     async tick(): Promise<ArtLabPollerResult> {
+      // Prime the canon identity cache with telemetry. The cache absorbs
+      // subsequent calls within the same process, so this fires at most
+      // once per daemon boot unless `resetCanonIdentityCache()` runs (tests
+      // or canon root env change). Per-file YAML parse failures and an
+      // unreachable `characters/` directory both surface in
+      // daemon-errors.jsonl so silent canon drift never regresses every
+      // downstream consumer to legacy roleSlug shape without operator
+      // visibility — the silent-drift class Unit 5 is designed to close.
+      loadCanonIdentities({
+        onError: (err, file) =>
+          recordDaemonError(
+            input.workspaceRoot,
+            "canon-identity-load-degraded",
+            new Error(`canon-identity ${file}: ${err.message}`),
+          ),
+      });
+
       const dir = artLabInboxDir(input.workspaceRoot);
       if (!existsSync(dir)) {
         // Lazy-create so the ArtLab SDK MCP server can drop its first file in.

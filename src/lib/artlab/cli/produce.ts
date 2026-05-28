@@ -29,7 +29,11 @@ export async function runProduceSubcommand(input: ProduceSubcommandInput): Promi
   const inboxDir = join(input.workspaceRoot, "inbox", "cli");
   if (!existsSync(inboxDir)) mkdirSync(inboxDir, { recursive: true });
   const intentPath = join(inboxDir, `produce-${runId}.json`);
+  // Include runId so the daemon's cli-inbox-bridge enqueues with the SAME id
+  // we just returned to the operator — otherwise `artlab status <runId>` and
+  // `artlab cancel <runId>` would target a phantom.
   writeFileSync(intentPath, JSON.stringify({
+    runId,
     request,
     sourceSurface: "cli",
     createdAt: new Date().toISOString(),

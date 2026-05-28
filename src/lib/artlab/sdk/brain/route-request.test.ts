@@ -85,13 +85,12 @@ describe("routeArtLabRequest", () => {
       writeFileSync(
         join(memoryDir, "style-rejections.jsonl"),
         JSON.stringify({
+          at: "2026-05-24T12:00:00.000Z",
           characterId: "rafe-calder",
-          runId: "r1",
           lane: 1,
-          rejectedAt: "2026-05-24T12:00:00.000Z",
           reason: "wrong color",
-          qaFailureCodes: ["WARDROBE"],
-          promptHashRejected: "h0",
+          codes: ["WARDROBE"],
+          promptHash: "h0",
           source: "character",
         }) + "\n",
       );

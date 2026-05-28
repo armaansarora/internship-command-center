@@ -24,6 +24,35 @@ describe("cli inbox bridge", () => {
     expect(readdirSync(inboxDir)).toHaveLength(0);
   });
 
+  it("preserves runId from the produce payload (no phantom UUID re-generation)", async () => {
+    const inboxDir = join(workspaceRoot, "inbox", "cli");
+    mkdirSync(inboxDir, { recursive: true });
+    const cliRunId = "11111111-2222-3333-4444-555555555555";
+    writeFileSync(
+      join(inboxDir, `produce-${cliRunId}.json`),
+      JSON.stringify({ runId: cliRunId, request: "make a hero", sourceSurface: "cli" }),
+    );
+    const bridge = createCliInboxBridge({ workspaceRoot });
+    const result = await bridge.drain();
+    expect(result.enqueuedRunIds).toEqual([cliRunId]);
+    const queued = listQueuedRuns(workspaceRoot);
+    expect(queued).toHaveLength(1);
+    expect(queued[0]!.runId).toBe(cliRunId);
+  });
+
+  it("falls back to a fresh UUID when payload has no runId (legacy compatibility)", async () => {
+    const inboxDir = join(workspaceRoot, "inbox", "cli");
+    mkdirSync(inboxDir, { recursive: true });
+    writeFileSync(
+      join(inboxDir, `produce-legacy.json`),
+      JSON.stringify({ request: "legacy", sourceSurface: "cli" }),
+    );
+    const bridge = createCliInboxBridge({ workspaceRoot });
+    const result = await bridge.drain();
+    expect(result.enqueuedRunIds).toHaveLength(1);
+    expect(result.enqueuedRunIds[0]).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
   it("ignores produce intents with empty request bodies", async () => {
     const inboxDir = join(workspaceRoot, "inbox", "cli");
     mkdirSync(inboxDir, { recursive: true });

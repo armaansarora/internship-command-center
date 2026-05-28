@@ -1,6 +1,7 @@
 // src/lib/artlab/bot/gate-advance.ts
 //
-// When the Telegram user replies "approve direction N" or "approved for app",
+// When the Telegram user replies "approve direction N" or the canonical
+// promotion phrase (REQUIRED_PROMOTION_PHRASE — see promotion/constants.ts),
 // the dispatcher needs to (a) find the run waiting at the corresponding gate,
 // (b) write the human-approval artifact + advance the run's phase, and
 // (c) re-enqueue the run so the daemon's queue processor spawns a fresh
@@ -10,11 +11,13 @@
 // final-review → promoting) are the two "human" transitions in
 // ARTLAB_TRANSITIONS — bot replies are the canonical surface that fires them.
 
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { readRunStateSnapshot, writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
 import { appendArtLabEvent } from "@/lib/artlab/state/events";
 import { enqueueRun, type ArtLabQueueEntry } from "@/lib/artlab/queue/queue";
+import { appendRejection } from "@/lib/artlab/memory/rejection-ledger";
+import { REQUIRED_PROMOTION_PHRASE } from "@/lib/artlab/promotion/constants";
 import type { ArtLabPhase } from "@/lib/artlab/types";
 import { writeFileSync } from "node:fs";
 
@@ -91,6 +94,54 @@ export async function advanceConceptApproval(input: {
   return { ok: true, runId, toPhase: "canary" };
 }
 
+/**
+ * Reject a run waiting at a human gate (concept-review or final-review).
+ * Sets `blocker: "cancelled"` on the run AND records a rejection ledger
+ * entry so the taste signal carries forward into future runs.
+ *
+ * Unit 4 (2026-05-27) wires the rejection ledger — before this, the
+ * Telegram reject button only sent an ack message via `bot-dispatcher`
+ * with no state mutation and no learning surface.
+ */
+export async function rejectGate(input: {
+  workspaceRoot: string;
+  surface: "concept" | "final";
+}): Promise<GateAdvanceResult> {
+  const targetPhase: ArtLabPhase = input.surface === "concept" ? "concept-review" : "final-review";
+  const runId = findLatestRunAtPhase(input.workspaceRoot, targetPhase);
+  if (!runId) return { ok: false, reason: `no-run-at-${targetPhase}` };
+  const runDir = join(input.workspaceRoot, "runs", runId);
+  const state = readRunStateSnapshot(runDir);
+  if (!state || state.phase !== targetPhase || state.blocker) {
+    return { ok: false, reason: `state-not-${targetPhase}` };
+  }
+  const now = new Date().toISOString();
+  writeRunStateSnapshot(runDir, { ...state, blocker: "cancelled", updatedAt: now });
+  appendArtLabEvent(runDir, {
+    runId,
+    at: now,
+    kind: "phase-transition",
+    payload: { from: state.phase, to: state.phase, blocker: "cancelled", source: "bot-reject", surface: input.surface },
+  });
+  // Best-effort rejection ledger write — must never break the reject flow.
+  if (state.characterId) {
+    try {
+      const memoryDir = join(input.workspaceRoot, "memory");
+      if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
+      appendRejection(memoryDir, {
+        at: now,
+        characterId: state.characterId,
+        reason: "user-rejected-run",
+        codes: ["telegram-reject"],
+        source: "character",
+      });
+    } catch {
+      // ignore — observability, not control flow
+    }
+  }
+  return { ok: true, runId, toPhase: targetPhase };
+}
+
 export async function advancePromotionApproval(input: {
   workspaceRoot: string;
 }): Promise<GateAdvanceResult> {
@@ -102,7 +153,10 @@ export async function advancePromotionApproval(input: {
     return { ok: false, reason: "state-not-final-review" };
   }
   // The promotion firewall requires an approval.json with the exact phrase.
-  writeFileSync(join(runDir, "approval.json"), JSON.stringify({ phrase: "approved for app" }, null, 2));
+  writeFileSync(
+    join(runDir, "approval.json"),
+    JSON.stringify({ phrase: REQUIRED_PROMOTION_PHRASE }, null, 2),
+  );
   const now = new Date().toISOString();
   writeRunStateSnapshot(runDir, {
     ...state,

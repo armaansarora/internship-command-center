@@ -20,8 +20,8 @@ beforeEach(() => {
   writeFileSync(
     join(memoryDir, "style-rejections.jsonl"),
     [
-      JSON.stringify({ characterId: "rafe-calder", runId: "r1", lane: 1, rejectedAt: "2026-05-24T12:00:00.000Z", reason: "wrong jacket color", qaFailureCodes: ["WARDROBE"], promptHashRejected: "h0", source: "character" }),
-      JSON.stringify({ characterId: "war-room", runId: "r2", lane: 1, rejectedAt: "2026-05-24T13:00:00.000Z", reason: "skyline too bright", qaFailureCodes: ["LIGHT"], promptHashRejected: "h0b", source: "floor" }),
+      JSON.stringify({ at: "2026-05-24T12:00:00.000Z", characterId: "rafe-calder", lane: 1, reason: "wrong jacket color", codes: ["WARDROBE"], promptHash: "h0", source: "character" }),
+      JSON.stringify({ at: "2026-05-24T13:00:00.000Z", characterId: "war-room", lane: 1, reason: "skyline too bright", codes: ["LIGHT"], promptHash: "h0b", source: "floor" }),
     ].join("\n") + "\n",
   );
 });

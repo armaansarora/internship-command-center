@@ -11,6 +11,8 @@ import { composeFinalBoard } from "../speed/placeholder-images";
 import { cutoutRunner } from "./cutout-runner";
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
 import { measureIdentityDrift } from "../coherence/identity-drift";
+import { recordDaemonError } from "../daemon/entry";
+import { appendRejection } from "../memory/rejection-ledger";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -124,6 +126,28 @@ export const strictQaRunner: ArtLabRunner = {
     writeFileSync(join(input.runDir, "asset-doctor.json"), JSON.stringify({ entries }, null, 2));
     writeFileSync(join(input.runDir, "repair-plan.json"), JSON.stringify({ repairs }, null, 2));
     if (repairs.length > 0) {
+      // Unit 4 — write a rejection ledger entry so the brain learns from
+      // strict-QA failures. Best-effort: never block strict-qa over a
+      // memory-write IO failure.
+      const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+      if (workspaceRoot && input.characterId) {
+        try {
+          const memoryDir = join(workspaceRoot, "memory");
+          if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
+          appendRejection(memoryDir, {
+            at: new Date().toISOString(),
+            characterId: input.characterId,
+            reason: "repair-required",
+            codes: repairs.map((r) => r.reason),
+            ...(typeof input.approvedLaneIndex === "number"
+              ? { lane: input.approvedLaneIndex }
+              : {}),
+            source: "character",
+          });
+        } catch (err) {
+          recordDaemonError(workspaceRoot, "strict-qa-rejection-ledger", err);
+        }
+      }
       return {
         runnerKind: "strict-qa",
         status: "failed",
@@ -158,7 +182,14 @@ export const strictQaRunner: ArtLabRunner = {
           critique.identityDrift = drift;
           writeFileSync(critiquePath, JSON.stringify(critique, null, 2));
         }
-      } catch { /* drift probe is informational — never fail strict-qa over it */ }
+      } catch (err) {
+        // Drift probe is informational — never fail strict-qa over it.
+        // But record so a regression in identity-drift can't go silent
+        // (previously this catch swallowed pHash failures + sharp errors
+        // with no operator signal).
+        const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+        if (workspaceRoot) recordDaemonError(workspaceRoot, "strict-qa-identity-drift", err);
+      }
     }
     publishBoards(input.runDir, input.runId, entries);
     // Compose a real final-board.png the Telegram bot can attach.
@@ -175,7 +206,13 @@ export const strictQaRunner: ArtLabRunner = {
               displayName = ctx.displayName;
               title = `${ctx.title} · ${cutoutPngs.length} upload-ready sprites`;
             }
-          } catch { /* fall through to defaults */ }
+          } catch (err) {
+            // Tower-context lookup failures fall back to default labels on
+            // the composite board, but the failure mode (corrupt bible
+            // YAML, missing character entry) needs an operator signal.
+            const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+            if (workspaceRoot) recordDaemonError(workspaceRoot, "strict-qa-tower-context", err);
+          }
         }
         // Read brain verdict (if it ran + parsed cleanly) for the composite badge.
         let verdict: "tight" | "minor-drift" | "major-drift" | undefined;
@@ -197,7 +234,14 @@ export const strictQaRunner: ArtLabRunner = {
         });
         writeFileSync(join(input.runDir, "final-board.png"), board);
       }
-    } catch { /* don't fail strict-qa over a placeholder image issue */ }
+    } catch (err) {
+      // Composite-board rendering failures must not break strict-qa
+      // (it's a UX nicety, not a correctness gate), but the operator
+      // needs to know when sharp or the placeholder-images pipeline
+      // regress so the Telegram /final caption stops carrying images.
+      const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+      if (workspaceRoot) recordDaemonError(workspaceRoot, "strict-qa-final-board", err);
+    }
     return {
       runnerKind: "strict-qa",
       status: "ok",

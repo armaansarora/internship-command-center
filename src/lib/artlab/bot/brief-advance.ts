@@ -3,7 +3,7 @@
 // Brief-review gate helpers: approve the brief (→ generating-concepts) or
 // record an adjustment (→ briefing with a new iteration).
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { readRunStateSnapshot, writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
 import { appendArtLabEvent } from "@/lib/artlab/state/events";
@@ -12,6 +12,7 @@ import {
   appendBriefAdjustment,
   type BriefAdjustmentEntry,
 } from "@/lib/artlab/brainstorm/feedback-ledger";
+import { appendRejection } from "@/lib/artlab/memory/rejection-ledger";
 
 export interface BriefGateSuccess { ok: true; runId: string; }
 export interface BriefGateFailure { ok: false; reason: string; }
@@ -78,6 +79,26 @@ export async function recordBriefAdjustmentAndReAuthor(input: {
     return { ok: false, reason: "state-not-brief-review" };
   }
   appendBriefAdjustment(runDir, input.entry);
+  // Unit 4 — record a rejection ledger entry: a brief adjustment is the
+  // human signalling "this brief isn't right yet." Persisting it makes the
+  // taste signal available to later runs for the same character.
+  // Best-effort: a memory write failure must never block the adjustment
+  // flow (the user's reply must still advance the run).
+  if (state.characterId) {
+    try {
+      const memoryDir = join(input.workspaceRoot, "memory");
+      if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
+      appendRejection(memoryDir, {
+        at: input.entry.at,
+        characterId: state.characterId,
+        reason: "user-rejected-brief",
+        codes: ["brief-feedback"],
+        source: "character",
+      });
+    } catch {
+      // ignore — observability, not control flow
+    }
+  }
   // Bounce phase back to briefing so the runner re-composes the brief with
   // the new adjustment in mind. Auto-walker will advance to brief-review
   // again on the next tick.

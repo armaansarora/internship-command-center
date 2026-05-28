@@ -33,7 +33,7 @@ export const DesignBriefSchema = z.object({
   referenceAnchor: z.string().min(1),
   adjustmentOptions: z.array(BriefAdjustmentOptionSchema).max(8),
   deltaSummary: z.string().optional(),       // only present on iterations > 0
-  source: z.enum(["brain", "canonical-fallback"]),
+  source: z.enum(["brain", "canonical"]),
   model: z.string().optional(),
 }).strict();
 export type DesignBrief = z.infer<typeof DesignBriefSchema>;

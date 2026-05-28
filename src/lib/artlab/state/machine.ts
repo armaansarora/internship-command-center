@@ -87,6 +87,11 @@ const BLOCKERS_FOR_TRANSITIONS = [
   "style-failed",
   "upgrade-required",
   "cancelled",
+  // `concept-critique-fallback` is emitted by `concept-runner` when the
+  // multimodal critique brain throws or laneImages count mismatches. The
+  // blocker pins the run in concept-review with a loud signal so operators
+  // can choose to /cancel or continue without the quality gate.
+  "concept-critique-fallback",
 ] as const satisfies readonly ArtLabBlocker[];
 
 export const BLOCKER_TRANSITIONS: readonly ArtLabTransition[] = BLOCKER_PHASES_NONTERMINAL.flatMap(

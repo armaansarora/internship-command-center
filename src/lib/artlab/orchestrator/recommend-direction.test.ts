@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { recommendDirection } from "./recommend-direction";
 import type { ArtLabLlmBrain } from "./llm-brain";
 import type { TowerCharacterContext } from "../context/tower-context";
@@ -104,5 +107,41 @@ describe("recommendDirection", () => {
     };
     const r = await recommendDirection({ characterId: "cno", characterContext: ctx(), lanes: [], brain });
     expect(r.laneIndex).toBe(1);
+  });
+
+  // Silent-catch sweep: brain throws → daemon-errors.jsonl gets a structured
+  // entry tagged "recommend-direction-fallback". Without this telemetry the
+  // only signal of a brain outage was the silent demotion to middle-lane.
+  describe("daemon-error telemetry on brain failure", () => {
+    let workspaceRoot: string;
+    const previousWorkspace = process.env.ARTLAB_WORKSPACE_ROOT;
+
+    beforeEach(() => {
+      workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-recommend-err-"));
+      process.env.ARTLAB_WORKSPACE_ROOT = workspaceRoot;
+    });
+    afterEach(() => {
+      if (previousWorkspace === undefined) delete process.env.ARTLAB_WORKSPACE_ROOT;
+      else process.env.ARTLAB_WORKSPACE_ROOT = previousWorkspace;
+      rmSync(workspaceRoot, { recursive: true, force: true });
+    });
+
+    it("records a recommend-direction-fallback daemon-error when brain throws", async () => {
+      const brain: ArtLabLlmBrain = {
+        async decide() { throw new Error("HTTP 404: gemini-retired-preview not found"); },
+      };
+      const r = await recommendDirection({ characterId: "cno", characterContext: ctx(), lanes, brain });
+      // Run still falls back deterministically — telemetry must NOT alter
+      // behaviour.
+      expect(r.source).toBe("fallback");
+      expect(r.laneIndex).toBe(3);
+
+      const errPath = join(workspaceRoot, "daemon-errors.jsonl");
+      expect(existsSync(errPath)).toBe(true);
+      const lines = readFileSync(errPath, "utf8").split("\n").filter(Boolean);
+      const entry = JSON.parse(lines[0]!);
+      expect(entry.source).toBe("recommend-direction-fallback");
+      expect(entry.message).toContain("gemini-retired-preview");
+    });
   });
 });

@@ -19,6 +19,8 @@ import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
+import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
+import { recordDaemonError } from "../daemon/entry";
 import {
   DesignBriefSchema,
   type DesignBrief,
@@ -31,7 +33,7 @@ import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runn
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
   const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
     ? process.env.GEMINI_API_KEY
     : null;
@@ -72,10 +74,20 @@ function writeBrief(runDir: string, brief: DesignBrief): void {
   appendFileSync(join(runDir, "brief-history.jsonl"), `${JSON.stringify(brief)}\n`);
 }
 
-function canonicalBriefFromContext(ctx: TowerCharacterContext, runId: string): Omit<DesignBrief, "iteration" | "composedAt"> {
+function canonicalBriefFromContext(
+  ctx: TowerCharacterContext,
+  runId: string,
+  // canonCharacterId: the identifier that arrived from intake (now the canon
+  // `header.id`, e.g. "sol-navarro"). The bundle context still keys by the
+  // legacy `meta.id` roleSlug (e.g. "cno"), but we persist the canonical
+  // identifier on the brief so every downstream artifact agrees. Falls back
+  // to `ctx.characterId` only when no intake identity reached the runner —
+  // legacy CLI paths that never set `input.characterId`.
+  canonCharacterId: string | undefined,
+): Omit<DesignBrief, "iteration" | "composedAt"> {
   return {
     runId,
-    characterId: ctx.characterId,
+    characterId: canonCharacterId ?? ctx.characterId,
     identity: [
       `${ctx.displayName}, the ${ctx.title}.`,
       `${ctx.visualArchetype} `,
@@ -96,7 +108,7 @@ function canonicalBriefFromContext(ctx: TowerCharacterContext, runId: string): O
       { label: "🎯 Adjust prop emphasis", dimension: "props" },
       { label: "✏️ Free-text", dimension: "freetext" },
     ],
-    source: "canonical-fallback",
+    source: "canonical",
   };
 }
 
@@ -152,7 +164,7 @@ function parseBriefFromBrain(
   };
 }
 
-async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: DesignBrief; source: "brain" | "canonical-fallback" }> {
+async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: DesignBrief; source: "brain" | "canonical" }> {
   const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
   const bundle = await loadTowerContext({ workspaceRoot });
   const ctx = input.characterId ? pickCharacterContext(bundle, input.characterId) : null;
@@ -173,13 +185,13 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
 
   // Brainstorm-mode off → write a single canonical brief and auto-approve.
   if (process.env.ARTLAB_BRAINSTORM_MODE === "off") {
-    const base = canonicalBriefFromContext(ctx, input.runId);
+    const base = canonicalBriefFromContext(ctx, input.runId, input.characterId);
     const brief: DesignBrief = DesignBriefSchema.parse({
       ...base,
       composedAt: new Date().toISOString(),
       iteration: 0,
     });
-    return { brief, source: "canonical-fallback" };
+    return { brief, source: "canonical" };
   }
 
   const brain = buildBrain(workspaceRoot);
@@ -243,7 +255,10 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
 
   try {
     const result = await brain.decide(brainInput);
-    const parsed = parseBriefFromBrain(result.outputJson, input.runId, ctx.characterId, existing ?? undefined);
+    // Pass through `input.characterId` (now the canon header.id from intake)
+    // rather than `ctx.characterId` (the legacy roleSlug bundle key) so the
+    // brief artifact agrees with run-state / concept-board / promotion.
+    const parsed = parseBriefFromBrain(result.outputJson, input.runId, input.characterId ?? ctx.characterId, existing ?? undefined);
     if (parsed) {
       const brief: DesignBrief = DesignBriefSchema.parse({
         ...parsed,
@@ -254,16 +269,21 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
       });
       return { brief, source: "brain" };
     }
-  } catch {
-    // fall through to canonical
+  } catch (err) {
+    // Brain unreachable or its output failed parsing — emit a structured
+    // daemon-error before degrading to the canonical brief. Previously this
+    // catch was silent: every Anthropic+Gemini failure landed users on the
+    // canonical brief with no operator signal explaining WHY the brain
+    // didn't author it.
+    recordDaemonError(workspaceRoot, "brief-runner-canonical-fallback", err);
   }
-  const fallbackBase = canonicalBriefFromContext(ctx, input.runId);
+  const fallbackBase = canonicalBriefFromContext(ctx, input.runId, input.characterId);
   const brief: DesignBrief = DesignBriefSchema.parse({
     ...fallbackBase,
     composedAt: new Date().toISOString(),
     iteration,
   });
-  return { brief, source: "canonical-fallback" };
+  return { brief, source: "canonical" };
 }
 
 export const briefRunner: ArtLabRunner = {

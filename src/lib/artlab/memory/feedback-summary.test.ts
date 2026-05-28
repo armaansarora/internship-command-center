@@ -15,13 +15,12 @@ function win(at: string, techniques: string[]): StyleWinEntry {
 
 function rejection(at: string, reason: string, codes: string[] = []): RejectionEntry {
   return {
+    at,
     characterId: "cno",
-    runId: "r1",
     lane: 1,
-    rejectedAt: at,
     reason,
-    qaFailureCodes: codes,
-    promptHashRejected: "xyz789",
+    codes,
+    promptHash: "xyz789",
   };
 }
 

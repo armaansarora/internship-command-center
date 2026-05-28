@@ -22,6 +22,19 @@ describe("artlab produce subcommand", () => {
     expect(body.request).toBe("make Sol Navarro");
   });
 
+  it("preserves the returned runId inside the produce-<runId>.json payload", async () => {
+    const result = await runProduceSubcommand({
+      workspaceRoot,
+      args: ["make", "Sol"],
+    });
+    expect(result.exitCode).toBe(0);
+    const files = readdirSync(join(workspaceRoot, "inbox", "cli"));
+    expect(files).toHaveLength(1);
+    const body = JSON.parse(readFileSync(join(workspaceRoot, "inbox", "cli", files[0]!), "utf8"));
+    expect(body.runId).toBe(result.runId);
+    expect(files[0]).toContain(result.runId!);
+  });
+
   it("exits 2 with empty args", async () => {
     const result = await runProduceSubcommand({ workspaceRoot, args: [] });
     expect(result.exitCode).toBe(2);

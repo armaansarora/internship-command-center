@@ -174,4 +174,50 @@ describe("ArtLabGenerateInputSchema — abuse-prevention limits", () => {
     });
     expect(parsed.anchorPackId).toBe("rafe-character-v3");
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // characterId — Unit 5 of the 2026-05-27 system-fixes plan.
+  //
+  // The MCP `generate` tool now accepts an optional canon `header.id`
+  // (e.g. "sol-navarro") or legacy roleSlug (e.g. "cno"). Absent, the
+  // daemon routes the description through the intake router. Present,
+  // the daemon resolves it through the same router so legacy slugs
+  // always lift to canon header.ids before reaching run-state.
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("characterId — canon identity passthrough", () => {
+    it("accepts canon header.id", () => {
+      const parsed = ArtLabGenerateInputSchema.parse({ ...baseValid, characterId: "sol-navarro" });
+      expect(parsed.characterId).toBe("sol-navarro");
+    });
+
+    it("accepts legacy roleSlug", () => {
+      const parsed = ArtLabGenerateInputSchema.parse({ ...baseValid, characterId: "cno" });
+      expect(parsed.characterId).toBe("cno");
+    });
+
+    it("treats characterId as optional (callers may rely on description-based routing)", () => {
+      const parsed = ArtLabGenerateInputSchema.parse(baseValid);
+      expect(parsed.characterId).toBeUndefined();
+    });
+
+    it("rejects non-kebab-case characterId", () => {
+      expect(() =>
+        ArtLabGenerateInputSchema.parse({ ...baseValid, characterId: "Sol Navarro" }),
+      ).toThrow();
+      expect(() =>
+        ArtLabGenerateInputSchema.parse({ ...baseValid, characterId: "Mara_Voss" }),
+      ).toThrow();
+      // Single chars and empty strings violate the min-length rule.
+      expect(() =>
+        ArtLabGenerateInputSchema.parse({ ...baseValid, characterId: "a" }),
+      ).toThrow();
+    });
+
+    it("rejects characterId longer than 64 chars (abuse cap)", () => {
+      const tooLong = "a".repeat(65);
+      expect(() =>
+        ArtLabGenerateInputSchema.parse({ ...baseValid, characterId: tooLong }),
+      ).toThrow();
+    });
+  });
 });
