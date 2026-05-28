@@ -10,7 +10,6 @@ export const ARTLAB_SUBCOMMANDS = [
   "cancel",
   "daemon",
   "bot",
-  "migrate",
   "run-worker",
   "smoke",
   "help",
@@ -36,7 +35,6 @@ Usage:
   artlab cancel <runId>               cancel a run with refund
   artlab daemon <run|start|stop|restart|status|logs>
   artlab bot <setup>                  interactive bot setup
-  artlab migrate --import <list>      one-shot legacy import
   artlab smoke                        free end-to-end mock-mode smoke test
 `;
 
@@ -44,17 +42,15 @@ function defaultWorkspaceRoot(): string {
   return process.env.ARTLAB_WORKSPACE_ROOT ?? ".artlab/engine";
 }
 
-async function stub(name: string, args: string[], io: ArtLabCliIo): Promise<number> {
-  io.stdout(`artlab ${name}: stub — fills in during Phase 1-3 implementation`);
-  if (args.length > 0) io.stdout(`  args: ${args.join(" ")}`);
-  return 0;
-}
-
 export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
   const [subcommand, ...rest] = io.argv;
   if (!subcommand) {
     io.stderr(HELP_TEXT);
     return 2;
+  }
+  if (subcommand === "--help" || subcommand === "-h") {
+    io.stdout(HELP_TEXT);
+    return 0;
   }
   if (!ARTLAB_SUBCOMMANDS.includes(subcommand as ArtLabSubcommand)) {
     io.stderr(`artlab: unknown subcommand "${subcommand}"\n\n${HELP_TEXT}`);
@@ -133,8 +129,18 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
       });
       return result.exitCode;
     }
-    case "cancel":
-      return stub("cancel", rest, io);
+    case "cancel": {
+      const { runCancelSubcommand } = await import("@/lib/artlab/cli/cancel");
+      const result = await runCancelSubcommand({
+        workspaceRoot: defaultWorkspaceRoot(),
+        args: rest,
+      });
+      if (result.message) {
+        if (result.exitCode === 0) io.stdout(result.message);
+        else io.stderr(result.message);
+      }
+      return result.exitCode;
+    }
     case "daemon": {
       const sub = rest[0];
       const tail = rest.slice(1);
@@ -182,8 +188,6 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
       io.stderr(`bot: expected subcommand "setup". Got "${sub ?? ""}".`);
       return 2;
     }
-    case "migrate":
-      return stub("migrate", rest, io);
     case "smoke": {
       const { runSmokeSubcommand } = await import("@/lib/artlab/cli/smoke");
       const result = await runSmokeSubcommand({
