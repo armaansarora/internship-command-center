@@ -121,3 +121,66 @@ export function parseBundle(request: string): BundleSpec | null {
 
   return null;
 }
+
+export type BundleAcceptanceErrorCode =
+  | "BUNDLE_PARTIAL_ACCEPT"
+  | "BUNDLE_MISSING_CHILDREN"
+  | "BUNDLE_LINK_DANGLING";
+
+export class BundleAcceptanceError extends Error {
+  readonly code: BundleAcceptanceErrorCode;
+  constructor(code: BundleAcceptanceErrorCode, message: string) {
+    super(message);
+    this.name = "BundleAcceptanceError";
+    this.code = code;
+  }
+}
+
+/**
+ * Enforce the acceptance invariant for atomic bundles.
+ *
+ * An "atomic" bundle (`promotionPolicy === "atomic"`) means every child must
+ * land together or none at all — partial acceptance is forbidden. This helper
+ * validates the bundle structure against an optional `requiredAssetTypes`
+ * list and throws `BundleAcceptanceError` with a specific code if the bundle
+ * would result in a partial accept.
+ *
+ * Callers in the production promotion path can use this to reject a corrupted
+ * bundle before any child enters the run queue.
+ */
+export function enforceAtomicBundle(
+  bundle: BundleSpec,
+  requiredAssetTypes?: readonly ArtLabAssetType[],
+): void {
+  if (bundle.promotionPolicy !== "atomic") return;
+
+  if (bundle.children.length === 0) {
+    throw new BundleAcceptanceError(
+      "BUNDLE_MISSING_CHILDREN",
+      `atomic bundle ${bundle.bundleId} has no children — partial accept`,
+    );
+  }
+
+  if (requiredAssetTypes && requiredAssetTypes.length > 0) {
+    const present = new Set(bundle.children.map((c) => c.assetType));
+    const missing = requiredAssetTypes.filter((t) => !present.has(t));
+    if (missing.length > 0) {
+      throw new BundleAcceptanceError(
+        "BUNDLE_PARTIAL_ACCEPT",
+        `atomic bundle ${bundle.bundleId} is missing required assetTypes: ${missing.join(", ")}`,
+      );
+    }
+  }
+
+  // Validate links reference real children — a dangling link in an atomic
+  // bundle would silently drop a co-appearance edge in the promotion DAG.
+  const childIds = new Set(bundle.children.map((c) => c.childId));
+  for (const link of bundle.links) {
+    if (!childIds.has(link.childA) || !childIds.has(link.childB)) {
+      throw new BundleAcceptanceError(
+        "BUNDLE_LINK_DANGLING",
+        `atomic bundle ${bundle.bundleId} has dangling link ${link.childA}->${link.childB}`,
+      );
+    }
+  }
+}
