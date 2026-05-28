@@ -80,7 +80,11 @@ export const ArtLabRunStateSchema = z
     request: z.string().min(1),
     approvedConcept: ArtLabApprovedConceptSchema.optional(),
     referenceImagePaths: z.array(z.string()).optional(),
-    sourceSurface: z.enum(["telegram", "cli", "daemon-resume", "migration"]).optional(),
+    // `artlab-mcp` is the surface used by the ArtLab SDK MCP server (the
+    // `artlab/generate` tool). Before this entry existed, `sdk-poller.ts`
+    // wrote `"cli"` for MCP-origin jobs — a schema lie that confused
+    // operators reading run-state to find out who started a run.
+    sourceSurface: z.enum(["telegram", "cli", "artlab-mcp", "daemon-resume", "migration"]).optional(),
     // Populated by `promotionRunner` once a run successfully promotes
     // assets into `public/art/`. The ArtLab `generate_status` MCP handler
     // surfaces this value to callers so agents can immediately follow up

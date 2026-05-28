@@ -28,6 +28,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import { enqueueRun, ArtLabQueueEntrySchema, type ArtLabQueueEntry } from "@/lib/artlab/queue/queue";
 import { writeRunStateSnapshot } from "@/lib/artlab/state/snapshots";
+import { routeRequest } from "@/lib/artlab/intake/router";
 import { recordDaemonError } from "./entry";
 import {
   ARTLAB_ASSET_TYPES,
@@ -56,6 +57,12 @@ export const ArtLabGenerateJobSchema = z
     anchorPackId: z.string().min(1).optional(),
     priority: z.enum(["low", "normal", "high"]).optional(),
     requesterAgent: z.string().min(1).optional(),
+    // Optional canon `header.id` (or legacy roleSlug) — when the MCP
+    // caller knows the subject upfront, they pass it through and we skip
+    // the description-based route. Falls back to `routeRequest(description)`
+    // when absent so legacy callers (and the Claude/Antigravity skills)
+    // keep working without code changes.
+    characterId: z.string().min(1).optional(),
     brainHintStatus: z.enum(["pending", "ready", "failed"]).optional(),
     brainHint: z.record(z.string(), z.unknown()).optional(),
     brainHintError: z.string().optional(),
@@ -160,6 +167,12 @@ function seedRunState(
   if (!ARTLAB_ASSET_TYPES.includes(assetType)) {
     throw new Error(`sdk-poller: kind=${job.kind} mapped to unknown assetType=${assetType}`);
   }
+  // Resolve the character identity: prefer the explicit `characterId` from
+  // the MCP caller, else route from the natural-language description.
+  // routeRequest writes the canon `header.id` directly so the seed state
+  // file agrees with every downstream artifact (brief, concept-board,
+  // promotion target dir, style-wins memory).
+  const characterId = resolveCharacterIdForJob(job);
   const createdAt = now().toISOString();
   const state: ArtLabRunState = {
     runId: job.runId,
@@ -168,9 +181,40 @@ function seedRunState(
     createdAt,
     updatedAt: createdAt,
     request: job.description,
-    sourceSurface: "cli",
+    // sourceSurface MUST agree with the actual surface. MCP-originated jobs
+    // are NOT CLI jobs — operators reading run-state to debug a stuck run
+    // would silently learn the wrong origin under the old "cli" lie.
+    sourceSurface: "artlab-mcp",
+    ...(characterId ? { characterId } : {}),
   };
   writeRunStateSnapshot(runDir, state);
+}
+
+/**
+ * Resolve the character identity (canon header.id) for an MCP-originated
+ * job. Order:
+ *   1. Explicit `job.characterId` (MCP caller knows the subject).
+ *      Routed through the same router so legacy roleSlugs ("cno") are
+ *      lifted to canon header.ids ("sol-navarro").
+ *   2. `routeRequest(job.description)` — natural-language fallback that
+ *      mirrors the bot/CLI intake path.
+ *
+ * Returns `undefined` for non-character kinds where no character match
+ * was found in the description. The state file is allowed to be
+ * characterId-less for non-character runs (environment, ui-texture, etc.).
+ */
+function resolveCharacterIdForJob(job: ArtLabGenerateJob): string | undefined {
+  if (job.kind !== "character") return undefined;
+  if (job.characterId) {
+    const outcome = routeRequest({ request: `make characterId: ${job.characterId}` });
+    if (outcome.characterId) return outcome.characterId;
+    // Explicit ID didn't resolve — propagate it raw so the worker fails
+    // loudly with no-character-match rather than silently writing a
+    // wrong canon header.id.
+    return job.characterId;
+  }
+  const outcome = routeRequest({ request: job.description });
+  return outcome.characterId;
 }
 
 /**
@@ -183,6 +227,12 @@ function enqueueArtLabRun(
   job: ArtLabGenerateJob,
   now: () => Date,
 ): void {
+  // Resolve the same canon characterId we wrote to run-state, so the queue
+  // spec carries the same identity. The run-worker checks the queue entry
+  // when state is missing (lost crash recovery) and would otherwise route
+  // the description fresh — possibly to a different roleSlug if intake
+  // heuristics evolved between enqueue and dequeue.
+  const characterId = resolveCharacterIdForJob(job);
   const entry: ArtLabQueueEntry = ArtLabQueueEntrySchema.parse({
     runId: job.runId,
     priority: mapPriority(job.priority),
@@ -197,6 +247,7 @@ function enqueueArtLabRun(
       anchorPackId: job.anchorPackId ?? null,
       brainHintStatus: job.brainHintStatus ?? null,
       brainHint: job.brainHint ?? null,
+      ...(characterId ? { characterId } : {}),
     },
   });
   enqueueRun(workspaceRoot, entry);

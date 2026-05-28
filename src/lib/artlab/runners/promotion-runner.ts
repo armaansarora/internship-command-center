@@ -11,6 +11,8 @@ import { appendStyleWin } from "@/lib/artlab/memory/style-ledger";
 import { autoCommitPromotion } from "@/lib/artlab/daemon/git-commit";
 import { displayFor } from "@/lib/artlab/intake/known-cast";
 import { loadTowerContext, pickCharacterContext } from "@/lib/artlab/context/tower-context";
+import { resolveCanonIdentity } from "@/lib/artlab/sdk/canon/canon-identity-map";
+import { recordDaemonError } from "@/lib/artlab/daemon/entry";
 import { createClaudeBrain } from "@/lib/artlab/orchestrator/claude-brain";
 import { createGeminiBrain } from "@/lib/artlab/orchestrator/gemini-brain";
 import { createLoggedBrain } from "@/lib/artlab/orchestrator/logged-brain";
@@ -120,6 +122,32 @@ function publicArtRoot(): string {
 
 function targetRelativeDir(input: ArtLabRunnerInput): string {
   if (input.assetType === "character" && input.characterId) {
+    // Resolve canon to land assets in their canonical floor — e.g. Sol's
+    // sprite goes to `public/art/rolodex-lounge/sol-navarro/`, NOT
+    // `public/art/lobby/cno/`. The hardcoded "lobby" fallback predates
+    // canon and was the root cause of the `ls public/art/lobby/` returning
+    // `cno otis` symptom called out by 4 auditors.
+    const canon = resolveCanonIdentity(input.characterId);
+    if (canon) {
+      return join(canon.floorId, canon.headerId);
+    }
+    // Canon unreachable — record so we can debug the canon-load failure
+    // and fall back to the legacy `lobby/<id>` shape so the run still
+    // promotes rather than crashing on the missing dir.
+    try {
+      const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+      if (workspaceRoot) {
+        recordDaemonError(
+          workspaceRoot,
+          "promotion-runner:canon-fallback",
+          new Error(`canon identity not found for characterId="${input.characterId}" — promotion falling back to lobby/`),
+        );
+      }
+    } catch {
+      // recordDaemonError must never break promotion — at this point we
+      // already have approved assets staged and the user is waiting on
+      // the receipt.
+    }
     return join("lobby", input.characterId);
   }
   if (input.assetType === "environment") return join("backgrounds", input.runId);

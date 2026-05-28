@@ -329,4 +329,78 @@ describe("sdk-poller", () => {
       ).toBe(true);
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Canon identity contract — see Unit 5 of the 2026-05-27 system-fixes plan.
+  //
+  // The poller historically wrote `sourceSurface: "cli"` for MCP-originated
+  // jobs (schema lie — confused operators reading run-state to debug stuck
+  // runs) and never populated `characterId`. Now:
+  //   - run-state carries the actual surface (`artlab-mcp`).
+  //   - run-state + queue spec carry the canon `header.id` (not the legacy
+  //     roleSlug), resolved either from `job.characterId` or the description.
+  // ─────────────────────────────────────────────────────────────────────────
+  describe("canon identity + sourceSurface contract", () => {
+    it("writes sourceSurface 'artlab-mcp' to run-state (not the legacy 'cli' lie)", async () => {
+      const runId = writeInboxJob({});
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state).not.toBeNull();
+      expect(state!.sourceSurface).toBe("artlab-mcp");
+    });
+
+    it("resolves explicit characterId roleSlug 'cno' to canon header.id 'sol-navarro' on run-state", async () => {
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "make a thing the description is intentionally generic",
+        characterId: "cno",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state).not.toBeNull();
+      expect(state!.characterId).toBe("sol-navarro");
+      const queued = listQueuedRuns(workspaceRoot);
+      expect(queued[0]!.spec.characterId).toBe("sol-navarro");
+    });
+
+    it("passes through canon header.id unchanged when caller already canonical", async () => {
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "make the character via canonical name",
+        characterId: "sol-navarro",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state!.characterId).toBe("sol-navarro");
+    });
+
+    it("resolves characterId from description when MCP caller omits it", async () => {
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "make Sol Navarro for the Tower",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state!.characterId).toBe("sol-navarro");
+    });
+
+    it("leaves characterId unset when description has no character match (router fallback)", async () => {
+      // The router returns no characterId for ambiguous-no-mention character
+      // requests. The poller writes state without it; the worker eventually
+      // fails with no-character-match (this is the loud failure the audit
+      // demanded — not a silent miscategorization).
+      const runId = writeInboxJob({
+        kind: "character",
+        description: "a generic character with no canon match",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      await poller.tick();
+      const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
+      expect(state!.characterId).toBeUndefined();
+    });
+  });
 });

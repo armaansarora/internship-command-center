@@ -20,6 +20,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { SEASON_ONE_CHARACTER_METADATA } from "@/lib/visual-assets/characters";
 import { getRelevantMemory } from "@/lib/artlab/memory/retrieve";
+import { resolveCanonIdentity } from "@/lib/artlab/sdk/canon/canon-identity-map";
 import type { StyleWinEntry } from "@/lib/artlab/memory/style-ledger";
 import type { RejectionEntry } from "@/lib/artlab/memory/rejection-ledger";
 
@@ -201,7 +202,21 @@ export function pickCharacterContext(
   characterId: string | undefined,
 ): TowerCharacterContext | null {
   if (!characterId) return null;
-  return bundle.characters[characterId] ?? null;
+  // Direct hit: the legacy `SEASON_ONE_CHARACTER_METADATA.id` key
+  // (e.g. "cno", "ceo") still flows through some runtime paths.
+  const direct = bundle.characters[characterId];
+  if (direct) return direct;
+  // Canon header.id passthrough — the intake router now writes the canon
+  // `header.id` (e.g. "sol-navarro") to run-state. Translate to the
+  // equivalent runtime roleSlug and re-attempt the bundle lookup so the
+  // brief-runner / concept-runner / strict-qa-runner all reach the same
+  // character context regardless of which identifier reached them.
+  const canon = resolveCanonIdentity(characterId);
+  if (canon) {
+    const byRoleSlug = bundle.characters[canon.roleSlug];
+    if (byRoleSlug) return byRoleSlug;
+  }
+  return null;
 }
 
 export function pickFloorContext(

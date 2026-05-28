@@ -45,13 +45,25 @@ export async function runWorkerSubcommand(input: RunWorkerInput): Promise<RunWor
       input.log(`run-worker: no state and no queue-entry.json at ${queueEntryPath}`);
       return { exitCode: 1, runId };
     }
-    const entry = JSON.parse(readFileSync(queueEntryPath, "utf8")) as { spec?: { request?: unknown } };
+    const entry = JSON.parse(readFileSync(queueEntryPath, "utf8")) as {
+      spec?: { request?: unknown; characterId?: unknown };
+    };
     const request = typeof entry.spec?.request === "string" ? entry.spec.request : "";
     const outcome = routeRequest({ request });
+    // Prefer the queue spec's characterId when present — the enqueuer
+    // (bot-dispatcher / sdk-poller) already resolved canon at enqueue time,
+    // and re-routing the description here is at best wasted work and at
+    // worst a divergence vector if intake heuristics evolved between
+    // enqueue and dequeue. Fall back to outcome.characterId only when the
+    // spec didn't carry one.
+    const specCharacterId = typeof entry.spec?.characterId === "string"
+      ? entry.spec.characterId
+      : undefined;
+    const characterId = specCharacterId ?? outcome.characterId;
     state = {
       runId,
       assetType: outcome.assetType,
-      characterId: outcome.characterId,
+      ...(characterId ? { characterId } : {}),
       phase: "routed",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -64,7 +76,7 @@ export async function runWorkerSubcommand(input: RunWorkerInput): Promise<RunWor
       kind: "routed",
       payload: {
         assetType: outcome.assetType,
-        characterId: outcome.characterId,
+        ...(characterId ? { characterId } : {}),
         reasonCodes: outcome.reasonCodes,
       },
     });

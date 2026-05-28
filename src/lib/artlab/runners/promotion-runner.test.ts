@@ -73,17 +73,25 @@ describe("promotion runner — delegates to the real firewall", () => {
     expect(String(result.failureCode)).toContain("final-board-manifest-missing");
   });
 
-  it("promotes successfully when phrase + strict-qa + both manifests are present and emits a receipt", async () => {
+  it("promotes successfully and writes to the canon floor (rafe-calder → war-room/rafe-calder)", async () => {
     seedPassingRun(runDir, "r1");
     process.env.ARTLAB_PUBLIC_ART_ROOT = publicArtRoot;
+    // Pass the canon header.id (what intake now writes to run-state); the
+    // runner resolves canon → floorId so the target path matches the
+    // canonical floor instead of the legacy hardcoded `lobby/`.
     const result = await promotionRunner.run({
-      runId: "r1", runDir, assetType: "character", characterId: "cro", providerId: "local-mock",
+      runId: "r1", runDir, assetType: "character", characterId: "rafe-calder", providerId: "local-mock",
     });
     delete process.env.ARTLAB_PUBLIC_ART_ROOT;
     expect(result.status).toBe("ok");
-    const target = join(publicArtRoot, "lobby", "cro");
+    const target = join(publicArtRoot, "war-room", "rafe-calder");
     expect(existsSync(target)).toBe(true);
     expect(readdirSync(target).length).toBeGreaterThan(0);
+    // Lobby fallback path MUST NOT exist — the audit's `ls public/art/lobby/`
+    // returned `cno otis` for characters that belong elsewhere; this
+    // regression guard makes sure that bug can't reappear silently.
+    expect(existsSync(join(publicArtRoot, "lobby", "rafe-calder"))).toBe(false);
+    expect(existsSync(join(publicArtRoot, "lobby", "cro"))).toBe(false);
     const receiptPath = join(runDir, "promotion-receipt.json");
     expect(existsSync(receiptPath)).toBe(true);
     const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));

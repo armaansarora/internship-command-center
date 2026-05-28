@@ -72,10 +72,20 @@ function writeBrief(runDir: string, brief: DesignBrief): void {
   appendFileSync(join(runDir, "brief-history.jsonl"), `${JSON.stringify(brief)}\n`);
 }
 
-function canonicalBriefFromContext(ctx: TowerCharacterContext, runId: string): Omit<DesignBrief, "iteration" | "composedAt"> {
+function canonicalBriefFromContext(
+  ctx: TowerCharacterContext,
+  runId: string,
+  // canonCharacterId: the identifier that arrived from intake (now the canon
+  // `header.id`, e.g. "sol-navarro"). The bundle context still keys by the
+  // legacy `meta.id` roleSlug (e.g. "cno"), but we persist the canonical
+  // identifier on the brief so every downstream artifact agrees. Falls back
+  // to `ctx.characterId` only when no intake identity reached the runner —
+  // legacy CLI paths that never set `input.characterId`.
+  canonCharacterId: string | undefined,
+): Omit<DesignBrief, "iteration" | "composedAt"> {
   return {
     runId,
-    characterId: ctx.characterId,
+    characterId: canonCharacterId ?? ctx.characterId,
     identity: [
       `${ctx.displayName}, the ${ctx.title}.`,
       `${ctx.visualArchetype} `,
@@ -173,7 +183,7 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
 
   // Brainstorm-mode off → write a single canonical brief and auto-approve.
   if (process.env.ARTLAB_BRAINSTORM_MODE === "off") {
-    const base = canonicalBriefFromContext(ctx, input.runId);
+    const base = canonicalBriefFromContext(ctx, input.runId, input.characterId);
     const brief: DesignBrief = DesignBriefSchema.parse({
       ...base,
       composedAt: new Date().toISOString(),
@@ -243,7 +253,10 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
 
   try {
     const result = await brain.decide(brainInput);
-    const parsed = parseBriefFromBrain(result.outputJson, input.runId, ctx.characterId, existing ?? undefined);
+    // Pass through `input.characterId` (now the canon header.id from intake)
+    // rather than `ctx.characterId` (the legacy roleSlug bundle key) so the
+    // brief artifact agrees with run-state / concept-board / promotion.
+    const parsed = parseBriefFromBrain(result.outputJson, input.runId, input.characterId ?? ctx.characterId, existing ?? undefined);
     if (parsed) {
       const brief: DesignBrief = DesignBriefSchema.parse({
         ...parsed,
@@ -257,7 +270,7 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
   } catch {
     // fall through to canonical
   }
-  const fallbackBase = canonicalBriefFromContext(ctx, input.runId);
+  const fallbackBase = canonicalBriefFromContext(ctx, input.runId, input.characterId);
   const brief: DesignBrief = DesignBriefSchema.parse({
     ...fallbackBase,
     composedAt: new Date().toISOString(),
