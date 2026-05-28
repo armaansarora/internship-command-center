@@ -30,7 +30,7 @@ import { loadTowerContext, pickCharacterContext } from "../context/tower-context
 import { recommendDirection } from "../orchestrator/recommend-direction";
 import { readConceptFeedback } from "../brainstorm/feedback-ledger";
 import { summariseFeedbackForBrain } from "../memory/feedback-summary";
-import { writeConceptCritiqueFallbackBlocker } from "./concept-critique-blocker";
+import { recordConceptCritiqueFallback, type ConceptCritiqueFallbackOutcome } from "./concept-critique-blocker";
 import { loadArtLabCanon } from "../sdk/canon/load-canon";
 import { resolveCanonCharacter } from "../sdk/canon/resolve-character";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
@@ -233,10 +233,10 @@ export const conceptRunner: ArtLabRunner = {
 
     const laneIndexes = Array.from({ length: TARGET_LANES }, (_, i) => i + 1);
     const useReal = shouldUseRealGemini();
-    // Single source of truth for the workspace root — used both by brain
-    // construction below and by the concept-critique-fallback blocker
-    // writer further down. Mirrors what the rest of the runner already does
-    // (process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir).
+    // Single source of truth for the workspace root — used by brain
+    // construction below and by `recordConceptCritiqueFallback` further
+    // down for daemon-error telemetry. Mirrors what the rest of the
+    // runner already does (process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir).
     const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
 
     // Resolve the canon header.id for this character. Runtime callers pass in
@@ -269,6 +269,11 @@ export const conceptRunner: ArtLabRunner = {
     let towerCtx: ReturnType<typeof pickCharacterContext> = null;
     let towerBundle: Awaited<ReturnType<typeof loadTowerContext>> | null = null;
     let recommendBrain: ReturnType<typeof buildBrain> | null = null;
+    // When the multimodal critique fails (brain throw or laneImages
+    // mismatch), this carries the blocker descriptor through to the
+    // runner result so the orchestrator persists it via the state
+    // machine. See `recordConceptCritiqueFallback`.
+    let critiqueFallback: ConceptCritiqueFallbackOutcome | null = null;
 
     if (useReal && input.characterId) {
       try {
@@ -401,12 +406,17 @@ export const conceptRunner: ArtLabRunner = {
       // "middle lane is the safe pick".
       //
       // Two fallback paths surface as `concept-critique-fallback`:
-      //   • brain.decide throws (network / 401 / 5xx) → run still ok, but
-      //     no quality gate ran.
+      //   • brain.decide throws (network / 401 / 5xx) → no quality gate.
       //   • laneImages count mismatch (not every lane has a real image) →
-      //     critique block is skipped silently.
-      // Both write a blocker into run-state + a daemon-error line so the
-      // operator gets a signal in /status and `artlab health`.
+      //     critique block is skipped.
+      // Both record a daemon-error line via `recordConceptCritiqueFallback`
+      // AND cause the runner to return `status:"failed"` with
+      // `blockerHint:"concept-critique-fallback"`. The orchestrator's
+      // failed-branch persists the blocker into run-state through the
+      // state-machine-blessed write — previously, this runner wrote
+      // run-state out-of-band and the orchestrator's auto-transition
+      // immediately overwrote `blocker: undefined`, silently losing the
+      // signal (Unit 3, 2026-05-27).
       const laneImages = slotOutputs
         .filter((s) => s.mode === "gemini")  // only critique real images, not placeholders
         .map((s) => ({ path: s.pngPath }));
@@ -445,15 +455,23 @@ export const conceptRunner: ArtLabRunner = {
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          writeConceptCritiqueFallbackBlocker(workspaceRoot, input.runDir, `brain failed: ${message}`);
+          critiqueFallback = recordConceptCritiqueFallback(workspaceRoot, `brain failed: ${message}`);
         }
       } else {
-        writeConceptCritiqueFallbackBlocker(
+        critiqueFallback = recordConceptCritiqueFallback(
           workspaceRoot,
-          input.runDir,
           `laneImages mismatch (real=${laneImages.length} expected=${slotOutputs.length})`,
         );
       }
+    }
+
+    if (critiqueFallback) {
+      return {
+        runnerKind: "concept", status: "failed", durationMs: Date.now() - startedAt,
+        artifacts: { slotOutputs, conceptBoardPath, promptSource },
+        blockerHint: critiqueFallback.blocker,
+        failureCode: critiqueFallback.failureCode,
+      };
     }
 
     return {

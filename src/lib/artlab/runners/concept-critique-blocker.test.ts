@@ -1,25 +1,25 @@
 // src/lib/artlab/runners/concept-critique-blocker.test.ts
 //
-// Unit tests for `writeConceptCritiqueFallbackBlocker` — the helper that
-// turns a swallowed concept-critique fallback into a loud, operator-visible
-// signal. Two outputs:
-//   1. `blocker: "concept-critique-fallback"` written into the existing
-//      `run-state.json` (when present), with `updatedAt` bumped.
-//   2. A `{ at, source, message }` JSON line appended to
-//      `<workspaceRoot>/daemon-errors.jsonl` so it surfaces in the health
-//      view's "recent errors" tail and in `/health`.
+// Unit tests for `recordConceptCritiqueFallback` — the pure helper that
+// turns a swallowed concept-critique fallback into a loud,
+// operator-visible signal.
 //
-// Regression: if no `run-state.json` exists yet (early-phase partial run),
-// the helper still writes the daemon-error line and does NOT throw.
+// Unit 3 (2026-05-27) split this helper's persistence layer: it used to
+// also write `blocker: "concept-critique-fallback"` directly into the
+// run's `run-state.json`, but the deterministic orchestrator overwrote
+// that field on the next auto-transition. The blocker now flows through
+// `ArtLabRunnerResult.blockerHint` and the orchestrator persists it via
+// the state machine. This helper is now pure side-effect: it only
+// records the daemon-error line and returns the blocker descriptor the
+// runner lifts onto its result.
 
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeConceptCritiqueFallbackBlocker } from "./concept-critique-blocker";
-import { writeRunStateSnapshot } from "../state/snapshots";
+import { recordConceptCritiqueFallback } from "./concept-critique-blocker";
 
-describe("writeConceptCritiqueFallbackBlocker", () => {
+describe("recordConceptCritiqueFallback", () => {
   let workspaceRoot: string;
   let runDir: string;
 
@@ -31,27 +31,15 @@ describe("writeConceptCritiqueFallbackBlocker", () => {
 
   afterEach(() => { try { rmSync(workspaceRoot, { recursive: true }); } catch { /* ignore */ } });
 
-  it("sets blocker on existing run-state and bumps updatedAt", () => {
-    const createdAt = new Date(Date.now() - 60_000).toISOString();
-    writeRunStateSnapshot(runDir, {
-      runId: "r1",
-      assetType: "character",
-      characterId: "cro",
-      phase: "concept-review",
-      createdAt,
-      updatedAt: createdAt,
-      request: "make cro",
-    });
-
-    writeConceptCritiqueFallbackBlocker(workspaceRoot, runDir, "brain failed: 401 unauthorized");
-
-    const parsed = JSON.parse(readFileSync(join(runDir, "run-state.json"), "utf8"));
-    expect(parsed.blocker).toBe("concept-critique-fallback");
-    expect(parsed.updatedAt).not.toBe(createdAt);
+  it("returns the concept-critique-fallback blocker + failureCode descriptor", () => {
+    const outcome = recordConceptCritiqueFallback(workspaceRoot, "brain failed: 401 unauthorized");
+    expect(outcome.blocker).toBe("concept-critique-fallback");
+    expect(outcome.failureCode).toBe("concept-critique-skipped");
+    expect(outcome.reason).toBe("brain failed: 401 unauthorized");
   });
 
   it("appends a daemon-error JSON line with source=concept-critique-fallback", () => {
-    writeConceptCritiqueFallbackBlocker(workspaceRoot, runDir, "brain failed: boom");
+    recordConceptCritiqueFallback(workspaceRoot, "brain failed: boom");
 
     const errPath = join(workspaceRoot, "daemon-errors.jsonl");
     expect(existsSync(errPath)).toBe(true);
@@ -64,17 +52,19 @@ describe("writeConceptCritiqueFallbackBlocker", () => {
     expect(entry.message).toContain("brain failed: boom");
   });
 
-  it("still writes the daemon-error line when run-state.json does not exist (no throw)", () => {
-    // No writeRunStateSnapshot beforehand — partial-run case.
-    expect(() => {
-      writeConceptCritiqueFallbackBlocker(workspaceRoot, runDir, "laneImages mismatch (real=3 expected=5)");
-    }).not.toThrow();
-
+  it("does NOT write run-state.json (persistence is owned by the orchestrator via blockerHint)", () => {
+    // Pre-Unit-3 this helper wrote the blocker into run-state directly.
+    // After the split, the runner returns `result.blockerHint` and the
+    // orchestrator persists state. This helper must not touch run-state.
+    recordConceptCritiqueFallback(workspaceRoot, "any reason");
     expect(existsSync(join(runDir, "run-state.json"))).toBe(false);
-    const errPath = join(workspaceRoot, "daemon-errors.jsonl");
-    expect(existsSync(errPath)).toBe(true);
-    const entry = JSON.parse(readFileSync(errPath, "utf8").trim());
-    expect(entry.source).toBe("concept-critique-fallback");
-    expect(entry.message).toContain("laneImages mismatch (real=3 expected=5)");
+  });
+
+  it("does not throw when daemon-errors.jsonl directory is unwritable (best-effort logging)", () => {
+    // `recordDaemonError` swallows its own errors to keep the daemon
+    // running. Pass a clearly invalid workspace path to exercise that
+    // resilience — the helper still returns the descriptor.
+    const outcome = recordConceptCritiqueFallback("/dev/null/this-cannot-exist", "boom");
+    expect(outcome.blocker).toBe("concept-critique-fallback");
   });
 });
