@@ -315,6 +315,12 @@ export const promotionRunner: ArtLabRunner = {
             winningTechniques: ["artlab-pipeline"],
             promptHash: `run:${input.runId}`,
             totalCostCents: 0,
+            // Unit 4 — `memory-scope.ts` filters wins by `source` so the
+            // per-agent brain only sees feedback from its own kind. Without
+            // this field, every promotion win was invisible to scoped brain
+            // calls and only character-master + character/floor/etc.-targeted
+            // memory reads showed promotion data.
+            source: "artlab-promotion",
           });
         } catch { /* memory write failure must not break promotion */ }
 

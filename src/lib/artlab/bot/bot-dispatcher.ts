@@ -10,7 +10,7 @@ import { parseBundle } from "../intake/bundle-parser";
 import { saveReferenceAttachment } from "../intake/reference-attachment-fs";
 import { validateReferencePhoto } from "../intake/reference-attachment";
 import { enqueueRun } from "../queue/queue";
-import { advanceConceptApproval, advancePromotionApproval } from "./gate-advance";
+import { advanceConceptApproval, advancePromotionApproval, rejectGate } from "./gate-advance";
 import {
   approveBrief,
   cancelBrief,
@@ -160,6 +160,23 @@ async function dispatchCallback(input: DispatchInboundInput, callback: TelegramC
       return { action: { type: "callback-handled", callback: decoded } };
     }
     if (decoded.action.kind === "reject") {
+      // Unit 4 — the reject button now actually marks the run cancelled AND
+      // writes a rejection ledger entry so the brain learns from the
+      // human's "this is wrong" signal. Falls back to the legacy text-reply
+      // prompt only if there's no run waiting at the matching gate.
+      if (decoded.surface === "concept" || decoded.surface === "final") {
+        const result = await rejectGate({
+          workspaceRoot: input.workspaceRoot,
+          surface: decoded.surface,
+        });
+        if (result.ok) {
+          await safeAnswerCallback(input.telegram, callback.id, "Run cancelled. Logged for next time.");
+          if (callback.message) {
+            await safeClearKeyboard(input.telegram, callback.message.chat.id, callback.message.message_id);
+          }
+          return { action: { type: "callback-handled", callback: decoded } };
+        }
+      }
       await safeAnswerCallback(input.telegram, callback.id, "Reply 'reject' to abandon this run.");
       return { action: { type: "callback-handled", callback: decoded } };
     }

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, existsSync, writeFileSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,6 +7,8 @@ import {
   readRunStateSnapshot,
   writeRunStateSnapshot,
 } from "@/lib/artlab/state/snapshots";
+import { readStyleWins } from "@/lib/artlab/memory/style-ledger";
+import { loadArtLabMemoryScope } from "@/lib/artlab/sdk/brain/memory-scope";
 
 function seedPassingRun(runDir: string, runId: string): void {
   mkdirSync(join(runDir, "cutouts"), { recursive: true });
@@ -187,6 +189,58 @@ describe("promotion runner — delegates to the real firewall", () => {
       expect(result.artifacts.promotedPackId).toBe(`ui-texture-${runId.slice(0, 8)}`);
       const state = readRunStateSnapshot(runDir);
       expect(state!.promotedPackId).toBe(`ui-texture-${runId.slice(0, 8)}`);
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────
+  // Unit 4 (2026-05-27) — style-wins.jsonl write must include
+  // `source: "artlab-promotion"` so memory-scope.ts surfaces the win to
+  // brain agents. Before this fix, every promotion win was written without
+  // a `source` field; `memory-scope`'s `(w.source ?? "") === winSource`
+  // filter excluded all of them and the brain ran with empty `recentWins`.
+  // ───────────────────────────────────────────────────────────────────────
+  describe("style-wins ledger — source field bridges memory-scope filter", () => {
+    let workspaceRoot: string;
+    let prevWorkspaceEnv: string | undefined;
+    beforeEach(() => {
+      workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-promote-workspace-"));
+      prevWorkspaceEnv = process.env.ARTLAB_WORKSPACE_ROOT;
+      process.env.ARTLAB_WORKSPACE_ROOT = workspaceRoot;
+    });
+    afterEach(() => {
+      if (prevWorkspaceEnv === undefined) delete process.env.ARTLAB_WORKSPACE_ROOT;
+      else process.env.ARTLAB_WORKSPACE_ROOT = prevWorkspaceEnv;
+    });
+
+    it("writes style-wins.jsonl with source='artlab-promotion' and loadArtLabMemoryScope surfaces it", async () => {
+      const runId = "44444444-4444-4444-8444-444444444444";
+      writeRunStateSnapshot(runDir, {
+        runId,
+        assetType: "character",
+        characterId: "rafe-calder",
+        phase: "promoting",
+        createdAt: "2026-05-25T00:00:00.000Z",
+        updatedAt: "2026-05-25T00:00:00.000Z",
+        request: "promotion source-field smoke",
+      });
+      seedPassingRun(runDir, runId);
+      process.env.ARTLAB_PUBLIC_ART_ROOT = publicArtRoot;
+      const result = await promotionRunner.run({
+        runId, runDir, assetType: "character", characterId: "rafe-calder", providerId: "local-mock",
+      });
+      delete process.env.ARTLAB_PUBLIC_ART_ROOT;
+      expect(result.status).toBe("ok");
+
+      const wins = readStyleWins(join(workspaceRoot, "memory"));
+      expect(wins).toHaveLength(1);
+      expect(wins[0]!.source).toBe("artlab-promotion");
+
+      // loadArtLabMemoryScope must surface artlab-promotion wins to the
+      // character-master agent (and would also surface them to any other
+      // agent — promotion is a cross-agent source marker).
+      const scope = loadArtLabMemoryScope(join(workspaceRoot, "memory"), "character-master", { topN: 3 });
+      expect(scope.recentWins).toHaveLength(1);
+      expect(scope.recentWins[0]!.techniques).toBe("artlab-pipeline");
     });
   });
 });

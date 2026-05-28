@@ -21,13 +21,12 @@ describe("getRelevantMemory", () => {
       });
     }
     appendRejection(dir, {
+      at: new Date(2026, 0, 5).toISOString(),
       characterId: "otis",
-      runId: "r1",
       lane: 5,
-      rejectedAt: new Date(2026, 0, 5).toISOString(),
       reason: "jawline too perfect",
-      qaFailureCodes: ["style-coherence-failed"],
-      promptHashRejected: "p1",
+      codes: ["style-coherence-failed"],
+      promptHash: "p1",
     });
     appendPromptEvolution(dir, {
       promptComponent: "character-concept-base",
@@ -49,5 +48,30 @@ describe("getRelevantMemory", () => {
     const mem = await getRelevantMemory({ memoryDir: dir, assetType: "character", topN: 5 });
     expect(mem.rejections.length).toBeGreaterThanOrEqual(1);
     expect(mem.recentPromptHardening.length).toBeGreaterThanOrEqual(1);
+  });
+
+  // Unit 4 (2026-05-27) — a freshly-appended rejection must surface in
+  // `getRelevantMemory({characterId})`. Before Unit 4, no production
+  // callers wrote rejections, so this round-trip was untested. The brain
+  // agents read from `getRelevantMemory` for `recentRejections`, so a
+  // schema/path drift here translates directly to the brain seeing no
+  // taste signal even when the writers are wired.
+  it("round-trips a just-written rejection through getRelevantMemory(characterId)", async () => {
+    const characterId = "sol-navarro";
+    const at = new Date(2026, 4, 27).toISOString();
+    appendRejection(dir, {
+      at,
+      characterId,
+      reason: "repair-required",
+      codes: ["alpha-missing"],
+      lane: 2,
+      source: "character",
+    });
+    const mem = await getRelevantMemory({ memoryDir: dir, assetType: "character", characterId, topN: 5 });
+    expect(mem.rejections.length).toBeGreaterThanOrEqual(1);
+    const just = mem.rejections.find((r) => r.characterId === characterId && r.at === at);
+    expect(just).toBeDefined();
+    expect(just!.reason).toBe("repair-required");
+    expect(just!.codes).toContain("alpha-missing");
   });
 });

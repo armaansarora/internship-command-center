@@ -21,8 +21,11 @@
 // surface the failure. The runner is responsible for returning the
 // blocker on its result.
 
+import { existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import type { ArtLabBlocker } from "../types";
 import { recordDaemonError } from "../daemon/entry";
+import { appendRejection } from "../memory/rejection-ledger";
 
 export interface ConceptCritiqueFallbackOutcome {
   blocker: ArtLabBlocker;
@@ -37,12 +40,36 @@ export interface ConceptCritiqueFallbackOutcome {
  * Does NOT write `run-state.json`. The orchestrator (`deterministic.ts`)
  * persists the blocker via `result.blockerHint` so the write goes through
  * the state machine instead of racing the auto-transition.
+ *
+ * Unit 4 — also writes a `style-rejections.jsonl` entry so the brain has a
+ * taste-decision feed in addition to the error telemetry. The rejection
+ * ledger is independent of the daemon-error feed: this is "a quality gate
+ * was skipped" surfaced to the next refinement round, NOT a duplicate of
+ * `recordDaemonError`.
  */
 export function recordConceptCritiqueFallback(
   workspaceRoot: string,
   reason: string,
+  opts: { characterId?: string } = {},
 ): ConceptCritiqueFallbackOutcome {
   recordDaemonError(workspaceRoot, "concept-critique-fallback", `concept-critique skipped: ${reason}`);
+  if (opts.characterId) {
+    try {
+      const memoryDir = join(workspaceRoot, "memory");
+      if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
+      appendRejection(memoryDir, {
+        at: new Date().toISOString(),
+        characterId: opts.characterId,
+        reason: "critique-skipped",
+        codes: ["brain-failure"],
+        source: "character",
+      });
+    } catch {
+      // Best-effort — never let a memory-write IO failure rewrite the
+      // outcome the caller relies on. recordDaemonError already covers the
+      // operator-visible signal.
+    }
+  }
   return {
     blocker: "concept-critique-fallback",
     failureCode: "concept-critique-skipped",

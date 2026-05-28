@@ -18,6 +18,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { recordConceptCritiqueFallback } from "./concept-critique-blocker";
+import { readRejections } from "../memory/rejection-ledger";
 
 describe("recordConceptCritiqueFallback", () => {
   let workspaceRoot: string;
@@ -66,5 +67,25 @@ describe("recordConceptCritiqueFallback", () => {
     // resilience — the helper still returns the descriptor.
     const outcome = recordConceptCritiqueFallback("/dev/null/this-cannot-exist", "boom");
     expect(outcome.blocker).toBe("concept-critique-fallback");
+  });
+
+  // Unit 4 — when a characterId is supplied, the helper also writes a
+  // rejection ledger entry so the brain learns that this character's
+  // concept-critique step was skipped. The daemon-error is operator
+  // telemetry; the rejection ledger is brain-facing taste signal — these
+  // are intentionally separate feeds.
+  it("writes a rejection ledger entry when characterId is supplied", () => {
+    recordConceptCritiqueFallback(workspaceRoot, "brain failed: 401 unauthorized", { characterId: "sol-navarro" });
+    const entries = readRejections(join(workspaceRoot, "memory"));
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.characterId).toBe("sol-navarro");
+    expect(entries[0]!.reason).toBe("critique-skipped");
+    expect(entries[0]!.codes).toContain("brain-failure");
+    expect(entries[0]!.source).toBe("character");
+  });
+
+  it("does NOT write a rejection ledger entry when characterId is omitted", () => {
+    recordConceptCritiqueFallback(workspaceRoot, "brain failed: no char id");
+    expect(existsSync(join(workspaceRoot, "memory", "style-rejections.jsonl"))).toBe(false);
   });
 });

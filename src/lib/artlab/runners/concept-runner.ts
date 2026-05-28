@@ -28,8 +28,9 @@ import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
 import { buildConceptLanePrompts, type ConceptLanePrompt } from "../orchestrator/prompt-builder";
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
 import { recommendDirection } from "../orchestrator/recommend-direction";
-import { readConceptFeedback } from "../brainstorm/feedback-ledger";
+import { readConceptFeedback, type ConceptFeedbackEntry } from "../brainstorm/feedback-ledger";
 import { summariseFeedbackForBrain } from "../memory/feedback-summary";
+import { appendRejection } from "../memory/rejection-ledger";
 import { recordConceptCritiqueFallback, type ConceptCritiqueFallbackOutcome } from "./concept-critique-blocker";
 import { loadArtLabCanon } from "../sdk/canon/load-canon";
 import { resolveCanonCharacter } from "../sdk/canon/resolve-character";
@@ -118,6 +119,35 @@ async function refineConceptPromptsFromFeedback(input: RefineFromFeedbackInput):
     // fall through
   }
   return null;
+}
+
+// Unit 4 — write a `style-rejections.jsonl` entry for each piece of negative
+// or freetext concept feedback so future refinement rounds and other runs for
+// this character carry the taste signal forward. Best-effort: a memory-write
+// failure must never break the refinement runner.
+function recordConceptRejectionFeedback(
+  workspaceRoot: string,
+  characterId: string,
+  feedback: readonly ConceptFeedbackEntry[],
+): void {
+  const negativeOrFreetext = feedback.filter((f) => f.polarity === "negative" || f.polarity === "freetext");
+  if (negativeOrFreetext.length === 0) return;
+  try {
+    const memoryDir = join(workspaceRoot, "memory");
+    if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
+    for (const entry of negativeOrFreetext) {
+      const code = entry.token ?? (entry.polarity === "freetext" ? "freetext" : "negative");
+      appendRejection(memoryDir, {
+        at: entry.at,
+        characterId,
+        reason: "user-rejected-lane",
+        codes: [code],
+        source: "character",
+      });
+    }
+  } catch {
+    // swallow — memory writes are observability, not control flow.
+  }
 }
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
@@ -289,6 +319,13 @@ export const conceptRunner: ArtLabRunner = {
         const feedback = readConceptFeedback(input.runDir);
         let built: { prompts: ConceptLanePrompt[]; source: "brain" | "canonical" };
         if (feedback.length > 0) {
+          // Unit 4 — every negative/freetext concept-feedback entry is a user
+          // rejection of the current lane set. Persist to the rejection
+          // ledger so the brain learns across runs (not just this run's
+          // refinement round). Uses the resolved canon header.id so the
+          // entry keys off the same identifier every other ledger writer
+          // uses.
+          recordConceptRejectionFeedback(workspaceRoot, resolvedCharacterId ?? input.characterId, feedback);
           built = await refineConceptPromptsFromFeedback({
             workspaceRoot,
             brain,
@@ -455,12 +492,15 @@ export const conceptRunner: ArtLabRunner = {
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          critiqueFallback = recordConceptCritiqueFallback(workspaceRoot, `brain failed: ${message}`);
+          critiqueFallback = recordConceptCritiqueFallback(workspaceRoot, `brain failed: ${message}`, {
+            characterId: resolvedCharacterId,
+          });
         }
       } else {
         critiqueFallback = recordConceptCritiqueFallback(
           workspaceRoot,
           `laneImages mismatch (real=${laneImages.length} expected=${slotOutputs.length})`,
+          { characterId: resolvedCharacterId },
         );
       }
     }

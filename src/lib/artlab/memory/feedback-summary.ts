@@ -26,7 +26,7 @@ export interface BrainWinSummary {
 export interface BrainRejectionSummary {
   at: string;                  // YYYY-MM-DD
   reason: string;              // capped at MAX_TECHNIQUE_CHARS
-  codes: string;               // joined qaFailureCodes, capped at MAX_TECHNIQUE_CHARS
+  codes: string;               // joined codes, capped at MAX_TECHNIQUE_CHARS
 }
 
 export interface BrainFeedbackSignal {
@@ -60,9 +60,9 @@ export function summariseFeedbackForBrain(
       techniques: truncate(w.winningTechniques.join(", "), MAX_TECHNIQUE_CHARS),
     })),
     recentRejections: rejectionsTail.map((r) => ({
-      at: r.rejectedAt.slice(0, 10),
+      at: r.at.slice(0, 10),
       reason: truncate(r.reason, MAX_TECHNIQUE_CHARS),
-      codes: truncate(r.qaFailureCodes.join(", "), MAX_TECHNIQUE_CHARS),
+      codes: truncate(r.codes.join(", "), MAX_TECHNIQUE_CHARS),
     })),
     winsCount: wins.length,
     rejectionsCount: rejections.length,

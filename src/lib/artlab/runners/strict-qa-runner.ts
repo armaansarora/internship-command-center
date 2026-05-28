@@ -12,6 +12,7 @@ import { cutoutRunner } from "./cutout-runner";
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
 import { measureIdentityDrift } from "../coherence/identity-drift";
 import { recordDaemonError } from "../daemon/entry";
+import { appendRejection } from "../memory/rejection-ledger";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -125,6 +126,28 @@ export const strictQaRunner: ArtLabRunner = {
     writeFileSync(join(input.runDir, "asset-doctor.json"), JSON.stringify({ entries }, null, 2));
     writeFileSync(join(input.runDir, "repair-plan.json"), JSON.stringify({ repairs }, null, 2));
     if (repairs.length > 0) {
+      // Unit 4 — write a rejection ledger entry so the brain learns from
+      // strict-QA failures. Best-effort: never block strict-qa over a
+      // memory-write IO failure.
+      const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+      if (workspaceRoot && input.characterId) {
+        try {
+          const memoryDir = join(workspaceRoot, "memory");
+          if (!existsSync(memoryDir)) mkdirSync(memoryDir, { recursive: true });
+          appendRejection(memoryDir, {
+            at: new Date().toISOString(),
+            characterId: input.characterId,
+            reason: "repair-required",
+            codes: repairs.map((r) => r.reason),
+            ...(typeof input.approvedLaneIndex === "number"
+              ? { lane: input.approvedLaneIndex }
+              : {}),
+            source: "character",
+          });
+        } catch (err) {
+          recordDaemonError(workspaceRoot, "strict-qa-rejection-ledger", err);
+        }
+      }
       return {
         runnerKind: "strict-qa",
         status: "failed",

@@ -23,7 +23,7 @@ export async function getRelevantMemory(input: RelevantMemoryInput): Promise<Rel
   const evoAll = readPromptEvolution(input.memoryDir);
   return {
     wins: [...winsAll].sort((a, b) => b.promotedAt.localeCompare(a.promotedAt)).slice(0, topN),
-    rejections: [...rejAll].sort((a, b) => b.rejectedAt.localeCompare(a.rejectedAt)).slice(0, topN),
+    rejections: [...rejAll].sort((a, b) => b.at.localeCompare(a.at)).slice(0, topN),
     recentPromptHardening: [...evoAll].sort((a, b) => b.changedAt.localeCompare(a.changedAt)).slice(0, topN),
   };
 }
