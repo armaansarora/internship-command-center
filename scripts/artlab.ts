@@ -29,7 +29,7 @@ Usage:
   artlab answer <runId> "<response>"  record human response
   artlab status [runId]               plain-English status
   artlab queue                        queued + active runs
-  artlab health                       real engine health report
+  artlab health [--soft]              real engine health report (exit 1 on daemon down / stale locks)
   artlab doctor                       5-check session-readiness validation
   artlab show <runId> [--open]        open the concept-board HTML grid
   artlab cancel <runId>               cancel a run with refund
@@ -91,6 +91,7 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
       const { runStatusSubcommand } = await import("@/lib/artlab/cli/status");
       const result = await runStatusSubcommand({
         workspaceRoot: defaultWorkspaceRoot(),
+        args: rest,
         log: (line) => io.stdout(line),
       });
       return result.exitCode;
@@ -104,11 +105,13 @@ export async function artlabCliEntry(io: ArtLabCliIo): Promise<number> {
       return result.exitCode;
     }
     case "health": {
-      const { renderHealthView } = await import("@/lib/artlab/cli/ui/render");
-      const { buildArtLabHealthSnapshot } = await import("@/lib/artlab/health/snapshot");
-      const snapshot = await buildArtLabHealthSnapshot({ workspaceRoot: defaultWorkspaceRoot() });
-      io.stdout(renderHealthView(snapshot));
-      return 0;
+      const { runHealthSubcommand } = await import("@/lib/artlab/cli/health");
+      const result = await runHealthSubcommand({
+        workspaceRoot: defaultWorkspaceRoot(),
+        args: rest,
+        log: (line) => io.stdout(line),
+      });
+      return result.exitCode;
     }
     case "doctor": {
       const { runDoctorSubcommand } = await import("@/lib/artlab/cli/doctor");

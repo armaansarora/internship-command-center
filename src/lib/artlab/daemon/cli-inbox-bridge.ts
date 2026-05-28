@@ -52,7 +52,11 @@ export function createCliInboxBridge(input: CliInboxBridgeInput): CliInboxBridge
       for (const intent of produces.intents) {
         const request = String(intent.body.request ?? "").trim();
         if (!request) continue;
-        const runId = randomUUID();
+        // Prefer the runId the CLI already returned to the operator (so
+        // `artlab status <runId>` works). Fall back to a fresh UUID only for
+        // legacy intents that pre-date the runId-preserving produce path.
+        const payloadRunId = typeof intent.body.runId === "string" ? intent.body.runId.trim() : "";
+        const runId = payloadRunId.length > 0 ? payloadRunId : randomUUID();
         enqueueRun(input.workspaceRoot, {
           runId,
           priority: "default",

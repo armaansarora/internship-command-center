@@ -42,6 +42,7 @@ describe("daemon entry", () => {
     const workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-daemon-comp-"));
     const cancelDrain = { processCancelIntents: vi.fn().mockResolvedValue({ signaled: [], orphaned: [] }) };
     const cliInboxBridge = { drain: vi.fn().mockResolvedValue({ enqueuedRunIds: [], continueIntents: 0, answerIntents: 0 }) };
+    const cliInboxConsumer = { drain: vi.fn().mockResolvedValue({ answersProcessed: 0, advancements: [] }) };
     const crashRecovery = { reconcile: vi.fn().mockResolvedValue({ staleRunsReconciled: [], leasesReleased: [] }) };
     const sleepGuardState = { active: false };
     const sleepGuard = {
@@ -56,6 +57,7 @@ describe("daemon entry", () => {
       queueProcessor: { tick: vi.fn().mockResolvedValue(undefined) },
       cancelDrain,
       cliInboxBridge,
+      cliInboxConsumer,
       crashRecovery,
       crashRecoveryIntervalMs: 0,
       sleepGuard,
@@ -64,8 +66,25 @@ describe("daemon entry", () => {
     await runDaemonOnce(ctx);
     expect(cancelDrain.processCancelIntents).toHaveBeenCalledOnce();
     expect(cliInboxBridge.drain).toHaveBeenCalledOnce();
+    expect(cliInboxConsumer.drain).toHaveBeenCalledOnce();
     expect(crashRecovery.reconcile).toHaveBeenCalledOnce();
     expect(sleepGuard.activate).toHaveBeenCalledOnce(); // children present → guard activates
+  });
+
+  it("isolates cli-inbox-consumer failures via runStep — error goes to daemon-errors.jsonl", async () => {
+    const workspaceRoot = mkdtempSync(join(tmpdir(), "artlab-daemon-consumer-err-"));
+    const cliInboxConsumer = { drain: vi.fn().mockRejectedValue(new Error("consumer boom")) };
+    const ctx = createDaemonContext({
+      workspaceRoot,
+      telegramPoller: { tick: vi.fn().mockResolvedValue(undefined) },
+      queueProcessor: { tick: vi.fn().mockResolvedValue(undefined) },
+      cliInboxConsumer,
+    });
+    await runDaemonOnce(ctx);
+    const errPath = join(workspaceRoot, "daemon-errors.jsonl");
+    expect(existsSync(errPath)).toBe(true);
+    const lines = readFileSync(errPath, "utf8").trim().split("\n").map((l) => JSON.parse(l));
+    expect(lines.some((l) => l.source === "cli-inbox-consumer" && l.message.includes("consumer boom"))).toBe(true);
   });
 
   it("logs structured errors to daemon-errors.jsonl instead of swallowing silently", async () => {
