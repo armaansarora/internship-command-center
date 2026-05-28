@@ -32,6 +32,7 @@ import {
   type TelegramOutboundMessage,
 } from "@/lib/artlab/bot/message-templates";
 import { DesignBriefSchema, type DesignBrief } from "@/lib/artlab/brainstorm/brief-schema";
+import { REQUIRED_PROMOTION_PHRASE } from "@/lib/artlab/promotion/constants";
 
 export interface PhaseNotifierInput {
   workspaceRoot: string;
@@ -401,6 +402,6 @@ function fallbackFinalCaption(runId: string, characterId: string, err: unknown):
     ``,
     `⚠️ Couldn't attach the composite: ${err instanceof Error ? err.message : String(err)}`,
     ``,
-    `Reply 'approved for app' to promote.`,
+    `Reply '${REQUIRED_PROMOTION_PHRASE}' to promote.`,
   ].join("\n");
 }

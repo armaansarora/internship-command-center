@@ -26,7 +26,7 @@ Target aesthetic: luxury game UI meets Bloomberg Terminal meets Apple spatial de
 | L | The Lobby (Login/Onboarding) | Otis |
 
 Full agent hierarchy spec: `docs/CHAIN-OF-COMMAND.md`
-Character voice prompts: `docs/CHARACTER-PROMPTS.md`
+Character voice prompts: `docs/artlab/CHARACTER-PIPELINE.md`
 Spatial design metaphor: `docs/VISION-SPEC.md`
 
 ## Key Commands

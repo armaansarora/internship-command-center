@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { displayFor } from "../intake/known-cast";
 import type { TelegramMediaPhoto } from "./telegram-client";
 import { esc } from "./message-templates";
+import { REQUIRED_PROMOTION_PHRASE } from "../promotion/constants";
 
 export interface BoardAttachmentsResult {
   media: TelegramMediaPhoto[];
@@ -45,7 +46,7 @@ export function buildFinalBoardAttachments(input: { runDir: string; characterId:
     "",
     `<b>${input.spriteCount}</b> sprite${input.spriteCount === 1 ? "" : "s"} composed · upload-ready`,
     "",
-    "  <code>approved for app</code>   promotes to public/art",
+    `  <code>${REQUIRED_PROMOTION_PHRASE}</code>   promotes to public/art`,
     "  <code>reject</code>",
   ].filter(Boolean).join("\n");
   return {

@@ -25,6 +25,7 @@
     "artlab:sdk-install-claude-skill": "tsx scripts/artlab-sdk-install-claude-skill.ts",
     "artlab:sdk-install-antigravity-workspace": "tsx scripts/artlab-sdk-install-antigravity-workspace.ts",
     "check:links": "tsx scripts/check-dead-doc-links.ts",
+    "artlab-doc-drift-check": "tsx scripts/artlab-doc-drift-check.ts",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",

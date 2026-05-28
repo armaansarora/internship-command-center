@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { REQUIRED_PROMOTION_PHRASE, type RequiredPromotionPhrase } from "./constants";
 
 export type CreativePromotionPhase =
   | "final-board-ready"
@@ -52,7 +53,7 @@ export interface CreativePromotionFirewallResult {
 export interface CreativePromotionReceipt {
   schemaVersion: "tower-creative-promotion-receipt-v1";
   runId: string;
-  approvalPhrase: "approved for app";
+  approvalPhrase: RequiredPromotionPhrase;
   promotedAt: string;
   promotedAssets: Array<{
     slotId: string;
@@ -83,7 +84,7 @@ export function evaluateCreativePromotionFirewall(
 ): CreativePromotionFirewallResult {
   const blockers: CreativePromotionBlocker[] = [];
 
-  if (input.approvalPhrase !== "approved for app") {
+  if (input.approvalPhrase !== REQUIRED_PROMOTION_PHRASE) {
     blockers.push("approval-phrase-missing");
   }
 
@@ -173,7 +174,7 @@ export async function promoteCreativeAssetsTransactionally(
   const receipt: CreativePromotionReceipt = {
     schemaVersion: "tower-creative-promotion-receipt-v1",
     runId: input.runId,
-    approvalPhrase: "approved for app",
+    approvalPhrase: REQUIRED_PROMOTION_PHRASE,
     promotedAt: (input.now ?? new Date()).toISOString(),
     promotedAssets: input.stagedAssets.map((asset) => ({
       slotId: asset.slotId,

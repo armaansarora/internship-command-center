@@ -20,20 +20,22 @@ Variation NEVER lives in: rendering style, line weight, color depth, framing —
 
 ## Character roster
 
+This table mirrors `docs/artlab/sdk/canon/characters/*.yaml` — canon is the source of truth. The drift check at `scripts/artlab-doc-drift-check.ts` (CI: `.github/workflows/artlab-doc-drift.yml`) fails any PR that desyncs this table from the YAMLs.
+
 | ID | Floor | Role | Status |
 |---|---|---|---|
-| otis | Lobby | Concierge | Promoted (legacy-import) |
-| ceo | Penthouse | Mara Voss (CEO) | Promoted (legacy-import) |
-| rafe | Floor 7 (War Room) | Rafe Calder — Phase 4 go-live | Promoted |
-| priya | Floor 7 (War Room) | CRO | Phase 6 |
-| dylan | Floor 6 (Rolodex) | CNO | Phase 6 |
-| vera | Floor 5 (Writing Room) | CMO | Phase 6 |
-| sol | Floor 4 (Situation) | COO | Phase 6 |
-| inez | Floor 3 (Briefing) | CPO | Phase 6 |
-| mina | Floor 2 (Observatory) | CFO | Phase 6 |
-| etta | Floor 6 (Rolodex) | CIO | Phase 6 |
-| rowan | Floor 4 secondary | Ops support | Phase 6 |
-| nadia | Floor 3 secondary | Interview prep | Phase 6 |
+| dylan | Floor 4 — The Situation Room | Chief Operating Officer (COO) | queued |
+| etta | The Vault | Chief Trust Officer (trust) | queued |
+| inez | Floor 3 — The Briefing Room | Chief Preparation Officer (CPO) | queued |
+| mara-voss | PH — The Penthouse | CEO — Chief Executive Officer | promoted |
+| mina | Research | Chief Intelligence Officer (CIO) | queued |
+| nadia | Red Team Review | Red Team Counsel (red-team) | queued |
+| otis | L — The Lobby | Lobby Concierge | promoted |
+| priya | Floor 2 — The Observatory | Chief Financial Officer (CFO) | queued |
+| rafe-calder | Floor 7 — The War Room | Chief Revenue Officer (CRO) | queued |
+| rowan | The Archive | Archivist | queued |
+| sol-navarro | Floor 6 — The Rolodex Lounge | Chief Networking Officer (CNO) | queued |
+| vera | Floor 5 — The Writing Room | Chief Marketing Officer (CMO) | queued |
 
 ## Cast coherence (auto-checked at concept board)
 

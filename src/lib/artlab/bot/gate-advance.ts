@@ -1,6 +1,7 @@
 // src/lib/artlab/bot/gate-advance.ts
 //
-// When the Telegram user replies "approve direction N" or "approved for app",
+// When the Telegram user replies "approve direction N" or the canonical
+// promotion phrase (REQUIRED_PROMOTION_PHRASE — see promotion/constants.ts),
 // the dispatcher needs to (a) find the run waiting at the corresponding gate,
 // (b) write the human-approval artifact + advance the run's phase, and
 // (c) re-enqueue the run so the daemon's queue processor spawns a fresh
@@ -16,6 +17,7 @@ import { readRunStateSnapshot, writeRunStateSnapshot } from "@/lib/artlab/state/
 import { appendArtLabEvent } from "@/lib/artlab/state/events";
 import { enqueueRun, type ArtLabQueueEntry } from "@/lib/artlab/queue/queue";
 import { appendRejection } from "@/lib/artlab/memory/rejection-ledger";
+import { REQUIRED_PROMOTION_PHRASE } from "@/lib/artlab/promotion/constants";
 import type { ArtLabPhase } from "@/lib/artlab/types";
 import { writeFileSync } from "node:fs";
 
@@ -151,7 +153,10 @@ export async function advancePromotionApproval(input: {
     return { ok: false, reason: "state-not-final-review" };
   }
   // The promotion firewall requires an approval.json with the exact phrase.
-  writeFileSync(join(runDir, "approval.json"), JSON.stringify({ phrase: "approved for app" }, null, 2));
+  writeFileSync(
+    join(runDir, "approval.json"),
+    JSON.stringify({ phrase: REQUIRED_PROMOTION_PHRASE }, null, 2),
+  );
   const now = new Date().toISOString();
   writeRunStateSnapshot(runDir, {
     ...state,

@@ -1,3 +1,8 @@
+import {
+  REQUIRED_PROMOTION_PHRASE,
+  type RequiredPromotionPhrase,
+} from "../promotion/constants";
+
 export const CREATIVE_REVIEW_ACTION_IDS = [
   "approve-direction",
   "regenerate-named-slots",
@@ -14,7 +19,7 @@ export type CreativePreviewCheckStatus = "passed" | "warning" | "blocked";
 export interface CreativeReviewAction {
   id: CreativeReviewActionId;
   label: string;
-  requiresExactPhrase: false | "approved for app";
+  requiresExactPhrase: false | RequiredPromotionPhrase;
   slots?: readonly string[];
   input?: "plain English";
 }
@@ -98,7 +103,7 @@ function action(
   return {
     id,
     label,
-    requiresExactPhrase: id === "approve-for-app" ? "approved for app" : false,
+    requiresExactPhrase: id === "approve-for-app" ? REQUIRED_PROMOTION_PHRASE : false,
     ...(input ? { input } : {}),
     ...(slots ? { slots } : {}),
   };

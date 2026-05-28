@@ -1,4 +1,10 @@
-export const REQUIRED_PROMOTION_PHRASE = "approved for app";
+// Re-exported from the canonical promotion constants module so any caller
+// importing from `@/lib/artlab/bot/reply-parser` still resolves the same
+// value/type. The literal lives in exactly one place
+// (src/lib/artlab/promotion/constants.ts) — drift would silently break the
+// firewall (one site accepts, another rejects).
+export { REQUIRED_PROMOTION_PHRASE } from "../promotion/constants";
+import { REQUIRED_PROMOTION_PHRASE } from "../promotion/constants";
 
 export type Tier1Result =
   | { kind: "promotion-accepted" }

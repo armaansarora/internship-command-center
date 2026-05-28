@@ -24,6 +24,7 @@ import {
   type CreativePromotionActionManifestSummary,
   type CreativePromotionStagedAsset,
 } from "@/lib/artlab/promotion/promotion";
+import { REQUIRED_PROMOTION_PHRASE } from "@/lib/artlab/promotion/constants";
 import { appendStyleWin } from "@/lib/artlab/memory/style-ledger";
 import { autoCommitPromotion } from "@/lib/artlab/daemon/git-commit";
 import { displayFor } from "@/lib/artlab/intake/known-cast";
@@ -108,7 +109,10 @@ function buildBrainForPromotion(workspaceRoot: string): ArtLabLlmBrain {
   return createLoggedBrain({ inner: raw, workspaceRoot });
 }
 
-const REQUIRED_PHRASE = "approved for app";
+// Promotion-firewall phrase — kept as a local alias for readability; sourced
+// from the single canonical constant so it can never drift from the value
+// the firewall actually checks.
+const REQUIRED_PHRASE = REQUIRED_PROMOTION_PHRASE;
 const DEFAULT_CAP_CENTS = 350;
 
 function readSpendFromRunState(runDir: string): { actualCents: number; capCents: number } {
