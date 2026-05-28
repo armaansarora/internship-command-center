@@ -402,5 +402,43 @@ describe("sdk-poller", () => {
       const state = readRunStateSnapshot(join(workspaceRoot, "runs", runId));
       expect(state!.characterId).toBeUndefined();
     });
+
+    // Unit 5 follow-up Issue #5: an explicit `characterId` that doesn't
+    // resolve via canon used to flow through to run-state.json as a raw
+    // string (z.string().min(1) accepts anything). ArtLabRunStateSchema
+    // then preserved the corruption across the whole run, and every
+    // downstream consumer (brief, concept, promotion) had to handle a
+    // ghost identifier nobody could explain. We now fail fast at the
+    // poller boundary: quarantine the inbox file, record a deterministic
+    // telemetry error, never seed run-state.
+    it("quarantines inbox file when explicit characterId doesn't resolve via canon", async () => {
+      const runId = "00000000-0000-4000-8000-000000000fff";
+      writeInboxJob({
+        runId,
+        kind: "character",
+        description: "make the legacy ghost from a deleted canon",
+        characterId: "ghost-character-not-in-canon",
+      });
+      const poller = createArtLabPoller({ workspaceRoot });
+      const out = await poller.tick();
+      // The inbox file was rejected — not enqueued.
+      expect(out.enqueuedRunIds).toEqual([]);
+      expect(out.failedFiles).toContain(`generate-${runId}.json`);
+      // No run-state was written — the worker never sees the corrupt id.
+      expect(existsSync(join(workspaceRoot, "runs", runId, "run-state.json"))).toBe(false);
+      // No queue entry was written either.
+      expect(listQueuedRuns(workspaceRoot)).toHaveLength(0);
+      // Inbox file is in .bad/ for operator inspection.
+      const badDir = join(workspaceRoot, "inbox", "sdk", ".bad");
+      expect(existsSync(badDir)).toBe(true);
+      expect(readdirSync(badDir).some((f) => f.endsWith(`-generate-${runId}.json`))).toBe(
+        true,
+      );
+      // daemon-errors.jsonl carries the deterministic telemetry.
+      const errs = readFileSync(join(workspaceRoot, "daemon-errors.jsonl"), "utf8");
+      expect(errs).toMatch(/sdk-poller:unrecognized-character/);
+      expect(errs).toContain("ghost-character-not-in-canon");
+      expect(errs).toContain(runId);
+    });
   });
 });

@@ -127,7 +127,21 @@ function targetRelativeDir(input: ArtLabRunnerInput): string {
     // `public/art/lobby/cno/`. The hardcoded "lobby" fallback predates
     // canon and was the root cause of the `ls public/art/lobby/` returning
     // `cno otis` symptom called out by 4 auditors.
-    const canon = resolveCanonIdentity(input.characterId);
+    // Surface canon load failures (malformed YAML, missing dir) into
+    // daemon-errors.jsonl alongside the canon-not-found fallback so silent
+    // YAML drift can't reach this critical promotion path without operator
+    // visibility.
+    const workspaceRootForTelemetry = process.env.ARTLAB_WORKSPACE_ROOT;
+    const canon = resolveCanonIdentity(input.characterId, {
+      onError: workspaceRootForTelemetry
+        ? (err, file) =>
+            recordDaemonError(
+              workspaceRootForTelemetry,
+              "canon-identity-load-degraded",
+              new Error(`canon-identity ${file}: ${err.message}`),
+            )
+        : undefined,
+    });
     if (canon) {
       return join(canon.floorId, canon.headerId);
     }
@@ -135,10 +149,9 @@ function targetRelativeDir(input: ArtLabRunnerInput): string {
     // and fall back to the legacy `lobby/<id>` shape so the run still
     // promotes rather than crashing on the missing dir.
     try {
-      const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
-      if (workspaceRoot) {
+      if (workspaceRootForTelemetry) {
         recordDaemonError(
-          workspaceRoot,
+          workspaceRootForTelemetry,
           "promotion-runner:canon-fallback",
           new Error(`canon identity not found for characterId="${input.characterId}" — promotion falling back to lobby/`),
         );
