@@ -20,7 +20,13 @@ export interface AutoCommitInput {
   displayName?: string;            // "Sol Navarro"
   promotedPaths: string[];         // absolute or workspace-relative paths
   manifestPath?: string;           // absolute or workspace-relative path to the manifest JSON
-  skipPush?: boolean;              // for tests
+  /**
+   * Explicit override that short-circuits the env-derived auto-push gate.
+   * Tests pass `true` to assert commit behaviour without exercising a real
+   * remote; the production daemon leaves this unset so the gate honours
+   * `ARTLAB_AUTO_PUSH=on` (opt-in default).
+   */
+  skipPush?: boolean;
 }
 
 export interface AutoCommitResult {
@@ -142,6 +148,20 @@ export function autoCommitPromotion(input: AutoCommitInput): AutoCommitResult {
 
   if (input.skipPush) {
     return { status: "committed", sha, stagedPaths: stagedAllowed };
+  }
+
+  // Unit 6 — auto-push is OPT-IN. Operators set `ARTLAB_AUTO_PUSH=on`
+  // when they accept that the daemon will push promotions straight to
+  // origin/main, bypassing the byte-diff CI gate (which only runs on
+  // PRs). Any other value (unset, "off", "false", "yes-i-mean-it") keeps
+  // the commit local; the operator can push manually after review.
+  if (process.env.ARTLAB_AUTO_PUSH !== "on") {
+    return {
+      status: "committed",
+      sha,
+      reason: "push-opt-in-required (set ARTLAB_AUTO_PUSH=on to enable auto-push to origin/main)",
+      stagedPaths: stagedAllowed,
+    };
   }
 
   const push = exec(input.projectRoot, ["push", "origin", "HEAD:main"]);

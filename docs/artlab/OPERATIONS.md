@@ -30,6 +30,44 @@ npm run artlab -- answer <runId> "approve direction 3"
 npm run artlab -- answer <runId> "approved for app"
 ```
 
+### Auto-push to origin/main is OPT-IN
+
+After a successful promotion the daemon stages the path-scoped diff
+(`public/art/**`, `src/lib/visual-assets/approved-character-assets.generated.json`,
+`.artlab/production-manifests/**`) and creates a local commit.
+
+**The commit is NOT pushed unless `ARTLAB_AUTO_PUSH=on` is set in the daemon's
+environment.** With the env unset (the default), the daemon returns
+`status:"committed", reason:"push-opt-in-required (set ARTLAB_AUTO_PUSH=on …)"`
+and leaves the commit on the local branch for manual review + push.
+
+This default is deliberate: the byte-diff CI workflow (`.github/workflows/artlab-byte-diff.yml`)
+runs **only on pull requests**. A direct push to `origin/main` therefore
+bypasses the Otis + Mara byte-protection gate. Operators who accept that
+trade-off can enable auto-push:
+
+```bash
+# Enable for the current shell only (daemon must inherit it)
+launchctl setenv ARTLAB_AUTO_PUSH on
+launchctl unload ~/Library/LaunchAgents/com.tower.artlab.plist
+launchctl load   ~/Library/LaunchAgents/com.tower.artlab.plist
+
+# Disable (revert to opt-in default)
+launchctl unsetenv ARTLAB_AUTO_PUSH
+launchctl unload ~/Library/LaunchAgents/com.tower.artlab.plist
+launchctl load   ~/Library/LaunchAgents/com.tower.artlab.plist
+```
+
+Manual push after a promotion:
+
+```bash
+# Inspect the local commit
+git log -1 --stat HEAD
+
+# Push when ready
+git push origin HEAD:main
+```
+
 ## Troubleshooting
 
 | Symptom | Action |
