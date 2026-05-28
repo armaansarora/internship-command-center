@@ -4,10 +4,15 @@
 // image generator uses, so a single GEMINI_API_KEY unlocks both real images
 // AND brain-authored prompt variations / recommendations / critique.
 //
-// Defaults to gemini-3-pro-preview for maximum reasoning depth (cost is no
-// object — the user wants the brain to feel like a real creative director).
-// Falls back automatically to gemini-3.5-flash via the buildBrain wrapper in
-// concept-runner if Pro tier returns errors.
+// Model selection: defaults to `DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL` from
+// `src/lib/artlab/sdk/brain/provider-registry.ts` (currently
+// `gemini-3.5-flash` — Stable on Google's catalog as of 2026-05-27).
+// Override per-call via `options.model`, or globally via the
+// `ARTLAB_GEMINI_BRAIN_MODEL` env var (read by each runner's `buildBrain`
+// wrapper). There is NO automatic retry to a different Gemini tier inside
+// this adapter — the only fallback chain is Anthropic→Gemini, wired by
+// runners/{brief,concept,production,promotion}-runner.ts when both
+// `ANTHROPIC_API_KEY` and `GEMINI_API_KEY` are present in env.
 //
 // Multimodal: vision-aware decision kinds (critique-concept-board,
 // critique-production-sprites) pass PNG image paths or bytes via the
@@ -25,13 +30,14 @@ import type {
 import { SYSTEM_PROMPTS_BY_KIND } from "./system-prompts";
 import { defaultTimeoutForKind, isRetryableHttpStatus, withRetryAndTimeout } from "./brain-retry";
 import { validateDecisionOutput } from "./decision-schemas";
+import { DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL } from "../sdk/brain/provider-registry";
 
 interface GeminiBrainOptions {
   apiKey: string;
-  model?: string;            // default gemini-3-pro-preview (premium reasoning)
+  model?: string;            // default DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL
 }
 
-const DEFAULT_MODEL = "gemini-3-pro-preview";
+const DEFAULT_MODEL = DEFAULT_ARTLAB_GEMINI_BRAIN_MODEL;
 
 export interface ArtLabGeminiBrain extends ArtLabLlmBrain {
   modelId: string;

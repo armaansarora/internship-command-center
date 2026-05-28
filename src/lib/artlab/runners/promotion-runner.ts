@@ -17,6 +17,7 @@ import { createClaudeBrain } from "@/lib/artlab/orchestrator/claude-brain";
 import { createGeminiBrain } from "@/lib/artlab/orchestrator/gemini-brain";
 import { createLoggedBrain } from "@/lib/artlab/orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "@/lib/artlab/orchestrator/llm-brain";
+import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "@/lib/artlab/sdk/brain/provider-registry";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 async function composeAndPersistPromotionCelebration(input: {
@@ -61,7 +62,7 @@ async function composeAndPersistPromotionCelebration(input: {
 
 function buildBrainForPromotion(workspaceRoot: string): ArtLabLlmBrain {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
   const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
     ? process.env.GEMINI_API_KEY
     : null;

@@ -29,12 +29,13 @@ import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
+import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
 import { CHARACTER_OUTFIT_VARIANTS, CHARACTER_POSES } from "@/lib/visual-assets/types";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
   const geminiKey = geminiKeyFromEnv();
   const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL;
   const forceGemini = process.env.ARTLAB_BRAIN_PROVIDER === "gemini";

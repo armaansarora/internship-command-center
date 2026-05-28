@@ -19,6 +19,8 @@ import { createClaudeBrain } from "../orchestrator/claude-brain";
 import { createGeminiBrain } from "../orchestrator/gemini-brain";
 import { createLoggedBrain } from "../orchestrator/logged-brain";
 import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
+import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
+import { recordDaemonError } from "../daemon/entry";
 import {
   DesignBriefSchema,
   type DesignBrief,
@@ -31,7 +33,7 @@ import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runn
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? "claude-opus-4-5";
+  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
   const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
     ? process.env.GEMINI_API_KEY
     : null;
@@ -106,7 +108,7 @@ function canonicalBriefFromContext(
       { label: "🎯 Adjust prop emphasis", dimension: "props" },
       { label: "✏️ Free-text", dimension: "freetext" },
     ],
-    source: "canonical-fallback",
+    source: "canonical",
   };
 }
 
@@ -162,7 +164,7 @@ function parseBriefFromBrain(
   };
 }
 
-async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: DesignBrief; source: "brain" | "canonical-fallback" }> {
+async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: DesignBrief; source: "brain" | "canonical" }> {
   const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT ?? input.runDir;
   const bundle = await loadTowerContext({ workspaceRoot });
   const ctx = input.characterId ? pickCharacterContext(bundle, input.characterId) : null;
@@ -189,7 +191,7 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
       composedAt: new Date().toISOString(),
       iteration: 0,
     });
-    return { brief, source: "canonical-fallback" };
+    return { brief, source: "canonical" };
   }
 
   const brain = buildBrain(workspaceRoot);
@@ -267,8 +269,13 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
       });
       return { brief, source: "brain" };
     }
-  } catch {
-    // fall through to canonical
+  } catch (err) {
+    // Brain unreachable or its output failed parsing — emit a structured
+    // daemon-error before degrading to the canonical brief. Previously this
+    // catch was silent: every Anthropic+Gemini failure landed users on the
+    // canonical brief with no operator signal explaining WHY the brain
+    // didn't author it.
+    recordDaemonError(workspaceRoot, "brief-runner-canonical-fallback", err);
   }
   const fallbackBase = canonicalBriefFromContext(ctx, input.runId, input.characterId);
   const brief: DesignBrief = DesignBriefSchema.parse({
@@ -276,7 +283,7 @@ async function composeOrRefineBrief(input: ArtLabRunnerInput): Promise<{ brief: 
     composedAt: new Date().toISOString(),
     iteration,
   });
-  return { brief, source: "canonical-fallback" };
+  return { brief, source: "canonical" };
 }
 
 export const briefRunner: ArtLabRunner = {

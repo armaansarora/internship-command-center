@@ -6,6 +6,7 @@
 
 import type { ArtLabLlmBrain } from "./llm-brain";
 import type { TowerCharacterContext } from "../context/tower-context";
+import { recordDaemonError } from "../daemon/entry";
 
 export interface RecommendDirectionInput {
   characterId: string;
@@ -58,8 +59,15 @@ export async function recommendDirection(input: RecommendDirectionInput): Promis
     });
     const parsed = parseRecommendation(result.outputJson, input.lanes.length);
     if (parsed) return { ...parsed, source: "brain" };
-  } catch {
-    // fall through to deterministic fallback
+  } catch (err) {
+    // Brain unreachable (network / 401 / 5xx) — surface the failure into
+    // daemon-errors.jsonl so the operator can grep the model name that
+    // failed. Without this the only signal a brain outage left was the
+    // silent demotion to the deterministic middle-lane pick.
+    const workspaceRoot = process.env.ARTLAB_WORKSPACE_ROOT;
+    if (workspaceRoot) {
+      recordDaemonError(workspaceRoot, "recommend-direction-fallback", err);
+    }
   }
   // Deterministic fallback: pick the middle lane (most "average", least drift)
   const fallbackIndex = Math.max(1, Math.min(input.lanes.length, Math.ceil(input.lanes.length / 2)));
