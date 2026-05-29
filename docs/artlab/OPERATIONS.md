@@ -14,6 +14,41 @@ npm run artlab:bot -- setup --token <BotFather-token> --chat-id <numeric-id>
 npm run artlab -- health
 ```
 
+## Cost & quality (FREE by default)
+
+ArtLab runs on Google's FREE tier out of the box — no per-call API fees:
+
+| Layer | Default (FREE) | Max-quality opt-in |
+|-------|----------------|--------------------|
+| Concept + production images | `gemini-2.5-flash-image` (Nano Banana) — ~500/day at $0, top-tier character consistency | `gemini-3-pro-image-preview` (Nano Banana Pro) — SOTA character consistency, ~$0.134/img, covered by the $10/mo Google AI Pro cloud credit |
+| Orchestration brain | Gemini (reuses the same free key) | Claude Max via OAuth (`claude setup-token`), or Anthropic API (paid) |
+
+**Cost guard.** A paid image model can never be selected by accident. An
+override to a paid model is silently downgraded to the free default unless BOTH
+`ARTLAB_ALLOW_PAID_IMAGES=on` AND `ARTLAB_PRODUCTION_IMAGE_MODEL=gemini-3-pro-image-preview`
+are set. This is the fix for the "$50 for two characters" surprise.
+
+**Enable max-quality production sprites** (uses the $10/mo Google AI Pro credit):
+
+```bash
+# in .env.local (or the daemon environment)
+ARTLAB_ALLOW_PAID_IMAGES=on
+ARTLAB_PRODUCTION_IMAGE_MODEL=gemini-3-pro-image-preview
+```
+
+**Use Claude Max as the brain** (best art direction, $0 within your plan):
+
+```bash
+claude setup-token                         # prints an OAuth token
+# add to .env.local:
+#   CLAUDE_CODE_OAUTH_TOKEN=<token>
+#   ARTLAB_BRAIN_PROVIDER=claude-oauth
+```
+
+Policy lives in one place each: `src/lib/artlab/providers/image-tiers.ts`
+(image cost policy + guard) and `src/lib/artlab/orchestrator/build-brain.ts`
+(FREE-first brain selection).
+
 ## Daily use
 
 ```bash

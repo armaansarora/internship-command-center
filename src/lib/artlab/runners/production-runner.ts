@@ -23,43 +23,17 @@ import type { ArtLabAssetType } from "../types";
 import { renderPlaceholderImage } from "../speed/placeholder-images";
 import { displayFor } from "../intake/known-cast";
 import { createGeminiProvider, type GeminiProvider } from "../providers/gemini-adapter";
+import { resolveProductionImageModel } from "../providers/image-tiers";
 import { buildProductionSlotPrompts, type ProductionSlotPrompt } from "../orchestrator/prompt-builder";
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
-import { createClaudeBrain } from "../orchestrator/claude-brain";
-import { createGeminiBrain } from "../orchestrator/gemini-brain";
-import { createLoggedBrain } from "../orchestrator/logged-brain";
-import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
-import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
+import { buildArtLabBrain } from "../orchestrator/build-brain";
+import type { ArtLabLlmBrain } from "../orchestrator/llm-brain";
 import { CHARACTER_OUTFIT_VARIANTS, CHARACTER_POSES } from "@/lib/visual-assets/types";
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
-  const geminiKey = geminiKeyFromEnv();
-  const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL;
-  const forceGemini = process.env.ARTLAB_BRAIN_PROVIDER === "gemini";
-  let raw: ArtLabLlmBrain;
-  if (anthropicKey && !forceGemini) {
-    const claude = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
-    const fallback = geminiKey
-      ? createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel })
-      : null;
-    raw = {
-      async decide(req) {
-        try { return await claude.decide(req); }
-        catch (err) {
-          if (!fallback) throw err;
-          return fallback.decide(req);
-        }
-      },
-    };
-  } else if (geminiKey) {
-    raw = createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel });
-  } else {
-    raw = { decide: decideWithMockBrain };
-  }
-  return createLoggedBrain({ inner: raw, workspaceRoot });
+  // FREE-first brain selection (Gemini default; Claude opt-in) — see build-brain.ts.
+  return buildArtLabBrain({ workspaceRoot });
 }
 
 export const PRODUCTION_SLOT_COUNT_PER_ASSET_TYPE: Record<ArtLabAssetType, number> = {
@@ -205,7 +179,7 @@ export const productionRunner: ArtLabRunner = {
         // Production sprites land in public/art/ and ship to interntower.com,
         // so we use the premium image tier by default (Nano Banana Pro).
         // Override via ARTLAB_PRODUCTION_IMAGE_MODEL.
-        const productionModel = process.env.ARTLAB_PRODUCTION_IMAGE_MODEL ?? "nano-banana-pro-preview";
+        const productionModel = resolveProductionImageModel().model;
         const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()!, modelId: productionModel });
         // Anchor every production sprite to the approved lane's PNG so the
         // 21 sprites all share the same face / identity instead of drifting

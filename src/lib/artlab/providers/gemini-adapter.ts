@@ -1,4 +1,6 @@
 // src/lib/artlab/providers/gemini-adapter.ts
+import { isFreeTierImageModel, paidImagesAllowed } from "./image-tiers";
+
 export interface GeminiProviderOptions {
   apiKey: string;
   modelId?: string;
@@ -23,36 +25,55 @@ export interface GeminiProvider {
   generateImage(input: GenerateImageInput): Promise<GenerateImageResult>;
 }
 
-// Default image model. Callers (concept-runner, production-runner) override
-// this via the constructor option to apply a tiered strategy:
-//   • concept exploration: cheap fast model (gemini-2.5-flash-image)
-//   • production / final renders: premium model (nano-banana-pro-preview)
-// See costCentsForModel() below for the per-image price table that the
-// budget ledger reads off of.
+// Default image model. Callers (concept-runner, production-runner) select the
+// model via `src/lib/artlab/providers/image-tiers.ts`, which is FREE by
+// default (gemini-2.5-flash-image — Google AI Studio free tier) for BOTH
+// concept exploration and production sprites. The premium Nano Banana Pro
+// tier (gemini-3-pro-image-preview) is opt-in only — see image-tiers.ts.
+// costCentsForModel() below is the per-image LIST price the budget ledger
+// reads off of (list price, not the $0 free-tier price).
 const DEFAULT_MODEL = "gemini-2.5-flash-image";
 const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
 const MAX_RETRIES = 3;
 
 // Per-image list price in cents, by model. Used by the budget ledger.
 // Update these when Google's pricing changes — they're roughly:
-//   gemini-2.5-flash-image:        $0.039/image  → 4¢
-//   gemini-3.1-flash-image-preview: $0.039/image → 4¢ (Nano Banana 2)
-//   nano-banana-pro-preview:        $0.13/image  → 13¢ (Nano Banana Pro)
-//   imagen-4.0-generate-001:        $0.04/image  → 4¢
-//   imagen-4.0-ultra-generate-001:  $0.06/image  → 6¢
-//   imagen-4.0-fast-generate-001:   $0.02/image  → 2¢
+//   gemini-2.5-flash-image:          $0.039/image → 4¢  (FREE on AI Studio free tier)
+//   gemini-3.1-flash-image:          $0.067/image → 7¢  (Nano Banana 2)
+//   gemini-3-pro-image-preview:      $0.134/image → 13¢ (Nano Banana Pro — max quality)
+//   imagen-4.0-generate-001:         $0.04/image  → 4¢
+//   imagen-4.0-ultra-generate-001:   $0.06/image  → 6¢
+//   imagen-4.0-fast-generate-001:    $0.02/image  → 2¢
 function costCentsForModel(model: string): number {
-  if (model.startsWith("nano-banana-pro")) return 13;
+  // Nano Banana Pro — the real Gemini API id is `gemini-3-pro-image-preview`;
+  // `nano-banana-pro*` is kept as a back-compat alias for older configs.
+  if (model.startsWith("gemini-3-pro-image") || model.startsWith("nano-banana-pro")) return 13;
   if (model.startsWith("imagen-4.0-ultra")) return 6;
   if (model.startsWith("imagen-4.0-fast")) return 2;
   if (model.startsWith("imagen-4.0")) return 4;
-  if (model.startsWith("gemini-3.1-flash-image")) return 4;
+  if (model.startsWith("gemini-3.1-flash-image")) return 7;
   if (model.startsWith("gemini-2.5-flash-image")) return 4;
   return 5; // unknown — middle estimate
 }
 
+// Resolve the image model for a caller. A no-modelId caller (e.g. the SDK
+// character CLI) must NEVER silently land on a PAID model: the legacy
+// ARTLAB_GEMINI_IMAGE_MODEL env var is honoured only when it names a free-tier
+// model OR paid images are explicitly enabled (ARTLAB_ALLOW_PAID_IMAGES=on);
+// otherwise we fall back to the free DEFAULT_MODEL. Runners always pass an
+// already-guarded modelId via image-tiers.ts. Exported for testing.
+export function resolveAdapterImageModel(
+  modelId: string | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  if (modelId) return modelId;
+  const envModel = env.ARTLAB_GEMINI_IMAGE_MODEL;
+  if (envModel && (isFreeTierImageModel(envModel) || paidImagesAllowed(env))) return envModel;
+  return DEFAULT_MODEL;
+}
+
 export function createGeminiProvider(options: GeminiProviderOptions): GeminiProvider {
-  const model = options.modelId ?? process.env.ARTLAB_GEMINI_IMAGE_MODEL ?? DEFAULT_MODEL;
+  const model = resolveAdapterImageModel(options.modelId, process.env);
   return {
     async generateImage(input: GenerateImageInput): Promise<GenerateImageResult> {
       if (process.env.ARTLAB_GEMINI_MODE === "mock") {

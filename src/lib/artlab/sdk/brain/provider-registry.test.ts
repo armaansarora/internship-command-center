@@ -35,9 +35,26 @@ describe("resolveArtLabAgentProvider", () => {
     expect(cfg.apiKey).toBe("");
   });
 
-  it("returns dryRun=false when ANTHROPIC_API_KEY is set", () => {
+  it("FREE-by-default: dry-runs when ANTHROPIC_API_KEY is set but Claude is not opted into", () => {
     const cfg = resolveArtLabAgentProvider({ agent: "ui-texture" }, { ANTHROPIC_API_KEY: "sk-x" });
+    expect(cfg.dryRun).toBe(true);
+    expect(cfg.apiKey).toBe("sk-x");
+  });
+
+  it("returns dryRun=false only when ANTHROPIC_API_KEY is set AND ARTLAB_BRAIN_PROVIDER opts into Claude", () => {
+    const cfg = resolveArtLabAgentProvider(
+      { agent: "ui-texture" },
+      { ANTHROPIC_API_KEY: "sk-x", ARTLAB_BRAIN_PROVIDER: "claude" },
+    );
     expect(cfg.dryRun).toBe(false);
     expect(cfg.apiKey).toBe("sk-x");
+  });
+
+  it("claude-oauth also opts into a live (non-dry-run) brain", () => {
+    const cfg = resolveArtLabAgentProvider(
+      { agent: "ui-texture" },
+      { ANTHROPIC_API_KEY: "sk-x", ARTLAB_BRAIN_PROVIDER: "claude-oauth" },
+    );
+    expect(cfg.dryRun).toBe(false);
   });
 });

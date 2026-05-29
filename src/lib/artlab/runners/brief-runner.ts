@@ -15,11 +15,8 @@
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadTowerContext, pickCharacterContext, type TowerCharacterContext } from "../context/tower-context";
-import { createClaudeBrain } from "../orchestrator/claude-brain";
-import { createGeminiBrain } from "../orchestrator/gemini-brain";
-import { createLoggedBrain } from "../orchestrator/logged-brain";
-import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
-import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
+import { buildArtLabBrain } from "../orchestrator/build-brain";
+import type { ArtLabLlmBrain } from "../orchestrator/llm-brain";
 import { recordDaemonError } from "../daemon/entry";
 import {
   DesignBriefSchema,
@@ -32,34 +29,8 @@ import { writeRunStateSnapshot, readRunStateSnapshot } from "../state/snapshots"
 import type { ArtLabRunner, ArtLabRunnerInput, ArtLabRunnerResult } from "./runner-contract";
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
-  const geminiKey = process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith("__")
-    ? process.env.GEMINI_API_KEY
-    : null;
-  const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL;
-  const forceGemini = process.env.ARTLAB_BRAIN_PROVIDER === "gemini";
-  let raw: ArtLabLlmBrain;
-  if (anthropicKey && !forceGemini) {
-    const claude = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
-    const fallback = geminiKey
-      ? createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel })
-      : null;
-    raw = {
-      async decide(req) {
-        try { return await claude.decide(req); }
-        catch (err) {
-          if (!fallback) throw err;
-          return fallback.decide(req);
-        }
-      },
-    };
-  } else if (geminiKey) {
-    raw = createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel });
-  } else {
-    raw = { decide: decideWithMockBrain };
-  }
-  return createLoggedBrain({ inner: raw, workspaceRoot });
+  // FREE-first brain selection (Gemini default; Claude opt-in) — see build-brain.ts.
+  return buildArtLabBrain({ workspaceRoot });
 }
 
 function readExistingBrief(runDir: string): DesignBrief | null {

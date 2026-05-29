@@ -20,11 +20,9 @@ import { join } from "node:path";
 import { renderPlaceholderImage } from "../speed/placeholder-images";
 import { displayFor } from "../intake/known-cast";
 import { createGeminiProvider, type GeminiProvider } from "../providers/gemini-adapter";
-import { createClaudeBrain } from "../orchestrator/claude-brain";
-import { createGeminiBrain } from "../orchestrator/gemini-brain";
-import { createLoggedBrain } from "../orchestrator/logged-brain";
-import { decideWithMockBrain, type ArtLabLlmBrain } from "../orchestrator/llm-brain";
-import { DEFAULT_ARTLAB_CLAUDE_MODEL } from "../sdk/brain/provider-registry";
+import { resolveConceptImageModel } from "../providers/image-tiers";
+import { buildArtLabBrain } from "../orchestrator/build-brain";
+import type { ArtLabLlmBrain } from "../orchestrator/llm-brain";
 import { buildConceptLanePrompts, type ConceptLanePrompt } from "../orchestrator/prompt-builder";
 import { loadTowerContext, pickCharacterContext } from "../context/tower-context";
 import { recommendDirection } from "../orchestrator/recommend-direction";
@@ -151,38 +149,9 @@ function recordConceptRejectionFeedback(
 }
 
 function buildBrain(workspaceRoot: string): ArtLabLlmBrain {
-  // Brain preference: Anthropic (if key present) > Gemini (reuses image key) > mock.
-  // If Anthropic is configured but throws at runtime (invalid key / 401 / 5xx)
-  // we transparently retry the same decision against the Gemini brain — that
-  // way a stale ANTHROPIC_API_KEY doesn't cascade into the canonical path
-  // when the user has a perfectly good Gemini key available.
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  const claudeModel = process.env.ARTLAB_CLAUDE_MODEL ?? DEFAULT_ARTLAB_CLAUDE_MODEL;
-  const geminiKey = geminiKeyFromEnv();
-  const geminiBrainModel = process.env.ARTLAB_GEMINI_BRAIN_MODEL; // optional override
-  const forceGemini = process.env.ARTLAB_BRAIN_PROVIDER === "gemini";
-  let raw: ArtLabLlmBrain;
-  if (anthropicKey && !forceGemini) {
-    const claude = createClaudeBrain({ apiKey: anthropicKey, model: claudeModel });
-    const fallback = geminiKey
-      ? createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel })
-      : null;
-    raw = {
-      async decide(req) {
-        try {
-          return await claude.decide(req);
-        } catch (err) {
-          if (!fallback) throw err;
-          return fallback.decide(req);
-        }
-      },
-    };
-  } else if (geminiKey) {
-    raw = createGeminiBrain({ apiKey: geminiKey, model: geminiBrainModel });
-  } else {
-    raw = { decide: decideWithMockBrain };
-  }
-  return createLoggedBrain({ inner: raw, workspaceRoot });
+  // FREE-first brain selection (Gemini default; Claude opt-in) lives in one
+  // place now — see build-brain.ts.
+  return buildArtLabBrain({ workspaceRoot });
 }
 
 async function renderPlaceholderLane(
@@ -351,7 +320,7 @@ export const conceptRunner: ArtLabRunner = {
         // Concept exploration uses the cheap fast tier by default — we
         // generate a lot of variations, the user picks one, and only the
         // winner advances to the premium production tier downstream.
-        const conceptModel = process.env.ARTLAB_CONCEPT_IMAGE_MODEL ?? "gemini-2.5-flash-image";
+        const conceptModel = resolveConceptImageModel().model;
         const provider = createGeminiProvider({ apiKey: geminiKeyFromEnv()!, modelId: conceptModel });
         // Concurrency=2 cuts 5-lane wall time roughly in half (~40s → ~20s).
         // The image-adapter retry layer (round 1) transparently absorbs the

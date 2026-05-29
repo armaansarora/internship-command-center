@@ -48,10 +48,19 @@ export function resolveArtLabAgentProvider(
   const globalModel = env.ARTLAB_BRAIN_MODEL;
   const model = perAgentModel ?? globalModel ?? DEFAULT_ARTLAB_AGENT_MODEL;
   const apiKey = env.ANTHROPIC_API_KEY ?? "";
+  // FREE-by-default: the SDK per-agent brain spends on PAID Claude ONLY when the
+  // operator explicitly opts in via ARTLAB_BRAIN_PROVIDER=claude|claude-oauth.
+  // Otherwise it dry-runs (zero API spend) so an MCP client (Claude Code,
+  // Antigravity) calling artlab/generate while ANTHROPIC_API_KEY merely sits in
+  // the environment never silently bills Claude Opus. Mirrors the FREE-first
+  // policy in orchestrator/build-brain.ts — generation still completes via the
+  // FREE runner pipeline; only the optional brain-enrichment hint is skipped.
+  const optedIntoClaude =
+    env.ARTLAB_BRAIN_PROVIDER === "claude" || env.ARTLAB_BRAIN_PROVIDER === "claude-oauth";
   return {
     agent: args.agent,
     model,
     apiKey,
-    dryRun: apiKey === "",
+    dryRun: apiKey === "" || !optedIntoClaude,
   };
 }

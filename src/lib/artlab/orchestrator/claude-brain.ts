@@ -6,7 +6,14 @@ import { defaultTimeoutForKind, withRetryAndTimeout } from "./brain-retry";
 import { validateDecisionOutput } from "./decision-schemas";
 
 interface ClaudeBrainOptions {
-  apiKey: string;
+  apiKey?: string;
+  /**
+   * Claude Max/Pro subscription OAuth token (from `claude setup-token`,
+   * exported as CLAUDE_CODE_OAUTH_TOKEN). When set, the brain authenticates
+   * against the subscription instead of a metered API key — $0 incremental
+   * spend within the plan. Falls back to `apiKey` when absent.
+   */
+  oauthToken?: string;
   model: string;
 }
 
@@ -14,8 +21,29 @@ export interface ArtLabClaudeBrain extends ArtLabLlmBrain {
   modelId: string;
 }
 
+// Anthropic's subscription (Claude Code / Max) auth uses a Bearer OAuth token
+// plus the oauth beta header instead of `x-api-key`. We wrap fetch to enforce
+// that header shape so the AI SDK's Anthropic provider bills the user's Claude
+// plan rather than a metered API key. Exported for unit testing.
+export function createOAuthFetch(token: string): typeof globalThis.fetch {
+  return (async (
+    input: Parameters<typeof globalThis.fetch>[0],
+    init?: Parameters<typeof globalThis.fetch>[1],
+  ) => {
+    const headers = new Headers(init?.headers);
+    headers.delete("x-api-key");
+    headers.set("authorization", `Bearer ${token}`);
+    if (!headers.has("anthropic-beta")) {
+      headers.set("anthropic-beta", "oauth-2025-04-20");
+    }
+    return globalThis.fetch(input, { ...init, headers });
+  }) as typeof globalThis.fetch;
+}
+
 export function createClaudeBrain(options: ClaudeBrainOptions): ArtLabClaudeBrain {
-  const provider = createAnthropic({ apiKey: options.apiKey });
+  const provider = options.oauthToken
+    ? createAnthropic({ apiKey: "", fetch: createOAuthFetch(options.oauthToken) })
+    : createAnthropic({ apiKey: options.apiKey ?? "" });
   return {
     modelId: options.model,
     async decide(req: ArtLabLlmDecisionRequest): Promise<ArtLabLlmDecisionResult> {

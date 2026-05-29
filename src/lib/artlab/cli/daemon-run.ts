@@ -31,6 +31,7 @@ import { decideWithMockBrain, type ArtLabLlmBrain } from "@/lib/artlab/orchestra
 import { createLoggedBrain } from "@/lib/artlab/orchestrator/logged-brain";
 import { getKeychainSecret, ARTLAB_KEYCHAIN_PREFIX } from "@/lib/artlab/bot/keychain";
 import { notifyPhase } from "@/lib/artlab/daemon/phase-notifier";
+import { resolveConceptImageModel, resolveProductionImageModel } from "@/lib/artlab/providers/image-tiers";
 
 export interface DaemonRunInput {
   workspaceRoot: string;
@@ -245,21 +246,37 @@ export async function runDaemonRunSubcommand(input: DaemonRunInput): Promise<num
     const anthropicKeyPresent = !!(await resolveAnthropicKey());
     input.log(banner({ subtitle: "Daemon running — supervising queue + telegram + cancel + crash-recovery" }));
     input.log("");
-    const brainProvider = anthropicKeyPresent
-      ? "claude (anthropic) → gemini fallback"
-      : geminiKeyPresent
-        ? "gemini (reusing image key)"
-        : "mock (no key — bible fallback only)";
-    const conceptModel = process.env.ARTLAB_CONCEPT_IMAGE_MODEL ?? "gemini-2.5-flash-image";
-    const productionModel = process.env.ARTLAB_PRODUCTION_IMAGE_MODEL ?? "nano-banana-pro-preview";
+    const oauthPresent = !!process.env.CLAUDE_CODE_OAUTH_TOKEN;
+    const explicitBrain = process.env.ARTLAB_BRAIN_PROVIDER;
+    // FREE-first brain display — mirrors resolveBrainProvider() in build-brain.ts.
+    // Gemini is the $0 default; Claude is used only when explicitly opted into.
+    const brainProvider =
+      explicitBrain === "claude" && anthropicKeyPresent
+        ? "claude (Anthropic API — PAID, opted in)"
+        : explicitBrain === "claude-oauth" && oauthPresent
+          ? "claude (Max subscription via OAuth — $0 in plan)"
+          : geminiKeyPresent
+            ? "gemini (FREE tier)"
+            : oauthPresent
+              ? "claude (Max subscription via OAuth — $0 in plan)"
+              : anthropicKeyPresent
+                ? "claude (Anthropic API — PAID)"
+                : "mock (no key — bible fallback only)";
+    const conceptModel = resolveConceptImageModel().model;
+    const prod = resolveProductionImageModel();
+    const productionTierLabel = prod.downgraded
+      ? `${prod.model} (FREE — paid override ignored; set ARTLAB_ALLOW_PAID_IMAGES=on)`
+      : prod.tier === "paid"
+        ? `${prod.model} (PAID — max quality)`
+        : `${prod.model} (FREE)`;
     input.log(box([kvList([
       { label: "workspace", value: input.workspaceRoot },
       { label: "pid", value: String(process.pid) },
       { label: "tick", value: "1000ms" },
       { label: "telegram", value: telegramTokenPresent ? "live" : "noop (no token in env or keychain)", status: telegramTokenPresent ? "ok" : "muted" },
-      { label: "concept tier", value: geminiKeyPresent ? `${conceptModel} (cheap exploration)` : "noop (no key)", status: geminiKeyPresent ? "ok" : "muted" },
-      { label: "production tier", value: geminiKeyPresent ? `${productionModel} (premium ship)` : "noop (no key)", status: geminiKeyPresent ? "ok" : "muted" },
-      { label: "brain", value: brainProvider, status: anthropicKeyPresent || geminiKeyPresent ? "ok" : "muted" },
+      { label: "concept tier", value: geminiKeyPresent ? `${conceptModel} (FREE exploration)` : "noop (no key)", status: geminiKeyPresent ? "ok" : "muted" },
+      { label: "production tier", value: geminiKeyPresent ? productionTierLabel : "noop (no key)", status: geminiKeyPresent ? "ok" : "muted" },
+      { label: "brain", value: brainProvider, status: anthropicKeyPresent || geminiKeyPresent || oauthPresent ? "ok" : "muted" },
     ])], { title: "Daemon configuration" }));
     input.log("");
     input.log(`${gold("●")} daemon online — Ctrl-C to stop`);
