@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>The Keystone — canonical idle</title>
+<style>
+  html,body{margin:0;height:100%;background:#0e0e1a;display:grid;place-items:center}
+  .keystone{width:min(64vmin,280px);height:auto;display:block}
+  /* Idle (Variant A — Breathe): the cream light swells in place, silhouette-stable.
+     Animate VALUE + scaleY from the base only — never the gold outline. */
+  .ks-light{
+    transform-box:fill-box; transform-origin:50% 100%;
+    animation:ks-breathe 7s cubic-bezier(.45,0,.55,1) infinite;
+  }
+  @keyframes ks-breathe{
+    0%,100%{opacity:.50; transform:scaleY(.90)}
+    50%    {opacity:.95; transform:scaleY(1)}
+  }
+  /* Reduced-motion: a DESIGNED still — fully-formed, gently lit (not a frozen mid-frame). */
+  @media (prefers-reduced-motion:reduce){
+    .ks-light{animation:none; opacity:.70; transform:none}
+  }
+</style></head><body>
+<svg class="keystone" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="kt kd">
+  <title id="kt">The Tower</title>
+  <desc id="kd">A gold keystone with a warm light breathing up through an ascending passage.</desc>
+  <rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+  <path fill="#C9A84C" fill-rule="evenodd" d="M43.7 25.6Q44.1 23.4 46.4 23.4L73.6 23.4Q75.9 23.4 76.3 25.6L95.9 91.2Q96.6 93.6 94.1 93.6L70.8 93.6Q70.8 73 70.6 70.4Q69.6 56.4 60 56.4Q50.4 56.4 49.4 70.4Q49.2 73 49.2 93.6L25.9 93.6Q23.4 93.6 24.1 91.2Z"/>
+  <path class="ks-light" fill="#F5F1E8" d="M60 63.4Q65.2 64 65.2 75.6L65.2 93.6L54.8 93.6L54.8 75.6Q54.8 64 60 63.4Z"/>
+</svg>
+</body></html>

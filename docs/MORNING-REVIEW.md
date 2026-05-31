@@ -20,7 +20,9 @@
   negative-space cut** to navy with a **cream `#F5F1E8` light-pillar** as the soul. **Inline SVG** (evenodd
   compound path), no filters/gradients at rest; CSS/GSAP on the light only; gradient/halo **reserved for
   the active state**. (Panel winner `negative-cut`, confirmed by my own pixels.)
-- **Motion/soul:** _pending Phase 3_
+- **Motion/soul:** The **cream light is the soul** (body stays still — the Claude/Luxo playbook). Idle =
+  a calm 7s breathe (the light swells in place). 4 states + a designed reduced-motion still. (Chosen via a
+  motion filmstrip study — `docs/research/_renders/motion-study.png`.)
 - **Where to see it:** `/lobby-pilot` · gallery `docs/glyph-autopilot-review.html` · spec `docs/MARK-SPEC.md`
 
 ---
@@ -89,6 +91,25 @@
   `#F5F1E8`.
 - **Marks saved:** `docs/research/_marks/look-keystone.svg` (resting), `look-keystone-idle.html`,
   `active-state-ref.html`. Panel data: `docs/research/_phase2.json`; all 14 renders: `docs/research/_renders/p2-*`.
+
+### Phase 3 — Characterize (motion / soul) · DONE
+- The pixel panel judges *static frames* and can't see motion, so I ran a **motion filmstrip study**
+  instead (`docs/research/_renders/motion-study.png`): the negative-cut glyph with **3 idle characters**,
+  each shown at low/mid/high animation phase so the *range* is visible.
+- **Decision — Idle = Variant A "Breathe":** the cream light swells *in place* (opacity 0.5↔0.95 + scaleY
+  0.9↔1.0 from the base), ~7s settle curve. Calmest, most premium, silhouette-stable. Rejected: **B Ascend**
+  (the glide detaches the light and leaves a void — reads "loading," too restless for an always-on idle;
+  kept as a one-shot login/arrival reveal) and **C Breathe+Halo** (richer, but the halo is held back for
+  hover/active).
+- **The soul lives in the cream LIGHT** — the gold keystone body stays institutional and still; all life is
+  in the one breathing light (the Claude-icon / Pixar-Luxo "motion in one element" playbook).
+- **4-state + reduced-motion grammar (locked in MARK-SPEC):** Idle (7s breathe) · Hover (light→full +
+  warm halo bloom + ~1px lift, 250ms) · Active/thinking (reserved gradient welling-glow + halo pulse,
+  ~1.6s loop — the mark *is* the spinner) · Notify (one soft gold ring from the apex + brief flare, 900ms
+  once) · Reduced-motion (a designed steady still at light-opacity 0.70 — not a frozen mid-frame).
+- **Saved:** `docs/research/_marks/mark-idle.html` (canonical idle), `mark-final-glyph.svg` (rest tile),
+  `mark-glyph-bare.svg` (no-ground, for in-app). Rest glyph **passes the 24px grayscale gate**
+  (`docs/research/_renders/mark-final-proof.png`).
 
 ---
 
