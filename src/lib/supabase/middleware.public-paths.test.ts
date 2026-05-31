@@ -131,6 +131,18 @@ describe("isPathPublic — exact paths", () => {
     expect(isPathPublic("/api/waitlistdrip")).toBe(false);
   });
 
+  it("matches /lobby-pilot exactly (additive identity A/B surface)", () => {
+    expect(isPathPublic("/lobby-pilot")).toBe(true);
+  });
+
+  it("rejects /lobby-pilotfake (exact match, no prefix-leak)", () => {
+    expect(isPathPublic("/lobby-pilotfake")).toBe(false);
+  });
+
+  it("rejects nested /lobby-pilot/extra (exact, no sub-routes)", () => {
+    expect(isPathPublic("/lobby-pilot/extra")).toBe(false);
+  });
+
   it("matches /opengraph-image exactly", () => {
     expect(isPathPublic("/opengraph-image")).toBe(true);
   });

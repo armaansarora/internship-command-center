@@ -1,0 +1,86 @@
+/* FloorMark — motion grammar for The Tower's identity mark (The Keystone).
+ *
+ * The gold body NEVER moves; all life is in the cream "soul" light. Animation
+ * is value/scale only — never the outline — so the 24px silhouette stays stable.
+ * See docs/MARK-SPEC.md §3. Reactive notify state is GSAP (FloorMark.tsx).
+ */
+
+.fm {
+  display: block;
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The soul light. transform-box:fill-box so scaleY pivots on the light's own box. */
+.fm-light {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+/* The active-state welling glow — hidden until hover/active. */
+.fm-halo {
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+/* ── Idle: a calm 7s breath (the light swells in place) ───────────────── */
+.fm[data-state="idle"] .fm-light {
+  animation: fm-breathe 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes fm-breathe {
+  0%, 100% { opacity: 0.5; transform: scaleY(0.9); }
+  50%      { opacity: 0.95; transform: scaleY(1); }
+}
+
+/* ── Hover: light to full, warm halo bloom, ~1px lift ─────────────────── */
+.fm:hover {
+  transform: translateY(-1px);
+}
+.fm:hover .fm-light {
+  animation: none;
+  opacity: 0.98;
+  transform: scaleY(1);
+}
+.fm:hover .fm-halo {
+  opacity: 0.5;
+}
+
+/* ── Active / thinking: the mark IS the spinner (light + halo pulse) ──── */
+.fm[data-state="active"] .fm-light {
+  animation: fm-pulse 1.6s ease-in-out infinite;
+}
+.fm[data-state="active"] .fm-halo {
+  opacity: 0.3;
+  animation: fm-halo-pulse 1.6s ease-in-out infinite;
+}
+@keyframes fm-pulse {
+  0%, 100% { opacity: 0.65; transform: scaleY(0.96); }
+  50%      { opacity: 1; transform: scaleY(1); }
+}
+@keyframes fm-halo-pulse {
+  0%, 100% { opacity: 0.15; }
+  50%      { opacity: 0.45; }
+}
+
+/* ── Reduced motion: a DESIGNED still, not a frozen mid-frame ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  .fm,
+  .fm-light,
+  .fm-halo {
+    animation: none !important;
+    transition: none !important;
+  }
+  .fm-light {
+    opacity: 0.7;
+    transform: none;
+  }
+  .fm:hover {
+    transform: none;
+  }
+  .fm:hover .fm-light {
+    opacity: 0.88;
+  }
+  .fm:hover .fm-halo,
+  .fm[data-state="active"] .fm-halo {
+    opacity: 0.28;
+  }
+}

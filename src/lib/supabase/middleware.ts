@@ -58,6 +58,10 @@ function requireEnv(name: string): string {
  */
 const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
   { path: "/lobby", prefix: true },
+  // Additive identity A/B surface — renders the candidate mark without a session
+  // so it can be reviewed. Exact match; does NOT touch the live /lobby. (Does not
+  // match the /lobby prefix because "/lobby-pilot" is not under a "/" boundary.)
+  { path: "/lobby-pilot" },
   { path: "/terms" },
   { path: "/privacy" },
   { path: "/pricing" },
