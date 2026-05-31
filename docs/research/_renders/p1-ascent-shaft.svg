@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="The Ascent">
+<defs>
+<linearGradient id="g" x1="60" y1="16" x2="60" y2="104" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#DCC278"/>
+<stop offset="1" stop-color="#B5943A"/>
+</linearGradient>
+</defs>
+<rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+<path fill="url(#g)" fill-rule="evenodd" d="M54 16.5h12a6 6 0 0 1 4.4 1.9L80.7 30a8 8 0 0 1 2.1 5.4V95a8 8 0 0 1-8 8H45.2a8 8 0 0 1-8-8V35.4A8 8 0 0 1 39.3 30L49.6 18.4A6 6 0 0 1 54 16.5Zm6 16.5a7.5 7.5 0 0 0-7.5 7.5v40a7.5 7.5 0 0 0 15 0V40.5A7.5 7.5 0 0 0 60 33Z"/>
+<rect x="54.8" y="52" width="10.4" height="25" rx="5.2" fill="#F4E7BA"/>
+</svg>

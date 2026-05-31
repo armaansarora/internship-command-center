@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="The Tower monogram — a T built as a tower with a lit elevator window">
+<defs>
+<linearGradient id="t-g" x1="60" y1="22" x2="60" y2="98" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#D8BC6A"/>
+<stop offset="1" stop-color="#B5942F"/>
+</linearGradient>
+</defs>
+<rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+<path fill="url(#t-g)" fill-rule="evenodd" d="M33 27 Q33 24 36 24 L84 24 Q87 24 87 27 L87 37.5 Q87 40.5 84 40.5 L67 40.5 L67 91 Q67 94 64 94 L56 94 Q53 94 53 91 L53 40.5 L36 40.5 Q33 40.5 33 37.5 Z M56.5 52 Q56.5 50.5 58 50.5 L62 50.5 Q63.5 50.5 63.5 52 L63.5 84 Q63.5 85.5 62 85.5 L58 85.5 Q56.5 85.5 56.5 84 Z"/>
+<rect x="57.5" y="56" width="5" height="7" rx="1" fill="#F2E2A8"/>
+</svg>

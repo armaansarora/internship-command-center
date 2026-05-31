@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="The Lodestar">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D4B86A"/>
+      <stop offset="1" stop-color="#BE9D44"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+  <!-- spire: slender tapered shaft -->
+  <path d="M56.4 92 L60 47 L63.6 92 Z" fill="url(#g)"/>
+  <!-- base plinth -->
+  <rect x="46" y="92" width="28" height="5" rx="2.5" fill="url(#g)"/>
+  <!-- four-point lodestar glint at apex, optical overshoot above tip -->
+  <path d="M60 12
+           C61.2 26 62.6 31.6 72 33.2
+           C62.6 34.8 61.2 40.4 60 54
+           C58.8 40.4 57.4 34.8 48 33.2
+           C57.4 31.6 58.8 26 60 12 Z" fill="url(#g)"/>
+</svg>

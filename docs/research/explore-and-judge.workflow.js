@@ -22,7 +22,9 @@ export const meta = {
 
 async function safe(fn){ try { return await fn(); } catch(e){ log('agent skipped (continuing): ' + (e && e.message ? e.message : String(e))); return null; } }
 
-const A = (args && typeof args === 'object') ? args : {};
+let A = args;
+if (typeof A === 'string') { try { A = JSON.parse(A); } catch (_e) { A = {}; } }
+A = (A && typeof A === 'object') ? A : {};
 const CTX = A.context || 'The Tower — a premium internship command-center web app styled as a luxury skyscraper. Navy #1A1A2E + gold #C9A84C; Playfair/Satoshi/JetBrains Mono.';
 const CRAFT = A.craftSpec || 'Produce the mark as a clean, premium, gold-on-navy SVG (viewBox 0 0 120 120) plus a calm self-contained animated idle.';
 const ITEMS = Array.isArray(A.items) ? A.items.filter((i) => i && i.key) : [];

@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;background:#0f0f1a;display:grid;place-items:center}
+.k{width:240px;height:240px}
+@keyframes breathe{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes rise{0%{transform:translateY(3px);opacity:.25}45%{opacity:.85}100%{transform:translateY(-9px);opacity:0}}
+.glow{animation:breathe 9s ease-in-out infinite}
+.spark{animation:rise 11s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.glow,.spark{animation:none}.glow{opacity:.8}.spark{opacity:0}}
+</style></head><body>
+<svg class="k" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Keysmith">
+<defs>
+<linearGradient id="g" x1="60" y1="22" x2="60" y2="100" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#D6B85F"/><stop offset="1" stop-color="#C9A84C"/></linearGradient>
+<radialGradient id="gl" cx="60" cy="47" r="16" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#F4E3A0"/><stop offset="1" stop-color="#F4E3A0" stop-opacity="0"/></radialGradient>
+<clipPath id="hole"><path d="M60 36.8C54 36.8 49.2 41.6 49.2 47.5C49.2 52.2 52.3 56.2 56.6 57.6C57.4 57.9 57.9 58.6 57.7 59.4L54.4 76.8C54.1 78.4 55.3 79.8 56.9 79.8L63.1 79.8C64.7 79.8 65.9 78.4 65.6 76.8L62.3 59.4C62.1 58.6 62.6 57.9 63.4 57.6C67.7 56.2 70.8 52.2 70.8 47.5C70.8 41.6 66 36.8 60 36.8Z"/></clipPath>
+</defs>
+<rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+<g clip-path="url(#hole)">
+<circle class="glow" cx="60" cy="47" r="15" fill="url(#gl)"/>
+<rect class="spark" x="58.5" y="60" width="3" height="14" rx="1.5" fill="#F4E3A0"/></g>
+<path fill="url(#g)" fill-rule="evenodd" d="M60 23C73.3 23 84 33.7 84 47C84 56.8 78.1 65.2 69.6 69L73.6 91.4C74.1 94.2 72 96.8 69.2 96.8L50.8 96.8C48 96.8 45.9 94.2 46.4 91.4L50.4 69C41.9 65.2 36 56.8 36 47C36 33.7 46.7 23 60 23ZM60 36.8C54 36.8 49.2 41.6 49.2 47.5C49.2 52.2 52.3 56.2 56.6 57.6C57.4 57.9 57.9 58.6 57.7 59.4L54.4 76.8C54.1 78.4 55.3 79.8 56.9 79.8L63.1 79.8C64.7 79.8 65.9 78.4 65.6 76.8L62.3 59.4C62.1 58.6 62.6 57.9 63.4 57.6C67.7 56.2 70.8 52.2 70.8 47.5C70.8 41.6 66 36.8 60 36.8Z"/>
+</svg></body></html>

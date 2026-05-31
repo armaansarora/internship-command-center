@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  html,body{margin:0;height:100%;background:#0e0e1a;display:grid;place-items:center}
+  .ks{width:min(60vmin,260px);height:min(60vmin,260px)}
+  .glow{transform-origin:60px 66px;animation:breathe 9s ease-in-out infinite}
+  .cap{animation:lift 9s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.26;transform:translateY(2px) scale(.92)}50%{opacity:.82;transform:translateY(-2px) scale(1)}}
+  @keyframes lift{0%,100%{opacity:.95}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.glow{animation:none;opacity:.5}.cap{animation:none;opacity:1}}
+</style></head><body>
+<svg class="ks" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Keystone">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D8B964"/><stop offset="1" stop-color="#C2A047"/></linearGradient>
+    <radialGradient id="lite" cx="50%" cy="58%" r="55%"><stop offset="0" stop-color="#FBE9B0"/><stop offset="55%" stop-color="#E7C766"/><stop offset="100%" stop-color="#E7C766" stop-opacity="0"/></radialGradient>
+    <clipPath id="ap"><path d="M60 49.5 Q58.5 49.5 57.7 50.8 L47.7 67.8 Q47 69 47 70.4 L47 78.5 Q47 80 48.5 80 L71.5 80 Q73 80 73 78.5 L73 70.4 Q73 69 72.3 67.8 L62.3 50.8 Q61.5 49.5 60 49.5 Z"/></clipPath>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+  <g clip-path="url(#ap)"><ellipse class="glow" cx="60" cy="68" rx="15" ry="20" fill="url(#lite)"/></g>
+  <path class="cap" fill="url(#g)" fill-rule="evenodd" d="M47.4 30.4 Q47.7 29 49.2 29 L70.8 29 Q72.3 29 72.6 30.4 L85.8 81.8 Q86.5 84.6 83.6 84.6 L36.4 84.6 Q33.5 84.6 34.2 81.8 L47.4 30.4 Z M60 49.5 Q58.5 49.5 57.7 50.8 L47.7 67.8 Q47 69 47 70.4 L47 78.5 Q47 80 48.5 80 L71.5 80 Q73 80 73 78.5 L73 70.4 Q73 69 72.3 67.8 L62.3 50.8 Q61.5 49.5 60 49.5 Z"/>
+</svg>
+</body></html>
