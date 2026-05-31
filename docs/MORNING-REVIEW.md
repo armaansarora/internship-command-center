@@ -111,6 +111,14 @@
   `mark-glyph-bare.svg` (no-ground, for in-app). Rest glyph **passes the 24px grayscale gate**
   (`docs/research/_renders/mark-final-proof.png`).
 
+### Phase 4 — Lock the spec · DONE
+- Wrote **`docs/MARK-SPEC.md`** — the locked build contract: shape DNA with the **exact path data**,
+  palette tokens (incl. the 7:1 / 2.1:1 luminance rules), frame rules (navy tile vs bare glyph; **no seal
+  ring**), the locked **tech** (inline SVG, evenodd path, no filters at rest, gradient/halo = active only),
+  the **4-state + reduced-motion** grammar with motion tokens, the **floor token contract**, the governed
+  **variant system** (gold-on-navy / navy-on-cream / 1-color / reduced-motion still), and the **24px
+  grayscale ship-gate** with a repeatable test command. Guardrails (locked do-nots) included.
+
 ---
 
 ## Degrades / skips / notes
