@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Keystone idle</title>
+<style>html,body{margin:0;height:100%;background:#0d0d18;display:grid;place-items:center}
+.ks{display:block;width:160px;height:160px}
+.core{animation:breathe 8s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.6;transform:scaleY(.94)}50%{opacity:1;transform:scaleY(1.03)}}
+@media (prefers-reduced-motion:reduce){.core{animation:none;opacity:.9;transform:none}}</style></head>
+<body>
+<div role="img" aria-label="The Tower keystone, warm light breathing up through its passage">
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="ks">
+<defs>
+<linearGradient id="kHolo" x1="26" y1="34" x2="94" y2="86" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#ff5fc8"/><stop offset=".22" stop-color="#a06bff"/>
+<stop offset=".44" stop-color="#4fd0ff"/><stop offset=".62" stop-color="#57f5b0"/>
+<stop offset=".8" stop-color="#ffe06a"/><stop offset="1" stop-color="#ff7a59"/>
+</linearGradient>
+<linearGradient id="kSheen" x1="38" y1="38" x2="80" y2="84" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+<stop offset="1" stop-color="#fff" stop-opacity=".18"/>
+</linearGradient>
+<radialGradient id="kCore" cx=".5" cy=".82" r=".55">
+<stop offset="0" stop-color="#fff6e0"/><stop offset=".5" stop-color="#ffd9f2"/>
+<stop offset="1" stop-color="#ffd9f2" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+<path d="M41.4 40 Q40.8 37.6 43.2 37.6 L76.8 37.6 Q79.2 37.6 78.6 40 L90.6 82 Q91.3 84.4 88.8 84.4 L31.2 84.4 Q28.7 84.4 29.4 82 Z M60 60 Q51.5 60 48.4 82.4 Q48.1 84.4 50.1 84.4 L69.9 84.4 Q71.9 84.4 71.6 82.4 Q68.5 60 60 60 Z" fill-rule="evenodd" fill="url(#kHolo)"/>
+<path d="M41.4 40 Q40.8 37.6 43.2 37.6 L76.8 37.6 Q79.2 37.6 78.6 40 L90.6 82 Q91.3 84.4 88.8 84.4 L31.2 84.4 Q28.7 84.4 29.4 82 Z M60 60 Q51.5 60 48.4 82.4 Q48.1 84.4 50.1 84.4 L69.9 84.4 Q71.9 84.4 71.6 82.4 Q68.5 60 60 60 Z" fill-rule="evenodd" fill="url(#kSheen)"/>
+<g style="transform-box:fill-box;transform-origin:60px 84px">
+<path class="core" d="M60 63 Q53 63 50.4 82.4 Q50.1 84.4 52.1 84.4 L67.9 84.4 Q69.9 84.4 69.6 82.4 Q67 63 60 63 Z" fill="url(#kCore)"/>
+</g>
+</svg></div>
+</body></html>

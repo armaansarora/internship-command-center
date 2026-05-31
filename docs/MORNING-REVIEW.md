@@ -16,7 +16,10 @@
 - **Symbol:** **The Keystone** — an architectural capstone with an ascending lit passage (the cap-stone
   of the climb; "getting in" in the negative space). *I overrode the panel's raw winner `keyhole-tower`
   on rootedness/ownability grounds — see Phase 1.*
-- **Look + tech:** _pending Phase 2_
+- **Look + tech:** Flat geometric **Art-Deco**, solid **matte gold** `#C9A84C`; the doorway is a **true
+  negative-space cut** to navy with a **cream `#F5F1E8` light-pillar** as the soul. **Inline SVG** (evenodd
+  compound path), no filters/gradients at rest; CSS/GSAP on the light only; gradient/halo **reserved for
+  the active state**. (Panel winner `negative-cut`, confirmed by my own pixels.)
 - **Motion/soul:** _pending Phase 3_
 - **Where to see it:** `/lobby-pilot` · gallery `docs/glyph-autopilot-review.html` · spec `docs/MARK-SPEC.md`
 
@@ -64,6 +67,28 @@
   override section at the bottom of this file.
 - **Base mark saved:** `docs/research/_marks/symbol-keystone.svg`. Full panel data: `docs/research/_phase1.json`.
   All 16 rendered candidates: `docs/research/_renders/p1-*.svg`.
+
+### Phase 2 — Choose LOOK + TECH · DONE
+- Ran `explore-and-judge` on **14 treatments** of The Keystone (silhouette held constant; art-style ×
+  tech varied), including research-predicted "cheap on navy" controls.
+- **Panel winner (confirmed by my own pixels): `negative-cut` (8.78)** — solid matte-gold Art-Deco
+  keystone with the doorway as a **TRUE negative-space cut to navy** + a **cream `#F5F1E8` light-pillar**
+  rising in the passage. Top silhouette-safety (9.0); #1 on all three lenses; the "getting in" is the cut
+  itself, so it survives bare silhouette where every fill-light rival collapses to a featureless trapezoid.
+- **Alternates:** `line-fill-hybrid` (8.2, safest favicon-grade — kept as the small-size fallback),
+  `flat-vgrad` (7.9 — its warm welling glow is adopted as the **active/hover state**), `flat-matte`
+  (7.7 — rejected: no soul-light and the dark counter misreads as the letter **"A"**).
+- **Controls behaved exactly as the research predicted** (pixels confirm): `holographic` 4.7 (gamer-RGB/NFT),
+  `glass` 4.4 (vanishes on navy), `soft-emboss` 4.3 (worst small-size), `metallic-ramp` 5.4 (tarnished/Web3).
+- **TECH (unanimous across lenses + research):** inline SVG, single **evenodd** compound gold path + one
+  cream path for the soul, `role="img"` + `<title>/<desc>`, themeable via fill tokens; **NO filters/gradients
+  at rest** (they were the 24px killer on soft-emboss/engraved); reserve gradient + a breathing radial halo
+  (CSS/GSAP transform+opacity, reduced-motion fallback, zero network) **strictly for the ACTIVE state**.
+- **Ship refinements to apply in Phase 5** (director's synthesis): sharpen the Deco apex, tighten the
+  squat taper toward a stricter narrows-upward keystone with optical top overshoot, warm the cream to
+  `#F5F1E8`.
+- **Marks saved:** `docs/research/_marks/look-keystone.svg` (resting), `look-keystone-idle.html`,
+  `active-state-ref.html`. Panel data: `docs/research/_phase2.json`; all 14 renders: `docs/research/_renders/p2-*`.
 
 ---
 

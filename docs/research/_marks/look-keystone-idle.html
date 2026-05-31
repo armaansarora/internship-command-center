@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Keystone — Negative-Space Cut</title><style>
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(140% 120% at 50% 0,#23233f,#14142a 50%,#0c0c1a);display:grid;place-items:center;min-height:100vh}
+  .mark{width:min(56vw,360px);height:auto;display:block}
+  .light{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 8s ease-in-out infinite}
+  .glow{transform-box:fill-box;transform-origin:50% 100%;animation:glow 8s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.62;transform:scaleY(.93)}50%{opacity:1;transform:scaleY(1.04)}}
+  @keyframes glow{0%,100%{opacity:.16}50%{opacity:.46}}
+  @media (prefers-reduced-motion:reduce){
+    .light{animation:none;opacity:.9;transform:none}
+    .glow{animation:none;opacity:.3}
+  }
+</style></head><body>
+<svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="The Tower — keystone with ascending lit passage, light gently breathing">
+  <title>The Tower</title>
+  <defs>
+    <linearGradient id="ks-light" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#F5F1E8" stop-opacity=".35"/>
+      <stop offset=".55" stop-color="#F5F1E8" stop-opacity=".92"/>
+      <stop offset="1" stop-color="#FBE9B8"/>
+    </linearGradient>
+    <radialGradient id="ks-glow" cx="50%" cy="74%" r="34%">
+      <stop offset="0" stop-color="#FBE9B8"/>
+      <stop offset="1" stop-color="#FBE9B8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="120" height="120" rx="26" fill="#1A1A2E"/>
+  <ellipse class="glow" cx="60" cy="86" rx="26" ry="20" fill="url(#ks-glow)"/>
+  <path fill="#C9A84C" fill-rule="evenodd" d="M43.7 25.6Q44.1 23.4 46.4 23.4L73.6 23.4Q75.9 23.4 76.3 25.6L95.9 91.2Q96.6 93.6 94.1 93.6L70.8 93.6Q70.8 73 70.6 70.4Q69.6 56.4 60 56.4Q50.4 56.4 49.4 70.4Q49.2 73 49.2 93.6L25.9 93.6Q23.4 93.6 24.1 91.2Z"/>
+  <path class="light" fill="url(#ks-light)" d="M60 63.4Q65.2 64 65.2 75.6L65.2 93.6L54.8 93.6L54.8 75.6Q54.8 64 60 63.4Z"/>
+</svg>
+</body></html>
