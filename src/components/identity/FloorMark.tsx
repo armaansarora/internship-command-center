@@ -9,15 +9,19 @@ import { getFloor, type FloorId } from "@/lib/config/floors.config";
 import "@/styles/floor-mark.css";
 
 /**
- * The LOCKED keystone geometry (docs/MARK-SPEC.md §1.1). The gold body is one
- * evenodd compound path (the doorway is a TRUE cut); the light is one path.
+ * The LOCKED mark geometry (docs/MARK-SPEC.md §1.1): a vertical Art-Deco tower
+ * with a keystone cornice cap and a tall lit archway. The gold body is one
+ * contour (the archway is a TRUE cut up from the base); the light is one path.
  * Exported so tests, the favicon pipeline, and the gallery share one source.
  */
 export const KEYSTONE_VIEWBOX = "0 0 120 120";
+// A vertical tower with a squared Art-Deco cornice cap and a tall lit archway.
+// Single contour (the archway is a concave notch in the base) — reads as an
+// architectural tower at 24px, never as a letter.
 export const KEYSTONE_BODY_PATH =
-  "M43.7 25.6Q44.1 23.4 46.4 23.4L73.6 23.4Q75.9 23.4 76.3 25.6L95.9 91.2Q96.6 93.6 94.1 93.6L70.8 93.6Q70.8 73 70.6 70.4Q69.6 56.4 60 56.4Q50.4 56.4 49.4 70.4Q49.2 73 49.2 93.6L25.9 93.6Q23.4 93.6 24.1 91.2Z";
+  "M45 96 L45 39 L40 39 L40 30 Q40 28.5 41.5 28.5 L78.5 28.5 Q80 28.5 80 30 L80 39 L75 39 L75 96 L66.5 96 L66.5 67 Q66.5 57 60 57 Q53.5 57 53.5 67 L53.5 96 Z";
 export const KEYSTONE_LIGHT_PATH =
-  "M60 63.4Q65.2 64 65.2 75.6L65.2 93.6L54.8 93.6L54.8 75.6Q54.8 64 60 63.4Z";
+  "M60 60 Q65 60.5 65 69 L65 96 L55 96 L55 69 Q55 60.5 60 60 Z";
 
 const MARK_NAVY = "#1A1A2E";
 const MARK_GOLD = "#C9A84C";
@@ -42,9 +46,9 @@ export interface FloorMarkProps {
 }
 
 /**
- * FloorMark — The Tower's identity mark: a matte-gold Art-Deco keystone with an
- * ascending passage cut as true negative space and a cream "soul" light that
- * breathes. One locked silhouette; floors vary only the light's accent.
+ * FloorMark — The Tower's identity mark: a matte-gold Art-Deco tower with a
+ * keystone cornice and a lit archway cut as true negative space, and a cream
+ * "soul" light that breathes. One locked silhouette; floors vary only the light's accent.
  *
  * Motion (docs/MARK-SPEC.md §3): idle / hover / active live in CSS
  * (`@/styles/floor-mark.css`); the one-shot **notify** ring is GSAP, routed
@@ -122,7 +126,7 @@ export function FloorMark({
     >
       <title id={titleId}>{label}</title>
       <desc id={descId}>
-        A gold keystone — the cap-stone of the climb — with a lit passage you enter.
+        A gold Art-Deco tower with a keystone cornice and a lit archway you enter.
       </desc>
       <defs>
         <radialGradient id={glowId} cx="60" cy="80" r="20" gradientUnits="userSpaceOnUse">
@@ -144,7 +148,7 @@ export function FloorMark({
         ref={ringRef}
         className="fm-ring"
         cx="60"
-        cy="26"
+        cy="28"
         r="4"
         fill="none"
         stroke={MARK_GOLD}

@@ -8,13 +8,14 @@ trail + how to override any pick: `docs/MORNING-REVIEW.md`. Research foundation:
 
 ## 0. The mark, in one line
 
-**The Keystone** — a flat, matte-gold Art-Deco **capstone** (the wedge that locks an arch; the cap-stone
-of the internship climb) with an **ascending passage cut as true negative space**, and a **cream light**
-standing in that passage. The gold body is still and institutional; **all life is in the light** — a calm
-breath that says *the floor above is lit, and the way in is open*.
+**The Keystone Tower** — a flat, matte-gold **Art-Deco tower** with a squared **keystone cornice cap**
+and a tall **arched doorway cut as true negative space**, with a **cream light** standing in the archway.
+The gold body is still and institutional; **all life is in the light** — a calm breath that says *the floor
+above is lit, and the way in is open*. It is, literally, **the Tower** — the building you enter.
 
-Why this mark (rooted in the product): the climb to a first offer (capstone of the ascent), **getting *in***
-(the passage / threshold), guidance and arrival (the light above). It deliberately occupies the **cool,
+Why this mark (rooted in the product): the Tower itself (the sacred building metaphor), the climb to a
+first offer (the vertical ascent), **getting *in*** (the lit archway / threshold), guidance and arrival
+(the light above). It deliberately occupies the **cool,
 architectural, weight-bearing** whitespace — the inverse of the warm AI-spark monoculture and the opposite
 of the career-category handshake/ladder/arrow/star clichés.
 
@@ -24,22 +25,27 @@ of the career-category handshake/ladder/arrow/star clichés.
 
 ### 1.1 Shape DNA — the exact geometry
 - **Canvas:** `viewBox="0 0 120 120"`. The glyph is built and centered on this grid.
-- **Three elements, in z-order:** (1) optional navy ground tile, (2) the gold keystone body
-  (single `fill-rule="evenodd"` compound path — the doorway is the *inner* contour, a TRUE cut), (3) the
-  cream light-pillar standing in the passage.
-- **Keystone body** — narrows **upward** (wider base, narrower top), flat top, gently rounded corners,
-  optical overshoot at the apex. The passage is a pointed arch rising to ~y=56. **Locked path:**
+- **Three elements, in z-order:** (1) optional navy ground tile, (2) the gold tower body
+  (single contour — the archway is a concave notch in the base, a TRUE cut to the ground), (3) the
+  cream light standing in the archway.
+- **Tower body** — a **vertical** shaft (taller than wide → reads as a tower) topped by a **squared
+  Art-Deco cornice cap** (the "keystone" crown — wider than the shaft, flat top, crisp corners), with a
+  tall **arched doorway** cut up from the base. Verticality + the cornice are what make it read as an
+  architectural tower and never as a letter. **Locked path:**
   ```
-  M43.7 25.6Q44.1 23.4 46.4 23.4L73.6 23.4Q75.9 23.4 76.3 25.6L95.9 91.2Q96.6 93.6 94.1 93.6
-  L70.8 93.6Q70.8 73 70.6 70.4Q69.6 56.4 60 56.4Q50.4 56.4 49.4 70.4Q49.2 73 49.2 93.6
-  L25.9 93.6Q23.4 93.6 24.1 91.2Z
+  M44 96 L44 44 L38 44 L38 33 Q38 31.5 39.5 31.5 L80.5 31.5 Q82 31.5 82 33 L82 44 L76 44
+  L76 96 L66 96 L66 72 Q66 62 60 62 Q54 62 54 72 L54 96 Z
   ```
-- **Cream light-pillar** — a vertical, round-topped bar standing in the passage from the base. **Locked path:**
+- **Cream light** — a vertical, round-topped bar standing in the archway from the base. **Locked path:**
   ```
-  M60 63.4Q65.2 64 65.2 75.6L65.2 93.6L54.8 93.6L54.8 75.6Q54.8 64 60 63.4Z
+  M60 65 Q64.5 65.5 64.5 74 L64.5 96 L55.5 96 L55.5 74 Q55.5 65.5 60 65 Z
   ```
-- **The silhouette is sacred.** The recognizable outline = capstone + arched void + central pillar. Animation
-  may **never** alter this outline (see §3). The doorway must remain a clean cut to the ground at every size.
+- **The silhouette is sacred.** The recognizable outline = cornice cap + vertical shaft + arched void +
+  central light. Animation may **never** alter this outline (see §3). The archway must remain a clean cut
+  to the ground at every size.
+- **History:** an earlier upward-narrowing "keystone wedge" geometry was rejected after an adversarial
+  pixel review found its bare silhouette read as the capital letter **"A"** (wrong initial; a ship-gate
+  failure). The locked geometry above is the correction — a true vertical tower.
 
 ### 1.2 Palette tokens (luminance is the law)
 | Token | Hex | Role | Notes |
@@ -47,7 +53,7 @@ of the career-category handshake/ladder/arrow/star clichés.
 | `--mark-navy` | `#1A1A2E` | ground tile / the void in the cut | the Tower dark |
 | `--mark-gold` | `#C9A84C` | keystone body (matte, solid) | gold-on-navy ≈ **7:1** (passes WCAG) |
 | `--mark-light`| `#F5F1E8` | the light-pillar (the soul) | warm cream |
-| `--mark-light-rest` | `#F5F1E8` @ **0.70** | resting light opacity | designed reduced-motion still |
+| `--mark-light-rest` | `#F5F1E8` @ **0.85** | resting light opacity | designed reduced-motion still (kept high so cream stays warm) |
 | `--mark-glow` | `#FBE9B0` | **active-state only** warm welling glow | never used at rest |
 - **Gold is matte and solid at rest** — no gradient, no bevel, no filter (those collapse at 24px). A single
   subtle vertical gold gradient (`#D8B964 → #C2A047`) is *permitted* at hero size only; the canonical mark
@@ -95,11 +101,11 @@ curves `{ settle: cubic-bezier(.45,0,.55,1) (idle), out: cubic-bezier(.22,1,.36,
 
 | State | What happens | Timing |
 |---|---|---|
-| **Idle** *(always-on)* | light **breathes** in place: `opacity .50↔.95`, `transform: scaleY(.90↔1)` from the base | 7s `settle`, infinite |
+| **Idle** *(always-on)* | light **breathes** in place: `opacity .62↔1`, `transform: scaleY(.92↔1)` from the base (floor kept high so the cream stays warm) | 7s `settle`, infinite |
 | **Hover** | light → full (`.95`); a faint warm **halo** blooms behind the doorway; whole mark lifts ~1px; gold warms ≤5% | 250ms `out` |
 | **Active / thinking** | reserved **gradient welling-glow** + halo pulse up the passage — the mark *is* the spinner | ~1.6s loop |
 | **Notify** | one soft **gold ring** emanates from the apex + a brief light flare, then settles to idle | 900ms once |
-| **Reduced-motion** | no animation; light rests at **opacity 0.70** — a fully-formed, designed still | — |
+| **Reduced-motion** | no animation; light rests at **opacity 0.85** — a fully-formed, designed still | — |
 
 ---
 

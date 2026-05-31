@@ -118,8 +118,8 @@ export function LobbyPilotClient(): JSX.Element {
               The Keystone
             </h1>
             <p style={{ ...sub, maxWidth: 540 }}>
-              The cap-stone of the climb — a matte-gold Art-Deco keystone with a lit passage you
-              enter, and one warm light that breathes. Live behind <code style={{ color: GOLD, fontFamily: mono }}>/lobby-pilot</code>{" "}
+              A matte-gold Art-Deco tower crowned by a keystone cornice, with a lit archway you enter
+              and one warm light that breathes. Live behind <code style={{ color: GOLD, fontFamily: mono }}>/lobby-pilot</code>{" "}
               only; the real lobby is untouched.
             </p>
           </div>

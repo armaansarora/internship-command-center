@@ -27,8 +27,9 @@
   animation: fm-breathe 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 @keyframes fm-breathe {
-  0%, 100% { opacity: 0.5; transform: scaleY(0.9); }
-  50%      { opacity: 0.95; transform: scaleY(1); }
+  /* Floor kept high so the cream light stays WARM (low opacity grays out on navy). */
+  0%, 100% { opacity: 0.62; transform: scaleY(0.92); }
+  50%      { opacity: 1; transform: scaleY(1); }
 }
 
 /* ── Hover: light to full, warm halo bloom, ~1px lift ─────────────────── */
@@ -53,7 +54,7 @@
   animation: fm-halo-pulse 1.6s ease-in-out infinite;
 }
 @keyframes fm-pulse {
-  0%, 100% { opacity: 0.65; transform: scaleY(0.96); }
+  0%, 100% { opacity: 0.72; transform: scaleY(0.97); }
   50%      { opacity: 1; transform: scaleY(1); }
 }
 @keyframes fm-halo-pulse {
@@ -70,14 +71,14 @@
     transition: none !important;
   }
   .fm-light {
-    opacity: 0.7;
+    opacity: 0.85;
     transform: none;
   }
   .fm:hover {
     transform: none;
   }
   .fm:hover .fm-light {
-    opacity: 0.88;
+    opacity: 0.95;
   }
   .fm:hover .fm-halo,
   .fm[data-state="active"] .fm-halo {

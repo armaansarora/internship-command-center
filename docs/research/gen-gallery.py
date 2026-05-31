@@ -58,10 +58,10 @@ def cards(phase, prefix, chosen_key, chosen_note, panel_pick_note=None):
 
 # Animated winner SVG (the canonical idle), inlined.
 WINNER_SVG = '''
-<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Tower keystone">
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Tower">
   <rect width="120" height="120" rx="26" fill="#1A1A2E"/>
-  <path fill="#C9A84C" fill-rule="evenodd" d="M43.7 25.6Q44.1 23.4 46.4 23.4L73.6 23.4Q75.9 23.4 76.3 25.6L95.9 91.2Q96.6 93.6 94.1 93.6L70.8 93.6Q70.8 73 70.6 70.4Q69.6 56.4 60 56.4Q50.4 56.4 49.4 70.4Q49.2 73 49.2 93.6L25.9 93.6Q23.4 93.6 24.1 91.2Z"/>
-  <path class="soul" fill="#F5F1E8" d="M60 63.4Q65.2 64 65.2 75.6L65.2 93.6L54.8 93.6L54.8 75.6Q54.8 64 60 63.4Z"/>
+  <path fill="#C9A84C" fill-rule="evenodd" d="M45 96 L45 39 L40 39 L40 30 Q40 28.5 41.5 28.5 L78.5 28.5 Q80 28.5 80 30 L80 39 L75 39 L75 96 L66.5 96 L66.5 67 Q66.5 57 60 57 Q53.5 57 53.5 67 L53.5 96 Z"/>
+  <path class="soul" fill="#F5F1E8" d="M60 60 Q65 60.5 65 69 L65 96 L55 96 L55 69 Q55 60.5 60 60 Z"/>
 </svg>'''
 
 p1_cards = cards(p1, "p1", "keystone", "")
@@ -85,8 +85,8 @@ DOC = f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
   .hero{{display:flex;gap:40px;align-items:center;flex-wrap:wrap}}
   .hero .mk{{width:160px;height:160px}}
   .soul{{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 7s cubic-bezier(.45,0,.55,1) infinite}}
-  @keyframes breathe{{0%,100%{{opacity:.5;transform:scaleY(.9)}}50%{{opacity:.95;transform:scaleY(1)}}}}
-  @media (prefers-reduced-motion:reduce){{.soul{{animation:none;opacity:.7}}}}
+  @keyframes breathe{{0%,100%{{opacity:.62;transform:scaleY(.92)}}50%{{opacity:1;transform:scaleY(1)}}}}
+  @media (prefers-reduced-motion:reduce){{.soul{{animation:none;opacity:.85}}}}
   .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-top:22px}}
   .card{{background:rgba(28,28,48,.5);border:1px solid rgba(201,168,76,.16);border-radius:16px;padding:16px;margin:0;
     display:flex;flex-direction:column;gap:10px}}
@@ -114,10 +114,11 @@ DOC = f'''<!doctype html><html lang="en"><head><meta charset="utf-8">
     <div class="mk">{WINNER_SVG}</div>
     <div>
       <p class="eyebrow">The Tower · Identity Autopilot · Review</p>
-      <h1>The Keystone</h1>
-      <p class="sub">The cap-stone of the internship climb — a matte-gold Art-Deco keystone with a lit
-      passage you enter, and one cream light that breathes (the soul). Chosen overnight by research →
-      three pixel-judged adversarial panels → a motion study. Live behind
+      <h1>The Keystone Tower</h1>
+      <p class="sub">A matte-gold Art-Deco tower crowned by a keystone cornice, with a lit archway you
+      enter and one cream light that breathes (the soul). Chosen overnight by research →
+      three pixel-judged adversarial panels → a motion study, then refined after an adversarial design
+      review killed an "A"-letterform misread. Live behind
       <a href="../src/app/lobby-pilot/page.tsx"><code>/lobby-pilot</code></a>; nothing on main touched.</p>
     </div>
   </header>

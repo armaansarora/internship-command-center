@@ -13,9 +13,10 @@
 
 ## TL;DR (filled in as phases close)
 
-- **Symbol:** **The Keystone** — an architectural capstone with an ascending lit passage (the cap-stone
-  of the climb; "getting in" in the negative space). *I overrode the panel's raw winner `keyhole-tower`
-  on rootedness/ownability grounds — see Phase 1.*
+- **Symbol:** **The Keystone Tower** — a vertical Art-Deco tower with a keystone cornice cap and a lit
+  archway you enter (it *is* the Tower; "getting in" is the lit gate). *I overrode the panel's raw winner
+  `keyhole-tower` (reads as a security keyhole) — see Phase 1 — and **reworked the geometry** after an
+  adversarial design review caught an "A"-letterform misread — see "Adversarial review" below.*
 - **Look + tech:** Flat geometric **Art-Deco**, solid **matte gold** `#C9A84C`; the doorway is a **true
   negative-space cut** to navy with a **cream `#F5F1E8` light-pillar** as the soul. **Inline SVG** (evenodd
   compound path), no filters/gradients at rest; CSS/GSAP on the light only; gradient/halo **reserved for
@@ -156,6 +157,28 @@
 - **Committed** to `identity/autopilot` across 6 phase commits. **Not merged, not pushed, not deployed.**
 - **Stray file noted (not committed):** `docs/glyph-keystone-control.html` — a temp render a Phase-2 judge
   subagent left in `docs/`. Left untracked (delete nothing); safe to remove.
+
+### Phase 6.5 — Adversarial review + geometry rework · DONE
+- Ran a 5-lens adversarial review workflow (`docs/research/review.workflow.js`) over the deliverable, with
+  an adversarial verify stage. **Correctness, accessibility, safety/scope, and completeness all PASSED**
+  (only low-severity polish). The **design-quality lens (judging the actual pixels) raised — and the
+  verify stage CONFIRMED — two real issues:**
+  1. **(HIGH) The mark's bare silhouette read as the capital letter "A"** — the wrong initial for The
+     Tower, and a failure of my own MARK-SPEC §5 ship-gate ("no letter misread"). The earlier
+     keystone-wedge narrowed upward with a centered bottom aperture = an 'A'.
+  2. **(MEDIUM) The cream "soul" light grayed out** at low opacity (0.5/0.7) over navy — not warm.
+  (A third "tombstone" claim was adversarially **rejected** as not-shipped.)
+- **Fix — reworked the geometry to a true vertical tower.** Generated tower candidates, rendered + judged
+  them with a fresh skeptical-viewer agent on the pixels: a 2-tier block read "mailbox", a ziggurat read
+  "pyramid/temple" (cultural baggage), and the **keystone-capped tower won** (the only one that reads as a
+  tower at 24px with no misread). Refined it taller/slimmer (skyscraper proportion) with a brighter, wider
+  archway so the lit gate survives 24px. Final design audit: **no blocker — the 'A' is gone, reads as a
+  tower, passes the gate, light is warm.**
+- **Light warmth fix:** raised the idle/rest opacity floors (breathe `.62↔1`, reduced-motion still `.85`)
+  so the cream stays warm, not gray.
+- **Propagated** the new locked path everywhere (FloorMark, favicons, MARK-SPEC §1.1, the mark SVGs, the
+  gallery) and re-verified green. Proof: `docs/research/_renders/mark-final-proof.png`. The earlier
+  candidates remain in `docs/research/_renders/rw-*` for comparison.
 
 ### DONE conditions — all seven hold
 1. ✅ `docs/research/IDENTITY-RESEARCH.md` exists (~248KB).
