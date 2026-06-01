@@ -67,6 +67,9 @@ const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
   { path: "/pricing" },
   { path: "/waitlist" },
   { path: "/art", prefix: true },
+  // Brand assets (the owl mascot etc.) must serve without a session — without
+  // this the auth redirect 307s the PNGs and the image optimizer 400s on them.
+  { path: "/brand", prefix: true },
   // PR 5 marketing surfaces — public landing pages with their own
   // CTAs. /season-pass + /campus must be reachable without a session
   // so an unauthenticated visitor can read the pitch and decide.

@@ -24,13 +24,8 @@ function walk(dir: string): string[] {
 
 // Files allowed to contain inline SVG markup because they intentionally
 // build a vector image at runtime (handed to sharp for PNG rasterization,
-// never inlined into the React tree) — OR are the LOCKED brand identity mark,
-// which is deliberately hand-authored, exact, version-controlled inline SVG
-// (the favicon/app-icon source; the soul light must be a live DOM node to
-// animate). It is the one piece of vector identity that does NOT route through
-// ArtLab generation. See docs/MARK-SPEC.md.
+// never inlined into the React tree).
 const ALLOWED_SVG_FILES = new Set<string>([
-  "src/components/identity/FloorMark.tsx",
   "src/lib/artlab/speed/placeholder-images.ts",
   "src/lib/artlab/sdk/agents/ui-texture/qa/svg-aria-label.ts",
   "src/lib/artlab/sdk/agents/ui-texture/qa/svg-aria-label.test.ts",

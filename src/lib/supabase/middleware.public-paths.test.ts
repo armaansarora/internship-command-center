@@ -185,6 +185,15 @@ describe("isPathPublic — prefix paths", () => {
     expect(isPathPublic("/artifact/lobby/otis")).toBe(false);
   });
 
+  it("matches /brand mascot assets (the owl)", () => {
+    expect(isPathPublic("/brand/owl-cream.png")).toBe(true);
+    expect(isPathPublic("/brand/owl-navy.png")).toBe(true);
+  });
+
+  it("rejects /branding so the brand prefix does not leak", () => {
+    expect(isPathPublic("/branding/secret")).toBe(false);
+  });
+
   it("matches /api/cron/sync (real cron job)", () => {
     expect(isPathPublic("/api/cron/sync")).toBe(true);
   });
