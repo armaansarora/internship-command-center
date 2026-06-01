@@ -1,8 +1,10 @@
 "use client";
 
 import type { CSSProperties, JSX } from "react";
+import { useState } from "react";
 
 import { Mascot } from "@/components/identity/Mascot";
+import { TowerCompanion } from "@/components/identity/TowerCompanion";
 
 const NAVY = "#1A1A2E";
 const GOLD = "#C9A84C";
@@ -45,6 +47,8 @@ const label: CSSProperties = {
 };
 
 export function LobbyPilotClient(): JSX.Element {
+  const [perch, setPerch] = useState(0);
+
   return (
     <main style={page}>
       <div style={shell}>
@@ -92,12 +96,46 @@ export function LobbyPilotClient(): JSX.Element {
           </div>
         </section>
 
+        {/* ── Companion (prototype) ────────────────────────────────── */}
+        <section style={sectionGap} aria-labelledby="comp-h">
+          <p style={eyebrow}>Your Tower companion · prototype</p>
+          <h2 id="comp-h" style={h2}>It perches, floats, and glides to you</h2>
+          <p style={sub}>
+            The owl is pinned to a corner of this page right now — watch it idle (barely-perceptible
+            float), then send it gliding to the next corner. Click the owl to say hi. This is the
+            single static sprite as a puppet; a real wing-flap needs it rigged into layers (next step).
+          </p>
+          <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap", alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={() => setPerch((p) => p + 1)}
+              style={{
+                fontFamily: mono,
+                fontSize: 12,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: NAVY,
+                background: GOLD,
+                border: `1px solid ${GOLD}`,
+                borderRadius: 999,
+                padding: "10px 20px",
+                cursor: "pointer",
+              }}
+            >
+              Send it flying →
+            </button>
+            <span style={label}>glides to the next corner</span>
+          </div>
+        </section>
+
         <footer style={{ ...sectionGap, ...label, lineHeight: 1.8 }}>
           Decision: <code style={{ color: GOLD, fontFamily: mono }}>docs/research/mascots/MASCOT-DECISION.md</code>
           <br />
           Additive · behind <code style={{ color: GOLD, fontFamily: mono }}>/lobby-pilot</code> · nothing on main touched.
         </footer>
       </div>
+
+      <TowerCompanion perchIndex={perch} />
     </main>
   );
 }
