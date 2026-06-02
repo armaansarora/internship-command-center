@@ -194,6 +194,14 @@ describe("isPathPublic — prefix paths", () => {
     expect(isPathPublic("/branding/secret")).toBe(false);
   });
 
+  it("matches /rive runtime wasm (the companion's animation engine)", () => {
+    expect(isPathPublic("/rive/rive.wasm")).toBe(true);
+  });
+
+  it("rejects /rivet so the rive prefix does not leak", () => {
+    expect(isPathPublic("/rivet/secret")).toBe(false);
+  });
+
   it("matches /api/cron/sync (real cron job)", () => {
     expect(isPathPublic("/api/cron/sync")).toBe(true);
   });

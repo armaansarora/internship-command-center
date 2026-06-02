@@ -45,9 +45,29 @@ const label: CSSProperties = {
   textTransform: "uppercase",
   color: "#8A90A6",
 };
+const segGroup: CSSProperties = {
+  display: "inline-flex",
+  border: `1px solid ${GOLD}33`,
+  borderRadius: 999,
+  padding: 3,
+  background: "rgba(255,255,255,0.03)",
+};
+const segBtn = (active: boolean): CSSProperties => ({
+  fontFamily: mono,
+  fontSize: 11,
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+  color: active ? NAVY : "#A9AEC4",
+  background: active ? GOLD : "transparent",
+  border: "none",
+  borderRadius: 999,
+  padding: "8px 16px",
+  cursor: "pointer",
+});
 
 export function LobbyPilotClient(): JSX.Element {
   const [perch, setPerch] = useState(0);
+  const [engine, setEngine] = useState<"png" | "rive">("png");
 
   return (
     <main style={page}>
@@ -102,8 +122,8 @@ export function LobbyPilotClient(): JSX.Element {
           <h2 id="comp-h" style={h2}>It perches, floats, and glides to you</h2>
           <p style={sub}>
             The owl is pinned to a corner of this page right now — watch it idle (barely-perceptible
-            float), then send it gliding to the next corner. Click the owl to say hi. This is the
-            single static sprite as a puppet; a real wing-flap needs it rigged into layers (next step).
+            float), then send it gliding to the next corner. Click the owl to say hi. GSAP owns
+            <em> where </em> it sits; the engine below owns what its body <em>does</em>.
           </p>
           <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap", alignItems: "center" }}>
             <button
@@ -126,6 +146,33 @@ export function LobbyPilotClient(): JSX.Element {
             </button>
             <span style={label}>glides to the next corner</span>
           </div>
+
+          {/* Engine toggle: flat puppet vs the rigged Rive owl. */}
+          <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap", alignItems: "center" }}>
+            <div role="group" aria-label="Companion animation engine" style={segGroup}>
+              <button
+                type="button"
+                aria-pressed={engine === "png"}
+                onClick={() => setEngine("png")}
+                style={segBtn(engine === "png")}
+              >
+                GSAP (alive)
+              </button>
+              <button
+                type="button"
+                aria-pressed={engine === "rive"}
+                onClick={() => setEngine("rive")}
+                style={segBtn(engine === "rive")}
+              >
+                Rive (rigged)
+              </button>
+            </div>
+            <span style={label}>
+              {engine === "rive"
+                ? "loads /brand/owl.riv · falls back to the GSAP owl until a rig is dropped in"
+                : "breathe · greet on click · hover perk · float + glide (no flap — that needs the rig)"}
+            </span>
+          </div>
         </section>
 
         <footer style={{ ...sectionGap, ...label, lineHeight: 1.8 }}>
@@ -135,7 +182,7 @@ export function LobbyPilotClient(): JSX.Element {
         </footer>
       </div>
 
-      <TowerCompanion perchIndex={perch} />
+      <TowerCompanion perchIndex={perch} engine={engine} riveSrc="/brand/owl.riv" />
     </main>
   );
 }

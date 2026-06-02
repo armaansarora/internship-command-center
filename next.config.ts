@@ -14,6 +14,11 @@ import type { NextConfig } from "next";
 const scriptSources = [
   "'self'",
   "'unsafe-inline'",
+  // Rive renders via WebAssembly; instantiating a module requires this grant
+  // when a CSP is present. It is far narrower than 'unsafe-eval' (WASM compile
+  // only, no arbitrary JS eval). The runtime WASM is self-hosted at
+  // /rive/rive.wasm (see src/lib/rive-init.ts), so no CDN origin is needed.
+  "'wasm-unsafe-eval'",
   ...(process.env.NODE_ENV === "development" ? ["'unsafe-eval'"] : []),
   "https://js.stripe.com",
   "https://*.vercel.app",

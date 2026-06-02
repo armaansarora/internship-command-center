@@ -70,6 +70,10 @@ const PUBLIC_PATHS: ReadonlyArray<{ path: string; prefix?: boolean }> = [
   // Brand assets (the owl mascot etc.) must serve without a session — without
   // this the auth redirect 307s the PNGs and the image optimizer 400s on them.
   { path: "/brand", prefix: true },
+  // Self-hosted Rive runtime WASM (the companion's animation engine). Same
+  // reasoning as /brand — without this the auth redirect 307s /rive/rive.wasm
+  // and the rigged owl fails to load on public pages like /lobby-pilot.
+  { path: "/rive", prefix: true },
   // PR 5 marketing surfaces — public landing pages with their own
   // CTAs. /season-pass + /campus must be reachable without a session
   // so an unauthenticated visitor can read the pitch and decide.
