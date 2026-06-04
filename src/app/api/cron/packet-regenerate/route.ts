@@ -21,7 +21,7 @@ import { withCronHealth } from "@/lib/cron/health";
  * out into the LLM provider. The cron runs at :15 past each hour (offset
  * from our other hourly-ish jobs).
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 

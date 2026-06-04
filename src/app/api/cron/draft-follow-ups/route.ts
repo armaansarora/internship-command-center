@@ -23,7 +23,7 @@ import type { Row } from "@/db/database.types";
  * intentionally matches across statuses so a user who already approved a
  * draft doesn't get a replacement generated on the next tick.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 

@@ -22,7 +22,7 @@ import type { Row } from "@/db/database.types";
  *   - On success: agent_side_effect_email_sent with resource_id = outreach id
  *   - Counts + durations in structured logs
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  * Runs every 5 minutes so an approval feels immediate without spamming
  * Resend's rate limits. Idempotent within a row — once sent_at is stamped
  * the row is no longer picked up.

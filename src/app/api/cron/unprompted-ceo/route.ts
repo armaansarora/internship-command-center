@@ -35,7 +35,7 @@ import {
  * Per-user error isolation: any throw inside the per-user block is caught
  * and logged; the sweep continues with the next user.
  *
- * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET OR x-vercel-cron: 1.
+ * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted).
  */
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;

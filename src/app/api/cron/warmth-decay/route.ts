@@ -23,7 +23,7 @@ import { withCronHealth } from "@/lib/cron/health";
  * (`cooling-<contactId>-w<weekBucket>`). Re-running within the same week
  * finds the existing notification row and inserts nothing.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 

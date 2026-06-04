@@ -15,7 +15,7 @@ import { withCronHealth } from "@/lib/cron/health";
  * batch. Each user run is bounded by DISCOVERY_MAX_NEW_PER_RUN so a cold
  * profile never floods the war-table on first hit.
  *
- * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET OR x-vercel-cron: 1.
+ * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted).
  */
 export const maxDuration = 300;
 

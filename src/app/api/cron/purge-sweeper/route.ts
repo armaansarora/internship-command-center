@@ -37,7 +37,7 @@ import {
  * bulk insertion. A failing row is recorded in the response and moves to the
  * next tick — it does not block the batch.
  *
- * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET OR `x-vercel-cron: 1`.
+ * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET only (the spoofable `x-vercel-cron` header is NOT trusted).
  */
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;

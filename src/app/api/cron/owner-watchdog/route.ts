@@ -49,7 +49,7 @@ import {
  *   * Row open AND signal back below threshold → stamp resolved_at +
  *     send "recovered" digest.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  * When RESEND_API_KEY is unset, the route still returns 200 + counters
  * and the helper logs a warning — the state machine continues to evolve
  * so when Resend is provisioned the next tick picks up where it left off.

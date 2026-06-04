@@ -29,7 +29,7 @@ import type { Row } from "@/db/database.types";
  * Idempotency: `source_entity_id = cfo-threshold-<userId>-w<weekBucket>`,
  * so repeated runs inside the same week collapse to one notification row.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 

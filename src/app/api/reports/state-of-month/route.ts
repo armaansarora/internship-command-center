@@ -358,13 +358,9 @@ export async function GET(req: Request): Promise<Response> {
       userId: user.id,
       month,
     });
-    return NextResponse.json(
-      {
-        error: "render_failed",
-        message: err instanceof Error ? err.message : String(err),
-      },
-      { status: 500 },
-    );
+    // The detailed exception is captured server-side via log.error above;
+    // don't leak internal error text (stack hints, paths) to the client.
+    return NextResponse.json({ error: "render_failed" }, { status: 500 });
   }
 
   return new Response(new Uint8Array(buffer), {
