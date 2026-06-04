@@ -136,6 +136,25 @@ async function handle(req: NextRequest): Promise<NextResponse> {
     }>).map((a) => [a.id, a]),
   );
 
+  // Resolve packet freshness for every candidate in a single round-trip
+  // (mirrors the applications batch above) instead of one SELECT per row.
+  const packetIds = Array.from(
+    new Set(
+      upcoming
+        .map((r) => r.prep_packet_id)
+        .filter((id): id is string => typeof id === "string" && id.length > 0),
+    ),
+  );
+  const { data: pkts } = packetIds.length
+    ? await admin.from("documents").select("id, updated_at").in("id", packetIds)
+    : { data: [] as Array<{ id: string; updated_at: string | null }> };
+  const packetUpdatedById = new Map(
+    ((pkts ?? []) as Array<{ id: string; updated_at: string | null }>).map((p) => [
+      p.id,
+      p.updated_at,
+    ]),
+  );
+
   // Filter down to candidates — no packet, or packet older than stale threshold.
   const candidates: Candidate[] = [];
   for (const row of upcoming) {
@@ -158,14 +177,8 @@ async function handle(req: NextRequest): Promise<NextResponse> {
       continue;
     }
 
-    const { data: pkt } = await admin
-      .from("documents")
-      .select("updated_at")
-      .eq("id", row.prep_packet_id)
-      .single();
-
-    if (pkt && typeof (pkt as { updated_at: string }).updated_at === "string") {
-      const updatedAt = (pkt as { updated_at: string }).updated_at;
+    const updatedAt = packetUpdatedById.get(row.prep_packet_id);
+    if (typeof updatedAt === "string") {
       if (updatedAt < stale) {
         candidates.push({
           interview_id: row.id,
