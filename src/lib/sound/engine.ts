@@ -26,6 +26,14 @@ export type SoundId =
 interface ActiveAmbient {
   nodes: AudioNode[];
   gain: GainNode;
+  /**
+   * Modulation timers owned by this bed (radar pings, clock ticks, blips).
+   * stopAmbient() clears them so they cannot keep firing after the bed is torn
+   * down — previously they self-guarded on the SHARED activeAmbient, which is
+   * truthy again as soon as the next floor's bed starts, so they leaked and
+   * briefly bled one room's SFX into the next.
+   */
+  intervals?: ReturnType<typeof setInterval>[];
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -352,7 +360,10 @@ class SoundEngine {
 
   stopAmbient(): void {
     if (!this.activeAmbient) return;
-    const { gain } = this.activeAmbient;
+    const { gain, intervals } = this.activeAmbient;
+    // Stop this bed's modulation timers immediately so they can't keep firing
+    // (leaking, and bleeding SFX into the next floor) after teardown.
+    intervals?.forEach((id) => clearInterval(id));
     const ctx = this.ctx;
     if (ctx) {
       const now = ctx.currentTime;
@@ -450,11 +461,10 @@ class SoundEngine {
     };
     scheduleRadar();
     const interval = setInterval(() => {
-      if (!this.activeAmbient) { clearInterval(interval); return; }
       scheduleRadar();
     }, 4200);
 
-    return { nodes: [hum], gain: master };
+    return { nodes: [hum], gain: master, intervals: [interval] };
   }
 
   /** Situation Room: ticking clock + alert pulse */
@@ -488,11 +498,10 @@ class SoundEngine {
     };
     tick();
     const interval = setInterval(() => {
-      if (!this.activeAmbient) { clearInterval(interval); return; }
       tick();
     }, 1000);
 
-    return { nodes: [hum], gain: master };
+    return { nodes: [hum], gain: master, intervals: [interval] };
   }
 
   /** Writing Room: quiet, occasional soft pen scratch */
@@ -591,11 +600,10 @@ class SoundEngine {
     };
     blip();
     const interval = setInterval(() => {
-      if (!this.activeAmbient) { clearInterval(interval); return; }
       blip();
     }, 2800);
 
-    return { nodes: [drone], gain: master };
+    return { nodes: [drone], gain: master, intervals: [interval] };
   }
 
   /** C-Suite: authority hum + distant city texture */
