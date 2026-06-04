@@ -90,14 +90,21 @@ export async function POST(
     );
   }
 
-  const result = await simulateTurn({
-    userFirstName:
-      (auth.user as { firstName?: string }).firstName ?? "there",
-    offer,
-    stance,
-    history,
-    userReply: userReply ?? null,
-  });
+  let result;
+  try {
+    result = await simulateTurn({
+      userFirstName:
+        (auth.user as { firstName?: string }).firstName ?? "there",
+      offer,
+      stance,
+      history,
+      userReply: userReply ?? null,
+    });
+  } catch {
+    // AI provider error or timeout (simulateTurn aborts at 45s). Fail with a
+    // clean 503 the client can retry instead of a raw 500 / held-open function.
+    return NextResponse.json({ error: "simulation_failed" }, { status: 503 });
+  }
 
   const round = Math.floor(history.length / 2);
   const done = round >= MAX_ROUNDS;

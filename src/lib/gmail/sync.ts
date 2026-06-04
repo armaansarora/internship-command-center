@@ -10,6 +10,13 @@ import { readGoogleApiError } from "@/lib/google/api-error";
 import { log } from "@/lib/logger";
 import type { GmailMessage } from "@/lib/gmail/parser";
 
+// Per-request ceiling on each Gmail API round-trip. The initial sync is
+// awaited on the OAuth callback redirect path (via Promise.allSettled), so a
+// hung Google response must not hold the serverless function open to its
+// maxDuration. On timeout the fetch rejects → the caller logs a rejected sync
+// and proceeds.
+const GMAIL_FETCH_TIMEOUT_MS = 10_000;
+
 interface GmailMessageRef {
   id: string;
   threadId: string;
@@ -44,6 +51,7 @@ async function fetchRecentMessageRefs(
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(GMAIL_FETCH_TIMEOUT_MS),
     }
   );
 
@@ -66,6 +74,7 @@ async function fetchMessageDetail(
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(GMAIL_FETCH_TIMEOUT_MS),
     }
   );
 
