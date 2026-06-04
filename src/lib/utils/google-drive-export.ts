@@ -35,7 +35,7 @@ const DRIVE_FILES_API = "https://www.googleapis.com/drive/v3/files";
 // Export to Google Drive as a Google Doc
 // ---------------------------------------------------------------------------
 
-export async function exportToGoogleDrive(
+async function exportToGoogleDrive(
   userId: string,
   options: ExportOptions
 ): Promise<DriveFile> {
@@ -88,7 +88,7 @@ export async function exportToGoogleDrive(
 // Create or find "The Tower" folder in Google Drive
 // ---------------------------------------------------------------------------
 
-export async function getOrCreateTowerFolder(userId: string): Promise<string> {
+async function getOrCreateTowerFolder(userId: string): Promise<string> {
   const tokens = await getGoogleTokens(userId);
 
   // Search for existing folder

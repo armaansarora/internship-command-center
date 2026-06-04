@@ -47,7 +47,6 @@ export const DebriefContentSchema = z.object({
 export type DebriefContent = z.infer<typeof DebriefContentSchema>;
 export type DrillQuestionResult = z.infer<typeof DrillQuestionResultSchema>;
 export type DrillAnswer = z.infer<typeof DrillAnswerSchema>;
-export type DrillInterrupt = z.infer<typeof DrillInterruptSchema>;
 
 export function parseDebriefContent(raw: string | null | undefined): DebriefContent {
   if (!raw) throw new Error("empty debrief content");

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   CHARACTER_MASTER_STAGES,
   CharacterMasterInputSchema,
-  CharacterMasterStageSchema,
 } from "./types";
 
 describe("character-master types", () => {
