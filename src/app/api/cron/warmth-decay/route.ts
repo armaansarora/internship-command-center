@@ -50,7 +50,10 @@ async function handle(req: NextRequest): Promise<NextResponse> {
     const { data: page, error } = await admin
       .from("contacts")
       .select("id, user_id, name, warmth, last_contact_at")
-      .range(fromOffset, fromOffset + PAGE_SIZE - 1);
+      .range(fromOffset, fromOffset + PAGE_SIZE - 1)
+      // Stable order so OFFSET windows tile the table without skipping or
+      // double-processing rows (matches the sibling crons' convention).
+      .order("id", { ascending: true });
 
     if (error) {
       log.error("warmth_decay.read_failed", error, { error: error.message });

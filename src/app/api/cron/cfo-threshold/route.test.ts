@@ -32,10 +32,14 @@ vi.mock("@/lib/supabase/admin", () => ({
       return {
         select: () => ({
           gte: () => ({
-            range: async (from: number, to: number) => {
-              if (fixtureBox.error) return { data: null, error: fixtureBox.error };
-              return { data: fixtureBox.applications.slice(from, to + 1), error: null };
-            },
+            // Mirrors the real chain: .select().gte().range().order() — .order()
+            // is the awaited terminal that returns the page.
+            range: (from: number, to: number) => ({
+              order: async () => {
+                if (fixtureBox.error) return { data: null, error: fixtureBox.error };
+                return { data: fixtureBox.applications.slice(from, to + 1), error: null };
+              },
+            }),
           }),
         }),
       };

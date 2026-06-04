@@ -99,7 +99,10 @@ async function handle(req: NextRequest): Promise<NextResponse> {
       .from("applications")
       .select("user_id, status, created_at")
       .gte("created_at", eightWeeksAgo.toISOString())
-      .range(fromOffset, fromOffset + PAGE_SIZE - 1);
+      .range(fromOffset, fromOffset + PAGE_SIZE - 1)
+      // Stable order so OFFSET windows tile the table without skipping or
+      // double-counting rows (matches the sibling crons' convention).
+      .order("id", { ascending: true });
 
     if (error) {
       log.error("cfo_threshold.read_failed", error, { error: error.message });
