@@ -69,6 +69,7 @@ export interface DaemonContext {
   now: () => Date;
   lastCrashRecoveryAt: number;
   lastLogRotationAt: number;
+  lastRunArchivalAt: number;
   requestShutdown(): void;
   isShutdownRequested(): boolean;
 }
@@ -90,6 +91,7 @@ export function createDaemonContext(input: DaemonContextInput): DaemonContext {
     now: input.now ?? (() => new Date()),
     lastCrashRecoveryAt: 0,
     lastLogRotationAt: 0,
+    lastRunArchivalAt: 0,
     requestShutdown(): void { shutdown = true; },
     isShutdownRequested(): boolean { return shutdown; },
   };
@@ -99,8 +101,6 @@ const LOG_ROTATION_INTERVAL_MS = 60_000;
 const RUN_ARCHIVAL_INTERVAL_MS = 60 * 60_000; // hourly
 const SHUTDOWN_DRAIN_MS = 30_000;
 const SHUTDOWN_POLL_MS = 500;
-
-let lastRunArchivalAt = 0;
 
 // Captured once at boot so /health can answer "did my changes deploy?" with
 // a single line instead of forcing the operator to ssh + git log.
@@ -159,8 +159,8 @@ export async function runDaemonOnce(ctx: DaemonContext): Promise<void> {
   }
 
   // Hourly: archive completed runs older than 30 days into tar.gz.
-  if (nowMs - lastRunArchivalAt >= RUN_ARCHIVAL_INTERVAL_MS) {
-    lastRunArchivalAt = nowMs;
+  if (nowMs - ctx.lastRunArchivalAt >= RUN_ARCHIVAL_INTERVAL_MS) {
+    ctx.lastRunArchivalAt = nowMs;
     await runStep(ctx.workspaceRoot, "run-archival", async () => archiveOldRuns(ctx.workspaceRoot));
   }
 
