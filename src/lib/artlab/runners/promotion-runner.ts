@@ -110,7 +110,15 @@ function readSpendFromRunState(runDir: string): { actualCents: number; capCents:
 }
 
 function publicArtRoot(): string {
-  return process.env.ARTLAB_PUBLIC_ART_ROOT ?? "/Users/armaanarora/Documents/The Tower/public/art";
+  if (process.env.ARTLAB_PUBLIC_ART_ROOT) return process.env.ARTLAB_PUBLIC_ART_ROOT;
+  // Derive from the project root (consistent with promotedPacksRoot) instead
+  // of a single contributor's absolute home path. Final fallback is the
+  // running repo's public/art — at worst this writes under the current
+  // checkout rather than a machine-specific Documents folder.
+  if (process.env.ARTLAB_PROJECT_ROOT) {
+    return join(process.env.ARTLAB_PROJECT_ROOT, "public", "art");
+  }
+  return join(process.cwd(), "public", "art");
 }
 
 /**
