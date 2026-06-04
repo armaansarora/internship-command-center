@@ -84,6 +84,7 @@ export function LiveComposePanel({
     bold: false,
   });
   const startedRef = useRef(false);
+  const completedRef = useRef(false);
 
   const streamOne = useCallback(
     async (tone: ToneKey, signal: AbortSignal): Promise<void> => {
@@ -145,8 +146,13 @@ export function LiveComposePanel({
   }, [autoStart, streamOne]);
 
   useEffect(() => {
-    if (!onComplete) return;
+    if (!onComplete || completedRef.current) return;
     if (TONES.every((t) => done[t])) {
+      // One-shot: honour the documented "called ONCE all three streams
+      // resolve" contract. Without this guard, any later re-render that
+      // changes the onComplete identity (an unmemoised parent callback) would
+      // re-fire it with the final texts and double-submit.
+      completedRef.current = true;
       onComplete({ ...texts });
     }
   }, [done, texts, onComplete]);

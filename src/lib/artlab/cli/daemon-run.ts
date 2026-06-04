@@ -7,7 +7,7 @@
 // every 10 seconds forever.
 
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
   createDaemonContext,
@@ -179,6 +179,11 @@ export async function buildProductionDaemonContext(input: { workspaceRoot: strin
         stdio: ["ignore", workerOutFd, workerErrFd],
         detached: false,
       });
+      // spawn() dup()s these fds into the child; the parent's copies are ours
+      // to close. Without this the daemon leaks 2 fds per run and eventually
+      // hits EMFILE ("too many open files") and wedges until restart.
+      closeSync(workerOutFd);
+      closeSync(workerErrFd);
       child.on("exit", () => {
         // Post-worker notification: read run-state.json + queue-entry.chatId and
         // push the appropriate board / status message back to Telegram.

@@ -264,16 +264,17 @@ export async function importFirstApplicationAction(
   // exists; if none was created we fall back to an error so the client can
   // pivot to manual entry. The sync is bounded by an 8s AbortSignal so the
   // user never stares at a spinner past the wall-clock budget.
+  let syncTimeout: ReturnType<typeof setTimeout> | undefined;
   try {
     const { syncGmailForUser } = await import("@/lib/gmail/sync");
     await Promise.race([
       syncGmailForUser(user.id, { useAdmin: true }),
-      new Promise<never>((_, reject) =>
-        setTimeout(
+      new Promise<never>((_, reject) => {
+        syncTimeout = setTimeout(
           () => reject(new Error("gmail_sync_timeout")),
           GMAIL_SYNC_TIMEOUT_MS,
-        ),
-      ),
+        );
+      }),
     ]);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -288,6 +289,10 @@ export async function importFirstApplicationAction(
       ok: false,
       error: message === "gmail_sync_timeout" ? "gmail_sync_timeout" : "gmail_sync_failed",
     };
+  } finally {
+    // Clear the race timer so it doesn't keep the function instance alive
+    // (and the unsettled-race rejection from firing) when the sync wins.
+    if (syncTimeout) clearTimeout(syncTimeout);
   }
 
   const { data: firstApp, error: lookupError } = await supabase
