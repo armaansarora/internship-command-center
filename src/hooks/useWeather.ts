@@ -60,10 +60,22 @@ export function useWeather(): UseWeatherResult {
           if (Date.now() - cached.fetchedAt < REFETCH_INTERVAL_MS) {
             setCondition(cached.condition);
             setIsLoading(false);
-            // Still schedule re-fetch when the cache expires
+            // Re-fetch when the cache expires, then keep refreshing on the
+            // normal cadence. (Previously this was a one-shot timeout, so
+            // after a cache hit the weather refreshed once and then froze.)
             const remaining = REFETCH_INTERVAL_MS - (Date.now() - cached.fetchedAt);
-            const t = setTimeout(() => { void fetchWeather(); }, remaining);
-            return () => clearTimeout(t);
+            const t = setTimeout(() => {
+              void fetchWeather();
+              intervalRef.current = setInterval(() => {
+                void fetchWeather();
+              }, REFETCH_INTERVAL_MS);
+            }, remaining);
+            return () => {
+              clearTimeout(t);
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+              }
+            };
           }
         } catch {
           // Invalid cache — fetch fresh
