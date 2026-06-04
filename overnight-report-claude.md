@@ -69,10 +69,10 @@ Same machine-specific path also appears as a runtime fallback in `promotion-runn
 | `tsc --noEmit` | 0 errors | **0 errors** | held |
 | `eslint .` | 0 errors, 3 warnings | **0 errors, 1 warning** | −2 warnings |
 | `next build` | exit 0 | **exit 0** | held |
-| `vitest run` | **3 failed** / 4259 passed / 10 skipped (4272) | **0 failed** / 4276 passed / 10 skipped (4286) | **−3 failures, +14 tests** |
+| `vitest run` | **3 failed** / 4259 passed / 10 skipped (4272) | **0 failed** / 4280 passed / 10 skipped (4290) | **−3 failures, +18 tests** |
 | `npm audit` | **7 vulns** (1 high, 6 moderate) | **0 vulns** | **−7 (incl. the HIGH Next.js middleware-bypass)** |
 
-17 commits, 46 files, +718/−195 (plus the lockfile-only dep bump). Every commit green on tsc + lint + targeted tests; full build + full suite verified at checkpoints and after the dependency bump.
+24 commits across 3 iterations, 58 files, +1313/−318 (incl. the lockfile-only dep bump). Every commit green on tsc + lint + targeted tests; full build + full suite verified at each checkpoint, after the dependency bump, and on the final tree.
 
 ---
 
@@ -93,9 +93,10 @@ Re-ran the same 5-auditor diagnostic on the post-iteration-1 tree (496k tokens, 
 
 The re-surfaced deferred items (outreach #3; the `env()`-convention class) were left deferred with the same documented reasoning — not churned.
 
----
+### Iteration 3 — FINISH confirmation pass (fresh diagnostic on the pushed tree) → FIX → VERIFY
+After pushing, re-ran the full 5-auditor diagnostic against the final tree (527k tokens). It **confirmed every prior fix** (UUID guard, JSON-LD escaping, all timeouts, sound-engine cleanup verified) and surfaced one **genuinely new HIGH**: `notifications.source_entity_id` is a `uuid` column, but four crons (warmth-decay, cfo-threshold, cio-reresearch, warm-intro-scan) write **non-UUID idempotency strings** into it — so Postgres rejected those inserts and `createNotification` only logged it, meaning **those user alerts silently never delivered** (invisible to tests because the Supabase stubs don't enforce the uuid type). Fixed without a schema change (deterministic-UUID coercion + opt-in dedupe). Also fixed: Google OAuth/login token-endpoint timeouts (the data APIs were timed out in iter 1/2 but the token endpoints weren't), a scheduler heartbeat that could crash the worker via an uncaught timer throw, a PDF-route error leak, a warm-intro-scan N+1, and three more undeclared env vars added to the schema. 8 more green commits + 2 new test files.
 
-## REORGANIZE (evaluated once → intentional no-op)
+**Convergence:** all remaining pass-3 findings are either already-deferred (COO timezone, `env()` read-conversion, outreach idempotency) or low-value/risky-to-auto-fix and explicitly logged below (bulk dead-code sweep, cron time-budgets, a complex Zod schema, a substring-match tightening). No new *safe, high-value* actionable work remains — the loop has converged.
 
 Per the protocol, after fixes converged I researched best-practice structure for this stack and wrote the decision before acting.
 
@@ -120,6 +121,14 @@ Deferred deliberately — each is a real finding but touches an internal contrac
 4. **match-delta non-atomic debounce (#23)** — two concurrent rescans can both pass the read-then-check and both run the expensive (idempotent) rebuild. **Why deferred:** LOW severity (wasteful, not incorrect). The "claim-the-window-first" fix would advance the timestamp before the rebuild, so a *failed* rebuild then skips retries for 5 min — a worse failure mode — unless racy compensation is added. **Recommended:** atomic conditional `UPDATE ... WHERE last_rescan_at IS NULL OR last_rescan_at < now()-interval '5 min' RETURNING id` to claim, with timestamp reset on rebuild failure.
 
 5. **env() convention nits (#21, #22)** — `EXPORT_EMAIL_FROM`/`OUTREACH_EMAIL_FROM` read via `process.env` and absent from `EnvSchema`; `FIRECRAWL_API_KEY` read via `process.env` though it's in the schema. **Why deferred (low value):** switching these optional-feature reads to `env()` couples them to full-schema validation — a missing required var would turn a graceful `null`/disabled-feature into a throw, a mild resilience regression. The adjacent `comp-bands/lookup.ts` already reads `process.env` directly by the same pattern. Low value; left as-is.
+
+6. **Bulk dead-code sweep (~3 dozen unused exports)** — pass 3's dead-code auditor flagged many never-referenced exported functions/consts (orphaned `EasterEggs.tsx` UI, unused `*-rest.ts` query helpers, unused ArtLab-engine helpers, unused `*_DEFAULT` preference constants). **Why deferred:** a 30+-symbol removal across many files is high-churn and carries real risk of removing something reached via a pattern static search misses (dynamic import, barrel re-export consumed elsewhere). A few high-confidence ones were already removed in iter 1; the rest are best done as a focused, individually-reviewed cleanup PR rather than an unattended end-of-night sweep.
+
+7. **Cron time-budgets (unprompted-ceo, job-discovery, etc.)** — a few batch crons sweep an unbounded user set with sequential per-user round-trips and no `maxDuration` time budget, so at scale they could silently truncate mid-batch. Not a present-day outage; a scale-hardening task (add a time budget + cursor) for deliberate design.
+
+8. **Gmail matcher substring breadth (`parser.ts`)** — the domain match uses bidirectional `includes`, which could over-match in rare cases. Pre-existing logic (extracted unchanged when killing the N+1); tightening it changes matching behavior and wants its own test matrix. Low/medium confidence.
+
+9. **`negotiation-draft` body lacks a Zod schema** — the request body is type-asserted (not Zod-validated) before feeding AI prompt construction. It is byte-bounded (token-DOS guarded), so low risk; a correct `ParlorConveningResult` Zod schema is non-trivial and a wrong one would reject valid payloads, so it's left for deliberate authoring.
 
 ### Pre-existing notes (not bugs)
 - The full `npm test` suite is **not run in any CI workflow** (`config-guard.yml` runs only `npm test -- src/lib/config` and `npm test -- src/db`; `hardening-e2e.yml` runs Playwright). This is why the `tower-context` failures (Fix #0) were invisible. **Recommendation:** add a lightweight `unit-tests.yml` running `npx tsc --noEmit` + `npm test` + `npm run lint` on every PR. (Not added here — CI workflow changes are owner-gated infra.)
@@ -175,6 +184,12 @@ All commits on `auto/overnight-claude-2026-06-04`. Every commit: tsc + lint + ta
 
 **Docs**
 - README Development section expanded (Node version, env setup, the full tsc/lint/test/build/e2e quality-gate commands).
+
+**Iteration 3 — confirmation-pass fixes**
+- `934ec851` **(HIGH)** deliver cron alerts that silently never inserted — `source_entity_id` uuid column vs non-UUID composite keys; deterministic-UUID coercion in `createNotification` + opt-in `dedupeBySourceEntity` so 4 crons' notifications insert *and* dedupe. + new coercion unit tests.
+- `503ddbbf` 10s timeouts on the Google OAuth + sign-in token endpoints (interactive auth + every cron sync); drop the PDF-route 500 error-text leak.
+- `85d396e3` guard the ArtLab scheduler heartbeat against an uncaught timer throw (was a worker-crash path); declare `OUTREACH_EMAIL_FROM` / `EXPORT_EMAIL_FROM` / `VERCEL_GIT_COMMIT_SHA` in the env schema.
+- `b7279552` batch target-company name lookups in warm-intro-scan (kill N+1).
 
 ---
 

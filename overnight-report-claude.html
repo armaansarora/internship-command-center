@@ -114,7 +114,7 @@
       <span class="chip">agent <b>claude</b></span>
       <span class="chip">branch <b>auto/overnight-claude-2026-06-04</b></span>
       <span class="chip">base <b>main @ f84aee87</b></span>
-      <span class="chip"><b>17</b> commits · <b>46</b> files · <b>+718 / −195</b></span>
+      <span class="chip"><b>24</b> commits · <b>58</b> files · <b>+1313 / −318</b></span>
       <span class="chip">stack <b>Next.js 16 · Supabase · Drizzle · AI SDK v6</b></span>
     </div>
     <div class="verdict">
@@ -128,7 +128,7 @@
   <p class="lede">Every number measured with the project's own gates (<code>tsc --noEmit</code>, <code>eslint</code>, <code>vitest run</code>, <code>next build</code>, <code>npm audit</code>) — at the start of the night and again at the end.</p>
   <div class="grid m4">
     <div class="stat"><div class="k">Failing tests</div><div class="v good">0</div><div class="d">was 3 <span class="delta up">−3</span></div></div>
-    <div class="stat"><div class="k">Tests passing</div><div class="v gold">4276</div><div class="d">+14 new <span class="delta up">▲</span></div></div>
+    <div class="stat"><div class="k">Tests passing</div><div class="v gold">4280</div><div class="d">+18 new <span class="delta up">▲</span></div></div>
     <div class="stat"><div class="k">Dependency vulns</div><div class="v good">0</div><div class="d">was 7 · 1 high <span class="delta up">−7</span></div></div>
     <div class="stat"><div class="k">Lint warnings</div><div class="v ink">1</div><div class="d">was 3 <span class="delta up">−2</span></div></div>
   </div>
@@ -138,7 +138,7 @@
       <div class="lbl">vitest</div>
       <div class="track">
         <div class="seg"><span class="tag">base</span><div class="bar base" style="width:18%">3 failed</div></div>
-        <div class="seg"><span class="tag">final</span><div class="bar zero" style="width:100%">4276 passed · 0 failed</div></div>
+        <div class="seg"><span class="tag">final</span><div class="bar zero" style="width:100%">4280 passed · 0 failed</div></div>
       </div>
     </div>
     <div class="barrow">
@@ -165,21 +165,23 @@
 
   <!-- APPROACH -->
   <h2><span class="n">02</span>How the night ran</h2>
-  <p class="lede">A disciplined loop in an isolated git worktree: establish a measured baseline, fan out read-only diagnostics, fix highest-priority first in tiny green commits, verify, then re-diagnose to confirm convergence — never trading a working tree for a risky change.</p>
-  <div class="grid m2">
-    <div class="stat"><div class="k">Pass 1 · Diagnose</div><div class="v gold" style="font-size:24px">24 findings</div><div class="d">5 parallel auditors · ~501k tokens. → 17 fixed, 6 deferred with reasoning.</div></div>
-    <div class="stat"><div class="k">Independent review</div><div class="v gold" style="font-size:24px">Codex</div><div class="d">Adversarial diff review (different model family). Verdict: SAFE TO KEEP; 2 minor flags addressed.</div></div>
-    <div class="stat"><div class="k">Pass 2 · Re-diagnose</div><div class="v gold" style="font-size:24px">17 findings</div><div class="d">Fresh full re-run confirmed pass-1 fixes &amp; surfaced new real bugs → 10 more commits.</div></div>
-    <div class="stat"><div class="k">Convergence</div><div class="v ink" style="font-size:24px">reached</div><div class="d">All actionable findings fixed or deferred-with-rationale. Remaining items are external-contract / DB-concurrency, flagged for review.</div></div>
+  <p class="lede">A disciplined loop in an isolated git worktree: establish a measured baseline, fan out read-only diagnostics, fix highest-priority first in tiny green commits, verify, then re-diagnose — repeated until a fresh pass finds no new safe, high-value work. Never trading a working tree for a risky change.</p>
+  <div class="grid m4">
+    <div class="stat"><div class="k">Pass 1 · Diagnose</div><div class="v gold" style="font-size:23px">24 found</div><div class="d">5 auditors · ~501k tok → 17 fixed, 6 deferred.</div></div>
+    <div class="stat"><div class="k">Codex review</div><div class="v gold" style="font-size:23px">SAFE</div><div class="d">Independent diff review, different model family. 2 minor flags addressed.</div></div>
+    <div class="stat"><div class="k">Pass 2 · Re-diagnose</div><div class="v gold" style="font-size:23px">17 found</div><div class="d">Confirmed pass-1; new bugs (cron pagination, Gmail N+1, sound leak) → 10 commits.</div></div>
+    <div class="stat"><div class="k">Pass 3 · Confirm</div><div class="v gold" style="font-size:23px">+1 HIGH</div><div class="d">On the pushed tree: found notifications silently never delivering → fixed. Then converged.</div></div>
   </div>
-  <div class="callout"><b>Why two diagnostic passes mattered:</b> the second pass found genuinely new bugs the first missed — two crons paginating without an <code>.order()</code> (silently skipping/double-processing rows), a Gmail-sync N+1 (≤20 full-table queries per sync), and a sound-engine timer leak that bled one floor's SFX into the next. Re-diagnosing isn't ceremony; it's where a third of the real bugs were caught.</div>
+  <div class="callout"><b>Why re-diagnosing kept paying off:</b> each fresh pass found real bugs the prior missed. Pass 2: two crons paginating without <code>.order()</code> (skipping/double-processing rows), a Gmail-sync N+1 (≤20 full-table queries per sync), a sound-engine timer leak bleeding SFX across floors. Pass 3: a <b>HIGH</b> — four crons writing non-UUID strings into a <code>uuid</code> column, so those user alerts <i>silently never inserted</i> while the cron reported success. Re-diagnosing isn't ceremony; it's where many of the real bugs were caught.</div>
 
   <!-- FIXES -->
   <h2><span class="n">03</span>What changed, grouped</h2>
   <p class="lede">17 atomic, individually-revertible commits. Each was green on type-check, lint, and targeted tests before landing; the full suite and production build were verified at every checkpoint.</p>
 
-  <span class="cat correct">Correctness · failing tests</span>
+  <span class="cat correct">Correctness · failing tests · silently-broken features</span>
   <div class="panel">
+    <div class="fix"><div class="t">Cron alerts that silently never delivered <span class="em">— HIGH, found on the final confirmation pass</span></div><span class="sha">934ec851</span>
+      <div class="desc"><code>notifications.source_entity_id</code> is a <code>uuid</code> column, but four crons wrote non-UUID idempotency strings (e.g. <code>cooling-&lt;id&gt;-w&lt;week&gt;</code>) into it. Postgres rejected the inserts; <code>createNotification</code> only logged it and returned success — so the alerts <i>never reached users</i> while the crons reported success. Tests missed it (the Supabase stubs don't enforce the uuid type). Fixed with deterministic-UUID coercion + opt-in dedupe — no schema change.</div></div>
     <div class="fix"><div class="t">Robust Tower-context project-root resolution <span class="em">— fixed 3 failing tests</span></div><span class="sha">29964e27</span>
       <div class="desc">A machine-specific hardcoded path (<code>/Users/.../Documents/The Tower</code>) was the fallback root, so the bundle read empty bibles in CI / fresh clones / worktrees. Replaced with a cwd walk-up to the repo root. Invisible before because the full suite isn't run in CI — only scoped subsets are.</div></div>
     <div class="fix"><div class="t">Deterministic cron pagination (warmth-decay, cfo-threshold)</div><span class="sha">80f61c52</span>
@@ -194,6 +196,8 @@
       <div class="desc">One DB round-trip per candidate replaced with a single chunked <code>.in()</code> query on the discovery request path.</div></div>
     <div class="fix"><div class="t">Batched prep-packet freshness lookup (packet-regenerate cron)</div><span class="sha">95f786dd</span>
       <div class="desc">One <code>documents</code> SELECT per interview row replaced with a single batched query + map, mirroring the handler's existing applications batch.</div></div>
+    <div class="fix"><div class="t">Batched target-company name lookup (warm-intro-scan cron)</div><span class="sha">b7279552</span>
+      <div class="desc">One companies query per proposal replaced with a single <code>.in()</code> + map.</div></div>
   </div>
 
   <span class="cat rel">Reliability · timeouts &amp; error handling</span>
@@ -208,6 +212,8 @@
       <div class="desc">Ambient modulation <code>setInterval</code>s self-guarded on a shared singleton, so they never cleared on navigation — one timer leaked per visit and the old room's SFX bled into the next. Now tracked per-bed and cleared on teardown.</div></div>
     <div class="fix"><div class="t">Daemon data-loss: quarantine malformed inbox intents</div><span class="sha">292ea37e</span>
       <div class="desc"><code>drainInbox</code> deleted files unconditionally — a half-written intent vanished. Now only deletes after a successful parse; bad files move to <code>.bad/</code> for inspection. Also moved a run-archival timer onto the daemon context.</div></div>
+    <div class="fix"><div class="t">Google OAuth/login token-endpoint timeouts + scheduler crash guard</div><span class="sha">503ddbbf · 85d396e3</span>
+      <div class="desc">10s timeouts on the OAuth token-exchange + refresh + sign-in endpoints (the data APIs were already timed out; these weren't). Wrapped the ArtLab scheduler's lease-heartbeat timer in try/catch — an uncaught throw there would have crashed the worker.</div></div>
   </div>
 
   <span class="cat sec">Security · dependencies, info-leaks, validation</span>
@@ -244,6 +250,8 @@
     <li><div class="hr-title">ArtLab sdk-poller archive self-wedge (rare)</div><div class="hr-why"><b>Why deferred:</b> the fix touches the queue's atomic <code>wx</code> invariant; making enqueue idempotent globally could permit double-enqueue — worse than a rare wedge. Plan: a localized pre-enqueue existence check.</div></li>
     <li><div class="hr-title">match-delta non-atomic debounce (duplicate idempotent rebuild)</div><div class="hr-why"><b>Why deferred:</b> low severity (wasteful, not incorrect); the naive “claim-first” fix would skip retries for 5 min after a failed rebuild — a worse failure mode without racy compensation.</div></li>
     <li><div class="hr-title">env() convention drift (a few <code>process.env.*</code> reads of declared vars)</div><div class="hr-why"><b>Why deferred (low value):</b> routing optional-feature reads through <code>env()</code> couples them to full-schema validation — turning a graceful disabled-feature into a throw. Two undeclared flags <i>were</i> added to the schema as the safe subset.</div></li>
+    <li><div class="hr-title">Bulk dead-code sweep (~3 dozen unused exports)</div><div class="hr-why"><b>Why deferred:</b> a 30+-symbol removal across many files is high-churn and risks removing something reached via a pattern static search misses (dynamic import, barrel re-export). The high-confidence ones were removed; the rest belong in a focused, individually-reviewed cleanup PR — not an unattended end-of-night sweep.</div></li>
+    <li><div class="hr-title">Cron time-budgets &amp; a few low-severity tidy-ups</div><div class="hr-why">A few batch crons sweep an unbounded user set with no <code>maxDuration</code> budget (scale-hardening, not a current outage); plus a Gmail substring-match tightening and a <code>negotiation-draft</code> Zod schema — both low-risk today and best authored deliberately.</div></li>
     <li><div class="hr-title">CI gap (not a code bug)</div><div class="hr-why">The full <code>npm test</code> suite isn't run by any workflow (only scoped subsets), which is why a failing test hid on <code>main</code>. Suggest a lightweight <code>tsc + test + lint</code> PR workflow — left to the owner since CI changes are infra-gated.</div></li>
   </ul>
 
