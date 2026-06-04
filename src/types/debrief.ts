@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const DrillInterruptSchema = z.object({
+const DrillInterruptSchema = z.object({
   type: z.enum([
     "no_action_verb",
     "too_much_situation",
@@ -11,13 +11,13 @@ export const DrillInterruptSchema = z.object({
   atMs: z.number().int().nonnegative(),
 });
 
-export const DrillAnswerSchema = z.object({
+const DrillAnswerSchema = z.object({
   text: z.string(),
   durationMs: z.number().int().nonnegative(),
   audioPath: z.string().nullable(),
 });
 
-export const DrillQuestionResultSchema = z.object({
+const DrillQuestionResultSchema = z.object({
   id: z.string(),
   text: z.string(),
   category: z.enum(["behavioral", "technical", "culture-fit", "case"]),
@@ -45,8 +45,6 @@ export const DebriefContentSchema = z.object({
 });
 
 export type DebriefContent = z.infer<typeof DebriefContentSchema>;
-export type DrillQuestionResult = z.infer<typeof DrillQuestionResultSchema>;
-export type DrillAnswer = z.infer<typeof DrillAnswerSchema>;
 
 export function parseDebriefContent(raw: string | null | undefined): DebriefContent {
   if (!raw) throw new Error("empty debrief content");
