@@ -25,10 +25,13 @@ import {
 /**
  * GET /api/cron/owner-watchdog
  *
- * Every 30 minutes (see vercel.json). Reads three production signals and
- * emails the owner a Resend digest when something is wrong. Each
- * incident is state-machined through `incident_alerts` so an active
- * incident does NOT page on every tick.
+ * Every 30 minutes — driven off-platform by
+ * `.github/workflows/owner-watchdog.yml` (a GitHub Actions schedule), NOT by
+ * vercel.json: Vercel Hobby caps vercel.json crons at once-per-day, but the
+ * watchdog's whole point is sub-hour detection. Reads three production signals
+ * and emails the owner a Resend digest when something is wrong. Each incident
+ * is state-machined through `incident_alerts` so an active incident does NOT
+ * page on every run.
  *
  * Signals read on each run:
  *   1. Cron staleness — for every named cron in vercel.json, check the

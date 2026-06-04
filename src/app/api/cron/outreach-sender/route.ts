@@ -16,16 +16,17 @@ import type { Row } from "@/db/database.types";
  * Processes the outreach_queue: pulls up to OUTREACH_BATCH_LIMIT rows with
  * status='approved', attempts to send each via Resend, then updates the row
  * to status='sent' with resend_message_id + sent_at on success. On failure
- * the row remains 'approved' so the next tick retries.
+ * the row remains 'approved' so the next run retries (the following day).
  *
  * Audit:
  *   - On success: agent_side_effect_email_sent with resource_id = outreach id
  *   - Counts + durations in structured logs
  *
  * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
- * Runs every 5 minutes so an approval feels immediate without spamming
- * Resend's rate limits. Idempotent within a row — once sent_at is stamped
- * the row is no longer picked up.
+ * Scheduled once daily at 07:00 UTC (`0 7 * * *`, see vercel.json — Vercel
+ * Hobby caps cron frequency at once-per-day, so an approved row is sent on the
+ * next daily run, i.e. within ~24h, not minutes). Idempotent within a row —
+ * once sent_at is stamped the row is no longer picked up.
  *
  * Blast-brake (Lighthouse OutreachBrake): three layers stack on top of the
  * per-row queue logic to make sure a corrupted approval batch can't blast

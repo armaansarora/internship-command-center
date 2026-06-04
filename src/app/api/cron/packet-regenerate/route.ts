@@ -8,18 +8,18 @@ import { withCronHealth } from "@/lib/cron/health";
 /**
  * GET /api/cron/packet-regenerate
  *
- * Hourly sweep for upcoming interviews (within HORIZON_HOURS) whose prep
- * packet is either missing entirely or older than STALE_DAYS. For each
- * candidate we:
+ * Daily sweep for upcoming interviews (within HORIZON_HOURS = 72h, so a
+ * once-daily run still catches interviews ~3 days out) whose prep packet is
+ * either missing entirely or older than STALE_DAYS. For each candidate we:
  *   1. Generate a fresh packet via generateStructuredPrepPacket.
  *   2. Insert a new documents row (prep_packet, generated_by='cpo').
  *   3. Point the interview row's prep_packet_id at the new document.
  *   4. Drop a pneumatic-tube notification so the Penthouse can surface
  *      "CPO: fresh packet on your desk for {company}".
  *
- * Batch-capped at BATCH_LIMIT per tick so a cold-start spike doesn't fan
- * out into the LLM provider. The cron runs at :15 past each hour (offset
- * from our other hourly-ish jobs).
+ * Batch-capped at BATCH_LIMIT per run so a cold-start spike doesn't fan
+ * out into the LLM provider. Scheduled once daily at 11:00 UTC (`0 11 * * *`,
+ * see vercel.json — Vercel Hobby caps cron frequency at once-per-day).
  *
  * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */

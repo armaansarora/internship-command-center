@@ -16,9 +16,11 @@ import {
 /**
  * GET /api/cron/unprompted-ceo
  *
- * Fires every 6h (see vercel.json — `0 ∗/6 ∗ ∗ ∗`). Sweeps every active
- * user and lets the CEO drop unprompted notifications when the pipeline
- * crosses one of three thresholds:
+ * Runs once daily at 10:00 UTC (`0 10 * * *`, see vercel.json — Vercel Hobby
+ * caps cron frequency at once-per-day). Sweeps every active user and lets the
+ * CEO drop unprompted notifications when the pipeline crosses one of three
+ * thresholds (the trigger windows below use a 24h+ lookback with 24h dedup, so
+ * a single daily sweep still covers the gap):
  *
  *   - stale_cluster:    >5 early-pipeline apps idle 14+ days → high
  *   - rejection_cluster: >=3 rejections in the last 7 days → medium
