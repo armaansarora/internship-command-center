@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Overnight Hardening Report — claude</title>
+<style>
+  :root{
+    --bg:#14141f; --bg2:#1A1A2E; --panel:#1e1e32; --panel2:#232339;
+    --ink:#ECE7DA; --muted:#9a93a8; --faint:#6f6982;
+    --gold:#C9A84C; --gold-soft:#e0c97a;
+    --green:#5FB87A; --red:#E2685A; --blue:#6FA8DC; --violet:#9b8bd6;
+    --line:rgba(201,168,76,.18); --line2:rgba(255,255,255,.06);
+    --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:
+      radial-gradient(1100px 600px at 78% -8%,rgba(201,168,76,.10),transparent 60%),
+      radial-gradient(900px 500px at 5% 110%,rgba(111,168,220,.07),transparent 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 96px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:30px;margin-bottom:42px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin:0 0 14px}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5vw,46px);line-height:1.08;margin:0 0 16px;letter-spacing:.2px}
+  h1 .sub{display:block;color:var(--gold-soft);font-style:italic;font-size:.5em;margin-top:10px;letter-spacing:0}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:18px}
+  .chip{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:var(--panel);border:1px solid var(--line2);border-radius:999px;padding:5px 12px}
+  .chip b{color:var(--ink);font-weight:600}
+  .verdict{margin-top:24px;display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(95,184,122,.12),rgba(95,184,122,.04));border:1px solid rgba(95,184,122,.3);border-radius:14px;padding:14px 18px}
+  .verdict .dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(95,184,122,.18);flex:none}
+  .verdict span{font-size:14.5px;color:#d8e8dd}
+  .verdict b{color:#a7e0ba}
+
+  h2{font-family:var(--serif);font-weight:600;font-size:25px;margin:54px 0 6px;letter-spacing:.2px}
+  h2 .n{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.2em;margin-right:12px;vertical-align:middle}
+  .lede{color:var(--muted);font-size:14.5px;margin:0 0 22px;max-width:74ch}
+
+  .grid{display:grid;gap:16px}
+  .m4{grid-template-columns:repeat(4,1fr)}
+  .m2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:760px){.m4{grid-template-columns:repeat(2,1fr)}.m2{grid-template-columns:1fr}}
+
+  .stat{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line2);border-radius:16px;padding:18px 18px 16px;position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
+  .stat .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .stat .v{font-family:var(--serif);font-size:33px;font-weight:600;margin:8px 0 2px;letter-spacing:.5px}
+  .stat .d{font-size:12.5px;color:var(--muted)}
+  .v.good{color:var(--green)} .v.gold{color:var(--gold-soft)} .v.ink{color:var(--ink)}
+  .delta{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:6px;margin-left:2px}
+  .delta.up{color:#a7e0ba;background:rgba(95,184,122,.14)}
+  .delta.flat{color:var(--muted);background:rgba(255,255,255,.05)}
+
+  /* comparison bars */
+  .bars{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:22px 24px;margin-top:4px}
+  .barrow{display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:center;padding:11px 0;border-top:1px solid var(--line2)}
+  .barrow:first-child{border-top:0}
+  .barrow .lbl{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+  .track{position:relative}
+  .seg{display:flex;align-items:center;gap:10px;margin:3px 0}
+  .seg .tag{font-family:var(--mono);font-size:10px;color:var(--faint);width:46px;flex:none;text-transform:uppercase;letter-spacing:.1em}
+  .bar{height:14px;border-radius:7px;min-width:2px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-family:var(--mono);font-size:10px;color:#0d0d14;font-weight:700}
+  .bar.base{background:linear-gradient(90deg,rgba(226,104,90,.55),rgba(226,104,90,.85))}
+  .bar.final{background:linear-gradient(90deg,var(--gold),var(--gold-soft))}
+  .bar.zero{background:rgba(95,184,122,.85)}
+
+  .panel{background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:6px 22px}
+  .fix{padding:17px 0;border-top:1px solid var(--line2);display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:start}
+  .fix:first-child{border-top:0}
+  .fix .t{font-size:14.5px;color:var(--ink);font-weight:600}
+  .fix .t .em{color:var(--gold-soft)}
+  .fix .desc{grid-column:1/-1;color:var(--muted);font-size:13px;margin-top:3px;max-width:88ch}
+  .sha{font-family:var(--mono);font-size:11px;color:var(--blue);background:rgba(111,168,220,.1);border:1px solid rgba(111,168,220,.18);border-radius:6px;padding:3px 8px;white-space:nowrap;height:fit-content}
+  .cat{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:3px 9px;border-radius:999px;display:inline-block;margin-bottom:14px;margin-top:8px}
+  .cat.correct{color:#a7e0ba;background:rgba(95,184,122,.12);border:1px solid rgba(95,184,122,.25)}
+  .cat.perf{color:var(--gold-soft);background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25)}
+  .cat.sec{color:#e9a8a0;background:rgba(226,104,90,.1);border:1px solid rgba(226,104,90,.25)}
+  .cat.rel{color:#b7c9e8;background:rgba(111,168,220,.1);border:1px solid rgba(111,168,220,.22)}
+  .cat.clean{color:#cabfe8;background:rgba(155,139,214,.1);border:1px solid rgba(155,139,214,.22)}
+
+  ul.clean{list-style:none;padding:0;margin:0}
+  ul.clean li{padding:14px 0;border-top:1px solid var(--line2)}
+  ul.clean li:first-child{border-top:0}
+  .hr-title{font-weight:600;color:var(--ink);font-size:14.5px}
+  .hr-why{color:var(--muted);font-size:13px;margin-top:4px}
+  .hr-why b{color:var(--gold-soft);font-weight:600}
+
+  table.tools{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.tools td{padding:11px 12px;border-top:1px solid var(--line2);vertical-align:top}
+  table.tools tr:first-child td{border-top:0}
+  table.tools td:first-child{font-family:var(--mono);font-size:12px;color:var(--gold-soft);white-space:nowrap;width:1%}
+  table.tools td:last-child{color:var(--muted)}
+
+  .callout{background:linear-gradient(180deg,rgba(155,139,214,.08),transparent);border:1px solid rgba(155,139,214,.22);border-left:3px solid var(--violet);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:13.5px;color:#cfc8e0}
+  .callout b{color:#d9d2ec}
+  code{font-family:var(--mono);font-size:.88em;color:var(--gold-soft);background:rgba(201,168,76,.08);padding:1px 5px;border-radius:4px}
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:var(--faint);font-family:var(--mono);font-size:11.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  a{color:var(--gold-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">The Tower · Autonomous Overnight Hardening</p>
+    <h1>Codebase Hardening Report<span class="sub">healthier &amp; better-documented by morning — verified, not asserted</span></h1>
+    <div class="meta">
+      <span class="chip">agent <b>claude</b></span>
+      <span class="chip">branch <b>auto/overnight-claude-2026-06-04</b></span>
+      <span class="chip">base <b>main @ f84aee87</b></span>
+      <span class="chip"><b>17</b> commits · <b>46</b> files · <b>+718 / −195</b></span>
+      <span class="chip">stack <b>Next.js 16 · Supabase · Drizzle · AI SDK v6</b></span>
+    </div>
+    <div class="verdict">
+      <span class="dot"></span>
+      <span><b>Green across the board.</b> 0 failed tests (was 3), 0 lint errors, 0 type errors, production build passing, 0 dependency vulnerabilities (was 7). Independent Codex review of the full diff: <b>“SAFE TO KEEP.”</b></span>
+    </div>
+  </header>
+
+  <!-- METRICS -->
+  <h2><span class="n">01</span>Baseline → Final</h2>
+  <p class="lede">Every number measured with the project's own gates (<code>tsc --noEmit</code>, <code>eslint</code>, <code>vitest run</code>, <code>next build</code>, <code>npm audit</code>) — at the start of the night and again at the end.</p>
+  <div class="grid m4">
+    <div class="stat"><div class="k">Failing tests</div><div class="v good">0</div><div class="d">was 3 <span class="delta up">−3</span></div></div>
+    <div class="stat"><div class="k">Tests passing</div><div class="v gold">4276</div><div class="d">+14 new <span class="delta up">▲</span></div></div>
+    <div class="stat"><div class="k">Dependency vulns</div><div class="v good">0</div><div class="d">was 7 · 1 high <span class="delta up">−7</span></div></div>
+    <div class="stat"><div class="k">Lint warnings</div><div class="v ink">1</div><div class="d">was 3 <span class="delta up">−2</span></div></div>
+  </div>
+
+  <div class="bars" style="margin-top:18px">
+    <div class="barrow">
+      <div class="lbl">vitest</div>
+      <div class="track">
+        <div class="seg"><span class="tag">base</span><div class="bar base" style="width:18%">3 failed</div></div>
+        <div class="seg"><span class="tag">final</span><div class="bar zero" style="width:100%">4276 passed · 0 failed</div></div>
+      </div>
+    </div>
+    <div class="barrow">
+      <div class="lbl">npm audit</div>
+      <div class="track">
+        <div class="seg"><span class="tag">base</span><div class="bar base" style="width:35%">1 high · 6 moderate</div></div>
+        <div class="seg"><span class="tag">final</span><div class="bar zero" style="width:100%">0 vulnerabilities</div></div>
+      </div>
+    </div>
+    <div class="barrow">
+      <div class="lbl">eslint</div>
+      <div class="track">
+        <div class="seg"><span class="tag">base</span><div class="bar base" style="width:30%">0 err · 3 warn</div></div>
+        <div class="seg"><span class="tag">final</span><div class="bar final" style="width:88%">0 err · 1 warn (golden &lt;img&gt; fixture)</div></div>
+      </div>
+    </div>
+    <div class="barrow">
+      <div class="lbl">tsc · build</div>
+      <div class="track">
+        <div class="seg"><span class="tag">both</span><div class="bar zero" style="width:100%">0 type errors · production build green</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROACH -->
+  <h2><span class="n">02</span>How the night ran</h2>
+  <p class="lede">A disciplined loop in an isolated git worktree: establish a measured baseline, fan out read-only diagnostics, fix highest-priority first in tiny green commits, verify, then re-diagnose to confirm convergence — never trading a working tree for a risky change.</p>
+  <div class="grid m2">
+    <div class="stat"><div class="k">Pass 1 · Diagnose</div><div class="v gold" style="font-size:24px">24 findings</div><div class="d">5 parallel auditors · ~501k tokens. → 17 fixed, 6 deferred with reasoning.</div></div>
+    <div class="stat"><div class="k">Independent review</div><div class="v gold" style="font-size:24px">Codex</div><div class="d">Adversarial diff review (different model family). Verdict: SAFE TO KEEP; 2 minor flags addressed.</div></div>
+    <div class="stat"><div class="k">Pass 2 · Re-diagnose</div><div class="v gold" style="font-size:24px">17 findings</div><div class="d">Fresh full re-run confirmed pass-1 fixes &amp; surfaced new real bugs → 10 more commits.</div></div>
+    <div class="stat"><div class="k">Convergence</div><div class="v ink" style="font-size:24px">reached</div><div class="d">All actionable findings fixed or deferred-with-rationale. Remaining items are external-contract / DB-concurrency, flagged for review.</div></div>
+  </div>
+  <div class="callout"><b>Why two diagnostic passes mattered:</b> the second pass found genuinely new bugs the first missed — two crons paginating without an <code>.order()</code> (silently skipping/double-processing rows), a Gmail-sync N+1 (≤20 full-table queries per sync), and a sound-engine timer leak that bled one floor's SFX into the next. Re-diagnosing isn't ceremony; it's where a third of the real bugs were caught.</div>
+
+  <!-- FIXES -->
+  <h2><span class="n">03</span>What changed, grouped</h2>
+  <p class="lede">17 atomic, individually-revertible commits. Each was green on type-check, lint, and targeted tests before landing; the full suite and production build were verified at every checkpoint.</p>
+
+  <span class="cat correct">Correctness · failing tests</span>
+  <div class="panel">
+    <div class="fix"><div class="t">Robust Tower-context project-root resolution <span class="em">— fixed 3 failing tests</span></div><span class="sha">29964e27</span>
+      <div class="desc">A machine-specific hardcoded path (<code>/Users/.../Documents/The Tower</code>) was the fallback root, so the bundle read empty bibles in CI / fresh clones / worktrees. Replaced with a cwd walk-up to the repo root. Invisible before because the full suite isn't run in CI — only scoped subsets are.</div></div>
+    <div class="fix"><div class="t">Deterministic cron pagination (warmth-decay, cfo-threshold)</div><span class="sha">80f61c52</span>
+      <div class="desc">Both paginated with PostgREST <code>.range()</code> but no <code>.order()</code> — undefined row order between pages can skip or double-process rows (missed decay alerts; mis-counted aggregation). Added <code>.order("id")</code>, matching the sibling crons.</div></div>
+  </div>
+
+  <span class="cat perf">Performance · N+1 elimination</span>
+  <div class="panel">
+    <div class="fix"><div class="t">Gmail sync N+1 → single fetch + pure matcher</div><span class="sha">4d095824</span>
+      <div class="desc">Matching each email re-queried the entire applications table (with a join), up to 20× per sync on the OAuth-callback path. Hoisted to one fetch; extracted a pure, now-unit-tested matcher.</div></div>
+    <div class="fix"><div class="t">Batched source-id dedupe in job discovery</div><span class="sha">edac59e4</span>
+      <div class="desc">One DB round-trip per candidate replaced with a single chunked <code>.in()</code> query on the discovery request path.</div></div>
+    <div class="fix"><div class="t">Batched prep-packet freshness lookup (packet-regenerate cron)</div><span class="sha">95f786dd</span>
+      <div class="desc">One <code>documents</code> SELECT per interview row replaced with a single batched query + map, mirroring the handler's existing applications batch.</div></div>
+  </div>
+
+  <span class="cat rel">Reliability · timeouts &amp; error handling</span>
+  <div class="panel">
+    <div class="fix"><div class="t">Timeboxes on every external call</div><span class="sha">edac59e4 · 4af0c80b · d2e33313</span>
+      <div class="desc">8–10s <code>AbortSignal.timeout</code> on Firecrawl, Greenhouse/Lever, Gmail, Calendar, and Google Drive fetches, plus a 45s abort on the offer-simulator AI call — so a hung upstream can't hold a serverless function open to its maxDuration.</div></div>
+    <div class="fix"><div class="t">Writing-Room stream-leak + weather refresh</div><span class="sha">2a55bc66</span>
+      <div class="desc">Abort the three in-flight compose streams on unmount (was holding open connections + paying for LLM output for an unseen panel); re-arm the weather interval after a cache hit (it had frozen after one refresh).</div></div>
+    <div class="fix"><div class="t">503 guard on the negotiation simulator</div><span class="sha">4af0c80b</span>
+      <div class="desc">An AI failure returned a raw 500; now a clean retryable 503.</div></div>
+    <div class="fix"><div class="t">Sound-engine timer leak + cross-floor SFX bleed</div><span class="sha">065109af</span>
+      <div class="desc">Ambient modulation <code>setInterval</code>s self-guarded on a shared singleton, so they never cleared on navigation — one timer leaked per visit and the old room's SFX bled into the next. Now tracked per-bed and cleared on teardown.</div></div>
+    <div class="fix"><div class="t">Daemon data-loss: quarantine malformed inbox intents</div><span class="sha">292ea37e</span>
+      <div class="desc"><code>drainInbox</code> deleted files unconditionally — a half-written intent vanished. Now only deletes after a successful parse; bad files move to <code>.bad/</code> for inspection. Also moved a run-archival timer onto the daemon context.</div></div>
+  </div>
+
+  <span class="cat sec">Security · dependencies, info-leaks, validation</span>
+  <div class="panel">
+    <div class="fix"><div class="t">Dependency vulnerabilities: 7 → 0 <span class="em">(incl. the HIGH Next.js middleware bypass)</span></div><span class="sha">npm audit fix</span>
+      <div class="desc">Semver-compatible fixes only — <code>next</code> 16.2.5 → 16.2.7 plus moderate transitive bumps. <code>package.json</code> unchanged (lockfile-only); full suite + build re-verified after.</div></div>
+    <div class="fix"><div class="t">Stop leaking internal error text + fix cron-auth docstrings</div><span class="sha">ab2e0e72</span>
+      <div class="desc">The report-500 echoed <code>err.message</code> to the client; now generic. Corrected 11 cron docstrings that falsely claimed the spoofable <code>x-vercel-cron</code> header is accepted auth (the helper requires a Bearer secret — proven by the 49-test cron-auth suite).</div></div>
+    <div class="fix"><div class="t">Defense-in-depth hardening</div><span class="sha">991917ca · d2e33313</span>
+      <div class="desc">comp-bands try/catch (preserve graceful-empty), JSON-LD <code>&lt;/script&gt;</code> escaping (×2), a UUID guard before a PostgREST <code>.or()</code> interpolation, and a single-token-fetch + generic-error refactor in the Drive export.</div></div>
+  </div>
+
+  <span class="cat clean">Dead code · cleanup · docs</span>
+  <div class="panel">
+    <div class="fix"><div class="t">Remove dead exports &amp; machine-specific paths</div><span class="sha">aab88470 · 10cd19ea · 97ecf82a</span>
+      <div class="desc">Deleted unused exports (verified zero importers), demoted internal-only helpers to private, dropped a hardcoded home-dir fallback in promotion code, and declared two undeclared <code>TOWER_*</code> flags in the env schema.</div></div>
+    <div class="fix"><div class="t">Tests + README</div><span class="sha">1a39b2f4</span>
+      <div class="desc">New coverage for the previously-untested in-memory rate limiter (incl. the H-7 eviction bound) + regression tests locking in the inbox-quarantine, simulator-503, and Gmail-matcher fixes. README Development section expanded with env setup + the full quality-gate commands.</div></div>
+  </div>
+
+  <!-- REORG -->
+  <h2><span class="n">04</span>Reorganize — evaluated once, intentional no-op</h2>
+  <p class="lede">The protocol calls for exactly one structural pass after fixes converge. The honest outcome here: don't move anything.</p>
+  <div class="callout" style="border-left-color:var(--gold)">
+    The repo already matches canonical <b>Next.js 16 App-Router</b> conventions — <code>src/{app,components,lib,db,hooks,types,styles}</code> with route groups <code>(authenticated)</code> / <code>(marketing)</code>, an <code>api/</code> tree, the standard root files (<code>layout/page/error/loading/not-found/robots/sitemap/opengraph-image</code>), <code>proxy.ts</code> (the Next 16 middleware rename), feature-colocated components, and colocated tests. 244 components, 931 lib modules, 104 route entries — all in their conventional homes, with an accurate living map in <code>STRUCTURE.md</code>. Moving 1,000+ files would be pure churn, and <b>churn is a regression</b>. Sources: Next.js docs (Project structure &amp; organization, Route Groups, <code>src/</code> directory, Routing/middleware) and the repo's own <code>STRUCTURE.md</code> / <code>CLAUDE.md</code>.
+  </div>
+
+  <!-- NEEDS REVIEW -->
+  <h2><span class="n">05</span>Needs human review</h2>
+  <p class="lede">Real findings deliberately left for a human — each touches an internal contract, an external service, or DB concurrency where an unattended fix would be riskier than the issue.</p>
+  <ul class="clean">
+    <li><div class="hr-title">COO daily-briefing timezone (interviews shown in server-UTC, not the user's zone)</div><div class="hr-why"><b>Why deferred:</b> <code>getDailyBriefingData</code> is a typed callback in the CEO dispatch-graph contract; threading a timezone is a wide change, and wrong day-boundary math shows the <i>wrong</i> interviews — worse than today's consistent UTC. Plan: optional <code>timeZone?</code> param, Intl-based local-midnight boundaries, wire the two direct callers first.</div></li>
+    <li><div class="hr-title">Outreach duplicate-email window on post-send status-update failure</div><div class="hr-why"><b>Why deferred:</b> sending email is an external contract; the clean fix needs a Resend idempotency-key (verify SDK support) rather than a guess on the blast-brake state machine.</div></li>
+    <li><div class="hr-title">ArtLab sdk-poller archive self-wedge (rare)</div><div class="hr-why"><b>Why deferred:</b> the fix touches the queue's atomic <code>wx</code> invariant; making enqueue idempotent globally could permit double-enqueue — worse than a rare wedge. Plan: a localized pre-enqueue existence check.</div></li>
+    <li><div class="hr-title">match-delta non-atomic debounce (duplicate idempotent rebuild)</div><div class="hr-why"><b>Why deferred:</b> low severity (wasteful, not incorrect); the naive “claim-first” fix would skip retries for 5 min after a failed rebuild — a worse failure mode without racy compensation.</div></li>
+    <li><div class="hr-title">env() convention drift (a few <code>process.env.*</code> reads of declared vars)</div><div class="hr-why"><b>Why deferred (low value):</b> routing optional-feature reads through <code>env()</code> couples them to full-schema validation — turning a graceful disabled-feature into a throw. Two undeclared flags <i>were</i> added to the schema as the safe subset.</div></li>
+    <li><div class="hr-title">CI gap (not a code bug)</div><div class="hr-why">The full <code>npm test</code> suite isn't run by any workflow (only scoped subsets), which is why a failing test hid on <code>main</code>. Suggest a lightweight <code>tsc + test + lint</code> PR workflow — left to the owner since CI changes are infra-gated.</div></li>
+  </ul>
+
+  <!-- TOOLS -->
+  <h2><span class="n">06</span>Skills &amp; workflows used</h2>
+  <p class="lede">Work was routed through the best-fit tool rather than hand-done — read-only diagnostics fanned out in parallel; writes serialized and verified.</p>
+  <div class="panel" style="padding:14px 22px">
+  <table class="tools">
+    <tr><td>Workflow ×2</td><td>Both full DIAGNOSE passes — 5 parallel read-only auditors (security · bugs · error-handling/perf · dead-code · fragility) returning structured findings. ~1.0M subagent tokens total.</td></tr>
+    <tr><td>Agent · codex</td><td>Independent adversarial review of the entire diff — a second model-family correctness check. Verdict: SAFE TO KEEP.</td></tr>
+    <tr><td>using-git-worktrees</td><td>Isolated worktree on a dedicated branch, parallel-safe alongside the codex agent running the same prompt.</td></tr>
+    <tr><td>systematic-debugging</td><td>Root-caused the baseline failures and each finding before proposing a fix.</td></tr>
+    <tr><td>test-driven-development</td><td>Regression tests written alongside fixes (rate limiter, inbox quarantine, simulator-503, Gmail matcher).</td></tr>
+    <tr><td>receiving-code-review</td><td>Triaged Codex's two flags by verification — one corrected, one shown to be a non-issue by analysis.</td></tr>
+    <tr><td>verification-before-completion</td><td>tsc + lint + targeted tests before every commit; full build + suite at checkpoints and after the dep bump.</td></tr>
+  </table>
+  </div>
+
+  <footer>
+    <span>The Tower · overnight hardening · agent claude · 2026-06-04</span>
+    <span>branch auto/overnight-claude-2026-06-04 — pushed, clean tree, not merged (awaiting review)</span>
+  </footer>
+
+</div>
+</body>
+</html>
