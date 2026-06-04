@@ -29,7 +29,7 @@ import { loadSeedJobs } from "./sources/seed";
 import { rankJobs, type RankedJob } from "./scorer";
 import { getCompanyTier, normalizeCompany } from "./company-tiers";
 import {
-  existsBySourceId,
+  existingSourceIds,
   findSimilarJobByEmbedding,
   insertDiscoveredApplication,
 } from "@/lib/db/queries/job-discovery-rest";
@@ -42,6 +42,11 @@ export const DISCOVERY_MIN_SCORE = 0.45;
 export const DISCOVERY_MAX_NEW_PER_RUN = 10;
 export const DISCOVERY_DUP_THRESHOLD = 0.85;
 const SOURCE_FETCH_LIMIT_PER_BOARD = 30;
+// Total wall-clock budget for the parallel job-board fetches. Without this,
+// a single hung board (Greenhouse/Lever) could hold the discovery request
+// path open to the function's maxDuration. Adapters convert the abort into a
+// warning + empty result, so a timeout degrades gracefully.
+const SOURCE_FETCH_TIMEOUT_MS = 8000;
 
 export interface DiscoveryOptions {
   /** Soft cap on new applications inserted per run (default 10). */
@@ -96,9 +101,16 @@ export async function gatherCandidatesFromSources(
         .map((c) => c.replace(/\s+/g, ""));
     const unique = [...new Set(boards)];
 
+    const fetchSignal = AbortSignal.timeout(SOURCE_FETCH_TIMEOUT_MS);
     const fetches = unique.flatMap((board) => [
-      fetchGreenhouseBoard(board, { limit: SOURCE_FETCH_LIMIT_PER_BOARD }),
-      fetchLeverAccount(board, { limit: SOURCE_FETCH_LIMIT_PER_BOARD }),
+      fetchGreenhouseBoard(board, {
+        limit: SOURCE_FETCH_LIMIT_PER_BOARD,
+        signal: fetchSignal,
+      }),
+      fetchLeverAccount(board, {
+        limit: SOURCE_FETCH_LIMIT_PER_BOARD,
+        signal: fetchSignal,
+      }),
     ]);
     const results = await Promise.allSettled(fetches);
     for (const r of results) {
@@ -177,12 +189,15 @@ export async function runJobDiscoveryForUser(
     }
   );
 
-  // Source-level dedupe — skip anything we already ingested.
-  const freshJobs: SourceJob[] = [];
-  for (const job of gathered) {
-    const exists = await existsBySourceId(userId, job.sourceId);
-    if (!exists) freshJobs.push(job);
-  }
+  // Source-level dedupe — skip anything we already ingested. One batched
+  // query instead of one per candidate (avoids an N+1 on the request path).
+  const alreadyIngested = await existingSourceIds(
+    userId,
+    gathered.map((job) => job.sourceId)
+  );
+  const freshJobs: SourceJob[] = gathered.filter(
+    (job) => !alreadyIngested.has(job.sourceId)
+  );
 
   if (freshJobs.length === 0) {
     return baseResult({
