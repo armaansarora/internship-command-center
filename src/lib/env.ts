@@ -117,6 +117,15 @@ const EnvSchema = z.object({
 
   // ── Email delivery (outreach) ────────────────────────────────────────────
   RESEND_API_KEY: z.string().min(1).optional(),
+  // From-addresses for transactional mail. Declared here (optional) so they
+  // are part of the single-source-of-truth schema; consumers fall back to a
+  // default sender when unset.
+  OUTREACH_EMAIL_FROM: z.string().optional(),
+  EXPORT_EMAIL_FROM: z.string().optional(),
+
+  // ── Platform (Vercel-injected at build) ──────────────────────────────────
+  // Set automatically by Vercel; surfaced for build/version stamping.
+  VERCEL_GIT_COMMIT_SHA: z.string().optional(),
 
   // ── Lighthouse Watchdog ──────────────────────────────────────────────────
   // Owner-only operational watchdog (every 30 minutes). Hourly AI cost
