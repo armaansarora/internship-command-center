@@ -116,14 +116,22 @@ async function handle(req: NextRequest): Promise<NextResponse> {
       perUserCap: PER_USER_CAP,
     });
 
-    for (const p of proposals) {
-      // Look up the target company name for the body copy.
-      const { data: target } = await admin
+    // Batch the target-company name lookups for the body copy — one query
+    // instead of one per proposal.
+    const targetIds = Array.from(new Set(proposals.map((p) => p.toCompanyId)));
+    const targetNameById = new Map<string, string>();
+    if (targetIds.length > 0) {
+      const { data: targets } = await admin
         .from("companies")
-        .select("name")
-        .eq("id", p.toCompanyId)
-        .maybeSingle();
-      const targetName = (target?.name as string) ?? "your target";
+        .select("id, name")
+        .in("id", targetIds);
+      for (const t of (targets ?? []) as Array<{ id: string; name: string | null }>) {
+        if (t.name) targetNameById.set(t.id, t.name);
+      }
+    }
+
+    for (const p of proposals) {
+      const targetName = targetNameById.get(p.toCompanyId) ?? "your target";
 
       await createNotification({
         userId,

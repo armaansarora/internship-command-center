@@ -59,11 +59,15 @@ vi.mock("@/lib/supabase/admin", () => ({
       if (table === "companies") {
         return {
           select: () => ({
-            eq: (_col: string, id: string) => ({
-              maybeSingle: async () => ({
-                data: fixture.companies.get(id) ?? null,
-                error: null,
-              }),
+            // Batched name lookup: .select("id, name").in("id", ids)
+            in: async (_col: string, ids: string[]) => ({
+              data: ids
+                .map((id) => {
+                  const c = fixture.companies.get(id);
+                  return c ? { id, name: c.name } : null;
+                })
+                .filter(Boolean),
+              error: null,
             }),
           }),
         };
