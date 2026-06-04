@@ -161,6 +161,14 @@ describe("R10.13 POST /api/offers/[id]/simulate", () => {
     expect(res.status).toBe(400);
     expect(simulateTurnMock).not.toHaveBeenCalled();
   });
+
+  it("returns 503 (not a raw 500) when the AI simulator throws or times out", async () => {
+    simulateTurnMock.mockRejectedValueOnce(new Error("provider stalled"));
+    const res = await POST(makeReq(validBody), ctx);
+    expect(res.status).toBe(503);
+    const json = (await res.json()) as { error: string };
+    expect(json.error).toBe("simulation_failed");
+  });
 });
 
 /**
