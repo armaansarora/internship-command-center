@@ -23,8 +23,8 @@ export function computeWarmth(lastContactAt: Date | null, now: Date): number {
 }
 
 export function computeWarmthTier(warmth: number): WarmthTier {
-  if (warmth >= 94) return "hot";      // 0-2 days
-  if (warmth >= 88) return "warm";     // 3-5 days (bucket ends at 6 days = 88)
+  if (warmth >= 94) return "hot";      // 0-3 days (day 3 = 94)
+  if (warmth >= 88) return "warm";     // 4-6 days (bucket ends at 6 days = 88)
   if (warmth >= 74) return "neutral";  // 7-13 days
   if (warmth >= 42) return "cooling";  // 14-29 days
   return "cold";                        // 30+ days

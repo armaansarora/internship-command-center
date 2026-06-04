@@ -30,12 +30,12 @@ describe("R8 P2 — computeWarmth", () => {
 });
 
 describe("computeWarmthTier (cool-blue palette, no red)", () => {
-  it("hot tier for 0-2 days since contact (warmth 94-100)", () => {
+  it("hot tier for 0-3 days since contact (warmth 94-100)", () => {
     expect(computeWarmthTier(100)).toBe("hot");
     expect(computeWarmthTier(96)).toBe("hot");
     expect(computeWarmthTier(94)).toBe("hot");
   });
-  it("warm tier for 3-5 days (warmth 88-93)", () => {
+  it("warm tier for 4-6 days (warmth 88-93)", () => {
     expect(computeWarmthTier(92)).toBe("warm");
     expect(computeWarmthTier(88)).toBe("warm");
   });
