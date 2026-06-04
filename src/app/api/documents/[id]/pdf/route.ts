@@ -91,10 +91,8 @@ export async function GET(
       id,
       type,
     });
-    return NextResponse.json(
-      { error: "render_failed", message: err instanceof Error ? err.message : String(err) },
-      { status: 500 },
-    );
+    // Exception already captured server-side above; don't echo internals.
+    return NextResponse.json({ error: "render_failed" }, { status: 500 });
   }
 
   const filename = `${slugify(title)}.pdf`;
