@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/supabase/server";
 import { scoreAnswer } from "@/lib/ai/structured/score-answer";
+import { log } from "@/lib/logger";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -62,9 +63,10 @@ export async function POST(req: NextRequest): Promise<Response> {
       rubric: parsed.data.rubric,
       answer: parsed.data.answer,
     });
-  } catch {
+  } catch (err) {
     // AI provider error (rate limit, upstream 5xx, malformed completion).
     // Fail with a clean 503 the client can retry instead of a raw 500.
+    log.error("briefing.score_answer.ai_failed", err, { userId: user.id });
     return NextResponse.json({ error: "scoring_failed" }, { status: 503 });
   }
   return NextResponse.json(result);

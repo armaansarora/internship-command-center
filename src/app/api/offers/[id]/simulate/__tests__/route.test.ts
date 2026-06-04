@@ -50,6 +50,10 @@ vi.mock("@/lib/stripe/entitlements", () => ({
   getUserTier: vi.fn(async () => "free"),
 }));
 
+vi.mock("@/lib/logger", () => ({
+  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
 import { POST } from "../route";
 
 function makeReq(body: unknown): NextRequest {

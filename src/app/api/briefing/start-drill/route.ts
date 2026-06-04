@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser, createClient } from "@/lib/supabase/server";
 import { generateDrillQuestions } from "@/lib/ai/structured/drill-questions";
+import { log } from "@/lib/logger";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -101,9 +102,10 @@ export async function POST(req: NextRequest): Promise<Response> {
       round: interview.round ?? "1",
       packetSummary,
     });
-  } catch {
+  } catch (err) {
     // AI provider error (rate limit, upstream 5xx, malformed completion).
     // Fail with a clean 503 the client can retry instead of a raw 500.
+    log.error("briefing.start_drill.ai_failed", err, { userId: user.id });
     return NextResponse.json({ error: "drill_failed" }, { status: 503 });
   }
 

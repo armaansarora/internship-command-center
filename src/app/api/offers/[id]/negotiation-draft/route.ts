@@ -11,6 +11,7 @@
  * Contract:
  *   - 401 when unauthenticated.
  *   - 404 when the offer doesn't exist or isn't owned by the caller.
+ *   - 503 when the AI draft helper errors or times out (retryable).
  *   - 500 when the queue insert fails.
  *   - 200 with `{ outreach }` on happy path — the inserted
  *     outreach_queue row (id, subject, body, type='negotiation', …).
@@ -30,6 +31,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { draftNegotiationEmail } from "@/lib/ai/structured/negotiation-draft";
 import type { ParlorConveningResult } from "@/lib/ai/agents/parlor-convening";
+import { log } from "@/lib/logger";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -104,12 +106,24 @@ export async function POST(
     );
   }
 
-  const draft = await draftNegotiationEmail({
-    userFirstName:
-      (auth.user as { firstName?: string }).firstName ?? "there",
-    offer,
-    convening,
-  });
+  let draft;
+  try {
+    draft = await draftNegotiationEmail({
+      userFirstName:
+        (auth.user as { firstName?: string }).firstName ?? "there",
+      offer,
+      convening,
+    });
+  } catch (err) {
+    // AI provider error (rate limit, upstream 5xx, malformed completion).
+    // Fail with a clean retryable 503 instead of a raw 500, matching the
+    // offers/[id]/simulate pattern.
+    log.error("offers.negotiation_draft.ai_failed", err, {
+      userId: auth.user.id,
+      offerId: offer.id,
+    });
+    return NextResponse.json({ error: "draft_failed" }, { status: 503 });
+  }
 
   const admin = getSupabaseAdmin();
   const { data: inserted, error } = await admin

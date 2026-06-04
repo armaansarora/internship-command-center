@@ -21,6 +21,7 @@
  *   - 404 when the contact or offer doesn't resolve under the caller's user.
  *   - 429 when a prior reference_request for this (contact, offer) is
  *     within the cooldown window.
+ *   - 503 when the AI draft helper errors or times out (retryable).
  *   - 500 when the queue insert fails.
  *   - 200 with { outreach } on happy path.
  *
@@ -37,6 +38,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getContactById } from "@/lib/db/queries/contacts-rest";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { draftReferenceRequest } from "@/lib/ai/structured/reference-request";
+import { log } from "@/lib/logger";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
@@ -142,12 +144,25 @@ export async function POST(
     );
   }
 
-  const draft = await draftReferenceRequest({
-    userFirstName:
-      (auth.user as { firstName?: string }).firstName ?? "there",
-    contact,
-    offer,
-  });
+  let draft;
+  try {
+    draft = await draftReferenceRequest({
+      userFirstName:
+        (auth.user as { firstName?: string }).firstName ?? "there",
+      contact,
+      offer,
+    });
+  } catch (err) {
+    // AI provider error (rate limit, upstream 5xx, malformed completion).
+    // Fail with a clean retryable 503 instead of a raw 500, matching the
+    // offers/[id]/simulate pattern.
+    log.error("contacts.reference_request.ai_failed", err, {
+      userId: auth.user.id,
+      contactId: contact.id,
+      offerId: offer.id,
+    });
+    return NextResponse.json({ error: "draft_failed" }, { status: 503 });
+  }
 
   const admin = getSupabaseAdmin();
   const { data: inserted, error } = await admin

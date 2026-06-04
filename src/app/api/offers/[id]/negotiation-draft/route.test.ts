@@ -88,6 +88,10 @@ vi.mock("@/lib/stripe/entitlements", () => ({
   getUserTier: vi.fn(async () => "free"),
 }));
 
+vi.mock("@/lib/logger", () => ({
+  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
 const { POST } = await import("./route");
 
 const OFFER_ID = "33333333-3333-4333-8333-333333333333";
@@ -189,6 +193,19 @@ describe("POST /api/offers/[id]/negotiation-draft", () => {
     expect(res.status).toBe(500);
     const body = (await res.json()) as { error: string };
     expect(body.error).toBe("insert blew up");
+  });
+
+  it("returns 503 (not a raw 500) when the AI draft helper throws", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    getOfferByIdSpy.mockResolvedValue(offerRow());
+    draftNegotiationEmailSpy.mockRejectedValueOnce(new Error("provider 503"));
+
+    const res = await callPost({});
+    expect(res.status).toBe(503);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("draft_failed");
+    // The AI call failed before any DB write — nothing queued.
+    expect(insertRowCaptureSpy).not.toHaveBeenCalled();
   });
 
   it("returns 200 with the inserted outreach on happy path (convening=null)", async () => {

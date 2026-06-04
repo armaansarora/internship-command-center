@@ -22,6 +22,7 @@ import { requireUserApi } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { simulateTurn } from "@/lib/ai/structured/simulator-turn";
+import { log } from "@/lib/logger";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -100,9 +101,10 @@ export async function POST(
       history,
       userReply: userReply ?? null,
     });
-  } catch {
+  } catch (err) {
     // AI provider error or timeout (simulateTurn aborts at 45s). Fail with a
     // clean 503 the client can retry instead of a raw 500 / held-open function.
+    log.error("offers.simulate.ai_failed", err, { userId: auth.user.id });
     return NextResponse.json({ error: "simulation_failed" }, { status: 503 });
   }
 
