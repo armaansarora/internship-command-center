@@ -4,7 +4,8 @@ import { getGoogleTokens } from "@/lib/gmail/oauth";
 import {
   parseGmailMessage,
   classifyEmail,
-  matchEmailToApplication,
+  fetchApplicationsForMatching,
+  matchEmailAgainstApplications,
 } from "@/lib/gmail/parser";
 import { readGoogleApiError } from "@/lib/google/api-error";
 import { log } from "@/lib/logger";
@@ -101,6 +102,13 @@ export async function syncGmailForUser(
   let classifiedCount = 0;
   let failedCount = 0;
 
+  // Fetch the user's applications ONCE for the whole batch — matching each
+  // email against them used to re-query the full applications table per email
+  // (an N+1 of up to 20 queries on the OAuth-callback request path).
+  const applications = await fetchApplicationsForMatching(userId, {
+    useAdmin: options.useAdmin,
+  });
+
   for (const ref of messageRefs) {
     try {
       const raw = await fetchMessageDetail(tokens.access_token, ref.id);
@@ -113,9 +121,10 @@ export async function syncGmailForUser(
         userId,
       });
 
-      const matchedApplicationId = await matchEmailToApplication(parsed, userId, {
-        useAdmin: options.useAdmin,
-      });
+      const matchedApplicationId = matchEmailAgainstApplications(
+        parsed,
+        applications,
+      );
 
       const row = {
         user_id: userId,

@@ -5,7 +5,8 @@ const {
   getGoogleTokensSpy,
   parseGmailMessageSpy,
   classifyEmailSpy,
-  matchEmailToApplicationSpy,
+  fetchApplicationsForMatchingSpy,
+  matchEmailAgainstApplicationsSpy,
   upsertSpy,
   fetchSpy,
 } = vi.hoisted(() => ({
@@ -13,7 +14,8 @@ const {
   getGoogleTokensSpy: vi.fn(),
   parseGmailMessageSpy: vi.fn(),
   classifyEmailSpy: vi.fn(),
-  matchEmailToApplicationSpy: vi.fn(),
+  fetchApplicationsForMatchingSpy: vi.fn(),
+  matchEmailAgainstApplicationsSpy: vi.fn(),
   upsertSpy: vi.fn(),
   fetchSpy: vi.fn(),
 }));
@@ -33,7 +35,8 @@ vi.mock("@/lib/gmail/oauth", () => ({
 vi.mock("@/lib/gmail/parser", () => ({
   parseGmailMessage: parseGmailMessageSpy,
   classifyEmail: classifyEmailSpy,
-  matchEmailToApplication: matchEmailToApplicationSpy,
+  fetchApplicationsForMatching: fetchApplicationsForMatchingSpy,
+  matchEmailAgainstApplications: matchEmailAgainstApplicationsSpy,
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -50,7 +53,8 @@ describe("syncGmailForUser", () => {
     getGoogleTokensSpy.mockReset();
     parseGmailMessageSpy.mockReset();
     classifyEmailSpy.mockReset();
-    matchEmailToApplicationSpy.mockReset();
+    fetchApplicationsForMatchingSpy.mockReset();
+    matchEmailAgainstApplicationsSpy.mockReset();
     upsertSpy.mockReset();
     fetchSpy.mockReset();
 
@@ -90,7 +94,10 @@ describe("syncGmailForUser", () => {
       urgency: "high",
       suggestedAction: "Schedule the interview",
     });
-    matchEmailToApplicationSpy.mockResolvedValue("application-1");
+    fetchApplicationsForMatchingSpy.mockResolvedValue([
+      { id: "application-1", company_name: "Example", companies: null },
+    ]);
+    matchEmailAgainstApplicationsSpy.mockReturnValue("application-1");
     upsertSpy.mockResolvedValue({ error: null });
   });
 
