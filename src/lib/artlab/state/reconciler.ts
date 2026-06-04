@@ -53,7 +53,14 @@ const MonthlySpendShapeSchema = z.object({
 function readMonthlySpend(runDir: string): { monthlySpentCents: number; monthlyCeilingCents: number } {
   const path = join(runDir, "monthly-spend.json");
   if (!existsSync(path)) return { monthlySpentCents: 0, monthlyCeilingCents: 0 };
-  return MonthlySpendShapeSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+  // Degrade gracefully on a corrupt/partial file (matches the other readers
+  // here): one bad monthly-spend.json must not throw out of readRunReality and
+  // abort crash-recovery for every subsequent run.
+  try {
+    return MonthlySpendShapeSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+  } catch {
+    return { monthlySpentCents: 0, monthlyCeilingCents: 0 };
+  }
 }
 
 function countActiveLeases(runDir: string): number {

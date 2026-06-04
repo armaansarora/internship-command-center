@@ -93,12 +93,19 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
   }
 
-  const questions = await generateDrillQuestions({
-    company: app?.company_name ?? "Unknown",
-    role: app?.role ?? "Unknown",
-    round: interview.round ?? "1",
-    packetSummary,
-  });
+  let questions;
+  try {
+    questions = await generateDrillQuestions({
+      company: app?.company_name ?? "Unknown",
+      role: app?.role ?? "Unknown",
+      round: interview.round ?? "1",
+      packetSummary,
+    });
+  } catch {
+    // AI provider error (rate limit, upstream 5xx, malformed completion).
+    // Fail with a clean 503 the client can retry instead of a raw 500.
+    return NextResponse.json({ error: "drill_failed" }, { status: 503 });
+  }
 
   return NextResponse.json({
     drillId: randomUUID(),
