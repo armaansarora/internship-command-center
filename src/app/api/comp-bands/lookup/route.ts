@@ -19,6 +19,7 @@ import { requireUserApi } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { lookupCompBands } from "@/lib/comp-bands/lookup";
+import { log } from "@/lib/logger";
 
 export async function GET(req: NextRequest | Request): Promise<Response> {
   const auth = await requireUserApi();
@@ -36,12 +37,18 @@ export async function GET(req: NextRequest | Request): Promise<Response> {
 
   const userClient = await createClient();
   const admin = getSupabaseAdmin();
-  const out = await lookupCompBands(userClient, admin, {
-    company,
-    role,
-    location,
-    level,
-  });
-
-  return NextResponse.json(out);
+  try {
+    const out = await lookupCompBands(userClient, admin, {
+      company,
+      role,
+      location,
+      level,
+    });
+    return NextResponse.json(out);
+  } catch (err) {
+    // Preserve the graceful-empty contract on a transient DB/scrape throw
+    // instead of surfacing an unhandled 500.
+    log.error("[comp-bands/lookup] lookup failed", err);
+    return NextResponse.json({ ok: false, reason: "empty" });
+  }
 }
