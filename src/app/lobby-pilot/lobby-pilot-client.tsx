@@ -1,10 +1,12 @@
 "use client";
 
 import type { CSSProperties, JSX } from "react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Mascot } from "@/components/identity/Mascot";
-import { TowerCompanion } from "@/components/identity/TowerCompanion";
+import { TowerCompanion, type CompanionDiagnostic } from "@/components/identity/TowerCompanion";
+
+type Engine = "png" | "rive" | "video";
 
 const NAVY = "#1A1A2E";
 const GOLD = "#C9A84C";
@@ -67,7 +69,10 @@ const segBtn = (active: boolean): CSSProperties => ({
 
 export function LobbyPilotClient(): JSX.Element {
   const [perch, setPerch] = useState(0);
-  const [engine, setEngine] = useState<"png" | "rive">("png");
+  const [engine, setEngine] = useState<Engine>("png");
+  const [status, setStatus] = useState<CompanionDiagnostic | null>(null);
+  // Stable identity so TowerCompanion's status effect doesn't re-fire each render.
+  const handleStatus = useCallback((d: CompanionDiagnostic) => setStatus(d), []);
 
   return (
     <main style={page}>
@@ -147,7 +152,7 @@ export function LobbyPilotClient(): JSX.Element {
             <span style={label}>glides to the next corner</span>
           </div>
 
-          {/* Engine toggle: flat puppet vs the rigged Rive owl. */}
+          {/* Engine toggle: flat puppet · rigged Rive · baked video loop. */}
           <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap", alignItems: "center" }}>
             <div role="group" aria-label="Companion animation engine" style={segGroup}>
               <button
@@ -166,13 +171,27 @@ export function LobbyPilotClient(): JSX.Element {
               >
                 Rive (rigged)
               </button>
+              <button
+                type="button"
+                aria-pressed={engine === "video"}
+                onClick={() => setEngine("video")}
+                style={segBtn(engine === "video")}
+              >
+                Video (baked)
+              </button>
             </div>
             <span style={label}>
               {engine === "rive"
                 ? "loads /brand/owl.riv · falls back to the GSAP owl until a rig is dropped in"
-                : "breathe · greet on click · hover perk · float + glide (no flap — that needs the rig)"}
+                : engine === "video"
+                  ? "loads /brand/owl-idle.mov + .webm · real baked breathe · falls back to the GSAP owl until the clip is dropped in"
+                  : "breathe · greet on click · hover perk · float + glide (no flap — that needs the rig)"}
             </span>
           </div>
+
+          {/* Live read-out of what the active engine's asset actually contains — so a
+              missing/mis-authored .riv or video is visible instead of silently falling back. */}
+          {status && status.engine === engine ? <CompanionStatusPill status={status} /> : null}
         </section>
 
         <footer style={{ ...sectionGap, ...label, lineHeight: 1.8 }}>
@@ -182,8 +201,111 @@ export function LobbyPilotClient(): JSX.Element {
         </footer>
       </div>
 
-      <TowerCompanion perchIndex={perch} engine={engine} riveSrc="/brand/owl.riv" />
+      <TowerCompanion
+        perchIndex={perch}
+        engine={engine}
+        riveSrc="/brand/owl.riv"
+        onStatus={handleStatus}
+      />
     </main>
+  );
+}
+
+/**
+ * CompanionStatusPill — surfaces what the active engine's asset actually is, so the
+ * author → drop-in loop is self-diagnosing (no more "I dropped it in and nothing
+ * changed"). For Rive it reads the loaded animation/state-machine names; for video
+ * it reflects whether the baked loop actually started playing.
+ */
+function CompanionStatusPill({ status }: { status: CompanionDiagnostic }): JSX.Element {
+  const named = (xs: string[]): string => (xs.length ? xs.map((s) => `“${s}”`).join(", ") : "none");
+
+  let tone = "#8A90A6";
+  let dot = "#8A90A6";
+  let text = "";
+
+  if (status.engine === "video") {
+    switch (status.phase) {
+      case "loading":
+        text = "Loading owl video — /brand/owl-idle…";
+        break;
+      case "live":
+        tone = GOLD;
+        dot = "#6FCF8E";
+        text = "Video live — the owl is breathing (baked loop). ✓";
+        break;
+      case "failed":
+        dot = "#C96A5A";
+        text =
+          "No owl video at /brand/owl-idle.{mov,webm} yet — showing the GSAP owl. Generate the clip (Kling → transparent WebM + HEVC .mov) and drop both into public/brand/.";
+        break;
+      case "reduced-motion":
+        text = "Reduced motion is on — showing the lit still (video never loads).";
+        break;
+    }
+  } else {
+    switch (status.phase) {
+      case "loading":
+        text = "Loading rig — /brand/owl.riv…";
+        break;
+      case "live":
+        tone = GOLD;
+        dot = "#6FCF8E";
+        text = "Rig live — playing the “Idle” animation via Rive. ✓";
+        break;
+      case "missing-idle":
+        tone = "#E2B341";
+        dot = "#E2B341";
+        text =
+          `Loaded, but no animation named “Idle”. Found animations: ${named(status.animations)}` +
+          (status.stateMachines.length ? `; state machines: ${named(status.stateMachines)}` : "") +
+          ". Rename your Rive animation to exactly “Idle” and re-export.";
+        break;
+      case "failed":
+        dot = "#C96A5A";
+        text =
+          "No rig at /brand/owl.riv yet — showing the GSAP owl. Export from Rive (Export → For runtime) and save it as public/brand/owl.riv.";
+        break;
+      case "reduced-motion":
+        text = "Reduced motion is on — showing the lit still (Rive never loads).";
+        break;
+    }
+  }
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10,
+        marginTop: 14,
+        maxWidth: 620,
+        padding: "10px 14px",
+        borderRadius: 12,
+        border: `1px solid ${tone}33`,
+        background: "rgba(255,255,255,0.03)",
+        fontFamily: mono,
+        fontSize: 12,
+        lineHeight: 1.55,
+        color: tone,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          flex: "0 0 auto",
+          width: 8,
+          height: 8,
+          marginTop: 5,
+          borderRadius: 999,
+          background: dot,
+          boxShadow: `0 0 8px ${dot}99`,
+        }}
+      />
+      <span>{text}</span>
+    </div>
   );
 }
 

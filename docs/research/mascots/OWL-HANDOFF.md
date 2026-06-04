@@ -32,12 +32,15 @@ Files (all present at the new path):
 ## 3. THE NEXT STEP (do this to light up the Rive owl)
 The user is mid-Rive-editor with **`owl-cream` imported (40% scale) + a looping `Idle` animation that keyframes Scale (the breathe)** — the screenshot state. It is **not exported yet**.
 
-1. In the Rive editor: **Export → Runtime `.riv`** (no state machine needed for v1).
+0. **First make the breathe actually MOVE.** A single Scale keyframe = static. Author the `Idle` loop with ≥2 keyframes whose Scale differs (e.g. rest → ~+1.5% → rest), first==last for a seamless loop, Cubic/Ease-In-Out interpolation, loop mode = **Loop**, ~3s long (brand rule: slow/barely-perceptible — a 1s pulse reads like panting). Anchor Origin Y≈100% so it breathes from the feet, not floating. Press play in the editor and confirm.
+1. **Export → For runtime** (confirmed path, Rive docs): top-left **`☰` menu → Export → For runtime**, or the blue export action on the toolbar. NOT **"Publish"** (that publishes to the Rive Community, not a local file). Needs a paid seat (Cadet covers it). No state machine needed for v1.
 2. Save the export to **`public/brand/owl.riv`** (this path is git-tracked and NOT CI-byte-protected — confirmed; only `public/art/lobby/otis/**` + `public/art/penthouse/ceo/**` are locked).
 3. On `/lobby-pilot`, flip the engine toggle to **"Rive (rigged)"** → the owl should breathe via Rive. **Zero code changes** (RiveOwl already plays `animations: "Idle"`).
-4. Verify: `npm run dev`, open `/lobby-pilot`, toggle to Rive, confirm it breathes + no console errors. (Or Playwright: assert the `<canvas>` mounts and `rive.wasm` returns 200.)
+4. Verify: open `/lobby-pilot`, toggle to Rive. **A status pill under the toggle now reads out exactly what the file contains** — "Rig live — playing 'Idle' ✓", or "Loaded, but no animation named 'Idle'. Found: […]" (rename + re-export), or "No rig at /brand/owl.riv yet" (fallback). No more silent fallback. (Runtime-verified 2026-06-02: missing-rig path shows the fallback pill + keeps the GSAP owl, only the expected 404 in console.)
 
-If the export uses a different animation name than `Idle`, either rename it in Rive to `Idle` or pass `animation="<name>"` to `<RiveOwl>` in `TowerCompanion.tsx`.
+If the export uses a different animation name than `Idle`, the pill names what it found — either rename it in Rive to `Idle` or pass `animation="<name>"` to `<RiveOwl>` in `TowerCompanion.tsx`.
+
+**Dev-server caveat (this session):** `npm run dev` (Turbopack) panicked on `/lobby-pilot` with "Failed to write app endpoint … Next.js package not found" and reload-looped. `npm run build && npm run start` (the production server) is clean — use it to smoke-test the owl if Turbopack dev panics.
 
 ## 4. Deferred (Stage 2 / later — NOT needed for v1)
 - **Greet + hover in Rive:** needs a **state machine named exactly `Owl`** with a **Trigger input `greet`** and **Boolean input `hover`**, plus Greet/Hover states + transitions. Then set `<RiveOwl stateMachine="Owl" ...>` in TowerCompanion and the greet/hover bridge lights up automatically. (For now, GSAP already does greet/hover on the `png` engine.)

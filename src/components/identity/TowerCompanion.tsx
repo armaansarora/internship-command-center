@@ -13,26 +13,45 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * a corner, idles with life, **glides** to a new perch when `perchIndex` changes
  * (the "flies across the app" motion), greets on click, and perks on hover.
  *
- * Two visual engines share ONE behaviour layer:
- *  - `engine="png"` (default): the single flat sprite treated as a LAYERED GSAP
- *    puppet. Nested transform wrappers keep each channel conflict-free —
- *    outer = glide (position), inner = idle float + sway, hover = perk scale,
- *    greet = one-shot reaction, breathe = slow scale pulse from the feet. No
- *    wing-flap (a true flap needs the rig); everything else reads as alive.
- *  - `engine="rive"`: a rigged owl (owl.riv) driving breathe / blink / greet via
- *    a Rive state machine. GSAP still owns WHERE the owl sits (the glide arc);
- *    Rive only owns what its body does. If the .riv is missing or fails to load,
- *    it falls back to the PNG (which keeps all the GSAP life above).
+ * Three visual engines share ONE behaviour layer. GSAP always owns WHERE the owl
+ * sits — perch, glide arc, greet bob, hover perk; the chosen engine owns what its
+ * BODY does:
+ *  - `engine="png"` (default): the single flat sprite as a layered GSAP puppet —
+ *    a slow breathe (scale pulse from the feet), greet, hover. No real blink/flap.
+ *  - `engine="rive"`: a rigged owl (owl.riv) — breathe / blink / greet via Rive.
+ *  - `engine="video"`: a baked, transparent, looping clip (owl-idle.webm for
+ *    Chrome/Firefox + an HEVC-alpha owl-idle.mov for Safari/iOS) of the owl
+ *    actually breathing and blinking — real body motion, authored with zero rigging.
  *
- * The Rive island is code-split (next/dynamic, ssr:false) and only mounted AFTER
- * first paint, with the PNG as the instant placeholder, so the ~700KB WASM never
- * blocks LCP. Reduced-motion resolves to the designed, fully-lit still (no loops,
- * no greet/hover motion) and never loads Rive at all. Scoped to /lobby-pilot.
+ * The Rive island is code-split (next/dynamic, ssr:false); both the Rive and the
+ * video engine mount only AFTER first paint, with the PNG as the instant
+ * placeholder, so neither the WASM nor the video ever competes for LCP. When an
+ * engine's asset is missing or fails to load, the PNG (with all the GSAP life)
+ * silently stands in. Reduced motion resolves to the designed, fully-lit still and
+ * loads neither heavy engine. Scoped to /lobby-pilot.
  */
 const RiveOwl = dynamic(() => import("./RiveOwl"), { ssr: false });
 
 const SIZE = 112;
 const MARGIN = 28;
+
+// The animation the v1 Rive rig must expose (must match RiveOwl's DEFAULT_ANIMATION
+// and the name authored in the Rive editor — case-sensitive).
+const EXPECTED_ANIMATION = "Idle";
+
+/**
+ * What a heavy engine (Rive or video) is actually doing — surfaced to the host
+ * page so a missing/mis-authored asset is visible instead of silently falling back.
+ *  - `loading`        — fetching/instantiating the asset
+ *  - `live`           — playing (Rive: the expected `Idle` animation is present)
+ *  - `missing-idle`   — Rive loaded, but no animation named `Idle` (lists what it found)
+ *  - `failed`         — asset missing / failed to load (the PNG owl stands in)
+ *  - `reduced-motion` — user prefers reduced motion; the engine never loads, still shown
+ */
+export type CompanionDiagnostic =
+  | { engine: "rive"; phase: "loading" | "failed" | "reduced-motion" }
+  | { engine: "rive"; phase: "live" | "missing-idle"; animations: string[]; stateMachines: string[] }
+  | { engine: "video"; phase: "loading" | "live" | "failed" | "reduced-motion" };
 
 type Corner = "br" | "bl" | "tl" | "tr";
 const ORDER: ReadonlyArray<Corner> = ["br", "bl", "tl", "tr"];
@@ -55,38 +74,95 @@ function coord(corner: Corner): { x: number; y: number } {
 export interface TowerCompanionProps {
   /** Index into the perch order; changing it glides the owl to that corner. */
   perchIndex?: number;
-  /** Visual engine: "png" (layered GSAP puppet) or "rive" (rigged owl.riv). Default "png". */
-  engine?: "png" | "rive";
+  /** Visual engine: "png" (GSAP puppet), "rive" (rigged owl.riv), or "video" (baked loop). Default "png". */
+  engine?: "png" | "rive" | "video";
   /** Path to the rigged owl when engine="rive". Default "/brand/owl.riv". */
   riveSrc?: string;
+  /** WebM (VP9 alpha) source when engine="video" — Chrome/Firefox. Default "/brand/owl-idle.webm". */
+  videoWebm?: string;
+  /** HEVC-alpha .mov source when engine="video" — Safari/iOS (listed first). Default "/brand/owl-idle.mov". */
+  videoMov?: string;
+  /** Reports what the active heavy engine is doing (for a visible status / debugging). */
+  onStatus?: (diagnostic: CompanionDiagnostic) => void;
 }
 
-type RiveStatus = "idle" | "ready" | "failed";
+type EngineStatus = "idle" | "ready" | "failed";
 
 export function TowerCompanion({
   perchIndex = 0,
   engine = "png",
   riveSrc = "/brand/owl.riv",
+  videoWebm = "/brand/owl-idle.webm",
+  videoMov = "/brand/owl-idle.mov",
+  onStatus,
 }: TowerCompanionProps): JSX.Element {
   const outerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<HTMLDivElement>(null);
   const greetRef = useRef<HTMLDivElement>(null);
   const breatheRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const prevPerch = useRef<number>(perchIndex);
   const reduce = useReducedMotion();
   const [bubble, setBubble] = useState(false);
   const [greetSignal, setGreetSignal] = useState(0);
   const [hovered, setHovered] = useState(false);
-  const [riveStatus, setRiveStatus] = useState<RiveStatus>("idle");
+  const [riveStatus, setRiveStatus] = useState<EngineStatus>("idle");
+  const [videoStatus, setVideoStatus] = useState<EngineStatus>("idle");
   const [afterPaint, setAfterPaint] = useState(false);
 
-  // Mount the Rive island only AFTER first paint so the PNG placeholder renders
-  // instantly and the WASM download never competes for LCP.
+  // Which heavy engine is mounted, and which is actually visible/playing. A body
+  // engine is "visible" only once its asset is live; until then the PNG shows.
+  const useRiveEngine = engine === "rive" && !reduce && afterPaint && riveStatus !== "failed";
+  const riveVisible = useRiveEngine && riveStatus === "ready";
+  const useVideoEngine = engine === "video" && !reduce && afterPaint && videoStatus !== "failed";
+  const videoVisible = useVideoEngine && videoStatus === "ready";
+  const bodyEngineVisible = riveVisible || videoVisible;
+
+  // Mount the heavy engines only AFTER first paint so the PNG placeholder renders
+  // instantly and neither the WASM nor the video competes for LCP.
   useEffect(() => {
     const id = requestAnimationFrame(() => setAfterPaint(true));
     return () => cancelAnimationFrame(id);
   }, []);
+
+  // Report what the active heavy engine is up to as conditions change. On (re)entry
+  // reset that engine to "idle" so a freshly-dropped asset is retried even after a
+  // prior "failed" in the same session.
+  useEffect(() => {
+    if (engine === "rive") {
+      if (reduce) {
+        onStatus?.({ engine: "rive", phase: "reduced-motion" });
+        return;
+      }
+      setRiveStatus("idle");
+      onStatus?.({ engine: "rive", phase: "loading" });
+    } else if (engine === "video") {
+      if (reduce) {
+        onStatus?.({ engine: "video", phase: "reduced-motion" });
+        return;
+      }
+      setVideoStatus("idle");
+      onStatus?.({ engine: "video", phase: "loading" });
+    }
+  }, [engine, reduce, onStatus]);
+
+  // React can omit the muted *attribute* on first render, which some browsers
+  // require set before they'll honour muted autoplay — force it on the element.
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = true;
+  }, [useVideoEngine]);
+
+  // Backstop: if the video neither starts nor errors within a few seconds (some
+  // browsers don't fire `error` on a 404 <source> set), treat it as failed → PNG.
+  useEffect(() => {
+    if (!useVideoEngine || videoStatus !== "idle") return;
+    const t = window.setTimeout(() => {
+      setVideoStatus("failed");
+      onStatus?.({ engine: "video", phase: "failed" });
+    }, 7000);
+    return () => window.clearTimeout(t);
+  }, [useVideoEngine, videoStatus, onStatus]);
 
   // Place at the initial perch + start the idle float (position bob + slow sway).
   useEffect(() => {
@@ -112,11 +188,13 @@ export function TowerCompanion({
   }, [reduce]);
 
   // Breathe: a barely-perceptible scale pulse from the feet (belly expand/settle).
-  // The signature "alive" beat — slow and organic, honouring the design system.
+  // Runs only when the flat PNG is the body — a Rive/video engine breathes on its
+  // own, so the GSAP breathe stands down when one is visible (no double-breathe).
   useEffect(() => {
     const el = breatheRef.current;
     if (!el) return;
-    if (reduce) {
+    if (reduce || bodyEngineVisible) {
+      gsap.killTweensOf(el);
       gsap.set(el, { scale: 1 });
       return;
     }
@@ -125,7 +203,7 @@ export function TowerCompanion({
     return () => {
       tl.kill();
     };
-  }, [reduce]);
+  }, [reduce, bodyEngineVisible]);
 
   // Greet: a one-shot warm reaction when clicked (small bob + tilt + scale pop).
   useEffect(() => {
@@ -175,12 +253,6 @@ export function TowerCompanion({
       .to(outer, { rotation: dir * 8, duration: 0.34, ease: "sine.out" }, 0)
       .to(outer, { rotation: 0, duration: 0.55, ease: "sine.inOut" }, 0.78);
   }, [perchIndex, reduce]);
-
-  // Use the rigged owl only when asked, motion is allowed, after first paint,
-  // and the .riv hasn't failed to load. Otherwise the PNG (with all the GSAP
-  // life above) stands in.
-  const useRiveEngine = engine === "rive" && !reduce && afterPaint && riveStatus !== "failed";
-  const riveVisible = useRiveEngine && riveStatus === "ready";
 
   return (
     <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 60 }}>
@@ -242,7 +314,7 @@ export function TowerCompanion({
                   ref={breatheRef}
                   style={{ position: "relative", width: SIZE, height: SIZE, transformOrigin: "50% 100%" }}
                 >
-                  {/* PNG: instant placeholder, reduced-motion still, and Rive fallback. */}
+                  {/* PNG: instant placeholder, reduced-motion still, and engine fallback. */}
                   <Image
                     src="/brand/owl-cream.png"
                     alt="Your Tower companion, a cream owl"
@@ -251,7 +323,7 @@ export function TowerCompanion({
                     priority
                     style={{
                       display: "block",
-                      opacity: riveVisible ? 0 : 1,
+                      opacity: bodyEngineVisible ? 0 : 1,
                       transition: "opacity 0.35s ease",
                     }}
                   />
@@ -271,9 +343,64 @@ export function TowerCompanion({
                         greetSignal={greetSignal}
                         hovered={hovered}
                         onReady={() => setRiveStatus("ready")}
-                        onFail={() => setRiveStatus("failed")}
+                        onFail={() => {
+                          setRiveStatus("failed");
+                          onStatus?.({ engine: "rive", phase: "failed" });
+                        }}
+                        onContents={({ animations, stateMachines }) => {
+                          setRiveStatus("ready");
+                          onStatus?.({
+                            engine: "rive",
+                            phase: animations.includes(EXPECTED_ANIMATION) ? "live" : "missing-idle",
+                            animations,
+                            stateMachines,
+                          });
+                        }}
                       />
                     </div>
+                  ) : null}
+                  {/* Video overlay: a baked transparent breathe/blink loop. The HEVC
+                      .mov is listed FIRST so Safari (which supports VP9 but NOT
+                      VP9-with-alpha) picks it; WebM serves Chrome/Firefox. */}
+                  {useVideoEngine ? (
+                    <video
+                      ref={videoRef}
+                      muted
+                      autoPlay
+                      loop
+                      playsInline
+                      poster="/brand/owl-cream.png"
+                      onPlaying={() => {
+                        setVideoStatus("ready");
+                        onStatus?.({ engine: "video", phase: "live" });
+                      }}
+                      onError={() => {
+                        // A per-<source> rejection is how multi-source fallback
+                        // works — every non-Safari browser rejects the HEVC .mov
+                        // (no alpha/codec) before falling back to the WebM, and
+                        // that fires `error` on the <source>, which React routes
+                        // here. Only fail the ENGINE once the <video> itself has
+                        // exhausted every source (its own MediaError is set).
+                        if (videoRef.current?.error) {
+                          setVideoStatus("failed");
+                          onStatus?.({ engine: "video", phase: "failed" });
+                        }
+                      }}
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: SIZE,
+                        height: SIZE,
+                        objectFit: "contain",
+                        display: "block",
+                        opacity: videoVisible ? 1 : 0,
+                        transition: "opacity 0.35s ease",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <source src={videoMov} type='video/mp4; codecs="hvc1"' />
+                      <source src={videoWebm} type="video/webm" />
+                    </video>
                   ) : null}
                 </div>
               </div>

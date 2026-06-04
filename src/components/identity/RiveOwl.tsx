@@ -1,7 +1,7 @@
 "use client";
 
 import type { JSX } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { initRive, useRive, useStateMachineInput, Fit, Alignment, Layout } from "@/lib/rive-init";
 
@@ -42,6 +42,13 @@ export interface RiveOwlProps {
   onReady?: () => void;
   /** Fired if the .riv is missing or fails to load (parent keeps the PNG). */
   onFail?: () => void;
+  /**
+   * Fired once after load with what the file actually contains. Lets the UI tell
+   * whether the expected `Idle` animation / `Owl` state machine are present — a
+   * mis-named or empty export otherwise fails silently (canvas shows frame 0,
+   * nothing plays, and the PNG-identical still hides the mistake).
+   */
+  onContents?: (contents: { animations: string[]; stateMachines: string[] }) => void;
 }
 
 /**
@@ -63,16 +70,33 @@ export default function RiveOwl({
   paused = false,
   onReady,
   onFail,
+  onContents,
 }: RiveOwlProps): JSX.Element {
+  const [loaded, setLoaded] = useState(false);
+  const reportedRef = useRef(false);
   const { rive, RiveComponent } = useRive({
     src,
     // Drive a state machine if one is named; otherwise just play the animation.
     ...(stateMachine ? { stateMachines: stateMachine } : { animations: animation }),
     autoplay: true,
     layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
-    onLoad: () => onReady?.(),
+    onLoad: () => setLoaded(true),
     onLoadError: () => onFail?.(),
   });
+
+  // Once the instance is loaded, surface readiness + what the file contains.
+  // Done in an effect (not the onLoad callback) because `rive` — and therefore
+  // `animationNames`/`stateMachineNames` — is only populated after load. Guarded
+  // to fire exactly once.
+  useEffect(() => {
+    if (!loaded || !rive || reportedRef.current) return;
+    reportedRef.current = true;
+    onReady?.();
+    onContents?.({
+      animations: [...(rive.animationNames ?? [])],
+      stateMachines: [...(rive.stateMachineNames ?? [])],
+    });
+  }, [loaded, rive, onReady, onContents]);
 
   // These resolve to null until a state machine with these inputs exists, so the
   // greet/hover bridge is a safe no-op for the v1 animation-only owl.
