@@ -137,6 +137,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
         sourceEntityId: `warm-intro-${p.contactId}-${p.applicationId}`,
         sourceEntityType: "contact",
         channels: ["pneumatic_tube"],
+        dedupeBySourceEntity: true,
       });
       total += 1;
     }

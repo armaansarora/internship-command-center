@@ -105,6 +105,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
           sourceEntityId: `cooling-${row.id}-w${weekBucket}`,
           sourceEntityType: "contact",
           channels: ["pneumatic_tube"],
+          dedupeBySourceEntity: true,
         });
         alerted += 1;
       }

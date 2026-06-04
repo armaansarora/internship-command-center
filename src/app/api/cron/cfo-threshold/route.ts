@@ -179,6 +179,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
         sourceEntityId: `cfo-threshold-${userId}-w${weekBucket}`,
         sourceEntityType: "analytics",
         channels: ["pneumatic_tube"],
+        dedupeBySourceEntity: true,
       });
       notified += 1;
     } catch (err) {

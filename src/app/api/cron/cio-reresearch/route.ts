@@ -133,6 +133,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
         sourceEntityId: `cio-reresearch-${co.id}-${today}`,
         sourceEntityType: "company",
         channels: ["pneumatic_tube"],
+        dedupeBySourceEntity: true,
       });
     }
   }
