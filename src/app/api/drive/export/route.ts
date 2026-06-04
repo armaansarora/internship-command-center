@@ -3,6 +3,7 @@ import { requireUserApi } from "@/lib/auth/require-user";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import { getDocumentById } from "@/lib/db/queries/documents-rest";
 import { exportDocumentToDrive } from "@/lib/utils/google-drive-export";
+import { log } from "@/lib/logger";
 import {
   DEFAULT_JSON_BODY_MAX_BYTES,
   readJsonBodyWithLimit,
@@ -53,9 +54,11 @@ export async function POST(req: Request): Promise<Response> {
       webViewLink: result.webViewLink,
     }, { headers: rate.headers });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Export failed";
+    // Don't leak the internal exception (Google API / token-storage details)
+    // to the client; capture it server-side and return a generic message.
+    log.error("[drive/export] export failed", error, { userId: user.id });
     return NextResponse.json(
-      { error: message },
+      { error: "Export failed", code: "DRIVE_EXPORT_FAILED" },
       { status: 500, headers: rate.headers }
     );
   }
