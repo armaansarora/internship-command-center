@@ -240,6 +240,8 @@ function resolveProjectRootFromWorkspace(workspaceRoot: string): string {
     return ws.replace(/\/\.artlab\/engine\/?$/, "");
   }
   if (existsSync(join(ws, "docs", "ART-BIBLE.md"))) return ws;
+  const cwd = process.cwd();
+  if (existsSync(join(cwd, "docs", "ART-BIBLE.md"))) return cwd;
   return LOCAL_PROJECT_ROOT_GUESS;
 }
 

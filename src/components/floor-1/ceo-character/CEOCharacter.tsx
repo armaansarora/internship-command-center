@@ -58,6 +58,7 @@ export function CEOCharacter({
       activeLabel="● CEO"
       isOpen={snapshot.context.isConversationOpen}
       accent="#C9A84C"
+      priority
       onClick={() => {
         send({ type: "CLICK" });
         if (!snapshot.context.isConversationOpen) onConversationOpen?.();

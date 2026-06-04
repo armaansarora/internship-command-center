@@ -14,37 +14,33 @@ The studio was reset on 2026-05-15. Since that reset, Otis completed the product
 
 ## Start Here
 
-For the guided Creative Production Engine session:
+For a new visual request, use the ArtLab router rather than hand-placing files:
 
 ```bash
-npm run art:studio
+npm run artlab -- produce "let's make Mara"
 ```
 
 For read-only status:
 
 ```bash
-npm run art:status
+npm run artlab -- status
 ```
 
-For machine-readable status:
+For queue and health diagnostics:
 
 ```bash
-npm --silent run art:status -- --json
+npm run artlab -- queue
+npm run artlab -- health
+npm run artlab -- doctor
 ```
 
-For a new visual request, use the studio router rather than hand-placing files:
+For daemon supervision:
 
 ```bash
-npm run art:produce -- --request "let's make Mara"
+npm run artlab:daemon -- status
 ```
 
-For a no-provider operator rehearsal:
-
-```bash
-npm run art:produce -- --request "let's make Mara" --dry-run
-```
-
-The engine routes characters, backgrounds, screens, UI surfaces, animations, props, scenes, shaders, and marketing visuals into organized `.artlab/studio/...` packets.
+The engine routes characters, backgrounds, screens, UI surfaces, animations, props, scenes, shaders, and marketing visuals through `.artlab/engine/...` run state.
 
 ## Image Generation Rules
 
@@ -66,18 +62,14 @@ The engine routes characters, backgrounds, screens, UI surfaces, animations, pro
 
 ## Parallel Mode
 
-Normal creative packets use five-lane parallel wave mode by default. Each lane writes only to its own lane root. The coordinator validates lanes, scores and dedupes results, creates the review board, and owns promotion.
-
-Lane subagents should use GPT-5.5 fast mode with extra-high reasoning when available. Use `--no-parallel` only for diagnostics. Validate each lane with `npm run art:studio -- --mode validate-lane --lane-brief <lane-brief.json>`, then run `npm run art:studio -- --mode coordinate --parallel-plan <parallel-plan.json>` so the coordinator writes `coordinator-review.json`, `coordinator-report.md`, `review-board.html`, and `promotion-gate.json`.
-
-API image runs use 5 lanes with concurrency 5 for initial design. Do not serialize the five initial concepts unless the run is explicitly diagnostic.
+ArtLab owns run parallelism through its queue, daemon, leases, and per-run state. Do not hand-launch competing `produce` or `continue` commands against the same run; enqueue once, then inspect with `status`, `queue`, `health`, and `doctor`. Promotion remains coordinator-owned and still requires the exact human phrase `approved for app`.
 
 ## Required Gates
 
 Every phase must run:
 
 - Housekeeping Gate: inventory created files, delete loose junk, keep only used artifacts, and confirm no unapproved asset entered `public/art`.
-- Continuous Improvement Gate: run `npm run art:studio -- --mode improve` to record slow steps, errors, confusing points, quality failures, and engine rewrite needs. Repeated friction must become code, tests, or a stricter command-level guard.
+- Continuous Improvement Gate: record slow steps, errors, confusing points, quality failures, and engine rewrite needs in the run ledgers. Repeated friction must become code, tests, or a stricter command-level guard.
 - Asset Doctor Gate before final approval boards and promotion.
 
 ## Layout
@@ -85,16 +77,15 @@ Every phase must run:
 ```text
 .artlab/
   README.md
-  studio/
-    <asset-type>/<run-id>/
-      creative-brief.json
-      prompt.md
-      next-action.md
-      parallel/
-      generation/
-      ledgers/
-  inbox/
-    <asset-type>/<run-id>/<slot-id>/
+  engine/
+    runs/<run-id>/
+      run-state.json
+      progress.json
+      events.jsonl
+      slot-leases/
+    inbox/cli/
+    queue/
+    ledgers/
   characters/
     <character-id>/
   runs/

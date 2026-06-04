@@ -16,41 +16,42 @@ This is the start-here runbook for any Codex or Claude session that continues To
 
 ## First Commands
 
-For the guided Creative Production Engine session:
+For a new ArtLab request:
 
 ```bash
-npm run art:produce -- --request "<what Armaan wants to add or continue>"
+npm run artlab -- produce "<what Armaan wants to add or continue>"
 ```
 
 For read-only status:
 
 ```bash
-npm run art:status
+npm run artlab -- status
 ```
 
 For engine safety before another provider or promotion step:
 
 ```bash
-npm run art:health
+npm run artlab -- health
+npm run artlab -- doctor
 ```
 
 To answer a durable human-action gate:
 
 ```bash
-npm run art:produce -- --answer <run-id> "<plain English answer>"
+npm run artlab -- answer <run-id> "<plain English answer>"
 ```
 
-For machine-readable handoff:
+To continue a paused run:
 
 ```bash
-npm --silent run art:status -- --json
+npm run artlab -- continue <run-id>
 ```
 
-Use `npm run art:operate` only when the active asset is a Season 1 character and the engine has reached the strict character-art operator stage.
+The removed `art:*` scripts are legacy-only. Use `npm run artlab -- help` to inspect the current CLI surface.
 
 ## If Armaan Says Continue Generating Images
 
-1. Run `npm run art:studio`.
+1. Run `npm run artlab -- status`.
 2. Confirm the current art state in plain language: promoted Otis is protected, Lobby backgrounds remain, and any new requested character starts from scratch unless a current run-state explicitly names an approved identity reference.
 3. Ask what is being added or changed today if the request is not already clear.
 4. For a new or explicitly requested character, create exactly five prompt-only initial concepts with five concurrent lanes. Do not reuse an old reference unless the current run-state says it is the approved identity reference.
@@ -60,7 +61,7 @@ Use `npm run art:operate` only when the active asset is a Season 1 character and
 8. Promote only after the exact phrase, and do not stop at an unlocked `approved-for-app` state:
 
 ```bash
-npm run art:produce -- --answer <run-id> "approved for app"
+npm run artlab -- answer <run-id> "approved for app"
 ```
 
 That command must run the reusable final promotion adapter: create public WebP renditions for every required character slot, copy them into `public/art/<space>/<characterId>/`, update `src/lib/visual-assets/approved-character-assets.generated.json`, write the promotion receipt, and move the run into app integration. The legacy `npm run art:promote -- <run.json> --approval-phrase "approved for app"` remains only for older character-art run JSONs.
@@ -82,16 +83,17 @@ Production paid generation is canary-gated. After an initial design is chosen, p
 - Failed slots are repaired or regenerated individually. Do not rerun a whole pack because one image failed.
 - Generated outputs stay in `.artlab` until final promotion.
 - `src/lib/visual-assets/approved-character-assets.generated.json` is the production character manifest. It currently includes promoted Otis and must not be cleared or rewritten except through the final promotion firewall.
-- Current v1-final runs resume from `run-state.json`, `progress.json`, `human-action.json`, `events.jsonl`, receipts, and review action manifests. Do not rely on chat history.
-- `art:produce -- --continue <run-id>` must stop at `upgrade-required` when active continuous-improvement blockers exist. Resolved historical failures are reset by an `engine-upgrade` ledger entry.
+- Current ArtLab runs resume from `run-state.json`, `progress.json`, `events.jsonl`, receipts, and review action manifests. Do not rely on chat history.
+- `npm run artlab -- continue <run-id>` must stop when active blockers require human, provider, budget, repair, or engine action. Resolved historical failures are reset by an engine-upgrade ledger entry.
 
 ## If Armaan Asks What Has Been Done
 
 Answer from these sources, in this order:
 
-- `npm run art:status`
+- `npm run artlab -- status`
 - `.artlab/README.md`
-- `docs/legacy/CREATIVE-PRODUCTION-ENGINE.md`
+- `docs/artlab/ENGINE.md`
+- `docs/artlab/OPERATIONS.md`
 - `docs/CHARACTER-ART-PIPELINE.md`
 - `docs/CHARACTER-ASSET-HANDOFF.md`
 - `src/lib/visual-assets/approved-character-assets.generated.json`

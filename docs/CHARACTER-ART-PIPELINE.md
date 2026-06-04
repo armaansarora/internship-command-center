@@ -104,26 +104,17 @@ The factory contract lives in `src/lib/visual-assets/art-run.ts`.
 Factory commands:
 
 ```bash
-npm run art:operate
-npm run art:status
-npm run art:produce -- --request "Create five prompt-only initial Otis designs from scratch."
-npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json> --lane-count 5 --concurrency 5 --resolution 4K --aspect-ratio 9:16 --budget-cents 1000
-npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --request-timeout-ms 300000
-npm run art:generate prepare-api --phase production-pack --packet <creative-brief.json> --directive <next-image-generation-step.json> --lane-count 1 --concurrency 5 --budget-cents 600
-npm run art:generate run-api --plan <canary/gemini-api-plan.json> --max-attempts 2 --request-timeout-ms 300000
-npm run art:generate repair-plan --plan <canary/gemini-api-plan.json> --strict
-npm run art:generate repair-auto --plan <canary/gemini-api-plan.json>
-npm run art:generate verify-canary --plan <canary/gemini-api-plan.json>
-npm run art:generate run-api --plan <full/gemini-api-plan.json> --max-attempts 2 --no-retry-warnings --request-timeout-ms 300000
-npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>
-npm run art:plan -- otis --run-id <approved-otis-production-run> --identity-ref .artlab/characters/otis/references/identity/<approved-file>.png
-npm run art:ingest -- <run.json> --source <generated-file.png> --kind pose-sheet --id pose-sheet-regular --outfit regular --columns 7 --rows 1
-npm run art:split -- <run.json> --source-asset pose-sheet-regular
-npm run art:master -- <run.json>
-npm run art:qa -- <run.json>
-npm run art:review -- <run.json>
-npm run art:promote -- <run.json> --approval-phrase "approved for app"
+npm run artlab -- status
+npm run artlab -- health
+npm run artlab -- doctor
+npm run artlab -- produce "Create five prompt-only initial Otis designs from scratch."
+npm run artlab -- continue <runId>
+npm run artlab -- answer <runId> "approve direction 3"
+npm run artlab -- answer <runId> "approved for app"
+npm run artlab -- show <runId>
 ```
+
+Older `art:*` factory commands live only in legacy docs and should not be used for new runs.
 
 ## Runtime Motion Model
 
@@ -247,7 +238,7 @@ Otis remains first because the Lobby already has canonical environmental art. Ot
 
 Next:
 
-- Run `npm run art:status`.
+- Run `npm run artlab -- status`.
 - Confirm Otis reports as `closed`, browser-QA verified, and protected as the promoted baseline.
 - Use Otis as the first regression fixture for status, health, cleanup, manifest protection, and browser checks.
 - Mara Voss (`ceo`) is the next unpromoted character unless Armaan explicitly asks to redo Otis.

@@ -98,6 +98,7 @@ interface CharacterStageProps {
   outfitVariant?: CharacterOutfitVariant;
   "aria-label": string;
   className?: string;
+  priority?: boolean;
   style?: CSSProperties;
   reducedMotionOverride?: boolean;
 }
@@ -108,6 +109,7 @@ export function CharacterStage({
   outfitVariant = "regular",
   "aria-label": ariaLabel,
   className,
+  priority = false,
   style,
   reducedMotionOverride,
 }: CharacterStageProps): JSX.Element {
@@ -142,6 +144,7 @@ export function CharacterStage({
 	          pose={pose}
 	          state={state}
 	          aria-label={ariaLabel}
+	          priority={priority}
 	          style={style}
 	        />
 	      </VisualAssetStage>
