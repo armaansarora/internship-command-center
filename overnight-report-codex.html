@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex Overnight Hardening Report</title>
+  <style>
+    :root {
+      --ink: #10131a;
+      --muted: #647084;
+      --line: #d8dee8;
+      --paper: #f7f8fb;
+      --panel: #ffffff;
+      --navy: #172033;
+      --gold: #c9a84c;
+      --green: #2d8f5d;
+      --red: #b74a4a;
+      --blue: #4a83c4;
+      --violet: #6f5bb8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(23,32,51,0.08), transparent 260px),
+        var(--paper);
+      font: 15px/1.55 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main { max-width: 1160px; margin: 0 auto; padding: 36px 22px 60px; }
+    header {
+      min-height: 340px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 28px;
+      align-items: end;
+      padding: 42px;
+      color: #f5f1e8;
+      background:
+        radial-gradient(circle at 78% 18%, rgba(201,168,76,0.30), transparent 28%),
+        linear-gradient(135deg, #121827, #1f2b44 58%, #111826);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 8px;
+      box-shadow: 0 24px 70px rgba(18,24,39,0.18);
+    }
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font: 700 12px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    h1 { margin: 0; font-size: clamp(36px, 6vw, 72px); line-height: 0.96; letter-spacing: 0; }
+    h2 { margin: 0 0 14px; font-size: 23px; line-height: 1.15; letter-spacing: 0; }
+    h3 { margin: 0 0 10px; font-size: 15px; line-height: 1.25; letter-spacing: 0; }
+    p { margin: 0 0 12px; }
+    a { color: var(--blue); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; }
+    .hero-copy { max-width: 680px; color: #dfe5ef; font-size: 18px; margin-top: 20px; }
+    .hero-panel {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 8px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .hero-panel strong { display: block; font-size: 34px; line-height: 1; color: #fff; }
+    .hero-panel span { display: block; margin-top: 8px; color: #cad3e1; }
+    .grid { display: grid; gap: 16px; }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    section { margin-top: 24px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(18,24,39,0.06);
+    }
+    .metric {
+      min-height: 146px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .metric .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; }
+    .metric .value { font-size: 38px; line-height: 1; font-weight: 800; }
+    .metric.good .value { color: var(--green); }
+    .metric.bad .value { color: var(--red); }
+    .metric .note { color: var(--muted); font-size: 13px; }
+    .compare { display: grid; gap: 12px; }
+    .bar-row { display: grid; grid-template-columns: 150px 1fr 68px; gap: 12px; align-items: center; }
+    .bar-label { color: var(--muted); font-size: 13px; }
+    .track { height: 10px; background: #edf1f6; border-radius: 999px; overflow: hidden; }
+    .bar { height: 100%; border-radius: 999px; }
+    .bar.red { background: var(--red); }
+    .bar.green { background: var(--green); }
+    .bar.blue { background: var(--blue); }
+    .bar.gold { background: var(--gold); }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #edf7f1;
+      color: #206b45;
+      font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .timeline { display: grid; gap: 10px; }
+    .event {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    .dot { width: 10px; height: 10px; margin-top: 7px; border-radius: 50%; background: var(--gold); }
+    ul { margin: 8px 0 0 19px; padding: 0; }
+    li { margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+    .footer-note { margin-top: 26px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 860px) {
+      header, .grid.two, .grid.four { grid-template-columns: 1fr; }
+      header { padding: 28px; }
+      .bar-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <p class="eyebrow">Codex overnight hardening</p>
+      <h1>Green by morning.</h1>
+      <p class="hero-copy">The branch moved from red baseline checks and vulnerable dependencies to a clean, pushed branch with two full verification passes.</p>
+    </div>
+    <div class="hero-panel">
+      <strong>21695cc2</strong>
+      <span><code>auto/overnight-codex-2026-06-04</code></span>
+      <span>Source fixes pushed to origin. Final report commit follows this artifact.</span>
+    </div>
+  </header>
+
+  <section class="grid four">
+    <div class="card metric good">
+      <div class="label">Unit Tests</div>
+      <div class="value">4273</div>
+      <div class="note">passed, 10 skipped, 0 failed</div>
+    </div>
+    <div class="card metric good">
+      <div class="label">E2E Tests</div>
+      <div class="value">72</div>
+      <div class="note">passed, 9 skipped, 0 failed</div>
+    </div>
+    <div class="card metric good">
+      <div class="label">Vulnerabilities</div>
+      <div class="value">0</div>
+      <div class="note">down from 7</div>
+    </div>
+    <div class="card metric good">
+      <div class="label">Warnings</div>
+      <div class="value">0</div>
+      <div class="note">lint clean</div>
+    </div>
+  </section>
+
+  <section class="grid two">
+    <div class="card">
+      <h2>Baseline vs Final</h2>
+      <div class="compare">
+        <div class="bar-row">
+          <div class="bar-label">Unit failures</div>
+          <div class="track"><div class="bar red" style="width: 75%"></div></div>
+          <code>3 -> 0</code>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">E2E failures</div>
+          <div class="track"><div class="bar red" style="width: 50%"></div></div>
+          <code>2 -> 0</code>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Vulnerabilities</div>
+          <div class="track"><div class="bar gold" style="width: 100%"></div></div>
+          <code>7 -> 0</code>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Lint warnings</div>
+          <div class="track"><div class="bar blue" style="width: 60%"></div></div>
+          <code>3 -> 0</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Verification</h2>
+      <table>
+        <tr><th>Gate</th><th>Final</th></tr>
+        <tr><td>Build</td><td><span class="status-pill">Pass</span> Next 16.2.7, 91 static pages</td></tr>
+        <tr><td>Lint</td><td><span class="status-pill">Pass</span> 0 warnings</td></tr>
+        <tr><td>Types</td><td><span class="status-pill">Pass</span> <code>tsc --noEmit</code></td></tr>
+        <tr><td>Vitest</td><td><span class="status-pill">Pass</span> 4273 passed, 10 skipped</td></tr>
+        <tr><td>Playwright</td><td><span class="status-pill">Pass</span> 72 passed, 9 skipped</td></tr>
+        <tr><td>Audit</td><td><span class="status-pill">Pass</span> 0 vulnerabilities</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="grid two">
+    <div class="card">
+      <h2>Fixes Grouped</h2>
+      <h3>Correctness</h3>
+      <ul>
+        <li>ArtLab context loader now prefers the current repo before stale absolute fallback paths.</li>
+        <li>Stripe webhook returns a typed missing-signature response before requiring secrets.</li>
+        <li>Orrery high-density render path holds the real Chromium 30 FPS floor.</li>
+      </ul>
+      <h3>Security</h3>
+      <ul>
+        <li>Next.js upgraded to 16.2.7 and all audit findings cleared.</li>
+        <li>Comp-bands lookup now has tier-B rate limiting and length guards.</li>
+      </ul>
+      <h3>Frontend</h3>
+      <ul>
+        <li>Stable DnD id removes scale-route hydration drift.</li>
+        <li>Above-the-fold character art can opt into priority loading.</li>
+      </ul>
+      <h3>Docs</h3>
+      <ul>
+        <li>Active ArtLab docs now use <code>npm run artlab -- ...</code>.</li>
+        <li>Missing visual identity review/spec artifacts were restored to match the current owl pilot.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Timeline</h2>
+      <div class="timeline">
+        <div class="event"><div class="dot"></div><div><strong>Baseline</strong><br>Build passed, but unit, E2E, lint warnings, and audit were red/yellow.</div></div>
+        <div class="event"><div class="dot"></div><div><strong>Parallel diagnostics</strong><br>ArtLab, frontend/perf, security, and docs/architecture agents found independent issues.</div></div>
+        <div class="event"><div class="dot"></div><div><strong>Fix loop</strong><br>Targeted tests first, then full build/test/lint/type/audit gates.</div></div>
+        <div class="event"><div class="dot"></div><div><strong>Commit and push</strong><br><code>21695cc2 Harden overnight baseline checks</code> pushed to origin.</div></div>
+        <div class="event"><div class="dot"></div><div><strong>Second pass</strong><br>Fresh diagnostics and full verification stayed green.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Reorganization Decision</h2>
+    <p>Research used the official Next.js project structure guidance plus local <code>CLAUDE.md</code>, <code>STRUCTURE.md</code>, and package conventions.</p>
+    <p>The repo already follows the relevant App Router split. A broad doc move was considered but skipped because active tests and agent prompts still consume root character-image docs directly. The safer atomic action was to repair stale docs in place and log broader relocation for human review.</p>
+    <p>Source: <a href="https://nextjs.org/docs/app/getting-started/project-structure">Next.js project structure docs</a>.</p>
+  </section>
+
+  <section class="grid two">
+    <div class="card">
+      <h2>Skills And Workflows Used</h2>
+      <ul>
+        <li>Superpowers-style TDD, debugging, and verification loop.</li>
+        <li>Codex Security-style dependency and abuse-surface review.</li>
+        <li>Vercel/Next.js build and structure guidance.</li>
+        <li>Playwright real-browser verification.</li>
+        <li>Parallel read-only multi-agent diagnostics.</li>
+        <li>UI/UX report design pass for this artifact.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Needs Human Review</h2>
+      <ul>
+        <li>Global RTK hook integrity failure in <code>~/.claude/hooks/rtk-rewrite.sh</code>.</li>
+        <li>Public canary heartbeat service-role write contract.</li>
+        <li>AI quota RPC fail-open/fail-closed tradeoff and E2E log noise.</li>
+        <li>Atomic comp-bands lookup budget RPC follow-up.</li>
+        <li>Production trust assumptions for forwarded client IPs.</li>
+        <li>Broad docs reorganization, if desired.</li>
+      </ul>
+    </div>
+  </section>
+
+  <p class="footer-note">Generated in the isolated worktree <code>/Users/armaanarora/Developer/overnight-codex</code>. Main was not touched.</p>
+</main>
+</body>
+</html>
