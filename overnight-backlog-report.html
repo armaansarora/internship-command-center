@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Tower · Overnight Backlog — Ship Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{
+  --bg:oklch(0.18 0.035 275); --bg-2:oklch(0.215 0.04 277);
+  --panel:oklch(0.235 0.038 278 / 0.72); --panel-2:oklch(0.27 0.04 278 / 0.55);
+  --line:oklch(0.42 0.03 278 / 0.45); --line-soft:oklch(0.42 0.03 278 / 0.22);
+  --ink:oklch(0.95 0.012 90); --ink-2:oklch(0.80 0.018 280); --ink-3:oklch(0.66 0.022 280);
+  --gold:oklch(0.78 0.11 86); --gold-deep:oklch(0.70 0.12 80);
+  --green:oklch(0.78 0.14 155); --red:oklch(0.70 0.16 25);
+  --blue:oklch(0.74 0.12 240); --violet:oklch(0.74 0.12 300);
+  --serif:'Playfair Display',Georgia,serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.6;
+  background:radial-gradient(1200px 600px at 78% -8%,oklch(0.30 0.07 86 / 0.18),transparent 60%),
+    radial-gradient(900px 500px at 8% 4%,oklch(0.32 0.06 278 / 0.30),transparent 55%),
+    linear-gradient(180deg,var(--bg-2),var(--bg) 40%);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);font-weight:600}
+a{color:var(--gold);text-decoration:none;border-bottom:1px solid var(--line)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:no-preference){
+  .rise{opacity:0;animation:rise .9s cubic-bezier(.16,1,.3,1) forwards}
+  .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.2s}.d4{animation-delay:.28s}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .bar-fill{transform-origin:left center;animation:grow 1.1s cubic-bezier(.16,1,.3,1) forwards}
+}
+header{position:relative;padding:74px 0 44px;border-bottom:1px solid var(--line-soft)}
+.crown{display:flex;align-items:center;gap:14px;margin-bottom:30px}
+.crown .glyph{font-family:var(--serif);font-weight:800;font-size:21px;color:var(--gold);letter-spacing:.02em}
+.crown .sep{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(40px,7.2vw,82px);line-height:.98;letter-spacing:-.01em;margin:0 0 18px}
+h1 .thin{font-weight:500;font-style:italic;color:var(--ink-2)}
+.lede{max-width:62ch;font-size:19px;color:var(--ink-2);margin:0 0 30px}
+.lede b{color:var(--ink);font-weight:600}
+.facts{display:flex;flex-wrap:wrap;gap:10px 22px;font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+.facts span{display:inline-flex;gap:8px;align-items:center}
+.facts b{color:var(--ink-2);font-weight:500}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px oklch(0.78 0.14 155 / 0.16)}
+.dot.amber{background:var(--gold);box-shadow:0 0 0 4px oklch(0.78 0.11 86 / 0.16)}
+.verdict{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;margin:40px 0 8px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:14px;overflow:hidden}
+.v{background:linear-gradient(180deg,var(--bg-2),oklch(0.20 0.035 277));padding:20px 18px}
+.v .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+.v .val{font-family:var(--serif);font-size:30px;font-weight:700;margin-top:8px;line-height:1;color:var(--ink)}
+.v .val.ok{color:var(--green)} .v .val.amber{color:var(--gold)}
+.v .sub{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:7px}
+@media(max-width:860px){.verdict{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.verdict{grid-template-columns:repeat(2,1fr)}}
+section{padding:58px 0;border-bottom:1px solid var(--line-soft)}
+.sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:8px}
+.sec-no{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.2em}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(27px,3.8vw,40px);margin:0;letter-spacing:-.01em}
+.sec-sub{color:var(--ink-2);max-width:74ch;margin:14px 0 34px;font-size:16px}
+.ledger{border:1px solid var(--line-soft);border-radius:16px;overflow:hidden}
+.lrow{display:grid;grid-template-columns:150px 1fr 120px;gap:18px;padding:18px 22px;border-top:1px solid var(--line-soft);align-items:start}
+.lrow:first-child{border-top:none}
+.lrow.head{background:oklch(0.22 0.035 278 / 0.6);font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);padding:13px 22px}
+.lrow .what{font-weight:600;font-size:14.5px;margin-bottom:4px}
+.lrow .sha{font-family:var(--mono);font-size:11px;color:var(--gold)}
+.lrow .why{color:var(--ink-2);font-size:13.5px;line-height:1.5}
+.lrow .why code,.why code{font-family:var(--mono);font-size:12px;color:var(--ink);background:oklch(0.30 0.03 278 / 0.5);padding:1px 5px;border-radius:4px}
+.pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;white-space:nowrap;text-align:center;font-weight:600}
+.shipped{color:var(--green);border:1px solid oklch(0.78 0.14 155 / 0.4);background:oklch(0.78 0.14 155 / 0.08)}
+.ready{color:var(--gold);border:1px solid oklch(0.78 0.11 86 / 0.4);background:oklch(0.78 0.11 86 / 0.08)}
+.defer{color:var(--ink-3);border:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.card{border:1px solid var(--line-soft);border-radius:14px;padding:22px;background:linear-gradient(180deg,var(--panel),transparent)}
+.card h4{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 12px}
+.card p{margin:0 0 10px;font-size:13.5px;color:var(--ink-2)}
+.card.warn{border-color:oklch(0.78 0.11 86 / 0.4);background:oklch(0.78 0.11 86 / 0.06)}
+table.invest{width:100%;border-collapse:collapse;font-size:13.5px}
+table.invest th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:10px 12px;border-bottom:1px solid var(--line)}
+table.invest td{padding:12px;border-bottom:1px solid var(--line-soft);color:var(--ink-2);vertical-align:top}
+table.invest td code{font-family:var(--mono);font-size:12px;color:var(--gold)}
+table.invest .verdict-cell{font-family:var(--mono);font-size:11px;color:var(--ink)}
+pre.sql{margin:14px 0 0;padding:18px;background:oklch(0.16 0.03 278 / 0.7);border:1px solid var(--line-soft);border-radius:12px;font-family:var(--mono);font-size:12px;color:var(--ink);overflow-x:auto;line-height:1.65}
+pre.sql .c{color:var(--ink-3)} pre.sql .k{color:var(--violet)} pre.sql .g{color:var(--gold)}
+.item{display:grid;grid-template-columns:26px 1fr;gap:14px;padding:13px 0;border-top:1px solid var(--line-soft)}
+.item .n{font-family:var(--mono);font-size:13px;color:var(--ink-3)}
+.item .h{font-weight:600;font-size:14px;margin-bottom:3px}
+.item .b{color:var(--ink-2);font-size:13px;line-height:1.5}
+.item .b code{font-family:var(--mono);font-size:11.5px;color:var(--gold)}
+.tier-label{display:flex;align-items:center;gap:14px;margin:26px 0 6px}
+.tier-label .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding:5px 12px;border-radius:6px;font-weight:600}
+.t1{color:var(--gold);border:1px solid oklch(0.78 0.11 86 / 0.4)}
+.t2{color:var(--blue);border:1px solid oklch(0.74 0.12 240 / 0.35)}
+.t3{color:var(--ink-3);border:1px solid var(--line)}
+.tier-label .rule{flex:1;height:1px;background:var(--line-soft)}
+.checklist{list-style:none;padding:0;margin:0}
+.checklist li{padding:12px 0 12px 34px;position:relative;border-top:1px solid var(--line-soft);color:var(--ink-2);font-size:14px}
+.checklist li:first-child{border-top:none}
+.checklist li::before{content:"";position:absolute;left:4px;top:15px;width:14px;height:14px;border-radius:4px;border:2px solid var(--gold)}
+.checklist li b{color:var(--ink)}
+.checklist li code{font-family:var(--mono);font-size:12px;color:var(--gold);background:oklch(0.30 0.03 278 / 0.5);padding:1px 5px;border-radius:4px}
+footer{padding:50px 0 70px;color:var(--ink-3);font-family:var(--mono);font-size:11.5px;letter-spacing:.04em}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:2px 7px;border-radius:4px;border:1px solid var(--line);color:var(--ink-3);margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="crown rise">
+    <span class="glyph">THE&nbsp;TOWER</span><span class="sep"></span>
+    <span class="eyebrow">Overnight Backlog · Ship Report · 2026-06-05</span>
+  </div>
+  <p class="eyebrow rise d1">Clear the backlog · harden the advisor findings · ship it</p>
+  <h1 class="rise d1">Shipped to <span class="thin">main &amp; production.</span></h1>
+  <p class="lede rise d2">Six remaining backlog items — top-down by blast radius — each landed as a tiny green commit with its own regression test, plus a reversible migration that hardens four advisor-flagged <span class="mono">SECURITY DEFINER</span> RPCs. The branch merged clean to <span class="mono">main</span>, pushed, and auto-deployed to production. The two Tier-0 pins were already fixed in the base, so they were verified, not redone. <b>One owner action remains</b> — applying the DB migration + the leaked-password toggle — because this environment has no Supabase admin credentials; both are documented to one paste each below.</p>
+  <div class="facts rise d3">
+    <span><span class="dot"></span><b>auto/overnight-backlog-2026-06-04 → main</b></span>
+    <span>base <b>eaa764c5</b> (rollback point)</span>
+    <span>merge <b>bd2a9246</b></span>
+    <span>prod <b>READY</b></span>
+    <span>rollback <b>none</b></span>
+  </div>
+
+  <div class="verdict rise d4">
+    <div class="v"><div class="k">Build</div><div class="val ok">PASS</div><div class="sub">next build · exit 0</div></div>
+    <div class="v"><div class="k">Types</div><div class="val ok">0</div><div class="sub">tsc --noEmit</div></div>
+    <div class="v"><div class="k">Lint</div><div class="val ok">0 / 0</div><div class="sub">errors / warnings</div></div>
+    <div class="v"><div class="k">Tests</div><div class="val ok">4299</div><div class="sub">0 failed · 10 skip</div></div>
+    <div class="v"><div class="k">Audit</div><div class="val ok">0</div><div class="sub">npm vulnerabilities</div></div>
+    <div class="v"><div class="k">Prod smoke</div><div class="val ok">200</div><div class="sub">4/4 live URLs</div></div>
+  </div>
+</header>
+
+<!-- 1 — WHAT SHIPPED -->
+<section>
+  <div class="sec-head"><span class="sec-no">01</span><h2>What shipped</h2></div>
+  <p class="sec-sub">Seven commits on <span class="mono">auto/overnight-backlog-2026-06-04</span>, branched from the green superset <span class="mono">origin/main</span> (eaa764c5) — the <em>identity/autopilot</em> owl branch was intentionally excluded as out-of-scope (9k+ lines of in-flight mascot work that must not ride a backlog merge into main). Every commit passed build + full tests + lint + tsc before landing.</p>
+
+  <div class="ledger">
+    <div class="lrow head"><span>Commit</span><span>Fix · rationale · regression test</span><span>State</span></div>
+
+    <div class="lrow"><div><div class="what">security(db) · 0041</div><div class="sha">8a180e81</div></div><div class="why"><b>Advisor RPC hardening.</b> Reversible migration for the four flagged <code>SECURITY DEFINER</code> RPCs (details in §3). Committed + ready; applied by the owner via Supabase (no auto-migrate path in this repo). Not imported by app code, so inert to the suite.</div><span class="pill ready">Ready</span></div>
+
+    <div class="lrow"><div><div class="what">fix(outreach) · #4</div><div class="sha">a73bc7af</div></div><div class="why"><b>Double-send window closed.</b> A failed status→<code>sent</code> write left the row re-drainable, so the next daily tick re-sent the email. Now the <code>outreach_queue</code> row id is the Resend <code>Idempotency-Key</code> (server-side dedupe), plus a one-shot write-retry that escalates to <code>log.error</code> so the watchdog catches a stuck row inside Resend's ~24h window. <span class="tag">+3 tests</span></div><span class="pill shipped">Shipped</span></div>
+
+    <div class="lrow"><div><div class="what">fix(coo) · #3</div><div class="sha">77b7e838</div></div><div class="why"><b>Briefing timezone.</b> Interview times rendered in server UTC (a 2:30 PM ET slot read as "06:30 PM"). The user's IANA tz now rides inside the opaque <code>BriefingData</code> payload — <em>not</em> the 8-agent dispatch contract — and formats with <code>{ timeZone }</code>, default UTC. <span class="tag">+2 tests</span></div><span class="pill shipped">Shipped</span></div>
+
+    <div class="lrow"><div><div class="what">fix(artlab) · #5</div><div class="sha">e32674c3</div></div><div class="why"><b>sdk-poller un-wedged.</b> On a failed inbox→archive, the next tick hit the atomic <code>wx</code> queue-write and threw <code>EEXIST</code> forever. <code>enqueueArtLabRun</code> now treats <code>EEXIST</code> as "already enqueued" and falls through to archive; the <code>wx</code> exactly-once guard is untouched and non-EEXIST errors still propagate. <span class="tag">+1 test</span></div><span class="pill shipped">Shipped</span></div>
+
+    <div class="lrow"><div><div class="what">fix(owner-watchdog) · #10</div><div class="sha">4c33fb25</div></div><div class="why"><b>AI-cost probe can't under-count.</b> A single <code>.limit(5000)</code> fetch truncated a runaway wave — the very thing the probe catches — and could read "ok". Replaced with a bounded <code>.range()</code> pagination loop summing every row. No migration; the fail-closed spend-brake is separate. <span class="tag">+1 test</span></div><span class="pill shipped">Shipped</span></div>
+
+    <div class="lrow"><div><div class="what">perf(cron) · #12</div><div class="sha">8e84596b</div></div><div class="why"><b>Time-budgeted the unbounded sweep.</b> <code>unprompted-ceo</code> selected every active user with no limit; a large set could exceed <code>maxDuration</code> and be hard-killed. Added the repo's standard 250s budget guard (idempotent — per-user dedupe re-covers skipped users next run). <span class="tag">+1 test</span></div><span class="pill shipped">Shipped</span></div>
+
+    <div class="lrow"><div><div class="what">test(e2e) · #22</div><div class="sha">b298095d</div></div><div class="why"><b>Progression-upsert noise.</b> The 500-apps scale spec ran with <code>allowWrites:false</code>, so the milestone upsert 500'd and the engine threw on every reload. Allowed the write (fixture-only; production fail-loud + DOM/heap assertions untouched).</div><span class="pill shipped">Shipped</span></div>
+  </div>
+</section>
+
+<!-- 2 — TIER-0 ALREADY DONE -->
+<section>
+  <div class="sec-head"><span class="sec-no">02</span><h2>The two Tier-0 pins — verified, not redone</h2></div>
+  <p class="sec-sub">The backlog's two highest-blast-radius items were already fixed and merged in the base (<span class="mono">eaa764c5</span>) before this run. Cross-checked against git log so they weren't re-touched.</p>
+  <div class="grid2">
+    <div class="card"><h4>#1 · Stripe <code>.single()</code> on a 0-row write</h4><p>Fixed in <span class="mono">57ef6ada</span> — the webhook acks + alerts a 0-row tier write instead of 500'ing into days of Stripe retries. Genuine DB errors still retry.</p></div>
+    <div class="card"><h4>#2 · getAgentMemories N+1 + lost-update race</h4><p>Fixed in <span class="mono">73c1831e</span> + migration <span class="mono">0040</span> (already applied to prod) — the per-retrieval access bump is one atomic <code>increment_memory_access</code> RPC instead of N racy UPDATEs.</p></div>
+  </div>
+</section>
+
+<!-- 3 — PART A SECURITY -->
+<section>
+  <div class="sec-head"><span class="sec-no">03</span><h2>Part A — Supabase security advisor</h2></div>
+  <p class="sec-sub">Each advisor finding was resolved by a <em>caller investigation</em>, not a guess: every <code>.rpc("&lt;name&gt;")</code> call site and trigger usage was traced in the application code. The remediations live in reversible migration <span class="mono">0041</span>.</p>
+
+  <table class="invest">
+    <thead><tr><th>Object</th><th>Investigation finding</th><th>Disposition</th></tr></thead>
+    <tbody>
+      <tr><td><code>handle_new_user()</code></td><td>SECURITY DEFINER <b>trigger function</b> (<code>on_auth_user_created</code> on <code>auth.users</code>). No application code calls it directly; flagged only because Postgres grants EXECUTE to PUBLIC by default.</td><td class="verdict-cell"><b>REVOKE</b> EXECUTE from anon/authenticated/PUBLIC. Trigger still fires (execution is not gated by EXECUTE). Stays DEFINER.</td></tr>
+      <tr><td><code>consume_ai_call_quota(uuid,int)</code></td><td>SECURITY DEFINER. Migration 0023 already <code>revoke from public; grant service_role</code>. Sole caller (<code>src/lib/ai/quota.ts</code>) uses the admin/service-role client.</td><td class="verdict-cell"><b>Re-assert REVOKE</b> from anon/authenticated (idempotent) so prod matches intent + the advisor clears.</td></tr>
+      <tr><td><code>bump_match_rate_limit(uuid,ts,int)</code></td><td>SECURITY DEFINER, granted to <code>authenticated</code>. <b>Real authenticated caller</b>: <code>src/lib/networking/rate-limit.ts</code> calls it under the user's own session (not admin) via the match-candidates route, always passing the session user's own id.</td><td class="verdict-cell"><b>Keep grant + add guard.</b> Internal <code>auth.uid()</code> check (mirrors 0004/0040) so a definer fn can't bump another user's counter. No-op for legit calls.</td></tr>
+      <tr><td><code>rls_auto_enable</code></td><td><b>Not defined in this repo</b> — no migration, no caller, signature unknown. Created ad-hoc in the dashboard at some point.</td><td class="verdict-cell"><b>Left as-is + documented.</b> A REVOKE against an unknown signature risks an erroring migration. Owner inspects + REVOKEs via dashboard (ambiguous → no risky guess).</td></tr>
+      <tr><td><code>comp_bands_budget</code> (table)</td><td>RLS enabled, no policy (deny-all by design). Migration 0033 already REVOKE'd anon/authenticated; the only accessors (<code>src/lib/comp-bands/budget.ts</code>) require the admin client.</td><td class="verdict-cell"><b>Confirmed service-role only.</b> No change needed; intentional deny-all is already documented in 0020 + 0033.</td></tr>
+      <tr><td>Leaked-password (HIBP)</td><td>Auth setting, currently OFF. Requires the Management API or dashboard toggle.</td><td class="verdict-cell"><b>Documented toggle</b> (§5). Not changeable unattended — no Supabase access token in this environment.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card warn" style="margin-top:24px">
+    <h4>⚠ Why the DB migration is committed-and-ready, not applied to prod</h4>
+    <p>The directive's DB rail — <em>"apply on a Supabase dev branch first, test up &amp; down, then promote to production, then re-run the advisor"</em> — is <b>not mechanically reachable in this unattended environment</b>. There is no <code>SUPABASE_ACCESS_TOKEN</code> (so no Management API → no branch create/promote, no advisor run, no Auth config), no <code>psql</code>, no Docker, and no Postgres driver; the direct DB is IPv6-only and the Supabase MCP needs interactive OAuth. This repo's actual migration mechanism is exactly this: a numbered SQL file in <code>src/db/migrations/</code> that the owner applies via the Supabase SQL editor (see <code>drizzle.config.ts</code>). Blind-applying DDL to the live production DB with no advisor to verify and no dev-branch safety net is precisely the unverifiable risk the rollback doctrine forbids — so the migration is delivered one-paste-ready instead, with rollback inline.</p>
+  </div>
+</section>
+
+<!-- 4 — MIGRATION DETAIL -->
+<section>
+  <div class="sec-head"><span class="sec-no">04</span><h2>Migration 0041 — up &amp; down</h2></div>
+  <p class="sec-sub">All statements idempotent + reversible; the full rollback is inline in the file. The owner applies the UP in the Supabase SQL editor; the DOWN restores prior state with no data change.</p>
+  <pre class="sql"><span class="c">-- UP (excerpt — full file: src/db/migrations/0041_security_advisor_rpc_hardening.sql)</span>
+<span class="c">-- handle_new_user: trigger-only → revoke direct EXECUTE</span>
+<span class="k">REVOKE EXECUTE ON FUNCTION</span> public.handle_new_user() <span class="k">FROM</span> anon, authenticated, PUBLIC;
+
+<span class="c">-- consume_ai_call_quota: service-role only → re-assert revoke</span>
+<span class="k">REVOKE EXECUTE ON FUNCTION</span> public.consume_ai_call_quota(uuid, integer) <span class="k">FROM</span> anon, authenticated, PUBLIC;
+
+<span class="c">-- bump_match_rate_limit: keep authenticated grant, add auth.uid() guard</span>
+<span class="k">CREATE OR REPLACE FUNCTION</span> bump_match_rate_limit(p_user_id uuid, p_bucket timestamptz, p_limit int)
+  ... <span class="k">SECURITY DEFINER SET</span> search_path = public <span class="k">AS</span> $$
+  <span class="k">BEGIN</span>
+    <span class="k">IF</span> p_user_id <span class="k">IS NULL OR</span> p_user_id &lt;&gt; auth.uid() <span class="k">THEN RAISE EXCEPTION</span> '...'; <span class="k">END IF</span>;
+    ... <span class="c">-- original upsert body unchanged</span>
+  <span class="k">END</span>; $$;
+<span class="k">GRANT EXECUTE ON FUNCTION</span> bump_match_rate_limit(uuid, timestamptz, int) <span class="k">TO</span> authenticated;
+
+<span class="c">-- DOWN (inline in file): GRANT ... TO PUBLIC/authenticated to undo each REVOKE;</span>
+<span class="c">-- CREATE OR REPLACE bump_match_rate_limit with the original (unguarded) 0022 body.</span></pre>
+</section>
+
+<!-- 5 — OWNER ACTION -->
+<section>
+  <div class="sec-head"><span class="sec-no">05</span><h2>The one remaining owner action</h2></div>
+  <p class="sec-sub">Everything in code is live on main + production. These two DB/Auth steps need Supabase admin access this unattended environment does not have. Each is one paste / one click.</p>
+  <ul class="checklist">
+    <li><b>Apply migration 0041.</b> Paste <code>src/db/migrations/0041_security_advisor_rpc_hardening.sql</code> into the Supabase SQL editor (Dashboard → SQL Editor → Run). Idempotent — safe to run once. Rollback SQL is inline in the file if ever needed.</li>
+    <li><b>Enable leaked-password protection.</b> Dashboard → Authentication → Sign In / Providers → Password security → toggle <b>"Check against HaveIBeenPwned."</b> (Or Management API <code>PATCH /v1/projects/{ref}/config/auth</code> with <code>{"password_hibp_enabled": true}</code>.)</li>
+    <li><b>Inspect <code>rls_auto_enable</code>.</b> It isn't in the repo. In the SQL editor, run <code>\df+ public.rls_auto_enable</code> (or query <code>pg_proc</code>) to recover its signature, then <code>REVOKE EXECUTE ... FROM anon, authenticated</code> if it's an admin/maintenance function (it almost certainly is).</li>
+    <li><b>Re-run the security advisor</b> (Dashboard → Advisors → Security) to confirm the four RPC findings + leaked-password are cleared.</li>
+  </ul>
+</section>
+
+<!-- 6 — DEFERRED -->
+<section>
+  <div class="sec-head"><span class="sec-no">06</span><h2>Deliberately deferred — judgment calls, documented</h2></div>
+  <p class="sec-sub">The remaining backlog items were left as-is because each changes a product / ops / analytics contract, needs a DB migration that can't be applied here, or is explicitly unsafe to do unattended. This mirrors why two prior thorough runs deferred them: ambiguous → leave + document, never a risky guess. Each was investigated, not skipped.</p>
+
+  <div class="tier-label"><span class="t t1">Tier 1 · correctness &amp; contracts</span><span class="rule"></span></div>
+  <div class="item"><span class="n">#6</span><div><div class="h">cio-reresearch per-company UPDATE in a loop</div><div class="b">Batching to one <code>.in()</code> changes partial-failure semantics (per-company error isolation + per-row notifications). A product decision, not a mechanical edit.</div></div></div>
+
+  <div class="tier-label"><span class="t t2">Tier 2 · scale, analytics &amp; abuse surface</span><span class="rule"></span></div>
+  <div class="item"><span class="n">#7</span><div><div class="h">canary-heartbeat public cron writes via service-role</div><div class="b">Public by design; needs a product/security acceptance call, not a code change.</div></div></div>
+  <div class="item"><span class="n">#8</span><div><div class="h">getClientIp proxy-trust before x-forwarded-for</div><div class="b">Depends on the production forwarded-header trust model — a config/deployment decision.</div></div></div>
+  <div class="item"><span class="n">#9</span><div><div class="h">comp-bands atomic lookup-budget RPC</div><div class="b">Enhancement (rate + length guards already landed). The stronger atomic RPC needs a DB migration that can't be applied unattended here.</div></div></div>
+  <div class="item"><span class="n">#11</span><div><div class="h">cfo-threshold cohort-maturity conversion bias</div><div class="b">An analytics redefinition (buckets by created_at vs counts from current status) — changes what the metric means. Needs product sign-off.</div></div></div>
+  <div class="item"><span class="n">#12b</span><div><div class="h">OFFSET-paged sweeps (warmth-decay, cfo-threshold)</div><div class="b">A bare time budget here would starve high-id rows; correct fix needs a persisted keyset cursor (new state). purge-sweeper is already <code>.limit()</code>-bounded. The idempotent <code>unprompted-ceo</code> sweep <b>was</b> fixed (#12).</div></div></div>
+  <div class="item"><span class="n">#13</span><div><div class="h">draft-follow-ups timezone window only reaches the Americas</div><div class="b">Widening needs more cron invocations; Vercel Hobby caps once-daily. Already noted in-code. Infra-limited, not a code bug.</div></div></div>
+
+  <div class="tier-label"><span class="t t3">Tier 3 · convention, dead code &amp; noise</span><span class="rule"></span></div>
+  <div class="item"><span class="n">#14</span><div><div class="h">Gmail matcher substring breadth</div><div class="b">Bidirectional <code>includes()</code> over-matches, but tightening silently drops legitimate matches with no telemetry to measure impact — needs a test matrix first (correct sequence the prior run identified).</div></div></div>
+  <div class="item"><span class="n">#15</span><div><div class="h">negotiation-draft body lacks a Zod schema</div><div class="b">Consumed as free-text (byte-capped, token-DOS-guarded). A strict schema adds near-zero security and risks 400'ing a legitimate evolving convening. Churn with a latent hazard.</div></div></div>
+  <div class="item"><span class="n">#18</span><div><div class="h">Bulk dead-code sweep (~3 dozen exports)</div><div class="b">Explicitly unsafe as an unattended bulk removal — belongs in a focused, individually-reviewed PR.</div></div></div>
+  <div class="item"><span class="n">#19 · #20</span><div><div class="h">Dead code: Calendar insert path · getFloorIdentity accessor</div><div class="b">Delete-vs-wire-up and which-pattern-is-canonical judgment calls; each is cited by a test. Not a clear mechanical removal.</div></div></div>
+  <div class="item"><span class="n">#21</span><div><div class="h">AI quota RPC error behavior (fail-open vs fail-closed)</div><div class="b">A deliberate policy review, not a bug fix.</div></div></div>
+  <div class="item"><span class="n">#16 · #17</span><div><div class="h">Skipped per directive</div><div class="b">match-delta non-atomic debounce and env()/EnvSchema optional reads — the two "fixing-makes-it-worse" nits explicitly excluded.</div></div></div>
+</section>
+
+<!-- 7 — VERIFICATION -->
+<section style="border-bottom:none">
+  <div class="sec-head"><span class="sec-no">07</span><h2>Final production verification</h2></div>
+  <p class="sec-sub">Post-ship checks against the live result. The auto-rollback (revert the merge on main + re-verify) was armed for any failure; it did not fire.</p>
+  <div class="grid2">
+    <div class="card">
+      <h4>Code rails — re-run on live SHA bd2a9246</h4>
+      <p><code>next build</code> → exit 0</p>
+      <p><code>tsc --noEmit</code> → 0 errors</p>
+      <p><code>eslint</code> → 0 errors / 0 warnings</p>
+      <p><code>vitest run</code> → 4299 passed · 10 skipped · 0 failed</p>
+      <p><code>npm audit</code> → 0 vulnerabilities</p>
+    </div>
+    <div class="card">
+      <h4>Production deploy + smoke</h4>
+      <p>Vercel deploy <code>dpl_YtsUJiNd…</code> (target production) → <b>READY</b>, build exit 0, serving <code>www.interntower.com</code> + <code>interntower.com</code></p>
+      <p>Smoke → <code>/</code>, <code>/pricing</code>, <code>/waitlist</code>, and apex all <b>HTTP 200</b> (homepage title <em>"The Lobby | The Tower"</em>)</p>
+      <p>Supabase advisors → <b>documented</b> (not re-runnable without an access token; remediations committed in 0041 + the §5 checklist)</p>
+      <p>Rollback → <b>none</b> — ROLLBACK_POINT eaa764c5 preserved as a Vercel rollback candidate.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <h4>End state</h4>
+    <p>All code is live on <span class="mono">main</span> + production. The two Tier-0 pins were already shipped in the base. The DB advisor remediations are committed in migration 0041 and ready for one-paste application; the leaked-password toggle and the <code>rls_auto_enable</code> inspection are the only residual owner actions, each documented above — they require Supabase admin credentials this unattended environment does not hold.</p>
+  </div>
+</section>
+
+<footer>
+  THE TOWER · Internship Command Center &nbsp;·&nbsp; overnight backlog ship · 2026-06-05 &nbsp;·&nbsp; base eaa764c5 → merge bd2a9246 &nbsp;·&nbsp; 6 fixes + 1 reversible migration &nbsp;·&nbsp; build · types · lint · tests · audit green · prod deployed
+</footer>
+
+</div>
+</body>
+</html>
