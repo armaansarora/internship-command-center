@@ -28,7 +28,7 @@ playwright.canary.config.ts     canary-only — hits real prod, no stub
 
 ## src/app/  — Next.js App Router
 
-URL paths are determined by directory names. Auth-redirect lives in `src/proxy.ts` (`publicPaths` array gates which routes are reachable without a session).
+URL paths are determined by directory names. Auth-redirect lives in `src/proxy.ts`; unauthenticated reachability is controlled by `PUBLIC_PATHS` in `src/lib/supabase/middleware.ts`.
 
 ### Public routes
 ```
@@ -82,8 +82,7 @@ src/app/api/
                                                    (all use
                                                     createAgentRouteHandler)
   stripe/checkout, stripe/portal, stripe/webhook
-  cron/                                            15 Vercel-scheduled jobs +
-                                                   2 off-platform handlers.
+  cron/                                            17 cron route families.
                                                    All wrapped withCronHealth.
                                                    owner-watchdog runs every 30m
                                                    from GitHub Actions (Hobby
@@ -212,7 +211,7 @@ src/lib/db/
 src/db/schema.ts                                   Drizzle schema (49KB,
                                                    schema-only — NEVER use
                                                    `db` object at runtime)
-src/db/migrations/                                 0000–0037.sql
+src/db/migrations/                                 0000–0039.sql
 src/db/manual/                                     hand-written SQL
 src/db/manual/auth-email-templates/                4 HTML templates already
                                                    pasted into Supabase dashboard
@@ -221,7 +220,7 @@ src/db/manual/auth-email-templates/                4 HTML templates already
 ### Cross-cutting
 ```
 src/lib/cron/health.ts                             withCronHealth wrapper
-                                                   (used in all 14 cron routes)
+                                                   (used in all 17 cron route families)
 src/lib/ai/spend-brake.ts                          global daily Anthropic-bill
                                                    kill-switch (fails CLOSED)
 src/lib/legal/{privacy,terms}.ts                   legal copy source
@@ -301,10 +300,12 @@ scripts/init-env.ts               local env init helper (`npm run env:init`)
 scripts/setup-env.sh              env init shell helper
 scripts/dev-preview.ts            `npm run dev:preview` — dev preview
                                   harness (auth-stub, ports)
-scripts/art-pipeline.ts           `npm run art:operate`, `npm run art:status`,
-                                  plus character asset factory commands:
-                                  plan, clean, ingest, split, master, derive, qa,
-                                  review, promote
+scripts/artlab.ts                 `npm run artlab -- <subcommand>` CLI:
+                                  produce, continue, answer, status, queue,
+                                  health, doctor, show, cancel, daemon, bot,
+                                  smoke
+scripts/artlab-sdk*.ts            ArtLab MCP, Claude skill, and Antigravity
+                                  workspace installers
 scripts/validate-sentry-alerts.ts CLI validator for sentry/alerts.yaml
                                   (same logic as the vitest regression in
                                   src/lib/observability/sentry-alerts.test.ts)
@@ -323,8 +324,8 @@ docs/ART-BIBLE.md            Tower art style, prompt rules, quality ladder
 docs/CHARACTER-ART-PIPELINE.md   approval gates and batch character factory
 docs/CHARACTER-IMAGE-OPERATIONS.md  start-here runbook for future image work
 docs/CHARACTER-IMAGE-SESSION-PROMPT.md  copy-paste prompt for fresh sessions
-docs/CREATIVE-PRODUCTION-ENGINE.md  Creative Production Engine architecture,
-                             Housekeeping Gate, Continuous Improvement Gate
+docs/artlab/ENGINE.md       ArtLab architecture and state machine
+docs/artlab/OPERATIONS.md   ArtLab runbook and troubleshooting
 docs/LAUNCH-READY.md         locked business decisions + remaining ops
                              checklist (§0 has the table of decisions)
 docs/RUNBOOK.md              on-call runbook — one paragraph per Sentry
@@ -349,15 +350,15 @@ docs/RUNBOOK.md              operations playbook (synthetic canary,
 .artlab/inbox/<assetType>/<runId>/     captured provider outputs before ingest
 ```
 
-Use `npm run art:produce -- --request "<request>"` for new visual work and
-`npm run art:status` for read-only inspection. The art lab is past the reset:
+Use `npm run artlab -- produce "<request>"` for new visual work and
+`npm run artlab -- status` for read-only inspection. The art lab is past the reset:
 Otis Vale is promoted, browser-QA verified, closed, and protected as the Lobby
 baseline. New characters start from scratch unless a durable run-state names an
 approved identity reference.
 
-For broader visual work, use the Creative Production Engine. When Armaan says
-"Creative Production Engine" or asks to add/generate Tower visuals, run
-`npm run art:studio` and follow `.agents/skills/creative-production-engine/SKILL.md`.
+For broader visual work, use ArtLab. When Armaan says "Creative Production Engine"
+or asks to add/generate Tower visuals, run `npm run artlab -- produce "<request>"`
+and follow `.agents/skills/artlab/SKILL.md`.
 Every phase must run the Housekeeping Gate and the Continuous Improvement Gate.
 Normal creative packets default to five-lane parallel output: 5 agents x 1 wave.
 Each subagent gets one isolated lane prompt, should use GPT-5.5 fast mode with
@@ -427,7 +428,7 @@ E2E requires a stub Supabase server on `:3001` (auto-started by Playwright globa
 | Change refund / retention / age policy | `src/lib/config/legal-config.ts` |
 | Change brand name / canonical URL / beta mode | `src/lib/config/gate-config.ts` |
 | Edit privacy / terms copy | `src/lib/legal/{privacy,terms}.ts` (rendered into routes automatically) |
-| Add a new public marketing page | `src/app/(marketing)/<route>/page.tsx` + add to `src/proxy.ts` `publicPaths` + add to `src/app/sitemap.ts` |
+| Add a new public marketing page | `src/app/(marketing)/<route>/page.tsx` + add to `src/lib/supabase/middleware.ts` `PUBLIC_PATHS` + add to `src/app/sitemap.ts` |
 | Add a new floor / authenticated route | `src/app/(authenticated)/<floor>/page.tsx` + `src/components/floor-N/<Floor>Client.tsx` + add to `FLOORS` in `src/types/ui.ts` |
 | Change an AI agent's voice | `src/lib/agents/<agent>/system-prompt.ts` |
 | Change an AI agent's tools | `src/lib/agents/<agent>/tools.ts` |

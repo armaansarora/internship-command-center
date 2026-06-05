@@ -140,9 +140,21 @@ Everything between those two rows is internal factory work. Turnaround sheets, o
 ## Factory Commands
 
 ```bash
-npm run art:operate
-npm run art:status
-npm run art:studio -- --request "Create five prompt-only initial Otis designs from scratch."
+npm run artlab -- status
+npm run artlab -- health
+npm run artlab -- doctor
+npm run artlab -- produce "Create five prompt-only initial Otis designs from scratch."
+npm run artlab -- continue <runId>
+npm run artlab -- answer <runId> "approve direction 3"
+npm run artlab -- answer <runId> "approved for app"
+npm run artlab -- show <runId>
+```
+
+Older `art:*` factory commands live only in legacy docs and should not be used for new runs.
+
+Legacy lower-level operator commands, if needed while reading archived run ledgers:
+
+```bash
 npm run art:generate prepare-api --packet <creative-brief.json> --directive <next-image-generation-step.json> --lane-count 5 --concurrency 5 --resolution 4K --aspect-ratio 9:16 --budget-cents 1000
 npm run art:generate run-api --plan <gemini-api-plan.json> --max-attempts 3 --request-timeout-ms 300000
 npm run art:generate doctor --plan <gemini-api-plan.json> --board <review-board.html>
@@ -189,8 +201,6 @@ After approved files are added:
 
 ## Current State
 
-Fresh-start reset is active. No Season 1 character has approved production sprites in `src/lib/visual-assets/approved-character-assets.generated.json`.
+The fresh-start reset remains active for new character work, but Otis Vale is now the promoted production baseline and should be treated as protected. Mara Voss (`ceo`) is the next unpromoted character unless Armaan explicitly asks to redo Otis.
 
-Otis Vale is the first production pilot. Generate him from scratch through the Creative Production Engine: five prompt-only initial designs, one approved winner, then a full production pack and final upload-ready board. Mara Voss (`ceo`) comes after Otis is promoted.
-
-Run `npm run art:studio` before continuing image work; use `npm run art:status` for read-only inspection.
+Run `npm run artlab -- status` before continuing image work; use `npm run artlab -- produce "<request>"` for a new request.
