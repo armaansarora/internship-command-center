@@ -82,6 +82,28 @@ describe("sendOutreachEmail", () => {
     );
   });
 
+  it("forwards idempotencyKey to Resend as the second options arg", async () => {
+    sendSpy.mockResolvedValueOnce({ data: { id: "mock-idem" }, error: null });
+    const { sendOutreachEmail } = await import("./outreach");
+    await sendOutreachEmail({
+      to: "r@example.com",
+      subject: "Hi",
+      body: "Body",
+      idempotencyKey: "row-123",
+    });
+    expect(sendSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "r@example.com", text: "Body" }),
+      { idempotencyKey: "row-123" },
+    );
+  });
+
+  it("omits the options arg entirely when no idempotencyKey is given", async () => {
+    sendSpy.mockResolvedValueOnce({ data: { id: "mock-noidem" }, error: null });
+    const { sendOutreachEmail } = await import("./outreach");
+    await sendOutreachEmail({ to: "r@example.com", subject: "Hi", body: "Body" });
+    expect(sendSpy.mock.calls[0]).toHaveLength(1);
+  });
+
   it("falls back to no replyTo when not provided", async () => {
     sendSpy.mockResolvedValueOnce({
       data: { id: "mock-no-reply" },

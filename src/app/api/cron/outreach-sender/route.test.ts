@@ -303,6 +303,7 @@ describe("GET /api/cron/outreach-sender", () => {
       subject: "Hi",
       body: "Body",
       replyTo: "user@example.com",
+      idempotencyKey: "o1",
     });
     expect(fixture.updates[0]?.patch.status).toBe("sent");
     expect(fixture.updates[0]?.patch.resend_message_id).toBe("msg-123");
@@ -317,6 +318,36 @@ describe("GET /api/cron/outreach-sender", () => {
         applicationId: "app1",
       }),
     });
+  });
+
+  it("retries the status write and escalates (stays drainable) when the post-send update fails", async () => {
+    // Regression for the double-send window: send succeeds but the
+    // status→sent write fails. The row must stay drainable (so it is NOT
+    // silently marked sent), the write is retried once, and the send carries
+    // the row-id idempotency key so a re-drain next tick cannot double-send.
+    fixture.approved = [
+      { id: "o1", user_id: "u1", application_id: "app1", contact_id: "c1", subject: "Hi", body: "Body", type: "follow_up" },
+    ];
+    fixture.users = [{ id: "u1", email: "user@example.com" }];
+    fixture.contacts = [{ id: "c1", email: "contact@example.com" }];
+    fixture.updateError = { message: "db write down" };
+    sendOutreachEmailMock.mockResolvedValue({ messageId: "msg-xyz" });
+    const { GET } = await import("./route");
+    const res = await GET(makeRequest());
+    const body = (await res.json()) as { sent: number };
+    expect(body.sent).toBe(1);
+    // The send used the row id as the Resend idempotency key.
+    expect(sendOutreachEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({ idempotencyKey: "o1" }),
+    );
+    // The status write was attempted twice (initial + one retry) and both
+    // failed, so the row was never confirmed sent and remains re-drainable.
+    expect(fixture.updates).toHaveLength(2);
+    expect(logErrorMock).toHaveBeenCalledWith(
+      "outreach_sender.update_after_send_failed",
+      undefined,
+      expect.objectContaining({ outreachId: "o1" }),
+    );
   });
 
   it("skips rows missing subject/body without sending", async () => {

@@ -22,6 +22,14 @@ export interface SendOutreachParams {
   subject: string;
   body: string;
   replyTo?: string;
+  /**
+   * Forwarded to Resend as the `Idempotency-Key` header. When set, Resend
+   * de-duplicates identical requests server-side, so a retry (e.g. the cron
+   * re-draining a row whose post-send status write failed) cannot deliver a
+   * second email. The caller should pass a stable, per-message key — the
+   * outreach_queue row id is ideal.
+   */
+  idempotencyKey?: string;
 }
 
 export interface SendOutreachResult {
@@ -35,13 +43,18 @@ export async function sendOutreachEmail(
   const from = process.env.OUTREACH_EMAIL_FROM ?? DEFAULT_FROM;
 
   const resend = new Resend(RESEND_API_KEY);
-  const result = await resend.emails.send({
+  const payload = {
     from,
     to: params.to,
     subject: params.subject,
     text: params.body,
     replyTo: params.replyTo ?? undefined,
-  });
+  };
+  // Only pass the options arg when we actually have a key, so callers that
+  // don't supply one keep the single-argument call shape.
+  const result = params.idempotencyKey
+    ? await resend.emails.send(payload, { idempotencyKey: params.idempotencyKey })
+    : await resend.emails.send(payload);
 
   if (result.error) {
     throw new Error(`resend: ${result.error.message}`);
