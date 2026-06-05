@@ -61,9 +61,11 @@ function rowToMemory(row: Record<string, unknown>): AgentMemoryEntry {
 /**
  * Retrieve memories for a specific agent, ordered by importance + recency.
  *
- * The previous implementation increment-bug used `data[0].access_count + 1`
- * for every row — that bumped all rows to the same count instead of per-row
- * +1. We now perform a per-row update using the row's own current count.
+ * Access-count maintenance is a fire-and-forget ATOMIC increment via the
+ * `increment_memory_access` RPC (`access_count = access_count + 1` in the
+ * database). This supersedes two earlier bugs: a uniform `data[0] + 1` bump,
+ * then a per-row read-modify-write that fanned out N UPDATEs and could lose
+ * increments under concurrent retrieval.
  */
 export async function getAgentMemories(
   userId: string,
@@ -91,21 +93,32 @@ export async function getAgentMemories(
     return [];
   }
 
-  // Per-row access-count bump (fire-and-forget — never block retrieval).
+  // Atomic access-count bump (fire-and-forget — never block retrieval). One
+  // RPC replaces the previous N parallel UPDATEs, and the increment happens in
+  // the database (`access_count = access_count + 1`) so concurrent retrievals
+  // cannot lose an increment. Failures are logged, never thrown.
   const rows = data ?? [];
   if (rows.length > 0) {
-    const now = new Date().toISOString();
-    void Promise.all(
-      rows.map((row) =>
-        supabase
-          .from("agent_memory")
-          .update({
-            access_count: ((row.access_count as number | null) ?? 0) + 1,
-            last_accessed_at: now,
-          })
-          .eq("id", row.id as string),
-      ),
-    );
+    const ids = rows.map((row) => row.id as string);
+    void (async () => {
+      try {
+        const { error: bumpError } = await supabase.rpc(
+          "increment_memory_access",
+          { p_ids: ids, p_user_id: userId },
+        );
+        if (bumpError) {
+          log.warn("agent_memory.access_bump_failed", {
+            agent,
+            error: bumpError.message,
+          });
+        }
+      } catch (err) {
+        log.warn("agent_memory.access_bump_failed", {
+          agent,
+          err: err instanceof Error ? err.message : String(err),
+        });
+      }
+    })();
   }
 
   return rows.map(rowToMemory);
