@@ -17,6 +17,12 @@ export interface BriefingData {
   todaysInterviews: InterviewWithApplication[];
   unreadEmailsCount: number;
   pendingOutreachCount: number;
+  /**
+   * The user's IANA timezone (e.g. "America/New_York"), used to render
+   * interview times in their local wall-clock rather than server UTC. Absent
+   * when the profile row could not be read — consumers must default to "UTC".
+   */
+  userTimezone?: string;
 }
 
 export interface FollowUpItem {
@@ -390,8 +396,13 @@ export async function getDailyBriefingData(userId: string): Promise<BriefingData
     now.getTime() - FOLLOWUP_OVERDUE_DAYS * 24 * 60 * 60 * 1000
   ).toISOString();
 
-  const [followUpsResult, interviewsResult, emailsResult, outreachResult] =
-    await Promise.all([
+  const [
+    followUpsResult,
+    interviewsResult,
+    emailsResult,
+    outreachResult,
+    timezoneResult,
+  ] = await Promise.all([
       // Overdue follow-ups count
       supabase
         .from("applications")
@@ -425,6 +436,13 @@ export async function getDailyBriefingData(userId: string): Promise<BriefingData
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
         .eq("status", "pending_approval"),
+
+      // User's IANA timezone for local-time rendering of interview slots
+      supabase
+        .from("user_profiles")
+        .select("timezone")
+        .eq("id", userId)
+        .maybeSingle(),
     ]);
 
   const todaysInterviews = ((interviewsResult.data ?? []) as InterviewRow[]).map(
@@ -445,11 +463,14 @@ export async function getDailyBriefingData(userId: string): Promise<BriefingData
     })
   );
 
+  const tzRow = timezoneResult.data as { timezone?: string | null } | null;
+
   return {
     overdueFollowUpsCount: followUpsResult.count ?? 0,
     todaysInterviews,
     unreadEmailsCount: emailsResult.count ?? 0,
     pendingOutreachCount: outreachResult.count ?? 0,
+    userTimezone: tzRow?.timezone ?? undefined,
   };
 }
 

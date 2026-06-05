@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -88,6 +89,43 @@ describe("sdk-poller", () => {
     const remaining = readdirSync(inboxDir).filter((f) => f.startsWith("generate-"));
     expect(remaining).toHaveLength(0);
     expect(existsSync(join(inboxDir, ".processed", `${runId}.json`))).toBe(true);
+  });
+
+  it("recovers a wedged inbox file when a prior tick enqueued but failed to archive", async () => {
+    // Regression: enqueue succeeds, then the inbox→.processed rename fails.
+    // The run was queued, so the next tick re-enqueues, hits the atomic `wx`
+    // collision, and (pre-fix) throws EEXIST forever — wedging the inbox file
+    // and spamming daemon errors. The fix treats EEXIST as already-enqueued.
+    const runId = writeInboxJob({});
+    const poller = createArtLabPoller({ workspaceRoot });
+    const processed = join(workspaceRoot, "inbox", "sdk", ".processed");
+
+    // Force tick 1's archive to fail: a non-empty directory at the exact
+    // destination path makes renameSync(file, dir) throw.
+    mkdirSync(join(processed, `${runId}.json`), { recursive: true });
+    writeFileSync(join(processed, `${runId}.json`, "blocker"), "x");
+
+    const tick1 = await poller.tick();
+    // Archive threw → run not reported, but it WAS enqueued and the inbox file
+    // is still present so a future tick can retry.
+    expect(tick1.enqueuedRunIds).toEqual([]);
+    expect(listQueuedRuns(workspaceRoot).some((e) => e.runId === runId)).toBe(true);
+    expect(
+      existsSync(join(workspaceRoot, "inbox", "sdk", `generate-${runId}.json`)),
+    ).toBe(true);
+
+    // Clear the obstruction and tick again. Pre-fix the wx EEXIST would wedge
+    // the file forever; post-fix the EEXIST is swallowed and it archives.
+    rmSync(join(processed, `${runId}.json`), { recursive: true, force: true });
+    const tick2 = await poller.tick();
+
+    expect(tick2).toBeDefined();
+    expect(
+      existsSync(join(workspaceRoot, "inbox", "sdk", `generate-${runId}.json`)),
+    ).toBe(false);
+    expect(existsSync(join(processed, `${runId}.json`))).toBe(true);
+    // Exactly-once preserved: the run is queued exactly once, never duplicated.
+    expect(listQueuedRuns(workspaceRoot).filter((e) => e.runId === runId)).toHaveLength(1);
   });
 
   it("maps high-priority artlab jobs onto the human-flagged queue lane", async () => {

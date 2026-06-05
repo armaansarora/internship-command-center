@@ -111,10 +111,12 @@ vi.mock("@/lib/supabase/admin", () => ({
         return {
           select: () => ({
             gte: () => ({
-              limit: async () =>
-                fixture.errors.cost
-                  ? { data: null, error: { message: fixture.errors.cost } }
-                  : { data: fixture.agentCostRows, error: null },
+              order: () => ({
+                range: async (from: number, to: number) =>
+                  fixture.errors.cost
+                    ? { data: null, error: { message: fixture.errors.cost } }
+                    : { data: fixture.agentCostRows.slice(from, to + 1), error: null },
+              }),
             }),
           }),
         };
@@ -394,6 +396,26 @@ describe("GET /api/cron/owner-watchdog", () => {
     ];
     expect(openArg.jobName).toBe("ai-cost-hourly");
     expect(openArg.lastSeenValue).toContain("$7.50");
+    vi.useRealTimers();
+  });
+
+  it("does not under-count when >5000 agent_logs rows land in one hour", async () => {
+    // Regression for the 5000-row cap. Tuned so the truncated first-5000-row
+    // sum lands EXACTLY at the cap (500c, not > 500 → would read "ok"), while
+    // the full 6000-row sum (600c) crosses it. Pre-fix: opened=0. Post-fix: 1.
+    fixture.cronRuns = [
+      freshCron(NOW_MS, "warmth-decay"),
+      freshCron(NOW_MS, "cfo-threshold"),
+    ];
+    fixture.agentCostRows = Array.from({ length: 6000 }, () => ({
+      cost_cents: "0.10",
+    }));
+    const { GET } = await import("./route");
+    const res = await GET(makeRequest());
+    const body = (await res.json()) as { opened: number };
+    expect(body.opened).toBe(1);
+    const [openArg] = openIncidentMock.mock.calls[0] as [{ jobName: string }];
+    expect(openArg.jobName).toBe("ai-cost-hourly");
     vi.useRealTimers();
   });
 

@@ -42,6 +42,12 @@ import {
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
+// Leave ~50s of headroom under maxDuration so a large active-user set degrades
+// gracefully (logs the remainder, returns 200) instead of being hard-killed
+// mid-sweep. The next daily run re-covers any skipped users — the trigger
+// windows (7-14 day lookback, 24h dedup) tolerate a one-day delay.
+const TIME_BUDGET_MS = 250_000;
+
 const ACTIVE_WINDOW_DAYS = 30;
 
 interface ActiveUser {
@@ -74,6 +80,7 @@ async function handle(request: NextRequest): Promise<Response> {
   }
 
   const now = new Date();
+  const startedAt = Date.now();
   const admin = getSupabaseAdmin();
 
   const activeCutoff = new Date(
@@ -95,9 +102,22 @@ async function handle(request: NextRequest): Promise<Response> {
   const activeUsers = (users ?? []) as ActiveUser[];
   let usersSwept = 0;
   let notificationsCreated = 0;
+  let remainingUsers = 0;
   const failures: string[] = [];
 
-  for (const user of activeUsers) {
+  for (let i = 0; i < activeUsers.length; i++) {
+    const user = activeUsers[i]!;
+    // The active-user set is unbounded (no LIMIT) and each user is a sequential
+    // round-trip, so a large set could blow past maxDuration and be hard-killed.
+    // Stop gracefully at the time budget; the daily schedule re-covers the rest.
+    if (Date.now() - startedAt > TIME_BUDGET_MS) {
+      remainingUsers = activeUsers.length - i;
+      log.warn("unprompted_ceo.time_budget_exceeded", {
+        processedUsers: usersSwept,
+        remainingUsers,
+      });
+      break;
+    }
     try {
       const decisions = await sweepUser(user.id, now);
       notificationsCreated += decisions;
@@ -113,6 +133,7 @@ async function handle(request: NextRequest): Promise<Response> {
     usersSwept,
     notificationsCreated,
     failed: failures.length,
+    remainingUsers,
   });
 
   return NextResponse.json({
@@ -120,6 +141,7 @@ async function handle(request: NextRequest): Promise<Response> {
     usersSwept,
     notificationsCreated,
     failed: failures,
+    remainingUsers,
   });
 }
 

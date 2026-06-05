@@ -188,32 +188,44 @@ async function probeAiCost(now: number, capCents: number): Promise<Probe> {
   const admin = getSupabaseAdmin();
   const since = new Date(now - HOUR_MS).toISOString();
 
-  // Page through the rolling hour. Cost_cents is numeric(10,2); Supabase
+  // Sum EVERY agent-log row in the rolling hour, not just the first page. A
+  // single capped fetch (.limit(5000)) silently under-counts a runaway cost
+  // wave — exactly the scenario this probe exists to catch — so it could read
+  // "ok" while spend exploded. We page with .range() in a bounded loop (the
+  // codebase's standard sweep pattern). Cost_cents is numeric(10,2); Supabase
   // REST returns it as a string for precision, so we parseFloat each row.
-  const { data, error } = await admin
-    .from("agent_logs")
-    .select("cost_cents, created_at")
-    .gte("created_at", since)
-    .limit(5_000);
-
-  if (error) {
-    log.error("owner_watchdog.cost_read_failed", undefined, {
-      error: error.message,
-    });
-    return {
-      signalId: "ai-cost-hourly",
-      severity: "crit",
-      outcome: "ok",
-      lastSeenValue: null,
-    };
-  }
-
+  const PAGE_SIZE = 1_000;
+  const MAX_PAGES = 100; // 100k rows/hr is already catastrophic — bound the work.
   let totalCents = 0;
-  for (const row of (data ?? []) as Array<{ cost_cents: string | number | null }>) {
-    const raw = row.cost_cents;
-    if (raw === null || raw === undefined) continue;
-    const parsed = typeof raw === "number" ? raw : Number.parseFloat(raw);
-    if (Number.isFinite(parsed)) totalCents += parsed;
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE_SIZE;
+    const { data, error } = await admin
+      .from("agent_logs")
+      .select("cost_cents")
+      .gte("created_at", since)
+      .order("id", { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) {
+      log.error("owner_watchdog.cost_read_failed", undefined, {
+        error: error.message,
+      });
+      return {
+        signalId: "ai-cost-hourly",
+        severity: "crit",
+        outcome: "ok",
+        lastSeenValue: null,
+      };
+    }
+
+    const rows = (data ?? []) as Array<{ cost_cents: string | number | null }>;
+    for (const row of rows) {
+      const raw = row.cost_cents;
+      if (raw === null || raw === undefined) continue;
+      const parsed = typeof raw === "number" ? raw : Number.parseFloat(raw);
+      if (Number.isFinite(parsed)) totalCents += parsed;
+    }
+    if (rows.length < PAGE_SIZE) break;
   }
 
   if (totalCents > capCents) {

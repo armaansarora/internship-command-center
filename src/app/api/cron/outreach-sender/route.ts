@@ -321,20 +321,38 @@ async function handle(req: NextRequest): Promise<NextResponse> {
         subject: row.subject,
         body: row.body,
         replyTo: userEmail.get(row.user_id),
+        // Stable per-row key so a retry (next tick re-draining this row after a
+        // failed status write) is de-duplicated by Resend and never delivers a
+        // second email. See the post-send write-failure handling below.
+        idempotencyKey: row.id,
       });
 
-      const { error: updateErr } = await admin
+      // Flip the row to 'sent'. If this write fails the row stays drainable, so
+      // the next tick would re-send — the idempotency key above is what makes
+      // that safe. Resend's idempotency window is finite (~24h) and this cron
+      // runs daily, so we also retry the write once and escalate to error on a
+      // persistent failure so owner-watchdog surfaces a stuck row promptly.
+      const sentPatch = {
+        status: "sent" as const,
+        sent_at: new Date().toISOString(),
+        resend_message_id: messageId,
+      };
+      let { error: updateErr } = await admin
         .from("outreach_queue")
-        .update({
-          status: "sent",
-          sent_at: new Date().toISOString(),
-          resend_message_id: messageId,
-        })
+        .update(sentPatch)
         .eq("id", row.id)
         .eq("user_id", row.user_id);
 
       if (updateErr) {
-        log.warn("outreach_sender.update_after_send_failed", {
+        ({ error: updateErr } = await admin
+          .from("outreach_queue")
+          .update(sentPatch)
+          .eq("id", row.id)
+          .eq("user_id", row.user_id));
+      }
+
+      if (updateErr) {
+        log.error("outreach_sender.update_after_send_failed", undefined, {
           outreachId: row.id,
           error: updateErr.message,
         });

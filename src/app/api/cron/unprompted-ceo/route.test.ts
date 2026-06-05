@@ -164,6 +164,43 @@ describe("GET /api/cron/unprompted-ceo", () => {
     expect(logErrorSpy).toHaveBeenCalled();
   });
 
+  it("stops at the time budget and reports the remaining users", async () => {
+    verifyCronSpy.mockReturnValue({ ok: true });
+    userProfilesSelectSpy.mockResolvedValue({
+      data: [{ id: "u-1" }, { id: "u-2" }],
+      error: null,
+    });
+    // Empty pipelines → sweepUser does no inserts; we only exercise the budget.
+    applicationsSelectSpy.mockResolvedValue({ data: [], error: null });
+    notificationsSelectSpy.mockResolvedValue({ data: [], error: null });
+
+    // Clock: startedAt and the first iteration are within budget (process u-1);
+    // the second iteration is past it → break before u-2. Date.now is only
+    // called by the budget code (startedAt + one check per iteration).
+    const nowSpy = vi
+      .spyOn(Date, "now")
+      .mockReturnValueOnce(0) // startedAt
+      .mockReturnValueOnce(0) // iteration 0 check → within budget
+      .mockReturnValue(250_001); // iteration 1 check → exceeded (TIME_BUDGET_MS=250_000)
+
+    try {
+      const res = await GET(makeRequest());
+      const body = (await res.json()) as {
+        usersSwept: number;
+        remainingUsers: number;
+      };
+      expect(body.usersSwept).toBe(1);
+      expect(body.remainingUsers).toBe(1);
+      expect(applicationsSelectSpy).toHaveBeenCalledTimes(1);
+      expect(logWarnSpy).toHaveBeenCalledWith(
+        "unprompted_ceo.time_budget_exceeded",
+        expect.objectContaining({ processedUsers: 1, remainingUsers: 1 }),
+      );
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
   it("sweeps two users, inserts the right notifications, and returns the aggregate", async () => {
     verifyCronSpy.mockReturnValue({ ok: true });
     userProfilesSelectSpy.mockResolvedValue({

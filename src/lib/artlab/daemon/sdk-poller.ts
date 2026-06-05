@@ -275,7 +275,19 @@ function enqueueArtLabRun(
       ...(characterId ? { characterId } : {}),
     },
   });
-  enqueueRun(workspaceRoot, entry);
+  try {
+    enqueueRun(workspaceRoot, entry);
+  } catch (err) {
+    // A prior tick enqueued this runId but then failed before archiving the
+    // inbox trigger file, so the queue entry already exists. enqueueRun uses
+    // an atomic `wx` write that refuses to overwrite (the exactly-once guard),
+    // so an EEXIST here means "already enqueued by us" — idempotent. Swallow
+    // it and let processOne fall through to archive the inbox file, clearing
+    // the wedge. Any OTHER error (schema parse, ENOSPC, permissions) is a real
+    // failure and must propagate so the file stays in the inbox for a genuine
+    // retry rather than being silently archived.
+    if ((err as NodeJS.ErrnoException)?.code !== "EEXIST") throw err;
+  }
 }
 
 /**
