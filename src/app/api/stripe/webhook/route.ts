@@ -263,15 +263,30 @@ async function updateUserSubscriptionTier(
   tier: string,
   context: string,
 ): Promise<void> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("user_profiles")
     .update({ subscription_tier: tier })
     .eq("id", userId)
     .select("id")
-    .single();
+    .maybeSingle();
 
   if (error) {
+    // A genuine DB error is transient: throw so the webhook 500s and Stripe
+    // retries the (still-resolvable) event once the database recovers.
     throw new Error(`Failed to persist ${context}: ${error.message}`);
+  }
+
+  if (!data) {
+    // 0 rows matched: the user_profiles row was deleted between checkout and
+    // webhook delivery (a TOCTOU on the metadata-driven path). Retrying can
+    // never resolve this, so we must NOT throw — a throw would 500 and make
+    // Stripe retry an unresolvable event for days. Alert and ack instead.
+    log.warn("stripe.webhook.tier_update_no_row", {
+      alert: true,
+      userId,
+      tier,
+      context,
+    });
   }
 }
 
