@@ -283,6 +283,7 @@ export function WarTable({
       }}
     >
       <DndContext
+        id="war-table-dnd"
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
