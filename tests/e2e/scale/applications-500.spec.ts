@@ -42,6 +42,13 @@ test.describe("scale — 500 applications — virtualization + no memory leak", 
         companies: [],
       },
       rpc: {},
+      // 500 apps cross the fifty_apps/hundred_apps progression milestones, so
+      // every authenticated page mount POSTs /api/progression to upsert them.
+      // Without write permission the stub 500s that upsert and the engine
+      // throws, spamming the e2e log with "Failed to upsert progression
+      // milestones" on each of the 5 reloads. Allow the write so the upsert
+      // returns 201 and the noise disappears (assertions are unaffected).
+      allowWrites: true,
     });
   });
 
