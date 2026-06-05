@@ -25,7 +25,7 @@ const {
   profileUpdateSpy,
   profileEqSpy,
   profileSelectSpy,
-  profileSingleSpy,
+  profileMaybeSingleSpy,
   profileLookupSpy,
   profileLookupEqSpy,
   profileLookupLimitSpy,
@@ -47,7 +47,7 @@ const {
   profileUpdateSpy: vi.fn(),
   profileEqSpy: vi.fn(),
   profileSelectSpy: vi.fn(),
-  profileSingleSpy: vi.fn(),
+  profileMaybeSingleSpy: vi.fn(),
   profileLookupSpy: vi.fn(),
   profileLookupEqSpy: vi.fn(),
   profileLookupLimitSpy: vi.fn(),
@@ -136,8 +136,8 @@ function setupWebhookUpdateOk(): void {
 }
 
 function setupProfileUpdateOk(): void {
-  profileSingleSpy.mockResolvedValue({ data: { id: "user-1" }, error: null });
-  profileSelectSpy.mockReturnValue({ single: profileSingleSpy });
+  profileMaybeSingleSpy.mockResolvedValue({ data: { id: "user-1" }, error: null });
+  profileSelectSpy.mockReturnValue({ maybeSingle: profileMaybeSingleSpy });
   profileEqSpy.mockReturnValue({ select: profileSelectSpy });
   profileUpdateSpy.mockReturnValue({ eq: profileEqSpy });
 }
@@ -169,7 +169,7 @@ describe("POST /api/stripe/webhook — subscription lifecycle", () => {
     profileUpdateSpy.mockReset();
     profileEqSpy.mockReset();
     profileSelectSpy.mockReset();
-    profileSingleSpy.mockReset();
+    profileMaybeSingleSpy.mockReset();
     profileLookupSpy.mockReset();
     profileLookupEqSpy.mockReset();
     profileLookupLimitSpy.mockReset();

@@ -32,7 +32,7 @@ const {
   profileUpdateSpy,
   profileEqSpy,
   profileSelectSpy,
-  profileSingleSpy,
+  profileMaybeSingleSpy,
   recordServerEngagementEventSpy,
 } = vi.hoisted(() => ({
   requireEnvSpy: vi.fn(),
@@ -50,7 +50,7 @@ const {
   profileUpdateSpy: vi.fn(),
   profileEqSpy: vi.fn(),
   profileSelectSpy: vi.fn(),
-  profileSingleSpy: vi.fn(),
+  profileMaybeSingleSpy: vi.fn(),
   recordServerEngagementEventSpy: vi.fn(),
 }));
 
@@ -156,7 +156,7 @@ describe("POST /api/stripe/webhook — Season Pass purchase mirror", () => {
     profileUpdateSpy.mockReset();
     profileEqSpy.mockReset();
     profileSelectSpy.mockReset();
-    profileSingleSpy.mockReset();
+    profileMaybeSingleSpy.mockReset();
     recordServerEngagementEventSpy.mockReset();
 
     requireEnvSpy.mockReturnValue({ STRIPE_WEBHOOK_SECRET: "whsec_test" });
@@ -178,11 +178,11 @@ describe("POST /api/stripe/webhook — Season Pass purchase mirror", () => {
       neq: webhookUpdateNeqSpy,
     });
 
-    profileSingleSpy.mockResolvedValue({
+    profileMaybeSingleSpy.mockResolvedValue({
       data: { id: "user-purchaser" },
       error: null,
     });
-    profileSelectSpy.mockReturnValue({ single: profileSingleSpy });
+    profileSelectSpy.mockReturnValue({ maybeSingle: profileMaybeSingleSpy });
     profileEqSpy.mockReturnValue({ select: profileSelectSpy });
     profileUpdateSpy.mockReturnValue({ eq: profileEqSpy });
 

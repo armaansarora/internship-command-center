@@ -16,8 +16,9 @@ const {
   profileUpdateSpy,
   profileEqSpy,
   profileSelectSpy,
-  profileSingleSpy,
+  profileMaybeSingleSpy,
   logErrorSpy,
+  logWarnSpy,
 } = vi.hoisted(() => ({
   requireEnvSpy: vi.fn(),
   constructEventSpy: vi.fn(),
@@ -34,8 +35,9 @@ const {
   profileUpdateSpy: vi.fn(),
   profileEqSpy: vi.fn(),
   profileSelectSpy: vi.fn(),
-  profileSingleSpy: vi.fn(),
+  profileMaybeSingleSpy: vi.fn(),
   logErrorSpy: vi.fn(),
+  logWarnSpy: vi.fn(),
 }));
 
 vi.mock("@/lib/env", () => ({
@@ -66,7 +68,7 @@ vi.mock("@/lib/supabase/admin", () => ({
 vi.mock("@/lib/logger", () => ({
   log: {
     info: vi.fn(),
-    warn: vi.fn(),
+    warn: logWarnSpy,
     error: logErrorSpy,
   },
 }));
@@ -156,7 +158,7 @@ describe("POST /api/stripe/webhook", () => {
     profileUpdateSpy.mockReset();
     profileEqSpy.mockReset();
     profileSelectSpy.mockReset();
-    profileSingleSpy.mockReset();
+    profileMaybeSingleSpy.mockReset();
     logErrorSpy.mockReset();
 
     requireEnvSpy.mockReturnValue({ STRIPE_WEBHOOK_SECRET: "whsec_test" });
@@ -183,11 +185,11 @@ describe("POST /api/stripe/webhook", () => {
       neq: webhookUpdateNeqSpy,
     });
 
-    profileSingleSpy.mockResolvedValue({
+    profileMaybeSingleSpy.mockResolvedValue({
       data: { id: "user-billing" },
       error: null,
     });
-    profileSelectSpy.mockReturnValue({ single: profileSingleSpy });
+    profileSelectSpy.mockReturnValue({ maybeSingle: profileMaybeSingleSpy });
     profileEqSpy.mockReturnValue({ select: profileSelectSpy });
     profileUpdateSpy.mockReturnValue({ eq: profileEqSpy });
   });
@@ -200,7 +202,7 @@ describe("POST /api/stripe/webhook", () => {
     expect(profileUpdateSpy).toHaveBeenCalledWith({ subscription_tier: "pro" });
     expect(profileEqSpy).toHaveBeenCalledWith("id", "user-billing");
     expect(profileSelectSpy).toHaveBeenCalledWith("id");
-    expect(profileSingleSpy).toHaveBeenCalledOnce();
+    expect(profileMaybeSingleSpy).toHaveBeenCalledOnce();
   });
 
   // ── Season Pass durability ──────────────────────────────────────────────
@@ -244,24 +246,47 @@ describe("POST /api/stripe/webhook", () => {
     expect(profileUpdateSpy).not.toHaveBeenCalled();
   });
 
-  it("fails the webhook when checkout tier persistence touches no profile row", async () => {
-    profileSingleSpy.mockResolvedValueOnce({
+  it("acks (and alerts on) a checkout whose profile row no longer exists", async () => {
+    // maybeSingle() returns { data: null, error: null } for a 0-row update —
+    // the user_profiles row was deleted between checkout and webhook delivery.
+    // That is NOT retryable, so the webhook must ACK (200) rather than 500 and
+    // send Stripe into days of retrying an unresolvable event. An alert is
+    // logged so the dropped entitlement is observable.
+    profileMaybeSingleSpy.mockResolvedValueOnce({ data: null, error: null });
+
+    const res = await POST(makeRequest());
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ received: true });
+    expect(logWarnSpy).toHaveBeenCalledWith(
+      "stripe.webhook.tier_update_no_row",
+      expect.objectContaining({
+        alert: true,
+        userId: "user-billing",
+        tier: "pro",
+        context: "checkout tier",
+      }),
+    );
+    expect(webhookUpdateSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "failed" }),
+    );
+  });
+
+  it("still fails (so Stripe retries) on a genuine DB error during tier persistence", async () => {
+    // A real DB error is transient and the event is still resolvable, so the
+    // webhook must 500 and let Stripe retry once the database recovers.
+    profileMaybeSingleSpy.mockResolvedValueOnce({
       data: null,
-      error: { message: "No rows found" },
+      error: { message: "connection reset" },
     });
 
     const res = await POST(makeRequest());
 
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toEqual({ error: "Handler failed" });
-    expect(logErrorSpy).toHaveBeenCalledWith(
-      "stripe.webhook.handler_failed",
-      expect.any(Error),
-      { eventId: "evt_checkout", type: "checkout.session.completed" },
-    );
     expect(webhookUpdateSpy).toHaveBeenCalledWith({
       status: "failed",
-      error: "Failed to persist checkout tier: No rows found",
+      error: "Failed to persist checkout tier: connection reset",
     });
   });
 });
