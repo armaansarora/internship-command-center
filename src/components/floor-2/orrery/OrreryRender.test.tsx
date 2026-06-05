@@ -223,6 +223,34 @@ describe("OrreryRender — colorToken inline style", () => {
 });
 
 describe("OrreryRender — reduced-motion path", () => {
+  it("adds the dense class at 80 planets to trim paint-heavy ornamentation", () => {
+    const planets = Array.from({ length: 80 }, (_, i) => makePlanet(i));
+    const html = renderToString(
+      <OrreryRender
+        planets={planets}
+        mode="stage"
+        focusPlanetId={null}
+        reducedMotion={false}
+        onPlanetClick={() => undefined}
+      />,
+    );
+    expect(html).toMatch(/class="[^"]*orrery-dense[^"]*"/);
+  });
+
+  it("does not add the dense class below 80 planets", () => {
+    const planets = Array.from({ length: 79 }, (_, i) => makePlanet(i));
+    const html = renderToString(
+      <OrreryRender
+        planets={planets}
+        mode="stage"
+        focusPlanetId={null}
+        reducedMotion={false}
+        onPlanetClick={() => undefined}
+      />,
+    );
+    expect(html).not.toMatch(/class="[^"]*orrery-dense[^"]*"/);
+  });
+
   it("scene root carries the orrery-reduced class when reducedMotion=true", () => {
     const planets = Array.from({ length: 4 }, (_, i) => makePlanet(i));
     const html = renderToString(
