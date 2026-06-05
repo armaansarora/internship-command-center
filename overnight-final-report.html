@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Tower · Overnight Integration Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  /* Tower palette in OKLCH, neutrals tinted toward the brand navy */
+  --bg:        oklch(0.18 0.035 275);
+  --bg-2:      oklch(0.215 0.04 277);
+  --panel:     oklch(0.235 0.038 278 / 0.72);
+  --panel-2:   oklch(0.27 0.04 278 / 0.55);
+  --line:      oklch(0.42 0.03 278 / 0.45);
+  --line-soft: oklch(0.42 0.03 278 / 0.22);
+  --ink:       oklch(0.95 0.012 90);
+  --ink-2:     oklch(0.80 0.018 280);
+  --ink-3:     oklch(0.66 0.022 280);
+  --gold:      oklch(0.78 0.11 86);
+  --gold-deep: oklch(0.70 0.12 80);
+  --green:     oklch(0.78 0.14 155);
+  --red:       oklch(0.70 0.16 25);
+  --blue:      oklch(0.74 0.12 240);
+  --violet:    oklch(0.74 0.12 300);
+  --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); font-family:var(--sans); font-size:15.5px; line-height:1.6;
+  background:
+    radial-gradient(1200px 600px at 78% -8%, oklch(0.30 0.07 86 / 0.18), transparent 60%),
+    radial-gradient(900px 500px at 8% 4%, oklch(0.32 0.06 278 / 0.30), transparent 55%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 40%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:0 28px}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono); font-size:11.5px; letter-spacing:.34em; text-transform:uppercase; color:var(--gold); font-weight:600}
+a{color:var(--gold); text-decoration:none; border-bottom:1px solid var(--line)}
+
+/* entrance */
+@keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion: no-preference){
+  .rise{opacity:0; animation:rise .9s cubic-bezier(.16,1,.3,1) forwards}
+  .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.2s}.d4{animation-delay:.28s}
+  @keyframes grow{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+  .bar-fill{transform-origin:left center; animation:grow 1.1s cubic-bezier(.16,1,.3,1) forwards}
+}
+
+/* ── masthead ── */
+header{position:relative; padding:74px 0 44px; border-bottom:1px solid var(--line-soft)}
+.crown{display:flex; align-items:center; gap:14px; margin-bottom:30px}
+.crown .glyph{font-family:var(--serif); font-weight:800; font-size:21px; color:var(--gold); letter-spacing:.02em}
+.crown .sep{flex:1; height:1px; background:linear-gradient(90deg, var(--line), transparent)}
+h1{font-family:var(--serif); font-weight:800; font-size:clamp(40px,7.2vw,82px); line-height:.98; letter-spacing:-.01em; margin:0 0 18px}
+h1 .thin{font-weight:500; font-style:italic; color:var(--ink-2)}
+.lede{max-width:60ch; font-size:19px; color:var(--ink-2); margin:0 0 30px}
+.lede b{color:var(--ink); font-weight:600}
+.facts{display:flex; flex-wrap:wrap; gap:10px 22px; font-family:var(--mono); font-size:12.5px; color:var(--ink-3)}
+.facts span{display:inline-flex; gap:8px; align-items:center}
+.facts b{color:var(--ink-2); font-weight:500}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px oklch(0.78 0.14 155 / 0.16)}
+
+/* ── verdict strip ── */
+.verdict{display:grid; grid-template-columns:repeat(6,1fr); gap:1px; margin:40px 0 8px; background:var(--line-soft); border:1px solid var(--line-soft); border-radius:14px; overflow:hidden}
+.v{background:linear-gradient(180deg, var(--bg-2), oklch(0.20 0.035 277)); padding:20px 18px}
+.v .k{font-family:var(--mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3)}
+.v .val{font-family:var(--serif); font-size:30px; font-weight:700; margin-top:8px; line-height:1; color:var(--ink)}
+.v .val.ok{color:var(--green)}
+.v .sub{font-family:var(--mono); font-size:11px; color:var(--ink-3); margin-top:7px}
+@media(max-width:860px){.verdict{grid-template-columns:repeat(3,1fr)} }
+@media(max-width:520px){.verdict{grid-template-columns:repeat(2,1fr)} }
+
+/* ── sections ── */
+section{padding:60px 0; border-bottom:1px solid var(--line-soft)}
+.sec-head{display:flex; align-items:baseline; gap:16px; margin-bottom:8px}
+.sec-no{font-family:var(--mono); font-size:12px; color:var(--gold); letter-spacing:.2em}
+h2{font-family:var(--serif); font-weight:700; font-size:clamp(27px,3.8vw,40px); margin:0; letter-spacing:-.01em}
+.sec-sub{color:var(--ink-2); max-width:72ch; margin:14px 0 34px; font-size:16px}
+
+/* run comparison */
+.runs{display:grid; grid-template-columns:1fr 1fr; gap:22px}
+@media(max-width:820px){.runs{grid-template-columns:1fr}}
+.run{border:1px solid var(--line-soft); border-radius:16px; padding:26px; background:linear-gradient(180deg, var(--panel), transparent)}
+.run.claude{box-shadow:inset 0 0 0 1px oklch(0.74 0.12 240 / 0.12)}
+.run.codex{box-shadow:inset 0 0 0 1px oklch(0.74 0.12 300 / 0.12)}
+.run h3{font-family:var(--serif); font-weight:700; font-size:23px; margin:0 0 4px}
+.run .role{font-family:var(--mono); font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:18px}
+.run.claude .role{color:var(--blue)} .run.codex .role{color:var(--violet)}
+.metricrow{display:grid; grid-template-columns:1fr auto; gap:6px 12px; align-items:center; padding:11px 0; border-top:1px solid var(--line-soft)}
+.metricrow:first-of-type{border-top:none}
+.metricrow .label{font-size:13.5px; color:var(--ink-2)}
+.delta{font-family:var(--mono); font-size:13px; display:inline-flex; align-items:center; gap:9px; justify-content:flex-end}
+.was{color:var(--ink-3); text-decoration:line-through; text-decoration-color:var(--line)}
+.arrow{color:var(--ink-3)}
+.now{color:var(--green); font-weight:600}
+.now.flat{color:var(--ink-2)}
+.tag{display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:999px; border:1px solid var(--line)}
+
+/* chart */
+.chart-card{border:1px solid var(--line-soft); border-radius:16px; padding:26px 28px; background:linear-gradient(180deg, var(--panel), transparent)}
+.chartgrid{display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:6px}
+@media(max-width:820px){.chartgrid{grid-template-columns:1fr}}
+.chart-title{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); margin-bottom:18px}
+.legend{display:flex; gap:18px; font-family:var(--mono); font-size:11px; color:var(--ink-3); margin-top:14px}
+.legend i{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle}
+
+/* provenance ledger */
+.ledger{border:1px solid var(--line-soft); border-radius:16px; overflow:hidden}
+.lrow{display:grid; grid-template-columns:30px 1fr 132px; gap:18px; padding:18px 22px; border-top:1px solid var(--line-soft); align-items:start}
+.lrow:first-child{border-top:none}
+.lrow.head{background:oklch(0.22 0.035 278 / 0.6); font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); padding:13px 22px}
+.lrow .idx{font-family:var(--mono); font-size:13px; color:var(--gold)}
+.lrow .what{font-weight:600; font-size:15px; margin-bottom:4px}
+.lrow .why{color:var(--ink-2); font-size:13.5px; line-height:1.5}
+.lrow .why code{font-family:var(--mono); font-size:12px; color:var(--ink); background:oklch(0.30 0.03 278 / 0.5); padding:1px 5px; border-radius:4px}
+.verdict-pill{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border-radius:999px; white-space:nowrap; text-align:center; font-weight:600}
+.kept{color:var(--green); border:1px solid oklch(0.78 0.14 155 / 0.4); background:oklch(0.78 0.14 155 / 0.08)}
+.skip{color:var(--ink-3); border:1px solid var(--line)}
+.merge{color:var(--gold); border:1px solid oklch(0.78 0.11 86 / 0.4); background:oklch(0.78 0.11 86 / 0.08)}
+.src{font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; padding:2px 7px; border-radius:4px; margin-right:7px}
+.src.cx{color:var(--violet); border:1px solid oklch(0.74 0.12 300 / 0.4)}
+.src.cl{color:var(--blue); border:1px solid oklch(0.74 0.12 240 / 0.4)}
+.src.both{color:var(--gold); border:1px solid oklch(0.78 0.11 86 / 0.4)}
+
+/* backlog */
+.tier{margin-top:30px}
+.tier-label{display:flex; align-items:center; gap:14px; margin-bottom:16px}
+.tier-label .t{font-family:var(--mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; padding:5px 12px; border-radius:6px; font-weight:600}
+.t0{color:var(--red); border:1px solid oklch(0.70 0.16 25 / 0.5); background:oklch(0.70 0.16 25 / 0.08)}
+.t1{color:var(--gold); border:1px solid oklch(0.78 0.11 86 / 0.4)}
+.t2{color:var(--blue); border:1px solid oklch(0.74 0.12 240 / 0.35)}
+.t3{color:var(--ink-3); border:1px solid var(--line)}
+.tier-label .rule{flex:1; height:1px; background:var(--line-soft)}
+.tier-label .meta{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
+.item{display:grid; grid-template-columns:26px 1fr; gap:14px; padding:14px 0; border-top:1px solid var(--line-soft)}
+.item .n{font-family:var(--mono); font-size:13px; color:var(--ink-3)}
+.item.pin{padding:18px; border:1px solid oklch(0.70 0.16 25 / 0.35); border-radius:12px; background:oklch(0.70 0.16 25 / 0.05); margin-bottom:10px; grid-template-columns:26px 1fr}
+.item .h{font-weight:600; font-size:14.5px; margin-bottom:4px}
+.item .b{color:var(--ink-2); font-size:13px; line-height:1.5}
+.item .b code{font-family:var(--mono); font-size:11.5px; color:var(--gold)}
+.item .origin{font-family:var(--mono); font-size:10px; color:var(--ink-3); letter-spacing:.06em}
+
+.note{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:8px}
+@media(max-width:820px){.note{grid-template-columns:1fr}}
+.note .card{border:1px solid var(--line-soft); border-radius:14px; padding:22px; background:linear-gradient(180deg, var(--panel), transparent)}
+.note h4{font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:0 0 12px}
+.note p{margin:0 0 10px; font-size:13.5px; color:var(--ink-2)}
+.note code{font-family:var(--mono); font-size:12px; color:var(--ink)}
+
+/* merge footer */
+.merge-block{margin-top:10px; border:1px solid var(--line); border-radius:14px; overflow:hidden}
+.merge-block .bar{background:oklch(0.22 0.035 278 / 0.7); padding:10px 16px; font-family:var(--mono); font-size:11px; color:var(--ink-3); letter-spacing:.12em; text-transform:uppercase; display:flex; justify-content:space-between}
+.merge-block pre{margin:0; padding:20px 18px; font-family:var(--mono); font-size:13px; color:var(--ink); overflow-x:auto; line-height:1.8}
+.merge-block .cm{color:var(--ink-3)}
+.merge-block .gold{color:var(--gold)}
+footer{padding:50px 0 70px; color:var(--ink-3); font-family:var(--mono); font-size:11.5px; letter-spacing:.04em}
+
+.pull{font-family:var(--serif); font-style:italic; font-size:clamp(20px,2.6vw,27px); color:var(--ink); max-width:34ch; line-height:1.35}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="crown rise">
+    <span class="glyph">THE&nbsp;TOWER</span>
+    <span class="sep"></span>
+    <span class="eyebrow">Overnight Integration · 2026-06-04</span>
+  </div>
+  <p class="eyebrow rise d1">Two hardening runs, one branch</p>
+  <h1 class="rise d1">The best of both,<br><span class="thin">merged clean.</span></h1>
+  <p class="lede rise d2">Two independent overnight runs hardened the same codebase in isolation. This branch takes the <b>broader, deeper Claude run</b> as the integration base and grafts in <b>eight unique Codex wins</b>, hunk by hunk, each verified on all four rails before it landed. No folder churn, no history rewrite, no merge to <span class="mono">main</span>.</p>
+  <div class="facts rise d3">
+    <span><span class="dot"></span><b>auto/overnight-final-2026-06-04</b></span>
+    <span>base <b>auto/overnight-claude</b></span>
+    <span>donor <b>auto/overnight-codex</b></span>
+    <span>Next <b>16.2.7</b></span>
+    <span>audit <b>0 vulns</b></span>
+  </div>
+
+  <div class="verdict rise d4">
+    <div class="v"><div class="k">Build</div><div class="val ok">PASS</div><div class="sub">next build · exit 0</div></div>
+    <div class="v"><div class="k">Types</div><div class="val ok">0</div><div class="sub">tsc --noEmit</div></div>
+    <div class="v"><div class="k">Lint</div><div class="val ok">0 / 0</div><div class="sub">errors / warnings</div></div>
+    <div class="v"><div class="k">Tests</div><div class="val ok">4287</div><div class="sub">0 failed · 10 skip</div></div>
+    <div class="v"><div class="k">Audit</div><div class="val ok">0</div><div class="sub">npm vulnerabilities</div></div>
+    <div class="v"><div class="k">Commits</div><div class="val">8</div><div class="sub">tiny · green · atomic</div></div>
+  </div>
+</header>
+
+<!-- ── SECTION 1 ── -->
+<section>
+  <div class="sec-head"><span class="sec-no">01</span><h2>Where each run ended</h2></div>
+  <p class="sec-sub">Both runs were already green and fully converged before this merge began. Verified independently: the Claude branch through this branch's own baseline rails (it is the substrate), the Codex branch per-hunk in place. Baseline to final, side by side.</p>
+
+  <div class="runs">
+    <div class="run claude">
+      <h3>Claude</h3>
+      <div class="role">Integration base · broad + deep · 32 commits</div>
+      <div class="metricrow"><span class="label">Failing tests</span><span class="delta"><span class="was">3 failed</span><span class="arrow">→</span><span class="now">0 failed</span></span></div>
+      <div class="metricrow"><span class="label">Tests passing</span><span class="delta"><span class="was">4259</span><span class="arrow">→</span><span class="now">4283 (+24)</span></span></div>
+      <div class="metricrow"><span class="label">npm audit</span><span class="delta"><span class="was">7 (1 high)</span><span class="arrow">→</span><span class="now">0</span></span></div>
+      <div class="metricrow"><span class="label">eslint warnings</span><span class="delta"><span class="was">3</span><span class="arrow">→</span><span class="now">1</span></span></div>
+      <div class="metricrow"><span class="label">tsc / build</span><span class="delta"><span class="now flat">0 err · exit 0</span></span></div>
+      <div class="metricrow"><span class="label">Convergence</span><span class="delta"><span class="now flat">8 passes · zero-delta</span></span></div>
+    </div>
+
+    <div class="run codex">
+      <h3>Codex</h3>
+      <div class="role">Donor · focused · 1 squashed commit</div>
+      <div class="metricrow"><span class="label">Failing unit tests</span><span class="delta"><span class="was">3 failed</span><span class="arrow">→</span><span class="now">0 failed</span></span></div>
+      <div class="metricrow"><span class="label">Failing e2e tests</span><span class="delta"><span class="was">2 failed</span><span class="arrow">→</span><span class="now">0 failed</span></span></div>
+      <div class="metricrow"><span class="label">npm audit</span><span class="delta"><span class="was">7 (1 high)</span><span class="arrow">→</span><span class="now">0</span></span></div>
+      <div class="metricrow"><span class="label">eslint warnings</span><span class="delta"><span class="was">3</span><span class="arrow">→</span><span class="now">0</span></span></div>
+      <div class="metricrow"><span class="label">Next.js</span><span class="delta"><span class="was">16.2.5</span><span class="arrow">→</span><span class="now">16.2.7</span></span></div>
+      <div class="metricrow"><span class="label">Reorg decision</span><span class="delta"><span class="now flat">no move · same as Claude</span></span></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-top:22px">
+    <div class="chartgrid">
+      <div>
+        <div class="chart-title">Security · npm audit vulnerabilities</div>
+        <svg viewBox="0 0 460 150" width="100%" role="img" aria-label="npm audit went from 7 vulnerabilities to 0 on both runs and the final branch">
+          <!-- baseline -->
+          <text x="0" y="20" fill="oklch(0.66 0.022 280)" font-family="var(--mono)" font-size="11">7</text>
+          <text x="0" y="86" fill="oklch(0.66 0.022 280)" font-family="var(--mono)" font-size="11">0</text>
+          <line x1="18" y1="14" x2="460" y2="14" stroke="oklch(0.42 0.03 278 / 0.25)" stroke-width="1"/>
+          <line x1="18" y1="80" x2="460" y2="80" stroke="oklch(0.42 0.03 278 / 0.45)" stroke-width="1"/>
+          <!-- Claude baseline 7 -->
+          <rect class="bar-fill" x="40"  y="14" width="46" height="66" rx="3" fill="oklch(0.70 0.16 25 / 0.85)"/>
+          <rect x="96"  y="78" width="46" height="2" rx="1" fill="oklch(0.78 0.14 155 / 0.9)"/>
+          <text x="63" y="100" fill="oklch(0.74 0.12 240)" font-family="var(--mono)" font-size="10" text-anchor="middle">Claude</text>
+          <text x="119" y="100" fill="oklch(0.78 0.14 155)" font-family="var(--mono)" font-size="10" text-anchor="middle">→ 0</text>
+          <!-- Codex baseline 7 -->
+          <rect class="bar-fill" x="200" y="14" width="46" height="66" rx="3" fill="oklch(0.70 0.16 25 / 0.85)"/>
+          <rect x="256" y="78" width="46" height="2" rx="1" fill="oklch(0.78 0.14 155 / 0.9)"/>
+          <text x="223" y="100" fill="oklch(0.74 0.12 300)" font-family="var(--mono)" font-size="10" text-anchor="middle">Codex</text>
+          <text x="279" y="100" fill="oklch(0.78 0.14 155)" font-family="var(--mono)" font-size="10" text-anchor="middle">→ 0</text>
+          <!-- Final 0 -->
+          <rect x="360" y="78" width="60" height="2" rx="1" fill="oklch(0.78 0.11 86 / 0.95)"/>
+          <text x="390" y="100" fill="oklch(0.78 0.11 86)" font-family="var(--mono)" font-size="10" text-anchor="middle">Final 0</text>
+          <text x="390" y="62" fill="oklch(0.78 0.11 86)" font-family="var(--mono)" font-size="10" text-anchor="middle">held</text>
+        </svg>
+        <div class="legend"><span><i style="background:oklch(0.70 0.16 25)"></i>baseline</span><span><i style="background:oklch(0.78 0.14 155)"></i>resolved</span><span><i style="background:oklch(0.78 0.11 86)"></i>final branch</span></div>
+      </div>
+      <div>
+        <div class="chart-title">eslint warnings · lower is better</div>
+        <svg viewBox="0 0 460 150" width="100%" role="img" aria-label="eslint warnings: Claude 3 to 1, Codex 3 to 0, final branch 0">
+          <line x1="18" y1="14" x2="460" y2="14" stroke="oklch(0.42 0.03 278 / 0.25)" stroke-width="1"/>
+          <line x1="18" y1="80" x2="460" y2="80" stroke="oklch(0.42 0.03 278 / 0.45)" stroke-width="1"/>
+          <text x="0" y="18" fill="oklch(0.66 0.022 280)" font-family="var(--mono)" font-size="11">3</text>
+          <text x="0" y="84" fill="oklch(0.66 0.022 280)" font-family="var(--mono)" font-size="11">0</text>
+          <!-- Claude 3 -> 1 -->
+          <rect class="bar-fill" x="40" y="14" width="46" height="66" rx="3" fill="oklch(0.74 0.12 240 / 0.35)"/>
+          <rect class="bar-fill" x="96" y="58" width="46" height="22" rx="3" fill="oklch(0.74 0.12 240 / 0.9)"/>
+          <text x="63" y="100" fill="oklch(0.74 0.12 240)" font-family="var(--mono)" font-size="10" text-anchor="middle">Claude 3</text>
+          <text x="119" y="100" fill="oklch(0.74 0.12 240)" font-family="var(--mono)" font-size="10" text-anchor="middle">→ 1</text>
+          <!-- Codex 3 -> 0 -->
+          <rect class="bar-fill" x="200" y="14" width="46" height="66" rx="3" fill="oklch(0.74 0.12 300 / 0.35)"/>
+          <rect x="256" y="78" width="46" height="2" rx="1" fill="oklch(0.78 0.14 155 / 0.9)"/>
+          <text x="223" y="100" fill="oklch(0.74 0.12 300)" font-family="var(--mono)" font-size="10" text-anchor="middle">Codex 3</text>
+          <text x="279" y="100" fill="oklch(0.78 0.14 155)" font-family="var(--mono)" font-size="10" text-anchor="middle">→ 0</text>
+          <!-- Final 0 -->
+          <rect x="360" y="78" width="60" height="2" rx="1" fill="oklch(0.78 0.11 86 / 0.95)"/>
+          <text x="390" y="100" fill="oklch(0.78 0.11 86)" font-family="var(--mono)" font-size="10" text-anchor="middle">Final 0</text>
+          <text x="390" y="62" fill="oklch(0.78 0.11 86)" font-family="var(--mono)" font-size="10" text-anchor="middle">best of both</text>
+        </svg>
+        <div class="legend"><span>Final branch adopts Codex's snippet fix to reach <b style="color:var(--ink-2)">0 warnings</b>, beating the Claude base's 1.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 2 ── -->
+<section>
+  <div class="sec-head"><span class="sec-no">02</span><h2>What came from where</h2></div>
+  <p class="sec-sub">The base is the whole Claude run: 32 commits of root-cause hardening (N+1 elimination, request timeouts, four HIGH-severity fixes, the 7→0 audit). On top of it, eight Codex contributions, each evaluated against the base before porting. Kept, hand-merged, or skipped with a reason.</p>
+
+  <div class="ledger">
+    <div class="lrow head"><span>#</span><span>Contribution · rationale</span><span>Disposition</span></div>
+
+    <div class="lrow"><span class="idx">1</span><div><div class="what"><span class="src cx">Codex</span>Stripe webhook signature ordering</div><div class="why">Missing <code>stripe-signature</code> now returns the typed 400 <em>before</em> <code>requireEnv</code> runs, so an unset secret can't mask it with a 500. Applied cleanly. Deliberately left the separate <code>.single()</code>-on-0-row issue in the same handler untouched (it is a retry/ack contract decision, ranked top of the backlog).</div></div><span class="verdict-pill kept">Kept</span></div>
+
+    <div class="lrow"><span class="idx">2</span><div><div class="what"><span class="src cx">Codex</span>Orrery high-density FPS</div><div class="why">An <code>orrery-dense</code> class at ≥80 planets trims paint-heavy ornamentation and the supernova burst moves from animating a large <code>box-shadow</code> to a transform/opacity pseudo-element, holding the ~30 FPS floor while preserving the 2.4s animation contract. +2 dense-mode tests.</div></div><span class="verdict-pill kept">Kept</span></div>
+
+    <div class="lrow"><span class="idx">3</span><div><div class="what"><span class="src cx">Codex</span>DnD hydration id</div><div class="why">A stable <code>id="war-table-dnd"</code> on the dnd-kit context removes server/client id drift on the scale route.</div></div><span class="verdict-pill kept">Kept</span></div>
+
+    <div class="lrow"><span class="idx">4</span><div><div class="what"><span class="src both">Hand-merged</span>comp-bands rate limit + length guards</div><div class="why">Codex's tier-B limiter and 120-char param guards <em>woven onto</em> the base, so Claude's graceful-empty <code>try/catch</code> contract survives. Both halves coexist: oversized → 400, limited → 429, transient throw → graceful empty. +2 contract tests.</div></div><span class="verdict-pill merge">Merged</span></div>
+
+    <div class="lrow"><span class="idx">5</span><div><div class="what"><span class="src cx">Codex</span>Priority above-the-fold art (LCP)</div><div class="why">A real fix, not a fixture: <code>VisualAssetImage</code> already supported <code>priority</code>, so the prop only needed threading through the button/stage/sprite chain and opting in Otis, CRO, and CEO. Defaults false everywhere else.</div></div><span class="verdict-pill kept">Kept</span></div>
+
+    <div class="lrow"><span class="idx">6</span><div><div class="what"><span class="src cx">Codex</span>0-warning generated snippets</div><div class="why">The ArtLab SDK snippet generator and its golden fixture now emit the <code>no-img-element</code> disable, dropping the repo's last eslint warning from 1 to 0 while keeping the golden contract test in sync. The final branch ends cleaner than either source.</div></div><span class="verdict-pill kept">Kept</span></div>
+
+    <div class="lrow"><span class="idx">7</span><div><div class="what"><span class="src cx">Codex</span>ArtLab CLI doc accuracy</div><div class="why">Seven docs updated from removed <code>art:*</code> scripts and a deleted CPE doc to the current <code>npm run artlab --</code> CLI. Verified owl-independent; check:links and doc-drift both pass. The owl-only MARK-SPEC / MORNING-REVIEW additions were left out.</div></div><span class="verdict-pill kept">Kept</span></div>
+
+    <div class="lrow"><span class="idx">8</span><div><div class="what"><span class="src both">Dedupe</span>Next.js 16.2.7 floor</div><div class="why">Both runs reached 16.2.7. Claude bumped the lockfile only; Codex set the explicit <code>package.json</code> floor (<code>^16.2.7</code> + matching <code>eslint-config-next</code>). Kept Codex's explicit floor, the stronger posture: a fresh install can't resolve below the patched version. Audit stays 0.</div></div><span class="verdict-pill merge">Merged</span></div>
+
+    <div class="lrow"><span class="idx">—</span><div><div class="what"><span class="src cx">Codex</span>ArtLab context cwd fallback &nbsp;·&nbsp; <span class="src cl">Claude</span>two unused-import removals</div><div class="why">Skipped. The base already resolves the project root with a <em>superior</em> bounded <code>findRepoRootFromCwd()</code> walk-up (Codex's single <code>process.cwd()</code> check is a strict subset), and Claude's <code>aab88470</code> already removed both unused test imports Codex also removed. Kept the safer / already-present versions.</div></div><span class="verdict-pill skip">Skipped · dup</span></div>
+
+    <div class="lrow"><span class="idx">—</span><div><div class="what"><span class="src cx">Codex</span>Owl mascot work (identity branch)</div><div class="why">Skipped by design. The Codex run sat on top of the in-flight <code>identity/autopilot</code> owl branch, so its raw diff carried 9,000+ lines of mascot code, Rive, and binaries that are <em>not</em> hardening. Only the squashed hardening commit <code>21695cc2</code> was treated as the donor. The owl docs would have described code absent from this branch, the exact drift both runs were repairing.</div></div><span class="verdict-pill skip">Out of scope</span></div>
+  </div>
+</section>
+
+<!-- ── SECTION 3 ── -->
+<section>
+  <div class="sec-head"><span class="sec-no">03</span><h2>The combined branch</h2></div>
+  <p class="sec-sub">Claude's depth, Codex's eight wins, verified to convergence. Every one of the four rails green, the tree clean, and the test suite four tests larger than the base it started from.</p>
+
+  <div class="chart-card">
+    <div class="chart-title">Test suite · base to final (passing tests)</div>
+    <svg viewBox="0 0 920 132" width="100%" role="img" aria-label="Test growth from 4283 on the Claude base to 4287 on the final branch, gaining Codex's 4 donor tests">
+      <line x1="0" y1="96" x2="920" y2="96" stroke="oklch(0.42 0.03 278 / 0.4)" stroke-width="1"/>
+      <!-- base -->
+      <rect class="bar-fill" x="20" y="40" width="150" height="56" rx="4" fill="oklch(0.74 0.12 240 / 0.5)"/>
+      <text x="95" y="32" text-anchor="middle" fill="oklch(0.80 0.018 280)" font-family="var(--mono)" font-size="13">4283</text>
+      <text x="95" y="116" text-anchor="middle" fill="oklch(0.66 0.022 280)" font-family="var(--mono)" font-size="11">Claude base</text>
+      <!-- +orrery -->
+      <rect class="bar-fill d1" x="190" y="34" width="150" height="62" rx="4" fill="oklch(0.74 0.12 300 / 0.5)"/>
+      <text x="265" y="26" text-anchor="middle" fill="oklch(0.80 0.018 280)" font-family="var(--mono)" font-size="13">4285</text>
+      <text x="265" y="116" text-anchor="middle" fill="oklch(0.66 0.022 280)" font-family="var(--mono)" font-size="11">+ orrery (2)</text>
+      <!-- +compbands -->
+      <rect class="bar-fill d2" x="360" y="28" width="150" height="68" rx="4" fill="oklch(0.74 0.12 300 / 0.6)"/>
+      <text x="435" y="20" text-anchor="middle" fill="oklch(0.80 0.018 280)" font-family="var(--mono)" font-size="13">4287</text>
+      <text x="435" y="116" text-anchor="middle" fill="oklch(0.66 0.022 280)" font-family="var(--mono)" font-size="11">+ comp-bands (2)</text>
+      <!-- final -->
+      <rect class="bar-fill d3" x="530" y="24" width="370" height="72" rx="4" fill="oklch(0.78 0.11 86 / 0.85)"/>
+      <text x="715" y="62" text-anchor="middle" fill="oklch(0.20 0.03 278)" font-family="var(--serif)" font-weight="700" font-size="26">4287 passing · 0 failed</text>
+      <text x="715" y="116" text-anchor="middle" fill="oklch(0.78 0.11 86)" font-family="var(--mono)" font-size="11">FINAL · 10 skipped · 4297 total</text>
+    </svg>
+  </div>
+
+  <div class="note">
+    <div class="card">
+      <h4>Rails discipline</h4>
+      <p>Every commit is tiny, atomic, and independently green. Before each landed, all four ran: <code>next build</code>, <code>tsc --noEmit</code>, <code>eslint .</code>, <code>vitest run</code>.</p>
+      <p>The rails run strictly sequential. An early concurrent <code>next build</code> collided with the suite's own <code>build.integration</code> test (which spawns its own build) over <code>.next/</code> and port 3000. Caught it, root-caused it as a harness artifact rather than a code regression, switched to serial, and the run held green the rest of the way.</p>
+    </div>
+    <div class="card">
+      <h4>No structural churn</h4>
+      <p>Both runs independently concluded the repo already matches the Next 16 App-Router layout, so no folders moved. This merge honored that: a content-only integration with zero structural conflict.</p>
+      <p>Stale <code>.next/dev</code> route types left over from the <code>identity/autopilot</code> branch were cleared before each type-check so a phantom <code>lobby-pilot</code> reference couldn't produce a false tsc failure.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 4 ── -->
+<section>
+  <div class="sec-head"><span class="sec-no">04</span><h2>Left for human review</h2></div>
+  <p class="sec-sub">Twenty-two findings both runs deliberately did not auto-fix, merged and de-duped (Claude's 17 + Codex's 6, less the one shared docs-reorg call), ranked by blast radius. The two at the top touch money and a hot write path; they lead.</p>
+
+  <div class="tier">
+    <div class="tier-label"><span class="t t0">Tier 0 · pinned</span><span class="rule"></span><span class="meta">highest blast radius</span></div>
+
+    <div class="item pin"><span class="n">1</span><div><div class="h">Stripe webhook <code>.single()</code> on a 0-row update → days of retries</div><div class="b"><code>src/app/api/stripe/webhook/route.ts:260</code> · A profile deleted between checkout and webhook delivery (a real TOCTOU on the metadata-driven <code>checkout.session.completed</code> path) makes <code>updateUserSubscriptionTier</code> throw, returning 500, so Stripe retries an unresolvable event for days. The clean fix changes ack / retry / alerting semantics, a product and ops decision. <span class="origin">Claude #12 · distinct from the signature fix shipped above</span></div></div></div>
+
+    <div class="item pin"><span class="n">2</span><div><div class="h"><code>getAgentMemories</code> N+1 access-count bump + lost-update race</div><div class="b"><code>src/lib/db/queries/agent-memory-rest.ts</code> · Every chat retrieval fires N parallel UPDATEs plus a read-modify-write lost-update race on a hot path. A race-free fix needs a Postgres atomic-increment RPC (<code>increment_memory_access(ids)</code>), a schema change. The per-row increment is load-bearing. <span class="origin">Claude #10</span></div></div></div>
+  </div>
+
+  <div class="tier">
+    <div class="tier-label"><span class="t t1">Tier 1 · correctness &amp; external contracts</span><span class="rule"></span><span class="meta">4 items</span></div>
+    <div class="item"><span class="n">3</span><div><div class="h">COO daily-briefing renders interview times in server UTC, not the user's IANA timezone</div><div class="b">User-facing. Threads through a typed callback at many call sites including the CEO dispatch-graph contract; wrong tz math shows the wrong interviews. <span class="origin">Claude #1</span></div></div></div>
+    <div class="item"><span class="n">4</span><div><div class="h">Outreach can double-send on a post-send status update failure</div><div class="b">After <code>resend.emails.send</code> succeeds, a failed status→sent write leaves the row re-sendable. External email contract; fix with an idempotency key = row id. <span class="origin">Claude #2</span></div></div></div>
+    <div class="item"><span class="n">5</span><div><div class="h">sdk-poller can wedge its inbox on a failed archive</div><div class="b">Seed + enqueue succeed but inbox→archive fails → next tick re-enqueues, hits the <code>wx</code> collision, throws, inbox wedges. Touches the atomic-<code>wx</code> enqueue invariant. <span class="origin">Claude #3</span></div></div></div>
+    <div class="item"><span class="n">6</span><div><div class="h">cio-reresearch per-company UPDATE in a loop</div><div class="b">Collapses to one <code>.in()</code> in principle, but the loop carries per-company error isolation, a refreshed counter, and per-row notifications. Batching is a partial-failure decision, not a mechanical edit. <span class="origin">Claude #11</span></div></div></div>
+  </div>
+
+  <div class="tier">
+    <div class="tier-label"><span class="t t2">Tier 2 · scale, analytics &amp; abuse surface</span><span class="rule"></span><span class="meta">7 items</span></div>
+    <div class="item"><span class="n">7</span><div><div class="h">Public <code>canary-heartbeat</code> cron writes through service-role paths</div><div class="b">Public by design and writes via service role; confirm product/security acceptance. <span class="origin">Codex</span></div></div></div>
+    <div class="item"><span class="n">8</span><div><div class="h"><code>getClientIp</code> proxy-trust before relying on <code>x-forwarded-for</code> for abuse control</div><div class="b">Confirm the forwarded-header ordering trust model in production. <span class="origin">Codex</span></div></div></div>
+    <div class="item"><span class="n">9</span><div><div class="h">comp-bands atomic lookup-budget RPC</div><div class="b">Rate and length guards landed in this merge (win #4); an atomic lookup-budget RPC would be the stronger follow-up. <span class="origin">Codex · partially addressed</span></div></div></div>
+    <div class="item"><span class="n">10</span><div><div class="h">owner-watchdog AI-cost probe caps at 5000 rows with no pagination</div><div class="b">A runaway cost wave (exactly what it should catch) can under-count and stay "ok". Fix is server-side aggregation. The hard spend-brake is separate and fail-closed. <span class="origin">Claude #14</span></div></div></div>
+    <div class="item"><span class="n">11</span><div><div class="h">cfo-threshold cohort-maturity conversion bias</div><div class="b">Buckets by <code>created_at</code> but counts advancement from current status, so the youngest cohort is structurally under-advanced → false "conversion fell" alerts. Analytics redefinition. <span class="origin">Claude #13</span></div></div></div>
+    <div class="item"><span class="n">12</span><div><div class="h">Batch crons sweep unbounded user sets with no time budget</div><div class="b">Sequential per-user round-trips, no <code>maxDuration</code> budget. A scale-hardening task (budget + cursor). <span class="origin">Claude #7</span></div></div></div>
+    <div class="item"><span class="n">13</span><div><div class="h">draft-follow-ups timezone window only reaches the Americas</div><div class="b">A single daily run gated by a local [02:00, 06:00) window only sweeps ~UTC-6…-3. Widening needs more cron invocations (Vercel Hobby caps once-daily). Noted in-code. <span class="origin">Claude #17</span></div></div></div>
+  </div>
+
+  <div class="tier">
+    <div class="tier-label"><span class="t t3">Tier 3 · convention, dead code &amp; noise</span><span class="rule"></span><span class="meta">9 items</span></div>
+    <div class="item"><span class="n">14</span><div><div class="b"><b>Gmail matcher substring breadth</b> — bidirectional <code>includes()</code> could over-match; wants its own test matrix first. <span class="origin">Claude #8</span></div></div></div>
+    <div class="item"><span class="n">15</span><div><div class="b"><b>negotiation-draft body lacks a Zod schema</b> — type-asserted, byte-bounded, token-DOS guarded; a correct schema is non-trivial. <span class="origin">Claude #9</span></div></div></div>
+    <div class="item"><span class="n">16</span><div><div class="b"><b>match-delta non-atomic debounce</b> — two concurrent rescans can both pass the read-then-check. Low: wasteful, not incorrect. <span class="origin">Claude #4</span></div></div></div>
+    <div class="item"><span class="n">17</span><div><div class="b"><b>env() convention nits</b> — a couple of optional-feature env reads bypass EnvSchema. <span class="origin">Claude #5</span></div></div></div>
+    <div class="item"><span class="n">18</span><div><div class="b"><b>Bulk dead-code sweep</b> (~3 dozen unused exports) — best as a focused, individually-reviewed PR, not an unattended bulk removal. <span class="origin">Claude #6</span></div></div></div>
+    <div class="item"><span class="n">19</span><div><div class="b"><b>Dead code: createCalendarEvent + getUpcomingEvents</b> — zero callers, but the only Calendar insert path and a scope-minimization test cite it. Delete-vs-wire-up. <span class="origin">Claude #15</span></div></div></div>
+    <div class="item"><span class="n">20</span><div><div class="b"><b>Dead code: getFloorIdentity accessor</b> — referenced only by its own test; FloorShell reads the registry directly. Which pattern is canonical. <span class="origin">Claude #16</span></div></div></div>
+    <div class="item"><span class="n">21</span><div><div class="b"><b>AI quota RPC error behavior</b> — noisy in e2e; review fail-open vs fail-closed. <span class="origin">Codex</span></div></div></div>
+    <div class="item"><span class="n">22</span><div><div class="b"><b>Progression milestone upsert noise</b> — repeated errors in stubbed e2e logs; assertions pass, stub noise to clean up. <span class="origin">Codex</span></div></div></div>
+  </div>
+
+  <div class="note" style="margin-top:34px">
+    <div class="card">
+      <h4>De-duped overlap</h4>
+      <p><b>Broad docs reorganization.</b> Both runs independently evaluated relocating root docs and both skipped it as unsafe without human direction. Targeted ArtLab-CLI doc accuracy did land (win #7); broad relocation stays deferred. This is the single overlap that collapses 17 + 6 = 23 into 22.</p>
+    </div>
+    <div class="card">
+      <h4>Environment, not code</h4>
+      <p>Outside the 22: the global RTK git-rewrite hook reports an integrity mismatch and mangles <code>git</code> inside shell loops (worked around this run), and <code>RTK.md</code> is referenced by env instructions but absent from the tree. Also pre-existing: the full <code>npm test</code> suite runs in no CI workflow, which is why the tower-context failures were invisible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── MERGE ── -->
+<section style="border-bottom:none">
+  <div class="sec-head"><span class="sec-no">05</span><h2>Yours to merge</h2></div>
+  <p class="sec-sub">The branch is pushed and is <em>not</em> merged to <span class="mono">main</span>. When you have reviewed it, this is the merge.</p>
+  <div class="merge-block">
+    <div class="bar"><span>fast-forward / no-ff merge to main</span><span>run locally</span></div>
+<pre><span class="cm"># review first</span>
+git fetch origin
+git log --oneline main..origin/<span class="gold">auto/overnight-final-2026-06-04</span>
+
+<span class="cm"># then merge (no-ff keeps the integration as one reviewable unit)</span>
+git checkout main
+git merge --no-ff origin/<span class="gold">auto/overnight-final-2026-06-04</span>
+git push origin main</pre>
+  </div>
+</section>
+
+<footer>
+  THE TOWER · Internship Command Center &nbsp;·&nbsp; overnight integration · 2026-06-04 &nbsp;·&nbsp; base auto/overnight-claude + 8 ported Codex wins &nbsp;·&nbsp; build · types · lint · tests · audit all green
+</footer>
+
+</div>
+</body>
+</html>
