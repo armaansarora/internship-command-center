@@ -470,7 +470,15 @@ export async function runCreativeSlotScheduler(input: {
 
     try {
       heartbeatTimer = setInterval(() => {
-        heartbeatCreativeSlotLease(leaseStore, lease);
+        // Best-effort: if the lease was taken over or deleted mid-flight,
+        // heartbeatCreativeSlotLease can throw. An uncaught throw in a timer
+        // callback would crash the worker — swallow it; the lease then simply
+        // times out and is reclaimed.
+        try {
+          heartbeatCreativeSlotLease(leaseStore, lease);
+        } catch {
+          /* lease gone; let it time out */
+        }
       }, Math.max(1, Math.floor(input.policy.slotLeaseTimeoutMs / 4)));
       const request: CreativeProviderSlotRequest = {
         runId: input.runId,

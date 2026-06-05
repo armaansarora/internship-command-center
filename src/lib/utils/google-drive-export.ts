@@ -31,16 +31,19 @@ interface ExportOptions {
 const DRIVE_API_BASE = "https://www.googleapis.com/upload/drive/v3/files";
 const DRIVE_FILES_API = "https://www.googleapis.com/drive/v3/files";
 
+// Per-request ceiling on each Drive API round-trip, matching the 10s ceiling
+// used by the Gmail/Calendar integrations so a hung Google response can't hold
+// the export request open to the function's maxDuration.
+const DRIVE_FETCH_TIMEOUT_MS = 10_000;
+
 // ---------------------------------------------------------------------------
 // Export to Google Drive as a Google Doc
 // ---------------------------------------------------------------------------
 
-export async function exportToGoogleDrive(
-  userId: string,
+async function exportToGoogleDrive(
+  accessToken: string,
   options: ExportOptions
 ): Promise<DriveFile> {
-  const tokens = await getGoogleTokens(userId);
-
   // Create file metadata
   const metadata: Record<string, string | string[]> = {
     name: options.title,
@@ -70,10 +73,11 @@ export async function exportToGoogleDrive(
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${tokens.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": `multipart/related; boundary=${boundary}`,
       },
       body,
+      signal: AbortSignal.timeout(DRIVE_FETCH_TIMEOUT_MS),
     }
   );
 
@@ -88,9 +92,7 @@ export async function exportToGoogleDrive(
 // Create or find "The Tower" folder in Google Drive
 // ---------------------------------------------------------------------------
 
-export async function getOrCreateTowerFolder(userId: string): Promise<string> {
-  const tokens = await getGoogleTokens(userId);
-
+async function getOrCreateTowerFolder(accessToken: string): Promise<string> {
   // Search for existing folder
   const searchParams = new URLSearchParams({
     q: "name='The Tower - Documents' and mimeType='application/vnd.google-apps.folder' and trashed=false",
@@ -99,9 +101,10 @@ export async function getOrCreateTowerFolder(userId: string): Promise<string> {
 
   const searchResponse = await fetch(`${DRIVE_FILES_API}?${searchParams.toString()}`, {
     headers: {
-      Authorization: `Bearer ${tokens.access_token}`,
+      Authorization: `Bearer ${accessToken}`,
       Accept: "application/json",
     },
+    signal: AbortSignal.timeout(DRIVE_FETCH_TIMEOUT_MS),
   });
 
   if (!searchResponse.ok) {
@@ -118,13 +121,14 @@ export async function getOrCreateTowerFolder(userId: string): Promise<string> {
   const createResponse = await fetch(`${DRIVE_FILES_API}?fields=id,name`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${tokens.access_token}`,
+      Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       name: "The Tower - Documents",
       mimeType: "application/vnd.google-apps.folder",
     }),
+    signal: AbortSignal.timeout(DRIVE_FETCH_TIMEOUT_MS),
   });
 
   if (!createResponse.ok) {
@@ -143,12 +147,17 @@ export async function exportDocumentToDrive(
   userId: string,
   document: { title: string; content: string; type: string }
 ): Promise<{ fileId: string; webViewLink: string }> {
-  const folderId = await getOrCreateTowerFolder(userId);
+  // Resolve the user's Google tokens ONCE and thread the access token through
+  // both Drive calls (previously each helper re-fetched + possibly re-refreshed
+  // tokens — a redundant DB read per export).
+  const tokens = await getGoogleTokens(userId);
+
+  const folderId = await getOrCreateTowerFolder(tokens.access_token);
 
   const prefix = document.type === "cover_letter" ? "Cover Letter" : "Prep Packet";
   const title = `${prefix} — ${document.title}`;
 
-  const file = await exportToGoogleDrive(userId, {
+  const file = await exportToGoogleDrive(tokens.access_token, {
     title,
     content: document.content,
     folderId,

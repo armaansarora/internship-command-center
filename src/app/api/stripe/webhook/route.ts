@@ -91,8 +91,6 @@ async function executeStripeWebhook(
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const { STRIPE_WEBHOOK_SECRET } = requireEnv(["STRIPE_WEBHOOK_SECRET"] as const);
-
   const signature = request.headers.get("stripe-signature");
   if (!signature) {
     log.warn("stripe.webhook.signature_missing", { alert: true });
@@ -101,6 +99,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       { status: 400 },
     );
   }
+
+  const { STRIPE_WEBHOOK_SECRET } = requireEnv(["STRIPE_WEBHOOK_SECRET"] as const);
 
   let event: Stripe.Event;
   try {

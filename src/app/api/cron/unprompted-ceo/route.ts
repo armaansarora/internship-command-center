@@ -16,9 +16,11 @@ import {
 /**
  * GET /api/cron/unprompted-ceo
  *
- * Fires every 6h (see vercel.json — `0 ∗/6 ∗ ∗ ∗`). Sweeps every active
- * user and lets the CEO drop unprompted notifications when the pipeline
- * crosses one of three thresholds:
+ * Runs once daily at 10:00 UTC (`0 10 * * *`, see vercel.json — Vercel Hobby
+ * caps cron frequency at once-per-day). Sweeps every active user and lets the
+ * CEO drop unprompted notifications when the pipeline crosses one of three
+ * thresholds (the trigger windows below use a 24h+ lookback with 24h dedup, so
+ * a single daily sweep still covers the gap):
  *
  *   - stale_cluster:    >5 early-pipeline apps idle 14+ days → high
  *   - rejection_cluster: >=3 rejections in the last 7 days → medium
@@ -35,7 +37,7 @@ import {
  * Per-user error isolation: any throw inside the per-user block is caught
  * and logged; the sweep continues with the next user.
  *
- * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET OR x-vercel-cron: 1.
+ * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted).
  */
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;

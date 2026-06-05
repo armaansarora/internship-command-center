@@ -87,6 +87,9 @@ export async function exchangeGoogleLoginCodeForIdToken(
       redirect_uri: GMAIL_REDIRECT_URI,
       grant_type: "authorization_code",
     }).toString(),
+    // 10s ceiling on the sign-in token exchange so a hung Google endpoint
+    // can't hold the login callback open to the function's maxDuration.
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {

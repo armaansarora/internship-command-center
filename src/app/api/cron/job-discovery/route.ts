@@ -9,13 +9,14 @@ import { withCronHealth } from "@/lib/cron/health";
  * GET /api/cron/job-discovery
  *
  * Runs Job Discovery for every user whose CRO has a target profile on
- * record. Scheduled by Vercel Cron (see vercel.json — every 4 hours).
+ * record. Scheduled by Vercel Cron once daily at 02:00 UTC (`0 2 * * *`, see
+ * vercel.json).
  *
  * Non-fatal on per-user failure: one user blowing up does not stop the
  * batch. Each user run is bounded by DISCOVERY_MAX_NEW_PER_RUN so a cold
  * profile never floods the war-table on first hit.
  *
- * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET OR x-vercel-cron: 1.
+ * Auth: `verifyCronRequest` enforces Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted).
  */
 export const maxDuration = 300;
 

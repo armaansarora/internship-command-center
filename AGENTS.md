@@ -7,8 +7,8 @@ Other top-level pointers:
 - [`README.md`](./README.md) — public-facing summary
 - [`docs/`](./docs/) — design specs (`VISION-SPEC.md`, `CHAIN-OF-COMMAND.md`, `CHARACTER-PROMPTS.md`, `LAUNCH-READY.md`, `TESTING.md`)
 
-Creative Production Engine:
-- When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, start with `npm run art:produce -- --request "<natural language request>"` and follow `.agents/skills/creative-production-engine/SKILL.md`. Use `npm run art:studio` for orientation or diagnostics.
+ArtLab / Creative Production Engine:
+- When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, use ArtLab. Start from `.agents/skills/artlab/SKILL.md`, then run `npm run artlab -- produce "<natural language request>"` for a new run or `npm run artlab -- status [<runId>]` for read-only inspection. Use `npm run artlab -- health` or `npm run artlab -- doctor` for diagnostics.
 - Normal creative packets default to five-lane parallel output: 5 agents x 1 wave. Dispatch subagents only to isolated lane prompts, prefer GPT-5.5 fast mode with extra-high reasoning when available, run `--mode coordinate` after lane validation, and keep promotion coordinator-owned.
 - Do not ask for `approve direction` before concept images exist. The first normal CPE human gate is the five-image concept review board; pre-image `human-action.json` is only for true blockers.
 - Character concept boards must share one Tower/Otis-compatible style envelope across all lanes. Lane prompts vary only character design cards (silhouette, age, hair, face, wardrobe, palette, posture, accessories, personality, role archetype), never rendering style. UI/background/prop/icon/marketing assets use their own contracts, not the character contract.

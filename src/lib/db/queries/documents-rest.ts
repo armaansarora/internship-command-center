@@ -325,6 +325,14 @@ export async function getDocumentVersionChain(
   // The root is chainIds[0] — now fetch all descendants from the root
   const rootId = chainIds[0];
 
+  // Defense-in-depth: rootId is always a DB-sourced UUID here (documentId was
+  // validated by getDocumentById's uuid-typed .eq; parentId comes from the DB).
+  // Guard before interpolating into the PostgREST .or() filter so a value
+  // carrying a comma or operator token can never alter the filter logic.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rootId)) {
+    return [target];
+  }
+
   // Fetch all documents that share the same root:
   // - the root itself
   // - all documents whose parent_id exists in our known chain

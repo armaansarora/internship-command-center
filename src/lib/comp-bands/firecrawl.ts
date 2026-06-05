@@ -23,6 +23,13 @@ export interface CompBandsScrape {
 
 const FIRECRAWL_URL = "https://api.firecrawl.dev/v1/scrape";
 
+// Hard ceiling on the Firecrawl round-trip. This scrape sits on the
+// comp-bands request path, so a stalled upstream must not hold the
+// serverless function open to its maxDuration. On timeout the fetch
+// rejects with an AbortError and the existing catch returns null →
+// graceful-empty UI.
+const FIRECRAWL_TIMEOUT_MS = 8000;
+
 /**
  * Build the canonical Levels.fyi salaries URL for the given (company, role,
  * location) triple. Company + role are slugged into the path; location
@@ -115,6 +122,7 @@ export async function scrapeLevelsFyi(
         url: buildLevelsFyiUrl({ company, role, location }),
         formats: ["markdown"],
       }),
+      signal: AbortSignal.timeout(FIRECRAWL_TIMEOUT_MS),
     });
   } catch {
     return null;

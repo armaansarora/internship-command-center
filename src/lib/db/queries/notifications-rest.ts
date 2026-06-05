@@ -3,6 +3,7 @@
  * Used by agents and the in-world notification system.
  */
 
+import { createHash } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { log } from "@/lib/logger";
 import type { Row } from "@/db/database.types";
@@ -25,10 +26,38 @@ export interface CreateNotificationInput {
   title: string;
   body: string;
   sourceAgent?: string;
+  /**
+   * Logical id of the source entity. `notifications.source_entity_id` is a
+   * `uuid` column: a real entity UUID is stored as-is, while a non-UUID
+   * idempotency string (e.g. `cooling-<id>-w<week>`) is hashed to a stable
+   * deterministic UUID so the insert never fails the column's type check.
+   */
   sourceEntityId?: string;
   sourceEntityType?: string;
   channels?: string[];
   actions?: Array<{ label: string; url: string }>;
+  /**
+   * When true, skip the insert if a notification with the same
+   * (user_id, source_entity_id) already exists — collapses repeated cron
+   * alerts that share an idempotency key (e.g. one "conversion dipped" note
+   * per week). Off by default so existing callers are unaffected.
+   */
+  dedupeBySourceEntity?: boolean;
+}
+
+const NOTIF_UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Map a caller-supplied source-entity id onto a value the `uuid` column
+ * accepts: real UUIDs pass through unchanged; any other string is hashed
+ * (SHA-256) into a deterministic, well-formed UUID. Stable per input, so it
+ * doubles as an idempotency key for `dedupeBySourceEntity`.
+ */
+export function toNotificationEntityId(raw: string): string {
+  if (NOTIF_UUID_RE.test(raw)) return raw;
+  const h = createHash("sha256").update(raw).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -181,6 +210,26 @@ export async function createNotification(
     });
   }
 
+  // Coerce the source-entity id to a uuid the column accepts (a non-UUID
+  // idempotency string would otherwise make the insert fail silently).
+  const sourceEntityId = input.sourceEntityId
+    ? toNotificationEntityId(input.sourceEntityId)
+    : null;
+
+  // Opt-in idempotency: collapse repeated alerts sharing a source-entity key.
+  if (input.dedupeBySourceEntity && sourceEntityId) {
+    const { data: existing } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", input.userId)
+      .eq("source_entity_id", sourceEntityId)
+      .limit(1)
+      .maybeSingle();
+    if (existing) {
+      return { success: true, id: (existing as { id: string }).id };
+    }
+  }
+
   const { data, error } = await supabase
     .from("notifications")
     .insert({
@@ -190,7 +239,7 @@ export async function createNotification(
       title: input.title,
       body: input.body,
       source_agent: input.sourceAgent ?? null,
-      source_entity_id: input.sourceEntityId ?? null,
+      source_entity_id: sourceEntityId,
       source_entity_type: input.sourceEntityType ?? null,
       channels: input.channels ?? null,
       actions: input.actions ?? null,

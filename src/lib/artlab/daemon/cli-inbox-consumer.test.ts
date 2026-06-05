@@ -1,6 +1,6 @@
 // src/lib/artlab/daemon/cli-inbox-consumer.test.ts
 import { describe, expect, it, beforeEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createCliInboxConsumer } from "./cli-inbox-consumer";

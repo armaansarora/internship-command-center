@@ -38,10 +38,35 @@ Live at [interntower.com](https://www.interntower.com).
 
 ## Development
 
+Requires Node 24.x (see `engines` in `package.json`).
+
 ```bash
-npm install
-npm run dev
+npm install            # install dependencies
+npm run dev            # dev server (http://localhost:3000)
 ```
+
+A handful of environment variables gate local runs. The two Supabase
+`NEXT_PUBLIC_*` keys are required even for the build/test commands; the rest are
+optional (features fail closed when unset). Copy the template and fill it in:
+
+```bash
+cp .env.example .env.local   # then populate values
+```
+
+### Quality gates
+
+These mirror what CI runs — keep them green before pushing:
+
+```bash
+npx tsc --noEmit       # type check
+npm run lint           # eslint
+npm test               # vitest unit/integration suite
+npm run build          # production build (next build)
+npm run test:e2e       # Playwright E2E (auto-starts the stub server on :3001)
+```
+
+See `docs/TESTING.md` for the test layout and `CLAUDE.md` for the full command
+reference (ArtLab, Drizzle, env helpers).
 
 ## Docs
 

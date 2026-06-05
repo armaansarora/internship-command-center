@@ -36,6 +36,7 @@ interface AgentCharacterButtonProps {
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   badge?: JSX.Element | null;
+  priority?: boolean;
   style?: CSSProperties;
 }
 
@@ -51,6 +52,7 @@ export function AgentCharacterButton({
   onMouseEnter,
   onMouseLeave,
   badge,
+  priority = false,
   style,
 }: AgentCharacterButtonProps): JSX.Element {
   const character = getCharacterVisualMetadata(characterId);
@@ -77,6 +79,7 @@ export function AgentCharacterButton({
         characterId={characterId}
         state={resolveCharacterStageState(state)}
         aria-label={label}
+        priority={priority}
       />
       {badge}
       <span

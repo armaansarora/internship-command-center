@@ -49,7 +49,7 @@ import { buildText, buildHtml, INVITE_SUBJECT } from "@/lib/email/invite-templat
  *     this cron flips the row regardless of whether the token has been
  *     clicked yet.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1) — same
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)) — same
  * gate as every other Vercel-scheduled cron in the project.
  */
 export const maxDuration = 120;

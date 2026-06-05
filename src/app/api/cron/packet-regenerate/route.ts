@@ -8,20 +8,20 @@ import { withCronHealth } from "@/lib/cron/health";
 /**
  * GET /api/cron/packet-regenerate
  *
- * Hourly sweep for upcoming interviews (within HORIZON_HOURS) whose prep
- * packet is either missing entirely or older than STALE_DAYS. For each
- * candidate we:
+ * Daily sweep for upcoming interviews (within HORIZON_HOURS = 72h, so a
+ * once-daily run still catches interviews ~3 days out) whose prep packet is
+ * either missing entirely or older than STALE_DAYS. For each candidate we:
  *   1. Generate a fresh packet via generateStructuredPrepPacket.
  *   2. Insert a new documents row (prep_packet, generated_by='cpo').
  *   3. Point the interview row's prep_packet_id at the new document.
  *   4. Drop a pneumatic-tube notification so the Penthouse can surface
  *      "CPO: fresh packet on your desk for {company}".
  *
- * Batch-capped at BATCH_LIMIT per tick so a cold-start spike doesn't fan
- * out into the LLM provider. The cron runs at :15 past each hour (offset
- * from our other hourly-ish jobs).
+ * Batch-capped at BATCH_LIMIT per run so a cold-start spike doesn't fan
+ * out into the LLM provider. Scheduled once daily at 11:00 UTC (`0 11 * * *`,
+ * see vercel.json — Vercel Hobby caps cron frequency at once-per-day).
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 
@@ -136,6 +136,25 @@ async function handle(req: NextRequest): Promise<NextResponse> {
     }>).map((a) => [a.id, a]),
   );
 
+  // Resolve packet freshness for every candidate in a single round-trip
+  // (mirrors the applications batch above) instead of one SELECT per row.
+  const packetIds = Array.from(
+    new Set(
+      upcoming
+        .map((r) => r.prep_packet_id)
+        .filter((id): id is string => typeof id === "string" && id.length > 0),
+    ),
+  );
+  const { data: pkts } = packetIds.length
+    ? await admin.from("documents").select("id, updated_at").in("id", packetIds)
+    : { data: [] as Array<{ id: string; updated_at: string | null }> };
+  const packetUpdatedById = new Map(
+    ((pkts ?? []) as Array<{ id: string; updated_at: string | null }>).map((p) => [
+      p.id,
+      p.updated_at,
+    ]),
+  );
+
   // Filter down to candidates — no packet, or packet older than stale threshold.
   const candidates: Candidate[] = [];
   for (const row of upcoming) {
@@ -158,14 +177,8 @@ async function handle(req: NextRequest): Promise<NextResponse> {
       continue;
     }
 
-    const { data: pkt } = await admin
-      .from("documents")
-      .select("updated_at")
-      .eq("id", row.prep_packet_id)
-      .single();
-
-    if (pkt && typeof (pkt as { updated_at: string }).updated_at === "string") {
-      const updatedAt = (pkt as { updated_at: string }).updated_at;
+    const updatedAt = packetUpdatedById.get(row.prep_packet_id);
+    if (typeof updatedAt === "string") {
       if (updatedAt < stale) {
         candidates.push({
           interview_id: row.id,

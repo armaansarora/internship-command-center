@@ -4,6 +4,11 @@ import { getGoogleTokens } from "@/lib/gmail/oauth";
 import { readGoogleApiError } from "@/lib/google/api-error";
 import type { Row } from "@/db/database.types";
 
+// Per-request ceiling on each Google Calendar API round-trip. The initial
+// sync is awaited on the OAuth callback redirect path, so a hung Google
+// response must not hold the serverless function open to its maxDuration.
+const CALENDAR_FETCH_TIMEOUT_MS = 10_000;
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -78,6 +83,7 @@ export async function fetchCalendarEvents(
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(CALENDAR_FETCH_TIMEOUT_MS),
     }
   );
 
@@ -151,6 +157,7 @@ export async function createCalendarEvent(
         Accept: "application/json",
       },
       body: JSON.stringify(event),
+      signal: AbortSignal.timeout(CALENDAR_FETCH_TIMEOUT_MS),
     }
   );
 

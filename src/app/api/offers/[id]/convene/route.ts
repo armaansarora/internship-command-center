@@ -24,7 +24,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { getOfferById } from "@/lib/db/queries/offers-rest";
 import { convenePipelineForOffer } from "@/lib/ai/agents/parlor-convening";
-import { lookupCompBands } from "@/lib/comp-bands/lookup";
+import { lookupCompBands, type LookupResult } from "@/lib/comp-bands/lookup";
+import { log } from "@/lib/logger";
 import { consumeAiQuota } from "@/lib/ai/quota";
 import { getUserTier } from "@/lib/stripe/entitlements";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -60,12 +61,24 @@ export async function POST(
   }
 
   const admin = getSupabaseAdmin();
-  const bands = await lookupCompBands(client, admin, {
-    company: offer.company_name,
-    role: offer.role,
-    location: offer.location,
-    level: offer.level ?? undefined,
-  });
+  let bands: LookupResult;
+  try {
+    bands = await lookupCompBands(client, admin, {
+      company: offer.company_name,
+      role: offer.role,
+      location: offer.location,
+      level: offer.level ?? undefined,
+    });
+  } catch (err) {
+    // Preserve the graceful-empty contract (the "pass null through" branch
+    // above) on a transient DB/scrape throw, matching comp-bands/lookup,
+    // instead of surfacing an unhandled 500 on the Convene button.
+    log.error("offers.convene.bands_lookup_failed", err, {
+      userId: auth.user.id,
+      offerId: offer.id,
+    });
+    bands = { ok: false, reason: "empty" };
+  }
 
   const result = await convenePipelineForOffer({
     userId: auth.user.id,

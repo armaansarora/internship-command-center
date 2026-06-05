@@ -98,7 +98,11 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
       {seasonPassSchema !== null && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(seasonPassSchema) }}
+          dangerouslySetInnerHTML={{
+            // Escape "<" so a value can never break out of the <script> element
+            // (defense-in-depth; the schema is currently static config).
+            __html: JSON.stringify(seasonPassSchema).replace(/</g, "\\u003c"),
+          }}
         />
       )}
 

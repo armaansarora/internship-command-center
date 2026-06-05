@@ -9,8 +9,9 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
  *   - 200 on success, proxying the LookupResult from lookupCompBands
  */
 
-const { requireUserSpy, createClientSpy, adminSpy, lookupSpy } = vi.hoisted(() => ({
+const { requireUserSpy, rateLimitSpy, createClientSpy, adminSpy, lookupSpy } = vi.hoisted(() => ({
   requireUserSpy: vi.fn(),
+  rateLimitSpy: vi.fn(),
   createClientSpy: vi.fn(),
   adminSpy: vi.fn(),
   lookupSpy: vi.fn(),
@@ -18,6 +19,10 @@ const { requireUserSpy, createClientSpy, adminSpy, lookupSpy } = vi.hoisted(() =
 
 vi.mock("@/lib/auth/require-user", () => ({
   requireUserApi: requireUserSpy,
+}));
+
+vi.mock("@/lib/rate-limit-middleware", () => ({
+  withRateLimit: rateLimitSpy,
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -35,6 +40,11 @@ vi.mock("@/lib/comp-bands/lookup", () => ({
 const { GET } = await import("./route");
 
 const OK_AUTH = { ok: true as const, user: { id: "user-xyz" } };
+const OK_RATE = {
+  limited: false,
+  headers: { "X-RateLimit-Limit": "20" },
+  response: null,
+};
 
 function makeRequest(qs: string): Request {
   return new Request(`http://localhost/api/comp-bands/lookup${qs}`);
@@ -43,9 +53,11 @@ function makeRequest(qs: string): Request {
 describe("GET /api/comp-bands/lookup", () => {
   beforeEach(() => {
     requireUserSpy.mockReset();
+    rateLimitSpy.mockReset();
     createClientSpy.mockReset();
     adminSpy.mockReset();
     lookupSpy.mockReset();
+    rateLimitSpy.mockResolvedValue(OK_RATE);
     createClientSpy.mockResolvedValue({ tag: "user" });
     adminSpy.mockReturnValue({ tag: "admin" });
   });
@@ -83,6 +95,43 @@ describe("GET /api/comp-bands/lookup", () => {
     expect(lookupSpy).not.toHaveBeenCalled();
   });
 
+  it("returns the tier-B rate-limit response before lookup", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    rateLimitSpy.mockResolvedValue({
+      limited: true,
+      headers: { "Retry-After": "30" },
+      response: Response.json({ error: "Rate limit exceeded." }, { status: 429 }),
+    });
+
+    const res = await GET(
+      makeRequest("?company=Meta&role=Software%20Engineer&location=NYC"),
+    );
+
+    expect(res.status).toBe(429);
+    expect(rateLimitSpy).toHaveBeenCalledWith("user-xyz", "B");
+    expect(createClientSpy).not.toHaveBeenCalled();
+    expect(adminSpy).not.toHaveBeenCalled();
+    expect(lookupSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 for oversized params before lookup", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    const hugeCompany = "A".repeat(121);
+
+    const res = await GET(
+      makeRequest(
+        `?company=${hugeCompany}&role=Software%20Engineer&location=New%20York`,
+      ),
+    );
+
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toEqual({ error: "param_too_long" });
+    expect(rateLimitSpy).not.toHaveBeenCalled();
+    expect(createClientSpy).not.toHaveBeenCalled();
+    expect(adminSpy).not.toHaveBeenCalled();
+    expect(lookupSpy).not.toHaveBeenCalled();
+  });
+
   it("returns 200 with the LookupResult on happy path", async () => {
     requireUserSpy.mockResolvedValue(OK_AUTH);
     lookupSpy.mockResolvedValue({
@@ -109,6 +158,8 @@ describe("GET /api/comp-bands/lookup", () => {
     expect(body.ok).toBe(true);
     expect(body.base.p50).toBe(220000);
     expect(body.fromCache).toBe(true);
+    expect(res.headers.get("X-RateLimit-Limit")).toBe("20");
+    expect(rateLimitSpy).toHaveBeenCalledWith("user-xyz", "B");
 
     expect(lookupSpy).toHaveBeenCalledTimes(1);
     const [userArg, adminArg, input] = lookupSpy.mock.calls[0] as [

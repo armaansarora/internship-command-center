@@ -17,6 +17,7 @@ interface CharacterSpriteProps {
   state?: string;
   "aria-label": string;
   className?: string;
+  priority?: boolean;
   style?: CSSProperties;
 }
 
@@ -27,6 +28,7 @@ export function CharacterSprite({
   state,
   "aria-label": ariaLabel,
   className,
+  priority = false,
   style,
 }: CharacterSpriteProps): JSX.Element {
   const asset = getCharacterAsset(characterId, pose, outfitVariant);
@@ -54,6 +56,7 @@ export function CharacterSprite({
       >
         <VisualAssetImage
           asset={asset}
+          priority={priority}
           sizes="(max-width: 760px) 42vw, 220px"
           style={{
             display: "block",

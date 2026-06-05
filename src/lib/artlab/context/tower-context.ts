@@ -17,7 +17,7 @@
 // the daemon to pick up doc edits.
 
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { SEASON_ONE_CHARACTER_METADATA } from "@/lib/visual-assets/characters";
 import { getRelevantMemory } from "@/lib/artlab/memory/retrieve";
 import { resolveCanonIdentity } from "@/lib/artlab/sdk/canon/canon-identity-map";
@@ -102,7 +102,6 @@ export interface TowerContextBundle {
 // ---------- public API ----------
 
 const TOWER_LIVE_BASE_URL = "https://www.interntower.com";
-const LOCAL_PROJECT_ROOT_GUESS = "/Users/armaanarora/Documents/The Tower";
 
 // Cache the bundle for up to 5 minutes per worker process. Bible files
 // change rarely — re-reading them on every brain call costs a few hundred
@@ -240,7 +239,23 @@ function resolveProjectRootFromWorkspace(workspaceRoot: string): string {
     return ws.replace(/\/\.artlab\/engine\/?$/, "");
   }
   if (existsSync(join(ws, "docs", "ART-BIBLE.md"))) return ws;
-  return LOCAL_PROJECT_ROOT_GUESS;
+  // Fall back to walking up from the current working directory so the bundle
+  // resolves correctly from any checkout location (tests, CI, fresh clones,
+  // git worktrees) instead of a single contributor's machine-specific path.
+  return findRepoRootFromCwd() ?? ws;
+}
+
+// Walk up from process.cwd() looking for the directory that owns the canon
+// docs. Bounded to a handful of levels so a stray cwd can never loop forever.
+function findRepoRootFromCwd(): string | null {
+  let dir = process.cwd();
+  for (let depth = 0; depth < 8; depth += 1) {
+    if (existsSync(join(dir, "docs", "ART-BIBLE.md"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
 }
 
 function readDoc(projectRoot: string, relativePath: string): string {

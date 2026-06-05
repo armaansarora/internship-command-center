@@ -53,7 +53,10 @@ async function fetchOpenWeatherForGrid(lat: string, lon: string): Promise<Weathe
   }
 
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
-  const res = await fetch(url);
+  // Bound the upstream call so a hung/half-open socket can't hold the function
+  // open. The outer catch converts the AbortError into the { condition:
+  // "clear" } fallback, same as any other upstream failure.
+  const res = await fetch(url, { signal: AbortSignal.timeout(5_000) });
 
   if (!res.ok) {
     log.warn("weather.upstream_error", { status: res.status });

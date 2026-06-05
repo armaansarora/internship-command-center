@@ -52,6 +52,7 @@ const ALL_TIERS: Tier[] = [1, 2, 3, 4];
 /** Camera dolly target scale when focusing a single planet. */
 const FOCUS_SCALE = 1.4;
 const FOCUS_DURATION_S = 0.6;
+const DENSE_PLANET_THRESHOLD = 80;
 
 interface Props {
   planets: OrreryPlanet[];
@@ -152,7 +153,11 @@ export function OrreryRender({
       ? "Pipeline orrery: empty"
       : `Pipeline orrery: ${planetCount} application${planetCount === 1 ? "" : "s"}`;
 
-  const sceneClass = ["orrery-scene", reducedMotion ? "orrery-reduced" : null]
+  const sceneClass = [
+    "orrery-scene",
+    planetCount >= DENSE_PLANET_THRESHOLD ? "orrery-dense" : null,
+    reducedMotion ? "orrery-reduced" : null,
+  ]
     .filter(Boolean)
     .join(" ");
 

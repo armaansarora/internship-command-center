@@ -29,7 +29,7 @@ import type { Row } from "@/db/database.types";
  * Idempotency: `source_entity_id = cfo-threshold-<userId>-w<weekBucket>`,
  * so repeated runs inside the same week collapse to one notification row.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 
@@ -99,7 +99,10 @@ async function handle(req: NextRequest): Promise<NextResponse> {
       .from("applications")
       .select("user_id, status, created_at")
       .gte("created_at", eightWeeksAgo.toISOString())
-      .range(fromOffset, fromOffset + PAGE_SIZE - 1);
+      .range(fromOffset, fromOffset + PAGE_SIZE - 1)
+      // Stable order so OFFSET windows tile the table without skipping or
+      // double-counting rows (matches the sibling crons' convention).
+      .order("id", { ascending: true });
 
     if (error) {
       log.error("cfo_threshold.read_failed", error, { error: error.message });
@@ -176,6 +179,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
         sourceEntityId: `cfo-threshold-${userId}-w${weekBucket}`,
         sourceEntityType: "analytics",
         channels: ["pneumatic_tube"],
+        dedupeBySourceEntity: true,
       });
       notified += 1;
     } catch (err) {

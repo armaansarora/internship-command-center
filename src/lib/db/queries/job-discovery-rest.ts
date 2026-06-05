@@ -3,7 +3,7 @@
  *
  * The ingest path (see src/lib/jobs/discovery.ts) calls into these helpers:
  *   - findSimilarJobByEmbedding  → pgvector dedupe before an insert
- *   - existsBySourceId           → cheap idempotency check by source id
+ *   - existingSourceIds          → batched idempotency check by source id
  *   - insertDiscoveredApplication → atomic insert of application + embedding
  */
 import { createClient } from "@/lib/supabase/server";
@@ -57,28 +57,45 @@ export async function findSimilarJobByEmbedding(
 }
 
 /**
- * Idempotency — fast path. If we already ingested this SourceJob for the
- * user, skip embedding + score work entirely.
+ * Batch idempotency — given a list of candidate sourceIds, return the subset
+ * that already exist as applications for this user. One (chunked) round-trip
+ * instead of one `existsBySourceId` query per candidate, which was an N+1 on
+ * the job-discovery request path. Chunked so a large candidate set cannot
+ * blow PostgREST's query-string length limit.
+ *
+ * Fails open per-chunk (treats a chunk as "none exist" on error), matching
+ * `existsBySourceId`'s fail-open contract — the downstream pgvector dedupe and
+ * insert path remain the authoritative duplicate guards.
  */
-export async function existsBySourceId(
+export async function existingSourceIds(
   userId: string,
-  sourceId: string
-): Promise<boolean> {
+  sourceIds: string[]
+): Promise<Set<string>> {
+  const found = new Set<string>();
+  if (sourceIds.length === 0) return found;
   const supabase = await createClient();
-  const { count, error } = await supabase
-    .from("applications")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("source", sourceId);
-  if (error) {
-    log.warn("job_discovery.exists_by_source_failed", {
-      userId,
-      sourceId,
-      error: error.message,
-    });
-    return false;
+  const CHUNK = 200;
+  for (let i = 0; i < sourceIds.length; i += CHUNK) {
+    const chunk = sourceIds.slice(i, i + CHUNK);
+    const { data, error } = await supabase
+      .from("applications")
+      .select("source")
+      .eq("user_id", userId)
+      .in("source", chunk);
+    if (error) {
+      log.warn("job_discovery.existing_source_ids_failed", {
+        userId,
+        chunkSize: chunk.length,
+        error: error.message,
+      });
+      continue;
+    }
+    for (const row of data ?? []) {
+      const src = (row as { source: string | null }).source;
+      if (src) found.add(src);
+    }
   }
-  return (count ?? 0) > 0;
+  return found;
 }
 
 export interface InsertDiscoveredInput {

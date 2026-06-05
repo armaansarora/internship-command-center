@@ -9,21 +9,31 @@ import type { Row } from "@/db/database.types";
 /**
  * GET /api/cron/draft-follow-ups
  *
- * Every 2 hours (`0 * /2 * * *`) the COO sweeps across users. For each user
- * whose LOCAL time is inside [02:00, 06:00) we look for stale applications
- * (status in the "active" set, `last_activity_at < now - 7d`), draft an AI
- * follow-up for up to 5 of them, park the drafts as `pending_approval` on
- * `outreach_queue`, and fire ONE batched pneumatic-tube notification per
- * user. The user approves from Floor 4 when they wake up.
+ * Runs once daily at 08:00 UTC (`0 8 * * *`, see vercel.json) — the COO
+ * sweeps across users. For each user whose LOCAL time is inside
+ * [02:00, 06:00) we look for stale applications (status in the "active" set,
+ * `last_activity_at < now - 7d`), draft an AI follow-up for up to 5 of them,
+ * park the drafts as `pending_approval` on `outreach_queue`, and fire ONE
+ * batched pneumatic-tube notification per user. The user approves from
+ * Floor 4 when they wake up.
  *
- * Idempotency. Because the cron runs every 2h but the window is 4h wide,
- * each user will be hit up to twice per night. The second invocation must
- * create zero new drafts — dedupe against any pending_approval / approved
- * rows already in outreach_queue for the same application. The check
- * intentionally matches across statuses so a user who already approved a
- * draft doesn't get a replacement generated on the next tick.
+ * KNOWN LIMITATION (coverage). Because there is a single daily invocation at
+ * 08:00 UTC and the local-time gate is the 4h window [02:00, 06:00), only
+ * users whose UTC offset puts 08:00 UTC inside that window are ever swept —
+ * roughly UTC-6…UTC-3 (the Americas). Users elsewhere (Europe, Asia, US West
+ * Coast) never receive drafts. Widening coverage requires either a wider
+ * local window or additional cron invocations across the day; both are
+ * deployment/product decisions tracked for human review, not changed here.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Idempotency. The gate is by local hour, so under the current single daily
+ * run a given user is swept at most once per night. Dedupe is still enforced
+ * (and matters for manual re-triggers, retries, and any future move to a
+ * multi-tick schedule): a new draft is created only when no pending_approval
+ * / approved row already exists in outreach_queue for the same application.
+ * The check intentionally matches across statuses so a user who already
+ * approved a draft doesn't get a replacement generated on a later run.
+ *
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 

@@ -10,9 +10,12 @@ import { withCronHealth } from "@/lib/cron/health";
 /**
  * GET /api/cron/export-worker
  *
- * Sweeps up to BATCH_LIMIT queued data-export jobs per tick (every 5 min per
- * `vercel.json`). For each queued user:
- *   1. Flip status to `running` (so a concurrent tick doesn't double-process).
+ * Sweeps up to BATCH_LIMIT queued data-export jobs per run. Scheduled once
+ * daily at 01:00 UTC (`0 1 * * *`, see vercel.json — Vercel Hobby caps cron
+ * frequency at once-per-day, so the queue drains at most once a day and export
+ * delivery latency can be up to ~24h). For each queued user:
+ *   1. Flip status to `running` (guards against a manual re-trigger or retry
+ *      overlapping a still-running run).
  *   2. Build the zip via `buildUserExport`.
  *   3. Upload to the private `exports/` Storage bucket.
  *   4. Mint a 7-day signed URL.

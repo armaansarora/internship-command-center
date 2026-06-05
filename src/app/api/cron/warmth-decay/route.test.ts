@@ -33,9 +33,13 @@ vi.mock("@/lib/supabase/admin", () => ({
       if (table !== "contacts") throw new Error(`Unexpected table ${table}`);
       return {
         select: () => ({
-          range: async (from: number, to: number) => ({
-            data: fixture.readError ? null : fixture.contacts.slice(from, to + 1),
-            error: fixture.readError,
+          // Mirrors the real chain: .select().range().order() — .order() is
+          // the awaited terminal that returns the page.
+          range: (from: number, to: number) => ({
+            order: async () => ({
+              data: fixture.readError ? null : fixture.contacts.slice(from, to + 1),
+              error: fixture.readError,
+            }),
           }),
         }),
         update: () => ({

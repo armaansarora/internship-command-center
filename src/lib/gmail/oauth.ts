@@ -6,6 +6,12 @@ import { createOAuthState } from "@/lib/auth/oauth-state";
 import { deriveUserKey } from "@/lib/crypto/keys";
 import { log } from "@/lib/logger";
 
+// Per-request ceiling on the Google OAuth token endpoints. These sit on the
+// interactive auth callback AND on every cron-triggered sync (token refresh),
+// so a hung token endpoint must not hold a serverless function open — matching
+// the 10s ceiling used by the rest of the Google integration.
+const GOOGLE_TOKEN_TIMEOUT_MS = 10_000;
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -193,6 +199,7 @@ export async function exchangeCodeForTokens(code: string): Promise<TokenResponse
       redirect_uri: GMAIL_REDIRECT_URI,
       grant_type: "authorization_code",
     }).toString(),
+    signal: AbortSignal.timeout(GOOGLE_TOKEN_TIMEOUT_MS),
   });
 
   if (!response.ok) {
@@ -224,6 +231,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<TokenRes
       client_secret: GOOGLE_CLIENT_SECRET,
       grant_type: "refresh_token",
     }).toString(),
+    signal: AbortSignal.timeout(GOOGLE_TOKEN_TIMEOUT_MS),
   });
 
   if (!response.ok) {

@@ -60,6 +60,10 @@ vi.mock("@/lib/ai/structured/reference-request", () => ({
   draftReferenceRequest: draftRefMock,
 }));
 
+vi.mock("@/lib/logger", () => ({
+  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
 import { POST } from "../route";
 
 function makeReq(body: unknown): NextRequest {
@@ -242,6 +246,22 @@ describe("R10.14 POST /api/contacts/[id]/reference-request", () => {
       ctx,
     );
     expect(res.status).toBe(500);
+  });
+
+  it("returns 503 (not a raw 500) when the AI draft helper throws", async () => {
+    // Cooldown SELECT is empty so we proceed to the draft, which rejects.
+    const cooldown = cooldownSelectChain([]);
+    supabaseFromMock.mockReturnValueOnce(cooldown);
+    draftRefMock.mockRejectedValueOnce(new Error("provider 503"));
+    const res = await POST(
+      makeReq({ offerId: "11111111-1111-4111-8111-111111111111" }),
+      ctx,
+    );
+    expect(res.status).toBe(503);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("draft_failed");
+    // The AI call failed before any DB write — nothing queued.
+    expect(supabaseAdminFromMock).not.toHaveBeenCalled();
   });
 
   it("returns 429 before drafting when AI quota is exhausted", async () => {

@@ -1,7 +1,7 @@
 /**
  * Unprompted CEO triggers — pure threshold functions.
  *
- * Consumed by `/api/cron/unprompted-ceo` (every 6h). The cron sweeps each
+ * Consumed by `/api/cron/unprompted-ceo` (once daily at 10:00 UTC). The cron sweeps each
  * active user, fetches their minimal application + recent-ceo-notification
  * set, and runs these functions. Each `TriggerDecision` becomes one
  * notification row (source_agent='ceo'). De-dup for offers happens here

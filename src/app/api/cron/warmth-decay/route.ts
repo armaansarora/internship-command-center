@@ -23,7 +23,7 @@ import { withCronHealth } from "@/lib/cron/health";
  * (`cooling-<contactId>-w<weekBucket>`). Re-running within the same week
  * finds the existing notification row and inserts nothing.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  */
 export const maxDuration = 300;
 
@@ -50,7 +50,10 @@ async function handle(req: NextRequest): Promise<NextResponse> {
     const { data: page, error } = await admin
       .from("contacts")
       .select("id, user_id, name, warmth, last_contact_at")
-      .range(fromOffset, fromOffset + PAGE_SIZE - 1);
+      .range(fromOffset, fromOffset + PAGE_SIZE - 1)
+      // Stable order so OFFSET windows tile the table without skipping or
+      // double-processing rows (matches the sibling crons' convention).
+      .order("id", { ascending: true });
 
     if (error) {
       log.error("warmth_decay.read_failed", error, { error: error.message });
@@ -102,6 +105,7 @@ async function handle(req: NextRequest): Promise<NextResponse> {
           sourceEntityId: `cooling-${row.id}-w${weekBucket}`,
           sourceEntityType: "contact",
           channels: ["pneumatic_tube"],
+          dedupeBySourceEntity: true,
         });
         alerted += 1;
       }

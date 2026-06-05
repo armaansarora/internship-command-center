@@ -5,7 +5,7 @@ Use this prompt when opening a fresh Codex session for Tower character art work.
 ```text
 Work from the The Tower repository root.
 
-Continue Tower visual work through the Creative Production Engine. First read CLAUDE.md, STRUCTURE.md, docs/CREATIVE-PRODUCTION-ENGINE.md, docs/CHARACTER-IMAGE-OPERATIONS.md, docs/CHARACTER-ART-PIPELINE.md, docs/ART-BIBLE.md, docs/CHARACTER-BIBLE.md, and .artlab/README.md. Then run npm run art:studio and treat its guided opening as the source of truth. Use npm run art:status for read-only inspection. Use npm run art:operate only when the active asset is a Season 1 character and the engine reaches the character-art operator stage.
+Continue Tower visual work through ArtLab. First read CLAUDE.md, STRUCTURE.md, docs/artlab/ENGINE.md, docs/artlab/OPERATIONS.md, docs/artlab/CHARACTER-PIPELINE.md, docs/CHARACTER-IMAGE-OPERATIONS.md, docs/CHARACTER-ART-PIPELINE.md, docs/ART-BIBLE.md, docs/CHARACTER-BIBLE.md, and .artlab/README.md. Then run npm run artlab -- status for read-only inspection. Start new requested work with npm run artlab -- produce "<request>".
 
 Otis Vale is already promoted, browser-QA verified, closed, and protected as the Lobby baseline in public/art/lobby/otis and src/lib/visual-assets/approved-character-assets.generated.json. The four Lobby backgrounds in public/lobby/bg-1.jpg through public/lobby/bg-4.jpg are protected and must not be touched.
 
@@ -19,5 +19,5 @@ Production promotion requires the exact phrase approved for app. If any generate
 Short version:
 
 ```text
-Continue Tower visuals from the current Otis-protected baseline. Run npm run art:status first, read docs/CREATIVE-PRODUCTION-ENGINE.md and docs/CHARACTER-IMAGE-OPERATIONS.md, then start the requested new asset through npm run art:produce. New characters start from scratch with 5 prompt-only initial concepts, five concurrent API lanes, no old references unless approved in run-state, no Color block, and no direct public/art writes. Promote only after approved for app, and harden the pipeline whenever it exposes a weakness.
+Continue Tower visuals from the current Otis-protected baseline. Run npm run artlab -- status first, read docs/artlab/ENGINE.md, docs/artlab/OPERATIONS.md, and docs/CHARACTER-IMAGE-OPERATIONS.md, then start the requested new asset through npm run artlab -- produce "<request>". New characters start from scratch unless approved in run-state, with no direct public/art writes. Promote only after approved for app, and harden the pipeline whenever it exposes a weakness.
 ```

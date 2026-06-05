@@ -25,10 +25,13 @@ import {
 /**
  * GET /api/cron/owner-watchdog
  *
- * Every 30 minutes (see vercel.json). Reads three production signals and
- * emails the owner a Resend digest when something is wrong. Each
- * incident is state-machined through `incident_alerts` so an active
- * incident does NOT page on every tick.
+ * Every 30 minutes — driven off-platform by
+ * `.github/workflows/owner-watchdog.yml` (a GitHub Actions schedule), NOT by
+ * vercel.json: Vercel Hobby caps vercel.json crons at once-per-day, but the
+ * watchdog's whole point is sub-hour detection. Reads three production signals
+ * and emails the owner a Resend digest when something is wrong. Each incident
+ * is state-machined through `incident_alerts` so an active incident does NOT
+ * page on every run.
  *
  * Signals read on each run:
  *   1. Cron staleness — for every named cron in vercel.json, check the
@@ -49,7 +52,7 @@ import {
  *   * Row open AND signal back below threshold → stamp resolved_at +
  *     send "recovered" digest.
  *
- * Auth: verifyCronRequest (Bearer CRON_SECRET OR x-vercel-cron: 1).
+ * Auth: verifyCronRequest (Bearer CRON_SECRET only (the spoofable x-vercel-cron header is NOT trusted)).
  * When RESEND_API_KEY is unset, the route still returns 200 + counters
  * and the helper logs a warning — the state machine continues to evolve
  * so when Resend is provisioned the next tick picks up where it left off.

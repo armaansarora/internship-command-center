@@ -102,11 +102,30 @@ const EnvSchema = z.object({
   TOWER_TRUST_CONSOLE: z.string().optional(),
   TOWER_SEASON_PASS: z.string().optional(),
 
+  // Prompt-cache layout selector (src/lib/ai/prompt-cache.ts). "legacy" pins
+  // the pre-consolidation cache-block layout; unset uses the current layout.
+  // Declared here so the flag is part of the single-source-of-truth schema.
+  TOWER_PROMPT_CACHE_LAYOUT: z.string().optional(),
+
+  // Dev/preview-only auth bypass (src/lib/dev-preview-auth.ts). Triple-gated to
+  // non-production + an explicit local stub URL; never honored in production.
+  // Declared here so the auth-bypass flag is documented + visible in the schema.
+  TOWER_DEV_PREVIEW_AUTH: z.string().optional(),
+
   // ── Cron ─────────────────────────────────────────────────────────────────
   CRON_SECRET: z.string().min(16).optional(),
 
   // ── Email delivery (outreach) ────────────────────────────────────────────
   RESEND_API_KEY: z.string().min(1).optional(),
+  // From-addresses for transactional mail. Declared here (optional) so they
+  // are part of the single-source-of-truth schema; consumers fall back to a
+  // default sender when unset.
+  OUTREACH_EMAIL_FROM: z.string().optional(),
+  EXPORT_EMAIL_FROM: z.string().optional(),
+
+  // ── Platform (Vercel-injected at build) ──────────────────────────────────
+  // Set automatically by Vercel; surfaced for build/version stamping.
+  VERCEL_GIT_COMMIT_SHA: z.string().optional(),
 
   // ── Lighthouse Watchdog ──────────────────────────────────────────────────
   // Owner-only operational watchdog (every 30 minutes). Hourly AI cost

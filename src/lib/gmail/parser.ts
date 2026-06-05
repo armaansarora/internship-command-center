@@ -280,35 +280,45 @@ interface ApplicationRecord {
   companies?: Array<{ domain: string | null }> | null;
 }
 
-export async function matchEmailToApplication(
-  email: ParsedEmail,
+/**
+ * Fetch the user's applications (id, company_name, linked company domain) for
+ * email→application matching. Callers that match MANY emails (e.g. a Gmail
+ * sync batch) should call this ONCE and reuse the list with
+ * `matchEmailAgainstApplications` to avoid an N+1 — previously this query ran
+ * once per email.
+ */
+export async function fetchApplicationsForMatching(
   userId: string,
   options: { useAdmin?: boolean } = {}
-): Promise<string | undefined> {
+): Promise<ApplicationRecord[]> {
   const supabase = options.useAdmin ? getSupabaseAdmin() : await createClient();
-
   // Join to companies via `company_id` so we can read `companies.domain`.
-  // PostgREST nested-select returns the joined row (or `null`) under the
-  // foreign-table key. Apps without a linked company will have `companies: null`
-  // — those fall through to the name-based fuzzy match below.
-  const { data: applications, error } = await supabase
+  // Apps without a linked company have `companies: null` and fall through to
+  // the name-based fuzzy match.
+  const { data, error } = await supabase
     .from("applications")
     .select("id, company_name, companies(domain)")
     .eq("user_id", userId);
+  if (error || !data) return [];
+  // The `companies(domain)` nested-select models embeds as `T[] | T | null`
+  // depending on FK direction, so we narrow to the local projection.
+  return data as ApplicationRecord[];
+}
 
-  if (error || !applications) return undefined;
-
+/**
+ * Pure matcher: pick the application a parsed email belongs to, given the
+ * user's applications. No I/O — domain match first, then a normalized
+ * company-name fallback.
+ */
+export function matchEmailAgainstApplications(
+  email: ParsedEmail,
+  records: ApplicationRecord[]
+): string | undefined {
   const fromDomain = extractDomainFromEmail(email.from);
   if (!fromDomain) return undefined;
 
-  // The `companies(domain)` nested-select returns the joined row as an
-  // object — supabase's generated types model embeds as `T[] | T | null`
-  // depending on the FK direction, so we narrow to the local projection.
-  const records = applications as ApplicationRecord[];
-
   // Try matching by linked company domain first. The `companies(domain)`
-  // embed lands as an array of at most one row (many-to-one FK), so we
-  // pick the head before reading the domain.
+  // embed lands as an array of at most one row (many-to-one FK).
   for (const app of records) {
     const appDomain = app.companies?.[0]?.domain;
     if (appDomain) {
@@ -319,7 +329,7 @@ export async function matchEmailToApplication(
     }
   }
 
-  // Fall back to matching by normalized company name in email domain
+  // Fall back to matching by normalized company name in email domain.
   for (const app of records) {
     if (!app.company_name) continue;
     const normalizedName = app.company_name.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -330,6 +340,17 @@ export async function matchEmailToApplication(
   }
 
   return undefined;
+}
+
+export async function matchEmailToApplication(
+  email: ParsedEmail,
+  userId: string,
+  options: { useAdmin?: boolean } = {}
+): Promise<string | undefined> {
+  return matchEmailAgainstApplications(
+    email,
+    await fetchApplicationsForMatching(userId, options),
+  );
 }
 
 function extractDomainFromEmail(from: string): string | null {

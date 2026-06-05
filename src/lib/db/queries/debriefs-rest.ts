@@ -77,5 +77,11 @@ export async function readBinder(
     .eq("type", "debrief")
     .single();
   if (!data?.content) return null;
-  return parseDebriefContent(data.content);
+  // Mirror listBindersForUser: a malformed/schema-drifted row is treated as
+  // absent (→ the route maps null to 404) rather than throwing a raw 500.
+  try {
+    return parseDebriefContent(data.content);
+  } catch {
+    return null;
+  }
 }

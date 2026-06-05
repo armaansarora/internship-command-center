@@ -84,9 +84,10 @@ export function LiveComposePanel({
     bold: false,
   });
   const startedRef = useRef(false);
+  const completedRef = useRef(false);
 
   const streamOne = useCallback(
-    async (tone: ToneKey): Promise<void> => {
+    async (tone: ToneKey, signal: AbortSignal): Promise<void> => {
       try {
         const res = await fetch(endpoint, {
           method: "POST",
@@ -98,6 +99,7 @@ export function LiveComposePanel({
             jobDescription,
             companyResearch,
           }),
+          signal,
         });
         if (!res.ok || !res.body) {
           throw new Error(`HTTP ${res.status}`);
@@ -115,6 +117,10 @@ export function LiveComposePanel({
         }
         setDone((prev) => ({ ...prev, [tone]: true }));
       } catch (err) {
+        // Intentional abort on unmount — not a user-facing failure. Bail
+        // before touching state so we don't render a spurious error or fire
+        // onComplete/onToneError for a panel nobody is looking at.
+        if (signal.aborted) return;
         const message = err instanceof Error ? err.message : String(err);
         setErrors((prev) => ({ ...prev, [tone]: message }));
         setDone((prev) => ({ ...prev, [tone]: true }));
@@ -127,12 +133,26 @@ export function LiveComposePanel({
   useEffect(() => {
     if (!autoStart || startedRef.current) return;
     startedRef.current = true;
-    void Promise.all(TONES.map((t) => streamOne(t)));
+    // Abort all three in-flight streams if the user leaves the Writing Room
+    // mid-compose, so we stop reading (and stop paying for) LLM output for an
+    // unmounted panel. Reset the guard in cleanup so a remount (React strict
+    // mode in dev, or a prop-driven restart) starts fresh.
+    const ac = new AbortController();
+    void Promise.all(TONES.map((t) => streamOne(t, ac.signal)));
+    return () => {
+      ac.abort();
+      startedRef.current = false;
+    };
   }, [autoStart, streamOne]);
 
   useEffect(() => {
-    if (!onComplete) return;
+    if (!onComplete || completedRef.current) return;
     if (TONES.every((t) => done[t])) {
+      // One-shot: honour the documented "called ONCE all three streams
+      // resolve" contract. Without this guard, any later re-render that
+      // changes the onComplete identity (an unmemoised parent callback) would
+      // re-fire it with the final texts and double-submit.
+      completedRef.current = true;
       onComplete({ ...texts });
     }
   }, [done, texts, onComplete]);

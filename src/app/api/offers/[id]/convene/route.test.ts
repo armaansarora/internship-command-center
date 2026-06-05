@@ -68,6 +68,10 @@ vi.mock("@/lib/stripe/entitlements", () => ({
   getUserTier: vi.fn(async () => "free"),
 }));
 
+vi.mock("@/lib/logger", () => ({
+  log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
+
 const { POST } = await import("./route");
 
 const OFFER_ID = "22222222-2222-4222-8222-222222222222";
@@ -211,6 +215,32 @@ describe("POST /api/offers/[id]/convene", () => {
     expect(convenePipelineSpy).toHaveBeenCalledWith(
       expect.objectContaining({ bands: null }),
     );
+  });
+
+  it("degrades to bands=null (not a raw 500) when the comp-bands lookup throws", async () => {
+    requireUserSpy.mockResolvedValue(OK_AUTH);
+    getOfferByIdSpy.mockResolvedValue(offerRow());
+    lookupBandsSpy.mockRejectedValueOnce(new Error("comp_bands DB down"));
+    convenePipelineSpy.mockResolvedValue({
+      offer_evaluator: { verdict: "THIN_DATA", narrative: "no bands", risks: [] },
+      cfo: {
+        total_comp_year1: 100000,
+        total_comp_4yr: 400000,
+        vesting_note: "",
+        narrative: "",
+      },
+      cno: { contacts_at_company: [], narrative: "" },
+    });
+
+    const res = await callPost();
+    expect(res.status).toBe(200);
+    // The pipeline still runs with null bands; the response carries the
+    // graceful-empty LookupResult so the UI can pattern-match on ok/reason.
+    expect(convenePipelineSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ bands: null }),
+    );
+    const body = (await res.json()) as { bands: { ok: boolean; reason?: string } };
+    expect(body.bands).toEqual({ ok: false, reason: "empty" });
   });
 
   it("returns 429 when AI quota is exhausted, never invokes the pipeline", async () => {

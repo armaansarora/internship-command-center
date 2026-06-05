@@ -18,7 +18,7 @@ import type { Row } from "@/db/database.types";
  * opted in.
  *
  * Shape mirrors `/api/cron/briefing/route.ts`:
- *   - `verifyCronRequest` enforces Bearer CRON_SECRET OR `x-vercel-cron: 1`.
+ *   - `verifyCronRequest` enforces Bearer CRON_SECRET only (the spoofable `x-vercel-cron` header is NOT trusted).
  *   - PAGE_SIZE = 500 for the paginated user fetch.
  *   - WORKERS = 6 parallel per-user rebuilds bounded by a queue.
  *   - Per-user errors are logged + recorded as `status: "error"` but

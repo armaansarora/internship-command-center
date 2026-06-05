@@ -26,6 +26,11 @@ import { getAgentModel } from "../model";
 import { SIMULATOR_TURN_MAX_OUTPUT_TOKENS } from "@/lib/ai/output-budgets";
 import type { OfferRow } from "@/lib/db/queries/offers-rest";
 
+// Internal ceiling on the simulator's single generateObject call. The route
+// sets maxDuration=60; this leaves headroom so a stalled provider aborts and
+// surfaces a clean error to the caller instead of running out the function.
+const SIMULATOR_TURN_TIMEOUT_MS = 45_000;
+
 const ScoringSchema = z.object({
   anchorScore: z.number().int().min(0).max(5),
   concessionScore: z.number().int().min(0).max(5),
@@ -93,6 +98,7 @@ Rules:
       `USER REPLY THIS TURN:\n${input.userReply ?? "(none — you open)"}\n\n` +
       `Produce the recruiter's next reply and score the user's latest reply (null scoring if no user reply this turn).`,
     maxOutputTokens: SIMULATOR_TURN_MAX_OUTPUT_TOKENS,
+    abortSignal: AbortSignal.timeout(SIMULATOR_TURN_TIMEOUT_MS),
   });
 
   return object;

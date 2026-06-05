@@ -110,7 +110,16 @@ function readSpendFromRunState(runDir: string): { actualCents: number; capCents:
 }
 
 function publicArtRoot(): string {
-  return process.env.ARTLAB_PUBLIC_ART_ROOT ?? "/Users/armaanarora/Documents/The Tower/public/art";
+  if (process.env.ARTLAB_PUBLIC_ART_ROOT) return process.env.ARTLAB_PUBLIC_ART_ROOT;
+  if (process.env.ARTLAB_PROJECT_ROOT) {
+    return join(process.env.ARTLAB_PROJECT_ROOT, "public", "art");
+  }
+  // Unlike promotedPacksRoot (which returns null when no env is set), callers
+  // here require a string. Fall back to the running repo's public/art via cwd
+  // as a LAST resort — production always sets ARTLAB_PUBLIC_ART_ROOT or
+  // ARTLAB_PROJECT_ROOT — so writes land under the current checkout instead of
+  // a single contributor's absolute home path.
+  return join(process.cwd(), "public", "art");
 }
 
 /**
