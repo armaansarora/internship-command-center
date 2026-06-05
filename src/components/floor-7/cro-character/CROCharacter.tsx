@@ -58,6 +58,7 @@ export function CROCharacter({
       activeLabel="● CRO"
       isOpen={snapshot.context.isConversationOpen}
       accent="#1E90FF"
+      priority
       onClick={() => {
         send({ type: "CLICK" });
         if (!snapshot.context.isConversationOpen) onConversationOpen?.();

@@ -28,6 +28,7 @@ export function OtisAvatar({
       state={STAGE_STATE_BY_MOOD[mood]}
       aria-label="Otis, the Concierge, standing at the reception desk"
       className={className}
+      priority
       style={style}
     />
   );
