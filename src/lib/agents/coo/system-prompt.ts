@@ -58,12 +58,17 @@ function buildDynamicContext(
   userName: string,
   memories: AgentMemoryEntry[]
 ): string {
+  // Render interview slots in the user's IANA timezone so the COO states the
+  // correct local time. Default to UTC when the profile timezone is unknown —
+  // never silently render in the server's timezone (UTC on Vercel), which is
+  // what made a 2:30 PM ET slot read as "06:30 PM".
+  const timeZone = briefingData.userTimezone ?? "UTC";
   const todaysInterviewLines =
     briefingData.todaysInterviews.length > 0
       ? briefingData.todaysInterviews
           .map(
             (i) =>
-              `  - ${new Date(i.scheduledAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} — ${i.companyName ?? "Unknown"} (${i.role}) — ${i.format ?? "interview"} ${i.round ? `Round ${i.round}` : ""}`
+              `  - ${new Date(i.scheduledAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone })} — ${i.companyName ?? "Unknown"} (${i.role}) — ${i.format ?? "interview"} ${i.round ? `Round ${i.round}` : ""}`
           )
           .join("\n")
       : "  - No interviews scheduled today";
