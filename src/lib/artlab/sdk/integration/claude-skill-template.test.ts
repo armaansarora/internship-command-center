@@ -2,30 +2,35 @@ import { describe, expect, it } from "vitest";
 import { renderArtLabClaudeSkill } from "./claude-skill-template";
 
 describe("renderArtLabClaudeSkill", () => {
-  it("returns a markdown body referencing all 9 MCP tools", () => {
+  it("references all 9 MCP tools by their harness-real mcp__artlab__ names", () => {
     const md = renderArtLabClaudeSkill({ repoRoot: "/r" });
-    expect(md).toMatch(/artlab\/canon_list/);
-    expect(md).toMatch(/artlab\/canon_get/);
-    expect(md).toMatch(/artlab\/asset_pack_list/);
-    expect(md).toMatch(/artlab\/asset_pack_get/);
-    expect(md).toMatch(/artlab\/asset_pack_integration/);
-    expect(md).toMatch(/artlab\/slot_audit/);
-    expect(md).toMatch(/artlab\/generate/);
-    expect(md).toMatch(/artlab\/generate_status/);
-    expect(md).toMatch(/artlab\/diagnostics/);
+    for (const t of [
+      "canon_list", "canon_get", "asset_pack_list", "asset_pack_get",
+      "asset_pack_integration", "slot_audit", "generate", "generate_status", "diagnostics",
+    ]) {
+      expect(md).toContain(`mcp__artlab__${t}`);
+    }
   });
 
-  it("includes a 'when to use' decision table", () => {
+  it("includes the enrichment sections (Preflight, Troubleshooting, Tool naming note)", () => {
     const md = renderArtLabClaudeSkill({ repoRoot: "/r" });
+    expect(md).toMatch(/Preflight/);
+    expect(md).toMatch(/Troubleshooting/);
+    expect(md).toMatch(/Tool naming note/);
     expect(md).toMatch(/when to use/i);
   });
 
-  it("includes the canon path so the agent knows where YAML lives", () => {
+  it("never contains the dead husk path (regression guard)", () => {
+    const md = renderArtLabClaudeSkill({ repoRoot: "/Users/x/Developer/The Tower" });
+    expect(md).not.toMatch(/Documents\/The Tower/);
+  });
+
+  it("bakes the repo root into the canon path", () => {
     const md = renderArtLabClaudeSkill({ repoRoot: "/repo" });
     expect(md).toMatch(/\/repo\/docs\/artlab\/sdk\/canon/);
   });
 
-  it("opens with a YAML frontmatter block (Claude Code skill format)", () => {
+  it("opens with YAML frontmatter (Claude Code skill format)", () => {
     const md = renderArtLabClaudeSkill({ repoRoot: "/r" });
     expect(md.startsWith("---\n")).toBe(true);
     expect(md).toMatch(/^name: artlab/m);
