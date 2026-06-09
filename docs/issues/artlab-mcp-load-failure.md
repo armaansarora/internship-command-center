@@ -48,12 +48,12 @@ or has no explicit `cwd` set on the MCP entry, the server explodes
 during module load:
 
 ```
-$ cd / && npx tsx "/Users/armaanarora/Documents/The Tower/scripts/artlab-sdk-mcp.ts" --help
+$ cd / && npx tsx "/Users/armaanarora/Developer/The Tower/scripts/artlab-sdk-mcp.ts" --help
 Error: Cannot find module '@/lib/artlab/state/snapshots'
 Require stack:
-- /Users/armaanarora/Documents/The Tower/src/lib/artlab/sdk/mcp/tool-handlers/generate.ts
-- /Users/armaanarora/Documents/The Tower/src/lib/artlab/sdk/mcp/server.ts
-- /Users/armaanarora/Documents/The Tower/scripts/artlab-sdk-mcp.ts
+- /Users/armaanarora/Developer/The Tower/src/lib/artlab/sdk/mcp/tool-handlers/generate.ts
+- /Users/armaanarora/Developer/The Tower/src/lib/artlab/sdk/mcp/server.ts
+- /Users/armaanarora/Developer/The Tower/scripts/artlab-sdk-mcp.ts
 ```
 
 The same command from the repo root succeeds and prints `--help`. The
@@ -94,7 +94,7 @@ inherits the launching shell's cwd.
 Until fixed, agents should fall back to the CLI:
 
 ```
-cd "/Users/armaanarora/Documents/The Tower"
+cd "/Users/armaanarora/Developer/The Tower"
 npm run artlab -- doctor       # session-readiness check
 npm run artlab -- status       # see runs
 npm run artlab -- produce "<request>"

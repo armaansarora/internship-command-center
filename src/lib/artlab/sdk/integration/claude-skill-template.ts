@@ -50,23 +50,23 @@ The MCP path frequently does NOT load (the installer writes to the wrong setting
 
 ## When to use which tool
 
-Every MCP tool has a 1:1 CLI twin; use the CLI column whenever you are on the CLI path.
+Generation + health have real engine-CLI twins (\`npm run artlab -- ...\`); the canon/pack READ tools are MCP-only — when the MCP server is down, Read those files directly off disk (paths in the CLI/fallback column).
 
 | You want to... | MCP tool | CLI equivalent | Notes |
 |---|---|---|---|
-| See every canonical character / floor / palette | \`mcp__artlab__canon_list\` | \`npm run artlab -- canon list\` | Optional \`kind\` filter; canon also readable directly under \`docs/artlab/sdk/canon/\` |
-| Fetch one canon entry (YAML-as-JSON) | \`mcp__artlab__canon_get\` | \`npm run artlab -- canon get <id>\` | Required \`id\` |
-| See every promoted Asset Pack | \`mcp__artlab__asset_pack_list\` | \`npm run artlab -- status\` | Filters: kind / characterId / space |
-| Fetch one Asset Pack manifest + file paths | \`mcp__artlab__asset_pack_get\` | \`npm run artlab -- pack <packId>\` | Required \`packId\` |
-| Get a copy-paste TSX integration snippet | \`mcp__artlab__asset_pack_integration\` | \`npm run artlab -- integrate <packId>\` | Required \`packId\`; \`targetFramework\` defaults to next-app-router |
-| Audit what art is MISSING | \`mcp__artlab__slot_audit\` | \`npm run artlab -- audit\` | Returns slots with no promoted pack |
+| See every canonical character / floor / palette | \`mcp__artlab__canon_list\` | Read \`$ROOT/docs/artlab/sdk/canon/\` directly (no list CLI) | Optional \`kind\` filter; canon also readable directly under \`docs/artlab/sdk/canon/\` |
+| Fetch one canon entry (YAML-as-JSON) | \`mcp__artlab__canon_get\` | Read \`$ROOT/docs/artlab/sdk/canon/<id>.yaml\` directly | Required \`id\` |
+| See every promoted Asset Pack | \`mcp__artlab__asset_pack_list\` | Read \`$ROOT/.artlab/engine/promoted/\` directly (no pack-list CLI) | Filters: kind / characterId / space |
+| Fetch one Asset Pack manifest + file paths | \`mcp__artlab__asset_pack_get\` | Read \`$ROOT/.artlab/engine/promoted/<packId>/\` directly | Required \`packId\` |
+| Get a copy-paste TSX integration snippet | \`mcp__artlab__asset_pack_integration\` | MCP-only (no CLI twin) | Required \`packId\`; \`targetFramework\` defaults to next-app-router |
+| Audit what art is MISSING | \`mcp__artlab__slot_audit\` | MCP-only (no CLI twin; compare canon vs promoted/ by hand) | Returns slots with no promoted pack |
 | Request a NEW artifact be generated | \`mcp__artlab__generate\` | \`npm run artlab -- produce "..."\` | Returns a \`runId\` immediately; poll with \`generate_status\` |
-| Poll an in-flight generation | \`mcp__artlab__generate_status\` | \`npm run artlab -- queue\` | Status: queued / running / blocked / promoted / cancelled / failed |
+| Poll an in-flight generation | \`mcp__artlab__generate_status\` | \`npm run artlab -- status <runId>\` (omit runId or \`queue\` for the whole queue) | Status: queued / running / blocked / promoted / cancelled / failed |
 | Health snapshot | \`mcp__artlab__diagnostics\` | \`npm run artlab -- doctor\` / \`health\` | daemonUp, provider reachability, backlog, recent runs |
 
 ## Decision tree
 
-- **Broad "what's missing / what art do we still need"** → \`mcp__artlab__slot_audit\` (or \`npm run artlab -- audit\`). Don't enumerate canon by hand.
+- **Broad "what's missing / what art do we still need"** → \`mcp__artlab__slot_audit\` (MCP-only — or compare canon vs promoted/ by hand). Don't enumerate canon by hand.
 - **"This might already exist" (a specific character/floor/space)** → \`mcp__artlab__asset_pack_list\` to check, then \`mcp__artlab__asset_pack_integration\` to hand back the snippet if a pack is found.
 - **Generate ONLY when the list comes back empty.** Generation is async, daemon-gated, and costs a run — never the first move.
 
@@ -126,7 +126,7 @@ If the artlab MCP tools aren't in your tool list (visible via ToolSearch or in d
 
 4. **Restart Claude Code.** MCP server registration happens at session start. New servers added via \`claude mcp add\` or by editing \`~/.claude.json\` are NOT picked up by an in-flight session — you must exit and reopen.
 
-5. **Fall back to the CLI.** Every MCP tool has a CLI equivalent (see the CLI column in the tool table above) and is fully functional without the MCP server. Canon is also readable directly under \`${opts.repoRoot}/docs/artlab/sdk/canon/\` (standard \`Read\` tool) and promoted packs under \`${opts.repoRoot}/.artlab/engine/promoted/\`.
+5. **Fall back to the CLI / direct file reads.** Generation and health have real \`npm run artlab -- ...\` twins (\`produce\`, \`status\`, \`doctor\`/\`health\`); the canon/pack READ tools have no list CLI, but the underlying files are readable directly with the standard \`Read\` tool — canon under \`${opts.repoRoot}/docs/artlab/sdk/canon/\` and promoted packs under \`${opts.repoRoot}/.artlab/engine/promoted/\`. Two tools are MCP-only with no fallback: \`asset_pack_integration\` (snippet generation) and \`slot_audit\` (compare canon vs promoted/ by hand). See the CLI column in the tool table above for the exact per-tool fallback.
 
 ### Tool naming note
 

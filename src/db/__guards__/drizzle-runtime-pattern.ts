@@ -20,5 +20,12 @@ export const DRIZZLE_VALUE_IMPORT =
 /** C — a runtime query call shape. Scope to SERVER_SURFACE only (avoids ArtLab `db` delta vars). */
 export const DRIZZLE_RUNTIME_CALL = /\bdb\.(?:select|insert|update|delete|query|transaction|execute)\s*\(/;
 
-/** Server surfaces where regex C applies: api routes, route handlers, server actions. */
-export const SERVER_SURFACE = /(?:^|\/)src\/app\/api\/|\/route\.ts$|(?:^|\/)src\/lib\/[^]*(?:actions|server)/;
+/**
+ * Server surfaces where regex C applies. The whole App Router tree (`src/app/`)
+ * renders server-side by default — page.tsx / layout.tsx server components hit
+ * the IPv6 prod-breaker exactly like api routes do — so it is in scope alongside
+ * route handlers and server-flavoured lib (actions/server). `src/lib` ArtLab
+ * pixel-delta `db` vars stay out because they are not under src/app and don't
+ * match actions|server.
+ */
+export const SERVER_SURFACE = /(?:^|\/)src\/app\/|\/route\.ts$|(?:^|\/)src\/lib\/[^]*(?:actions|server)/;
