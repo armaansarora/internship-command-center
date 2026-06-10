@@ -43,9 +43,12 @@ export function MomentumWidget({ momentum }: { momentum: MomentumSummary }): JSX
   const dir = DIRECTION_COPY[direction];
   const maxPipeline = Math.max(...points.map((p) => p.activePipeline), 1);
 
+  // Claims audit (siege kill): direction blends pipeline AND interview movement,
+  // so the label says "momentum", never "pipeline" — bars can fall while
+  // interviews rise. Per-series truth lives in the legend.
   const headline = [
     appsAdded > 0 ? `+${appsAdded} application${appsAdded === 1 ? "" : "s"}` : "no new applications",
-    `pipeline ${dir.label}`,
+    `momentum ${dir.label}`,
   ].join(" · ");
 
   const description =
@@ -131,7 +134,7 @@ export function MomentumWidget({ momentum }: { momentum: MomentumSummary }): JSX
       </div>
 
       <p style={legendStyle}>
-        Bars: active pipeline per day · dot: interviews moved that day
+        Bars: active pipeline per snapshot · dot: interviews moved since the prior snapshot
         {interviewDelta !== 0
           ? ` · interviews ${interviewDelta > 0 ? "+" : ""}${interviewDelta} this window`
           : ""}

@@ -15,10 +15,12 @@ function point(date: string, overrides: Partial<SnapshotPoint> = {}): SnapshotPo
 }
 
 describe("classifyDirection", () => {
-  it("any forward motion reads rising", () => {
+  it("any forward motion reads rising (the label says 'momentum', not 'pipeline')", () => {
     expect(classifyDirection(1, 0)).toBe("rising");
     expect(classifyDirection(0, 1)).toBe("rising");
-    expect(classifyDirection(-2, 1)).toBe("rising"); // interviews trump shrinkage
+    // Interviews trump pipeline shrinkage — the widget copy must therefore
+    // never attribute the direction to the pipeline series alone.
+    expect(classifyDirection(-2, 1)).toBe("rising");
   });
 
   it("pure shrinkage reads cooling; no motion reads steady", () => {

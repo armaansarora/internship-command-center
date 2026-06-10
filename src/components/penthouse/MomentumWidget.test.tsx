@@ -50,7 +50,7 @@ describe("MomentumWidget", () => {
     expect(doc.querySelectorAll('[data-testid="momentum-interview-dot"]')).toHaveLength(1);
     const headline = doc.querySelector('[data-testid="momentum-headline"]');
     expect(headline?.textContent).toContain("+3 applications");
-    expect(headline?.textContent).toContain("pipeline rising");
+    expect(headline?.textContent).toContain("momentum rising");
     // a11y: the chart container narrates itself (divs, not SVG — house rule)
     const chart = doc.querySelector('[data-testid="momentum-chart"]');
     expect(chart?.getAttribute("role")).toBe("img");
@@ -66,6 +66,6 @@ describe("MomentumWidget", () => {
     const doc = render(renderToStaticMarkup(<MomentumWidget momentum={momentum} />));
     const headline = doc.querySelector('[data-testid="momentum-headline"]');
     expect(headline?.textContent).toContain("no new applications");
-    expect(headline?.textContent).toContain("pipeline cooling");
+    expect(headline?.textContent).toContain("momentum cooling");
   });
 });
