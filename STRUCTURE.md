@@ -318,12 +318,12 @@ scripts/validate-sentry-alerts.ts CLI validator for sentry/alerts.yaml
 ```
 docs/VISION-SPEC.md          spatial UI metaphor (sacred — read first)
 docs/CHAIN-OF-COMMAND.md     AI agent hierarchy spec (66KB — long, skim)
-docs/CHARACTER-PROMPTS.md    8 agent system prompts (voice/personality)
-docs/CHARACTER-BIBLE.md      Season 1 cast canon and visual DNA
+docs/CHARACTER-BIBLE.md      Season 1 cast canon and visual DNA (runtime canon —
+                             parsed by src/lib/artlab/context/tower-context.ts)
 docs/ART-BIBLE.md            Tower art style, prompt rules, quality ladder
+                             (runtime canon — parsed by tower-context.ts)
 docs/CHARACTER-ART-PIPELINE.md   approval gates and batch character factory
-docs/CHARACTER-IMAGE-OPERATIONS.md  start-here runbook for future image work
-docs/CHARACTER-IMAGE-SESSION-PROMPT.md  copy-paste prompt for fresh sessions
+                             (test contract: character-production-contract.test.ts)
 docs/artlab/ENGINE.md       ArtLab architecture and state machine
 docs/artlab/OPERATIONS.md   ArtLab runbook and troubleshooting
 docs/LAUNCH-READY.md         locked business decisions + remaining ops

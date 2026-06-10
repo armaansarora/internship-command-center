@@ -5,7 +5,7 @@ This file exists for tools that look for `AGENTS.md` by convention (OpenAI Codex
 Other top-level pointers:
 - [`STRUCTURE.md`](./STRUCTURE.md) — where every file lives
 - [`README.md`](./README.md) — public-facing summary
-- [`docs/`](./docs/) — design specs (`VISION-SPEC.md`, `CHAIN-OF-COMMAND.md`, `CHARACTER-PROMPTS.md`, `LAUNCH-READY.md`, `TESTING.md`)
+- [`docs/`](./docs/) — design specs (`VISION-SPEC.md`, `CHAIN-OF-COMMAND.md`, `LAUNCH-READY.md`, `TESTING.md`)
 
 ArtLab / Creative Production Engine:
 - When Armaan says "Creative Production Engine" or asks to add/generate Tower visuals, use ArtLab. Start from `.agents/skills/artlab/SKILL.md`, then run `npm run artlab -- produce "<natural language request>"` for a new run or `npm run artlab -- status [<runId>]` for read-only inspection. Use `npm run artlab -- health` or `npm run artlab -- doctor` for diagnostics.

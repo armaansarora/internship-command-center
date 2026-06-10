@@ -58,13 +58,10 @@ After the five concept lanes appear on the initial concept board, the human has 
 
 The loop ensures the concept gate is iterative — operators don't get a single "approve or kill" choice.
 
-## Three /goal layers
+## Install history
 
-| Layer | When | Command |
-|---|---|---|
-| Whole-plan | first install | see `docs/superpowers/plans/2026-05-20-artlab-implementation.md` |
-| Per-phase | staged rollout | see plan |
-| Per-task | auto-invoked by dispatcher | see plan |
+Built via a 142-task superpowers plan, completed 2026-05. The plan doc is retired
+(git history) — the running system + this doc are the source of truth now.
 
 ## CLI commands
 

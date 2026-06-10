@@ -76,7 +76,6 @@ reference (ArtLab, Drizzle, env helpers).
 | [`STRUCTURE.md`](./STRUCTURE.md) | Where every file lives — read this when you don't know where something should go |
 | [`docs/VISION-SPEC.md`](./docs/VISION-SPEC.md) | Spatial UI specification — the building metaphor (sacred) |
 | [`docs/CHAIN-OF-COMMAND.md`](./docs/CHAIN-OF-COMMAND.md) | AI agent hierarchy and dispatch model |
-| [`docs/CHARACTER-PROMPTS.md`](./docs/CHARACTER-PROMPTS.md) | System prompts for all 8 agents |
 | [`docs/LAUNCH-READY.md`](./docs/LAUNCH-READY.md) | Locked business decisions + remaining ops checklist |
 | [`docs/TESTING.md`](./docs/TESTING.md) | Test layout (vitest + Playwright) |
 

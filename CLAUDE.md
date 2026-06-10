@@ -84,9 +84,7 @@ ArtLab replaces the legacy CPE. Telegram-driven, two human gates (`approve direc
 - `docs/artlab/SPEED.md` — Phase 5 speed mechanisms.
 - `docs/artlab/CAST-PUSH-RUNBOOK.md` — per-character protocol.
 
-**Implementation plan:** `docs/superpowers/plans/2026-05-20-artlab-implementation.md` (142 tasks across 9 phases — use the Execution Protocol with `/goal`).
-
-Legacy CPE docs moved to `docs/legacy/`.
+ArtLab is fully built (142-task implementation plan completed 2026-05; plan and legacy CPE docs retired — recoverable in git history).
 
 ## ArtLab SDK
 
@@ -147,5 +145,5 @@ Stripe price IDs live alongside in `src/lib/stripe/config.ts`. CODEOWNERS gates 
 - `STRUCTURE.md` — **READ FIRST.** Complete file map. Where things live, "where do I look to do X" table, conventions.
 - `docs/VISION-SPEC.md` — spatial UI metaphor (sacred)
 - `docs/CHAIN-OF-COMMAND.md` — AI agent hierarchy
-- `docs/CHARACTER-PROMPTS.md` — 8 agent system prompts (legacy; see docs/artlab/CHARACTER-PIPELINE.md)
+- Character voice/canon: `docs/artlab/CHARACTER-PIPELINE.md` (the owner). `docs/CHARACTER-PROMPTS.md` is legacy but test-held (season-one-character-system.test.ts asserts against it) — retire it together with that assertion or not at all.
 - `docs/LAUNCH-READY.md` — locked business decisions + remaining ops checklist

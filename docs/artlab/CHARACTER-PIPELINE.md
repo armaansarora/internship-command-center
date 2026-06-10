@@ -1,6 +1,6 @@
 # ArtLab — Character Pipeline
 
-Consolidated from six legacy docs (now in `docs/legacy/`): CHARACTER-ART-PIPELINE.md, CHARACTER-IMAGE-OPERATIONS.md, CHARACTER-IMAGE-PROMPTS.md, CHARACTER-PROMPTS.md, CHARACTER-BIBLE.md, CHARACTER-RELATIONSHIPS.md.
+Consolidated from six legacy character docs. Three remain at `docs/` root because the engine consumes them mechanically — `docs/ART-BIBLE.md`, `docs/CHARACTER-BIBLE.md`, `docs/CHARACTER-IMAGE-PROMPTS.md` are parsed at runtime by `src/lib/artlab/context/tower-context.ts` (plus `CHARACTER-ART-PIPELINE.md`, `CHARACTER-ASSET-HANDOFF.md`, `CHARACTER-RELATIONSHIPS.md` held by vitest contracts). The rest are retired (git history).
 
 ## Style envelope (locked)
 
