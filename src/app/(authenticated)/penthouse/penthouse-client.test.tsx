@@ -8,6 +8,19 @@ vi.mock("next/navigation", () => ({
 }));
 
 const scene: PenthouseScene = {
+  momentum: {
+    points: [
+      { date: "2026-06-08", totalApplications: 12, activePipeline: 8, appliedCount: 5, interviewCount: 1, offerCount: 0, staleCount: 2 },
+      { date: "2026-06-09", totalApplications: 14, activePipeline: 10, appliedCount: 6, interviewCount: 2, offerCount: 0, staleCount: 2 },
+    ],
+    appsAdded: 2,
+    pipelineDelta: 2,
+    interviewDelta: 1,
+    direction: "rising",
+    hasEnoughData: true,
+    firstDate: "2026-06-08",
+    lastDate: "2026-06-09",
+  },
   stats: {
     totalApplications: 14,
     inPipeline: 10,

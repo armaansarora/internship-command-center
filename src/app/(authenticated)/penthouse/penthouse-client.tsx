@@ -5,6 +5,8 @@ import { useState } from "react";
 import { EntranceSequence } from "@/components/transitions/EntranceSequence";
 import { PipelineNodes, PipelineBar } from "@/components/penthouse/PipelineNodes";
 import { ActivityFeed } from "@/components/penthouse/ActivityFeed";
+import { MomentumWidget } from "@/components/penthouse/MomentumWidget";
+import type { MomentumSummary } from "@/lib/penthouse/momentum";
 import { QuickActionsRow } from "@/components/penthouse/quick-actions/QuickActionsRow";
 import { IdleDetail } from "@/components/penthouse/idle/IdleDetail";
 import { useIdleDetail } from "@/hooks/useIdleDetail";
@@ -99,6 +101,7 @@ export function PenthouseClient({ scene }: Props): JSX.Element {
           pipeline={scene.pipeline}
           activity={scene.activity}
           nextActions={nextActions}
+          momentum={scene.momentum}
         />
       </main>
 
@@ -282,11 +285,13 @@ function DashboardDesk({
   pipeline,
   activity,
   nextActions,
+  momentum,
 }: {
   stats: PenthouseStats;
   pipeline: PipelineStageData[];
   activity: ActivityItemData[];
   nextActions: NextAction[];
+  momentum: MomentumSummary;
 }): JSX.Element {
   const [tasksOpen, setTasksOpen] = useState(false);
   const totalPipeline = pipeline.reduce((sum, stage) => sum + stage.count, 0);
@@ -316,6 +321,8 @@ function DashboardDesk({
         <MetricTile label="Interviews" value={stats.interviews} />
         <MetricTile label="Response rate" value={`${stats.responseRate}%`} />
       </div>
+
+      <MomentumWidget momentum={momentum} />
 
       <section aria-label="Pipeline status" style={innerPanelStyle}>
         <div className="flex items-center justify-between gap-3">
