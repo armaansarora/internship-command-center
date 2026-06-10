@@ -10,6 +10,8 @@ import {
   weatherLabel,
 } from "@/lib/penthouse/pipeline-weather";
 import { timeOfDayFor, type TimeOfDay } from "@/lib/penthouse/time-of-day";
+import { computeMomentum, type MomentumSummary } from "@/lib/penthouse/momentum";
+import { getRecentSnapshotsRest } from "@/lib/db/queries/daily-snapshots-rest";
 
 /** Dashboard stats for the Penthouse */
 export interface PenthouseStats {
@@ -175,6 +177,9 @@ export interface PenthouseScene {
   /** Pre-computed structured briefing (nullable on first-time users). */
   briefing: MorningBriefing | null;
 
+  /** 14-day movement from daily_snapshots (sparse-safe; [] degrades to empty state). */
+  momentum: MomentumSummary;
+
   /** Overnight deltas in the last 24h (for scene copy + weather). */
   overnightDelta: {
     newApps: number;
@@ -221,8 +226,12 @@ export async function fetchPenthouseScene(user: {
 }): Promise<PenthouseScene> {
   const supabase = await createClient();
 
-  // 1. Existing dashboard payload (stats, pipeline, activity).
-  const existing = await fetchPenthouseData(user.id);
+  // 1. Existing dashboard payload (stats, pipeline, activity) + snapshot momentum.
+  const [existing, snapshotPoints] = await Promise.all([
+    fetchPenthouseData(user.id),
+    getRecentSnapshotsRest(user.id),
+  ]);
+  const momentum = computeMomentum(snapshotPoints);
 
   // 2. Resolve user timezone (from user_profiles).
   let timezone: string | null = null;
@@ -347,6 +356,7 @@ export async function fetchPenthouseScene(user: {
   return {
     ...existing,
     briefing,
+    momentum,
     overnightDelta: { newApps, responses, rejections, importantEmailCount },
     weather: { delta: weatherDelta, label: weatherLabel(weatherDelta) },
     timeOfDay,
