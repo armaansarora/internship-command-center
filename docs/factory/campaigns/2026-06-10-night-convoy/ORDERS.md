@@ -136,6 +136,32 @@ Inputs: the four verdicts + THE-TRIBUNAL.html + both AARs + the benchmark + Serv
 - If the kill-switch fired (2 of 3: siege killed nothing the gates missed · ceremony
   cost more than it caught · AAR changed nothing), the rebuild's PR instead recommends
   **Stand Down** and says so plainly. Negative data wins.
+- **Write `PROVING-SERIES.md` — the post-rebuild test gauntlet.** The Commander's
+  standing order: once rebuilt, the Military runs a SERIES of varied campaigns, each
+  constructed to push a specific organ to its brink — no mechanism goes untested
+  (this answers tribunal charge: "the pilot exempts every novel mechanism by design").
+  Draft a mini-Orders skeleton per entry:
+  | # | Campaign | Organ pushed to the brink |
+  |---|---|---|
+  | PG-2 | **The tracker as an iPhone app** (Expo/React Native, same product, alien terrain) | terrain transfer: does the class-kit/template system generalize? does PG-1 precedent measurably speed the Briefing — the first real compounding datum |
+  | PG-3 | A researched decision memo (Rung 2) | the sieged-rubric verdict machinery no code test touches |
+  | PG-4 | A taste campaign through the Tailor pipeline (render→screenshot→judge→refine), demo-team verdicts as Boot Camp reps | Rung 3 + Boot Camp graduation curves |
+  | PG-5 | Convert the tracker into a Standing Operation (Morning Brief rhythm; the trio's real usage = the external outcome metric) | standing tempo + outcome observability |
+  | PG-6 | A deliberately vague intent → probe loop | intent discovery |
+  | PG-7 | **Failure drills**: an oversized scope to force the F1→F3 tripwire · a siege-blocked failover · a mid-build cold-resume · a weak-seat (Sonnet) run on a small scope | every escalation, stop-loss, and failover mechanism, fired on purpose |
+  The demo team (Commander + the two users) sits on top of all of it as the human
+  verdict layer. Apple/TestFlight steps in PG-2 are a Commander gate (account/cert);
+  overnight work on it is build + gates only.
+
+## Phase 4b — BONUS: SERIES PG-2 OPENS EARLY (only if ≥ 90 min remain before 07:30)
+
+If the night ran fast: start the iPhone-app port now. New repo `~/Developer/gym-tracker-ios`
+(Expo + TypeScript), its own mini-Orders seeded from PG-1's Archive precedent — and
+**time the Briefing**: PG-1 precedent should make it measurably faster (record the
+delta; that's compounding, plotted). Deliver: walking skeleton + tsc/lint/tests green +
+web-export check. Native simulator/TestFlight = morning runbook (Apple account is a
+Commander gate). One Codex siege round if time allows; else SIEGE-PENDING. Service
+Record row regardless of how far it gets.
 
 ## Phase 5 — MORNING BRIEF (cap 00:30)
 
