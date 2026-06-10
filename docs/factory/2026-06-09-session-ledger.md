@@ -96,7 +96,21 @@ that comfort"); no obligation to be constructive. Deliverable: write verdict to
 > - Full verdict texts are also recoverable from each session's transcript JSONL
 >   (`Write` tool_use inputs) if anything else goes wrong.
 
-**Triage protocol when they return (this is siege round 3):**
+> ✅ **ALL FOUR IN — TRIBUNAL COMPILED (23:15).** Codex's verdict was rescued from a
+> truncated filename (`2026-06-09-c` → `-codex.md`, byte-identical, guard-snapshotted);
+> Fable #2 landed at `-fable-2.md`; Fable #1 completed its GPT-5.x annex post-commit.
+> Synthesis + decision brief: **`THE-TRIBUNAL.html`** — full corpus re-read, all four
+> verdicts read first-hand, machine claims re-verified (AGENTS.md debris ✓,
+> bypassPermissions ✓, caps drift ✓), then itself sieged (fidelity attack on every
+> quote/dot + a Codex alien pass on the argument layer; findings dispositioned, incl.
+> a kill-switch added for the pilot). **DOCTRINE FREEZE IN FORCE:** tribunal findings
+> are NOT folded into doctrine — per Fable #2's tripwire, the next file created in
+> docs/factory/ must be a campaign's WAR-LOG.md. The Commander picks a road from the
+> tribunal brief (recommended: the Convoy — repairs tonight → Proving Ground →
+> Tower feature → Fable-vs-Opus benchmark ≤06-21 → only then triage, corpus exits smaller).
+
+**Triage protocol as originally scripted (superseded by the freeze above — folding
+waits for campaign data):**
 1. Collect all four verdicts (watch the clobbering).
 2. Dedupe findings across reviewers; convergent findings from different model families =
    highest-priority signal (the v1 siege showed the families find disjoint sets).
@@ -140,10 +154,12 @@ that comfort"); no obligation to be constructive. Deliverable: write verdict to
   Full agent briefs in task outputs under /private/tmp/claude-501/… (volatile; key
   content already distilled into the docs).
 
-## 6. The queue (next actions, ranked)
+## 6. The queue (next actions, ranked — updated 23:15 after the tribunal)
 
-1. **Triage the four cold-eyes verdicts** (§4 protocol) → fold → doctrine v2.x.
-2. **Commit `docs/factory/`** (Commander's word needed) — see GIT WARNING.
+1. ~~Triage the four cold-eyes verdicts~~ → DONE as `THE-TRIBUNAL.html`; folding into
+   doctrine is FROZEN until two campaigns produce data (the tripwire). Commander picks
+   a road.
+2. ~~Commit `docs/factory/`~~ → DONE (f96ea648 + the tribunal commit).
 3. **Operation: Proving Ground** — Orders skeleton ready; Commander brings: victory-
    condition edits, Supabase/Vercel for the new repo, stop-loss numbers, "go."
 4. **Stand up the night shift**: 3 scheduled Routines (Analyst nightly · Morning Brief

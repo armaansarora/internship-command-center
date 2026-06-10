@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Tribunal — four cold reads of The Military</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e0e1a; --panel:#161628; --panel2:#1c1c33; --line:#2c2c4a;
+    --gold:#C9A84C; --gold-dim:#8a7434; --cream:#ece5d3; --body:#b9b4c6; --mute:#6f6a82;
+    --red:#e05252; --red-dim:#5a2330; --amber:#d9a441; --green:#5fae7f; --blue:#6f8fd9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--ink);color:var(--body);font-family:'Inter',sans-serif;font-size:15.5px;line-height:1.6;
+    background-image:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,.07), transparent),
+                     radial-gradient(ellipse 60% 40% at 90% 110%, rgba(111,143,217,.05), transparent);}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  ::selection{background:rgba(201,168,76,.3)}
+
+  /* ---------- type ---------- */
+  h1,h2{font-family:'Playfair Display',serif;color:var(--cream)}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+  .section-kick{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .section-kick::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold-dim),transparent)}
+  h2{font-size:30px;font-weight:700;margin-bottom:10px}
+  .lede{color:var(--body);max-width:760px}
+  section{padding:64px 0 8px}
+  q{quotes:"\201C" "\201D"}
+
+  /* ---------- masthead ---------- */
+  header{padding:84px 0 50px;border-bottom:1px solid var(--line);position:relative}
+  .stamp{position:absolute;top:60px;right:28px;transform:rotate(7deg);border:2px solid var(--red);color:var(--red);
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.18em;padding:8px 14px;border-radius:4px;opacity:.85}
+  h1{font-size:64px;font-weight:900;line-height:1.05;letter-spacing:-.01em}
+  h1 .thin{font-style:italic;font-weight:500;color:var(--gold)}
+  .sub{margin-top:18px;font-size:17px;max-width:720px}
+  .meta-row{display:flex;gap:26px;flex-wrap:wrap;margin-top:26px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mute)}
+  .meta-row b{color:var(--cream);font-weight:600}
+  nav{margin-top:30px;display:flex;gap:10px;flex-wrap:wrap}
+  nav a{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:var(--gold);text-decoration:none;
+    border:1px solid var(--line);padding:7px 13px;border-radius:99px;transition:.18s}
+  nav a:hover{border-color:var(--gold);background:rgba(201,168,76,.08)}
+
+  /* ---------- exhibit A: inventory ---------- */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px}
+  .card h3{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;margin-bottom:16px}
+  .built h3{color:var(--green)} .absent h3{color:var(--red)}
+  .card ul{list-style:none}
+  .card li{padding:7px 0;border-bottom:1px dashed rgba(44,44,74,.6);font-size:14.5px;display:flex;gap:10px}
+  .card li:last-child{border-bottom:none}
+  .card li .tick{color:var(--green);flex-shrink:0} .card li .cross{color:var(--red);flex-shrink:0}
+  .card li b{color:var(--cream);font-weight:600}
+
+  .ratio{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px}
+  .bar{display:flex;height:34px;border-radius:8px;overflow:hidden;margin:14px 0 10px;border:1px solid var(--line)}
+  .bar div{display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.05em;white-space:nowrap;overflow:hidden}
+  .seg-corpora{width:87%;background:#262642;color:var(--mute)}
+  .seg-canon{width:9%;background:var(--gold-dim);color:var(--ink)}
+  .seg-ops{width:3.6%;background:var(--green);color:var(--ink)}
+  .seg-camp{width:.4%;background:var(--red)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute)}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+  .pull{margin-top:14px;font-family:'Playfair Display',serif;font-style:italic;font-size:18px;color:var(--cream)}
+  .pull b{color:var(--gold);font-style:normal}
+
+  /* ---------- the bench ---------- */
+  .bench{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px}
+  .judge{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px;position:relative}
+  .judge .seat{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase}
+  .judge .name{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream);font-weight:700;margin:6px 0 2px}
+  .judge .tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:3px 9px;border-radius:99px;margin:6px 6px 12px 0;border:1px solid var(--line)}
+  .tag.alien{color:var(--blue);border-color:rgba(111,143,217,.5)}
+  .tag.claude{color:var(--gold);border-color:rgba(201,168,76,.4)}
+  .tag.warn{color:var(--amber);border-color:rgba(217,164,65,.5)}
+  .tag.clean{color:var(--green);border-color:rgba(95,174,127,.5)}
+  .judge blockquote{font-family:'Playfair Display',serif;font-style:italic;font-size:16.5px;line-height:1.5;color:var(--cream);border-left:2px solid var(--gold);padding-left:14px}
+  .judge .file{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mute)}
+  .bench-note{margin-top:14px;font-size:13.5px;color:var(--mute);font-style:italic}
+
+  /* ---------- charge sheet ---------- */
+  .charges{margin-top:26px;display:flex;flex-direction:column;gap:10px}
+  .charge{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;display:grid;
+    grid-template-columns:34px 1fr auto;gap:18px;align-items:start}
+  .charge .num{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--gold-dim);padding-top:2px}
+  .charge h4{color:var(--cream);font-size:16px;font-weight:600;margin-bottom:4px}
+  .charge p{font-size:14px;color:var(--body)}
+  .charge p .q{font-style:italic;color:var(--cream)}
+  .charge p .who{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute)}
+  .charge .right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:130px}
+  .sev{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;padding:4px 10px;border-radius:4px}
+  .sev.crit{background:rgba(224,82,82,.15);color:var(--red);border:1px solid rgba(224,82,82,.4)}
+  .sev.high{background:rgba(217,164,65,.12);color:var(--amber);border:1px solid rgba(217,164,65,.4)}
+  .sev.med{background:rgba(111,143,217,.12);color:var(--blue);border:1px solid rgba(111,143,217,.4)}
+  .dots{display:flex;gap:6px;align-items:center}
+  .dots .d{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--mute)}
+  .dots .d.on{background:rgba(201,168,76,.18);border-color:var(--gold);color:var(--gold);font-weight:700}
+  .dots .v{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);margin-left:4px}
+  .dots-key{margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute)}
+
+  /* ---------- what held ---------- */
+  .core-quote{background:linear-gradient(135deg,rgba(95,174,127,.08),rgba(201,168,76,.06));border:1px solid rgba(95,174,127,.35);
+    border-radius:14px;padding:28px 30px;margin-top:26px}
+  .core-quote .kicker{color:var(--green)}
+  .core-quote ul{list-style:none;margin:14px 0;columns:2;gap:34px}
+  .core-quote li{font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--cream);padding:6px 0;break-inside:avoid}
+  .core-quote li::before{content:"▸ ";color:var(--green)}
+  .core-quote .attr{font-size:13px;color:var(--mute);font-style:italic}
+  .keeps{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .keep{background:var(--panel);border:1px solid rgba(95,174,127,.35);border-radius:99px;padding:8px 16px;font-size:13px;color:var(--cream)}
+  .keep b{color:var(--green);font-weight:600}
+
+  /* ---------- repair order ---------- */
+  .repairs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+  .repair{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  .repair h3{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;color:var(--amber)}
+  .repair ol{list-style:none;counter-reset:r}
+  .repair li{counter-increment:r;padding:7px 0 7px 26px;position:relative;font-size:13.5px;border-bottom:1px dashed rgba(44,44,74,.6)}
+  .repair li:last-child{border-bottom:none}
+  .repair li::before{content:counter(r,decimal-leading-zero);position:absolute;left:0;top:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--gold-dim)}
+  .repair li b{color:var(--cream);font-weight:600}
+  .repair .vtag{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--green)}
+
+  /* ---------- tripwire ---------- */
+  .tripwire{margin-top:40px;border:1px solid rgba(224,82,82,.5);background:repeating-linear-gradient(-45deg,rgba(224,82,82,.05),rgba(224,82,82,.05) 14px,rgba(224,82,82,.1) 14px,rgba(224,82,82,.1) 28px);
+    border-radius:14px;padding:30px 34px}
+  .tripwire .kicker{color:var(--red)}
+  .tripwire blockquote{font-family:'Playfair Display',serif;font-size:21px;font-style:italic;color:var(--cream);line-height:1.5;margin-top:10px}
+  .tripwire .note{margin-top:14px;font-size:13.5px;color:var(--body)}
+  .tripwire .note b{color:var(--red)}
+
+  /* ---------- roads ---------- */
+  .roads{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:26px}
+  .road{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 26px;display:flex;flex-direction:column}
+  .road .rk{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:var(--mute)}
+  .road h3{font-family:'Playfair Display',serif;font-size:21px;color:var(--cream);margin:6px 0 10px}
+  .road p{font-size:14px;flex:1}
+  .road .fa{margin-top:14px;font-size:12.5px;display:flex;flex-direction:column;gap:5px}
+  .road .fa span{display:block}
+  .road .for::before{content:"FOR  ";font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--green);letter-spacing:.1em}
+  .road .against::before{content:"RISK ";font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--red);letter-spacing:.1em}
+  .road .champ{margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--gold-dim)}
+
+  .convoy{margin-top:18px;background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.03));border:1px solid var(--gold);border-radius:14px;padding:30px 34px;position:relative}
+  .convoy .rec{position:absolute;top:-12px;left:30px;background:var(--gold);color:var(--ink);font-family:'JetBrains Mono',monospace;
+    font-size:10px;font-weight:700;letter-spacing:.18em;padding:5px 12px;border-radius:4px}
+  .convoy h3{font-family:'Playfair Display',serif;font-size:25px;color:var(--cream);margin-bottom:8px}
+  .convoy>p{max-width:780px;font-size:14.5px}
+  .timeline{display:flex;gap:0;margin-top:24px;overflow-x:auto}
+  .tstep{flex:1;min-width:150px;position:relative;padding:0 14px 0 0}
+  .tstep::before{content:"";position:absolute;top:7px;left:0;right:0;height:2px;background:var(--gold-dim)}
+  .tstep:last-child::before{right:40%}
+  .tstep .dot{width:16px;height:16px;border-radius:50%;background:var(--ink);border:2px solid var(--gold);position:relative;z-index:1;margin-bottom:12px}
+  .tstep .when{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.1em}
+  .tstep .what{font-size:13px;color:var(--cream);font-weight:600;margin:3px 0 4px}
+  .tstep .why{font-size:11.5px;color:var(--mute)}
+  .convoy .law{margin-top:24px;padding-top:18px;border-top:1px dashed var(--gold-dim);font-size:13.5px;color:var(--body)}
+  .convoy .law b{color:var(--gold)}
+
+  /* ---------- commander's call ---------- */
+  .call{margin-top:44px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:30px 34px}
+  .call .kicker{color:var(--blue)}
+  .call h3{font-family:'Playfair Display',serif;font-size:23px;color:var(--cream);margin:8px 0 10px}
+  .call p{max-width:780px;font-size:14.5px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  .opt{border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-size:13.5px}
+  .opt b{display:block;color:var(--cream);margin-bottom:4px;font-weight:600}
+  .call .note{margin-top:16px;font-size:12.5px;color:var(--mute);font-style:italic}
+
+  footer{margin-top:70px;padding:34px 0 60px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mute);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  footer b{color:var(--gold)}
+
+  @media(max-width:860px){
+    .two-col,.bench,.roads,.repairs,.opts{grid-template-columns:1fr}
+    h1{font-size:42px} .stamp{position:static;display:inline-block;margin-bottom:20px}
+    .core-quote ul{columns:1}
+    .charge{grid-template-columns:1fr}
+    .charge .right{flex-direction:row;align-items:center;justify-content:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="stamp">ZERO CAMPAIGNS RUN</div>
+    <div class="kicker">The Military · Verdict Session · 2026-06-09, late</div>
+    <h1>The Tribunal<br><span class="thin">four cold reads, one defendant</span></h1>
+    <p class="sub">Four fresh sessions — two Fable 5 seats, Opus 4.8, and Codex 5.5 — were each handed the
+    entire Military corpus with one instruction: <em>no bias, no protection, say where this falls short.</em>
+    This is what we have, what they killed, what survived, and the roads out.</p>
+    <div class="meta-row">
+      <span>DEFENDANT <b>The Military (doctrine v2)</b></span>
+      <span>CORPUS <b>~1.06&nbsp;MB · 22 files</b></span>
+      <span>FIELD RECORD <b>0 campaigns</b></span>
+      <span>CLOCK <b>Fable window closes 06-22 — 13 days</b></span>
+    </div>
+    <nav>
+      <a href="#have">What we have</a>
+      <a href="#bench">The bench</a>
+      <a href="#charges">The charge sheet</a>
+      <a href="#held">What held</a>
+      <a href="#repair">The repair order</a>
+      <a href="#roads">The roads</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ════════════════ EXHIBIT A ════════════════ -->
+<section id="have">
+  <div class="wrap">
+    <div class="section-kick"><span class="kicker">Exhibit A</span></div>
+    <h2>What we have — the honest inventory</h2>
+    <p class="lede">One day's work, stated without costume: a designed institution and an empty battlefield.</p>
+
+    <div class="two-col">
+      <div class="card built">
+        <h3>● Built &amp; standing</h3>
+        <ul>
+          <li><span class="tick">✓</span><span><b>Doctrine v2</b> — five moves, RoE dial, Verdict Ladder, fleet resolver, gears (committed <span class="mono">f96ea648</span>)</span></li>
+          <li><span class="tick">✓</span><span><b>Intelligence Division spec</b> — Archive · Analyst · Boot Camp · minting · Service Record</span></li>
+          <li><span class="tick">✓</span><span><b>The Base spec</b> — 9 rooms, 10 UI laws, terminals-first build order</span></li>
+          <li><span class="tick">✓</span><span><b>The Kernel, live</b> — global CLAUDE.md + per-message hook + Codex AGENTS.md</span></li>
+          <li><span class="tick">✓</span><span><b>doctrine/ seeds (24&nbsp;KB)</b> — PLAYBOOK · GOTCHAS · VERDICTS · code class-kit · check-caps.sh</span></li>
+          <li><span class="tick">✓</span><span><b>The proven toolchain it routes to</b> — forge, grill-me, codex, Workflow, graphify, ArtLab (all pre-dated the Military)</span></li>
+        </ul>
+      </div>
+      <div class="card absent">
+        <h3>● Absent — the compounding layer</h3>
+        <ul>
+          <li><span class="cross">✗</span><span><b>Campaigns run:</b> zero — no ORDERS.md, no WAR-LOG.md, no AAR.md exists anywhere</span></li>
+          <li><span class="cross">✗</span><span><b>Service Record:</b> zero rows — every improvement claim is currently unplotted</span></li>
+          <li><span class="cross">✗</span><span><b>VERDICTS.md:</b> "(empty — no Verdict-Pending campaigns yet)"</span></li>
+          <li><span class="cross">✗</span><span><b>Armory:</b> nothing minted — no asset has survived a Siege, because there's been no Siege of real work</span></li>
+          <li><span class="cross">✗</span><span><b>Boot Camp:</b> zero verdicts recorded — no class has a graduation curve</span></li>
+          <li><span class="cross">✗</span><span><b>The seed 24&nbsp;KB that matters is imported, not earned</b> — Tower + forge scar tissue acquired before the Military existed</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ratio">
+      <h3 class="kicker" style="letter-spacing:.22em">Corpus composition · 1.06 MB</h3>
+      <div class="bar">
+        <div class="seg-corpora">87% idea corpora</div>
+        <div class="seg-canon">9% canon</div>
+        <div class="seg-ops">2%</div>
+        <div class="seg-camp"></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:#262642"></i>brainstorm + naming + title bank (920&nbsp;KB)</span>
+        <span><i style="background:var(--gold-dim)"></i>canon describing the system to itself (~95&nbsp;KB)</span>
+        <span><i style="background:var(--green)"></i>operational doctrine (24&nbsp;KB)</span>
+        <span><i style="background:var(--red)"></i>campaign artifacts (0 bytes)</span>
+      </div>
+      <p class="pull">The system's own maxim says the compounding lives in the files. <b>The compounding files are the empty ones.</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ THE BENCH ════════════════ -->
+<section id="bench">
+  <div class="wrap">
+    <div class="section-kick"><span class="kicker">The Bench</span></div>
+    <h2>Four judges, one-line verdicts</h2>
+    <p class="lede">Each got pointers and permission, nothing protected — not even the north star. Prior sessions' reasoning carried no authority.</p>
+
+    <div class="bench">
+      <div class="judge">
+        <div class="seat">Filed 22:38</div>
+        <div class="name">Claude Opus 4.8</div>
+        <span class="tag claude">CLAUDE FAMILY</span><span class="tag clean">INDEPENDENT</span>
+        <blockquote>Almost all of its energy went to the part that depreciates and almost none to the part that compounds — and it can't see this because the prose is good enough to feel like progress.</blockquote>
+        <div class="file">2026-06-09-cold-eyes-opus.md</div>
+      </div>
+      <div class="judge">
+        <div class="seat">Filed 22:42</div>
+        <div class="name">Claude Fable 5 — first seat</div>
+        <span class="tag claude">CLAUDE FAMILY</span><span class="tag warn">DRAFTED FIRST — findings formed before discovering Opus's verdict (its own account); its GPT-5.x annex was commissioned, not independent</span>
+        <blockquote>By the corpus's own standard — improvement you can't see on a chart didn't happen — nothing here has happened yet.</blockquote>
+        <div class="file">2026-06-09-cold-eyes-fable.md</div>
+      </div>
+      <div class="judge">
+        <div class="seat">Filed 22:47</div>
+        <div class="name">Claude Fable 5 — second seat</div>
+        <span class="tag claude">CLAUDE FAMILY</span><span class="tag clean">INDEPENDENT — verified claims on the machine first</span>
+        <blockquote>This is a system that has learned to survive review without ever having to survive use — it converts every criticism into more of itself.</blockquote>
+        <div class="file">2026-06-09-cold-eyes-fable-2.md</div>
+      </div>
+      <div class="judge">
+        <div class="seat">Filed 22:40 · rescued 22:53</div>
+        <div class="name">Codex 5.5 (GPT family)</div>
+        <span class="tag alien">ALIEN FAMILY</span><span class="tag clean">INDEPENDENT</span>
+        <blockquote>You have built a cathedral around a checklist that has not survived one field use yet. The checklist may be valuable. The cathedral is mostly premature self-mythology.</blockquote>
+        <div class="file">2026-06-09-cold-eyes-codex.md <span style="color:var(--amber)">· rescued from a truncated filename</span></div>
+      </div>
+    </div>
+    <p class="bench-note">Weighting caveat the judges themselves raised: three of four are Claude-family reviewing Claude-written prose.
+    Cross-family convergence — anything Codex agrees with — carries the most weight. It agreed with nearly everything.</p>
+  </div>
+</section>
+
+<!-- ════════════════ CHARGE SHEET ════════════════ -->
+<section id="charges">
+  <div class="wrap">
+    <div class="section-kick"><span class="kicker">The Charge Sheet</span></div>
+    <h2>What they said is bad — by convergence</h2>
+    <p class="lede">Findings that landed across model families are the highest-confidence signal this process can produce.
+    Machine-level claims were re-verified tonight before appearing here.</p>
+
+    <div class="charges">
+      <div class="charge">
+        <div class="num">01</div>
+        <div>
+          <h4>Memoirs before battle — zero field contact</h4>
+          <p>Three doctrine versions, an examination round, a pitch page rebuilt twice, a kernel install — in one day, against zero campaigns.
+          Every quality mechanism (sieges, lenses, this tribunal) has only ever attacked <span class="q">prose</span>.
+          <span class="who">— all four, independently</span></p>
+        </div>
+        <div class="right"><span class="sev crit">CRITICAL</span>
+          <div class="dots"><span class="d on">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">02</div>
+        <div>
+          <h4>The maxim convicts the execution</h4>
+          <p>"The compounding lives in the files" — and the discipline went to the depreciating half (protocol prose, naming studies, theming)
+          while the compounding half (archive, Service Record, minted assets, feedback-with-rationale) holds <span class="q">nothing the system generated itself</span>.
+          <span class="who">— Opus §1, Fable² B7, Codex #1/#3</span></p>
+        </div>
+        <div class="right"><span class="sev crit">CRITICAL</span>
+          <div class="dots"><span class="d on">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">03</div>
+        <div>
+          <h4>The ratchet — criticism only ever makes it bigger</h4>
+          <p>v1 siege → more doctrine. Codex teardown → more doctrine. The Commander's five shots → a Division, a fleet, a frontend spec.
+          The sharpest sentence in the folder — <span class="q">"the user's own product is being starved to build a tool to build products"</span> —
+          was quoted admiringly and acted on never. No deletion has stayed deleted. <span class="who">— all four; the GPT annex: "retirement reverses, growth never does"</span></p>
+        </div>
+        <div class="right"><span class="sev crit">CRITICAL</span>
+          <div class="dots"><span class="d on">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">04</div>
+        <div>
+          <h4>The kernel was installed backwards</h4>
+          <p>The one component in production alters every session, both vendors, all projects — shipped before the doctrine it routes to survived a single use.
+          It violates the doctrine's own cold-start law (maximum ceremony at campaign count zero) and its own RoE (a 🔴-adjacent surface, direct-written, unsieged).
+          <span class="who">— all four</span></p>
+        </div>
+        <div class="right"><span class="sev high">HIGH</span>
+          <div class="dots"><span class="d on">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">05</div>
+        <div>
+          <h4>The safety story is prose</h4>
+          <p>Doctrine promises Red-class proposal mode and per-action confirms. The machine runs <span class="mono">defaultMode: bypassPermissions</span> +
+          <span class="mono">skipDangerousModePermissionPrompt: true</span> with blanket Bash/Write/Edit allows. The only mechanical enforcement in existence is a line-count script.
+          <span class="q">"A Red-class action is gated by whether a model happened to load and obey a markdown file."</span>
+          <span class="who">— Fable¹ #4, Fable² B1, Codex #2 · ✓ re-verified tonight</span></p>
+        </div>
+        <div class="right"><span class="sev high">HIGH</span>
+          <div class="dots"><span class="d">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span><span class="v">✓ VERIFIED</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">06</div>
+        <div>
+          <h4>Borrowed authority — provenance-washing</h4>
+          <p>Benchmark effect sizes (Voyager, MemRL, ACE) from narrow tasks are quoted as if they transfer; 44 TikToks from one creator enter doctrine as
+          <span class="q">"field-proven"</span>; and the genuinely load-bearing vendor claims (the 06-15 billing split, Routines quotas, window pricing)
+          carry <span class="q">no sources at all</span> — in a corpus that mandates provenance marks for everyone else. <span class="who">— all four</span></p>
+        </div>
+        <div class="right"><span class="sev high">HIGH</span>
+          <div class="dots"><span class="d on">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">07</div>
+        <div>
+          <h4>The improvement curves can't reach statistical mass</h4>
+          <p>A solo operator runs a handful of campaigns a month and routes most work to Skirmish gear, which bypasses the machinery.
+          Per-class n sits at 2–5 for months — every Service Record curve is noise at that n; the 30-campaign decommission tripwire is placed where it may never fire.
+          <span class="q">"Fleet telemetry installed on a bicycle."</span> <span class="who">— Fable¹ #3; extended with arithmetic by its commissioned GPT-5.x annex (cross-family, but not the Codex judge)</span></p>
+        </div>
+        <div class="right"><span class="sev high">HIGH</span>
+          <div class="dots"><span class="d">O</span><span class="d on">F¹</span><span class="d">F²</span><span class="d">C</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">08</div>
+        <div>
+          <h4>The theming tax — two costumes, one operator</h4>
+          <p>~20 costume terms must be held in the head to operate what is underneath a four-verb loop (<span class="q">sharpen, build, attack, record</span>) —
+          stacked on top of The Tower's own sacred building metaphor. The fix for "SITREP tells me nothing" was a better costume, not less of one.
+          <span class="who">— Opus §7, Fable¹ annex, Fable² §E, Codex #9</span></p>
+        </div>
+        <div class="right"><span class="sev med">MEDIUM</span>
+          <div class="dots"><span class="d on">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">09</div>
+        <div>
+          <h4>The doc set breaks its own one-owner-per-fact law</h4>
+          <p>The Fable window date lives in 5+ files; the five moves are explained in six documents; the pitch page was rebuilt twice in a day to stay in sync;
+          GOTCHAS.md says cap 150 while check-caps.sh enforces 400. Each file is thin; the set is a hand-synchronized fat system.
+          <span class="who">— Fable¹ annex, Fable² B6, Codex #12 · ✓ cap drift re-verified tonight</span></p>
+        </div>
+        <div class="right"><span class="sev med">MEDIUM</span>
+          <div class="dots"><span class="d">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d on">C</span><span class="v">✓ VERIFIED</span></div></div>
+      </div>
+
+      <div class="charge">
+        <div class="num">10</div>
+        <div>
+          <h4>Unique verified finds — one judge each, both confirmed on the machine</h4>
+          <p><b style="color:var(--cream)">Fable²:</b> the only shipped artifact, <span class="mono">~/.codex/AGENTS.md</span>, is broken — find-replace debris
+          (<span class="mono">~/.Codex/</span> path, "Codex Preview", "Codex in Chrome", a dangling <span class="mono">@RTK.md</span>) — and the kernel was appended without noticing. No siege ever touched it.
+          <b style="color:var(--cream)">Fable¹:</b> the forge double-brain — forge already owns tiering/memory/cursors; the Military layers a second process vocabulary on the same lane, with the merge "deferred."
+          <span class="who">— ✓ AGENTS.md debris re-verified tonight</span></p>
+        </div>
+        <div class="right"><span class="sev high">HIGH</span>
+          <div class="dots"><span class="d">O</span><span class="d on">F¹</span><span class="d on">F²</span><span class="d">C</span><span class="v">✓ VERIFIED</span></div></div>
+      </div>
+    </div>
+    <p class="dots-key">O = Opus 4.8 · F¹ = Fable seat 1 · F² = Fable seat 2 · C = Codex 5.5 · filled = that judge found it independently</p>
+  </div>
+</section>
+
+<!-- ════════════════ WHAT HELD ════════════════ -->
+<section id="held">
+  <div class="wrap">
+    <div class="section-kick"><span class="kicker">What Held</span></div>
+    <h2>What they said is good — survived all four attacks</h2>
+    <p class="lede">Four hostile reads with kill authority, and the same small core walked out of every one of them.</p>
+
+    <div class="core-quote">
+      <div class="kicker">Codex's keep-list — "real senior-agent process, not fake productivity theater"</div>
+      <ul>
+        <li>write explicit Orders before spend</li>
+        <li>gate danger by blast radius</li>
+        <li>build a walking skeleton early</li>
+        <li>make mid-build changes append-only</li>
+        <li>adversarial review with disposition before "done"</li>
+        <li>AAR from the attacker's misses, not the builder's self-story</li>
+      </ul>
+      <p class="attr">"That core is good." — the alien family, whose agreement is worth the most</p>
+    </div>
+
+    <div class="keeps">
+      <span class="keep"><b>The two maxims</b> — "the corpus's best sentence is its first"</span>
+      <span class="keep"><b>done = survived</b> — cross-family Siege + disposition ledger</span>
+      <span class="keep"><b>RoE by danger, not size</b> — 🟢🟡🔴 as the master dial</span>
+      <span class="keep"><b>Orders as a human-editable contract</b> + FRAGO</span>
+      <span class="keep"><b>Verdict Ladder honesty</b> — rungs 2–3 are opinion, named as such</span>
+      <span class="keep"><b>The decommission criterion</b> — "the antidote to the surrounding self-mythology"</span>
+      <span class="keep"><b>The Fable revision's deletions</b> — orchestrator, router, daemon, cockpit</span>
+      <span class="keep"><b>doctrine/ 24&nbsp;KB</b> — "the highest value-per-line files in the folder"</span>
+      <span class="keep"><b>Proving Ground's framing</b> — the AAR is the deliverable, not the app</span>
+      <span class="keep"><b>This tribunal itself</b> — "cross-family review at the right moment; the instinct is exactly right"</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ REPAIR ORDER ════════════════ -->
+<section id="repair">
+  <div class="wrap">
+    <div class="section-kick"><span class="kicker">The Repair Order</span></div>
+    <h2>What needs to change — concrete and checkable</h2>
+    <p class="lede">Almost nothing on this list is an addition. The judges were unanimous: the system needs <em>subtraction and contact</em>, not features.</p>
+
+    <div class="repairs">
+      <div class="repair">
+        <h3>⚡ Tonight — ≤30 minutes</h3>
+        <ol>
+          <li><b>Fix <span class="mono">~/.codex/AGENTS.md</span></b> — purge the find-replace debris the kernel was appended beneath <span class="vtag">✓ debris verified</span></li>
+          <li><b>Pick the safety posture</b> — the real fix is small and buildable now: PreToolUse protected-path + Red-confirm hooks. Stamping the doctrine's safety section ASPIRATIONAL is the honest <em>floor</em>, not the fix</li>
+          <li><b>Fix the caps drift</b> — GOTCHAS.md header (150) vs check-caps.sh (400): one number, one owner</li>
+          <li><b>Commit the verdicts</b> — the tribunal record joins the corpus in git</li>
+        </ol>
+      </div>
+      <div class="repair">
+        <h3>🛡 Before anything claims "done"</h3>
+        <ol>
+          <li><b>Doctrine freeze</b> — no new doctrine files, no v2.x, until campaigns produce data (the tripwire below)</li>
+          <li><b>Source-or-mark every load-bearing vendor claim</b> — 06-15 billing split, Routines quotas, window pricing: link it or label it ASSUMED</li>
+          <li><b>An alien hand grades the pilot AAR</b> — the author of the doctrine must not be the one who scores its first contact</li>
+          <li><b>Stop saying "installed / mechanical / provably"</b> about prompt text — Codex's correction: those words are earned by code or a checked artifact</li>
+        </ol>
+      </div>
+      <div class="repair">
+        <h3>📉 At triage — subtraction</h3>
+        <ol>
+          <li><b>The corpus must exit smaller</b> — merge the six overlapping canon docs toward one owner per fact</li>
+          <li><b>External outcome metric per standing op</b> — usage, revenue, a user's verdict; efficiency curves alone can Goodhart</li>
+          <li><b>Resolve the forge double-brain</b> — one process vocabulary owns the Build lane, after the pilot says which</li>
+          <li><b>The only addition that counts: data</b> — a WAR-LOG.md, an AAR, a Service Record row. Everything else exists.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="tripwire">
+      <div class="kicker">⚠ The Tripwire — left armed by the second Fable seat, in its words</div>
+      <blockquote>"If the next file created in this folder is doctrine v2.x rather than a campaign's WAR-LOG.md,
+      the central diagnosis of all four verdicts is confirmed, and no further review of any kind should be commissioned."</blockquote>
+      <p class="note"><b>This page was ordered by the Commander</b> as the decision brief for this fork; it proposes no doctrine change and folds nothing.
+      The tripwire's force lands on the next file created in this folder — it must be a War Log.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ ROADS ════════════════ -->
+<section id="roads">
+  <div class="wrap">
+    <div class="section-kick"><span class="kicker">The Roads</span></div>
+    <h2>Possible roads from here</h2>
+    <p class="lede">Four honest options, each with its champion among the judges — then the recommended sequence.</p>
+
+    <div class="roads">
+      <div class="road">
+        <div class="rk">ROAD 1</div>
+        <h3>⚔️ First Blood</h3>
+        <p>Run Operation: Proving Ground (the gym tracker) this week, exactly as drafted. Doctrine frozen until its AAR lands.
+        The campaign is the answer to every charge on the sheet.</p>
+        <div class="fa">
+          <span class="for">Two external users (girlfriend + brother) = a verdict the author cannot write for himself; greenfield isolates doctrine failures from terrain failures.</span>
+          <span class="against">Still inward-facing — an app built to test the doctrine; the Tower stays starved one more week.</span>
+        </div>
+        <div class="champ">CHAMPION: Fable seat 2 — "keep the gym tracker as the pilot"</div>
+      </div>
+
+      <div class="road">
+        <div class="rk">ROAD 2</div>
+        <h3>🏙 The Tower Front</h3>
+        <p>Skip the tracker. Ship one user-visible Tower feature this week using the four verbs <em>silently</em> — no ceremony, no cast names —
+        and measure exactly two numbers: did the cross-family siege catch anything the gates missed, and what did it cost.</p>
+        <div class="fa">
+          <span class="for">Feeds the product the meta-work has been starving; cheapest possible real data; the dream is tested where rent is paid.</span>
+          <span class="against">Brownfield terrain failures confound the doctrine reading; no external verdict beyond your own users-of-one.</span>
+        </div>
+        <div class="champ">CHAMPION: Opus 4.8 — "ship something that can tell you no"</div>
+      </div>
+
+      <div class="road">
+        <div class="rk">ROAD 3</div>
+        <h3>🧹 The Great Subtraction</h3>
+        <p>Before any campaign: shrink the corpus to one doctrine file + the seeds, archive the mythology, fix the broken installs, de-duplicate every fact. Then fight.</p>
+        <div class="fa">
+          <span class="for">Every judge demanded the repairs; a smaller corpus is cheaper to hold in every future session.</span>
+          <span class="against">It is one more inward round — the ratchet wearing a diet. <b>No judge endorsed it as the next move.</b> The 30-minute fixes don't need a campaign's worth of time.</span>
+        </div>
+        <div class="champ">CHAMPION: all four as homework, none as the road — folded into the Convoy as step one; rejected only as a delay to contact</div>
+      </div>
+
+      <div class="road">
+        <div class="rk">ROAD 4</div>
+        <h3>🕊 Stand Down</h3>
+        <p>Call the folder what the harshest read said it might be — world-building, a legitimate hobby for someone who loves the craft —
+        keep the four verbs as silent habits, and pour every hour into The Tower directly.</p>
+        <div class="fa">
+          <span class="for">Brutally honest if the building was the fun part; The Tower gets 100% of the remaining Fable window.</span>
+          <span class="against">Abandons a possibly-compounding asset before its first data point; the four verbs without records never compound at all.</span>
+        </div>
+        <div class="champ">CHAMPION: the outsider in Fable² §E — "a hobby doesn't have to compound; a tool has to ship"</div>
+      </div>
+    </div>
+
+    <div class="convoy">
+      <div class="rec">★ RECOMMENDED</div>
+      <h3>The Convoy — a sequence, not a choice</h3>
+      <p>Roads 1 and 2 are both right and don't conflict; Road 3's real content is 30 minutes of repairs, not a road.
+      Run them in order, under a standing doctrine freeze, with the Fable clock as the forcing function:</p>
+      <div class="timeline">
+        <div class="tstep"><div class="dot"></div><div class="when">TONIGHT</div><div class="what">The repairs</div><div class="why">AGENTS.md · safety posture · caps drift · commit verdicts. 30 min, then never again.</div></div>
+        <div class="tstep"><div class="dot"></div><div class="when">THIS WEEK</div><div class="what">Campaign 1 — Proving Ground</div><div class="why">The gym tracker. External users = the one verdict that can't be persuaded.</div></div>
+        <div class="tstep"><div class="dot"></div><div class="when">NEXT</div><div class="what">Campaign 2 — a Tower feature</div><div class="why">The four verbs, silent, on the product that pays rent. Opus's two numbers measured.</div></div>
+        <div class="tstep"><div class="dot"></div><div class="when">≤ 06-21</div><div class="what">The benchmark</div><div class="why">Same campaign, Opus in the General's seat — the exit thesis measured before the window closes.</div></div>
+        <div class="tstep"><div class="dot"></div><div class="when">AFTER DATA</div><div class="what">The triage</div><div class="why">Doctrine v2.x at last — with kill authority, and the corpus must exit <b style="color:var(--gold)">smaller</b>.</div></div>
+      </div>
+      <p class="law"><b>The standing law throughout:</b> the doctrine freeze holds until two campaigns have produced War Logs, AARs, and Service Record rows.
+      Findings from this tribunal are <em>not</em> folded into doctrine now — that's the ratchet. They wait, on this page, for the data to agree or overrule them.
+      Campaign 3 (a Rung-2 decision memo — the unexercised half of the Verdict Ladder) queues behind the benchmark.</p>
+      <p class="law"><b>Why this isn't the ratchet in convoy formation:</b> the unanimous prescription of all four judges <em>was</em> contact —
+      Opus: "run one real campaign this week"; Codex: "three boring campaigns." The ratchet is doctrine production; the freeze stops exactly that.
+      And the statistical-mass charge is engaged, not dodged: the first decisions don't need 30-campaign curves — they need <em>existence proofs</em>
+      (did the cross-family Siege catch anything the gates missed? what did the ceremony cost?), which two campaigns supply as binary facts.
+      If time runs short before 06-22: Campaign 1 + the benchmark are the core; Campaign 2 slips to the Opus seat — which is itself the exit-thesis data.</p>
+      <p class="law" style="border-top:1px dashed var(--red-dim);color:var(--body)"><b style="color:var(--red)">The kill switch (set before the pilot, so it can't be argued with after):</b>
+      the doctrine FAILS Campaign 1 if (a)&nbsp;the Siege kills nothing the mechanical gates missed, (b)&nbsp;the ceremony's overhead exceeds what it caught
+      (Orders + AAR cost vs. a bare build), or (c)&nbsp;the AAR changes nothing about how Campaign 2 would run. <b style="color:var(--red)">Any two of three →
+      Road 4 goes live:</b> the costume stands down, the four verbs stay as silent habits, and The Tower gets every remaining hour. Negative data wins; that is the whole point.</p>
+    </div>
+
+    <div class="call">
+      <div class="kicker">Commander's call — yours alone, per protocol</div>
+      <h3>The status of the north star</h3>
+      <p>All four judges touched the sacred line. Codex, most precisely: <em>"As motivation, it works. As product strategy, it is dangerous —
+      it licenses unbounded scope… treat 'the last tool you need to build' as motivational copy, not a planning premise."</em>
+      The tribunal had license to attack it; only you can rule on it.</p>
+      <div class="opts">
+        <div class="opt"><b>A — Demote to motto</b>The dream stays on the wall and in the voice; planning premises become concrete ("ship N campaigns that beat baseline on the Service Record"). Scope must be argued per-campaign, never inherited from the dream.</div>
+        <div class="opt"><b>B — Keep as planning premise</b>Status quo. The dream legitimately licenses building the force out — accepting, with eyes open, the unbounded-scope risk all four judges named.
+        The steelman the judges didn't weigh: oversized visions are how ArtLab and The Tower's world got built and shipped — the Commander's pattern of big premises becoming real systems is itself evidence.</div>
+      </div>
+      <p class="note">No recommendation offered. The dream is the one thing this seat does not get to rule on.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:0">
+    <span>THE TRIBUNAL · compiled 2026-06-09 by the General's seat (Fable 5) · sources: four cold-eyes verdicts + full corpus re-read</span>
+    <span>corpus at <b>f96ea648</b> · verdicts in <b>docs/factory/</b> + snapshots · clock: <b>Fable window closes 2026-06-22</b></span>
+  </div>
+</footer>
+
+</body>
+</html>
