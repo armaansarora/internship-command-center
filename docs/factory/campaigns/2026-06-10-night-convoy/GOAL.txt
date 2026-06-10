@@ -11,7 +11,7 @@ READ THEN: doctrine/ (PLAYBOOK, GOTCHAS, class-kits/code) · THE-TRIBUNAL.html �
 PHASES (caps + spec in Orders):
 0 MUSTER (0:15) — verify codex CLI/Playwright/gh/clean main; open WAR-LOG.md cursor.
 1 LEAN SWEEP (1:00) — ruthless full-repo audit, every file: KEEP/UPDATE/SCRAP → AUDIT.md. Docs scrap freely (legacy/, completed plans, dupes); code scrap needs mechanical deadness proof + gates green per batch; protected paths untouchable; git history is the safety net.
-2 PROVING GROUND (2:45, green) — gym tracker web app for real at ~/Developer/gym-tracker: own Orders → walking skeleton → full gates → Codex siege with kill authority → disposition ledger → AAR from the kill-log → Service Record row. Data adapter: Supabase if MCP cooperates in ≤5 min, else SQLite + PIN v0 (runbook flips it) — never stall on auth.
+2 PROVING GROUND (2:45, green) — gym tracker web app for real at ~/Developer/gym-tracker: own Orders → walking skeleton → full gates → Codex siege with kill authority → disposition ledger → AAR from the kill-log → Service Record row. Data adapter: Supabase if MCP cooperates in ≤5 min, else SQLite + PIN v0 (runbook flips it).
 3 TOWER FEATURE (1:30, amber) — one user-visible feature per the Orders list, four verbs silent. Survived → MERGE TO MAIN + push. Not survived → PR + flag. No migrations applied.
 4 BENCHMARK (0:45) — Opus-seat subagent one-shots Phase 2's frozen mini-spec; same gates + one siege round each; seat comparison in numbers. The 06-22 decision's data.
 5 SNOWBALL (until 07:15) — iterate; each round consumes all prior lessons and must leave the records richer, or its AAR says "theater":
