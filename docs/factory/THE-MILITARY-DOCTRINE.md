@@ -194,6 +194,12 @@ conditions is invalid ("cannot be sieged, only reviewed — ship at your own ris
 
 ## 4. Rules of Engagement (the master dial)
 
+> ⚠️ **Honesty mark (2026-06-09 tribunal):** RoE enforcement is currently **ASPIRATIONAL**
+> — the installed environment runs `bypassPermissions` with no PreToolUse gates, so these
+> rules bind by doctrine-following, not mechanism. Until the §10 hooks exist, every
+> campaign's Orders must carry its protected paths explicitly, and "mechanical" may not
+> be claimed.
+
 | Class | Means | Rules |
 |---|---|---|
 | 🟢 Green | reversible, isolated | direct writes; skirmish gear allowed |

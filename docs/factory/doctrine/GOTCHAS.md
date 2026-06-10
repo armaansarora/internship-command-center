@@ -1,7 +1,8 @@
 # ⚠️ Gotchas — campaign-level, hard-won
 
 *Things that bit a real run. Tool-level, not target-specific (target gotchas live in the
-target repo's CLAUDE.md / class kit). Cap: 150 lines.*
+target repo's CLAUDE.md / class kit). Cap: 400 lines — `check-caps.sh` is the one owner
+of this number (entry-structured: ~100 entries × ~4 lines).*
 
 ## Workflow tool
 - **Codex agents + JSON schema fail** — `agentType: 'codex'` has no StructuredOutput tool.
