@@ -1,191 +1,176 @@
-# ⚔️ NIGHT ORDERS — Operation: Night Convoy (2026-06-10, overnight)
+# ⚔️ NIGHT ORDERS v2 — Operation: Night Convoy (2026-06-10, overnight)
 
-*Pre-signed master Orders for the overnight autonomous run. The Commander edits the ✏️
-lines, launches the `/goal`, and sleeps. Tripwire compliance: this is a CAMPAIGN artifact,
-not doctrine — the next files this operation creates are War Logs, exactly as the
-tribunal demanded. The doctrine freeze holds until Phase 4, where it lifts BECAUSE field
-data will exist by then.*
+*Pre-signed master Orders, revamped ground-up on the Commander's order: the night must
+compound like a snowball, never tangent, and end **done-done** — everything merged,
+pushed, clean, with nothing left for him to touch except decisions only a human can make.
+The Commander's edits to the ✏️ lines + launching the `/goal` = the word **go**.*
 
 ---
 
-## Mission
+## The Morning State Contract (what "done" means — verify before closing)
 
-Run the expanded Convoy end-to-end in one night: **use** The Military for real (two
-campaigns + a seat benchmark), then **rebuild** it from what the field data and the four
-cold-eyes verdicts prove — and leave the Commander a one-screen Morning Brief with
-everything done, attacked, recorded, and awaiting only his merges.
+1. `git status` clean on Tower `main`; all night work **merged to main and pushed** —
+   except artifacts that failed their survival gate, which exist as open PRs and are
+   flagged. The gym tracker is its own repo, committed and pushed (create private GitHub
+   repo via `gh` if authed; local-only is the fallback, flagged).
+2. `BLOCKERS.md` (campaign dir) lists every human-required item: exactly what's needed,
+   why it's human-only, and what was built around it in the meantime.
+3. `MORNING-BRIEF.md` exists (spec below). `AUDIT.md` exists (lean sweep ledger).
+4. The Service Record holds a row per campaign run tonight. `check-caps.sh` green.
+5. No console.logs, no TODO/FIXME, no secrets, in anything that merged.
 
-**The night's victory conditions:**
-1. Campaign 1 (Proving Ground) produced the full artifact set: Orders, War Log, kill-log
-   + disposition ledger, AAR-from-the-attacker's-kill-log, Service Record row — and a
-   working, gate-green, sieged gym tracker.
-2. Campaign 2 (Tower feature) produced the same artifact set, as an OPEN PR — never merged.
-3. The benchmark produced a measured Fable-vs-Opus Service Record comparison (the exit thesis).
-4. The Rebuild produced doctrine v2.1 as a PROPOSAL branch + PR with the corpus **net
-   smaller** (report the line delta), every tribunal charge dispositioned, and the first
-   Armory mints (survival-gated only).
-5. `MORNING-BRIEF.md` exists, in voice, one screen, with every decision the Commander
-   must make listed with links.
+**Merge policy (pre-authorized by the Commander, gated on survival):** an artifact merges
+to main ONLY when its mechanical gates are green AND its cross-family siege was survived
+(every Crit/High dispositioned). Siege unreachable → it does NOT merge; PR + flag. This
+is the one rule that protects "done-done" from meaning "broken in production."
 
-## Standing rules for the whole night (non-negotiable)
+## ⛔ The Blocker Protocol (the anti-tangent law — applies every minute of the night)
 
-- **The Commander is asleep. NEVER block on a question.** Any fork that would normally
-  need him: take the conservative branch, log it in the War Log as `FRAGO-PENDING`, keep
-  moving. Anything 🔴 (payments, auth config, deletion, main-branch merge, spend beyond
-  free tiers) → leave as a proposal for morning.
-- **Cursor discipline** (compaction WILL happen): `WAR-LOG.md` cursor block updated
-  before every long operation and immediately after any compaction. Cold resume =
-  re-read these Orders + the cursor, reconcile against `git status` — believe the repo.
-- **Wall-clock caps per phase** (below). Cap hit → park at the nearest cut-line, write
-  the Dispatch, move to the next phase. A parked phase beats a hung night.
-- **Siege-blocked rule:** if Codex is unreachable, mark the campaign `SIEGE-PENDING`
-  (never claim survived), continue other phases. Codex invocation per GOTCHAS.md:
-  read-only via `codex exec` with `--ignore-user-config`.
+When ANY obstacle appears, classify it within ~2 minutes:
+
+- **HUMAN-REQUIRED** (credentials, OAuth/interactive logins, paid accounts, Apple certs,
+  emails/identities, taste verdicts, anything needing the Commander's body or wallet):
+  write it to `BLOCKERS.md` with the exact ask, build the adapter/fallback around it,
+  and MOVE ON. **Hard rule: never spend more than 5 minutes attempting to work around a
+  human-required blocker.** No 20-minute tangents. The workaround is always "design so
+  it slots in tomorrow," never "simulate it tonight."
+- **SOLVABLE**: max 2 distinct hypotheses or 15 minutes, whichever first. Both fail →
+  park as `FRAGO-PENDING` in the War Log, route around, continue.
+- **Tangent budget:** any sub-problem not on a victory condition's critical path gets
+  20 minutes lifetime, total. The War Log cursor records when a tangent clock starts.
+- The Commander is asleep. NEVER block on a question; take the conservative branch and log it.
+
+## Standing rules (all night)
+
+- **Cursor discipline:** `WAR-LOG.md` cursor updated before every long op and right
+  after any compaction. Cold resume = re-read these Orders + cursor, reconcile against
+  `git status`; believe the repo.
 - **Protected, never touched:** `public/lobby/`, `public/art/lobby/otis/`,
-  `public/art/penthouse/ceo/`, Tower `main` branch (no direct commits, no merges),
-  `.env*`, Stripe/auth config, `src/lib/config/legal-config.ts`. No secrets in any commit.
-- **Force discipline:** F1 solo by default; subagents for laterals; Workflow fan-outs
-  ONLY for genuinely parallel work (siege lens panel, benchmark seats). Escalate on
-  measured walls only. Beware the known Workflow gotchas (GOTCHAS.md): no schemas on
-  Codex agents, no large outputs through schemas.
-- All campaign records live under `docs/factory/campaigns/2026-06-10-night-convoy/`.
-  Commit early, commit often, on the right branch per phase RoE.
+  `public/art/penthouse/ceo/`, `.env*`, Stripe/payments/auth config,
+  `src/lib/config/legal-config.ts`, push protection. Migrations are NEVER applied to the
+  live DB (ship numbered SQL + runbook — known gotcha).
+- **Codex siege calls** per GOTCHAS.md (`codex exec --ignore-user-config`, read-only).
+  Codex down → `SIEGE-PENDING`, never claim survived, continue elsewhere.
+- F1 solo default; subagents for laterals; Workflow fan-outs only for true parallel work.
+  Never schemas on Codex agents; never large outputs through schemas.
+- Phase cap hit → park at the nearest cut-line, Dispatch, next phase. Commit + push at
+  every phase boundary (and more often) so a crash loses minutes, not hours.
+- Loop detection: same hypothesis fails 2× → park. Spend: free tiers only.
 
-## Phase 0 — Muster (cap 00:20)
+## Phase 0 — MUSTER (cap 00:15)
 
-Verify the ground, then open `WAR-LOG.md` with the cursor block:
-- `codex exec --ignore-user-config` answers (one-line ping) · Playwright launches ·
-  `git status` clean on main · `docs/factory/doctrine/check-caps.sh` green.
-- Read, in order: this file · `doctrine/PLAYBOOK.md` · `doctrine/GOTCHAS.md` ·
-  `doctrine/class-kits/code.md` · `THE-TRIBUNAL.html` (the charge sheet IS the night's
-  conscience) · the four `2026-06-09-cold-eyes-*.md` verdicts · `OPERATION-PROVING-GROUND.md`.
+Verify: `codex exec --ignore-user-config` answers · Playwright launches · `gh auth status` ·
+main clean · `check-caps.sh` green. Read: this file → `doctrine/PLAYBOOK.md` + `GOTCHAS.md`
++ `class-kits/code.md` → `THE-TRIBUNAL.html` → the four cold-eyes verdicts →
+`THE-MILITARY-DOCTRINE.md` → `OPERATION-PROVING-GROUND.md`. Open `WAR-LOG.md` with the
+cursor block. Note the clock; all caps key off it.
 
-## Phase 1 — Campaign: PROVING GROUND (cap 03:30, incl. siege) — RoE 🟢
+## Phase 1 — THE LEAN SWEEP (cap 01:00) — the clean foundation
 
-The gym tracker, per `docs/factory/OPERATION-PROVING-GROUND.md`, built for real.
+Ruthless audit of the **entire repo**: every file gets a row in `AUDIT.md` (by directory
+batch): **KEEP / UPDATE / SCRAP** + one-line reason. Rules that keep it safe at 3am:
 
-- **Terrain:** NEW repo at `~/Developer/gym-tracker` (git init; local commits; create a
-  GitHub repo only if `gh` is already authed — else local is fine tonight).
-  Stack per the class kit: Next.js + Supabase + Tailwind, typed, RLS, @supabase/ssr.
-- **Write its own ORDERS.md first** (in `proving-ground/`), sharpening the draft's
-  victory conditions; freeze the verdict: Rung 1 — tsc, lint, vitest, build, Playwright
-  e2e on log-a-set (the <10s condition asserted as ≤N interactions in e2e).
-- **Users:** ✏️ COMMANDER — names/emails of the three users, or leave as-is and the app
-  ships with an `allowlist.ts` config + magic-link auth, emails added in the morning.
-  Default visibility: all three see each other's logs (per the draft Orders).
-- **Walking skeleton first** (log a set → see it in history, end-to-end, ugly), then
-  fill. First Contact = a War Log dispatch + screenshot.
-- **Deploy chain (each step optional, fall through silently):** Supabase project via
-  MCP if available and $0 → else write numbered SQL migrations + `MORNING-RUNBOOK.md`
-  (10-minute setup for the Commander). Vercel deploy if authed → else runbook line.
-  The kill-switch metrics do NOT require deployment.
-- **The Siege:** full packet to Codex (kill authority, praise forbidden, attack the
-  ORDERS not just the diff, severity taxonomy) → disposition ledger → fix Crit/High →
-  one more round (🟢 = 1 round; a second only if round 1 drew blood).
-- **Debrief:** AAR authored FROM the kill-log; Service Record row #1 into
-  `SERVICE-RECORD.md` (kill-rate, first-pass survival, est-vs-actual, intervention
-  count = 0 by construction, wall-clock, token estimate); lesson deltas appended to
-  doctrine files ONLY as `GOTCHA:` entries (behavioral PLAYBOOK rules wait for
-  campaign 2 confirmation, per two-speed graduation).
-- **Measure for the kill-switch, honestly:** (a) did the Siege kill anything the gates
-  missed? (b) ceremony overhead (Orders+log+AAR time) vs. build time. (c) does the AAR
-  change how Phase 2 runs?
+- **Docs:** scrap freely — `docs/legacy/` (828K, already superseded), completed plan docs
+  in `docs/superpowers/`, duplicated character docs (CHARACTER-PROMPTS.md is marked
+  legacy; the artlab pipeline owns characters). Stale content → UPDATE only if ≤10 min,
+  else row says "update needed: <what>".
+- **Code (`src/`, `scripts/`):** SCRAP requires mechanical proof of deadness — no
+  imports/references (grep + ts-prune or equivalent), then **full gates green after each
+  removal batch** (tsc, lint, vitest, build). Any doubt → "flagged, kept."
+- **`public/` (33MB):** unreferenced assets may be scrapped EXCEPT anything under the
+  protected paths, which are never touched regardless of reference status.
+- Production behavior must not change in this phase. Each batch = one commit; push at
+  phase end. Everything scrapped is recoverable in git history — say so in AUDIT.md.
 
-## Phase 2 — Campaign: A TOWER FEATURE (cap 02:00) — RoE 🟡 (branch + PR ONLY)
+## Phase 2 — Campaign: PROVING GROUND (cap 02:45) — RoE 🟢
 
-The four verbs run silently on the product that pays rent. Branch `feature/night-convoy-*`.
+The gym tracker web app, real, at `~/Developer/gym-tracker`. Five moves, full discipline:
+its own ORDERS.md (sharpen the draft in `OPERATION-PROVING-GROUND.md`; freeze Rung-1
+verdict: tsc/lint/vitest/build/Playwright-e2e on log-a-set, the <10s condition as an
+interaction-count assertion) → walking skeleton → fill → gates → Codex siege (packet,
+kill authority, attack the Orders) → disposition ledger → AAR from the kill-log →
+Service Record row #1.
 
-✏️ COMMANDER — pick one or delete to let the General choose by Recon-measured fit:
-1. **Stale-application nudge** (War Room): applications untouched N days get a visible
-   nudge + one-tap follow-up action.
-2. **Momentum widget** (Penthouse): 7-day activity sparkline + streak from the existing
-   snapshots data.
-3. **Follow-up-due-today surfacing** (Rolodex): contacts with due follow-ups float to
-   the top with a badge.
+**Zero-human-blocker engineering (decided now so the night never stalls):**
+- **Data layer behind an adapter.** Try Supabase MCP `create_project` (free tier, $0)
+  once, ≤5 min: success → real auth (magic-link) + RLS + remote Postgres. Failure →
+  SQLite (better-sqlite3) local adapter + **name-picker + per-user PIN** v0 auth
+  (3 trusted users; allowlist file), with the Supabase adapter code written and
+  env-gated. `MORNING-RUNBOOK.md` = the 10-minute flip. e2e runs against whichever
+  adapter is live — the campaign is fully testable either way.
+- ✏️ COMMANDER — the three users (names/emails): `Armaan, ___, ___` (defaults: User2/User3,
+  renamed in the morning).
+- Vercel deploy: one attempt if authed, else runbook line. Deploy is NOT a victory condition.
+- Kill-switch measurements recorded honestly (siege catch? · ceremony overhead? · AAR
+  changes Phase 3?).
 
-Same discipline as Phase 1: mini-Orders → skeleton → gates (full class-kit list) →
-Codex siege (2 rounds max, 🟡) → disposition → AAR → Service Record row #2 → **open a
-PR with screenshots; never merge.** Supabase schema changes: numbered SQL + runbook,
-never applied (gotcha: unattended migrations are a handoff).
+## Phase 3 — Campaign: A TOWER FEATURE (cap 01:30) — RoE 🟡, survival-gated merge
 
-## Phase 3 — THE BENCHMARK (cap 01:30) — the exit thesis, measured
+✏️ COMMANDER — pick or delete to let Recon choose: 1) stale-application nudge (War Room) ·
+2) momentum widget from snapshots (Penthouse) · 3) follow-up-due-today surfacing (Rolodex).
 
-Extract a frozen mini-spec from Phase 1's Orders (the core log-a-set flow: schema, API,
-UI, tests). In a clean scratch dir, an **Opus-seat subagent** (`model: opus`) builds it
-one-pass from the spec. Then: same gates, one Codex mini-siege round on each seat's
-output (Fable's = the Phase-1 implementation of that slice). Record per seat: gates
-green first try? · siege kills (count + severity) · wall-clock · est-vs-actual.
-Write `benchmark/SEAT-COMPARISON.md` + Service Record rows. No narrative spin — the
-numbers ARE the deliverable. This is the 06-22 decision's data.
+Mini-Orders → skeleton → full gates → Codex siege (≤2 rounds) → disposition → AAR →
+Service Record row #2. Survived → **merge to main + push** (pre-authorized above; main
+auto-deploys — that is the point: the Commander wakes to it live). Not survived →
+PR + flag. No DB migrations applied either way.
 
-## Phase 4 — THE REBUILD (cap 01:30) — the freeze lifts, because data now exists
+## Phase 4 — THE BENCHMARK (cap 00:45)
 
-Inputs: the four verdicts + THE-TRIBUNAL.html + both AARs + the benchmark + Service Record.
+Opus-seat subagent one-shots Phase 2's frozen core-flow mini-spec in a scratch dir; same
+gates; one Codex round per seat (Fable's = the Phase-2 slice). Record per seat: first-try
+gate pass · kills by severity · wall-clock. `benchmark/SEAT-COMPARISON.md` + Service
+Record rows. Numbers, no spin — this is the 06-22 seat decision's data.
 
-- **Disposition ledger over every tribunal charge** (fixed / rejected / deferred /
-  accepted-risk + reason) — the charges are findings, not orders; some SHOULD be rejected
-  with reasons.
-- **Doctrine v2.1 on branch `military/v21-rebuild`, as a PR, never merged:** merge the
-  overlapping canon (THE-MILITARY.md, THE-MILITARY-CONCEPT.md, doctrine §-duplication)
-  toward one owner per fact; kill what the field data killed; keep what survived. The
-  corpus must exit **net smaller** — report the exact line delta in the PR body. No new
-  subsystems, no new surfaces, no new names: triage and subtraction only.
-- **The Armory opens:** `docs/factory/armory/` with its first survival-gated mints from
-  tonight's campaigns (e.g., the gym-tracker Orders template, the Siege packet that drew
-  blood, the benchmark protocol). Each entry: artifact + description + provenance.
-- If the kill-switch fired (2 of 3: siege killed nothing the gates missed · ceremony
-  cost more than it caught · AAR changed nothing), the rebuild's PR instead recommends
-  **Stand Down** and says so plainly. Negative data wins.
-- **Write `PROVING-SERIES.md` — the post-rebuild test gauntlet.** The Commander's
-  standing order: once rebuilt, the Military runs a SERIES of varied campaigns, each
-  constructed to push a specific organ to its brink — no mechanism goes untested
-  (this answers tribunal charge: "the pilot exempts every novel mechanism by design").
-  Draft a mini-Orders skeleton per entry:
-  | # | Campaign | Organ pushed to the brink |
-  |---|---|---|
-  | PG-2 | **The tracker as an iPhone app** (Expo/React Native, same product, alien terrain) | terrain transfer: does the class-kit/template system generalize? does PG-1 precedent measurably speed the Briefing — the first real compounding datum |
-  | PG-3 | A researched decision memo (Rung 2) | the sieged-rubric verdict machinery no code test touches |
-  | PG-4 | A taste campaign through the Tailor pipeline (render→screenshot→judge→refine), demo-team verdicts as Boot Camp reps | Rung 3 + Boot Camp graduation curves |
-  | PG-5 | Convert the tracker into a Standing Operation (Morning Brief rhythm; the trio's real usage = the external outcome metric) | standing tempo + outcome observability |
-  | PG-6 | A deliberately vague intent → probe loop | intent discovery |
-  | PG-7 | **Failure drills**: an oversized scope to force the F1→F3 tripwire · a siege-blocked failover · a mid-build cold-resume · a weak-seat (Sonnet) run on a small scope | every escalation, stop-loss, and failover mechanism, fired on purpose |
-  The demo team (Commander + the two users) sits on top of all of it as the human
-  verdict layer. Apple/TestFlight steps in PG-2 are a Commander gate (account/cert);
-  overnight work on it is build + gates only.
+## Phase 5 — THE SNOWBALL (until 07:15 — the night's engine)
 
-## Phase 4b — BONUS: SERIES PG-2 OPENS EARLY (only if ≥ 90 min remain before 07:30)
+A loop, not a line. Each iteration MUST consume everything before it:
 
-If the night ran fast: start the iPhone-app port now. New repo `~/Developer/gym-tracker-ios`
-(Expo + TypeScript), its own mini-Orders seeded from PG-1's Archive precedent — and
-**time the Briefing**: PG-1 precedent should make it measurably faster (record the
-delta; that's compounding, plotted). Deliver: walking skeleton + tsc/lint/tests green +
-web-export check. Native simulator/TestFlight = morning runbook (Apple account is a
-Commander gate). One Codex siege round if time allows; else SIEGE-PENDING. Service
-Record row regardless of how far it gets.
+**Iteration 1 — THE REBUILD** (the freeze lifts; data exists): disposition every
+tribunal charge (rejecting some is expected) → doctrine **v2.1**: one owner per fact,
+merge the overlapping canon (THE-MILITARY.md / CONCEPT / doctrine §-duplication), kill
+what the data killed — corpus must exit **net smaller** (report the line delta) → open
+`docs/factory/armory/` with the first survival-gated mints (Orders template, the Siege
+packet that drew blood, the benchmark protocol) → run its own alien check (one Codex
+round on the diff) → survived → **merge to main** (docs-only). If the kill-switch fired
+(2 of 3), v2.1 instead recommends Stand Down, plainly. Also write `PROVING-SERIES.md`:
+the full gauntlet (PG-2..PG-7 below) with a mini-Orders skeleton each.
 
-## Phase 5 — MORNING BRIEF (cap 00:30)
+**Iterations 2+ — fight under the NEW doctrine, autonomously runnable entries only,
+in this order, while time remains. For each: full discipline, AAR, Service Record row,
+doctrine deltas appended — and TIME the Briefing (the precedent-speedup is the
+compounding datum, plotted in the brief):**
+- **PG-2 — the tracker as an iPhone app** (`~/Developer/gym-tracker-ios`, Expo+TS),
+  seeded from PG-1 precedent. Skeleton + tsc/lint/tests + web-export check; simulator/
+  TestFlight = BLOCKERS.md (Apple account = human).
+- **PG-3 — Rung-2 for real:** a researched decision memo, subject: **"the post-Fable
+  seat strategy after 06-22"** — using Phase 4's own benchmark data as evidence. Rubric
+  frozen first, rubric sieged, then the memo written, then panel-scored. The Verdict
+  Ladder's untested rung, tested on a decision the Commander actually needs.
+- **PG-7 — failure drills** (the brink): (a) a deliberately oversized scope to fire the
+  F1→F3 tripwire; (b) a forced mid-build cold-resume (park, wipe context via subagent
+  hand-off, resume from cursor alone); (c) a weak-seat run (Sonnet subagent, small scope)
+  to measure the floating F1 bar. Each drill's finding → doctrine delta.
+- **PG-6 — probe loop:** pick the vaguest real want in the Tower backlog; run discovery
+  probes to a sharpened draft Orders (build it only if time absurdly allows).
+- PG-4 (taste/Boot Camp) and PG-5 (standing op on real usage) are human-gated →
+  BLOCKERS.md with ready-to-run plans.
 
-`MORNING-BRIEF.md` in this directory — in voice ("Good morning, Commander"), ONE screen:
-what shipped · what each siege killed · the Service Record table · the benchmark verdict
-in one sentence · kill-switch result · the decisions awaiting (merge v2.1 PR? merge Tower
-PR? run the tracker runbook? Stand Down?) · links to every artifact. Then: final commits
-pushed on their branches; `check-caps.sh` green; one `mem.sh remember` pointer if
-available. Optional, non-blocking: if the ArtLab Telegram bot env is configured, send
-exactly one message: "🎖️ Morning Brief ready — docs/factory/campaigns/2026-06-10-night-convoy/MORNING-BRIEF.md".
+Snowball law: an iteration that doesn't leave the Archive/doctrine/Service Record richer
+than it found them was theater — say so in its AAR.
+
+## Phase 6 — MORNING BRIEF + DONE-DONE CHECK (cap 00:30, hard-triggered 07:15–07:30)
+
+`MORNING-BRIEF.md`, in voice, one screen: what shipped & merged · what each siege killed ·
+the Service Record table · the benchmark verdict in one sentence · the compounding curve
+(briefing-time + kill-rate across the night's campaigns) · kill-switch result ·
+BLOCKERS.md summary (the only things left needing a human) · links. Then execute the
+Morning State Contract checklist literally, item by item, and end with `git status`
+proving main clean. Optional, non-blocking: ArtLab Telegram ping "🎖️ Morning Brief ready".
 
 ## Stop-loss (global)
 
-✏️ COMMANDER — defaults stand unless edited:
-- Total wall-clock: at **08:00** or 8h elapsed (whichever first) → jump to Phase 5 from
-  wherever you are. A finished Brief about a half-finished night beats neither.
-- Spend: subscription only; nothing that requires a paid confirmation beyond free tiers.
-- Loop detection: same hypothesis fails 2× → park, log, move on. Per-phase caps above.
+✏️ COMMANDER — defaults stand unless edited: hard stop **07:15 → Phase 6** from wherever;
+spend = subscriptions/free tiers only; per-phase caps above; blocker protocol always.
 
-## Go/No-Go
-
-The Commander's edits to this file + launching the `/goal` **constitute the word "go"**
-— the one spend gate, satisfied before sleep. FRAGOs overnight are impossible; that is
-why every fork above has a pre-decided conservative branch.
-
-*Signed in advance: the General's seat (Fable 5), 2026-06-09 night. The next file this
-operation writes is a War Log.* 🎖️
+*Signed in advance: the General's seat (Fable 5), 2026-06-09 night, v2 after the
+Commander's snowball order. The next file this operation writes is a War Log.* 🎖️
