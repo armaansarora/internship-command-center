@@ -23,12 +23,15 @@ describe("ArtLab final acceptance gate (Phase 8)", () => {
     expect(existsSync("src/lib/creative-production")).toBe(false);
   });
 
-  it("docs/legacy/ has truly-retired archived docs + README", () => {
-    expect(existsSync("docs/legacy/README.md")).toBe(true);
-    // CREATIVE-PRODUCTION-ENGINE.md and SVG-RETIREMENT.md are truly retired (no
-    // active references). Character bibles and runbooks remain in docs/ because
-    // visual-assets and observability tests still verify them as active.
-    expect(existsSync("docs/legacy/CREATIVE-PRODUCTION-ENGINE.md")).toBe(true);
+  it("legacy CPE docs stay retired — no archive resurrection", () => {
+    // The docs/legacy/ archive itself was retired in the 2026-06-10 lean sweep
+    // (git history is the archive). The acceptance condition this guarded —
+    // CPE docs out of circulation — now means the archive must NOT come back.
+    expect(existsSync("docs/legacy")).toBe(false);
+    expect(existsSync("docs/CREATIVE-PRODUCTION-ENGINE.md")).toBe(false);
+    // Character bibles and runbooks remain in docs/ because visual-assets,
+    // artlab context, and observability tests still verify them as active.
+    expect(existsSync("docs/CHARACTER-BIBLE.md")).toBe(true);
   });
 
   it("3 new ArtLab docs exist and are not placeholders", () => {
