@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, JSX } from "react";
-import { useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { EntranceSequence } from "@/components/transitions/EntranceSequence";
 import { PipelineNodes, PipelineBar } from "@/components/penthouse/PipelineNodes";
 import { ActivityFeed } from "@/components/penthouse/ActivityFeed";
@@ -53,7 +53,24 @@ export function PenthouseClient({ scene }: Props): JSX.Element {
     recentRejection: scene.recentRejection,
   });
   const nextActions = deriveNextActions(scene);
-  const [reportOpen, setReportOpen] = useState(true);
+
+  // "Since you were gone" auto-opens ONCE per tab-session per day — not on
+  // every navigation back to the dashboard (that was popup spam). Starts closed
+  // on both server and client render (no hydration mismatch), then the effect
+  // opens it iff this session hasn't shown today's report yet. A new day in a
+  // long-lived session re-opens it; sessionStorage being unavailable falls back
+  // to the old always-open behavior.
+  const [reportOpen, setReportOpen] = useState(false);
+  useEffect(() => {
+    const KEY = "tower-morning-report-shown";
+    try {
+      if (window.sessionStorage.getItem(KEY) === scene.dateIso) return;
+      window.sessionStorage.setItem(KEY, scene.dateIso);
+      startTransition(() => setReportOpen(true));
+    } catch {
+      startTransition(() => setReportOpen(true));
+    }
+  }, [scene.dateIso]);
 
   return (
     <EntranceSequence>

@@ -283,6 +283,9 @@ export function PneumaticTubeArrivalOverlay(): JSX.Element | null {
                 fontSize: "13px",
                 lineHeight: 1.5,
                 color: "rgba(255,255,255,0.78)",
+                // Digest cards carry a multi-line bullet list in body —
+                // preserve the newlines instead of collapsing to one run.
+                whiteSpace: "pre-line",
               }}
             >
               {current.body}

@@ -80,7 +80,10 @@ describe("PenthouseClient", () => {
     const html = renderToStaticMarkup(<PenthouseClient scene={scene} />);
 
     expect(html).toContain("Command center dashboard");
-    expect(html).toContain("Since you were gone");
+    // The morning report is session-gated (popup-spam fix): it starts CLOSED on
+    // the server/static render and an effect opens it once per tab-session per
+    // day. Static markup must therefore NOT contain it.
+    expect(html).not.toContain("Since you were gone");
     expect(html).toContain("Pipeline status");
     expect(html).toContain("Open tasks");
     expect(html).toContain("Applications");

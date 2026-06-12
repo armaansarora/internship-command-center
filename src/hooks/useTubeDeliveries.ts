@@ -47,6 +47,22 @@ interface UseTubeDeliveriesOpts {
 const SWEEP_INTERVAL_MS = 60_000;
 
 /**
+ * A sweep that claims more than this many rows is a backlog flood (e.g. first
+ * dashboard open after days away), not a live delivery moment. The newest few
+ * still get the full tube arrival; the rest fold into ONE digest card so the
+ * user is never marched through a modal dismissal parade. The sweep paginates
+ * until the backlog is fully drained (page cap below), so any backlog size
+ * yields at most one digest per sweep — not one per 60s interval. Live
+ * realtime inserts arrive one at a time and are unaffected.
+ */
+const MAX_MODAL_ARRIVALS_PER_SWEEP = 3;
+const DIGEST_TITLE_LINES = 6;
+const SWEEP_PAGE_SIZE = 20;
+const MAX_SWEEP_PAGES = 10; // hard bound: 200 rows per sweep
+
+let digestSeq = 0; // uniqueness across same-millisecond sweeps
+
+/**
  * Row shape we need from `notifications`. Keep lean to minimise payload —
  * we don't need is_read / is_dismissed / timestamps here.
  */
@@ -145,26 +161,71 @@ export async function sweepDeliveries(
   now: Date = new Date(),
 ): Promise<void> {
   const nowIso = now.toISOString();
-  const { data, error } = await sb
-    .from("notifications")
-    .select("id, deliver_after, delivered_at")
-    .eq("user_id", userId)
-    .is("delivered_at", null)
-    .or(`deliver_after.is.null,deliver_after.lte.${nowIso}`)
-    .limit(20);
+  const claimed: TubeArrival[] = [];
 
-  if (error || !data) return;
-  const rows = data as Array<{
-    id: string;
-    deliver_after: string | null;
-    delivered_at: string | null;
-  }>;
+  // Paginate until drained: each page's claims stamp delivered_at, so the
+  // next identical query returns the NEXT batch of unclaimed rows.
+  for (let page = 0; page < MAX_SWEEP_PAGES; page++) {
+    const { data, error } = await sb
+      .from("notifications")
+      .select("id, deliver_after, delivered_at")
+      .eq("user_id", userId)
+      .is("delivered_at", null)
+      .or(`deliver_after.is.null,deliver_after.lte.${nowIso}`)
+      .order("created_at", { ascending: false })
+      .limit(SWEEP_PAGE_SIZE);
 
-  for (const row of rows) {
-    if (!isEligibleForSweep(row, now)) continue;
-    const arrival = await claimNotification(sb, userId, row.id);
-    if (arrival) onArrival(arrival);
+    if (error || !data || data.length === 0) break;
+    const rows = data as Array<{
+      id: string;
+      deliver_after: string | null;
+      delivered_at: string | null;
+    }>;
+
+    let claimedThisPage = 0;
+    for (const row of rows) {
+      if (!isEligibleForSweep(row, now)) continue;
+      const arrival = await claimNotification(sb, userId, row.id);
+      if (arrival) {
+        claimed.push(arrival);
+        claimedThisPage++;
+      }
+    }
+
+    if (rows.length < SWEEP_PAGE_SIZE) break; // backlog drained
+    // Full page but zero wins: every claim lost its race to another session —
+    // that session owns the rest. Bail rather than spin on the same rows.
+    if (claimedThisPage === 0) break;
   }
+
+  if (claimed.length <= MAX_MODAL_ARRIVALS_PER_SWEEP) {
+    for (const arrival of claimed) onArrival(arrival);
+    return;
+  }
+
+  // Backlog flood: full arrival for the newest few (rows are ordered
+  // created_at DESC), one digest card for everything else. Every row was
+  // still atomically claimed above, so nothing re-fires on later sweeps.
+  const shown = claimed.slice(0, MAX_MODAL_ARRIVALS_PER_SWEEP);
+  const rest = claimed.slice(MAX_MODAL_ARRIVALS_PER_SWEEP);
+  for (const arrival of shown) onArrival(arrival);
+
+  const listed = rest
+    .slice(0, DIGEST_TITLE_LINES)
+    .map((a) => `• ${a.title.trim() || "(untitled delivery)"}`)
+    .join("\n");
+  const overflow =
+    rest.length > DIGEST_TITLE_LINES
+      ? `\n…and ${rest.length - DIGEST_TITLE_LINES} more`
+      : "";
+  digestSeq += 1;
+  onArrival({
+    id: `tube-digest-${now.getTime()}-${digestSeq}`,
+    title: `${rest.length} more deliveries while you were away`,
+    body: `${listed}${overflow}`,
+    sourceAgent: null,
+    actions: null,
+  });
 }
 
 export function useTubeDeliveries(opts: UseTubeDeliveriesOpts): void {

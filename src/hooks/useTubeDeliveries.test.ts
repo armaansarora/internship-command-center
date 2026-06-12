@@ -132,6 +132,9 @@ function makeClient(
                 }
                 const row = rows.find((r) => r.id === id);
                 if (!row) return { data: null, error: null };
+                // Faithful to PostgREST: a winning claim stamps delivered_at,
+                // so subsequent SELECTs (sweep pagination) exclude this row.
+                row.delivered_at = "2026-04-23T12:00:00.000Z";
                 return {
                   data: {
                     id: row.id,
@@ -172,12 +175,17 @@ function makeClient(
           return chain;
         },
 
+        order(col: string, o: { ascending: boolean }) {
+          void col;
+          void o;
+          return chain;
+        },
+
         async limit(n: number) {
-          void n;
           selectCalls.push({ userId: chain._userId ?? "" });
           const eligible = rows.filter((r) => r.delivered_at === null);
           return {
-            data: eligible.map((r) => ({
+            data: eligible.slice(0, n).map((r) => ({
               id: r.id,
               deliver_after: r.deliver_after,
               delivered_at: r.delivered_at,
@@ -318,5 +326,84 @@ describe("sweepDeliveries", () => {
     expect((onArrival.mock.calls[0][0] as TubeArrival).id).toBe("win1");
     // Both rows were claim-attempted.
     expect(updateCalls.map((c) => c.id).sort()).toEqual(["lose1", "win1"]);
+  });
+
+  // -------------------------------------------------------------------------
+  // Backlog-flood digest (the dashboard popup-spam fix)
+  // -------------------------------------------------------------------------
+
+  const floodRow = (i: number): MockRow => ({
+    id: `n${i}`,
+    user_id: USER_ID,
+    title: `Delivery ${i}`,
+    body: "...",
+    source_agent: null,
+    actions: null,
+    deliver_after: null,
+    delivered_at: null,
+  });
+
+  it("exactly 3 claimable rows → 3 normal arrivals, no digest", async () => {
+    const { client } = makeClient([floodRow(1), floodRow(2), floodRow(3)]);
+    const onArrival = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await sweepDeliveries(client as any, USER_ID, onArrival, NOW);
+
+    expect(onArrival).toHaveBeenCalledTimes(3);
+    const titles = onArrival.mock.calls.map((c) => (c[0] as TubeArrival).title);
+    expect(titles.some((t) => t.includes("more deliveries"))).toBe(false);
+  });
+
+  it("a 7-row backlog → 3 normal arrivals + ONE digest carrying the other 4", async () => {
+    const { client, updateCalls } = makeClient(
+      [1, 2, 3, 4, 5, 6, 7].map(floodRow),
+    );
+    const onArrival = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await sweepDeliveries(client as any, USER_ID, onArrival, NOW);
+
+    // 3 full arrivals + 1 digest — never a 7-modal parade.
+    expect(onArrival).toHaveBeenCalledTimes(4);
+    const last = onArrival.mock.calls[3][0] as TubeArrival;
+    expect(last.id.startsWith("tube-digest-")).toBe(true);
+    expect(last.title).toBe("4 more deliveries while you were away");
+    expect(last.body).toContain("• Delivery 4");
+    expect(last.body).toContain("• Delivery 7");
+    // Every row was still atomically claimed (no re-fire on later sweeps).
+    expect(updateCalls.length).toBe(7);
+  });
+
+  it("digest body caps listed titles and reports the overflow count", async () => {
+    const { client } = makeClient(
+      Array.from({ length: 12 }, (_, i) => floodRow(i + 1)),
+    );
+    const onArrival = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await sweepDeliveries(client as any, USER_ID, onArrival, NOW);
+
+    expect(onArrival).toHaveBeenCalledTimes(4);
+    const digest = onArrival.mock.calls[3][0] as TubeArrival;
+    expect(digest.title).toBe("9 more deliveries while you were away");
+    // 6 listed lines + overflow tail for the remaining 3.
+    expect(digest.body.match(/^• /gm)?.length).toBe(6);
+    expect(digest.body).toContain("…and 3 more");
+  });
+
+  it("a >20-row backlog drains via pagination in ONE sweep with ONE digest", async () => {
+    const { client, updateCalls, selectCalls } = makeClient(
+      Array.from({ length: 25 }, (_, i) => floodRow(i + 1)),
+    );
+    const onArrival = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await sweepDeliveries(client as any, USER_ID, onArrival, NOW);
+
+    // All 25 rows claimed (none left to re-digest on the next interval)…
+    expect(updateCalls.length).toBe(25);
+    // …across paginated selects (20 + 5)…
+    expect(selectCalls.length).toBeGreaterThanOrEqual(2);
+    // …surfaced as 3 full arrivals + exactly ONE digest carrying the other 22.
+    expect(onArrival).toHaveBeenCalledTimes(4);
+    const digest = onArrival.mock.calls[3][0] as TubeArrival;
+    expect(digest.title).toBe("22 more deliveries while you were away");
   });
 });
