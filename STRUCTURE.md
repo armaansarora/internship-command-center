@@ -10,6 +10,10 @@ A map of the repo so future sessions don't burn tokens hunting. Skim the top, th
 src/                            the app
 scripts/                        maintenance, seed, dev, and art pipeline scripts
 docs/                           design specs, testing, runbooks, character art canon
+  docs/reports/                 generated one-off HTML reports (overnight runs etc.)
+.brain/                         agent memory — save/<lane>.md (live task state),
+                                decisions/, gotchas.md, journal.log (crash trail);
+                                conventions live in ~/Developer/commonbrain/
 .artlab/                        non-production character art lab, run ledgers, QA boards
 sentry/                         versioned Sentry alert rules (alerts.yaml)
 tests/                          Playwright E2E + off-platform canary

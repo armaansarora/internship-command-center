@@ -147,3 +147,8 @@ Stripe price IDs live alongside in `src/lib/stripe/config.ts`. CODEOWNERS gates 
 - `docs/CHAIN-OF-COMMAND.md` — AI agent hierarchy
 - Character voice/canon: `docs/artlab/CHARACTER-PIPELINE.md` (the owner). `docs/CHARACTER-PROMPTS.md` is legacy but test-held (season-one-character-system.test.ts asserts against it) — retire it together with that assertion or not at all.
 - `docs/LAUNCH-READY.md` — locked business decisions + remaining ops checklist
+
+## Agent memory (.brain/)
+Live task state, decisions, and traps live in `.brain/` — read your lane's
+`.brain/save/<lane>.md` before resuming work; update it at done (the Stop hook enforces
+this). Conventions + templates: `~/Developer/commonbrain/`.

@@ -1,9 +1,0 @@
-{
-  "schemaVersion": "tower-creative-brief-v1",
-  "runId": "2026-05-20-rafe-calder-character",
-  "assetType": "character",
-  "name": "Rafe",
-  "request": "Create the next Season 1 character initial designs for Rafe Calder, characterId cro, based directly on docs/CHARACTER-BIBLE.md Rafe Calder entry and docs/CHARACTER-IMAGE-PROMPTS.md Rafe Calder prompt refs. Generate the five initial prompt-only Tower character concept designs for Armaan to choose from before production. Rafe is the CRO of the War Room: a competitive application demolition expert, forward-leaning athletic silhouette, rolled sleeves, loosened tie or tactical jacket, loud sneakers, red pen or stylus like a weapon, expressive brows, whiteboard/pipeline-board energy, loud useful pressure. Preserve the locked tower-flat-plus-depth-v1 / Professional Scars character style envelope and do not vary rendering style between lanes. Vary only character design axes from the bible: posture, intensity, wardrobe cut, age impression, prop handling, silhouette, personality read. Avoid finance-bro stock pose, luxury flex, generic salesman grin, superhero stance, full tactical armor, fake text, logos, watermarks, photorealism, and celebrity likeness.",
-  "outputRoot": ".artlab/studio/characters/2026-05-20-rafe-calder-character",
-  "createdAt": "2026-05-20T14:14:58.626Z"
-}
